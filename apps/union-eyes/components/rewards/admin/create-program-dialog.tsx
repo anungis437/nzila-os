@@ -24,6 +24,7 @@ import { Plus, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createRecognitionProgram } from '@/actions/rewards-actions';
+import { failureText } from '@/lib/client/api-envelope';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
@@ -50,7 +51,7 @@ export function CreateProgramDialog() {
       const result = await createRecognitionProgram(data);
       
       if (!result.success) {
-        setError(result.error || t('error', { defaultValue: 'Failed to create program' }));
+        setError(('error' in result && result.error) || t('error', { defaultValue: 'Failed to create program' }));
         setLoading(false);
         return;
       }
@@ -58,7 +59,7 @@ export function CreateProgramDialog() {
       setOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err.message || t('errorUnknown', { defaultValue: 'An error occurred' }));
+      setError(failureText(err, t('errorUnknown', { defaultValue: 'An error occurred' })));
       setLoading(false);
     }
   };

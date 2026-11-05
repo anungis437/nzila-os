@@ -91,7 +91,7 @@ test.describe('UE E2E — evidence misuse and access control', () => {
       // Must not expose internal infrastructure identifiers
       expect(text).not.toMatch(/postgresql:\/\/|neon\.tech|supabase\.co/i)
       // Must not expose raw connection strings or secrets
-      expect(text).not.toMatch(/password=|secret_key|CLERK_SECRET/i)
+      expect(text).not.toMatch(/password=|secret_key|AUTH_SECRET/i)
       // Must have at least a generated_at or timestamp field (evidence chain requires it)
       const hasTimestamp =
         'generated_at' in payload ||

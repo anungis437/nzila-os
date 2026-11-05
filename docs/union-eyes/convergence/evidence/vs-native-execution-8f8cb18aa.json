@@ -1,0 +1,57 @@
+{
+  "record": "UE_VS_NATIVE_EXECUTION_EVIDENCE",
+  "version": 1,
+  "mission": "UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026",
+  "executor": "VS Code Copilot (single integration agent)",
+  "baseCommit": "0b0e363aaf5c8b5cc546e6e136af44d78e4fca1a",
+  "testedCommit": "8f8cb18aad8167b67fb12b57504211a13c917042",
+  "branch": "agents/ue-cursor-final-closure",
+  "pullRequest": 1014,
+  "environment": {
+    "os": "Windows (Eastern time zone, tests pin UTC where needed)",
+    "node": "v24.13.1",
+    "docker": "29.2.0",
+    "postgres": ["pgvector/pgvector:0.8.1-pg16 (disposable)", "postgres 15 (disposable)"],
+    "note": "Native runs executed on the working tree later committed byte-for-byte as testedCommit; ownership-backfill and notification-delivery were re-run directly on testedCommit."
+  },
+  "blockerFoundAndFixed": {
+    "symptom": "Bootstrap runtime-grant activation aborted; every runtime-role suite failed with permission denied.",
+    "rootCause": "election_certificate_successions and election_organization_ownership (platform 0033/0034) had no manifest classification and no cache RLS closure.",
+    "repair": "cache migration 0029 (FORCE RLS), journal and lineage registration, governance registry classification, regenerated catalog contract."
+  },
+  "results": [
+    { "id": "authority-kernel-combined", "pg16": "10/10", "pg15": "10/10" },
+    { "id": "thread-assignment", "pg16": "3/3", "pg15": "3/3" },
+    { "id": "atomic-audit-fault", "pg16": "6/6", "pg15": "6/6" },
+    { "id": "canonical-schema-census", "pg16": "4/4", "pg15": "4/4" },
+    { "id": "document-intake", "pg16": "10/10", "pg15": "10/10" },
+    { "id": "location-retention", "pg16": "5/5", "pg15": "5/5" },
+    { "id": "finance-duties", "pg16": "21/21", "pg15": "21/21" },
+    { "id": "message-lifecycle-combined", "pg16": "26 passed, 1 skipped", "pg15": "26 passed, 1 skipped", "skipReason": "Canonical V2 predicate topology not installed; NOT proven." },
+    { "id": "workaid-union-side", "pg16": "5/5", "pg15": "5/5" },
+    { "id": "auth-native-pg16", "result": "19/19" },
+    { "id": "auth-invite-concurrency", "result": "7/7" },
+    { "id": "election-certificate-succession-native", "result": "1/1" },
+    { "id": "notification-delivery-native", "result": "2/2" },
+    { "id": "ownership-backfill-native", "result": "1/1" }
+  ],
+  "nonNativeGates": {
+    "unionEyesTypecheck": "exit 0",
+    "unionEyesVitest": "1361 files passed, 3 skipped; 19765 tests passed, 19 skipped",
+    "contractTests": "302 files, 10293 tests passed",
+    "checkUeConvergence": "passed (migration lineage verified)",
+    "validateDocs": "no critical errors",
+    "eslintChangedFiles": "0 errors, 13 warnings"
+  },
+  "notProven": [
+    "Canonical V2 message predicate (skipped test)",
+    "Browser acceptance, accessibility, performance and rate-limit acceptance",
+    "Credentialed provider sandboxes",
+    "Cross-persona journeys A-I end to end",
+    "Clean-checkout Docker reproducibility"
+  ],
+  "verdicts": {
+    "VS_NATIVE_VALIDATION_COMPLETE": false,
+    "READY_FOR_STAGING": "NO"
+  }
+}

@@ -13,13 +13,14 @@ import { z } from 'zod';
 import { claims } from '@/db/schema/claims-schema';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { createClaim } from '@/db/queries/claims-queries';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
-import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireCaseFilingCapacity } from '@/lib/cases/case-authorization';
 import { createHash } from 'crypto';
 import { eq, and } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { incidentInstant } from '@/lib/cases/incident-instant';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,10 +75,12 @@ export async function POST(request: Request) {
 
     await requireEntitlement(orgId, 'grievance_case_suite');
 
-    const isAdmin = await hasMinRole('admin');
-    if (!isAdmin) {
+    // Importing on behalf of many members is an office-bearer capacity on the canonical membership, not a role rank.
+    try {
+      await withRLSContext(async (tx) => requireCaseFilingCapacity(tx, { userId, organizationId: orgId }, 'bulk'));
+    } catch {
       return NextResponse.json(
-        { error: 'FORBIDDEN', message: 'Bulk import requires admin role or above.' },
+        { error: 'FORBIDDEN', message: 'Bulk import requires an officer or executive capacity.' },
         { status: 403 },
       );
     }
@@ -134,14 +137,14 @@ export async function POST(request: Request) {
         const claimType = (CLAIM_TYPE_MAP[record.caseType] ?? record.caseType) as Parameters<typeof createClaim>[0]['claimType'];
 
         const claim = await withRLSContext(async (tx) => {
-          return createClaim(
+          const created = await createClaim(
             {
               organizationId: orgId,
               memberId: record.memberId,
               claimType,
               priority: record.priority as 'low' | 'medium' | 'high' | 'critical',
               description: record.description,
-              incidentDate: new Date(record.incidentDate),
+              incidentDate: incidentInstant(record.incidentDate),
               location: record.location ?? null,
               desiredOutcome: record.desiredOutcome ?? '',
               isAnonymous: false,
@@ -158,6 +161,15 @@ export async function POST(request: Request) {
             },
             tx,
           );
+          await persistAtomicAudit(tx, {
+            organizationId: orgId,
+            userId,
+            action: 'case.bulk_import_row',
+            resourceType: 'claims',
+            resourceId: created.claimId,
+            details: { event: 'BULK_IMPORT_ROW' },
+          });
+          return created;
         });
 
         results.push({
@@ -180,18 +192,22 @@ export async function POST(request: Request) {
     const duplicates = results.filter(r => r.status === 'duplicate').length;
     const errors = results.filter(r => r.status === 'error').length;
 
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claims',
-      action: 'create',
-      details: {
-        event: 'BULK_IMPORT',
-        totalRecords: caseRecords.length,
-        created,
-        duplicates,
-        errors,
-      },
+    // The batch summary commits on its own. A failed audit withholds the success response.
+    // Rows that already committed keep the per-claim audit from their own transaction.
+    await withRLSContext(async (tx) => {
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'case.bulk_import',
+        resourceType: 'claims',
+        details: {
+          event: 'BULK_IMPORT',
+          totalRecords: caseRecords.length,
+          created,
+          duplicates,
+          errors,
+        },
+      });
     });
 
     logger.info('Bulk import completed', { total: caseRecords.length, created, duplicates, errors });

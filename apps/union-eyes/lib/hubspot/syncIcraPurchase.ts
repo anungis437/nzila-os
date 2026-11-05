@@ -22,7 +22,7 @@
  */
 
 import { eq } from 'drizzle-orm';
-import { db } from '@/db';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type {
   ExecutivePersonaId,
@@ -96,12 +96,23 @@ export async function syncIcraPurchase(
       return { ok: false, skipped: 'crm_disabled' };
     }
 
-    // Load assessment + profile (read-only)
-    const [assessment] = await db
-      .select({ id: icraAssessments.id, reportTierId: icraAssessments.reportTierId })
-      .from(icraAssessments)
-      .where(eq(icraAssessments.id, input.assessmentId))
-      .limit(1);
+    // Load assessment + profile (read-only). Both tables are system-only, and this runs after the webhook's own transaction has ended, so
+    // the read opens its own system context; the transaction is closed before any CRM call is made.
+    const { assessment, profileRow } = await withSystemContext(async (tx) => {
+      const [assessmentRow] = await tx
+        .select({ id: icraAssessments.id, reportTierId: icraAssessments.reportTierId })
+        .from(icraAssessments)
+        .where(eq(icraAssessments.id, input.assessmentId))
+        .limit(1);
+      if (!assessmentRow) return { assessment: undefined, profileRow: undefined };
+
+      const [profile] = await tx
+        .select({ profilePayload: icraMaturityProfiles.profilePayload })
+        .from(icraMaturityProfiles)
+        .where(eq(icraMaturityProfiles.assessmentId, input.assessmentId))
+        .limit(1);
+      return { assessment: assessmentRow, profileRow: profile };
+    });
 
     if (!assessment) {
       logger.warn('[hubspot-icra] assessment missing for purchase sync', {
@@ -109,12 +120,6 @@ export async function syncIcraPurchase(
       });
       return { ok: false, skipped: 'assessment_missing' };
     }
-
-    const [profileRow] = await db
-      .select({ profilePayload: icraMaturityProfiles.profilePayload })
-      .from(icraMaturityProfiles)
-      .where(eq(icraMaturityProfiles.assessmentId, input.assessmentId))
-      .limit(1);
 
     if (!profileRow?.profilePayload) {
       logger.warn('[hubspot-icra] profile missing for purchase sync', {

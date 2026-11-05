@@ -1,0 +1,1182 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-SUPERSESSION-CLARIFICATION",
+  "gate": "GATE-0C.4",
+  "version": 1,
+  "anchorCommit": "ab9c184263020a95b91066014395f16dc3ec78e8",
+  "preparedOn": "2026-10-27",
+  "status": "RECORDS_NOT_ACCEPTANCE",
+  "note": "Explicit supersession and clarification records. Each names the frozen record it concerns by hash. No frozen record is edited, and the Gate 0C.3 registers are byte-identical to the accepted commit.",
+  "historyAnchor": {
+    "commit": "ab9c184263020a95b91066014395f16dc3ec78e8",
+    "rule": "Every target register hash equals the hash of that register at the anchor commit and at the working tree."
+  },
+  "totals": {
+    "records": 38,
+    "byKind": {
+      "CLARIFICATION": 37,
+      "SUPERSESSION": 1
+    },
+    "unsupportedClaimRecords": 30
+  },
+  "records": [
+    {
+      "id": "CLAR-0C4-CHALLENGE-0B10-OPL-01",
+      "kind": "CLARIFICATION",
+      "title": "The conditional disposition of DEF-0B10-OPL-01 and the challenge to it are two separate records.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-opl-challenge-treatment-0c3.json",
+          "registerSha256": "46871016035772ae87b29b8ef4607b2c65db3ffc400d0aea7b2f1761c5654bf5",
+          "recordPath": "challenges[CHALLENGE-0B10-OPL-01]",
+          "recordSha256": "d7b4f46bd21a98603433698ec2133bfbafbc45a82c9c171ee444b879e363ca73"
+        }
+      ],
+      "statement": "The frozen disposition CONDITIONALLY_BLOCKING is kept as the frozen record. The challenge CHALLENGE-0B10-OPL-01 takes the position RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF pending containment proof. Neither supersedes the other, the challenge is not an additional defect, and no accepted release decision exists for either.",
+      "frozenDisposition": "CONDITIONALLY_BLOCKING",
+      "challengePosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+      "carriedInto": [
+        "CERTIFICATION_CHECKLIST"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-CHALLENGE-0B10-OPL-07",
+      "kind": "CLARIFICATION",
+      "title": "The conditional disposition of DEF-0B10-OPL-07 and the challenge to it are two separate records.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-opl-challenge-treatment-0c3.json",
+          "registerSha256": "46871016035772ae87b29b8ef4607b2c65db3ffc400d0aea7b2f1761c5654bf5",
+          "recordPath": "challenges[CHALLENGE-0B10-OPL-07]",
+          "recordSha256": "4d00cb797ba727e7758dcfba76d3ce02f017bfd498c5a75003d508a5f6ef6f9a"
+        }
+      ],
+      "statement": "The frozen disposition CONDITIONALLY_BLOCKING is kept as the frozen record. The challenge CHALLENGE-0B10-OPL-07 takes the position RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF pending containment proof. Neither supersedes the other, the challenge is not an additional defect, and no accepted release decision exists for either.",
+      "frozenDisposition": "CONDITIONALLY_BLOCKING",
+      "challengePosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+      "carriedInto": [
+        "CERTIFICATION_CHECKLIST"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B1-BILLING-TARGET-ORG-UNBOUND-RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "kind": "CLARIFICATION",
+      "title": "Two rubric keys could both apply; the proposal applies the less severe one.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B1-BILLING-TARGET-ORG-UNBOUND]",
+          "recordSha256": "def7e37cdb0dc4a7e5a5437c13c7e886f567229349d10264619d4d90752d3e56"
+        }
+      ],
+      "defectId": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+      "findingCode": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_PLAT. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B1-CRUD-FACADE-ORG-MEMBERS-FLOOR_UNDERSTATED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor understates who can reach the operation.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B1-CRUD-FACADE-ORG-MEMBERS]",
+          "recordSha256": "22d2d6dc86e353f826f81c6af64a2dd4515b428050ed9317486f8c0e298d10a2"
+        }
+      ],
+      "defectId": "DEF-0B1-CRUD-FACADE-ORG-MEMBERS",
+      "findingCode": "FLOOR_UNDERSTATED",
+      "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: some relevant operation is declared at a lower floor.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS-RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "kind": "CLARIFICATION",
+      "title": "Two rubric keys could both apply; the proposal applies the less severe one.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS]",
+          "recordSha256": "bddcbeaf5d7d5bc2c2d895f243269016b63f90d598e647493bf7a108f31ec7b0"
+        }
+      ],
+      "defectId": "DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
+      "findingCode": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_PLAT. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B2-ANALYTICS-CRUD-FACADE-FLOOR_UNDERSTATED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor understates who can reach the operation.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B2-ANALYTICS-CRUD-FACADE]",
+          "recordSha256": "b25a9963a7d5cd9570b905f5b47c54264b3172f5d63a8f8efea9fd1a81104236"
+        }
+      ],
+      "defectId": "DEF-0B2-ANALYTICS-CRUD-FACADE",
+      "findingCode": "FLOOR_UNDERSTATED",
+      "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: some relevant operation is declared at a lower floor.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B2-ANALYTICS-CRUD-FACADE-LOCAL_GUARD_RETURNS_TRUE",
+      "kind": "CLARIFICATION",
+      "title": "A route-local access guard returns true unconditionally.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B2-ANALYTICS-CRUD-FACADE]",
+          "recordSha256": "b25a9963a7d5cd9570b905f5b47c54264b3172f5d63a8f8efea9fd1a81104236"
+        }
+      ],
+      "defectId": "DEF-0B2-ANALYTICS-CRUD-FACADE",
+      "findingCode": "LOCAL_GUARD_RETURNS_TRUE",
+      "statement": "apps/union-eyes/app/api/intelligence/route.ts defines requireOrgAccess, which returns true unconditionally.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ-ABSENCE_CLAIM_CONTESTED",
+      "kind": "CLARIFICATION",
+      "title": "An absence claim is contested by a token in the cited source.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ]",
+          "recordSha256": "6f2ef400f964568b82defb1a13cc1ecf523d5daf801f740bc20bcaaf42b0d26c"
+        }
+      ],
+      "defectId": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+      "findingCode": "ABSENCE_CLAIM_CONTESTED",
+      "statement": "The claim \"no organization predicate\" is contested: cited source names organizationId.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ-RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "kind": "CLARIFICATION",
+      "title": "Two rubric keys could both apply; the proposal applies the less severe one.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ]",
+          "recordSha256": "6f2ef400f964568b82defb1a13cc1ecf523d5daf801f740bc20bcaaf42b0d26c"
+        }
+      ],
+      "defectId": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+      "findingCode": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_PLAT. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B2-UPDATE-ROLE-INERT-STATED_FLOOR_ROLE_NOT_DECLARED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor names a role the route declarations do not use.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B2-UPDATE-ROLE-INERT]",
+          "recordSha256": "21232ed3e3240b25b22fcf6b17a2ab5792017fcc28d2761e67a7afb7487567b4"
+        }
+      ],
+      "defectId": "DEF-0B2-UPDATE-ROLE-INERT",
+      "findingCode": "STATED_FLOOR_ROLE_NOT_DECLARED",
+      "statement": "The stated floor names steward; the relevant operations declare administrator.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT-FLOOR_UNDERSTATED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor understates who can reach the operation.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT]",
+          "recordSha256": "299bcbbb3a86e126a10f4edd8e0b2d50f2f28a06d6f2b758f390f69efde108b5"
+        }
+      ],
+      "defectId": "DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT",
+      "findingCode": "FLOOR_UNDERSTATED",
+      "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: every relevant operation is declared at a lower floor.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW-STATED_FLOOR_ROLE_NOT_DECLARED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor names a role the route declarations do not use.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW]",
+          "recordSha256": "37ce4cc83b8c8edd3e2350665085e3e5cb276012542ab2ad54e74a2bbd4e93af"
+        }
+      ],
+      "defectId": "DEF-0B3-ARBITRATION-DECISIONS-ORG-ADMIN-DELETES-SHARED-ROW",
+      "findingCode": "STATED_FLOOR_ROLE_NOT_DECLARED",
+      "statement": "The stated floor names administrator; the relevant operations declare content_manager.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE-ABSENCE_CLAIM_CONTESTED",
+      "kind": "CLARIFICATION",
+      "title": "An absence claim is contested by a token in the cited source.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE]",
+          "recordSha256": "236fa9ab66a244173bc0059814c08d2f6bb24ab82247ae506470b2b34acbc1ac"
+        }
+      ],
+      "defectId": "DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",
+      "findingCode": "ABSENCE_CLAIM_CONTESTED",
+      "statement": "The claim \"no organization column, so the generic factory adds no tenant predicate\" is contested: cited source names organizationId.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE-FLOOR_UNDERSTATED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor understates who can reach the operation.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE]",
+          "recordSha256": "236fa9ab66a244173bc0059814c08d2f6bb24ab82247ae506470b2b34acbc1ac"
+        }
+      ],
+      "defectId": "DEF-0B3-BARGAINING-PROPOSALS-NO-TENANT-PREDICATE",
+      "findingCode": "FLOOR_UNDERSTATED",
+      "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: some relevant operation is declared at a lower floor.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ-ABSENCE_CLAIM_CONTESTED",
+      "kind": "CLARIFICATION",
+      "title": "An absence claim is contested by a token in the cited source.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ]",
+          "recordSha256": "c850170ca4f5d5291d3aa8095026ed7ef66a15c2b3f2473e08a45cc425b96813"
+        }
+      ],
+      "defectId": "DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ",
+      "findingCode": "ABSENCE_CLAIM_CONTESTED",
+      "statement": "The claim \"no organization predicate\" is contested: cited source names organizationId.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B3-BULK-IMPORT-INERT-STATED_FLOOR_ROLE_NOT_DECLARED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor names a role the route declarations do not use.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B3-BULK-IMPORT-INERT]",
+          "recordSha256": "9c8777079ec0e255867dd6303e3114f9586658b0e085e564bf504ff391c0b5af"
+        }
+      ],
+      "defectId": "DEF-0B3-BULK-IMPORT-INERT",
+      "findingCode": "STATED_FLOOR_ROLE_NOT_DECLARED",
+      "statement": "The stated floor names staff; the relevant operations declare steward.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT-LOCAL_GUARD_RETURNS_TRUE",
+      "kind": "CLARIFICATION",
+      "title": "A route-local access guard returns true unconditionally.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT]",
+          "recordSha256": "c236fbd56fbba189a4abfd9692f4c7ef8f78c9827603383496fc60e97be85fbc"
+        }
+      ],
+      "defectId": "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
+      "findingCode": "LOCAL_GUARD_RETURNS_TRUE",
+      "statement": "apps/union-eyes/app/api/intelligence/route.ts defines requireOrgAccess, which returns true unconditionally.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B3-WEEKLY-SUMMARY-FABRICATED-MODEL-CLAIM-STATED_FLOOR_ROLE_NOT_DECLARED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor names a role the route declarations do not use.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B3-WEEKLY-SUMMARY-FABRICATED-MODEL-CLAIM]",
+          "recordSha256": "5951a8324e14cee2456af286f1e6f0501ba5aaeacbdd1a63503acd4c534a14ec"
+        }
+      ],
+      "defectId": "DEF-0B3-WEEKLY-SUMMARY-FABRICATED-MODEL-CLAIM",
+      "findingCode": "STATED_FLOOR_ROLE_NOT_DECLARED",
+      "statement": "The stated floor names officer; the relevant operations declare steward.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT-FLOOR_OVERSTATED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor overstates who can reach the operation.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT]",
+          "recordSha256": "75ca2f0ce63c919509fb5a09997ee96faac76e5d8bc6c795a803ed8e89b7c9ce"
+        }
+      ],
+      "defectId": "DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT",
+      "findingCode": "FLOOR_OVERSTATED",
+      "statement": "The stated state REACHABLE_ANY_AUTHENTICATED overstates reachability: every relevant operation is declared at a higher floor.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_STRICT"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT-STATED_FLOOR_ROLE_NOT_DECLARED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor names a role the route declarations do not use.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT]",
+          "recordSha256": "75ca2f0ce63c919509fb5a09997ee96faac76e5d8bc6c795a803ed8e89b7c9ce"
+        }
+      ],
+      "defectId": "DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT",
+      "findingCode": "STATED_FLOOR_ROLE_NOT_DECLARED",
+      "statement": "The stated floor names member; the relevant operations declare steward.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_STRICT"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION-ABSENCE_CLAIM_CONTESTED",
+      "kind": "CLARIFICATION",
+      "title": "An absence claim is contested by a token in the cited source.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION]",
+          "recordSha256": "b258fbbf22d4d76ba9a1ada73bffbe993fe4a6646d260c42620d42d18c9ed8e0"
+        }
+      ],
+      "defectId": "DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION",
+      "findingCode": "ABSENCE_CLAIM_CONTESTED",
+      "statement": "The claim \"no userId predicate\" is contested: cited source names organizationId.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY-ABSENCE_CLAIM_CONTESTED",
+      "kind": "CLARIFICATION",
+      "title": "An absence claim is contested by a token in the cited source.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY]",
+          "recordSha256": "dea75c7813a802edb0a5cbe43c9f32d3b666577fc3be979bb1c76e5ded8f3899"
+        }
+      ],
+      "defectId": "DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY",
+      "findingCode": "ABSENCE_CLAIM_CONTESTED",
+      "statement": "The claim \"no organization predicate\" is contested: cited source names organizationId.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY-FLOOR_UNDERSTATED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor understates who can reach the operation.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY]",
+          "recordSha256": "dea75c7813a802edb0a5cbe43c9f32d3b666577fc3be979bb1c76e5ded8f3899"
+        }
+      ],
+      "defectId": "DEF-0B4-CBA-CHILD-RECORDS-READ-BY-AGREEMENT-ID-ONLY",
+      "findingCode": "FLOOR_UNDERSTATED",
+      "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: every relevant operation is declared at a lower floor.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ-FLOOR_OVERSTATED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor overstates who can reach the operation.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ]",
+          "recordSha256": "dfdfbbeddaa264a1e6600cfe5224d2fcef448070ffb64f4719eaf82d8ba3de2c"
+        }
+      ],
+      "defectId": "DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
+      "findingCode": "FLOOR_OVERSTATED",
+      "statement": "The stated state REACHABLE_ANY_AUTHENTICATED overstates reachability: every relevant operation is declared at a higher floor.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_STRICT"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ-STATED_FLOOR_ROLE_NOT_DECLARED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor names a role the route declarations do not use.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ]",
+          "recordSha256": "dfdfbbeddaa264a1e6600cfe5224d2fcef448070ffb64f4719eaf82d8ba3de2c"
+        }
+      ],
+      "defectId": "DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
+      "findingCode": "STATED_FLOOR_ROLE_NOT_DECLARED",
+      "statement": "The stated floor names member; the relevant operations declare steward.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_STRICT"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES-FLOOR_UNDERSTATED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor understates who can reach the operation.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES]",
+          "recordSha256": "f7d5652dabb5c3ff762077f2a012fc0ff11f575c4605a26a97b51a38c7251e0e"
+        }
+      ],
+      "defectId": "DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES",
+      "findingCode": "FLOOR_UNDERSTATED",
+      "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: every relevant operation is declared at a lower floor.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT",
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES-RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "kind": "CLARIFICATION",
+      "title": "Two rubric keys could both apply; the proposal applies the less severe one.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES]",
+          "recordSha256": "f7d5652dabb5c3ff762077f2a012fc0ff11f575c4605a26a97b51a38c7251e0e"
+        }
+      ],
+      "defectId": "DEF-0B5-COGNITION-SNAPSHOTS-IN-LOCAL-FILES",
+      "findingCode": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_DEP. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT",
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS-RUBRIC_PRECONDITION_NOT_MET",
+      "kind": "CLARIFICATION",
+      "title": "The rubric the proposal applies requires a fact the record does not show.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS]",
+          "recordSha256": "2d91601277f4548682c229d45916c47b57c169799692fcb4bf8b4cac3824f6dc"
+        }
+      ],
+      "defectId": "DEF-0B5-SURVEY-RESPONSES-IDENTIFY-RESPONDENTS-TO-STEWARDS",
+      "findingCode": "RUBRIC_PRECONDITION_NOT_MET",
+      "statement": "The rubric RB_FALSE requires: The impact classes include FALSE_ATTESTATION_OR_OUTCOME. The record does not show it.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B5-SURVEY-RESULTS-NO-ORG-PREDICATE-LOADS-ALL-ANSWERS-ABSENCE_CLAIM_CONTESTED",
+      "kind": "CLARIFICATION",
+      "title": "An absence claim is contested by a token in the cited source.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B5-SURVEY-RESULTS-NO-ORG-PREDICATE-LOADS-ALL-ANSWERS]",
+          "recordSha256": "9b58c609dd0907201cdcb0ea3b301ccb01fbf4d0b0c6821b5fc313965a7ff7e1"
+        }
+      ],
+      "defectId": "DEF-0B5-SURVEY-RESULTS-NO-ORG-PREDICATE-LOADS-ALL-ANSWERS",
+      "findingCode": "ABSENCE_CLAIM_CONTESTED",
+      "statement": "The claim \"no organization predicate\" is contested: cited source names organizationId.",
+      "proposedDisposition": "RELEASE_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES-ABSENCE_CLAIM_CONTESTED",
+      "kind": "CLARIFICATION",
+      "title": "An absence claim is contested by a token in the cited source.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES]",
+          "recordSha256": "38589e81d2fd5bc54932930d615805ec48580d08f155e5d132dbee33f16524a3"
+        }
+      ],
+      "defectId": "DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+      "findingCode": "ABSENCE_CLAIM_CONTESTED",
+      "statement": "The claim \"no organization column, so the factory adds no tenant predicate\" is contested: cited source names organizationId.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES-RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "kind": "CLARIFICATION",
+      "title": "Two rubric keys could both apply; the proposal applies the less severe one.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES]",
+          "recordSha256": "38589e81d2fd5bc54932930d615805ec48580d08f155e5d132dbee33f16524a3"
+        }
+      ],
+      "defectId": "DEF-0B6-SYS-INHERITANCE-ORG-SCOPE-NO-OP-ON-PENDING-PROFILES",
+      "findingCode": "RUBRIC_PRECEDENCE_AMBIGUOUS",
+      "statement": "The impact includes cross-organization disclosure and no executed containment proof is on file, which is the rubric RB_XT test, yet the proposal applies CB_INERT. The proposal stays as proposed; the precedence between the two rubric keys needs an authorized reviewer.",
+      "proposedDisposition": "CONDITIONALLY_BLOCKING",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "RUBRIC_APPLICATION_UNCLEAR"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DEF-0B6-SYS-LOCATION-RETENTION-HAS-NO-SCHEDULER-IN-REPOSITORY-FLOOR_UNDERSTATED",
+      "kind": "CLARIFICATION",
+      "title": "The stated floor understates who can reach the operation.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B6-SYS-LOCATION-RETENTION-HAS-NO-SCHEDULER-IN-REPOSITORY]",
+          "recordSha256": "9bcace1b6153f5ac6d7d121852b558666fba8b59622ffe4bc5f618f250ee5cb6"
+        }
+      ],
+      "defectId": "DEF-0B6-SYS-LOCATION-RETENTION-HAS-NO-SCHEDULER-IN-REPOSITORY",
+      "findingCode": "FLOOR_UNDERSTATED",
+      "statement": "The stated state REACHABLE_ROLE_RESTRICTED understates reachability: some relevant operation is declared at a lower floor.",
+      "proposedDisposition": "REVIEW_REQUIRED",
+      "proposalState": "PROPOSED_NOT_ACCEPTED",
+      "dispositionSensitivity": [
+        "POSSIBLY_TOO_LENIENT"
+      ],
+      "carriedInto": [
+        "QUALIFICATION_REGISTER"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-DOCUMENTARY-CRITERIA-PRESENTATION",
+      "kind": "CLARIFICATION",
+      "title": "The seven Gate 0 criteria are documentary criteria and are never displayed as certification.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-closure-model-0c3.json",
+          "registerSha256": "36b6423a34fe97e30ad09bdc7c98664875e79f74ca1e81d4bf105d984d47a635",
+          "recordPath": "level1.criteriaSatisfiedByRecord",
+          "recordSha256": "91496b28f00632a188df68a91c53899f70d489be34e0e15256d93b35c73a20a8"
+        }
+      ],
+      "statement": "The seven criteria describe whether the record is complete. They carry the label DOCUMENTARY_SCOPE_RECORD_COMPLETE. Independent Gate 0 certification, persona ratification, institutional authority decisions, release authorization and production readiness are recorded separately and none is satisfied by them.",
+      "carriedInto": [
+        "CERTIFICATION_CHECKLIST",
+        "GATE_0_REPORT"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-OPL-FLAG-DEPENDENT-UNCHALLENGED",
+      "kind": "CLARIFICATION",
+      "title": "Unchallenged conditional dispositions rest on the same flag assumption as the two challenged ones.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-opl-challenge-treatment-0c3.json",
+          "registerSha256": "46871016035772ae87b29b8ef4607b2c65db3ffc400d0aea7b2f1761c5654bf5",
+          "recordPath": "flagDependentDispositions",
+          "recordSha256": "1b1c0fa6d6586a0bda9e0c712390fdb1abca137df3da61e0bd716e240f436d13"
+        }
+      ],
+      "statement": "6 further conditional dispositions depend on the flag UE_CANONICAL_BOOTSTRAP_V2. The flag is not shown to be enforced in every release path, so the assumption that softens them is unproven. No challenge is opened here and no disposition is changed; an authorized reviewer decides whether to challenge them.",
+      "defectIds": [
+        "DEF-0B10-PIL-USAGE-TELEMETRY-ROUTES-READ-ANY-ORGANIZATION-NAMED-IN-THE-QUERY-AT-AN-ADMIN-FLOOR-AND-RETURN-PER-USER-IDS-THROUGH-THE-BARE-DB-IMPORT",
+        "DEF-0B11-RPT-EXECUTE-JOINED-TABLES-CARRY-NO-ORGANIZATION-PREDICATE-SO-A-CALLER-CONFIGURED-JOIN-SELECTS-ROWS-OF-OTHER-ORGANIZATIONS",
+        "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
+        "DEF-0B9-ORG-ITEM-DELETE-ORGANIZATION-ADMIN-ARCHIVES-OWN-ORGANIZATION-BYPASSING-STATUS-GOVERNANCE",
+        "DEF-0B9-ORG-MEMBERSHIP-GUARD-IGNORES-MEMBER-STATUS-AND-REMOVAL-FLAG",
+        "DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK"
+      ],
+      "carriedInto": [
+        "CERTIFICATION_CHECKLIST"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-PER-CAPITA-SEVERITY-RELATIONSHIP",
+      "kind": "CLARIFICATION",
+      "title": "The MEDIUM health-and-welfare record and the HIGH tax-path record describe separate paths over one table at one floor.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-route-classification-0c1.json",
+          "registerSha256": "ebfaae1603b351e127fcb4f0cc006afa927f32937c4d45071cf3847fa28da1b3",
+          "recordIds": [
+            "DEF-0B8-JUR-HEALTH-WELFARE-PLANS-PATH-IS-THE-PER-CAPITA-REMITTANCE-LEDGER-AT-MEMBER-FLOOR"
+          ],
+          "recordSha256": "e4b5151166e2d8633eb5412998d24c6835909fec5bf99ca622655bc4316b705d"
+        },
+        {
+          "register": "docs/union-eyes/convergence/register/ue-route-classification-0c1.json",
+          "registerSha256": "ebfaae1603b351e127fcb4f0cc006afa927f32937c4d45071cf3847fa28da1b3",
+          "recordIds": [
+            "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER"
+          ],
+          "recordSha256": "2cbd68e02617c5307c7e12dca94f1efbb460ad5f22af44873eb0fbee5eea5991"
+        }
+      ],
+      "statement": "The health-and-welfare path and the four tax paths are separate advertised paths over the same table at the same member read floor. The source shows the same exposure on both. The difference between the MEDIUM and the HIGH rating is therefore not explained by the route source.",
+      "sharedTable": "perCapitaRemittances",
+      "distinctExposurePaths": [
+        {
+          "defectId": "DEF-0B8-JUR-HEALTH-WELFARE-PLANS-PATH-IS-THE-PER-CAPITA-REMITTANCE-LEDGER-AT-MEMBER-FLOOR",
+          "severity": "MEDIUM",
+          "releaseBlocking": false,
+          "path": "healthwelfare/plans",
+          "inReleaseDebtIndex": false
+        },
+        {
+          "defectId": "DEF-0B12-CRUD-TAX-PATHS-SERVE-THE-PER-CAPITA-REMITTANCE-LEDGER-TO-ANY-MEMBER",
+          "severity": "HIGH",
+          "releaseBlocking": true,
+          "paths": [
+            "tax/slips",
+            "tax/t106",
+            "tax/rl-1/generate",
+            "tax/cope/receipts"
+          ],
+          "inReleaseDebtIndex": true
+        }
+      ],
+      "carriedGap": "The MEDIUM record is not an item of the 150-item index although the route it describes exposes the same ledger at the same floor as the indexed HIGH record. It is cross-referenced here and remains an obligation of its engineering owner; it is not added to the index by this gate.",
+      "treatment": "Both original records are kept as recorded. Neither severity is changed. The difference is for an authorized severity review.",
+      "carriedInto": [
+        "CERTIFICATION_CHECKLIST"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-PUBLIC-EXPOSURE-ALLOWLIST",
+      "kind": "CLARIFICATION",
+      "title": "The three public exposure contracts rest on the handler declaration; reachability depends on the proxy allowlist.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-defect-relationship-map-0c3.json",
+          "registerSha256": "3c166aa58e8606217fd6ff9f828af19da9b03af47f13c7065fe30bad69b10dbf",
+          "recordPath": "exposures",
+          "recordSha256": "e152f72bdf438bca0d8811a6052c85f1d59ff584827f97364bae44ab2d3921fe"
+        }
+      ],
+      "statement": "Each of the three handlers is a plain exported function with no authentication wrapper, so the handler itself does not restrict the caller. None of the three paths is in the proxy allowlist the proxy consults (only /api/docs/openapi.json is), so whether an unauthenticated caller reaches them is decided by the proxy and the deployment, which the repository cannot show. The record keeps the exposure contract as release blocking and does not rely on either reading.",
+      "operations": [
+        {
+          "operation": "docs/openapi/route.ts|GET",
+          "inProxyAllowlist": false,
+          "justification": "NONE_RECORDED"
+        },
+        {
+          "operation": "docs/route.ts|GET",
+          "inProxyAllowlist": false,
+          "justification": "NONE_RECORDED"
+        },
+        {
+          "operation": "version/route.ts|GET",
+          "inProxyAllowlist": false,
+          "justification": "NONE_RECORDED"
+        }
+      ],
+      "carriedInto": [
+        "CERTIFICATION_CHECKLIST"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "CLAR-0C4-RETENTION-SCHEDULER-ABSENCE",
+      "kind": "CLARIFICATION",
+      "title": "A repository search that finds no scheduler does not show that no retention mechanism exists.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-release-high-defect-assessment-0c3.json",
+          "registerSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+          "recordPath": "assessments[DEF-0B6-SYS-LOCATION-RETENTION-HAS-NO-SCHEDULER-IN-REPOSITORY]",
+          "recordSha256": "9bcace1b6153f5ac6d7d121852b558666fba8b59622ffe4bc5f618f250ee5cb6"
+        }
+      ],
+      "statement": "Files outside the route name it; each needs reading to decide whether it schedules the route. The absence of a repository reference is evidence about repository content only.",
+      "doesNotEstablish": [
+        "That no retention mechanism exists. A scheduler can be configured in a deployment, a platform console or another repository, none of which is searched.",
+        "That location data is or is not deleted in any deployment."
+      ],
+      "carriedInto": [
+        "CERTIFICATION_CHECKLIST"
+      ],
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    },
+    {
+      "id": "SUP-0C4-CARBON-SOURCE-EXISTENCE",
+      "kind": "SUPERSESSION",
+      "title": "The frozen statement that no source names carbon accounting is superseded by a narrower supported finding.",
+      "targets": [
+        {
+          "register": "docs/union-eyes/convergence/register/ue-carbon-scope-decision-0c3.json",
+          "registerSha256": "65a78d5766d9f25cfd775bfc2f5e8439acfaa0b7d823517659cc65f72b130106",
+          "recordPath": "priorEvidenceGap.frozenStatement",
+          "recordSha256": "bd56c2993c28570c3dd8cba11cb08b5f24a9a4222a014f215b5aad5fa2e83956"
+        },
+        {
+          "register": "docs/union-eyes/convergence/register/ue-route-decision-bound-exceptions.json",
+          "registerSha256": "e412bec8870a37d3b3ac7354763b7b79c8f8e891a08e62e5ec28ca45d75e63c4",
+          "recordIds": [
+            "carbon/dashboard/route.ts|GET",
+            "carbon/infrastructure/route.ts|GET",
+            "carbon/validate/route.ts|GET",
+            "carbon/validate/route.ts|POST"
+          ]
+        }
+      ],
+      "supersededStatement": "No table, service, persona source, register entry or product caller names carbon accounting or Azure emissions monitoring.",
+      "supersedingFinding": "Sources outside the four route files do name carbon accounting. None of them has been demonstrated to supply measured evidence to the four classified routes: no route file imports a carbon component, and the components record their figures as estimates or caller-entered amounts.",
+      "notEstablished": [
+        "That no measured carbon data source exists anywhere in the platform.",
+        "That the backend recording path is outside the released scope.",
+        "That a source citation is absent from every register for the four operations."
+      ],
+      "evidence": {
+        "filesNamingCarbonAccounting": 12,
+        "filesImportingACarbonService": [
+          "apps/union-eyes/backend/services/api/carbon_accounting_integration_views.py",
+          "apps/union-eyes/backend/services/api/urls.py",
+          "apps/union-eyes/modules.d.ts",
+          "apps/union-eyes/scripts/bootstrap-v2/framework_application.py",
+          "apps/union-eyes/services/__tests__/carbon-accounting-integration.test.ts",
+          "apps/union-eyes/services/__tests__/carbon-accounting-service.test.ts"
+        ],
+        "reachableFromTheFourRoutes": []
+      },
+      "carriedInto": [
+        "CERTIFICATION_CHECKLIST",
+        "CARBON_DECISION_DOSSIER"
+      ],
+      "frozenTextPreserved": true,
+      "effect": {
+        "dispositionChanged": false,
+        "severityChanged": false,
+        "historicalRecordAltered": false,
+        "acceptsAnything": false
+      }
+    }
+  ]
+}

@@ -3,7 +3,9 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   withAdminAuth: vi.fn(),
+  withSystemAdminAuth: vi.fn(),
   getCurrentUser: vi.fn(),
+  operation: vi.fn(),
   embeddingCache: {
     getStats: vi.fn(),
     clearCache: vi.fn(),
@@ -14,7 +16,15 @@ const m = vi.hoisted(() => ({
 
 vi.mock('@/lib/api-auth-guard', () => ({
   withAdminAuth: m.withAdminAuth,
+  withSystemAdminAuth: m.withSystemAdminAuth,
   getCurrentUser: m.getCurrentUser,
+}));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: m.operation,
+  operationAuditResponse: (e: unknown) =>
+    (e as { code?: string })?.code === 'OPERATION_AUDIT_UNAVAILABLE'
+      ? { status: 409, body: { error: { code: 'OPERATION_AUDIT_UNAVAILABLE', message: 'not performed' } } }
+      : null,
 }));
 vi.mock('@/lib/services/ai/embedding-cache', () => ({
   embeddingCache: m.embeddingCache,
@@ -37,6 +47,11 @@ describe('ai/cache-stats route', () => {
       (handler: (req: NextRequest) => Promise<Response>) =>
         (req: NextRequest) => handler(req),
     );
+    m.withSystemAdminAuth.mockImplementation(
+      (handler: (req: NextRequest, ctx: unknown) => Promise<Response>) =>
+        (req: NextRequest) => handler(req, { userId: 'admin_1', organizationId: 'org_1' }),
+    );
+    m.operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
     m.getCurrentUser.mockResolvedValue({ id: 'admin_1' });
     m.embeddingCache.getStats.mockResolvedValue({
       totalRequests: 10,
@@ -101,6 +116,23 @@ describe('ai/cache-stats route', () => {
     expect(response.status).toBe(200);
     expect(payload.deletedKeys).toBe(12);
     expect(m.embeddingCache.clearCache).toHaveBeenCalled();
+    expect(m.operation).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: 'org_1', userId: 'admin_1', action: 'ai.embedding_cache.clear' }),
+      expect.any(Function),
+    );
+  });
+
+  it('POST does not touch the cache when the audit intent cannot be recorded', async () => {
+    const { POST } = await loadRoute();
+    m.operation.mockRejectedValueOnce(Object.assign(new Error('x'), { code: 'OPERATION_AUDIT_UNAVAILABLE' }));
+    const response = await POST(new NextRequest('http://localhost/api/ai/cache-stats', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'clear' }),
+    }));
+
+    expect(response.status).toBe(409);
+    expect(m.embeddingCache.clearCache).not.toHaveBeenCalled();
   });
 
   it('POST resets stats when action is reset-stats', async () => {

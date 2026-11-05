@@ -138,9 +138,6 @@ export class IndigenousDataService {
     const requiresElderApproval = sensitivity === 'sacred';
 
     // Determine band council from the requester's indigenous data
-    const { indigenousMemberData } = await import('@/db/schema/indigenous-data-schema');
-    const { eq } = await import('drizzle-orm');
-    
     // Get requester's band council
     const requesterData = await db
       .select({

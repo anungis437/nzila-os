@@ -11,7 +11,7 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Organization"],
   orgScoped: true,
-  readRole: 'member',
-  writeRole: 'steward',
+  readRole: 'officer',
+  writeRole: 'officer',
 });
 export { GET, POST };

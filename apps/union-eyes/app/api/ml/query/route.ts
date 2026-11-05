@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { logApiAuditEvent } from '@/lib/middleware/api-security';
+import { createHash } from 'node:crypto';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { z } from 'zod';
 
 import {
@@ -13,8 +15,9 @@ import {
   import { enforceAISafety } from '@nzila/policies';
 const QuerySchema = z.object({
   question: z.string().min(1).max(500),
-  context: z.any().optional(),
-});
+  // A bounded flat map: the context goes to an external service, so it is not an arbitrary document.
+  context: z.record(z.string().max(64), z.union([z.string().max(500), z.number(), z.boolean()])).refine((value) => Object.keys(value).length <= 20, 'at most 20 context keys').optional(),
+}).strict();
 
 /**
  * POST /api/ml/query
@@ -42,7 +45,9 @@ const QuerySchema = z.object({
  * - "What&apos;s our win rate this quarter?"
  * - "Which employer has the most claims?"
  */
-export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+// Natural-language questions are answered over the organization's claims, steward workload and settlement data, which a
+// rank-and-file member is not entitled to read in aggregate; the minimum is steward until the institution names who may ask.
+export const POST = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
   const { userId, organizationId } = context;
 
   // CRITICAL: Rate limit ML query calls (expensive AI operations)
@@ -67,13 +72,25 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     }
     const blocked = await guardAiFeature(AI_FEATURES.ML_QUERY, { userId, organizationId });
     if (blocked) return blocked;
-    enforceAISafety({ origin: 'ml-query', action: 'POST', organizationId, userId, userRole: 'member', dataClass: 'internal' });
+    // The question is answered over claims, workload and settlement data, so the data class is confidential and the role is the caller's own.
+    enforceAISafety({ origin: 'ml-query', action: 'POST', organizationId, userId, userRole: (context.userRole as string | undefined) ?? 'steward', dataClass: 'confidential' });
 
   try {
     const body = await request.json();
     const { question, context: queryContext } = QuerySchema.parse(body);
 
       const organizationScopeId = organizationId;
+
+    // The disclosure is on the durable record before the text leaves: if the record cannot be written, nothing is sent. The record keeps
+    // the length and a digest of the question, not its text.
+    await withRLSContext({ organizationId, userId }, (tx) => persistAtomicAudit(tx, {
+      organizationId,
+      userId: userId!,
+      action: 'ml.query.external_disclosure',
+      resourceType: 'ml_query',
+      resourceId: null,
+      details: { questionLength: question.length, questionSha256: createHash('sha256').update(question).digest('hex'), contextKeys: Object.keys(queryContext ?? {}).length },
+    }));
 
     // Call AI service for natural language query
     const aiServiceUrl = process.env.AI_SERVICE_URL;
@@ -103,20 +120,6 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     // Generate follow-up suggestions based on the query type
     const suggestions = generateFollowUpSuggestions(question, result);
 
-    // Log audit event
-    logApiAuditEvent({
-      timestamp: new Date().toISOString(),
-      endpoint: '/api/ml/query',
-      method: 'POST',
-      eventType: 'success',
-      severity: 'low',
-      userId,
-      details: {
-        question: question.substring(0, 100),
-        confidence: result.confidence,
-      },
-    });
-
     return NextResponse.json({
       ...result,
       suggestions
@@ -125,7 +128,7 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
   } catch (error) {
 if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request', details: error.errors },
+        { error: 'Invalid request', details: error.issues },
         { status: 400 }
       );
     }

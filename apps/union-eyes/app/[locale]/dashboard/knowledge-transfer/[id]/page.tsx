@@ -1,8 +1,8 @@
 import { notFound, redirect } from 'next/navigation';
-import { requireUser } from '@/lib/api-auth-guard';
-import { db } from '@/db/db';
-import { and, eq } from 'drizzle-orm';
-import { exitInterviews } from '@/db/schema';
+import { hasMinRole } from '@/lib/api-auth-guard';
+import { requireOrganizationScope } from '@/lib/page-data/organization-scope';
+import { readExitInterview } from '@/lib/knowledge-transfer/governance/read-interview';
+import { checkModuleEntitlement, PLATFORM_MODULES } from '@/services/platform-economics/entitlement-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,17 +11,29 @@ type PageProps = {
 };
 
 export default async function ExitInterviewDetailPage({ params }: PageProps) {
-  const user = await requireUser();
-  if (!user) {
-    redirect('/sign-in');
+  const { userId, organizationId } = await requireOrganizationScope();
+  const { id } = await params;
+
+  // The detail page is for officers and above, as the index and the creation page are (the persona matrix). The interview's own sensitivity
+  // floor, consent flag and workflow state then apply on top, as they do in the API.
+  if (!(await hasMinRole('officer'))) {
+    redirect('/dashboard');
   }
 
-  const { id } = await params;
-  const [item] = await db
-    .select()
-    .from(exitInterviews)
-    .where(and(eq(exitInterviews.id, id), eq(exitInterviews.organizationId, user.organizationId ?? '')))
-    .limit(1);
+  // The same module the interview API requires.
+  if (!(await checkModuleEntitlement(organizationId, PLATFORM_MODULES.UNION_KNOWLEDGE_SUITE)).allowed) {
+    redirect('/dashboard');
+  }
+
+  // Sensitivity floor, consent and workflow state apply here as they do in the API: an interview the reader may not read is not found.
+  const item = await readExitInterview({
+    organizationId,
+    userId,
+    interviewId: id,
+    // The officer floor above includes the steward floor.
+    stewardPlus: true,
+    hasMinRole,
+  });
 
   if (!item) {
     notFound();
@@ -32,7 +44,9 @@ export default async function ExitInterviewDetailPage({ params }: PageProps) {
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">{item.title}</h1>
         <p className="text-sm text-muted-foreground">
-          {item.retiringEmployeeName} · {item.roleInUnion} · {item.yearsOfService} years
+          {[item.retiringEmployeeName, item.roleInUnion, item.yearsOfService != null ? `${item.yearsOfService} years` : null]
+            .filter(Boolean)
+            .join(' · ')}
         </p>
       </header>
 

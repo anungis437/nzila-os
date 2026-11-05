@@ -178,7 +178,7 @@ export async function submitForApproval(
         submittedDate: new Date().toISOString(),
         createdBy: userId
       })
-      .where(eq(perCapitaRemittances.id, remittanceId));
+      .where(and(eq(perCapitaRemittances.id, remittanceId), eq(perCapitaRemittances.organizationId, rem.organizationId)));
 
     // Log approval action
     await logApprovalAction(
@@ -295,7 +295,7 @@ export async function approveRemittance(
         approvedDate: nextLevel ? undefined : new Date().toISOString(),
         approvedBy: nextLevel ? undefined : userId
       })
-      .where(eq(perCapitaRemittances.id, remittanceId));
+      .where(and(eq(perCapitaRemittances.id, remittanceId), eq(perCapitaRemittances.organizationId, rem.organizationId)));
 
     // Log approval
     await logApprovalAction(
@@ -407,7 +407,7 @@ export async function rejectRemittance(
         rejectedBy: userId,
         rejectionReason
       })
-      .where(eq(perCapitaRemittances.id, remittanceId));
+      .where(and(eq(perCapitaRemittances.id, remittanceId), eq(perCapitaRemittances.organizationId, rem.organizationId)));
 
     // Log rejection
     await logApprovalAction(

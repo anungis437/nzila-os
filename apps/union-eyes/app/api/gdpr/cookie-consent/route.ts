@@ -7,13 +7,20 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from '@/lib/api-auth-guard';
-import { CookieConsentManager } from "@/lib/gdpr/consent-manager";
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { organizations } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { CookieConsentManager, CookieConsentOwnershipError } from "@/lib/gdpr/consent-manager";
+import { publicCookieConsent } from '@/lib/gdpr/public-cookie-consent';
 import { logger } from '@/lib/logger';
+import { guardPublicIntake } from '@/lib/public-intake/guard';
 
 const gdprCookieConsentSchema = z.object({
-  consentId: z.string().uuid('Invalid consentId'),
-  organizationId: z.string().uuid('Invalid organizationId'),
-  essential: z.boolean().optional(),
+  consentId: z.guid('Invalid consentId'),
+  organizationId: z.guid('Invalid organizationId'),
+  // Necessary cookies are not an optional marketing preference.
+  essential: z.literal(true).optional(),
   functional: z.boolean().optional(),
   analytics: z.boolean().optional(),
   marketing: z.boolean().optional(),
@@ -22,35 +29,67 @@ const gdprCookieConsentSchema = z.object({
 
 export const POST = async (request: NextRequest) => {
   try {
+    // Public and every save writes an audit row, so it is bounded per client and by body size before anything else.
+    const intake = await guardPublicIntake(request, { bucket: 'write' });
+    if (!intake.ok) return intake.response;
+
     let userId: string | undefined;
     try { const user = await getCurrentUser(); userId = user?.id ?? undefined; } catch { /* unauthenticated */ }
 
-    const body = await request.json();
-    const validation = gdprCookieConsentSchema.safeParse(body);
+    const validation = gdprCookieConsentSchema.safeParse(intake.json);
     if (!validation.success) {
       return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
     }
     
-    const { consentId, organizationId, essential, functional, analytics, marketing, userAgent } = validation.data;
+    const { consentId, organizationId, functional, analytics, marketing, userAgent } = validation.data;
 
     const ipAddress = request.headers.get("x-forwarded-for") || 
                       request.headers.get("x-real-ip") || 
                       "unknown";
 
-    const consent = await CookieConsentManager.saveCookieConsent({
-      userId,
-      organizationId,
-      consentId,
-      essential: essential ?? true,
-      functional: functional ?? false,
-      analytics: analytics ?? false,
-      marketing: marketing ?? false,
-      ipAddress,
-      userAgent,
-    });
+    // Anonymous visitors have no organization binding, so the write and its audit run on the system connection; the
+    // organization the banner names must exist, and a record held by a signed-in member cannot be changed by others.
+    const result = await withSystemContext(async (tx) => {
+      const [organization] = await tx
+        .select({ id: organizations.id })
+        .from(organizations)
+        .where(eq(organizations.id, organizationId))
+        .limit(1);
+      if (!organization) return { error: 'organization' as const };
 
-    return NextResponse.json(consent);
+      const consent = await CookieConsentManager.saveCookieConsent({
+        userId,
+        organizationId,
+        consentId,
+        essential: true,
+        functional: functional ?? false,
+        analytics: analytics ?? false,
+        marketing: marketing ?? false,
+        ipAddress,
+        userAgent,
+      }, tx);
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId: userId ?? 'system:cookie-consent',
+        action: 'gdpr.cookie_consent.save',
+        resourceType: 'cookie_consents',
+        resourceId: consent.id,
+        details: {
+          functional: consent.functional,
+          analytics: consent.analytics,
+          marketing: consent.marketing,
+          authenticated: !!userId,
+        },
+      });
+      return { consent };
+    });
+    if ('error' in result) return NextResponse.json({ error: 'Invalid request data' }, { status: 400 });
+
+    return NextResponse.json(publicCookieConsent(result.consent));
   } catch (error) {
+    if (error instanceof CookieConsentOwnershipError) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
     logger.error('[cookie-consent] POST error', { error });
     return NextResponse.json({ error: 'Failed to save cookie consent' }, { status: 500 });
   }
@@ -65,18 +104,26 @@ export const GET = async (request: NextRequest) => {
       // No consent ID — return empty (cookie banner initial check)
       return NextResponse.json({ consent: null });
     }
+    // The consent id is the visitor's only credential, and the read is made on the system connection: it is bounded per client like the write.
+    const intake = await guardPublicIntake(request, { bucket: 'capability', readBody: false });
+    if (!intake.ok) return intake.response;
+    if (!z.guid().safeParse(consentId).success) {
+      return NextResponse.json({ error: 'Invalid consentId' }, { status: 400 });
+    }
 
-    const consent = await CookieConsentManager.getCookieConsent(consentId);
+    // A visitor has no tenant session, so the record is read on the system connection by its browser-side consent id (a v4 uuid the
+    // visitor holds), exactly as the POST above writes it.
+    const consent = await withSystemContext((tx) => CookieConsentManager.getCookieConsent(consentId, tx));
 
     if (!consent) {
       return NextResponse.json({ consent: null });
     }
 
-    return NextResponse.json(consent);
+    return NextResponse.json(publicCookieConsent(consent));
   } catch (error) {
-    // Gracefully handle missing table / DB errors — don't block the page
+    // A database failure is a failure: an empty "no consent recorded" answer would make the banner ask again and hide the outage.
     logger.error('[cookie-consent] GET error', { error });
-    return NextResponse.json({ consent: null });
+    return NextResponse.json({ error: 'Failed to load cookie consent' }, { status: 500 });
   }
 };
 

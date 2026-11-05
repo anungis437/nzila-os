@@ -5,7 +5,7 @@ export const farmer360SourceRefSchema = z
   .object({
     system: z.string().min(1),
     recordId: z.string().min(1),
-    evidenceId: z.string().uuid().optional(),
+    evidenceId: z.guid().optional(),
     payloadSha256: z
       .string()
       .regex(/^[a-f0-9]{64}$/)
@@ -58,7 +58,7 @@ export const coraEnterpriseContextSchema = z
 
 export const coraEnterpriseContextInputSchema = z
   .object({
-    profileId: z.string().uuid().optional(),
+    profileId: z.guid().optional(),
     subjectRef: farmer360SourceRefSchema,
     context: coraEnterpriseContextSchema,
     effectiveFrom: z.string().datetime(),
@@ -73,7 +73,7 @@ export const coraEnterpriseContextInputSchema = z
 
 export const farmerAssertionInputSchema = z
   .object({
-    profileId: z.string().uuid(),
+    profileId: z.guid(),
     subject: z.string().min(1),
     statement: z.string().min(1),
     purpose: z.string().min(1),

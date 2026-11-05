@@ -182,6 +182,7 @@ class ExitInterview(models.Model):
     updated_by = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    submitted_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "exit_interviews"

@@ -7,6 +7,7 @@
  */
 
 import { db } from "@/db/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import {
   dispatchRequests,
   dispatchAssignments,
@@ -14,7 +15,8 @@ import {
   type DispatchRequestInsert,
   type DispatchRuleType,
 } from "@/db/schema/domains/dispatch/dispatch";
-import { eq, and, asc, desc } from "drizzle-orm";
+import { organizationMembers } from "@/db/schema-organizations";
+import { eq, and, asc, desc, inArray } from "drizzle-orm";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -94,8 +96,9 @@ export function calculateDispatchPriority(
  */
 export async function createDispatchRequest(
   data: DispatchRequestInsert,
+  exec: RLSTx = db,
 ) {
-  const [row] = await db
+  const [row] = await exec
     .insert(dispatchRequests)
     .values(data)
     .returning();
@@ -103,7 +106,7 @@ export async function createDispatchRequest(
 }
 
 /**
- * List open dispatch requests for an org.
+ * List the dispatch requests that still need workers: open ones and partially filled ones (a partly filled request leaves the queue only when it is filled).
  */
 export async function listDispatchQueue(orgId: string) {
   return db
@@ -112,7 +115,7 @@ export async function listDispatchQueue(orgId: string) {
     .where(
       and(
         eq(dispatchRequests.orgId, orgId),
-        eq(dispatchRequests.status, "open"),
+        inArray(dispatchRequests.status, ["open", "partially_filled"]),
       ),
     )
     .orderBy(asc(dispatchRequests.requestedDate));
@@ -163,48 +166,86 @@ export async function rankCandidates(
   return scored;
 }
 
+/** The refusals of an assignment, so a route can answer each with its own status. */
+export class DispatchAssignmentError extends Error {
+  constructor(readonly reason: 'not_found' | 'not_open' | 'not_members' | 'already_assigned' | 'over_capacity', message: string) {
+    super(message);
+  }
+}
+
+const LIVE_ASSIGNMENT_STATUSES = ["offered", "accepted", "confirmed", "completed"] as const;
+
 /**
- * Assign top-ranked workers to a dispatch request.
+ * Offer a dispatch request to named members.
  *
- * Inserts assignment rows and updates request status.
+ * The officer chooses the members; the dispatch rules are not applied here (rankCandidates scores a candidate list, and no source of
+ * candidate skills or availability feeds it). What this guarantees is that the choice is a valid one: the request is the caller's and
+ * still open, every member is an active member of the organization, none is already offered or placed on it, and the offers do not
+ * exceed the workers requested. The request row is locked so two officers cannot both fill the last place.
  *
  * ROUND 50 SECURITY FIX: previously took no orgId and performed no check
  * that requestId belonged to the caller's organization, letting one
  * organization inject assignment rows into another organization's
- * dispatch request (cross-tenant IDOR). Mirrors the ownership check
- * already used in rankCandidates() above.
+ * dispatch request (cross-tenant IDOR).
  */
 export async function assignWorkersToDispatch(
   orgId: string,
   requestId: string,
   memberIds: string[],
+  exec: RLSTx = db,
 ) {
-  const [request] = await db
+  const members = [...new Set(memberIds)];
+
+  const [request] = await exec
     .select()
     .from(dispatchRequests)
-    .where(and(eq(dispatchRequests.id, requestId), eq(dispatchRequests.orgId, orgId)));
+    .where(and(eq(dispatchRequests.id, requestId), eq(dispatchRequests.orgId, orgId)))
+    .for("update");
 
-  if (!request) throw new Error("Dispatch request not found.");
+  if (!request) throw new DispatchAssignmentError("not_found", "Dispatch request not found.");
+  if (request.status !== "open" && request.status !== "partially_filled") {
+    throw new DispatchAssignmentError("not_open", "Dispatch request is not open.");
+  }
 
-  const assignments = await db
+  const active = await exec
+    .select({ id: organizationMembers.id })
+    .from(organizationMembers)
+    .where(
+      and(
+        eq(organizationMembers.organizationId, orgId),
+        inArray(organizationMembers.id, members),
+        eq(organizationMembers.status, "active"),
+      ),
+    );
+  if (active.length !== members.length) {
+    throw new DispatchAssignmentError("not_members", "Every worker must be an active member of this organization.");
+  }
+
+  const live = await exec
+    .select({ memberId: dispatchAssignments.memberId })
+    .from(dispatchAssignments)
+    .where(and(eq(dispatchAssignments.requestId, requestId), inArray(dispatchAssignments.status, [...LIVE_ASSIGNMENT_STATUSES])));
+  const already = new Set(live.map((row) => row.memberId));
+  if (members.some((memberId) => already.has(memberId))) {
+    throw new DispatchAssignmentError("already_assigned", "A worker is already offered or placed on this request.");
+  }
+  if (live.length + members.length > request.requestedWorkers) {
+    throw new DispatchAssignmentError("over_capacity", "More workers were named than the request still needs.");
+  }
+
+  const assignments = await exec
     .insert(dispatchAssignments)
-    .values(
-      memberIds.map((memberId) => ({
-        requestId,
-        memberId,
-        status: "offered" as const,
-      })),
-    )
+    .values(members.map((memberId) => ({ requestId, memberId, status: "offered" as const })))
     .returning();
 
-  const filled = memberIds.length >= request.requestedWorkers;
-  await db
+  const filled = live.length + members.length >= request.requestedWorkers;
+  await exec
     .update(dispatchRequests)
     .set({
       status: filled ? "filled" : "partially_filled",
       updatedAt: new Date(),
     })
-    .where(eq(dispatchRequests.id, requestId));
+    .where(and(eq(dispatchRequests.id, requestId), eq(dispatchRequests.orgId, request.orgId)));
 
   return assignments;
 }

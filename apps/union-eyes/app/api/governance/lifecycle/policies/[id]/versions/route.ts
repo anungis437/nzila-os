@@ -1,37 +1,16 @@
 /**
  * GET /api/governance/lifecycle/policies/[id]/versions
+ *
+ * Not available (capability UE-GOVERNANCE-POLICY-LIFECYCLE): see lib/governance/policy-lifecycle-unavailable.ts. Nothing is read.
  */
-import { withApi } from '@/lib/api/framework'
-import { db } from '@/db/db'
-import { withSystemContext } from '@/lib/db/with-rls-context'
-import { governedPolicies } from '@nzila/db/schema'
-import { eq, asc } from 'drizzle-orm'
+import { withApi, ApiError } from '@/lib/api/framework'
+import { POLICY_LIFECYCLE_UNAVAILABLE } from '@/lib/governance/policy-lifecycle-unavailable'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'admin' },
-    entitlement: 'governance_suite',
-  },
-  async ({ params }) => {
-    const id = (params as Record<string, string>).id
-
-    return withSystemContext(async () => {
-      const [policy] = await db
-        .select()
-        .from(governedPolicies)
-        .where(eq(governedPolicies.id, id))
-        .limit(1)
-      if (!policy) return null
-
-      const versions = await db
-        .select()
-        .from(governedPolicies)
-        .where(eq(governedPolicies.policyFamilyId, policy.policyFamilyId))
-        .orderBy(asc(governedPolicies.createdAt))
-
-      return { policyFamilyId: policy.policyFamilyId, versions }
-    })
+  { auth: { required: true, minRole: 'admin' }, entitlement: 'governance_suite' },
+  async () => {
+    throw ApiError.notImplemented(POLICY_LIFECYCLE_UNAVAILABLE)
   },
 )

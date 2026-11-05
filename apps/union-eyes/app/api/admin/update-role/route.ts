@@ -1,18 +1,27 @@
 /**
- * CRUD collection route for organizationMembers — role management
- * Requires admin+ role (not steward) for writes since this controls role assignment.
+ * GET POST /api/admin/update-role
+ *
+ * Not implemented. This path advertises an operation of its own but was the generic CRUD factory over organization_members: GET
+ * returned member roster rows under this name and every write was refused, so nothing it advertises was ever done. It answers
+ * HTTP 501 rather than present a roster listing as that operation. The member roster is served by /api/members/[id].
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { organizationMembers } from '@/db/schema';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
-  table: organizationMembers,
-  pk: 'id',
-  tags: ["Members"],
-  orgScoped: true,
-  readRole: 'steward',
-  writeRole: 'admin',
-});
-export { GET, POST };
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'steward' },
+    openapi: {
+      tags: ['Members'],
+      summary: '/api/admin/update-role (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/admin/update-role is not implemented: it performed no operation of its own and returned the member roster instead.');
+  },
+);
+
+export const GET = handler;
+export const POST = handler;

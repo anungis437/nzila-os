@@ -3,10 +3,11 @@
  * Requires platform-level auth (platform_lead or higher).
  */
 import { withApi } from '@/lib/api/with-api';
-import { db } from '@/db/db';
 import { analyticsMetrics } from '@/db/schema';
 import { desc } from 'drizzle-orm';
-import { withRLSContext } from '@/lib/db/with-rls-context';
+import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';
 
@@ -99,9 +100,11 @@ export const GET = withApi(
     auth: { required: true, minRole: 'platform_lead' },
     openapi: { tags: ['Analytics'], summary: 'Cross-org aggregate analytics metrics' },
   },
-  async () => {
-    return withRLSContext(async () => {
-      const rows = await db
+  async ({ userId, organizationId }) => {
+    if (!userId || !organizationId) throw ApiError.forbidden('An active organization is required to read cross-organization analytics');
+    // The read crosses every tenant, so it runs under the system role on purpose (not whatever the connection role happens to show) and is recorded with the read.
+    return withSystemContext(async (tx) => {
+      const rows = await tx
         .select({
           organizationId: analyticsMetrics.organizationId,
           metricType: analyticsMetrics.metricType,
@@ -114,6 +117,14 @@ export const GET = withApi(
         .from(analyticsMetrics)
         .orderBy(desc(analyticsMetrics.createdAt))
         .limit(1000);
+
+      await persistAtomicAudit(tx, {
+        userId,
+        organizationId,
+        resourceType: 'analytics_metrics',
+        action: 'analytics.cross_org.read',
+        details: { sourceRowsAggregated: rows.length },
+      });
 
       return {
         dataClass: 'aggregate_only',

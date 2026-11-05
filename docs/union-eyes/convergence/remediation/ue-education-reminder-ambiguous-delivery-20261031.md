@@ -1,0 +1,3 @@
+# UE Gate 0 — ambiguous education email delivery outcome (2026-10-31)
+
+A provider promise may throw after it has accepted an email. The training email helper previously collapsed every exception into a normal failed-send response, causing the durable claim to be released and a retry to risk a duplicate. Session and certification warning senders now mark exceptions as `uncertain`; the batch sender retains the unique claim for reconciliation, while an explicit provider refusal still releases it for retry. Regression source: `lib/email/__tests__/training-notifications-dedupe.test.ts`. Exact-HEAD unit, native and HTTP qualification remain pending.

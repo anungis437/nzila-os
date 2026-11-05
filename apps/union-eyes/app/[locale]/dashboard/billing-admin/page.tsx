@@ -15,13 +15,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { DollarSign, CreditCard, TrendingUp, Users, FileText, AlertCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
-import { logger } from '@/lib/logger';
-import {
-  getAdminSubscriptions,
-  getAdminInvoices,
-  getAdminPayments,
-} from '@/services/platform-economics';
+import { loadBillingAdminData } from '@/lib/platform-economics/billing-admin-data';
 import { formatCurrency } from '@/lib/utils';
+import { recordedDay } from '@/lib/client/day';
 import { getTranslations } from 'next-intl/server';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -80,7 +76,8 @@ interface BillingStats {
   totalMrr: number;
   activeSubscriptions: number;
   totalSubscriptions: number;
-  paymentSuccessRate: number;
+  /** Null when there is no payment: a rate of nothing is not 100%. */
+  paymentSuccessRate: number | null;
   totalPayments: number;
   succeededPayments: number;
   failedPayments: number;
@@ -93,21 +90,7 @@ interface BillingStats {
 }
 
 // ── Data loaders ───────────────────────────────────────────────────────────
-
-async function loadSubscriptions(): Promise<Subscription[]> {
-  const rows = await getAdminSubscriptions();
-  return rows as Subscription[];
-}
-
-async function loadInvoices(): Promise<Invoice[]> {
-  const rows = await getAdminInvoices();
-  return rows as Invoice[];
-}
-
-async function loadPayments(): Promise<Payment[]> {
-  const rows = await getAdminPayments();
-  return rows as Payment[];
-}
+// Cross-organization reads: loadBillingAdminData runs on the system role, so the platform-role check in the page precedes every call.
 
 function computeStats(
   subscriptions: Subscription[],
@@ -124,7 +107,7 @@ function computeStats(
   const totalPayments = payments.length;
   const paymentSuccessRate = totalPayments > 0
     ? Math.round((completedPayments / totalPayments) * 1000) / 10
-    : 100;
+    : null;
 
   const overdueInvoices = invoices.filter(i => i.status === 'overdue').length;
   const issuedInvoices = invoices.filter(i => i.status === 'issued').length;
@@ -174,7 +157,7 @@ function paymentStatusVariant(status: string) {
 }
 
 function formatDate(dateStr: string | Date, locale: string) {
-  return new Date(dateStr).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
+  return recordedDay(dateStr).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function timeAgo(dateStr: string | Date, t: Awaited<ReturnType<typeof getTranslations>>) {
@@ -209,19 +192,12 @@ export default async function BillingAdminDashboard({
     redirect(`/${locale}/dashboard`);
   }
 
-  let subscriptions: Subscription[] = [];
-  let invoices: Invoice[] = [];
-  let payments: Payment[] = [];
-
-  try {
-    [subscriptions, invoices, payments] = await Promise.all([
-      loadSubscriptions(),
-      loadInvoices(),
-      loadPayments(),
-    ]);
-  } catch (error) {
-    logger.error('Error loading billing data:', error);
-  }
+  // A failed read is an error state (the dashboard's error boundary), never a dashboard of zeros.
+  const { subscriptions, invoices, payments } = (await loadBillingAdminData()) as {
+    subscriptions: Subscription[];
+    invoices: Invoice[];
+    payments: Payment[];
+  };
 
   const stats = computeStats(subscriptions, invoices, payments);
 
@@ -310,8 +286,8 @@ export default async function BillingAdminDashboard({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold ${stats.paymentSuccessRate >= 98 ? 'text-green-600' : stats.paymentSuccessRate >= 95 ? 'text-yellow-600' : 'text-red-600'}`}>
-                    {stats.paymentSuccessRate}%
+                  <div className={`text-2xl font-bold ${stats.paymentSuccessRate === null ? 'text-muted-foreground' : stats.paymentSuccessRate >= 98 ? 'text-green-600' : stats.paymentSuccessRate >= 95 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    {stats.paymentSuccessRate === null ? '—' : `${stats.paymentSuccessRate}%`}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {t('overview.paymentsCount', { succeeded: stats.succeededPayments, total: stats.totalPayments })}
@@ -550,8 +526,8 @@ export default async function BillingAdminDashboard({
                 <CardTitle className="text-sm font-medium">{t('payments.successRateTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${stats.paymentSuccessRate >= 98 ? 'text-green-600' : 'text-yellow-600'}`}>
-                  {stats.paymentSuccessRate}%
+                <div className={`text-2xl font-bold ${stats.paymentSuccessRate === null ? 'text-muted-foreground' : stats.paymentSuccessRate >= 98 ? 'text-green-600' : 'text-yellow-600'}`}>
+                  {stats.paymentSuccessRate === null ? '—' : `${stats.paymentSuccessRate}%`}
                 </div>
               </CardContent>
             </Card>

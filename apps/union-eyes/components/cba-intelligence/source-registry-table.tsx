@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
+import { ApiShapeError, apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
 import {
   Card,
   CardContent,
@@ -29,7 +31,6 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   Database,
-  Plus,
   Search,
   CheckCircle2,
   AlertTriangle,
@@ -60,14 +61,11 @@ interface CbaIntelSource {
   adapterKey?: string;
 }
 
-interface SourceListResponse {
-  success: boolean;
-  data: {
-    items: CbaIntelSource[];
-    total: number;
-    page: number;
-    limit: number;
-  };
+interface SourcePage {
+  items: CbaIntelSource[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -88,9 +86,9 @@ const TRUST_LABELS: Record<string, string> = {
   unverified: "Unverified",
 };
 
-function formatDate(dateStr: string | null): string {
+function formatDate(dateStr: string | null, locale: string): string {
   if (!dateStr) return "Never";
-  return new Date(dateStr).toLocaleDateString("en-CA", {
+  return new Date(dateStr).toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -104,6 +102,7 @@ function formatDate(dateStr: string | null): string {
 // ---------------------------------------------------------------------------
 
 export function SourceRegistryTable() {
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const [sourceTypeFilter, setSourceTypeFilter] = useState<string>("all");
   const [healthFilter, setHealthFilter] = useState<string>("all");
@@ -113,14 +112,21 @@ export function SourceRegistryTable() {
   if (sourceTypeFilter !== "all") queryParams.set("sourceType", sourceTypeFilter);
   if (healthFilter !== "all") queryParams.set("healthStatus", healthFilter);
 
-  const { data, isLoading, error } = useQuery<SourceListResponse>({
+  const { data, isLoading, error } = useQuery<SourcePage>({
     queryKey: ["cba-intel-sources", page, sourceTypeFilter, healthFilter],
-    queryFn: () =>
-      fetch(`/api/cba-intelligence/sources?${queryParams}`).then((r) => r.json()),
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch(`/api/cba-intelligence/sources?${queryParams}`);
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, "Failed to load sources"));
+      const sources: SourcePage = envelopeData(body) as unknown as SourcePage;
+      if (!Array.isArray(sources.items)) throw new ApiShapeError("no sources");
+      return sources;
+    },
   });
 
-  const items = data?.data?.items ?? [];
-  const total = data?.data?.total ?? 0;
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 25);
 
   // Client-side name filter
@@ -145,10 +151,6 @@ export function SourceRegistryTable() {
               Registered CBA data sources with health tracking and provenance metadata
             </CardDescription>
           </div>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Source
-          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -215,8 +217,8 @@ export function SourceRegistryTable() {
                 </TableRow>
               ) : error ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-red-500">
-                    Failed to load sources
+                  <TableCell colSpan={8} role="alert" className="text-center py-8 text-red-500">
+                    {failureText(error, "Failed to load sources")}
                   </TableCell>
                 </TableRow>
               ) : filtered.length === 0 ? (
@@ -256,7 +258,7 @@ export function SourceRegistryTable() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
-                        {formatDate(source.lastSuccessAt)}
+                        {formatDate(source.lastSuccessAt, locale)}
                       </TableCell>
                       <TableCell>
                         {source.consecutiveFailures > 0 ? (

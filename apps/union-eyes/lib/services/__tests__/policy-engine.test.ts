@@ -12,11 +12,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
 
-const { mockSelectWhere, mockInsertValues, mockLimit } = vi.hoisted(() => ({
+const { mockSelectWhere, mockInsertValues, mockLimit, mockAudit } = vi.hoisted(() => ({
   mockSelectWhere: vi.fn(),
   mockInsertValues: vi.fn(),
   mockLimit: vi.fn(),
+  mockAudit: vi.fn(),
 }));
+
+const txMock = { insert: vi.fn(() => ({ values: mockInsertValues })) };
+
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(txMock)),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mockAudit }));
 
 vi.mock('@/db', () => ({
   db: {
@@ -81,6 +89,7 @@ describe('PolicyEngine', () => {
     mockSelectWhere.mockResolvedValue([]);
     mockLimit.mockResolvedValue([]);
     mockInsertValues.mockResolvedValue(undefined);
+    mockAudit.mockResolvedValue(undefined);
   });
 
   it('returns allow when no rules match', async () => {
@@ -136,6 +145,49 @@ describe('PolicyEngine', () => {
     expect(result.passed).toBe(false);
     expect(result.actionTaken).toBe('denied');
     expect(result.failureReason).toContain('role');
+    expect(mockInsertValues).toHaveBeenCalledTimes(1);
+    expect(mockAudit).toHaveBeenCalledWith(
+      txMock,
+      expect.objectContaining({
+        organizationId: 'org-1',
+        userId: 'system:policy-engine',
+        action: 'policy.evaluate',
+        details: expect.objectContaining({ actionTaken: 'denied', ruleIds: ['rule-1'] }),
+      }),
+    );
+  });
+
+  it('records the evaluating administrator, and fails the evaluation when its audit cannot be written', async () => {
+    const rule = {
+      id: 'rule-9',
+      ruleType: 'access_control',
+      category: 'member_data',
+      status: 'active',
+      enforced: true,
+      conditions: { field: 'role', operator: 'equals', value: 'admin' },
+    };
+    mockSelectWhere.mockResolvedValueOnce([rule]).mockResolvedValueOnce([]);
+    await engine.evaluate('org-1', 'access_control', 'member_data', {
+      subjectType: 'user', subjectId: 'user-1', inputData: { role: 'admin' },
+    }, 'admin-1');
+    expect(mockAudit).toHaveBeenCalledWith(txMock, expect.objectContaining({ userId: 'admin-1' }));
+
+    mockSelectWhere.mockResolvedValueOnce([rule]).mockResolvedValueOnce([]);
+    mockAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+    await expect(
+      engine.evaluate('org-1', 'access_control', 'member_data', {
+        subjectType: 'user', subjectId: 'user-1', inputData: { role: 'admin' },
+      }, 'admin-1'),
+    ).rejects.toThrow('audit unavailable');
+  });
+
+  it('writes nothing, and no audit, when no rule applies', async () => {
+    mockSelectWhere.mockResolvedValue([]);
+    await engine.evaluate('org-1', 'access_control', 'member_data', {
+      subjectType: 'user', subjectId: 'user-1', inputData: {},
+    });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+    expect(mockAudit).not.toHaveBeenCalled();
   });
 
   it('allows when condition passes', async () => {

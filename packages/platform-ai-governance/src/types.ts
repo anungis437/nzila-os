@@ -15,7 +15,7 @@ export interface ModelRegistryEntry {
 }
 
 export const modelRegistryEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   name: z.string(),
   version: z.string(),
   provider: z.string(),
@@ -40,7 +40,7 @@ export interface PromptVersion {
 }
 
 export const promptVersionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   promptName: z.string(),
   version: z.number().int().positive(),
   template: z.string(),
@@ -72,7 +72,7 @@ export interface AIDecisionLogEntry {
 }
 
 export const aiDecisionLogEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   timestamp: z.string().datetime(),
   modelId: z.string(),
   promptId: z.string(),
@@ -104,8 +104,8 @@ export interface HumanReviewFlag {
 }
 
 export const humanReviewFlagSchema = z.object({
-  id: z.string().uuid(),
-  decisionId: z.string().uuid(),
+  id: z.guid(),
+  decisionId: z.guid(),
   reason: z.string(),
   flaggedAt: z.string().datetime(),
   flaggedBy: z.string(),

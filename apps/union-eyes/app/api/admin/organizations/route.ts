@@ -6,12 +6,15 @@ import { db } from '@/db/db';
 import { organizations, organizationMembers } from '@/db/schema';
 import { sql, ne, ilike, or, eq, count } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
+import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
+// A platform operation: it lists every organization and its members' counts, so it is gated by platform authority (platform_lead) and its
+// statements run as the system role, which holds SELECT on both tables.
 export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
-  async (ctx) => {
+  async (ctx) => withSystemContext(async () => {
     const url = new URL(ctx.request.url);
     const search = url.searchParams.get('search')?.trim() ?? '';
 
@@ -91,6 +94,6 @@ export const GET = withApi(
         status: (o.status ?? 'active') as 'active' | 'inactive',
       };
     });
-  },
+  }),
 );
 

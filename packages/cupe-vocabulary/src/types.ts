@@ -47,8 +47,11 @@ export interface CUPEVocabulary {
   severities: Severity[];
   roles: Role[];
   statuses: Status[];
+  /** When the content below was last revised; stable across calls. */
   lastUpdated: string;
   version: string;
+  /** Changes whenever any entry changes, so a client can tell revisions of one version apart. */
+  contentDigest: string;
 }
 
 export interface VocabularyValidationError {

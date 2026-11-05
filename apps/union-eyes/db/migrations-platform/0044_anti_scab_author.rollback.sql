@@ -1,0 +1,1 @@
+-- Rollback for 0044_anti_scab_author: forward recovery only. created_by records who filed each violation; drop it only after confirming nothing reads it.

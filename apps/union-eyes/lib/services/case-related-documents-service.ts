@@ -1,7 +1,7 @@
 import { and, desc, eq, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { grievanceCaseAccessAssignments } from '@/db/schema/domains/claims/grievance-lifecycle';
+import { assignedCaseRepresentativeIds } from '@/lib/services/case-access-service';
 import { documents, documentLinks } from '@/db/schema/documents-schema';
 import {
   filterAuthorizedDocumentsForActor,
@@ -164,22 +164,8 @@ function getOrCreateCandidate(
   return created;
 }
 
-async function getAssignedLroIds(params: { organizationId: string; caseId: string; primaryLroId: string | null }) {
-  const collaboratorRows = await db
-    .select({ userId: grievanceCaseAccessAssignments.userId })
-    .from(grievanceCaseAccessAssignments)
-    .where(
-      and(
-        eq(grievanceCaseAccessAssignments.organizationId, params.organizationId),
-        eq(grievanceCaseAccessAssignments.grievanceId, params.caseId),
-        eq(grievanceCaseAccessAssignments.status, 'active'),
-      ),
-    );
-
-  const ids = new Set<string>();
-  if (params.primaryLroId) ids.add(params.primaryLroId);
-  for (const row of collaboratorRows) ids.add(row.userId);
-  return [...ids];
+async function getAssignedLroIds(params: { organizationId: string; caseId: string }) {
+  return assignedCaseRepresentativeIds(params.organizationId, params.caseId);
 }
 
 export async function getRelatedDocuments(params: {
@@ -197,7 +183,6 @@ export async function getRelatedDocuments(params: {
       employerId: grievances.employerId,
       workplaceId: grievances.workplaceId,
       cbaId: grievances.cbaId,
-      unionRepId: grievances.unionRepId,
       organizationId: grievances.organizationId,
       createdAt: grievances.createdAt,
     })
@@ -263,7 +248,6 @@ export async function getRelatedDocuments(params: {
   const assignedLroIds = await getAssignedLroIds({
     organizationId: params.orgId,
     caseId: params.caseId,
-    primaryLroId: caseRow.unionRepId,
   });
 
   for (const row of baseRows) {

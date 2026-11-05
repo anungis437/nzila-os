@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocale } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
+import { ApiShapeError, apiErrorMessage, envelopeData, failureText } from "@/lib/client/api-envelope";
+import { useOperationalHealth } from "./use-operational-health";
 import {
   Card,
   CardContent,
@@ -58,25 +61,11 @@ interface IngestionJob {
   createdAt: string;
 }
 
-interface JobListResponse {
-  success: boolean;
-  data: {
-    items: IngestionJob[];
-    total: number;
-    page: number;
-    limit: number;
-  };
-}
-
-interface OperationalHealthResponse {
-  success: boolean;
-  data: {
-    checks: Array<{
-      name: string;
-      level: "healthy" | "warning" | "critical";
-      detail: string;
-    }>;
-  };
+interface JobPage {
+  items: IngestionJob[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -103,9 +92,9 @@ function formatDuration(start: string | null, end: string | null): string {
   return `${mins}m ${secs}s`;
 }
 
-function formatTime(dateStr: string | null): string {
+function formatTime(dateStr: string | null, locale: string): string {
   if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleTimeString("en-CA", {
+  return new Date(dateStr).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -116,46 +105,37 @@ function formatTime(dateStr: string | null): string {
 // ---------------------------------------------------------------------------
 
 export function IngestionMonitor() {
+  const locale = useLocale();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
-  const queryClient = useQueryClient();
 
   const queryParams = new URLSearchParams({ page: String(page), limit: "20" });
   if (statusFilter !== "all") queryParams.set("status", statusFilter);
 
-  const { data, isLoading, error } = useQuery<JobListResponse>({
+  const { data, isLoading, error } = useQuery<JobPage>({
     queryKey: ["cba-intel-ingestion", page, statusFilter],
-    queryFn: () =>
-      fetch(`/api/cba-intelligence/ingestion?${queryParams}`).then((r) => r.json()),
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch(`/api/cba-intelligence/ingestion?${queryParams}`);
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, "Failed to load ingestion jobs"));
+      const jobs: JobPage = envelopeData(body) as unknown as JobPage;
+      if (!Array.isArray(jobs.items)) throw new ApiShapeError("no ingestion jobs");
+      return jobs;
+    },
     refetchInterval: 10_000, // Poll every 10s for running jobs
   });
 
-  const { data: healthData } = useQuery<OperationalHealthResponse>({
-    queryKey: ["cba-intel-operational-health"],
-    queryFn: () => fetch("/api/cba-intelligence/health").then((r) => r.json()),
-    refetchInterval: 60_000,
-  });
+  const { data: health } = useOperationalHealth();
 
-  const _triggerMutation = useMutation({
-    mutationFn: (sourceId: string) =>
-      fetch("/api/cba-intelligence/ingestion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sourceId, triggerType: "manual" }),
-      }).then((r) => r.json()),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cba-intel-ingestion"] });
-    },
-  });
-
-  const items = data?.data?.items ?? [];
-  const total = data?.data?.total ?? 0;
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
 
   // Summary counts
   const running = items.filter((j) => j.status === "running").length;
   const failed = items.filter((j) => j.status === "failed").length;
-  const ingestionHealth = healthData?.data.checks.find((c) => c.name === "ingestion_success_rate");
+  const ingestionHealth = health?.checks.find((c) => c.name === "ingestion_success_rate");
   const showIngestionAlert = ingestionHealth && ingestionHealth.level !== "healthy";
 
   return (
@@ -237,8 +217,8 @@ export function IngestionMonitor() {
                 </TableRow>
               ) : error ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-red-500">
-                    Failed to load ingestion jobs
+                  <TableCell colSpan={7} role="alert" className="text-center py-8 text-red-500">
+                    {failureText(error, "Failed to load ingestion jobs")}
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
@@ -290,7 +270,7 @@ export function IngestionMonitor() {
                         {formatDuration(job.startedAt, job.completedAt)}
                       </TableCell>
                       <TableCell className="text-sm">
-                        {formatTime(job.startedAt)}
+                        {formatTime(job.startedAt, locale)}
                       </TableCell>
                       <TableCell>
                         {job.errorMessage && (

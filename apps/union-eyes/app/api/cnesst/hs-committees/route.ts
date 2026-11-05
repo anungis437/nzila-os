@@ -16,7 +16,8 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ['CNESST', 'H&S Committee'],
   orgScoped: true,
-  readRole: 'member',
+  // The roster names the worker and employer members of the committee.
+  readRole: 'steward',
   writeRole: 'officer',
 });
 export { GET, POST };

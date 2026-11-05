@@ -9,24 +9,27 @@
  * (the explicit private-grant list) is only returned to the owner — it is
  * owner-internal sharing configuration, not shared clause content.
  *
- * Mutations run in the caller's tenant RLS context. ue_shared_library_update
- * and ue_shared_library_delete already restrict writes to the source org,
- * matching isSharedClauseOwner. GET stays on the system role: federation and
- * congress visibility is not expressed by ue_shared_library_select (owner,
- * explicit share, or public only) and must not be added by weakening RLS.
+ * Every read and write runs in the caller's tenant RLS context. ue_shared_library_update
+ * and ue_shared_library_delete restrict writes to the source org, matching
+ * isSharedClauseOwner, and the select policies (owner, explicit share and public)
+ * admit exactly what canReadSharedClause admits. Federation and congress sharing
+ * are readable by the owner only (see lib/clause-library/sharing-authority.ts).
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
+import type { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
-import { organizations } from '@/db/schema-organizations';
-import { eq } from 'drizzle-orm';
-import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
-import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
+import { and, eq } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { canReadSharedClause, isSharedClauseOwner, sharingChangeDenial, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
+import { parseClauseBody, assertMayPublish } from '@/lib/clause-library/clause-body';
+import { formatClause } from '@/lib/clause-library/clause-detail';
+import { clauseTextSha256, recordClauseVersion } from '@/lib/clause-library/version-history';
 
 export const dynamic = 'force-dynamic';
 
-async function getClauseRow(id: string) {
-  const rows = await db
+async function getClauseRow(id: string, executor: typeof db) {
+  const rows = await executor
     .select({
       id: sharedClauseLibrary.id,
       clauseNumber: sharedClauseLibrary.clauseNumber,
@@ -43,49 +46,18 @@ async function getClauseRow(id: string) {
       effectiveDate: sharedClauseLibrary.effectiveDate,
       expiryDate: sharedClauseLibrary.expiryDate,
       viewCount: sharedClauseLibrary.viewCount,
+      comparisonCount: sharedClauseLibrary.comparisonCount,
       version: sharedClauseLibrary.version,
       sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-      organizationName: organizations.name,
       createdBy: sharedClauseLibrary.createdBy,
       createdAt: sharedClauseLibrary.createdAt,
       updatedAt: sharedClauseLibrary.updatedAt,
     })
     .from(sharedClauseLibrary)
-    .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
     .where(eq(sharedClauseLibrary.id, id))
     .limit(1);
 
   return rows[0] ?? null;
-}
-
-function formatClause(r: Awaited<ReturnType<typeof getClauseRow>>, callerOrgId: string | null, tags: { id: string; tagName: string }[]) {
-  const isOwner = callerOrgId ? r!.sourceOrganizationId === callerOrgId : false;
-  return {
-    id: r!.id,
-    clauseNumber: r!.clauseNumber,
-    clauseTitle: r!.clauseTitle,
-    clauseText: r!.clauseText,
-    clauseType: r!.clauseType,
-    sharingLevel: r!.sharingLevel,
-    // owner-internal sharing configuration — never exposed to a non-owner
-    // reader, even one authorized to read the clause content itself.
-    sharedWithOrgIds: isOwner ? r!.sharedWithOrgIds : undefined,
-    isAnonymized: r!.isAnonymized,
-    originalEmployerName: r!.originalEmployerName,
-    anonymizedEmployerName: r!.anonymizedEmployerName,
-    sector: r!.sector,
-    province: r!.province,
-    effectiveDate: r!.effectiveDate,
-    expiryDate: r!.expiryDate,
-    viewCount: r!.viewCount,
-    version: r!.version,
-    sourceOrganization: { id: r!.sourceOrganizationId, organizationName: r!.organizationName },
-    createdBy: r!.createdBy,
-    createdAt: r!.createdAt,
-    updatedAt: r!.updatedAt,
-    tags: tags.map((t) => ({ id: t.id, tagName: t.tagName })),
-    isOwner,
-  };
 }
 
 export const GET = withApi(
@@ -98,16 +70,15 @@ export const GET = withApi(
     const id = url.pathname.split('/').filter(Boolean).pop()!;
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    // PRIVILEGED_CROSS_TENANT_REVIEW: federation/congress readers are not
-    // visible under ue_shared_library_select. Keep this read on the system
-    // role and apply canReadSharedClause. Do not widen the runtime policy.
-    return withSystemContext(async () => {
-      const row = await getClauseRow(id);
+    // As the tenant: the policy withholds what this organization may not read, and canReadSharedClause states the same rule.
+    return withRLSContext({ organizationId }, async (tx) => {
+      const row = await getClauseRow(id, tx);
       if (!row || !(await canReadSharedClause(organizationId, row))) {
         throw ApiError.notFound('clause', id);
       }
-      const tags = await db.select().from(clauseLibraryTags).where(eq(clauseLibraryTags.clauseId, id));
-      return formatClause(row, organizationId, tags);
+      const tags = await tx.select().from(clauseLibraryTags).where(eq(clauseLibraryTags.clauseId, id));
+      const sourceNames = await sourceNamesFor([row], organizationId);
+      return formatClause(row, organizationId, tags, sourceNames.get(row.sourceOrganizationId) ?? null);
     });
   },
 );
@@ -117,20 +88,27 @@ export const PATCH = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Update a shared clause' },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, userId, organizationId, user }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/').filter(Boolean).pop()!;
-    const body = await request.json();
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const body = parseClauseBody(await request.json().catch(() => null), 'update');
+    assertMayPublish(user?.role, body.sharingLevel);
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    return withRLSContext({ organizationId }, async () => {
-      const existing = await getClauseRow(id);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const existing = await getClauseRow(id, tx);
       // Fail closed identically whether the row is missing or the caller
       // simply isn't its owner — broad reader visibility never implies
       // write authority (round 55). Tenant RLS hides non-visible rows;
       // the owner predicate still rejects public/explicit-share readers.
       if (!existing || !isSharedClauseOwner(organizationId, existing)) {
         throw ApiError.notFound('clause', id);
+      }
+
+      // Judged against the level the clause has now, so a clause stored at a level that is no longer offered can still be edited.
+      const denial = await sharingChangeDenial(organizationId, body, existing.sharingLevel);
+      if (denial) {
+        throw denial.status === 403 ? ApiError.forbidden(denial.message) : ApiError.badRequest(denial.message);
       }
 
       const updateData: Record<string, unknown> = { updatedAt: new Date() };
@@ -148,15 +126,47 @@ export const PATCH = withApi(
       if (body.anonymizedEmployerName !== undefined) updateData.anonymizedEmployerName = body.anonymizedEmployerName;
       if (body.sharedWithOrgIds !== undefined) updateData.sharedWithOrgIds = body.sharedWithOrgIds;
 
-      const [updated] = await db
+      // A change to what the clause says raises its version, so a reader who compared or cited it can tell it has changed. The audit keeps
+      // a digest of the text it replaced.
+      const contentChanged = (['clauseTitle', 'clauseText', 'clauseType'] as const).some(
+        (field) => body[field] !== undefined && body[field] !== existing[field],
+      );
+      if (contentChanged) updateData.version = (existing.version ?? 1) + 1;
+
+      // The text being replaced is kept, in this transaction, before it is overwritten.
+      if (contentChanged) {
+        await recordClauseVersion(tx, { organizationId, recordedBy: userId, kind: 'replaced', clause: existing });
+      }
+
+      const [updated] = await tx
         .update(sharedClauseLibrary)
         .set(updateData)
-        .where(eq(sharedClauseLibrary.id, id))
+        .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
         .returning();
 
       if (!updated) {
         throw ApiError.notFound('clause', id);
       }
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.update',
+        resourceType: 'shared_clause_library',
+        resourceId: id,
+        details: {
+          fields: Object.keys(updateData).filter((k) => k !== 'updatedAt'),
+          ...(contentChanged
+            ? {
+                fromVersion: existing.version ?? 1,
+                toVersion: updateData.version,
+                replacedTextSha256: clauseTextSha256(existing.clauseText),
+              }
+            : {}),
+          ...(updateData.sharingLevel !== undefined
+            ? { fromSharingLevel: existing.sharingLevel, toSharingLevel: updateData.sharingLevel }
+            : {}),
+        },
+      });
       return { success: true, clause: updated };
     });
   },
@@ -167,25 +177,49 @@ export const DELETE = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Delete a shared clause' },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, userId, organizationId }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/').filter(Boolean).pop()!;
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
-    return withRLSContext({ organizationId }, async () => {
-      const existing = await getClauseRow(id);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const existing = await getClauseRow(id, tx);
       if (!existing || !isSharedClauseOwner(organizationId, existing)) {
         throw ApiError.notFound('clause', id);
       }
 
-      const [deleted] = await db
+      // A clause that is shared beyond its owner has been compared and cited by others, and the delete also removes its tags for good, so
+      // it is withdrawn from sharing first (sharingLevel private) and only then removed.
+      if (existing.sharingLevel !== 'private') {
+        throw ApiError.conflict('This clause is shared. Withdraw it from sharing (set its sharing level to private) before deleting it.');
+      }
+
+      // The final text is kept before the row goes, so a deleted clause can still be shown as it was.
+      await recordClauseVersion(tx, { organizationId, recordedBy: userId, kind: 'deleted', clause: existing });
+
+      const [deleted] = await tx
         .delete(sharedClauseLibrary)
-        .where(eq(sharedClauseLibrary.id, id))
+        .where(and(eq(sharedClauseLibrary.id, id), eq(sharedClauseLibrary.sourceOrganizationId, organizationId)))
         .returning({ id: sharedClauseLibrary.id });
 
       if (!deleted) {
         throw ApiError.notFound('clause', id);
       }
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.delete',
+        resourceType: 'shared_clause_library',
+        resourceId: id,
+        details: {
+          clauseNumber: existing.clauseNumber,
+          clauseTitle: existing.clauseTitle,
+          clauseType: existing.clauseType,
+          version: existing.version ?? 1,
+          sharingLevel: existing.sharingLevel,
+          clauseTextSha256: clauseTextSha256(existing.clauseText),
+        },
+      });
       return { success: true };
     });
   },

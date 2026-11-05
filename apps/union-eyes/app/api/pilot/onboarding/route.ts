@@ -8,10 +8,8 @@
 import { z } from "zod";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import {
-  emitCapeAuditEvent,
-  CAPE_AUDIT_EVENTS,
-} from "@/lib/audit/cape-audit-events";
+import { CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -22,17 +20,8 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { pilotChecklistItems } from "@/db/schema/domains/pilot/pilot-onboarding";
 import { pilotDemoSeeds } from "@/db/schema/domains/pilot/pilot-demo-seeds";
 import { getDemoDatasetSummary } from "@/lib/pilot/cape-demo-data";
-import { eq, and } from "drizzle-orm";
-
-const CHECKLIST_ITEM_IDS = [
-  "org-seeded",
-  "users-invited",
-  "roles-assigned",
-  "contracts-uploaded",
-  "employers-imported",
-  "integrations-configured",
-  "export-verified",
-] as const;
+import { CHECKLIST_ITEM_IDS, verifyChecklistStep, type ChecklistItemId } from "@/lib/pilot/onboarding-checklist-evidence";
+import { eq } from "drizzle-orm";
 
 // ── GET ─────────────────────────────────────────────────────────────────────
 
@@ -130,87 +119,86 @@ export const PATCH = withOrganizationAuth(async (request, context) => {
 
     const { itemId, completed } = parsed.data;
 
-    if (!CHECKLIST_ITEM_IDS.includes(itemId as (typeof CHECKLIST_ITEM_IDS)[number])) {
+    if (!CHECKLIST_ITEM_IDS.includes(itemId as ChecklistItemId)) {
       return standardErrorResponse(ErrorCode.NOT_FOUND, "Checklist item not found");
     }
 
-    // Upsert: insert the row if it doesn't exist, update if it does
-    const existing = await db
-      .select()
-      .from(pilotChecklistItems)
-      .where(
-        and(
-          eq(pilotChecklistItems.organizationId, organizationId),
-          eq(pilotChecklistItems.itemId, itemId),
-        ),
-      );
-
-    await withRLSContext(async () => {
-      if (existing.length === 0) {
-        await db.insert(pilotChecklistItems).values({
+    // The toggle, the completeness it implies and the audit records commit together; a failed audit rolls the toggle back.
+    // A step is marked done only when the organization's own data shows it happened (see onboarding-checklist-evidence).
+    const state = await withRLSContext({ organizationId }, async (tx) => {
+      let evidence: Record<string, number | boolean> | undefined;
+      if (completed) {
+        const check = await verifyChecklistStep(tx, organizationId, userId, itemId as ChecklistItemId);
+        if (!check.ok) return { missing: check.missing };
+        evidence = check.evidence;
+      }
+      const changedAt = new Date();
+      const [saved] = await tx
+        .insert(pilotChecklistItems)
+        .values({
           organizationId,
           itemId,
           completed,
-          completedAt: completed ? new Date() : null,
+          completedAt: completed ? changedAt : null,
           completedBy: completed ? userId : null,
-        });
-      } else {
-        await db
-          .update(pilotChecklistItems)
-          .set({
+        })
+        .onConflictDoUpdate({
+          target: [pilotChecklistItems.organizationId, pilotChecklistItems.itemId],
+          set: {
             completed,
-            completedAt: completed ? new Date() : null,
+            completedAt: completed ? changedAt : null,
             completedBy: completed ? userId : null,
-            updatedAt: new Date(),
-          })
-          .where(
-            and(
-              eq(pilotChecklistItems.organizationId, organizationId),
-              eq(pilotChecklistItems.itemId, itemId),
-            ),
-          );
+            updatedAt: changedAt,
+          },
+        })
+        .returning({ id: pilotChecklistItems.id });
+
+      const rows = await tx
+        .select()
+        .from(pilotChecklistItems)
+        .where(eq(pilotChecklistItems.organizationId, organizationId));
+
+      const items: Record<string, boolean> = {};
+      const rowMap = new Map(rows.map((r) => [r.itemId, r.completed]));
+      for (const id of CHECKLIST_ITEM_IDS) {
+        items[id] = rowMap.get(id) ?? false;
       }
-    });
 
-    // Re-read full checklist for response
-    const rows = await db
-      .select()
-      .from(pilotChecklistItems)
-      .where(eq(pilotChecklistItems.organizationId, organizationId));
+      const completedCount = Object.values(items).filter(Boolean).length;
+      const totalCount = CHECKLIST_ITEM_IDS.length;
+      const isComplete = completedCount === totalCount;
 
-    const items: Record<string, boolean> = {};
-    const rowMap = new Map(rows.map((r) => [r.itemId, r.completed]));
-    for (const id of CHECKLIST_ITEM_IDS) {
-      items[id] = rowMap.get(id) ?? false;
-    }
-
-    const completedCount = Object.values(items).filter(Boolean).length;
-    const totalCount = CHECKLIST_ITEM_IDS.length;
-    const isComplete = completedCount === totalCount;
-
-    await emitCapeAuditEvent({
-      eventType: CAPE_AUDIT_EVENTS.PILOT_CHECKLIST_ITEM_COMPLETED,
-      userId,
-      organizationId,
-      resource: "pilot_checklist",
-      details: { itemId, completed },
-    });
-
-    if (isComplete) {
-      await emitCapeAuditEvent({
-        eventType: CAPE_AUDIT_EVENTS.PILOT_CHECKLIST_COMPLETED,
-        userId,
+      await persistAtomicAudit(tx, {
         organizationId,
-        resource: "pilot_checklist",
+        userId,
+        action: completed ? CAPE_AUDIT_EVENTS.PILOT_CHECKLIST_ITEM_COMPLETED : 'pilot.checklist_item_reopened',
+        resourceType: 'pilot_checklist_items',
+        resourceId: saved?.id,
+        details: { itemId, completed, checklistComplete: isComplete, ...(evidence ? { evidence } : {}) },
       });
+
+      if (isComplete && completed) {
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: CAPE_AUDIT_EVENTS.PILOT_CHECKLIST_COMPLETED,
+          resourceType: 'pilot_checklist_items',
+          resourceId: saved?.id,
+          details: { completedCount, totalCount },
+        });
+      }
+
+      return { items, completedCount, totalCount, isComplete };
+    });
+
+    if ("missing" in state) {
+      return standardErrorResponse(
+        ErrorCode.CONFLICT,
+        `This step cannot be marked complete: the system found no ${state.missing}.`,
+      );
     }
 
-    return standardSuccessResponse({
-      items,
-      completedCount,
-      totalCount,
-      isComplete,
-    });
+    return standardSuccessResponse(state);
   } catch (_error) {
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,

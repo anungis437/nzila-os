@@ -10,12 +10,12 @@ export interface NaturalLanguageQuery {
 }
 
 export const naturalLanguageQuerySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   query: z.string().min(1),
   orgId: z.string(),
   actor: z.string(),
   timestamp: z.string().datetime(),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 })
 
 export interface QueryResult {
@@ -44,8 +44,8 @@ export const evidenceReferenceSchema = z.object({
 })
 
 export const queryResultSchema = z.object({
-  id: z.string().uuid(),
-  queryId: z.string().uuid(),
+  id: z.guid(),
+  queryId: z.guid(),
   answer: z.string(),
   confidence: z.number().min(0).max(1),
   evidenceRefs: z.array(evidenceReferenceSchema),

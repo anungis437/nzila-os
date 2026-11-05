@@ -47,7 +47,7 @@ export function emitAdaptiveProfileCreated(
 
 /**
  * Emit `assessment_routed` immediately after `routeQuestionBank` returns.
- * Carries only counts + fallback flag + low-cardinality fingerprint.
+ * Carries only counts + fallback flag, never a per-assessment selection fingerprint.
  */
 export function emitAssessmentRouted(routed: RoutedQuestionBank): void {
   fireAndForgetEvent({
@@ -60,9 +60,6 @@ export function emitAssessmentRouted(routed: RoutedQuestionBank): void {
       required: routed.requiredQuestions.length,
       optional: routed.optionalContextQuestions.length,
       safeDefault: routed.usedSafeDefault,
-      // selectionFingerprint is low-cardinality by design (e.g. "37|c10r6m8x13|s_a,s_b,s_c").
-      // Truncate defensively in case future routing changes inflate it.
-      selection: routed.selectionFingerprint.slice(0, 60),
     },
   });
 }
@@ -72,15 +69,13 @@ export function emitAssessmentRouted(routed: RoutedQuestionBank): void {
  * deferral rationale entries from `routed.routingRationale` filtered to
  * `decision.startsWith('defer_')`.
  *
- * Each emission carries only the question id (a low-cardinality stable
- * token from the question bank) and the rule id that fired.
+ * Each emission carries the generic rule and decision, never the per-question id.
  */
 export function emitAdaptiveQuestionDeferred(rationale: RoutingRationale): void {
   if (!rationale.decision.startsWith('defer_')) return;
   fireAndForgetEvent({
     kind: 'adaptive_question_deferred',
     metadata: {
-      questionId: rationale.questionId.slice(0, 60),
       decision: rationale.decision,
       ruleId: rationale.ruleId.slice(0, 60),
     },

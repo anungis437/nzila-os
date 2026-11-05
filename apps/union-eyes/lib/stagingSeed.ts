@@ -18,15 +18,16 @@
  *     `seed_source = 'staging-deterministic'` so they can be re-run safely.
  *   - No random data. Stable UUIDs (v5 from a fixed namespace).
  *   - No environment-specific secrets.
- *   - Refuses to run against production (NODE_ENV === 'production' AND
- *     STAGING_SEED_ALLOW_PROD !== 'true').
+ *   - Refuses to run against a production deployment (lib/runtime/production-guard.ts). A staging deployment is named by its identity
+ *     (UE_ENVIRONMENT=staging); there is no override flag, and an unlabeled production container is production.
  */
 import { db } from '@/db/db'
 import { grievances } from '@/db/schema/domains/claims/grievances'
 import { eq, and } from 'drizzle-orm'
+import { assertNotProduction } from '@/lib/runtime/production-guard'
 
 const SEED_SOURCE = 'staging-deterministic'
-const DEFAULT_ORG_ID = process.env.STAGING_SEED_ORG_ID ?? 'org_demo_unioneyes_staging'
+const DEFAULT_ORG_ID = process.env.STAGING_SEED_ORG_ID?.trim() || 'org_demo_unioneyes_staging'
 
 export interface StagingSeedResult {
   ok: boolean
@@ -43,12 +44,7 @@ export interface StagingSeedScenario {
 }
 
 function assertSafeEnvironment(): void {
-  if (process.env.NODE_ENV === 'production' && process.env.STAGING_SEED_ALLOW_PROD !== 'true') {
-    throw new Error(
-      'stagingSeed refuses to run against NODE_ENV=production. ' +
-      'Set STAGING_SEED_ALLOW_PROD=true to override (do NOT do this on real prod).',
-    )
-  }
+  assertNotProduction('stagingSeed')
 }
 
 async function upsertGrievance(orgId: string, grievanceNumber: string, status: string, summary: string): Promise<void> {

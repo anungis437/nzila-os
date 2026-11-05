@@ -9,6 +9,8 @@ import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
+from core.fields import UnboundedDecimalField
+from django.utils import timezone
 
 try:
     from pgvector.django import VectorField
@@ -63,11 +65,11 @@ class BenchmarkCategories(BaseModel):
     category_group = models.TextField()
     unit_type = models.TextField()
     calculation_method = models.TextField(null=True, blank=True)
-    higher_is_better = models.BooleanField(default=False)
+    higher_is_better = models.BooleanField(default=True)
     display_order = models.IntegerField(null=True, blank=True, default=0)
     icon = models.TextField(null=True, blank=True)
     color = models.TextField(null=True, blank=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -94,6 +96,16 @@ class OrganizationBenchmarkSnapshots(BaseModel):
 class AnalyticsMetrics(BaseModel):
     """Migrated from drizzle: analytics.ts"""
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='analytics_metrics_organization_set')
+    metric_type = models.TextField()
+    metric_name = models.TextField()
+    metric_value = UnboundedDecimalField()
+    metric_unit = models.TextField(null=True, blank=True)
+    period_type = models.TextField()
+    period_start = models.DateTimeField()
+    period_end = models.DateTimeField()
+    metadata = models.JSONField(null=True, blank=True)
+    comparison_value = UnboundedDecimalField(null=True, blank=True)
+    trend = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'analytics_metrics'
@@ -102,6 +114,23 @@ class AnalyticsMetrics(BaseModel):
 class KpiConfigurations(BaseModel):
     """Migrated from drizzle: analytics.ts"""
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='kpi_configurations_organization_set')
+    created_by = models.CharField(max_length=255)
+    name = models.TextField()
+    description = models.TextField(null=True, blank=True)
+    metric_type = models.TextField()
+    data_source = models.TextField()
+    calculation = models.JSONField()
+    visualization_type = models.TextField()
+    target_value = UnboundedDecimalField(null=True, blank=True)
+    warning_threshold = UnboundedDecimalField(null=True, blank=True)
+    critical_threshold = UnboundedDecimalField(null=True, blank=True)
+    alert_enabled = models.BooleanField(default=False, null=True, blank=True)
+    alert_recipients = models.JSONField(null=True, blank=True)
+    refresh_interval = models.IntegerField(default=3600, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    display_order = models.IntegerField(null=True, blank=True)
+    dashboard_layout = models.JSONField(null=True, blank=True)
+    direction = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'kpi_configurations'
@@ -110,6 +139,20 @@ class KpiConfigurations(BaseModel):
 class TrendAnalyses(BaseModel):
     """Migrated from drizzle: analytics.ts"""
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='trend_analyses_organization_set')
+    analysis_type = models.TextField()
+    data_source = models.TextField()
+    time_range = models.JSONField()
+    detected_trend = models.TextField(null=True, blank=True)
+    trend_strength = UnboundedDecimalField(null=True, blank=True)
+    anomalies_detected = models.JSONField(null=True, blank=True)
+    anomaly_count = models.IntegerField(default=0, null=True, blank=True)
+    seasonal_pattern = models.JSONField(null=True, blank=True)
+    correlations = models.JSONField(null=True, blank=True)
+    insights = models.TextField(null=True, blank=True)
+    recommendations = models.JSONField(null=True, blank=True)
+    statistical_tests = models.JSONField(null=True, blank=True)
+    visualization_data = models.JSONField(null=True, blank=True)
+    confidence = UnboundedDecimalField(null=True, blank=True)
 
     class Meta:
         db_table = 'trend_analyses'
@@ -118,6 +161,30 @@ class TrendAnalyses(BaseModel):
 class InsightRecommendations(BaseModel):
     """Migrated from drizzle: analytics.ts"""
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='insight_recommendations_organization_set')
+    insight_type = models.TextField()
+    category = models.TextField()
+    priority = models.TextField()
+    title = models.TextField()
+    description = models.TextField()
+    data_source = models.JSONField(null=True, blank=True)
+    metrics = models.JSONField(null=True, blank=True)
+    trend = models.TextField(null=True, blank=True)
+    impact = models.TextField(null=True, blank=True)
+    recommendations = models.JSONField(null=True, blank=True)
+    action_required = models.BooleanField(default=False, null=True, blank=True)
+    action_deadline = models.DateTimeField(null=True, blank=True)
+    estimated_benefit = models.TextField(null=True, blank=True)
+    confidence_score = UnboundedDecimalField(null=True, blank=True)
+    ai_reference_id = models.TextField(null=True, blank=True)
+    related_entities = models.JSONField(null=True, blank=True)
+    status = models.TextField(default='new', null=True, blank=True)
+    acknowledged_by = models.CharField(max_length=255, null=True, blank=True)
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
+    dismissed_by = models.CharField(max_length=255, null=True, blank=True)
+    dismissed_at = models.DateTimeField(null=True, blank=True)
+    dismissal_reason = models.TextField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'insight_recommendations'
@@ -141,7 +208,25 @@ class PageAnalytics(BaseModel):
 
 class CommunicationAnalytics(BaseModel):
     """Migrated from drizzle: communication-analytics-schema.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    bounces = models.IntegerField(default=0, null=True, blank=True)
+    channel = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['email', 'sms', 'push', 'newsletter', 'in_app']],
+    )
+    click_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    complaints = models.IntegerField(default=0, null=True, blank=True)
+    date = models.DateField()
+    delivery_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    engagement_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    messages_clicked = models.IntegerField(default=0, null=True, blank=True)
+    messages_delivered = models.IntegerField(default=0, null=True, blank=True)
+    messages_failed = models.IntegerField(default=0, null=True, blank=True)
+    messages_opened = models.IntegerField(default=0, null=True, blank=True)
+    messages_sent = models.IntegerField(default=0, null=True, blank=True)
+    open_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    opt_outs = models.IntegerField(default=0, null=True, blank=True)
+    unique_recipients = models.IntegerField(default=0, null=True, blank=True)
 
     class Meta:
         db_table = 'communication_analytics'
@@ -149,7 +234,22 @@ class CommunicationAnalytics(BaseModel):
 
 class UserEngagementScores(BaseModel):
     """Migrated from drizzle: communication-analytics-schema.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    calculated_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    email_score = models.IntegerField(default=0, null=True, blank=True)
+    last_email_open = models.DateTimeField(null=True, blank=True)
+    last_push_open = models.DateTimeField(null=True, blank=True)
+    last_sms_reply = models.DateTimeField(null=True, blank=True)
+    overall_score = models.IntegerField(default=0, null=True, blank=True)
+    push_score = models.IntegerField(default=0, null=True, blank=True)
+    sms_score = models.IntegerField(default=0, null=True, blank=True)
+    total_emails_opened = models.IntegerField(default=0, null=True, blank=True)
+    total_emails_received = models.IntegerField(default=0, null=True, blank=True)
+    total_push_opened = models.IntegerField(default=0, null=True, blank=True)
+    total_push_received = models.IntegerField(default=0, null=True, blank=True)
+    total_sms_received = models.IntegerField(default=0, null=True, blank=True)
+    total_sms_replied = models.IntegerField(default=0, null=True, blank=True)
+    user_id = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'user_engagement_scores'
@@ -157,7 +257,29 @@ class UserEngagementScores(BaseModel):
 
 class Reports(BaseModel):
     """Migrated from drizzle: reports.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    report_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['custom', 'template', 'system', 'scheduled']],
+        default='custom',
+    )
+    category = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'claims', 'members', 'financial', 'compliance', 'performance', 'custom',
+        ]],
+        default='custom',
+    )
+    config = models.JSONField()
+    is_public = models.BooleanField(default=False)
+    is_template = models.BooleanField(default=False)
+    template_id = models.UUIDField(null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
+    last_run_at = models.DateTimeField(null=True, blank=True)
+    run_count = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'reports'
@@ -200,7 +322,30 @@ class ReportShares(BaseModel):
 
 class WageBenchmarks(BaseModel):
     """Migrated from drizzle: benchmarks.ts"""
-    noc_code = models.CharField(max_length=255, null=True, blank=True)
+    noc_code = models.CharField(max_length=255, blank=True)
+    noc_name = models.CharField(max_length=255)
+    noc_category = models.CharField(max_length=100, null=True, blank=True)
+    geography_code = models.CharField(max_length=10)
+    geography_name = models.CharField(max_length=255)
+    geography_type = models.CharField(max_length=20, default='national')
+    naics_code = models.CharField(max_length=10, null=True, blank=True)
+    naics_name = models.CharField(max_length=255, null=True, blank=True)
+    wage_value = models.DecimalField(max_digits=12, decimal_places=2)
+    wage_unit = models.CharField(max_length=20, default='hourly')
+    wage_type = models.CharField(max_length=50)
+    sex = models.CharField(max_length=1, default='B')
+    age_group = models.CharField(max_length=50, null=True, blank=True)
+    age_group_name = models.CharField(max_length=100, null=True, blank=True)
+    education_level = models.CharField(max_length=50, null=True, blank=True)
+    statistics_type = models.CharField(max_length=100, null=True, blank=True)
+    data_type = models.CharField(max_length=100, null=True, blank=True)
+    ref_date = models.CharField(max_length=20)
+    survey_year = models.IntegerField()
+    source = models.CharField(max_length=100, default='Statistics Canada')
+    data_quality_symbol = models.CharField(max_length=10, null=True, blank=True)
+    is_terminated = models.BooleanField(default=False, null=True, blank=True)
+    decimals = models.IntegerField(default=2, null=True, blank=True)
+    sync_id = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         db_table = 'wage_benchmarks'
@@ -208,7 +353,24 @@ class WageBenchmarks(BaseModel):
 
 class UnionDensity(BaseModel):
     """Migrated from drizzle: benchmarks.ts"""
-    geography_code = models.CharField(max_length=255, null=True, blank=True)
+    geography_code = models.CharField(max_length=255, blank=True)
+    geography_name = models.CharField(max_length=255)
+    naics_code = models.CharField(max_length=10, null=True, blank=True)
+    naics_name = models.CharField(max_length=255, null=True, blank=True)
+    noc_code = models.CharField(max_length=10, null=True, blank=True)
+    noc_name = models.CharField(max_length=255, null=True, blank=True)
+    sex = models.CharField(max_length=1, default='B')
+    age_group = models.CharField(max_length=50, null=True, blank=True)
+    age_group_name = models.CharField(max_length=100, null=True, blank=True)
+    citizenship = models.CharField(max_length=50, null=True, blank=True)
+    citizenship_name = models.CharField(max_length=100, null=True, blank=True)
+    union_status = models.CharField(max_length=50)
+    union_status_name = models.CharField(max_length=100)
+    density_value = models.DecimalField(max_digits=5, decimal_places=2)
+    ref_date = models.CharField(max_length=20)
+    survey_year = models.IntegerField()
+    source = models.CharField(max_length=100, default='Statistics Canada')
+    sync_id = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         db_table = 'union_density'
@@ -216,7 +378,15 @@ class UnionDensity(BaseModel):
 
 class CostOfLivingData(BaseModel):
     """Migrated from drizzle: benchmarks.ts"""
-    geography_code = models.CharField(max_length=255, null=True, blank=True)
+    geography_code = models.CharField(max_length=255, blank=True)
+    geography_name = models.CharField(max_length=255)
+    cpi_value = models.DecimalField(max_digits=10, decimal_places=2)
+    cpi_vector = models.CharField(max_length=50, null=True, blank=True)
+    inflation_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    year = models.IntegerField()
+    ref_date = models.CharField(max_length=20)
+    source = models.CharField(max_length=100, default='Statistics Canada')
+    sync_id = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         db_table = 'cost_of_living_data'
@@ -224,7 +394,26 @@ class CostOfLivingData(BaseModel):
 
 class ContributionRates(BaseModel):
     """Migrated from drizzle: benchmarks.ts"""
-    rate_type = models.CharField(max_length=255, null=True, blank=True)
+    rate_type = models.CharField(max_length=255, blank=True)
+    effective_date = models.CharField(max_length=20, null=True, blank=True)
+    exemption_limit = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    max_insurable_earnings = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    maximum_contribution = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    rate = models.DecimalField(max_digits=5, decimal_places=4)
+    rate_type_name = models.CharField(max_length=100, null=True, blank=True)
+    source = models.CharField(max_length=100, default='Canada Revenue Agency')
+    sync_id = models.CharField(max_length=100, null=True, blank=True)
+    year = models.IntegerField()
 
     class Meta:
         db_table = 'contribution_rates'
@@ -232,7 +421,21 @@ class ContributionRates(BaseModel):
 
 class ExternalDataSyncLog(BaseModel):
     """Migrated from drizzle: benchmarks.ts"""
-    source = models.CharField(max_length=255, null=True, blank=True)
+    source = models.CharField(max_length=255, blank=True)
+    source_type = models.CharField(max_length=50)
+    sync_id = models.CharField(max_length=100)
+    started_at = models.DateTimeField(default=timezone.now)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='running')
+    records_processed = models.IntegerField(default=0, null=True, blank=True)
+    records_inserted = models.IntegerField(default=0, null=True, blank=True)
+    records_updated = models.IntegerField(default=0, null=True, blank=True)
+    records_failed = models.IntegerField(default=0, null=True, blank=True)
+    error_message = models.TextField(null=True, blank=True)
+    error_details = models.TextField(null=True, blank=True)
+    initiated_by = models.CharField(max_length=100, null=True, blank=True)
+    sync_type = models.CharField(max_length=50, default='manual')
+    parameters = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'external_data_sync_log'

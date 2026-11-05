@@ -17,11 +17,12 @@ import {
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
-import { db } from '@/db';
 import { cbaClause } from '@/db/schema';
 import { eq, sql, and, or, SQL } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { logger } from '@/lib/logger';
 import { embeddingCache } from './embedding-cache';
+import { CLAUSE_EMBEDDING, PRECEDENT_EMBEDDING, requireVectorColumn } from '@/lib/ai/vector-readiness';
 
 const EMBEDDING_MODEL = 'text-embedding-3-small';
 const _EMBEDDING_DIMENSIONS = 1536;
@@ -114,9 +115,18 @@ export async function semanticClauseSearch(
     hybridSearch = { enabled: false, keywordWeight: 0.3 },
   } = options;
 
+  // Clauses belong to an organization: a search that does not say whose clauses to search reads none
+  const organizationId = filters.organizationId;
+  if (!organizationId) {
+    throw new Error('organizationId is required to search clauses');
+  }
+
+  // Asked before the query is sent to the embedding service: a database that cannot search by similarity cannot use the answer.
+  await requireVectorColumn(CLAUSE_EMBEDDING);
+
   try {
     // Generate embedding for search query
-    const queryEmbedding = await generateEmbedding(query, filters.organizationId);
+    const queryEmbedding = await generateEmbedding(query, organizationId);
     const embeddingString = `[${queryEmbedding.join(',')}]`;
 
     // Build WHERE clause based on filters
@@ -129,8 +139,9 @@ export async function semanticClauseSearch(
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-    // Perform vector similarity search using pgvector
-    const results = await db.execute(sql`
+    // Perform vector similarity search using pgvector, in the organization's own context after the embedding call has returned.
+    // A clause's tags are its key terms (cba_clauses has no tags column).
+    const results = await withRLSContext({ organizationId }, (tx) => tx.execute(sql`
       SELECT 
         id,
         clause_number,
@@ -138,17 +149,18 @@ export async function semanticClauseSearch(
         content,
         clause_type,
         article_number,
-        tags,
+        key_terms AS tags,
         1 - (embedding <=> ${embeddingString}::vector) as similarity,
         ${hybridSearch.enabled ? sql`
           (1 - (embedding <=> ${embeddingString}::vector)) * ${1 - (hybridSearch.keywordWeight || 0.3)} +
           (CASE WHEN content ILIKE ${`%${query}%`} THEN ${hybridSearch.keywordWeight || 0.3} ELSE 0 END) as hybrid_score
         ` : sql`1 - (embedding <=> ${embeddingString}::vector) as hybrid_score`}
       FROM cba_clauses
-      ${whereClause ? sql`WHERE ${whereClause}` : sql``}
+      WHERE organization_id = ${organizationId}
+      ${whereClause ? sql`AND ${whereClause}` : sql``}
       ORDER BY ${hybridSearch.enabled ? sql`hybrid_score` : sql`similarity`} DESC
       LIMIT ${limit}
-    `);
+    `));
 
     return (results as unknown as SqlRow[]).map((row: SqlRow) => ({
       id: row.id as string,
@@ -174,18 +186,23 @@ export async function semanticClauseSearch(
 export async function findSimilarClauses(
   clauseId: string,
   options: {
+    organizationId: string;
     limit?: number;
     threshold?: number;
     sameTypeOnly?: boolean;
-  } = {}
+  }
 ): Promise<SearchResult[]> {
-  const { limit = 5, threshold = 0.75, sameTypeOnly = false } = options;
+  const { organizationId, limit = 5, threshold = 0.75, sameTypeOnly = false } = options;
+
+  await requireVectorColumn(CLAUSE_EMBEDDING);
 
   try {
-    // Get the source clause
-    const sourceClause = await db.query.cbaClause.findFirst({
-      where: eq(cbaClause.id, clauseId),
-    });
+    // Get the source clause, in the organization's own context; one in another organization is simply not found
+    const sourceClause = await withRLSContext({ organizationId }, (tx) =>
+      tx.query.cbaClause.findFirst({
+        where: and(eq(cbaClause.id, clauseId), eq(cbaClause.organizationId, organizationId)),
+      }),
+    );
 
     if (!sourceClause) {
       throw new Error('Source clause not found');
@@ -200,7 +217,7 @@ export async function findSimilarClauses(
       ? sql`AND clause_type = ${sourceClause.clauseType}`
       : sql``;
 
-    const results = await db.execute(sql`
+    const results = await withRLSContext({ organizationId }, (tx) => tx.execute(sql`
       SELECT 
         id,
         clause_number,
@@ -208,14 +225,15 @@ export async function findSimilarClauses(
         content,
         clause_type,
         cba_id,
-        tags,
+        key_terms AS tags,
         1 - (embedding <=> ${embeddingString}::vector) as similarity
       FROM cba_clauses
       WHERE id != ${clauseId}
+        AND organization_id = ${organizationId}
       ${typeFilter}
       ORDER BY similarity DESC
       LIMIT ${limit}
-    `);
+    `));
 
     return (results as unknown as SqlRow[])
       .map((row: SqlRow) => ({
@@ -238,43 +256,51 @@ export async function findSimilarClauses(
 }
 
 /**
- * Semantic search for arbitration precedents
+ * Semantic search for arbitration precedents. The decisions a caller may see (public ones and its own) are decided by row-level security in the
+ * organization's own context, so the search says whose context to run in.
  */
 export async function semanticPrecedentSearch(
   query: string,
   options: {
+    organizationId: string;
     limit?: number;
     threshold?: number;
     issueType?: string;
     jurisdiction?: string;
-  } = {}
+  }
 ): Promise<SearchResult[]> {
-  const { limit = 10, threshold = 0.7, issueType, jurisdiction } = options;
+  const { organizationId, limit = 10, threshold = 0.7, issueType, jurisdiction } = options;
+  if (!organizationId) {
+    throw new Error('organizationId is required to search precedents');
+  }
+
+  await requireVectorColumn(PRECEDENT_EMBEDDING);
 
   try {
     const queryEmbedding = await generateEmbedding(query);
     const embeddingString = `[${queryEmbedding.join(',')}]`;
 
+    // issue_types is a jsonb array of the issues a decision turned on; jurisdiction is its own column
     const whereFilters: SQL[] = [];
     if (issueType) {
-      whereFilters.push(sql`issue_type = ${issueType}`);
+      whereFilters.push(sql`issue_types @> to_jsonb(${issueType}::text)`);
     }
     if (jurisdiction) {
-      whereFilters.push(sql`tribunal_type = ${jurisdiction}`);
+      whereFilters.push(sql`jurisdiction = ${jurisdiction}`);
     }
 
     const whereClause = whereFilters.length > 0 
       ? sql`WHERE ${sql.join(whereFilters, sql` AND `)}`
       : sql``;
 
-    const results = await db.execute(sql`
+    const results = await withRLSContext({ organizationId }, (tx) => tx.execute(sql`
       SELECT 
         id,
         case_title,
         case_number,
         precedent_summary,
         reasoning,
-        issue_type,
+        issue_types,
         outcome,
         precedent_value,
         citation_count,
@@ -283,7 +309,7 @@ export async function semanticPrecedentSearch(
       ${whereClause}
       ORDER BY similarity DESC
       LIMIT ${limit}
-    `);
+    `));
 
     return (results as unknown as SqlRow[])
       .map((row: SqlRow) => ({
@@ -294,7 +320,7 @@ export async function semanticPrecedentSearch(
           caseTitle: row.case_title,
           caseNumber: row.case_number,
           reasoning: row.reasoning,
-          issueType: row.issue_type,
+          issueTypes: row.issue_types,
           outcome: row.outcome,
           precedentValue: row.precedent_value,
           citationCount: row.citation_count,
@@ -312,170 +338,33 @@ export async function semanticPrecedentSearch(
 }
 
 /**
- * Batch generate and update embeddings for all clauses
- */
-export async function generateClauseEmbeddings(
-  options: {
-    batchSize?: number;
-    organizationId?: string;
-    onProgress?: (completed: number, total: number) => void;
-  } = {}
-): Promise<{ success: number; failed: number }> {
-  const { batchSize = 100, organizationId, onProgress } = options;
-  let success = 0;
-  let failed = 0;
-
-  try {
-    // Get clauses without embeddings
-    const whereClause = organizationId 
-      ? and(
-          eq(cbaClause.organizationId, organizationId),
-          sql`embedding IS NULL`
-        )
-      : sql`embedding IS NULL`;
-
-    const clauses = await db.query.cbaClause.findMany({
-      where: whereClause,
-      limit: 1000, // Process in chunks
-    });
-
-    const total = clauses.length;
-    logger.info('Generating clause embeddings', { total });
-
-    // Process in batches
-    for (let i = 0; i < clauses.length; i += batchSize) {
-      const batch = clauses.slice(i, i + batchSize);
-      
-      const embeddingPromises = batch.map(async clause => {
-        try {
-          const embedding = await generateEmbedding(
-            `${clause.title} ${clause.content}`,
-            clause.organizationId,
-          );
-          
-          await db.execute(sql`
-            UPDATE cba_clauses
-            SET embedding = ${`[${embedding.join(',')}]`}::vector
-            WHERE id = ${clause.id}
-          `);
-          
-          success++;
-          return true;
-        } catch (error) {
-          logger.error('Failed to generate embedding for clause', {
-            error,
-            clauseId: clause.id,
-          });
-          failed++;
-          return false;
-        }
-      });
-
-      await Promise.all(embeddingPromises);
-      
-      if (onProgress) {
-        onProgress(i + batch.length, total);
-      }
-    }
-
-    logger.info('Clause embedding generation complete', { success, failed });
-    return { success, failed };
-  } catch (error) {
-    logger.error('Error generating clause embeddings', { error });
-    return { success, failed };
-  }
-}
-
-/**
- * Batch generate embeddings for precedents
- */
-export async function generatePrecedentEmbeddings(
-  options: {
-    batchSize?: number;
-    onProgress?: (completed: number, total: number) => void;
-  } = {}
-): Promise<{ success: number; failed: number }> {
-  const { batchSize = 100, onProgress } = options;
-  let success = 0;
-  let failed = 0;
-
-  try {
-    const precedents = await db.query.arbitrationDecisions.findMany({
-      where: sql`embedding IS NULL`,
-      limit: 1000,
-    });
-
-    const total = precedents.length;
-    logger.info('Generating precedent embeddings', { total });
-
-    for (let i = 0; i < precedents.length; i += batchSize) {
-      const batch = precedents.slice(i, i + batchSize);
-      
-      const embeddingPromises = batch.map(async precedent => {
-        try {
-          const textToEmbed = `${precedent.caseTitle} ${precedent.precedentSummary} ${precedent.reasoning}`;
-          const embedding = await generateEmbedding(textToEmbed);
-          
-          await db.execute(sql`
-            UPDATE arbitration_decisions
-            SET embedding = ${`[${embedding.join(',')}]`}::vector
-            WHERE id = ${precedent.id}
-          `);
-          
-          success++;
-          return true;
-        } catch (error) {
-          logger.error('Failed to generate embedding for precedent', {
-            error,
-            precedentId: precedent.id,
-          });
-          failed++;
-          return false;
-        }
-      });
-
-      await Promise.all(embeddingPromises);
-      
-      if (onProgress) {
-        onProgress(i + batch.length, total);
-      }
-    }
-
-    logger.info('Precedent embedding generation complete', { success, failed });
-    return { success, failed };
-  } catch (error) {
-    logger.error('Error generating precedent embeddings', { error });
-    return { success, failed };
-  }
-}
-
-/**
  * Multi-modal search: combine clause search with precedent search
  */
 export async function unifiedSemanticSearch(
   query: string,
   options: {
+    organizationId: string;
     includeClauses?: boolean;
     includePrecedents?: boolean;
     limit?: number;
     threshold?: number;
-  } = {}
+  }
 ): Promise<{
   clauses: SearchResult[];
   precedents: SearchResult[];
   combined: SearchResult[];
 }> {
   const {
+    organizationId,
     includeClauses = true,
     includePrecedents = true,
     limit = 10,
     threshold = 0.7,
   } = options;
 
-  const [clauses, precedents] = await Promise.all([
-    includeClauses ? semanticClauseSearch(query, { limit, threshold }) : [],
-    includePrecedents ? semanticPrecedentSearch(query, { limit, threshold }) : [],
-  ]);
+  // One after the other: each search opens its own organization context, and two contexts must not interleave on one connection when this runs inside a transaction.
+  const clauses = includeClauses ? await semanticClauseSearch(query, { limit, threshold, filters: { organizationId } }) : [];
+  const precedents = includePrecedents ? await semanticPrecedentSearch(query, { organizationId, limit, threshold }) : [];
 
   // Combine and sort by similarity
   const combined = [...clauses, ...precedents]

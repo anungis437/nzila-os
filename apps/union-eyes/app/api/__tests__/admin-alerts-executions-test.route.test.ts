@@ -4,49 +4,33 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
 }));
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
+vi.mock('@/lib/api/framework', async () => {
+  const { ApiError, ErrorCode } = await import('@/lib/api/errors');
+  return { withApi: m.withApi, ApiError, ErrorCode };
+});
 
 async function loadRoute() {
   return import('../admin/alerts/executions/test/route');
 }
 
-describe('admin/alerts/executions/test route', () => {
+describe('admin/alerts/executions/test route (not implemented)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
+    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: unknown) => Promise<unknown>) => (ctx: unknown) => handler(ctx));
   });
 
-  it('POST accepts payload and returns accepted status', async () => {
+  it('POST refuses with NOT_IMPLEMENTED instead of claiming an alert was accepted', async () => {
     const { POST } = await loadRoute();
-
-    const result = await POST({
-      request: {
-        json: vi.fn(async () => ({ sample: true })),
-      },
-    });
-
-    expect(result).toMatchObject({ action: 'test', status: 'accepted' });
+    await expect(POST({ request: { json: vi.fn(async () => ({ sample: true })) } })).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED' });
   });
 
-  it('POST still accepts malformed json body', async () => {
+  it('POST refuses regardless of the body', async () => {
     const { POST } = await loadRoute();
-
-    const result = await POST({
-      request: {
-        json: vi.fn(async () => {
-          throw new Error('bad json');
-        }),
-      },
-    });
-
-    expect(result).toMatchObject({ action: 'test', status: 'accepted' });
+    await expect(POST({ request: { json: vi.fn(async () => { throw new Error('bad json'); }) } })).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED' });
   });
 
-  it('GET returns empty status payload', async () => {
+  it('GET refuses with NOT_IMPLEMENTED instead of returning an empty list as a status', async () => {
     const { GET } = await loadRoute();
-
-    const result = await GET({});
-
-    expect(result).toEqual([]);
+    await expect(GET({})).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED' });
   });
 });

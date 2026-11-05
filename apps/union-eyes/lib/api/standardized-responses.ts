@@ -45,6 +45,9 @@ export enum ErrorCode {
   INVALID_INPUT = 'INVALID_INPUT',
   MISSING_REQUIRED_FIELD = 'MISSING_REQUIRED_FIELD',
   INVALID_FORMAT = 'INVALID_FORMAT',
+
+  // Request size (413)
+  PAYLOAD_TOO_LARGE = 'PAYLOAD_TOO_LARGE',
   
   // Resource Errors (404, 409)
   NOT_FOUND = 'NOT_FOUND',
@@ -86,6 +89,9 @@ const ERROR_CODE_TO_STATUS: Record<ErrorCode, number> = {
   [ErrorCode.INVALID_INPUT]: 400,
   [ErrorCode.MISSING_REQUIRED_FIELD]: 400,
   [ErrorCode.INVALID_FORMAT]: 400,
+
+  // Request size
+  [ErrorCode.PAYLOAD_TOO_LARGE]: 413,
   
   // Resource errors
   [ErrorCode.NOT_FOUND]: 404,

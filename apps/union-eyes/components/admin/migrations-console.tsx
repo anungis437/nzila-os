@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { envelopeData, readApiError } from "@/lib/client/api-envelope";
 import {
   Table,
   TableBody,
@@ -94,17 +95,22 @@ export default function MigrationsConsole() {
   const router = useRouter();
   const [data, setData] = useState<BatchesResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [problem, setProblem] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setProblem(null);
     try {
       const params = new URLSearchParams();
       if (statusFilter) params.set("status", statusFilter);
       const res = await fetch(`/api/admin/ingest/batches?${params.toString()}`);
-      if (res.ok) {
-        setData(await res.json());
-      }
+      if (!res.ok) throw new Error(await readApiError(res, "The migration batches could not be loaded."));
+      // The route's own { batches, total, metrics } is what the framework wraps as { success, data, timestamp }.
+      setData(envelopeData(await res.json()) as unknown as BatchesResponse);
+    } catch (error) {
+      setData(null);
+      setProblem(error instanceof Error ? error.message : "The migration batches could not be loaded.");
     } finally {
       setLoading(false);
     }
@@ -131,6 +137,12 @@ export default function MigrationsConsole() {
           Refresh
         </Button>
       </div>
+
+      {problem && (
+        <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {problem}
+        </p>
+      )}
 
       {/* ─── Metrics Summary (§10) ─────────────────────────────────────── */}
       {metrics && (
@@ -214,7 +226,7 @@ export default function MigrationsConsole() {
                   </TableCell>
                 </TableRow>
               ))}
-              {!loading && (!data?.batches || data.batches.length === 0) && (
+              {!loading && !problem && (!data?.batches || data.batches.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                     No migration batches found

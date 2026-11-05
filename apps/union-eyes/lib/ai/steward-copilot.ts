@@ -18,9 +18,13 @@
  * @module lib/ai/steward-copilot
  */
 
-import { db } from '@/db/db';
+import { randomUUID } from 'crypto';
 import { eq, and, desc } from 'drizzle-orm';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { aiCopilotSessions, type AiCopilotSessionInsert } from '@/db/schema/domains/ml/ai-copilot-sessions';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
@@ -60,19 +64,36 @@ export async function executeCopilotAction(
 ): Promise<AiResponseEnvelope<CopilotResult>> {
   const { organizationId, userId, userRole, actionType, relatedEntityType, relatedEntityId, query } = input;
 
+  if (relatedEntityType === 'grievance' && relatedEntityId) {
+    const access = await getEffectiveCaseAccess({ organizationId, grievanceId: relatedEntityId, userId });
+    if (!access.canViewCase) throw new Error('Case access denied');
+  }
+
   // 1. Build context-aware prompt
   const prompt = await buildCopilotPrompt(input);
 
-  // 2. Call AI
+  // 2. Call AI. The provider call cannot share a database transaction: its intent is recorded first and the call is
+  // skipped if that record cannot be written.
   const ai = getAiClient();
-  const aiResult = await ai.generate({
-    orgId: UE_SYSTEM_ORG_ID,
-    trace: buildOrgAiTrace(organizationId),
-    appKey: UE_APP_KEY,
-    profileKey: UE_PROFILES.STEWARD_COPILOT,
-    input: prompt,
-    dataClass: 'internal',
-  });
+  const aiResult = await performAuditedOperation(
+    {
+      organizationId,
+      userId,
+      action: 'ai.copilot.generate',
+      resourceType: relatedEntityType ?? 'ai_copilot_sessions',
+      resourceId: relatedEntityId,
+      details: { actionType },
+    },
+    () =>
+      ai.generate({
+        orgId: UE_SYSTEM_ORG_ID,
+        trace: buildOrgAiTrace(organizationId),
+        appKey: UE_APP_KEY,
+        profileKey: UE_PROFILES.STEWARD_COPILOT,
+        input: prompt,
+        dataClass: toGatewayDataClass('grievance_legal'),
+      }),
+  );
 
   // 3. Parse
   const parsed = parseCopilotResponse(aiResult.content ?? '');
@@ -90,7 +111,9 @@ export async function executeCopilotAction(
   });
 
   // 5. Persist session
+  const sessionId = randomUUID();
   const insert: AiCopilotSessionInsert = {
+    id: sessionId,
     organizationId,
     userId,
     userRole,
@@ -109,7 +132,17 @@ export async function executeCopilotAction(
     outcome: 'pending',
   };
 
-  await db.insert(aiCopilotSessions).values(insert);
+  await withRLSContext({ organizationId }, async (tx) => {
+    await tx.insert(aiCopilotSessions).values(insert);
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'ai.copilot.session.create',
+      resourceType: 'ai_copilot_sessions',
+      resourceId: sessionId,
+      details: { actionType, relatedEntityType: relatedEntityType ?? null, auditRef },
+    });
+  });
 
   return buildAiEnvelope(parsed.result, {
     confidence: parsed.confidence,
@@ -176,25 +209,56 @@ export async function draftResponse(
 /**
  * Record outcome for a copilot session.
  */
+export type CopilotOutcomeResult = 'recorded' | 'not_found' | 'already_decided';
+
+/**
+ * Record the human outcome of a copilot session. Only the steward the session was produced for may decide it, and only
+ * once: a session of another user or organization is not found, and a decided session is never overwritten. The
+ * outcome and its audit record commit together.
+ */
 export async function recordCopilotOutcome(
   sessionId: string,
   organizationId: string,
+  userId: string,
   outcome: 'accepted' | 'edited' | 'rejected',
   editedResponse?: string,
   feedbackRating?: number,
   feedbackNotes?: string,
-) {
-  await db
-    .update(aiCopilotSessions)
-    .set({
-      outcome,
-      editedResponse: editedResponse ?? null,
-      feedbackRating: feedbackRating?.toFixed(2) ?? null,
-      feedbackNotes: feedbackNotes ?? null,
-      humanApproved: outcome === 'accepted' || outcome === 'edited',
-      completedAt: new Date(),
-    })
-    .where(and(eq(aiCopilotSessions.id, sessionId), eq(aiCopilotSessions.organizationId, organizationId)));
+): Promise<CopilotOutcomeResult> {
+  return withRLSContext({ organizationId }, async (tx): Promise<CopilotOutcomeResult> => {
+    const inOrganizationAsOwner = and(
+      eq(aiCopilotSessions.id, sessionId),
+      eq(aiCopilotSessions.organizationId, organizationId),
+      eq(aiCopilotSessions.userId, userId),
+    );
+    const [decided] = await tx
+      .update(aiCopilotSessions)
+      .set({
+        outcome,
+        editedResponse: editedResponse ?? null,
+        feedbackRating: feedbackRating?.toFixed(2) ?? null,
+        feedbackNotes: feedbackNotes ?? null,
+        humanApproved: outcome === 'accepted' || outcome === 'edited',
+        completedAt: new Date(),
+      })
+      .where(and(inOrganizationAsOwner, eq(aiCopilotSessions.outcome, 'pending')))
+      .returning({ id: aiCopilotSessions.id });
+
+    if (!decided) {
+      const [existing] = await tx.select({ id: aiCopilotSessions.id }).from(aiCopilotSessions).where(inOrganizationAsOwner).limit(1);
+      return existing ? 'already_decided' : 'not_found';
+    }
+
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'ai.copilot.session.outcome',
+      resourceType: 'ai_copilot_sessions',
+      resourceId: sessionId,
+      details: { outcome, humanApproved: outcome === 'accepted' || outcome === 'edited' },
+    });
+    return 'recorded';
+  });
 }
 
 /**
@@ -205,14 +269,16 @@ export async function getCopilotHistory(
   organizationId: string,
   limit = 20,
 ) {
-  return db.query.aiCopilotSessions.findMany({
-    where: and(
-      eq(aiCopilotSessions.userId, userId),
-      eq(aiCopilotSessions.organizationId, organizationId),
-    ),
-    orderBy: [desc(aiCopilotSessions.createdAt)],
-    limit,
-  });
+  return withRLSContext({ organizationId }, (tx) =>
+    tx.query.aiCopilotSessions.findMany({
+      where: and(
+        eq(aiCopilotSessions.userId, userId),
+        eq(aiCopilotSessions.organizationId, organizationId),
+      ),
+      orderBy: [desc(aiCopilotSessions.createdAt)],
+      limit,
+    }),
+  );
 }
 
 // ============================================================================
@@ -226,14 +292,17 @@ async function buildCopilotPrompt(input: CopilotInput): Promise<string> {
     `Action: ${input.actionType}`,
   ];
 
-  // If related to a grievance, fetch context
+  // If related to a grievance, fetch context (in the organization's own context, before the provider is called)
   if (input.relatedEntityType === 'grievance' && input.relatedEntityId) {
-    const grievance = await db.query.grievances.findFirst({
-      where: and(
-        eq(grievances.id, input.relatedEntityId),
-        eq(grievances.organizationId, input.organizationId),
-      ),
-    });
+    const relatedEntityId = input.relatedEntityId;
+    const grievance = await withRLSContext({ organizationId: input.organizationId }, (tx) =>
+      tx.query.grievances.findFirst({
+        where: and(
+          eq(grievances.id, relatedEntityId),
+          eq(grievances.organizationId, input.organizationId),
+        ),
+      }),
+    );
 
     if (grievance) {
       parts.push('');

@@ -53,8 +53,10 @@ import {
   getMemberEffectivePermissions,
   logPermissionCheck,
   incrementExceptionUsage,
+  findLivePermissionException,
   type MemberRoleWithDetails,
 } from '@/db/queries/enhanced-rbac-queries';
+import { logger } from '@/lib/logger';
 
 // ============================================================================
 // TYPES
@@ -500,33 +502,11 @@ async function getPermissionExceptionId(
   resourceId?: string
 ): Promise<string | null> {
   try {
-    const { sql } = await import('drizzle-orm');
-    const { db } = await import('@/db/db');
-    
-    let query = sql`
-      SELECT id FROM permission_exceptions
-      WHERE member_id = ${memberId}
-        AND organization_id = ${organizationId}
-        AND permission = ${permission}
-        AND is_active = TRUE
-        AND revoked_at IS NULL
-        AND (expires_at IS NULL OR expires_at > NOW())
-        AND (usage_limit IS NULL OR usage_count < usage_limit)
-    `;
-    
-    if (resourceType) {
-      query = sql`${query} AND resource_type = ${resourceType}`;
-    }
-    if (resourceId) {
-      query = sql`${query} AND (resource_id IS NULL OR resource_id = ${resourceId})`;
-    }
-    
-    query = sql`${query} LIMIT 1`;
-    
-    const result = await db.execute(query);
-    return (result as Array<{ id?: string }>)[0]?.id || null;
-  } catch (_error) {
-return null;
+    return await findLivePermissionException(memberId, organizationId, permission, resourceType, resourceId);
+  } catch (error) {
+    // Fail closed: no exception is found, the request is judged on the member's roles alone. The failure is not hidden.
+    logger.error('Permission exception lookup failed', { error, organizationId, permission });
+    return null;
   }
 }
 
@@ -562,17 +542,20 @@ async function checkMemberPermission(
     );
     
     if (exceptionId) {
-      // Increment usage count for the exception
+      // Count the use. An exception that has just run out (another request used the last one) is not a grant: the count never passes the limit.
+      let used = false;
       try {
-        await incrementExceptionUsage(exceptionId);
-      } catch (_error) {
-// Don&apos;t fail the request if usage tracking fails
+        used = await incrementExceptionUsage(exceptionId, organizationId);
+      } catch (error) {
+        logger.error('Permission exception usage could not be counted', { error, organizationId });
       }
-      
-      return {
-        allowed: true,
-        grantMethod: 'exception',
-      };
+
+      if (used) {
+        return {
+          allowed: true,
+          grantMethod: 'exception',
+        };
+      }
     }
   }
   

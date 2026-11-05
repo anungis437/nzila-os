@@ -70,7 +70,9 @@ export const organizationStatusEnum = pgEnum('organization_status', [
 export const organizations = pgTable(
   'organizations',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    // The physical table is Django-managed and carries no database defaults, so every NOT NULL default is also supplied by the ORM
+    // (a Drizzle .default() is DDL only: an insert that omits the column sends DEFAULT, which the physical table cannot resolve).
+    id: uuid('id').defaultRandom().$defaultFn(() => crypto.randomUUID()).primaryKey(),
 
     // Basic Information
     name: text('name').notNull(),
@@ -83,12 +85,12 @@ export const organizations = pgTable(
     organizationType: organizationTypeEnum('organization_type').notNull(),
     parentId: uuid('parent_id').references((): AnyPgColumn => organizations.id, { onDelete: 'restrict' }),
     hierarchyPath: text('hierarchy_path').array().notNull(),
-    hierarchyLevel: integer('hierarchy_level').notNull().default(0),
+    hierarchyLevel: integer('hierarchy_level').notNull().default(0).$defaultFn(() => 0),
 
     // Jurisdiction & Sectors
     // jurisdiction: caJurisdictionEnum('jurisdiction'), // Commented out - column does not exist in database
     provinceTerritory: text('province_territory'),
-    sectors: labourSectorEnum('sectors').array().default([]),
+    sectors: labourSectorEnum('sectors').array().default([]).$defaultFn(() => []),
 
     // Contact & Metadata
     email: text('email'),
@@ -104,7 +106,7 @@ export const organizations = pgTable(
     }>(),
 
     // CLC Affiliation
-    clcAffiliated: boolean('clc_affiliated').default(false),
+    clcAffiliated: boolean('clc_affiliated').default(false).$defaultFn(() => false),
     affiliationDate: date('affiliation_date'),
     charterNumber: text('charter_number'),
 
@@ -114,8 +116,8 @@ export const organizations = pgTable(
     // These are organization-level defaults that feed into per-capita calculations
 
     // Membership Counts (cached)
-    memberCount: integer('member_count').default(0),
-    activeMemberCount: integer('active_member_count').default(0),
+    memberCount: integer('member_count').default(0).$defaultFn(() => 0),
+    activeMemberCount: integer('active_member_count').default(0).$defaultFn(() => 0),
     lastMemberCountUpdate: timestamp('last_member_count_update', { withTimezone: true }),
 
     // Billing & Settings
@@ -128,13 +130,13 @@ export const organizations = pgTable(
     //   fiscalYearEnd?: string;        // e.g., "March 31"
     //   customFields?: Record<string, unknown>;
     // }
-    settings: jsonb('settings').$type<Record<string, unknown>>().default({}),
-    featuresEnabled: text('features_enabled').array().default([]),
+    settings: jsonb('settings').$type<Record<string, unknown>>().default({}).$defaultFn(() => ({})),
+    featuresEnabled: text('features_enabled').array().default([]).$defaultFn(() => []),
 
     // Status & Audit
-    status: text('status').default('active'),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    status: text('status').default('active').$defaultFn(() => 'active'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
     createdBy: text('created_by'),
 
     // Legacy & Migration
@@ -143,7 +145,7 @@ export const organizations = pgTable(
     // CLC Financial Fields
     clcAffiliateCode: varchar('clc_affiliate_code', { length: 20 }),
     perCapitaRate: numeric('per_capita_rate', { precision: 10, scale: 2 }),
-    remittanceDay: integer('remittance_day').default(15),
+    remittanceDay: integer('remittance_day').default(15).$defaultFn(() => 15),
     lastRemittanceDate: timestamp('last_remittance_date', { withTimezone: true }),
     fiscalYearEnd: date('fiscal_year_end').default('2024-12-31'),
   },
@@ -288,7 +290,7 @@ export const organizationMembers = pgTable(
     
     role: text('role').notNull(),
     status: text('status').notNull().default('active'),
-    isPrimary: boolean('is_primary').default(false),
+    isPrimary: boolean('is_primary').default(false).$defaultFn(() => false),
     
     // Additional fields
     department: text('department'),
@@ -309,10 +311,11 @@ export const organizationMembers = pgTable(
     exemptionReason: text('exemption_reason'),
     exemptionApprovedBy: varchar('exemption_approved_by', { length: 255 }),
 
-    // Timestamps
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    // Timestamps. The canonical created_at, updated_at and is_primary columns are NOT NULL without a database default (Django
+    // sets them in Python), so an ORM insert that leaves them out fails natively; the ORM supplies the value.
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow().$defaultFn(() => new Date()),
     joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().$defaultFn(() => new Date()),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (table) => ({
@@ -412,42 +415,9 @@ export const orgConfigurationsRelations = relations(orgConfigurations, ({ one })
   }),
 }));
 
-// =====================================================
-// ORGANIZATION USAGE TABLE
-// Tracks per-org resource consumption (storage, API calls, etc.)
-// =====================================================
-
-export const orgUsage = pgTable(
-  'org_usage',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    organizationId: uuid('organization_id')
-      .notNull()
-      .references(() => organizations.id, { onDelete: 'cascade' }),
-    storageUsedBytes: integer('storage_used_bytes').notNull().default(0),
-    documentCount: integer('document_count').notNull().default(0),
-    apiCallCount: integer('api_call_count').notNull().default(0),
-    lastCalculatedAt: timestamp('last_calculated_at', { withTimezone: true }).defaultNow(),
-    periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
-    periodEnd: timestamp('period_end', { withTimezone: true }).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (table) => ({
-    orgPeriodIdx: uniqueIndex('idx_org_usage_org_period').on(
-      table.organizationId,
-      table.periodStart,
-      table.periodEnd,
-    ),
-    orgIdx: index('idx_org_usage_org').on(table.organizationId),
-  }),
-);
-
-export const orgUsageRelations = relations(orgUsage, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [orgUsage.organizationId],
-    references: [organizations.id],
-  }),
-}));
+// org_usage is not declared here. The physical relation stays. Django does not
+// define it. The unwired admin-actions module no longer returns a storage figure.
+// Do not DROP the relation from this file.
 
 // =====================================================
 // TYPE EXPORTS
@@ -461,8 +431,6 @@ export type OrganizationMember = typeof organizationMembers.$inferSelect;
 export type NewOrganizationMember = typeof organizationMembers.$inferInsert;
 export type OrgConfiguration = typeof orgConfigurations.$inferSelect;
 export type NewOrgConfiguration = typeof orgConfigurations.$inferInsert;
-export type OrgUsage = typeof orgUsage.$inferSelect;
-export type NewOrgUsage = typeof orgUsage.$inferInsert;
 
 // =====================================================
 // HELPER TYPE GUARDS

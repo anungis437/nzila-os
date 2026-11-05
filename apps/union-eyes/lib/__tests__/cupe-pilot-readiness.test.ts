@@ -8,7 +8,7 @@ function readWorkspaceFile(...segments: string[]): string {
 
 describe('CUPE pilot readiness source audit', () => {
   it('routes the member new-claim page through the hardened case intake API', () => {
-    const source = readWorkspaceFile('app', '[locale]', 'dashboard', 'claims', 'new', 'page.tsx');
+    const source = readWorkspaceFile('components', 'claims', 'new-claim-form.tsx');
 
     expect(source).toContain('fetch("/api/cases/intake"');
     expect(source).not.toContain('fetch("/api/claims"');
@@ -16,7 +16,7 @@ describe('CUPE pilot readiness source audit', () => {
   });
 
   it('routes member attachments through the dedicated case evidence API', () => {
-    const source = readWorkspaceFile('app', '[locale]', 'dashboard', 'claims', 'new', 'page.tsx');
+    const source = readWorkspaceFile('components', 'claims', 'new-claim-form.tsx');
     const uploaderSource = readWorkspaceFile('components', 'file-upload.tsx');
 
     expect(source).toContain('fetch(`/api/cases/${claimId}/evidence`');
@@ -31,8 +31,8 @@ describe('CUPE pilot readiness source audit', () => {
     expect(source).toContain('export const GET = withApi');
     expect(source).toContain('export const POST = withApi');
     expect(source).toContain('export const DELETE = withApi');
-    expect(source).toContain('CaseAuditEvent.CASE_ATTACHMENT_UPLOADED');
-    expect(source).toContain('CaseAuditEvent.CASE_ATTACHMENT_DELETED');
+    expect(source).toContain("action: 'case.attachment_uploaded'");
+    expect(source).toContain("action: 'case.attachment_deleted'");
   });
 
   it('documents that the hardened intake route exists separately and resolves org scope via getOrganizationIdForUser', () => {

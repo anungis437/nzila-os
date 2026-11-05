@@ -18,6 +18,7 @@ import {
   FRAMEWORK_ROLES,
   PLATFORM_METADATA_MODEL_OWNERS,
 } from './framework-contract'
+import { assertNoProtectedConstraintDrop } from '../lib/protected-physical-constraints'
 
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..')
 export const folder = path.join(root, 'docs', 'union-eyes', 'bootstrap-v2')
@@ -381,8 +382,32 @@ export function currentBackendSourceDigests(): Record<string, string> {
   )
 }
 
+interface DrizzleSnapshotJson {
+  tables: Record<
+    string,
+    {
+      columns: Record<string, { name: string; type: string; typeSchema?: string; default?: unknown }>
+      indexes: Record<string, { name: string; columns: Array<{ expression: string; isExpression?: boolean }> } & Record<string, unknown>>
+      foreignKeys: Record<
+        string,
+        { columnsFrom: string[]; columnsTo: string[]; tableTo: string; schemaTo?: string } & Record<string, unknown>
+      >
+      uniqueConstraints: Record<string, unknown>
+      checkConstraints: Record<string, { name: string; value: string }>
+    } & Record<string, unknown>
+  >
+  enums: Record<string, { name: string; schema?: string; values: string[] }>
+  schemas?: Record<string, unknown>
+}
+
 export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
-  const { generateDrizzleJson, generateMigration } = await import('drizzle-kit/api')
+  // drizzle-kit derives its declaration types from its own zod schema; under zod 4 they widen to unknown, so the fields
+  // this planner reads are stated once here (the runtime shapes are unchanged).
+  const drizzleKit = await import('drizzle-kit/api')
+  const generateDrizzleJson = (input: Record<string, unknown>) =>
+    drizzleKit.generateDrizzleJson(input as never) as unknown as DrizzleSnapshotJson
+  const generateMigration = (from: DrizzleSnapshotJson, to: DrizzleSnapshotJson) =>
+    drizzleKit.generateMigration(from as never, to as never) as Promise<string[]>
   const currentModels = collectModels(wheelhouse)
   const loadSchema = createRequire(import.meta.url)
   const applicationSchema: Record<string, unknown> = {
@@ -966,6 +991,7 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     }
     const ddl = await generateMigration(previous, snapshot)
     for (const [index, sql] of ddl.entries()) {
+      assertNoProtectedConstraintDrop(sql)
       if (/^CREATE TYPE/.test(sql)) continue
       statements.push({
         canonicalId: `CURRENT_DECLARATION:${key}:${index}`,
@@ -1017,13 +1043,15 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     const snapshot = generateDrizzleJson({ [symbol]: table })
     snapshot.schemas = {}
     const ddl = await generateMigration(generateDrizzleJson({}), snapshot)
-    for (const [index, sql] of ddl.entries())
+    for (const [index, sql] of ddl.entries()) {
+      assertNoProtectedConstraintDrop(sql)
       statements.push({
         canonicalId: `PLATFORM_AUTH_CURRENT:${config.name}:${index}`,
         sql,
         source: authSource,
         sourceDigest: authDigest,
       })
+    }
     tables.push({
       name: `user_management.${config.name}`,
       columns: config.columns.map((column) => ({
@@ -1044,13 +1072,15 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
   const bindingSnapshot = generateDrizzleJson({ platformIdentityBindings })
   for (const [index, sql] of (
     await generateMigration(generateDrizzleJson({}), bindingSnapshot)
-  ).entries())
+  ).entries()) {
+    assertNoProtectedConstraintDrop(sql)
     statements.push({
       canonicalId: `PLATFORM_IDENTITY_CURRENT:${index}`,
       sql,
       source: bindingSource,
       sourceDigest: bindingDigest,
     })
+  }
   tables.push({
     name: bindingConfig.name,
     source: bindingSource,
@@ -1136,20 +1166,22 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     const column = tables
       .find((table) => table.name === name)
       ?.columns.find((entry) => entry.name === 'organization_id')
-    if (column?.type !== 'uuid' || column.notNull)
+    // Current Django source requires the owner (tranche 10, d42d05ba5, 2026-11-02); a nullable column here means the
+    // plan was built from stale models.
+    if (column?.type !== 'uuid' || !column.notNull)
       throw new Error(`UE_V2_CURRENT_NULLABILITY_REQUIRED:${name}`)
     decisions.push({
       relation: name,
-      canonicalDecision: 'UUID NULLABLE',
+      canonicalDecision: 'UUID NOT NULL',
       sourceDefinition: column,
       applicationUsage: storageAuthorityManifest.find((entry) => entry.table === name)
         ?.supportingCapability,
       rlsImplication:
-        'NULL rows are inaccessible to ordinary tenant role; no global read inference. System access only from explicit manifest grants.',
+        'Every row has an owning organization; there is no ownerless row for any role to read. System access only from explicit manifest grants.',
       tenantIsolationImplication:
-        'NULL cannot match a nonnull authenticated org context; tenant writes must include own org.',
+        'A write without an organization is refused by the column itself; tenant writes must include their own org.',
       rationale:
-        'Current Django source wins over historical W4P NOT NULL; no historical payload replay.',
+        'Current Django source wins: tranche 10 (d42d05ba5) made organization_id required, matching the Drizzle declarations. A fresh V2 database has no legacy ownerless rows to preserve.',
     })
   }
   return {

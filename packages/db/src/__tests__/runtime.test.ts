@@ -62,15 +62,25 @@ describe('db client proxy', () => {
 
 describe('db runtime exports', () => {
   it('re-exports raw and platform database aliases', async () => {
-    const { clientModule } = await importClientWithMocks({
-      databaseUrl: 'postgres://example.test/nzila',
-      drizzleReturn: { select: vi.fn() },
-    })
-    const rawModule = await import('../raw')
-    const platformModule = await import('../platform')
+    const previous = process.env.PLATFORM_DATABASE_URL
+    delete process.env.PLATFORM_DATABASE_URL
+    try {
+      const select = vi.fn(() => 'selected')
+      const { clientModule } = await importClientWithMocks({
+        databaseUrl: 'postgres://example.test/nzila',
+        drizzleReturn: { select },
+      })
+      const rawModule = await import('../raw')
+      const platformModule = await import('../platform')
 
-    expect(rawModule.rawDb).toBe(clientModule.db)
-    expect(platformModule.platformDb).toBe(clientModule.db)
+      expect(rawModule.rawDb).toBe(clientModule.db)
+      // platformDb is a lazy proxy: without PLATFORM_DATABASE_URL it delegates every call to the default client.
+      expect((platformModule.platformDb as unknown as { select: (...a: unknown[]) => unknown }).select('x')).toBe('selected')
+      expect(select).toHaveBeenCalledWith('x')
+    } finally {
+      if (previous === undefined) delete process.env.PLATFORM_DATABASE_URL
+      else process.env.PLATFORM_DATABASE_URL = previous
+    }
   })
 
   it('loads the root barrel and schema barrels with known exports', async () => {

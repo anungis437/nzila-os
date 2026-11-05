@@ -18,9 +18,13 @@
  * @module lib/ai/grievance-triage
  */
 
-import { db } from '@/db/db';
+import { randomUUID } from 'crypto';
 import { eq, and, desc } from 'drizzle-orm';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
 import { aiGrievanceTriages, type AiGrievanceTriageInsert } from '@/db/schema/domains/ml/ai-grievance-triage';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
@@ -88,26 +92,42 @@ export async function analyzeGrievance(
 ): Promise<AiResponseEnvelope<TriageResult>> {
   const { grievanceId, organizationId, userId } = input;
 
-  // 1. Fetch grievance
-  const grievance = await db.query.grievances.findFirst({
-    where: and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)),
-  });
+  const access = await getEffectiveCaseAccess({ organizationId, grievanceId, userId });
+  if (!access.canViewCase) throw new Error('Case access denied');
+
+  // 1. Fetch grievance, in the organization's own context and before the provider is called
+  const grievance = await withRLSContext({ organizationId }, (tx) =>
+    tx.query.grievances.findFirst({
+      where: and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)),
+    }),
+  );
 
   if (!grievance) {
     throw new Error(`Grievance ${grievanceId} not found in org ${organizationId}`);
   }
 
-  // 2. Call AI
+  // 2. Call AI. The provider call cannot share a database transaction: its intent is recorded first and the call is
+  // skipped if that record cannot be written.
   const ai = getAiClient();
   const prompt = buildTriagePrompt(grievance);
-  const aiResult = await ai.generate({
-    orgId: UE_SYSTEM_ORG_ID,
-    trace: buildOrgAiTrace(organizationId),
-    appKey: UE_APP_KEY,
-    profileKey: UE_PROFILES.GRIEVANCE_TRIAGE,
-    input: prompt,
-    dataClass: 'internal',
-  });
+  const aiResult = await performAuditedOperation(
+    {
+      organizationId,
+      userId,
+      action: 'ai.grievance_triage.generate',
+      resourceType: 'grievances',
+      resourceId: grievanceId,
+    },
+    () =>
+      ai.generate({
+        orgId: UE_SYSTEM_ORG_ID,
+        trace: buildOrgAiTrace(organizationId),
+        appKey: UE_APP_KEY,
+        profileKey: UE_PROFILES.GRIEVANCE_TRIAGE,
+        input: prompt,
+        dataClass: toGatewayDataClass('grievance_legal'),
+      }),
+  );
 
   // 3. Parse AI response
   const parsed = parseTriageResponse(aiResult.content ?? '');
@@ -125,7 +145,9 @@ export async function analyzeGrievance(
   });
 
   // 5. Persist
+  const triageId = randomUUID();
   const insert: AiGrievanceTriageInsert = {
+    id: triageId,
     organizationId,
     grievanceId,
     suggestedPriority: parsed.triage.suggestedPriority,
@@ -143,7 +165,17 @@ export async function analyzeGrievance(
     status: 'pending',
   };
 
-  await db.insert(aiGrievanceTriages).values(insert);
+  await withRLSContext({ organizationId }, async (tx) => {
+    await tx.insert(aiGrievanceTriages).values(insert);
+    await persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'ai.grievance_triage.create',
+      resourceType: 'ai_grievance_triages',
+      resourceId: triageId,
+      details: { grievanceId, auditRef },
+    });
+  });
 
   // 6. Envelope
   return buildAiEnvelope(parsed.triage, {
@@ -161,13 +193,15 @@ export async function getTriageHistory(
   grievanceId: string,
   organizationId: string,
 ) {
-  return db.query.aiGrievanceTriages.findMany({
-    where: and(
-      eq(aiGrievanceTriages.grievanceId, grievanceId),
-      eq(aiGrievanceTriages.organizationId, organizationId),
-    ),
-    orderBy: [desc(aiGrievanceTriages.createdAt)],
-  });
+  return withRLSContext({ organizationId }, (tx) =>
+    tx.query.aiGrievanceTriages.findMany({
+      where: and(
+        eq(aiGrievanceTriages.grievanceId, grievanceId),
+        eq(aiGrievanceTriages.organizationId, organizationId),
+      ),
+      orderBy: [desc(aiGrievanceTriages.createdAt)],
+    }),
+  );
 }
 
 /**
@@ -187,56 +221,79 @@ export async function reviewTriage(
   notes?: string,
   override?: { priority: string; reason: string },
 ) {
-  // Guard: only pending triages may be reviewed
-  const [existing] = await db
-    .select({ id: aiGrievanceTriages.id, status: aiGrievanceTriages.status, suggestedPriority: aiGrievanceTriages.suggestedPriority })
-    .from(aiGrievanceTriages)
-    .where(and(eq(aiGrievanceTriages.id, triageId), eq(aiGrievanceTriages.organizationId, organizationId)))
-    .limit(1);
+  // The read, the guard, the update and the audit record share one transaction
+  await withRLSContext({ organizationId }, async (tx) => {
+    // Guard: only pending triages may be reviewed
+    const [existing] = await tx
+      .select({ id: aiGrievanceTriages.id, status: aiGrievanceTriages.status, suggestedPriority: aiGrievanceTriages.suggestedPriority })
+      .from(aiGrievanceTriages)
+      .where(and(eq(aiGrievanceTriages.id, triageId), eq(aiGrievanceTriages.organizationId, organizationId)))
+      .limit(1);
 
-  if (!existing) {
-    throw new Error(`Triage ${triageId} not found in org ${organizationId}`);
-  }
-  if (existing.status !== 'pending') {
-    throw new Error(
-      `Triage ${triageId} is already '${existing.status}' and cannot be re-reviewed. Create a new triage to get a fresh AI assessment.`,
-    );
-  }
+    if (!existing) {
+      throw new Error(`Triage ${triageId} not found in org ${organizationId}`);
+    }
+    if (existing.status !== 'pending') {
+      throw new Error(
+        `Triage ${triageId} is already '${existing.status}' and cannot be re-reviewed. Create a new triage to get a fresh AI assessment.`,
+      );
+    }
 
-  // NZ-RISK-016: Build structured review notes preserving override audit trail
-  let reviewNotes = notes ?? null;
-  if (override) {
-    const overrideLog = JSON.stringify({
-      overridePriority: override.priority,
-      originalPriority: existing.suggestedPriority,
-      overrideReason: override.reason,
-      reviewedBy,
-      reviewedAt: new Date().toISOString(),
-    });
-    reviewNotes = reviewNotes
-      ? `[OVERRIDE] ${overrideLog}\n${reviewNotes}`
-      : `[OVERRIDE] ${overrideLog}`;
+    // NZ-RISK-016: Build structured review notes preserving override audit trail
+    let reviewNotes = notes ?? null;
+    if (override) {
+      const overrideLog = JSON.stringify({
+        overridePriority: override.priority,
+        originalPriority: existing.suggestedPriority,
+        overrideReason: override.reason,
+        reviewedBy,
+        reviewedAt: new Date().toISOString(),
+      });
+      reviewNotes = reviewNotes
+        ? `[OVERRIDE] ${overrideLog}\n${reviewNotes}`
+        : `[OVERRIDE] ${overrideLog}`;
 
-    logger.info('[grievance-triage] Priority override applied', {
-      triageId,
+      logger.info('[grievance-triage] Priority override applied', {
+        triageId,
+        organizationId,
+        reviewedBy,
+        originalPriority: existing.suggestedPriority,
+        overridePriority: override.priority,
+        reason: override.reason,
+      });
+    }
+
+    // The pending predicate keeps a concurrent review from being overwritten
+    const [reviewed] = await tx
+      .update(aiGrievanceTriages)
+      .set({
+        status: accept ? 'accepted' : 'rejected',
+        reviewedBy,
+        reviewedAt: new Date(),
+        reviewNotes,
+        humanApproved: accept,
+      })
+      .where(
+        and(
+          eq(aiGrievanceTriages.id, triageId),
+          eq(aiGrievanceTriages.organizationId, organizationId),
+          eq(aiGrievanceTriages.status, 'pending'),
+        ),
+      )
+      .returning({ id: aiGrievanceTriages.id });
+    if (!reviewed) {
+      throw new Error(`Triage ${triageId} was reviewed concurrently and cannot be re-reviewed.`);
+    }
+
+    await persistAtomicAudit(tx, {
       organizationId,
-      reviewedBy,
-      originalPriority: existing.suggestedPriority,
-      overridePriority: override.priority,
-      reason: override.reason,
+      userId: reviewedBy,
+      action: 'ai.grievance_triage.review',
+      resourceType: 'ai_grievance_triages',
+      resourceId: triageId,
+      details: { accepted: accept, overridden: Boolean(override) },
     });
-  }
-
-  await db
-    .update(aiGrievanceTriages)
-    .set({
-      status: accept ? 'accepted' : 'rejected',
-      reviewedBy,
-      reviewedAt: new Date(),
-      reviewNotes,
-      humanApproved: accept,
-    })
-    .where(and(eq(aiGrievanceTriages.id, triageId), eq(aiGrievanceTriages.organizationId, organizationId)));
+  });
 }
 
 // ============================================================================

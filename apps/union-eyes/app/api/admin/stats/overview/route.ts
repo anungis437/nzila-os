@@ -11,9 +11,11 @@ import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
+// A platform operation: system-wide counts, gated by platform authority (platform_lead); its statements run as the system role, which holds
+// SELECT on both tables.
 export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
-  async () => {
+  async () => withSystemContext(async () => {
     const [memberStats] = await db
       .select({ totalMembers: count() })
       .from(organizationMembers);
@@ -27,10 +29,8 @@ export const GET = withApi(
       .where(ne(organizations.organizationType, 'platform'));
 
     // Estimate storage from table sizes
-    const storageResult = await withSystemContext(async () =>
-      db.execute(
-        sql`SELECT pg_database_size(current_database()) as db_size`
-      )
+    const storageResult = await db.execute(
+      sql`SELECT pg_database_size(current_database()) as db_size`
     );
     const rows = Array.from(storageResult);
     const dbSizeBytes = Number((rows[0] as Record<string, unknown>)?.db_size ?? 0);
@@ -50,6 +50,6 @@ export const GET = withApi(
       totalStorage: Number(totalStorageGb.toFixed(2)),
       activeToday: activeResult.activeToday ?? 0,
     };
-  },
+  }),
 );
 

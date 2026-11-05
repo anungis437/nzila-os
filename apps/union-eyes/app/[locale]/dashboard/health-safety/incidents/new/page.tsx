@@ -19,7 +19,9 @@ import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileWarning, ArrowLeft, AlertCircle } from "lucide-react";
-import { IncidentReportForm } from "@/components/health-safety";
+import { IncidentReportForm, type IncidentFormData } from "@/components/health-safety/IncidentReportForm";
+import { toIncidentRequest } from "@/components/health-safety/incident-payload";
+import { readApiError } from "@/lib/client/api-envelope";
 import { toast } from "sonner";
 import { logger } from '@/lib/logger';
 
@@ -28,30 +30,31 @@ export default function NewIncidentPage() {
   const router = useRouter();
   const organizationId = useOrganizationId();
 
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: IncidentFormData) => {
+    // The body names no organization (the route takes the caller's own and refuses a body that names one) and carries only fields it stores.
+    const body = toIncidentRequest(data);
     try {
       const res = await fetch('/api/health-safety/incidents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, organizationId }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
-        throw new Error(t("errors.submitFailed"));
+        throw new Error(await readApiError(res, t("errors.submitFailed")));
       }
-      
-      toast.success(t("toast.success.title"), {
-        description: t("toast.success.description"),
-      });
-      
-      // Redirect to incidents list
-      router.push("/dashboard/health-safety/incidents");
     } catch (error) {
       logger.error("Failed to submit incident report:", error);
-      toast.error(t("toast.error.title"), {
-        description: t("toast.error.description"),
-      });
+      // The form shows this, and stays open with what was typed.
+      throw error;
     }
+
+    toast.success(t("toast.success.title"), {
+      description: t("toast.success.description"),
+    });
+
+    // Redirect to incidents list
+    router.push("/dashboard/health-safety/incidents");
   };
 
   const handleCancel = () => {
@@ -149,7 +152,6 @@ export default function NewIncidentPage() {
             </CardHeader>
             <CardContent>
               <IncidentReportForm
-                organizationId={organizationId}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
               />

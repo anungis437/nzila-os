@@ -30,11 +30,18 @@
  */
 import { withApi } from './with-api';
 import { ApiError } from './errors';
+import { parseCrudPagination } from './pagination';
 import { db } from '@/db/db';
-import { eq, and, desc, count, sql, type SQL } from 'drizzle-orm';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { eq, and, or, ilike, asc, desc, count, sql, inArray, getTableName as drizzleTableName, type SQL } from 'drizzle-orm';
 import type { PgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { NextRequest } from 'next/server';
-import type { UserRole } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
+import { isBelowStaff, lowRoleModeFor, ownRowsScope, resolveLowRoleScope } from './crud-low-role-guard';
+import { assertCrudRead, assertCrudWrite, crudGovernanceFor, supportsGenericArchive } from './crud-governance';
+import { normalizeWriteValues, propertyOfColumn } from './crud-write-values';
+import { mapClientDatabaseError, type WriteAction } from './db-client-errors';
 
 // crud-factory's readRole/writeRole accept the full canonical role hierarchy
 // (same set withApi's auth.minRole already enforces via ROLE_HIERARCHY), not
@@ -55,14 +62,68 @@ export interface CrudOptions {
   tags: string[];
   /** Whether the table has an organization_id column for scoping */
   orgScoped?: boolean;
+  /**
+   * A tenant table with no organization column is scoped through a parent row its organization owns: every read, update and
+   * delete is limited to rows whose `column` points at a parent in the caller's organization, a create must name such a
+   * parent, and the column cannot be changed afterwards.
+   */
+  parentScope?: { column: string; parent: PgTable; parentKey?: string; parentOrgColumn?: string };
+  /**
+   * Required, with a reason, when an org-scoped route is mounted over a table that has no organization column and no
+   * `parentScope` (shared reference data, or a table the governance class already refuses). Without it the factory refuses
+   * to build the route rather than serve every tenant's rows.
+   */
+  unscopedByDesign?: string;
+  /**
+   * The body fields a client may set on create and update. Any other field is refused with 400 rather than copied into the
+   * row, so status, counters, approval flags and similar server-owned columns cannot be written by mass assignment.
+   * The primary key, organization and creator are always server-owned and ignored if sent.
+   */
+  writableFields?: string[];
+  /** Columns removed from every row the route returns (credentials, internal security flags). */
+  omitFromResponse?: string[];
+  /** Response fields visible only to authenticated steward-or-higher members of this organization. Fail closed if the role lookup fails. */
+  staffOnlyResponseFields?: string[];
+  /**
+   * With an ownerColumn: a caller at or above the steward floor reads every row of the organization on GET, while a member
+   * still reads only their own. Writes keep the owner scope, so staff reading a member's record never edits it as the member.
+   */
+  staffReadsAll?: boolean;
+  /**
+   * With an ownerColumn: a caller at or above the steward floor may name the owner of a new row in the body (a steward filing on behalf of a member). The
+   * owner is otherwise server-owned and a body that sets it is refused. The value is checked like any other (a uuid column takes a uuid); updates are unchanged.
+   */
+  staffMayNameOwner?: boolean;
+  /**
+   * A regulatory or evidentiary record that is never deleted through the generic route: DELETE answers 409 before any write, so the
+   * row (and what cascades from it) survives, and the record is changed only through its governed correction or withdrawal process.
+   */
+  retainOnDelete?: boolean;
+  /**
+   * Name of a boolean column that marks a row inactive. DELETE sets it to false (an archive: the row, its history and what cascades from it
+   * stay) instead of removing the row. The route lists active rows only, through its own readCondition.
+   */
+  archiveColumn?: string;
+  /** A condition added to every GET, whatever the caller's role (for example, a restricted row of shared reference data is never listed). */
+  readCondition?: SQL;
+  /** Like readCondition, but decided per caller (for example: public, or written by the caller). Applies to every GET. */
+  readConditionFor?: (caller: { userId: string | null | undefined; organizationId: string | null | undefined }) => SQL | undefined;
+  /** A condition added to GET only for a caller below the steward floor (for example, hiding unpublished rows from members). */
+  belowStaffReadCondition?: SQL;
+  /** With an ownerColumn: the owner may delete their own row at the write floor (the row scope already limits it to theirs). */
+  ownerMayDelete?: boolean;
   /** Column name to auto-filter by authenticated userId (e.g. 'memberId'). Restricts reads to the current user's own rows. */
   ownerColumn?: string;
   /** Whether this is an item route ([id]/route.ts) vs collection */
   itemRoute?: boolean;
   /** URL param name for the item ID (default: 'id') */
   paramName?: string;
+  /** Bind a nested collection POST's foreign-key to the parent identifier in its URL. */
+  createPathBinding?: { paramName: string; field: string };
   /** Column to order by (default: 'createdAt') */
   orderBy?: string;
+  /** Direction of the ordering (default: 'desc', newest first). */
+  orderDirection?: 'asc' | 'desc';
   /** Minimum role for read operations (default: 'member') */
   readRole?: MinRole;
   /** Minimum role for write operations (default: 'steward') */
@@ -90,10 +151,40 @@ export interface CrudOptions {
    * by a bug in a future hook) — those two fields are always taken from the
    * authenticated request context, never from this hook's return value.
    */
+  /**
+   * Optional legacy-client input normalization BEFORE schema-column validation.
+   * Use only for explicitly documented aliases. The normalized result still
+   * passes assertGenericWritePayload and writableFields, so no identity,
+   * tenancy, lifecycle or unknown column can be mass-assigned.
+   */
+  preprocessCreateBody?: (body: unknown) => unknown;
   beforeCreate?: (
     values: Record<string, unknown>,
     ctx: { organizationId?: string | null; userId?: string | null },
   ) => Record<string, unknown> | Promise<Record<string, unknown>>;
+  /**
+   * Declares that a create is anonymous: the row's createdBy and the audit entry's actor are recorded as
+   * ANONYMOUS_ACTOR instead of the session user. Receives the values returned by beforeCreate.
+   */
+  anonymousCreate?: (values: Record<string, unknown>) => boolean;
+  /**
+   * Translates a database refusal raised by the insert itself (a trigger or unique index that settles a race the hook
+   * could only check) into the error the caller should see. Return null to let the original error propagate.
+   */
+  mapCreateError?: (error: unknown) => Error | null;
+  /**
+   * Columns whose values the audit record keeps when DELETE removes the row for good (a table with no status or archive column).
+   * Without it the record of a hard delete names no field, so nothing survives of what was removed. Choose identifying, non-sensitive
+   * columns (a name, a category, an owner id), never free text or personal data.
+   */
+  hardDeleteAuditColumns?: string[];
+  /**
+   * Query-string filters the list GET honours, so a screen's filter controls act on the server instead of being ignored.
+   * `equals` maps a query parameter to a column name; an enum column refuses a value outside its members with a 400 rather than
+   * reaching the database. `search` lists text columns matched case-insensitively by the `search` parameter (at most 100
+   * characters, wildcards escaped). Filters only narrow the caller's already-scoped rows.
+   */
+  listFilters?: { equals?: Record<string, string>; search?: string[] };
   /**
    * Optional transform applied to the PATCH payload, after
    * `blockedPatchFields` have been stripped, before `.set(...)`. Receives
@@ -157,6 +248,37 @@ function getColumn(table: PgTable, name: string): PgColumn | undefined {
   return (table as unknown as Record<string, PgColumn>)[name];
 }
 
+/** Builds the optional list filters; see the `listFilters` option. An unknown enum member or an over-long term is a 400. */
+export function listFilterConditions(
+  filters: { equals?: Record<string, string>; search?: string[] } | undefined,
+  table: PgTable,
+  params: URLSearchParams,
+): SQL[] {
+  if (!filters) return [];
+  const conditions: SQL[] = [];
+  for (const [param, columnName] of Object.entries(filters.equals ?? {})) {
+    const value = params.get(param);
+    if (value === null || value === '' || value === 'all') continue;
+    const column = getColumn(table, columnName);
+    if (!column) throw ApiError.internal(`List filter ${param} names a column the table does not have`);
+    const members = (column as unknown as { enumValues?: readonly string[] }).enumValues;
+    if (members ? !members.includes(value) : value.length > 100) throw ApiError.badRequest(`Invalid ${param} filter`);
+    conditions.push(eq(column, value));
+  }
+  const term = params.get('search')?.trim();
+  if (term && filters.search?.length) {
+    if (term.length > 100) throw ApiError.badRequest('search must be at most 100 characters');
+    const pattern = `%${term.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+    const columns = filters.search.map((name) => {
+      const column = getColumn(table, name);
+      if (!column) throw ApiError.internal(`List search names a column the table does not have: ${name}`);
+      return ilike(column, pattern);
+    });
+    conditions.push(or(...columns) as SQL);
+  }
+  return conditions;
+}
+
 /** Auto-detect the primary key column on a Drizzle pgTable */
 function findPrimaryKeyColumn(table: PgTable): { name: string; col: PgColumn } | undefined {
   for (const [name, col] of Object.entries(table as unknown as Record<string, unknown>)) {
@@ -184,6 +306,27 @@ function getTableName(table: PgTable): string {
  * the authenticated request context, never from a hook's return value.
  * Exported for direct unit testing of this invariant in isolation.
  */
+/** Recorded as the creator and audit actor of a record filed anonymously. */
+export const ANONYMOUS_ACTOR = 'anonymous';
+
+/** Enforce the URL parent for a nested collection create before any domain hook. */
+export function bindCreatePathIdentifier(
+  values: Record<string, unknown>,
+  params: Record<string, string>,
+  binding: { paramName: string; field: string },
+): string {
+  const pathId = params[binding.paramName];
+  if (typeof pathId !== 'string' || !pathId.trim()) {
+    throw ApiError.badRequest('Missing parent identifier in URL');
+  }
+  const supplied = values[binding.field];
+  if (supplied !== undefined && supplied !== pathId) {
+    throw ApiError.badRequest('Body parent identifier does not match URL');
+  }
+  values[binding.field] = pathId;
+  return pathId;
+}
+
 export function enforceCreateSecurityInvariants(
   transformed: Record<string, unknown>,
   guard: {
@@ -211,6 +354,44 @@ export function enforceCreateSecurityInvariants(
  * whatever platform-only flow was supposed to be the only writer of that
  * column (e.g. `verifiedOrganizationId`, FSM-governed `status`).
  */
+/** Restrict generic writes to real schema columns and prevent client assignment of
+ * framework-owned identity, tenancy, attribution and lifecycle metadata. */
+const FACTORY_MANAGED_FIELDS = new Set([
+  'organizationId', 'createdBy', 'updatedBy', 'deletedBy',
+  'createdAt', 'updatedAt', 'deletedAt', 'archivedAt',
+  'verifiedAt', 'verifiedBy', 'approvedAt', 'approvedBy',
+  'submittedAt', 'reviewedAt', 'reviewedBy', 'publishedAt', 'publishedBy',
+  // Attribution and approval written under another spelling: the person and time of an act are the server's record, not a field the caller supplies.
+  'createdById', 'updatedById', 'approvedById', 'reviewedById', 'publishedById', 'verifiedById', 'verifiedByName', 'verifiedDate',
+  'approvedByName', 'approvedDate', 'closedBy', 'closedById', 'resolvedBy', 'resolvedById', 'signedBy', 'signedById', 'enteredBy',
+]);
+
+/** Strict, bounded pagination for every collection backed by the CRUD factory. */
+export { parseCrudPagination };
+
+export function assertGenericWritePayload(
+  body: unknown,
+  table: PgTable,
+  options: { primaryKey: string; ownerColumn?: string; parentColumn?: string; blockedFields?: string[] },
+): Record<string, unknown> {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw ApiError.badRequest('A JSON object is required');
+  }
+  const payload = body as Record<string, unknown>;
+  const forbidden = new Set([
+    ...FACTORY_MANAGED_FIELDS, options.primaryKey,
+    ...(options.ownerColumn ? [options.ownerColumn] : []),
+    ...(options.parentColumn ? [options.parentColumn] : []),
+    ...(options.blockedFields ?? []),
+  ]);
+  for (const key of Object.keys(payload)) {
+    if (!getColumn(table, key) || forbidden.has(key)) {
+      throw ApiError.badRequest(`Field ${key} cannot be assigned through generic CRUD`);
+    }
+  }
+  return { ...payload };
+}
+
 export function stripBlockedPatchFields(
   body: unknown,
   guard: { pk: string; orgScoped: boolean; blockedPatchFields: string[] },
@@ -284,6 +465,27 @@ export function validateMergeJsonColumnValues(
   }
 }
 
+/**
+ * Mandatory response projection for generic CRUD reads. analytics_metrics.metadata
+ * may contain historical claim IDs, source references or other case-level
+ * provenance. A member may read aggregate values but never this internal JSON.
+ * Apply centrally rather than trusting every alias to set omitFromResponse.
+ */
+export function shapeCrudResponseRow<T extends Record<string, unknown> | undefined>(
+  row: T,
+  tableName: string,
+  omitFromResponse: readonly string[] = [],
+  staffOnlyResponseFields: readonly string[] = [],
+  belowStaff = true,
+): T {
+  if (!row) return row;
+  const omitted = new Set(omitFromResponse);
+  if (belowStaff) for (const field of staffOnlyResponseFields) omitted.add(field);
+  if (tableName === 'analytics_metrics') omitted.add('metadata');
+  if (omitted.size === 0) return row;
+  return Object.fromEntries(Object.entries(row).filter(([key]) => !omitted.has(key))) as T;
+}
+
 export function crudRoutes(opts: CrudOptions & { itemRoute: true }): ItemHandlers;
 export function crudRoutes(opts: CrudOptions & { itemRoute?: false | undefined }): CollectionHandlers;
 export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers {
@@ -317,8 +519,116 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
 
   const orgCol = orgScoped ? getColumn(table, 'organizationId') : undefined;
   const ownerCol = opts.ownerColumn ? getColumn(table, opts.ownerColumn) : undefined;
-  const orderCol = getColumn(table, orderBy);
+  // A scope that silently resolves to nothing would expose every tenant's rows (or every owner's), so a route that asks
+  // for one and names a column the table does not have is refused when it is built, not served unscoped.
+  const parentColumn = opts.parentScope ? getColumn(table, opts.parentScope.column) : undefined;
+  const parentKeyColumn = opts.parentScope ? getColumn(opts.parentScope.parent, opts.parentScope.parentKey ?? 'id') : undefined;
+  const parentOrgColumn = opts.parentScope ? getColumn(opts.parentScope.parent, opts.parentScope.parentOrgColumn ?? 'organizationId') : undefined;
+  if (opts.parentScope && !(parentColumn && parentKeyColumn && parentOrgColumn)) {
+    throw new Error(`crud-factory: "${resourceName}" parentScope names a column that does not exist`);
+  }
+  if (orgScoped && !orgCol && !parentColumn && !opts.unscopedByDesign) {
+    throw new Error(`crud-factory: "${resourceName}" is org-scoped but has no organizationId column; declare a parentScope, or unscopedByDesign with the reason`);
+  }
 
+  /**
+   * Tenant and subject scope are mandatory, not optional filters.  The generic API wrapper
+   * normally supplies both, but an absent membership/organization may never silently
+   * turn a SELECT into an unscoped query (nor invoke a beforeCreate hook).
+   */
+  function assertRequiredScope(organizationId: string | null | undefined, userId: string | null | undefined): void {
+    if (orgScoped && !organizationId) throw ApiError.forbidden();
+    if (ownerCol && !userId) throw ApiError.forbidden();
+  }
+
+  async function staffMayReadAll(userId: string, organizationId: string | null | undefined): Promise<boolean> {
+    if (!opts.staffReadsAll) return false;
+    return !(await isBelowStaff(userId, organizationId));
+  }
+
+  /** Apply the same confidentiality projection to collection, item and write responses. An absent/failed tenant role lookup hides staff-only fields. */
+  async function shapeForCaller<T extends Record<string, unknown> | undefined>(
+    row: T,
+    userId: string | null | undefined,
+    organizationId: string | null | undefined,
+  ): Promise<T> {
+    const belowStaff = !opts.staffOnlyResponseFields?.length || await isBelowStaff(userId, organizationId);
+    return shapeCrudResponseRow(row, drizzleTableName(table), opts.omitFromResponse, opts.staffOnlyResponseFields, belowStaff);
+  }
+
+  /** Refuses any body field outside the route's allow-list. Factory-managed fields are already refused by assertGenericWritePayload. */
+  function assertWritable(fields: Record<string, unknown>): void {
+    if (!opts.writableFields) return;
+    const unexpected = Object.keys(fields).filter((key) => !opts.writableFields!.includes(key));
+    if (unexpected.length > 0) throw ApiError.badRequest(`Fields not allowed on this resource: ${unexpected.join(', ')}`);
+  }
+
+  /** Limits a query to rows whose parent belongs to the caller's organization. */
+  function parentCondition(organizationId: string | null | undefined): SQL | undefined {
+    if (!parentColumn || !parentKeyColumn || !parentOrgColumn) return undefined;
+    if (!organizationId) throw ApiError.forbidden();
+    // The subquery is part of the caller's own statement and runs on its handle, so it is written as SQL rather than built on a handle of its own.
+    return inArray(parentColumn, sql`(select ${parentKeyColumn} from ${opts.parentScope!.parent} where ${eq(parentOrgColumn, organizationId)})`);
+  }
+  if (opts.ownerColumn && !ownerCol) throw new Error(`crud-factory: "${resourceName}" declares ownerColumn "${opts.ownerColumn}" which the table does not have`);
+  const orderCol = getColumn(table, orderBy);
+  const lowRoleMode = lowRoleModeFor(table, Boolean(opts.ownerColumn));
+  const governance = { ...crudGovernanceFor(table), hasOwnerColumn: Boolean(opts.ownerColumn) };
+  const ownRowsMode = lowRoleModeFor(table, false);
+
+  /**
+   * Answers what the client caused in the statement a generic write issues as the client error it is (see db-client-errors). A route's own
+   * mapCreateError is consulted first for a create, so a route that translates a database refusal itself (a full session, a taken seat) keeps its answer.
+   */
+  function clientFault(action: WriteAction, error: unknown): Error | null {
+    const routeSpecific = action === 'create' ? opts.mapCreateError?.(error) : null;
+    return routeSpecific ?? mapClientDatabaseError(error, action, (column) => propertyOfColumn(table, column));
+  }
+
+  /**
+   * Runs a generic write and its durable audit record in one tenant transaction. The audit names the fields written,
+   * never their values. A write without an organization and an acting user cannot be attributed, so it is refused.
+   */
+  async function audited<T extends Record<string, unknown>>(
+    organizationId: string | null | undefined,
+    userId: string | null | undefined,
+    action: 'create' | 'update' | 'delete',
+    fields: string[],
+    operation: (tx: RLSTx) => Promise<T | undefined>,
+    describe?: (row: T) => Record<string, unknown>,
+  ): Promise<T | undefined> {
+    if (!organizationId || !userId) throw ApiError.forbidden();
+    return withRLSContext({ organizationId, userId: userId === ANONYMOUS_ACTOR ? undefined : userId }, async (tx) => {
+      // Only the write's own statement is translated: a failure of the audit that commits with it is a server fault and stays one.
+      let row: T | undefined;
+      try {
+        row = await operation(tx);
+      } catch (error) {
+        throw clientFault(action, error) ?? error;
+      }
+      if (row) {
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: `crud.${governance.name}.${action}`,
+          resourceType: governance.name,
+          resourceId: String(row[resolvedPk] ?? ''),
+          details: { fields, route: 'generic-crud', ...(describe ? { removed: describe(row) } : {}) },
+        });
+      }
+      return row;
+    });
+  }
+
+  async function readScope(userId: string | null | undefined, organizationId: string | null | undefined) {
+    assertCrudRead(governance);
+    if (governance.class === 'OWN_ROWS_READ') return ownRowsScope(ownRowsMode, userId);
+    return resolveLowRoleScope(lowRoleMode, userId, organizationId);
+  }
+
+  // Every generic route is authenticated and bound to the caller's organization, so every handler runs in the caller's tenant transaction
+  // (`rlsOrgContext: true`), including a route over a table with no organization column of its own (`orgScoped: false`): the factory's reads go
+  // through the ambient handle, which is only that transaction inside it, and a shared reference table's policy admits any organization.
   if (itemRoute) {
     return buildItemHandlers();
   }
@@ -329,7 +639,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: readRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `List ${resourceName}`,
@@ -337,18 +647,26 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ request, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
         const url = new URL(request.url);
-        const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
-        const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || String(defaultLimit))));
-        const offset = (page - 1) * limit;
+        const { page, limit, offset } = parseCrudPagination(url.searchParams, defaultLimit);
 
         const conditions: SQL[] = [];
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
         }
-        if (ownerCol && userId) {
+        const parentScoped = parentCondition(organizationId);
+        if (parentScoped) conditions.push(parentScoped);
+        if (ownerCol && userId && !(await staffMayReadAll(userId, organizationId))) {
           conditions.push(eq(ownerCol, userId));
         }
+        if (opts.readCondition) conditions.push(opts.readCondition);
+        const callerCondition = opts.readConditionFor?.({ userId, organizationId });
+        if (callerCondition) conditions.push(callerCondition);
+        if (opts.belowStaffReadCondition && (await isBelowStaff(userId, organizationId))) conditions.push(opts.belowStaffReadCondition);
+        const lowRole = await readScope(userId, organizationId);
+        if (lowRole.condition) conditions.push(lowRole.condition);
+        conditions.push(...listFilterConditions(opts.listFilters, table, url.searchParams));
 
         const whereClause = conditions.length > 0
           ? and(...conditions)
@@ -365,7 +683,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           : [baseQuery, countQuery] as const;
 
         const ordered = orderCol
-          ? withWhere[0].orderBy(desc(orderCol))
+          ? withWhere[0].orderBy(opts.orderDirection === 'asc' ? asc(orderCol) : desc(orderCol))
           : withWhere[0];
 
         const [rows, totalResult] = await Promise.all([
@@ -375,8 +693,10 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
 
         const total = totalResult[0]?.total ?? 0;
 
+        // Resolve the tenant role once per page, not once per row. A failed role lookup redacts rather than discloses.
+        const belowStaff = !opts.staffOnlyResponseFields?.length || await isBelowStaff(userId, organizationId);
         return {
-          data: rows,
+          data: rows.map((row) => shapeCrudResponseRow(row as Record<string, unknown>, drizzleTableName(table), opts.omitFromResponse, opts.staffOnlyResponseFields, belowStaff)),
           pagination: {
             page,
             limit,
@@ -391,18 +711,27 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: writeRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `Create ${resourceName}`,
           description: `Creates a new ${resourceName} record.`,
         },
       },
-      async ({ body, organizationId, userId }) => {
-        const values: Record<string, unknown> =
-          body && typeof body === 'object' && !Array.isArray(body)
-            ? { ...(body as Record<string, unknown>) }
-            : {};
+      async ({ body, params, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
+        const normalizedBody = opts.preprocessCreateBody ? opts.preprocessCreateBody(body) : body;
+        // Staff filing on behalf of a member may name the owner; for everyone else the owner column is server-owned.
+        const staffNamesOwner = Boolean(opts.ownerColumn && opts.staffMayNameOwner) && !(await isBelowStaff(userId, organizationId));
+        const values = assertGenericWritePayload(normalizedBody, table, {
+          primaryKey: resolvedPk,
+          ownerColumn: staffNamesOwner ? undefined : opts.ownerColumn,
+          blockedFields: blockedPatchFields,
+        });
+        assertWritable(values);
+        const boundParentId = opts.createPathBinding
+          ? bindCreatePathIdentifier(values, params, opts.createPathBinding)
+          : null;
 
         if (orgScoped && orgCol && organizationId) {
           values.organizationId = organizationId;
@@ -413,6 +742,9 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (createdByCol && userId) {
           values.createdBy = userId;
         }
+
+        assertCrudWrite(governance);
+        const lowRole = await resolveLowRoleScope(lowRoleMode, userId, organizationId);
 
         const transformed = opts.beforeCreate
           ? await opts.beforeCreate(values, { organizationId, userId })
@@ -429,9 +761,40 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           hasOrgColumn: Boolean(orgScoped && orgCol),
           hasCreatedByColumn: Boolean(createdByCol),
         });
+        if (opts.createPathBinding && boundParentId !== null) {
+          finalValues[opts.createPathBinding.field] = boundParentId;
+        }
 
-        const [row] = await db.insert(table).values(finalValues).returning();
-        return { data: row };
+        // A record the reporter chose to file anonymously is not attributed to them: neither the row nor the audit entry
+        // carries the session user. This is the one sanctioned override of the created-by invariant, and only the route
+        // that declares it can use it.
+        const anonymous = opts.anonymousCreate?.(transformed) === true;
+        if (anonymous && createdByCol) finalValues.createdBy = ANONYMOUS_ACTOR;
+
+        // A below-staff caller can only create rows about themselves.
+        if (lowRole.forcedOwner) finalValues[lowRole.forcedOwner.name] = lowRole.forcedOwner.value;
+
+        // Shaped for its column after every hook has run, so a hook sees the body as it arrived and a malformed field is a 400 before a transaction opens.
+        const writeValues = normalizeWriteValues(finalValues, table);
+
+        const createAudited = () => audited(organizationId, anonymous ? ANONYMOUS_ACTOR : userId, 'create', Object.keys(finalValues), async (tx) => {
+          if (parentColumn && parentKeyColumn && parentOrgColumn && opts.parentScope) {
+            // An indirect reference is checked like a direct one: the named parent must belong to the caller's organization.
+            const parentId = finalValues[opts.parentScope.column];
+            const owned = typeof parentId === 'string' && organizationId
+              ? await tx.select({ key: parentKeyColumn }).from(opts.parentScope.parent).where(and(eq(parentKeyColumn, parentId), eq(parentOrgColumn, organizationId))).limit(1)
+              : [];
+            if (owned.length === 0) throw ApiError.forbidden();
+          }
+          return (await tx.insert(table).values(writeValues).returning())[0] as Record<string, unknown> | undefined;
+        });
+        let row: Record<string, unknown> | undefined;
+        try {
+          row = await createAudited();
+        } catch (error) {
+          throw opts.mapCreateError?.(error) ?? error;
+        }
+        return { data: await shapeForCaller(row, userId, organizationId) };
       },
     );
 
@@ -447,7 +810,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: readRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `Get ${resourceName} by ID`,
@@ -455,18 +818,27 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ params, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
         const id = params[paramName];
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
         }
-        if (ownerCol && userId) {
+        const parentScoped = parentCondition(organizationId);
+        if (parentScoped) conditions.push(parentScoped);
+        if (ownerCol && userId && !(await staffMayReadAll(userId, organizationId))) {
           conditions.push(eq(ownerCol, userId));
         }
+        if (opts.readCondition) conditions.push(opts.readCondition);
+        const callerCondition = opts.readConditionFor?.({ userId, organizationId });
+        if (callerCondition) conditions.push(callerCondition);
+        if (opts.belowStaffReadCondition && (await isBelowStaff(userId, organizationId))) conditions.push(opts.belowStaffReadCondition);
+        const lowRole = await readScope(userId, organizationId);
+        if (lowRole.condition) conditions.push(lowRole.condition);
 
         const [row] = await db.select().from(table).where(and(...conditions));
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
-        return { data: row };
+        return { data: await shapeForCaller(row, userId, organizationId) };
       },
     );
 
@@ -474,7 +846,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
       {
         auth: { required: true, minRole: writeRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `Update ${resourceName}`,
@@ -482,8 +854,25 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ body, params, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
+        assertCrudWrite(governance);
         const id = params[paramName];
-        let updates = stripBlockedPatchFields(body, { pk, orgScoped, blockedPatchFields });
+        // Resolve the *physical* primary key and protect all factory-managed ownership fields.
+        // A caller-supplied pk may be wrong; findPrimaryKeyColumn then picks resolvedPk instead.
+        const protectedFields = [
+          ...blockedPatchFields,
+          ...(opts.parentScope ? [opts.parentScope.column] : []),
+          ...(opts.ownerColumn ? [opts.ownerColumn] : []),
+          ...(getColumn(table, 'createdBy') ? ['createdBy'] : []),
+        ];
+        const checkedUpdates = assertGenericWritePayload(body, table, {
+          primaryKey: resolvedPk,
+          ownerColumn: opts.ownerColumn,
+          parentColumn: opts.parentScope?.column,
+          blockedFields: protectedFields,
+        });
+        let updates = stripBlockedPatchFields(checkedUpdates, { pk: resolvedPk, orgScoped, blockedPatchFields: protectedFields });
+        assertWritable(updates);
 
         // Fail closed BEFORE opening a transaction or running any hook: a
         // merge column can only ever be safely converted into a JSONB
@@ -497,11 +886,15 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
         }
+        const parentScoped = parentCondition(organizationId);
+        if (parentScoped) conditions.push(parentScoped);
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
+        const lowRole = await resolveLowRoleScope(lowRoleMode, userId, organizationId);
+        if (lowRole.condition) conditions.push(lowRole.condition);
 
-        if (opts.beforeUpdate || mergeJsonColumns.length > 0) {
+        if (opts.beforeUpdate || mergeJsonColumns.length > 0 || opts.lockedAuthCheck) {
           // Locked read-then-write: the row cannot change between the hook
           // seeing it and the final write, closing the lost-update race a
           // plain read-then-`.set()` (below) cannot. `mergeJsonColumns`
@@ -509,7 +902,7 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           // merge (`col || value`) rather than a full-column replace, so a
           // concurrent write to a key the merge fragment doesn't mention
           // can never be reverted by this PATCH.
-          const [row] = await db.transaction(async (tx) => {
+          const row = await audited(organizationId, userId, 'update', Object.keys(updates), (outer) => outer.transaction(async (tx) => {
             const [existingRow] = await tx
               .select()
               .from(table)
@@ -539,6 +932,11 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
                 userId,
                 existing: existingRow as Record<string, unknown>,
               });
+              // A normalizer must not reintroduce a primary key, owner, parent or other
+              // server-managed field after the first sanitization step.
+              updates = stripBlockedPatchFields(updates, {
+                pk: resolvedPk, orgScoped, blockedPatchFields: protectedFields,
+              });
             }
 
             const updatedAtCol = getColumn(table, 'updatedAt');
@@ -546,13 +944,13 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
               updates.updatedAt = new Date();
             }
 
-            const setValues = buildMergeSetValues(updates, table, mergeJsonColumns);
+            const setValues = buildMergeSetValues(normalizeWriteValues(updates, table), table, mergeJsonColumns);
 
-            return tx.update(table).set(setValues).where(and(...conditions)).returning();
-          });
+            return (await tx.update(table).set(setValues).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined;
+          }));
 
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
-          return { data: row };
+          return { data: await shapeForCaller(row, userId, organizationId) };
         }
 
         // Auto-set updatedAt if column exists
@@ -561,21 +959,30 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           updates.updatedAt = new Date();
         }
 
-        const [row] = await db.update(table)
-          .set(updates)
+        const setValues = normalizeWriteValues(updates, table);
+        const row = await audited(organizationId, userId, 'update', Object.keys(updates), async (tx) => (await tx.update(table)
+          .set(setValues)
           .where(and(...conditions))
-          .returning();
+          .returning())[0] as Record<string, unknown> | undefined);
 
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
-        return { data: row };
+        return { data: await shapeForCaller(row, userId, organizationId) };
       },
     );
 
+    // Deleting needs at least an administrator, and never LESS than the role that may write: a table whose writes are
+    // reserved for an elevated role (shared reference or marketing content) must not be deletable by an organization
+    // administrator, who could otherwise remove any organization's row by id.
+    // An owner-scoped route can let the owner remove their own row at the write floor: the row scope already limits it to theirs.
+    const deleteRole: MinRole = opts.ownerMayDelete && opts.ownerColumn
+      ? writeRole
+      : (ROLE_HIERARCHY[writeRole] ?? 0) > ROLE_HIERARCHY.admin ? writeRole : 'admin';
+
     const DELETE = withApi(
       {
-        auth: { required: true, minRole: 'admin' },
+        auth: { required: true, minRole: deleteRole },
         entitlement: opts.entitlement,
-        rlsOrgContext: orgScoped,
+        rlsOrgContext: true,
         openapi: {
           tags,
           summary: `Delete ${resourceName}`,
@@ -583,32 +990,80 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
         },
       },
       async ({ params, organizationId, userId }) => {
+        assertRequiredScope(organizationId, userId);
+        assertCrudWrite(governance);
+        if (opts.retainOnDelete) {
+          throw ApiError.conflict(`${resourceName} records are retained and cannot be deleted; use the governed correction or withdrawal process.`);
+        }
         const id = params[paramName];
         const conditions: SQL[] = [eq(pkCol, id)];
         if (orgScoped && orgCol && organizationId) {
           conditions.push(eq(orgCol, organizationId));
         }
+        const parentScoped = parentCondition(organizationId);
+        if (parentScoped) conditions.push(parentScoped);
         if (ownerCol && userId) {
           conditions.push(eq(ownerCol, userId));
         }
 
-        // Try soft delete first (status → archived), fall back to hard delete
+        if (opts.archiveColumn) {
+          const flag = getColumn(table, opts.archiveColumn);
+          if (!flag) throw ApiError.internal(`${resourceName} has no ${opts.archiveColumn} column to archive with`);
+          const archived = await audited(organizationId, userId, 'delete', [opts.archiveColumn], async (tx) => (await tx.update(table)
+            .set({ [opts.archiveColumn as string]: false, ...(getColumn(table, 'updatedAt') ? { updatedAt: new Date() } : {}) } as Record<string, unknown>)
+            .where(and(...conditions))
+            .returning())[0] as Record<string, unknown> | undefined);
+          if (!archived) throw ApiError.notFound(`${resourceName} not found`);
+          return { data: await shapeForCaller(archived, userId, organizationId) };
+        }
+
+        // Never write an invented 'archived' value to a domain-specific enum. In particular,
+        // bargaining proposals use a governed lifecycle (withdrawn/superseded) and must not
+        // be silently hard-deleted or answered with an accidental database HTTP 500.
         const statusCol = getColumn(table, 'status');
+        if (statusCol && !supportsGenericArchive(statusCol)) {
+          throw ApiError.forbidden(`Generic deletion is unavailable for ${resourceName}; use the governed lifecycle action.`);
+        }
+
+        // A route may declare lockedAuthCheck without beforeUpdate/mergeJsonColumns (e.g. personal calendars).
+        // The callback must run against THIS row under SELECT ... FOR UPDATE inside the write/audit transaction.
+        // Checking an earlier unlocked row, or ignoring the callback on DELETE, permits same-org IDOR.
+        if (opts.lockedAuthCheck) {
+          const row = await audited(organizationId, userId, 'delete', ['status'], (outer) => outer.transaction(async (tx) => {
+            const [existingRow] = await tx.select().from(table).where(and(...conditions)).limit(1).for('update');
+            if (!existingRow) throw ApiError.notFound(`${resourceName} not found`);
+            const authResult = await opts.lockedAuthCheck!(existingRow as Record<string, unknown>, {
+              id, organizationId, userId,
+            });
+            if (!authResult.ok) {
+              throw authResult.status === 401 ? ApiError.unauthorized() : ApiError.forbidden();
+            }
+            return statusCol
+              ? (await tx.update(table).set({ status: 'archived', updatedAt: new Date() } as Record<string, unknown>).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined
+              : (await tx.delete(table).where(and(...conditions)).returning())[0] as Record<string, unknown> | undefined;
+          }));
+          if (!row) throw ApiError.notFound(`${resourceName} not found`);
+          return { data: await shapeForCaller(row, userId, organizationId) };
+        }
+
+        // Try soft delete first (status → archived), fall back to hard delete
         if (statusCol) {
-          const [row] = await db.update(table)
+          const row = await audited(organizationId, userId, 'delete', ['status'], async (tx) => (await tx.update(table)
             .set({ status: 'archived', updatedAt: new Date() } as Record<string, unknown>)
             .where(and(...conditions))
-            .returning();
+            .returning())[0] as Record<string, unknown> | undefined);
           if (!row) throw ApiError.notFound(`${resourceName} not found`);
-          return { data: row };
+          return { data: await shapeForCaller(row, userId, organizationId) };
         }
 
         // Hard delete for tables without a status column
-        const [deleted] = await db.delete(table)
+        const removedColumns = opts.hardDeleteAuditColumns ?? [];
+        const deleted = await audited(organizationId, userId, 'delete', removedColumns, async (tx) => (await tx.delete(table)
           .where(and(...conditions))
-          .returning();
+          .returning())[0] as Record<string, unknown> | undefined,
+        removedColumns.length > 0 ? (row) => Object.fromEntries(removedColumns.map((name) => [name, row[name] ?? null])) : undefined);
         if (!deleted) throw ApiError.notFound(`${resourceName} not found`);
-        return { data: deleted };
+        return { data: await shapeForCaller(deleted, userId, organizationId) };
       },
     );
 

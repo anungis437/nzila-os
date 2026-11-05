@@ -18,6 +18,7 @@ const dispatchSchema = z.object({
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     body: dispatchSchema,
     openapi: { tags: ["Correspondence"], summary: "Dispatch correspondence" },

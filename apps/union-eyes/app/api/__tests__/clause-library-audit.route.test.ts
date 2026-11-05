@@ -1,0 +1,265 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const h = vi.hoisted(() => ({
+  queue: [] as unknown[],
+  audit: vi.fn(),
+  denial: vi.fn(),
+  where: vi.fn(),
+  isOwner: vi.fn(),
+  canRead: vi.fn(),
+  unscopedRead: vi.fn(),
+}));
+
+function chain(): Record<string, unknown> {
+  const c: Record<string, unknown> = {};
+  for (const m of ['select', 'from', 'leftJoin', 'limit', 'insert', 'values', 'update', 'set', 'delete', 'returning', 'orderBy', 'offset', 'onConflictDoNothing']) c[m] = () => c;
+  c.where = (...a: unknown[]) => {
+    h.where(...a);
+    return c;
+  };
+  c.then = (resolve: (v: unknown) => void) => resolve(h.queue.shift());
+  return c;
+}
+const tx = chain();
+
+vi.mock('@/lib/api/framework', () => ({
+  withApi: (_cfg: unknown, handler: (ctx: unknown) => unknown) => (ctx: unknown) => handler(ctx),
+  ApiError: {
+    badRequest: (message: string) => Object.assign(new Error(message), { status: 400 }),
+    forbidden: (message: string) => Object.assign(new Error(message), { status: 403 }),
+    notFound: (resource: string) => Object.assign(new Error(`${resource} not found`), { status: 404 }),
+  },
+}));
+vi.mock('@/db/db', () => ({ db: { ...chain(), select: () => { h.unscopedRead(); return chain(); } } }));
+vi.mock('@/db/schema/domains/agreements/shared-library', () => ({
+  sharedClauseLibrary: new Proxy({}, { get: (_t, p) => `scl.${String(p)}` }),
+  clauseLibraryTags: new Proxy({}, { get: (_t, p) => `tag.${String(p)}` }),
+  sharedClauseVersions: new Proxy({}, { get: (_t, p) => `ver.${String(p)}` }),
+}));
+vi.mock('@/db/schema-organizations', () => ({ organizations: new Proxy({}, { get: (_t, p) => `org.${String(p)}` }) }));
+vi.mock('@/db/schema', () => ({
+  organizations: {},
+  congressMemberships: {},
+  collectiveAgreements: new Proxy({}, { get: (_t, p) => `cba.${String(p)}` }),
+}));
+vi.mock('drizzle-orm', () => ({
+  and: (...a: unknown[]) => a,
+  eq: (...a: unknown[]) => a,
+  or: (...a: unknown[]) => a,
+  inArray: (...a: unknown[]) => a,
+  ilike: (...a: unknown[]) => a,
+  gte: (...a: unknown[]) => a,
+  isNull: (a: unknown) => a,
+  sql: Object.assign((..._a: unknown[]) => 'sql', {}),
+}));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_s: unknown, fn: (t: unknown) => Promise<unknown>) => fn(tx),
+  withSystemContext: async (fn: (t: unknown) => Promise<unknown>) => fn(tx),
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
+vi.mock('@/lib/clause-library/sharing-authority', () => ({
+  sourceNamesFor: async () => new Map<string, string>(),
+  sharingChangeDenial: h.denial,
+  isSharedClauseOwner: h.isOwner,
+  canReadSharedClause: h.canRead,
+  buildClauseVisibilityCondition: vi.fn(),
+}));
+
+const req = (path: string, body: unknown) => ({ url: `http://x${path}`, json: async () => body });
+// The route reads the caller's role from the session user (public sharing needs an officer); ids in bodies are guids.
+const TAG_A = '11111111-1111-4111-8111-111111111111';
+const TAG_B = '22222222-2222-4222-8222-222222222222';
+const CBA_X = '33333333-3333-4333-8333-333333333333';
+const ctx = (path: string, body: unknown, role = 'officer') => ({ request: req(path, body), organizationId: 'org-1', userId: 'u1', user: { role } });
+
+beforeEach(() => {
+  h.queue.length = 0;
+  h.audit.mockReset().mockResolvedValue(undefined);
+  h.denial.mockReset().mockResolvedValue(null);
+  h.where.mockReset();
+  h.isOwner.mockReset().mockReturnValue(true);
+  h.canRead.mockReset().mockResolvedValue(true);
+  h.unscopedRead.mockReset();
+});
+
+describe('clause-library tenant-scoped GET family', () => {
+  const row = { id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private', isAnonymized: false, clauseTitle: 'Safe', clauseText: 'Text', clauseType: 'wages' };
+
+  it('GET clause detail reads the clause and its tags only through the tenant transaction', async () => {
+    const { GET } = await import('../clause-library/[id]/route');
+    h.queue.push([row], [{ id: 't1', tagName: 'wages' }]);
+    await expect(GET(ctx('/api/clause-library/k1', undefined))).resolves.toMatchObject({ id: 'k1' });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('GET clause tags reads both parent and child only through the tenant transaction', async () => {
+    const { GET } = await import('../clause-library/[id]/tags/route');
+    h.queue.push([row], [{ id: 't1', tagName: 'wages' }]);
+    await expect(GET(ctx('/api/clause-library/k1/tags', undefined))).resolves.toMatchObject({ tags: [{ id: 't1', tagName: 'wages' }] });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('GET search uses the tenant transaction for the result query', async () => {
+    const { GET } = await import('../clause-library/search/route');
+    h.queue.push([row]);
+    await expect(GET(ctx('/api/clause-library/search?q=Safe', undefined))).resolves.toMatchObject({ clauses: [{ id: 'k1' }] });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('GET collection uses the tenant transaction for both page and count', async () => {
+    const { GET } = await import('../clause-library/route');
+    h.queue.push([row], [{ count: 1 }]);
+    await expect(GET(ctx('/api/clause-library?page=1&limit=20', undefined))).resolves.toMatchObject({ clauses: [{ id: 'k1' }], total: 1 });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('refuses tenantless search, collection and tag reads without touching either database handle', async () => {
+    const { GET: search } = await import('../clause-library/search/route');
+    const { GET: list } = await import('../clause-library/route');
+    const { GET: tags } = await import('../clause-library/[id]/tags/route');
+    for (const [handler, path] of [
+      [search, '/api/clause-library/search?q=Safe'],
+      [list, '/api/clause-library'],
+      [tags, '/api/clause-library/k1/tags'],
+    ] as const) {
+      await expect(handler({ ...ctx(path, undefined), organizationId: null })).rejects.toMatchObject({ status: 400 });
+    }
+    expect(h.where).not.toHaveBeenCalled();
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+});
+
+describe('clause-library/[id]/tags', () => {
+  it('POST adds a tag to an owned clause and audits it on the same transaction', async () => {
+    const { POST } = await import('../clause-library/[id]/tags/route');
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1' }], [{ id: 't1', tagName: 'wages' }]);
+    await POST(ctx('/api/clause-library/k1/tags', { tagName: ' wages ' }));
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ organizationId: 'org-1', userId: 'u1', action: 'clause_library.tag.add', resourceId: 't1' }));
+  });
+
+  it('POST on a clause the caller does not own is 404 with no write or audit', async () => {
+    const { POST } = await import('../clause-library/[id]/tags/route');
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-2' }]);
+    h.isOwner.mockReturnValue(false);
+    await expect(POST(ctx('/api/clause-library/k1/tags', { tagName: 'x' }))).rejects.toMatchObject({ status: 404 });
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
+  it('DELETE removing nothing is 404 with no audit; removing a tag is audited', async () => {
+    const { DELETE } = await import('../clause-library/[id]/tags/route');
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1' }], []);
+    await expect(DELETE(ctx('/api/clause-library/k1/tags', { tagId: TAG_B }))).rejects.toMatchObject({ status: 404 });
+    expect(h.audit).not.toHaveBeenCalled();
+
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1' }], [{ id: 't1', tagName: 'wages' }]);
+    await DELETE(ctx('/api/clause-library/k1/tags', { tagId: TAG_A }));
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'clause_library.tag.remove', resourceId: 't1' }));
+  });
+});
+
+describe('clause-library/[id]/share GET', () => {
+  it('reads sharing configuration through the tenant-scoped transaction, not the module database handle', async () => {
+    const { GET } = await import('../clause-library/[id]/share/route');
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private', sharedWithOrgIds: [] }]);
+    await expect(GET(ctx('/api/clause-library/k1/share', undefined))).resolves.toMatchObject({
+      sharing: { id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private' },
+    });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('does not disclose another organization\'s sharing configuration or perform a module-level read', async () => {
+    const { GET } = await import('../clause-library/[id]/share/route');
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-2', sharingLevel: 'private' }]);
+    h.isOwner.mockReturnValue(false);
+    await expect(GET(ctx('/api/clause-library/k1/share', undefined))).rejects.toMatchObject({ status: 404 });
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+
+  it('refuses a missing organization context before any database read', async () => {
+    const { GET } = await import('../clause-library/[id]/share/route');
+    await expect(GET({ ...ctx('/api/clause-library/k1/share', undefined), organizationId: null })).rejects.toMatchObject({ status: 400 });
+    expect(h.where).not.toHaveBeenCalled();
+    expect(h.unscopedRead).not.toHaveBeenCalled();
+  });
+});
+
+describe('clause-library/[id]/share POST', () => {
+  it('refuses a sharing scope the owner has no standing in, after verifying ownership and before mutation', async () => {
+    const { POST } = await import('../clause-library/[id]/share/route');
+    h.denial.mockResolvedValue({ status: 403, message: 'Congress sharing requires an active congress membership' });
+    // Authorization to change sharing is evaluated only after a tenant-scoped owner read.
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private' }]);
+    await expect(POST(ctx('/api/clause-library/k1/share', { sharingLevel: 'congress' }))).rejects.toMatchObject({ status: 403 });
+    // The denial is judged against the level the clause has now, so a clause stored at a withdrawn level stays editable.
+    expect(h.denial).toHaveBeenCalledWith('org-1', expect.objectContaining({ sharingLevel: 'congress' }), 'private');
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
+  it('records the old and new sharing level in the audit on the same transaction', async () => {
+    const { POST } = await import('../clause-library/[id]/share/route');
+    h.queue.push(
+      [{ id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private' }],
+      [{ id: 'k1', sharingLevel: 'public', sharedWithOrgIds: null }],
+    );
+    await POST(ctx('/api/clause-library/k1/share', { sharingLevel: 'public' }));
+    expect(h.audit).toHaveBeenCalledWith(
+      tx,
+      expect.objectContaining({ action: 'clause_library.sharing.update', details: expect.objectContaining({ fromSharingLevel: 'private', toSharingLevel: 'public' }) }),
+    );
+  });
+
+  it('constrains the update to the owner organization', async () => {
+    const { POST } = await import('../clause-library/[id]/share/route');
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1', sharingLevel: 'private' }], [{ id: 'k1', sharingLevel: 'public' }]);
+    await POST(ctx('/api/clause-library/k1/share', { sharingLevel: 'public' }));
+    expect(JSON.stringify(h.where.mock.calls)).toContain('"scl.sourceOrganizationId","org-1"');
+  });
+});
+
+describe('clause-library/[id] PATCH and DELETE', () => {
+  it('DELETE audits the deletion and a non-owner gets 404', async () => {
+    const { DELETE } = await import('../clause-library/[id]/route');
+    // The clause read, the final-text version insert, then the delete.
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-1', clauseNumber: '1', sharingLevel: 'private' }], [], [{ id: 'k1' }]);
+    await DELETE(ctx('/api/clause-library/k1', undefined));
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'clause_library.delete', resourceId: 'k1' }));
+
+    h.audit.mockClear();
+    h.queue.push([{ id: 'k1', sourceOrganizationId: 'org-2' }]);
+    h.isOwner.mockReturnValue(false);
+    await expect(DELETE(ctx('/api/clause-library/k1', undefined))).rejects.toMatchObject({ status: 404 });
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
+  it('PATCH validates a sharing change before the update', async () => {
+    const { PATCH } = await import('../clause-library/[id]/route');
+    h.denial.mockResolvedValue({ status: 400, message: 'sharingLevel must be one of private, federation, congress, public' });
+    // The body schema (B45) now refuses an unknown level before the sharing authority is consulted.
+    await expect(PATCH(ctx('/api/clause-library/k1', { sharingLevel: 'galaxy' }))).rejects.toThrow(/Invalid clause \(sharingLevel\)/);
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+});
+
+describe('clause-library POST', () => {
+  const body = { clauseTitle: 'T', clauseText: 'X', clauseType: 'wages' };
+
+  it('creates the clause owned by the caller\'s organization and audits it on the same transaction', async () => {
+    const { POST } = await import('../clause-library/route');
+    h.queue.push([{ id: 'k1', clauseType: 'wages', sharingLevel: 'private', sourceCbaId: null }]);
+    await POST(ctx('/api/clause-library', { ...body, sourceOrganizationId: 'org-evil' }));
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ organizationId: 'org-1', userId: 'u1', action: 'clause_library.create', resourceId: 'k1' }));
+  });
+
+  it('refuses an agreement of another organization as the source', async () => {
+    const { POST } = await import('../clause-library/route');
+    h.queue.push([]);
+    await expect(POST(ctx('/api/clause-library', { ...body, sourceCbaId: CBA_X }))).rejects.toMatchObject({ status: 404 });
+    expect(h.audit).not.toHaveBeenCalled();
+  });
+
+  it('refuses a sharing scope the organization cannot hold', async () => {
+    const { POST } = await import('../clause-library/route');
+    h.denial.mockResolvedValue({ status: 403, message: 'Federation sharing requires membership of a federation' });
+    await expect(POST(ctx('/api/clause-library', { ...body, sharingLevel: 'federation' }))).rejects.toMatchObject({ status: 403 });
+  });
+});

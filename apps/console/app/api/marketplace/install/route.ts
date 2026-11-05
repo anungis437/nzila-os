@@ -17,7 +17,7 @@ const logger = createLogger('api:marketplace:install')
 const InstallRequestSchema = z.object({
   providerId: z.string().min(1),
   orgId: z.string().min(1),
-  secrets: z.record(z.string()),
+  secrets: z.record(z.string(), z.string()),
 })
 
 export async function POST(req: NextRequest) {

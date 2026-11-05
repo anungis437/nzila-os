@@ -5,6 +5,7 @@ import {
   isIndexingAllowed,
   isPublishAllowed,
   describeAccessRestriction,
+  readableSensitivityLevels,
 } from '../consent-controls';
 
 describe('lib/knowledge-transfer/governance/consent-controls', () => {
@@ -28,6 +29,15 @@ describe('lib/knowledge-transfer/governance/consent-controls', () => {
     expect(isPublishAllowed('legal_sensitive', true)).toBe(true);
     expect(isPublishAllowed('public_internal', false)).toBe(true);
     expect(isPublishAllowed('privileged', false)).toBe(true);
+  });
+
+  it('readableSensitivityLevels leaves out every level above the caller\'s role', async () => {
+    const roleLevel: Record<string, number> = { member: 1, steward: 2, officer: 3, admin: 4 };
+    const at = (held: string) => async (role: string) => roleLevel[held] >= roleLevel[role];
+    expect(await readableSensitivityLevels(at('member'))).toEqual(['public_internal']);
+    expect(await readableSensitivityLevels(at('steward'))).toEqual(['public_internal', 'restricted']);
+    expect(await readableSensitivityLevels(at('officer'))).toEqual(['public_internal', 'restricted', 'privileged']);
+    expect(await readableSensitivityLevels(at('admin'))).toHaveLength(5);
   });
 
   it('describeAccessRestriction reflects indexing status', () => {

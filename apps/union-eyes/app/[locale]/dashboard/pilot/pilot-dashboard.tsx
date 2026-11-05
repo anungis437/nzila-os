@@ -12,13 +12,16 @@
 import Link from 'next/link';
 
 import { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { PilotMetrics } from '@/types/marketing';
 import { calculatePilotHealthBreakdown, getHealthScoreStatus } from '@/lib/pilot/health-scoring';
 import { SystemStatusBadge } from '@/components/marketing/system-status-badge';
 import { HumanCenteredCallout } from '@/components/marketing/human-centered-callout';
 import { logger } from '@/lib/logger';
+import { formatDay } from '@/lib/client/day';
+import { formattingLocale } from '@/lib/locales';
 
-export default function PilotDashboard() {
+export default function PilotDashboard({ supportEmail }: { supportEmail: string }) {
   const [metrics, setMetrics] = useState<PilotMetrics | null>(null);
   const [allOrgs, setAllOrgs] = useState<PilotMetrics[] | null>(null);
   const [isPlatformView, setIsPlatformView] = useState(false);
@@ -31,8 +34,8 @@ export default function PilotDashboard() {
         // Try to load the platform overview first (only succeeds for NZILA)
         const overviewRes = await fetch('/api/pilot/overview');
         if (overviewRes.ok) {
-          const data = await overviewRes.json();
-          if (data.organizations && data.organizations.length > 0) {
+          const data = (await overviewRes.json()) as { organizations?: PilotMetrics[] };
+          if (Array.isArray(data.organizations) && data.organizations.length > 0) {
             setAllOrgs(data.organizations);
             setIsPlatformView(true);
             setLoading(false);
@@ -43,8 +46,8 @@ export default function PilotDashboard() {
         // Fallback: load single-org metrics
         const response = await fetch('/api/pilot/current');
         if (response.ok) {
-          const data = await response.json();
-          setMetrics(data.metrics);
+          const data = (await response.json()) as { metrics?: PilotMetrics };
+          setMetrics(data.metrics ?? null);
         }
       } catch (error) {
         logger.error('Failed to load pilot metrics:', error);
@@ -82,13 +85,13 @@ export default function PilotDashboard() {
             >
               ← Back to Overview
             </button>
-            <OrgPilotDetail metrics={activeMetrics} />
+            <OrgPilotDetail metrics={activeMetrics} supportEmail={supportEmail} />
           </div>
         </div>
       );
     }
 
-    return <PlatformOverview orgs={allOrgs} onSelectOrg={setSelectedOrg} />;
+    return <PlatformOverview orgs={allOrgs} onSelectOrg={setSelectedOrg} supportEmail={supportEmail} />;
   }
 
   // Single org view (pilot org sees its own data)
@@ -112,7 +115,7 @@ export default function PilotDashboard() {
     );
   }
 
-  return <OrgPilotDetail metrics={metrics} />;
+  return <OrgPilotDetail metrics={metrics} supportEmail={supportEmail} />;
 }
 
 // ============================================================================
@@ -122,9 +125,11 @@ export default function PilotDashboard() {
 function PlatformOverview({
   orgs,
   onSelectOrg,
+  supportEmail,
 }: {
   orgs: PilotMetrics[];
   onSelectOrg: (id: string) => void;
+  supportEmail: string;
 }) {
   // Aggregate stats
   const avgHealth =
@@ -314,7 +319,7 @@ function PlatformOverview({
           </p>
           <div className="flex gap-4 justify-center">
             <a
-              href="mailto:pilot-support@unioneyes.org"
+              href={`mailto:${supportEmail}`}
               className="bg-white text-indigo-600 px-6 py-3 rounded-md font-medium hover:bg-indigo-50 transition-colors"
             >
               Pilot Support
@@ -336,9 +341,11 @@ function PlatformOverview({
 // Org Pilot Detail (used for both single-org and drill-down views)
 // ============================================================================
 
-function OrgPilotDetail({ metrics }: { metrics: PilotMetrics }) {
+function OrgPilotDetail({ metrics, supportEmail }: { metrics: PilotMetrics; supportEmail: string }) {
   const breakdown = calculatePilotHealthBreakdown(metrics);
   const status = getHealthScoreStatus(breakdown.overall);
+  // Month-first numeric days for English readers, as this screen has always shown them; the reader's own conventions otherwise.
+  const dayLocale = formattingLocale(useLocale(), 'en-US');
 
   return (
     <div>
@@ -511,12 +518,12 @@ function OrgPilotDetail({ metrics }: { metrics: PilotMetrics }) {
                 </div>
                 {milestone.targetDate && (
                   <p className="text-sm text-gray-500 mt-2">
-                    Target: {new Date(milestone.targetDate).toLocaleDateString('en-US')}
+                    Target: {formatDay(milestone.targetDate, dayLocale, 'numeric')}
                   </p>
                 )}
                 {milestone.completedAt && (
                   <p className="text-sm text-green-600 mt-2">
-                    Completed: {new Date(milestone.completedAt).toLocaleDateString('en-US')}
+                    Completed: {new Date(milestone.completedAt).toLocaleDateString(dayLocale)}
                   </p>
                 )}
               </div>
@@ -533,7 +540,7 @@ function OrgPilotDetail({ metrics }: { metrics: PilotMetrics }) {
         </p>
         <div className="flex gap-4 justify-center">
           <a
-            href="mailto:pilot-support@unioneyes.org"
+            href={`mailto:${supportEmail}`}
             className="bg-white text-blue-600 px-6 py-3 rounded-md font-medium hover:bg-blue-50 transition-colors"
           >
             Email Support

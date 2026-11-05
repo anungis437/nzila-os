@@ -40,30 +40,36 @@ function collectFiles(dir: string, ext = '.ts'): string[] {
 
 describe('MIL-INT-001 — Billing admin dashboard uses MIL services', () => {
   const page = read(join(DASHBOARD, 'billing-admin', 'page.tsx'));
+  // The dashboard reads through one loader that runs the MIL billing service's cross-organization queries on the system role, after the page has admitted the platform
+  // billing roles; the page itself holds no query. What must hold is true of the page and of that loader together.
+  const loader = read(join(UE, 'lib', 'platform-economics', 'billing-admin-data.ts'));
+  const surface = `${page}\n${loader}`;
 
   it('billing-admin page exists', () => {
     expect(page.length).toBeGreaterThan(0);
   });
 
-  it('imports from platform-economics service barrel', () => {
-    expect(page).toMatch(/from\s+['"]@\/services\/platform-economics['"]/);
+  it('reads through the MIL billing data loader, which imports from the platform-economics service layer', () => {
+    expect(page).toMatch(/from\s+['"]@\/lib\/platform-economics\/billing-admin-data['"]/);
+    expect(loader).toMatch(/from\s+['"]@\/services\/platform-economics(?:\/billing-service)?['"]/);
   });
 
   it('does NOT use raw SQL on legacy billing tables', () => {
-    expect(page).not.toContain('billing_subscriptions');
-    expect(page).not.toContain('billing_invoices');
-    expect(page).not.toContain('billing_payments');
+    expect(surface).not.toContain('billing_subscriptions');
+    expect(surface).not.toContain('billing_invoices');
+    expect(surface).not.toContain('billing_payments');
   });
 
   it('does NOT import db or sql directly', () => {
-    expect(page).not.toMatch(/from\s+['"]@\/db\/db['"]/);
-    expect(page).not.toMatch(/from\s+['"]drizzle-orm['"]/);
+    expect(surface).not.toMatch(/from\s+['"]@\/db\/db['"]/);
+    expect(surface).not.toMatch(/from\s+['"]drizzle-orm['"]/);
   });
 
-  it('uses canonical MIL query functions', () => {
-    expect(page).toContain('getAdminSubscriptions');
-    expect(page).toContain('getAdminInvoices');
-    expect(page).toContain('getAdminPayments');
+  it('uses canonical MIL query functions, on the system role', () => {
+    expect(loader).toContain('getAdminSubscriptions');
+    expect(loader).toContain('getAdminInvoices');
+    expect(loader).toContain('getAdminPayments');
+    expect(loader).toContain('withSystemContext');
   });
 });
 
@@ -136,7 +142,6 @@ describe('MIL-INT-003 — Core billing API routes avoid crudRoutes stubs', () =>
 describe('MIL-INT-004 — Entitlement enforcement on commerce routes', () => {
   const entitledRoutes = [
     'contracts/route.ts',
-    'billing/send-invoice/route.ts',
     'billing/subscriptions/route.ts',
     'dues/late-fees/route.ts',
     'dues/ledger/route.ts',
@@ -158,6 +163,16 @@ describe('MIL-INT-004 — Entitlement enforcement on commerce routes', () => {
       expect(hasEntitlement).toBe(true);
     });
   }
+
+  it('billing/send-invoice remains fail-closed until delivery and entitlement controls exist', () => {
+    // A retired operation must not be made to look implemented by adding a
+    // no-op entitlement check. It cannot send or generate an invoice.
+    const file = read(join(API, 'billing/send-invoice/route.ts'));
+    expect(file).toContain('withApi');
+    expect(file).toMatch(/auth:\s*\{\s*required:\s*true/);
+    expect(file).toMatch(/throw\s+ApiError\.notImplemented\s*\(/);
+    expect(file).not.toMatch(/(?:createInvoice|generateInvoice|sendInvoice|sendEmail|db\.insert|db\.update)\s*\(/);
+  });
 });
 
 // ============================================================================

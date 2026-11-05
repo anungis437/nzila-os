@@ -12,8 +12,8 @@ import {
   type NewForeignWorker,
   type NewGSSApplication,
   type NewMentorship,
-} from '@/db/schema/lmbp-immigration-schema';
-import { eq, and, gte, lte, sql } from 'drizzle-orm';
+} from '@/db/schema/domains/compliance/immigration';
+import { eq, and, gte, lte, inArray, sql } from 'drizzle-orm';
 
 /**
  * LMBP Immigration Service
@@ -157,7 +157,7 @@ export class LMBPImmigrationService {
         lmbpLetterDate: validFrom,
       })
       .where(
-        sql`${foreignWorkers.id} = ANY(${data.foreignWorkerIds})`
+        inArray(foreignWorkers.id, data.foreignWorkerIds)
       );
     
     // Create alert for annual compliance report

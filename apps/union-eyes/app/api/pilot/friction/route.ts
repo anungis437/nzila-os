@@ -1,32 +1,29 @@
 import { NextResponse } from "next/server";
-import { withRoleAuth } from "@/lib/api-auth-guard";
+import { withRoleAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
+import { resolveTelemetryOrganization } from "@/lib/pilot/telemetry-scope";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 import { getFrictionReport, getFrictionSummary } from "@/lib/services/pilot-friction";
 
 /**
  * GET /api/pilot/friction?organizationId=...&summary=true
  *
- * Returns friction detection report for the given org.
+ * Returns the friction detection report for the caller's own organization (a different ?organizationId= is refused).
  * Add &summary=true for counts only ; omit for full user lists.
  */
-export const GET = withRoleAuth('admin', async (req) => {
+export const GET = withRoleAuth('admin', async (req, context: BaseAuthContext) => {
   try {
-    const orgId = req.nextUrl.searchParams.get("organizationId");
+    const scope = resolveTelemetryOrganization(req.nextUrl.searchParams.get("organizationId"), context.organizationId);
+    if ("denied" in scope) return scope.denied;
+    const orgId = scope.organizationId;
     const summaryOnly = req.nextUrl.searchParams.get("summary") === "true";
 
-    if (!orgId) {
-      return NextResponse.json(
-        { error: "Missing organizationId" },
-        { status: 400 },
-      );
-    }
-
     if (summaryOnly) {
-      const summary = await getFrictionSummary(orgId);
+      const summary = await withRLSContext({ organizationId: orgId }, async () => getFrictionSummary(orgId));
       return NextResponse.json(summary);
     }
 
-    const report = await getFrictionReport(orgId);
+    const report = await withRLSContext({ organizationId: orgId }, async () => getFrictionReport(orgId));
     return NextResponse.json(report);
   } catch (error) {
     logger.error("[pilot/friction] Error:", error as Error);

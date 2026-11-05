@@ -43,8 +43,7 @@ export default async function AdminShopifyPage({
 
   // Test connection if fully configured
   let connectionStatus: 'success' | 'error' | 'unknown' = 'unknown';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let shopInfo: any = null;
+  let shopInfo: Awaited<ReturnType<typeof testShopifyConnection>> = null;
 
   if (isFullyConfigured) {
     try {

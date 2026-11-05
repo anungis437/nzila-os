@@ -100,7 +100,7 @@ function realImporterFiles(moduleSpecifierFragment: string, definingFileRelative
   try {
     out = execFileSync(
       'grep',
-      ['-rl', '-E', moduleSpecifierFragment, 'app', 'lib', 'actions', 'services'],
+      ['-rl', '--exclude-dir=node_modules', '--exclude-dir=.next', '-E', moduleSpecifierFragment, 'app', 'lib', 'actions', 'services'],
       { cwd: APP_ROOT, encoding: 'utf8' },
     );
   } catch (err: unknown) {

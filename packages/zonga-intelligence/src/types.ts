@@ -212,7 +212,7 @@ export const RecordSignalSchema = z.object({
   targetId: z.string().min(1),
   targetType: z.enum(['track', 'artist', 'event', 'playlist']),
   weight: z.number().min(0).max(10).default(1),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const RequestRecommendationsSchema = z.object({

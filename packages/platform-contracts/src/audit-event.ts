@@ -10,7 +10,7 @@ import { z } from 'zod'
 
 export const platformAuditEventSchema = z.object({
   /** Audit entry ID. */
-  id: z.string().uuid(),
+  id: z.guid(),
   /** ISO-8601 timestamp. */
   timestamp: z.string().datetime(),
   /** Actor who performed the action. */
@@ -26,7 +26,7 @@ export const platformAuditEventSchema = z.object({
   /** Resource ID affected. */
   resourceId: z.string().optional(),
   /** Event payload (safe, no PII). */
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   /** Request correlation ID. */
   correlationId: z.string().optional(),
   /** Severity level. */

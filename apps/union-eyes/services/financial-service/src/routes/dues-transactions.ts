@@ -38,7 +38,7 @@ function getAuthUser(req: Request): AuthUser {
 
 // Validation schemas
 const calculateDuesSchema = z.object({
-  memberId: z.string().uuid(),
+  memberId: z.guid(),
   billingPeriodStart: z.coerce.date(),
   billingPeriodEnd: z.coerce.date(),
   grossWages: z.coerce.number().optional(),
@@ -50,9 +50,9 @@ const calculateDuesSchema = z.object({
 const batchCalculateSchema = z.object({
   billingPeriodStart: z.coerce.date(),
   billingPeriodEnd: z.coerce.date(),
-  memberIds: z.array(z.string().uuid()).optional(),
+  memberIds: z.array(z.guid()).optional(),
   memberData: z.array(z.object({
-    memberId: z.string().uuid(),
+    memberId: z.guid(),
     grossWages: z.number().optional(),
     baseSalary: z.number().optional(),
     hourlyRate: z.number().optional(),
@@ -162,7 +162,7 @@ router.post('/calculate', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({
@@ -338,7 +338,7 @@ router.post('/batch', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({

@@ -107,8 +107,8 @@ export const chartOfAccounts = pgTable(
     openingBalanceDate: timestamp("opening_balance_date"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     createdBy: varchar("created_by", { length: 255 }),
     updatedBy: varchar("updated_by", { length: 255 }),
   },
@@ -208,8 +208,8 @@ export const glAccountMappings = pgTable(
     validTo: timestamp("valid_to"),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
     createdBy: varchar("created_by", { length: 255 }),
   },
   (t) => ({
@@ -264,7 +264,7 @@ export const glTransactionLog = pgTable(
     reconciledBy: varchar("reconciled_by", { length: 255 }),
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     createdBy: varchar("created_by", { length: 255 }),
   },
   (t) => ({
@@ -310,7 +310,7 @@ export const glTrialBalance = pgTable(
     balance: decimal("balance", { precision: 19, scale: 2 }), // Should be 0 if balanced
     
     // Audit
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     createdBy: varchar("created_by", { length: 255 }),
   },
   (t) => ({

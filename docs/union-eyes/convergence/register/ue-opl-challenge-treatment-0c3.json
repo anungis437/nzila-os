@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-OPL-CHALLENGE-TREATMENT",
+  "gate": "GATE-0C.3",
+  "version": 1,
+  "anchorCommit": "f90f74d135c209812b4728585c076ea410704719",
+  "preparedOn": "2026-10-27",
+  "status": "CHALLENGES_PRESERVED_UNRESOLVED",
+  "note": "Treatment of the independent challenges of the frozen Gate 0B.10 dispositions of DEF-0B10-OPL-01 and DEF-0B10-OPL-07. The original CONDITIONALLY_BLOCKING records stay frozen. The challenge positions stay RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF. This record checks whether new source evidence changes the challenge, supersedes nothing and records no containment.",
+  "challengeRegister": {
+    "file": "docs/union-eyes/convergence/register/ue-release-disposition-challenges.json",
+    "sha256": "ea818d2a17a8c201ba110d8c80bb2652a5bcd9ac28909118fa03b3b8ae42acae",
+    "anchorCommit": "b091158a8df04eb82c837ab0b53b115e1be70e90",
+    "provisionalPositions": [
+      "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF"
+    ]
+  },
+  "flag": {
+    "name": "UE_CANONICAL_BOOTSTRAP_V2",
+    "canonicalValue": "1",
+    "legacyValues": [
+      "unset",
+      "0"
+    ],
+    "enforcedInAllReleasePaths": false,
+    "basis": [
+      "Legacy branch excluded from the released runtime: false.",
+      "Startup refusal of a legacy value: NOT_FOUND.",
+      "The flag reader accepts the legacy values (if (flag !== undefined && flag !== '0' && flag !== '1')).",
+      "The canonical value is set in the deployment template (infrastructure/bicep/ue-v2/modules/apps.bicep), which is a deployment parameter and not a code guard.",
+      "A repository workflow runs the application with the legacy value (.github/workflows/e2e.yml)."
+    ],
+    "assumption": "This record does not assume the flag is enforced in every release path."
+  },
+  "newSourceEvidence": {
+    "comparedAgainst": "b091158a8df04eb82c837ab0b53b115e1be70e90",
+    "citedFilesCompared": 9,
+    "changedCitedFiles": [],
+    "filesNamingTheFlagAtTheChallengeCommit": 40,
+    "filesNamingTheFlagNow": 40,
+    "flagFilesAdded": [],
+    "flagFilesRemoved": [],
+    "materialChange": false,
+    "conclusion": "NO_NEW_SOURCE_EVIDENCE_THE_CHALLENGES_ARE_UNCHANGED"
+  },
+  "challenges": [
+    {
+      "challengeId": "CHALLENGE-0B10-OPL-01",
+      "challengedDefectId": "DEF-0B10-OPL-01",
+      "frozenRecord": {
+        "disposition": "CONDITIONALLY_BLOCKING",
+        "releaseBlocking": false,
+        "severity": "HIGH",
+        "defectSha256": "b0a1a20403d41c3c15c3a756cd6bdff54db1fd1c37bb04f4178a755bf3c59d55",
+        "challengeRecordedDefectSha256": "b0a1a20403d41c3c15c3a756cd6bdff54db1fd1c37bb04f4178a755bf3c59d55",
+        "matchesChallengeRecord": true,
+        "modifiedByGate0C3": false
+      },
+      "challengePosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+      "challengeStatus": "AWAITING_CONTAINMENT_PROOF_AND_INSTITUTIONAL_DECISION",
+      "blocksGate": 14,
+      "containment": {
+        "verified": false,
+        "executedProofOnFile": 0,
+        "claimedMechanisms": 2,
+        "requiredProof": [
+          "An executed proof, on a database that carries migration 0108, that the role the released DATABASE_URL connects as is subject to the organizations row-level-security policy (the policy is bypassed by a superuser, a table owner and any role with BYPASSRLS, and a policy that is not enabled and forced for the connecting role confines nothing).",
+          "An executed proof that a caller of one organization receives no row of another organization from the route in the intended release configuration, including the case of the flag unset and the flag at 0.",
+          "Either a code or deployment guard that makes the released runtime refuse to start with the flag unset or 0, or removal of the legacy branch; the deployment template alone is not a guard.",
+          "An institutional decision naming which organization fields a signed-in user of another organization may read and the audience that holds that permission, followed by a field projection that returns only those fields."
+        ]
+      },
+      "debtItemId": "DEBT:DEF-0B10-OPL-01",
+      "treatment": {
+        "challengePreserved": true,
+        "supersededBy": null,
+        "withdrawn": false,
+        "frozenDispositionModified": false,
+        "acceptedReleaseDecision": null,
+        "effectivePosture": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF"
+      }
+    },
+    {
+      "challengeId": "CHALLENGE-0B10-OPL-07",
+      "challengedDefectId": "DEF-0B10-OPL-07",
+      "frozenRecord": {
+        "disposition": "CONDITIONALLY_BLOCKING",
+        "releaseBlocking": false,
+        "severity": "HIGH",
+        "defectSha256": "9057d09cf224366763a84bcea85314a1772464505230b28f2f964a4c7377dc22",
+        "challengeRecordedDefectSha256": "9057d09cf224366763a84bcea85314a1772464505230b28f2f964a4c7377dc22",
+        "matchesChallengeRecord": true,
+        "modifiedByGate0C3": false
+      },
+      "challengePosition": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF",
+      "challengeStatus": "AWAITING_CONTAINMENT_PROOF_AND_INSTITUTIONAL_DECISION",
+      "blocksGate": 14,
+      "containment": {
+        "verified": false,
+        "executedProofOnFile": 0,
+        "claimedMechanisms": 2,
+        "requiredProof": [
+          "An executed proof, on a database that carries migration 0108, that the role the released DATABASE_URL connects as is subject to the organizations row-level-security policy (the policy is bypassed by a superuser, a table owner and any role with BYPASSRLS, and a policy that is not enabled and forced for the connecting role confines nothing).",
+          "An executed proof that a caller of one organization receives no row of another organization from the route in the intended release configuration, including the case of the flag unset and the flag at 0.",
+          "Either a code or deployment guard that makes the released runtime refuse to start with the flag unset or 0, or removal of the legacy branch; the deployment template alone is not a guard.",
+          "An institutional decision naming which organization fields a signed-in user of another organization may read and the audience that holds that permission, followed by a field projection that returns only those fields."
+        ]
+      },
+      "debtItemId": "DEBT:DEF-0B10-OPL-07",
+      "treatment": {
+        "challengePreserved": true,
+        "supersededBy": null,
+        "withdrawn": false,
+        "frozenDispositionModified": false,
+        "acceptedReleaseDecision": null,
+        "effectivePosture": "RELEASE_BLOCKING_PENDING_CONTAINMENT_PROOF"
+      }
+    }
+  ],
+  "flagDependentDispositions": [
+    {
+      "defectId": "DEF-0B10-OPL-01",
+      "severity": "HIGH",
+      "frozenDisposition": "CONDITIONALLY_BLOCKING",
+      "challenged": true,
+      "frozenBlockingCondition": "The deployment runs with UE_CANONICAL_BOOTSTRAP_V2 unset or 0 and the DATABASE_URL role used by the shared db client is not confined by the 0108 organizations policy, so the list returns organizations other than the caller own.",
+      "treatment": "CHALLENGE_PRESERVED",
+      "note": "The flag is not shown to be enforced in every release path, so the disposition is not softened by it."
+    },
+    {
+      "defectId": "DEF-0B10-OPL-07",
+      "severity": "HIGH",
+      "frozenDisposition": "CONDITIONALLY_BLOCKING",
+      "challenged": true,
+      "frozenBlockingCondition": "The deployment runs with UE_CANONICAL_BOOTSTRAP_V2 unset or 0 and the DATABASE_URL role used by the shared db client is not confined by the 0108 organizations policy, so the legacy branch returns organizations other than the caller own.",
+      "treatment": "CHALLENGE_PRESERVED",
+      "note": "The flag is not shown to be enforced in every release path, so the disposition is not softened by it."
+    },
+    {
+      "defectId": "DEF-0B10-PIL-USAGE-TELEMETRY-ROUTES-READ-ANY-ORGANIZATION-NAMED-IN-THE-QUERY-AT-AN-ADMIN-FLOOR-AND-RETURN-PER-USER-IDS-THROUGH-THE-BARE-DB-IMPORT",
+      "severity": "HIGH",
+      "frozenDisposition": "RELEASE_BLOCKING",
+      "challenged": false,
+      "frozenBlockingCondition": null,
+      "treatment": "ALREADY_RELEASE_BLOCKING",
+      "note": "The flag is not shown to be enforced in every release path, so the disposition is not softened by it."
+    },
+    {
+      "defectId": "DEF-0B11-RPT-EXECUTE-JOINED-TABLES-CARRY-NO-ORGANIZATION-PREDICATE-SO-A-CALLER-CONFIGURED-JOIN-SELECTS-ROWS-OF-OTHER-ORGANIZATIONS",
+      "severity": "HIGH",
+      "frozenDisposition": "RELEASE_BLOCKING",
+      "challenged": false,
+      "frozenBlockingCondition": null,
+      "treatment": "ALREADY_RELEASE_BLOCKING",
+      "note": "The flag is not shown to be enforced in every release path, so the disposition is not softened by it."
+    },
+    {
+      "defectId": "DEF-0B12-PLT-ORGANIZATIONS-GET-REBINDS-EVERY-MEMBERSHIP-ROW-OF-AN-E-MAIL-ADDRESS-TO-THE-CALLER-IN-THE-LEGACY-BRANCH",
+      "severity": "HIGH",
+      "frozenDisposition": "RELEASE_BLOCKING",
+      "challenged": false,
+      "frozenBlockingCondition": null,
+      "treatment": "ALREADY_RELEASE_BLOCKING",
+      "note": "The flag is not shown to be enforced in every release path, so the disposition is not softened by it."
+    },
+    {
+      "defectId": "DEF-0B9-ORG-ITEM-DELETE-ORGANIZATION-ADMIN-ARCHIVES-OWN-ORGANIZATION-BYPASSING-STATUS-GOVERNANCE",
+      "severity": "HIGH",
+      "frozenDisposition": "CONDITIONALLY_BLOCKING",
+      "challenged": false,
+      "frozenBlockingCondition": "The deployment runs the canonical organization selection (UE_CANONICAL_BOOTSTRAP_V2 set to 1), where only organizations with status active are offered, or the institution decides that archiving an organization is a platform governance act, as the PATCH on the same route already enforces.",
+      "treatment": "FROZEN_CONDITIONAL_PRESERVED_FOR_INDEPENDENT_REVIEW",
+      "note": "The frozen condition depends on the flag. The flag is not shown to be enforced in every release path. An independent reviewer decides whether this disposition needs its own challenge; this gate neither challenges nor changes it."
+    },
+    {
+      "defectId": "DEF-0B9-ORG-MEMBERSHIP-GUARD-IGNORES-MEMBER-STATUS-AND-REMOVAL-FLAG",
+      "severity": "HIGH",
+      "frozenDisposition": "CONDITIONALLY_BLOCKING",
+      "challenged": false,
+      "frozenBlockingCondition": "The deployment runs in the legacy mode (UE_CANONICAL_BOOTSTRAP_V2 unset or 0) and an organization holds a membership row with a suspended, inactive or deleted state that keeps a steward, admin or member role; the canonical mode resolves the role from the canonical organization context instead.",
+      "treatment": "FROZEN_CONDITIONAL_PRESERVED_FOR_INDEPENDENT_REVIEW",
+      "note": "The frozen condition depends on the flag. The flag is not shown to be enforced in every release path. An independent reviewer decides whether this disposition needs its own challenge; this gate neither challenges nor changes it."
+    },
+    {
+      "defectId": "DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK",
+      "severity": "HIGH",
+      "frozenDisposition": "CONDITIONALLY_BLOCKING",
+      "challenged": false,
+      "frozenBlockingCondition": "The deployment runs with UE_CANONICAL_BOOTSTRAP_V2 unset or 0 and the DATABASE_URL role used by the shared db client is not confined by the 0108 organizations policy, so the legacy branch returns rows of organizations other than the caller own.",
+      "treatment": "FROZEN_CONDITIONAL_PRESERVED_FOR_INDEPENDENT_REVIEW",
+      "note": "The frozen condition depends on the flag. The flag is not shown to be enforced in every release path. An independent reviewer decides whether this disposition needs its own challenge; this gate neither challenges nor changes it."
+    }
+  ],
+  "flagDependentCount": 8
+}

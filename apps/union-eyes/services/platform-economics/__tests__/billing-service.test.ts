@@ -2,46 +2,69 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 const h = vi.hoisted(() => {
   const queue: unknown[] = [];
-  const makeChain = () => {
+  type Write = { table: string; values: Record<string, unknown>; via: 'db' | 'tx' };
+  // What the service read and what it kept. A write on the shared handle is kept at once; a write in a transaction is kept only when the
+  // transaction's callback returns, as the database keeps it only when the transaction commits.
+  const reads: string[] = [];
+  const committed: Write[] = [];
+  const transactions: unknown[] = [];
+  const tableOf = (table: unknown) => (table as { __table?: string } | undefined)?.__table ?? 'unknown';
+  const makeChain = (hooks: { from?: (table: unknown) => void; values?: (values: unknown) => void } = {}) => {
     const chain: Record<string, unknown> = {};
-    for (const m of ['select', 'from', 'where', 'limit', 'orderBy', 'innerJoin', 'leftJoin', 'insert', 'update', 'set', 'values', 'returning', 'delete']) {
+    for (const m of ['select', 'from', 'where', 'limit', 'offset', 'orderBy', 'innerJoin', 'leftJoin', 'insert', 'update', 'set', 'values', 'returning', 'delete']) {
       chain[m] = () => chain;
     }
+    chain.from = (table: unknown) => {
+      hooks.from?.(table);
+      return chain;
+    };
+    chain.values = (values: unknown) => {
+      hooks.values?.(values);
+      return chain;
+    };
     chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {
       const v = queue.length ? queue.shift() : [];
       return (v instanceof Error ? Promise.reject(v) : Promise.resolve(v)).then(res, rej);
     };
     return chain;
   };
-  const tx = {
-    select: () => makeChain(),
-    insert: () => makeChain(),
-    update: () => makeChain(),
-  };
-  const db = {
-    select: () => makeChain(),
-    insert: () => makeChain(),
+  const makeHandle = (via: Write['via'], keep: (write: Write) => void) => ({
+    select: () => makeChain({ from: (table) => reads.push(tableOf(table)) }),
+    insert: (table: unknown) => makeChain({ values: (values) => keep({ table: tableOf(table), values: values as Record<string, unknown>, via }) }),
     update: () => makeChain(),
     delete: () => makeChain(),
-    transaction: (fn: (t: typeof tx) => Promise<unknown>) => fn(tx),
+  });
+  const db = {
+    ...makeHandle('db', (write) => committed.push(write)),
+    transaction: async (fn: (tx: unknown) => Promise<unknown>) => {
+      const written: Write[] = [];
+      const tx = makeHandle('tx', (write) => written.push(write));
+      transactions.push(tx);
+      const result = await fn(tx);
+      committed.push(...written);
+      return result;
+    },
   };
   const auditLog = vi.fn();
-  const appendLedgerEntry = vi.fn(async () => 'ledger-1');
+  const persistAtomicAudit = vi.fn(async (_tx: unknown, _entry: Record<string, unknown>) => undefined);
+  const appendLedgerEntry = vi.fn(async (_entry: Record<string, unknown>, _tx?: unknown) => 'ledger-1');
   const requireReconciliation = vi.fn(async () => ({ id: 'run-1' }));
   const getActiveContract = vi.fn();
-  return { queue, db, auditLog, appendLedgerEntry, requireReconciliation, getActiveContract };
+  return { queue, reads, committed, transactions, db, auditLog, persistAtomicAudit, appendLedgerEntry, requireReconciliation, getActiveContract };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
-vi.mock('@/db/schema', () =>
-  new Proxy(
-    {},
-    {
-      has: () => true,
-      get: (_t, n) => (n === '__esModule' ? false : new Proxy({}, { get: (_o, c) => ({ __col: c }) })),
-    },
-  ),
-);
+vi.mock('@/db/schema', () => {
+  // One named object per table, so a statement can be attributed to the table it names.
+  const tables = new Map<string, unknown>();
+  const table = (name: string) => {
+    if (!tables.has(name)) {
+      tables.set(name, new Proxy({ __table: name } as Record<string | symbol, unknown>, { get: (o, c) => (c in o ? o[c] : { __col: c }) }));
+    }
+    return tables.get(name);
+  };
+  return new Proxy({}, { has: () => true, get: (_t, n) => (n === '__esModule' ? false : table(String(n))) });
+});
 vi.mock('drizzle-orm', async (orig) => ({
   ...(await orig<Record<string, unknown>>()),
   eq: vi.fn(() => ({})),
@@ -57,6 +80,7 @@ vi.mock('@/lib/audit-logger', () => ({
   AuditEventType: { DATA_CREATE: 'data_create', DATA_UPDATE: 'data_update', PAYMENT_PROCESSED: 'payment_processed' },
   AuditSeverity: { HIGH: 'high', CRITICAL: 'critical' },
 }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('../ledger-service', () => ({ appendLedgerEntry: h.appendLedgerEntry }));
 vi.mock('../reconciliation-service', () => ({ requireReconciliation: h.requireReconciliation }));
 vi.mock('../contract-service', () => ({ getActiveContract: h.getActiveContract }));
@@ -84,7 +108,11 @@ const pushSel = (...items: unknown[]) => h.queue.push(...items);
 
 beforeEach(() => {
   h.queue.length = 0;
+  h.reads.length = 0;
+  h.committed.length = 0;
+  h.transactions.length = 0;
   h.auditLog.mockReset();
+  h.persistAtomicAudit.mockClear();
   h.appendLedgerEntry.mockClear();
   h.requireReconciliation.mockClear();
   h.getActiveContract.mockReset();
@@ -156,14 +184,14 @@ describe('platform-economics/billing-service', () => {
     });
 
     it('throws when the period is already closed', async () => {
-      pushSel([{ id: 'bp-1', isClosed: true, label: 'P1' }]);
+      pushSel([{ id: 'bp-1', organizationId: 'o1', isClosed: true, label: 'P1' }]);
       await expect(closeBillingPeriod('bp-1', 'user-1')).rejects.toThrow('already closed');
     });
   });
 
   describe('generateInvoice', () => {
     const account = { id: 'acct-1', netTermsDays: 30 };
-    const period = { id: 'bp-1', isClosed: false, label: 'P1', periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
+    const period = { id: 'bp-1', organizationId: 'o1', isClosed: false, label: 'P1', periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
     const subscription = {
       organizationId: 'o1',
       status: 'active',
@@ -171,7 +199,7 @@ describe('platform-economics/billing-service', () => {
       localCount: 2,
       seatCount: 3,
       moduleList: ['m1'],
-      discountPercent: '1000', // 10%
+      discountPercent: '10.00', // decimal(5,2): 10%
       subsidyAmount: '5.00',
     };
     const plan = {
@@ -185,23 +213,84 @@ describe('platform-economics/billing-service', () => {
       updatedAt: new Date('2025-01-01'),
     };
 
-    it('generates an invoice with all line-item types, discount, subsidy and usage', async () => {
+    it('generates the subscription lines, discount and subsidy, bills no usage, and writes the invoice, its lines, its ledger entries and its audit record in one transaction', async () => {
       pushSel([account]); // getBillingAccount
       pushSel([period]); // billing period
       pushSel([]); // no existing invoice
       h.getActiveContract.mockResolvedValueOnce({ id: 'ctr-1' });
       pushSel([subscription]); // subscription
       pushSel([plan]); // plan
-      pushSel([
-        { id: 'agg-1', meterId: 'mtr-1', billableQuantity: '10', unitPrice: '0.50', totalAmount: '5.00', status: 'open', meterCode: 'API', meterUnit: 'calls' },
-      ]); // usage aggregates
-      pushSel([{ id: 'ue-1' }]); // usage events for agg
       pushSel([{ id: 'inv-1' }]); // tx insert invoice returning
       // line item inserts default to []
       const result = await generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1', createdBy: 'user-1' });
       expect(result.id).toBe('inv-1');
+
+      // Usage is not billed (metering is not implemented): no metering table is read, and every fixture was consumed by a read the service makes.
+      expect(h.reads).toEqual(['billingAccounts', 'billingPeriods', 'platformInvoices', 'orgSubscriptions', 'subscriptionPlans']);
+      expect(h.queue).toHaveLength(0);
+
+      // 100.00 + 2 × 10.00 + 3 × 5.00 + 1 × 20.00 = 155.00, less a 10% discount (15.50) and a 5.00 subsidy: 134.50.
+      const lines = [
+        ['base_subscription', '100.00'],
+        ['local_fee', '20.00'],
+        ['seat_fee', '15.00'],
+        ['module_fee', '20.00'],
+        ['credit', '-15.50'],
+        ['subsidy', '-5.00'],
+      ];
+      const [invoice] = h.committed.filter((w) => w.table === 'platformInvoices');
+      expect(invoice.values).toMatchObject({
+        billingAccountId: 'acct-1',
+        organizationId: 'o1',
+        billingPeriodId: 'bp-1',
+        subtotal: '134.50',
+        totalAmount: '134.50',
+        currency: 'CAD',
+        status: 'issued',
+        createdBy: 'user-1',
+      });
+      const lineRows = h.committed.filter((w) => w.table === 'platformInvoiceLineItems');
+      expect(lineRows.map((w) => [w.values.costType, w.values.amount])).toEqual(lines);
+      expect(lineRows.every((w) => w.values.invoiceId === 'inv-1')).toBe(true);
+
+      // The invoice, its lines, its ledger entries and its audit record share one transaction (DEF-0B3-BILLING-AUDIT-NOT-ATOMIC); nothing is written outside it.
+      expect(h.transactions).toHaveLength(1);
+      const [tx] = h.transactions;
+      expect(h.committed.every((w) => w.via === 'tx')).toBe(true);
+      expect(h.appendLedgerEntry.mock.calls.map(([entry]) => [entry.costType, entry.amountCad])).toEqual(lines);
+      for (const [entry, handle] of h.appendLedgerEntry.mock.calls) {
+        expect(handle).toBe(tx);
+        expect(entry).toMatchObject({ organizationId: 'o1', billingPeriodId: 'bp-1', eventType: 'invoice_generated', sourceType: 'invoice', sourceId: 'inv-1' });
+      }
+      expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
+      const [auditHandle, audit] = h.persistAtomicAudit.mock.calls[0];
+      expect(auditHandle).toBe(tx);
+      expect(audit).toMatchObject({
+        organizationId: 'o1',
+        userId: 'user-1',
+        action: 'invoice_generated',
+        resourceType: 'platform_invoice',
+        resourceId: 'inv-1',
+        details: { totalAmount: '134.50', lineItemCount: 6 },
+      });
+      expect(h.auditLog).not.toHaveBeenCalled();
+    });
+
+    it('writes no invoice when its audit record cannot be written', async () => {
+      pushSel([account]);
+      pushSel([period]);
+      pushSel([]);
+      h.getActiveContract.mockResolvedValueOnce({ id: 'ctr-1' });
+      pushSel([subscription]);
+      pushSel([plan]);
+      pushSel([{ id: 'inv-1' }]); // tx insert invoice returning
+      h.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
+      await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1', createdBy: 'user-1' })).rejects.toThrow('audit down');
+      // The audit record is written on the invoice's own transaction, so its failure leaves the invoice, its lines and its ledger entries uncommitted.
+      expect(h.transactions).toHaveLength(1);
+      expect(h.persistAtomicAudit.mock.calls[0][0]).toBe(h.transactions[0]);
       expect(h.appendLedgerEntry).toHaveBeenCalled();
-      expect(h.auditLog).toHaveBeenCalledTimes(1);
+      expect(h.committed).toEqual([]);
     });
 
     it('throws when there is no billing account', async () => {
@@ -211,7 +300,7 @@ describe('platform-economics/billing-service', () => {
 
     it('throws when the period is closed', async () => {
       pushSel([account]);
-      pushSel([{ id: 'bp-1', isClosed: true, label: 'P1' }]);
+      pushSel([{ id: 'bp-1', organizationId: 'o1', isClosed: true, label: 'P1' }]);
       await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1' })).rejects.toThrow('is closed');
     });
 
@@ -239,6 +328,18 @@ describe('platform-economics/billing-service', () => {
       await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1' })).rejects.toThrow('No active subscription');
     });
 
+    it('refuses multiple active subscriptions before reading a plan or issuing an invoice', async () => {
+      pushSel([account]);
+      pushSel([period]);
+      pushSel([]); // no existing invoice
+      h.getActiveContract.mockResolvedValueOnce({ id: 'ctr-1' });
+      pushSel([subscription, { ...subscription, planId: 'plan-2' }]);
+      await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1' }))
+        .rejects.toThrow('multiple active subscriptions');
+      expect(h.appendLedgerEntry).not.toHaveBeenCalled();
+      expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
     it('throws when the plan is missing', async () => {
       pushSel([account]);
       pushSel([period]);
@@ -264,11 +365,17 @@ describe('platform-economics/billing-service', () => {
       expect(h.appendLedgerEntry).toHaveBeenCalledTimes(1);
     });
 
-    it('returns the existing payment on idempotency key match', async () => {
+    it('fails closed on an unverified idempotency replay', async () => {
       pushSel([account]); // getBillingAccount
-      pushSel([{ id: 'pay-existing' }]); // existing by idempotency
-      const result = await recordPayment({ organizationId: 'o1', invoiceId: 'inv-1', amount: '10.00', method: 'card', idempotencyKey: 'idem-1' });
-      expect(result.id).toBe('pay-existing');
+      pushSel([{ id: 'pay-existing', organizationId: 'o1', amount: '10.00' }]); // existing by idempotency
+      await expect(recordPayment({ organizationId: 'o1', invoiceId: 'inv-1', amount: '10.00', method: 'card', idempotencyKey: 'idem-1' })).rejects.toThrow('requires verified invoice allocation');
+    });
+
+    it('fails closed on a new keyed payment until database uniqueness is enforced', async () => {
+      pushSel([account]);
+      pushSel([]);
+      await expect(recordPayment({ organizationId: 'o1', invoiceId: 'inv-1', amount: '10.00', method: 'card', idempotencyKey: 'new-key' })).rejects.toThrow('Keyed payment recording unavailable');
+      expect(h.appendLedgerEntry).not.toHaveBeenCalled();
     });
 
     it('throws when there is no billing account', async () => {
@@ -332,17 +439,16 @@ describe('platform-economics/billing-service', () => {
       expect(result.id).toBe('pay-2');
     });
 
-    it('returns the existing payment when already reconciled', async () => {
+    it('fails closed when external payment allocation is unverified', async () => {
       pushSel([invoice]);
-      pushSel([{ id: 'pay-existing' }]); // existing payment
-      const result = await reconcileExternalInvoicePayment({
+      pushSel([{ id: 'pay-existing', organizationId: 'o1', amount: '100.00' }]); // existing payment
+      await expect(reconcileExternalInvoicePayment({
         organizationId: 'o1',
         invoiceId: 'inv-1',
         amount: '100.00',
         method: 'eft',
         externalReference: 'ext-1',
-      });
-      expect(result.id).toBe('pay-existing');
+      })).rejects.toThrow('requires verified invoice allocation');
     });
 
     it('throws when the invoice is missing', async () => {
@@ -361,7 +467,7 @@ describe('platform-economics/billing-service', () => {
       pushSel([{ id: 'bp-1' }]); // getOrCreateBillingPeriod existing
       // generateInvoice → throws 'already exists' (skipped)
       pushSel([{ id: 'acct-1', netTermsDays: 30 }]); // getBillingAccount
-      pushSel([{ id: 'bp-1', isClosed: false, label: 'P', periodStart: runAt, periodEnd: runAt }]); // period
+      pushSel([{ id: 'bp-1', organizationId: 'o1', isClosed: false, label: 'P', periodStart: runAt, periodEnd: runAt }]); // period
       pushSel([{ id: 'inv-x', invoiceNumber: 'INV-X' }]); // existing invoice → throws already exists
       // draft invoices query
       pushSel([{ id: 'draft-1', metadata: null }]);
@@ -386,32 +492,37 @@ describe('platform-economics/billing-service', () => {
 
   describe('getInvoiceWithLineItems', () => {
     it('returns an invoice with line items', async () => {
-      pushSel([{ id: 'inv-1' }]); // invoice
+      pushSel([{ id: 'inv-1', organizationId: 'o1' }]); // invoice
       pushSel([{ id: 'li-1' }]); // line items
-      const result = await getInvoiceWithLineItems('inv-1');
+      const result = await getInvoiceWithLineItems('inv-1', 'o1');
       expect(result?.lineItems).toHaveLength(1);
     });
 
     it('returns null when not found', async () => {
       pushSel([]);
-      expect(await getInvoiceWithLineItems('inv-1')).toBeNull();
+      expect(await getInvoiceWithLineItems('inv-1', 'o1')).toBeNull();
     });
   });
 
   describe('replayInvoiceDeterministically', () => {
+    it('refuses a foreign invoice before reading its line items', async () => {
+      pushSel([{ id: 'inv-1', organizationId: 'foreign-org' }]);
+      expect(await replayInvoiceDeterministically('inv-1', 'o1')).toBeNull();
+    });
+
     it('recomputes the subtotal and lineage', async () => {
-      pushSel([{ id: 'inv-1', subtotal: '100.00', totalAmount: '100.00', metadata: { pricingRuleVersion: 'v1' } }]); // invoice
+      pushSel([{ id: 'inv-1', organizationId: 'o1', subtotal: '100.00', totalAmount: '100.00', metadata: { pricingRuleVersion: 'v1' } }]); // invoice
       pushSel([
         { id: 'li-1', costType: 'base_subscription', amount: '100.00', metadata: { usageAggregateId: 'agg-1', usageEventIds: ['ue-1', 'ue-2'] } },
       ]); // line items
-      const result = await replayInvoiceDeterministically('inv-1');
+      const result = await replayInvoiceDeterministically('inv-1', 'o1');
       expect(result?.recomputed.isMatch).toBe(true);
       expect(result?.lineage[0]!.usageEventIds).toEqual(['ue-1', 'ue-2']);
     });
 
     it('returns null when the invoice is missing', async () => {
       pushSel([]); // getInvoiceWithLineItems invoice missing
-      expect(await replayInvoiceDeterministically('inv-1')).toBeNull();
+      expect(await replayInvoiceDeterministically('inv-1', 'o1')).toBeNull();
     });
   });
 

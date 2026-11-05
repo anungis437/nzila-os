@@ -63,31 +63,60 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { createBargainingUnitSchema } from "@/lib/validation/union-structure-schemas";
 import { useTranslations } from "next-intl";
+import { fetchAllRows } from "@/lib/client/crud-lists";
+import { formatDay } from "@/lib/client/day";
 
-// Form schema (omit audit fields)
-const formSchema = createBargainingUnitSchema.omit({
-  organizationId: true,
+const UNIT_TYPES = [
+  "full_time",
+  "part_time",
+  "casual",
+  "mixed",
+  "craft",
+  "industrial",
+  "professional",
+] as const;
+
+type UnitType = (typeof UNIT_TYPES)[number];
+
+// Only what /api/units accepts from a steward. Certification facts, status and member count come from the certification and the
+// roster, so this form neither offers nor sends them.
+const formSchema = z.object({
+  employerId: z.string().min(1, "Employer is required"),
+  worksiteId: z.string(),
+  name: z.string().trim().min(1, "Name is required").max(255),
+  unitNumber: z.string().max(50),
+  unitType: z.enum(UNIT_TYPES),
+  contractExpiryDate: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, "Invalid date"),
+  nextBargainingDate: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, "Invalid date"),
+  description: z.string(),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type UnitFormValues = z.infer<typeof formSchema>;
+
+const EMPTY_FORM: UnitFormValues = {
+  employerId: "",
+  worksiteId: "",
+  name: "",
+  unitNumber: "",
+  unitType: "full_time",
+  contractExpiryDate: "",
+  nextBargainingDate: "",
+  description: "",
+};
 
 interface BargainingUnit {
   id: string;
   name: string;
   unitNumber: string | null;
-  unitType: string;
+  unitType: UnitType;
   status: string;
   employerId: string;
-  employerName?: string;
   worksiteId: string | null;
-  worksiteName?: string | null;
-  memberCount: number;
-  certificationNumber: string | null;
-  certificationDate: string | null;
+  memberCount: number | null;
   contractExpiryDate: string | null;
   nextBargainingDate: string | null;
+  description: string | null;
 }
 
 interface Employer {
@@ -106,6 +135,36 @@ interface BargainingUnitManagementProps {
   onUpdate?: () => void;
 }
 
+/** The body PATCH /api/units/{id} and POST /api/units take: an empty optional field is sent as null, which clears it. */
+export function toUnitPayload(values: UnitFormValues) {
+  return {
+    employerId: values.employerId,
+    worksiteId: values.worksiteId || null,
+    name: values.name,
+    unitNumber: values.unitNumber || null,
+    unitType: values.unitType,
+    contractExpiryDate: values.contractExpiryDate || null,
+    nextBargainingDate: values.nextBargainingDate || null,
+    description: values.description || null,
+  };
+}
+
+/** The route's own explanation of a refusal (its error body carries a `message`), or the fallback when it sent none. */
+async function failureMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const body: unknown = await response.json();
+    const message = (body as { message?: unknown } | null)?.message;
+    return typeof message === "string" && message !== "" ? message : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/** A calendar date has no time zone: reading "2026-12-31" as UTC midnight would show 30 December west of Greenwich. */
+function formatDateOnly(value: string): string {
+  return formatDay(value, undefined, "numeric");
+}
+
 export function BargainingUnitManagement({
   organizationId,
   onUpdate,
@@ -115,135 +174,77 @@ export function BargainingUnitManagement({
   const [employers, setEmployers] = useState<Employer[]>([]);
   const [worksites, setWorksites] = useState<Worksite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState({ units: false, employers: false, worksites: false });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUnit, setEditingUnit] = useState<BargainingUnit | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
-  const form = useForm<FormData>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(formSchema) as any,
-    defaultValues: {
-      name: "",
-      unitNumber: "",
-      unitType: "full_time",
-      status: "active",
-      employerId: "",
-      worksiteId: undefined,
-      certificationNumber: "",
-      certificationDate: "",
-      certificationBody: "",
-      certificationExpiryDate: "",
-      currentCollectiveAgreementId: undefined,
-      contractExpiryDate: "",
-      nextBargainingDate: "",
-      memberCount: 0,
-      classifications: [],
-      chiefStewardId: "",
-      bargainingChairId: "",
-      description: "",
-      notes: "",
-      customFields: {},
-    },
+  const form = useForm<UnitFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: EMPTY_FORM,
   });
 
-  // Fetch bargaining units
+  // A list that did not load is an error on the page, not an empty list: the toast passes, the table below it would not.
+  const reportLoadFailure = (what: keyof typeof failed, error: unknown) => {
+    logger.error(`Failed to fetch ${what}`, error);
+    setFailed((current) => ({ ...current, [what]: true }));
+    toast({
+      title: t("errorTitle"),
+      description: t("failedToLoad"),
+      variant: "destructive",
+    });
+  };
+
   const fetchUnits = async () => {
     try {
-      const response = await fetch(
-        `/api/bargaining-units?organizationId=${organizationId}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch bargaining units");
-      const data = await response.json();
-      setUnits(data.data || []);
-    } catch (_error) {
-      toast({
-        title: t("errorTitle"),
-        description: t("failedToLoad"),
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      setUnits(await fetchAllRows<BargainingUnit>("/api/units"));
+      setFailed((current) => ({ ...current, units: false }));
+    } catch (error) {
+      reportLoadFailure("units", error);
     }
   };
 
-  // Fetch employers
   const fetchEmployers = async () => {
     try {
-      const response = await fetch(
-        `/api/employers?organizationId=${organizationId}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch employers");
-      const data = await response.json();
-      setEmployers(data.data || []);
+      setEmployers(await fetchAllRows<Employer>("/api/employers"));
+      setFailed((current) => ({ ...current, employers: false }));
     } catch (error) {
-      logger.error("Failed to fetch employers", error);
+      reportLoadFailure("employers", error);
     }
   };
 
-  // Fetch worksites
   const fetchWorksites = async () => {
     try {
-      const response = await fetch(
-        `/api/worksites?organizationId=${organizationId}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch worksites");
-      const data = await response.json();
-      setWorksites(data.data || []);
+      setWorksites(await fetchAllRows<Worksite>("/api/worksites"));
+      setFailed((current) => ({ ...current, worksites: false }));
     } catch (error) {
-      logger.error("Failed to fetch worksites", error);
+      reportLoadFailure("worksites", error);
     }
   };
 
   useEffect(() => {
-    fetchUnits();
-    fetchEmployers();
-    fetchWorksites();
+    Promise.all([fetchUnits(), fetchEmployers(), fetchWorksites()]).finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organizationId]);
 
   const handleCreate = () => {
     setEditingUnit(null);
-    form.reset({
-      name: "",
-      unitNumber: "",
-      unitType: "full_time",
-      status: "active",
-      employerId: "",
-      worksiteId: undefined,
-      certificationNumber: "",
-      certificationDate: "",
-      certificationBody: "",
-      certificationExpiryDate: "",
-      contractExpiryDate: "",
-      nextBargainingDate: "",
-      memberCount: 0,
-      description: "",
-      notes: "",
-    });
+    form.reset(EMPTY_FORM);
     setDialogOpen(true);
   };
 
   const handleEdit = (unit: BargainingUnit) => {
     setEditingUnit(unit);
     form.reset({
-      name: unit.name,
-      unitNumber: unit.unitNumber || "",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      unitType: unit.unitType as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      status: unit.status as any,
       employerId: unit.employerId,
-      worksiteId: unit.worksiteId || undefined,
-      certificationNumber: unit.certificationNumber || "",
-      certificationDate: unit.certificationDate || "",
-      certificationBody: "",
-      certificationExpiryDate: "",
-      contractExpiryDate: unit.contractExpiryDate || "",
-      nextBargainingDate: unit.nextBargainingDate || "",
-      memberCount: unit.memberCount,
-      description: "",
-      notes: "",
+      worksiteId: unit.worksiteId ?? "",
+      name: unit.name,
+      unitNumber: unit.unitNumber ?? "",
+      unitType: unit.unitType,
+      contractExpiryDate: unit.contractExpiryDate ?? "",
+      nextBargainingDate: unit.nextBargainingDate ?? "",
+      description: unit.description ?? "",
     });
     setDialogOpen(true);
   };
@@ -253,11 +254,11 @@ export function BargainingUnitManagement({
       return;
 
     try {
-      const response = await fetch(`/api/bargaining-units/${id}`, {
+      const response = await fetch(`/api/units/${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
 
-      if (!response.ok) throw new Error("Failed to delete bargaining unit");
+      if (!response.ok) throw new Error(await failureMessage(response, t("failedToDelete")));
 
       toast({
         title: t("successTitle"),
@@ -266,49 +267,30 @@ export function BargainingUnitManagement({
 
       await fetchUnits();
       onUpdate?.();
-    } catch (_error) {
+    } catch (error) {
       toast({
         title: t("errorTitle"),
-        description: t("failedToDelete"),
+        description:
+          error instanceof Error ? error.message : t("failedToDelete"),
         variant: "destructive",
       });
     }
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (values: UnitFormValues) => {
     try {
-      const payload = {
-        ...data,
-        organizationId,
-        worksiteId: data.worksiteId || null,
-        unitNumber: data.unitNumber || null,
-        certificationNumber: data.certificationNumber || null,
-        certificationDate: data.certificationDate || null,
-        certificationBody: data.certificationBody || null,
-        certificationExpiryDate: data.certificationExpiryDate || null,
-        contractExpiryDate: data.contractExpiryDate || null,
-        nextBargainingDate: data.nextBargainingDate || null,
-        chiefStewardId: data.chiefStewardId || null,
-        bargainingChairId: data.bargainingChairId || null,
-        description: data.description || null,
-        notes: data.notes || null,
-      };
-
       const url = editingUnit
-        ? `/api/bargaining-units/${editingUnit.id}`
-        : "/api/bargaining-units";
+        ? `/api/units/${encodeURIComponent(editingUnit.id)}`
+        : "/api/units";
       const method = editingUnit ? "PATCH" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(toUnitPayload(values)),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to save bargaining unit");
-      }
+      if (!response.ok) throw new Error(await failureMessage(response, t("failedToSave")));
 
       toast({
         title: t("successTitle"),
@@ -328,11 +310,19 @@ export function BargainingUnitManagement({
     }
   };
 
+  const employerNameOf = (unit: BargainingUnit) =>
+    employers.find((employer) => employer.id === unit.employerId)?.name;
+  const worksiteNameOf = (unit: BargainingUnit) =>
+    unit.worksiteId ? worksites.find((worksite) => worksite.id === unit.worksiteId)?.name : undefined;
+
+  // Deleting a unit archives it: the route keeps the record and lists it with status "archived", so it leaves this working list.
+  const query = searchQuery.toLowerCase();
   const filteredUnits = units.filter(
     (unit) =>
-      unit.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      unit.unitNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      unit.employerName?.toLowerCase().includes(searchQuery.toLowerCase())
+      unit.status !== "archived" &&
+      (unit.name.toLowerCase().includes(query) ||
+        unit.unitNumber?.toLowerCase().includes(query) ||
+        employerNameOf(unit)?.toLowerCase().includes(query))
   );
 
   const getStatusColor = (status: string) => {
@@ -398,6 +388,13 @@ export function BargainingUnitManagement({
             <div className="flex items-center justify-center py-8">
               <p className="text-sm text-muted-foreground">{t("loading")}</p>
             </div>
+          ) : failed.units || failed.employers || failed.worksites ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <Building2 className="mb-2 h-8 w-8 text-muted-foreground" />
+              <p role="alert" className="text-sm text-destructive">
+                {t("failedToLoad")}
+              </p>
+            </div>
           ) : filteredUnits.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
               <Building2 className="mb-2 h-8 w-8 text-muted-foreground" />
@@ -428,12 +425,12 @@ export function BargainingUnitManagement({
                     <TableCell className="font-medium">{unit.name}</TableCell>
                     <TableCell>{unit.unitNumber || "—"}</TableCell>
                     <TableCell>{getUnitTypeLabel(unit.unitType)}</TableCell>
-                    <TableCell>{unit.employerName || "—"}</TableCell>
-                    <TableCell>{unit.worksiteName || "—"}</TableCell>
-                    <TableCell>{unit.memberCount}</TableCell>
+                    <TableCell>{employerNameOf(unit) || "—"}</TableCell>
+                    <TableCell>{worksiteNameOf(unit) || "—"}</TableCell>
+                    <TableCell>{unit.memberCount ?? "—"}</TableCell>
                     <TableCell>
                       {unit.contractExpiryDate
-                        ? new Date(unit.contractExpiryDate).toLocaleDateString()
+                        ? formatDateOnly(unit.contractExpiryDate)
                         : "—"}
                     </TableCell>
                     <TableCell>
@@ -500,8 +497,15 @@ export function BargainingUnitManagement({
                     <FormItem>
                       <FormLabel>{t("employerLabel")} *</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // A worksite belongs to one employer: drop a choice that is not this employer's.
+                          const worksiteId = form.getValues("worksiteId");
+                          if (worksiteId && !worksites.some((ws) => ws.id === worksiteId && ws.employerId === value)) {
+                            form.setValue("worksiteId", "");
+                          }
+                        }}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -586,36 +590,13 @@ export function BargainingUnitManagement({
 
                   <FormField
                     control={form.control}
-                    name="memberCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("memberCountLabel")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="0"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseInt(e.target.value) || 0)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
                     name="unitType"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t("unitTypeLabel")} *</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -634,104 +615,6 @@ export function BargainingUnitManagement({
                             </SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("statusLabel")} *</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="active">{t("statusActive")}</SelectItem>
-                            <SelectItem value="under_certification">
-                              {t("statusUnderCertification")}
-                            </SelectItem>
-                            <SelectItem value="decertified">
-                              {t("statusDecertified")}
-                            </SelectItem>
-                            <SelectItem value="merged">{t("statusMerged")}</SelectItem>
-                            <SelectItem value="inactive">{t("statusInactive")}</SelectItem>
-                            <SelectItem value="archived">{t("statusArchived")}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* Certification Information */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium">{t("certificationSection")}</h3>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="certificationNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("certificationNumberLabel")}</FormLabel>
-                        <FormControl>
-                          <Input placeholder={t("certificationNumberPlaceholder")} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="certificationBody"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("certificationBodyLabel")}</FormLabel>
-                        <FormControl>
-                          <Input placeholder={t("certificationBodyPlaceholder")} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="certificationDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("certificationDateLabel")}</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="certificationExpiryDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("certificationExpiryLabel")}</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -788,24 +671,6 @@ export function BargainingUnitManagement({
                         <Textarea
                           placeholder={t("descriptionPlaceholder")}
                           rows={3}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("notesLabel")}</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder={t("notesPlaceholder")}
-                          rows={2}
                           {...field}
                         />
                       </FormControl>

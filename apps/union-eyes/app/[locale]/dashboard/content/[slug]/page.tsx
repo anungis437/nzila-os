@@ -14,75 +14,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
-import { ArrowLeft, Download, Eye, Calendar, FolderOpen, FileText } from 'lucide-react';
+import { ArrowLeft, Calendar, FolderOpen, FileText } from 'lucide-react';
 import { ContentWorkflowActions } from '../_components/content-workflow-actions';
-import { db } from '@/db/db';
-import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-
-interface TemplateField {
-  label: string;
-  type: string;
-  required?: boolean;
-  placeholder?: string;
-  options?: string[];
-}
-
-interface ContentBlock {
-  type: 'heading' | 'info' | 'section' | 'footer';
-  text?: string;
-  heading?: string;
-  fields?: TemplateField[];
-}
-
-interface TemplateData {
-  id: string;
-  title: string;
-  slug: string;
-  description: string | null;
-  status: string;
-  category: string | null;
-  contentType: string;
-  content: ContentBlock[];
-  fileUrl: string | null;
-  fileSizeMb: number | null;
-  downloads: number;
-  views: number;
-  publishedAt: string | null;
-  updatedAt: string | null;
-}
-
-async function loadTemplate(orgId: string, slug: string): Promise<TemplateData | null> {
-  const result = await db.execute(sql`
-    SELECT id, title, slug, meta_description, status, category,
-           content_type, content, file_url, file_size_mb,
-           download_count, view_count, published_at, updated_at
-    FROM cms_pages
-    WHERE organization_id = ${orgId}::uuid AND slug = ${slug}
-    LIMIT 1
-  `);
-
-  const rows = Array.from(result);
-  if (rows.length === 0) return null;
-
-  const r = rows[0] as Record<string, unknown>;
-  return {
-    id: r.id as string,
-    title: r.title as string,
-    slug: r.slug as string,
-    description: r.meta_description as string | null,
-    status: r.status as string,
-    category: r.category as string | null,
-    contentType: r.content_type as string,
-    content: (r.content as ContentBlock[]) ?? [],
-    fileUrl: r.file_url as string | null,
-    fileSizeMb: r.file_size_mb ? Number(r.file_size_mb) : null,
-    downloads: Number(r.download_count ?? 0),
-    views: Number(r.view_count ?? 0),
-    publishedAt: r.published_at as string | null,
-    updatedAt: r.updated_at as string | null,
-  };
-}
+import { isUuid } from '@/lib/page-data/uuid';
+import { loadContentTemplate, type ContentBlock, type TemplateField } from '@/lib/dashboard-reads/content';
 
 function FieldRenderer({
   field,
@@ -204,11 +139,11 @@ export default async function TemplateDetailPage({
   }
 
   const organizationId = user.organizationId;
-  if (!organizationId) {
+  if (!isUuid(organizationId)) {
     redirect('/dashboard');
   }
 
-  const template = await withSystemContext(() => loadTemplate(organizationId, slug));
+  const template = await loadContentTemplate(organizationId, slug);
   if (!template) {
     notFound();
   }
@@ -257,28 +192,20 @@ export default async function TemplateDetailPage({
       />
 
       {/* Stats bar */}
-      <div className="flex items-center gap-6 text-sm text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <Eye className="h-4 w-4" />
-          {t('stats.views', { count: template.views.toLocaleString() })}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Download className="h-4 w-4" />
-          {t('stats.downloads', { count: template.downloads.toLocaleString() })}
-        </span>
-        {template.updatedAt && (
+      {template.updatedAt && (
+        <div className="flex items-center gap-6 text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
             {t('stats.updated', {
-              date: new Date(template.updatedAt).toLocaleDateString('en-CA', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
+              date: new Date(template.updatedAt).toLocaleDateString(locale, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
               }),
             })}
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       <Separator />
 

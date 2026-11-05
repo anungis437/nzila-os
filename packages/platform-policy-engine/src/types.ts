@@ -139,7 +139,7 @@ export const policyRuleSchema = z.object({
 })
 
 export const policyScopeSchema = z.object({
-  orgId: z.string().uuid().optional(),
+  orgId: z.guid().optional(),
   environments: z.array(z.string()).optional(),
   resources: z.array(z.string()).optional(),
 })
@@ -153,7 +153,7 @@ export const policyDefinitionSchema = z.object({
   enabled: z.boolean(),
   scope: policyScopeSchema,
   rules: z.array(policyRuleSchema),
-  metadata: z.record(z.string()).default({}),
+  metadata: z.record(z.string(), z.string()).prefault({}),
 })
 
 export const policyFileSchema = z.object({

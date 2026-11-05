@@ -61,7 +61,8 @@ vi.mock('../logger', () => ({
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: (fn: any) => fn(),
+  // The system-context wrapper hands its callback the (mocked) database, as the real one hands it the system transaction.
+  withSystemContext: (fn: any) => fn({ select: mocks.mockSelect }),
 }));
 
 /** Helper: set up N sequential db.select→from→where→limit chains */
@@ -230,6 +231,36 @@ describe('organization-utils', () => {
       setupLimitSequence([]); // no membership anywhere
       const { getOrganizationIdForUser } = await import('../organization-utils');
       await expect(getOrganizationIdForUser('user-1')).rejects.toThrow('Default Organization fallback');
+      vi.unstubAllEnvs();
+    });
+
+    it('BR-6: UE_ALLOW_DEFAULT_ORG=true does not open the fallback on a deployed runtime', async () => {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('UE_ALLOW_DEFAULT_ORG', 'true');
+      mocks.mockCookiesGet.mockReturnValue(undefined);
+      setupLimitSequence([]); // no membership anywhere
+      const { getOrganizationIdForUser } = await import('../organization-utils');
+      await expect(getOrganizationIdForUser('user-1')).rejects.toThrow('Default Organization fallback');
+      vi.unstubAllEnvs();
+    });
+
+    it('BR-6: UE_ALLOW_DEFAULT_ORG is ignored on every deployed runtime, including a production container labelled development', async () => {
+      const { isDefaultOrgFallbackAllowed } = await import('../organization-utils');
+      const identities = [
+        { NODE_ENV: 'production' },
+        { NODE_ENV: 'production', UE_ENVIRONMENT: 'staging' },
+        { NODE_ENV: 'development', UE_ENVIRONMENT: 'production' },
+        { NODE_ENV: 'development', UE_ENVIRONMENT: 'pilot' },
+        { NODE_ENV: 'test', NEXT_PUBLIC_APP_ENV: 'production' },
+        { NODE_ENV: 'development', NZILA_MODE: 'production' },
+      ];
+      for (const identity of identities) {
+        vi.unstubAllEnvs();
+        for (const name of ['UE_ENVIRONMENT', 'NEXT_PUBLIC_APP_ENV', 'TARGET_ENVIRONMENT', 'NZILA_MODE']) vi.stubEnv(name, '');
+        for (const [name, value] of Object.entries(identity)) vi.stubEnv(name, value);
+        vi.stubEnv('UE_ALLOW_DEFAULT_ORG', 'true');
+        expect(isDefaultOrgFallbackAllowed(), JSON.stringify(identity)).toBe(false);
+      }
       vi.unstubAllEnvs();
     });
 

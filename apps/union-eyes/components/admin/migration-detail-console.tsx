@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { envelopeData, isRecord, readApiError } from "@/lib/client/api-envelope";
 import {
   Table,
   TableBody,
@@ -107,16 +108,25 @@ export default function MigrationDetailConsole({ batchId }: Props) {
   const router = useRouter();
   const [batch, setBatch] = useState<BatchDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [problem, setProblem] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
   const [retryResult, setRetryResult] = useState<string | null>(null);
 
   const fetchDetail = useCallback(async () => {
     setLoading(true);
+    setProblem(null);
     try {
       const res = await fetch(`/api/admin/ingest/batches/${batchId}`);
-      if (res.ok) {
-        setBatch(await res.json());
+      if (res.status === 404) {
+        setBatch(null);
+        return;
       }
+      if (!res.ok) throw new Error(await readApiError(res, "The batch could not be loaded."));
+      // The batch is what the framework wraps as { success, data, timestamp }.
+      setBatch(envelopeData(await res.json()) as unknown as BatchDetail);
+    } catch (error) {
+      setBatch(null);
+      setProblem(error instanceof Error ? error.message : "The batch could not be loaded.");
     } finally {
       setLoading(false);
     }
@@ -134,8 +144,15 @@ export default function MigrationDetailConsole({ batchId }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ batch_id: batchId }),
       });
-      const data = await res.json();
-      setRetryResult(data.message ?? "Retry completed");
+      const body: unknown = await res.json().catch(() => null);
+      if (!res.ok) {
+        setRetryResult("Retry request failed; no completed replay is confirmed.");
+        return;
+      }
+      // withApi wraps successful responses under "data". The server only moves
+      // failed records back to pending; never report an import as completed.
+      const answer = isRecord(body) && body.success === true && isRecord(body.data) ? body.data : body;
+      setRetryResult(isRecord(answer) && typeof answer.message === "string" ? answer.message : "Retry request accepted; records queued for processing.");
       await fetchDetail();
     } catch {
       setRetryResult("Retry failed");
@@ -151,7 +168,11 @@ export default function MigrationDetailConsole({ batchId }: Props) {
   }
 
   if (!batch) {
-    return <div className="p-6 text-muted-foreground">Batch not found</div>;
+    return (
+      <div className={problem ? "p-6 text-red-800" : "p-6 text-muted-foreground"} role={problem ? "alert" : undefined}>
+        {problem ?? "Batch not found"}
+      </div>
+    );
   }
 
   return (

@@ -17,9 +17,8 @@ import CampaignsPage from "./campaigns/page";
 import DistributionListsPage from "./distribution-lists/page";
 import TemplatesPage from "./templates/page";
 import { SmsConsole } from "@/components/communications/sms-console";
-import { db } from "@/db";
-import { campaigns, messageTemplates, newsletterDistributionLists, smsCampaigns } from "@/db/schema";
-import { eq, and, inArray, count, sum, desc } from "drizzle-orm";
+import { loadCommunicationsHubMetrics, type CommunicationsHubMetrics } from "@/lib/communications/hub-metrics";
+import { isUuid } from "@/lib/page-data/uuid";
 import { logger } from "@/lib/logger";
 // NOTE (Wave 0 §3 — semantic demo isolation): The prior implementation
 // contained a runtime-gated branch that dynamically imported a demo
@@ -27,85 +26,6 @@ import { logger } from "@/lib/logger";
 // and the runtime gate have been removed from the operational build. Demo
 // behaviour now lives exclusively in the `@nzila/union-eyes-demo`
 // artifact (`apps/union-eyes-demo/`).
-
-/** Fetch all hub metrics in parallel */
-async function getHubMetrics(orgId: string) {
-  try {
-    const [
-      activeCampaigns,
-      scheduledCampaigns,
-      sentCampaigns,
-      distributionListStats,
-      templateCount,
-      smsCampaignCount,
-      recentCampaigns,
-    ] = await Promise.all([
-      // Active campaigns (scheduled, sending, or sent)
-      db.select({ value: count() })
-        .from(campaigns)
-        .where(and(
-          eq(campaigns.organizationId, orgId),
-          inArray(campaigns.status, ['scheduled', 'sending', 'sent']),
-        )),
-      // Scheduled only
-      db.select({ value: count() })
-        .from(campaigns)
-        .where(and(
-          eq(campaigns.organizationId, orgId),
-          eq(campaigns.status, 'scheduled'),
-        )),
-      // Sent campaigns (completed sends)
-      db.select({ value: count() })
-        .from(campaigns)
-        .where(and(
-          eq(campaigns.organizationId, orgId),
-          eq(campaigns.status, 'sent'),
-        )),
-      // Distribution lists count + total subscribers
-      db.select({ listCount: count(), totalSubscribers: sum(newsletterDistributionLists.subscriberCount) })
-        .from(newsletterDistributionLists)
-        .where(eq(newsletterDistributionLists.organizationId, orgId)),
-      // Templates count
-      db.select({ value: count() })
-        .from(messageTemplates)
-        .where(eq(messageTemplates.organizationId, orgId)),
-      // SMS campaigns count
-      db.select({ value: count() })
-        .from(smsCampaigns)
-        .where(eq(smsCampaigns.organizationId, orgId)),
-      // Recent campaigns for activity feed
-      db.select({
-        id: campaigns.id,
-        name: campaigns.name,
-        status: campaigns.status,
-        channel: campaigns.channel,
-        createdAt: campaigns.createdAt,
-      })
-        .from(campaigns)
-        .where(eq(campaigns.organizationId, orgId))
-        .orderBy(desc(campaigns.createdAt))
-        .limit(5),
-    ]);
-
-    return {
-      activeCampaignCount: activeCampaigns[0]?.value ?? 0,
-      scheduledCount: scheduledCampaigns[0]?.value ?? 0,
-      sentCount: sentCampaigns[0]?.value ?? 0,
-      listCount: distributionListStats[0]?.listCount ?? 0,
-      totalSubscribers: Number(distributionListStats[0]?.totalSubscribers ?? 0),
-      templateCount: templateCount[0]?.value ?? 0,
-      smsCampaignCount: smsCampaignCount[0]?.value ?? 0,
-      recentCampaigns: recentCampaigns,
-    };
-  } catch (err) {
-    logger.error('Failed to fetch hub metrics', err);
-    return {
-      activeCampaignCount: 0, scheduledCount: 0, sentCount: 0,
-      listCount: 0, totalSubscribers: 0, templateCount: 0,
-      smsCampaignCount: 0, recentCampaigns: [],
-    };
-  }
-}
 
 function formatTimeAgo(date: Date | null, t: Awaited<ReturnType<typeof getTranslations>>): string {
   if (!date) return t('time.justNow');
@@ -127,6 +47,20 @@ const channelIcons: Record<string, typeof Mail> = {
   multi_channel: BarChart3,
 };
 
+// Shown in place of the figures when they could not be read; the message catalogues are shared, so the copy is kept here.
+const FIGURES_UNAVAILABLE = {
+  en: {
+    title: 'The communications figures could not be loaded',
+    body: 'The campaign, distribution list and template totals are unavailable right now. Reload the page to try again.',
+    recent: 'Recent campaigns could not be loaded.',
+  },
+  fr: {
+    title: 'Les chiffres des communications n’ont pas pu être chargés',
+    body: 'Les totaux des campagnes, des listes de distribution et des modèles sont indisponibles pour le moment. Rechargez la page pour réessayer.',
+    recent: 'Les campagnes récentes n’ont pas pu être chargées.',
+  },
+} as const;
+
 export default async function CommunicationsDashboard({
   params,
 }: {
@@ -145,8 +79,18 @@ export default async function CommunicationsDashboard({
     redirect(`/${locale}/dashboard`);
   }
 
-  const orgId = user.organizationId;
-  const metrics = orgId ? await getHubMetrics(orgId) : null;
+  // A caller with no tenant organization (a platform administrator who belongs to none) has no hub to show.
+  if (!isUuid(user.organizationId)) {
+    redirect(`/${locale}/dashboard`);
+  }
+  // A failed read is shown as "could not load", never as a count of zero.
+  let metrics: CommunicationsHubMetrics | null = null;
+  try {
+    metrics = await loadCommunicationsHubMetrics(user.organizationId);
+  } catch (error) {
+    logger.error('Communications hub figures failed to load', error, { organizationId: user.organizationId });
+  }
+  const unavailable = FIGURES_UNAVAILABLE[locale.toLowerCase().startsWith('fr') ? 'fr' : 'en'];
 
   return (
     <div className="p-6 space-y-6">
@@ -162,47 +106,54 @@ export default async function CommunicationsDashboard({
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.activeCampaigns')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics?.activeCampaignCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t('stats.scheduled', { count: metrics?.scheduledCount ?? 0 })}</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.distributionLists')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics?.listCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t('stats.totalSubscribers', { count: (metrics?.totalSubscribers ?? 0).toLocaleString() })}</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.templates')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics?.templateCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t('stats.acrossChannels')}</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.campaignsSent')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics?.sentCount ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t('stats.smsCampaigns', { count: metrics?.smsCampaignCount ?? 0 })}</p>
-          </CardContent>
-        </Card>
-      </div>
+      {metrics ? (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.activeCampaigns')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.activeCampaignCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">{t('stats.scheduled', { count: metrics.scheduledCount })}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.distributionLists')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.listCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">{t('stats.totalSubscribers', { count: metrics.totalSubscribers.toLocaleString() })}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.templates')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.templateCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">{t('stats.acrossChannels')}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('stats.campaignsSent')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.sentCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">{t('stats.smsCampaigns', { count: metrics.smsCampaignCount })}</p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <div role="alert" className="rounded-lg border border-destructive/50 bg-destructive/5 p-4">
+          <p className="font-medium text-destructive">{unavailable.title}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{unavailable.body}</p>
+        </div>
+      )}
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
@@ -224,10 +175,13 @@ export default async function CommunicationsDashboard({
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {(metrics?.recentCampaigns ?? []).length === 0 && (
+                  {metrics === null && (
+                    <p className="text-sm text-muted-foreground">{unavailable.recent}</p>
+                  )}
+                  {metrics?.recentCampaigns.length === 0 && (
                     <p className="text-sm text-muted-foreground">{t('overview.recentActivity.empty')}</p>
                   )}
-                  {(metrics?.recentCampaigns ?? []).map((c) => {
+                  {metrics?.recentCampaigns.map((c) => {
                     const Icon = channelIcons[c.channel] ?? Mail;
                     return (
                       <div key={c.id} className="flex items-start gap-3 p-3 border rounded-lg">
@@ -261,7 +215,8 @@ export default async function CommunicationsDashboard({
                 <Button className="w-full justify-start" variant="outline" asChild>
                   <Link href={`/${locale}/dashboard/communications/sms`}>
                     <MessageSquare className="mr-2 h-4 w-4" />
-                    {t('overview.quickActions.sendSms')}
+                    {/* No text can be sent in this release; the SMS tab lists the records that exist. */}
+                    {locale.toLowerCase().startsWith('fr') ? 'Consulter les SMS enregistrés' : 'View stored SMS records'}
                   </Link>
                 </Button>
                 <Button className="w-full justify-start" variant="outline" asChild>

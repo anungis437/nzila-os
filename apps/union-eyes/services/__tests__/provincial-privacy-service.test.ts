@@ -203,18 +203,8 @@ describe('provincial-privacy-service', () => {
     expect(r).toEqual({ id: 'dsar1' });
   });
 
-  describe('updateDSARStatus', () => {
-    it('updates a non-completed status', async () => {
-      pushSel([]);
-      await S.updateDSARStatus('dsar1', 'in_progress', 'agent');
-      expect(h.db.update).toHaveBeenCalled();
-    });
-
-    it('updates a completed status and checks the deadline', async () => {
-      pushSel([{ responseDeadline: new Date('2999-01-01') }], []); // select dsar, update
-      await S.updateDSARStatus('dsar1', 'completed');
-      expect(h.db.update).toHaveBeenCalled();
-    });
+  it('does not expose an id-only DSAR status writer (processing awaits a mandated privacy-officer workflow)', () => {
+    expect((S as unknown as Record<string, unknown>).updateDSARStatus).toBeUndefined();
   });
 
   it('getOverdueDSARs queries pending overdue requests', async () => {

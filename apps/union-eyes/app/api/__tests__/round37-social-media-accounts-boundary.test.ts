@@ -13,6 +13,12 @@
  * fix (asserting the exact context object withRLSContext was called with).
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Provider tokens are stored sealed (B91); a deterministic stand-in for the secret service keeps these tests free of key material.
+vi.mock('@/lib/encryption', () => ({
+  encryptSecret: async (value: string) => `sealed(${value})`,
+  decryptSecret: async (value: string) => value.replace(/^sealed\((.*)\)$/, '$1'),
+}));
 import { NextRequest } from 'next/server';
 
 interface FakeAccount {
@@ -46,12 +52,16 @@ function matches(row: Record<string, unknown>, predicate: Predicate): boolean {
 
 const ORG_A = 'org-A-uuid';
 const ORG_B = 'org-B-uuid';
-const TEST_USER = { userId: 'user-b-1', organizationId: ORG_B, role: 'steward' };
+const ROGUE_ID = '00000000-0000-0000-0000-0000000000a0';
+const LEGIT_ID = '00000000-0000-0000-0000-0000000000b0';
+// Disconnecting an account is an administrator's act.
+const TEST_USER = { userId: 'user-b-1', organizationId: ORG_B, role: 'admin' };
 
 let accounts: FakeAccount[];
 
 const m = vi.hoisted(() => ({
   logApiAuditEvent: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   checkRateLimit: vi.fn(),
   createMetaClient: vi.fn(),
   createTwitterClient: vi.fn(),
@@ -61,7 +71,9 @@ const m = vi.hoisted(() => ({
   cookieStore: { get: vi.fn(), set: vi.fn(), delete: vi.fn() },
 }));
 
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: { SOCIAL_MEDIA_API: { requests: 30, window: 60 } },
@@ -134,18 +146,20 @@ function makeFakeDb() {
     }),
     update: (_table: unknown) => ({
       set: (patch: Record<string, unknown>) => ({
-        where: async (pred: Predicate) => {
+        where: (pred: Predicate) => {
           const targets = accounts.filter((a) => matches(a as unknown as Record<string, unknown>, pred));
           for (const t of targets) Object.assign(t, patch);
-          return targets;
+          return Object.assign(Promise.resolve(targets), { returning: async () => targets.map((t) => ({ id: t.id })) });
         },
       }),
     }),
     delete: (_table: unknown) => ({
-      where: async (pred: Predicate) => {
-        const before = accounts.length;
+      where: (pred: Predicate) => {
+        const removed = accounts.filter((a) => matches(a as unknown as Record<string, unknown>, pred));
         accounts = accounts.filter((a) => !matches(a as unknown as Record<string, unknown>, pred));
-        return { deletedCount: before - accounts.length };
+        return Object.assign(Promise.resolve({ deletedCount: removed.length }), {
+          returning: async () => removed.map((a) => ({ id: a.id })),
+        });
       },
     }),
   };
@@ -163,16 +177,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   }),
 }));
 
-vi.mock('@/lib/api-auth-guard', async (orig) => {
-  const actual = await orig<typeof import('@/lib/api-auth-guard')>();
-  return {
-    ...actual,
-    withRoleAuth: vi.fn(
-      (_role: string, handler: (req: NextRequest, ctx: typeof TEST_USER) => Promise<Response>) =>
-        (req: NextRequest, ctx: Partial<typeof TEST_USER> = {}) => handler(req, { ...TEST_USER, ...ctx })
-    ),
-  };
-});
+const { caller, resetCaller } = await import('./support/with-api-stub');
 
 async function loadRoute() {
   return import('../social-media/accounts/route');
@@ -181,7 +186,7 @@ async function loadRoute() {
 function seedAccounts() {
   accounts = [
     {
-      id: 'rogue-account',
+      id: ROGUE_ID,
       organizationId: ORG_A,
       platform: 'twitter',
       platformUserId: 'tw-rogue',
@@ -196,7 +201,7 @@ function seedAccounts() {
       engagementRate: '0.1',
     },
     {
-      id: 'legit-account',
+      id: LEGIT_ID,
       organizationId: ORG_B,
       platform: 'twitter',
       platformUserId: 'tw-legit',
@@ -216,10 +221,15 @@ function seedAccounts() {
 describe('round 37: social-media accounts route org boundary (negative tests 3, 5, 6)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.userId = TEST_USER.userId;
+    caller.organizationId = TEST_USER.organizationId;
+    caller.role = TEST_USER.role;
     m.withRLSContextCalls.length = 0;
     m.selectPredicates.length = 0;
     seedAccounts();
     m.checkRateLimit.mockResolvedValue({ allowed: true, remaining: 99, resetIn: 0 });
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.createTwitterClient.mockReturnValue({ revokeToken: vi.fn(async () => undefined) });
   });
 
@@ -227,14 +237,14 @@ describe('round 37: social-media accounts route org boundary (negative tests 3, 
     const { DELETE } = await loadRoute();
 
     const response = await DELETE(
-      new NextRequest('http://localhost/api/social-media/accounts?id=rogue-account', { method: 'DELETE' })
+      new NextRequest(`http://localhost/api/social-media/accounts?id=${ROGUE_ID}`, { method: 'DELETE' })
     );
 
     // Org-scoped at the query level: a foreign account is simply not found,
     // not fetched-then-rejected (which would still have loaded its
     // credential-bearing row into memory before denying).
     expect(response.status).toBe(404);
-    expect(accounts.find((a) => a.id === 'rogue-account')).toBeDefined();
+    expect(accounts.find((a) => a.id === ROGUE_ID)).toBeDefined();
 
     // Prove the predicate itself — not merely the HTTP outcome — carries the
     // organization boundary: every SELECT this request issued must require
@@ -252,9 +262,9 @@ describe('round 37: social-media accounts route org boundary (negative tests 3, 
   it('the delete mutation itself carries the trusted organizationId predicate (not id-only)', async () => {
     const { DELETE } = await loadRoute();
 
-    await DELETE(new NextRequest('http://localhost/api/social-media/accounts?id=legit-account', { method: 'DELETE' }));
+    await DELETE(new NextRequest(`http://localhost/api/social-media/accounts?id=${LEGIT_ID}`, { method: 'DELETE' }));
 
-    expect(accounts.find((a) => a.id === 'legit-account')).toBeUndefined();
+    expect(accounts.find((a) => a.id === LEGIT_ID)).toBeUndefined();
     // withRLSContext must have been called with the trusted org explicitly,
     // never the no-context overload that silently re-resolves org elsewhere.
     expect(m.withRLSContextCalls).toContainEqual({ organizationId: ORG_B });
@@ -265,21 +275,21 @@ describe('round 37: social-media accounts route org boundary (negative tests 3, 
     m.createTwitterClient.mockReturnValue({
       refreshAccessToken: vi.fn(async () => ({ access_token: 'new-token', expires_in: 3600 })),
     });
-    accounts.find((a) => a.id === 'legit-account')!.refreshToken = 'legit-secret-refresh-token';
+    accounts.find((a) => a.id === LEGIT_ID)!.refreshToken = 'legit-secret-refresh-token';
 
     const response = await PUT(
       new NextRequest('http://localhost/api/social-media/accounts', {
         method: 'PUT',
-        body: JSON.stringify({ account_id: 'legit-account' }),
+        body: JSON.stringify({ account_id: LEGIT_ID }),
         headers: { 'content-type': 'application/json' },
       })
     );
 
     expect(response.status).toBe(200);
     expect(m.withRLSContextCalls).toContainEqual({ organizationId: ORG_B });
-    expect(accounts.find((a) => a.id === 'legit-account')!.accessToken).toBe('new-token');
+    expect(accounts.find((a) => a.id === LEGIT_ID)!.accessToken).toBe('enc:v1:sealed(new-token)');
     // The other org's account must never be reachable through this call.
-    expect(accounts.find((a) => a.id === 'rogue-account')!.accessToken).toBe('rogue-secret-access-token');
+    expect(accounts.find((a) => a.id === ROGUE_ID)!.accessToken).toBe('rogue-secret-access-token');
   });
 
   it('negative test 5: GET never returns accessToken or refreshToken fields', async () => {
@@ -299,9 +309,10 @@ describe('round 37: social-media accounts route org boundary (negative tests 3, 
     const { GET, DELETE } = await loadRoute();
 
     await GET(new NextRequest('http://localhost/api/social-media/accounts'));
-    await DELETE(new NextRequest('http://localhost/api/social-media/accounts?id=legit-account', { method: 'DELETE' }));
+    await DELETE(new NextRequest(`http://localhost/api/social-media/accounts?id=${LEGIT_ID}`, { method: 'DELETE' }));
 
-    const serializedCalls = JSON.stringify(m.logApiAuditEvent.mock.calls);
+    const serializedCalls = JSON.stringify([...m.logApiAuditEvent.mock.calls, ...m.persistAtomicAudit.mock.calls]);
+    expect(serializedCalls).toContain('social.account.disconnect');
     expect(serializedCalls).not.toContain('legit-secret-access-token');
     expect(serializedCalls).not.toContain('legit-secret-refresh-token');
     expect(serializedCalls).not.toContain('rogue-secret-access-token');

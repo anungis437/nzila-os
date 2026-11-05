@@ -18,17 +18,24 @@
  * both success and failure paths.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Provider tokens are stored sealed (B91); a deterministic stand-in for the secret service keeps these tests free of key material.
+vi.mock('@/lib/encryption', () => ({
+  encryptSecret: async (value: string) => `sealed(${value})`,
+  decryptSecret: async (value: string) => value.replace(/^sealed\((.*)\)$/, '$1'),
+}));
 import { NextRequest } from 'next/server';
 
 const ORG_B = 'org-B-uuid';
 const ORG_OTHER = 'org-other-uuid';
 const USER_B = 'user-b-1';
 const USER_OTHER = 'user-other-1';
-const TEST_USER = { userId: USER_B, organizationId: ORG_B, role: 'steward' };
+// Completing the connection of an account is an administrator's act.
+const TEST_USER = { userId: USER_B, organizationId: ORG_B, role: 'admin' };
 const STATE = 'a'.repeat(64); // stand-in for a random 32-byte hex nonce
 
 const m = vi.hoisted(() => ({
-  logApiAuditEvent: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   createMetaClient: vi.fn(),
   createTwitterClient: vi.fn(),
   createLinkedInClient: vi.fn(),
@@ -45,7 +52,9 @@ const m = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
+// The connection and its audit record commit together, in the organization's tenant transaction.
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('next/headers', () => ({ cookies: vi.fn(async () => m.cookieStore) }));
 vi.mock('@/lib/social-media/meta-api-client', () => ({ createMetaClient: m.createMetaClient }));
 vi.mock('@/lib/social-media/twitter-api-client', () => ({ createTwitterClient: m.createTwitterClient }));
@@ -84,16 +93,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   }),
 }));
 
-vi.mock('@/lib/api-auth-guard', async (orig) => {
-  const actual = await orig<typeof import('@/lib/api-auth-guard')>();
-  return {
-    ...actual,
-    withRoleAuth: vi.fn(
-      (_role: string, handler: (req: NextRequest, ctx: typeof TEST_USER) => Promise<Response>) =>
-        (req: NextRequest, ctx: Partial<typeof TEST_USER> = {}) => handler(req, { ...TEST_USER, ...ctx })
-    ),
-  };
-});
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
 async function loadRoute() {
   return import('../social-media/accounts/callback/route');
@@ -115,18 +115,50 @@ function seedInitiationCookies(overrides: Partial<{ state: string; platform: str
 describe('round 37: OAuth callback state/replay/PKCE/org-binding/credential-exposure invariants', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.userId = TEST_USER.userId;
+    caller.organizationId = TEST_USER.organizationId;
+    caller.role = TEST_USER.role;
+    m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withRLSContextCalls.length = 0;
     m.insertedValues.length = 0;
     m.cookieStore.values = {};
   });
 
-  it('required test #11 / negative: missing state is rejected', async () => {
+  it('declares what it asks of the wrapper: an administrator, with the no-organization answer left to the handler, and no transaction spanning the provider calls', async () => {
+    await loadRoute();
+    const config = declared.find((entry) => entry.openapi?.summary === 'Complete the OAuth connection of a social account');
+
+    expect(config?.auth).toEqual({ minRole: 'admin' });
+    expect(config?.requireOrg).toBe(false);
+    expect(config?.rlsOrgContext).toBeUndefined();
+  });
+
+  it('refuses a steward, and a caller who is not signed in, before the pending connection is touched or a provider is contacted', async () => {
+    seedInitiationCookies();
+    const { GET } = await loadRoute();
+
+    caller.role = 'steward';
+    expect((await GET(callbackRequest({ code: 'auth-code', state: STATE }))).status).toBe(403);
+    caller.userId = null;
+    expect((await GET(callbackRequest({ code: 'auth-code', state: STATE }))).status).toBe(401);
+
+    expect(m.cookieStore.values.oauth_state).toBe(STATE);
+    expect(m.createMetaClient).not.toHaveBeenCalled();
+    expect(m.insertedValues).toHaveLength(0);
+  });
+
+  it('required test #11 / negative: missing state is rejected before any provider contact and does not consume the pending connection', async () => {
     seedInitiationCookies();
     const { GET } = await loadRoute();
 
     const response = await GET(callbackRequest({ code: 'auth-code' }));
 
-    expect(response.status).toBe(400);
+    // A missing state cannot match the stored one: the same FORBIDDEN refusal as a wrong state.
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.cookieStore.values.oauth_state).toBe(STATE);
+    expect(m.createMetaClient).not.toHaveBeenCalled();
   });
 
   it('state mismatch is rejected', async () => {
@@ -249,7 +281,11 @@ describe('round 37: OAuth callback state/replay/PKCE/org-binding/credential-expo
     expect(serializedResponse).not.toContain('page-secret-token');
 
     // Never in the audit log.
-    const serializedAudit = JSON.stringify(m.logApiAuditEvent.mock.calls);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ organizationId: ORG_B, userId: USER_B, action: 'social_account.connected', details: { platform: 'facebook' } }),
+    );
+    const serializedAudit = JSON.stringify(m.persistAtomicAudit.mock.calls);
     expect(serializedAudit).not.toContain('page-secret-token');
     expect(serializedAudit).not.toContain('auth-code');
     expect(serializedAudit).not.toContain(STATE);
@@ -261,22 +297,80 @@ describe('round 37: OAuth callback state/replay/PKCE/org-binding/credential-expo
     expect(m.cookieStore.values.oauth_user_id).toBe('');
   });
 
-  it('cookies are cleared even on a terminal failure path', async () => {
+  it('a forged or mismatched callback does not consume the legitimate pending connection', async () => {
     seedInitiationCookies();
     const { GET } = await loadRoute();
 
     await GET(callbackRequest({ code: 'auth-code', state: 'wrong-state' }));
 
+    // Clearing here would let anyone who can send the browser to this URL cancel the user's own pending connection.
+    expect(m.cookieStore.values).toMatchObject({
+      oauth_state: STATE,
+      oauth_platform: 'facebook',
+      oauth_organization_id: ORG_B,
+      oauth_user_id: USER_B,
+    });
+  });
+
+  it('an ambiguous callback (a repeated parameter, or a code together with an error) is refused before the pending connection is touched', async () => {
+    seedInitiationCookies();
+    const { GET } = await loadRoute();
+
+    const repeated = await GET(new NextRequest(`http://localhost/api/social-media/accounts/callback?code=auth-code&state=${STATE}&state=${STATE}`));
+    const both = await GET(callbackRequest({ code: 'auth-code', error: 'access_denied', state: STATE }));
+
+    expect(repeated.status).toBe(400);
+    expect(both.status).toBe(400);
+    expect(m.cookieStore.values.oauth_state).toBe(STATE);
+    expect(m.createMetaClient).not.toHaveBeenCalled();
+  });
+
+  it('cookies are consumed once the callback validates, even when the provider exchange then fails', async () => {
+    seedInitiationCookies();
+    m.createMetaClient.mockReturnValue({
+      getAccessToken: vi.fn(async () => { throw new Error('provider unavailable'); }),
+    });
+    const { GET } = await loadRoute();
+
+    const response = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
+
+    expect(response.status).toBe(500);
+    expect(m.insertedValues).toHaveLength(0);
     expect(m.cookieStore.values.oauth_state).toBe('');
     expect(m.cookieStore.values.oauth_platform).toBe('');
     expect(m.cookieStore.values.oauth_organization_id).toBe('');
     expect(m.cookieStore.values.oauth_user_id).toBe('');
   });
 
+  it('an account that manages several Pages or organizations is not connected to an arbitrary one', async () => {
+    seedInitiationCookies();
+    m.createMetaClient.mockReturnValue({
+      getAccessToken: vi.fn(async () => ({ access_token: 'short-lived', expires_in: 3600 })),
+      getLongLivedToken: vi.fn(async () => ({ access_token: 'long-lived', expires_in: 5_000_000 })),
+      getUserPages: vi.fn(async () => [
+        { id: 'page-1', name: 'One', access_token: 'token-1' },
+        { id: 'page-2', name: 'Two', access_token: 'token-2' },
+      ]),
+    });
+    const { GET } = await loadRoute();
+    const facebook = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
+    expect(facebook.status).toBe(400);
+
+    seedInitiationCookies({ platform: 'linkedin' });
+    const getAccessToken = vi.fn(async () => ({ access_token: 'li-access', expires_in: 1800 }));
+    const getOrganizations = vi.fn(async () => [{ id: 'org-1', localizedName: 'One' }, { id: 'org-2', localizedName: 'Two' }]);
+    m.createLinkedInClient.mockImplementation((accessToken?: string) => (accessToken ? { getOrganizations } : { getAccessToken }));
+    const linkedin = await GET(callbackRequest({ code: 'auth-code', state: STATE }));
+    expect(linkedin.status).toBe(400);
+
+    expect(m.insertedValues).toHaveLength(0);
+  });
+
   it('no organization context is rejected before any provider call is made', async () => {
+    caller.organizationId = null;
     const { GET } = await loadRoute();
 
-    const response = await GET(callbackRequest({ code: 'auth-code', state: 'x' }), { ...TEST_USER, organizationId: '' });
+    const response = await GET(callbackRequest({ code: 'auth-code', state: 'x' }));
 
     expect(response.status).toBe(403);
     expect(m.createMetaClient).not.toHaveBeenCalled();

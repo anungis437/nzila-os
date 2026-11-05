@@ -32,6 +32,14 @@ param sku string = 'GP_Standard_D4ds_v5'
 @maxValue(32768)
 param storageGb int = 512
 
+@description('Let Azure apply the default storage performance tier for storageGb (cheapest) instead of the P15/P20/P30 mapping below.')
+param useDefaultStorageTier bool = false
+
+@description('max_connections override. 0 = default (500 with PgBouncer, 200 without). Burstable B1ms supports 50.')
+@minValue(0)
+@maxValue(5000)
+param maxConnectionsOverride int = 0
+
 @description('Backup retention in days. Range: 7–35')
 @minValue(7)
 @maxValue(35)
@@ -125,11 +133,12 @@ resource server 'Microsoft.DBforPostgreSQL/flexibleServers@2023-12-01-preview' =
     version: '16'
     administratorLogin: adminLogin
     administratorLoginPassword: adminPassword
-    storage: {
+    storage: union({
       storageSizeGB: storageGb
       autoGrow: 'Enabled'
+    }, useDefaultStorageTier ? {} : {
       tier: storageGb >= 1024 ? 'P30' : (storageGb >= 256 ? 'P20' : 'P15')
-    }
+    })
     backup: {
       backupRetentionDays: backupRetentionDays
       geoRedundantBackup: effectiveGeoBackup ? 'Enabled' : 'Disabled'
@@ -255,7 +264,7 @@ resource maxConnections 'Microsoft.DBforPostgreSQL/flexibleServers/configuration
   name: 'max_connections'
   properties: {
     // With PgBouncer, actual server connections ≪ client connections
-    value: enablePgBouncer ? '500' : '200'
+    value: maxConnectionsOverride > 0 ? string(maxConnectionsOverride) : (enablePgBouncer ? '500' : '200')
     source: 'user-override'
   }
 }

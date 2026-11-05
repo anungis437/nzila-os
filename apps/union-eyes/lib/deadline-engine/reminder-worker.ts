@@ -25,6 +25,7 @@ import { writeDeadlineAuditEvent } from './audit';
 import { deliverDeadlineReminderEmail } from './email-adapter';
 import { sweepPendingAssignmentConvergence } from './assignment-sync';
 import { isTerminalDeadlineStatus } from './deadline-semantics';
+import { isKnownTimeZone, shiftByCalendarDaysInZone } from './deadline-day';
 import type { WorkerRunResult } from './types';
 
 export interface RunReminderWorkerConfig {
@@ -47,6 +48,8 @@ interface ClaimedReminderRow {
   reminder_kind: string;
   offset_days: number;
   scheduled_for: string;
+  /** The zone the scheduler counted offset_days in (reminder-scheduler.ts); rows written before it recorded one read 'UTC'. */
+  timezone?: string | null;
   attempt_count: number;
   max_attempts: number;
 }
@@ -176,6 +179,7 @@ export async function runDeadlineReminderWorker(
        deadline_reminders.reminder_kind,
        deadline_reminders.offset_days,
        deadline_reminders.scheduled_for,
+       deadline_reminders.timezone,
        deadline_reminders.attempt_count,
        deadline_reminders.max_attempts
   `);
@@ -281,11 +285,12 @@ export async function runDeadlineReminderWorker(
     }
 
     const attemptStart = Date.now();
-    const dueDate = new Date(row.scheduled_for);
-    // scheduled_for = dueDate - offset_days days → deadline occurs at
-    // scheduled_for + offset_days.
-    const deadlineDate = new Date(
-      dueDate.getTime() + row.offset_days * 24 * 60 * 60 * 1000,
+    // scheduled_for = dueDate - offset_days calendar days in the row's zone → the deadline falls offset_days calendar days
+    // after scheduled_for at the same local time (reminder-scheduler.ts computeScheduledFor).
+    const deadlineDate = shiftByCalendarDaysInZone(
+      new Date(row.scheduled_for),
+      row.offset_days,
+      isKnownTimeZone(row.timezone) ? row.timezone : 'UTC',
     );
     const daysToDeadline = isoDaysBetween(deadlineDate, clock());
 

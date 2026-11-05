@@ -129,9 +129,10 @@ describe('claims-queries', () => {
 
   it('addClaimUpdate returns new update (default + custom type)', async () => {
     push([{ id: 'u1' }], []);
-    expect(await q.addClaimUpdate('c1', 'msg', 'u1')).toEqual({ id: 'u1' });
+    // The row is returned under the public case id whatever internal key the history row stores.
+    expect(await q.addClaimUpdate('c1', 'msg', 'u1')).toEqual({ id: 'u1', claimId: 'c1' });
     push([{ id: 'u2' }], []);
-    expect(await q.addClaimUpdate('c1', 'msg', 'u1', 'status_change')).toEqual({ id: 'u2' });
+    expect(await q.addClaimUpdate('c1', 'msg', 'u1', 'status_change')).toEqual({ id: 'u2', claimId: 'c1' });
   });
 
   it('deleteClaim soft-closes and returns claim', async () => {

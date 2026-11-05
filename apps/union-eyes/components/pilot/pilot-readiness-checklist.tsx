@@ -135,6 +135,14 @@ const API_ITEM_TO_CHECKLIST_ID: Record<string, string> = {
   "export-verified": "export_verified",
 };
 
+/** The id the onboarding API knows a step by (`org-seeded`), from the id the checklist shows it under (`org_seeded`); null for a step the API does not have. */
+export function apiItemIdOf(checklistId: string): string | null {
+  for (const [apiItemId, id] of Object.entries(API_ITEM_TO_CHECKLIST_ID)) {
+    if (id === checklistId) return apiItemId;
+  }
+  return null;
+}
+
 /**
  * Convert backend onboarding flags to checklist item completion states.
  * Unknown keys are ignored by design to keep the UI forward compatible.
@@ -306,10 +314,7 @@ export function PilotReadinessChecklist({
                   variant="ghost"
                   size="sm"
                   className="shrink-0 text-xs h-7"
-                  onClick={() => {
-                    if (item.onAction) item.onAction();
-                    if (onItemComplete) onItemComplete(item.id);
-                  }}
+                  onClick={item.onAction}
                   asChild={!!item.actionHref}
                 >
                   {item.actionHref ? (
@@ -323,6 +328,17 @@ export function PilotReadinessChecklist({
                       <ChevronRight className="h-3 w-3 ml-0.5" />
                     </>
                   )}
+                </Button>
+              )}
+              {/* Going to the place where a step is done is not doing it: the step is marked done only when the organization's own data shows it. */}
+              {!item.completed && onItemComplete && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 text-xs h-7"
+                  onClick={() => onItemComplete(item.id)}
+                >
+                  Verify
                 </Button>
               )}
             </div>

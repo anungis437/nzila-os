@@ -57,7 +57,6 @@ vi.mock('../adapters/insurance/ia-adapter', () => ({ IndustrialAllianceAdapter: 
 vi.mock('../adapters/communication/slack-adapter', () => ({ SlackAdapter: h.FakeAdapter }));
 vi.mock('../adapters/communication/teams-adapter', () => ({ TeamsAdapter: h.FakeAdapter }));
 vi.mock('../adapters/lms/linkedin-learning-adapter', () => ({ LinkedInLearningAdapter: h.FakeAdapter }));
-vi.mock('../adapters/documents/sharepoint-adapter', () => ({ SharePointAdapter: h.FakeAdapter }));
 
 import { IntegrationFactory, getIntegration, getIntegrations } from '../factory';
 import { IntegrationProvider, IntegrationType } from '../types';
@@ -114,6 +113,20 @@ describe('IntegrationFactory', () => {
     await expect(factory.getIntegration('org1', IntegrationProvider.CUSTOM)).rejects.toMatchObject({
       code: 'PROVIDER_UNAVAILABLE',
     });
+  });
+
+  it('refuses SharePoint: it is not in the catalog and no adapter can be constructed for it', async () => {
+    await expect(factory.getIntegration('org1', IntegrationProvider.SHAREPOINT)).rejects.toMatchObject({
+      code: 'PROVIDER_UNAVAILABLE',
+    });
+    const create = (factory as unknown as { createInstance: (provider: IntegrationProvider, organizationId: string) => unknown }).createInstance.bind(factory);
+    let refusal: unknown;
+    try {
+      create(IntegrationProvider.SHAREPOINT, 'org1');
+    } catch (error) {
+      refusal = error;
+    }
+    expect(refusal).toMatchObject({ code: 'NOT_IMPLEMENTED' });
   });
 
   it('throws MISSING_ENV_VARS when env not configured', async () => {

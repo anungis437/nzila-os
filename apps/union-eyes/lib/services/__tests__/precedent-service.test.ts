@@ -64,8 +64,10 @@ function sfw(data: any[] = []) {
 function sfol(data: any[] = []) {
   return {
     from: vi.fn(() => ({
-      orderBy: vi.fn(() => ({
-        limit: vi.fn().mockResolvedValue(data),
+      where: vi.fn(() => ({
+        orderBy: vi.fn(() => ({
+          limit: vi.fn().mockResolvedValue(data),
+        })),
       })),
     })),
   };
@@ -86,7 +88,9 @@ function _sfwool(data: any[] = []) {
 function sfg(data: any[] = []) {
   return {
     from: vi.fn(() => ({
-      groupBy: vi.fn().mockResolvedValue(data),
+      where: vi.fn(() => ({
+        groupBy: vi.fn().mockResolvedValue(data),
+      })),
     })),
   };
 }
@@ -104,9 +108,15 @@ vi.mock("@/db/db", () => ({
   },
 }));
 
+// Disclosed adaptation (B101): the library has an owner now, and the owner-scoped writes run in a tenant transaction.
+vi.mock("@/lib/db/with-rls-context", () => ({
+  withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => unknown) => fn((await import("@/db/db")).db),
+}));
+
 vi.mock("@/db/schema", () => ({
   arbitrationDecisions: {
     id: "id",
+    sourceOrganizationId: "sourceOrganizationId",
     caseNumber: "caseNumber",
     caseTitle: "caseTitle",
     tribunal: "tribunal",
@@ -127,6 +137,8 @@ vi.mock("@/db/schema", () => ({
     createdAt: "createdAt",
     updatedAt: "updatedAt",
     fullText: "fullText",
+    isPublic: "isPublic",
+    accessRestrictions: "accessRestrictions",
   },
   arbitratorProfiles: {
     id: "id",
@@ -156,7 +168,9 @@ vi.mock("@/lib/logger", () => ({
 /* ── imports ────────────────────────────────────────────────────────── */
 
 import { db } from "@/db/db";
+import { eq, like } from "drizzle-orm";
 import {
+  PrecedentFilterError,
   getPrecedentById,
   getPrecedentByCaseNumber,
   listPrecedents,
@@ -194,14 +208,12 @@ describe("precedent-service", () => {
 
   // ── getPrecedentById ────────────────────────────────────────────────
   describe("getPrecedentById", () => {
-    it("returns decision and increments view count", async () => {
+    it("returns the decision without writing: a read does not count itself", async () => {
       mocks.mockFindFirst.mockResolvedValueOnce(dec);
-      mocks.mockUpdateSet.mockReturnValueOnce({
-        where: vi.fn().mockResolvedValue([dec]),
-      });
       const result = await getPrecedentById("d-1");
       expect(result).toBeDefined();
       expect(mocks.mockFindFirst).toHaveBeenCalled();
+      expect(db.update).not.toHaveBeenCalled();
     });
 
     it("returns null when not found", async () => {
@@ -211,18 +223,12 @@ describe("precedent-service", () => {
 
     it("strips fullText when includeFullText=false", async () => {
       mocks.mockFindFirst.mockResolvedValueOnce({ ...dec, fullText: "long..." });
-      mocks.mockUpdateSet.mockReturnValueOnce({
-        where: vi.fn().mockResolvedValue([dec]),
-      });
       const r = await getPrecedentById("d-1", { includeFullText: false });
       expect(r?.fullText).toBeUndefined();
     });
 
     it("keeps fullText when includeFullText=true", async () => {
       mocks.mockFindFirst.mockResolvedValueOnce({ ...dec, fullText: "long..." });
-      mocks.mockUpdateSet.mockReturnValueOnce({
-        where: vi.fn().mockResolvedValue([dec]),
-      });
       const r = await getPrecedentById("d-1", { includeFullText: true });
       expect(r?.fullText).toBe("long...");
     });
@@ -298,8 +304,7 @@ describe("precedent-service", () => {
       mocks.mockReturning.mockResolvedValueOnce([dec]);
       // updateArbitratorStats background: select for decisions
       (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfw([]));
-      const r = await createPrecedent({
-        organizationId: "org-1",
+      const r = await createPrecedent({ organizationId: "org-1" }, {
         caseNumber: "ARB-002",
         decisionDate: new Date(),
         arbitrator: "Smith",
@@ -309,12 +314,22 @@ describe("precedent-service", () => {
 
     it("skips arbitrator stats when no arbitrator", async () => {
       mocks.mockReturning.mockResolvedValueOnce([dec]);
-      const r = await createPrecedent({
-        organizationId: "org-1",
+      const r = await createPrecedent({ organizationId: "org-1" }, {
         caseNumber: "ARB-003",
         decisionDate: new Date(),
       } as never);
       expect(r.id).toBe("d-1");
+    });
+
+    it("owns the decision by the supplying organization and does not share it, whatever the caller sends", async () => {
+      mocks.mockReturning.mockResolvedValueOnce([dec]);
+      await createPrecedent({ organizationId: "org-1" }, {
+        caseNumber: "ARB-004", decisionDate: new Date(),
+        sourceOrganizationId: "org-victim", isPublic: true, accessRestrictions: "",
+      } as never);
+      expect(mocks.mockInsertValues).toHaveBeenCalledWith(
+        expect.objectContaining({ sourceOrganizationId: "org-1", isPublic: false, accessRestrictions: "pending_review" }),
+      );
     });
   });
 
@@ -322,13 +337,15 @@ describe("precedent-service", () => {
   describe("updatePrecedent", () => {
     it("updates and returns the decision", async () => {
       mocks.mockReturning.mockResolvedValueOnce([{ ...dec, caseTitle: "Updated" }]);
-      const r = await updatePrecedent("d-1", { caseTitle: "Updated" } as never);
+      const r = await updatePrecedent({ organizationId: "org-1" }, "d-1", { caseTitle: "Updated" } as never);
       expect(r?.caseTitle).toBe("Updated");
+      // the statement names the owning organization as well as the id
+      expect(eq).toHaveBeenCalledWith("sourceOrganizationId", "org-1");
     });
 
     it("returns null when not found", async () => {
       mocks.mockReturning.mockResolvedValueOnce([undefined]);
-      const r = await updatePrecedent("bad", {} as never);
+      const r = await updatePrecedent({ organizationId: "org-1" }, "bad", {} as never);
       expect(r).toBeNull();
     });
   });
@@ -336,13 +353,19 @@ describe("precedent-service", () => {
   // ── deletePrecedent ────────────────────────────────────────────────
   describe("deletePrecedent", () => {
     it("returns true on success", async () => {
-      mocks.mockDeleteWhere.mockResolvedValueOnce(undefined);
-      expect(await deletePrecedent("d-1")).toBe(true);
+      mocks.mockDeleteWhere.mockReturnValueOnce({ returning: vi.fn().mockResolvedValue([{ id: "d-1" }]) });
+      expect(await deletePrecedent({ organizationId: "org-1" }, "d-1")).toBe(true);
+      expect(eq).toHaveBeenCalledWith("sourceOrganizationId", "org-1");
+    });
+
+    it("reports false, deleting nothing, for a decision another organization owns", async () => {
+      mocks.mockDeleteWhere.mockReturnValueOnce({ returning: vi.fn().mockResolvedValue([]) });
+      expect(await deletePrecedent({ organizationId: "org-2" }, "d-1")).toBe(false);
     });
 
     it("throws on error", async () => {
-      mocks.mockDeleteWhere.mockRejectedValueOnce(new Error("del err"));
-      await expect(deletePrecedent("d-1")).rejects.toThrow("Failed to delete precedent");
+      mocks.mockDeleteWhere.mockReturnValueOnce({ returning: vi.fn().mockRejectedValue(new Error("del err")) });
+      await expect(deletePrecedent({ organizationId: "org-1" }, "d-1")).rejects.toThrow("Failed to delete precedent");
     });
   });
 
@@ -361,6 +384,40 @@ describe("precedent-service", () => {
         tribunal: ["OLRB"],
       });
       expect(r).toHaveLength(0);
+    });
+  });
+
+  // DEF-0B3-ARBITRATION-DECISIONS-NON-PUBLIC-READABLE-CROSS-TENANT, DEF-0B11-PRP-PRECEDENT-SEARCH-USES-UNESCAPED-WILDCARD-LIKE
+  describe("what the library reads", () => {
+    it("takes the wildcards of a search term literally", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await searchPrecedents("50%_off");
+      expect(like).toHaveBeenCalledWith("fullText", "%50\\%\\_off%");
+    });
+
+    it("restricts a search to decisions marked public with no access restriction", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await searchPrecedents("discipline");
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
+    });
+
+    it("applies the same restriction to a read by id", async () => {
+      (db.query.arbitrationDecisions.findFirst as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
+      expect(await getPrecedentById("d1")).toBeNull();
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+    });
+
+    it("refuses a filter value outside the column's declared values instead of casting it to the database", async () => {
+      const columns = (await import("@/db/schema")).arbitrationDecisions as unknown as Record<string, unknown>;
+      const original = columns.tribunal;
+      columns.tribunal = { enumValues: ["OLRB", "CIRB"] };
+      try {
+        await expect(searchPrecedents("x", { tribunal: ["NOT-A-TRIBUNAL"] })).rejects.toBeInstanceOf(PrecedentFilterError);
+        await expect(searchPrecedents("x", { tribunal: ["NOT-A-TRIBUNAL"] })).rejects.toMatchObject({ code: "INVALID_PRECEDENT_FILTER" });
+      } finally {
+        columns.tribunal = original;
+      }
     });
   });
 
@@ -384,10 +441,6 @@ describe("precedent-service", () => {
     it("returns related when source exists", async () => {
       // getPrecedentById internal call
       mocks.mockFindFirst.mockResolvedValueOnce(dec);
-      // increment view count
-      mocks.mockUpdateSet.mockReturnValueOnce({
-        where: vi.fn().mockResolvedValue([dec]),
-      });
       // the final select for related
       (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([{ id: "d-2" }]));
       const r = await getRelatedPrecedents("d-1");
@@ -466,7 +519,7 @@ describe("precedent-service", () => {
       (db.select as ReturnType<typeof vi.fn>)
         .mockReturnValueOnce(sfg([{ outcome: "upheld", count: 3 }]))
         .mockReturnValueOnce(sfg([{ tribunal: "OLRB", count: 2 }]))
-        .mockReturnValueOnce(sf([{ total: 5 }]));
+        .mockReturnValueOnce(sfw([{ total: 5 }]));
       const r = await getPrecedentStatistics();
       expect(r.total).toBe(5);
       expect(r.byOutcome).toHaveLength(1);
@@ -480,6 +533,47 @@ describe("precedent-service", () => {
       (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfol([dec]));
       const r = await getMostCitedPrecedents(5);
       expect(r).toHaveLength(1);
+    });
+  });
+
+
+  // DEF-0B11-PRP-PRECEDENT-LIBRARY-READS-RETURN-EVERY-COLUMN-AND-IGNORE-IS-PUBLIC-AND-ACCESS-RESTRICTIONS
+  describe("public-only SQL predicates across every shared-library read mode", () => {
+    it("filters issue-type lookup before returning rows", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await getPrecedentsByIssueType("discipline");
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
+    });
+
+    it("filters most-cited rankings before returning rows", async () => {
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfol([]));
+      await getMostCitedPrecedents(10);
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
+    });
+
+    it("filters every statistics query, including the total count", async () => {
+      const groupedOutcome = sfg([]);
+      const groupedTribunal = sfg([]);
+      const total = sfw([{ total: 0 }]);
+      (db.select as ReturnType<typeof vi.fn>)
+        .mockReturnValueOnce(groupedOutcome)
+        .mockReturnValueOnce(groupedTribunal)
+        .mockReturnValueOnce(total);
+      await getPrecedentStatistics();
+      expect(groupedOutcome.from.mock.results[0].value.where).toHaveBeenCalled();
+      expect(groupedTribunal.from.mock.results[0].value.where).toHaveBeenCalled();
+      expect(total.from.mock.results[0].value.where).toHaveBeenCalled();
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+    });
+
+    it("filters related decisions independently of the source decision", async () => {
+      mocks.mockFindFirst.mockResolvedValueOnce(dec);
+      (db.select as ReturnType<typeof vi.fn>).mockReturnValueOnce(sfwolNoOffset([]));
+      await getRelatedPrecedents("d-1");
+      expect(eq).toHaveBeenCalledWith("isPublic", true);
+      expect(eq).toHaveBeenCalledWith("accessRestrictions", "");
     });
   });
 
@@ -537,7 +631,7 @@ describe("precedent-service", () => {
 
     it("createPrecedent throws on error", async () => {
       mocks.mockReturning.mockRejectedValue(new Error("db"));
-      await expect(createPrecedent({} as never)).rejects.toThrow(
+      await expect(createPrecedent({ organizationId: "org-1" }, {} as never)).rejects.toThrow(
         "Failed to create precedent",
       );
     });
@@ -548,7 +642,7 @@ describe("precedent-service", () => {
           returning: vi.fn().mockRejectedValue(new Error("db")),
         })),
       }));
-      await expect(updatePrecedent("id", {})).rejects.toThrow(
+      await expect(updatePrecedent({ organizationId: "org-1" }, "id", {})).rejects.toThrow(
         "Failed to update precedent",
       );
     });
@@ -608,9 +702,3 @@ describe("precedent-service", () => {
   });
 });
 
-/* sf: select→from (no where/orderBy) */
-function sf(data: any[] = []) {
-  return {
-    from: vi.fn().mockResolvedValue(data),
-  };
-}

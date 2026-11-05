@@ -1,5 +1,4 @@
-import { pgTable, text, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
-import { createId } from "@paralleldrive/cuid2";
+import { pgTable, text, timestamp, boolean, jsonb, uuid } from "drizzle-orm/pg-core";
 
 /**
  * Whiplash Prevention Schema
@@ -10,9 +9,9 @@ import { createId } from "@paralleldrive/cuid2";
 
 // Stripe Connect account registry
 export const stripeConnectAccounts = pgTable("stripe_connect_accounts", {
-  id: text("id")
+  id: uuid("id")
     .primaryKey()
-    .$defaultFn(() => createId()),
+    .defaultRandom(),
   accountType: text("account_type").notNull(), // "operational", "strike_fund", "legal_defense", "education_fund"
   accountPurpose: text("account_purpose").notNull(),
   stripeAccountId: text("stripe_account_id").notNull().unique(), // Stripe Connect Account ID (acct_xxx)
@@ -27,51 +26,51 @@ export const stripeConnectAccounts = pgTable("stripe_connect_accounts", {
   bankName: text("bank_name"),
   accountVerified: boolean("account_verified").notNull().default(false),
   createdBy: text("created_by").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Payment classification policy
 export const paymentClassificationPolicy = pgTable("payment_classification_policy", {
-  id: text("id")
+  id: uuid("id")
     .primaryKey()
-    .$defaultFn(() => createId()),
+    .defaultRandom(),
   policyName: text("policy_name").notNull(), // e.g., "Strike Fund Separation Policy"
   policyDescription: text("policy_description"),
-  effectiveDate: timestamp("effective_date").notNull(),
-  expiryDate: timestamp("expiry_date"),
+  effectiveDate: timestamp("effective_date", { withTimezone: true }).notNull(),
+  expiryDate: timestamp("expiry_date", { withTimezone: true }),
   enforceStrictSeparation: boolean("enforce_strict_separation").notNull().default(true), // Strike payments must use separate account
   allowOperationalFallback: boolean("allow_operational_fallback").notNull().default(false), // Can never use operational account for strike payments
   requireTrustAccount: boolean("require_trust_account").notNull().default(true), // Strike fund must be in trust account
   automaticClassification: boolean("automatic_classification").notNull().default(true), // Auto-detect payment type and route to correct account
   approvedBy: text("approved_by").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Payment routing rules (which account for which payment type)
 export const paymentRoutingRules = pgTable("payment_routing_rules", {
-  id: text("id")
+  id: uuid("id")
     .primaryKey()
-    .$defaultFn(() => createId()),
+    .defaultRandom(),
   paymentType: text("payment_type").notNull(), // "strike_payment", "dues_payment", "donation", "service_fee", "legal_fee"
   paymentCategory: text("payment_category").notNull(), // "strike_fund", "operational", "legal_defense", "education"
-  destinationAccountId: text("destination_account_id").references(() => stripeConnectAccounts.id).notNull(),
+  destinationAccountId: uuid("destination_account_id").references(() => stripeConnectAccounts.id).notNull(),
   destinationAccountType: text("destination_account_type").notNull(), // "operational", "strike_fund"
   routingMandatory: boolean("routing_mandatory").notNull().default(true), // Must use this account
-  fallbackAccountId: text("fallback_account_id").references(() => stripeConnectAccounts.id),
+  fallbackAccountId: uuid("fallback_account_id").references(() => stripeConnectAccounts.id),
   allowFallback: boolean("allow_fallback").notNull().default(false), // Can use fallback if primary fails?
   routingPriority: text("routing_priority").notNull().default("1"), // Priority order (1 = highest)
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Payment transaction log with routing enforcement
 export const separatedPaymentTransactions = pgTable("separated_payment_transactions", {
-  id: text("id")
+  id: uuid("id")
     .primaryKey()
-    .$defaultFn(() => createId()),
-  transactionDate: timestamp("transaction_date").notNull().defaultNow(),
+    .defaultRandom(),
+  transactionDate: timestamp("transaction_date", { withTimezone: true }).notNull().defaultNow(),
   paymentType: text("payment_type").notNull(), // "strike_payment", "operational", "dues"
   paymentCategory: text("payment_category").notNull(),
   paymentAmount: text("payment_amount").notNull(), // In cents
@@ -82,29 +81,29 @@ export const separatedPaymentTransactions = pgTable("separated_payment_transacti
   payeeName: text("payee_name"),
   stripePaymentIntentId: text("stripe_payment_intent_id"), // Stripe Payment Intent ID (pi_xxx)
   stripeChargeId: text("stripe_charge_id"), // Stripe Charge ID (ch_xxx)
-  routedToAccountId: text("routed_to_account_id").references(() => stripeConnectAccounts.id).notNull(),
+  routedToAccountId: uuid("routed_to_account_id").references(() => stripeConnectAccounts.id).notNull(),
   routedToAccountType: text("routed_to_account_type").notNull(),
-  routingRuleId: text("routing_rule_id").references(() => paymentRoutingRules.id),
-  separationEnforced: boolean("separation_enforced").notNull().default(true), // Was separation enforced?
-  correctAccountUsed: boolean("correct_account_used").notNull().default(true),
+  routingRuleId: uuid("routing_rule_id").references(() => paymentRoutingRules.id),
+  separationEnforced: boolean("separation_enforced").notNull().default(false), // Was separation enforced? Not asserted for a transaction nobody checked
+  correctAccountUsed: boolean("correct_account_used").notNull().default(false),
   paymentStatus: text("payment_status").notNull().default("pending"), // "pending", "completed", "failed", "refunded"
   failureReason: text("failure_reason"),
   metadata: jsonb("metadata"), // Additional payment details
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Whiplash violation detection (payments routed to wrong account)
 export const whiplashViolations = pgTable("whiplash_violations", {
-  id: text("id")
+  id: uuid("id")
     .primaryKey()
-    .$defaultFn(() => createId()),
-  violationDate: timestamp("violation_date").notNull().defaultNow(),
+    .defaultRandom(),
+  violationDate: timestamp("violation_date", { withTimezone: true }).notNull().defaultNow(),
   violationType: text("violation_type").notNull(), // "strike_payment_to_operational", "commingled_funds", "incorrect_routing"
   severity: text("severity").notNull(), // "critical", "high", "medium", "low"
-  transactionId: text("transaction_id").references(() => separatedPaymentTransactions.id),
+  transactionId: uuid("transaction_id").references(() => separatedPaymentTransactions.id),
   paymentType: text("payment_type").notNull(),
-  expectedAccountId: text("expected_account_id").references(() => stripeConnectAccounts.id),
-  actualAccountId: text("actual_account_id").references(() => stripeConnectAccounts.id),
+  expectedAccountId: uuid("expected_account_id").references(() => stripeConnectAccounts.id),
+  actualAccountId: uuid("actual_account_id").references(() => stripeConnectAccounts.id),
   violationDescription: text("violation_description").notNull(),
   amountInvolved: text("amount_involved"), // How much money was misrouted
   correctionRequired: boolean("correction_required").notNull().default(true),
@@ -112,18 +111,18 @@ export const whiplashViolations = pgTable("whiplash_violations", {
   violationStatus: text("violation_status").notNull().default("open"), // "open", "investigating", "resolved"
   detectedBy: text("detected_by"),
   resolvedBy: text("resolved_by"),
-  resolvedAt: timestamp("resolved_at"),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   resolutionNotes: text("resolution_notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Strike fund payment audit
 export const strikeFundPaymentAudit = pgTable("strike_fund_payment_audit", {
-  id: text("id")
+  id: uuid("id")
     .primaryKey()
-    .$defaultFn(() => createId()),
-  auditDate: timestamp("audit_date").notNull().defaultNow(),
+    .defaultRandom(),
+  auditDate: timestamp("audit_date", { withTimezone: true }).notNull().defaultNow(),
   auditPeriod: text("audit_period").notNull(), // "Q1-2025", "2024"
   totalStrikePayments: text("total_strike_payments").notNull(),
   totalStrikeAmount: text("total_strike_amount").notNull(),
@@ -138,16 +137,16 @@ export const strikeFundPaymentAudit = pgTable("strike_fund_payment_audit", {
   recommendedActions: text("recommended_actions"),
   auditedBy: text("audited_by").notNull(),
   auditReport: text("audit_report"), // Link to full report
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Account balance reconciliation
 export const accountBalanceReconciliation = pgTable("account_balance_reconciliation", {
-  id: text("id")
+  id: uuid("id")
     .primaryKey()
-    .$defaultFn(() => createId()),
-  reconciliationDate: timestamp("reconciliation_date").notNull().defaultNow(),
-  accountId: text("account_id").references(() => stripeConnectAccounts.id).notNull(),
+    .defaultRandom(),
+  reconciliationDate: timestamp("reconciliation_date", { withTimezone: true }).notNull().defaultNow(),
+  accountId: uuid("account_id").references(() => stripeConnectAccounts.id).notNull(),
   accountType: text("account_type").notNull(),
   stripeReportedBalance: text("stripe_reported_balance").notNull(), // Balance according to Stripe
   systemCalculatedBalance: text("system_calculated_balance").notNull(), // Balance according to our records
@@ -157,19 +156,19 @@ export const accountBalanceReconciliation = pgTable("account_balance_reconciliat
   reconciliationStatus: text("reconciliation_status").notNull().default("pending"), // "pending", "reconciled", "discrepancy"
   reconciledBy: text("reconciled_by"),
   reconciliationNotes: text("reconciliation_notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Whiplash prevention audit log
 export const whiplashPreventionAudit = pgTable("whiplash_prevention_audit", {
-  id: text("id")
+  id: uuid("id")
     .primaryKey()
-    .$defaultFn(() => createId()),
-  auditDate: timestamp("audit_date").notNull().defaultNow(),
+    .defaultRandom(),
+  auditDate: timestamp("audit_date", { withTimezone: true }).notNull().defaultNow(),
   actionType: text("action_type").notNull(), // "payment_routed", "account_created", "violation_detected", "correction_applied"
   actionDescription: text("action_description").notNull(),
-  accountId: text("account_id").references(() => stripeConnectAccounts.id),
-  transactionId: text("transaction_id").references(() => separatedPaymentTransactions.id),
+  accountId: uuid("account_id").references(() => stripeConnectAccounts.id),
+  transactionId: uuid("transaction_id").references(() => separatedPaymentTransactions.id),
   performedBy: text("performed_by").notNull(),
   complianceImpact: text("compliance_impact"), // "none", "low", "medium", "high", "critical"
   metadata: jsonb("metadata"),

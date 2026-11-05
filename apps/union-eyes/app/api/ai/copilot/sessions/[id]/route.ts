@@ -6,68 +6,76 @@
  * Feature-gated: AI_STEWARD_COPILOT
  */
 
-import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { recordCopilotOutcome } from '@/lib/ai/steward-copilot';
 import { standardErrorResponse, standardSuccessResponse, ErrorCode } from '@/lib/api/standardized-responses';
-import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { enforceAISafety } from '@nzila/policies';
 import { logAiActionTaken } from '@/lib/audit-logger';
 
 const outcomeSchema = z.object({
   outcome: z.enum(['accepted', 'edited', 'rejected']),
-  editedResponse: z.string().optional(),
+  editedResponse: z.string().max(20_000).optional(),
   feedbackRating: z.number().min(1).max(5).optional(),
   feedbackNotes: z.string().max(2000).optional(),
 });
 
-export const PATCH = withRoleAuth('steward', async (request: NextRequest, context: BaseAuthContext) => {
-  // Rate limit
-  const rl = await checkRateLimit(`ai-copilot-session:${context.userId}`, RATE_LIMITS.AI_COMPLETION);
-  if (!rl.allowed) return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded.');
+// `recordCopilotOutcome` decides the session and writes its audit record in one tenant transaction; the entitlement and the body are checked by the wrapper.
+export const PATCH = withApi(
+  {
+    auth: { minRole: 'steward' },
+    entitlement: 'ai_advanced_insights',
+    body: outcomeSchema,
+    registry: { audience: 'steward', productionStatus: 'active', evidenceRequired: false, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'Record the outcome of a copilot session' },
+  },
+  async ({ user, userId, organizationId, params, body }) => {
+    // Rate limit
+    const rl = await checkRateLimit(`ai-copilot-session:${userId}`, RATE_LIMITS.AI_COMPLETION);
+    if (!rl.allowed) return standardErrorResponse(ErrorCode.RATE_LIMIT_EXCEEDED, 'AI rate limit exceeded.');
 
-  const blocked = await guardAiFeature(AI_FEATURES.STEWARD_COPILOT, {
-    userId: context.userId,
-    organizationId: context.organizationId,
-  });
-  if (blocked) return blocked;
+    const blocked = await guardAiFeature(AI_FEATURES.STEWARD_COPILOT, {
+      userId: userId!,
+      organizationId: organizationId!,
+    });
+    if (blocked) return blocked;
 
-  await requireEntitlement(context.organizationId!, 'ai_advanced_insights');
-  enforceAISafety({ origin: 'copilot-session', action: 'PATCH', organizationId: context.organizationId!, userId: context.userId!, userRole: context.userRole as string, dataClass: 'internal' });
+    enforceAISafety({ origin: 'copilot-session', action: 'PATCH', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'steward', dataClass: 'internal' });
 
-  const id = (context.params as Record<string, string>)?.id;
-  if (!id) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing session id');
+    const id = z.guid().safeParse(params.id);
+    if (!id.success) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing session id');
 
-  const body = await request.json();
-  const parsed = outcomeSchema.safeParse(body);
-  if (!parsed.success) {
-    return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid outcome', parsed.error.flatten());
-  }
+    const recorded = await recordCopilotOutcome(
+      id.data,
+      organizationId!,
+      userId!,
+      body.outcome,
+      body.editedResponse,
+      body.feedbackRating,
+      body.feedbackNotes,
+    );
+    if (recorded === 'not_found') {
+      return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Copilot session not found');
+    }
+    if (recorded === 'already_decided') {
+      return standardErrorResponse(ErrorCode.CONFLICT, 'An outcome has already been recorded for this session');
+    }
 
-  await recordCopilotOutcome(
-    id,
-    context.organizationId!,
-    parsed.data.outcome,
-    parsed.data.editedResponse,
-    parsed.data.feedbackRating,
-    parsed.data.feedbackNotes,
-  );
+    // Emit AI_ACTION_TAKEN for full user→AI output traceability chain
+    await logAiActionTaken({
+      userId: userId!,
+      organizationId: organizationId!,
+      aiReferenceId: id.data,
+      actionType: body.outcome === 'accepted' ? 'accept'
+        : body.outcome === 'edited' ? 'modify'
+        : 'reject',
+      entityType: 'recommendation',
+      targetEntityId: id.data,
+    });
 
-  // Emit AI_ACTION_TAKEN for full user→AI output traceability chain
-  await logAiActionTaken({
-    userId: context.userId!,
-    organizationId: context.organizationId!,
-    aiReferenceId: id,
-    actionType: parsed.data.outcome === 'accepted' ? 'accept'
-      : parsed.data.outcome === 'edited' ? 'modify'
-      : 'reject',
-    entityType: 'recommendation',
-    targetEntityId: id,
-  });
-
-  return standardSuccessResponse({ sessionId: id, ...parsed.data });
-});
+    return standardSuccessResponse({ sessionId: id.data, ...body });
+  },
+);

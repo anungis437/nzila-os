@@ -45,10 +45,9 @@ Every server action mutation produces a sealed evidence pack:
 
 ### Webhook Security
 
-Single verification path for Clerk webhooks via `@nzila/platform-auth`:
+The shared Clerk webhook verifier was retired with the identity provider in Union Eyes and `@nzila/platform-auth` (UE-CONV-A-006); a Clerk-named webhook route that still exists carries its own HMAC and timestamp check:
 
-- `verifyClerkWebhook()` — HMAC-SHA256 + timestamp replay protection
-- Contract test: `webhook-hygiene.test.ts` (WHK-001, WHK-002, WHK-003)
+- Contract test: `webhook-hygiene.test.ts` (WHK-001 signature, WHK-002 timestamp, WHK-003 guard files use platform-auth)
 
 ### App Registry
 

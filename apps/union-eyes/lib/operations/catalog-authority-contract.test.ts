@@ -9,6 +9,16 @@ describe('packaged catalog authority contract', () => {
     expect(contract.payload.entries.length).toBeGreaterThanOrEqual(100)
   })
 
+  it('never packages member-writable global location tracking policy', () => {
+    const location = contract.payload.entries.find((entry) => entry.table === 'location_tracking_config')
+    const canonical = storageAuthorityManifest.find((entry) => entry.table === 'location_tracking_config')
+    expect(location?.classification).toBe('GLOBAL_REFERENCE_DATA')
+    expect(location?.runtime).toEqual(['SELECT'])
+    expect(location?.system).toEqual([])
+    expect(canonical?.requiredRuntimePrivileges).toEqual(['SELECT'])
+    expect(canonical?.requiredSystemPrivileges).toEqual([])
+  })
+
   it('matches the reviewed storage-authority source', () => {
     const packaged = new Map(contract.payload.entries.map((entry) => [entry.table, entry]))
     expect(packaged.size).toBe(storageAuthorityManifest.length)

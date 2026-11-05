@@ -6,28 +6,33 @@
  * - Runs daily to send session reminders and certification expiry warnings
  */
 
-import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { db } from '@/db';
+import { expiryWarningQuery, rowsOf, sessionReminderQuery, toExpiryWarning, toSessionReminder } from '@/lib/education/reminder-queries';
 import { logger } from "@/lib/logger";
 import { withApi } from '@/lib/api/framework';
+import { jobResponse, type JobFailure } from '@/lib/operations/job-result';
 import {
   batchSendSessionReminders,
   batchSendExpiryWarnings,
 } from "@/lib/email/training-notifications";
 
 export const dynamic = "force-dynamic";
+
+// One run sends sequentially (with a pause between messages) inside a bounded request, so each kind is capped; the rest is reported as
+// not processed rather than left to run past the job timeout.
+const MAX_RECIPIENTS_PER_KIND = 300;
 export const runtime = "nodejs";
 
 /**
- * GET /api/cron/education-reminders
+ * POST /api/cron/education-reminders
  * Automated job to send:
  * - Session reminders (7, 3, 1 day before)
  * - Certification expiry warnings (90, 30 days before)
  * 
  * Runs daily at 6 AM via Vercel Cron
  */
-export const GET = withApi(
+export const POST = withApi(
   {
     auth: { cron: true },
     openapi: { tags: ['Cron'], summary: 'Send education reminders and certification expiry warnings' },
@@ -37,6 +42,7 @@ export const GET = withApi(
     const results = {
       sessionReminders: { sent: 0, failed: 0, errors: [] as string[] },
       expiryWarnings: { sent: 0, failed: 0, errors: [] as string[] },
+      truncated: { sessionReminders: 0, expiryWarnings: 0 },
       timestamp: new Date().toISOString(),
     };
 
@@ -45,64 +51,22 @@ export const GET = withApi(
     // ========================================
     
     // Use withSystemContext for system-wide cron job access
-    const sessionReminders = await withSystemContext(async () => {
-      return await db.execute(sql`
-        SELECT 
-          m.email,
-          m.first_name,
-          m.last_name,
-          c.course_name,
-          cs.session_date,
-          cs.session_time,
-          cs.location,
-          cs.duration_hours,
-          i.first_name as instructor_first_name,
-          i.last_name as instructor_last_name,
-          EXTRACT(DAY FROM (cs.session_date - CURRENT_DATE))::int as days_until
-        FROM course_registrations cr
-        JOIN members m ON m.id = cr.member_id
-        JOIN training_courses c ON c.id = cr.course_id
-        JOIN course_sessions cs ON cs.id = cr.session_id
-        LEFT JOIN members i ON i.id = cs.lead_instructor_id
-        WHERE 
-          cr.registration_status = 'registered'
-          AND cs.session_status = 'scheduled'
-          AND cs.session_date::date IN (
-            CURRENT_DATE + INTERVAL '7 days',
-            CURRENT_DATE + INTERVAL '3 days',
-            CURRENT_DATE + INTERVAL '1 day'
-          )
-          AND m.email IS NOT NULL
-          AND m.email != ''
-        ORDER BY cs.session_date, m.email
-      `);
-    }) as Record<string, unknown>[];
+    const allSessionReminders = await withSystemContext(async () => {
+      return rowsOf(await db.execute(sessionReminderQuery));
+    });
+    const sessionReminders = allSessionReminders.slice(0, MAX_RECIPIENTS_PER_KIND);
+    // Query returns at most 301 rows, with the full cardinality in a window count.
+    // Do not describe an unknown number of unprocessed recipients as zero.
+    results.truncated.sessionReminders = Math.max(0, Number(allSessionReminders[0]?.total_due ?? allSessionReminders.length) - sessionReminders.length);
 
     if (sessionReminders.length > 0) {
       logger.info("Processing session reminders", {
         count: sessionReminders.length,
       });
 
-      const reminderData = sessionReminders.map((row: Record<string, unknown>) => ({
-        toEmail: String(row.email),
-        memberName: `${row.first_name} ${row.last_name}`,
-        courseName: String(row.course_name),
-        sessionDate: new Date(row.session_date as string).toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        sessionTime: String(row.session_time || "TBD"),
-        daysUntilSession: Number(row.days_until),
-        location: row.location ? String(row.location) : undefined,
-        instructorName: row.instructor_first_name
-          ? `${row.instructor_first_name} ${row.instructor_last_name}`
-          : undefined,
-        sessionDuration: row.duration_hours ? Number(row.duration_hours) : undefined,
-      }));
+      const reminderData = sessionReminders.map(toSessionReminder);
 
-      results.sessionReminders = await batchSendSessionReminders(reminderData);
+            results.sessionReminders = await batchSendSessionReminders(reminderData);
       
       logger.info("Session reminders completed", {
         sent: results.sessionReminders.sent,
@@ -116,51 +80,20 @@ export const GET = withApi(
     // 2. CERTIFICATION EXPIRY WARNINGS (90, 30 days)
     // ========================================
     
-    const expiryWarnings = await withSystemContext(async () => {
-      return await db.execute(sql`
-        SELECT 
-          m.email,
-          m.first_name,
-          m.last_name,
-          mc.certification_name,
-          mc.certificate_number,
-          mc.expiry_date,
-          EXTRACT(DAY FROM (mc.expiry_date - CURRENT_DATE))::int as days_until_expiry,
-          c.continuing_education_hours
-        FROM member_certifications mc
-        JOIN members m ON m.id = mc.member_id
-        LEFT JOIN training_courses c ON c.provides_certification = mc.certification_name
-        WHERE 
-          mc.certification_status = 'active'
-          AND mc.expiry_date::date IN (
-            CURRENT_DATE + INTERVAL '90 days',
-            CURRENT_DATE + INTERVAL '30 days'
-          )
-          AND m.email IS NOT NULL
-          AND m.email != ''
-        ORDER BY mc.expiry_date, m.email
-      `);
-    }) as Record<string, unknown>[];
+    const allExpiryWarnings = await withSystemContext(async () => {
+      return rowsOf(await db.execute(expiryWarningQuery));
+    });
+    const expiryWarnings = allExpiryWarnings.slice(0, MAX_RECIPIENTS_PER_KIND);
+    results.truncated.expiryWarnings = Math.max(0, Number(allExpiryWarnings[0]?.total_due ?? allExpiryWarnings.length) - expiryWarnings.length);
 
     if (expiryWarnings.length > 0) {
       logger.info("Processing expiry warnings", {
         count: expiryWarnings.length,
       });
 
-      const warningData = expiryWarnings.map((row: Record<string, unknown>) => ({
-        toEmail: String(row.email),
-        memberName: `${row.first_name} ${row.last_name}`,
-        certificationName: String(row.certification_name),
-        certificateNumber: String(row.certificate_number),
-        expiryDate: new Date(row.expiry_date as string).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        daysUntilExpiry: Number(row.days_until_expiry),
-      }));
+      const warningData = expiryWarnings.map(toExpiryWarning);
 
-      results.expiryWarnings = await batchSendExpiryWarnings(warningData);
+            results.expiryWarnings = await batchSendExpiryWarnings(warningData);
       
       logger.info("Expiry warnings completed", {
         sent: results.expiryWarnings.sent,
@@ -170,12 +103,30 @@ export const GET = withApi(
       logger.info("No expiry warnings to send today");
     }
 
-    // Return summary
-    return {
-      success: true,
-      results,
-      message: "Education reminders processed successfully",
-    };
+    if (results.truncated.sessionReminders + results.truncated.expiryWarnings > 0) {
+      logger.warn('Education reminders were capped for this run', results.truncated);
+    }
+
+    const failures: JobFailure[] = [];
+    if (results.sessionReminders.failed > 0 || results.truncated.sessionReminders > 0) {
+      failures.push({ scope: 'session-reminders', reason: `${results.sessionReminders.failed} send(s) failed; ${results.truncated.sessionReminders} recipient(s) unprocessed` });
+    }
+    if (results.expiryWarnings.failed > 0 || results.truncated.expiryWarnings > 0) {
+      failures.push({ scope: 'expiry-warnings', reason: `${results.expiryWarnings.failed} send(s) failed; ${results.truncated.expiryWarnings} recipient(s) unprocessed` });
+    }
+
+    return jobResponse({
+      job: 'education-reminders',
+      attempted: 2,
+      succeeded: 2 - failures.length,
+      failures,
+      details: {
+        results,
+        message: failures.length === 0
+          ? "Education reminders processed successfully"
+          : "Education reminders incomplete: failed sends or unprocessed recipients",
+      },
+    });
   },
 );
 

@@ -2,12 +2,13 @@
  * Health & Safety - Hazards Management Page
  * 
  * Workplace hazard identification and tracking:
- * - Hazard reports list and grid view
- * - Priority-based filtering
- * - Status tracking and resolution
- * - Risk assessment
- * - Corrective action management
- * 
+ * - Hazard reports, filtered by status and level, with search
+ * - Statistics read from the hazard statistics route (unknown figures are shown as dashes)
+ * - Hazard reporting, also reached with ?report=1 (the dashboard's "Report Hazard" action)
+ *
+ * No corrective-action tracker is offered: the corrective_actions table is neither declared in the schema nor authorised for the tenant runtime role.
+ * No hazard detail page exists, so listed hazards cannot be opened.
+ *
  * @page app/[locale]/dashboard/health-safety/hazards/page.tsx
  */
 
@@ -15,122 +16,82 @@
 
 
 export const dynamic = 'force-dynamic';
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useTranslations } from 'next-intl';
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   AlertTriangle,
-  Search,
-  Filter,
   Plus,
-  Download,
   TrendingDown,
-  CheckCircle2,
   Clock,
   ArrowLeft,
-  Grid,
-  List,
   Target,
 } from "lucide-react";
 import {
   HazardsList,
   HazardReportForm,
-  CorrectiveActionTracker,
 } from "@/components/health-safety";
+import { useStats } from "@/components/health-safety/use-stats";
+import { StatsLoadFailed } from "@/components/health-safety/stats-load-failed";
+import { countOrNull, requiredCount } from "@/lib/client/row-fields";
+import { readApiError } from "@/lib/client/api-envelope";
 import { toast } from "sonner";
 import { logger } from '@/lib/logger';
 
-type HazardStatus = "reported" | "assessed" | "in-progress" | "resolved" | "closed";
-type HazardPriority = "low" | "medium" | "high" | "critical";
+interface HazardStats {
+  total: number;
+  critical: number;
+  inProgress: number;
+  /** Days from report to resolution; null when no hazard has been resolved. */
+  avgResolutionTime: number | null;
+}
+
+function toHazardStats(data: Record<string, unknown>): HazardStats {
+  return {
+    total: requiredCount(data, "total"),
+    critical: requiredCount(data, "critical"),
+    inProgress: requiredCount(data, "inProgress"),
+    avgResolutionTime: countOrNull(data, "avgResolutionTime"),
+  };
+}
 
 export default function HazardsPage() {
   const t = useTranslations("healthSafetyHazardsPage");
-  const router = useRouter();
   const organizationId = useOrganizationId();
-  
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<HazardStatus | "all">("all");
-  const [priorityFilter, setPriorityFilter] = useState<HazardPriority | "all">("all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [showReportForm, setShowReportForm] = useState(false);
+  const searchParams = useSearchParams();
 
-  // Summary statistics
-  const [stats, setStats] = useState({
-    total: 0,
-    open: 0,
-    inProgress: 0,
-    resolved: 0,
-    critical: 0,
-    avgResolutionTime: 0,
-  });
+  const [showReportForm, setShowReportForm] = useState(searchParams.get("report") === "1");
 
-  const loadStats = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/health-safety/hazards/stats?organizationId=${organizationId}`);
-      if (res.ok) {
-        const json = await res.json();
-        setStats({
-          total: json.total ?? 0,
-          open: json.open ?? 0,
-          inProgress: json.inProgress ?? json.in_progress ?? 0,
-          resolved: json.resolved ?? 0,
-          critical: json.critical ?? 0,
-          avgResolutionTime: json.avgResolutionTime ?? json.avg_resolution_time ?? 0,
-        });
-      }
-    } catch (error) {
-      logger.error("Failed to load stats:", error);
-      toast.error("Failed to load hazard statistics");
-    }
-  }, [organizationId]);
-
-  useEffect(() => {
-    if (organizationId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      loadStats();
-    }
-  }, [organizationId, loadStats]);
-
-  const handleViewHazard = (hazardId: string) => {
-    router.push(`/dashboard/health-safety/hazards/${hazardId}`);
-  };
+  const { outcome, reload: reloadStats } = useStats("/api/health-safety/hazards/stats", toHazardStats, organizationId ?? "", Boolean(organizationId));
+  const stats = outcome?.kind === "ready" ? outcome.stats : null;
+  // Loading is "…"; a figure that could not be read, or that the route could not give, is "—": neither is a count of zero.
+  const figure = (value: number | null | undefined) => (outcome === null ? "…" : value === null || value === undefined ? "—" : value);
 
   const handleReportSubmit = async (data: Record<string, unknown>) => {
+    // Blank optional fields are left out. The organization is the caller's own: it is never sent, and the route refuses a body that names one.
+    const body = Object.fromEntries(Object.entries(data).filter(([, value]) => value !== ""));
     try {
       const res = await fetch('/api/health-safety/hazards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, organizationId }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
-        throw new Error(`Request failed with status ${res.status}`);
+        throw new Error(await readApiError(res, `The hazard report could not be saved (status ${res.status}).`));
       }
-      toast.success("Hazard report submitted successfully");
-      setShowReportForm(false);
-      loadStats();
     } catch (error) {
       logger.error("Failed to submit hazard report:", error);
-      toast.error("Failed to submit hazard report");
+      // The form shows this, and stays open with what was typed.
+      throw error;
     }
-  };
-
-  const handleExportData = () => {
-    toast.info("Exporting hazard data...");
-    // Implement export functionality
+    toast.success("Hazard report submitted successfully");
+    setShowReportForm(false);
+    reloadStats();
   };
 
   if (!organizationId) {
@@ -170,7 +131,6 @@ export default function HazardsPage() {
           </motion.div>
 
           <HazardReportForm
-            organizationId={organizationId}
             onSubmit={handleReportSubmit}
             onCancel={() => setShowReportForm(false)}
           />
@@ -189,12 +149,12 @@ export default function HazardsPage() {
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-3 mb-4">
-            <Link href="/dashboard/health-safety">
-              <Button variant="ghost" size="sm" className="gap-2">
+            <Button variant="ghost" size="sm" className="gap-2" asChild>
+              <Link href="/dashboard/health-safety">
                 <ArrowLeft className="h-4 w-4" />
                 {t("back")}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
           
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -209,14 +169,6 @@ export default function HazardsPage() {
             </div>
             <div className="flex items-center gap-3">
               <Button
-                variant="outline"
-                onClick={handleExportData}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                {t("exportButton")}
-              </Button>
-              <Button
                 onClick={() => setShowReportForm(true)}
                 className="flex items-center gap-2 bg-linear-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
               >
@@ -226,6 +178,8 @@ export default function HazardsPage() {
             </div>
           </div>
         </motion.div>
+
+        {outcome?.kind === "error" && <StatsLoadFailed message={outcome.message} onRetry={reloadStats} />}
 
         {/* Statistics Cards */}
         <motion.div
@@ -240,7 +194,7 @@ export default function HazardsPage() {
               <AlertTriangle className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.total}</div>
+              <div className="text-3xl font-bold">{figure(stats?.total)}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {t("allTime")}
               </p>
@@ -253,7 +207,7 @@ export default function HazardsPage() {
               <Target className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-red-600">{stats.critical}</div>
+              <div className="text-3xl font-bold text-red-600">{figure(stats?.critical)}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {t("immediateActionRequired")}
               </p>
@@ -266,7 +220,7 @@ export default function HazardsPage() {
               <Clock className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-600">{stats.inProgress}</div>
+              <div className="text-3xl font-bold text-blue-600">{figure(stats?.inProgress)}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {t("beingAddressed")}
               </p>
@@ -279,7 +233,7 @@ export default function HazardsPage() {
               <TrendingDown className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">{stats.avgResolutionTime}</div>
+              <div className="text-3xl font-bold text-green-600">{figure(stats?.avgResolutionTime)}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 {t("daysUnit")}
               </p>
@@ -287,131 +241,23 @@ export default function HazardsPage() {
           </Card>
         </motion.div>
 
-        {/* Filters and View Toggle */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-        >
-          <Card className="bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Filter className="h-5 w-5" />
-                  {t("filtersTitle")}
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={t("searchPlaceholder")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-
-                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as HazardStatus | "all")}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("statusPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("allStatuses")}</SelectItem>
-                    <SelectItem value="reported">{t("reported")}</SelectItem>
-                    <SelectItem value="assessed">{t("assessed")}</SelectItem>
-                    <SelectItem value="in-progress">{t("inProgress")}</SelectItem>
-                    <SelectItem value="resolved">{t("resolved")}</SelectItem>
-                    <SelectItem value="closed">{t("closed")}</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={priorityFilter} onValueChange={(value) => setPriorityFilter(value as HazardPriority | "all")}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("priorityPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("allPriorities")}</SelectItem>
-                    <SelectItem value="low">{t("low")}</SelectItem>
-                    <SelectItem value="medium">{t("medium")}</SelectItem>
-                    <SelectItem value="high">{t("high")}</SelectItem>
-                    <SelectItem value="critical">{t("critical")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Main Content Tabs */}
+        {/* Hazard list */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
         >
-          <Tabs defaultValue="hazards" className="space-y-4">
-            <TabsList className="grid w-full md:w-auto grid-cols-2">
-              <TabsTrigger value="hazards" className="gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                {t("hazardReportsTab")}
-              </TabsTrigger>
-              <TabsTrigger value="actions" className="gap-2">
-                <CheckCircle2 className="h-4 w-4" />
-                {t("correctiveActionsTab")}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="hazards" className="space-y-4">
-              <Card className="bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>{t("allHazards")}</CardTitle>
-                  <CardDescription>
-                    {t("allHazardsDescription")}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <HazardsList
-                    organizationId={organizationId}
-                    onViewDetails={handleViewHazard}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="actions" className="space-y-4">
-              <Card className="bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>{t("correctiveActions")}</CardTitle>
-                  <CardDescription>
-                    {t("correctiveActionsDescription")}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <CorrectiveActionTracker
-                    organizationId={organizationId}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <Card className="bg-white/80 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle>{t("allHazards")}</CardTitle>
+              <CardDescription>
+                {t("allHazardsDescription")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <HazardsList organizationId={organizationId} />
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </div>

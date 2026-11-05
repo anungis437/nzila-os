@@ -88,15 +88,57 @@ describe('lib/stagingSeed', () => {
     expect(result.warnings[0]).toContain('db down');
   });
 
-  it('refuses to run against production without the override', async () => {
-    vi.stubEnv('NODE_ENV', 'production');
-    vi.stubEnv('STAGING_SEED_ALLOW_PROD', '');
-    await expect(runStagingSeed('org-4')).rejects.toThrow(/refuses to run against NODE_ENV=production/);
+  it('refuses to run against a production deployment, and the old override does nothing', async () => {
+    const write = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    try {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('UE_ENVIRONMENT', '');
+      vi.stubEnv('NEXT_PUBLIC_APP_ENV', '');
+      vi.stubEnv('STAGING_SEED_ALLOW_PROD', '');
+      await expect(runStagingSeed('org-4')).rejects.toThrow(/Refusing to run "stagingSeed" against a production deployment/);
+
+      vi.stubEnv('UE_ENVIRONMENT', 'production');
+      vi.stubEnv('STAGING_SEED_ALLOW_PROD', 'true');
+      await expect(runStagingSeed('org-4')).rejects.toThrow(/no override/);
+    } finally {
+      write.mockRestore();
+    }
   });
 
-  it('allows production with the explicit override', async () => {
+  it('seeds the organization STAGING_SEED_ORG_ID names, falls back to the demo staging organization, and still refuses production with it set', async () => {
+    const write = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    try {
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('UE_ENVIRONMENT', 'staging');
+      vi.stubEnv('NEXT_PUBLIC_APP_ENV', 'staging');
+      mocks.select.mockReturnValue(selectReturning([{ id: 'x' }]));
+      mocks.insert.mockReturnValue({ values: vi.fn() });
+
+      vi.stubEnv('STAGING_SEED_ORG_ID', 'org-from-the-environment');
+      vi.resetModules();
+      const named = await import('../stagingSeed');
+      expect((await named.runStagingSeed()).org_id).toBe('org-from-the-environment');
+
+      vi.stubEnv('STAGING_SEED_ORG_ID', '');
+      vi.resetModules();
+      const unnamed = await import('../stagingSeed');
+      expect((await unnamed.runStagingSeed()).org_id).toBe('org_demo_unioneyes_staging');
+
+      vi.stubEnv('STAGING_SEED_ORG_ID', 'org-from-the-environment');
+      vi.stubEnv('UE_ENVIRONMENT', 'production');
+      vi.stubEnv('NEXT_PUBLIC_APP_ENV', 'production');
+      vi.resetModules();
+      const production = await import('../stagingSeed');
+      await expect(production.runStagingSeed()).rejects.toThrow(/Refusing to run "stagingSeed" against a production deployment/);
+    } finally {
+      write.mockRestore();
+    }
+  });
+
+  it('runs in a staging deployment, which is named by its identity and needs no override', async () => {
     vi.stubEnv('NODE_ENV', 'production');
-    vi.stubEnv('STAGING_SEED_ALLOW_PROD', 'true');
+    vi.stubEnv('UE_ENVIRONMENT', 'staging');
+    vi.stubEnv('NEXT_PUBLIC_APP_ENV', 'staging');
     mocks.select.mockReturnValue(selectReturning([{ id: 'x' }]));
     mocks.insert.mockReturnValue({ values: vi.fn() });
 

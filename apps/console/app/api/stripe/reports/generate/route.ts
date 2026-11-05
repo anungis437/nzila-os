@@ -15,7 +15,7 @@ import { createLogger } from '@nzila/os-core'
 const logger = createLogger('stripe:reports:generate')
 
 const GenerateReportsSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
   periodId: z.string().optional(),

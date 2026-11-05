@@ -62,10 +62,11 @@ export interface ControlPlaneProviderPolicy {
  * it here would be aspirational, not evidence-backed.
  *
  * SHAREPOINT is deliberately excluded: it has no IntegrationRegistry entry
- * at all (registry.isAvailable('sharepoint') is false), so it cannot
- * reach IntegrationFactory today regardless of this policy. Do not add it
- * here until it is actually registered AND its adapter's write paths are
- * verified org-scoped.
+ * at all (registry.isAvailable('sharepoint') is false) and no adapter (the
+ * factory answers NOT_IMPLEMENTED), so it cannot run regardless of this
+ * policy. Do not add it here until an adapter exists, is registered, and its
+ * write paths are verified org-scoped and backed by declared database
+ * authority.
  */
 export const CONTROL_PLANE_PROVIDER_POLICY: Readonly<Record<string, ControlPlaneProviderPolicy>> = Object.freeze({
   workday: Object.freeze({
@@ -127,12 +128,13 @@ export const CONTROL_PLANE_PROVIDER_POLICY: Readonly<Record<string, ControlPlane
     publicSettingsKeys: ['groupPolicyNumber'],
   }),
   linkedin_learning: Object.freeze({
+    // Every write is an INSERT ... ON CONFLICT DO UPDATE: PostgreSQL reads the conflicting row, so SELECT is part of what the adapter needs.
     entities: Object.freeze({
-      courses: Object.freeze({ tables: ['external_lms_courses'], dml: ['INSERT', 'UPDATE'] as const }),
-      enrollments: Object.freeze({ tables: ['external_lms_enrollments'], dml: ['INSERT', 'UPDATE'] as const }),
-      progress: Object.freeze({ tables: ['external_lms_progress'], dml: ['INSERT', 'UPDATE'] as const }),
-      completions: Object.freeze({ tables: ['external_lms_completions'], dml: ['INSERT', 'UPDATE'] as const }),
-      learners: Object.freeze({ tables: ['external_lms_learners'], dml: ['INSERT', 'UPDATE'] as const }),
+      courses: Object.freeze({ tables: ['external_lms_courses'], dml: ['SELECT', 'INSERT', 'UPDATE'] as const }),
+      enrollments: Object.freeze({ tables: ['external_lms_enrollments'], dml: ['SELECT', 'INSERT', 'UPDATE'] as const }),
+      progress: Object.freeze({ tables: ['external_lms_progress'], dml: ['SELECT', 'INSERT', 'UPDATE'] as const }),
+      completions: Object.freeze({ tables: ['external_lms_completions'], dml: ['SELECT', 'INSERT', 'UPDATE'] as const }),
+      learners: Object.freeze({ tables: ['external_lms_learners'], dml: ['SELECT', 'INSERT', 'UPDATE'] as const }),
     }),
     publicSettingsKeys: ['organizationUrn'],
   }),

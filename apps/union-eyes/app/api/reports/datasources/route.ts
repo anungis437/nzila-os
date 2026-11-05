@@ -10,7 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { withRoleAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import { getAllDataSources } from '@/lib/report-executor';
 
 import {
@@ -79,5 +79,6 @@ function getIconForDataSource(dataSourceId: string): string {
   return iconMap[dataSourceId] || 'Table';
 }
 
-export const GET = withApiAuth(getHandler);
+// The registry is served to the same floor that can execute a report over it.
+export const GET = withRoleAuth('officer', getHandler);
 

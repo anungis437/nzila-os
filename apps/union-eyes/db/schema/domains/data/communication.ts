@@ -44,7 +44,7 @@ export const externalCommunicationChannels = pgTable(
     channelName: varchar('channel_name', { length: 255 }).notNull(),
     channelType: varchar('channel_type', { length: 50 }), // public, private, team, standard, shared
     isArchived: boolean('is_archived').default(false),
-    createdAt: timestamp('created_at').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     creatorId: varchar('creator_id', { length: 255 }), // External user ID
     memberCount: integer('member_count').default(0),
     topic: text('topic'),
@@ -185,7 +185,7 @@ export const externalCommunicationFiles = pgTable(
     fileSize: integer('file_size'), // Size in bytes
     fileUrl: text('file_url'),
     downloadUrl: text('download_url'),
-    createdAt: timestamp('created_at').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     commentCount: integer('comment_count').default(0),
     lastSyncedAt: timestamp('last_synced_at').notNull().defaultNow(),
   },

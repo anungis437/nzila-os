@@ -11,7 +11,6 @@ import {
   PaymentProcessorError,
 } from './types';
 import { StripeProcessor } from './processors/stripe-processor';
-import { WhopProcessor } from './processors/whop-processor';
 import { PayPalProcessor } from './processors/paypal-processor';
 import { SquareProcessor } from './processors/square-processor';
 import { ManualProcessor } from './processors/future-processors';
@@ -23,7 +22,6 @@ export interface ProcessorFactoryConfig {
   defaultProcessor?: PaymentProcessorType;
   processors: {
     [PaymentProcessorType.STRIPE]?: ProcessorConfig;
-    [PaymentProcessorType.WHOP]?: ProcessorConfig;
     [PaymentProcessorType.PAYPAL]?: ProcessorConfig;
     [PaymentProcessorType.SQUARE]?: ProcessorConfig;
     [PaymentProcessorType.MANUAL]?: ProcessorConfig;
@@ -116,9 +114,6 @@ export class PaymentProcessorFactory {
       case PaymentProcessorType.STRIPE:
         return new StripeProcessor();
       
-      case PaymentProcessorType.WHOP:
-        return new WhopProcessor();
-      
       case PaymentProcessorType.PAYPAL:
         return new PayPalProcessor();
       
@@ -207,15 +202,6 @@ export function loadProcessorConfigFromEnv(): ProcessorFactoryConfig {
     config.processors[PaymentProcessorType.STRIPE] = {
       apiKey: process.env.STRIPE_SECRET_KEY,
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
-      environment: process.env.NODE_ENV === 'production' ? 'production' : 'test',
-    };
-  }
-
-  // Whop configuration
-  if (process.env.WHOP_API_KEY) {
-    config.processors[PaymentProcessorType.WHOP] = {
-      apiKey: process.env.WHOP_API_KEY,
-      webhookSecret: process.env.WHOP_WEBHOOK_SECRET,
       environment: process.env.NODE_ENV === 'production' ? 'production' : 'test',
     };
   }

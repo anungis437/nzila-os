@@ -351,89 +351,6 @@
       "controlClass": "SERVER_ACTION_SESSION|TENANT_IN_SOURCE"
     },
     {
-      "id": "apps/union-eyes/actions/credits-actions.ts#checkCredits",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/credits-actions.ts",
-      "sourceSha256": "a90201e7674a6dece58452e57d50237944c947a127f2f82b9b3c8d2f757e3bb7",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/credits-actions.ts#getCreditStatus",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/credits-actions.ts",
-      "sourceSha256": "a90201e7674a6dece58452e57d50237944c947a127f2f82b9b3c8d2f757e3bb7",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/credits-actions.ts#hasReachedCreditLimit",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/credits-actions.ts",
-      "sourceSha256": "a90201e7674a6dece58452e57d50237944c947a127f2f82b9b3c8d2f757e3bb7",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/credits-actions.ts#useCredits",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/credits-actions.ts",
-      "sourceSha256": "a90201e7674a6dece58452e57d50237944c947a127f2f82b9b3c8d2f757e3bb7",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/credits-actions.ts#withPremiumFeature",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/credits-actions.ts",
-      "sourceSha256": "a90201e7674a6dece58452e57d50237944c947a127f2f82b9b3c8d2f757e3bb7",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
       "id": "apps/union-eyes/actions/member-employment-actions.ts#approveMemberLeaveAction",
       "kind": "SERVER_ACTION",
       "sourcePath": "apps/union-eyes/actions/member-employment-actions.ts",
@@ -712,151 +629,6 @@
       "mutating": true,
       "mutatedTables": [
         "member_segments"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/pending-profiles-actions.ts#deletePendingProfileAction",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/pending-profiles-actions.ts",
-      "sourceSha256": "8b6b59a2cbfc96540df60d29ad0ec46dd6aa15806354abf5b5af6d7ebab6c2a9",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "pending_profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/pending-profiles-actions.ts#getPendingProfileByEmailAction",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/pending-profiles-actions.ts",
-      "sourceSha256": "8b6b59a2cbfc96540df60d29ad0ec46dd6aa15806354abf5b5af6d7ebab6c2a9",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/pending-profiles-actions.ts#getUnclaimedPendingProfilesAction",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/pending-profiles-actions.ts",
-      "sourceSha256": "8b6b59a2cbfc96540df60d29ad0ec46dd6aa15806354abf5b5af6d7ebab6c2a9",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/pending-profiles-actions.ts#markPendingProfileAsClaimedAction",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/pending-profiles-actions.ts",
-      "sourceSha256": "8b6b59a2cbfc96540df60d29ad0ec46dd6aa15806354abf5b5af6d7ebab6c2a9",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "pending_profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/profiles-actions.ts#checkPaymentFailedAction",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/profiles-actions.ts",
-      "sourceSha256": "dad638313440ac5e7d16aae60b2774e590126334c7f05d241ae64db109d1a7ee",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/profiles-actions.ts#createProfileAction",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/profiles-actions.ts",
-      "sourceSha256": "dad638313440ac5e7d16aae60b2774e590126334c7f05d241ae64db109d1a7ee",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/profiles-actions.ts#deleteProfileAction",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/profiles-actions.ts",
-      "sourceSha256": "dad638313440ac5e7d16aae60b2774e590126334c7f05d241ae64db109d1a7ee",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/profiles-actions.ts#getUserPlanInfoAction",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/profiles-actions.ts",
-      "sourceSha256": "dad638313440ac5e7d16aae60b2774e590126334c7f05d241ae64db109d1a7ee",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/profiles-actions.ts#updateProfileAction",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/profiles-actions.ts",
-      "sourceSha256": "dad638313440ac5e7d16aae60b2774e590126334c7f05d241ae64db109d1a7ee",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
       ],
       "sharedControlBound": true,
       "boundControl": "CANONICAL_SESSION_INLINE",
@@ -1199,73 +971,6 @@
       "bindingBasis": "server action session",
       "exceptionReasons": [],
       "controlClass": "SERVER_ACTION_SESSION|TENANT_IN_SOURCE"
-    },
-    {
-      "id": "apps/union-eyes/actions/whop-actions.ts#canAccessPremiumFeatures",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/whop-actions.ts",
-      "sourceSha256": "0c12ad1563a3d021bc0f699be767d2257b971e8ba80b9e91fd9138269c180dd9",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/whop-actions.ts#claimPendingProfile",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/whop-actions.ts",
-      "sourceSha256": "0c12ad1563a3d021bc0f699be767d2257b971e8ba80b9e91fd9138269c180dd9",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "pending_profiles",
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/whop-actions.ts#manageWhopMembershipStatusChange",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/whop-actions.ts",
-      "sourceSha256": "0c12ad1563a3d021bc0f699be767d2257b971e8ba80b9e91fd9138269c180dd9",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
-    },
-    {
-      "id": "apps/union-eyes/actions/whop-actions.ts#updateWhopCustomer",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/actions/whop-actions.ts",
-      "sourceSha256": "0c12ad1563a3d021bc0f699be767d2257b971e8ba80b9e91fd9138269c180dd9",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|NONE"
     },
     {
       "id": "apps/union-eyes/app/[locale]/app/route.ts#GET",
@@ -6935,21 +6640,6 @@
       "controlClass": "WITH_API|TENANT_FROM_GUARD"
     },
     {
-      "id": "apps/union-eyes/app/api/dues/payment-methods/route.ts#GET",
-      "kind": "NEXT_HTTP",
-      "sourcePath": "apps/union-eyes/app/api/dues/payment-methods/route.ts",
-      "sourceSha256": "71bd3b81d12f2335f03f9bd0df9c79252dc45cbb21e242f5c228d609522b0f55",
-      "guard": "WITH_API",
-      "databaseContext": "TENANT_RLS_CONTEXT_FROM_SHARED_GUARD",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": true,
-      "boundControl": "WITH_API",
-      "bindingBasis": "withApi wrapper (auth, rate limit, validation, tenant RLS)",
-      "exceptionReasons": [],
-      "controlClass": "WITH_API|TENANT_FROM_GUARD"
-    },
-    {
       "id": "apps/union-eyes/app/api/dues/payment-plans/route.ts#GET",
       "kind": "NEXT_HTTP",
       "sourcePath": "apps/union-eyes/app/api/dues/payment-plans/route.ts",
@@ -11977,7 +11667,7 @@
       "id": "apps/union-eyes/app/api/notifications/preferences/route.ts#GET",
       "kind": "NEXT_HTTP",
       "sourcePath": "apps/union-eyes/app/api/notifications/preferences/route.ts",
-      "sourceSha256": "cad548183713f545a9ef290ed3d2ca4da5d997124c7f0dbc4cd57e73510501b4",
+      "sourceSha256": "1326d448b633654beb47dc6d97cb257f1cc5c260b0098c46d88c7b505b7d2883",
       "guard": "WITH_API",
       "databaseContext": "TENANT_RLS_CONTEXT_FROM_SHARED_GUARD",
       "mutating": true,
@@ -11994,7 +11684,7 @@
       "id": "apps/union-eyes/app/api/notifications/preferences/route.ts#PUT",
       "kind": "NEXT_HTTP",
       "sourcePath": "apps/union-eyes/app/api/notifications/preferences/route.ts",
-      "sourceSha256": "cad548183713f545a9ef290ed3d2ca4da5d997124c7f0dbc4cd57e73510501b4",
+      "sourceSha256": "1326d448b633654beb47dc6d97cb257f1cc5c260b0098c46d88c7b505b7d2883",
       "guard": "WITH_API",
       "databaseContext": "TENANT_RLS_CONTEXT_FROM_SHARED_GUARD",
       "mutating": true,
@@ -12805,23 +12495,6 @@
       "kind": "NEXT_HTTP",
       "sourcePath": "apps/union-eyes/app/api/organizations/tree/route.ts",
       "sourceSha256": "72f9b550b555ea638012ae6e560f33a603ec7e727ddd2708bc824efb26017871",
-      "guard": "DIRECT_AUTH_ONLY",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": false,
-      "boundControl": null,
-      "bindingBasis": null,
-      "exceptionReasons": [
-        "BYPASSES_SHARED_AUTHORIZATION_GUARD"
-      ],
-      "controlClass": "DIRECT_AUTH_ONLY|NONE"
-    },
-    {
-      "id": "apps/union-eyes/app/api/payment/status/route.ts#GET",
-      "kind": "NEXT_HTTP",
-      "sourcePath": "apps/union-eyes/app/api/payment/status/route.ts",
-      "sourceSha256": "dde676fe31f8f38955102c91167b886ff0fb6d0b66ca0ef4652c89a1adff9e99",
       "guard": "DIRECT_AUTH_ONLY",
       "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
       "mutating": false,
@@ -14115,23 +13788,6 @@
       "controlClass": "REQUIRE_API_AUTH|NONE"
     },
     {
-      "id": "apps/union-eyes/app/api/profile/me/route.ts#GET",
-      "kind": "NEXT_HTTP",
-      "sourcePath": "apps/union-eyes/app/api/profile/me/route.ts",
-      "sourceSha256": "87951f3762806909aed987b59137802a04b7b6211084bd5a4bdfbc03ff9bd762",
-      "guard": "DIRECT_AUTH_ONLY",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": false,
-      "boundControl": null,
-      "bindingBasis": null,
-      "exceptionReasons": [
-        "BYPASSES_SHARED_AUTHORIZATION_GUARD"
-      ],
-      "controlClass": "DIRECT_AUTH_ONLY|NONE"
-    },
-    {
       "id": "apps/union-eyes/app/api/reconciliation/bank/route.ts#GET",
       "kind": "NEXT_HTTP",
       "sourcePath": "apps/union-eyes/app/api/reconciliation/bank/route.ts",
@@ -15183,21 +14839,6 @@
       "controlClass": "WITH_API|TENANT_FROM_GUARD"
     },
     {
-      "id": "apps/union-eyes/app/api/whop/create-checkout/route.ts#POST",
-      "kind": "NEXT_HTTP",
-      "sourcePath": "apps/union-eyes/app/api/whop/create-checkout/route.ts",
-      "sourceSha256": "a8f1d82b4f727384f47d9c0a730fef60c57ad7c08415a8d4f598d298a60f138a",
-      "guard": "REQUIRE_API_AUTH",
-      "databaseContext": "NO_DATABASE_CONTEXT_IN_SOURCE",
-      "mutating": false,
-      "mutatedTables": [],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "requireApiAuth or requireUser",
-      "exceptionReasons": [],
-      "controlClass": "REQUIRE_API_AUTH|NONE"
-    },
-    {
       "id": "apps/union-eyes/app/api/workbench/assign/route.ts#POST",
       "kind": "NEXT_HTTP",
       "sourcePath": "apps/union-eyes/app/api/workbench/assign/route.ts",
@@ -15631,108 +15272,6 @@
       "mutating": true,
       "mutatedTables": [
         "member_leaves"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|TENANT_IN_SOURCE"
-    },
-    {
-      "id": "apps/union-eyes/db/queries/profiles-queries.ts#createProfile",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/db/queries/profiles-queries.ts",
-      "sourceSha256": "d2ad88f4755fd0b021adb87ab6a31c1230611f92f192fe9db4dc4bba90cfabb4",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "TENANT_RLS_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|TENANT_IN_SOURCE"
-    },
-    {
-      "id": "apps/union-eyes/db/queries/profiles-queries.ts#deleteProfile",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/db/queries/profiles-queries.ts",
-      "sourceSha256": "d2ad88f4755fd0b021adb87ab6a31c1230611f92f192fe9db4dc4bba90cfabb4",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "TENANT_RLS_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|TENANT_IN_SOURCE"
-    },
-    {
-      "id": "apps/union-eyes/db/queries/profiles-queries.ts#deleteProfileById",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/db/queries/profiles-queries.ts",
-      "sourceSha256": "d2ad88f4755fd0b021adb87ab6a31c1230611f92f192fe9db4dc4bba90cfabb4",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "TENANT_RLS_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|TENANT_IN_SOURCE"
-    },
-    {
-      "id": "apps/union-eyes/db/queries/profiles-queries.ts#updateProfile",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/db/queries/profiles-queries.ts",
-      "sourceSha256": "d2ad88f4755fd0b021adb87ab6a31c1230611f92f192fe9db4dc4bba90cfabb4",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "TENANT_RLS_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|TENANT_IN_SOURCE"
-    },
-    {
-      "id": "apps/union-eyes/db/queries/profiles-queries.ts#updateProfileByStripeCustomerId",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/db/queries/profiles-queries.ts",
-      "sourceSha256": "d2ad88f4755fd0b021adb87ab6a31c1230611f92f192fe9db4dc4bba90cfabb4",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "TENANT_RLS_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
-      ],
-      "sharedControlBound": true,
-      "boundControl": "CANONICAL_SESSION_INLINE",
-      "bindingBasis": "server action session",
-      "exceptionReasons": [],
-      "controlClass": "SERVER_ACTION_SESSION|TENANT_IN_SOURCE"
-    },
-    {
-      "id": "apps/union-eyes/db/queries/profiles-queries.ts#updateProfileByWhopUserId",
-      "kind": "SERVER_ACTION",
-      "sourcePath": "apps/union-eyes/db/queries/profiles-queries.ts",
-      "sourceSha256": "d2ad88f4755fd0b021adb87ab6a31c1230611f92f192fe9db4dc4bba90cfabb4",
-      "guard": "SERVER_ACTION_SESSION",
-      "databaseContext": "TENANT_RLS_CONTEXT_IN_SOURCE",
-      "mutating": true,
-      "mutatedTables": [
-        "profiles"
       ],
       "sharedControlBound": true,
       "boundControl": "CANONICAL_SESSION_INLINE",

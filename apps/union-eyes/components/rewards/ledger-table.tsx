@@ -10,7 +10,8 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUp, RefreshCw, Plus, Minus } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { formattingLocale } from '@/lib/locales';
 import type { RewardWalletLedgerEntry as RewardWalletLedger } from '@/db/schema/recognition-rewards-schema';
 
 interface LedgerTableProps {
@@ -21,6 +22,8 @@ interface LedgerTableProps {
 
 export function LedgerTable({ entries }: LedgerTableProps) {
   const t = useTranslations('rewards.wallet.ledger');
+  // US English ("Mar 04, 2026, 03:05 PM") for English readers, as the ledger has always read; the reader's own conventions otherwise.
+  const locale = formattingLocale(useLocale(), 'en-US');
 
   if (entries.length === 0) {
     return (
@@ -60,7 +63,7 @@ export function LedgerTable({ entries }: LedgerTableProps) {
             return (
               <TableRow key={entry.id}>
                 <TableCell className="font-medium text-sm text-muted-foreground">
-                  {new Date(entry.createdAt).toLocaleDateString('en-US', {
+                  {new Date(entry.createdAt).toLocaleDateString(locale, {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric',
@@ -73,11 +76,9 @@ export function LedgerTable({ entries }: LedgerTableProps) {
                     <span className="font-medium">
                       {getTransactionTitle(entry, t)}
                     </span>
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(entry as any).notes && (
+                    {entry.memo && (
                       <span className="text-sm text-muted-foreground">
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {(entry as any).notes}
+                        {entry.memo}
                       </span>
                     )}
                   </div>

@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
+import { zUUID } from "@/lib/api/schemas";
 import {
   getCorrespondenceWithDetails,
   updateCorrespondence,
@@ -24,12 +25,14 @@ const updateSchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     openapi: { tags: ["Correspondence"], summary: "Get correspondence details" },
   },
   async ({ params, organizationId }) => {
     const id = params?.id as string;
     if (!id) throw ApiError.badRequest("Missing correspondence ID");
+    if (!zUUID.safeParse(id).success) throw ApiError.badRequest("Invalid correspondence ID");
 
     const item = await getCorrespondenceWithDetails(id);
     if (!item) throw ApiError.notFound("Correspondence");
@@ -41,6 +44,8 @@ export const GET = withApi(
 
 export const PATCH = withApi(
   {
+    // The organization-ownership read and the edit are both tenant work: they run in the caller's own tenant transaction.
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     body: updateSchema,
     openapi: { tags: ["Correspondence"], summary: "Update draft correspondence" },
@@ -48,6 +53,7 @@ export const PATCH = withApi(
   async ({ params, organizationId, userId, body, user, request }) => {
     const id = params?.id as string;
     if (!id) throw ApiError.badRequest("Missing correspondence ID");
+    if (!zUUID.safeParse(id).success) throw ApiError.badRequest("Invalid correspondence ID");
 
     // Verify org ownership
     const existing = await getCorrespondenceWithDetails(id);

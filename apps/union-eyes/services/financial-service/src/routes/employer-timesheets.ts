@@ -7,9 +7,9 @@ import { normalizeTimesheetCsv } from "../services/employer-execution";
 const router = Router();
 
 const uploadSchema = z.object({
-  employerId: z.string().uuid(),
-  worksiteId: z.string().uuid().optional(),
-  bargainingUnitId: z.string().uuid().optional(),
+  employerId: z.guid(),
+  worksiteId: z.guid().optional(),
+  bargainingUnitId: z.guid().optional(),
   periodStart: z.string(),
   periodEnd: z.string(),
   fileName: z.string().min(1),
@@ -70,7 +70,7 @@ router.post("/upload", async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, error: "Validation failed", details: error.errors });
+      return res.status(400).json({ success: false, error: "Validation failed", details: error.issues });
     }
     return res.status(500).json({
       success: false,

@@ -24,7 +24,7 @@ Legend:
 | Azure Blob / document storage layer | File upload/evidence/document persistence | outbound | Yes (if file workflows in scope) | Yes | Blob storage connection settings/secrets | partial | Disable upload-heavy flows | Platform | Document/evidence workflows impacted |
 | Sentry | Error monitoring and tracing | outbound | No (strongly recommended) | Yes (recommended) | Sentry DSN/runtime config | partial | Logs-only troubleshooting | Platform SRE | Slower incident response |
 | Microsoft Graph calendar sync | Calendar integration and callbacks | both | No | No (optional by tenant) | OAuth app config and callback routes | partial | Disable calendar sync | Integrations | Sync feature unavailable |
-| Shopify/Whop webhook routes (present in code) | Commerce/webhook processing | inbound | No | No (tenant-specific) | Provider webhook secrets | unknown | Disable routes if unused | Integrations | None unless tenant enabled |
+| Shopify webhook route (present in code) | Commerce/webhook processing | inbound | No | No (tenant-specific) | Provider webhook secrets | unknown | Disable routes if unused | Integrations | None unless tenant enabled |
 
 ## Critical Path Dependencies
 

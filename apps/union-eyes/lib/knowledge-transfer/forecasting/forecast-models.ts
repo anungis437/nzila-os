@@ -30,10 +30,23 @@ export interface ContinuityForecast {
   historicalData: ContinuityTrendPoint[];
   /** Projected data points (next 12 months) */
   projections: ContinuityTrendPoint[];
-  /** Overall trend direction */
-  trendDirection: 'improving' | 'stable' | 'degrading';
+  /** Overall trend direction; `insufficient_data` when no measured series exists. */
+  trendDirection: 'improving' | 'stable' | 'degrading' | 'insufficient_data';
   /** Confidence in forecast (0-100) */
   confidence: number;
+  /** Measured metrics the recommendations are derived from; absent when there is nothing to measure. */
+  currentMetrics?: {
+    singleSourceCount: number;
+    totalNodes: number;
+    averageRedundancy: number;
+    governanceMaturity: number;
+    undocumentedRisk: number;
+    vendorConcentrationRisk: number;
+  };
+  /** Number of eligible interviews behind the measurement. */
+  dataPoints?: number;
+  /** Plain statement of what is and is not reported. */
+  note?: string;
   /** Key risks being tracked */
   trackedRisks: Array<{
     riskType: 'concentration_growth' | 'redundancy_erosion' | 'governance_drift' | 'documentation_degradation' | 'vendor_risk';

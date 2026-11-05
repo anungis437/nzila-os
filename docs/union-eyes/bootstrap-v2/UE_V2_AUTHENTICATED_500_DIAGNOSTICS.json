@@ -979,9 +979,7 @@
       "column": null,
       "role": null,
       "errorText": "{\"error\":\"Missing required parameter: planId\"}",
-      "routes": [
-        "apps/union-eyes/app/api/whop/create-checkout/route.ts#POST"
-      ],
+      "routes": [],
       "routeCount": 1
     },
     {
@@ -1612,21 +1610,6 @@
       "errorText": "{\"code\":\"VALIDATION_ERROR\",\"message\":\"Invalid request data\",\"timestamp\":\"2026-10-15T11:16:08.085Z\",\"traceId\":\"mv9g0rv9-2ac8bde2\",\"details\":[{\"code\":\"invalid_type\",\"expected\":\"string\",\"received\":\"undefined\",\"path\":[\"signerId\"],\"message\":\"Required\"},{\"code\":\"invalid_type\",\"expected\":\"string\",\"received\":\"undefined\",\"path\":[\"signatureImageUrl\"],\"message\":\"Required\"},{\"expected\":\"'electronic' | 'digital' | 'wet'\",\"received\":\"undefined\",\"code\":\"invalid_type\",\"path\":[\"signatureType\"],\"message\":\"Invalid signature type\"}]}",
       "rootCauses": [],
       "logExcerpt": "{\"level\":\"warn\",\"message\":\"API Error Response\",\"context\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Invalid request data\",\"statusCode\":400,\"traceId\":\"mv9g0rv9-2ac8bde2\",\"details\":{\"value\":\"[object Object],[object Object],[object Object]\"}},\"timestamp\":\"2026-10-15T11:16:08.085Z\",\"correlationId\":\"91046253-74cd-42de-91b9-634a60fbdd0d\"}\n"
-    },
-    {
-      "id": "apps/union-eyes/app/api/whop/create-checkout/route.ts#POST",
-      "sourcePath": "apps/union-eyes/app/api/whop/create-checkout/route.ts",
-      "method": "POST",
-      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
-      "status": 400,
-      "bodySnippet": "{\"error\":\"Missing required parameter: planId\"}",
-      "sqlstate": null,
-      "relation": null,
-      "column": null,
-      "role": null,
-      "errorText": "{\"error\":\"Missing required parameter: planId\"}",
-      "rootCauses": [],
-      "logExcerpt": ""
     },
     {
       "id": "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts#POST",

@@ -85,15 +85,14 @@ describe('emitAssessmentRouted', () => {
     expect(call.kind).toBe('assessment_routed');
   });
 
-  it('metadata carries counts + flags + truncated selection token', () => {
+  it('metadata carries counts and flags without a selection fingerprint', () => {
     const routed = routeQuestionBank(bank, PROFILE);
     emitAssessmentRouted(routed);
     const md = fireMock.mock.calls[0][0].metadata;
     expect(typeof md.included).toBe('number');
     expect(typeof md.deferred).toBe('number');
     expect(typeof md.safeDefault).toBe('boolean');
-    expect(typeof md.selection).toBe('string');
-    expect((md.selection as string).length).toBeLessThanOrEqual(60);
+    expect(md.selection).toBeUndefined();
     expect(pii(flatten(md))).toBe(false);
   });
 });
@@ -110,7 +109,7 @@ describe('emitAdaptiveQuestionDeferred', () => {
     expect(fireMock).toHaveBeenCalledTimes(1);
     expect(fireMock.mock.calls[0][0].kind).toBe('adaptive_question_deferred');
     const md = fireMock.mock.calls[0][0].metadata;
-    expect(md.questionId).toBe('q42');
+    expect(md.questionId).toBeUndefined();
     expect(md.decision).toBe('defer_suppressed');
     expect(pii(flatten(md))).toBe(false);
   });

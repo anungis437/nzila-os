@@ -53,8 +53,8 @@ export const externalInvoices = pgTable(
     
     // Sync metadata
     lastSyncedAt: timestamp('last_synced_at').notNull().defaultNow(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     orgProviderIdx: index('external_invoices_org_provider_idx').on(
@@ -114,8 +114,8 @@ export const externalPayments = pgTable(
     
     // Sync metadata
     lastSyncedAt: timestamp('last_synced_at').notNull().defaultNow(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     orgProviderIdx: index('external_payments_org_provider_idx').on(
@@ -172,8 +172,8 @@ export const externalCustomers = pgTable(
     
     // Sync metadata
     lastSyncedAt: timestamp('last_synced_at').notNull().defaultNow(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     orgProviderIdx: index('external_customers_org_provider_idx').on(
@@ -229,8 +229,8 @@ export const externalAccounts = pgTable(
     
     // Sync metadata
     lastSyncedAt: timestamp('last_synced_at').notNull().defaultNow(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     orgProviderIdx: index('external_accounts_org_provider_idx').on(

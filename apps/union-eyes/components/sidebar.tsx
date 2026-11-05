@@ -26,7 +26,6 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import type { SelectProfile } from "@/db/schema/domains/member";
 import { useOrganization } from "@/contexts/organization-context";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
 import { Badge } from "@/components/ui/badge";
@@ -50,10 +49,7 @@ import { navigationDestination, selectedNavigationDestination } from '@/lib/dash
 import { navigationCopyKey } from '@/lib/dashboard/navigation-copy';
 
 interface SidebarProps {
-  profile: SelectProfile | null;
   userEmail?: string;
-  whopMonthlyPlanId: string;
-  whopYearlyPlanId: string;
   userRole?: string;
   platformOrgId?: string;
 }
@@ -90,7 +86,6 @@ function IconForItem({ item }: { item: NavigationItem }) {
 }
 
 export default function Sidebar({
-  profile,
   userEmail,
   userRole,
   platformOrgId,
@@ -158,9 +153,11 @@ export default function Sidebar({
       return [{ group: { key: "__flat", label: "" }, items }];
     }
 
-    const order = Array.from(
-      new Set(items.map((i) => i.group).filter(Boolean) as string[]),
-    ).map((key) => ({ key, label: key }));
+    // Ungrouped items keep their place in encounter order rather than sinking below every group.
+    const order = Array.from(new Set(items.map((i) => i.group ?? "__ungrouped"))).map((key) => ({
+      key,
+      label: key === "__ungrouped" ? "" : key,
+    }));
 
     const orderMap = new Map(order.map((g, i) => [g.key, i]));
     const byKey = new Map<string, NavigationItem[]>();
@@ -184,7 +181,7 @@ export default function Sidebar({
     return result;
   }, [items]);
 
-  const identityLabel = userEmail || profile?.email || "User";
+  const identityLabel = userEmail || "User";
 
   const withLocale = (href: string) => `/${locale}${href}`;
 
@@ -196,7 +193,7 @@ export default function Sidebar({
     try {
       window.localStorage.setItem(LS_COLLAPSED, next ? "1" : "0");
     } catch {
-      /* ignore */
+      /* Storage is unavailable (private mode): the collapsed state lasts for this visit only. */
     }
   };
 
@@ -208,7 +205,7 @@ export default function Sidebar({
       try {
         window.localStorage.setItem(LS_GROUPS, JSON.stringify([...next]));
       } catch {
-        /* ignore */
+        /* Storage is unavailable (private mode): the group state lasts for this visit only. */
       }
       return next;
     });
@@ -304,7 +301,8 @@ export default function Sidebar({
                   const href = withLocale(item.href);
                   const active = isActive(item.href);
                   const showLabel = showLabels;
-                  const honesty = honestyForNavigationItem(item, homes.roleHomeHref, copy);
+                  // Members have no orientation hub, so the staff "role execution home" qualifier does not apply.
+                  const honesty = honestyForNavigationItem(item, homes.experience === "member" ? "" : homes.roleHomeHref, copy);
                   return (
                     <li key={`${item.href}-${item.label}`}>
                       <Link

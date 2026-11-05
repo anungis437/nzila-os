@@ -60,6 +60,7 @@ import {
   MessageSquare,
   Bell,
 } from 'lucide-react';
+import { ApiShapeError, envelopeRow, readApiError } from '@/lib/client/api-envelope';
 
 interface Variable {
   name: string;
@@ -88,9 +89,74 @@ interface Template {
   updatedAt: string;
 }
 
+/**
+ * The columns this form edits, and so the only fields a save sends to PATCH /api/communications/templates/[id]. The id, the type, the
+ * dates and the organization belong to the record: the route refuses a body that carries them.
+ */
+const EDITABLE_FIELDS = [
+  'name',
+  'description',
+  'category',
+  'subject',
+  'preheader',
+  'body',
+  'htmlContent',
+  'plainTextContent',
+  'variables',
+  'tags',
+  'isActive',
+] as const;
+
+const COPY = {
+  en: {
+    nameRequired: 'Template name is required.',
+    bodyRequired: 'Template body is required.',
+    subjectRequired: 'An email template needs a subject line.',
+    notFound: 'Template not found',
+    fetchFailed: 'The template could not be loaded.',
+    saveFailed: 'The template could not be saved.',
+    deleteFailed: 'The template could not be deleted.',
+  },
+  fr: {
+    nameRequired: 'Le nom du modèle est obligatoire.',
+    bodyRequired: 'Le corps du modèle est obligatoire.',
+    subjectRequired: 'Un modèle de courriel doit avoir un objet.',
+    notFound: 'Modèle introuvable',
+    fetchFailed: 'Le modèle n’a pas pu être chargé.',
+    saveFailed: 'Le modèle n’a pas pu être enregistré.',
+    deleteFailed: 'Le modèle n’a pas pu être supprimé.',
+  },
+} as const;
+
+/** The template a message_templates record is; a record without an id, a name, a type and a body is not one. */
+function templateFrom(row: Record<string, unknown>): Template {
+  if (
+    typeof row.id !== 'string' ||
+    typeof row.name !== 'string' ||
+    typeof row.type !== 'string' ||
+    typeof row.body !== 'string'
+  ) {
+    throw new ApiShapeError('not a template');
+  }
+  return {
+    ...(row as unknown as Template),
+    variables: Array.isArray(row.variables) ? (row.variables as Variable[]) : [],
+    tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
+  };
+}
+
+function editedFields(form: Partial<Template>): Record<string, unknown> {
+  const changes: Record<string, unknown> = {};
+  for (const field of EDITABLE_FIELDS) {
+    if (form[field] !== undefined) changes[field] = form[field];
+  }
+  return changes;
+}
+
 export default function TemplateDetailPage() {
   const router = useRouter();
   const locale = useLocale();
+  const copy = locale.toLowerCase().startsWith('fr') ? COPY.fr : COPY.en;
   const t = useTranslations('communicationsTemplatesDetailPage');
   const { id: paramId } = useParams<{ id: string }>();
   const [template, setTemplate] = useState<Template | null>(null);
@@ -127,17 +193,17 @@ export default function TemplateDetailPage() {
       
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error('Template not found');
+          throw new Error(copy.notFound);
         }
-        throw new Error('Failed to fetch template');
+        throw new Error(await readApiError(response, copy.fetchFailed));
       }
 
-      const json = await response.json();
-      const data = json.data ?? json;
+      // The item route answers { data: template }, which withApi wraps once more.
+      const data = templateFrom(envelopeRow(await response.json()));
       setTemplate(data);
       setFormData(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch template');
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : copy.fetchFailed);
     } finally {
       setLoading(false);
     }
@@ -149,26 +215,29 @@ export default function TemplateDetailPage() {
       setError(null);
       setSuccessMessage(null);
 
+      // The form's own required marks: a template needs a name and a body, and an email also a subject.
+      if (!formData.name?.trim()) throw new Error(copy.nameRequired);
+      if (!formData.body?.trim()) throw new Error(copy.bodyRequired);
+      if (template?.type === 'email' && !formData.subject?.trim()) throw new Error(copy.subjectRequired);
+
       const response = await fetch(`/api/communications/templates/${paramId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(editedFields(formData)),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to save template');
+        throw new Error(await readApiError(response, copy.saveFailed));
       }
 
-      const updatedJson = await response.json();
-      const updated = updatedJson.data ?? updatedJson;
+      const updated = templateFrom(envelopeRow(await response.json()));
       setTemplate(updated);
       setFormData(updated);
       setSuccessMessage('Template saved successfully');
       
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save template');
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : copy.saveFailed);
     } finally {
       setSaving(false);
     }
@@ -184,13 +253,12 @@ export default function TemplateDetailPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to delete template');
+        throw new Error(await readApiError(response, copy.deleteFailed));
       }
 
       router.push(`/${locale}/dashboard/communications/templates`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete template');
+      setError(err instanceof Error ? err.message : copy.deleteFailed);
       setShowDeleteDialog(false);
     } finally {
       setDeleting(false);

@@ -13,7 +13,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const t = await getTranslations({ locale, namespace: 'smsPage' });
   return {
     title: t('metaTitle'),
-    description: t('metaDescription'),
+    // Nothing can be sent in this release; the console lists the SMS records that are stored.
+    description: locale.toLowerCase().startsWith('fr')
+      ? 'Campagnes et conversations SMS enregistrées'
+      : 'Stored SMS campaign and conversation records',
   };
 }
 

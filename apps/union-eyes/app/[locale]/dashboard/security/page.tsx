@@ -15,38 +15,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { Shield, AlertTriangle, Activity, XCircle, Lock, Eye, Clock, CheckCircle } from 'lucide-react';
-import { logger } from '@/lib/logger';
-import { db } from '@/db/db';
-import { sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { isUuid } from '@/lib/page-data/uuid';
+import { loadSecurityDashboard, type SecurityEvent, type PostureCheck } from '@/lib/dashboard-reads/security';
 import { getTranslations } from 'next-intl/server';
 
 // ── Types ──────────────────────────────────────────────────────────────────
-
-interface SecurityEvent {
-  id: string;
-  eventType: string;
-  severity: string;
-  status: string;
-  sourceIp: string | null;
-  userEmail: string | null;
-  description: string;
-  resource: string | null;
-  actionTaken: string | null;
-  resolvedBy: string | null;
-  resolvedAt: string | null;
-  createdAt: string;
-}
-
-interface PostureCheck {
-  id: string;
-  checkName: string;
-  category: string;
-  status: string;
-  score: number | null;
-  details: string | null;
-  lastCheckedAt: string;
-}
 
 interface SecurityStats {
   totalEvents: number;
@@ -64,52 +37,7 @@ interface SecurityStats {
 }
 
 // ── Data loaders ───────────────────────────────────────────────────────────
-
-async function loadSecurityEvents(orgId: string): Promise<SecurityEvent[]> {
-  const result = await db.execute(sql`
-    SELECT id, event_type, severity, status, source_ip, user_email,
-           description, resource, action_taken, resolved_by, resolved_at, created_at
-    FROM security_events
-    WHERE organization_id = ${orgId}::uuid
-    ORDER BY created_at DESC
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    eventType: r.event_type as string,
-    severity: r.severity as string,
-    status: r.status as string,
-    sourceIp: r.source_ip as string | null,
-    userEmail: r.user_email as string | null,
-    description: r.description as string,
-    resource: r.resource as string | null,
-    actionTaken: r.action_taken as string | null,
-    resolvedBy: r.resolved_by as string | null,
-    resolvedAt: r.resolved_at as string | null,
-    createdAt: r.created_at as string,
-  }));
-}
-
-async function loadPostureChecks(orgId: string): Promise<PostureCheck[]> {
-  const result = await db.execute(sql`
-    SELECT id, check_name, category, status, score, details, last_checked_at
-    FROM security_posture_checks
-    WHERE organization_id = ${orgId}::uuid
-    ORDER BY
-      CASE status WHEN 'fail' THEN 0 WHEN 'warn' THEN 1 ELSE 2 END,
-      category
-  `);
-
-  return Array.from(result).map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    checkName: r.check_name as string,
-    category: r.category as string,
-    status: r.status as string,
-    score: r.score ? Number(r.score) : null,
-    details: r.details as string | null,
-    lastCheckedAt: r.last_checked_at as string,
-  }));
-}
+// The reads live in lib/dashboard-reads/security.ts, which runs them in the organization's own context.
 
 function computeStats(events: SecurityEvent[], posture: PostureCheck[]): SecurityStats {
   const criticalAlerts = events.filter(e => e.severity === 'critical').length;
@@ -209,22 +137,13 @@ export default async function SecurityDashboard({
   }
 
   const organizationId = user.organizationId;
-
-  let events: SecurityEvent[] = [];
-  let posture: PostureCheck[] = [];
-
-  if (organizationId) {
-    try {
-      [events, posture] = await withSystemContext(() =>
-        Promise.all([
-          loadSecurityEvents(organizationId),
-          loadPostureChecks(organizationId),
-        ])
-      );
-    } catch (error) {
-      logger.error('Error loading security data:', error);
-    }
+  // A person who belongs to no organization has no security data to read: they go back to the dashboard rather than to an empty one.
+  if (!isUuid(organizationId)) {
+    redirect(`/${locale}/dashboard`);
   }
+
+  // A failed read is an error, not "no events and a perfect score": nothing here catches it.
+  const { events, posture } = await loadSecurityDashboard(organizationId);
 
   const stats = computeStats(events, posture);
   const timeAgo = makeTimeAgo(t);

@@ -12,9 +12,7 @@ const m = vi.hoisted(() => ({
   batchClassifyClauses: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({
-  withRoleAuth: vi.fn((_: string, handler: (req: NextRequest, ctx: any) => Promise<Response>) => (req: NextRequest, ctx: any = { userId: 'u1', organizationId: 'org_1' }) => handler(req, ctx)),
-}));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: { AI_COMPLETION: { requests: 30, window: 60 } },
@@ -29,6 +27,15 @@ vi.mock('@/lib/services/ai/auto-classification-service', () => ({
   enrichClauseMetadata: m.enrichClauseMetadata,
   batchClassifyClauses: m.batchClassifyClauses,
 }));
+
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: (_op: unknown, run: () => Promise<unknown>) => run(),
+  operationAuditResponse: () => null,
+}));
+
+vi.mock('@/lib/ai/ai-feature-guard', () => ({ guardAiFeature: vi.fn(async () => null) }));
+vi.mock('@/lib/services/feature-flags', () => ({ AI_FEATURES: { AI_EXTRACT_CLAUSES: 'AI_EXTRACT_CLAUSES' } }));
+vi.mock('@nzila/policies', () => ({ enforceAISafety: vi.fn() }));
 
 async function loadRoute() {
   return import('../ai/classify/route');

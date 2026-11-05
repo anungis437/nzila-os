@@ -19,13 +19,13 @@ export const dynamic = 'force-dynamic'
 const logger = createLogger('control-plane:api:authority:entitlements')
 
 const SingleQuerySchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   feature: z.string().min(1),
   actorId: z.string().optional(),
 })
 
 const BulkQuerySchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   features: z.array(z.string().min(1)).min(1).max(50),
   actorId: z.string().optional(),
 })

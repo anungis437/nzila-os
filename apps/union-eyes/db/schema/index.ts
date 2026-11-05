@@ -50,11 +50,9 @@ export {
   meetingTypeEnum,
   // Tables
   workplaceIncidents, safetyInspections, hazardReports,
-  safetyCommitteeMeetings, safetyTrainingRecords, ppeEquipment,
-  safetyAudits, injuryLogs, safetyPolicies, correctiveActions, safetyCertifications,
+  safetyTrainingRecords, ppeEquipment,
   // Relations
   workplaceIncidentsRelations, safetyInspectionsRelations, hazardReportsRelations,
-  correctiveActionsRelations, injuryLogsRelations,
   // CNESST enums
   cneesstFilingTypeEnum, cneesstFilingStatusEnum,
   preventiveWithdrawalReasonEnum, rightOfRefusalOutcomeEnum,
@@ -106,6 +104,9 @@ export * from "./deadline-engine-schema";
 // Dues & Finance (member dues ledger, arrears, employer remittances)
 export * from "./dues-finance-schema";
 
+// Staging proof harness ledger (nonces, runs and events; SYSTEM_ONLY, no tenant data)
+export * from "./staging-proof-schema";
+
 // ============================================================================
 // EXTERNAL EXPORTS (Outside Domain Structure)
 // ============================================================================
@@ -133,7 +134,7 @@ export { type GrievanceType } from "./domains/claims";
 export { employmentStatusEnum } from "./domains/member";
 
 // mlPredictions - ML domain is the canonical source for predictions
-export { mlPredictions } from "./domains/ml";
+export { mlPredictions, mlPredictionFeedback } from "./domains/ml";
 
 // campaignStatusEnum - communications is the canonical source
 export { campaignStatusEnum } from "./domains/communications";

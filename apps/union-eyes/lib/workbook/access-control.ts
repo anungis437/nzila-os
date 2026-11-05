@@ -35,9 +35,12 @@
  */
 import { auth } from '@nzila/platform-auth/entra/server';
 import { eq } from 'drizzle-orm';
+import { getActiveTenantDb } from '@/db/tenant-context-storage';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
-import { withExplicitUserContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { withExplicitUserContext, withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { appendPublicIntakeAudit, type PublicIntakeAuditEntry } from '@/lib/public-intake/intake-audit';
+import { workbookCapabilityHolds } from '@/lib/workbook/workbook-capability';
 
 export type WorkbookAccessResult =
   | { ok: true }
@@ -45,7 +48,8 @@ export type WorkbookAccessResult =
 
 export type WorkbookAuthorityKind = 'preclaim' | 'claimant' | 'same_org';
 
-export interface ClaimedWorkbookAuthority {
+/** The decision: who may reach the workbook and how, before any protected statement has run. */
+export interface ResolvedWorkbookAuthority {
   /** How the caller is authorized to reach this workbook's protected data. */
   kind: WorkbookAuthorityKind;
   workbookId: string;
@@ -59,8 +63,26 @@ export interface ClaimedWorkbookAuthority {
   operation?: 'read' | 'write';
 }
 
+/** What the boundary's callback receives: the decision and the transaction its protected statements and their audit records run on. */
+export interface ClaimedWorkbookAuthority extends ResolvedWorkbookAuthority {
+  /**
+   * The transaction the boundary opened for this authority: the claimant's own user context, or the bounded system context for a
+   * same-organization peer and a pre-claim bearer. It is valid only until the callback returns.
+   */
+  tx: RLSTx;
+  /**
+   * Writes the platform's pseudonymous public-intake audit record on `tx`. Only the system-role branch of the boundary hands it out: an unclaimed
+   * workbook has no organization or actor to record under, and the store is the system role's alone. A claimant's own transaction runs as the
+   * runtime role, which holds no privilege on it, so a claimant authority carries no writer.
+   */
+  appendPublicIntakeAudit?: (entry: PublicIntakeAuditEntry) => Promise<{ subjectRef: string; contentHash: string }>;
+}
+
+/** The lowest organization role that may act on a claimed workbook as a same-organization peer. */
+const PEER_MIN_ROLE = 'steward';
+
 type AuthorityDecision =
-  | { ok: true; authority: ClaimedWorkbookAuthority }
+  | { ok: true; authority: ResolvedWorkbookAuthority }
   | { ok: false; status: 401 | 403 | 404; error: string };
 
 /**
@@ -71,13 +93,15 @@ type AuthorityDecision =
  * yet been established. Only ownership columns of the single workbook cross
  * this boundary — no child data is exposed by the lookup itself.
  */
-async function resolveClaimedWorkbookAuthority(workbookId: string): Promise<AuthorityDecision> {
+async function resolveClaimedWorkbookAuthority(workbookId: string, capability: string | null): Promise<AuthorityDecision> {
   const ownership = await withSystemContext(async (tx) => {
     const [wb] = await tx
       .select({
         id: workbooks.id,
         claimedByUserId: workbooks.claimedByUserId,
         claimedOrgId: workbooks.claimedOrgId,
+        capabilityTokenHash: workbooks.capabilityTokenHash,
+        capabilityTokenExpiresAt: workbooks.capabilityTokenExpiresAt,
       })
       .from(workbooks)
       .where(eq(workbooks.id, workbookId))
@@ -90,7 +114,11 @@ async function resolveClaimedWorkbookAuthority(workbookId: string): Promise<Auth
   }
 
   if (!ownership.claimedByUserId) {
-    // Unclaimed: the workbookId itself is the bearer credential.
+    // Unclaimed: the workbook's bearer capability is the credential, never its identifier (which is in URLs). Whatever is wrong with it
+    // (missing, wrong, expired, never issued) answers as a workbook that is not there, so the response does not say which workbooks exist.
+    if (!workbookCapabilityHolds(capability, ownership)) {
+      return { ok: false, status: 404, error: 'Workbook not found' };
+    }
     return {
       ok: true,
       authority: {
@@ -133,6 +161,14 @@ async function resolveClaimedWorkbookAuthority(workbookId: string): Promise<Auth
     return { ok: false, status: 403, error: 'Forbidden' };
   }
 
+  // The workbook names individuals who have no notice that they are recorded, so a peer needs a role in the organization, not just a
+  // membership: a plain member who shares the organization is not admitted to read, change or delete them.
+  // Loaded here, not at the top: the guard is heavy and only a peer needs it.
+  const { hasRoleInOrganization } = await import('@/lib/api-auth-guard');
+  if (!(await hasRoleInOrganization(ownerOrgId, PEER_MIN_ROLE, userId))) {
+    return { ok: false, status: 403, error: 'Forbidden' };
+  }
+
   return {
     ok: true,
     authority: {
@@ -149,8 +185,8 @@ async function resolveClaimedWorkbookAuthority(workbookId: string): Promise<Auth
  * Boolean authority check (backward-compatible surface). Delegates to the
  * single authority resolver — no protected child data is read here.
  */
-export async function verifyClaimedWorkbookAccess(workbookId: string): Promise<WorkbookAccessResult> {
-  const decision = await resolveClaimedWorkbookAuthority(workbookId);
+export async function verifyClaimedWorkbookAccess(workbookId: string, capability: string | null = null): Promise<WorkbookAccessResult> {
+  const decision = await resolveClaimedWorkbookAuthority(workbookId, capability);
   if (!decision.ok) {
     return { ok: false, status: decision.status, error: decision.error };
   }
@@ -158,32 +194,33 @@ export async function verifyClaimedWorkbookAccess(workbookId: string): Promise<W
 }
 
 export type WithClaimedWorkbookAccessResult<T> =
-  | { ok: true; value: T; authority: ClaimedWorkbookAuthority }
+  | { ok: true; value: T; authority: ResolvedWorkbookAuthority }
   | { ok: false; status: 401 | 403 | 404; error: string };
 
 /**
  * Execution boundary for the claimed-workbook authority chain.
  *
  * Resolves authorization first, then runs `callback` inside the DB execution
- * context that matches the resolved authority. Every protected query the
- * callback performs (directly or via helpers that use the module-level `db`)
- * runs inside that established context — there is no window where a protected
- * query executes before authorization or outside the correct principal.
+ * context that matches the resolved authority and hands it that transaction
+ * as `authority.tx`. Every protected query the callback performs (and the
+ * audit records written for it, see lib/workbook/claimed-write-audit.ts) runs
+ * on that transaction — there is no window where a protected query executes
+ * before authorization or outside the correct principal.
  *
  * The callback MUST constrain every query to `authority.workbookId`; the
  * boundary establishes the principal, not per-row scoping (for the preclaim
  * and same_org paths in particular).
  */
 export async function withClaimedWorkbookAccess<T>(
-  args: { workbookId: string; operation: 'read' | 'write' },
+  args: { workbookId: string; operation: 'read' | 'write'; /** The presented bearer capability of an unclaimed workbook; ignored for a claimed one. */ capability?: string | null },
   callback: (authority: ClaimedWorkbookAuthority) => Promise<T>,
 ): Promise<WithClaimedWorkbookAccessResult<T>> {
-  const decision = await resolveClaimedWorkbookAuthority(args.workbookId);
+  const decision = await resolveClaimedWorkbookAuthority(args.workbookId, args.capability ?? null);
   if (!decision.ok) {
     return decision;
   }
 
-  const authority: ClaimedWorkbookAuthority = {
+  const authority: ResolvedWorkbookAuthority = {
     ...decision.authority,
     operation: args.operation,
   };
@@ -196,7 +233,11 @@ export async function withClaimedWorkbookAccess<T>(
     // session principal IS the real acting principal (the claimant).
     value = await withExplicitUserContext(
       authority.actorUserId as string,
-      () => callback(authority),
+      () => {
+        const tx = getActiveTenantDb();
+        if (!tx) throw new Error('withClaimedWorkbookAccess: the claimant transaction is not open');
+        return callback({ ...authority, tx: tx as unknown as RLSTx });
+      },
       authority.claimedOrgId ?? undefined,
     );
   } else {
@@ -209,7 +250,7 @@ export async function withClaimedWorkbookAccess<T>(
     // callback constrains every query to this single workbook_id — RLS is not
     // broadened org-wide — and the true actor (if any) is available on
     // authority.actorUserId for audit.
-    value = await withSystemContext(() => callback(authority));
+    value = await withSystemContext((tx) => callback({ ...authority, tx, appendPublicIntakeAudit: (entry) => appendPublicIntakeAudit(tx, entry) }));
   }
 
   return { ok: true, value, authority };

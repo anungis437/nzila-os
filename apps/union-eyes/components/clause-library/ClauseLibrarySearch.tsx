@@ -21,22 +21,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-
-const CLAUSE_TYPES = [
-  { value: "wages", label: "Wages & Compensation" },
-  { value: "benefits", label: "Benefits" },
-  { value: "hours_of_work", label: "Hours of Work" },
-  { value: "overtime", label: "Overtime" },
-  { value: "vacation", label: "Vacation" },
-  { value: "sick_leave", label: "Sick Leave" },
-  { value: "grievance_procedure", label: "Grievance Procedure" },
-  { value: "discipline", label: "Discipline" },
-  { value: "seniority", label: "Seniority" },
-  { value: "health_safety", label: "Health & Safety" },
-  { value: "job_security", label: "Job Security" },
-  { value: "pension", label: "Pension" },
-  { value: "other", label: "Other" },
-];
+import { CLAUSE_TYPES } from "@/components/clause-library/clause-types";
 
 const SECTORS = [
   { value: "public", label: "Public Sector" },

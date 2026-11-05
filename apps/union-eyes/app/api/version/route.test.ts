@@ -13,21 +13,28 @@ vi.mock('@/lib/runtime/environment', () => ({
   getEnvironmentSnapshot: mocks.getEnvironmentSnapshot,
 }))
 
-function requestWithHost(headers: Record<string, string>): Request {
+// The topology (environment, host, deployment type, image digests) is disclosed only to a caller that presents the deployment-probe
+// credential (DEF-0B1-VERSION-UNAUTH-TOPOLOGY). These cases are the probe's view; the anonymous view is asserted separately below.
+const PROBE_TOKEN = 'probe-token-value-1234567890'
+
+function requestWithHost(headers: Record<string, string>, authorization: string | null = `Bearer ${PROBE_TOKEN}`): Request {
   return new Request('http://localhost/api/version', {
-    headers,
+    headers: authorization ? { ...headers, authorization } : headers,
   })
 }
 
 describe('GET /api/version (operational package)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    process.env.UE_CANDIDATE_PROBE_TOKEN = PROBE_TOKEN
     mocks.getBuildMetadata.mockReturnValue({
       app: 'union-eyes',
       appVersion: '1.2.3',
       environment: 'staging',
-      commitSha: 'abc123',
-      buildTime: '2025-01-01T00:00:00.000Z',
+      gitSha: 'abc123',
+      buildTimestamp: '2025-01-01T00:00:00.000Z',
+      releaseId: 'release-1',
+      artifactId: 'artifact-1',
     })
     mocks.getEnvironmentSnapshot.mockReturnValue({
       environment: 'staging',
@@ -100,5 +107,32 @@ describe('GET /api/version (operational package)', () => {
     expect(body.backendImageDigest).toBe('sha256:backend')
     delete process.env.UE_FRONTEND_IMAGE_DIGEST
     delete process.env.UE_BACKEND_IMAGE_DIGEST
+  })
+
+  describe('anonymous callers', () => {
+    const TOPOLOGY = ['surfaceEnvironment', 'requestHost', 'demoProfile', 'frontendImageDigest', 'backendImageDigest', 'runtimeEnvironment', 'deploymentType', 'featureProfile', 'configuredEnvironment']
+
+    it('receive only the build identity, whatever host they claim', async () => {
+      const { GET } = await import('./route')
+      for (const headers of [{ host: 'staging-app.unioneyes.app' }, { host: 'app.unioneyes.app', 'x-forwarded-host': 'staging-app.unioneyes.app' }, {}]) {
+        const response = await GET(requestWithHost(headers, null))
+        const body = await response.json()
+        expect(response.status).toBe(200)
+        expect(Object.keys(body).sort()).toEqual(['app', 'appVersion', 'artifactId', 'buildTimestamp', 'gitSha', 'releaseId'])
+        for (const key of TOPOLOGY) expect(body, key).not.toHaveProperty(key)
+        expect(response.headers.get('cache-control')).toBe('no-store')
+      }
+    })
+
+    it('are not upgraded by a wrong, malformed or unconfigured credential', async () => {
+      const { GET } = await import('./route')
+      for (const authorization of ['Bearer wrong-token', 'Basic abc', 'Bearer ', PROBE_TOKEN]) {
+        const body = await (await GET(requestWithHost({ host: 'staging-app.unioneyes.app' }, authorization))).json()
+        expect(body, authorization).not.toHaveProperty('surfaceEnvironment')
+      }
+      delete process.env.UE_CANDIDATE_PROBE_TOKEN
+      const unconfigured = await (await GET(requestWithHost({ host: 'staging-app.unioneyes.app' }))).json()
+      expect(unconfigured).not.toHaveProperty('surfaceEnvironment')
+    })
   })
 })

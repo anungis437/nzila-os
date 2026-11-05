@@ -147,5 +147,12 @@ describe('InvoiceGenerator', () => {
       const html = InvoiceGenerator.generateHTML(makeInvoiceData());
       expect(html).toContain('National Union of Workers');
     });
+
+    it("points the customer at the union's own address, and at the union office, never at an address nobody gave", () => {
+      expect(InvoiceGenerator.generateHTML(makeInvoiceData())).toContain('Questions? Contact us at billing@nuw.ca');
+      const without = InvoiceGenerator.generateHTML(makeInvoiceData({ unionEmail: undefined }));
+      expect(without).toContain('Questions? Contact your union office.');
+      expect(without).not.toContain('info@union.com');
+    });
   });
 });

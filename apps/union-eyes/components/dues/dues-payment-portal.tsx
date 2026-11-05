@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DollarSign,
@@ -11,6 +12,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { ApiShapeError, envelopeData, readApiError } from '@/lib/client/api-envelope';
 import DeductionHistory from './deduction-history';
 import ReportDeductionIssue from './report-deduction-issue';
 import PaymentHistory from './payment-history';
@@ -49,46 +51,53 @@ interface DuesPaymentPortalProps {
 
 export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
   const t = useTranslations('dashboard.dues');
+  const tCommon = useTranslations('common');
   const [balance, setBalance] = useState<DuesBalanceContext | null>(null);
   const [loading, setLoading] = useState(true);
-  // A genuine fetch/network failure — distinct from the API honestly
+  // A genuine fetch/network failure, with the message the server gave — distinct from the API honestly
   // reporting `available: false` because no dues data exists for this
   // member (e.g. dues are administered by a separate system).
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedDeductionId, setSelectedDeductionId] = useState<string | undefined>();
 
   const loadDuesBalance = useCallback(async () => {
     setLoading(true);
-    setLoadError(false);
+    setLoadError(null);
     try {
-      const response = await fetch(`/api/dues/balance?userId=${userId}`);
-      if (!response.ok) throw new Error('Failed to load dues balance');
-      const json = await response.json();
-      setBalance(json?.data ?? json);
-    } catch (_error) {
+      // The server knows who is asking; the request names nobody.
+      const response = await fetch('/api/dues/balance');
+      if (!response.ok) throw new Error(await readApiError(response, t('unavailableBody')));
+      const data = envelopeData(await response.json());
+      if (typeof data.available !== 'boolean') throw new ApiShapeError('no availability');
+      setBalance(data as unknown as DuesBalanceContext);
+    } catch (error) {
       // Honest failure state — never fabricate a balance to make the UI render.
       setBalance(null);
-      setLoadError(true);
+      setLoadError(error instanceof Error ? error.message : t('unavailableBody'));
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [t]);
 
+  // The balance belongs to the signed-in member, so it is fetched again when the member shown changes.
   useEffect(() => {
     loadDuesBalance();
-  }, [loadDuesBalance]);
+  }, [loadDuesBalance, userId]);
 
   if (loading) {
     return <div className="flex items-center justify-center p-12">{t('loading')}</div>;
   }
 
-  if (loadError || !balance) {
+  if (loadError !== null || !balance) {
     return (
       <Card>
         <CardContent className="pt-6 text-center py-12">
           <AlertTriangle className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">{t('unavailableTitle')}</h3>
-          <p className="text-muted-foreground">{t('unavailableBody')}</p>
+          <p role="alert" className="text-muted-foreground">{loadError ?? t('unavailableBody')}</p>
+          <Button variant="outline" className="mt-4" onClick={() => void loadDuesBalance()}>
+            {tCommon('retry')}
+          </Button>
         </CardContent>
       </Card>
     );
@@ -195,7 +204,6 @@ export default function DuesPaymentPortal({ userId }: DuesPaymentPortalProps) {
 
         <TabsContent value="report-issue" className="space-y-4">
           <ReportDeductionIssue
-            userId={userId}
             deductionId={selectedDeductionId}
           />
         </TabsContent>

@@ -1,6 +1,7 @@
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -119,6 +120,8 @@ export const externalDocumentAccessGrants = pgTable('external_document_access_gr
   canView: boolean('can_view').notNull().default(true),
   canDownload: boolean('can_download').notNull().default(false),
   canShare: boolean('can_share').notNull().default(false),
+  // The version this grant covers. Null (every grant before migration 0046) keeps the earlier meaning: the current version.
+  documentVersionNo: integer('document_version_no'),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
   revokedBy: text('revoked_by'),

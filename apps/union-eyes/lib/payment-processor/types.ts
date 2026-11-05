@@ -4,7 +4,6 @@
  * 
  * Supported Processors:
  * - Stripe (Primary)
- * - Whop (Marketplace)
  * - PayPal (Future)
  * - Square (Future)
  * - Manual/Bank Transfer (Future)
@@ -17,7 +16,6 @@ import { Decimal } from 'decimal.js';
  */
 export enum PaymentProcessorType {
   STRIPE = 'stripe',
-  WHOP = 'whop',
   PAYPAL = 'paypal',
   SQUARE = 'square',
   MANUAL = 'manual',

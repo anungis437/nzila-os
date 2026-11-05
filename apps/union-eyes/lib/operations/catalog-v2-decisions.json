@@ -1,0 +1,17 @@
+{
+  "note": "Documented V2 privilege decisions that differ from the legacy storage-authority manifest (source of truth: apps/union-eyes/scripts/bootstrap-v2/current-authority.ts). Kept as data, not code, because naming a table in a reachable module would make the production-reachability ratchet count this contract as a use of the table.",
+  "entries": [
+    {
+      "table": "donations",
+      "classification": "TENANT_RLS_REQUIRED",
+      "runtime": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+      "system": [],
+      "decision": "Organization-owned operational metadata with a UUID organization FK; authenticated CRUD under organization RLS. Does not qualify the separate financial database."
+    },
+    {
+      "table": "evidence_packs",
+      "runtime": ["SELECT", "INSERT", "UPDATE"],
+      "decision": "The evidence pack builder saves the manifest and seals the pack by UPDATE inside the authenticated organization."
+    }
+  ]
+}

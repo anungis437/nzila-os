@@ -1,26 +1,23 @@
 import { withApi } from '@/lib/api/framework';
+import { listPage } from '@/lib/api/list-page';
 import { db } from '@/db/db';
 import { pensionTrustees } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
-import { z } from 'zod';
-
-const createTrusteeSchema = z.object({
-  userId: z.string().uuid().optional(),
-  name: z.string().max(255),
-  role: z.string().max(100).optional(),
-  appointedDate: z.coerce.date().optional(),
-  termEndDate: z.coerce.date().optional(),
-  status: z.enum(['active', 'inactive', 'removed']).optional(),
-});
+import { capabilityNotImplementedResponse } from '@/lib/finance/financial-authority';
 
 export const dynamic = 'force-dynamic';
 
+// A list answers at most this many rows per page; offset pages through the rest.
+const LIST_LIMIT = 200;
+
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Pension'], summary: 'List trustees', description: 'List all pension trustees for the organization' },
   },
   async ({ request, organizationId }) => {
+    const page = listPage(request, LIST_LIMIT);
     const url = new URL(request.url);
     const activeOnly = url.searchParams.get('activeOnly') === 'true';
 
@@ -33,23 +30,20 @@ export const GET = withApi(
       .select()
       .from(pensionTrustees)
       .where(and(...conditions))
-      .orderBy(desc(pensionTrustees.createdAt));
+      .orderBy(desc(pensionTrustees.createdAt)).limit(page.limit).offset(page.offset);
     return trustees;
   },
 );
 
 export const POST = withApi(
   {
-    auth: { required: true, minRole: 'steward' },
-    openapi: { tags: ['Pension'], summary: 'Add trustee', description: 'Add a new pension trustee' },
+    auth: { required: true, minRole: 'member' },
+    openapi: { tags: ['Pension'], summary: 'Add trustee', description: 'Not implemented: trustee appointment requires an independently verified trustee-administration authority' },
   },
-  async ({ body, organizationId }) => {
-    const parsed = createTrusteeSchema.parse(body);
-    const [trustee] = await db
-      .insert(pensionTrustees)
-      .values({ ...parsed, organizationId: organizationId! })
-      .returning();
-    return trustee;
-  },
+  async () =>
+    capabilityNotImplementedResponse(
+      'pension-trustee-appointment',
+      'Trustee appointment requires an independently verified trustee-administration authority, which is not implemented. Steward and Secretary-Treasurer roles do not confer it.',
+    ),
 );
 

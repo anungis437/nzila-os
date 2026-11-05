@@ -29,9 +29,12 @@ export default async function AdminProgramsPage({
 
   const t = await getTranslations('rewards.admin.programs');
 
-  // Fetch programs
+  // Fetch programs. A failed read is an error, not an empty list of programs.
   const programsResult = await listRecognitionPrograms();
-  const programs = programsResult.success ? programsResult.data || [] : [];
+  if (!programsResult.success) {
+    throw new Error(('error' in programsResult && programsResult.error) || 'The recognition programs could not be loaded');
+  }
+  const programs = programsResult.data ?? [];
 
   return (
     <div className="container mx-auto py-8 space-y-8">

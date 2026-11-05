@@ -1,6 +1,11 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
+import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financial-mandate";
+import { rowsVisibleToGrant } from "@/lib/finance/principal-financial-authority";
+import { recordedRunAmounts } from "@/lib/employer-execution/run-duties";
 import { PLATFORM_MODULES, requireEntitlement } from "@/services/platform-economics/entitlement-guard";
 import {
   employerTimesheetEntries,
@@ -15,7 +20,7 @@ import { and, asc, desc, eq, gte, isNull, lte, or } from "drizzle-orm";
 import { calculatePayroll, resolvePayrollRules, sha256 } from "../_lib";
 
 const createSchema = z.object({
-  timesheetBatchId: z.string().uuid(),
+  timesheetBatchId: z.guid(),
   periodStart: z.string(),
   periodEnd: z.string(),
   runType: z.enum(["preview", "official"]),
@@ -24,35 +29,43 @@ const createSchema = z.object({
 
 export const GET = withApi(
   {
-    auth: { minRole: "member" },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_payroll_preview",
     openapi: { tags: ["Employer Execution"], summary: "List payroll runs" },
   },
-  async ({ organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
-    const rows = await db
-      .select()
-      .from(employerPayrollRuns)
-      .where(eq(employerPayrollRuns.organizationId, organizationId))
-      .orderBy(desc(employerPayrollRuns.createdAt));
+  async ({ organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
+    const rows = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const grant = await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:view" });
+      return tx
+        .select()
+        .from(employerPayrollRuns)
+        .where(rowsVisibleToGrant(grant, organizationId, employerPayrollRuns.organizationId, employerPayrollRuns.id))
+        .orderBy(desc(employerPayrollRuns.createdAt));
+    });
     return { data: rows };
   },
 );
 
 export const POST = withApi(
   {
-    auth: { minRole: "steward" },
+    rlsOrgContext: true,
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: "employer_payroll_preview",
     body: createSchema,
     successStatus: 201,
     openapi: { tags: ["Employer Execution"], summary: "Create deterministic payroll run" },
   },
   async ({ organizationId, userId, body }) => {
-    if (!organizationId) throw ApiError.badRequest("Organization context required");
+    if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
 
     if (body.runType === "official") {
       await requireEntitlement(organizationId, PLATFORM_MODULES.EMPLOYER_PAYROLL_OFFICIAL, userId ?? undefined);
     }
+
+    await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:prepare", requiresLedger: true });
+    });
 
     const [sourceBatch] = await db
       .select()
@@ -66,6 +79,9 @@ export const POST = withApi(
       .limit(1);
 
     if (!sourceBatch) throw ApiError.notFound("Timesheet batch not found");
+    if (sourceBatch.status !== "validated") {
+      throw ApiError.badRequest("Only a validated timesheet batch can be used to prepare a payroll run");
+    }
 
     if (body.runType === "official") {
       const [existingApproved] = await db
@@ -172,7 +188,7 @@ export const POST = withApi(
     const missingClassificationCount = timesheetEntries.filter((entry) => !entry.jobClassificationId).length;
     const missingEmploymentMappingCount = timesheetEntries.filter((entry) => !entry.memberEmploymentId).length;
 
-    const run = await withRLSContext(async (tx) => {
+    const run = await withRLSContext({ organizationId }, async (tx) => {
       const [createdRun] = await tx
         .insert(employerPayrollRuns)
         .values({
@@ -264,6 +280,25 @@ export const POST = withApi(
           blocking: "no",
         });
       }
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "employer_execution.payroll_run.prepare",
+        resourceType: "employer_payroll_runs",
+        resourceId: createdRun.id,
+        details: {
+          runCode: createdRun.runCode,
+          runType: body.runType,
+          timesheetBatchId: body.timesheetBatchId,
+          cbaRuleVersionId: activeRuleVersion.id,
+          engineVersion: body.engineVersion,
+          calcTraceHash: calc.calcTraceHash,
+          itemCount: calc.items.length,
+          preparedBy: userId,
+          amounts: recordedRunAmounts(createdRun),
+        },
+      });
 
       return createdRun;
     });

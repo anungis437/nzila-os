@@ -42,6 +42,7 @@ export interface CopilotQueryInput {
   /** Optional conversation ID for multi-turn context */
   conversationId?: string | null;
   /** Prior messages for multi-turn context */
+  /** Accepted for compatibility and ignored: the history is the caller's stored conversation. */
   priorMessages?: Array<{ role: 'user' | 'assistant'; content: string }>;
   /** Current graph context (node IDs, filters) */
   graphContext?: {

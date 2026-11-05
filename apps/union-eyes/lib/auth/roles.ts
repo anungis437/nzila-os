@@ -81,6 +81,27 @@ export enum UserRole {
   STAFF_REP = "staff_rep",                         // Deprecated: Use STEWARD
 }
 
+/**
+ * The roles an organization itself can hold, as an ordered list from the highest level down. Everything else in UserRole is not an organization role: the Nzila
+ * platform-operations roles and the CLC, federation and national roles work across organizations (PLATFORM_ELEVATED_ROLES in lib/api-auth-guard.ts), and the
+ * deprecated aliases and `guest` are not assigned any more. The database catalog of roles (role_definitions) is seeded from exactly this list, because a role
+ * row in an organization's own data must never carry a level that opens another organization or the platform; a test holds the list disjoint from
+ * PLATFORM_ELEVATED_ROLES and the seed equal to it. A new role has to be classified here or in that list: a test fails until it is.
+ */
+export const TENANT_LOCAL_ROLES: readonly UserRole[] = [
+  UserRole.ADMIN,
+  UserRole.PRESIDENT,
+  UserRole.VICE_PRESIDENT,
+  UserRole.SECRETARY_TREASURER,
+  UserRole.CHIEF_STEWARD,
+  UserRole.OFFICER,
+  UserRole.CLERK,
+  UserRole.STEWARD,
+  UserRole.BARGAINING_COMMITTEE,
+  UserRole.HEALTH_SAFETY_REP,
+  UserRole.MEMBER,
+];
+
 // Permissions that can be assigned to roles
 export enum Permission {
   // ===== APP OPERATIONS PERMISSIONS =====
@@ -864,11 +885,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ],
   
   [UserRole.UNION_REP]: [
-    // Union representatives have broad access
-    Permission.VIEW_ALL_CLAIMS,
+    // Legacy steward alias: case reads/edits are decided per case by lib/cases/case-authorization.
     Permission.VIEW_OWN_CLAIMS,
     Permission.CREATE_CLAIM,
-    Permission.EDIT_ALL_CLAIMS,
     Permission.EDIT_OWN_CLAIMS,
     Permission.APPROVE_CLAIM,
     Permission.VIEW_ALL_MEMBERS,
@@ -888,8 +907,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ],
   
   [UserRole.STAFF_REP]: [
-    // Staff representatives have moderate access
-    Permission.VIEW_ALL_CLAIMS,
+    // Legacy steward alias: no organization-wide claim read grant.
     Permission.VIEW_OWN_CLAIMS,
     Permission.CREATE_CLAIM,
     Permission.EDIT_OWN_CLAIMS,
@@ -1069,13 +1087,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   // ========================================================
 
   [UserRole.STEWARD]: [
-    // Steward - front-line representation
-    Permission.VIEW_ALL_CLAIMS,
+    // Steward - front-line representation. Case reads/edits/assignment are decided per case by
+    // lib/cases/case-authorization (assigned casework only); no organization-wide claim grants here.
     Permission.VIEW_OWN_CLAIMS,
     Permission.CREATE_CLAIM,
-    Permission.EDIT_ALL_CLAIMS,
     Permission.EDIT_OWN_CLAIMS,
-    Permission.ASSIGN_CLAIMS,
     Permission.VIEW_ALL_MEMBERS,
     Permission.VIEW_OWN_PROFILE,
     Permission.VIEW_VOTING,
@@ -1134,133 +1150,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ],
 };
 
-// Route access control - maps routes to required permissions
-export const ROUTE_PERMISSIONS: Record<string, Permission[]> = {
-  "/dashboard": [], // All authenticated users
-  "/dashboard/claims": [Permission.VIEW_OWN_CLAIMS],
-  "/dashboard/members": [Permission.VIEW_ALL_MEMBERS],
-  "/dashboard/voting": [Permission.VIEW_VOTING],
-  "/dashboard/collective-agreements": [Permission.VIEW_CBA],
-  "/dashboard/analytics": [Permission.VIEW_ANALYTICS],
-  "/dashboard/settings": [], // All authenticated users
-  
-  // Cross-organizational routes (Congress/Federation)
-  "/dashboard/cross-union-analytics": [Permission.VIEW_CROSS_UNION_ANALYTICS],
-  "/dashboard/precedents": [Permission.VIEW_PRECEDENT_DATABASE],
-  "/dashboard/clause-library": [Permission.VIEW_CLAUSE_LIBRARY],
-  "/dashboard/organizations": [Permission.VIEW_ALL_ORGANIZATIONS],
-  "/dashboard/compliance": [Permission.VIEW_COMPLIANCE_REPORTS],
-  "/dashboard/federation": [Permission.VIEW_FEDERATION_ANALYTICS],
-  "/dashboard/congress": [Permission.VIEW_CONGRESS_ANALYTICS],
-  
-  "/admin": [Permission.VIEW_ADMIN_PANEL],
-  "/admin/claims": [Permission.VIEW_ALL_CLAIMS, Permission.VIEW_ADMIN_PANEL],
-  "/admin/members": [Permission.MANAGE_USERS, Permission.VIEW_ADMIN_PANEL],
-  "/admin/voting": [Permission.MANAGE_VOTING, Permission.VIEW_ADMIN_PANEL],
-  "/admin/analytics": [Permission.VIEW_ADVANCED_ANALYTICS, Permission.VIEW_ADMIN_PANEL],
-  "/admin/settings": [Permission.SYSTEM_SETTINGS, Permission.VIEW_ADMIN_PANEL],
-  "/admin/organizations": [Permission.MANAGE_ORGANIZATIONS, Permission.VIEW_ADMIN_PANEL],
-};
-
-// Navigation items with required permissions
-export interface NavItem {
-  href: string;
-  label: string;
-  icon: string;
-  requiredPermissions: Permission[];
-  adminOnly?: boolean;
-}
-
-export const NAV_ITEMS: NavItem[] = [
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: "Home",
-    requiredPermissions: [],
-  },
-  {
-    href: "/dashboard/claims",
-    label: "My Claims",
-    icon: "FileText",
-    requiredPermissions: [Permission.VIEW_OWN_CLAIMS],
-  },
-  {
-    href: "/dashboard/collective-agreements",
-    label: "Collective Agreements",
-    icon: "BookOpen",
-    requiredPermissions: [Permission.VIEW_CBA],
-  },
-  {
-    href: "/dashboard/voting",
-    label: "Voting",
-    icon: "Vote",
-    requiredPermissions: [Permission.VIEW_VOTING],
-  },
-  {
-    href: "/dashboard/members",
-    label: "Members",
-    icon: "Users",
-    requiredPermissions: [Permission.VIEW_ALL_MEMBERS],
-  },
-  {
-    href: "/dashboard/analytics",
-    label: "Analytics",
-    icon: "TrendingUp",
-    requiredPermissions: [Permission.VIEW_ANALYTICS],
-  },
-  {
-    href: "/dashboard/settings",
-    label: "Settings",
-    icon: "Settings",
-    requiredPermissions: [],
-  },
-];
-
-export const ADMIN_NAV_ITEMS: NavItem[] = [
-  {
-    href: "/admin",
-    label: "Overview",
-    icon: "LayoutDashboard",
-    requiredPermissions: [Permission.VIEW_ADMIN_PANEL],
-    adminOnly: true,
-  },
-  {
-    href: "/admin/claims",
-    label: "Claims Management",
-    icon: "FileText",
-    requiredPermissions: [Permission.VIEW_ALL_CLAIMS, Permission.VIEW_ADMIN_PANEL],
-    adminOnly: true,
-  },
-  {
-    href: "/admin/members",
-    label: "Members",
-    icon: "Users",
-    requiredPermissions: [Permission.MANAGE_USERS, Permission.VIEW_ADMIN_PANEL],
-    adminOnly: true,
-  },
-  {
-    href: "/admin/voting",
-    label: "Voting Admin",
-    icon: "Vote",
-    requiredPermissions: [Permission.MANAGE_VOTING, Permission.VIEW_ADMIN_PANEL],
-    adminOnly: true,
-  },
-  {
-    href: "/admin/analytics",
-    label: "Analytics",
-    icon: "TrendingUp",
-    requiredPermissions: [Permission.VIEW_ADVANCED_ANALYTICS, Permission.VIEW_ADMIN_PANEL],
-    adminOnly: true,
-  },
-  {
-    href: "/admin/settings",
-    label: "Settings",
-    icon: "Settings",
-    requiredPermissions: [Permission.SYSTEM_SETTINGS, Permission.VIEW_ADMIN_PANEL],
-    adminOnly: true,
-  },
-];
-
 /**
  * Check if a role has a specific permission
  */
@@ -1282,23 +1171,6 @@ export function hasAnyPermission(role: UserRole, permissions: Permission[]): boo
 export function hasAllPermissions(role: UserRole, permissions: Permission[]): boolean {
   if (permissions.length === 0) return true; // No permissions required
   return permissions.every(permission => hasPermission(role, permission));
-}
-
-/**
- * Check if a role can access a specific route
- */
-export function canAccessRoute(role: UserRole, route: string): boolean {
-  const requiredPermissions = ROUTE_PERMISSIONS[route];
-  if (!requiredPermissions) return true; // Route not defined, allow access
-  return hasAllPermissions(role, requiredPermissions);
-}
-
-/**
- * Get filtered navigation items based on user role
- */
-export function getAccessibleNavItems(role: UserRole, adminMode: boolean = false): NavItem[] {
-  const items = adminMode ? ADMIN_NAV_ITEMS : NAV_ITEMS;
-  return items.filter(item => hasAllPermissions(role, item.requiredPermissions));
 }
 
 /**

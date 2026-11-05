@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ReviewQueueItem, getReviewQueueCounts } from "@/lib/services/cba-intelligence/review-service";
+import { ApiShapeError, apiErrorMessage, envelopeData, failureText, readApiError } from "@/lib/client/api-envelope";
+import { useOperationalHealth } from "./use-operational-health";
 import {
   Card,
   CardContent,
@@ -34,53 +37,13 @@ import {
 // Types
 // ---------------------------------------------------------------------------
 
-interface QueueCounts {
-  findings: number;
-  agreements: number;
-  wageAdjustments: number;
-  clauses: number;
+type QueueCounts = Awaited<ReturnType<typeof getReviewQueueCounts>>;
+
+interface ReviewQueuePage {
+  items: ReviewQueueItem[];
   total: number;
-}
-
-interface ReviewItem {
-  id: string;
-  clauseFamily?: string;
-  confidence?: number;
-  sourceSpan?: string;
-  citationText?: string;
-  isInferred?: boolean;
-  // Agreement fields
-  title?: string;
-  employer?: string;
-  jurisdiction?: string;
-  // Generic
-  createdAt: string;
-}
-
-interface ReviewQueueResponse {
-  success: boolean;
-  data: {
-    items: ReviewItem[];
-    total: number;
-    page: number;
-    limit: number;
-  };
-}
-
-interface ReviewCountsResponse {
-  success: boolean;
-  data: QueueCounts;
-}
-
-interface OperationalHealthResponse {
-  success: boolean;
-  data: {
-    checks: Array<{
-      name: string;
-      level: "healthy" | "warning" | "critical";
-      detail: string;
-    }>;
-  };
+  page: number;
+  limit: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -113,7 +76,7 @@ function confidenceBadge(c: number | null | undefined) {
 // ---------------------------------------------------------------------------
 
 export function ReviewQueue() {
-  const [activeTab, setActiveTab] = useState("finding");
+  const [activeTab, setActiveTab] = useState<(typeof TARGET_TYPES)[number]["key"]>("finding");
   const [page, setPage] = useState(1);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [decision, setDecision] = useState("");
@@ -122,12 +85,17 @@ export function ReviewQueue() {
   const queryClient = useQueryClient();
 
   // Queue counts
-  const { data: countsData } = useQuery<ReviewCountsResponse>({
+  const { data: counts } = useQuery<QueueCounts>({
     queryKey: ["cba-intel-review-counts"],
-    queryFn: () =>
-      fetch("/api/cba-intelligence/review?counts=true").then((r) => r.json()),
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch("/api/cba-intelligence/review?counts=true");
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, "Failed to load the review queue counts"));
+      const queueCounts: QueueCounts = envelopeData(body) as unknown as QueueCounts;
+      return queueCounts;
+    },
   });
-  const counts = countsData?.data;
 
   // Queue items
   const queryParams = new URLSearchParams({
@@ -135,34 +103,39 @@ export function ReviewQueue() {
     limit: "20",
     targetType: activeTab,
   });
-  const { data, isLoading, error } = useQuery<ReviewQueueResponse>({
+  const { data, isLoading, error } = useQuery<ReviewQueuePage>({
     queryKey: ["cba-intel-review-queue", activeTab, page],
-    queryFn: () =>
-      fetch(`/api/cba-intelligence/review?${queryParams}`).then((r) => r.json()),
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch(`/api/cba-intelligence/review?${queryParams}`);
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, "Failed to load review queue"));
+      const queue: ReviewQueuePage = envelopeData(body) as unknown as ReviewQueuePage;
+      if (!Array.isArray(queue.items)) throw new ApiShapeError("no review queue");
+      return queue;
+    },
   });
 
-  const { data: healthData } = useQuery<OperationalHealthResponse>({
-    queryKey: ["cba-intel-operational-health"],
-    queryFn: () => fetch("/api/cba-intelligence/health").then((r) => r.json()),
-    refetchInterval: 60_000,
-  });
+  const { data: health } = useOperationalHealth();
 
-  // Submit review
+  // Submit review: a decision the route refused (a role, a row already decided, a reason too long) is shown, not taken for a decision made.
   const submitMutation = useMutation({
-    mutationFn: (payload: {
+    mutationFn: async (payload: {
       targetType: string;
       targetId: string;
       decision: string;
       reason: string;
       comment?: string;
-    }) =>
-      fetch("/api/cba-intelligence/review", {
+    }) => {
+      const response = await fetch("/api/cba-intelligence/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }).then((r) => r.json()),
+      });
+      if (!response.ok) throw new Error(await readApiError(response, "Failed to submit the review decision"));
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cba-intel-review"] });
+      queryClient.invalidateQueries({ queryKey: ["cba-intel-review-queue"] });
       queryClient.invalidateQueries({ queryKey: ["cba-intel-review-counts"] });
       setReviewingId(null);
       setDecision("");
@@ -171,10 +144,10 @@ export function ReviewQueue() {
     },
   });
 
-  const items = data?.data?.items ?? [];
-  const total = data?.data?.total ?? 0;
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
-  const backlogHealth = healthData?.data.checks.find((c) => c.name === "review_backlog");
+  const backlogHealth = health?.checks.find((c) => c.name === "review_backlog");
   const showBacklogAlert = backlogHealth && backlogHealth.level !== "healthy";
 
   function handleSubmit(targetId: string) {
@@ -220,7 +193,7 @@ export function ReviewQueue() {
           </Alert>
         )}
 
-        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setPage(1); setReviewingId(null); }}>
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as typeof activeTab); setPage(1); setReviewingId(null); submitMutation.reset(); }}>
           <TabsList>
             {TARGET_TYPES.map((t) => (
               <TabsTrigger key={t.key} value={t.key} className="gap-1">
@@ -255,8 +228,8 @@ export function ReviewQueue() {
                       </TableRow>
                     ) : error ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8 text-red-500">
-                          Failed to load review queue
+                        <TableCell colSpan={4} role="alert" className="text-center py-8 text-red-500">
+                          {failureText(error, "Failed to load review queue")}
                         </TableCell>
                       </TableRow>
                     ) : items.length === 0 ? (
@@ -292,6 +265,9 @@ export function ReviewQueue() {
                           <TableCell>
                             <div className="text-sm text-muted-foreground">
                               {item.jurisdiction && <span>{item.jurisdiction} · </span>}
+                              {item.reviewStatus === "needs_followup" && (
+                                <Badge variant="outline" className="mr-1 text-xs">Needs Follow-up</Badge>
+                              )}
                               {item.isInferred && (
                                 <Badge variant="secondary" className="text-xs">Inferred</Badge>
                               )}
@@ -336,12 +312,18 @@ export function ReviewQueue() {
                                     Cancel
                                   </Button>
                                 </div>
+                                {submitMutation.error && (
+                                  <div role="alert" className="text-sm text-red-500">
+                                    {failureText(submitMutation.error, "Failed to submit the review decision")}
+                                  </div>
+                                )}
                               </div>
                             ) : (
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
+                                  submitMutation.reset();
                                   setReviewingId(item.id);
                                   setDecision("");
                                   setReason("");

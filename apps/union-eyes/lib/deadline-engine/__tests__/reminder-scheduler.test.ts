@@ -19,6 +19,11 @@ const mocks = vi.hoisted(() => ({
   resolve: vi.fn(),
   audit: vi.fn(),
   txExecute: vi.fn(),
+  loadZone: vi.fn(),
+}));
+
+vi.mock('../organization-time-zone', () => ({
+  loadOrganizationTimeZone: mocks.loadZone,
 }));
 
 vi.mock('../recipient-resolver', () => ({
@@ -56,6 +61,7 @@ const FUTURE_DUE = new Date(NOW.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 day
 beforeEach(() => {
   vi.clearAllMocks();
   vi.setSystemTime(NOW);
+  mocks.loadZone.mockResolvedValue({ timeZone: 'America/Toronto', source: 'province_territory' });
 });
 
 describe('reminder-scheduler', () => {
@@ -196,6 +202,47 @@ describe('reminder-scheduler', () => {
     expect(mocks.txExecute).toHaveBeenCalledTimes(1);
   });
 
+  it('sends an overdue reminder now instead of discarding it for being past its due instant', async () => {
+    mocks.resolve.mockResolvedValueOnce({
+      organizationId: ORG,
+      recipients: [{ userId: 'u-1', role: 'grievor', email: 'a@example.com', locale: 'en' }],
+      skipped: [],
+    });
+    mocks.txExecute.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+    const pastDue = new Date(NOW.getTime() - 3 * 24 * 60 * 60 * 1000);
+    const result = await scheduleGrievanceDeadlineReminders({
+      sourceDeadlineId: DL,
+      grievanceId: GRIEV,
+      dueDate: pastDue,
+      reminderOffsetsInDays: [0],
+      reminderKind: 'overdue',
+    });
+
+    expect(result.skippedInPast).toEqual([]);
+    // Cancel, then one insert for the one recipient.
+    expect(mocks.txExecute).toHaveBeenCalledTimes(2);
+    const insert = JSON.stringify(mocks.txExecute.mock.calls[1][0]);
+    expect(insert).not.toContain(pastDue.toISOString());
+  });
+
+  it('still discards a past upcoming reminder (only overdue reminders are sent late)', async () => {
+    mocks.resolve.mockResolvedValueOnce({
+      organizationId: ORG,
+      recipients: [{ userId: 'u-1', role: 'grievor', email: 'a@example.com', locale: 'en' }],
+      skipped: [],
+    });
+    mocks.txExecute.mockResolvedValueOnce([]);
+    const result = await scheduleGrievanceDeadlineReminders({
+      sourceDeadlineId: DL,
+      grievanceId: GRIEV,
+      dueDate: new Date(NOW.getTime() - 60_000),
+      reminderOffsetsInDays: [0],
+    });
+    expect(result.skippedInPast).toHaveLength(1);
+    expect(mocks.txExecute).toHaveBeenCalledTimes(1);
+  });
+
   it('when unique-index race causes ON CONFLICT DO NOTHING: no duplicate row appears in result', async () => {
     mocks.resolve.mockResolvedValueOnce({
       organizationId: ORG,
@@ -231,5 +278,69 @@ describe('reminder-scheduler', () => {
       }),
     ).rejects.toThrow(/grievance not found/);
     expect(mocks.txExecute).not.toHaveBeenCalled();
+  });
+
+  describe('calendar-day deadlines in the organization zone', () => {
+    const insertValues = () => mocks.txExecute.mock.calls.slice(1).map(([query]) => query.values as unknown[]);
+
+    it('records the organization zone on each row and keeps 23:59 local N days before, across a daylight-saving change', async () => {
+      vi.setSystemTime(new Date('2026-02-20T12:00:00.000Z'));
+      mocks.resolve.mockResolvedValueOnce({
+        organizationId: ORG,
+        recipients: [{ userId: 'u-1', role: 'grievor', email: 'a@example.com', locale: 'en' }],
+        skipped: [],
+      });
+      mocks.txExecute.mockResolvedValue([]);
+      // Due 23:59 EDT on 9 March 2026, the day after Toronto springs forward.
+      const due = new Date('2026-03-10T03:59:00.000Z');
+
+      const result = await scheduleGrievanceDeadlineReminders({
+        sourceDeadlineId: DL,
+        grievanceId: GRIEV,
+        dueDate: due,
+        reminderOffsetsInDays: [7, 1],
+      });
+
+      expect(mocks.loadZone).toHaveBeenCalledWith(ORG);
+      const [seven, one] = insertValues();
+      // 7 days before: 23:59 EST on 2 March (04:59Z), not 22:59 EST (03:59Z) as 168 hours of arithmetic would give.
+      expect(seven).toContain('2026-03-03T04:59:00.000Z');
+      expect(seven).toContain('America/Toronto');
+      expect(one).toContain('2026-03-09T03:59:00.000Z');
+      expect(one).toContain('America/Toronto');
+      expect(result.skippedInPast).toEqual([]);
+      const summary = mocks.audit.mock.calls.map(([arg]) => arg).find((arg) => arg.eventType === 'deadline.created');
+      expect(summary?.metadata).toMatchObject({ timezone: 'America/Toronto', due_date: '2026-03-10T03:59:00.000Z' });
+      mocks.txExecute.mockReset();
+    });
+
+    it('uses an explicit timezone without reading the organization, and refuses an unknown zone before any work', async () => {
+      mocks.resolve.mockResolvedValueOnce({
+        organizationId: ORG,
+        recipients: [{ userId: 'u-1', role: 'grievor', email: 'a@example.com', locale: 'en' }],
+        skipped: [],
+      });
+      mocks.txExecute.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+      await scheduleGrievanceDeadlineReminders({
+        sourceDeadlineId: DL,
+        grievanceId: GRIEV,
+        dueDate: FUTURE_DUE,
+        reminderOffsetsInDays: [1],
+        timezone: 'America/Regina',
+      });
+      expect(mocks.loadZone).not.toHaveBeenCalled();
+      expect(insertValues()[0]).toContain('America/Regina');
+
+      await expect(
+        scheduleGrievanceDeadlineReminders({
+          sourceDeadlineId: DL,
+          grievanceId: GRIEV,
+          dueDate: FUTURE_DUE,
+          reminderOffsetsInDays: [1],
+          timezone: 'Not/AZone',
+        }),
+      ).rejects.toThrow(/not a known IANA time zone/);
+      expect(mocks.resolve).toHaveBeenCalledTimes(1);
+    });
   });
 });

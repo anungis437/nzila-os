@@ -64,7 +64,7 @@ const toolGrantSchema: z.ZodType<ToolGrant> = z
     allowedSecretRefs: z.array(z.string()),
     maxTimeoutMs: z.number(),
     allowedFilesystemRoots: z.array(z.string()).optional(),
-    allowedEnv: z.record(z.array(z.string())).optional(),
+    allowedEnv: z.record(z.string(), z.array(z.string())).optional(),
     resourceLimits: z.object({
       cpuMs: z.number(),
       memoryBytes: z.number(),

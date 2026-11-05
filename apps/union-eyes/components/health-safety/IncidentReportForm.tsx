@@ -1,13 +1,14 @@
 /**
  * Incident Report Form Component
  * 
- * Comprehensive form for creating/editing incident reports with:
+ * Form for reporting an incident with:
  * - Multi-step validation
- * - File attachments
  * - Witness information
  * - Severity classification
  * - Location details
- * - Auto-save drafts
+ * 
+ * The form hands the typed report to its host, which saves it (see incident-payload.ts for how the fields reach the incidents route). It
+ * keeps no draft and takes no attachments: nothing restores a draft and no route stores a file.
  * 
  * @module components/health-safety/IncidentReportForm
  */
@@ -38,20 +39,20 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
-import { Calendar as CalendarIcon, Upload, Save, Send } from "lucide-react";
+import { Calendar as CalendarIcon, Send } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const incidentSchema = z.object({
   incidentDate: z.date({
-    required_error: "Incident date is required",
+    error: "Incident date is required",
   }),
   incidentTime: z.string().min(1, "Incident time is required"),
   location: z.string().min(1, "Location is required"),
   department: z.string().optional(),
   incidentType: z.string().min(1, "Incident type is required"),
   severity: z.enum(["minor", "major", "critical"], {
-    required_error: "Severity is required",
+    error: "Severity is required",
   }),
   description: z.string().min(50, "Description must be at least 50 characters"),
   immediateCause: z.string().min(20, "Immediate cause must be at least 20 characters"),
@@ -100,27 +101,22 @@ const incidentSchema = z.object({
   path: ["witnessNames"],
 });
 
-type IncidentFormData = z.infer<typeof incidentSchema>;
+export type IncidentFormData = z.infer<typeof incidentSchema>;
 
 export interface IncidentReportFormProps {
-  organizationId: string;
   initialData?: Partial<IncidentFormData>;
-  incidentId?: string;
-  onSubmit?: (data: IncidentFormData) => Promise<void>;
+  /** Saves the report. It throws when the report is refused, so the form stays open with what was typed and shows the reason. */
+  onSubmit: (data: IncidentFormData) => Promise<void>;
   onCancel?: () => void;
 }
 
 export function IncidentReportForm({
-  organizationId,
   initialData,
-  incidentId,
   onSubmit,
   onCancel
 }: IncidentReportFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [isSavingDraft, setIsSavingDraft] = React.useState(false);
-  const [attachments, setAttachments] = React.useState<File[]>([]);
 
   const form = useForm<IncidentFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -146,98 +142,18 @@ export function IncidentReportForm({
     },
   });
 
-  // Auto-save draft
-  React.useEffect(() => {
-    const subscription = form.watch(() => {
-      const data = form.getValues();
-      localStorage.setItem(`incident-draft-${organizationId}`, JSON.stringify(data));
-    });
-    return () => subscription.unsubscribe();
-  }, [form, organizationId]);
-
   async function handleSubmit(data: IncidentFormData) {
     setIsSubmitting(true);
     try {
-      if (onSubmit) {
-        await onSubmit(data);
-      } else {
-        // Default API call
-        const formData = new FormData();
-        Object.entries(data).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            formData.append(key, typeof value === 'object' ? JSON.stringify(value) : value.toString());
-          }
-        });
-
-        attachments.forEach((file) => {
-          formData.append('attachments', file);
-        });
-
-        const endpoint = incidentId
-          ? `/api/health-safety/incidents/${incidentId}`
-          : `/api/health-safety/incidents`;
-
-        const response = await fetch(endpoint, {
-          method: incidentId ? 'PATCH' : 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to submit incident report");
-        }
-
-        const result = await response.json();
-        
-        toast({
-          title: "Success",
-          description: incidentId 
-            ? "Incident report updated successfully" 
-            : "Incident report submitted successfully"
-        });
-
-        // Clear draft
-        localStorage.removeItem(`incident-draft-${organizationId}`);
-
-        // Redirect or callback
-        if (!incidentId && result.incidentId) {
-          window.location.href = `/health-safety/incidents/${result.incidentId}`;
-        }
-      }
-    } catch {
+      await onSubmit(data);
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to submit incident report",
+        description: error instanceof Error && error.message !== "" ? error.message : "Failed to submit incident report",
         variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
-    }
-  }
-
-  async function saveDraft() {
-    setIsSavingDraft(true);
-    try {
-      const data = form.getValues();
-      localStorage.setItem(`incident-draft-${organizationId}`, JSON.stringify(data));
-      
-      toast({
-        title: "Draft Saved",
-        description: "Your incident report has been saved as a draft"
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to save draft",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSavingDraft(false);
-    }
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) {
-      setAttachments(Array.from(e.target.files));
     }
   }
 
@@ -578,24 +494,6 @@ export function IncidentReportForm({
               </div>
             </div>
           )}
-
-          {/* File Attachments */}
-          <div className="space-y-2">
-            <Label htmlFor="attachments">Attachments</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="attachments"
-                type="file"
-                multiple
-                accept="image/*,.pdf,.doc,.docx"
-                onChange={handleFileChange}
-              />
-              <Upload className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Upload photos, documents, or other relevant files
-            </p>
-          </div>
         </CardContent>
       </Card>
 
@@ -606,15 +504,6 @@ export function IncidentReportForm({
             Cancel
           </Button>
         )}
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={saveDraft}
-          disabled={isSavingDraft}
-        >
-          <Save className="h-4 w-4 mr-2" />
-          Save Draft
-        </Button>
         <Button type="submit" disabled={isSubmitting}>
           <Send className="h-4 w-4 mr-2" />
           {isSubmitting ? "Submitting..." : "Submit Report"}

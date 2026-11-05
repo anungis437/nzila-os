@@ -78,11 +78,11 @@ function toRows<T extends Record<string, unknown>>(result: any): T[] {
 }
 
 /** Validates a route :param is a UUID before it reaches any query. */
-const uuidParam = z.string().uuid();
+const uuidParam = z.guid();
 
 // Validation schemas
 const createDonationSchema = z.object({
-  fundId: z.string().uuid(),
+  fundId: z.guid(),
   amount: z.number().positive().min(1), // Minimum $1
   donorName: z.string().min(1).max(100).optional(),
   donorEmail: z.string().email().optional(),
@@ -173,7 +173,7 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Validation error',
-        details: error.errors,
+        details: error.issues,
       });
     }
     res.status(500).json({

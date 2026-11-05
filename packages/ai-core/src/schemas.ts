@@ -7,7 +7,7 @@ import type { AiFeature, DataClass } from './types'
 // ── Request validation schemas ──────────────────────────────────────────────
 
 export const AiGenerateRequestSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
   promptKey: z.string().optional(),
@@ -15,7 +15,7 @@ export const AiGenerateRequestSchema = z.object({
     role: z.enum(['system', 'user', 'assistant']),
     content: z.string(),
   }))]),
-  variables: z.record(z.string()).optional(),
+  variables: z.record(z.string(), z.string()).optional(),
   dataClass: z.enum(['public', 'internal', 'sensitive', 'regulated']),
   trace: z.object({
     correlationId: z.string().optional(),
@@ -32,7 +32,7 @@ export const AiGenerateRequestSchema = z.object({
 export const AiChatStreamRequestSchema = AiGenerateRequestSchema
 
 export const AiEmbedRequestSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
   input: z.union([z.string(), z.array(z.string())]),
@@ -40,23 +40,23 @@ export const AiEmbedRequestSchema = z.object({
 })
 
 export const AiRagQueryRequestSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
   query: z.string().min(1),
   topK: z.number().int().min(1).max(50).default(5),
-  filters: z.record(z.unknown()).optional(),
+  filters: z.record(z.string(), z.unknown()).optional(),
   dataClass: z.enum(['public', 'internal', 'sensitive', 'regulated']),
 })
 
 export const AiExtractRequestSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
   promptKey: z.string(),
   input: z.string(),
   schemaKey: z.string().optional(),
-  variables: z.record(z.string()).optional(),
+  variables: z.record(z.string(), z.string()).optional(),
   dataClass: z.enum(['public', 'internal', 'sensitive', 'regulated']),
   trace: z.object({
     correlationId: z.string().optional(),
@@ -66,7 +66,7 @@ export const AiExtractRequestSchema = z.object({
 })
 
 export const AiActionProposeRequestSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
   actionType: z.string().min(1).max(120),
@@ -79,7 +79,7 @@ export const AiActionProposeRequestSchema = z.object({
 })
 
 export const AiActionApproveRequestSchema = z.object({
-  actionId: z.string().uuid(),
+  actionId: z.guid(),
   approved: z.boolean(),
   notes: z.string().optional(),
 })
@@ -96,35 +96,35 @@ export type ActionType = (typeof ACTION_TYPES)[keyof typeof ACTION_TYPES]
 // ── Action proposal schemas ─────────────────────────────────────────────────
 
 export const FinanceStripeMonthlyReportsProposalSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
   period: z.object({
     startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
     endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD'),
     periodLabel: z.string().min(1), // e.g., "2026-02"
-    periodId: z.string().uuid().optional(),
+    periodId: z.guid().optional(),
   }),
-  ventureId: z.string().uuid().optional(),
+  ventureId: z.guid().optional(),
   outputs: z.array(
     z.enum(['revenue_summary', 'payout_recon', 'refunds_summary', 'disputes_summary']),
   ).min(1).default(['revenue_summary', 'payout_recon', 'refunds_summary', 'disputes_summary']),
   evidence: z.object({
     storeUnderEvidencePack: z.boolean().default(true),
     evidencePathHint: z.string().optional(),
-  }).default({}),
+  }).prefault({}),
 })
 
 export type FinanceStripeMonthlyReportsProposal = z.infer<typeof FinanceStripeMonthlyReportsProposalSchema>
 
 export const AiIngestKnowledgeSourceProposalSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   appKey: z.string().min(1).max(60),
   profileKey: z.string().min(1).max(120),
   source: z.object({
     sourceType: z.enum(['blob_document', 'url', 'manual_text']),
     title: z.string().min(1),
-    documentId: z.string().uuid().optional(),
+    documentId: z.guid().optional(),
     url: z.string().url().optional(),
     text: z.string().optional(),
   }).refine(
@@ -141,14 +141,14 @@ export const AiIngestKnowledgeSourceProposalSchema = z.object({
     chunkOverlap: z.number().int().min(0).max(1000).default(150),
     embeddingBatchSize: z.number().int().min(1).max(256).default(64),
     maxChunks: z.number().int().min(1).max(50000).default(5000),
-  }).default({}),
+  }).prefault({}),
   retention: z.object({
     dataClass: z.enum(['public', 'internal', 'sensitive', 'regulated']),
     retentionDays: z.number().int().min(1).default(90),
   }),
   citations: z.object({
     requireCitations: z.boolean().default(true),
-  }).default({}),
+  }).prefault({}),
 })
 
 export type AiIngestKnowledgeSourceProposal = z.infer<typeof AiIngestKnowledgeSourceProposalSchema>
@@ -163,7 +163,7 @@ const ACTION_SCHEMAS: Record<string, z.ZodType<unknown>> = {
   [ACTION_TYPES.FINANCE_STRIPE_MONTHLY_REPORTS]: FinanceStripeMonthlyReportsProposalSchema as z.ZodType<unknown>,
   [ACTION_TYPES.AI_INGEST_KNOWLEDGE_SOURCE]: AiIngestKnowledgeSourceProposalSchema as z.ZodType<unknown>,
   create_close_exception: z.object({
-    periodId: z.string().uuid(),
+    periodId: z.guid(),
     description: z.string(),
     severity: z.enum(['low', 'medium', 'high']),
     suggestedAction: z.string(),

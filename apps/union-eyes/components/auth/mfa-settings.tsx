@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import QRCode from "qrcode";
+import { getJson, postJson, UNEXPECTED_MESSAGE } from "./auth-client";
 
 interface MfaStatus {
   enrolled: boolean;
@@ -16,8 +18,54 @@ interface EnrollResponse {
   recoveryCodes: string[];
 }
 
+/** /api/auth/mfa/status answers { enrolled, enabled, enabledAt, recoveryCodeCount }: an answer without them is not "two-factor is off". */
+function readStatus(data: Record<string, unknown>): MfaStatus | null {
+  const { enrolled, enabled, enabledAt, recoveryCodeCount } = data;
+  if (typeof enrolled !== "boolean" || typeof enabled !== "boolean") return null;
+  if (enabledAt !== null && (typeof enabledAt !== "string" || Number.isNaN(Date.parse(enabledAt)))) return null;
+  if (typeof recoveryCodeCount !== "number" || !Number.isInteger(recoveryCodeCount) || recoveryCodeCount < 0) return null;
+  return { enrolled, enabled, enabledAt, recoveryCodeCount };
+}
+
+/** /api/auth/mfa/enroll answers { otpAuthUri, secret, recoveryCodes }: all three are needed to finish enrolling. */
+function readEnrollment(data: Record<string, unknown>): EnrollResponse | null {
+  const { otpAuthUri, secret, recoveryCodes } = data;
+  if (typeof otpAuthUri !== "string" || !otpAuthUri.startsWith("otpauth://") || typeof secret !== "string" || !secret) return null;
+  if (!Array.isArray(recoveryCodes) || recoveryCodes.length === 0 || !recoveryCodes.every((code) => typeof code === "string" && code !== "")) return null;
+  return { otpAuthUri, secret, recoveryCodes: recoveryCodes as string[] };
+}
+
+/**
+ * The enrollment link carries the authenticator secret, so the code is drawn here, in the browser: the address is never sent to a QR service.
+ * When it cannot be drawn the manual setup secret below it still completes enrollment, and the person is told why the image is missing.
+ */
+function EnrollmentQr({ uri, alt, unavailable }: { uri: string; alt: string; unavailable: string }) {
+  const [image, setImage] = useState<{ uri: string; src: string | null } | null>(null);
+
+  useEffect(() => {
+    let current = true;
+    QRCode.toDataURL(uri, { width: 240, margin: 1 }).then(
+      (src) => {
+        if (current) setImage({ uri, src });
+      },
+      () => {
+        if (current) setImage({ uri, src: null });
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [uri]);
+
+  if (image === null || image.uri !== uri) return <div className="h-60 w-60 rounded-lg border border-gray-200" role="status" aria-busy="true" />;
+  if (image.src === null) return <p role="alert" className="max-w-60 text-sm text-red-700">{unavailable}</p>;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={image.src} alt={alt} width={240} height={240} className="border border-gray-200 rounded-lg" />;
+}
+
 export function MfaSettings() {
   const t = useTranslations("mfaSettings");
+  const locale = useLocale();
   const [status, setStatus] = useState<MfaStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,22 +73,29 @@ export function MfaSettings() {
   const [verifyCode, setVerifyCode] = useState("");
   const [confirmedCodes, setConfirmedCodes] = useState(false);
 
+  // What the person is told: the screen's own wording, followed by the route's reason when it gave one.
+  const failure = useCallback((title: string, reason: string) => (reason === title ? title : `${title}: ${reason}`), []);
+
   const loadStatus = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/auth/mfa/status", { cache: "no-store" });
-      if (!res.ok) {
-        setError(t("statusLoadError"));
+      const title = t("statusLoadError");
+      const answer = await getJson("/api/auth/mfa/status", title);
+      if (!answer.ok) {
+        setError(failure(title, answer.message));
         return;
       }
-      setStatus(await res.json());
-    } catch {
-      setError(t("statusLoadError"));
+      const read = readStatus(answer.data);
+      if (read === null) {
+        setError(failure(title, UNEXPECTED_MESSAGE));
+        return;
+      }
+      setStatus(read);
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, failure]);
 
   useEffect(() => {
     void loadStatus();
@@ -50,16 +105,19 @@ export function MfaSettings() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/mfa/enroll", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || t("enrollmentFailed"));
+      const title = t("enrollmentFailed");
+      const answer = await postJson("/api/auth/mfa/enroll", {}, title);
+      if (!answer.ok) {
+        setError(failure(title, answer.message));
         return;
       }
-      setEnrollment(data);
+      const read = readEnrollment(answer.data);
+      if (read === null) {
+        setError(failure(title, UNEXPECTED_MESSAGE));
+        return;
+      }
+      setEnrollment(read);
       setConfirmedCodes(false);
-    } catch {
-      setError(t("enrollmentFailed"));
     } finally {
       setLoading(false);
     }
@@ -70,21 +128,20 @@ export function MfaSettings() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/mfa/verify-enroll", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: verifyCode.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || t("invalidCode"));
+      const title = t("invalidCode");
+      const answer = await postJson("/api/auth/mfa/verify-enroll", { code: verifyCode.trim() }, title);
+      if (!answer.ok) {
+        setError(failure(t("verificationFailed"), answer.message));
+        return;
+      }
+      // The route confirms with { ok: true }; without it the account is not known to have two-factor on.
+      if (answer.data.ok !== true) {
+        setError(failure(t("verificationFailed"), UNEXPECTED_MESSAGE));
         return;
       }
       setEnrollment(null);
       setVerifyCode("");
       await loadStatus();
-    } catch {
-      setError(t("verificationFailed"));
     } finally {
       setLoading(false);
     }
@@ -98,19 +155,17 @@ export function MfaSettings() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/mfa/disable", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: "user_disabled" }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || t("disableError"));
+      const title = t("disableError");
+      const answer = await postJson("/api/auth/mfa/disable", { reason: "user_disabled" }, title);
+      if (!answer.ok) {
+        setError(failure(title, answer.message));
+        return;
+      }
+      if (answer.data.ok !== true) {
+        setError(failure(title, UNEXPECTED_MESSAGE));
         return;
       }
       await loadStatus();
-    } catch {
-      setError(t("disableError"));
     } finally {
       setLoading(false);
     }
@@ -121,8 +176,6 @@ export function MfaSettings() {
   }
 
   if (enrollment) {
-    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(enrollment.otpAuthUri)}`;
-
     return (
       <div className="space-y-6 border border-gray-200 rounded-xl p-6 bg-white">
         <div>
@@ -131,14 +184,7 @@ export function MfaSettings() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 items-start">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={qrSrc}
-            alt={t("qrAlt")}
-            width={240}
-            height={240}
-            className="border border-gray-200 rounded-lg"
-          />
+          <EnrollmentQr uri={enrollment.otpAuthUri} alt={t("qrAlt")} unavailable={t("qrUnavailable")} />
           <div className="flex-1 min-w-0">
             <label className="block text-sm font-medium text-gray-700">{t("manualSecretLabel")}</label>
             <code className="block mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs break-all">
@@ -221,7 +267,7 @@ export function MfaSettings() {
           </div>
           {status.enabledAt && (
             <p className="text-sm text-gray-600">
-              {t("enabledOn", { date: new Date(status.enabledAt).toLocaleDateString() })}
+              {t("enabledOn", { date: new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(new Date(status.enabledAt)) })}
             </p>
           )}
           <p className="text-sm text-gray-600">

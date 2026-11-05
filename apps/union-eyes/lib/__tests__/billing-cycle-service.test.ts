@@ -5,13 +5,21 @@
  *   - calculatePeriodDates (monthly, bi_weekly, weekly, quarterly, annual)
  *   - calculateProRatedAmount (mid-cycle join proration)
  *   - allocateDuesBreakdown (COPE/PAC/Strike Fund allocation)
- *   - getWeeksInPeriod
  *   - getNextBillingDate
+ * and, with the dues engine and the cycle's transaction stubbed, what makes the charge of one member:
+ *   - processMemberBilling (the amount is the member's dues assignment; a member already charged for the period is skipped)
+ *   - generateBillingCycle (hands each member whether the period is already charged to them)
  *
  * Tier 1 — Security & Money
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 
+const cycleMocks = vi.hoisted(() => ({ withRLSContext: vi.fn(), requireLiveFinancialMandate: vi.fn() }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: cycleMocks.withRLSContext }));
+vi.mock('@/lib/finance/require-live-financial-mandate', () => ({ requireLiveFinancialMandate: cycleMocks.requireLiveFinancialMandate }));
+vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+
+import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
 import { BillingCycleService, type BillingFrequency } from '../services/billing-cycle-service';
 
 // Access private static methods via type-casting — purely for testing
@@ -81,6 +89,18 @@ describe('BillingCycleService.calculatePeriodDates', () => {
     });
   });
 
+  it('weekly: a Sunday on the first of a month ends that Sunday, not four weeks later', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('weekly', new Date(2026, 2, 1));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2026, 1, 23]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2026, 2, 1]);
+  });
+
+  it('biweekly: a Sunday on the first of a month ends thirteen days after the prior Monday', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('bi_weekly', new Date(2026, 2, 1));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2026, 1, 23]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2026, 2, 8]);
+  });
+
   describe('quarterly', () => {
     it('Q1 reference returns Jan 1 - Mar 31', () => {
       const ref = new Date(2025, 1, 15); // Feb = Q1
@@ -109,6 +129,28 @@ describe('BillingCycleService.calculatePeriodDates', () => {
       expect(periodEnd.getMonth()).toBe(11);
       expect(periodEnd.getDate()).toBe(31);
     });
+  });
+
+  it('keeps month-end January 31 inside January rather than rolling into March', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('monthly', new Date(2025, 0, 31));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2025, 0, 1]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2025, 0, 31]);
+  });
+
+  it('keeps May 31 inside Q2 with an April 1 start', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('quarterly', new Date(2026, 4, 31));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2026, 3, 1]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2026, 5, 30]);
+  });
+
+  it('keeps December 31 inside Q4 rather than rolling into the following year', () => {
+    const { periodStart, periodEnd } = BillingCycleService.calculatePeriodDates('quarterly', new Date(2026, 11, 31));
+    expect([periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()]).toEqual([2026, 9, 1]);
+    expect([periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate()]).toEqual([2026, 11, 31]);
+  });
+
+  it('rejects invalid reference dates before deriving financial boundaries', () => {
+    expect(() => BillingCycleService.calculatePeriodDates('monthly', new Date(NaN))).toThrow('Invalid billing reference date');
   });
 
   it('throws for unsupported frequency', () => {
@@ -166,6 +208,33 @@ describe('BillingCycleService.calculateProRatedAmount', () => {
     const decimals = result.amount.toString().split('.')[1] || '';
     expect(decimals.length).toBeLessThanOrEqual(2);
   });
+
+  it('includes both the joining day and final day in a 31-day period', () => {
+    const start = new Date('2026-03-01T00:00:00.000Z');
+    const end = new Date('2026-03-31T23:59:59.999Z');
+    expect(Service.calculateProRatedAmount(31, new Date('2026-03-31T12:00:00Z'), start, end))
+      .toEqual({ amount: 1, isProRated: true });
+    expect(Service.calculateProRatedAmount(31, new Date('2026-03-16T23:00:00Z'), start, end))
+      .toEqual({ amount: 16, isProRated: true });
+    expect(Service.calculateProRatedAmount(31, new Date('2026-04-01T00:00:00Z'), start, end))
+      .toEqual({ amount: 0, isProRated: true });
+  });
+
+  it('counts leap-day joins and spring DST transitions by calendar day, not elapsed hours', () => {
+    const leapStart = new Date('2024-02-01T00:00:00Z');
+    const leapEnd = new Date('2024-02-29T23:59:59.999Z');
+    expect(Service.calculateProRatedAmount(29, new Date('2024-02-29T15:00:00Z'), leapStart, leapEnd).amount).toBe(1);
+    const dstStart = new Date('2026-03-01T00:00:00Z');
+    const dstEnd = new Date('2026-03-31T23:59:59.999Z');
+    expect(Service.calculateProRatedAmount(31, new Date('2026-03-08T07:00:00Z'), dstStart, dstEnd).amount).toBe(24);
+  });
+
+  it('refuses invalid proration dates rather than returning NaN as a charge', () => {
+    expect(() => Service.calculateProRatedAmount(100, new Date(NaN), periodStart, periodEnd))
+      .toThrow('Invalid dues proration calendar dates');
+    expect(() => Service.calculateProRatedAmount(100, new Date('2025-03-20'), periodEnd, periodStart))
+      .toThrow('Invalid dues proration calendar dates');
+  });
 });
 
 // ─── allocateDuesBreakdown (private static, accessed via casting) ────────────
@@ -179,12 +248,22 @@ describe('BillingCycleService.allocateDuesBreakdown', () => {
     expect(breakdown.strikeFundAmount).toBe(2);
   });
 
-  it('all parts sum to total (within rounding)', () => {
-    const amount = 157.50;
-    const b = Service.allocateDuesBreakdown(amount);
-    const total = b.duesAmount + b.copeAmount + b.pacAmount + b.strikeFundAmount;
-    // Rounding can introduce ±$0.04
-    expect(Math.abs(total - amount)).toBeLessThan(0.05);
+  it('reconciles every allocated cent to the charge, including sub-dollar amounts', () => {
+    for (const amount of [0.01, 0.03, 0.07, 0.11, 1.01, 33.33, 157.50, 999.99]) {
+      const b = Service.allocateDuesBreakdown(amount);
+      const allocatedCents = [b.duesAmount, b.copeAmount, b.pacAmount, b.strikeFundAmount]
+        .reduce((sum: number, component: number) => sum + Math.round(component * 100), 0);
+      expect(allocatedCents).toBe(Math.round(amount * 100));
+      expect(Object.values(b).every((component) => component >= 0)).toBe(true);
+    }
+  });
+
+  it('fails closed on invalid, negative or unsafe allocation values', () => {
+    for (const amount of [-1, NaN, Infinity, -Infinity]) {
+      expect(() => Service.allocateDuesBreakdown(amount)).toThrow('Invalid dues allocation amount');
+    }
+    expect(() => Service.allocateDuesBreakdown(Number.MAX_SAFE_INTEGER))
+      .toThrow('Dues allocation exceeds safe integer cents');
   });
 
   it('handles 0 amount', () => {
@@ -204,27 +283,157 @@ describe('BillingCycleService.allocateDuesBreakdown', () => {
   });
 });
 
-// ─── getWeeksInPeriod (private static) ──────────────────────────────────────
+// ─── processMemberBilling (private static): the charge is the member's dues assignment ──────────────────
 
-describe('BillingCycleService.getWeeksInPeriod', () => {
-  it('returns ~4 for a 30-day month', () => {
-    const start = new Date('2025-03-01');
-    const end = new Date('2025-03-31');
-    const weeks = Service.getWeeksInPeriod(start, end);
-    expect(weeks).toBeGreaterThanOrEqual(4);
-    expect(weeks).toBeLessThanOrEqual(5);
+describe('BillingCycleService.processMemberBilling', () => {
+  const periodStart = new Date('2025-03-01T00:00:00.000Z');
+  const periodEnd = new Date('2025-03-31T23:59:59.999Z');
+  const member = { id: 'member-1', userId: 'user-1', membershipNumber: 'M-1', status: 'active', joinedAt: new Date('2024-01-01T00:00:00Z') };
+  const assignmentResult = {
+    amount: 50,
+    calculationType: 'assignment' as const,
+    assignmentId: 'assignment-1',
+    frequency: 'monthly',
+    periodStart,
+    periodEnd,
+    dueDate: new Date('2025-04-15T23:59:59.999Z'),
+    breakdown: { baseAmount: 50, flatAmount: 50 },
+  };
+  const params = { organizationId: 'org-1', member, periodStart, periodEnd, frequency: 'monthly' as const, dryRun: false, alreadyBilled: false };
+
+  // The cycle's transaction: a charge is inserted with `.insert(table).values(row).returning()`
+  const cycleTransaction = () => {
+    const returning = vi.fn().mockResolvedValue([{ id: 'transaction-1' }]);
+    const values = vi.fn(() => ({ returning }));
+    return { tx: { insert: vi.fn(() => ({ values })) }, values };
+  };
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it('charges the amount of the member\'s dues assignment, asked for in the cycle\'s transaction and on the cycle\'s frequency', async () => {
+    const calculate = vi.spyOn(DuesCalculationEngine, 'calculateMemberDues').mockResolvedValue(assignmentResult);
+    const { tx, values } = cycleTransaction();
+
+    const result = await Service.processMemberBilling(tx, params);
+
+    expect(calculate).toHaveBeenCalledWith(
+      { organizationId: 'org-1', memberId: 'member-1', periodStart, periodEnd, frequency: 'monthly' },
+      tx,
+    );
+    expect(values).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: 'org-1',
+      memberId: 'member-1',
+      assignmentId: 'assignment-1',
+      transactionType: 'charge',
+      amount: '50',
+      totalAmount: '50',
+      periodStart: '2025-03-01',
+      periodEnd: '2025-03-31',
+      dueDate: '2025-04-15',
+      status: 'pending',
+      metadata: expect.objectContaining({ calculationType: 'assignment', assignmentId: 'assignment-1', assignmentFrequency: 'monthly', isProRated: false }),
+    }));
+    expect(result).toMatchObject({ success: true, transactionId: 'transaction-1', amount: 50 });
+    expect(result.breakdown).toEqual({ duesAmount: 42.5, copeAmount: 5, pacAmount: 1.5, strikeFundAmount: 1 });
   });
 
-  it('returns 1 for a 7-day period', () => {
-    const start = new Date('2025-03-10');
-    const end = new Date('2025-03-17');
-    expect(Service.getWeeksInPeriod(start, end)).toBe(1);
+  it('prices a charge from the assignment alone, never from wages, hours or employment data', async () => {
+    const calculate = vi.spyOn(DuesCalculationEngine, 'calculateMemberDues').mockResolvedValue(assignmentResult);
+    const { tx } = cycleTransaction();
+
+    await Service.processMemberBilling(tx, { ...params, member: { ...member, grossWages: '90000', hourlyRate: '40', regularHoursPerWeek: '37.5' } });
+
+    expect(Object.keys(calculate.mock.calls[0][0]).sort()).toEqual(['frequency', 'memberId', 'organizationId', 'periodEnd', 'periodStart']);
   });
 
-  it('returns 2 for a 14-day period', () => {
-    const start = new Date('2025-03-10');
-    const end = new Date('2025-03-24');
-    expect(Service.getWeeksInPeriod(start, end)).toBe(2);
+  it('pro-rates the assignment amount for a member who joined mid-cycle and records why', async () => {
+    vi.spyOn(DuesCalculationEngine, 'calculateMemberDues').mockResolvedValue({ ...assignmentResult, amount: 31 });
+    const { tx, values } = cycleTransaction();
+
+    const result = await Service.processMemberBilling(tx, { ...params, member: { ...member, joinedAt: new Date('2025-03-16T12:00:00Z') } });
+
+    expect(result.amount).toBe(16);
+    expect(values).toHaveBeenCalledWith(expect.objectContaining({
+      amount: '16',
+      metadata: expect.objectContaining({ isProRated: true, proRatedReason: expect.stringContaining('Joined') }),
+    }));
+  });
+
+  it('skips a member already charged for the period without calculating or writing, so a second run bills nobody twice', async () => {
+    const calculate = vi.spyOn(DuesCalculationEngine, 'calculateMemberDues');
+    const { tx } = cycleTransaction();
+
+    const result = await Service.processMemberBilling(tx, { ...params, alreadyBilled: true });
+
+    expect(result).toMatchObject({ memberId: 'member-1', success: true, skipped: true, skipReason: 'Already billed for this period' });
+    expect(calculate).not.toHaveBeenCalled();
+    expect(tx.insert).not.toHaveBeenCalled();
+  });
+
+  it('skips a member who has no dues assignment on the cycle\'s frequency, writing nothing', async () => {
+    vi.spyOn(DuesCalculationEngine, 'calculateMemberDues').mockResolvedValue(null);
+    const { tx } = cycleTransaction();
+
+    const result = await Service.processMemberBilling(tx, params);
+
+    expect(result).toMatchObject({ success: true, skipped: true, skipReason: 'No active dues assignment' });
+    expect(tx.insert).not.toHaveBeenCalled();
+  });
+
+  it('skips a member who is not active, before any dues are calculated', async () => {
+    const calculate = vi.spyOn(DuesCalculationEngine, 'calculateMemberDues');
+    const { tx } = cycleTransaction();
+
+    const result = await Service.processMemberBilling(tx, { ...params, member: { ...member, status: 'suspended' } });
+
+    expect(result).toMatchObject({ success: true, skipped: true, skipReason: 'Member status is suspended' });
+    expect(calculate).not.toHaveBeenCalled();
+  });
+
+  it('writes nothing in a preview but reports the amount and its allocation', async () => {
+    vi.spyOn(DuesCalculationEngine, 'calculateMemberDues').mockResolvedValue(assignmentResult);
+    const { tx } = cycleTransaction();
+
+    const result = await Service.processMemberBilling(tx, { ...params, dryRun: true });
+
+    expect(tx.insert).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ success: true, amount: 50 });
+    expect(result.transactionId).toBeUndefined();
+  });
+});
+
+// ─── generateBillingCycle: a charge already made for the period is not made again ────────────────────────
+
+describe('BillingCycleService.generateBillingCycle idempotency', () => {
+  const cycle = {
+    organizationId: '11111111-1111-4111-8111-111111111111',
+    executedBy: '22222222-2222-4222-8222-222222222222',
+    frequency: 'monthly' as const,
+    periodStart: new Date('2026-10-01T00:00:00.000Z'),
+    periodEnd: new Date('2026-10-31T23:59:59.999Z'),
+  };
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it('hands each member the fact of whether the period is already charged to them', async () => {
+    const tx = { marker: 'cycle-transaction' };
+    cycleMocks.withRLSContext.mockImplementation(async (_scope: unknown, fn: (t: unknown) => Promise<unknown>) => fn(tx));
+    cycleMocks.requireLiveFinancialMandate.mockResolvedValue({ id: 'live-mandate' });
+    vi.spyOn(Service, 'getActiveMembersForBilling').mockResolvedValue([{ id: 'member-1' }, { id: 'member-2' }]);
+    const billed = vi.spyOn(Service, 'getMembersBilledForPeriod').mockResolvedValue(new Set(['member-1']));
+    const process = vi.spyOn(Service, 'processMemberBilling').mockImplementation(async (_tx: unknown, p: { member: { id: string }; alreadyBilled: boolean }) =>
+      p.alreadyBilled
+        ? { memberId: p.member.id, success: true, skipped: true, skipReason: 'Already billed for this period' }
+        : { memberId: p.member.id, success: true, amount: 10, breakdown: { duesAmount: 8.5, copeAmount: 1, pacAmount: 0.3, strikeFundAmount: 0.2 } });
+
+    const result = await BillingCycleService.generateBillingCycle(cycle);
+
+    expect(billed).toHaveBeenCalledWith(tx, cycle.organizationId, cycle.periodStart, cycle.periodEnd);
+    expect(process).toHaveBeenCalledTimes(2);
+    expect(process.mock.calls.map(([, p]) => [p.member.id, p.alreadyBilled])).toEqual([['member-1', true], ['member-2', false]]);
+    expect(result.transactionsCreated).toBe(1);
+    expect(result.members.skipped).toBe(1);
+    expect(result.totalAmount).toBe(10);
   });
 });
 
@@ -254,6 +463,31 @@ describe('BillingCycleService.getNextBillingDate', () => {
     const last = new Date(2025, 0, 1); // Jan 1
     const next = BillingCycleService.getNextBillingDate('quarterly', last);
     expect(next.getMonth()).toBe(3); // April
+  });
+
+  it('monthly: clamps Jan 31 to Feb 28 rather than skipping February', () => {
+    const next = BillingCycleService.getNextBillingDate('monthly', new Date(2025, 0, 31));
+    expect([next.getFullYear(), next.getMonth(), next.getDate()]).toEqual([2025, 1, 28]);
+  });
+
+  it('monthly: preserves Feb 29 in a leap year', () => {
+    const next = BillingCycleService.getNextBillingDate('monthly', new Date(2024, 0, 31));
+    expect([next.getFullYear(), next.getMonth(), next.getDate()]).toEqual([2024, 1, 29]);
+  });
+
+  it('quarterly: clamps Jan 31 to Apr 30', () => {
+    const next = BillingCycleService.getNextBillingDate('quarterly', new Date(2025, 0, 31));
+    expect([next.getFullYear(), next.getMonth(), next.getDate()]).toEqual([2025, 3, 30]);
+  });
+
+  it('annual: clamps a leap-day anniversary rather than rolling into March', () => {
+    const next = BillingCycleService.getNextBillingDate('annual', new Date(2024, 1, 29));
+    expect([next.getFullYear(), next.getMonth(), next.getDate()]).toEqual([2025, 1, 28]);
+  });
+
+  it('rejects an invalid recurrence date or unsupported frequency', () => {
+    expect(() => BillingCycleService.getNextBillingDate('monthly', new Date(NaN))).toThrow('Invalid last billing date');
+    expect(() => BillingCycleService.getNextBillingDate('daily' as BillingFrequency, new Date(2025, 0, 1))).toThrow('Unsupported billing frequency');
   });
 
   it('annual: advances by 1 year', () => {

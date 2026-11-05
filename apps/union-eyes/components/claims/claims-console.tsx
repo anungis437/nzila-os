@@ -3,22 +3,32 @@
 /**
  * Claims Console
  *
- * Fetches and renders the claims list.
- * Members see their own claims; stewards+ see org-wide claims.
- * Consumes GET /api/claims
+ * Fetches and renders the list of cases the caller may see: their own, and the ones they hold a relationship to (the case authority of
+ * GET /api/cases), with the triage queue for a caller who triages.
+ * Consumes GET /api/cases
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { ClaimListTable, type ClaimRow } from '@/components/claims/claim-list-table';
+import { ClaimListTable } from '@/components/claims/claim-list-table';
+import { readClaimRow, type ClaimRow } from '@/components/claims/claim-row';
+import { MemberCaseList } from '@/components/claims/member-case-list';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { apiErrorMessage, envelopeRows, failureText } from '@/lib/client/api-envelope';
 import { AlertCircle, Plus, RefreshCw } from 'lucide-react';
 
-export function ClaimsConsole() {
+type ClaimsConsoleProps = {
+  /** Members see "My Cases" copy; stewards and above see the org-wide claims copy. */
+  view?: 'member' | 'staff';
+};
+
+export function ClaimsConsole({ view = 'staff' }: ClaimsConsoleProps) {
   const locale = useLocale();
   const router = useRouter();
+  const t = useTranslations('claimsPage');
+  const workAid = useTranslations('workAidPage');
 
   const [claims, setClaims] = useState<ClaimRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,30 +38,17 @@ export function ClaimsConsole() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/claims');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const raw: ClaimRow[] = (Array.isArray(data) ? data : (data.claims ?? [])).map(
-        (c: Record<string, unknown>) => ({
-          claimId: String(c.id ?? c.claimId ?? ''),
-          claimNumber: String(c.claimNumber ?? c.caseNumber ?? c.id ?? ''),
-          memberName: String(c.memberName ?? c.member_name ?? ''),
-          memberAvatar: c.memberAvatar as string | undefined,
-          claimType: String(c.claimType ?? c.claim_type ?? c.type ?? ''),
-          status: String(c.status ?? ''),
-          priority: String(c.priority ?? 'medium'),
-          incidentDate: c.incidentDate ? new Date(c.incidentDate as string) : new Date(c.createdAt as string),
-          createdAt: new Date(c.createdAt as string),
-          assignedToName: c.assignedToName as string | undefined,
-        })
-      );
-      setClaims(raw);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load claims');
+      const response = await fetch('/api/cases');
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, t('loadError')));
+      // The route's { data: rows } is what the framework wraps as { success, data, timestamp }.
+      setClaims(envelopeRows(body).map(readClaimRow));
+    } catch (failure) {
+      setError(failureText(failure, t('loadError')));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { fetchClaims(); }, [fetchClaims]);
 
@@ -76,32 +73,39 @@ export function ClaimsConsole() {
         <p className="text-sm text-muted-foreground">{error}</p>
         <Button variant="outline" size="sm" onClick={fetchClaims}>
           <RefreshCw className="mr-2 h-4 w-4" />
-          Retry
+          {t('retry')}
         </Button>
       </div>
     );
   }
 
+  const copy = view === 'member' ? 'member' : 'staff';
+
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Claims</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t(`${copy}Title`)}</h1>
           <p className="text-sm text-muted-foreground">
-            Track and manage submitted claims
+            {t(`${copy}Subtitle`)}
           </p>
         </div>
-        <Button onClick={() => router.push(`/${locale}/dashboard/claims/new`)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Claim
+        <div className="flex w-full flex-col gap-2 sm:w-auto">
+        <Button className="w-full sm:w-auto" variant="outline" onClick={() => router.push(view === 'member' ? `/${locale}/dashboard/claims/workaid` : `/${locale}/dashboard/workbench/workaid`)}>
+          {workAid('openJourney')}
         </Button>
+        <Button className="w-full sm:w-auto" onClick={() => router.push(`/${locale}/dashboard/claims/new`)}>
+          <Plus className="mr-2 h-4 w-4" />
+          {t(`${copy}NewAction`)}
+        </Button>
+        </div>
       </div>
 
       {claims.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-12 text-center">
-          <p className="text-base font-medium">No claims yet</p>
+          <p className="text-base font-medium">{t(`${copy}EmptyTitle`)}</p>
           <p className="text-sm text-muted-foreground">
-            Claims appear here after members or stewards submit them.
+            {t(`${copy}EmptyBody`)}
           </p>
           <Button
             variant="outline"
@@ -109,9 +113,11 @@ export function ClaimsConsole() {
             onClick={() => router.push(`/${locale}/dashboard/claims/new`)}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Submit first claim
+            {t(`${copy}EmptyAction`)}
           </Button>
         </div>
+      ) : view === 'member' ? (
+        <MemberCaseList data={claims} />
       ) : (
         <ClaimListTable
           data={claims}

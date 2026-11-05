@@ -38,6 +38,7 @@ const SimulationRequestSchema = z.object({
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'officer' },
     entitlement: 'union_knowledge_suite',
     body: SimulationRequestSchema,
@@ -51,6 +52,6 @@ export const POST = withApi(
     };
 
     const result = await simulateContinuityImpact(organizationId!, scenario);
-    return { data: result };
+    return { ...result };
   },
 );

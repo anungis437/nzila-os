@@ -17,8 +17,8 @@ const runSchema = z.object({
   adjustmentWithoutApprovalCount: z.number().int().nonnegative().default(0),
   replayMismatchCount: z.number().int().nonnegative().default(0),
   suspiciousVarianceCount: z.number().int().nonnegative().default(0),
-  payrollRunId: z.string().uuid().optional(),
-  remittanceRunId: z.string().uuid().optional(),
+  payrollRunId: z.guid().optional(),
+  remittanceRunId: z.guid().optional(),
 });
 
 router.post("/run", async (req: Request, res: Response) => {
@@ -49,7 +49,7 @@ router.post("/run", async (req: Request, res: Response) => {
     return res.json({ success: true, data: { events } });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ success: false, error: "Validation failed", details: error.errors });
+      return res.status(400).json({ success: false, error: "Validation failed", details: error.issues });
     }
     return res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Unexpected failure" });
   }

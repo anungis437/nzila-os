@@ -1,4 +1,8 @@
+import { requireSystemAdmin } from "@/lib/api-auth-guard";
 import { withApi, ApiError, z } from "@/lib/api/framework";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { assertPublicHttpUrl } from "@/lib/security/outbound-url";
 import {
   getSourceById,
   updateSource,
@@ -21,13 +25,23 @@ export const GET = withApi(
   async ({ params }) => {
     const source = await getSourceById(params.id);
     if (!source) throw ApiError.notFound("Source not found");
-    return { data: source };
+    return source;
   },
 );
 
 // ---------------------------------------------------------------------------
 // PATCH /api/cba-intelligence/sources/[id] — Update source
 // ---------------------------------------------------------------------------
+
+// A source address is fetched by the server, so a changed address must be a public http(s) address as it is at registration.
+const publicUrl = z.string().url().max(2000).refine((value) => {
+  try {
+    assertPublicHttpUrl(value);
+    return true;
+  } catch {
+    return false;
+  }
+}, 'Must be a public http(s) address');
 
 const updateSourceSchema = z.object({
   nameEn: z.string().min(1).max(255).optional(),
@@ -39,17 +53,17 @@ const updateSourceSchema = z.object({
   trustTier: z.string().optional(),
   jurisdictions: z.array(z.string()).optional(),
   sectors: z.array(z.string()).optional(),
-  baseUrl: z.string().url().optional(),
-  apiEndpoint: z.string().url().nullable().optional(),
-  feedUrl: z.string().url().nullable().optional(),
+  baseUrl: publicUrl.optional(),
+  apiEndpoint: publicUrl.nullable().optional(),
+  feedUrl: publicUrl.nullable().optional(),
   updateCadence: z.string().max(100).optional(),
   expectedUpdateDays: z.number().int().positive().optional(),
   robotsNotes: z.string().max(2000).optional(),
   termsUrl: z.string().url().nullable().optional(),
   redistributionNotes: z.string().max(2000).optional(),
-  provenanceRules: z.record(z.unknown()).optional(),
+  provenanceRules: z.record(z.string(), z.unknown()).optional(),
   adapterKey: z.string().max(100).optional(),
-  config: z.record(z.unknown()).optional(),
+  config: z.record(z.string(), z.unknown()).optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -63,20 +77,42 @@ export const PATCH = withApi(
       summary: "Update a CBA source",
     },
   },
-  async ({ params, body }) => {
+  async ({ params, body, userId, organizationId }) => {
+    // The dataset is platform-wide (no organization column): changing it is platform authority, not an organization administrator's.
+    await requireSystemAdmin();
+    if (!userId || !organizationId) throw ApiError.badRequest("Organization context required");
     const { isActive, ...updateData } = body;
-
-    // Handle deactivation separately
-    if (isActive === false) {
-      await deactivateSource(params.id);
+    const fields = Object.keys(updateData);
+    if (isActive !== false && fields.length === 0) {
+      const source = await getSourceById(params.id);
+      if (!source) throw ApiError.notFound("Source not found");
+      return source;
     }
 
-    if (Object.keys(updateData).length > 0) {
-      return { data: await updateSource(params.id, updateData as Record<string, unknown>) };
-    }
+    // The change and its audit record commit together; a source that does not exist is a 404 with no audit.
+    return withRLSContext({ organizationId }, async (tx) => {
+      // Handle deactivation separately
+      if (isActive === false && !(await deactivateSource(params.id, tx))) {
+        throw ApiError.notFound("Source not found");
+      }
 
-    const source = await getSourceById(params.id);
-    if (!source) throw ApiError.notFound("Source not found");
-    return { data: source };
+      let source;
+      if (fields.length > 0) {
+        source = await updateSource(params.id, updateData as Record<string, unknown>, tx);
+      } else {
+        source = await getSourceById(params.id);
+      }
+      if (!source) throw ApiError.notFound("Source not found");
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "cba_source.update",
+        resourceType: "cba_intel_sources",
+        resourceId: params.id,
+        details: { fields, ...(isActive === false ? { deactivated: true } : {}) },
+      });
+      return source;
+    });
   },
 );

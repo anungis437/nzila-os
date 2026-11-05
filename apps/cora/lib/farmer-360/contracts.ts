@@ -40,8 +40,8 @@ export const farmer360SectionNameSchema = z.enum([
 
 export const farmer360FactSchema = z
   .object({
-    orgId: z.string().uuid(),
-    profileId: z.string().uuid(),
+    orgId: z.guid(),
+    profileId: z.guid(),
     key: z.string().min(1),
     label: z.string().min(1),
     value: z.union([
@@ -194,8 +194,8 @@ export const farmer360SectionSchema = z
 
 export const farmer360DataGapSchema = z
   .object({
-    orgId: z.string().uuid(),
-    profileId: z.string().uuid(),
+    orgId: z.guid(),
+    profileId: z.guid(),
     id: z.string().min(1),
     subject: z.string().min(1),
     missingOrWeakEvidence: z.array(farmer360SourceRefSchema),

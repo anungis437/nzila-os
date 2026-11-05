@@ -1,6 +1,7 @@
 import { OperationalShell } from '@/components/dashboard/operational-shell';
+import { RetiredCapabilityNotice } from '@/components/system/retired-capability-notice';
 /**
- * Dashboard layout for Template App
+ * Dashboard layout for Union Eyes
  * This layout removes the global header from all dashboard pages
  * and applies the dashboard-specific styling
  */
@@ -11,16 +12,15 @@ import { logger } from "@/lib/logger";
 import { getOrganizationIdForUser, DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import { getUserRole } from "@/lib/auth/rbac-server";
 import { UserRole } from "@/lib/auth/roles";
-import { db } from "@/db/db";
-import { profiles } from "@/db/schema";
-import { organizationMembers } from "@/db/schema-organizations";
-import { organizations } from "@/db/schema-organizations";
-import { eq, sql } from "drizzle-orm";
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context';
-import { withRLSContext } from '@/lib/db/with-rls-context';
-// Credits system disabled — platform does not require credits
-// import { ExpiredCreditsChecker } from "@/components/billing/expired-credits-checker";
+import { isDeployedRuntime } from '@/lib/runtime/production-guard';
+import {
+  ensureOrganizationMembership,
+  isSeedMembershipLinkingAllowed,
+  loadOrCreateProfile,
+  readOrganizationProvince,
+} from '@/lib/dashboard/layout-bootstrap';
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   // Fetch user profile once at the layout level
@@ -38,188 +38,51 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     // Canonical membership is live authority. The legacy billing profile is not an
     // identity prerequisite, and email must never relink a profile or membership.
     const context = await getCanonicalOrganizationContext({ expectedActorUserId: userId });
-    const organizationProvince = await withRLSContext(
-      { organizationId: context.organizationId },
-      async (tx) => {
-        const [organization] = await tx.select({ provinceTerritory: organizations.provinceTerritory })
-          .from(organizations).where(eq(organizations.id, context.organizationId)).limit(1);
-        return organization?.provinceTerritory ?? null;
-      },
-    );
-    return <OperationalShell profile={null} userEmail={context.email}
-      userRole={context.role} organizationProvince={organizationProvince}>{children}</OperationalShell>;
+    const organizationProvince = await readOrganizationProvince(context.organizationId);
+    return <OperationalShell userEmail={context.email}
+      userRole={context.role} organizationProvince={organizationProvince}>{children}<RetiredCapabilityNotice /></OperationalShell>;
   }
 
-  let profile: (typeof profiles.$inferSelect) | null = null;
-  try {
-    profile = (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0] ?? null;
-  } catch (err) {
-    logger.error('[dashboard:profile] profiles query failed — redirecting to /sign-up', { userId, err });
-    return redirect("/sign-up");
-  }
-
-  // Auto-create profile if it doesn&apos;t exist (prevents redirect loop)
-  if (!profile) {
-    const user = await currentUser();
-    const userEmail = user?.emailAddresses?.[0]?.emailAddress || "";
-
-    // If this is a new Entra object ID for an existing person, link profile by email
-    // before creating a duplicate profile row.
-    if (userEmail) {
-      const existingByEmail = await db
-        .select()
-        .from(profiles)
-        .where(sql`lower(${profiles.email}) = lower(${userEmail})`)
-        .limit(1);
-
-      if (existingByEmail.length > 0) {
-        await db
-          .update(profiles)
-          .set({ userId })
-          .where(eq(profiles.id, existingByEmail[0].id));
-
-        profile = (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0] ?? null;
-
-        logger.info(`Linked existing profile by email for user ${userId}`, {
-          email: userEmail,
-          profileId: existingByEmail[0].id,
-        });
-      }
-    }
-
-    if (profile) {
-      // Profile was linked successfully; skip auto-create path.
-    } else {
-    
-      logger.info(`Auto-creating profile for user ${userId} (${userEmail})`);
-    
-      try {
-        // Create the profile
-        const profileData = {
-          userId: userId,
-          email: userEmail,
-        };
-        
-        await db.insert(profiles).values(profileData);
-        
-        // Fetch the newly created profile
-        profile = (await db.select().from(profiles).where(eq(profiles.userId, userId)))[0] ?? null;
-        
-        if (!profile) {
-          logger.error(`Failed to create profile for user ${userId}`);
-          return redirect("/sign-up");
-        }
-        
-        logger.info(`Successfully created profile ${profile.id} for user ${userId}`);
-      } catch (error) {
-        logger.error(`Error creating profile for user ${userId}:`, error);
-        return redirect("/sign-up");
-      }
-    }
-  }
-
-  // Credit check is triggered client-side to avoid blocking the layout render
-  
-  // Verify profile is still valid after check
-  if (!profile) {
-    return redirect("/sign-up");
-  }
-
-  // Get the current user to extract email
   const user = await currentUser();
   const userEmail = user?.emailAddresses?.[0]?.emailAddress || "";
+
+  // The person's profile row is the identity anchor other records reference (cookie consent, push devices). It is read, and created on
+  // the first visit (which prevents a redirect loop), in the person's own user context; nothing from it is sent to the browser.
+  // A database failure is an error, not a reason to send the person to sign up.
+  if (!(await loadOrCreateProfile({ userId, email: userEmail }))) {
+    logger.error(`Failed to create profile for user ${userId}`);
+    return redirect("/sign-up");
+  }
 
   // Auto-provision org membership if user has none.
   // With Entra auth, new users get a profile but no organization_members row.
   // Without a membership, all org-scoped API routes reject with 403.
-  try {
-    let localMemberships = await db
-      .select({ id: organizationMembers.id })
-      .from(organizationMembers)
-      .where(eq(organizationMembers.userId, userId))
-      .limit(1);
-
-    // If this Entra user has no membership yet, try linking seeded/demo rows
-    // by email so seeded pilot users resolve to their demo org instead of being
-    // auto-provisioned into the default org.
-    if (localMemberships.length === 0 && userEmail) {
-      const emailMemberships = await db
-        .select({ id: organizationMembers.id })
-        .from(organizationMembers)
-        .where(eq(organizationMembers.email, userEmail))
-        .limit(50);
-
-      if (emailMemberships.length > 0) {
-        await db
-          .update(organizationMembers)
-          .set({ userId })
-          .where(eq(organizationMembers.email, userEmail));
-
-        localMemberships = await db
-          .select({ id: organizationMembers.id })
-          .from(organizationMembers)
-          .where(eq(organizationMembers.userId, userId))
-          .limit(1);
-
-        logger.info(`Linked existing org membership(s) by email for user ${userId}`, {
-          email: userEmail,
-          linkedCount: emailMemberships.length,
-        });
-      }
-    }
-
-    if (localMemberships.length === 0) {
-      // Auto-provisioning into the default org is only permitted in non-production
-      // environments or when PILOT_AUTO_PROVISIONING=true is explicitly set.
-      // In production without that flag, users without an organisation membership
-      // must be directed to the access-request flow.
-      const allowAutoProvisioning =
-        process.env.NODE_ENV !== 'production' ||
-        process.env.PILOT_AUTO_PROVISIONING === 'true' ||
-        process.env.CI === 'true';
-
-      if (allowAutoProvisioning) {
-        const userName = user?.fullName ?? user?.firstName ?? userEmail.split('@')[0] ?? 'Member';
-        logger.info(`Auto-provisioning org membership for user ${userId} in default org`);
-        try {
-          await db.insert(organizationMembers).values({
-            userId,
-            organizationId: DEFAULT_ORGANIZATION_ID,
-            name: userName,
-            email: userEmail,
-            role: 'member',
-            status: 'active',
-            isPrimary: true,
-          });
-          logger.info(`Created org membership for ${userId} in ${DEFAULT_ORGANIZATION_ID}`);
-        } catch (insertErr) {
-          // Unique constraint race — another request may have created it
-          logger.warn('Org membership insert failed (may already exist)', insertErr);
-        }
-      } else {
-        // Production: no membership → require explicit invitation or admin approval.
-        logger.warn(`[dashboard:layout] User ${userId} has no org membership — redirecting to /pilot-request`);
-        return redirect('/pilot-request');
-      }
-    }
-  } catch (syncError) {
-    // Non-fatal — user can still access dashboard with fallback org
-    logger.warn('Org membership sync failed', syncError);
+  //
+  // Auto-provisioning into the default org is only permitted off a deployment (a developer's machine, a test run). A deployed runtime
+  // (NODE_ENV=production, or any production/staging/pilot identity) never auto-provisions, whatever the environment says: a user without an
+  // organisation membership is directed to the access-request flow (lib/runtime/production-guard.ts).
+  const allowAutoProvisioning = !isDeployedRuntime();
+  const membership = await ensureOrganizationMembership({
+    userId,
+    email: userEmail,
+    name: user?.fullName ?? user?.firstName ?? userEmail.split('@')[0] ?? 'Member',
+    defaultOrganizationId: DEFAULT_ORGANIZATION_ID,
+    allowAutoProvisioning,
+    // The session's e-mail is not verified, so a membership is never handed over by e-mail in production (see isSeedMembershipLinkingAllowed).
+    linkSeededMemberships: isSeedMembershipLinkingAllowed(),
+  });
+  if (membership === 'none') {
+    logger.warn(`[dashboard:layout] User ${userId} has no org membership — redirecting to /pilot-request`);
+    return redirect('/pilot-request');
   }
-  
-  // Get user's organization and role via proper RBAC chain
-  let organizationId: string = DEFAULT_ORGANIZATION_ID;
-  try {
-    organizationId = await getOrganizationIdForUser(userId);
-  } catch {
-    logger.warn('[dashboard:layout] getOrganizationIdForUser failed, defaulting to default org', { userId });
+  if (membership !== 'existing') {
+    logger.info(`Org membership ${membership} for user ${userId}`, { email: userEmail });
   }
-  let userRole: UserRole = UserRole.MEMBER;
-  try {
-    userRole = await getUserRole(userId, organizationId);
-  } catch {
-    logger.warn('[dashboard:layout] getUserRole failed, defaulting to member role', { userId, organizationId });
-  }
+
+  // The organization and the role come from the RBAC chain. A lookup that fails is an error: it is not a reason to show the default
+  // organization's notices or the member experience to someone whose organization or role could not be read.
+  const organizationId: string = await getOrganizationIdForUser(userId);
+  const userRole: UserRole = await getUserRole(userId, organizationId);
 
   if (!organizationId) {
     logger.error('[dashboard:identity] getOrganizationIdForUser returned no organizationId', {
@@ -236,36 +99,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     });
   }
 
-  // Fetch organization province for QC bilingual banner (Bill 96 / Law 25)
-  let organizationProvince: string | null = null;
-  if (organizationId) {
-    try {
-      const orgRow = (await db
-        .select({ provinceTerritory: organizations.provinceTerritory })
-        .from(organizations)
-        .where(eq(organizations.id, organizationId))
-        .limit(1))[0];
-      organizationProvince = orgRow?.provinceTerritory ?? null;
-    } catch (err) {
-      logger.warn('Failed to fetch organization province for QC banner', err);
-    }
-  }
-  
+  // Fetch organization province for QC bilingual banner (Bill 96 / Law 25). A failed read is an error: the banner is a legal notice and
+  // must not disappear silently.
+  const organizationProvince = organizationId ? await readOrganizationProvince(organizationId) : null;
+
   logger.debug('User role resolved via RBAC', {
     userId,
     organizationId,
     role: userRole,
   });
-  
-  // Log profile details for debugging
-  logger.debug('Dashboard profile loaded', {
-    userId: profile.userId,
-    membership: profile.membership,
-    createdAt: profile.createdAt,
-    usageCredits: profile.usageCredits,
-    userRole: userRole
-  });
 
-  return <OperationalShell profile={profile} userEmail={userEmail}
-    userRole={userRole} organizationProvince={organizationProvince}>{children}</OperationalShell>;
+  return <OperationalShell userEmail={userEmail}
+    userRole={userRole} organizationProvince={organizationProvince}>{children}<RetiredCapabilityNotice /></OperationalShell>;
 }

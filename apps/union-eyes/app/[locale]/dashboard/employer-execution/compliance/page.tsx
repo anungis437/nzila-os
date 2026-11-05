@@ -1,8 +1,6 @@
-import { requireUser } from "@/lib/api-auth-guard";
+import { requireOrganizationScope } from "@/lib/page-data/organization-scope";
 import { getTranslations } from "next-intl/server";
-import { db } from "@/db";
-import { employerExecutionComplianceEvents } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { listComplianceEvents } from "@/lib/employer-execution/page-reads";
 import { ComplianceIssuesPanel } from "@/components/employer-execution";
 
 export const dynamic = "force-dynamic";
@@ -14,15 +12,9 @@ type PageProps = {
 export default async function EmployerExecutionCompliancePage({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "employerExecutionCompliancePage" });
-  const context = await requireUser();
-  const organizationId = context.organizationId;
+  const { organizationId } = await requireOrganizationScope();
 
-  const events = await db
-    .select()
-    .from(employerExecutionComplianceEvents)
-    .where(eq(employerExecutionComplianceEvents.organizationId, organizationId))
-    .orderBy(desc(employerExecutionComplianceEvents.detectedAt))
-    .limit(100);
+  const events = await listComplianceEvents(organizationId);
 
   return (
     <div className="space-y-6">

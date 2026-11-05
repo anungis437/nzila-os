@@ -196,7 +196,7 @@ export const CreatePaymentIntentSchema = z.object({
     'ecocash', 'moov_money', 'vodacom_mpesa',
   ]),
   idempotencyKey: z.string().min(1),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 
 export const RequestRefundSchema = z.object({

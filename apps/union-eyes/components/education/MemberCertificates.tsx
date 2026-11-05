@@ -1,143 +1,79 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocale } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Award, AlertTriangle, CheckCircle2, XCircle, Calendar, FileText, ExternalLink } from "lucide-react";
-import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { Download, Award, AlertTriangle, CheckCircle2, XCircle, Calendar, ExternalLink } from "lucide-react";
+import { fetchAllRows } from "@/lib/client/crud-lists";
+import {
+  certificationState,
+  daysBetween,
+  formatDay,
+  humanizeCode,
+  readCertification,
+  safeHttpsUrl,
+  todayDay,
+  type Certification,
+  type CertificationState,
+} from "./education-data";
 
-interface Certification {
-  id: string;
-  certificationName: string;
-  certificationNumber: string;
-  certificationCategory: string | null;
-  issuingBody: string | null;
-  issueDate: string;
-  expiryDate: string | null;
-  certificationStatus: string;
-  courseName: string | null;
-  courseCode: string | null;
-  certificateUrl: string | null;
-  verificationUrl: string | null;
-  clcRegistryStatus: string | null;
-  clcCertificationNumber: string | null;
-  clcRegistryUrl: string | null;
-  renewalRequired: boolean;
-  renewalDeadline: string | null;
-  continuingEducationHours: number | null;
-  isExpired: boolean;
-  isExpiringSoon: boolean;
-  daysUntilExpiry: number | null;
-}
-
+/**
+ * `memberId` is part of the page's contract but is not sent anywhere: the certifications route decides whose records the signed-in caller
+ * may read (a member reads their own), and nothing the browser sends can widen that.
+ */
 interface MemberCertificatesProps {
   memberId: string;
   organizationId: string;
 }
 
-export function MemberCertificates({ memberId, organizationId }: MemberCertificatesProps) {
-  const [certifications, setCertifications] = useState<Certification[]>([]);
-  const [loading, setLoading] = useState(true);
+type View = { state: "loading" } | { state: "error"; reason: string } | { state: "ready"; certifications: Certification[] };
+
+const reasonOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
+async function loadCertifications(): Promise<Certification[]> {
+  const rows = await fetchAllRows<unknown>("/api/education/certifications");
+  return rows.map(readCertification);
+}
+
+export function MemberCertificates({ organizationId }: MemberCertificatesProps) {
+  const locale = useLocale();
+  const [view, setView] = useState<View>({ state: "loading" });
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [stats, setStats] = useState({ total: 0, active: 0, expiring: 0, expired: 0 });
+  const request = useRef(0);
 
-  const fetchCertifications = useCallback(async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        organizationId,
-        memberId,
-        includeExpired: "true",
-      });
-
-      const response = await fetch(`/api/education/certifications?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch certifications");
-
-      const data = await response.json();
-      setCertifications(data.certifications);
-      setStats(data.stats);
-    } catch (_error) {
-toast.error("Failed to load certifications");
-    } finally {
-      setLoading(false);
-    }
-  }, [memberId, organizationId]);
+  // The latest request wins: a slow answer to an earlier request (or to another organization) is never shown.
+  const load = useCallback(() => {
+    const id = ++request.current;
+    loadCertifications().then(
+      (certifications) => {
+        if (id === request.current) setView({ state: "ready", certifications });
+      },
+      (error: unknown) => {
+        if (id === request.current) setView({ state: "error", reason: reasonOf(error) });
+      },
+    );
+  }, []);
 
   useEffect(() => {
-    fetchCertifications();
-  }, [fetchCertifications]);
+    load();
+    return () => {
+      request.current += 1;
+    };
+  }, [organizationId, load]);
 
-  const downloadCertificate = async (certificationId: string, _certificateNumber: string) => {
-    try {
-      const cert = certifications.find((c) => c.id === certificationId);
-      if (!cert?.certificateUrl) {
-        toast.error("Certificate file not available");
-        return;
-      }
-
-      // Open certificate URL in new tab
-      window.open(cert.certificateUrl, "_blank");
-      toast.success("Certificate opened in new tab");
-    } catch (_error) {
-toast.error("Failed to download certificate");
-    }
+  const retry = () => {
+    setView({ state: "loading" });
+    load();
   };
 
-  const getStatusBadge = (cert: Certification) => {
-    if (cert.certificationStatus === "revoked") {
-      return <Badge variant="destructive">Revoked</Badge>;
-    }
-    if (cert.certificationStatus === "suspended") {
-      return <Badge variant="outline" className="border-yellow-500 text-yellow-700">Suspended</Badge>;
-    }
-    if (cert.isExpired) {
-      return <Badge variant="secondary">Expired</Badge>;
-    }
-    if (cert.isExpiringSoon) {
-      return <Badge variant="outline" className="border-orange-500 text-orange-700">Expiring Soon</Badge>;
-    }
-    return <Badge variant="default" className="bg-green-600">Active</Badge>;
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "No expiry";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  // Filter certifications
-  const filteredCertifications = certifications.filter((cert) => {
-    // Status filter
-    if (statusFilter !== "all") {
-      if (statusFilter === "active" && cert.certificationStatus !== "active") return false;
-      if (statusFilter === "expiring" && !cert.isExpiringSoon) return false;
-      if (statusFilter === "expired" && !cert.isExpired) return false;
-    }
-
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        cert.certificationName.toLowerCase().includes(query) ||
-        cert.certificationNumber.toLowerCase().includes(query) ||
-        cert.courseName?.toLowerCase().includes(query) ||
-        cert.courseCode?.toLowerCase().includes(query)
-      );
-    }
-
-    return true;
-  });
-
-  if (loading) {
+  if (view.state === "loading") {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" role="status" aria-busy="true">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading certifications...</p>
@@ -145,6 +81,43 @@ toast.error("Failed to download certificate");
       </div>
     );
   }
+
+  if (view.state === "error") {
+    return (
+      <div role="alert" className="space-y-3 rounded-lg border border-destructive/40 p-4 text-sm">
+        <p className="font-medium text-destructive">Your certifications could not be loaded.</p>
+        <p className="text-muted-foreground">{view.reason}</p>
+        <Button onClick={retry}>Try again</Button>
+      </div>
+    );
+  }
+
+  const today = todayDay();
+  const rows = view.certifications.map((cert) => ({ cert, state: certificationState(cert, today) }));
+  const count = (state: CertificationState) => rows.filter((row) => row.state === state).length;
+  const query = searchQuery.trim().toLowerCase();
+  const visible = rows.filter(({ cert, state }) => {
+    if (statusFilter !== "all" && state !== statusFilter) return false;
+    if (!query) return true;
+    return cert.name.toLowerCase().includes(query) || (cert.number ?? "").toLowerCase().includes(query);
+  });
+
+  const badgeOf = (state: CertificationState) => {
+    switch (state) {
+      case "revoked":
+        return <Badge variant="destructive">Revoked</Badge>;
+      case "suspended":
+        return <Badge variant="outline" className="border-yellow-500 text-yellow-700">Suspended</Badge>;
+      case "pending":
+        return <Badge variant="outline" className="border-blue-500 text-blue-700">Pending verification</Badge>;
+      case "expired":
+        return <Badge variant="secondary">Expired</Badge>;
+      case "expiring":
+        return <Badge variant="outline" className="border-orange-500 text-orange-700">Expiring Soon</Badge>;
+      default:
+        return <Badge variant="default" className="bg-green-600">Active</Badge>;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -157,7 +130,7 @@ toast.error("Failed to download certificate");
           <CardContent>
             <div className="flex items-center gap-2">
               <Award className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{stats.total}</span>
+              <span className="text-2xl font-bold" data-testid="stat-total">{rows.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -169,7 +142,7 @@ toast.error("Failed to download certificate");
           <CardContent>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{stats.active}</span>
+              <span className="text-2xl font-bold text-green-600" data-testid="stat-active">{count("active")}</span>
             </div>
           </CardContent>
         </Card>
@@ -181,7 +154,7 @@ toast.error("Failed to download certificate");
           <CardContent>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-500" />
-              <span className="text-2xl font-bold text-orange-500">{stats.expiring}</span>
+              <span className="text-2xl font-bold text-orange-500" data-testid="stat-expiring">{count("expiring")}</span>
             </div>
           </CardContent>
         </Card>
@@ -193,7 +166,7 @@ toast.error("Failed to download certificate");
           <CardContent>
             <div className="flex items-center gap-2">
               <XCircle className="h-5 w-5 text-red-600" />
-              <span className="text-2xl font-bold text-red-600">{stats.expired}</span>
+              <span className="text-2xl font-bold text-red-600" data-testid="stat-expired">{count("expired")}</span>
             </div>
           </CardContent>
         </Card>
@@ -201,156 +174,140 @@ toast.error("Failed to download certificate");
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <Input
-          placeholder="Search certifications..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="sm:w-64"
-        />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="sm:w-48">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Certifications</SelectItem>
-            <SelectItem value="active">Active Only</SelectItem>
-            <SelectItem value="expiring">Expiring Soon</SelectItem>
-            <SelectItem value="expired">Expired</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="space-y-1 sm:w-64">
+          <Label htmlFor="certification-search" className="sr-only">Search certifications</Label>
+          <Input
+            id="certification-search"
+            placeholder="Search certifications..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="space-y-1 sm:w-56">
+          <Label htmlFor="certification-status" className="sr-only">Filter by status</Label>
+          <select
+            id="certification-status"
+            className="w-full rounded-md border bg-background p-2 text-sm"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All Certifications</option>
+            <option value="active">Active Only</option>
+            <option value="expiring">Expiring Soon</option>
+            <option value="expired">Expired</option>
+            <option value="pending">Pending verification</option>
+          </select>
+        </div>
       </div>
 
       {/* Certifications Grid */}
-      {filteredCertifications.length === 0 ? (
+      {visible.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Award className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No certifications found</p>
+            {rows.length === 0 ? (
+              <p className="text-gray-600">No certifications are recorded for you yet.</p>
+            ) : (
+              <p className="text-gray-600">No certification matches these filters.</p>
+            )}
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCertifications.map((cert) => (
-            <Card key={cert.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg mb-2">{cert.certificationName}</CardTitle>
-                    <CardDescription className="text-xs">
-                      {cert.certificationNumber}
-                    </CardDescription>
+          {visible.map(({ cert, state }) => {
+            const certificateUrl = safeHttpsUrl(cert.certificateUrl);
+            const badgeUrl = safeHttpsUrl(cert.digitalBadgeUrl);
+            const daysLeft = cert.expiryDate !== null ? daysBetween(today, cert.expiryDate) : null;
+            return (
+              <Card key={cert.id} className="hover:shadow-lg transition-shadow" data-testid="certification-card">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg mb-2">{cert.name}</CardTitle>
+                      {cert.number !== null && <CardDescription className="text-xs">{cert.number}</CardDescription>}
+                    </div>
+                    {badgeOf(state)}
                   </div>
-                  {getStatusBadge(cert)}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Course Info */}
-                {cert.courseName && (
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-700">{cert.courseName}</p>
-                    {cert.courseCode && (
-                      <p className="text-xs text-gray-500">Code: {cert.courseCode}</p>
-                    )}
-                  </div>
-                )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {cert.type !== null && <p className="text-sm text-gray-600">{humanizeCode(cert.type)}</p>}
 
-                {/* Issuing Body */}
-                {cert.issuingBody && (
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">Issued by:</span> {cert.issuingBody}
-                  </div>
-                )}
+                  {cert.issuer !== null && (
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Issued by:</span> {cert.issuer}
+                    </div>
+                  )}
 
-                {/* Dates */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Calendar className="h-4 w-4" />
-                    <span>Issued: {formatDate(cert.issueDate)}</span>
-                  </div>
-                  {cert.expiryDate && (
+                  {/* Dates */}
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      <span>Issued: {formatDay(cert.issueDate, locale, "long")}</span>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       <span
                         className={
-                          cert.isExpired
+                          state === "expired"
                             ? "text-red-600 font-medium"
-                            : cert.isExpiringSoon
+                            : state === "expiring"
                             ? "text-orange-600 font-medium"
                             : "text-gray-600"
                         }
                       >
-                        Expires: {formatDate(cert.expiryDate)}
-                        {cert.daysUntilExpiry !== null && cert.daysUntilExpiry > 0 && (
-                          <span className="ml-1">({cert.daysUntilExpiry} days)</span>
-                        )}
+                        {cert.expiryDate === null ? "No expiry date" : `Expires: ${formatDay(cert.expiryDate, locale, "long")}`}
+                        {daysLeft !== null && daysLeft > 0 && state !== "revoked" && <span className="ml-1">({daysLeft} days)</span>}
                       </span>
                     </div>
+                  </div>
+
+                  {state === "pending" && (
+                    <p className="text-xs text-muted-foreground">This certification is waiting for verification by your union.</p>
                   )}
-                </div>
 
-                {/* CLC Badge */}
-                {cert.clcRegistryStatus === "approved" && (
-                  <Badge variant="outline" className="border-green-500 text-green-700">
-                    CLC Approved
-                    {cert.clcCertificationNumber && ` â€¢ ${cert.clcCertificationNumber}`}
-                  </Badge>
-                )}
+                  {cert.clcRegistered && (
+                    <Badge variant="outline" className="border-green-500 text-green-700">
+                      CLC Registered
+                      {cert.clcRegistrationNumber !== null && ` • ${cert.clcRegistrationNumber}`}
+                    </Badge>
+                  )}
 
-                {/* Renewal Warning */}
-                {cert.renewalRequired && cert.renewalDeadline && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2">
-                    <div className="flex items-start gap-2">
-                      <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
-                      <div className="text-xs text-yellow-800">
-                        <p className="font-medium">Renewal Required</p>
-                        <p>Deadline: {formatDate(cert.renewalDeadline)}</p>
+                  {cert.renewalRequired && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                        <div className="text-xs text-yellow-800">
+                          <p className="font-medium">Renewal Required</p>
+                          {cert.renewalDate !== null && <p>Renew by: {formatDay(cert.renewalDate, locale)}</p>}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* CE Hours */}
-                {cert.continuingEducationHours && (
-                  <div className="text-sm text-gray-600">
-                    <span className="font-medium">CE Hours:</span> {cert.continuingEducationHours}
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex gap-2 pt-2">
-                  {cert.certificateUrl && (
-                    <Button
-                      size="sm"
-                      onClick={() => downloadCertificate(cert.id, cert.certificationNumber)}
-                      className="flex-1"
-                    >
-                      <Download className="h-4 w-4 mr-1" />
-                      Download
-                    </Button>
+                  {(certificateUrl !== null || badgeUrl !== null) && (
+                    <div className="flex gap-2 pt-2">
+                      {certificateUrl !== null && (
+                        <Button asChild size="sm" className="flex-1">
+                          <a href={certificateUrl} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">
+                            <Download className="h-4 w-4 mr-1" />
+                            Open certificate
+                          </a>
+                        </Button>
+                      )}
+                      {badgeUrl !== null && (
+                        <Button asChild size="sm" variant="outline">
+                          <a href={badgeUrl} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Digital badge
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   )}
-                  {cert.verificationUrl && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(cert.verificationUrl!, "_blank")}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {cert.clcRegistryUrl && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(cert.clcRegistryUrl!, "_blank")}
-                      title="View in CLC Registry"
-                    >
-                      <FileText className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
@@ -358,4 +315,3 @@ toast.error("Failed to download certificate");
 }
 
 export default MemberCertificates;
-

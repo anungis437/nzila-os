@@ -26,6 +26,7 @@ export const employerExecutionArtifactTypeEnum = pgEnum("employer_execution_arti
 export const employerExecutionReplayModeEnum = pgEnum("employer_execution_replay_mode", [
   "exact",
   "simulated",
+  "new_engine",
 ]);
 
 export const employerExecutionEvidenceEntityTypeEnum = pgEnum("employer_execution_evidence_entity_type", [

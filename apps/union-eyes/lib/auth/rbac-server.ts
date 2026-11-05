@@ -14,12 +14,13 @@ import { db } from "@/db/db";
 import { organizationMembers } from "@/db/schema-organizations";
 import { authOrganizationUsers } from '@nzila/db/schema';
 import { eq, and } from "drizzle-orm";
-import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions, canAccessRoute } from "./roles";
+import { UserRole, Permission, hasPermission, hasAnyPermission, hasAllPermissions } from "./roles";
 import { createLogger } from '@nzila/os-core'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { currentStateContextEnabled } from './canonical-bootstrap'
 import { getCanonicalOrganizationContext } from './canonical-context'
 import { resolvePlatformOrgRole } from './platform-org-role'
+import { devRoleOverride } from './dev-role-override'
 
 const logger = createLogger('rbac-server')
 
@@ -90,15 +91,11 @@ export async function getUserRole(
     return context.role;
   }
   try {
-    // DEV ONLY: DEV_ROLE_OVERRIDE forces any role for local testing.
-    //   Set DEV_ROLE_OVERRIDE=steward in .env.local to simulate that role.
-    //   Ignored in production (NODE_ENV !== 'development').
-    if (process.env.NODE_ENV === 'development' && process.env.DEV_ROLE_OVERRIDE) {
-      const override = process.env.DEV_ROLE_OVERRIDE as UserRole;
-      if (Object.values(UserRole).includes(override)) {
-        logger.info('[getUserRole] DEV_ROLE_OVERRIDE active', { detail: override });
-        return override;
-      }
+    // DEV ONLY: DEV_ROLE_OVERRIDE forces any role for local testing; ignored in any deployment (lib/auth/dev-role-override.ts).
+    const override = devRoleOverride();
+    if (override) {
+      logger.info('[getUserRole] DEV_ROLE_OVERRIDE active', { detail: override });
+      return override;
     }
 
     // 0. PLATFORM_ADMIN_USER_IDS — explicit override, highest priority.
@@ -186,10 +183,10 @@ export async function getUserRole(
     const user = await currentUser();
 
     // 3a. publicMetadata.role (union-eyes native key)
-    const fromClerk = resolveUserRole(
+    const fromPublicMetadata = resolveUserRole(
       user?.publicMetadata?.role as string | undefined,
     );
-    if (fromClerk) return fromClerk;
+    if (fromPublicMetadata) return fromPublicMetadata;
 
     // 3b. publicMetadata.nzilaRole (used by the rest of the Nzila platform —
     //     console, CFO, partners apps all write to this key)
@@ -242,15 +239,6 @@ export async function userHasAllPermissions(permissions: Permission[]): Promise<
   const role = await getCurrentUserRole();
   if (!role) return false;
   return hasAllPermissions(role, permissions);
-}
-
-/**
- * Check if current user can access a route
- */
-export async function userCanAccessRoute(route: string): Promise<boolean> {
-  const role = await getCurrentUserRole();
-  if (!role) return false;
-  return canAccessRoute(role, route);
 }
 
 /**

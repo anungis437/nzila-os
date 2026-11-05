@@ -18,6 +18,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { resolve, join, relative } from 'node:path'
 
+import { isRetiredNoOpRoute } from './retired-routes'
 const ROOT = resolve(__dirname, '../..')
 
 function read(abs: string): string {
@@ -65,6 +66,7 @@ const SYSTEM_SKIP = (path: string) => {
          rel.includes('/api/auth_core/') ||
          rel.includes('/api/icra/') ||         // ICRA — pseudonymous public diagnostic (no org context) [legacy alias]
          rel.includes('/api/ocra/') ||         // OCRA — canonical alias of /api/icra (OCI↔OCRA convergence Phase 2)
+         rel.includes('/api/contact/') ||      // Public marketing contact form: anonymous, bounded and challenge-guarded, stored with no tenant (every other contract lists it as public)
          rel.includes('/api/workbook/')      // Governance Entropy Workbook — pseudonymous bearer-token flow (workbookId is the credential)
 }
 
@@ -224,7 +226,7 @@ describe('SEC-ORG-ISO-002: HTTP cross-org breach prevention', () => {
         const violations: string[] = []
         for (const route of exportRoutes) {
           const content = read(route)
-          const hasAuth = ORG_SCOPED_AUTH_PATTERNS.some((p) => p.test(content))
+          const hasAuth = ORG_SCOPED_AUTH_PATTERNS.some((p) => p.test(content)) || isRetiredNoOpRoute(content)
           if (!hasAuth) {
             violations.push(relative(ROOT, route))
           }

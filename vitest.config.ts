@@ -2,7 +2,10 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    maxWorkers: 4,
+    // Measured (UE-CONV, aggregate runs on this tree): at 4 workers the aggregate exited 1 twice from load-induced
+    // infrastructure failures (fixed 60 s worker-start timeout in vitest 5, 120 s test timeouts on cold imports) with every
+    // test passing in isolation; at 3 workers the same tree ran with none. Concurrency, not the tests, was the defect.
+    maxWorkers: 3,
     projects: [
       // Apps
       'apps/abr',
@@ -12,6 +15,7 @@ export default defineConfig({
       'apps/orchestrator-api',
       'apps/partners',
       'apps/union-eyes',
+      'apps/union-eyes/vitest.heavy.config.ts',
       'apps/web',
       'apps/nacp-exams',
       'apps/zonga',

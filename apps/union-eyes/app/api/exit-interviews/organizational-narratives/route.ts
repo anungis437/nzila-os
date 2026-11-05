@@ -4,6 +4,7 @@ import {
   narrateEnvelopes,
 } from '@/lib/organizational-narratives';
 import { runFullInstitutionalCognition } from '@/lib/organizational-operating-intelligence';
+import { describeAggregateOutcome, limitAggregateRun, memoizeAggregateRun } from '@/lib/organizational-operating-intelligence/aggregate-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,9 @@ export const GET = withApi(
     entitlement: 'union_knowledge_suite',
   },
   async ({ organizationId }) => {
-    const result = await runFullInstitutionalCognition(organizationId!);
+    await limitAggregateRun(organizationId!);
+    const result = await memoizeAggregateRun(organizationId!, () => runFullInstitutionalCognition(organizationId!));
+    const outcome = describeAggregateOutcome(result);
     const { narratives, failures: narrativeFailures } = narrateEnvelopes(result.envelopes);
     const briefing = composeExecutiveBriefing(Object.values(narratives));
     return {
@@ -29,8 +32,10 @@ export const GET = withApi(
         generatedAt: briefing.generatedAt,
         briefing,
         narratives,
-        engineFailures: result.failures,
-        narrativeFailures,
+        engineFailures: outcome.failures,
+        complete: outcome.complete,
+        // Only which narratives failed, never the exception text.
+        narrativeFailures: narrativeFailures.map((failure) => ({ engineId: failure.engine, code: 'NARRATIVE_FAILED' as const })),
       },
     };
   },

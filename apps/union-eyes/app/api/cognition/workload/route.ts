@@ -2,7 +2,7 @@
  * GET /api/cognition/workload
  *
  * Per-steward workload snapshots + org-level fairness for the org.
- * Org-scoped, audited, steward-or-higher.
+ * Org-scoped, audited, officer-or-higher: a steward's burnout signal and utilization are about a colleague, not about the steward's own cases.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
@@ -15,7 +15,7 @@ export const GET = withOrganizationAuth(async (
   _request: NextRequest,
   context,
 ) => {
-  const allowed = await hasMinRole('steward');
+  const allowed = await hasMinRole('officer');
   if (!allowed) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }

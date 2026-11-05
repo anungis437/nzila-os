@@ -2,12 +2,17 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
 
 const ENCRYPTED_PREFIX = 'enc:v1:'
 
+// Plaintext is a test convenience only. A provider token is never written without a key, and a stored value with no encryption
+// prefix is read only for the test runner or during an explicitly flagged migration of legacy rows.
+const plaintextAllowedForWrite = () => process.env.NODE_ENV === 'test'
+const legacyPlaintextReadable = () => process.env.NODE_ENV === 'test' || process.env.CALENDAR_TOKEN_ALLOW_LEGACY_PLAINTEXT === 'true'
+
 function getTokenEncryptionKey(): Buffer {
   const key = process.env.CALENDAR_TOKEN_ENCRYPTION_KEY || process.env.FALLBACK_ENCRYPTION_KEY || ''
 
   if (!key) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('Missing CALENDAR_TOKEN_ENCRYPTION_KEY (or FALLBACK_ENCRYPTION_KEY) in production')
+    if (!plaintextAllowedForWrite()) {
+      throw new Error('Missing CALENDAR_TOKEN_ENCRYPTION_KEY (or FALLBACK_ENCRYPTION_KEY)')
     }
 
     return Buffer.alloc(0)
@@ -41,6 +46,9 @@ export function decryptCalendarToken(token: string | null | undefined): string {
   if (!token) return ''
 
   if (!token.startsWith(ENCRYPTED_PREFIX)) {
+    if (!legacyPlaintextReadable()) {
+      throw new Error('Calendar token is stored unencrypted and must be re-authorized')
+    }
     return token
   }
 

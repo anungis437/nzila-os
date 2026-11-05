@@ -37,15 +37,26 @@ export function initRedis(url?: string): Redis {
     return redisClient;
   }
 
+  const configured = Boolean(url || process.env.REDIS_URL);
   const connectionUrl = url || process.env.REDIS_URL || 'redis://localhost:6379';
 
   redisClient = new Redis(connectionUrl, {
     maxRetriesPerRequest: 3,
     enableReadyCheck: true,
     lazyConnect: true,
+    // With no Redis configured there is nothing to wait for: never reconnect in a loop. Commands fail fast and every caller
+    // treats the failure as a cache miss.
+    ...(configured ? {} : { retryStrategy: () => null, enableOfflineQueue: false }),
   });
 
+  let unconfiguredLogged = false;
   redisClient.on('error', (err) => {
+    if (!configured) {
+      if (unconfiguredLogged) return;
+      unconfiguredLogged = true;
+      logger.warn('[Redis] Not configured (REDIS_URL unset): the cache is disabled and every lookup is a miss');
+      return;
+    }
     logger.error('[Redis] Connection error', err);
   });
 

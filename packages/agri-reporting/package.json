@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@nzila/agri-core": "workspace:*",
-    "zod": "^3.24.0"
+    "zod": "^4.6.7"
   },
   "scripts": {
     "test:coverage": "vitest run --coverage"

@@ -1,18 +1,17 @@
 /**
  * Campaign Creation Wizard
- * 
- * Multi-step form for creating a new communication campaign
+ *
+ * Multi-step form that saves a DRAFT campaign (POST /api/communications/campaigns). It posts only the fields that route accepts and only the
+ * enum values its table allows; the audience is chosen from the organization's saved member segments and the content from its templates. There is
+ * no sender in this release (UE-ACTION-CAMPAIGN-SEND), so the form offers no way to send or schedule, and the page says so.
  * Path: /dashboard/communications/campaigns/new
- * 
- * Phase 4: Communications & Organizing
  */
 
 'use client';
 
-
 export const dynamic = 'force-dynamic';
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,61 +34,92 @@ import {
 } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CapabilityUnavailable } from '@/components/system/capability-unavailable';
 import { logger } from '@/lib/logger';
-import { 
-  ArrowLeft, 
-  ArrowRight, 
-  Check, 
-  Mail, 
-  MessageSquare, 
-  Bell, 
+import { ApiShapeError, envelopeRow, readApiError } from '@/lib/client/api-envelope';
+import { fetchAllRows } from '@/lib/client/crud-lists';
+import { asRecord, optionalString, requiredString } from '@/lib/client/row-fields';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Bell,
+  Check,
+  Loader2,
+  Mail,
+  MessageSquare,
+  Save,
   Users,
-  Calendar,
-  Send,
-  Loader2
 } from 'lucide-react';
 
-interface Template {
+// The values of the campaign_type and campaign_channel enums that this wizard can describe. A sequence or a triggered campaign needs steps or a trigger
+// it has no way to define, so they are not offered.
+type CampaignType = 'broadcast' | 'transactional';
+type CampaignChannel = 'email' | 'sms' | 'push' | 'multi_channel';
+
+interface TemplateOption {
   id: string;
   name: string;
-  description: string | null;
   type: string;
-  category: string;
   subject: string | null;
   body: string;
-  variables: Array<{
-    name: string;
-    description: string;
-    required: boolean;
-    default: string | null;
-    example: string | null;
-  }>;
+}
+
+interface SegmentOption {
+  id: string;
+  name: string;
 }
 
 interface CampaignForm {
   name: string;
   description: string;
-  type: 'campaign' | 'announcement' | 'alert' | 'transactional';
-  channel: 'email' | 'sms' | 'push' | 'multi_channel';
-  
-  // Audience
+  type: CampaignType;
+  channel: CampaignChannel;
   segmentId: string | null;
-  segmentQuery: Record<string, unknown> | null;
-  testMode: boolean;
-  
-  // Content
   templateId: string | null;
   subject: string;
   body: string;
-  variables: Record<string, string>;
-  
-  // Scheduling
-  sendNow: boolean;
-  scheduledAt: string | null;
-  
-  // Settings
   trackOpens: boolean;
   trackClicks: boolean;
+}
+
+/** A list the page reads: not answered yet, answered, or failed (with the server's message when it gave one). */
+type Loaded<T> = { state: 'loading' } | { state: 'ready'; rows: T[] } | { state: 'error'; message: string };
+
+const NO_SEGMENT = 'none';
+const CUSTOM_CONTENT = 'custom';
+
+// A template the list route returns is an unarchived one (it filters archived rows out), so every row is offered.
+function templateFrom(value: unknown): TemplateOption {
+  const row = asRecord(value, 'template');
+  return { id: requiredString(row, 'id'), name: requiredString(row, 'name'), type: requiredString(row, 'type'), subject: optionalString(row, 'subject'), body: optionalString(row, 'body') ?? '' };
+}
+
+function segmentFrom(value: unknown): SegmentOption {
+  const row = asRecord(value, 'segment');
+  return { id: requiredString(row, 'id'), name: requiredString(row, 'name') };
+}
+
+async function loadOptions<T>(path: string, map: (value: unknown) => T): Promise<Loaded<T>> {
+  try {
+    return { state: 'ready', rows: (await fetchAllRows<unknown>(path)).map(map) };
+  } catch (err) {
+    logger.error(`Failed to read ${path}`, err);
+    return { state: 'error', message: err instanceof Error && !(err instanceof ApiShapeError) ? err.message : '' };
+  }
+}
+
+/** The body of the create: only fields the route accepts. Status, send time and schedule are the table's own (a draft, not sent). */
+function draftBody(form: CampaignForm): Record<string, unknown> {
+  const body: Record<string, unknown> = { name: form.name.trim(), type: form.type, channel: form.channel, body: form.body };
+  if (form.description.trim()) body.description = form.description.trim();
+  if (form.segmentId) body.segmentId = form.segmentId;
+  if (form.templateId) body.templateId = form.templateId;
+  if (form.channel === 'email') {
+    body.subject = form.subject.trim();
+    // The table's default settings have tracking on; a body that carries settings replaces that object, so it is sent only when a switch was turned off.
+    if (!form.trackOpens || !form.trackClicks) body.settings = { trackOpens: form.trackOpens, trackClicks: form.trackClicks };
+  }
+  return body;
 }
 
 export default function NewCampaignPage() {
@@ -100,133 +130,89 @@ export default function NewCampaignPage() {
     { id: 1, name: t('stepBasicInfo'), icon: Mail },
     { id: 2, name: t('stepAudience'), icon: Users },
     { id: 3, name: t('stepContent'), icon: MessageSquare },
-    { id: 4, name: t('stepSchedule'), icon: Calendar },
-    { id: 5, name: t('stepReview'), icon: Check },
+    { id: 4, name: t('stepReview'), icon: Check },
   ];
   const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [audiencePreview, _setAudiencePreview] = useState<number | null>(null);
-  
-  const [formData, setFormData] = useState<CampaignForm>({
+  const [templates, setTemplates] = useState<Loaded<TemplateOption>>({ state: 'loading' });
+  const [segments, setSegments] = useState<Loaded<SegmentOption>>({ state: 'loading' });
+
+  const [form, setForm] = useState<CampaignForm>({
     name: '',
     description: '',
-    type: 'campaign',
+    type: 'broadcast',
     channel: 'email',
     segmentId: null,
-    segmentQuery: null,
-    testMode: false,
     templateId: null,
     subject: '',
     body: '',
-    variables: {},
-    sendNow: false,
-    scheduledAt: null,
     trackOpens: true,
     trackClicks: true,
   });
 
-  // Fetch templates when content step is reached
   useEffect(() => {
-    if (currentStep === 3 && templates.length === 0) {
-      fetchTemplates();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStep]);
+    let current = true;
+    void loadOptions('/api/members/segments', segmentFrom).then((result) => {
+      if (current) setSegments(result);
+    });
+    void loadOptions('/api/communications/templates', templateFrom).then((result) => {
+      if (current) setTemplates(result);
+    });
+    return () => {
+      current = false;
+    };
+  }, []);
 
-  const fetchTemplates = async () => {
-    try {
-      const params = new URLSearchParams({
-        type: formData.channel,
-        isActive: 'true',
-      });
-
-      const response = await fetch(`/api/communications/templates?${params}`);
-      if (!response.ok) throw new Error(t('fetchTemplatesError'));
-
-      const data = await response.json();
-      setTemplates(data.data ?? []);
-    } catch (err) {
-      logger.error('Failed to fetch templates:', err);
-    }
-  };
-
-  const updateFormData = (updates: Partial<CampaignForm>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+  const update = (updates: Partial<CampaignForm>) => {
+    setForm((prev) => ({ ...prev, ...updates }));
   };
 
   const handleSubmit = async () => {
+    setSaving(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-
-      // Prepare campaign data
-      const campaignData = {
-        name: formData.name,
-        description: formData.description,
-        type: formData.type,
-        channel: formData.channel,
-        segmentId: formData.segmentId,
-        segmentQuery: formData.segmentQuery,
-        testMode: formData.testMode,
-        templateId: formData.templateId,
-        subject: formData.subject,
-        body: formData.body,
-        variables: formData.variables,
-        scheduledAt: formData.sendNow ? null : formData.scheduledAt,
-        settings: {
-          trackOpens: formData.trackOpens,
-          trackClicks: formData.trackClicks,
-        },
-      };
-
-      // If sendNow, mark campaign status so it can be processed
-      if (formData.sendNow) {
-        Object.assign(campaignData, {
-          sendImmediately: true,
-          status: 'sending',
-        });
-      }
-
       const response = await fetch('/api/communications/campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(campaignData),
+        body: JSON.stringify(draftBody(form)),
       });
+      if (!response.ok) throw new Error(await readApiError(response, t('createCampaignError')));
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || t('createCampaignError'));
-      }
-
-      await response.json();
-
-      // Redirect to campaigns list (detail page not yet built)
-      router.push(`/${locale}/dashboard/communications/campaigns`);
+      // The route answers { success, data: { data: record } }; the saved draft is opened by the id it was given.
+      const created = envelopeRow(await response.json());
+      if (typeof created.id !== 'string') throw new ApiShapeError('no id');
+      router.push(`/${locale}/dashboard/communications/campaigns/${created.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('createCampaignError'));
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('createCampaignError'));
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const canProceed = () => {
+  const canProceed = (): boolean => {
     switch (currentStep) {
       case 1:
-        return formData.name.trim() !== '' && formData.type && formData.channel;
-      case 2:
-        return true; // Audience is optional
+        return form.name.trim() !== '';
       case 3:
-        return formData.templateId || formData.body.trim() !== '';
-      case 4:
-        return formData.sendNow || formData.scheduledAt;
-      case 5:
-        return true;
+        return form.body.trim() !== '' && (form.channel !== 'email' || form.subject.trim() !== '');
       default:
-        return false;
+        return true;
     }
   };
+
+  const typeLabel = (type: CampaignType) => (type === 'broadcast' ? t('typeOptionBroadcast') : t('typeOptionTransactional'));
+  const channelLabel = (channel: CampaignChannel) =>
+    channel === 'email'
+      ? t('channelOptionEmail')
+      : channel === 'sms'
+        ? t('channelOptionSms')
+        : channel === 'push'
+          ? t('channelOptionPush')
+          : t('channelOptionMulti');
+
+  const channelTemplates = templates.state === 'ready' ? templates.rows.filter((template) => template.type === form.channel) : [];
+  const chosenSegment = segments.state === 'ready' ? segments.rows.find((segment) => segment.id === form.segmentId) : undefined;
 
   const renderStep = () => {
     switch (currentStep) {
@@ -244,8 +230,8 @@ export default function NewCampaignPage() {
                 <Label htmlFor="name">{t('campaignNameLabel')} *</Label>
                 <Input
                   id="name"
-                  value={formData.name}
-                  onChange={(e) => updateFormData({ name: e.target.value })}
+                  value={form.name}
+                  onChange={(e) => update({ name: e.target.value })}
                   placeholder={t('campaignNamePlaceholder')}
                 />
               </div>
@@ -254,8 +240,8 @@ export default function NewCampaignPage() {
                 <Label htmlFor="description">{t('descriptionLabel')}</Label>
                 <Textarea
                   id="description"
-                  value={formData.description}
-                  onChange={(e) => updateFormData({ description: e.target.value })}
+                  value={form.description}
+                  onChange={(e) => update({ description: e.target.value })}
                   placeholder={t('campaignDescriptionPlaceholder')}
                   rows={3}
                 />
@@ -264,25 +250,13 @@ export default function NewCampaignPage() {
               <div className="space-y-2">
                 <Label>{t('campaignTypeLabel')} *</Label>
                 <RadioGroup
-                  value={formData.type}
-                  onValueChange={(value) => updateFormData({ type: value as CampaignForm['type'] })}
+                  value={form.type}
+                  onValueChange={(value) => update({ type: value as CampaignType })}
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="campaign" id="type-campaign" />
-                    <Label htmlFor="type-campaign" className="font-normal">
-                      {t('typeOptionCampaign')}
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="announcement" id="type-announcement" />
-                    <Label htmlFor="type-announcement" className="font-normal">
-                      {t('typeOptionAnnouncement')}
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="alert" id="type-alert" />
-                    <Label htmlFor="type-alert" className="font-normal">
-                      {t('typeOptionAlert')}
+                    <RadioGroupItem value="broadcast" id="type-broadcast" />
+                    <Label htmlFor="type-broadcast" className="font-normal">
+                      {t('typeOptionBroadcast')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -297,8 +271,8 @@ export default function NewCampaignPage() {
               <div className="space-y-2">
                 <Label>{t('channelLabel')} *</Label>
                 <RadioGroup
-                  value={formData.channel}
-                  onValueChange={(value) => updateFormData({ channel: value as CampaignForm['channel'] })}
+                  value={form.channel}
+                  onValueChange={(value) => update({ channel: value as CampaignChannel, templateId: null })}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="email" id="channel-email" />
@@ -343,51 +317,38 @@ export default function NewCampaignPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Alert>
-                <Users className="h-4 w-4" />
-                <AlertDescription>
-                  {t('segmentIntegrationNote')}
-                </AlertDescription>
-              </Alert>
-
               <div className="space-y-2">
                 <Label htmlFor="segment">{t('segmentLabel')}</Label>
                 <Select
-                  value={formData.segmentId || 'all'}
-                  onValueChange={(value) => updateFormData({ segmentId: value === 'all' ? null : value })}
+                  value={form.segmentId ?? NO_SEGMENT}
+                  onValueChange={(value) => update({ segmentId: value === NO_SEGMENT ? null : value })}
+                  disabled={segments.state !== 'ready'}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="segment">
                     <SelectValue placeholder={t('selectSegmentPlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('segmentOptionAll')}</SelectItem>
-                    <SelectItem value="active">{t('segmentOptionActive')}</SelectItem>
-                    <SelectItem value="inactive">{t('segmentOptionInactive')}</SelectItem>
-                    <SelectItem value="new">{t('segmentOptionNew')}</SelectItem>
+                    <SelectItem value={NO_SEGMENT}>{t('segmentOptionNone')}</SelectItem>
+                    {segments.state === 'ready' &&
+                      segments.rows.map((segment) => (
+                        <SelectItem key={segment.id} value={segment.id}>
+                          {segment.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
-              </div>
-
-              {audiencePreview !== null && (
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{t('estimatedAudienceLabel')}</span>
-                    <span className="text-2xl font-bold">{audiencePreview.toLocaleString()}</span>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="testMode"
-                  checked={formData.testMode}
-                  onChange={(e) => updateFormData({ testMode: e.target.checked })}
-                  className="rounded"
-                />
-                <Label htmlFor="testMode" className="font-normal">
-                  {t('testModeLabel')}
-                </Label>
+                {segments.state === 'loading' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin text-muted-foreground" />}
+                {segments.state === 'error' && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      {t('segmentsLoadError')}
+                      {segments.message ? `: ${segments.message}` : ''}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {segments.state === 'ready' && segments.rows.length === 0 && (
+                  <p className="text-sm text-muted-foreground">{t('segmentsNone')}</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -406,43 +367,50 @@ export default function NewCampaignPage() {
               <div className="space-y-2">
                 <Label htmlFor="template">{t('templateLabel')}</Label>
                 <Select
-                  value={formData.templateId || 'custom'}
+                  value={form.templateId ?? CUSTOM_CONTENT}
                   onValueChange={(value) => {
-                    if (value === 'custom') {
-                      updateFormData({ templateId: null });
-                    } else {
-                      const template = templates.find(t => t.id === value);
-                      if (template) {
-                        updateFormData({
-                          templateId: value,
-                          subject: template.subject || '',
-                          body: template.body,
-                        });
-                      }
+                    if (value === CUSTOM_CONTENT) {
+                      update({ templateId: null });
+                      return;
                     }
+                    const template = channelTemplates.find((candidate) => candidate.id === value);
+                    if (template) update({ templateId: template.id, subject: template.subject ?? '', body: template.body });
                   }}
+                  disabled={templates.state !== 'ready'}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="template">
                     <SelectValue placeholder={t('selectTemplatePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="custom">{t('customContentOption')}</SelectItem>
-                    {templates.map(template => (
+                    <SelectItem value={CUSTOM_CONTENT}>{t('customContentOption')}</SelectItem>
+                    {channelTemplates.map((template) => (
                       <SelectItem key={template.id} value={template.id}>
                         {template.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {templates.state === 'loading' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin text-muted-foreground" />}
+                {templates.state === 'error' && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      {t('fetchTemplatesError')}
+                      {templates.message ? `: ${templates.message}` : ''}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {templates.state === 'ready' && channelTemplates.length === 0 && (
+                  <p className="text-sm text-muted-foreground">{t('templatesNone')}</p>
+                )}
               </div>
 
-              {formData.channel === 'email' && (
+              {form.channel === 'email' && (
                 <div className="space-y-2">
                   <Label htmlFor="subject">{t('subjectLineLabel')} *</Label>
                   <Input
                     id="subject"
-                    value={formData.subject}
-                    onChange={(e) => updateFormData({ subject: e.target.value })}
+                    value={form.subject}
+                    onChange={(e) => update({ subject: e.target.value })}
                     placeholder={t('subjectLinePlaceholder')}
                   />
                 </div>
@@ -452,30 +420,30 @@ export default function NewCampaignPage() {
                 <Label htmlFor="body">{t('messageLabel')} *</Label>
                 <Textarea
                   id="body"
-                  value={formData.body}
-                  onChange={(e) => updateFormData({ body: e.target.value })}
+                  value={form.body}
+                  onChange={(e) => update({ body: e.target.value })}
                   placeholder={
-                    formData.channel === 'sms' 
+                    form.channel === 'sms'
                       ? t('smsMessagePlaceholder')
                       : t('messageBodyPlaceholder')
                   }
                   rows={10}
-                  maxLength={formData.channel === 'sms' ? 160 : undefined}
+                  maxLength={form.channel === 'sms' ? 160 : undefined}
                 />
-                {formData.channel === 'sms' && (
+                {form.channel === 'sms' && (
                   <p className="text-sm text-muted-foreground">
-                    {formData.body.length} / 160 {t('charactersLabel')}
+                    {form.body.length} / 160 {t('charactersLabel')}
                   </p>
                 )}
               </div>
 
-              {formData.channel === 'email' && (
+              {form.channel === 'email' && (
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      checked={formData.trackOpens}
-                      onChange={(e) => updateFormData({ trackOpens: e.target.checked })}
+                      checked={form.trackOpens}
+                      onChange={(e) => update({ trackOpens: e.target.checked })}
                       className="rounded"
                     />
                     {t('trackOpensLabel')}
@@ -483,8 +451,8 @@ export default function NewCampaignPage() {
                   <Label className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      checked={formData.trackClicks}
-                      onChange={(e) => updateFormData({ trackClicks: e.target.checked })}
+                      checked={form.trackClicks}
+                      onChange={(e) => update({ trackClicks: e.target.checked })}
                       className="rounded"
                     />
                     {t('trackClicksLabel')}
@@ -499,55 +467,6 @@ export default function NewCampaignPage() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>{t('scheduleCampaignTitle')}</CardTitle>
-              <CardDescription>
-                {t('scheduleCampaignDescription')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <RadioGroup
-                value={formData.sendNow ? 'now' : 'scheduled'}
-                onValueChange={(value) => {
-                  updateFormData({
-                    sendNow: value === 'now',
-                    scheduledAt: value === 'now' ? null : formData.scheduledAt,
-                  });
-                }}
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="now" id="send-now" />
-                  <Label htmlFor="send-now" className="font-normal">
-                    {t('sendNowOption')}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="scheduled" id="send-scheduled" />
-                  <Label htmlFor="send-scheduled" className="font-normal">
-                    {t('scheduleForLaterOption')}
-                  </Label>
-                </div>
-              </RadioGroup>
-
-              {!formData.sendNow && (
-                <div className="space-y-2">
-                  <Label htmlFor="scheduledAt">{t('scheduleDateTimeLabel')} *</Label>
-                  <Input
-                    id="scheduledAt"
-                    type="datetime-local"
-                    value={formData.scheduledAt || ''}
-                    onChange={(e) => updateFormData({ scheduledAt: e.target.value })}
-                    min={new Date().toISOString().slice(0, 16)}
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        );
-
-      case 5:
-        return (
-          <Card>
-            <CardHeader>
               <CardTitle>{t('reviewCampaignTitle')}</CardTitle>
               <CardDescription>
                 {t('reviewCampaignDescription')}
@@ -559,66 +478,40 @@ export default function NewCampaignPage() {
                 <dl className="space-y-2">
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">{t('nameLabel')}:</dt>
-                    <dd className="font-medium">{formData.name}</dd>
+                    <dd className="font-medium">{form.name}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">{t('typeLabel')}:</dt>
-                    <dd className="font-medium">
-                      {formData.type === 'campaign'
-                        ? t('typeOptionCampaign')
-                        : formData.type === 'announcement'
-                          ? t('typeOptionAnnouncement')
-                          : formData.type === 'alert'
-                            ? t('typeOptionAlert')
-                            : t('typeOptionTransactional')}
-                    </dd>
+                    <dd className="font-medium">{typeLabel(form.type)}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">{t('channelLabel')}:</dt>
-                    <dd className="font-medium">
-                      {formData.channel === 'email'
-                        ? t('channelOptionEmail')
-                        : formData.channel === 'sms'
-                          ? t('channelOptionSms')
-                          : formData.channel === 'push'
-                            ? t('channelOptionPush')
-                            : t('channelOptionMulti')}
-                    </dd>
+                    <dd className="font-medium">{channelLabel(form.channel)}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">{t('audienceLabel')}:</dt>
+                    <dd className="font-medium">{chosenSegment ? chosenSegment.name : t('audienceNotSet')}</dd>
                   </div>
                 </dl>
               </div>
 
               <div>
                 <h3 className="font-semibold mb-2">{t('contentLabel')}</h3>
-                {formData.channel === 'email' && (
+                {form.channel === 'email' && (
                   <div className="mb-2">
                     <span className="text-sm text-muted-foreground">{t('subjectLabel')}: </span>
-                    <span className="font-medium">{formData.subject}</span>
+                    <span className="font-medium">{form.subject}</span>
                   </div>
                 )}
-                <div className="p-3 bg-muted rounded-lg text-sm">
-                  {formData.body}
+                <div className="p-3 bg-muted rounded-lg text-sm whitespace-pre-wrap">
+                  {form.body}
                 </div>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">{t('scheduleLabel')}</h3>
-                <p className="text-muted-foreground">
-                  {formData.sendNow ? (
-                    t('sendImmediatelyLabel')
-                  ) : (
-                    `${t('scheduledForLabel')} ${new Date(formData.scheduledAt!).toLocaleString()}`
-                  )}
-                </p>
+                <h3 className="font-semibold mb-2">{t('sendingLabel')}</h3>
+                <CapabilityUnavailable locale={locale} capability="UE-ACTION-CAMPAIGN-SEND" />
               </div>
-
-              {formData.testMode && (
-                <Alert>
-                  <AlertDescription>
-                    <strong>{t('testModeLabel')}:</strong> {t('testModeDescription')}
-                  </AlertDescription>
-                </Alert>
-              )}
 
               {error && (
                 <Alert variant="destructive">
@@ -640,7 +533,7 @@ export default function NewCampaignPage() {
       <div className="mb-6">
         <Button
           variant="ghost"
-          onClick={() => router.back()}
+          onClick={() => router.push(`/${locale}/dashboard/communications/campaigns`)}
           className="mb-4"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -650,6 +543,9 @@ export default function NewCampaignPage() {
         <p className="text-muted-foreground">
           {t('createCampaignDescription')}
         </p>
+        <Alert className="mt-4">
+          <AlertDescription>{t('draftNotice')}</AlertDescription>
+        </Alert>
       </div>
 
       {/* Progress Steps */}
@@ -659,7 +555,7 @@ export default function NewCampaignPage() {
             const Icon = step.icon;
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
-            
+
             return (
               <div key={step.id} className="flex items-center flex-1">
                 <div className="flex flex-col items-center">
@@ -699,17 +595,17 @@ export default function NewCampaignPage() {
         <CardFooter className="flex justify-between pt-6">
           <Button
             variant="outline"
-            onClick={() => setCurrentStep(s => Math.max(1, s - 1))}
-            disabled={currentStep === 1 || loading}
+            onClick={() => setCurrentStep((s) => Math.max(1, s - 1))}
+            disabled={currentStep === 1 || saving}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t('previousButton')}
           </Button>
 
-          {currentStep < 5 ? (
+          {currentStep < steps.length ? (
             <Button
-              onClick={() => setCurrentStep(s => s + 1)}
-              disabled={!canProceed() || loading}
+              onClick={() => setCurrentStep((s) => s + 1)}
+              disabled={!canProceed() || saving}
             >
               {t('nextButton')}
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -717,16 +613,16 @@ export default function NewCampaignPage() {
           ) : (
             <Button
               onClick={handleSubmit}
-              disabled={!canProceed() || loading}
+              disabled={saving}
             >
-              {loading ? (
+              {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {t('creatingStatus')}
                 </>
               ) : (
                 <>
-                  <Send className="mr-2 h-4 w-4" />
+                  <Save className="mr-2 h-4 w-4" />
                   {t('createCampaignButton')}
                 </>
               )}

@@ -31,7 +31,7 @@ import { withRLSContext } from "@/lib/db/with-rls-context";
 import { logger } from "@/lib/logger";
 import {
   type RepresentationProtocol,
-  getRepresentationProtocol,
+  resolveRepresentationProtocol,
   getPrimaryAssignmentRole,
 } from "@/lib/representation";
 
@@ -116,8 +116,15 @@ export async function autoAssignGrievance(
   } = {}
 ): Promise<AssignmentResult> {
   try {
-    // Resolve protocol for this org
-    const protocol = await getRepresentationProtocol(organizationId);
+    // Authority-bearing: a default or unapproved protocol must not decide who may represent members
+    const resolution = await resolveRepresentationProtocol(organizationId);
+    if (!resolution.executable) {
+      return {
+        success: false,
+        error: `Representation protocol is not approved for this organization (${resolution.status}). Assignment requires a configured, independently approved protocol.`,
+      };
+    }
+    const protocol = resolution.protocol;
 
     // Get claim details (wrapped with RLS for org isolation)
     const claim = await withRLSContext({ organizationId }, async (db) =>
@@ -195,7 +202,7 @@ export async function autoAssignGrievance(
         assignedTo: bestMatch.userId,
         assignedAt: new Date(),
       })
-      .where(eq(claims.claimId, claimId));
+      .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)));
 
     return {
       success: true,
@@ -228,6 +235,14 @@ export async function manuallyAssignGrievance(
   } = {}
 ): Promise<AssignmentResult> {
   try {
+    // Authority-bearing: requires an approved organization protocol, same as automatic assignment.
+    const resolution = await resolveRepresentationProtocol(organizationId);
+    if (!resolution.executable) {
+      return {
+        success: false,
+        error: `Representation protocol is not approved for this organization (${resolution.status}). Assignment requires a configured, independently approved protocol.`,
+      };
+    }
     // Validate officer exists and has capacity (unless bypassed)
     if (!options.bypassWorkloadCheck) {
       const workload = await getOfficerWorkload(assignedTo, organizationId);
@@ -286,7 +301,7 @@ export async function manuallyAssignGrievance(
             assignedTo,
             assignedAt: new Date(),
           })
-          .where(eq(claims.claimId, claimId))
+          .where(and(eq(claims.claimId, claimId), eq(claims.organizationId, organizationId)))
       );
     }
 
@@ -330,16 +345,15 @@ export async function reassignGrievance(
       return { success: false, error: "Assignment not found" };
     }
 
-    // Mark current assignment as reassigned
-    await db
-      .update(grievanceAssignments)
-      .set({
-        status: "reassigned",
-        notes: `Reassigned to new officer: ${reason}`,
-      })
-      .where(eq(grievanceAssignments.id, currentAssignmentId));
+    if (currentAssignment.claimId !== claimId) {
+      return { success: false, error: "Assignment does not belong to this case" };
+    }
 
-    // Create new assignment
+    if (currentAssignment.status !== "assigned") {
+      return { success: false, error: `Assignment is ${currentAssignment.status}, not active; nothing to reassign` };
+    }
+
+    // Create the successor assignment first so a failure leaves the existing owner in place.
     const result = await manuallyAssignGrievance(
       claimId,
       organizationId,
@@ -353,6 +367,31 @@ export async function reassignGrievance(
           : undefined,
       }
     );
+
+    if (!result.success) {
+      return result;
+    }
+
+    try {
+      await withRLSContext({ organizationId }, async (db) =>
+        db
+          .update(grievanceAssignments)
+          .set({
+            status: "reassigned",
+            notes: `Reassigned to new officer: ${reason}`,
+          })
+          .where(eq(grievanceAssignments.id, currentAssignmentId))
+      );
+    } catch (retireError) {
+      // Never report a completed transfer while the prior assignment is still active.
+      return {
+        success: false,
+        assignmentId: result.assignmentId,
+        assignedTo: result.assignedTo,
+        role: result.role,
+        error: `Successor assignment ${result.assignmentId} was created but the prior assignment could not be retired (${retireError instanceof Error ? retireError.message : "unknown error"}). Resolve before relying on this transfer.`,
+      };
+    }
 
     return result;
   } catch (error) {

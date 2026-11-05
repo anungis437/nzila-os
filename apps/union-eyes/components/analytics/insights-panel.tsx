@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   AlertCircle,
@@ -21,28 +22,20 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
-
-interface Insight {
-  id: string;
-  insightType: 'opportunity' | 'risk' | 'optimization' | 'alert' | 'information';
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  title: string;
-  description: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  recommendations?: any[];
-  status: 'new' | 'acknowledged' | 'in_progress' | 'completed' | 'dismissed';
-  actionRequired: boolean;
-  createdAt: string;
-}
+import { readApiError } from '@/lib/client/api-envelope';
+import type { Insight } from './analytics-readers';
 
 interface InsightsPanelProps {
   insights: Insight[];
   compact?: boolean;
+  /** Called after an insight was changed, so the caller can read the list again. */
+  onChanged?: () => void;
 }
 
-export function InsightsPanel({ insights, compact = false }: InsightsPanelProps) {
+export function InsightsPanel({ insights, compact = false, onChanged }: InsightsPanelProps) {
   const [expandedInsight, setExpandedInsight] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [dismissalReasons, setDismissalReasons] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   const getInsightIcon = (type: string) => {
@@ -107,22 +100,17 @@ export function InsightsPanel({ insights, compact = false }: InsightsPanelProps)
         })
       });
 
-      const data = await response.json();
+      if (!response.ok) throw new Error(await readApiError(response, 'Failed to update insight'));
 
-      if (data.success) {
-        toast({
-          title: 'Insight Updated',
-          description: `Insight marked as ${status.replace('_', ' ')}`
-        });
-        // Refresh insights
-        window.location.reload();
-      } else {
-        throw new Error(data.error);
-      }
-    } catch (_error) {
+      toast({
+        title: 'Insight Updated',
+        description: `Insight marked as ${status.replace('_', ' ')}`
+      });
+      onChanged?.();
+    } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to update insight',
+        description: error instanceof Error ? error.message : 'Failed to update insight',
         variant: 'destructive'
       });
     }
@@ -192,15 +180,14 @@ export function InsightsPanel({ insights, compact = false }: InsightsPanelProps)
           {expandedInsight === insight.id && (
             <CardContent className="space-y-4">
               {/* Recommendations */}
-              {insight.recommendations && insight.recommendations.length > 0 && (
+              {insight.recommendations.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-sm mb-2">Recommendations</h4>
                   <ul className="space-y-2">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {insight.recommendations.map((rec: any, idx: number) => (
+                    {insight.recommendations.map((rec, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-sm">
                         <CheckCircle className="h-4 w-4 mt-0.5 text-green-600" />
-                        <span>{rec.description || rec}</span>
+                        <span>{rec}</span>
                       </li>
                     ))}
                   </ul>
@@ -224,24 +211,37 @@ export function InsightsPanel({ insights, compact = false }: InsightsPanelProps)
 
               {/* Actions */}
               {insight.status === 'new' && (
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => updateInsightStatus(insight.id, 'acknowledged')}
-                  >
-                    <Check className="h-4 w-4 mr-2" />
-                    Acknowledge
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      updateInsightStatus(insight.id, 'dismissed', 'Not relevant')
-                    }
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Dismiss
-                  </Button>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => updateInsightStatus(insight.id, 'acknowledged')}
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      Acknowledge
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      aria-label="Reason for dismissing"
+                      placeholder="Reason for dismissing"
+                      value={dismissalReasons[insight.id] || ''}
+                      onChange={(e) =>
+                        setDismissalReasons({ ...dismissalReasons, [insight.id]: e.target.value })
+                      }
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!(dismissalReasons[insight.id] || '').trim()}
+                      onClick={() =>
+                        updateInsightStatus(insight.id, 'dismissed', dismissalReasons[insight.id].trim())
+                      }
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Dismiss
+                    </Button>
+                  </div>
                 </div>
               )}
 

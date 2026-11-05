@@ -15,10 +15,10 @@ export const eventMetadataSchema = z.object({
 export type EventMetadata = z.infer<typeof eventMetadataSchema>
 
 export const domainEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   type: z.string().min(1),
   version: z.number().int().positive(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   metadata: eventMetadataSchema,
   timestamp: z.string().datetime(),
 })
@@ -29,7 +29,7 @@ export type DomainEvent = z.infer<typeof domainEventSchema>
 
 // Claims Domain
 export const ClaimCreated_v1 = z.object({
-  claimId: z.string().uuid(),
+  claimId: z.guid(),
   claimType: z.string().min(1),
   claimantId: z.string().min(1),
   amount: z.number().nonnegative().optional(),
@@ -38,14 +38,14 @@ export const ClaimCreated_v1 = z.object({
 export type ClaimCreated_v1 = z.infer<typeof ClaimCreated_v1>
 
 export const ClaimUpdated_v1 = z.object({
-  claimId: z.string().uuid(),
-  changes: z.record(z.unknown()),
+  claimId: z.guid(),
+  changes: z.record(z.string(), z.unknown()),
   updatedBy: z.string().min(1),
 })
 export type ClaimUpdated_v1 = z.infer<typeof ClaimUpdated_v1>
 
 export const ClaimResolved_v1 = z.object({
-  claimId: z.string().uuid(),
+  claimId: z.guid(),
   resolution: z.enum(['approved', 'denied', 'withdrawn']),
   resolvedBy: z.string().min(1),
   notes: z.string().optional(),
@@ -71,7 +71,7 @@ export type UserDeactivated_v1 = z.infer<typeof UserDeactivated_v1>
 
 // Commerce Domain
 export const OrderCreated_v1 = z.object({
-  orderId: z.string().uuid(),
+  orderId: z.guid(),
   customerId: z.string().min(1),
   items: z.array(z.object({
     productId: z.string().min(1),
@@ -84,8 +84,8 @@ export const OrderCreated_v1 = z.object({
 export type OrderCreated_v1 = z.infer<typeof OrderCreated_v1>
 
 export const PaymentProcessed_v1 = z.object({
-  paymentId: z.string().uuid(),
-  orderId: z.string().uuid(),
+  paymentId: z.guid(),
+  orderId: z.guid(),
   amount: z.number().nonnegative(),
   currency: z.string().length(3),
   method: z.string().min(1),
@@ -106,7 +106,7 @@ export type PolicyEvaluated_v1 = z.infer<typeof PolicyEvaluated_v1>
 
 // AI Domain
 export const AIRequestCompleted_v1 = z.object({
-  requestId: z.string().uuid(),
+  requestId: z.guid(),
   model: z.string().min(1),
   tokensUsed: z.number().int().nonnegative(),
   costUsd: z.number().nonnegative(),

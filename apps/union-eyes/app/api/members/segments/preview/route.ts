@@ -54,6 +54,7 @@ function buildCondition(filter: SegmentFilter, _orgId: string): SQL | null {
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { minRole: 'steward' },
     openapi: { tags: ['Members'], summary: 'Preview segment member count' },
   },

@@ -1,20 +1,30 @@
 /**
- * Metrics endpoint
+ * Monthly recurring revenue is not yet backed by qualified platform financial reporting.
+ * DEF-0B10-OPL-12: never substitute unrelated zero usage counters for mrr.
+ * The institutional platform-data mandate and source-of-truth reconciliation
+ * must be approved before an actual metric is exposed.
  */
-import { withApi } from '@/lib/api/framework';
+import { NextResponse } from 'next/server'
+import { withApi } from '@/lib/api/framework'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export const GET = withApi(
   {
-    auth: { required: true, minRole: 'admin' },
+    auth: { required: true, minRole: 'system_admin' },
     openapi: {
-      tags: ["System"],
-      summary: 'System metrics',
-      description: 'Returns aggregated system metrics.',
+      tags: ['System'],
+      summary: 'Monthly recurring revenue (unavailable pending verified financial data)',
+      description: 'Explicitly unavailable until platform financial source data and authorization are verified.',
     },
   },
-  async () => {
-    return { activeUsers: 0, requestsToday: 0, errorRate: 0 };
-  },
-);
+  async () => NextResponse.json(
+    {
+      error: 'PLATFORM_MRR_NOT_IMPLEMENTED',
+      capability: 'platform.metrics.mrr',
+      capabilityState: 'NOT_IMPLEMENTED',
+      message: 'Verified financial source data and platform reporting authority are not available.',
+    },
+    { status: 501, headers: { 'Cache-Control': 'private, no-store' } },
+  ),
+)

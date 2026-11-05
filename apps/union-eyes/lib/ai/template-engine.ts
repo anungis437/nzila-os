@@ -43,11 +43,8 @@
 
 import { createHash } from 'crypto';
 import { db } from '@/db';
-import {
-  chatMessages,
-  knowledgeBase,
-} from '@/db/schema/ai-chatbot-schema';
-import { eq, desc, sql, and } from 'drizzle-orm';
+import { chatMessages } from '@/db/schema/ai-chatbot-schema';
+import { eq, desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { costTrackingWrapper as costTracker } from '@/lib/ai/services/cost-tracking-wrapper';
 
@@ -1199,66 +1196,17 @@ class AttentionMechanismEngine {
   }
 
   /**
-   * Retrieve and score RAG documents
+   * Knowledge retrieval for the template engine: none.
+   *
+   * It used to ask a stub embedding provider that always threw, so every call logged an error and returned nothing. The working path is
+   * RAGService.searchDocuments (lib/ai/chatbot-service.ts), which embeds through the AI control plane, has the database score the match, and applies the
+   * exit-interview visibility rule. This method says what it does: it returns no documents.
    */
   private async retrieveAndScoreRAG(
-    userMessage: string,
-    context: LLMRequestContext
+    _userMessage: string,
+    _context: LLMRequestContext
   ): Promise<Array<{ content: string; relevanceScore: number }>> {
-    try {
-      // Generate embedding for user message
-      const embeddingProvider = this.getEmbeddingProvider();
-      const queryEmbedding = await embeddingProvider.generateEmbedding(userMessage);
-
-      // Query knowledge base
-      const results = await db
-        .select({
-          id: knowledgeBase.id,
-          title: knowledgeBase.title,
-          content: knowledgeBase.content,
-          embedding: knowledgeBase.embedding,
-          relevanceScore: sql<number>`1 - ((${queryEmbedding}::vector <=> ${knowledgeBase.embedding}::vector))`
-        })
-        .from(knowledgeBase)
-        .where(
-          and(
-            eq(knowledgeBase.isActive, true),
-            eq(knowledgeBase.organizationId, context.organizationId)
-          )
-        )
-        .orderBy(sql`${knowledgeBase.embedding}::vector <=> ${queryEmbedding}::vector`)
-        .limit(10);
-
-      return results
-        .filter(r => (r.relevanceScore || 0) > 0.5)
-        .map(r => ({
-          content: `DOCUMENT: ${r.title}\n\n${r.content}`,
-          relevanceScore: r.relevanceScore || 0
-        }));
-    } catch (error) {
-      logger.error('RAG retrieval failed', { error });
-      return [];
-    }
-  }
-
-  /**
-   * Get embedding provider.
-   *
-   * NOTE: previously returned a SHA-256 byte stream as a fake "embedding". That
-   * silently poisoned RAG: the resulting pseudo-vector was compared via pgvector
-   * cosine distance against real OpenAI embeddings stored in `knowledgeBase`,
-   * producing meaningless relevance scores. We now refuse to fabricate vectors
-   * and direct callers to the real provider (`lib/ai/embeddings-service.ts`,
-   * which wraps @nzila/ai-sdk). The caller of `retrieveAndScoreRAG` catches
-   * errors and returns no documents, so RAG degrades to "no results" rather
-   * than "random results".
-   */
-  private getEmbeddingProvider() {
-    return {
-      async generateEmbedding(_text: string): Promise<number[]> {
-        throw new Error('template-engine.getEmbeddingProvider is not wired to a real embedding model. Use lib/ai/embeddings-service.ts (@nzila/ai-sdk) instead of generating fake vectors.');
-      }
-    };
+    return [];
   }
 
   /**

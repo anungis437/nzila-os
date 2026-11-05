@@ -13,19 +13,18 @@ import { withRLSContext } from '@/lib/db/with-rls-context'
 import { auditDataAccess } from '@/lib/audit-logger'
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
-import { getCaseActor, findReadableCase, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
+import { getCaseActor, findReadableCase, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
 
 export async function GET(_request: Request, { params }: { params: Promise<{ caseId: string }> }) {
   const { caseId } = await params
   try {
     const actor = await getCaseActor()
     const { userId, organizationId: orgId } = actor
-    await requireCaseAction(actor, 'note_add_internal', caseId)
     await requireEntitlement(orgId, 'grievance_case_suite')
     // Canonical audit sink: public.audit_logs (hash-chained, tenant RLS). The case may be addressed by
     // claim number or claim id; audit rows reference the claim id.
     const rows = await withRLSContext({ organizationId: orgId }, async (tx) => {
-      const claim = await findReadableCase(tx, actor, caseId)
+      const claim = await findReadableCase(tx, actor, caseId, false, 'case:read_internal')
       if (!claim) return null
       return (await tx.execute(
         sql`SELECT audit_id::text AS "auditId", action, user_id AS "userId",

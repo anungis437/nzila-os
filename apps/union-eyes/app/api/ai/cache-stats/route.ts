@@ -9,14 +9,15 @@
  * - Cache hit rate (percentage)
  * - Estimated cost savings (USD)
  * 
- * Authentication: Requires admin role (role >= 90)
+ * Authentication: Requires verified system administrator authority (shared platform data)
  * 
  * Created: February 11, 2026
  */
 
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
-import { withAdminAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { withSystemAdminAuth, getCurrentUser, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import { logger } from '@/lib/logger';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
@@ -25,18 +26,25 @@ import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-respons
  * GET /api/ai/cache-stats
  * 
  * Get embedding cache statistics
- * Requires admin role
+ * Requires system administrator authority — tenant administrators cannot see platform-wide cache state.
  */
-export const GET = withAdminAuth(async (_request: NextRequest) => {
+export const GET = withSystemAdminAuth(async (_request: NextRequest, context: BaseAuthContext) => {
   try {
     const user = await getCurrentUser();
     
     // Get cache statistics
-    const stats = await embeddingCache.getStats();
+    const stats = await performAuditedOperation(
+      {
+        organizationId: context.organizationId,
+        userId: context.userId,
+        action: 'ai.embedding_cache.stats.read',
+        resourceType: 'embedding_cache',
+      },
+      () => embeddingCache.getStats(),
+    );
 
       logger.info('Admin viewed embedding cache stats', {
         userId: user?.id,
-        stats,
       });
 
       return NextResponse.json({
@@ -50,6 +58,8 @@ export const GET = withAdminAuth(async (_request: NextRequest) => {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) return NextResponse.json(refused.body, { status: refused.status });
       logger.error('Failed to fetch embedding cache stats', error);
 
       return NextResponse.json(
@@ -65,15 +75,15 @@ export const GET = withAdminAuth(async (_request: NextRequest) => {
 /**
  * POST /api/ai/cache-stats
  * 
- * Admin action to clear cache or reset stats
- * Requires admin role
+ * Platform action to clear the cache or reset its stats. The embedding cache is shared by every organization, so the
+ * action is not an organization administrator's to take: it requires a system administrator.
  */
 
 const aiCacheStatsSchema = z.object({
   action: z.enum(['clear', 'reset-stats']).optional(),
 });
 
-export const POST = withAdminAuth(async (request: NextRequest) => {
+export const POST = withSystemAdminAuth(async (request: NextRequest, context: BaseAuthContext) => {
   try {
     const user = await getCurrentUser();
     const body = await request.json();
@@ -83,7 +93,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     
@@ -99,9 +109,22 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         );
       }
 
+      // The cache lives outside the database, so the intent is recorded first and the action is skipped if that
+      // record cannot be written.
+      const audited = <T>(operation: () => Promise<T>) =>
+        performAuditedOperation(
+          {
+            organizationId: context.organizationId,
+            userId: context.userId,
+            action: `ai.embedding_cache.${action}`,
+            resourceType: 'embedding_cache',
+          },
+          operation,
+        );
+
       if (action === 'clear') {
         // Clear all cached embeddings
-        const result = await embeddingCache.clearCache();
+        const result = await audited(() => embeddingCache.clearCache());
 
         logger.warn('Admin cleared embedding cache', {
           userId: user?.id,
@@ -117,7 +140,7 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
 
       if (action === 'reset-stats') {
         // Reset cache statistics
-        await embeddingCache.resetStats();
+        await audited(() => embeddingCache.resetStats());
 
         logger.info('Admin reset embedding cache stats', {
           userId: user?.id,
@@ -134,6 +157,8 @@ export const POST = withAdminAuth(async (request: NextRequest) => {
         { status: 400 }
       );
     } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) return NextResponse.json(refused.body, { status: refused.status });
       logger.error('Failed to execute cache action', error);
 
       return NextResponse.json(

@@ -27,7 +27,7 @@
     "@aws-sdk/cloudfront-signer": "^3.750.0",
     "@aws-sdk/s3-request-presigner": "^3.750.0",
     "@nzila/zonga-streaming": "workspace:*",
-    "zod": "^3.24.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "typescript": "^6",

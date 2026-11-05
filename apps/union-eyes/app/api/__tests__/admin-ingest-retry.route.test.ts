@@ -4,7 +4,9 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   withSystemContext: vi.fn(),
+  withRLSContext: vi.fn(),
   auditLog: vi.fn(),
+  persistAtomicAudit: vi.fn(),
   selectQueue: [] as unknown[][],
   updateFailAt: -1,
 }));
@@ -41,6 +43,7 @@ vi.mock('@/lib/api/framework', () => {
     z: {
       object: () => ({}),
       string: () => zString,
+      guid: () => zString,
       array: () => zArray,
       coerce: { number: () => zNumber },
       enum: () => ({ optional: () => ({}) }),
@@ -51,8 +54,15 @@ vi.mock('@/lib/api/framework', () => {
     },
   };
 });
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
-vi.mock('@/db/db', () => ({ db: mockDb }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: m.withSystemContext,
+  withRLSContext: m.withRLSContext,
+}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+// The route reaches the database only through its explicit tenant transaction: the ambient handle must never be touched.
+vi.mock('@/db/db', () => ({
+  db: new Proxy({}, { get: () => { throw new Error('the ambient db handle must not be used'); } }),
+}));
 vi.mock('@/lib/audit-logger', () => ({
   auditLog: m.auditLog,
   AuditEventType: { DATA_BULK_UPDATE: 'DATA_BULK_UPDATE' },
@@ -86,7 +96,9 @@ describe('admin/ingest/retry route', () => {
         },
     );
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
     m.auditLog.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
   });
 
   it('POST returns 400 when organization context is missing', async () => {
@@ -116,6 +128,8 @@ describe('admin/ingest/retry route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.retried).toBe(0);
+    expect(json.queued).toBe(0);
+    expect(json.succeeded).toBe(0);
   });
 
   it('POST retries failed records and reports counts', async () => {
@@ -129,21 +143,51 @@ describe('admin/ingest/retry route', () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.retried).toBe(2);
-    expect(json.succeeded).toBe(2);
-    expect(m.auditLog).toHaveBeenCalled();
+    expect(json.queued).toBe(2);
+    expect(json.succeeded).toBe(0);
+    expect(json.message).toMatch(/queued for retry; processing has not completed/);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'ingest.retry', organizationId: 'org_1', userId: 'u1', resourceId: 'b1' }));
   });
 
-  it('POST increments failed count when update errors occur', async () => {
+  it('POST runs the batch lookup, the reset and the audit in ONE tenant transaction of the caller organization', async () => {
     const { POST } = await loadRoute();
-    m.selectQueue.push([{ id: 'batch_1' }], [{ id: 'r1' }, { id: 'r2' }]);
-    m.updateFailAt = 2;
+    m.selectQueue.push([{ id: 'batch_1' }], [{ id: 'r1' }]);
 
     const response = await POST(new NextRequest('http://localhost/api/admin/ingest/retry', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ batch_id: 'b1' }),
     }), { organizationId: 'org_1', userId: 'u1' });
 
-    const json = await response.json();
-    expect(json.failed).toBe(1);
-    expect(json.succeeded).toBe(1);
+    expect(response.status).toBe(200);
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext.mock.calls[0][0]).toEqual({ organizationId: 'org_1' });
+    expect(mockDb.select).toHaveBeenCalledTimes(2);
+    expect(mockDb.update).toHaveBeenCalledTimes(1);
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'ingest.retry' }));
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+  });
+
+  it('POST writes nothing and no audit when the batch belongs to another organization', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([]);
+
+    const response = await POST(new NextRequest('http://localhost/api/admin/ingest/retry', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ batch_id: 'b1' }),
+    }), { organizationId: 'org_1', userId: 'u1' });
+
+    expect(response.status).toBe(404);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('POST re-queues all failed records or none: a failed audit fails the request', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([{ id: 'batch_1' }], [{ id: 'r1' }, { id: 'r2' }]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit write failed'));
+
+    const response = await POST(new NextRequest('http://localhost/api/admin/ingest/retry', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ batch_id: 'b1' }),
+    }), { organizationId: 'org_1', userId: 'u1' });
+
+    expect(response.status).toBe(500);
   });
 });

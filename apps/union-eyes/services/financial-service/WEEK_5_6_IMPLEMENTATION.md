@@ -412,7 +412,7 @@ The `/api/stipends/summary/:strikeFundId` endpoint provides:
 - **Framework**: Express.js
 - **Database**: PostgreSQL with Drizzle ORM
 - **Validation**: Zod schemas
-- **Authentication**: Clerk (dev bypass mode active)
+- **Authentication**: Auth provider JWT (dev bypass mode active)
 - **GPS**: Haversine formula (6371km Earth radius)
 - **QR Codes**: Base64 encoded JSON with timestamp expiry
 
@@ -510,7 +510,7 @@ Invoke-RestMethod -Uri 'http://localhost:3007/api/stipends/disbursements/pending
 - All services use Drizzle ORM with postgres-js driver
 - Numeric fields stored as strings (precision requirements)
 - Zod validation on all request bodies
-- Authentication via `(req as unknown).user` with Clerk bypass
+- Authentication via `(req as unknown).user` with auth bypass
 
 ### For Frontend Developers
 

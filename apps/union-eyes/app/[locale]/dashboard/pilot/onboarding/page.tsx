@@ -10,6 +10,7 @@ import { Metadata } from 'next';
 import { requireUser, hasMinRole } from '@/lib/api-auth-guard';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { supportEmail } from '@/lib/support-contact';
 import OnboardingConsole from './onboarding-console';
 
 type PageProps = {
@@ -33,5 +34,5 @@ export default async function PilotOnboardingPage() {
     redirect('/dashboard');
   }
 
-  return <OnboardingConsole />;
+  return <OnboardingConsole supportEmail={supportEmail()} />;
 }

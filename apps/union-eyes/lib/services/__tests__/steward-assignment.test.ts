@@ -11,13 +11,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
 
-const { mockSelectFrom, mockInsertValues, mockReturning, mockFindFirst } = vi.hoisted(() => {
+const { mockSelectFrom, mockInsertValues, mockReturning, mockFindFirst, mockUpdateSet } = vi.hoisted(() => {
   const mockReturning = vi.fn();
   return {
     mockSelectFrom: vi.fn(),
     mockInsertValues: vi.fn(() => ({ returning: mockReturning })),
     mockReturning,
     mockFindFirst: vi.fn(),
+    mockUpdateSet: vi.fn(() => ({ where: vi.fn(async () => undefined) })),
   };
 });
 
@@ -27,6 +28,7 @@ vi.mock('@/db/db', () => ({
       from: mockSelectFrom,
     })),
     insert: vi.fn(() => ({ values: mockInsertValues })),
+    update: vi.fn(() => ({ set: mockUpdateSet })),
     query: {
       stewards: { findFirst: mockFindFirst },
     },
@@ -49,10 +51,15 @@ vi.mock('drizzle-orm', async (importOriginal) => {
 
 // ── Imports ──────────────────────────────────────────────────────────────────
 
-import { calculateStewardScore, listStewards, createSteward, recommendSteward } from '../steward-assignment';
+import { db } from '@/db/db';
+import type { RLSTx } from '@/lib/db/with-rls-context';
+import { calculateStewardScore, listStewards, createSteward, recommendSteward, assignSteward } from '../steward-assignment';
 import type { ScoringInput } from '../steward-assignment';
 
 // ── Tests ────────────────────────────────────────────────────────────────────
+
+// The service runs on the transaction its caller hands it; the mocked database stands in for it.
+const tx = db as unknown as RLSTx;
 
 describe('calculateStewardScore', () => {
   it('returns baseline 50 with no matches', () => {
@@ -104,7 +111,7 @@ describe('listStewards', () => {
     mockSelectFrom.mockReturnValue({
       where: vi.fn(() => ({ orderBy: vi.fn(() => rows) })),
     });
-    const result = await listStewards('org-1');
+    const result = await listStewards('org-1', tx);
     expect(result).toEqual(rows);
   });
 });
@@ -115,7 +122,7 @@ describe('createSteward', () => {
   it('inserts and returns the new steward', async () => {
     const row = { id: 's-new', orgId: 'org-1', userId: 'u-1' };
     mockReturning.mockResolvedValue([row]);
-    const result = await createSteward({ orgId: 'org-1', userId: 'u-1' });
+    const result = await createSteward({ orgId: 'org-1', userId: 'u-1' }, tx);
     expect(result).toEqual(row);
   });
 });
@@ -127,7 +134,7 @@ describe('recommendSteward', () => {
     mockSelectFrom.mockReturnValue({
       where: vi.fn(() => []),
     });
-    await expect(recommendSteward('org-1', 'g-missing')).rejects.toThrow('Grievance not found');
+    await expect(recommendSteward('org-1', 'g-missing', tx)).rejects.toThrow('Grievance not found');
   });
 
   it('returns scored candidates sorted desc', async () => {
@@ -144,8 +151,27 @@ describe('recommendSteward', () => {
         ];
       }),
     }));
-    const candidates = await recommendSteward('org-1', 'g-1');
+    const candidates = await recommendSteward('org-1', 'g-1', tx);
     expect(candidates.length).toBe(2);
     expect(candidates[0].score).toBeGreaterThanOrEqual(candidates[1].score);
+  });
+});
+
+describe('assignSteward', () => {
+  beforeEach(() => { vi.clearAllMocks(); });
+
+  it('stores the assignment for the organization and bumps the caseload in the statement itself', async () => {
+    const row = { id: 'a1', organizationId: 'org-1', grievanceId: 'g-1', stewardId: 's-1' };
+    mockReturning.mockResolvedValue([row]);
+
+    const result = await assignSteward('org-1', 'g-1', 's-1', tx);
+
+    expect(result).toEqual(row);
+    expect(mockInsertValues).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org-1', grievanceId: 'g-1', stewardId: 's-1', stewardType: 'steward' }));
+    // A read-then-write increment would lose a concurrent assignment: the new value is an expression, not a number read earlier.
+    expect(mockUpdateSet).toHaveBeenCalledTimes(1);
+    const [set] = mockUpdateSet.mock.calls[0] as unknown as [{ currentCaseload: unknown }];
+    expect(typeof set.currentCaseload).not.toBe('number');
+    expect(db.select).not.toHaveBeenCalled();
   });
 });

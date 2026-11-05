@@ -17,7 +17,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -26,57 +25,66 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { 
   Mail, 
   MessageSquare, 
   Bell, 
-  Clock, 
   Save, 
   Loader2,
   CheckCircle2,
   AlertCircle,
   Shield,
-  Info,
 } from 'lucide-react';
+import { ApiShapeError, envelopeData, readApiError } from '@/lib/client/api-envelope';
 
-interface CommunicationPreferences {
-  id: string;
+/**
+ * The channel switches /api/notifications/preferences keeps for the signed-in user, which the notification service consults before it
+ * sends on a channel. The page offers only those. It once also offered content categories, a digest frequency, quiet hours with a zone,
+ * and an "unsubscribed on" notice: no column holds the categories, the zone or the date, and nothing that sends reads the frequency or the
+ * quiet hours, so a control for them would only look as though it did something. Until the switches are first saved the route answers
+ * with defaults, not a record.
+ */
+interface NotificationPreferences {
   emailEnabled: boolean;
   smsEnabled: boolean;
   pushEnabled: boolean;
-  categories: {
-    campaign: boolean;
-    transactional: boolean;
-    alerts: boolean;
-    newsletters: boolean;
-    social: boolean;
+  saved: boolean;
+  updatedAt: string | null;
+}
+
+const COPY = {
+  en: {
+    defaultsNote: 'These are the default settings. Nothing has been saved yet.',
+  },
+  fr: {
+    defaultsNote: 'Ce sont les paramètres par défaut. Rien n’a encore été enregistré.',
+  },
+} as const;
+
+/** The preferences in a withApi answer; a body that lacks a switch is refused, not filled in. */
+function preferencesFrom(body: unknown): NotificationPreferences {
+  const data = envelopeData(body);
+  const flag = (key: string): boolean => {
+    const value = data[key];
+    if (typeof value !== 'boolean') throw new ApiShapeError(key);
+    return value;
   };
-  frequency: 'real_time' | 'daily_digest' | 'weekly_digest';
-  quietHours: {
-    enabled: boolean;
-    start: string;
-    end: string;
-    timezone: string;
+  return {
+    emailEnabled: flag('emailEnabled'),
+    smsEnabled: flag('smsEnabled'),
+    pushEnabled: flag('pushEnabled'),
+    saved: data.saved === true,
+    updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : null,
   };
-  language: string;
-  unsubscribedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export default function CommunicationPreferencesPage() {
   const t = useTranslations('settingsCommunicationsPage');
   const locale = useLocale();
-  const [preferences, setPreferences] = useState<CommunicationPreferences | null>(null);
+  const copy = locale.toLowerCase().startsWith('fr') ? COPY.fr : COPY.en;
+  const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,16 +95,15 @@ export default function CommunicationPreferencesPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/messaging/preferences');
+      const response = await fetch('/api/notifications/preferences');
       
       if (!response.ok) {
-        throw new Error(t('errors.fetchFailed'));
+        throw new Error(await readApiError(response, t('errors.fetchFailed')));
       }
 
-      const data = await response.json();
-      setPreferences(data);
+      setPreferences(preferencesFrom(await response.json()));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.fetchFailed'));
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('errors.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -114,55 +121,35 @@ export default function CommunicationPreferencesPage() {
       setError(null);
       setSuccessMessage(null);
 
-      const response = await fetch('/api/messaging/preferences', {
+      const response = await fetch('/api/notifications/preferences', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(preferences),
+        body: JSON.stringify({
+          emailEnabled: preferences.emailEnabled,
+          smsEnabled: preferences.smsEnabled,
+          pushEnabled: preferences.pushEnabled,
+        }),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || t('errors.saveFailed'));
+        throw new Error(await readApiError(response, t('errors.saveFailed')));
       }
 
-      const updated = await response.json();
-      setPreferences(updated);
+      setPreferences(preferencesFrom(await response.json()));
       setSuccessMessage(t('success.saved'));
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.saveFailed'));
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('errors.saveFailed'));
     } finally {
       setSaving(false);
     }
   };
 
-  const updatePreferences = (updates: Partial<CommunicationPreferences>) => {
+  const updatePreferences = (updates: Partial<NotificationPreferences>) => {
     if (!preferences) return;
     setPreferences({ ...preferences, ...updates });
-  };
-
-  const updateCategory = (category: keyof CommunicationPreferences['categories'], enabled: boolean) => {
-    if (!preferences) return;
-    setPreferences({
-      ...preferences,
-      categories: {
-        ...preferences.categories,
-        [category]: enabled,
-      },
-    });
-  };
-
-  const updateQuietHours = (updates: Partial<CommunicationPreferences['quietHours']>) => {
-    if (!preferences) return;
-    setPreferences({
-      ...preferences,
-      quietHours: {
-        ...preferences.quietHours,
-        ...updates,
-      },
-    });
   };
 
   if (loading) {
@@ -226,6 +213,12 @@ export default function CommunicationPreferencesPage() {
           <strong>{t('privacyNotice.title')}</strong> {t('privacyNotice.body')}
         </AlertDescription>
       </Alert>
+
+      {!preferences.saved && (
+        <p className="text-sm text-muted-foreground" data-testid="preferences-defaults">
+          {copy.defaultsNote}
+        </p>
+      )}
 
       {/* Channel Preferences */}
       <Card>
@@ -305,259 +298,13 @@ export default function CommunicationPreferencesPage() {
         </CardContent>
       </Card>
 
-      {/* Content Categories */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('content.title')}</CardTitle>
-          <CardDescription>
-            {t('content.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="category-campaign" className="font-medium">
-                {t('content.campaign.title')}
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                {t('content.campaign.description')}
-              </p>
-            </div>
-            <Switch
-              id="category-campaign"
-              checked={preferences.categories.campaign}
-              onCheckedChange={(checked) => updateCategory('campaign', checked)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="category-transactional" className="font-medium">
-                {t('content.transactional.title')}
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                {t('content.transactional.description')}
-              </p>
-              <p className="text-xs text-amber-600 mt-1">
-                {t('content.transactional.warning')}
-              </p>
-            </div>
-            <Switch
-              id="category-transactional"
-              checked={preferences.categories.transactional}
-              disabled={true}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="category-alerts" className="font-medium">
-                {t('content.alerts.title')}
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                {t('content.alerts.description')}
-              </p>
-            </div>
-            <Switch
-              id="category-alerts"
-              checked={preferences.categories.alerts}
-              onCheckedChange={(checked) => updateCategory('alerts', checked)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="category-newsletters" className="font-medium">
-                {t('content.newsletters.title')}
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                {t('content.newsletters.description')}
-              </p>
-            </div>
-            <Switch
-              id="category-newsletters"
-              checked={preferences.categories.newsletters}
-              onCheckedChange={(checked) => updateCategory('newsletters', checked)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="category-social" className="font-medium">
-                {t('content.social.title')}
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                {t('content.social.description')}
-              </p>
-            </div>
-            <Switch
-              id="category-social"
-              checked={preferences.categories.social}
-              onCheckedChange={(checked) => updateCategory('social', checked)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Delivery Frequency */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('frequency.title')}</CardTitle>
-          <CardDescription>
-            {t('frequency.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="frequency">{t('frequency.label')}</Label>
-            <Select
-              value={preferences.frequency}
-              onValueChange={(value) => updatePreferences({ frequency: value as CommunicationPreferences['frequency'] })}
-            >
-              <SelectTrigger id="frequency">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="real_time">
-                  <div className="flex flex-col">
-                    <span>{t('frequency.options.realTime.title')}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {t('frequency.options.realTime.description')}
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="daily_digest">
-                  <div className="flex flex-col">
-                    <span>{t('frequency.options.dailyDigest.title')}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {t('frequency.options.dailyDigest.description')}
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="weekly_digest">
-                  <div className="flex flex-col">
-                    <span>{t('frequency.options.weeklyDigest.title')}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {t('frequency.options.weeklyDigest.description')}
-                    </span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              {t('frequency.note')}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quiet Hours */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            {t('quietHours.title')}
-          </CardTitle>
-          <CardDescription>
-            {t('quietHours.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="quiet-hours-enabled" className="font-medium">
-              {t('quietHours.enableLabel')}
-            </Label>
-            <Switch
-              id="quiet-hours-enabled"
-              checked={preferences.quietHours.enabled}
-              onCheckedChange={(checked) => updateQuietHours({ enabled: checked })}
-            />
-          </div>
-
-          {preferences.quietHours.enabled && (
-            <>
-              <Separator />
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="quiet-start">{t('quietHours.startTimeLabel')}</Label>
-                  <Input
-                    id="quiet-start"
-                    type="time"
-                    value={preferences.quietHours.start}
-                    onChange={(e) => updateQuietHours({ start: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="quiet-end">{t('quietHours.endTimeLabel')}</Label>
-                  <Input
-                    id="quiet-end"
-                    type="time"
-                    value={preferences.quietHours.end}
-                    onChange={(e) => updateQuietHours({ end: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="timezone">{t('quietHours.timezoneLabel')}</Label>
-                <Select
-                  value={preferences.quietHours.timezone}
-                  onValueChange={(value) => updateQuietHours({ timezone: value })}
-                >
-                  <SelectTrigger id="timezone">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="America/Toronto">{t('quietHours.timezones.toronto')}</SelectItem>
-                    <SelectItem value="America/Vancouver">{t('quietHours.timezones.vancouver')}</SelectItem>
-                    <SelectItem value="America/Chicago">{t('quietHours.timezones.chicago')}</SelectItem>
-                    <SelectItem value="America/Denver">{t('quietHours.timezones.denver')}</SelectItem>
-                    <SelectItem value="America/Halifax">{t('quietHours.timezones.halifax')}</SelectItem>
-                    <SelectItem value="America/St_Johns">{t('quietHours.timezones.stJohns')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  {t('quietHours.alert')}
-                </AlertDescription>
-              </Alert>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Unsubscribe Warning */}
-      {preferences.unsubscribedAt && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {t('unsubscribedNotice', {
-              date: new Date(preferences.unsubscribedAt).toLocaleDateString(locale),
-            })}
-          </AlertDescription>
-        </Alert>
-      )}
-
       {/* Save Button */}
       <Card>
         <CardFooter className="flex justify-between pt-6">
           <p className="text-sm text-muted-foreground">
-            {t('lastUpdated', {
-              value: new Date(preferences.updatedAt).toLocaleString(locale),
-            })}
+            {preferences.updatedAt
+              ? t('lastUpdated', { value: new Date(preferences.updatedAt).toLocaleString(locale) })
+              : ''}
           </p>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
@@ -586,9 +333,6 @@ export default function CommunicationPreferencesPage() {
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
             <strong>{t('compliance.rightsTitle')}</strong> {t('compliance.rightsBody')}
-          </p>
-          <p>
-            <strong>{t('compliance.consentTrackingTitle')}</strong> {t('compliance.consentTrackingBody')}
           </p>
           <p>
             <strong>{t('compliance.transactionalTitle')}</strong> {t('compliance.transactionalBody')}

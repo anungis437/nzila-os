@@ -1,10 +1,13 @@
-import { db } from '@/db/db';
 import { organizationMembers } from '@/db/schema';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import { grievanceCaseAccessAssignments } from '@/db/schema/domains/claims/grievance-lifecycle';
-import { eq, and } from 'drizzle-orm';
+import { withRLSContext, withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { authDb, withAuthContext } from '@nzila/platform-auth/auth-execution';
+
+/** The canonical organization binding refuses a caller who is not a live member of the organization it is asked to bind. */
+const isMembershipRequired = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'MEMBERSHIP_REQUIRED';
 
 /** Callers retain their administrator guard; bind every auth write to the real actor. */
 async function withMemberAuthMutation<T>(
@@ -33,14 +36,19 @@ export interface RevokeMemberAccessInput {
   authUserId: string;
   organizationId: string;
   newLocalStatus: 'inactive' | 'deleted';
+  /** The authenticated administrator performing the offboarding; recorded in the durable audit. */
+  actorUserId: string;
 }
 
 export interface RevokeMemberAccessResult {
   success: boolean;
   sessionsRevoked: boolean;
   authMembershipDisabled: boolean;
-  caseAccessRevokedCount: number;
+  /** How many kernel case relationships were live when the membership was disabled; `null` when they could not be counted (see the step in revokeMemberAccess). */
+  caseAccessRevokedCount: number | null;
   localStatusUpdated: boolean;
+  /** False when the attempt could not be recorded before the revocation ran (the revocation still ran: denial is the safe direction). */
+  intentRecorded: boolean;
   errors: string[];
 }
 
@@ -50,6 +58,8 @@ export interface ReactivateMemberAccessInput {
   /** organizationMembers.userId — the REAL authenticated user principal. */
   authUserId: string;
   organizationId: string;
+  /** The authenticated administrator performing the reactivation; recorded in the durable audit. */
+  actorUserId: string;
 }
 
 export interface ReactivateMemberAccessResult {
@@ -88,8 +98,27 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
   const errors: string[] = [];
   let sessionsRevoked = false;
   let authMembershipDisabled = false;
-  let caseAccessRevokedCount = 0;
+  let caseAccessRevokedCount: number | null = null;
   let localStatusUpdated = false;
+
+  // Revocation spans three stores (sessions, platform-auth membership, the local row) that cannot share one transaction, so the
+  // attempt is made durable first: a process that stops part-way leaves an attempt with no outcome, which is visible and safe to
+  // repeat. Unlike a grant, a revocation that cannot be recorded is still carried out, because denying access is the safe direction;
+  // the final record then says the attempt was not recorded.
+  let intentRecorded = true;
+  try {
+    await withSystemContext((tx) => persistAtomicAudit(tx as RLSTx, {
+      organizationId: input.organizationId,
+      userId: input.actorUserId,
+      action: input.newLocalStatus === 'deleted' ? 'member.access.delete_attempt' : 'member.access.deactivate_attempt',
+      resourceType: 'organization_members',
+      resourceId: input.membershipId,
+      details: { targetUserId: input.authUserId },
+    }));
+  } catch (err) {
+    intentRecorded = false;
+    logger.error('member_revocation_attempt_not_recorded', { membershipId: input.membershipId, error: err });
+  }
 
   // 1. Revoke all active sessions for the REAL auth user id, via the
   // SYSTEM auth DB credential (cross-user operation).
@@ -130,53 +159,77 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
     });
   }
 
-  // 3. Revoke active case-access assignments for the real auth user id.
+  // 3. Case access. Kernel case relationships are only ever effective for an ACTIVE membership: the kernel checks the
+  // membership on every decision, so disabling it above ends every relationship at once, without rewriting any
+  // governed record. This step only counts the relationships that were live, for the revocation report. The count reads the
+  // authority kernel's store, which only the organization's own tenant transaction may read (the system role holds no grant on it),
+  // so it runs there. A platform administrator acting on an organization they are not a member of cannot open that transaction
+  // (the canonical binding requires live membership): the report then says the count was not measured, as null, never as zero.
   try {
-    await withSystemContext(async (_tx) => {
-      const active = await db
-        .select({ id: grievanceCaseAccessAssignments.id })
-        .from(grievanceCaseAccessAssignments)
-        .where(
-          and(
-            eq(grievanceCaseAccessAssignments.userId, input.authUserId),
-            eq(grievanceCaseAccessAssignments.organizationId, input.organizationId),
-            eq(grievanceCaseAccessAssignments.status, 'active'),
-          ),
-        );
-      for (const assignment of active) {
-        await db
-          .update(grievanceCaseAccessAssignments)
-          .set({ status: 'revoked', updatedAt: new Date() })
-          .where(eq(grievanceCaseAccessAssignments.id, assignment.id));
-      }
-      caseAccessRevokedCount = active.length;
+    caseAccessRevokedCount = await withRLSContext({ organizationId: input.organizationId }, async (tx) => {
+      const rows = await tx.execute(sql`
+        SELECT count(*)::int AS n FROM ue_authority_resource_relationships
+         WHERE organization_id = ${input.organizationId}::uuid AND principal_user_id = ${input.authUserId}
+           AND resource_type = 'case' AND status = 'active' AND revoked_at IS NULL
+           AND (expires_at IS NULL OR expires_at > now())`);
+      const list = (Array.isArray(rows) ? rows : (rows as { rows?: { n: number }[] }).rows ?? []) as { n: number }[];
+      return Number(list[0]?.n ?? 0);
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    errors.push(`case_access_revocation_failed: ${message}`);
-    logger.error('case_access_revocation_failed', {
-      authUserId: input.authUserId,
-      organizationId: input.organizationId,
-      error: err,
-    });
+    if (isMembershipRequired(err)) {
+      logger.warn('case_relationship_count_not_measured', {
+        authUserId: input.authUserId,
+        organizationId: input.organizationId,
+        reason: 'The administrator is not a member of the organization, so its tenant transaction cannot be opened.',
+      });
+    } else {
+      const message = err instanceof Error ? err.message : String(err);
+      errors.push(`case_access_revocation_failed: ${message}`);
+      logger.error('case_access_revocation_failed', {
+        authUserId: input.authUserId,
+        organizationId: input.organizationId,
+        error: err,
+      });
+    }
   }
 
   // 4. Persist local membership state — done under SYSTEM_RUNTIME since a
   // platform-admin caller (see app/api/admin/users/[userId]/route.ts) has
   // no ordinary tenant RLS context for an arbitrary target organization.
   try {
-    await withSystemContext(async (_tx) => {
+    // The local state change and the revocation audit commit together; an outcome that records earlier-step
+    // failures is audited as a failure, but the local denial is still applied.
+    await withSystemContext(async (tx) => {
       if (input.newLocalStatus === 'deleted') {
-        await db
+        await tx
           .update(organizationMembers)
           .set({ deletedAt: new Date(), updatedAt: new Date() })
           .where(eq(organizationMembers.id, input.membershipId));
       } else {
-        await db
+        await tx
           .update(organizationMembers)
           .set({ status: 'inactive', updatedAt: new Date() })
           .where(eq(organizationMembers.id, input.membershipId));
       }
+      await persistAtomicAudit(
+        tx as RLSTx,
+        {
+          organizationId: input.organizationId,
+          userId: input.actorUserId,
+          action: input.newLocalStatus === 'deleted' ? 'member.access.delete' : 'member.access.deactivate',
+          resourceType: 'organization_members',
+          resourceId: input.membershipId,
+          details: {
+            targetUserId: input.authUserId,
+            sessionsRevoked,
+            authMembershipDisabled,
+            liveCaseRelationships: caseAccessRevokedCount,
+            attemptRecorded: intentRecorded,
+            incompleteSteps: errors.length > 0 ? errors : undefined,
+          },
+        },
+        errors.length > 0 ? 'failure' : 'success',
+      );
     });
     localStatusUpdated = true;
   } catch (err) {
@@ -201,6 +254,7 @@ export async function revokeMemberAccess(input: RevokeMemberAccessInput): Promis
     authMembershipDisabled,
     caseAccessRevokedCount,
     localStatusUpdated,
+    intentRecorded,
     errors,
   };
 }
@@ -241,6 +295,25 @@ export async function reactivateMemberAccess(
   const errors: string[] = [];
   let authMembershipReenabled = false;
   let localStatusUpdated = false;
+
+  const auditEntry = (action: string, details: Record<string, unknown> = {}) => ({
+    organizationId: input.organizationId,
+    userId: input.actorUserId,
+    action,
+    resourceType: 'organization_members',
+    resourceId: input.membershipId,
+    details: { targetUserId: input.authUserId, ...details },
+  });
+
+  // Reactivation grants authority in two stores that cannot share the audit transaction. The attempt is therefore
+  // made durable first: if it cannot be recorded, nothing is granted.
+  try {
+    await withSystemContext((tx) => persistAtomicAudit(tx as RLSTx, auditEntry('member.access.reactivate_attempt')));
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error('reactivation_attempt_audit_failed', { membershipId: input.membershipId, error: err });
+    return { success: false, authMembershipReenabled, localStatusUpdated, errors: [`audit_unavailable: ${message}`] };
+  }
 
   try {
     const { authOrganizationUsers } = await import('@nzila/db/schema');
@@ -287,6 +360,17 @@ export async function reactivateMemberAccess(
       organizationId: input.organizationId,
       error: err,
     });
+  }
+
+  // The attempt record already exists, so a failure to record the outcome is logged rather than reversing a grant.
+  try {
+    await withSystemContext((tx) => persistAtomicAudit(
+      tx as RLSTx,
+      auditEntry('member.access.reactivate', { errors: errors.length > 0 ? errors : undefined }),
+      errors.length > 0 ? 'failure' : 'success',
+    ));
+  } catch (err) {
+    logger.error('reactivation_outcome_audit_failed', { membershipId: input.membershipId, error: err });
   }
 
   const success = errors.length === 0;

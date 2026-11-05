@@ -23,7 +23,7 @@ export type GovernanceDecisionTrigger = z.infer<typeof governanceDecisionTrigger
 // ─── Assumption ───────────────────────────────────────────────────────────────
 
 export const governanceAssumptionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   assumption: z.string().min(1),
   evidenceRef: z.string().nullable(),
   confidence: z.number().min(0).max(100),
@@ -47,7 +47,7 @@ export type RationaleRejection = z.infer<typeof rationaleRejectionSchema>
 // ─── Accepted Risk ────────────────────────────────────────────────────────────
 
 export const rationaleAcceptedRiskSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   risk: z.string().min(1),
   severity: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
   acceptedBy: z.string().min(1),
@@ -61,7 +61,7 @@ export type RationaleAcceptedRisk = z.infer<typeof rationaleAcceptedRiskSchema>
 // ─── Governance Rationale Record ──────────────────────────────────────────────
 
 export const governanceRationaleSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
 
   // Decision context
@@ -88,7 +88,7 @@ export const governanceRationaleSchema = z.object({
 
   // Linkage
   policyRef: z.string().nullable().describe('Policy or framework this decision implements'),
-  decisionAnalysisRef: z.string().uuid().nullable(),
+  decisionAnalysisRef: z.guid().nullable(),
   releaseRef: z.string().nullable(),
   continuityImplications: z.array(z.string()),
 
@@ -108,8 +108,8 @@ export const governanceRationaleSchema = z.object({
 
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-  supersededBy: z.string().uuid().nullable(),
-  supersedes: z.string().uuid().nullable(),
+  supersededBy: z.guid().nullable(),
+  supersedes: z.guid().nullable(),
 })
 
 export type GovernanceRationale = z.infer<typeof governanceRationaleSchema>
@@ -132,9 +132,9 @@ export const governanceRationaleInputSchema = governanceRationaleSchema.omit({
   supportingEvidenceRefs: z.array(z.string()).optional().default([]),
   continuityImplications: z.array(z.string()).optional().default([]),
   policyRef: z.string().nullable().optional().default(null),
-  decisionAnalysisRef: z.string().uuid().nullable().optional().default(null),
+  decisionAnalysisRef: z.guid().nullable().optional().default(null),
   releaseRef: z.string().nullable().optional().default(null),
-  supersedes: z.string().uuid().nullable().optional().default(null),
+  supersedes: z.guid().nullable().optional().default(null),
   deviation: z.string().optional().default(''),
 })
 
@@ -143,7 +143,7 @@ export type GovernanceRationaleInput = z.input<typeof governanceRationaleInputSc
 // ─── Replay Result ────────────────────────────────────────────────────────────
 
 export const rationaleReplayResultSchema = z.object({
-  rationaleId: z.string().uuid(),
+  rationaleId: z.guid(),
   replayedAt: z.string().datetime(),
   integrityVerified: z.boolean(),
   computedHash: z.string(),

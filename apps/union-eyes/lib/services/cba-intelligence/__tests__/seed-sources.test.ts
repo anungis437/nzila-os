@@ -89,4 +89,18 @@ describe("seed-sources", () => {
     const result = await mod.seedSources();
     expect(result.errors.some((e) => e.includes("string failure"))).toBe(true);
   });
+
+  it("with failFast, the first failure is thrown so a surrounding transaction rolls back the whole seed", async () => {
+    const mod = await import("../seed-sources");
+    for (let i = 0; i < mod.SEED_SOURCES.length; i++) {
+      mocks.selectQueue.push([]);
+    }
+    mocks.dbInsert.mockImplementation(() => ({
+      values: vi.fn(() => {
+        throw new Error("db write failed");
+      }),
+    }));
+
+    await expect(mod.seedSources({ failFast: true })).rejects.toThrow("db write failed");
+  });
 });

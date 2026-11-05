@@ -10,10 +10,11 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
+import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
-const DJANGO = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+const djangoBase = () => (process.env.DJANGO_API_URL ?? process.env.NEXT_PUBLIC_DJANGO_API_URL ?? '').replace(/\/$/, '');
 
 export async function GET(_req: NextRequest) {
   // ── Step 1: Auth session ──────────────────────────────────────────────────────────
@@ -26,31 +27,39 @@ export async function GET(_req: NextRequest) {
     );
   }
 
+  // This route forwards the caller's session token to the backend, so it is a platform operator's diagnostic. It answers statuses only: the
+  // backend's response bodies are not returned to a signed-in user of any organization.
+  if (!(await isPlatformAdminUser(userId))) {
+    return NextResponse.json({ passed: false, message: 'Platform administrator required' }, { status: 403 });
+  }
+
+  // The same backend address every other route resolves; there is no localhost fallback to send a session token to.
+  const DJANGO = djangoBase();
+  if (!DJANGO) {
+    return NextResponse.json({ passed: false, message: 'The Django backend is not configured (DJANGO_API_URL)' }, { status: 503 });
+  }
+
   const token = await getToken();
 
   // ── Step 2: Django health (no auth) ────────────────────────────────────────
   let healthStatus = 0;
-  let healthBody: any = null;
   try {
     const r = await fetch(`${DJANGO}/api/auth_core/health/`, { cache: 'no-store' });
     healthStatus = r.status;
-    healthBody = await r.json();
-  } catch (e) {
-    healthBody = { error: String(e) };
+  } catch {
+    healthStatus = 0;
   }
 
   // ── Step 3: Django /me/ (JWT required) ─────────────────────────────────────
   let meStatus = 0;
-  let meBody: any = null;
   try {
     const r = await fetch(`${DJANGO}/api/auth_core/me/`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store',
     });
     meStatus = r.status;
-    meBody = await r.json();
-  } catch (e) {
-    meBody = { error: String(e) };
+  } catch {
+    meStatus = 0;
   }
 
   return NextResponse.json({
@@ -61,8 +70,8 @@ export async function GET(_req: NextRequest) {
       hasToken: !!token,
     },
     django: {
-      health: { status: healthStatus, body: healthBody },
-      me: { status: meStatus, body: meBody },
+      health: { status: healthStatus },
+      me: { status: meStatus },
     },
   });
 }

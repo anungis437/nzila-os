@@ -88,8 +88,8 @@ export const deadlineRules = pgTable('deadline_rules', {
   escalationDelayDays: integer('escalation_delay_days').notNull().default(0),
   isActive: boolean('is_active').notNull().default(true),
   isSystemRule: boolean('is_system_rule').notNull().default(false),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================================================
@@ -105,81 +105,27 @@ export const deadlines = pgTable('claim_deadlines', {
   deadlineRuleId: uuid('deadline_rule_id'),
   deadlineName: varchar('deadline_name', { length: 255 }).notNull(),
   deadlineType: varchar('deadline_type', { length: 100 }).notNull(),
-  eventDate: timestamp('event_date').notNull(),
-  originalDeadline: timestamp('original_deadline').notNull(),
-  dueDate: timestamp('due_date').notNull(), // Alias for currentDeadline
-  completedAt: timestamp('completed_at'),
+  eventDate: timestamp('event_date', { withTimezone: true }).notNull(),
+  originalDeadline: timestamp('original_deadline', { withTimezone: true }).notNull(),
+  dueDate: timestamp('due_date', { withTimezone: true }).notNull(), // Alias for currentDeadline
+  completedAt: timestamp('completed_at', { withTimezone: true }),
   status: deadlineStatusEnum('status').notNull().default('pending'),
   priority: deadlinePriorityEnum('priority').notNull().default('medium'),
   extensionCount: integer('extension_count').notNull().default(0),
   totalExtensionDays: integer('total_extension_days').notNull().default(0),
-  lastExtensionDate: timestamp('last_extension_date'),
+  lastExtensionDate: timestamp('last_extension_date', { withTimezone: true }),
   lastExtensionReason: text('last_extension_reason'),
   completedBy: varchar('completed_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
   completionNotes: text('completion_notes'),
   isOverdue: boolean('is_overdue').notNull().default(false),
   daysUntilDue: integer('days_until_due'),
   daysOverdue: integer('days_overdue').notNull().default(0),
-  escalatedAt: timestamp('escalated_at'),
+  escalatedAt: timestamp('escalated_at', { withTimezone: true }),
   escalatedTo: varchar('escalated_to', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
   alertCount: integer('alert_count').notNull().default(0),
-  lastAlertSent: timestamp('last_alert_sent'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
-
-// ============================================================================
-// DEADLINE EXTENSIONS TABLE
-// ============================================================================
-
-export const deadlineExtensions = pgTable('deadline_extensions', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  deadlineId: uuid('deadline_id').notNull(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  requestedBy: varchar('requested_by', { length: 255 }).notNull(), // User ID - matches users.userId VARCHAR(255)
-  requestedAt: timestamp('requested_at').notNull().defaultNow(),
-  requestedDays: integer('requested_days').notNull(),
-  requestReason: text('request_reason').notNull(),
-  status: extensionStatusEnum('status').notNull().default('pending'),
-  requiresApproval: boolean('requires_approval').notNull().default(true),
-  approvedBy: varchar('approved_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
-  approvalDecisionAt: timestamp('approval_decision_at'),
-  approvalNotes: text('approval_notes'),
-  newDeadline: timestamp('new_deadline'),
-  daysGranted: integer('days_granted'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
-
-// ============================================================================
-// DEADLINE ALERTS TABLE
-// ============================================================================
-
-export const deadlineAlerts = pgTable('deadline_alerts', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  deadlineId: uuid('deadline_id').notNull(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  alertType: varchar('alert_type', { length: 100 }).notNull(),
-  alertSeverity: alertSeverityEnum('alert_severity').notNull(),
-  alertTrigger: varchar('alert_trigger', { length: 100 }).notNull(),
-  recipientId: varchar('recipient_id', { length: 255 }).notNull(), // User ID - matches users.userId VARCHAR(255)
-  recipientRole: varchar('recipient_role', { length: 100 }),
-  deliveryMethod: deliveryMethodEnum('delivery_method').notNull(),
-  sentAt: timestamp('sent_at').notNull().defaultNow(),
-  deliveredAt: timestamp('delivered_at'),
-  deliveryStatus: deliveryStatusEnum('delivery_status').notNull().default('pending'),
-  deliveryError: text('delivery_error'),
-  viewedAt: timestamp('viewed_at'),
-  acknowledgedAt: timestamp('acknowledged_at'),
-  actionTaken: varchar('action_taken', { length: 255 }),
-  actionTakenAt: timestamp('action_taken_at'),
-  subject: varchar('subject', { length: 500 }),
-  message: text('message'),
-  actionUrl: varchar('action_url', { length: 500 }),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  lastAlertSent: timestamp('last_alert_sent', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================================================
@@ -197,7 +143,7 @@ export const holidays = pgTable('holidays', {
   isRecurring: boolean('is_recurring').notNull().default(false),
   appliesTo: varchar('applies_to', { length: 100 }).notNull().default('all'),
   isObserved: boolean('is_observed').notNull().default(true),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================================================
@@ -208,26 +154,10 @@ export const deadlineRulesRelations = relations(deadlineRules, ({ many }) => ({
   deadlines: many(deadlines),
 }));
 
-export const deadlinesRelations = relations(deadlines, ({ one, many }) => ({
+export const deadlinesRelations = relations(deadlines, ({ one }) => ({
   deadlineRule: one(deadlineRules, {
     fields: [deadlines.deadlineRuleId],
     references: [deadlineRules.id],
-  }),
-  extensions: many(deadlineExtensions),
-  alerts: many(deadlineAlerts),
-}));
-
-export const deadlineExtensionsRelations = relations(deadlineExtensions, ({ one }) => ({
-  deadline: one(deadlines, {
-    fields: [deadlineExtensions.deadlineId],
-    references: [deadlines.id],
-  }),
-}));
-
-export const deadlineAlertsRelations = relations(deadlineAlerts, ({ one }) => ({
-  deadline: one(deadlines, {
-    fields: [deadlineAlerts.deadlineId],
-    references: [deadlines.id],
   }),
 }));
 

@@ -8,7 +8,7 @@
  * - Sector comparisons
  */
 
-import { pgTable, uuid, varchar, text, timestamp, integer, numeric, boolean } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, integer, numeric, boolean, jsonb } from "drizzle-orm/pg-core";
 
 // =============================================================================
 // ENUMS
@@ -196,7 +196,7 @@ export const clcSyncLog = pgTable("clc_sync_log", {
   
   // Error Handling
   errorMessage: text("error_message"),
-  errorDetails: text("error_details"),
+  errorDetails: jsonb("error_details"),
   
   // Parameters
   parameters: text("parameters"), // JSON string

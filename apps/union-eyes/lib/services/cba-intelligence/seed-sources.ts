@@ -303,7 +303,11 @@ export const SEED_SOURCES: SeedSource[] = [
 // Seed function
 // ---------------------------------------------------------------------------
 
-export async function seedSources(): Promise<{
+/**
+ * With failFast the first failure is thrown instead of collected. The audited route runs the whole seed in one transaction, where a
+ * swallowed statement error would leave the transaction aborted and report a partial result as if it had worked.
+ */
+export async function seedSources(options: { failFast?: boolean } = {}): Promise<{
   created: number;
   skipped: number;
   errors: string[];
@@ -345,6 +349,7 @@ export async function seedSources(): Promise<{
       created++;
       logger.info("Seeded CBA source", { name: seed.name, adapter: seed.adapterKey });
     } catch (error) {
+      if (options.failFast) throw error;
       const msg = error instanceof Error ? error.message : String(error);
       errors.push(`Failed to seed ${seed.name}: ${msg}`);
       logger.error("Failed to seed source", { name: seed.name, error: msg });

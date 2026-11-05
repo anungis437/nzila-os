@@ -15,10 +15,10 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
-import { useToast } from '@/lib/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
+import { readApiError } from '@/lib/client/api-envelope';
 
 interface ReportDeductionIssueProps {
-  userId: string;
   deductionId?: string;
   onSubmitted?: () => void;
 }
@@ -31,7 +31,7 @@ const ISSUE_TYPES = [
   { value: 'other', label: 'Other — Something else' },
 ] as const;
 
-export default function ReportDeductionIssue({ userId, deductionId, onSubmitted }: ReportDeductionIssueProps) {
+export default function ReportDeductionIssue({ deductionId, onSubmitted }: ReportDeductionIssueProps) {
   const [issueType, setIssueType] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
@@ -56,8 +56,8 @@ export default function ReportDeductionIssue({ userId, deductionId, onSubmitted 
       const response = await fetch('/api/dues/issues', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        // The server knows who is reporting; the request names nobody.
         body: JSON.stringify({
-          userId,
           issueType,
           subject,
           description,
@@ -67,7 +67,7 @@ export default function ReportDeductionIssue({ userId, deductionId, onSubmitted 
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit issue');
+        throw new Error(await readApiError(response, 'Failed to submit your issue. Please try again.'));
       }
 
       setSubmitted(true);
@@ -77,11 +77,12 @@ export default function ReportDeductionIssue({ userId, deductionId, onSubmitted 
       });
 
       onSubmitted?.();
-    } catch (_error) {
-      setError('Failed to submit your issue. Please try again.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to submit your issue. Please try again.';
+      setError(message);
       toast({
         title: 'Error',
-        description: 'Failed to submit deduction issue.',
+        description: message,
         variant: 'destructive',
       });
     } finally {

@@ -15,19 +15,22 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from '@nzila/platform-auth/entra/client';
 import { CANONICAL_ORGANIZATION_AUTHORITY } from '@/lib/auth/organization-authority';
+import { apiErrorMessage, isRecord } from '@/lib/client/api-envelope';
+import { isOrganizationType, type OrganizationType } from '@/types/organization';
 
 // Organization type definitions
 export interface Organization {
   id: string;
   name: string;
   slug: string;
-  type: 'platform' | 'congress' | 'federation' | 'union' | 'local' | 'district' | 'chapter';
+  type: OrganizationType;
   parentId: string | null;
   sector?: string;
   jurisdiction?: string;
   description?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  /** Null where the database has no date: never the time the organization was read. */
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 export interface OrganizationMember {
@@ -36,7 +39,7 @@ export interface OrganizationMember {
   userId: string;
   role: string;
   isPrimary: boolean;
-  joinedAt: string;
+  joinedAt: string | null;
 }
 
 export interface OrganizationContextValue {
@@ -60,40 +63,72 @@ export interface OrganizationContextValue {
   loadOrganizationTree: () => Promise<void>;
 }
 
+/** What /api/users/me/organizations answers: the person's organizations and memberships, and under the canonical authority which organization is active. */
+interface OrganizationsAnswer {
+  organizations?: unknown;
+  memberships?: OrganizationMember[];
+  organizationAuthority?: string;
+  activeOrganizationId?: string | null;
+}
+
+/** What the hierarchy routes answer (the path of an organization, the whole tree): organizations in `data`, and under the canonical authority the authority that made them. */
+interface HierarchyAnswer {
+  data?: unknown;
+  organizationAuthority?: string;
+}
+
+/** What /api/organizations/switch answers. */
+interface SwitchAnswer {
+  success?: boolean;
+  organization?: unknown;
+  organizationAuthority?: string;
+  activeOrganizationId?: string | null;
+}
+
+const textOrNull = (value: unknown): string | null => (typeof value === 'string' ? value : null);
+
+/**
+ * An organization as the organization routes send it (lib/organizations/organization-wire.ts). What does not name an id, a name, a slug and one of the organization types is not an
+ * organization: nothing is filled in for it, and a date the database does not have stays null.
+ */
 function normalizeOrganization(raw: unknown): Organization | null {
-  if (!raw || typeof raw !== 'object') {
-    return null;
-  }
-
-  const value = raw as Record<string, unknown>;
-  const id = typeof value.id === 'string' ? value.id : null;
-  const name = typeof value.name === 'string' ? value.name : null;
-  const slug = typeof value.slug === 'string' ? value.slug : null;
-
-  if (!id || !name || !slug) {
-    return null;
-  }
-
-  const type = value.type ?? value.organization_type;
-  const parentId = value.parentId ?? value.parent_id;
-  const createdAt = value.createdAt ?? value.created_at;
-  const updatedAt = value.updatedAt ?? value.updated_at;
-  const sector = value.sector ?? (Array.isArray(value.sectors) ? value.sectors[0] : undefined);
-  const jurisdiction = value.jurisdiction ?? value.province_territory;
-
+  if (!isRecord(raw)) return null;
+  const { id, name, slug, type } = raw;
+  if (typeof id !== 'string' || typeof name !== 'string' || typeof slug !== 'string' || !isOrganizationType(type)) return null;
   return {
     id,
     name,
     slug,
-    type: (typeof type === 'string' ? type : 'union') as Organization['type'],
-    parentId: typeof parentId === 'string' ? parentId : null,
-    sector: typeof sector === 'string' ? sector : undefined,
-    jurisdiction: typeof jurisdiction === 'string' ? jurisdiction : undefined,
-    description: typeof value.description === 'string' ? value.description : null,
-    createdAt: typeof createdAt === 'string' ? createdAt : new Date().toISOString(),
-    updatedAt: typeof updatedAt === 'string' ? updatedAt : new Date().toISOString(),
+    type,
+    parentId: textOrNull(raw.parentId),
+    sector: textOrNull(raw.sector) ?? undefined,
+    jurisdiction: textOrNull(raw.jurisdiction) ?? undefined,
+    description: textOrNull(raw.description),
+    createdAt: textOrNull(raw.createdAt),
+    updatedAt: textOrNull(raw.updatedAt),
   };
 }
+
+/** The organization record of /api/organizations/{id}, which names its columns in snake_case. */
+function organizationFromRecord(raw: unknown): Organization | null {
+  if (!isRecord(raw)) return null;
+  return normalizeOrganization({
+    id: raw.id,
+    name: raw.name,
+    slug: raw.slug,
+    type: raw.organization_type,
+    parentId: raw.parent_id,
+    sector: Array.isArray(raw.sectors) ? raw.sectors[0] : undefined,
+    jurisdiction: raw.province_territory,
+    description: raw.description,
+    createdAt: raw.created_at,
+    updatedAt: raw.updated_at,
+  });
+}
+
+/** The organizations a list holds; an entry that is not an organization is left out. */
+const organizationsIn = (list: unknown): Organization[] =>
+  (Array.isArray(list) ? list : []).map(normalizeOrganization).filter((org): org is Organization => org !== null);
 
 const OrganizationContext = createContext<OrganizationContextValue | undefined>(undefined);
 
@@ -126,12 +161,12 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
         throw new Error(`Failed to load canonical organization path: ${response.status}`);
       }
       if (response.ok) {
-        const result = await response.json();
+        const result = (await response.json()) as HierarchyAnswer;
         if (canonical && (result.organizationAuthority !== CANONICAL_ORGANIZATION_AUTHORITY ||
           !Array.isArray(result.data))) {
           throw new Error('Organization hierarchy response lacks canonical authority');
         }
-        setOrganizationPath(result.data || []);
+        setOrganizationPath(organizationsIn(result.data));
       }
     } catch (err) {
       if (canonical) throw err;
@@ -186,24 +221,27 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
         throw new Error(`Failed to load organizations: ${response.status}`);
       }
 
-      const data = await response.json();
-      let organizations = (data.organizations || [])
-        .map((org: unknown) => normalizeOrganization(org))
-        .filter((org: Organization | null): org is Organization => org !== null);
-      const memberships = data.memberships || [];
-      setIsCanonicalAuthority(data.organizationAuthority === CANONICAL_ORGANIZATION_AUTHORITY);
+      const data = (await response.json()) as OrganizationsAnswer;
+      if (!Array.isArray(data.organizations) || !Array.isArray(data.memberships)) {
+        throw new Error('Unexpected organizations response');
+      }
+      let organizations = organizationsIn(data.organizations);
+      const memberships = data.memberships;
+      const canonical = data.organizationAuthority === CANONICAL_ORGANIZATION_AUTHORITY;
+      setIsCanonicalAuthority(canonical);
 
-      if (data.organizationAuthority === CANONICAL_ORGANIZATION_AUTHORITY) {
-        if (data.activeOrganizationId !== null && typeof data.activeOrganizationId !== 'string') {
+      if (canonical) {
+        const activeOrganizationId = data.activeOrganizationId;
+        if (activeOrganizationId !== null && typeof activeOrganizationId !== 'string') {
           throw new Error('Canonical organization response has no authoritative selection');
         }
-        const active = organizations.find((org: Organization) => org.id === data.activeOrganizationId);
-        if (data.activeOrganizationId !== null && !active) {
+        const active = organizations.find((org) => org.id === activeOrganizationId);
+        if (activeOrganizationId !== null && !active) {
           throw new Error('Canonical organization selection is not in the authorized list');
         }
         setUserOrganizations(organizations);
         setUserMemberships(memberships);
-        setOrganizationId(data.activeOrganizationId);
+        setOrganizationId(activeOrganizationId);
         setOrganization(active ?? null);
         setOrganizationPath([]);
         setOrganizationTree([]);
@@ -215,16 +253,16 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       // organizations directly by membership IDs.
       if (organizations.length === 0 && memberships.length > 0) {
         const resolvedOrgs: Organization[] = [];
-        for (const membership of memberships as OrganizationMember[]) {
+        for (const membership of memberships) {
           try {
             const orgResponse = await fetch(`/api/organizations/${membership.organizationId}`, {
               credentials: 'include',
               signal: abortSignal || controller.signal,
             });
             if (orgResponse.ok) {
-              const orgResult = await orgResponse.json();
-              const org = normalizeOrganization(orgResult.data);
-              if (org?.id && !resolvedOrgs.some((existing) => existing.id === org.id)) {
+              const orgResult = (await orgResponse.json()) as { data?: unknown };
+              const org = organizationFromRecord(orgResult.data);
+              if (org && !resolvedOrgs.some((existing) => existing.id === org.id)) {
                 resolvedOrgs.push(org);
               }
             }
@@ -246,74 +284,50 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
           });
 
           if (profileResponse.ok) {
-            const profileResult = await profileResponse.json();
+            const profileResult = (await profileResponse.json()) as { organization?: unknown };
             const profileOrg = normalizeOrganization(profileResult.organization);
             if (profileOrg) {
               organizations = [profileOrg];
             }
           }
         } catch {
-          // Fall through to synthetic fallback below.
+          // An organization that cannot be resolved is reported below, never invented from a membership.
         }
-      }
-
-      // Final safety net: never leave org list empty when memberships exist.
-      // This prevents UI dead-ends where users see "No organization" despite
-      // having a valid membership row.
-      if (organizations.length === 0 && memberships.length > 0) {
-        const syntheticOrgs: Organization[] = [];
-        for (const membership of memberships as OrganizationMember[]) {
-          if (!syntheticOrgs.some((existing) => existing.id === membership.organizationId)) {
-            syntheticOrgs.push({
-              id: membership.organizationId,
-              name: `Organization ${membership.organizationId.slice(0, 8)}`,
-              slug: membership.organizationId,
-              type: 'union',
-              parentId: null,
-              sector: undefined,
-              jurisdiction: undefined,
-              description: null,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            });
-          }
-        }
-        organizations = syntheticOrgs;
       }
 
       setUserOrganizations(organizations);
       setUserMemberships(memberships);
 
       // If user has organizations, select the primary one or first available
-      if (organizations && organizations.length > 0) {
+      if (organizations.length > 0) {
         // Check if there's a selected organization in cookie (stored as UUID)
         const cookies = document.cookie.split(';');
         const selectedOrgCookie = cookies.find(c => c.trim().startsWith('selected_organization_id='));
         let selectedOrgId = selectedOrgCookie?.split('=')[1];
 
         // Validate that user has access to the selected organization (by UUID)
-        const hasAccess = organizations.some((org: Organization) => org.id === selectedOrgId);
+        const hasAccess = organizations.some((org) => org.id === selectedOrgId);
         
         if (!selectedOrgId || !hasAccess) {
           // Find primary organization
-          const primaryMembership = data.memberships?.find((m: OrganizationMember) => m.isPrimary);
+          const primaryMembership = memberships.find((m) => m.isPrimary);
           
           if (primaryMembership) {
             // Membership organizationId is the UUID, matches organizations.id directly
-            const primaryOrg = organizations.find((o: Organization) => 
+            const primaryOrg = organizations.find((o) => 
               o.id === primaryMembership.organizationId
             );
-            selectedOrgId = primaryOrg?.id || organizations[0]?.id || null;
+            selectedOrgId = primaryOrg?.id || organizations[0]?.id || undefined;
           } else {
             // Default to first organization
-            selectedOrgId = organizations[0]?.id || null;
+            selectedOrgId = organizations[0]?.id || undefined;
           }
         }
 
         setOrganizationId(selectedOrgId || null);
 
         // Persist to cookie so server-side getCurrentUser() can resolve the org
-        // (Clerk satellite mode doesn't provide orgId, and this is the initial
+        // (the auth provider doesn't supply orgId here, and this is the initial
         // auto-selection — switchOrganization sets the cookie on explicit switch)
         if (selectedOrgId) {
           document.cookie = `selected_org_id=${selectedOrgId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
@@ -321,7 +335,7 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
         }
 
         // Load organization details (by UUID)
-        const org = organizations.find((o: Organization) => o.id === selectedOrgId);
+        const org = organizations.find((o) => o.id === selectedOrgId);
         if (org) {
           setOrganization(org);
           // Load organization path inline to avoid dependency issues
@@ -330,16 +344,15 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
             signal: abortSignal || controller.signal,
           });
           if (pathResponse.ok) {
-            const pathResult = await pathResponse.json();
-            setOrganizationPath(pathResult.data || []);
+            const pathResult = (await pathResponse.json()) as HierarchyAnswer;
+            setOrganizationPath(organizationsIn(pathResult.data));
           }
         } else if (selectedOrgId) {
           await loadOrganizationPath(selectedOrgId);
         }
-      } else if (memberships && memberships.length > 0) {
-        // User has memberships but no organizations found
-        // This can happen if organization records don't exist in DB
-        void data;
+      } else if (memberships.length > 0) {
+        // The person has memberships but none of their organizations could be read (the organization records may not exist).
+        // The screen says so; no organization is made up from a membership.
         setError('Organization data not found. Please contact support.');
       }
     } catch (err) {
@@ -366,12 +379,12 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
         throw new Error(`Failed to load canonical organization tree: ${response.status}`);
       }
       if (response.ok) {
-        const result = await response.json();
+        const result = (await response.json()) as HierarchyAnswer;
         if (isCanonicalAuthority && (result.organizationAuthority !== CANONICAL_ORGANIZATION_AUTHORITY ||
           !Array.isArray(result.data))) {
           throw new Error('Organization tree response lacks canonical authority');
         }
-        setOrganizationTree(result.data || []);
+        setOrganizationTree(organizationsIn(result.data));
       }
     } catch (err) {
       if (isCanonicalAuthority) {
@@ -403,26 +416,28 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to switch organization' }));
-        throw new Error(errorData.error || 'Access denied');
+        const errorData: unknown = await response.json().catch(() => null);
+        throw new Error(apiErrorMessage(errorData, errorData === null ? 'Failed to switch organization' : 'Access denied'));
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as SwitchAnswer;
       
       if (!data.success) {
         throw new Error('Organization switch validation failed');
       }
 
+      const switched = normalizeOrganization(data.organization);
+
       if (data.organizationAuthority === CANONICAL_ORGANIZATION_AUTHORITY) {
-        const active = normalizeOrganization(data.organization);
-        if (data.activeOrganizationId !== newOrganizationId || active?.id !== newOrganizationId) {
+        const activeOrganizationId = data.activeOrganizationId;
+        if (typeof activeOrganizationId !== 'string' || activeOrganizationId !== newOrganizationId || switched?.id !== newOrganizationId) {
           throw new Error('Canonical organization switch returned a different selection');
         }
-        setOrganizationId(data.activeOrganizationId);
-        setOrganization(active);
+        setOrganizationId(activeOrganizationId);
+        setOrganization(switched);
         setOrganizationPath([]);
         setOrganizationTree([]);
-        await loadOrganizationPath(data.activeOrganizationId, true);
+        await loadOrganizationPath(activeOrganizationId, true);
         window.location.reload();
         return;
       }
@@ -435,15 +450,15 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       // Legacy cookie — deprecated, read-only fallback in middleware
       document.cookie = `selected_tenant_id=${newOrganizationId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict${secureAttr}`;
       // Server-side org resolution reads slug cookie
-      if (data.organization?.slug) {
-        document.cookie = `active-organization=${data.organization.slug}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Strict${secureAttr}`; // 30 days
+      if (switched?.slug) {
+        document.cookie = `active-organization=${switched.slug}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Strict${secureAttr}`; // 30 days
       }
 
       // Update state
       setOrganizationId(newOrganizationId);
       
-      if (data.organization) {
-        setOrganization(data.organization);
+      if (switched) {
+        setOrganization(switched);
         await loadOrganizationPath(newOrganizationId);
       }
 

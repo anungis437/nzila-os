@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Dues'], summary: "Get a member's dues payment receipt by ledger entry ID" },
   },

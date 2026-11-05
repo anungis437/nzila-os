@@ -2,16 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  withRoleAuth: vi.fn(),
   checkRateLimit: vi.fn(),
   getPeerBenchmarks: vi.fn(),
-  eventBus: { emit: vi.fn() },
-  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  record: vi.fn(),
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock('@/lib/role-middleware', () => ({
-  withRoleAuth: m.withRoleAuth,
-}));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/utils/smart-onboarding', () => ({
   getPeerBenchmarks: m.getPeerBenchmarks,
 }));
@@ -20,32 +17,24 @@ vi.mock('@/lib/rate-limiter', () => ({
   RATE_LIMITS: { ONBOARDING: 'onboarding' },
   createRateLimitHeaders: () => ({}),
 }));
-vi.mock('@/lib/events', () => ({
-  eventBus: m.eventBus,
-  AppEvents: { AUDIT_LOG: 'AUDIT_LOG' },
-}));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
-vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: {
-    MISSING_REQUIRED_FIELD: 'MISSING_REQUIRED_FIELD',
-    INTERNAL_ERROR: 'INTERNAL_ERROR',
-  },
-  standardErrorResponse: (code: string, msg: string, err?: unknown) => ({
-    status: 400,
-    json: async () => ({ code, message: msg, error: err }),
-  }),
-}));
+// The read audit moved from an in-process event to the canonical audit log (B87); the writer has its own coverage.
+vi.mock('@/lib/utils/onboarding-read-audit', () => ({ recordOnboardingRead: m.record }));
+
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
 async function loadRoute() {
   return import('../onboarding/peer-benchmarks/route');
 }
 
+const get = (suffix = '') => new NextRequest(`http://localhost/api/onboarding/peer-benchmarks${suffix}`);
+
 describe('onboarding/peer-benchmarks route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withRoleAuth.mockImplementation((role: string, handler: (req: NextRequest, ctx: any) => Promise<any>) =>
-      (req: NextRequest, ctx: any = { userId: 'u1', organizationId: 'org1' }) => handler(req, ctx)
-    );
+    resetCaller();
+    caller.role = 'member';
+    caller.organizationId = 'org1';
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: null });
     m.getPeerBenchmarks.mockResolvedValue([
       { category: 'membership', metric: 'total_members', benchmark: 500 },
@@ -53,44 +42,55 @@ describe('onboarding/peer-benchmarks route', () => {
     ]);
   });
 
-  it('GET requires member role', async () => {
+  it('GET requires member role: it declares the floor, a member passes it, and a caller who is not signed in reads nothing', async () => {
     const { GET } = await loadRoute();
-    const response = await GET(
-      new NextRequest('http://localhost/api/onboarding/peer-benchmarks?organizationId=org1'),
-      { userId: 'u1', organizationId: null },
-    );
-    
-    expect(m.withRoleAuth).toHaveBeenCalled();
+    expect(declared).toEqual([expect.objectContaining({ auth: { minRole: 'member' } })]);
+
+    expect((await GET(get('?organizationId=org1'))).status).toBe(200);
+
+    caller.userId = null;
+    const response = await GET(get('?organizationId=org1'));
+    expect(response.status).toBe(401);
+    expect(m.getPeerBenchmarks).toHaveBeenCalledTimes(1);
   });
 
-  it('GET requires organizationId query parameter', async () => {
+  // DEF-0B9-ASM-PEER-BENCHMARKS-AND-CLAUSE-SUGGESTIONS-TAKE-THE-TARGET-ORGANIZATION-FROM-THE-REQUEST-AND-NEVER-COMPARE-IT-TO-THE-CALLER
+  it('GET compares the caller\u2019s own organization when none is named', async () => {
     const { GET } = await loadRoute();
-    const response = await GET(
-      new NextRequest('http://localhost/api/onboarding/peer-benchmarks'),
-      { userId: 'u1', organizationId: 'org1' },
-    );
+    const response = await GET(get());
+    expect(response.status).toBe(200);
+    expect(m.getPeerBenchmarks).toHaveBeenCalledWith('org1');
+  });
 
-    expect(response.status).toBeGreaterThanOrEqual(400);
+  it('GET answers 404 and reads nothing for another organization named in the query', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(get('?organizationId=someone-elses'));
+    expect(response.status).toBe(404);
+    expect(m.getPeerBenchmarks).not.toHaveBeenCalled();
+    expect(m.record).not.toHaveBeenCalled();
+  });
+
+  it('GET refuses a caller with no organization context', async () => {
+    const { GET } = await loadRoute();
+    caller.organizationId = null;
+    const response = await GET(get());
+    expect(response.status).toBe(403);
+    expect(m.getPeerBenchmarks).not.toHaveBeenCalled();
   });
 
   it('GET returns 429 when rate limit exceeded', async () => {
     const { GET } = await loadRoute();
     m.checkRateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 60 });
 
-    const response = await GET(
-      new NextRequest('http://localhost/api/onboarding/peer-benchmarks?organizationId=org1'),
-      { userId: 'u1', organizationId: 'org1' },
-    );
+    const response = await GET(get('?organizationId=org1'));
 
     expect(response.status).toBe(429);
+    expect(m.getPeerBenchmarks).not.toHaveBeenCalled();
   });
 
   it('GET fetches and returns peer benchmarks', async () => {
     const { GET } = await loadRoute();
-    const response = await GET(
-      new NextRequest('http://localhost/api/onboarding/peer-benchmarks?organizationId=org1'),
-      { userId: 'u1', organizationId: 'org1' },
-    );
+    const response = await GET(get('?organizationId=org1'));
 
     expect(response.status).toBe(200);
     expect(m.getPeerBenchmarks).toHaveBeenCalledWith('org1');
@@ -99,26 +99,14 @@ describe('onboarding/peer-benchmarks route', () => {
 
   it('GET emits audit event', async () => {
     const { GET } = await loadRoute();
-    await GET(
-      new NextRequest('http://localhost/api/onboarding/peer-benchmarks?organizationId=org1'),
-      { userId: 'u1', organizationId: 'org1' },
-    );
+    await GET(get('?organizationId=org1'));
 
-    expect(m.eventBus.emit).toHaveBeenCalledWith(
-      'AUDIT_LOG',
-      expect.objectContaining({
-        action: 'peer_benchmarks',
-        resource: 'onboarding',
-      })
-    );
+    expect(m.record).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u1', organizationId: 'org1' }), 'onboarding.peer_benchmarks', expect.anything());
   });
 
   it('GET returns benchmarks with metadata', async () => {
     const { GET } = await loadRoute();
-    const response = await GET(
-      new NextRequest('http://localhost/api/onboarding/peer-benchmarks?organizationId=org1'),
-      { userId: 'u1', organizationId: 'org1' },
-    );
+    const response = await GET(get('?organizationId=org1'));
 
     const json = await response.json();
     expect(json.success).toBe(true);
@@ -132,10 +120,7 @@ describe('onboarding/peer-benchmarks route', () => {
     const { GET } = await loadRoute();
     m.getPeerBenchmarks.mockResolvedValueOnce([]);
 
-    const response = await GET(
-      new NextRequest('http://localhost/api/onboarding/peer-benchmarks?organizationId=org1'),
-      { userId: 'u1', organizationId: 'org1' },
-    );
+    const response = await GET(get('?organizationId=org1'));
 
     const json = await response.json();
     expect(json.success).toBe(true);
@@ -146,12 +131,10 @@ describe('onboarding/peer-benchmarks route', () => {
     const { GET } = await loadRoute();
     m.getPeerBenchmarks.mockRejectedValueOnce(new Error('Service failed'));
 
-    const response = await GET(
-      new NextRequest('http://localhost/api/onboarding/peer-benchmarks?organizationId=org1'),
-      { userId: 'u1', organizationId: 'org1' },
-    );
+    const response = await GET(get('?organizationId=org1'));
 
     expect(response.status).toBe(500);
     expect(m.logger.error).toHaveBeenCalled();
+    expect(m.record).not.toHaveBeenCalled();
   });
 });

@@ -29,6 +29,17 @@ import { v4 as uuidv4 } from 'uuid';
 // Types
 // ============================================================================
 
+/** A run that cannot proceed for a reason the caller can act on (a period, rule or cost that is not there or not open), as opposed to a fault. */
+export class AllocationRunError extends Error {
+  constructor(
+    readonly kind: 'not_found' | 'conflict',
+    message: string,
+  ) {
+    super(message);
+    this.name = 'AllocationRunError';
+  }
+}
+
 export interface CreateAllocationRuleInput {
   organizationId: string;
   name: string;
@@ -181,32 +192,33 @@ async function verifyAllocationRuleOwnership(
  * 
  * In simulation mode (isSimulation=true), no ledger entries or chargebacks
  * are created. The run is stored as status='simulated' for preview.
+ *
+ * Every statement goes through the ambient handle, so the caller runs this inside the organization's tenant transaction
+ * (withRLSContext, or a route with rlsOrgContext); the period, rule and cost ledger are also filtered by the organization here.
  */
 export async function runAllocation(
   input: RunAllocationInput,
 ): Promise<AllocationResult> {
-  // Validate period is not closed (unless simulation)
-  if (!input.isSimulation) {
-    const [period] = await db
-      .select()
-      .from(billingPeriods)
-      .where(eq(billingPeriods.id, input.billingPeriodId))
-      .limit(1);
+  // The period must be the caller organization's own, for a simulation as well as for a posted run: the run stores a reference to it.
+  const [period] = await db
+    .select()
+    .from(billingPeriods)
+    .where(and(eq(billingPeriods.id, input.billingPeriodId), eq(billingPeriods.organizationId, input.organizationId)))
+    .limit(1);
 
-    if (!period) throw new Error(`Billing period ${input.billingPeriodId} not found`);
-    if (period.isClosed) throw new Error(`Billing period ${period.label} is closed`);
-  }
+  if (!period) throw new AllocationRunError('not_found', `Billing period ${input.billingPeriodId} not found`);
+  if (!input.isSimulation && period.isClosed) throw new AllocationRunError('conflict', `Billing period ${period.label} is closed`);
 
   // ROUND 50 SECURITY FIX: reject rules that don't belong to the caller's org
   // before resolving/applying them — see verifyAllocationRuleOwnership above.
   const ownsRule = await verifyAllocationRuleOwnership(input.ruleId, input.organizationId);
   if (!ownsRule) {
-    throw new Error(`Allocation rule ${input.ruleId} not found for this organization`);
+    throw new AllocationRunError('not_found', `Allocation rule ${input.ruleId} not found for this organization`);
   }
 
   // Get effective rule version
   const ruleVersion = await getActiveRuleVersion(input.ruleId);
-  if (!ruleVersion) throw new Error(`No active version for rule ${input.ruleId}`);
+  if (!ruleVersion) throw new AllocationRunError('conflict', `No active version for rule ${input.ruleId}`);
 
   // Calculate total unallocated cost for the period
   const [costResult] = await db
@@ -224,7 +236,7 @@ export async function runAllocation(
 
   const totalCostCents = toCents(costResult.total);
   if (totalCostCents <= 0 && !input.isSimulation) {
-    throw new Error('No unallocated costs for this period');
+    throw new AllocationRunError('conflict', 'No unallocated costs for this period');
   }
 
   // Calculate allocation basis totals
@@ -464,28 +476,6 @@ function getBasisValueForMethod(local: LocalBasis, method: string): number {
 // ============================================================================
 // Queries
 // ============================================================================
-
-export async function getAllocationRun(runId: string) {
-  const [run] = await db
-    .select()
-    .from(allocationRuns)
-    .where(eq(allocationRuns.id, runId))
-    .limit(1);
-
-  if (!run) return null;
-
-  const lines = await db
-    .select()
-    .from(allocationRunLines)
-    .where(eq(allocationRunLines.runId, runId));
-
-  const snapshots = await db
-    .select()
-    .from(allocationBasisSnapshots)
-    .where(eq(allocationBasisSnapshots.runId, runId));
-
-  return { ...run, lines, snapshots };
-}
 
 export async function getChargebacks(params: {
   organizationId: string;

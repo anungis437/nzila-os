@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,10 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Download, FileText } from 'lucide-react';
+import { AlertTriangle, FileText } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import { useToast } from '@/lib/hooks/use-toast';
+import { envelopeRows, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 
+// What GET /api/dues/payment-history sends for each posted, pending, reversed or voided payment of the signed-in member. The period and the
+// method are null when the ledger entry does not state them.
 interface PaymentHistoryItem {
   id: string;
   date: string;
@@ -24,10 +28,9 @@ interface PaymentHistoryItem {
   lateFeeAmount: number;
   totalAmount: number;
   status: 'completed' | 'pending' | 'failed' | 'refunded';
-  paymentMethod: string;
-  periodStart: string;
-  periodEnd: string;
-  receiptUrl?: string;
+  paymentMethod: string | null;
+  periodStart: string | null;
+  periodEnd: string | null;
 }
 
 interface PaymentHistoryProps {
@@ -36,55 +39,32 @@ interface PaymentHistoryProps {
 
 export default function PaymentHistory({ userId }: PaymentHistoryProps) {
   const t = useTranslations('dashboard.dues.history');
+  const tCommon = useTranslations('common');
+  const tErrors = useTranslations('errors');
+  const locale = useLocale();
   const [payments, setPayments] = useState<PaymentHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadPaymentHistory = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
     try {
-      const response = await fetch(`/api/dues/payment-history?userId=${userId}`);
-      if (!response.ok) throw new Error('Failed to load payment history');
-      const json = await response.json();
-      const items = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
-      setPayments(items);
-    } catch (_error) {
+      // The server knows who is asking; the request names nobody. The route answers { success, data: { data: rows } }.
+      const response = await fetch('/api/dues/payment-history');
+      if (!response.ok) throw new Error(await readApiError(response, tErrors('loadingError')));
+      setPayments(envelopeRows(await response.json()) as PaymentHistoryItem[]);
+    } catch (error) {
       setPayments([]);
+      setLoadError(error instanceof Error ? error.message : tErrors('loadingError'));
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [tErrors]);
 
   useEffect(() => {
     loadPaymentHistory();
-  }, [loadPaymentHistory]);
-
-  const handleDownloadReceipt = async (paymentId: string) => {
-    try {
-      const response = await fetch(`/api/dues/receipt/${paymentId}`);
-      if (!response.ok) throw new Error('Failed to download receipt');
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `dues-receipt-${paymentId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      toast({
-        title: t('successTitle'),
-        description: t('downloadSuccess'),
-      });
-    } catch (_error) {
-toast({
-        title: t('errorTitle'),
-        description: t('downloadFailed'),
-        variant: 'destructive',
-      });
-    }
-  };
+  }, [loadPaymentHistory, userId]);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -104,6 +84,20 @@ toast({
 
   if (loading) {
     return <div className="text-center p-12">{t('loading')}</div>;
+  }
+
+  if (loadError !== null) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <AlertTriangle className="mx-auto h-10 w-10 text-muted-foreground mb-4" />
+          <p role="alert" className="text-muted-foreground">{loadError}</p>
+          <Button variant="outline" className="mt-4" onClick={() => void loadPaymentHistory()}>
+            {tCommon('retry')}
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -136,10 +130,12 @@ toast({
               {payments.map((payment) => (
                 <TableRow key={payment.id}>
                   <TableCell>
-                    {new Date(payment.date).toLocaleDateString()}
+                    {formatDay(payment.date, undefined, 'numeric')}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {new Date(payment.periodStart).toLocaleDateString()} - {new Date(payment.periodEnd).toLocaleDateString()}
+                    {payment.periodStart !== null && payment.periodEnd !== null
+                      ? `${formatDay(payment.periodStart, undefined, 'numeric')} - ${formatDay(payment.periodEnd, undefined, 'numeric')}`
+                      : '—'}
                   </TableCell>
                   <TableCell>{formatCurrency(payment.amount)}</TableCell>
                   <TableCell>
@@ -149,17 +145,15 @@ toast({
                     {formatCurrency(payment.totalAmount)}
                   </TableCell>
                   <TableCell className="text-sm">
-                    {payment.paymentMethod}
+                    {payment.paymentMethod ?? '—'}
                   </TableCell>
                   <TableCell>{getStatusBadge(payment.status)}</TableCell>
                   <TableCell>
                     {payment.status === 'completed' && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDownloadReceipt(payment.id)}
-                      >
-                        <Download className="h-4 w-4" />
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/${locale}/dashboard/dues/receipts/${payment.id}`} aria-label={t('columns.receipt')}>
+                          <FileText className="h-4 w-4" />
+                        </Link>
                       </Button>
                     )}
                   </TableCell>

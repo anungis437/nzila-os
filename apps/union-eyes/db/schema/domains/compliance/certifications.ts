@@ -28,8 +28,8 @@ export const certificationTypes = pgTable("certification_types", {
   description: text("description"),
   applicationUrl: text("application_url"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Staff member certifications
@@ -67,8 +67,8 @@ export const staffCertifications = pgTable("staff_certifications", {
   compliant: boolean("compliant").notNull().default(true),
   complianceNotes: text("compliance_notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Continuing education tracking
@@ -97,7 +97,7 @@ export const continuingEducation = pgTable("continuing_education", {
   applicablePeriodStart: date("applicable_period_start"),
   applicablePeriodEnd: date("applicable_period_end"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // License renewals tracking
@@ -129,8 +129,8 @@ export const licenseRenewals = pgTable("license_renewals", {
   // Notes
   notes: text("notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Certification expiry alerts
@@ -158,7 +158,7 @@ export const certificationAlerts = pgTable("certification_alerts", {
   resolvedBy: varchar("resolved_by", { length: 255 }),
   resolutionNotes: text("resolution_notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Certification compliance reports
@@ -192,7 +192,7 @@ export const certificationComplianceReports = pgTable("certification_compliance_
   reportFormat: varchar("report_format", { length: 20 }).default("pdf"), // "pdf", "excel", "json"
   reportUrl: text("report_url"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Certification audit log
@@ -218,6 +218,6 @@ export const certificationAuditLog = pgTable("certification_audit_log", {
   metadata: jsonb("metadata"),
   ipAddress: varchar("ip_address", { length: 45 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

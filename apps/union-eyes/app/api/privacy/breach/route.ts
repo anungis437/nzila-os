@@ -1,25 +1,38 @@
 /**
- * CRUD collection route for dataClassificationPolicy
+ * Privacy incident (breach) management — NOT_IMPLEMENTED
+ *
+ * This route was previously bound to generic CRUD over
+ * `dataClassificationPolicy`, i.e. platform-wide classification doctrine, not
+ * privacy-incident records. A breach-management request could therefore read
+ * or mutate unrelated platform policy while appearing to be an incident
+ * workflow. It now fails closed.
+ *
+ * Capability: UE-PRIVACY-INCIDENT-WORKFLOW (state: NOT_IMPLEMENTED)
+ * Platform classification policy lives at /api/compliance/data-classification-policy.
+ *
+ * A real implementation requires dedicated incident storage, an accountable
+ * decision-maker, jurisdiction/applicable-law determination, human legal
+ * review and a distinct "dispatch" step. No notification is sent from here.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { dataClassificationPolicy } from '@/db/schema';
+import { withApi } from '@/lib/api/framework';
+import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';
 
-// round 52: data_classification_policy has no organizationId column, so
-// `orgScoped: true` is a no-op here (crud-factory's org filter only
-// applies when the table actually has that column) — this is a genuine
-// platform-wide policy (Employer Data Firewall doctrine), not per-org
-// state. writeRole must be a PLATFORM_ELEVATED_ROLES role (never
-// tenant-self-service-assignable, see lib/api-auth-guard.ts) so an
-// ordinary org 'admin' cannot mutate platform-wide compliance doctrine —
-// matches the round-51 feature_flags fix (withAdminAuth -> withSystemAdminAuth).
-const { GET, POST } = crudRoutes({
-  table: dataClassificationPolicy,
-  pk: 'id',
-  tags: ["Compliance"],
-  orgScoped: true,
-  readRole: 'member',
-  writeRole: 'compliance_manager',
-});
-export { GET, POST };
+const MESSAGE =
+  'Privacy incident management is not implemented. Capability UE-PRIVACY-INCIDENT-WORKFLOW is NOT_IMPLEMENTED; ' +
+  'this endpoint no longer exposes classification-policy records. Refer incidents to your Privacy Officer.';
+
+export const GET = withApi(
+  { auth: { required: true }, openapi: { tags: ['Compliance'], summary: 'Privacy incidents — NOT_IMPLEMENTED (HTTP 501)' } },
+  async () => {
+    throw ApiError.notImplemented(MESSAGE);
+  },
+);
+
+export const POST = withApi(
+  { auth: { required: true }, openapi: { tags: ['Compliance'], summary: 'Privacy incidents — NOT_IMPLEMENTED (HTTP 501)' } },
+  async () => {
+    throw ApiError.notImplemented(MESSAGE);
+  },
+);

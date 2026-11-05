@@ -23,13 +23,13 @@ export type PlaybookName = z.infer<typeof PlaybookName>
 
 export const CommandSchema = z.object({
   /** Caller-supplied correlation ID (UUID v4) */
-  correlation_id: z.string().uuid(),
+  correlation_id: z.guid(),
   /** Which playbook to dispatch */
   playbook: PlaybookName,
   /** If true, no mutations (issues, PRs, deploys) */
   dry_run: z.boolean().default(true),
   /** Freeform args passed through to the workflow */
-  args: z.record(z.string(), z.unknown()).default({}),
+  args: z.record(z.string(), z.unknown()).prefault({}),
   /** Who requested this (WhatsApp number, API key ID, etc.) */
   requested_by: z.string().min(1),
 })

@@ -7,6 +7,7 @@
 import { db } from '@/db';
 import { _organizations } from '@/db/schema';
 import { sql } from 'drizzle-orm';
+import { sqlIn } from '@/lib/db/sql-in';
 
 // =====================================================================================
 // TYPES
@@ -65,7 +66,7 @@ export async function generateRemittanceCSV(
     FROM per_capita_remittances r
     JOIN organizations from_org ON r.from_organization_id = from_org.id
     JOIN organizations to_org ON r.to_organization_id = to_org.id
-    WHERE r.id = ANY(${remittanceIds})
+    WHERE ${sqlIn(sql`r.id`, remittanceIds)}
     ORDER BY r.due_date, from_org.name`
   );
 
@@ -152,7 +153,7 @@ export async function generateRemittanceXML(
     FROM per_capita_remittances r
     JOIN organizations from_org ON r.from_organization_id = from_org.id
     JOIN organizations to_org ON r.to_organization_id = to_org.id
-    WHERE r.id = ANY(${remittanceIds})
+    WHERE ${sqlIn(sql`r.id`, remittanceIds)}
     ORDER BY r.due_date, from_org.name`
   );
 

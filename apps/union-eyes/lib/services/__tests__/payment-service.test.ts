@@ -2,10 +2,9 @@
  * Payment Service — Unit Tests
  *
  * Tests:
- *   - createCheckoutSession: validation, Stripe delegation
+ *   - createCheckoutSession: the payer check in the caller's organization, the processor called outside the transaction, Stripe delegation
  *   - handlePaymentSuccess: DB update, notification
  *   - handlePaymentFailure: retry metadata, notification
- *   - generateReceipt: validation, receipt number format
  *
  * Tier 1 — Security & Money
  */
@@ -15,13 +14,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockDbSelect = vi.fn();
 const mockDbUpdate = vi.fn();
+// The where-clause of every select, in the order the statements ran.
+const wheres: unknown[] = [];
 
-vi.mock('@/db', () => ({
-  db: {
-    select: (...a: any[]) => mockDbSelect(...a),
-    update: (...a: any[]) => mockDbUpdate(...a),
-  },
-}));
+const rls = vi.hoisted(() => ({ contexts: [] as unknown[], open: false }));
 
 vi.mock('@/db/schema/domains/finance/dues', () => ({
   duesTransactions: {
@@ -35,30 +31,37 @@ vi.mock('@/db/schema/domains/finance/dues', () => ({
 }));
 
 vi.mock('@/db/schema-organizations', () => ({
-  organizationMembers: { id: 'id', name: 'name', email: 'email' },
-  organizations: { id: 'id', name: 'name' },
+  organizationMembers: { id: 'id', name: 'name', email: 'email', userId: 'userId', organizationId: 'organizationId' },
 }));
 
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((...args: any[]) => ({ type: 'eq', args })),
   and: vi.fn((...args: any[]) => ({ type: 'and', args })),
+  inArray: vi.fn((...args: any[]) => ({ type: 'inArray', args })),
+  sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({ type: 'sql', text: strings.join('?'), values }),
 }));
+
+const audit = vi.hoisted(() => ({ tx: vi.fn(), op: vi.fn(async (_o: unknown, fn: () => Promise<unknown>) => fn()) }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit.tx }));
+vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: audit.op }));
+vi.mock('@/lib/db/with-rls-context', () => {
+  const tx = { select: (...a: any[]) => mockDbSelect(...a), update: (...a: any[]) => mockDbUpdate(...a) };
+  return {
+    withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(tx),
+    withRLSContext: async (context: unknown, fn: (tx: unknown) => Promise<unknown>) => {
+      rls.contexts.push(context);
+      rls.open = true;
+      try {
+        return await fn(tx);
+      } finally {
+        rls.open = false;
+      }
+    },
+  };
+});
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
-}));
-
-vi.mock('@react-pdf/renderer', () => ({
-  Document: 'Document',
-  Page: 'Page',
-  StyleSheet: { create: vi.fn((s: any) => s) },
-  Text: 'Text',
-  pdf: vi.fn(() => ({ toBuffer: vi.fn().mockResolvedValue(Buffer.from('fake-pdf')) })),
-}));
-
-vi.mock('react', () => ({
-  default: { createElement: vi.fn((...args: any[]) => ({ type: args[0], props: args[1] })) },
-  createElement: vi.fn((...args: any[]) => ({ type: args[0], props: args[1] })),
 }));
 
 const mockStripeCheckoutCreate = vi.fn();
@@ -81,262 +84,227 @@ vi.mock('@/lib/decimal-safe', () => ({
 
 // ── Imports ──────────────────────────────────────────────────────────────────
 
-import { PaymentService } from '../payment-service';
+import { PaymentService, PaymentAuthorityError } from '../payment-service';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function selectChain(rows: Record<string, unknown>[]) {
   return {
     from: vi.fn().mockReturnValue({
-      where: vi.fn().mockReturnValue({
-        limit: vi.fn().mockResolvedValue(rows),
-      }),
-      innerJoin: vi.fn().mockReturnValue({
-        innerJoin: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue(rows),
-          }),
-        }),
+      where: vi.fn((condition: unknown) => {
+        wheres.push(condition);
+        return { limit: vi.fn().mockResolvedValue(rows) };
       }),
     }),
   };
 }
 
-function updateChain() {
+function updateChain(returned: Record<string, unknown>[] = [{ id: 'txn-1' }]) {
   return {
     set: vi.fn().mockReturnValue({
-      where: vi.fn().mockResolvedValue(undefined),
+      where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue(returned) }),
     }),
   };
 }
 
 // ─── createCheckoutSession ──────────────────────────────────────────────────
 
+const actor = { userId: 'user-payer', organizationId: 'org-1' };
+const base = { returnUrl: 'https://example.com/return', cancelUrl: 'https://example.com/cancel', actor };
+const pendingTxn = {
+  id: 'txn-1', status: 'pending', totalAmount: '100.00', organizationId: 'org-1',
+  duesAmount: '85.00', copeAmount: '10.00', pacAmount: '3.00', strikeFundAmount: '2.00', memberId: 'mem-1',
+};
+const payer = { id: 'mem-1', name: 'J. Worker', email: 'jw@union.org' };
+
 describe('PaymentService.createCheckoutSession', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    rls.contexts.length = 0;
+    rls.open = false;
+    wheres.length = 0;
+    audit.op.mockImplementation(async (_o: unknown, fn: () => Promise<unknown>) => fn());
   });
 
-  it('throws if transaction not found', async () => {
+  it('reports an unknown transaction as not found', async () => {
     mockDbSelect.mockReturnValue(selectChain([]));
-
-    await expect(
-      PaymentService.createCheckoutSession({
-        transactionId: 'txn-404',
-        returnUrl: 'https://example.com/return',
-        cancelUrl: 'https://example.com/cancel',
-      }),
-    ).rejects.toThrow('Transaction not found: txn-404');
+    await expect(PaymentService.createCheckoutSession({ ...base, transactionId: 'txn-404' })).rejects.toMatchObject({ code: 'NOT_FOUND' });
   });
 
-  it('throws if transaction status is not pending/overdue', async () => {
-    // First call: transaction query
-    mockDbSelect.mockReturnValueOnce(
-      selectChain([
-        { id: 'txn-1', status: 'paid', totalAmount: '50.00', memberId: 'mem-1' },
-      ]),
-    );
-
-    await expect(
-      PaymentService.createCheckoutSession({
-        transactionId: 'txn-1',
-        returnUrl: 'https://x.com/r',
-        cancelUrl: 'https://x.com/c',
-      }),
-    ).rejects.toThrow('Transaction status is paid');
+  it('reports a transaction that is not the caller\'s as not found, and creates nothing at the processor', async () => {
+    mockDbSelect.mockReturnValueOnce(selectChain([pendingTxn])).mockReturnValueOnce(selectChain([]));
+    await expect(PaymentService.createCheckoutSession({ ...base, transactionId: 'txn-1' })).rejects.toBeInstanceOf(PaymentAuthorityError);
+    expect(mockStripeCheckoutCreate).not.toHaveBeenCalled();
+    expect(audit.op).not.toHaveBeenCalled();
   });
 
-  it('throws for unsupported PayPal processor', async () => {
-    mockDbSelect
-      .mockReturnValueOnce(
-        selectChain([
-          {
-            id: 'txn-1', status: 'pending', totalAmount: '100.00',
-            duesAmount: '85.00', copeAmount: '10.00', pacAmount: '3.00',
-            strikeFundAmount: '2.00', memberId: 'mem-1',
-          },
-        ]),
-      )
-      .mockReturnValueOnce(
-        selectChain([{ name: 'J. Worker', email: 'jw@union.org' }]),
-      );
+  it('refuses a transaction that is not payable', async () => {
+    mockDbSelect.mockReturnValueOnce(selectChain([{ ...pendingTxn, status: 'paid' }])).mockReturnValueOnce(selectChain([payer]));
+    await expect(PaymentService.createCheckoutSession({ ...base, transactionId: 'txn-1' })).rejects.toMatchObject({ code: 'CONFLICT' });
+  });
 
+  it('does not tell a caller who is not the payer whether the transaction is payable', async () => {
+    mockDbSelect.mockReturnValueOnce(selectChain([{ ...pendingTxn, status: 'paid' }])).mockReturnValueOnce(selectChain([]));
+    await expect(PaymentService.createCheckoutSession({ ...base, transactionId: 'txn-1' })).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+
+  it('throws for the unsupported PayPal processor', async () => {
+    mockDbSelect.mockReturnValueOnce(selectChain([pendingTxn])).mockReturnValueOnce(selectChain([payer]));
     await expect(
-      PaymentService.createCheckoutSession({
-        transactionId: 'txn-1',
-        returnUrl: 'https://x.com/r',
-        cancelUrl: 'https://x.com/c',
-        processorType: 'paypal',
-      }),
+      PaymentService.createCheckoutSession({ ...base, transactionId: 'txn-1', processorType: 'paypal' }),
     ).rejects.toThrow('PayPal checkout not yet implemented');
   });
 
-  it('creates Stripe checkout session on valid pending transaction', async () => {
-    mockDbSelect
-      .mockReturnValueOnce(
-        selectChain([
-          {
-            id: 'txn-1', status: 'pending', totalAmount: '100.00',
-            duesAmount: '85.00', copeAmount: '10.00', pacAmount: '3.00',
-            strikeFundAmount: '2.00', memberId: 'mem-1',
-          },
-        ]),
-      )
-      .mockReturnValueOnce(
-        selectChain([{ name: 'J. Worker', email: 'jw@union.org' }]),
-      );
+  it('creates the Stripe session for the payer and records the operation first', async () => {
+    mockDbSelect.mockReturnValueOnce(selectChain([pendingTxn])).mockReturnValueOnce(selectChain([payer]));
+    mockStripeCheckoutCreate.mockResolvedValue({ id: 'cs_test_123', url: 'https://checkout.stripe.com/pay/cs_test_123' });
 
-    mockStripeCheckoutCreate.mockResolvedValue({
-      id: 'cs_test_123',
-      url: 'https://checkout.stripe.com/pay/cs_test_123',
-    });
-
-    const result = await PaymentService.createCheckoutSession({
-      transactionId: 'txn-1',
-      returnUrl: 'https://example.com/success',
-      cancelUrl: 'https://example.com/cancel',
-    });
+    const result = await PaymentService.createCheckoutSession({ ...base, transactionId: 'txn-1' });
 
     expect(result.sessionId).toBe('cs_test_123');
-    expect(result.checkoutUrl).toBe('https://checkout.stripe.com/pay/cs_test_123');
     expect(result.transactionId).toBe('txn-1');
-    expect(mockStripeCheckoutCreate).toHaveBeenCalledOnce();
+    expect(mockStripeCheckoutCreate).toHaveBeenCalledWith(expect.objectContaining({ customer_email: 'jw@union.org', client_reference_id: 'txn-1' }));
+    expect(audit.op).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'dues.checkout.create', organizationId: 'org-1', userId: 'user-payer', resourceId: 'txn-1' }),
+      expect.any(Function),
+    );
+  });
+
+  it('reads the transaction and the payer in the caller\'s organization, filtered by it, and by the payer\'s user', async () => {
+    mockDbSelect.mockReturnValueOnce(selectChain([pendingTxn])).mockReturnValueOnce(selectChain([payer]));
+    mockStripeCheckoutCreate.mockResolvedValue({ id: 'cs_test_123', url: 'https://checkout.stripe.com/pay/cs_test_123' });
+
+    await PaymentService.createCheckoutSession({ ...base, transactionId: 'txn-1' });
+
+    expect(rls.contexts).toEqual([{ organizationId: 'org-1' }]);
+    expect(wheres[0]).toEqual({
+      type: 'and',
+      args: [
+        { type: 'eq', args: ['id', 'txn-1'] },
+        { type: 'eq', args: ['organizationId', 'org-1'] },
+      ],
+    });
+    const payerWhere = wheres[1] as { args: Array<{ args: unknown[] }> };
+    expect(payerWhere.args.map((condition) => condition.args[1])).toEqual(['mem-1', 'user-payer', 'org-1']);
+    expect((payerWhere.args[0].args[0] as { text: string }).text).toContain('::text');
+  });
+
+  it('does not hold the database transaction while the processor is called', async () => {
+    mockDbSelect.mockReturnValueOnce(selectChain([pendingTxn])).mockReturnValueOnce(selectChain([payer]));
+    let openDuringProcessorCall: boolean | undefined;
+    mockStripeCheckoutCreate.mockImplementation(async () => {
+      openDuringProcessorCall = rls.open;
+      return { id: 'cs_test_123', url: 'https://checkout.stripe.com/pay/cs_test_123' };
+    });
+
+    await PaymentService.createCheckoutSession({ ...base, transactionId: 'txn-1' });
+
+    expect(openDuringProcessorCall).toBe(false);
   });
 });
 
 // ─── handlePaymentSuccess ────────────────────────────────────────────────────
 
 describe('PaymentService.handlePaymentSuccess', () => {
+  const pay = { transactionId: 'txn-1', processorPaymentId: 'pi_test_123', processorType: 'stripe' as const, amount: '100.00' };
   beforeEach(() => {
     vi.clearAllMocks();
+    audit.tx.mockResolvedValue(undefined);
   });
 
-  it('updates transaction to paid and sends confirmation', async () => {
+  it('marks a payable transaction paid, audits it on the same transaction, and sends the confirmation', async () => {
+    mockDbSelect.mockReturnValue(selectChain([{ id: 'txn-1', status: 'pending', totalAmount: '100.00', organizationId: 'org-1' }]));
     mockDbUpdate.mockReturnValue(updateChain());
 
-    await PaymentService.handlePaymentSuccess({
-      transactionId: 'txn-1',
-      processorPaymentId: 'pi_test_123',
-      processorType: 'stripe',
-      amount: '100.00',
-    });
+    await PaymentService.handlePaymentSuccess(pay);
 
     expect(mockDbUpdate).toHaveBeenCalledOnce();
-    // Notification should be sent
-    const { sendPaymentConfirmation } = await import(
-      '@/lib/services/dues-notifications'
+    expect(audit.tx).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'dues.payment.received', organizationId: 'org-1', userId: 'system:payment-stripe' }),
     );
+    const { sendPaymentConfirmation } = await import('@/lib/services/dues-notifications');
     expect(sendPaymentConfirmation).toHaveBeenCalledWith('txn-1');
+  });
+
+  it('refuses a payment whose amount is not the amount on record', async () => {
+    mockDbSelect.mockReturnValue(selectChain([{ id: 'txn-1', status: 'pending', totalAmount: '100.00', organizationId: 'org-1' }]));
+    await expect(PaymentService.handlePaymentSuccess({ ...pay, amount: '1.00' })).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(mockDbUpdate).not.toHaveBeenCalled();
+    expect(audit.tx).not.toHaveBeenCalled();
+  });
+
+  it('treats a replay of the same payment as a no-op, with no second audit or confirmation', async () => {
+    mockDbSelect.mockReturnValue(selectChain([{ id: 'txn-1', status: 'paid', processorPaymentId: 'pi_test_123', totalAmount: '100.00', organizationId: 'org-1' }]));
+    await PaymentService.handlePaymentSuccess(pay);
+    expect(mockDbUpdate).not.toHaveBeenCalled();
+    expect(audit.tx).not.toHaveBeenCalled();
+    const { sendPaymentConfirmation } = await import('@/lib/services/dues-notifications');
+    expect(sendPaymentConfirmation).not.toHaveBeenCalled();
+  });
+
+  it('does not let a different payment overwrite an already-paid transaction', async () => {
+    mockDbSelect.mockReturnValue(selectChain([{ id: 'txn-1', status: 'paid', processorPaymentId: 'pi_other', totalAmount: '100.00', organizationId: 'org-1' }]));
+    await expect(PaymentService.handlePaymentSuccess(pay)).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(mockDbUpdate).not.toHaveBeenCalled();
+  });
+
+  it('is a conflict with no audit when the transaction stopped being payable in the meantime', async () => {
+    mockDbSelect.mockReturnValue(selectChain([{ id: 'txn-1', status: 'pending', totalAmount: '100.00', organizationId: 'org-1' }]));
+    mockDbUpdate.mockReturnValue(updateChain([]));
+    await expect(PaymentService.handlePaymentSuccess(pay)).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(audit.tx).not.toHaveBeenCalled();
+  });
+
+  it('does not report the payment as processed when its audit cannot be written', async () => {
+    mockDbSelect.mockReturnValue(selectChain([{ id: 'txn-1', status: 'pending', totalAmount: '100.00', organizationId: 'org-1' }]));
+    mockDbUpdate.mockReturnValue(updateChain());
+    audit.tx.mockRejectedValue(new Error('audit down'));
+    await expect(PaymentService.handlePaymentSuccess(pay)).rejects.toThrow('audit down');
+    const { sendPaymentConfirmation } = await import('@/lib/services/dues-notifications');
+    expect(sendPaymentConfirmation).not.toHaveBeenCalled();
   });
 });
 
 // ─── handlePaymentFailure ────────────────────────────────────────────────────
 
 describe('PaymentService.handlePaymentFailure', () => {
+  const failure = { transactionId: 'txn-1', processorType: 'stripe' as const, errorMessage: 'Card declined', errorCode: 'card_declined' };
   beforeEach(() => {
     vi.clearAllMocks();
+    audit.tx.mockResolvedValue(undefined);
   });
 
-  it('increments failure count and keeps status pending', async () => {
-    mockDbSelect.mockReturnValue(
-      selectChain([
-        {
-          id: 'txn-1', status: 'pending', metadata: { failureCount: 1 },
-        },
-      ]),
-    );
+  it('increments the failure count, keeps the transaction payable and audits it', async () => {
+    mockDbSelect.mockReturnValue(selectChain([{ id: 'txn-1', status: 'pending', organizationId: 'org-1', metadata: { failureCount: 1 } }]));
     mockDbUpdate.mockReturnValue(updateChain());
 
-    await PaymentService.handlePaymentFailure({
-      transactionId: 'txn-1',
-      processorType: 'stripe',
-      errorMessage: 'Card declined',
-      errorCode: 'card_declined',
-    });
+    await PaymentService.handlePaymentFailure(failure);
 
-    expect(mockDbUpdate).toHaveBeenCalledOnce();
-    const { sendPaymentFailure } = await import(
-      '@/lib/services/dues-notifications'
+    expect(audit.tx).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'dues.payment.failed', details: expect.objectContaining({ failureCount: 2 }) }),
     );
+    const { sendPaymentFailure } = await import('@/lib/services/dues-notifications');
     expect(sendPaymentFailure).toHaveBeenCalledWith('txn-1', 'Card declined', false);
   });
 
-  it('throws if transaction not found', async () => {
+  it('never undoes a payment: a late failure notice for a paid transaction is refused', async () => {
+    mockDbSelect.mockReturnValue(selectChain([{ id: 'txn-1', status: 'paid', organizationId: 'org-1', metadata: {} }]));
+    await expect(PaymentService.handlePaymentFailure(failure)).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(mockDbUpdate).not.toHaveBeenCalled();
+    expect(audit.tx).not.toHaveBeenCalled();
+  });
+
+  it('is a conflict with no audit when the transaction stopped being payable in the meantime', async () => {
+    mockDbSelect.mockReturnValue(selectChain([{ id: 'txn-1', status: 'pending', organizationId: 'org-1', metadata: {} }]));
+    mockDbUpdate.mockReturnValue(updateChain([]));
+    await expect(PaymentService.handlePaymentFailure(failure)).rejects.toMatchObject({ code: 'CONFLICT' });
+    expect(audit.tx).not.toHaveBeenCalled();
+  });
+
+  it('is not found for an unknown transaction', async () => {
     mockDbSelect.mockReturnValue(selectChain([]));
-
-    await expect(
-      PaymentService.handlePaymentFailure({
-        transactionId: 'txn-404',
-        processorType: 'stripe',
-        errorMessage: 'Not found',
-      }),
-    ).rejects.toThrow('Transaction not found: txn-404');
-  });
-});
-
-// ─── generateReceipt ─────────────────────────────────────────────────────────
-
-describe('PaymentService.generateReceipt', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('throws if transaction not found', async () => {
-    mockDbSelect.mockReturnValue(selectChain([]));
-
-    await expect(
-      PaymentService.generateReceipt('txn-404'),
-    ).rejects.toThrow('Transaction not found: txn-404');
-  });
-
-  it('throws if transaction is not paid', async () => {
-    mockDbSelect.mockReturnValue(
-      selectChain([
-        {
-          transaction: { id: 'txn-1', status: 'pending', totalAmount: '50.00' },
-          memberName: 'J Worker',
-          memberEmail: 'jw@union.org',
-          organizationName: 'CUPE Local 123',
-        },
-      ]),
-    );
-
-    await expect(
-      PaymentService.generateReceipt('txn-1'),
-    ).rejects.toThrow('Transaction not paid: txn-1');
-  });
-});
-
-// ─── getTransactionBySessionId ───────────────────────────────────────────────
-
-describe('PaymentService.getTransactionBySessionId', () => {
-  beforeEach(() => { vi.clearAllMocks(); });
-
-  it('returns matching transaction by stripeSessionId in metadata', async () => {
-    const txns = [
-      { id: 'txn-1', processorType: 'stripe', metadata: { stripeSessionId: 'cs_abc' } },
-      { id: 'txn-2', processorType: 'stripe', metadata: { stripeSessionId: 'cs_xyz' } },
-    ];
-    mockDbSelect.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(txns),
-      }),
-    });
-
-    const result = await PaymentService.getTransactionBySessionId('cs_abc');
-    expect(result).toMatchObject({ id: 'txn-1' });
-  });
-
-  it('returns null when no transaction matches session ID', async () => {
-    mockDbSelect.mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([
-          { id: 'txn-1', processorType: 'stripe', metadata: { stripeSessionId: 'cs_other' } },
-        ]),
-      }),
-    });
-
-    const result = await PaymentService.getTransactionBySessionId('cs_missing');
-    expect(result).toBeNull();
+    await expect(PaymentService.handlePaymentFailure({ ...failure, transactionId: 'txn-404' })).rejects.toMatchObject({ code: 'NOT_FOUND' });
   });
 });

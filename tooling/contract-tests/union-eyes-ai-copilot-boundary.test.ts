@@ -21,15 +21,24 @@ function read(path: string): string {
   return readFileSync(path, 'utf8');
 }
 
+/** One exported handler: from its `export const NAME =` to the next export, so a gate on the GET of the same file cannot stand in for the POST's. */
+function handler(source: string, name: 'POST' | 'GET' | 'PATCH'): string {
+  const start = source.indexOf(`export const ${name} =`);
+  expect(start).toBeGreaterThan(-1);
+  const next = source.indexOf('\nexport const ', start + 1);
+  return next === -1 ? source.slice(start) : source.slice(start, next);
+}
+
 describe('UnionEyes AI copilot boundary contract', () => {
   it('keeps copilot access steward-gated, feature-gated, entitled, and safety-checked', () => {
-    const source = read(ROUTE_PATH);
+    const post = handler(read(ROUTE_PATH), 'POST');
 
-    expect(source).toContain("withRoleAuth('steward'");
-    expect(source).toContain('guardAiFeature(AI_FEATURES.STEWARD_COPILOT');
-    expect(source).toContain("requireEntitlement(context.organizationId!, 'ai_advanced_insights')");
-    expect(source).toContain("enforceAISafety({ origin: 'copilot-query'");
-    expect(source).toContain("dataClass: 'internal'");
+    // The wrapper enforces the role and the entitlement before the handler runs.
+    expect(post).toContain("auth: { minRole: 'steward' }");
+    expect(post).toContain("entitlement: 'ai_advanced_insights'");
+    expect(post).toContain('guardAiFeature(AI_FEATURES.STEWARD_COPILOT');
+    expect(post).toContain("enforceAISafety({ origin: 'copilot-query'");
+    expect(post).toContain("dataClass: 'internal'");
   });
 
   it('keeps copilot output advisory and audit referenced', () => {
@@ -46,7 +55,9 @@ describe('UnionEyes AI copilot boundary contract', () => {
 
     expect(source).toContain('trace: buildOrgAiTrace(organizationId)');
     expect(source).toContain('profileKey: UE_PROFILES.STEWARD_COPILOT');
-    expect(source).toContain("dataClass: 'internal'");
+    // Grievance case content must retain its sensitive classification at the gateway.
+    expect(source).toContain("dataClass: toGatewayDataClass('grievance_legal')");
+    expect(source).not.toContain("dataClass: 'internal'");
     expect(source).toContain('auditAiInteraction');
     expect(source).toContain("outcome: 'pending'");
     expect(source).toContain('humanApproved: outcome ===');
@@ -64,9 +75,10 @@ describe('UnionEyes AI copilot boundary contract', () => {
     expect(service).not.toContain('addNotificationJob');
     expect(service).not.toContain('addReportJob');
 
-    expect(sessionRoute).toContain("withRoleAuth('steward'");
-    expect(sessionRoute).toContain('guardAiFeature(AI_FEATURES.STEWARD_COPILOT');
-    expect(sessionRoute).toContain("requireEntitlement(context.organizationId!, 'ai_advanced_insights')");
+    const sessionPatch = handler(sessionRoute, 'PATCH');
+    expect(sessionPatch).toContain("auth: { minRole: 'steward' }");
+    expect(sessionPatch).toContain("entitlement: 'ai_advanced_insights'");
+    expect(sessionPatch).toContain('guardAiFeature(AI_FEATURES.STEWARD_COPILOT');
     expect(sessionRoute).toContain('recordCopilotOutcome');
     expect(service).toContain('eq(aiCopilotSessions.organizationId, organizationId)');
   });

@@ -35,8 +35,8 @@ export const uploadRequestSchema = z.object({
   fileName: z.string().min(1).max(512),
   fileSizeBytes: z.number().int().positive(),
   mimeType: z.string(),
-  creatorId: z.string().uuid(),
-  orgId: z.string().uuid(),
+  creatorId: z.guid(),
+  orgId: z.guid(),
   title: z.string().min(1).max(255),
   genre: z.string().max(100).optional(),
 })

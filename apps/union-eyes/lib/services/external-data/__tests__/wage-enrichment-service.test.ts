@@ -10,6 +10,10 @@ const mocks = vi.hoisted(() => ({
   mockValues: vi.fn(),
   mockUpdate: vi.fn(),
   mockSet: vi.fn(),
+  // The nested transaction (a savepoint) of the system transaction: it runs its work on the same statement stubs
+  mockTransaction: vi.fn(),
+  // How many system transactions are open right now: a provider call made while one is open would hold it for the length of a network call
+  systemDepth: { value: 0 },
   mockGetWageData: vi.fn(),
   mockGetMedianHourlyWage: vi.fn(),
   mockGetUnionDensity: vi.fn(),
@@ -27,13 +31,19 @@ vi.mock('@/db/db', () => ({
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: vi.fn((fn: (tx: unknown) => Promise<unknown>) =>
-    fn({
-      select: mocks.mockSelect,
-      insert: mocks.mockInsert,
-      update: mocks.mockUpdate,
-    }),
-  ),
+  withSystemContext: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => {
+    mocks.systemDepth.value++;
+    try {
+      return await fn({
+        select: mocks.mockSelect,
+        insert: mocks.mockInsert,
+        update: mocks.mockUpdate,
+        transaction: mocks.mockTransaction,
+      });
+    } finally {
+      mocks.systemDepth.value--;
+    }
+  }),
 }));
 
 vi.mock('@/db/schema', () => ({
@@ -91,6 +101,9 @@ describe('WageEnrichmentService', () => {
     mocks.mockValues.mockResolvedValue(undefined);
     mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
     mocks.mockSet.mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
+    mocks.mockTransaction.mockImplementation(async (work: (savepoint: unknown) => Promise<unknown>) =>
+      work({ select: mocks.mockSelect, insert: mocks.mockInsert, update: mocks.mockUpdate }));
+    mocks.systemDepth.value = 0;
 
     service = new WageEnrichmentService();
   });
@@ -204,44 +217,104 @@ describe('WageEnrichmentService', () => {
   });
 
   describe('syncContributionRates', () => {
-    it('syncs EI and CPP rates', async () => {
-      mocks.mockGetEIContributionRates.mockResolvedValue({
-        year: 2025, employeeRate: 1.63, employerRate: 2.28, maxInsurableEarnings: 65700,
-      });
-      mocks.mockGetCPPContributionRates.mockResolvedValue({
-        year: 2025, employeeRate: 5.95, employerRate: 5.95, exemptionLimit: 3500, maximumContribution: 3867,
-      });
-      mocks.mockLimit.mockResolvedValue([]); // no existing
+    const eiRates = { year: 2025, employeeRate: 1.63, employerRate: 2.28, maxInsurableEarnings: 65700 };
+    const cppRates = { year: 2025, employeeRate: 5.95, employerRate: 5.95, exemptionLimit: 3500, maximumContribution: 3867 };
 
-      const result = await service.syncContributionRates(2025);
-      expect(result.success).toBe(true);
-      expect(result.recordsInserted).toBeGreaterThanOrEqual(2);
+    beforeEach(() => {
+      mocks.mockGetEIContributionRates.mockResolvedValue(eiRates);
+      mocks.mockGetCPPContributionRates.mockResolvedValue(cppRates);
+      mocks.mockLimit.mockResolvedValue([]); // no existing
     });
 
-    it('round 52: FINANCE FREEZE — contribution_rates is an explicitly deferred finance exception; this round must not touch its runtime principal', async () => {
-      mocks.mockGetEIContributionRates.mockResolvedValue({
-        year: 2025, employeeRate: 1.63, employerRate: 2.28, maxInsurableEarnings: 65700,
+    it('syncs EI and CPP rates', async () => {
+      const result = await service.syncContributionRates(2025);
+      expect(result.success).toBe(true);
+      expect(result.recordsProcessed).toBe(2);
+      // An employee and an employer rate for each of the two sources
+      expect(result.recordsInserted).toBe(4);
+      expect(mocks.mockValues).toHaveBeenCalledWith(expect.objectContaining({ rateType: 'ei_employer', year: 2025 }));
+      expect(mocks.mockValues).toHaveBeenCalledWith(expect.objectContaining({ rateType: 'cpp_employee', year: 2025 }));
+    });
+
+    it('round 57: contribution_rates is global reference data written as the system role — the sync log is opened, and the rates and the log\'s outcome are written, each in a system transaction', async () => {
+      await service.syncContributionRates(2025);
+      // One system transaction opens the sync log, a second writes the rates and records the outcome
+      expect(withSystemContext).toHaveBeenCalledTimes(2);
+    });
+
+    it('calls the provider outside any system transaction, and writes only inside one', async () => {
+      const openAtProviderCall: number[] = [];
+      mocks.mockGetEIContributionRates.mockImplementation(async () => {
+        openAtProviderCall.push(mocks.systemDepth.value);
+        return eiRates;
       });
-      mocks.mockGetCPPContributionRates.mockResolvedValue({
-        year: 2025, employeeRate: 5.95, employerRate: 5.95, exemptionLimit: 3500, maximumContribution: 3867,
+      mocks.mockGetCPPContributionRates.mockImplementation(async () => {
+        openAtProviderCall.push(mocks.systemDepth.value);
+        return cppRates;
       });
-      mocks.mockLimit.mockResolvedValue([]);
+      const openAtWrite: number[] = [];
+      mocks.mockInsert.mockImplementation(() => {
+        openAtWrite.push(mocks.systemDepth.value);
+        return { values: mocks.mockValues };
+      });
 
       await service.syncContributionRates(2025);
-      expect(withSystemContext).not.toHaveBeenCalled();
+
+      expect(openAtProviderCall).toEqual([0, 0]);
+      // The sync log row and the four rate rows
+      expect(openAtWrite).toHaveLength(5);
+      expect(openAtWrite.every((open) => open === 1)).toBe(true);
+    });
+
+    it('writes each source in its own savepoint, so a failure on one does not undo the other', async () => {
+      mocks.mockTransaction.mockImplementationOnce(async () => {
+        throw new Error('write refused');
+      });
+
+      const result = await service.syncContributionRates(2025);
+
+      expect(mocks.mockTransaction).toHaveBeenCalledTimes(2);
+      expect(result.success).toBe(false);
+      expect(result.recordsFailed).toBe(1);
+      // The CPP rates (employee and employer) were still written
+      expect(result.recordsInserted).toBe(2);
+      expect(result.errors).toEqual([expect.stringContaining('Failed to sync EI rates')]);
+      expect(mocks.mockSet).toHaveBeenCalledWith(expect.objectContaining({ status: 'partial', recordsFailed: 1, recordsInserted: 2 }));
+    });
+
+    it('does not write a source whose provider call failed, and reports it', async () => {
+      mocks.mockGetEIContributionRates.mockRejectedValue(new Error('StatCan down'));
+
+      const result = await service.syncContributionRates(2025);
+
+      expect(mocks.mockTransaction).toHaveBeenCalledTimes(1);
+      expect(result.success).toBe(false);
+      expect(result.recordsProcessed).toBe(1);
+      expect(result.recordsFailed).toBe(1);
+      expect(result.recordsInserted).toBe(2);
+      expect(result.errors).toEqual([expect.stringContaining('Failed to sync EI rates')]);
+    });
+
+    it('marks the sync failed, in its own system transaction, and rethrows when the rates cannot be written at all', async () => {
+      vi.mocked(withSystemContext)
+        .mockImplementationOnce(async (fn) => fn({ select: mocks.mockSelect, insert: mocks.mockInsert, update: mocks.mockUpdate } as never))
+        .mockImplementationOnce(async () => {
+          throw new Error('system database unavailable');
+        });
+
+      await expect(service.syncContributionRates(2025)).rejects.toThrow('system database unavailable');
+
+      expect(withSystemContext).toHaveBeenCalledTimes(3);
+      expect(mocks.mockSet).toHaveBeenCalledWith(expect.objectContaining({ status: 'failed', errorMessage: 'system database unavailable' }));
     });
 
     it('updates existing contribution rates', async () => {
-      mocks.mockGetEIContributionRates.mockResolvedValue({
-        year: 2025, employeeRate: 1.63, employerRate: 2.28, maxInsurableEarnings: 65700,
-      });
-      mocks.mockGetCPPContributionRates.mockResolvedValue({
-        year: 2025, employeeRate: 5.95, employerRate: 5.95, exemptionLimit: 3500, maximumContribution: 3867,
-      });
       mocks.mockLimit.mockResolvedValue([{ id: 'rate-1' }]); // existing found
 
       const result = await service.syncContributionRates(2025);
-      expect(result.recordsUpdated).toBeGreaterThan(0);
+      expect(result.success).toBe(true);
+      expect(result.recordsUpdated).toBe(2);
+      expect(result.recordsInserted).toBe(0);
     });
   });
 

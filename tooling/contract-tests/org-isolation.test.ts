@@ -11,6 +11,8 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 
+import { isRetiredNoOpRoute } from './retired-routes'
+import { isReexportAliasOfAcceptedRoute } from './route-aliases'
 const ROOT = resolve(__dirname, '../..')
 
 function readContent(path: string): string {
@@ -60,10 +62,12 @@ const AUTH_CALL_PATTERNS = [
   /requireApiAuth\s*\(/,         // UE API auth guard (checks userId + org)
   /withApiAuth\s*\(/,            // UE auth HOF (injects auth context + org)
   /withAdminAuth\s*\(/,          // UE admin-only auth guard
+  /withSystemAdminAuth\s*\(/,    // UE platform (system) administrator guard
   /withMinRole\s*\(/,            // UE role-based auth guard
   /requireUser\s*\(/,            // UE/UX auth guard (validates user identity)
   /getAuth\s*\(/,               // Clerk getAuth (low-level auth extraction)
   /cognitionRoute\s*\(/,         // Cognition route factory — wraps withApi() with required auth
+  /verifyTrackingToken\s*\(/,    // UE signed, action-bound tracking-link token: the open and click routes record nothing without it
 ]
 
 /** Public routes that are intentionally exempt from auth requirements. */
@@ -79,7 +83,6 @@ function isPublicRoute(routeFile: string): boolean {
     || normalized.includes('/api/rights/terms/')  // Public rights/terms routes (terms, agreement)
     || normalized.includes('/cron/')  // cron routes use CRON_SECRET bearer auth
     || normalized.includes('/webhook')  // webhook routes use signature verification (Stripe, PayPal, Shopify, Zoho, etc.)
-    || normalized.includes('/api/whop/')  // Whop payment routes (intentionally unauthenticated checkout)
     || normalized.includes('/api/quote/')  // Quote response via share token (no auth, token-validated)
     || normalized.includes('/api/healthcare/surveys/responses')  // Anonymous survey response via share token (no user auth, token-validated)
     || normalized.includes('/api/contact/')  // Public contact/demo-request form (marketing)
@@ -101,13 +104,17 @@ function isPublicRoute(routeFile: string): boolean {
 }
 
 describe('PR9: Org isolation — authorize() called in protected routes', () => {
+  const hasOwnAuth = (content: string) => AUTH_CALL_PATTERNS.some(p => p.test(content)) || isRetiredNoOpRoute(content)
+  // A route that only re-exports another route is as authorized as that route: one this contract accepts, or one it already exempts as public.
+  const acceptedTarget = (file: string, content: string) => isPublicRoute(file) || hasOwnAuth(content)
+
   for (const app of PROTECTED_APPS) {
     it(`${app}: every route.ts calls an auth function`, () => {
       const routeFiles = findRouteFiles(app)
       for (const routeFile of routeFiles) {
         if (isPublicRoute(routeFile)) continue  // health endpoints are intentionally public
         const content = readContent(routeFile)
-        const hasAuth = AUTH_CALL_PATTERNS.some(p => p.test(content))
+        const hasAuth = hasOwnAuth(content) || isReexportAliasOfAcceptedRoute(routeFile, content, acceptedTarget)
         expect(
           hasAuth,
           `${routeFile.replace(ROOT, '')} missing auth call`

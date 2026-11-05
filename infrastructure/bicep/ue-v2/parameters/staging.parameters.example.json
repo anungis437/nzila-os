@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "env": { "value": "staging" },
+
+    "logAnalyticsName": { "value": "<existing Log Analytics workspace name>" },
+    "logAnalyticsResourceGroup": { "value": "<resource group of that workspace>" },
+    "createLogAnalytics": { "value": false },
+    "logAnalyticsDailyCapGb": { "value": -1 },
+
+    "createActionGroup": { "value": true },
+    "actionGroupEmailReceivers": {
+      "value": [{ "name": "staging-owner", "emailAddress": "<staging alert recipient>" }]
+    },
+
+    "acrName": { "value": "<registry name>" },
+    "acrResourceGroup": { "value": "<registry resource group>" },
+    "appImageDigest": { "value": "sha256:<staging-built app image digest>" },
+    "clamavImageDigest": { "value": "sha256:<clamav adapter image digest>" },
+    "cronImageDigest": { "value": "sha256:<curl image digest imported into the registry>" },
+
+    "appDatabaseName": { "value": "ue_v2_staging" },
+    "dbSku": { "value": "B_Standard_B1ms" },
+    "dbStorageGb": { "value": 32 },
+    "dbBackupRetentionDays": { "value": 7 },
+    "dbHighAvailability": { "value": false },
+    "dbGeoRedundantBackup": { "value": false },
+    "dbUseDefaultStorageTier": { "value": true },
+    "dbMaxConnections": { "value": 50 },
+
+    "appMinReplicas": { "value": 0 },
+    "appMaxReplicas": { "value": 2 },
+    "clamavMinReplicas": { "value": 0 },
+    "clamavMaxReplicas": { "value": 2 },
+    "acaInternal": { "value": false },
+    "ingressAllowedIpRanges": { "value": ["<operator egress CIDR, e.g. 203.0.113.10/32>"] },
+
+    "publicHostName": { "value": "" },
+    "siteUrl": { "value": "" },
+    "emailFrom": { "value": "<staging-verified sender address>" },
+    "emailReplyTo": { "value": "<staging reply-to address>" },
+
+    "redisSkuName": { "value": "Balanced_B0" },
+    "redisHighAvailability": { "value": false },
+    "storageSkuName": { "value": "Standard_LRS" },
+    "keyVaultSoftDeleteRetentionDays": { "value": 7 },
+    "enableStripe": { "value": false },
+
+    "owner": { "value": "<owner alias or team>" },
+    "costCenter": { "value": "<cost center code>" },
+
+    "budgetAmount": { "value": 0 },
+    "budgetStartDate": { "value": "<yyyy-MM-01, first day of the deployment month>" },
+    "budgetThresholds": { "value": [50, 80, 100] },
+    "budgetContactEmails": { "value": ["<budget alert recipient>"] }
+  }
+}

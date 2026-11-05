@@ -72,19 +72,19 @@ export type FinanceRole = z.infer<typeof FinanceRole>
 // ── Input schemas ───────────────────────────────────────────────────────────
 
 export const CreateTaxProfileInput = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   federalBn: z.string().max(15).optional(),
   provinceOfRegistration: Province.optional(),
   fiscalYearEnd: z.string().regex(/^\d{2}-\d{2}$/).optional(), // MM-DD
   accountantName: z.string().optional(),
   accountantEmail: z.string().email().optional(),
-  craProgramAccounts: z.record(z.string()).optional(),
-  rqProgramAccounts: z.record(z.string()).optional(),
+  craProgramAccounts: z.record(z.string(), z.string()).optional(),
+  rqProgramAccounts: z.record(z.string(), z.string()).optional(),
 })
 export type CreateTaxProfileInput = z.infer<typeof CreateTaxProfileInput>
 
 export const CreateTaxYearInput = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   fiscalYearLabel: z.string().min(1).max(10),
   startDate: z.string(), // ISO date
   endDate: z.string(),
@@ -96,40 +96,40 @@ export const CreateTaxYearInput = z.object({
 export type CreateTaxYearInput = z.infer<typeof CreateTaxYearInput>
 
 export const CreateTaxFilingInput = z.object({
-  orgId: z.string().uuid(),
-  taxYearId: z.string().uuid(),
+  orgId: z.guid(),
+  taxYearId: z.guid(),
   filingType: TaxFilingType,
   filedDate: z.string().optional(),
   preparedBy: z.string().min(1),
   reviewedBy: z.string().optional(),
-  documentId: z.string().uuid().optional(),
+  documentId: z.guid().optional(),
   sha256: z.string().optional(),
 })
 export type CreateTaxFilingInput = z.infer<typeof CreateTaxFilingInput>
 
 export const CreateTaxInstallmentInput = z.object({
-  orgId: z.string().uuid(),
-  taxYearId: z.string().uuid(),
+  orgId: z.guid(),
+  taxYearId: z.guid(),
   dueDate: z.string(),
   requiredAmount: z.string(), // numeric string
   paidAmount: z.string().optional(),
-  paymentDocumentId: z.string().uuid().optional(),
+  paymentDocumentId: z.guid().optional(),
 })
 export type CreateTaxInstallmentInput = z.infer<typeof CreateTaxInstallmentInput>
 
 export const CreateTaxNoticeInput = z.object({
-  orgId: z.string().uuid(),
-  taxYearId: z.string().uuid(),
+  orgId: z.guid(),
+  taxYearId: z.guid(),
   authority: NoticeAuthority,
   noticeType: NoticeType,
   receivedDate: z.string(),
-  documentId: z.string().uuid().optional(),
+  documentId: z.guid().optional(),
   sha256: z.string().optional(),
 })
 export type CreateTaxNoticeInput = z.infer<typeof CreateTaxNoticeInput>
 
 export const CreateIndirectTaxAccountInput = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   taxType: IndirectTaxType,
   filingFrequency: IndirectTaxFilingFrequency,
   programAccountNumber: z.string().max(20).optional(),
@@ -137,8 +137,8 @@ export const CreateIndirectTaxAccountInput = z.object({
 export type CreateIndirectTaxAccountInput = z.infer<typeof CreateIndirectTaxAccountInput>
 
 export const CreateIndirectTaxPeriodInput = z.object({
-  orgId: z.string().uuid(),
-  accountId: z.string().uuid(),
+  orgId: z.guid(),
+  accountId: z.guid(),
   taxType: IndirectTaxType,
   startDate: z.string(),
   endDate: z.string(),
@@ -148,7 +148,7 @@ export const CreateIndirectTaxPeriodInput = z.object({
 export type CreateIndirectTaxPeriodInput = z.infer<typeof CreateIndirectTaxPeriodInput>
 
 export const UpdateIndirectTaxSummaryInput = z.object({
-  periodId: z.string().uuid(),
+  periodId: z.guid(),
   totalSales: z.string().optional(),
   taxCollected: z.string().optional(),
   itcs: z.string().optional(),

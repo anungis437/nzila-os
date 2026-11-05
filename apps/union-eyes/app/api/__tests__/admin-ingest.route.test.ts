@@ -2,9 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
-  withSystemContext: vi.fn(),
+  withRLSContext: vi.fn(),
   ingestGrievanceBatch: vi.fn(),
   verifyImportBatch: vi.fn(),
+  performAuditedOperation: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({
@@ -12,10 +13,15 @@ vi.mock('@/lib/api/framework', () => ({
   ApiError: {
     badRequest: (message: string) => new Error(message),
     forbidden: (message: string) => new Error(message),
+    conflict: (message: string) => new Error(message),
   },
   z: require('zod'),
 }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+vi.mock('@/lib/audit/operation-audit', () => ({
+  performAuditedOperation: m.performAuditedOperation,
+  OperationAuditError: class OperationAuditError extends Error {},
+}));
 vi.mock('@/lib/ingestion', () => ({ ingestGrievanceBatch: m.ingestGrievanceBatch }));
 vi.mock('@/lib/ingestion/post-import-verification', () => ({ verifyImportBatch: m.verifyImportBatch }));
 
@@ -36,9 +42,10 @@ describe('admin/ingest route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (_context: unknown, fn: (tx: unknown) => Promise<unknown>) => fn({}));
     m.ingestGrievanceBatch.mockResolvedValue({ batchId: 'batch_1', imported: 1, failed: 0 });
     m.verifyImportBatch.mockResolvedValue({ verified: true, issues: [] });
+    m.performAuditedOperation.mockImplementation((_op: unknown, run: () => unknown) => run());
   });
 
   it('throws when organization context is missing', async () => {
@@ -69,6 +76,32 @@ describe('admin/ingest route', () => {
     expect(result).toMatchObject({ batchId: 'batch_1', verification: { verified: true } });
     expect(m.ingestGrievanceBatch).toHaveBeenCalled();
     expect(m.verifyImportBatch).toHaveBeenCalledWith('batch_1');
+    // The import and its verification each run as the runtime role in the caller's organization's tenant transaction.
+    expect(m.withRLSContext).toHaveBeenCalledTimes(2);
+    for (const call of m.withRLSContext.mock.calls) {
+      expect(call[0]).toEqual({ organizationId: '11111111-1111-1111-1111-111111111111' });
+    }
+    expect(m.performAuditedOperation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organizationId: '11111111-1111-1111-1111-111111111111',
+        userId: 'u1',
+        action: 'admin.case_ingest',
+        details: expect.objectContaining({ recordCount: 1 }),
+      }),
+      expect.any(Function),
+    );
+  });
+
+  it('imports nothing when the intent cannot be recorded', async () => {
+    const { POST } = await loadRoute();
+    m.performAuditedOperation.mockRejectedValueOnce(new Error('audit down'));
+
+    await expect(POST({
+      organizationId: '11111111-1111-1111-1111-111111111111',
+      userId: 'u1',
+      body: { source_system: 'legacy', dry_run: false, continue_on_error: true, records: [baseRecord] },
+    })).rejects.toThrow('audit down');
+    expect(m.ingestGrievanceBatch).not.toHaveBeenCalled();
   });
 
   it('skips verification for dry-run ingestion', async () => {
@@ -83,5 +116,8 @@ describe('admin/ingest route', () => {
 
     expect(result).toMatchObject({ batchId: 'dry-run', verification: null });
     expect(m.verifyImportBatch).not.toHaveBeenCalled();
+    // The dry run reads the organization's data as the runtime role too.
+    expect(m.withRLSContext).toHaveBeenCalledTimes(1);
+    expect(m.withRLSContext.mock.calls[0][0]).toEqual({ organizationId: '11111111-1111-1111-1111-111111111111' });
   });
 });

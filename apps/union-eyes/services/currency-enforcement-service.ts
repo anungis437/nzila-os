@@ -273,7 +273,9 @@ export class CurrencyEnforcementService {
       amountCAD = conversion.amountCAD;
     }
 
-    // Check if exceeds $1M threshold
+    // Check if exceeds $1M threshold.
+    // The reasons are audit text kept with the T106 determination, not a display: the amount is written in one fixed locale (en-CA) so the
+    // same determination always reads the same, whoever triggered it and in whatever language.
     if (amountCAD > T106_THRESHOLD) {
       return {
         requiresT106: true,

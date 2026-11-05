@@ -86,7 +86,7 @@ describe('send quote actions slice', () => {
       expiresInDays: 7,
     } as never)
     expect(invalid.ok).toBe(false)
-    expect(invalid.error?.toLowerCase()).toContain('invalid uuid')
+    expect(invalid.error?.toLowerCase()).toMatch(/invalid (uuid|guid)/)
 
     mockQuoteRepo.findById.mockResolvedValueOnce(null)
     expect(

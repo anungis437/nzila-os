@@ -1,9 +1,10 @@
 /**
  * Campaigns Management Page
- * 
- * Lists all campaigns with filters and actions
+ *
+ * Lists the organization's campaigns with filters. The total is the route's own count of every campaign the query matches; the status figures count
+ * only the page in hand and say so. Nothing is sent in this release (UE-ACTION-CAMPAIGN-SEND), so a campaign here is a draft or a stored record.
  * Path: /dashboard/communications/campaigns
- * 
+ *
  * Phase 4: Communications & Organizing
  */
 
@@ -13,7 +14,10 @@
 export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { ApiShapeError, envelopePages, envelopeRows } from '@/lib/client/api-envelope';
+import { envelopeTotal } from '@/lib/client/list-total';
+import { campaignFrom, rate, type CampaignRecord, type Counter } from '@/lib/communications/campaign-record';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -41,34 +45,16 @@ import {
 } from '@/components/ui/table';
 import { Mail, MessageSquare, Bell, Plus, Search, RefreshCw } from 'lucide-react';
 
-interface Campaign {
-  id: string;
-  name: string;
-  description: string | null;
-  type: string;
-  channel: string;
-  status: string;
-  audienceCount: number;
-  scheduledAt: string | null;
-  sentAt: string | null;
-  completedAt: string | null;
-  stats: {
-    queued: number;
-    sent: number;
-    delivered: number;
-    opened: number;
-    clicked: number;
-  };
-  createdAt: string;
-}
-
 export default function CampaignsPage() {
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations('communicationsCampaignsPage');
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const base = `/${locale}/dashboard/communications/campaigns`;
+  const [campaigns, setCampaigns] = useState<CampaignRecord[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [channelFilter, setChannelFilter] = useState<string>('all');
@@ -97,18 +83,21 @@ export default function CampaignsPage() {
       }
 
       const response = await fetch(`/api/communications/campaigns?${params}`);
-      
+
       if (!response.ok) {
         throw new Error(t('failedToFetchCampaigns'));
       }
 
-      const json = await response.json();
-      // withApi wraps in { success, data: { data, pagination }, timestamp }
-      const payload = json.data ?? json;
-      setCampaigns(Array.isArray(payload.data) ? payload.data : payload.data ? [payload.data] : []);
-      setTotalPages(payload.pagination?.totalPages ?? 1);
+      // withApi wraps in { success, data: { data, pagination }, timestamp }; a body of another shape is an error, not an empty list.
+      const body: unknown = await response.json();
+      const rows = envelopeRows(body).map(campaignFrom);
+      setCampaigns(rows);
+      setTotal(envelopeTotal(body));
+      setTotalPages(envelopePages(body));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('failedToFetchCampaigns'));
+      setCampaigns([]);
+      setTotal(null);
+      setError(err instanceof Error && !(err instanceof ApiShapeError) ? err.message : t('failedToFetchCampaigns'));
     } finally {
       setLoading(false);
     }
@@ -161,26 +150,17 @@ export default function CampaignsPage() {
     });
   };
 
-  const calculateStats = (campaign: Campaign) => {
-    const { stats } = campaign;
-    const sent = stats.sent || 0;
-    
-    if (sent === 0) return { deliveryRate: 0, openRate: 0 };
-
-    const deliveryRate = ((stats.delivered || 0) / sent) * 100;
-    const openRate = ((stats.opened || 0) / sent) * 100;
-
-    return {
-      deliveryRate: deliveryRate.toFixed(1),
-      openRate: openRate.toFixed(1),
-    };
-  };
-
   // Filter campaigns by search query
   const filteredCampaigns = campaigns.filter(campaign =>
     campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     campaign.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // A figure over rows that were not loaded is not zero; it is unknown. A counter a record does not hold is unknown too.
+  const loaded = !loading && !error;
+  const figure = (count: number | null) => (loaded && count !== null ? count : '—');
+  const counted = (value: Counter) => (value === null ? '—' : value);
+  const onPage = (status: (value: string) => boolean) => campaigns.filter((campaign) => status(campaign.status)).length;
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -192,7 +172,7 @@ export default function CampaignsPage() {
             {t('subtitle')}
           </p>
         </div>
-        <Button onClick={() => router.push('/dashboard/communications/campaigns/new')}>
+        <Button onClick={() => router.push(`${base}/new`)}>
           <Plus className="mr-2 h-4 w-4" />
           {t('createCampaignButton')}
         </Button>
@@ -205,18 +185,19 @@ export default function CampaignsPage() {
             <CardTitle className="text-sm font-medium">{t('totalCampaignsTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{campaigns.length}</div>
+            <div className="text-2xl font-bold">{figure(total)}</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">{t('activeTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {campaigns.filter(c => c.status === 'sending' || c.status === 'scheduled').length}
+              {figure(loaded ? onPage((status) => status === 'sending' || status === 'scheduled') : null)}
             </div>
+            <p className="text-xs text-muted-foreground">{t('onThisPage')}</p>
           </CardContent>
         </Card>
 
@@ -226,8 +207,9 @@ export default function CampaignsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {campaigns.filter(c => c.status === 'draft').length}
+              {figure(loaded ? onPage((status) => status === 'draft') : null)}
             </div>
+            <p className="text-xs text-muted-foreground">{t('onThisPage')}</p>
           </CardContent>
         </Card>
 
@@ -237,8 +219,9 @@ export default function CampaignsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {campaigns.filter(c => c.status === 'sent').length}
+              {figure(loaded ? onPage((status) => status === 'sent') : null)}
             </div>
+            <p className="text-xs text-muted-foreground">{t('onThisPage')}</p>
           </CardContent>
         </Card>
       </div>
@@ -303,7 +286,9 @@ export default function CampaignsPage() {
         <CardHeader>
           <CardTitle>{t('allCampaignsTitle')}</CardTitle>
           <CardDescription>
-            {t('campaignsFound', { count: filteredCampaigns.length })}
+            {loaded && (searchQuery
+              ? `${t('campaignsFound', { count: filteredCampaigns.length })} (${t('onThisPage')})`
+              : total !== null && t('campaignsFound', { count: total }))}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -322,7 +307,7 @@ export default function CampaignsPage() {
           ) : filteredCampaigns.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">{t('noCampaignsFound')}</p>
-              <Button onClick={() => router.push('/dashboard/communications/campaigns/new')} className="mt-4">
+              <Button onClick={() => router.push(`${base}/new`)} className="mt-4">
                 {t('createFirstCampaignButton')}
               </Button>
             </div>
@@ -345,12 +330,13 @@ export default function CampaignsPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredCampaigns.map((campaign) => {
-                    const stats = calculateStats(campaign);
+                    const deliveryRate = rate(campaign.stats.delivered, campaign.stats.sent);
+                    const openRate = rate(campaign.stats.opened, campaign.stats.delivered);
                     return (
-                      <TableRow 
+                      <TableRow
                         key={campaign.id}
                         className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => router.push(`/dashboard/communications/campaigns/${campaign.id}`)}
+                        onClick={() => router.push(`${base}/${campaign.id}`)}
                       >
                         <TableCell>
                           <div>
@@ -370,21 +356,21 @@ export default function CampaignsPage() {
                         </TableCell>
                         <TableCell>{t(`type.${campaign.type}`)}</TableCell>
                         <TableCell>{getStatusBadge(campaign.status)}</TableCell>
-                        <TableCell>{campaign.audienceCount || 0}</TableCell>
-                        <TableCell>{campaign.stats.sent || 0}</TableCell>
+                        <TableCell>{campaign.audienceCount !== null && campaign.audienceCount > 0 ? campaign.audienceCount : '—'}</TableCell>
+                        <TableCell>{counted(campaign.stats.sent)}</TableCell>
                         <TableCell>
-                          {campaign.stats.delivered || 0}
-                          {campaign.stats.sent > 0 && (
+                          {counted(campaign.stats.delivered)}
+                          {deliveryRate !== null && (
                             <span className="text-xs text-muted-foreground ml-1">
-                              ({stats.deliveryRate}%)
+                              ({deliveryRate}%)
                             </span>
                           )}
                         </TableCell>
                         <TableCell>
-                          {campaign.stats.opened || 0}
-                          {campaign.stats.sent > 0 && (
+                          {counted(campaign.stats.opened)}
+                          {openRate !== null && (
                             <span className="text-xs text-muted-foreground ml-1">
-                              ({stats.openRate}%)
+                              ({openRate}%)
                             </span>
                           )}
                         </TableCell>
@@ -397,7 +383,7 @@ export default function CampaignsPage() {
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/dashboard/communications/campaigns/${campaign.id}`);
+                              router.push(`${base}/${campaign.id}`);
                             }}
                           >
                             {t('viewButton')}

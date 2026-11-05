@@ -18,14 +18,13 @@ import {
   platformPayments,
   paymentAllocations,
   subscriptionPlans,
-  usageAggregates,
-  usageEvents,
-  usageMeters,
   organizations,
   type NewBillingAccount,
 } from '@/db/schema';
-import { eq, and, desc, inArray, sql, or, lt } from 'drizzle-orm';
+import { eq, and, desc, inArray, or, lt } from 'drizzle-orm';
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import { appendLedgerEntry } from './ledger-service';
 import { requireReconciliation } from './reconciliation-service';
 import { getActiveContract } from './contract-service';
@@ -187,7 +186,7 @@ export async function closeBillingPeriod(
   const [updated] = await db
     .update(billingPeriods)
     .set({ isClosed: true, closedAt: new Date(), closedBy })
-    .where(eq(billingPeriods.id, billingPeriodId))
+    .where(and(eq(billingPeriods.id, billingPeriodId), eq(billingPeriods.organizationId, period.organizationId)))
     .returning();
 
   await auditLog({
@@ -216,8 +215,11 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
   const [period] = await db
     .select()
     .from(billingPeriods)
-    .where(eq(billingPeriods.id, input.billingPeriodId))
+    .where(and(eq(billingPeriods.id, input.billingPeriodId), eq(billingPeriods.organizationId, input.organizationId)))
     .limit(1);
+  if (!period || period.organizationId !== input.organizationId) {
+    throw new Error('Billing period not found for organization');
+  }
 
   if (period?.isClosed) {
     throw new Error(`Cannot generate invoice: billing period ${period.label} is closed`);
@@ -248,7 +250,9 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
   }
 
   // Get active subscription
-  const [subscription] = await db
+  // Fail closed on ambiguous pricing authority: choosing the first active
+  // subscription would issue an invoice against an arbitrary plan.
+  const activeSubscriptions = await db
     .select()
     .from(orgSubscriptions)
     .where(
@@ -257,8 +261,12 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
         eq(orgSubscriptions.status, 'active'),
       ),
     )
-    .limit(1);
+    .limit(2);
 
+  if (activeSubscriptions.length > 1) {
+    throw new Error('Cannot generate invoice: multiple active subscriptions require reconciliation');
+  }
+  const subscription = activeSubscriptions[0];
   if (!subscription) throw new Error(`No active subscription for org ${input.organizationId}`);
 
   // Get plan details
@@ -327,60 +335,10 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     });
   }
 
-  // Usage-driven line items with explicit event lineage.
-  if (period) {
-    const aggregates = await db
-      .select({
-        id: usageAggregates.id,
-        meterId: usageAggregates.meterId,
-        billableQuantity: usageAggregates.billableQuantity,
-        unitPrice: usageAggregates.unitPrice,
-        totalAmount: usageAggregates.totalAmount,
-        status: usageAggregates.status,
-        meterCode: usageMeters.code,
-        meterUnit: usageMeters.unit,
-      })
-      .from(usageAggregates)
-      .innerJoin(usageMeters, eq(usageMeters.id, usageAggregates.meterId))
-      .where(
-        and(
-          eq(usageAggregates.organizationId, input.organizationId),
-          eq(usageAggregates.billingPeriodId, input.billingPeriodId),
-        ),
-      );
-
-    for (const agg of aggregates) {
-      const amountCents = centsSafe(agg.totalAmount);
-      if (amountCents <= 0) continue;
-
-      const usageEventRows = await db
-        .select({ id: usageEvents.id })
-        .from(usageEvents)
-        .where(
-          and(
-            eq(usageEvents.organizationId, input.organizationId),
-            eq(usageEvents.meterId, agg.meterId),
-            sql`${usageEvents.eventTime} >= ${period.periodStart}`,
-            sql`${usageEvents.eventTime} <= ${period.periodEnd}`,
-          ),
-        );
-
-      lineItems.push({
-        description: `Usage ${agg.meterCode} (${agg.billableQuantity} ${agg.meterUnit})`,
-        costType: 'usage_fee',
-        quantity: String(agg.billableQuantity),
-        unitPrice: String(agg.unitPrice),
-        amount: String(agg.totalAmount),
-        metadata: {
-          usageAggregateId: agg.id,
-          meterId: agg.meterId,
-          meterCode: agg.meterCode,
-          usageAggregateStatus: agg.status,
-          usageEventIds: usageEventRows.map((r) => r.id),
-        },
-      });
-    }
-  }
+  // Usage-driven line items are not billed: metering is not implemented. The only writer of usage_events / usage_aggregates
+  // (usage-metering-service.ts) has no caller, so there is no usage to invoice, and the application's roles hold no grant on the
+  // metering tables (they are LATENT_UNREACHABLE in the storage-authority manifest). An invoice carries the subscription fees; when
+  // metering exists, its line items come back with the metering tables' authority declared.
 
   // Apply discount — cents-safe arithmetic
   let subtotalCents = lineItems.reduce((s, li) => s + centsSafe(li.amount), 0);
@@ -417,7 +375,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
   const issueDate = new Date();
   const dueDate = new Date(issueDate.getTime() + account.netTermsDays * 86400000);
 
-  // Insert invoice + line items + ledger entries in transaction
+  // The invoice, its lines, its ledger entries and its audit record commit together: a failure of any leaves no invoice.
   const result = await db.transaction(async (tx) => {
     const [invoice] = await tx
       .insert(platformInvoices)
@@ -454,38 +412,36 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
       });
     }
 
-    return invoice;
-  });
+    // Ledger entries for each non-zero line item
+    for (const li of lineItems) {
+      const amt = centsSafe(li.amount);
+      if (amt === 0) continue;
 
-  // Create ledger entries for each positive line item
-  for (const li of lineItems) {
-    const amt = centsSafe(li.amount);
-    if (amt === 0) continue;
+      await appendLedgerEntry({
+        organizationId: input.organizationId,
+        billingPeriodId: input.billingPeriodId,
+        costType: li.costType as NewPlatformCostLedgerEntry['costType'],
+        eventType: 'invoice_generated',
+        sourceType: 'invoice',
+        sourceId: invoice.id,
+        quantity: li.quantity,
+        unitPriceCad: li.unitPrice,
+        amountCad: li.amount,
+        description: li.description,
+        createdBy: input.createdBy,
+      }, tx);
+    }
 
-    await appendLedgerEntry({
+    await persistAtomicAudit(tx as unknown as RLSTx, {
       organizationId: input.organizationId,
-      billingPeriodId: input.billingPeriodId,
-      costType: li.costType as NewPlatformCostLedgerEntry['costType'],
-      eventType: 'invoice_generated',
-      sourceType: 'invoice',
-      sourceId: result.id,
-      quantity: li.quantity,
-      unitPriceCad: li.unitPrice,
-      amountCad: li.amount,
-      description: li.description,
-      createdBy: input.createdBy,
+      userId: input.createdBy,
+      action: 'invoice_generated',
+      resourceType: 'platform_invoice',
+      resourceId: invoice.id,
+      details: { invoiceNumber, totalAmount: centsToDecimal(totalCents), lineItemCount: lineItems.length },
     });
-  }
 
-  await auditLog({
-    eventType: AuditEventType.DATA_CREATE,
-    severity: AuditSeverity.HIGH,
-    organizationId: input.organizationId,
-    resource: 'platform_invoice',
-    resourceId: result.id,
-    action: 'invoice_generated',
-    userId: input.createdBy,
-    details: { invoiceNumber, totalAmount: centsToDecimal(totalCents), lineItemCount: lineItems.length },
+    return invoice;
   });
 
   return result;
@@ -504,10 +460,18 @@ export async function recordPayment(input: RecordPaymentInput) {
     const [existing] = await db
       .select()
       .from(platformPayments)
-      .where(eq(platformPayments.externalReference, input.idempotencyKey))
+      .where(and(eq(platformPayments.organizationId, input.organizationId), eq(platformPayments.externalReference, input.idempotencyKey)))
       .limit(1);
 
-    if (existing) return existing;
+    if (existing) {
+      if (existing.organizationId !== input.organizationId || existing.amount !== input.amount) {
+        throw new Error('Payment idempotency reference conflicts with the requested organization or amount');
+      }
+      // A reference cannot safely identify a payment without proving its invoice allocation.
+      throw new Error('Payment idempotency replay requires verified invoice allocation');
+    }
+    // No database-enforced uniqueness currently protects concurrent keyed payments.
+    throw new Error('Keyed payment recording unavailable until transactional idempotency is enforced');
   }
 
   // Get invoice
@@ -521,8 +485,14 @@ export async function recordPayment(input: RecordPaymentInput) {
     throw new Error('Invoice does not belong to this organization');
   }
 
+  // Reject malformed CAD amounts before financial writes; centsSafe alone can round precision.
+  if (!/^\d+(?:\.\d{1,2})?$/.test(input.amount)) {
+    throw new Error('Payment amount must be a valid CAD amount with at most two decimals');
+  }
   const paymentAmountCents = centsSafe(input.amount);
-  if (paymentAmountCents <= 0) throw new Error('Payment amount must be positive');
+  if (!Number.isSafeInteger(paymentAmountCents) || paymentAmountCents <= 0) {
+    throw new Error('Payment amount must be positive and within safe CAD limits');
+  }
 
   const result = await db.transaction(async (tx) => {
     // Insert payment
@@ -561,7 +531,7 @@ export async function recordPayment(input: RecordPaymentInput) {
         status: newStatus,
         updatedAt: new Date(),
       })
-      .where(eq(platformInvoices.id, input.invoiceId));
+      .where(and(eq(platformInvoices.id, input.invoiceId), eq(platformInvoices.organizationId, input.organizationId)));
 
     return payment;
   });
@@ -630,16 +600,29 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
   const [existingPayment] = await db
     .select()
     .from(platformPayments)
-    .where(eq(platformPayments.externalReference, input.externalReference))
+    .where(and(eq(platformPayments.organizationId, input.organizationId), eq(platformPayments.externalReference, input.externalReference)))
     .limit(1);
 
-  if (existingPayment) return existingPayment;
+  if (existingPayment) {
+    if (existingPayment.organizationId !== input.organizationId || existingPayment.amount !== input.amount) {
+      throw new Error('External payment reference conflicts with the requested organization or amount');
+    }
+    throw new Error('External payment replay requires verified invoice allocation');
+  }
 
   const account = await getBillingAccount(input.organizationId);
   if (!account) throw new Error(`No billing account for org ${input.organizationId}`);
 
   const normalizedStatus = input.status ?? 'completed';
+  // Refuse invalid settlement amounts before persisting a payment or mutating an invoice.
+  // A failed attempt may report zero, but can never represent a negative transfer.
+  if (!/^\d+(?:\.\d{1,2})?$/.test(input.amount)) {
+    throw new Error('External payment amount must be a non-negative CAD amount with at most two decimals');
+  }
   const paymentAmountCents = centsSafe(input.amount);
+  if (normalizedStatus === 'completed' && paymentAmountCents <= 0) {
+    throw new Error('Completed external payment amount must be positive');
+  }
 
   const [payment] = await db
     .insert(platformPayments)
@@ -683,7 +666,7 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
             lastReconciledPaymentId: payment.id,
           },
         })
-        .where(eq(platformInvoices.id, invoice.id));
+        .where(and(eq(platformInvoices.id, invoice.id), eq(platformInvoices.organizationId, input.organizationId)));
     });
   } else if (normalizedStatus === 'failed') {
     await db
@@ -698,7 +681,7 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
           lastFailureReason: input.failureReason ?? null,
         },
       })
-      .where(eq(platformInvoices.id, invoice.id));
+      .where(and(eq(platformInvoices.id, invoice.id), eq(platformInvoices.organizationId, input.organizationId)));
   }
 
   return payment;
@@ -771,7 +754,7 @@ export async function runBillingLifecycleAutomation(runAt = new Date(), actor = 
             finalizedBy: actor,
           },
         })
-        .where(eq(platformInvoices.id, draft.id));
+        .where(and(eq(platformInvoices.id, draft.id), eq(platformInvoices.organizationId, subscription.organizationId)));
       invoicesFinalized += 1;
     }
 
@@ -802,7 +785,7 @@ export async function runBillingLifecycleAutomation(runAt = new Date(), actor = 
             failedAt: runAt.toISOString(),
           },
         })
-        .where(eq(platformInvoices.id, inv.id));
+        .where(and(eq(platformInvoices.id, inv.id), eq(platformInvoices.organizationId, subscription.organizationId)));
       invoicesMarkedOverdue += 1;
     }
   }
@@ -823,25 +806,27 @@ export async function runBillingLifecycleAutomation(runAt = new Date(), actor = 
 // Queries
 // ============================================================================
 
-export async function getInvoices(organizationId: string, limit = 50) {
+export async function getInvoices(organizationId: string, limit = 50, offset = 0) {
   return db
     .select()
     .from(platformInvoices)
     .where(eq(platformInvoices.organizationId, organizationId))
-    .orderBy(desc(platformInvoices.issueDate))
-    .limit(limit);
+    .orderBy(desc(platformInvoices.issueDate), desc(platformInvoices.id))
+    .limit(limit)
+    .offset(offset);
 }
 
-export async function getInvoiceWithLineItems(invoiceId: string) {
-  const [invoice] = await db
+/** eader is the caller's tenant transaction when the read and its audit record must commit together; it defaults to the shared handle. */
+export async function getInvoiceWithLineItems(invoiceId: string, organizationId: string, reader: Pick<typeof db, 'select'> = db) {
+  const [invoice] = await reader
     .select()
     .from(platformInvoices)
-    .where(eq(platformInvoices.id, invoiceId))
+    .where(and(eq(platformInvoices.id, invoiceId), eq(platformInvoices.organizationId, organizationId)))
     .limit(1);
 
-  if (!invoice) return null;
+  if (!invoice || invoice.organizationId !== organizationId) return null;
 
-  const lineItems = await db
+  const lineItems = await reader
     .select()
     .from(platformInvoiceLineItems)
     .where(eq(platformInvoiceLineItems.invoiceId, invoiceId));
@@ -849,8 +834,8 @@ export async function getInvoiceWithLineItems(invoiceId: string) {
   return { ...invoice, lineItems };
 }
 
-export async function replayInvoiceDeterministically(invoiceId: string) {
-  const invoiceData = await getInvoiceWithLineItems(invoiceId);
+export async function replayInvoiceDeterministically(invoiceId: string, organizationId: string, reader: Pick<typeof db, 'select'> = db) {
+  const invoiceData = await getInvoiceWithLineItems(invoiceId, organizationId, reader);
   if (!invoiceData) return null;
 
   let recomputedSubtotalCents = 0;

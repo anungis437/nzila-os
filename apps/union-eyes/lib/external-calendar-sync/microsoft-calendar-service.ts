@@ -22,6 +22,7 @@ import {
   calendarEvents 
 } from '@/db/schema/calendar-schema';
 import { eq, and } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 import { decryptCalendarToken, encryptCalendarToken } from './token-crypto';
 
 // ============================================================================
@@ -98,7 +99,7 @@ async function requestMicrosoftTokens(params: URLSearchParams): Promise<Microsof
 /**
  * Generate authorization URL
  */
-export async function getAuthorizationUrl(userId: string): Promise<string> {
+export async function getAuthorizationUrl(state: string): Promise<string> {
   assertMicrosoftCalendarConfig();
 
   const params = new URLSearchParams({
@@ -107,7 +108,7 @@ export async function getAuthorizationUrl(userId: string): Promise<string> {
     redirect_uri: MICROSOFT_REDIRECT_URI,
     response_mode: 'query',
     scope: SCOPES.join(' '),
-    state: userId,
+    state,
   });
 
   return `${MICROSOFT_AUTH_BASE}/authorize?${params.toString()}`;
@@ -156,6 +157,7 @@ export async function exchangeCodeForTokens(code: string) {
  * Refresh access token
  */
 export async function refreshAccessToken(connectionId: string): Promise<string> {
+  let organizationId: string | undefined;
   try {
     assertMicrosoftCalendarConfig();
 
@@ -168,6 +170,7 @@ export async function refreshAccessToken(connectionId: string): Promise<string> 
     if (!connection || connection.provider !== 'microsoft') {
       throw new Error('Microsoft Calendar connection not found');
     }
+    organizationId = connection.organizationId;
     const refreshToken = decryptCalendarToken(connection.refreshToken);
 
     if (!refreshToken) {
@@ -200,19 +203,21 @@ export async function refreshAccessToken(connectionId: string): Promise<string> 
         syncError: null,
         updatedAt: new Date(),
       })
-      .where(eq(externalCalendarConnections.id, connectionId));
+      .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, connection.organizationId)));
 
     return response.access_token;
   } catch (error) {
 // Mark connection as failed
-    await db
-      .update(externalCalendarConnections)
-      .set({
-        syncStatus: 'failed',
-        syncError: error instanceof Error ? error.message : 'Token refresh failed',
-        updatedAt: new Date(),
-      })
-      .where(eq(externalCalendarConnections.id, connectionId));
+    if (organizationId) {
+      await db
+        .update(externalCalendarConnections)
+        .set({
+          syncStatus: 'failed',
+          syncError: error instanceof Error ? error.message : 'Token refresh failed',
+          updatedAt: new Date(),
+        })
+        .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)));
+    }
     
     throw error;
   }
@@ -242,11 +247,14 @@ async function getAuthenticatedClient(connectionId: string) {
     accessToken = await refreshAccessToken(connectionId);
   }
 
-  return Client.init({
-    authProvider: (done) => {
-      done(null, accessToken);
-    },
-  });
+  return {
+    client: Client.init({
+      authProvider: (done) => {
+        done(null, accessToken);
+      },
+    }),
+    organizationId: connection.organizationId,
+  };
 }
 
 // ============================================================================
@@ -258,7 +266,7 @@ async function getAuthenticatedClient(connectionId: string) {
  */
 export async function listMicrosoftCalendars(connectionId: string) {
   try {
-    const client = await getAuthenticatedClient(connectionId);
+    const { client } = await getAuthenticatedClient(connectionId);
     
     const response = await client
       .api('/me/calendars')
@@ -290,7 +298,7 @@ export async function importMicrosoftEvents(
   }
 ) {
   try {
-    const client = await getAuthenticatedClient(connectionId);
+    const { client, organizationId } = await getAuthenticatedClient(connectionId);
     
     let endpoint: string;
     
@@ -320,19 +328,20 @@ export async function importMicrosoftEvents(
       .where(eq(calendars.id, localCalendarId))
       .limit(1);
 
-    if (!localCalendar) {
+    if (!localCalendar || localCalendar.organizationId !== organizationId) {
       throw new Error('Local calendar not found');
     }
 
     let importedCount = 0;
     let updatedCount = 0;
     let deletedCount = 0;
+    let failed = 0;
 
     for (const msEvent of events) {
       try {
         // Check if event is deleted
         if (msEvent['@removed']) {
-          await handleDeletedMicrosoftEvent(localCalendarId, msEvent.id);
+          await handleDeletedMicrosoftEvent(localCalendarId, msEvent.id, organizationId);
           deletedCount++;
           continue;
         }
@@ -359,7 +368,7 @@ export async function importMicrosoftEvents(
               ...eventData,
               updatedAt: new Date(),
             })
-            .where(eq(calendarEvents.id, existingEvent.id));
+            .where(and(eq(calendarEvents.id, existingEvent.id), eq(calendarEvents.organizationId, organizationId)));
           updatedCount++;
         } else {
           // Create new event
@@ -367,12 +376,20 @@ export async function importMicrosoftEvents(
           await db.insert(calendarEvents).values(eventData as any);
           importedCount++;
         }
-      } catch (_error) {
-}
+      } catch (error) {
+        failed += 1;
+        logger.error('Microsoft calendar event was not applied', { connectionId, eventId: msEvent.id, error: String(error) });
+      }
+    }
+
+    // The delta link moves only when every event was applied: a failed event is neither counted as imported nor skipped forever, the
+    // import throws so the caller records a failed sync, and the next run starts from the same point.
+    if (failed > 0) {
+      throw new MicrosoftCalendarImportError(`${failed} of ${events.length} Microsoft calendar events were not applied`, { failed });
     }
 
     // Update delta link
-    await updateDeltaLink(connectionId, microsoftCalendarId, newDeltaLink);
+    await updateDeltaLink(connectionId, organizationId, microsoftCalendarId, newDeltaLink);
 
     return {
       imported: importedCount,
@@ -394,7 +411,7 @@ export async function exportEventToMicrosoft(
   microsoftCalendarId: string
 ) {
   try {
-    const client = await getAuthenticatedClient(connectionId);
+    const { client, organizationId } = await getAuthenticatedClient(connectionId);
     
     // Get local event
     const [localEvent] = await db
@@ -403,7 +420,7 @@ export async function exportEventToMicrosoft(
       .where(eq(calendarEvents.id, localEventId))
       .limit(1);
 
-    if (!localEvent) {
+    if (!localEvent || localEvent.organizationId !== organizationId) {
       throw new Error('Local event not found');
     }
 
@@ -430,7 +447,7 @@ export async function exportEventToMicrosoft(
           externalEventId: response.id,
           updatedAt: new Date(),
         })
-        .where(eq(calendarEvents.id, localEventId));
+        .where(and(eq(calendarEvents.id, localEventId), eq(calendarEvents.organizationId, organizationId)));
 
       return response;
     }
@@ -448,7 +465,7 @@ export async function deleteEventFromMicrosoft(
   microsoftEventId: string
 ) {
   try {
-    const client = await getAuthenticatedClient(connectionId);
+    const { client } = await getAuthenticatedClient(connectionId);
     
     await client
       .api(`/me/calendars/${microsoftCalendarId}/events/${microsoftEventId}`)
@@ -630,74 +647,79 @@ function mapRRuleToMicrosoftRecurrence(rrule: string): any {
 // HELPER FUNCTIONS
 // ============================================================================
 
+export class MicrosoftCalendarImportError extends Error {
+  constructor(message: string, readonly detail: { failed: number }) {
+    super(message);
+    this.name = 'MicrosoftCalendarImportError';
+  }
+}
+
 /**
  * Handle deleted Microsoft event
  */
-async function handleDeletedMicrosoftEvent(calendarId: string, msEventId: string) {
-  try {
-    const [event] = await db
-      .select()
-      .from(calendarEvents)
-      .where(
-        and(
-          eq(calendarEvents.calendarId, calendarId),
-          eq(calendarEvents.externalEventId, msEventId)
-        )
+// A failure is not swallowed here: the caller counts an event as deleted only when this returned.
+async function handleDeletedMicrosoftEvent(calendarId: string, msEventId: string, organizationId: string) {
+  const [event] = await db
+    .select()
+    .from(calendarEvents)
+    .where(
+      and(
+        eq(calendarEvents.calendarId, calendarId),
+        eq(calendarEvents.organizationId, organizationId),
+        eq(calendarEvents.externalEventId, msEventId)
       )
-      .limit(1);
+    )
+    .limit(1);
 
-    if (event) {
-      await db
-        .update(calendarEvents)
-        .set({
-          status: 'cancelled',
-          cancelledAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(calendarEvents.id, event.id));
-    }
-  } catch (_error) {
-}
+  if (event) {
+    await db
+      .update(calendarEvents)
+      .set({
+        status: 'cancelled',
+        cancelledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(and(eq(calendarEvents.id, event.id), eq(calendarEvents.organizationId, organizationId)));
+  }
 }
 
 /**
  * Update delta link for incremental sync
  */
+// A failure is not swallowed: the connection would otherwise read as synced while the next run started from the old delta link.
 async function updateDeltaLink(
   connectionId: string,
+  organizationId: string,
   microsoftCalendarId: string,
   deltaLink: string | null
 ) {
-  try {
-    const [connection] = await db
-      .select()
-      .from(externalCalendarConnections)
-      .where(eq(externalCalendarConnections.id, connectionId))
-      .limit(1);
+  const [connection] = await db
+    .select()
+    .from(externalCalendarConnections)
+    .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)))
+    .limit(1);
 
-    if (!connection) return;
+  if (!connection) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappings: any = (connection.calendarMappings as any) || {};
-    
-    if (!mappings[microsoftCalendarId]) {
-      mappings[microsoftCalendarId] = {};
-    }
-    
-    mappings[microsoftCalendarId].deltaLink = deltaLink;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mappings: any = (connection.calendarMappings as any) || {};
+  
+  if (!mappings[microsoftCalendarId]) {
+    mappings[microsoftCalendarId] = {};
+  }
+  
+  mappings[microsoftCalendarId].deltaLink = deltaLink;
 
-    await db
-      .update(externalCalendarConnections)
-      .set({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        calendarMappings: mappings as any,
-        lastSyncAt: new Date(),
-        syncStatus: 'synced',
-        updatedAt: new Date(),
-      })
-      .where(eq(externalCalendarConnections.id, connectionId));
-  } catch (_error) {
-}
+  await db
+    .update(externalCalendarConnections)
+    .set({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      calendarMappings: mappings as any,
+      lastSyncAt: new Date(),
+      syncStatus: 'synced',
+      updatedAt: new Date(),
+    })
+    .where(and(eq(externalCalendarConnections.id, connectionId), eq(externalCalendarConnections.organizationId, organizationId)));
 }
 
 /**

@@ -11,11 +11,12 @@
 export const dynamic = "force-dynamic";
 
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { requireUser, getUserRole } from "@/lib/api-auth-guard";
-import { db } from "@/db/db";
-import { sql } from "drizzle-orm";
+import { canManageOrganizationSettings } from "@/lib/auth/org-settings-access";
 import { getTranslations } from "next-intl/server";
-import { withSystemContext } from '@/lib/db/with-rls-context';
+import { isUuid } from "@/lib/page-data/uuid";
+import { loadPlatformSettings, type PlatformSettingsRows } from "@/lib/dashboard-reads/platform-settings";
 import PlatformSettingsContent from "./_components/platform-settings-content";
 import OrgSettingsContent from "./_components/org-settings-content";
 import type { PlatformSettingsData } from "./_components/platform-settings-content";
@@ -30,59 +31,15 @@ const PLATFORM_ROLES = new Set([
   "content_manager", "training_coordinator",
 ]);
 
-async function loadPlatformSettings(): Promise<PlatformSettingsData> {
-  // Load platform org settings JSONB
-  const orgRows = Array.from(
-    await db.execute(sql`
-      SELECT settings, features_enabled
-      FROM organizations
-      WHERE organization_type IN ('platform', 'congress')
-      LIMIT 1
-    `)
-  );
-  const org = orgRows[0] as Record<string, unknown> | undefined;
-  const settings = (org?.settings ?? {}) as Record<string, unknown>;
-  const featuresEnabled = Array.isArray(org?.features_enabled)
-    ? (org.features_enabled as string[])
-    : [];
+/** The route stores these two as yes/no. A value an earlier screen saved as a level ("admins_only", "critical") is "yes" unless it was "disabled". */
+const enabledFlag = (value: unknown, fallback: boolean): boolean =>
+  typeof value === "boolean" ? value : typeof value === "string" ? value !== "disabled" : fallback;
 
-  // Load API keys for the platform org
-  const keyRows = Array.from(
-    await db.execute(sql`
-      SELECT k.id, k.name, k.key_prefix, k.environment, k.status,
-             k.scopes, k.request_count::int as request_count
-      FROM integration_api_keys k
-      JOIN organizations o ON o.id = k.organization_id
-      WHERE o.organization_type IN ('platform', 'congress')
-      ORDER BY k.created_at DESC
-    `)
-  ).map((r: Record<string, unknown>) => ({
-    id: String(r.id),
-    keyName: String(r.name),
-    keyPrefix: String(r.key_prefix),
-    environment: String(r.environment),
-    status: String(r.status),
-    scopes: Array.isArray(r.scopes) ? (r.scopes as string[]) : [],
-    requestCount: Number(r.request_count),
-  }));
-
-  // Load platform services as integrations
-  const serviceRows = Array.from(
-    await db.execute(sql`
-      SELECT service_name, status
-      FROM platform_services
-      ORDER BY service_name
-    `)
-  ).map((r: Record<string, unknown>) => ({
-    label: String(r.service_name),
-    status: String(r.status) as "healthy" | "degraded" | "down",
-    detail: String(r.status),
-  }));
-
+function toPlatformSettingsData({ settings, featuresEnabled, apiKeys, services }: PlatformSettingsRows): PlatformSettingsData {
   return {
     settings: {
       sessionTimeout: Number(settings.sessionTimeout ?? 30),
-      mfaEnforcement: String(settings.mfaEnforcement ?? "admins_only"),
+      mfaEnforcement: enabledFlag(settings.mfaEnforcement, true),
       passwordMinLength: Number(settings.passwordMinLength ?? 12),
       requireMixedCase: Boolean(settings.requireMixedCase ?? true),
       requireSymbol: Boolean(settings.requireSymbol ?? true),
@@ -90,7 +47,7 @@ async function loadPlatformSettings(): Promise<PlatformSettingsData> {
       emailDigest: Boolean(settings.emailDigest ?? true),
       digestFrequency: String(settings.digestFrequency ?? "daily"),
       pushNotifications: Boolean(settings.pushNotifications ?? true),
-      smsAlerts: String(settings.smsAlerts ?? "critical"),
+      smsAlerts: enabledFlag(settings.smsAlerts, true),
       webhookNotifications: Boolean(settings.webhookNotifications ?? false),
       webhookUrl: String(settings.webhookUrl ?? ""),
       voiceGrievance: Boolean(settings.voiceGrievance ?? true),
@@ -101,8 +58,19 @@ async function loadPlatformSettings(): Promise<PlatformSettingsData> {
       dateFormat: String(settings.dateFormat ?? "YYYY-MM-DD"),
       currency: String(settings.currency ?? "CAD"),
     },
-    apiKeys: keyRows,
-    integrations: serviceRows,
+    apiKeys: apiKeys.map((key) => ({
+      id: key.id,
+      keyName: key.name,
+      keyPrefix: key.keyPrefix,
+      status: key.status,
+      scopes: key.scopes,
+      requestCount: key.requestCount,
+    })),
+    integrations: services.map((service) => ({
+      label: service.serviceName,
+      status: service.status as "healthy" | "degraded" | "down",
+      detail: service.status,
+    })),
     featuresEnabled,
   };
 }
@@ -120,15 +88,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ params }: PageProps) {
+  const { locale } = await params;
   const user = await requireUser();
 
   const organizationId = user.organizationId;
   const userRole = await getUserRole(user.userId, organizationId);
 
+  // Organization configuration is for administrators only. Everyone else (including members)
+  // goes to their own Profile & Settings, which holds only personal information and preferences.
+  if (!canManageOrganizationSettings(userRole)) {
+    redirect(`/${locale}/dashboard/profile`);
+  }
+
   if (userRole && PLATFORM_ROLES.has(userRole)) {
-    const data = await withSystemContext(() => loadPlatformSettings());
-    return <PlatformSettingsContent initialData={data} />;
+    // The platform view is read in the person's own organization; an organization that is not a platform one has no platform settings.
+    const rows = isUuid(organizationId) ? await loadPlatformSettings(organizationId) : null;
+    if (rows) {
+      return <PlatformSettingsContent initialData={toPlatformSettingsData(rows)} />;
+    }
   }
 
   return <OrgSettingsContent />;

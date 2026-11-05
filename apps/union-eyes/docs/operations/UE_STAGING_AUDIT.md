@@ -38,7 +38,7 @@ Validated at every Node.js startup:
 4. **Critical env vars (fail-closed)**: `DATABASE_URL`, `AUTH_SECRET`
 5. Tier 2 fail-closed runtime gate (`lib/runtime/fail-closed`) under `RUNTIME_FAIL_CLOSED=true`
 6. Pilot demo runtime mode classification
-7. DB startup checks (`lib/db-validator`) unless `SKIP_DB_STARTUP_CHECK=true`
+7. DB startup checks (`lib/db-validator`), skipped only on a developer's machine or a test run that sets `SKIP_DB_STARTUP_CHECK=true` (a deployed runtime ignores it)
 8. Redis connectivity (logged as CRITICAL in production when missing)
 
 ## 4. Operational endpoints

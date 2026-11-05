@@ -19,7 +19,7 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 
 // ============================================================================
 // deadline_reminders
@@ -66,12 +66,11 @@ export const deadlineReminders = pgTable(
     deadLetteredAt: timestamp('dead_lettered_at', { withTimezone: true }),
   },
   (t) => [
-    uniqueIndex('deadline_reminders_pending_uidx').on(
-      t.sourceDeadlineId,
-      t.recipientEmailHash,
-      t.offsetDays,
-      t.reminderKind,
-    ),
+    // Unique over the PENDING reminders only: the scheduler cancels a deadline's pending rows and inserts the new ones with `on conflict (...) where status = 'pending'`, so a cancelled or sent
+    // reminder must not keep the key (platform 0079 makes the physical index the same).
+    uniqueIndex('deadline_reminders_pending_uidx')
+      .on(t.sourceDeadlineId, t.recipientEmailHash, t.offsetDays, t.reminderKind)
+      .where(sql`${t.status} = 'pending'`),
     uniqueIndex('deadline_reminders_provider_msg_uidx').on(t.provider, t.providerMessageId),
     index('deadline_reminders_pending_scan_idx').on(t.scheduledFor, t.id),
     index('deadline_reminders_lease_recovery_idx').on(t.leaseExpiresAt),
@@ -161,7 +160,7 @@ export const deadlineReassignmentConvergence = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    index('deadline_reassignment_convergence_pending_idx').on(t.grievanceId),
+    index('deadline_reassignment_convergence_pending_idx').on(t.grievanceId).where(sql`${t.status} = 'pending'`),
     index('deadline_reassignment_convergence_org_idx').on(t.organizationId, t.status),
   ],
 );

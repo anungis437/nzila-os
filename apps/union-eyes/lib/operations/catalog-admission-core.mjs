@@ -35,9 +35,11 @@ export const admissionQueries = [
   },
   {
     name: 'schemaCreate',
+    // Only schemas that EXIST are inspected: has_schema_privilege raises on a missing schema, which made admission fail outright on a
+    // topology that has no audit_security schema (a missing schema holds no privilege to leak).
     sql: `SELECT r.rolname, s.nspname
           FROM pg_roles r
-          CROSS JOIN (VALUES ('public'), ('user_management'), ('audit_security')) AS s(nspname)
+          CROSS JOIN (SELECT nspname FROM pg_namespace WHERE nspname IN ('public', 'user_management', 'audit_security')) AS s
           WHERE r.rolname IN ('union_eyes_runtime', 'union_eyes_system')
             AND has_schema_privilege(r.rolname, s.nspname::name, 'CREATE')`,
   },

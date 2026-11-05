@@ -321,7 +321,9 @@ async function recomputeSignalsForCase(claimId: string): Promise<void> {
     .where(eq(organizationMembers.userId, claimData.memberId!))
     .limit(1);
   
-  const memberName = memberResult[0]?.name || 'Member';
+  // Signals feed staff dashboards, which are not the representatives directly on the case: an anonymous filing (or an
+  // unknown flag) never carries the member's name there. See lib/cases/claim-identity.ts.
+  const memberName = claimData.isAnonymous === false ? (memberResult[0]?.name || 'Member') : 'Anonymous member';
 
   const caseForSignals: CaseForSignals = {
     id: claimData.claimId,

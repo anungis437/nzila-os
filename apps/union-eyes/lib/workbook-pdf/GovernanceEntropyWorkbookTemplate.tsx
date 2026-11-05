@@ -66,7 +66,7 @@ export interface WorkbookPdfData {
   narrative: WorkbookNarrative;
   holders: ReadonlyArray<{
     role: string;
-    displayName: string | null;
+    displayName?: string | null;
     responsibility: string;
     tenureBand: string | null;
     criticality: string | null;

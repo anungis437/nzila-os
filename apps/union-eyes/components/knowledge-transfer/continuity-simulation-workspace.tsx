@@ -11,155 +11,43 @@
  * compare mitigation strategies, and reason through continuity decisions.
  *
  * All analysis is organizational — not individual/workforce evaluation.
+ *
+ * What each panel shows is mapped from the service's own result (./workspace-data), and a simulation or comparison is aimed at nodes
+ * of the organization's own dependency graph: a scenario that reaches no node is refused by the service, and one that evaluates
+ * nothing says nothing, so neither is offered.
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { CognitionGraphViz, type CognitionGraph } from './cognition-graph/cognition-graph-viz';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { GovernanceCascadeAnalysis } from '@/lib/knowledge-transfer/cascade-analysis/cascade-analyzer';
+import type { MitigationComparison, MitigationScenario } from '@/lib/knowledge-transfer/mitigation-comparison/mitigation-models';
+import type { PropagationMap } from '@/lib/knowledge-transfer/propagation/propagation-models';
+import type { ContinuitySimulationResult } from '@/lib/knowledge-transfer/simulation/simulation-models';
+import { CognitionGraphViz } from './cognition-graph/cognition-graph-viz';
 import { PropagationPlayback, type PropagationPlaybackData } from './propagation-playback/propagation-playback';
 import { GovernanceImpactExplorer, type GovernanceImpactData } from './governance-impact/governance-impact-explorer';
+import {
+  SIMULATION_PRESETS,
+  mitigationScenarios,
+  toCognitionGraph,
+  toGovernanceImpact,
+  toMitigationView,
+  toPlayback,
+  type MitigationView,
+  type SimulationPreset,
+} from './workspace-data';
 
 type WorkspaceTab = 'graph' | 'playback' | 'governance' | 'comparison';
 type OverlayMode = 'risk' | 'governance' | 'propagation' | 'none';
 
-interface SimulationScenario {
-  id: string;
-  type: string;
-  affectedNodes: string[];
-  duration: number;
-  label: string;
+/** The framework's success answer: what the service returned is under `data`. */
+interface Answer<T> {
+  data?: T;
 }
 
-interface MitigationScenariosData {
-  scenarios: Array<{
-    mitigationType: string;
-    investmentLevel: 'low' | 'medium' | 'high';
-    durationWeeks: number;
-    label: string;
-    projectedResilienceGain: number;
-    impactDeltas: Array<{ domainName: string; exposureReduction: number }>;
-  }>;
-  recommendation: string;
-}
-
-interface RawPropagationNode {
-  id: string;
-  label: string;
-  nodeType?: string;
-  category?: string;
-  continuitySensitivity?: 'low' | 'medium' | 'high';
-  isSingleSource?: boolean;
-  frequency?: number;
-}
-
-interface RawPropagationEdge {
-  sourceId: string;
-  targetId: string;
-  weight?: number;
-  strength?: number;
-  edgeType?: 'dependency' | 'governance' | 'operational';
-}
-
-interface RawPropagationPath {
-  path?: string[];
-  impactScore?: number;
-  disruptionScope?: string;
-}
-
-interface RawPropagationBottleneck {
-  nodeId?: string;
-  id?: string;
-}
-
-interface PropagationResponse {
-  data?: {
-    nodes?: RawPropagationNode[];
-    edges?: RawPropagationEdge[];
-    propagationPaths?: RawPropagationPath[];
-    bottlenecks?: Array<string | RawPropagationBottleneck>;
-  };
-}
-
-interface RawGovernanceNode {
-  id?: string;
-  name?: string;
-  label?: string;
-  type?: 'compliance' | 'regulatory' | 'procedural' | 'decision_authority';
-  isSingleSource?: boolean;
-  dependsOn?: string[];
-  downstreamProcesses?: string[];
-  downstream?: string[];
-  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
-  continuityImplication?: string;
-  description?: string;
-}
-
-interface RawCascadeRisk {
-  triggerNode?: string;
-  trigger?: string;
-  cascadedProcesses?: string[];
-  cascade?: string[];
-  severity?: 'low' | 'medium' | 'high';
-  description?: string;
-}
-
-interface GovernanceResponse {
-  data?: {
-    totalGovernanceNodes?: number;
-    singleSourceGovernanceNodes?: number;
-    criticalGaps?: string[];
-    governanceNodes?: RawGovernanceNode[];
-    cascadeRisks?: RawCascadeRisk[];
-  };
-}
-
-interface RawTimelinePoint {
-  week: number;
-  operationalCapacity?: number;
-  affectedDomains?: string[];
-  criticalFailures?: string[];
-  recoveryProgress?: number;
-}
-
-interface RawWeaknessIndicator {
-  area?: string;
-}
-
-interface SimulationResponse {
-  data?: {
-    durationWeeks?: number;
-    degradationTimeline?: RawTimelinePoint[];
-    weaknessIndicators?: RawWeaknessIndicator[];
-    estimatedRecoveryWeeks?: number | null;
-  };
-}
-
-interface RawImpactDelta {
-  domainName?: string;
-  exposureReduction?: number;
-}
-
-interface RawMitigationResult {
-  scenario?: {
-    mitigationType?: string;
-    investmentLevel?: 'low' | 'medium' | 'high';
-    durationWeeks?: number;
-    label?: string;
-  };
-  projectedGain?: {
-    resilienceScoreGain?: number;
-  };
-  impactDelta?: {
-    perDomainDeltas?: RawImpactDelta[];
-  };
-}
-
-interface MitigationComparisonResponse {
-  data?: {
-    results?: RawMitigationResult[];
-    topRecommendation?: {
-      mitigationType?: string;
-    };
-  };
+/** The reason a failed answer gives (`{ code, message }`), or the fallback when it gives none. */
+async function failureMessage(res: Response, fallback: string): Promise<string> {
+  const body = (await res.json().catch(() => null)) as { message?: unknown } | null;
+  return typeof body?.message === 'string' && body.message ? body.message : fallback;
 }
 
 function LoadingState({ message }: { message: string }) {
@@ -184,61 +72,42 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   );
 }
 
+function EmptyState({ message }: { message: string }) {
+  return <div className="text-sm text-slate-400 text-center py-12">{message}</div>;
+}
+
 export function ContinuitySimulationWorkspace() {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('graph');
   const [overlay, setOverlay] = useState<OverlayMode>('risk');
 
-  const [propagationData, setPropagationData] = useState<CognitionGraph | null>(null);
+  const [propagationMap, setPropagationMap] = useState<(PropagationMap & { message?: string }) | null>(null);
   const [propagationLoading, setPropagationLoading] = useState(true);
   const [propagationError, setPropagationError] = useState<string | null>(null);
+  const graph = useMemo(() => (propagationMap ? toCognitionGraph(propagationMap) : null), [propagationMap]);
 
   const [governanceData, setGovernanceData] = useState<GovernanceImpactData | null>(null);
   const [governanceLoading, setGovernanceLoading] = useState(false);
+  const [governanceError, setGovernanceError] = useState<string | null>(null);
 
   const [playbackData, setPlaybackData] = useState<PropagationPlaybackData | null>(null);
   const [playbackLoading, setPlaybackLoading] = useState(false);
-  const [selectedScenario, setSelectedScenario] = useState<SimulationScenario | null>(null);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
+  const [selectedPreset, setSelectedPreset] = useState<SimulationPreset | null>(null);
 
-  const [mitigationData, setMitigationData] = useState<MitigationScenariosData | null>(null);
+  const [mitigationData, setMitigationData] = useState<MitigationView | null>(null);
   const [mitigationLoading, setMitigationLoading] = useState(false);
+  const [mitigationNote, setMitigationNote] = useState<string | null>(null);
 
-  // Fetch propagation / cognition graph
+  // Fetch the dependency map the graph, the simulations and the governance view are all drawn from
   const fetchPropagation = async () => {
     try {
       setPropagationLoading(true);
       setPropagationError(null);
       const res = await fetch('/api/exit-interviews/propagation');
-      if (!res.ok) throw new Error('Failed to load propagation data');
-      const json = (await res.json()) as PropagationResponse;
-      const raw = json.data;
-
-      // Map raw propagation map to CognitionGraph shape
-      const graph: CognitionGraph = {
-        nodes: (raw?.nodes ?? []).map((n) => ({
-          id: n.id,
-          label: n.label,
-          nodeType: n.nodeType ?? 'expertise',
-          category: n.category ?? n.nodeType ?? 'general',
-          continuitySensitivity: n.continuitySensitivity ?? 'medium',
-          isSingleSource: n.isSingleSource ?? false,
-          frequency: n.frequency ?? 1,
-        })),
-        edges: (raw?.edges ?? []).map((e) => ({
-          sourceId: e.sourceId,
-          targetId: e.targetId,
-          strength: e.weight ?? e.strength ?? 1,
-          edgeType: e.edgeType ?? 'dependency',
-        })),
-        propagationPaths: (raw?.propagationPaths ?? []).map((p) => ({
-          path: p.path ?? [],
-          impactScore: p.impactScore ?? 0,
-          disruptionScope: p.disruptionScope ?? '',
-        })),
-        bottlenecks: (raw?.bottlenecks ?? []).map((b) =>
-          typeof b === 'string' ? b : b.nodeId ?? b.id ?? '',
-        ),
-      };
-      setPropagationData(graph);
+      if (!res.ok) throw new Error(await failureMessage(res, 'Failed to load propagation data'));
+      const json = (await res.json()) as Answer<PropagationMap & { message?: string }>;
+      if (!json.data) throw new Error('Failed to load propagation data');
+      setPropagationMap(json.data);
     } catch {
       setPropagationError('Unable to load organizational dependency graph.');
     } finally {
@@ -247,121 +116,68 @@ export function ContinuitySimulationWorkspace() {
   };
 
   const fetchGovernance = useCallback(async () => {
-    if (governanceData) return;
+    if (governanceData || !propagationMap) return;
     try {
       setGovernanceLoading(true);
+      setGovernanceError(null);
       const res = await fetch('/api/exit-interviews/cascade-analysis');
-      if (!res.ok) throw new Error('Failed to load governance data');
-      const json = (await res.json()) as GovernanceResponse;
-      const raw = json.data;
-
-      // Map cascade analysis to GovernanceImpactData
-      const mapped: GovernanceImpactData = {
-        totalGovernanceProcesses: raw?.totalGovernanceNodes ?? 0,
-        singleSourceProcesses: raw?.singleSourceGovernanceNodes ?? 0,
-        criticalGovernanceGaps: raw?.criticalGaps ?? [],
-        nodes: (raw?.governanceNodes ?? []).map((n) => ({
-          id: n.id ?? n.name ?? n.label ?? '',
-          name: n.name ?? n.label ?? n.id ?? '',
-          type: n.type ?? 'procedural',
-          isSingleSource: n.isSingleSource ?? false,
-          dependsOn: n.dependsOn ?? [],
-          downstreamProcesses: n.downstreamProcesses ?? n.downstream ?? [],
-          riskLevel: n.riskLevel ?? 'medium',
-          continuityImplication: n.continuityImplication ?? n.description ?? '',
-        })),
-        cascadeRisks: (raw?.cascadeRisks ?? []).map((r) => ({
-          triggerNode: r.triggerNode ?? r.trigger ?? '',
-          cascadedProcesses: r.cascadedProcesses ?? r.cascade ?? [],
-          severity: r.severity ?? 'medium',
-          description: r.description ?? '',
-        })),
-      };
-      setGovernanceData(mapped);
-    } catch {
-      // Leave null — governance tab will show empty state
+      if (!res.ok) throw new Error(await failureMessage(res, 'Failed to load governance data'));
+      const json = (await res.json()) as Answer<GovernanceCascadeAnalysis>;
+      if (!json.data) throw new Error('Failed to load governance data');
+      setGovernanceData(toGovernanceImpact(json.data, propagationMap));
+    } catch (error) {
+      setGovernanceError(error instanceof Error ? error.message : 'Failed to load governance data');
     } finally {
       setGovernanceLoading(false);
     }
-  }, [governanceData]);
+  }, [governanceData, propagationMap]);
 
-  const fetchSimulation = async (scenario: SimulationScenario) => {
+  const fetchSimulation = async (preset: SimulationPreset) => {
+    if (!graph) return;
     try {
       setPlaybackLoading(true);
+      setPlaybackError(null);
       const res = await fetch('/api/exit-interviews/simulation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          scenarioType: scenario.type,
-          affectedNodeIds: scenario.affectedNodes,
-          durationWeeks: scenario.duration,
-        }),
+        body: JSON.stringify({ simulationType: preset.simulationType, affectedNodeIds: preset.affected(graph) }),
       });
-      if (!res.ok) throw new Error('Failed to run simulation');
-      const json = (await res.json()) as SimulationResponse;
-      const raw = json.data;
-
-      const pb: PropagationPlaybackData = {
-        scenarioName: scenario.label,
-        disruptionType: scenario.type,
-        totalWeeks: raw?.durationWeeks ?? scenario.duration,
-        timeline: (raw?.degradationTimeline ?? []).map((t) => ({
-          week: t.week,
-          operationalCapacity: t.operationalCapacity ?? 100,
-          affectedDomains: t.affectedDomains ?? [],
-          criticalFailures: t.criticalFailures ?? [],
-          recoveryProgress: t.recoveryProgress ?? 0,
-        })),
-        mitigationReplays: [],
-        bottlenecksExposed: raw?.weaknessIndicators?.map((w) => w.area ?? '') ?? [],
-        recoveryWeek: raw?.estimatedRecoveryWeeks ?? null,
-      };
-      setPlaybackData(pb);
-    } catch {
-      // Leave null
+      if (!res.ok) throw new Error(await failureMessage(res, 'Failed to run simulation'));
+      const json = (await res.json()) as Answer<ContinuitySimulationResult>;
+      if (!json.data) throw new Error('Failed to run simulation');
+      setPlaybackData(toPlayback(json.data, preset.label));
+    } catch (error) {
+      setPlaybackError(error instanceof Error ? error.message : 'Failed to run simulation');
     } finally {
       setPlaybackLoading(false);
     }
   };
 
   const fetchMitigationComparison = useCallback(async () => {
-    if (mitigationData) return;
+    if (mitigationData || !graph) return;
+    const scenarios: MitigationScenario[] = mitigationScenarios(graph);
+    if (scenarios.length === 0) {
+      setMitigationNote('No single-source or governance knowledge is recorded, so there is nothing to aim a mitigation at.');
+      return;
+    }
     try {
       setMitigationLoading(true);
+      setMitigationNote(null);
       const res = await fetch('/api/exit-interviews/mitigation-comparison', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          scenarios: [
-            { mitigationType: 'documentation_campaign', targetNodeIds: [], investmentLevel: 'medium', durationWeeks: 12, label: 'Documentation Campaign' },
-            { mitigationType: 'cross_training', targetNodeIds: [], investmentLevel: 'medium', durationWeeks: 16, label: 'Cross-Training Program' },
-            { mitigationType: 'governance_decentralization', targetNodeIds: [], investmentLevel: 'high', durationWeeks: 20, label: 'Governance Decentralization' },
-          ],
-        }),
+        body: JSON.stringify({ scenarios }),
       });
-      if (!res.ok) throw new Error('Failed to load mitigation comparison');
-      const json = (await res.json()) as MitigationComparisonResponse;
-      const raw = json.data;
-      setMitigationData({
-        scenarios: (raw?.results ?? []).map((r) => ({
-          mitigationType: r.scenario?.mitigationType ?? '',
-          investmentLevel: r.scenario?.investmentLevel ?? 'medium',
-          durationWeeks: r.scenario?.durationWeeks ?? 12,
-          label: r.scenario?.label ?? r.scenario?.mitigationType ?? '',
-          projectedResilienceGain: r.projectedGain?.resilienceScoreGain ?? 0,
-          impactDeltas: (r.impactDelta?.perDomainDeltas ?? []).map((d) => ({
-            domainName: d.domainName ?? '',
-            exposureReduction: d.exposureReduction ?? 0,
-          })),
-        })),
-        recommendation: raw?.topRecommendation?.mitigationType ?? '',
-      });
-    } catch {
-      // Leave null
+      if (!res.ok) throw new Error(await failureMessage(res, 'Failed to load mitigation comparison'));
+      const json = (await res.json()) as Answer<MitigationComparison>;
+      if (!json.data) throw new Error('Failed to load mitigation comparison');
+      setMitigationData(toMitigationView(json.data, scenarios));
+    } catch (error) {
+      setMitigationNote(error instanceof Error ? error.message : 'Failed to load mitigation comparison');
     } finally {
       setMitigationLoading(false);
     }
-  }, [mitigationData]);
+  }, [mitigationData, graph]);
 
   useEffect(() => {
     fetchPropagation();
@@ -376,19 +192,14 @@ export function ContinuitySimulationWorkspace() {
     }
   }, [activeTab, fetchGovernance, fetchMitigationComparison]);
 
-  const PRESET_SCENARIOS: SimulationScenario[] = [
-    { id: 'retirement_wave', type: 'retirement_wave', affectedNodes: [], duration: 24, label: 'Retirement Wave' },
-    { id: 'rapid_turnover', type: 'rapid_turnover', affectedNodes: [], duration: 12, label: 'Rapid Turnover' },
-    { id: 'governance_transition', type: 'governance_transition', affectedNodes: [], duration: 16, label: 'Governance Transition' },
-    { id: 'vendor_disruption', type: 'vendor_disruption', affectedNodes: [], duration: 8, label: 'Vendor Disruption' },
-  ];
-
   const tabs: Array<{ id: WorkspaceTab; label: string }> = [
     { id: 'graph', label: 'Dependency Graph' },
     { id: 'playback', label: 'Propagation Playback' },
     { id: 'governance', label: 'Governance Impact' },
     { id: 'comparison', label: 'Mitigation Comparison' },
   ];
+
+  const unavailablePresets = graph ? SIMULATION_PRESETS.filter((preset) => preset.affected(graph).length === 0) : [];
 
   return (
     <div className="space-y-6">
@@ -444,8 +255,10 @@ export function ContinuitySimulationWorkspace() {
             <LoadingState message="Loading organizational dependency graph..." />
           ) : propagationError ? (
             <ErrorState message={propagationError} onRetry={fetchPropagation} />
-          ) : propagationData ? (
-            <CognitionGraphViz graph={propagationData} overlay={overlay} />
+          ) : graph && graph.nodes.length === 0 ? (
+            <EmptyState message={propagationMap?.message ?? 'No published interviews to analyze yet.'} />
+          ) : graph ? (
+            <CognitionGraphViz graph={graph} overlay={overlay} />
           ) : null}
         </div>
       )}
@@ -453,49 +266,63 @@ export function ContinuitySimulationWorkspace() {
       {/* Playback Tab */}
       {activeTab === 'playback' && (
         <div className="space-y-4">
-          <div>
-            <div className="text-xs font-medium text-slate-700 mb-2">Select a scenario to simulate</div>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_SCENARIOS.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    setSelectedScenario(s);
-                    setPlaybackData(null);
-                    fetchSimulation(s);
-                  }}
-                  className={`text-xs px-3 py-1.5 rounded border transition-colors ${
-                    selectedScenario?.id === s.id
-                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
-                      : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {propagationLoading ? (
+            <LoadingState message="Loading organizational dependency graph..." />
+          ) : propagationError || !graph ? (
+            <ErrorState message={propagationError ?? 'The dependency graph is not available.'} onRetry={fetchPropagation} />
+          ) : (
+            <>
+              <div>
+                <div className="text-xs font-medium text-slate-700 mb-2">Select a scenario to simulate</div>
+                <div className="flex flex-wrap gap-2">
+                  {SIMULATION_PRESETS.map((s) => (
+                    <button
+                      key={s.id}
+                      disabled={s.affected(graph).length === 0}
+                      onClick={() => {
+                        setSelectedPreset(s);
+                        setPlaybackData(null);
+                        void fetchSimulation(s);
+                      }}
+                      className={`text-xs px-3 py-1.5 rounded border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                        selectedPreset?.id === s.id
+                          ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+                {unavailablePresets.length > 0 && (
+                  <ul className="mt-2 space-y-0.5 text-xs text-slate-400">
+                    {unavailablePresets.map((s) => (
+                      <li key={s.id}>
+                        {s.label} is not available: {s.noneReason}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
-          {!selectedScenario && (
-            <div className="text-sm text-slate-400 text-center py-12">
-              Select a scenario above to begin propagation playback simulation.
-            </div>
-          )}
+              {!selectedPreset && (
+                <EmptyState message="Select a scenario above to begin propagation playback simulation." />
+              )}
 
-          {selectedScenario && playbackLoading && (
-            <LoadingState message={`Running ${selectedScenario.label} simulation...`} />
-          )}
+              {selectedPreset && playbackLoading && (
+                <LoadingState message={`Running ${selectedPreset.label} simulation...`} />
+              )}
 
-          {selectedScenario && !playbackLoading && playbackData && (
-            <div className="border border-slate-200 rounded-lg p-5">
-              <PropagationPlayback playback={playbackData} />
-            </div>
-          )}
+              {selectedPreset && !playbackLoading && playbackData && (
+                <div className="border border-slate-200 rounded-lg p-5">
+                  <PropagationPlayback playback={playbackData} />
+                </div>
+              )}
 
-          {selectedScenario && !playbackLoading && !playbackData && (
-            <div className="text-sm text-slate-400 text-center py-12">
-              Simulation could not be completed. Check that exit interview data is available.
-            </div>
+              {selectedPreset && !playbackLoading && !playbackData && (
+                <EmptyState message={playbackError ?? 'Simulation could not be completed.'} />
+              )}
+            </>
           )}
         </div>
       )}
@@ -508,9 +335,7 @@ export function ContinuitySimulationWorkspace() {
           ) : governanceData ? (
             <GovernanceImpactExplorer data={governanceData} />
           ) : (
-            <div className="text-sm text-slate-400 text-center py-12">
-              No governance impact data available. Ensure exit interviews have been published.
-            </div>
+            <EmptyState message={governanceError ?? 'No governance impact data available. Ensure exit interviews have been published.'} />
           )}
         </div>
       )}
@@ -522,33 +347,59 @@ export function ContinuitySimulationWorkspace() {
             <LoadingState message="Running mitigation comparison analysis..." />
           ) : mitigationData ? (
             <div className="space-y-4">
-              {mitigationData.recommendation && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm text-emerald-700">
-                  Top recommendation: <span className="font-medium">{mitigationData.recommendation.replace(/_/g, ' ')}</span>
+              {mitigationData.noNodesEvaluated ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">{mitigationData.rationale}</div>
+              ) : (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm text-emerald-700 space-y-1">
+                  {mitigationData.recommended && (
+                    <div>
+                      Highest projected gain: <span className="font-medium">{mitigationData.recommended}</span>
+                    </div>
+                  )}
+                  <div className="text-xs">{mitigationData.rationale}</div>
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {mitigationData.scenarios.map((s, idx) => (
-                  <div key={idx} className="border border-slate-200 rounded-lg p-4 bg-white space-y-2">
-                    <div className="font-medium text-slate-800 text-sm">{s.label || s.mitigationType.replace(/_/g, ' ')}</div>
-                    <div className="text-xs text-slate-500">{s.durationWeeks} weeks · {s.investmentLevel} investment</div>
+                {mitigationData.scenarios.map((s) => (
+                  <div key={s.scenarioId} className="border border-slate-200 rounded-lg p-4 bg-white space-y-2">
+                    <div className="font-medium text-slate-800 text-sm">{s.label}</div>
+                    {s.durationWeeks !== null && s.investmentLevel !== null && (
+                      <div className="text-xs text-slate-500">{s.durationWeeks} weeks · {s.investmentLevel} investment</div>
+                    )}
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-2xl font-semibold text-indigo-600">+{s.projectedResilienceGain}</span>
-                      <span className="text-xs text-slate-500">resilience points</span>
+                      <span className="text-2xl font-semibold text-indigo-600">+{s.resilienceGain}</span>
+                      <span className="text-xs text-slate-500">resilience points (assumed)</span>
                     </div>
-                    {s.impactDeltas.slice(0, 3).map((d, di) => (
-                      <div key={di} className="text-xs text-slate-600">
-                        {d.domainName}: <span className="text-emerald-600">-{d.exposureReduction.toFixed(0)}% exposure</span>
+                    <div className="text-xs text-slate-600">Exposure reduced by {Math.round(s.exposureReductionPct)}%</div>
+                    {s.domainDeltas.slice(0, 3).map((d) => (
+                      <div key={d.domain} className="text-xs text-slate-600">
+                        {d.domain}: exposure {Math.round(d.baselineExposure)} → <span className="text-emerald-600">{Math.round(d.mitigatedExposure)}</span>
                       </div>
                     ))}
                   </div>
                 ))}
               </div>
+              {mitigationData.residualRisks.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-slate-700 mb-1">Still unaddressed</h4>
+                  <ul className="space-y-0.5 text-xs text-slate-600">
+                    {mitigationData.residualRisks.map((risk) => (
+                      <li key={risk}>• {risk}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <details className="text-xs text-slate-500">
+                <summary className="cursor-pointer font-medium text-slate-600">How these figures are produced</summary>
+                <ul className="mt-1 space-y-0.5">
+                  {mitigationData.assumptions.map((assumption) => (
+                    <li key={assumption}>• {assumption}</li>
+                  ))}
+                </ul>
+              </details>
             </div>
           ) : (
-            <div className="text-sm text-slate-400 text-center py-12">
-              Mitigation comparison data unavailable. Ensure exit interviews have been published.
-            </div>
+            <EmptyState message={mitigationNote ?? 'Mitigation comparison data unavailable. Ensure exit interviews have been published.'} />
           )}
         </div>
       )}
