@@ -42,10 +42,10 @@ interface HealthPayload {
 }
 
 interface MetricsPayload {
-  sla_violations: number
-  workflow_transition_rate: number
+  sla_violations: number | null
+  workflow_transition_rate: number | null
   queue_depth: number
-  error_rate: number
+  error_rate: number | null
 }
 
 interface QueuePayload {
