@@ -8,6 +8,14 @@ const atApproval = new Date('2026-10-10T12:00:00Z')
 const fixture = (name: string) => `tooling/security/fixtures/${name}`
 
 describe('security gate input containment', () => {
+  it('refuses directory inputs rather than treating them as an empty audit or SBOM', () => {
+    const directory = 'tooling/security/fixtures'
+    const audit = checkVulnerabilityPolicy(directory, atApproval)
+    expect(audit.passed).toBe(false)
+    expect(audit.errors.some((message) => message.includes('Security input must be a regular file'))).toBe(true)
+    expect(() => validateSbomLicenses(directory)).toThrow('Security input must be a regular file')
+  })
+
   it('rejects symlink-escaped audit and SBOM inputs', () => {
     const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'nzila-security-input-'))
     const link = path.join(__dirname, 'fixtures', 'security-escaped-input-test.json')
