@@ -39,6 +39,8 @@ function makeQueryProxy(): Record<string, unknown> {
   });
 }
 
+vi.mock("@/lib/services/case-access-service", () => ({ getEffectiveCaseAccess: vi.fn(async () => ({ canViewCase: true })) }));
+
 vi.mock("@/db/db", () => ({ db: { ...makeDbChain(), query: makeQueryProxy() } }));
 
 vi.mock("drizzle-orm", () => ({
@@ -63,6 +65,7 @@ vi.mock("@/lib/ai/ai-client", () => ({
     component: "test",
     action: "mock",
   })),
+  toGatewayDataClass: vi.fn(() => 'regulated'),
   UE_APP_KEY: "union-eyes",
   UE_PROFILES: {
     GRIEVANCE_TRIAGE: "ue-grievance-triage",
@@ -96,6 +99,14 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+const { withRls } = vi.hoisted(() => ({ withRls: vi.fn() }));
+vi.mock("@/lib/db/with-rls-context", () => ({ withRLSContext: withRls }));
+vi.mock("@/lib/audit/atomic-audit", () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
+vi.mock("@/lib/audit/operation-audit", () => ({
+  performAuditedOperation: async (_op: unknown, fn: () => Promise<unknown>) => fn(),
+}));
+
+
 import {
   suggestClausesForGrievance,
   explainClauseRelevance,
@@ -105,8 +116,11 @@ import {
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe("Clause Reasoning AI", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    // The tenant transaction hands the service the same connection stub the rest of this file mocks
+    const { db } = await import("@/db/db");
+    withRls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(db));
   });
 
   describe("exports", () => {
@@ -126,7 +140,7 @@ describe("Clause Reasoning AI", () => {
   describe("suggestClausesForGrievance", () => {
     it("calls AI client with clause-reasoning profile", async () => {
       mockGenerate.mockResolvedValue({
-        text: JSON.stringify({
+        content: JSON.stringify({
           suggestedClauses: [
             {
               clauseArticle: "12",
@@ -155,6 +169,7 @@ describe("Clause Reasoning AI", () => {
       expect(mockGenerate).toHaveBeenCalledTimes(1);
       const callArgs = mockGenerate.mock.calls[0][0];
       expect(callArgs.profileKey).toBe("ue-clause-reasoning");
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 
@@ -162,6 +177,7 @@ describe("Clause Reasoning AI", () => {
     it("returns an array", async () => {
       const result = await getClauseReasoningHistory("gr-1", "org-1");
       expect(Array.isArray(result)).toBe(true);
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 });

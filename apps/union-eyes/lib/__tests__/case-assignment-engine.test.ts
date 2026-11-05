@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   mockMembersFindMany: vi.fn(),
   mockWithRLS: vi.fn(),
   mockGetProtocol: vi.fn(),
+  protocolStatus: { value: 'approved' as string },
   mockGetPrimaryRole: vi.fn(),
 }));
 
@@ -114,7 +115,12 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 
 vi.mock('@/lib/representation', () => ({
-  getRepresentationProtocol: mocks.mockGetProtocol,
+  resolveRepresentationProtocol: async (...args: unknown[]) => {
+    if (mocks.protocolStatus.value !== 'approved') {
+      return { status: mocks.protocolStatus.value, executable: false, protocol: { stewardPermissions: { canBeAssigned: true } }, reason: 'test' };
+    }
+    return { status: 'approved', executable: true, protocol: await mocks.mockGetProtocol(...args) };
+  },
   getPrimaryAssignmentRole: mocks.mockGetPrimaryRole,
 }));
 
@@ -172,7 +178,7 @@ const baseAssignment = {
 describe('case-assignment-engine', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default implementations
+    mocks.protocolStatus.value = 'approved';
     mocks.mockGetProtocol.mockResolvedValue({
       stewardPermissions: { canBeAssigned: false },
     });
@@ -192,6 +198,19 @@ describe('case-assignment-engine', () => {
 
   // ── autoAssignGrievance ───────────────────────────────────────────
   describe('autoAssignGrievance', () => {
+    it.each(['missing', 'invalid', 'pending_approval'])(
+      'fails closed and writes nothing when the representation protocol is %s',
+      async (status) => {
+        mocks.protocolStatus.value = status;
+        mocks.mockMembersFindMany.mockResolvedValue([baseOfficer]);
+        const r = await autoAssignGrievance('claim-1', 'org-1', {}, 'admin');
+        expect(r.success).toBe(false);
+        expect(r.error).toContain('not approved');
+        expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
+        expect(mocks.mockUpdateWhere).not.toHaveBeenCalled();
+      },
+    );
+
     it('returns error when claim not found', async () => {
       mocks.mockClaimsFindFirst.mockResolvedValue(null);
       const r = await autoAssignGrievance('claim-1', 'org-1', {}, 'admin');
@@ -373,6 +392,41 @@ describe('case-assignment-engine', () => {
       const r = await reassignGrievance('claim-1', 'org-1', 'asgn-x', 'off-2', 'admin', 'reason');
       expect(r.success).toBe(false);
       expect(r.error).toContain('not found');
+    });
+
+    it('refuses an assignment that belongs to a different case', async () => {
+      mocks.mockAssignmentsFindFirst.mockResolvedValueOnce({ ...baseAssignment, claimId: 'other-claim' });
+      const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(r.error).toContain('does not belong');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
+    });
+
+    it('refuses to reassign an assignment that is no longer active', async () => {
+      mocks.mockAssignmentsFindFirst.mockResolvedValueOnce({ ...baseAssignment, status: 'reassigned' });
+      const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(r.error).toContain('not active');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
+    });
+
+    it('does not retire the existing assignment when the successor cannot be created', async () => {
+      mocks.mockAssignmentsFindFirst
+        .mockResolvedValueOnce({ ...baseAssignment, role: 'primary_officer' })
+        .mockResolvedValueOnce({ ...baseAssignment, assignedTo: 'off-2' }); // successor already assigned
+      const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(mocks.mockUpdateWhere).not.toHaveBeenCalled();
+    });
+
+    it('is blocked, with no writes, when the representation protocol is not approved', async () => {
+      mocks.protocolStatus.value = 'legacy_unapproved';
+      mocks.mockAssignmentsFindFirst.mockResolvedValueOnce({ ...baseAssignment, role: 'primary_officer' });
+      const r = await reassignGrievance('claim-1', 'org-1', 'asgn-1', 'off-2', 'admin', 'reason');
+      expect(r.success).toBe(false);
+      expect(r.error).toContain('not approved');
+      expect(mocks.mockInsertReturning).not.toHaveBeenCalled();
+      expect(mocks.mockUpdateWhere).not.toHaveBeenCalled();
     });
 
     it('returns unknown error when non-Error is thrown', async () => {

@@ -17,7 +17,19 @@ describe('auth/mfa/disable route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.auth.mockResolvedValue({ userId: 'user_1' });
-    m.disableMfa.mockResolvedValue(undefined);
+    m.disableMfa.mockResolvedValue({ success: true });
+  });
+
+  it('does not report success when disableMfa refuses (the account state was not changed)', async () => {
+    const { POST } = await loadRoute();
+    m.disableMfa.mockResolvedValueOnce({ success: false });
+
+    const response = await POST(new NextRequest('http://localhost/api/auth/mfa/disable', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({}),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({ error: 'MFA mutation not authorized' });
   });
 
   it('returns 401 when unauthenticated', async () => {

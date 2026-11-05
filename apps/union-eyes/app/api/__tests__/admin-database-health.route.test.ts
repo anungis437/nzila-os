@@ -47,6 +47,7 @@ describe('admin/database/health route', () => {
       activeConnections: 7,
       tableCount: 12,
       status: 'healthy',
+      issues: [],
       tenantPrincipal: {
         databaseName: 'ue_acceptance',
         currentUser: 'union_eyes_runtime',
@@ -74,10 +75,35 @@ describe('admin/database/health route', () => {
       .mockResolvedValueOnce([{ table_count: '0' }]);
 
     const { GET } = await loadRoute();
-    const result = (await GET()) as { tenantPrincipal: { currentUser: string; rolbypassrls: boolean } };
+    const result = (await GET()) as { status: string; issues: string[]; tenantPrincipal: { currentUser: string; rolbypassrls: boolean } };
 
     expect(result.tenantPrincipal.currentUser).toBe('nzilaadmin');
     expect(result.tenantPrincipal.rolbypassrls).toBe(true);
+    // Measuring the database is not the same as the database being safe: the status says what the principals mean.
+    expect(result.status).toBe('degraded');
+    expect(result.issues).toEqual(['The tenant connection bypasses row-level security.']);
+  });
+
+  it('is degraded when the tenant connection is a superuser or is the same role as the system connection', async () => {
+    m.db.execute.mockReset();
+    m.db.execute
+      .mockResolvedValueOnce([{ u: 'postgres', app_name: null }])
+      .mockResolvedValueOnce([{ rolsuper: true, rolbypassrls: true }])
+      .mockResolvedValueOnce([{ u: 'postgres', app_name: null }])
+      .mockResolvedValueOnce([{ rolsuper: true, rolbypassrls: true }])
+      .mockResolvedValueOnce([{ db_size: '0' }])
+      .mockResolvedValueOnce([{ active_connections: '0' }])
+      .mockResolvedValueOnce([{ table_count: '0' }]);
+
+    const { GET } = await loadRoute();
+    const result = (await GET()) as { status: string; issues: string[] };
+
+    expect(result.status).toBe('degraded');
+    expect(result.issues).toEqual([
+      'The tenant connection is a superuser, so row-level security does not apply to it.',
+      'The tenant connection bypasses row-level security.',
+      'The tenant and system connections are the same database role.',
+    ]);
   });
 
   it('does not turn missing role attributes into a non-bypass identity', async () => {
@@ -92,6 +118,8 @@ describe('admin/database/health route', () => {
       .mockResolvedValueOnce([{ table_count: '0' }]);
     const { GET } = await loadRoute();
     expect(await GET()).toMatchObject({
+      status: 'degraded',
+      issues: ["The tenant connection's role attributes could not be read."],
       tenantPrincipal: { rolsuper: null, rolbypassrls: null },
       systemPrincipal: { rolsuper: null, rolbypassrls: null },
     });

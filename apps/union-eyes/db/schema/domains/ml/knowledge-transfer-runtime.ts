@@ -38,6 +38,8 @@ export const ueReasoningSessions = pgTable('ue_reasoning_sessions', {
   linkedMessageIds: jsonb('linked_message_ids').notNull().default([]),
   linkedMemoryIds: jsonb('linked_memory_ids').notNull().default([]),
   latestResilienceScore: integer('latest_resilience_score'),
+  // The principal that opened the session; null for rows that predate the column (platform migration 0043).
+  createdBy: text('created_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
@@ -51,6 +53,8 @@ export const ueCopilotConversations = pgTable('ue_copilot_conversations', {
   title: text('title').notNull().default('Continuity Conversation'),
   messages: jsonb('messages').notNull().default([]),
   contextSnapshot: jsonb('context_snapshot'),
+  // The principal that opened the conversation; null for rows that predate the column (platform migration 0043).
+  createdBy: text('created_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({

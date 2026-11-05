@@ -78,6 +78,13 @@ describe('validateIngestionBatch', () => {
     expect(result.errors[0].message).toContain('Cannot map status');
   });
 
+  it('rejects a status that a grievance status column cannot hold, with the reason', () => {
+    const result = validateIngestionBatch([makeRecord({ status: 'pending_documentation' })]);
+    expect(result.valid).toBe(false);
+    expect(result.errors[0].message).toContain("stored as 'pending_documentation'");
+    expect(result.errors[0].message).toContain('20 characters');
+  });
+
   it('detects duplicate external_case_id within batch', () => {
     const rec = makeRecord();
     const result = validateIngestionBatch([rec, { ...rec }]);

@@ -15,6 +15,7 @@ const BYLAW_TYPES = ['union_policy', 'guide'] as const;
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Governance'], summary: 'List governance bylaws' },
   },

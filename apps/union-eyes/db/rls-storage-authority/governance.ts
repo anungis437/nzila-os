@@ -58,12 +58,13 @@ export const governanceEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "board_packets",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "Manually verified (public-authority tranche): direct NOT NULL organization_id column (db/schema/board-packet-schema.ts). Reachable via app/api/governance/board-packets/route.ts (list/create), app/api/governance/board-packets/[id]/route.ts (get/update/archive), and app/api/governance/board-packets/[id]/distribute/route.ts (email distribution). REAL CROSS-TENANT IDOR FOUND AND FIXED: the list GET ran an unscoped `db.select().from(boardPackets)` returning EVERY organization's board packets (financial summaries, audit exceptions, compliance status) to any officer+; POST trusted a client-supplied `organizationId` body field instead of the resolved caller context; the [id] GET had no organizationId check at all; PATCH/DELETE relied solely on withRLSContext despite board_packets never having had a live RLS policy (not part of the 0108 baseline); the distribute route resolved the packet by id alone with no org check, letting any org admin email another org's packet content to attacker-supplied recipients. All five routes now explicitly filter/force by the withApi-resolved organizationId. Regression proof: app/api/governance/board-packets/__tests__/board-packets-tenant-isolation.test.ts (8 tests).",
-    supportingCapability: ["app/api/governance/board-packets/[id]/route.ts","app/api/governance/board-packets/route.ts","app/api/governance/board-packets/[id]/distribute/route.ts","lib/services/board-packet-generator.ts"],
+    reason: "Manually verified (public-authority tranche): direct NOT NULL organization_id column (db/schema/board-packet-schema.ts). Reachable via app/api/governance/board-packets/route.ts (list/create), app/api/governance/board-packets/[id]/route.ts (get/update/archive), and app/api/governance/board-packets/[id]/distribute/route.ts (email distribution). REAL CROSS-TENANT IDOR FOUND AND FIXED: the list GET ran an unscoped `db.select().from(boardPackets)` returning EVERY organization's board packets (financial summaries, audit exceptions, compliance status) to any officer+; POST trusted a client-supplied `organizationId` body field instead of the resolved caller context; the [id] GET had no organizationId check at all; PATCH/DELETE relied solely on withRLSContext despite board_packets never having had a live RLS policy (not part of the 0108 baseline); the distribute route resolved the packet by id alone with no org check, letting any org admin email another org's packet content to attacker-supplied recipients. All five routes now explicitly filter/force by the withApi-resolved organizationId. Regression proof: app/api/governance/board-packets/__tests__/board-packets-tenant-isolation.test.ts (the predicates each route builds, rendered with the real drizzle dialect). A second family was found in the census (UE-CONV-H-017) and fixed: the routes read through the ambient handle outside a tenant transaction, so under row-level security the list returned nothing and a single read answered not found for every caller; the packet was also created with a client-supplied preparer and status, a finalization stamped nothing and hashed nothing, a finalized or distributed packet could still be edited, and a finalize could race an edit. Every read and write now runs in a tenant transaction for the caller's organization; the lifecycle (lib/governance/board-packet-lifecycle.ts: draft, finalized with a SHA-256 content hash, distributed, archived) is applied under a row lock (lib/governance/board-packet-service.ts). Native proof as the real roles: db/__tests__/board-packets-routes.postgres.test.ts.",
+    supportingCapability: ["app/api/governance/board-packets/[id]/route.ts","app/api/governance/board-packets/route.ts","app/api/governance/board-packets/[id]/distribute/route.ts","lib/services/board-packet-generator.ts","lib/governance/board-packet-service.ts","lib/governance/board-packet-lifecycle.ts","lib/governance/board-packet-input.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",
@@ -128,8 +129,8 @@ export const governanceEntries: StorageAuthorityEntry[] = [
   {
     table: "congress_memberships",
     classification: "MULTI_PARTY_RLS_REQUIRED",
-    reason: "CORRECTED round 59D (staging acceptance testing found a live contradiction of the prior LATENT_UNREACHABLE disposition): the prior entry's caller census (lib/auth/hierarchy-access-control.ts, zero callers) was accurate but incomplete — it predates lib/clause-library/sharing-authority.ts's isOrgCongressEligible()/buildClauseVisibilityCondition(), which query this table directly via the plain tenant `db` client and ARE wired into live routes (app/api/clause-library/**, closed round 55, congress-level sharing checks). Verified live against staging: with requiredRuntimePrivileges=[] (the prior disposition), the round58 enforcement migration's manifest-compiled PART E REVOKEs left union_eyes_runtime with zero grant on this table, so any congress-affiliated caller org attempting a congress-level shared-clause visibility check hits a raw 'permission denied for table congress_memberships' Postgres error instead of a graceful authorization result. FIXED this round: narrow corrective grant applied via scripts/apply-round59-congress-memberships-grant-fix.ts (SELECT only, matching the read-only isOrgCongressEligible query shape) — re-verified live: canReadSharedClause()/buildClauseVisibilityCondition() now execute cleanly for a real congress-level clause and a real CLC-affiliated/non-affiliated caller pair (apps/union-eyes/lib/clause-library/__tests__/round59d-adhoc-staging-proof.test.ts, run directly against staging, not committed as a permanent test). CORRECTED again (Gate E.1, 2026-09-11): round 59D's reclassification to TENANT_RLS_REQUIRED assumed single-column tenant geometry, but the physical schema (db/schema/domains/data/congress.ts) has TWO direct organization_id-typed FK columns to the same `organizations` table — organization_id (the member org) and congress_id (the congress-level org) — confirmed via reports/union-eyes-rls-geometry.json (confidence=CANDIDATE_MULTI_PARTY, directOrgColumns=[organization_id, congress_id]). TENANT_RLS_REQUIRED's generator path requires HIGH_CONFIDENCE_DIRECT (one column) and cannot resolve this geometry, so it correctly blocked with UNRESOLVED_DIRECT_ORG_GEOMETRY rather than guess. Reclassified to MULTI_PARTY_RLS_REQUIRED, the correct classification for a genuine two-org-column junction table (the same pattern per_capita_remittances uses) — the generator's existing, already-defined ue_create_multi_party_rls_policy(table, orgColumnA, orgColumnB) function auto-derives from this exact geometry with zero new code: SELECT-only policy (matching requiredRuntimePrivileges=[\"SELECT\"] below, unchanged) permitting a row when EITHER organization_id OR congress_id matches the caller's current_org_id — i.e. both the member org and the congress-level org can read their own membership rows, matching isOrgCongressEligible()'s actual two-sided query shape. No write policy is created (fail-closed for tenant writes, unchanged from the classification's standing doctrine). This does not reopen or change the round 59D reachability finding, required privileges, invocation authority, or the separately-documented organizations-RLS-blocks-cross-org-reads backlog item — it only corrects which policy-generation path applies to this table's actual physical geometry.",
-    supportingCapability: ["lib/clause-library/sharing-authority.ts", "app/api/clause-library/route.ts", "app/api/clause-library/[id]/route.ts", "app/api/clause-library/search/route.ts", "app/api/clause-library/compare/route.ts"],
+    reason: "CORRECTED round 59D (staging acceptance testing found a live contradiction of the prior LATENT_UNREACHABLE disposition): the prior entry's caller census (lib/auth/hierarchy-access-control.ts, zero callers) was accurate but incomplete — it predates lib/clause-library/sharing-authority.ts's isOrgCongressEligible()/buildClauseVisibilityCondition(), which query this table directly via the plain tenant `db` client and ARE wired into live routes (app/api/clause-library/**, closed round 55, congress-level sharing checks). Verified live against staging: with requiredRuntimePrivileges=[] (the prior disposition), the round58 enforcement migration's manifest-compiled PART E REVOKEs left union_eyes_runtime with zero grant on this table, so any congress-affiliated caller org attempting a congress-level shared-clause visibility check hits a raw 'permission denied for table congress_memberships' Postgres error instead of a graceful authorization result. FIXED this round: narrow corrective grant applied via scripts/apply-round59-congress-memberships-grant-fix.ts (SELECT only, matching the read-only isOrgCongressEligible query shape) — re-verified live: canReadSharedClause()/buildClauseVisibilityCondition() now execute cleanly for a real congress-level clause and a real CLC-affiliated/non-affiliated caller pair (apps/union-eyes/lib/clause-library/__tests__/round59d-adhoc-staging-proof.test.ts, run directly against staging, not committed as a permanent test). CORRECTED again (Gate E.1, 2026-09-11): round 59D's reclassification to TENANT_RLS_REQUIRED assumed single-column tenant geometry, but the physical schema (db/schema/domains/data/congress.ts) has TWO direct organization_id-typed FK columns to the same `organizations` table — organization_id (the member org) and congress_id (the congress-level org) — confirmed via reports/union-eyes-rls-geometry.json (confidence=CANDIDATE_MULTI_PARTY, directOrgColumns=[organization_id, congress_id]). TENANT_RLS_REQUIRED's generator path requires HIGH_CONFIDENCE_DIRECT (one column) and cannot resolve this geometry, so it correctly blocked with UNRESOLVED_DIRECT_ORG_GEOMETRY rather than guess. Reclassified to MULTI_PARTY_RLS_REQUIRED, the correct classification for a genuine two-org-column junction table (the same pattern per_capita_remittances uses) — the generator's existing, already-defined ue_create_multi_party_rls_policy(table, orgColumnA, orgColumnB) function auto-derives from this exact geometry with zero new code: SELECT-only policy (matching requiredRuntimePrivileges=[\"SELECT\"] below, unchanged) permitting a row when EITHER organization_id OR congress_id matches the caller's current_org_id — i.e. both the member org and the congress-level org can read their own membership rows, matching isOrgCongressEligible()'s actual two-sided query shape. No write policy is created (fail-closed for tenant writes, unchanged from the classification's standing doctrine). This does not reopen or change the round 59D reachability finding, required privileges, invocation authority, or the separately-documented organizations-RLS-blocks-cross-org-reads backlog item — it only corrects which policy-generation path applies to this table's actual physical geometry. SUPERSEDED READER (F03-B, cache 0050): the congress-eligibility test this entry was written for was removed because the catalog admission contract refuses the SECURITY DEFINER function it needed, and the clause library now treats the federation and congress levels as owner-only, so no route reads this table any more (lib/auth/hierarchy-access-control.ts still references it and has no caller). The SELECT grant and the two-sided policy are left as they are; the table is a candidate for LATENT_UNREACHABLE with no runtime grant unless an approved way to evaluate federation and congress sharing is built, which would read it.",
+    supportingCapability: ["lib/auth/hierarchy-access-control.ts"],
     requiredRuntimePrivileges: ["SELECT"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",
@@ -146,6 +147,7 @@ export const governanceEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "governance_policies",
@@ -168,6 +170,7 @@ export const governanceEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "HIGH",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "icra_governance_flags",
@@ -238,7 +241,7 @@ export const governanceEntries: StorageAuthorityEntry[] = [
   {
     table: "board_packet_distributions",
     classification: "PARENT_OWNED_RLS_REQUIRED",
-    reason: "No direct organization_id column; scoped through packetId -> board_packets.id (db/schema/board-packet-schema.ts). Written by lib/services/board-packet-generator.ts's distributePacket(), reachable via app/api/governance/board-packets/[id]/distribute/route.ts. REAL CROSS-TENANT BUG FOUND AND FIXED alongside board_packets: distributePacket() resolved the parent packet by id alone with no organization check, so any org admin could distribute another org's packet; the route now verifies the parent packet's organizationId matches the caller before invoking the generator (see board_packets' entry).",
+    reason: "No direct organization_id column; scoped through packetId -> board_packets.id (db/schema/board-packet-schema.ts). Written by lib/services/board-packet-generator.ts's distributePacket(), reachable via app/api/governance/board-packets/[id]/distribute/route.ts. REAL CROSS-TENANT BUG FOUND AND FIXED alongside board_packets: distributePacket() resolved the parent packet by id alone with no organization check, so any org admin could distribute another org's packet; the service now reads the packet inside a tenant transaction filtered by the caller's organization and answers not found otherwise (see board_packets' entry). Recipients are active members of the organization only, with their name and address taken from the membership record. Native proof as the real roles: db/__tests__/board-packets-routes.postgres.test.ts.",
     supportingCapability: ["lib/services/board-packet-generator.ts","app/api/governance/board-packets/[id]/distribute/route.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
     requiredSystemPrivileges: [],
@@ -256,6 +259,7 @@ export const governanceEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "committee_meeting_attendees",
@@ -270,13 +274,13 @@ export const governanceEntries: StorageAuthorityEntry[] = [
   },
   {
     table: "committee_memberships",
-    classification: "LATENT_UNREACHABLE",
-    reason: "Manually verified (public-authority tranche): real, org-shaped (via committeeId -> committees.organizationId) pgTable declaration in db/schema/union-structure-schema.ts, but zero real (non-test) references to the 'committeeMemberships' Drizzle export exist anywhere in app/, actions/, lib/, services/ within apps/union-eyes proper. The only references are services/financial-service's own separately-declared, separately-databased same-named table (out of this manifest's remit) — confirms the original scan's supportingCapability list (financial-service only) accurately reflected zero union-eyes reachability, it just hadn't been classified.",
-    supportingCapability: [],
-    requiredRuntimePrivileges: [],
+    classification: "PARENT_OWNED_RLS_REQUIRED",
+    reason: "PROMOTED from LATENT_UNREACHABLE (census CTX-3). The earlier scan found no reference because the only live read goes through lib/services/committee-read-access.ts requireCommitteeReader, which the committee workspace routes call (GET/POST /api/committees/[id]/meetings, /attendance, /action-items, /documents, rendered by app/[locale]/dashboard/committees/[id]/committee-workspace.tsx): for a reader below staff it SELECTs the caller's active membership row (WHERE committee_id, member_id and status = active) in the caller's tenant transaction, and a reader with no active membership gets the same answer as for a committee that does not exist. Physical table (Django unions app, db_table committee_memberships): no organization column, committee_id uuid NOT NULL references committees(id) ON DELETE CASCADE, and committees carries organization_id uuid NOT NULL, so the row is PARENT-OWNED through committee_id -> committees.organization_id; cache migration 0055 applies ue_create_parent_owned_rls_policy_v2 (FORCE RLS, runtime policy through the parent's organization, system-role policy). Minimum proven runtime DML is SELECT: the INSERT, UPDATE and list helpers in db/queries/union-structure-queries.ts have no route, page or action caller, so no write is declared. No system path.",
+    supportingCapability: ["lib/services/committee-read-access.ts","app/api/committees/[id]/action-items/route.ts","app/api/committees/[id]/meetings/route.ts","app/api/committees/[id]/documents/route.ts","app/[locale]/dashboard/committees/[id]/committee-workspace.tsx","db/migrations-cache/0055_census_ctx3_promoted_relations_rls_closure.sql"],
+    requiredRuntimePrivileges: ["SELECT"],
     requiredSystemPrivileges: [],
-    invocationAuthority: "NONE",
-    dbExecutionPrincipal: "NONE",
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "NONE",
   },
   {
@@ -289,6 +293,7 @@ export const governanceEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "council_elections",
@@ -348,12 +353,43 @@ export const governanceEntries: StorageAuthorityEntry[] = [
   {
     table: "workbook_governance_lineage_entries",
     classification: "PARENT_OWNED_RLS_REQUIRED",
-    reason: "No direct organization_id column; scoped through workbookId -> workbooks.id (db/schema/workbook-schema.ts, onDelete:'cascade'). Read by lib/workbook-pdf/loadWorkbookModules.ts (SELECT only, filtered by workbookId), called from lib/workbook-pdf/generateWorkbookPdf.ts, reachable via app/api/workbook/[id]/export/route.ts. The parent 'workbooks' table has NO organization_id column either (uses claimedByUserId + a JSONB organizationContext blob, not a real FK) — the export route enforces access via real application-level logic: reject if unclaimed, and if the requester isn't the claimant, require requester and claimant to share the SAME resolved organizationId (via getOrganizationIdForUser on both sides). This is USER_RLS_REQUIRED-shaped authority (scoped by claim ownership, not a direct org column) inherited from its parent, not TENANT_RLS_REQUIRED.",
-    supportingCapability: ["lib/workbook-pdf/loadWorkbookModules.ts","lib/workbook-pdf/generateWorkbookPdf.ts","app/api/workbook/[id]/export/route.ts"],
+    reason: "No direct organization_id column; scoped through workbookId -> workbooks.id (db/schema/workbook-schema.ts, onDelete:'cascade'). Read by lib/workbook-pdf/loadWorkbookModules.ts (SELECT only, filtered by workbookId), called from lib/workbook-pdf/generateWorkbookPdf.ts, reachable via app/api/workbook/[id]/export/route.ts. The parent 'workbooks' table has NO organization_id column either (uses claimedByUserId + a JSONB organizationContext blob, not a real FK) — the export route enforces access via real application-level logic: reject if unclaimed, and if the requester isn't the claimant, require requester and claimant to share the SAME resolved organizationId (via getOrganizationIdForUser on both sides). This is USER_RLS_REQUIRED-shaped authority (scoped by claim ownership, not a direct org column) inherited from its parent, not TENANT_RLS_REQUIRED. SYSTEM SELECT (census CTX-3): GET app/api/workbook/[id]/export/route.ts runs through withClaimedWorkbookAccess (lib/workbook/access-control.ts), which executes a same-organization peer's request as the bounded system context (the claimed owner is never impersonated; every query is constrained to this workbook_id), so the lineage read of lib/workbook-pdf/loadWorkbookModules.ts runs as the system role for that peer and as the runtime role for the claimant. Read only; the unclaimed (preclaim) authority returns before any read.",
+    supportingCapability: ["lib/workbook-pdf/loadWorkbookModules.ts","lib/workbook-pdf/generateWorkbookPdf.ts","app/api/workbook/[id]/export/route.ts","lib/workbook/access-control.ts"],
     requiredRuntimePrivileges: ["SELECT"],
+    requiredSystemPrivileges: ["SELECT"],
+    invocationAuthority: "MIXED",
+    dbExecutionPrincipal: "MIXED",
+    reviewPriority: "NONE",
+  },
+  electionTenant(
+    "election_certificate_successions",
+    "A correction of a certified council election: an uncertified successor plus this row naming the certified predecessor, version, provenance hash, distinct issuer and reviewer, and the decision. The certified election is never updated.",
+  ),
+  electionTenant(
+    "election_organization_ownership",
+    "Names the one organization that may see or supersede a council election, because council_elections has no organization column. A lookup joins it and filters organization_id.",
+  ),
+]
+
+/** Council-election supersession relations: platform 0033 and 0034, protected by scoped cache 0029. */
+function electionTenant(table: string, reason: string): StorageAuthorityEntry {
+  return {
+    table,
+    classification: "TENANT_RLS_REQUIRED",
+    scopeDisposition: "OTHER_EXPLICITLY_JUSTIFIED",
+    reason: `Direct organization_id uuid NOT NULL, created by unqualified platform migration 0033/0034 and protected by scoped cache 0029 (FORCE RLS). ${reason} Not a Drizzle census declaration. Reached only through lib/voting/election-succession inside the authority transaction on the tenant runtime identity. Append-only: no UPDATE, no DELETE. No schema authority.`,
+    supportingCapability: [
+      "lib/voting/election-succession.ts",
+      "lib/voting/election-succession-grant.ts",
+      "lib/authority/store/resources.ts",
+      "db/migrations-platform/0033_election_certificate_successions.sql",
+      "db/migrations-platform/0034_election_organization_ownership.sql",
+      "db/migrations-cache/0029_election_succession_rls_closure.sql",
+    ],
+    requiredRuntimePrivileges: ["SELECT", "INSERT"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "NONE",
-  },
-]
+  };
+}

@@ -7,9 +7,9 @@
  * in an organization based on billing frequency (monthly, bi-weekly, weekly).
  * 
  * Features:
- * - Bulk transaction generation
+ * - Bulk transaction generation (one charge per member and period)
  * - Pro-rated dues for mid-cycle joins
- * - Override amount support
+ * - The amount is the member's dues assignment (dues_assignments)
  * - COPE/PAC/Strike Fund allocation
  * - Audit trail with execution metadata
  * 
@@ -17,13 +17,13 @@
  */
 
 import { organizationMembers } from '@/db/schema-organizations';
-import { memberEmployment } from '@/db/schema/domains/member/member-employment';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
 import { DuesCalculationEngine } from '@/lib/dues-calculation-engine';
 import { eq, and } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { moneyToNumber } from '@/lib/decimal-safe';
+import { toCents } from '@/lib/decimal-safe';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
 import { type RLSTx } from '@/lib/db/with-rls-context';
 
 // =============================================================================
@@ -98,15 +98,22 @@ export class BillingCycleService {
    * Generate billing cycle for an organization
    * 
    * Creates dues transactions for all active members based on:
-   * - Their dues assignment rules
-   * - Employment data (wages, hours, etc.)
+   * - Their dues assignment (the amount and frequency the organization recorded for the member)
    * - Pro-rated amounts for mid-cycle joins
+   *
+   * A member who already has a charge for the same period is skipped, so running a cycle twice never bills it twice.
    */
   static async generateBillingCycle(
     params: BillingCycleParams
   ): Promise<BillingCycleResult> {
     const startTime = Date.now();
     const { organizationId, periodStart, periodEnd, frequency, dryRun = false, executedBy } = params;
+    // Direct service and scheduler callers must not bypass the HTTP period validator.
+    if (!(periodStart instanceof Date) || !(periodEnd instanceof Date) ||
+        !Number.isFinite(periodStart.getTime()) || !Number.isFinite(periodEnd.getTime()) ||
+        periodStart.getTime() > periodEnd.getTime()) {
+      throw new Error('Invalid billing cycle period');
+    }
 
     logger.info('Starting billing cycle generation', {
       organizationId,
@@ -118,9 +125,19 @@ export class BillingCycleService {
 
     try {
        
-      return await withRLSContext(async (tx: RLSTx) => {
-        // Step 1: Get all active members
+      return await withRLSContext({ organizationId, userId: executedBy }, async (tx: RLSTx) => {
+        // Route-level preflights are not sufficient: scheduler and direct service callers also reach this write.
+        // The live ledger-wide execution mandate must be checked on the SAME tenant transaction as all charges.
+        await requireLiveFinancialMandate(tx, {
+          organizationId,
+          userId: executedBy,
+          action: 'finance:execute',
+          requiresLedger: true,
+        });
+
+        // Step 1: Get all active members, and the members already charged for this period
         const activeMembers = await this.getActiveMembersForBilling(tx, organizationId, periodStart);
+        const alreadyBilled = await this.getMembersBilledForPeriod(tx, organizationId, periodStart, periodEnd);
 
         logger.info(`Found ${activeMembers.length} active members for billing`, {
           organizationId,
@@ -137,7 +154,9 @@ export class BillingCycleService {
               member,
               periodStart,
               periodEnd,
+              frequency,
               dryRun,
+              alreadyBilled: alreadyBilled.has(member.id),
             });
 
             results.push(result);
@@ -171,7 +190,13 @@ export class BillingCycleService {
           }
         }
 
-        // Step 3: Calculate totals
+        // Step 3: A real billing run is all-or-nothing. A partial run must not commit charges for
+        // some members while reporting success for the cycle. Throw INSIDE withRLSContext so
+        // PostgreSQL rolls back every charge in this transaction. Preview keeps diagnostics.
+        const failedResults = results.filter((r) => !r.success);
+        if (!dryRun && failedResults.length > 0) {
+          throw new Error('Billing cycle aborted: one or more member calculations failed');
+        }
         const successResults = results.filter((r) => r.success && !r.skipped);
         const totalAmount = successResults.reduce((sum, r) => sum + (r.amount || 0), 0);
         const breakdown = successResults.reduce(
@@ -195,7 +220,7 @@ export class BillingCycleService {
         });
 
         return {
-          success: true,
+          success: failedResults.length === 0,
           cycleId,
           organizationId,
           periodStart,
@@ -250,22 +275,8 @@ export class BillingCycleService {
         membershipNumber: organizationMembers.membershipNumber,
         status: organizationMembers.status,
         joinedAt: organizationMembers.joinedAt,
-        // Employment data (left join - may be null)
-        employmentId: memberEmployment.id,
-        employmentStatus: memberEmployment.employmentStatus,
-        hourlyRate: memberEmployment.hourlyRate,
-        baseSalary: memberEmployment.baseSalary,
-        grossWages: memberEmployment.grossWages,
-        regularHoursPerWeek: memberEmployment.regularHoursPerWeek,
       })
       .from(organizationMembers)
-      .leftJoin(
-        memberEmployment,
-        and(
-          eq(memberEmployment.memberId, organizationMembers.id),
-          eq(memberEmployment.employmentStatus, 'active')
-        )
-      )
       .where(
         and(
           eq(organizationMembers.organizationId, organizationId),
@@ -274,6 +285,29 @@ export class BillingCycleService {
       );
 
     return members;
+  }
+
+  /**
+   * The members who already have a charge for exactly this period (ids as dues transactions keep them: text).
+   */
+  private static async getMembersBilledForPeriod(
+    tx: RLSTx,
+    organizationId: string,
+    periodStart: Date,
+    periodEnd: Date,
+  ): Promise<Set<string>> {
+    const rows = await tx
+      .select({ memberId: duesTransactions.memberId })
+      .from(duesTransactions)
+      .where(
+        and(
+          eq(duesTransactions.organizationId, organizationId),
+          eq(duesTransactions.transactionType, 'charge'),
+          eq(duesTransactions.periodStart, periodStart.toISOString().split('T')[0]),
+          eq(duesTransactions.periodEnd, periodEnd.toISOString().split('T')[0]),
+        )
+      );
+    return new Set(rows.map((row) => row.memberId));
   }
 
   /**
@@ -288,10 +322,12 @@ export class BillingCycleService {
       member: any;
       periodStart: Date;
       periodEnd: Date;
+      frequency: BillingFrequency;
       dryRun: boolean;
+      alreadyBilled: boolean;
     }
   ): Promise<MemberBillingResult> {
-    const { organizationId, member, periodStart, periodEnd, dryRun } = params;
+    const { organizationId, member, periodStart, periodEnd, frequency, dryRun, alreadyBilled } = params;
 
     // Skip members with certain statuses
     if (!member.status || member.status !== 'active') {
@@ -304,19 +340,21 @@ export class BillingCycleService {
       };
     }
 
-    // Calculate dues using DuesCalculationEngine
-    const calculation = await DuesCalculationEngine.calculateMemberDues({
-      organizationId,
-      memberId: member.id,
-      periodStart,
-      periodEnd,
-      memberData: {
-        grossWages: member.grossWages ? moneyToNumber(member.grossWages) : undefined,
-        baseSalary: member.baseSalary ? moneyToNumber(member.baseSalary) : undefined,
-        hourlyRate: member.hourlyRate ? moneyToNumber(member.hourlyRate) : undefined,
-        hoursWorked: member.regularHoursPerWeek ? moneyToNumber(member.regularHoursPerWeek) * this.getWeeksInPeriod(periodStart, periodEnd) : undefined,
-      },
-    });
+    if (alreadyBilled) {
+      return {
+        memberId: member.id,
+        memberName: member.membershipNumber || member.userId,
+        success: true,
+        skipped: true,
+        skipReason: 'Already billed for this period',
+      };
+    }
+
+    // Calculate dues from the member's assignment, in this cycle's transaction
+    const calculation = await DuesCalculationEngine.calculateMemberDues(
+      { organizationId, memberId: member.id, periodStart, periodEnd, frequency },
+      tx,
+    );
 
     // No active dues assignment
     if (!calculation) {
@@ -357,6 +395,7 @@ export class BillingCycleService {
       .values({
         organizationId,
         memberId: member.id,
+        assignmentId: calculation.assignmentId,
         transactionType: 'charge',
         amount: proRatedAmount.toString(),
         periodStart: periodStart.toISOString().split('T')[0],
@@ -370,8 +409,8 @@ export class BillingCycleService {
         totalAmount: proRatedAmount.toString(),
         metadata: {
           calculationType: calculation.calculationType,
-          ruleId: calculation.ruleId,
-          ruleName: calculation.ruleName,
+          assignmentId: calculation.assignmentId,
+          assignmentFrequency: calculation.frequency,
           isProRated,
           proRatedReason: isProRated ? `Joined ${member.joinedAt}` : undefined,
         },
@@ -402,24 +441,30 @@ export class BillingCycleService {
     }
 
     const joinDate = new Date(joinedAt);
-    
-    // If joined before or on period start, charge full amount
-    if (joinDate <= periodStart) {
-      return { amount: fullAmount, isProRated: false };
+    // Ledger periods are persisted as UTC calendar dates. Use inclusive calendar days,
+    // not elapsed milliseconds: a 23:59:59.999 period end and DST changes must not
+    // remove the member's last eligible day or change the denominator.
+    const utcDay = (date: Date): number =>
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / 86_400_000;
+    const startDay = utcDay(periodStart);
+    const endDay = utcDay(periodEnd);
+    const joinedDay = utcDay(joinDate);
+    if (!Number.isFinite(startDay) || !Number.isFinite(endDay) ||
+        !Number.isFinite(joinedDay) || endDay < startDay) {
+      throw new Error('Invalid dues proration calendar dates');
     }
 
-    // If joined after period end, charge nothing
-    if (joinDate > periodEnd) {
+    if (joinedDay <= startDay) {
+      return { amount: fullAmount, isProRated: false };
+    }
+    if (joinedDay > endDay) {
       return { amount: 0, isProRated: true };
     }
 
-    // Pro-rate based on days in period
-    const totalDays = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24));
-    const daysActive = Math.ceil((periodEnd.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
-    const proRatedAmount = (fullAmount * daysActive) / totalDays;
-
+    const totalDays = endDay - startDay + 1;
+    const daysActive = endDay - joinedDay + 1;
     return {
-      amount: Math.round(proRatedAmount * 100) / 100,
+      amount: Math.round(toCents(fullAmount) * daysActive / totalDays) / 100,
       isProRated: true,
     };
   }
@@ -439,25 +484,26 @@ export class BillingCycleService {
     pacAmount: number;
     strikeFundAmount: number;
   } {
-    const duesAmount = totalAmount * 0.85;
-    const copeAmount = totalAmount * 0.10;
-    const pacAmount = totalAmount * 0.03;
-    const strikeFundAmount = totalAmount * 0.02;
-
+    if (!Number.isFinite(totalAmount) || totalAmount < 0) {
+      throw new Error('Invalid dues allocation amount');
+    }
+    // All components must reconcile to the charge to the cent. Independently
+    // rounding four floating-point percentages can create or lose money.
+    // These existing default percentages are NOT an institutional allocation mandate.
+    const totalCents = toCents(totalAmount);
+    if (!Number.isSafeInteger(totalCents)) {
+      throw new Error('Dues allocation exceeds safe integer cents');
+    }
+    const copeCents = Math.round(totalCents * 10 / 100);
+    const pacCents = Math.round(totalCents * 3 / 100);
+    const strikeCents = Math.round(totalCents * 2 / 100);
+    const duesCents = totalCents - copeCents - pacCents - strikeCents;
     return {
-      duesAmount: Math.round(duesAmount * 100) / 100,
-      copeAmount: Math.round(copeAmount * 100) / 100,
-      pacAmount: Math.round(pacAmount * 100) / 100,
-      strikeFundAmount: Math.round(strikeFundAmount * 100) / 100,
+      duesAmount: duesCents / 100,
+      copeAmount: copeCents / 100,
+      pacAmount: pacCents / 100,
+      strikeFundAmount: strikeCents / 100,
     };
-  }
-
-  /**
-   * Get number of weeks in a billing period
-   */
-  private static getWeeksInPeriod(periodStart: Date, periodEnd: Date): number {
-    const days = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.ceil(days / 7);
   }
 
   /**
@@ -467,6 +513,9 @@ export class BillingCycleService {
     periodStart: Date;
     periodEnd: Date;
   } {
+    if (!(referenceDate instanceof Date) || !Number.isFinite(referenceDate.getTime())) {
+      throw new Error('Invalid billing reference date');
+    }
     const start = new Date(referenceDate);
     const end = new Date(referenceDate);
 
@@ -474,6 +523,8 @@ export class BillingCycleService {
       case 'monthly':
         start.setDate(1);
         start.setHours(0, 0, 0, 0);
+        // Reset day first: Jan 31 + one month normalizes into March.
+        end.setDate(1);
         end.setMonth(end.getMonth() + 1);
         end.setDate(0); // Last day of current month
         end.setHours(23, 59, 59, 999);
@@ -485,7 +536,9 @@ export class BillingCycleService {
         const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
         start.setDate(start.getDate() + mondayOffset);
         start.setHours(0, 0, 0, 0);
-        end.setDate(start.getDate() + 13);
+        // Anchor the end to the computed Monday, not the original reference month.
+        end.setTime(start.getTime());
+        end.setDate(end.getDate() + 13);
         end.setHours(23, 59, 59, 999);
         break;
 
@@ -495,15 +548,18 @@ export class BillingCycleService {
         const mondayOff = dow === 0 ? -6 : 1 - dow;
         start.setDate(start.getDate() + mondayOff);
         start.setHours(0, 0, 0, 0);
-        end.setDate(start.getDate() + 6);
+        end.setTime(start.getTime());
+        end.setDate(end.getDate() + 6);
         end.setHours(23, 59, 59, 999);
         break;
 
       case 'quarterly':
         const quarter = Math.floor(start.getMonth() / 3);
-        start.setMonth(quarter * 3);
+        // Set the day before changing months to avoid overflow (May 31 -> May 1).
         start.setDate(1);
+        start.setMonth(quarter * 3);
         start.setHours(0, 0, 0, 0);
+        end.setDate(1);
         end.setMonth((quarter + 1) * 3);
         end.setDate(0); // Last day of quarter
         end.setHours(23, 59, 59, 999);
@@ -526,29 +582,44 @@ export class BillingCycleService {
   }
 
   /**
+   * Advance by calendar months without silently skipping a billing month.
+   * Clamp month-end anchors (Jan 31 -> Feb 28/29); preserving an original
+   * month-end recurrence across multiple executions requires a separate
+   * persisted schedule anchor and remains a distinct obligation.
+   */
+  private static addMonthsClamped(date: Date, months: number): Date {
+    const next = new Date(date);
+    const day = next.getDate();
+    next.setDate(1);
+    next.setMonth(next.getMonth() + months);
+    const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
+    next.setDate(Math.min(day, lastDay));
+    return next;
+  }
+
+  /**
    * Get next billing date based on frequency
    */
   static getNextBillingDate(frequency: BillingFrequency, lastBillingDate: Date): Date {
+    if (!(lastBillingDate instanceof Date) || !Number.isFinite(lastBillingDate.getTime())) {
+      throw new Error('Invalid last billing date');
+    }
     const nextDate = new Date(lastBillingDate);
-
     switch (frequency) {
       case 'monthly':
-        nextDate.setMonth(nextDate.getMonth() + 1);
-        break;
+        return this.addMonthsClamped(nextDate, 1);
       case 'bi_weekly':
         nextDate.setDate(nextDate.getDate() + 14);
-        break;
+        return nextDate;
       case 'weekly':
         nextDate.setDate(nextDate.getDate() + 7);
-        break;
+        return nextDate;
       case 'quarterly':
-        nextDate.setMonth(nextDate.getMonth() + 3);
-        break;
+        return this.addMonthsClamped(nextDate, 3);
       case 'annual':
-        nextDate.setFullYear(nextDate.getFullYear() + 1);
-        break;
+        return this.addMonthsClamped(nextDate, 12);
+      default:
+        throw new Error(`Unsupported billing frequency: ${frequency}`);
     }
-
-    return nextDate;
   }
 }

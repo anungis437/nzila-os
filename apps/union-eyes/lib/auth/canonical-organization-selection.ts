@@ -20,6 +20,8 @@ import {
 } from '@nzila/platform-auth/org-binding'
 import { createLogger } from '@nzila/os-core'
 import { organizations } from '@/db/schema-organizations'
+import { organizationWire } from '@/lib/organizations/organization-wire'
+import { recordOrganizationSelection, recordOrganizationSelectionOutcome } from './organization-selection-audit'
 import { canonicalMembershipRole } from './canonical-membership-role'
 import {
   CANONICAL_ORGANIZATION_AUTHORITY,
@@ -152,16 +154,7 @@ async function choicesInIdentityScope(userId: string) {
   const ids = new Set(rows.map((row) => row.id))
   return {
     organizations: rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      slug: row.slug,
-      type: row.organizationType,
-      parentId: row.parentId,
-      sector: row.sectors?.[0] ?? null,
-      jurisdiction: row.provinceTerritory,
-      description: row.description,
-      createdAt: row.createdAt?.toISOString() ?? null,
-      updatedAt: row.updatedAt?.toISOString() ?? null,
+      ...organizationWire(row),
       hierarchyPath: row.hierarchyPath,
       hierarchyLevel: row.hierarchyLevel,
       memberCount: row.memberCount,
@@ -300,6 +293,11 @@ export async function handleCanonicalOrganizationSwitch(request: NextRequest) {
         (candidate) => candidate.id === organizationId,
       )
       if (!organization) throw new AuthOrgBindingError('MEMBERSHIP_REQUIRED')
+      // Recorded before the session is rebound or the preference set; a failure refuses the selection. The organization the actor
+      // was bound to is recorded with it, and the outcome is recorded once the session store has been changed (or has refused).
+      const mode = actor.authority === 'pg-session' ? 'canonical_session' : 'canonical_preference'
+      const previousOrganizationId = actor.authority === 'pg-session' ? actor.session.organizationId : actor.organizationId
+      await recordOrganizationSelection({ organizationId, userId: actor.userId, authority: 'membership', mode, previousOrganizationId })
       const response = NextResponse.json({
         success: true,
         organization,
@@ -307,11 +305,18 @@ export async function handleCanonicalOrganizationSwitch(request: NextRequest) {
         activeOrganizationId: organizationId,
       })
       if (actor.authority === 'pg-session') {
-        const rebound = await rebindSessionOrganization({
-          userId: actor.userId,
-          organizationId,
-          token: actor.token,
-        })
+        let rebound: Awaited<ReturnType<typeof rebindSessionOrganization>>
+        try {
+          rebound = await rebindSessionOrganization({
+            userId: actor.userId,
+            organizationId,
+            token: actor.token,
+          })
+        } catch (error) {
+          await recordOrganizationSelectionOutcome({ organizationId, userId: actor.userId, outcome: 'failed', mode: 'canonical_session', previousOrganizationId })
+          throw error
+        }
+        await recordOrganizationSelectionOutcome({ organizationId, userId: actor.userId, outcome: 'applied', mode: 'canonical_session', previousOrganizationId })
         response.cookies.set(
           SESSION_COOKIE_NAME,
           rebound.token,
@@ -323,6 +328,7 @@ export async function handleCanonicalOrganizationSwitch(request: NextRequest) {
           JSON.stringify({ userId: actor.userId, organizationId }),
           sessionCookieAttributes(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
         )
+        await recordOrganizationSelectionOutcome({ organizationId, userId: actor.userId, outcome: 'applied', mode: 'canonical_preference', previousOrganizationId })
       }
       return response
     }

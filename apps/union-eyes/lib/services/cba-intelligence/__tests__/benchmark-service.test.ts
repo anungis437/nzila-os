@@ -129,6 +129,8 @@ describe("benchmark-service", () => {
     expect(result.insufficientData).toBe(true);
     expect(result.requiredComparables).toBe(2);
     expect(result.comparableCount).toBe(1);
+    expect(result.wageIncreaseP25).toBeNull();
+    expect(result.wageIncreaseP75).toBeNull();
     expect(result.targetTermMonths).toBe(36);
     expect(mocks.mockLoggerWarn).toHaveBeenCalled();
   });
@@ -146,6 +148,7 @@ describe("benchmark-service", () => {
       [
         {
           id: "cmp-1",
+          title: "Agreement A",
           employerNormalized: "Employer A",
           unionNormalized: "Union A",
           jurisdiction: "federal",
@@ -154,6 +157,7 @@ describe("benchmark-service", () => {
         },
         {
           id: "cmp-2",
+          title: "Agreement B",
           employerNormalized: null,
           unionNormalized: null,
           jurisdiction: "federal",
@@ -184,13 +188,35 @@ describe("benchmark-service", () => {
 
     expect(result.insufficientData).toBeUndefined();
     expect(result.comparableCount).toBe(2);
-    expect(result.medianWageIncrease).toBe(4);
+    // Two comparables at 2% and 4%: the middle one is halfway between them, and the quartiles are a quarter of the way in from each end.
+    expect(result.medianWageIncrease).toBe(3);
+    expect(result.wageIncreaseP25).toBe(2.5);
+    expect(result.wageIncreaseP75).toBe(3.5);
     expect(result.avgTermMonths).toBe(30);
     expect(result.clauseFamilyCoverage).toEqual({ wages: 100, leave: 50 });
     expect(result.targetWageIncrease).toBe(3);
     expect(result.targetWagePercentile).toBe(50);
     expect(result.comparables[1].employer).toBe("Unknown");
     expect(result.comparables[1].union).toBe("Unknown");
+    expect(result.comparables.map((comparable) => comparable.title)).toEqual(["Agreement A", "Agreement B"]);
+  });
+
+  it("takes the quartiles of the comparables' wage increases by interpolation, for an odd and an even number of them", async () => {
+    const run = async (increases: number[]) => {
+      mocks.selectQueue.push(
+        [{ id: "target-1", jurisdiction: "federal", sector: "public", termMonths: 36 }],
+        increases.map((_, index) => ({ id: `cmp-${index}`, title: `Agreement ${index}`, employerNormalized: "Employer", unionNormalized: "Union", jurisdiction: "federal", sector: "public", termMonths: 24 })),
+        increases.map((value, index) => ({ agreementId: `cmp-${index}`, effectiveDate: new Date("2026-01-01"), adjustmentPercent: String(value) })),
+        [],
+      );
+      const { findComparableAgreements } = await import("../benchmark-service");
+      return findComparableAgreements("target-1", { minComparables: 1 });
+    };
+
+    const odd = await run([10, 1, 4, 2, 3]);
+    expect([odd.wageIncreaseP25, odd.medianWageIncrease, odd.wageIncreaseP75]).toEqual([2, 3, 4]);
+    const even = await run([4, 1, 3, 2]);
+    expect([even.wageIncreaseP25, even.medianWageIncrease, even.wageIncreaseP75]).toEqual([1.75, 2.5, 3.25]);
   });
 
   it("returns null aggregates when comparable wages and terms are missing", async () => {
@@ -221,6 +247,8 @@ describe("benchmark-service", () => {
     const result = await findComparableAgreements("target-1", { minComparables: 1 });
 
     expect(result.medianWageIncrease).toBeNull();
+    expect(result.wageIncreaseP25).toBeNull();
+    expect(result.wageIncreaseP75).toBeNull();
     expect(result.avgTermMonths).toBeNull();
     expect(result.clauseFamilyCoverage).toEqual({});
     expect(result.targetWageIncrease).toBeNull();
@@ -328,6 +356,7 @@ describe("benchmark-service", () => {
       comparables: [
         {
           agreementId: "cmp-1",
+          title: "Agreement A",
           employer: "Employer A",
           union: "Union A",
           jurisdiction: "federal",
@@ -340,6 +369,8 @@ describe("benchmark-service", () => {
       ],
       comparableCount: 1,
       medianWageIncrease: 3,
+      wageIncreaseP25: 3,
+      wageIncreaseP75: 3,
       avgTermMonths: 24,
       clauseFamilyCoverage: { wages: 100 },
       targetWageIncrease: 2.5,
@@ -371,7 +402,7 @@ describe("benchmark-service", () => {
         comparables: [
           expect.objectContaining({
             agreementId: "cmp-1",
-            title: "Employer A / Union A",
+            title: "Agreement A",
           }),
         ],
       }),

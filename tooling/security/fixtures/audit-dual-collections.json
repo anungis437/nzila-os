@@ -1,9 +1,9 @@
 {
   "advisories": {},
   "vulnerabilities": {
-    "1240912": {
+    "1108110": {
       "severity": "high",
-      "package": "node-forge"
+      "package": "xlsx"
     }
   },
   "metadata": {

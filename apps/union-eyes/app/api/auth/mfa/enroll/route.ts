@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/api-auth-guard'
 import { findMfaEnrollmentUser } from '@/lib/services/mfa-enrollment-service'
 import { enrollMfa } from '@nzila/platform-auth/mfa'
+import { withAuthenticatedAuthContext } from '@nzila/platform-auth/auth-execution'
 
 export const runtime = 'nodejs'
 
@@ -18,7 +19,9 @@ export async function POST(_request: NextRequest) {
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const user = await findMfaEnrollmentUser(userId)
+  // The person's own identity row is read through the auth execution boundary (the same one enrollMfa uses), never through the ambient
+  // handle: auth tables are self-only, and a connection with no user set sees none of them.
+  const user = await withAuthenticatedAuthContext(userId, () => findMfaEnrollmentUser(userId))
   if (!user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }

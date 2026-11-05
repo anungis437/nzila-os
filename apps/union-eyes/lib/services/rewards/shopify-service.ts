@@ -4,7 +4,7 @@
  * Provides integration with Shop Moi Ça (Shopify) for redemption fulfillment.
  * 
  * Key Responsibilities:
- * - Fetch curated product collections via Storefront API
+ * - Look up a product via the Storefront API
  * - Create discount codes via Admin API
  * - Generate checkout URLs with pre-applied discounts
  * 
@@ -12,14 +12,13 @@
  * - Uses Shopify Storefront API (GraphQL) for public catalog access
  * - Uses Shopify Admin API (REST) for discount code creation
  * - Discount codes follow pattern: UE{redemption_id}
+ * - Makes HTTP calls only; it reads no database table, so callers keep it outside their transactions
  * 
  * @see docs/recognition/api-contracts.md
  */
 
-import { db } from '@/db';
-import { shopifyConfig } from '@/db/schema/recognition-rewards-schema';
-import { eq } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { discountCodeFor } from './shopify-redemption-rules';
 
 // Shopify configuration
 const SHOPIFY_SHOP_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || 'shop-moi-ca.myshopify.com';
@@ -61,17 +60,6 @@ export interface ShopifyProduct {
     };
     availableForSale: boolean;
   }>;
-}
-
-/**
- * Collection of products
- */
-export interface ShopifyCollection {
-  id: string;
-  title: string;
-  description: string;
-  handle: string;
-  products: ShopifyProduct[];
 }
 
 /**
@@ -121,18 +109,6 @@ interface ShopifyProductNode {
   variants: { edges: ShopifyEdge<ShopifyVariantNode>[] };
 }
 
-interface StorefrontCollectionResponse {
-  data?: {
-    collectionByHandle?: {
-      id: string;
-      title: string;
-      description: string;
-      handle: string;
-      products: { edges: ShopifyEdge<ShopifyProductNode>[] };
-    } | null;
-  };
-}
-
 interface StorefrontProductResponse {
   data?: {
     productByHandle?: ShopifyProductNode | null;
@@ -155,163 +131,14 @@ interface ShopifyDiscountCodeResponse {
   discount_code?: ShopifyDiscountCode;
 }
 
-type ShopifyShop = Record<string, unknown>;
+/** What the Shopify Admin API's shop.json says about the shop; the admin page shows the name and the domain. */
+export interface ShopifyShop {
+  name: string;
+  domain: string;
+}
 
 interface ShopifyShopResponse {
-  shop?: ShopifyShop;
-}
-
-/**
- * Fetch curated product collections for redemption
- * 
- * Queries Shopify Storefront API to retrieve products from allowed collections.
- * Filters based on org-specific configuration if available.
- * 
- * @param orgId - Organization ID for collection filtering
- * @param limit - Maximum number of products per collection
- * @returns Array of collections with products
- */
-export async function fetchCuratedCollections(
-  orgId: string,
-  limit: number = 20
-): Promise<ShopifyCollection[]> {
-  try {
-    // Check if org has specific Shopify config
-    const orgConfig = await db.query.shopifyConfig.findFirst({
-      where: eq(shopifyConfig.orgId, orgId),
-    });
-
-    const allowedCollections = (orgConfig?.allowedCollections as string[] | null) || ['rewards'];
-
-    // Fetch collections via Storefront API
-    const collections: ShopifyCollection[] = [];
-
-    for (const collectionHandle of allowedCollections) {
-      const collection = await fetchCollectionByHandle(collectionHandle, limit);
-      if (collection) {
-        collections.push(collection);
-      }
-    }
-
-    return collections;
-  } catch (error) {
-    logger.error('[Shopify] Error fetching collections', { error, orgId });
-    throw new Error('Failed to fetch product catalog');
-  }
-}
-
-/**
- * Fetch a single collection by handle
- * 
- * @param handle - Collection handle (URL-friendly name)
- * @param limit - Maximum number of products
- * @returns Collection with products or null if not found
- */
-async function fetchCollectionByHandle(
-  handle: string,
-  limit: number
-): Promise<ShopifyCollection | null> {
-  const query = `
-    query GetCollection($handle: String!, $limit: Int!) {
-      collectionByHandle(handle: $handle) {
-        id
-        title
-        description
-        handle
-        products(first: $limit) {
-          edges {
-            node {
-              id
-              title
-              description
-              handle
-              images(first: 3) {
-                edges {
-                  node {
-                    url
-                    altText
-                  }
-                }
-              }
-              priceRange {
-                minVariantPrice {
-                  amount
-                  currencyCode
-                }
-                maxVariantPrice {
-                  amount
-                  currencyCode
-                }
-              }
-              variants(first: 10) {
-                edges {
-                  node {
-                    id
-                    title
-                    price {
-                      amount
-                      currencyCode
-                    }
-                    availableForSale
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  const response = await fetch(STOREFRONT_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN,
-    },
-    body: JSON.stringify({
-      query,
-      variables: { handle, limit },
-    }),
-  });
-
-  if (!response.ok) {
-    logger.error('[Shopify] Storefront API error', { statusText: response.statusText });
-    return null;
-  }
-
-  const result = (await response.json()) as StorefrontCollectionResponse;
-
-  if (!result.data?.collectionByHandle) {
-    logger.warn('[Shopify] Collection not found', { handle });
-    return null;
-  }
-
-  const collection = result.data.collectionByHandle;
-
-  return {
-    id: collection.id,
-    title: collection.title,
-    description: collection.description,
-    handle: collection.handle,
-    products: collection.products.edges.map((edge) => ({
-      id: edge.node.id,
-      title: edge.node.title,
-      description: edge.node.description,
-      handle: edge.node.handle,
-      images: edge.node.images.edges.map((imgEdge) => ({
-        url: imgEdge.node.url,
-        altText: imgEdge.node.altText ?? undefined,
-      })),
-      priceRange: edge.node.priceRange,
-      variants: edge.node.variants.edges.map((variantEdge) => ({
-        id: variantEdge.node.id,
-        title: variantEdge.node.title,
-        price: variantEdge.node.price,
-        availableForSale: variantEdge.node.availableForSale,
-      })),
-    })),
-  };
+  shop?: { name?: unknown; domain?: unknown };
 }
 
 /**
@@ -331,7 +158,8 @@ export async function createDiscountCode(
   currency: string = 'CAD'
 ): Promise<DiscountCodeResult> {
   try {
-    const code = `UE${redemptionId.replace(/-/g, '').substring(0, 12).toUpperCase()}`;
+    // The webhook resolves the redemption from this code, so it is defined with its parser in shopify-redemption-rules.
+    const code = discountCodeFor(redemptionId);
 
     // Create price rule first (discount amount)
     const priceRule = await createPriceRule(amount, currency, code);
@@ -490,6 +318,19 @@ export async function createCheckoutSession(
 }
 
 /**
+ * Whether an address is a checkout on the configured store: the one place a member is sent after their credits were spent. The checkout URL
+ * is built from the configured shop domain, and this is the check that keeps it so for whoever passes it on.
+ */
+export function isStoreCheckoutUrl(candidate: string): boolean {
+  try {
+    const url = new URL(candidate);
+    return url.protocol === 'https:' && url.hostname === SHOPIFY_SHOP_DOMAIN;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Test Shopify connection
  * 
  * Verifies that Shopify credentials are valid by fetching shop info.
@@ -510,7 +351,11 @@ export async function testShopifyConnection(): Promise<ShopifyShop | null> {
     }
 
     const result = (await response.json()) as ShopifyShopResponse;
-    return result.shop ?? null;
+    const { shop } = result;
+    // A connection is confirmed by a shop that names itself, not by any answer.
+    if (shop && typeof shop.name === 'string' && typeof shop.domain === 'string') return { name: shop.name, domain: shop.domain };
+    logger.error('[Shopify] Connection test answered without a shop name and domain');
+    return null;
   } catch (error) {
     logger.error('[Shopify] Connection error', { error });
     return null;

@@ -1,0 +1,129 @@
+name: Union Eyes Disposable HTTP and Browser Acceptance
+
+on:
+  pull_request:
+    paths:
+      - 'apps/union-eyes/**'
+      - 'tooling/scripts/ue-runtime-up.mjs'
+      - 'tooling/scripts/lib/ue-disposable-container-ownership*.mjs'
+      - 'tooling/scripts/lib/ue-runtime-restart-handoff*.mjs'
+      - '.github/workflows/ue-http-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ue-http-runtime-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  synthetic-browser-runtime:
+    name: Production-build HTTP, cross-tenant and restart QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify JavaScript parser accepts runtime entrypoint before any dependencies or Docker
+        run: |
+          node --check tooling/scripts/ue-runtime-up.mjs
+          node --check tooling/scripts/lib/ue-disposable-container-ownership.mjs
+          node --check tooling/scripts/lib/ue-runtime-restart-handoff.mjs
+
+      - uses: ./.github/actions/setup-monorepo
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11.14'
+          cache: pip
+          cache-dependency-path: apps/union-eyes/backend/requirements.lock
+
+      - name: Install locked Django dependencies
+        run: python -m pip install --require-hashes -r apps/union-eyes/backend/requirements.lock
+
+      - name: Install browser binaries and system dependencies
+        run: pnpm --filter @nzila/union-eyes exec playwright install --with-deps chromium
+
+      - name: Verify disposable runtime ownership contracts
+        run: node --test tooling/scripts/lib/ue-disposable-container-ownership.test.mjs
+
+      - name: Verify fresh restart filing hand-off fails closed
+        run: node --test tooling/scripts/lib/ue-runtime-restart-handoff.test.mjs
+
+      - name: Assert this runner owns every disposable name and no local port is already bound
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUNNER_ENVIRONMENT" = github-hosted
+          test -z "$(docker ps -aq --filter name='^/ue-runtime-pg$')"
+          test -z "$(docker ps -aq --filter name='^/ue-runtime-redis$')"
+
+      - name: Execute real production build, all QA journeys and restart persistence
+        timeout-minutes: 65
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: node tooling/scripts/ue-runtime-up.mjs all --prod --fresh --rebuild --redis
+
+      - name: Validate distinct Playwright phase reports (synthetic QA, NOT real login)
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          mkdir -p artifacts/ue-http-runtime
+          node <<'NODE'
+          const fs = require('node:fs')
+          const phases = [
+            'main',
+            'restart-pre-case',
+            'restart-pre-mandates',
+            'restart-persistence',
+          ]
+          const observations = []
+          for (const name of phases) {
+            const filename = `.ue-runtime/playwright-${name}.json`
+            if (!fs.existsSync(filename)) throw new Error('Missing executed browser phase: ' + name)
+            const r = JSON.parse(fs.readFileSync(filename, 'utf8'))
+            const expected = Number(r.stats?.expected ?? 0)
+            const unexpected = Number(r.stats?.unexpected ?? 0)
+            const flaky = Number(r.stats?.flaky ?? 0)
+            const skipped = Number(r.stats?.skipped ?? 0)
+            if (expected < 1 || unexpected !== 0 || flaky !== 0) {
+              throw new Error(JSON.stringify({ name, expected, unexpected, flaky, skipped }))
+            }
+            observations.push({ phase: name, expected, unexpected, flaky, skipped })
+          }
+          fs.writeFileSync('artifacts/ue-http-runtime/receipt.json', JSON.stringify({
+            kind: 'UE-DISPOSABLE-PRODUCTION-BUILD-HTTP-QA',
+            sourceSha: process.env.SOURCE_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            status: 'PASS',
+            authenticationClass: 'SYNTHETIC_QA_SESSIONS',
+            phases: observations,
+            evidenceClass: 'HTTP_BROWSER_AND_RESTART_QA',
+            limitation: 'Does not establish real provider login, immutable Azure audit, or final staging readiness',
+          }, null, 2) + '\n')
+          NODE
+
+      - name: Save only browser proofs, never database passwords or runtime secrets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-http-runtime-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            .ue-runtime/playwright-main.json
+            .ue-runtime/playwright-restart-pre-case.json
+            .ue-runtime/playwright-restart-pre-mandates.json
+            .ue-runtime/playwright-restart-persistence.json
+            artifacts/ue-http-runtime/receipt.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Remove owned disposable containers
+        if: always()
+        run: node tooling/scripts/ue-runtime-up.mjs down

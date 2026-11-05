@@ -1,10 +1,12 @@
 /**
- * Organization Members Management Component
- * Assign members, bulk transfers, cross-org search, and member analytics
+ * Organization Members Component
+ * The organization's roster (GET /api/organizations/{id}/members) with search, a role filter and a CSV export of the rows shown.
+ * Moving members to another organization is not offered: no authorised route does it.
  */
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useLocale } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,44 +20,39 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
- 
 import {
   Users,
   Search,
-  ArrowRight,
   Loader2,
   AlertCircle,
   Download,
-  Filter as _Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
+import { generateCSV, type CSVColumn } from "@/lib/csv-export";
 
+/** A roster row exactly as the members route sends it. */
 interface Member {
   id: string;
-  userId: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
+  user_id: string;
+  organization_id: string;
   role: string;
   status: string;
-  joinedAt: string;
-  organizationId: string;
-  organizationName?: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  department: string | null;
+  membership_number: string | null;
+  is_primary: boolean | null;
+  created_at: string | null;
+  joined_at: string | null;
+  updated_at: string | null;
 }
 
 interface OrganizationMembersProps {
@@ -63,26 +60,62 @@ interface OrganizationMembersProps {
   className?: string;
 }
 
+const COPY = {
+  en: { loadFailed: "The member list could not be loaded.", retry: "Retry" },
+  fr: { loadFailed: "La liste des membres n’a pas pu être chargée.", retry: "Réessayer" },
+} as const;
+
+// The route reads a roster one page at a time (at most 200 rows), so the whole roster is the pages up to the first short one.
+const PAGE_SIZE = 200;
+const MAX_PAGES = 500;
+
+async function fetchRoster(organizationId: string): Promise<Member[]> {
+  const roster: Member[] = [];
+  for (let page = 1; page <= MAX_PAGES; page += 1) {
+    const response = await fetch(
+      `/api/organizations/${encodeURIComponent(organizationId)}/members?limit=${PAGE_SIZE}&page=${page}`
+    );
+    if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+    const body: unknown = await response.json();
+    const rows = (body as { data?: unknown } | null)?.data;
+    if (!Array.isArray(rows)) throw new Error("Unexpected members response");
+    roster.push(...(rows as Member[]));
+    if (rows.length < PAGE_SIZE) return roster;
+  }
+  throw new Error("The member list is too long to load");
+}
+
+const displayName = (member: Member) => member.name || member.email || member.user_id;
+const joinedOn = (member: Member) => member.joined_at ?? member.created_at;
+
+const EXPORT_COLUMNS: CSVColumn<Member>[] = [
+  { header: "Name", accessor: (m) => m.name },
+  { header: "Email", accessor: (m) => m.email },
+  { header: "Role", accessor: (m) => m.role },
+  { header: "Status", accessor: (m) => m.status },
+  { header: "Department", accessor: (m) => m.department },
+  { header: "Membership Number", accessor: (m) => m.membership_number },
+  { header: "Joined Date", accessor: (m) => joinedOn(m) },
+];
+
 export function OrganizationMembers({ organizationId, className }: OrganizationMembersProps) {
+  const copy = useLocale().toLowerCase().startsWith("fr") ? COPY.fr : COPY.en;
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
-  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
-  const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [transferTargetOrg, setTransferTargetOrg] = useState<string>("");
-  const [transferring, setTransferring] = useState(false);
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
+    setLoadFailed(false);
     try {
-      const response = await fetch(`/api/organizations/${organizationId}/members`);
-      if (!response.ok) throw new Error("Failed to load members");
-      
-      const data = await response.json();
-      setMembers(data.data || []);
-    } catch (_err) {
-} finally {
+      setMembers(await fetchRoster(organizationId));
+    } catch (error) {
+      logger.error("Failed to load organization members", error);
+      setMembers([]);
+      setLoadFailed(true);
+    } finally {
       setLoading(false);
     }
   }, [organizationId]);
@@ -92,73 +125,18 @@ export function OrganizationMembers({ organizationId, className }: OrganizationM
   }, [loadMembers]);
 
   const filteredMembers = members.filter(member => {
-    const matchesSearch = !searchQuery || 
-      member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.lastName?.toLowerCase().includes(searchQuery.toLowerCase());
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = !query || 
+      member.email?.toLowerCase().includes(query) ||
+      member.name?.toLowerCase().includes(query);
     
     const matchesRole = roleFilter === "all" || member.role === roleFilter;
     
     return matchesSearch && matchesRole;
   });
 
-  const toggleMemberSelection = (memberId: string) => {
-    const newSelection = new Set(selectedMembers);
-    if (newSelection.has(memberId)) {
-      newSelection.delete(memberId);
-    } else {
-      newSelection.add(memberId);
-    }
-    setSelectedMembers(newSelection);
-  };
-
-  const toggleAllMembers = () => {
-    if (selectedMembers.size === filteredMembers.length) {
-      setSelectedMembers(new Set());
-    } else {
-      setSelectedMembers(new Set(filteredMembers.map(m => m.id)));
-    }
-  };
-
-  const handleBulkTransfer = async () => {
-    if (!transferTargetOrg || selectedMembers.size === 0) return;
-    
-    setTransferring(true);
-    try {
-      const response = await fetch(`/api/organizations/${organizationId}/members/bulk-transfer`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          memberIds: Array.from(selectedMembers),
-          targetOrganizationId: transferTargetOrg
-        })
-      });
-      
-      if (!response.ok) throw new Error("Transfer failed");
-      
-      await loadMembers();
-      setSelectedMembers(new Set());
-      setShowTransferDialog(false);
-      setTransferTargetOrg("");
-    } catch (_err) {
-alert("Failed to transfer members");
-    } finally {
-      setTransferring(false);
-    }
-  };
-
   const handleExport = () => {
-    const csv = [
-      ["Email", "First Name", "Last Name", "Role", "Status", "Joined Date"],
-      ...filteredMembers.map(m => [
-        m.email,
-        m.firstName || "",
-        m.lastName || "",
-        m.role,
-        m.status,
-        new Date(m.joinedAt).toLocaleDateString()
-      ])
-    ].map(row => row.join(",")).join("\n");
+    const csv = generateCSV(filteredMembers, EXPORT_COLUMNS);
     
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -179,6 +157,20 @@ alert("Failed to transfer members");
     );
   }
 
+  if (loadFailed) {
+    return (
+      <Card className={className}>
+        <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
+          <AlertCircle className="w-8 h-8 text-destructive" />
+          <p role="alert" className="text-sm">{copy.loadFailed}</p>
+          <Button variant="outline" size="sm" onClick={loadMembers}>
+            {copy.retry}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -190,7 +182,6 @@ alert("Failed to transfer members");
             </CardTitle>
             <CardDescription>
               {members.length} total members
-              {selectedMembers.size > 0 && ` â€¢ ${selectedMembers.size} selected`}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -198,16 +189,6 @@ alert("Failed to transfer members");
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            {selectedMembers.size > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setShowTransferDialog(true)}
-              >
-                <ArrowRight className="w-4 h-4 mr-2" />
-                Transfer ({selectedMembers.size})
-              </Button>
-            )}
           </div>
         </div>
       </CardHeader>
@@ -246,12 +227,6 @@ alert("Failed to transfer members");
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={selectedMembers.size === filteredMembers.length}
-                    onCheckedChange={toggleAllMembers}
-                  />
-                </TableHead>
                 <TableHead>Member</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
@@ -259,103 +234,44 @@ alert("Failed to transfer members");
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredMembers.map((member) => (
-                <TableRow key={member.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedMembers.has(member.id)}
-                      onCheckedChange={() => toggleMemberSelection(member.id)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">
-                        {member.firstName || member.lastName 
-                          ? `${member.firstName || ""} ${member.lastName || ""}`.trim()
-                          : member.email
-                        }
+              {filteredMembers.map((member) => {
+                const joined = joinedOn(member);
+                return (
+                  <TableRow key={member.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{displayName(member)}</div>
+                        {member.name && member.email && (
+                          <div className="text-sm text-muted-foreground">{member.email}</div>
+                        )}
                       </div>
-                      {(member.firstName || member.lastName) && (
-                        <div className="text-sm text-muted-foreground">{member.email}</div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={member.role === "admin" ? "default" : "secondary"}>
-                      {member.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant="outline"
-                      className={cn(
-                        member.status === "active" && "border-green-500 text-green-700",
-                        member.status === "inactive" && "border-gray-500 text-gray-700"
-                      )}
-                    >
-                      {member.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {new Date(member.joinedAt).toLocaleDateString()}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={member.role === "admin" ? "default" : "secondary"}>
+                        {member.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant="outline"
+                        className={cn(
+                          member.status === "active" && "border-green-500 text-green-700",
+                          member.status === "inactive" && "border-gray-500 text-gray-700"
+                        )}
+                      >
+                        {member.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {joined ? new Date(joined).toLocaleDateString() : "—"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
       </CardContent>
-
-      {/* Transfer Dialog */}
-      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Transfer Members</DialogTitle>
-            <DialogDescription>
-              Transfer {selectedMembers.size} selected member{selectedMembers.size !== 1 ? "s" : ""} to another organization
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Target Organization</label>
-              <Input
-                placeholder="Enter organization ID or search..."
-                value={transferTargetOrg}
-                onChange={(e) => setTransferTargetOrg(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Members will be transferred to the specified organization
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowTransferDialog(false)}
-              disabled={transferring}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleBulkTransfer}
-              disabled={!transferTargetOrg || transferring}
-            >
-              {transferring ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Transferring...
-                </>
-              ) : (
-                <>
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  Transfer
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </Card>
   );
 }
-

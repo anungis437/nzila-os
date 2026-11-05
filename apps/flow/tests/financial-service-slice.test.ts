@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest'
 
 const { mockSelectWhere } = vi.hoisted(() => ({
   mockSelectWhere: vi.fn(),
@@ -63,6 +63,11 @@ vi.mock('@nzila/db', () => {
 })
 
 describe('financial service analytics slice', () => {
+  // Load the module under real timers: a cold import under fake timers can stall until the test times out.
+  beforeAll(async () => {
+    await import('@/lib/financial-service')
+  })
+
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-06-08T00:00:00.000Z'))

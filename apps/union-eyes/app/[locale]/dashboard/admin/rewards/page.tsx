@@ -253,6 +253,22 @@ export default async function AdminRewardsPage({
           </Card>
 
           <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
+            <Link href={`/${locale}/dashboard/admin/rewards/analytics`}>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">{t('quickActions.analytics.title')}</CardTitle>
+                    <CardDescription>{t('quickActions.analytics.description')}</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Link>
+          </Card>
+
+          <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
             <Link href={`/${locale}/dashboard/admin/rewards/members`}>
               <CardHeader>
                 <div className="flex items-center gap-3">
@@ -275,29 +291,6 @@ export default async function AdminRewardsPage({
           </Card>
         </div>
       </div>
-
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {t('recentActivity.title', { defaultValue: 'Recent Activity' })}
-          </CardTitle>
-          <CardDescription>
-            {t('recentActivity.description', {
-              defaultValue: 'Latest awards and redemptions across the organization',
-            })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <p>
-              {t('recentActivity.placeholder', {
-                defaultValue: 'No recent activity',
-              })}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

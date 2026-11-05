@@ -11,6 +11,8 @@ import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
+from core import defaults as column_defaults
+from django.utils import timezone
 
 try:
     from pgvector.django import VectorField
@@ -48,6 +50,42 @@ class AlertRules(BaseModel):
         on_delete=models.CASCADE,
         related_name="alert_rules_organization_set",
     )
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    category = models.CharField(max_length=100, null=True, blank=True)
+    trigger_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['schedule', 'event', 'threshold', 'manual']],
+    )
+    trigger_config = models.JSONField()
+    severity = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['critical', 'high', 'medium', 'low', 'info']],
+        default='medium',
+    )
+    frequency = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'once', 'every_occurrence', 'daily_digest', 'hourly_digest', 'rate_limited',
+        ]],
+        default='every_occurrence',
+    )
+    rate_limit_minutes = models.IntegerField(null=True, blank=True)
+    is_enabled = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    last_executed_at = models.DateTimeField(null=True, blank=True)
+    last_execution_status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'pending', 'running', 'success', 'failed', 'skipped', 'rate_limited',
+        ]],
+        null=True,
+        blank=True,
+    )
+    execution_count = models.IntegerField(default=0)
+    success_count = models.IntegerField(default=0)
+    failure_count = models.IntegerField(default=0)
+    created_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "alert_rules"
@@ -104,6 +142,26 @@ class AlertExecutions(BaseModel):
         on_delete=models.CASCADE,
         related_name="alert_executions_alert_rule_set",
     )
+    triggered_by = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['schedule', 'event', 'threshold', 'manual']],
+    )
+    trigger_data = models.JSONField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'pending', 'running', 'success', 'failed', 'skipped', 'rate_limited',
+        ]],
+        default='pending',
+    )
+    started_at = models.DateTimeField(default=timezone.now)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    conditions_met = models.BooleanField(null=True, blank=True)
+    conditions_evaluated = models.JSONField(null=True, blank=True)
+    actions_executed = models.JSONField(null=True, blank=True)
+    error_message = models.TextField(null=True, blank=True)
+    error_details = models.JSONField(null=True, blank=True)
+    execution_time_ms = models.IntegerField(null=True, blank=True)
 
     class Meta:
         db_table = "alert_executions"
@@ -146,6 +204,15 @@ class AlertRecipients(BaseModel):
         on_delete=models.CASCADE,
         related_name="alert_recipients_alert_rule_set",
     )
+    delivery_methods = ArrayField(
+        models.CharField(max_length=50),
+        default=column_defaults.alert_recipients__delivery_methods,
+    )
+    quiet_hours_end = models.TimeField(null=True, blank=True)
+    quiet_hours_start = models.TimeField(null=True, blank=True)
+    recipient_id = models.UUIDField(null=True, blank=True)
+    recipient_type = models.CharField(max_length=50)
+    recipient_value = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "alert_recipients"
@@ -180,8 +247,8 @@ class AuditLogs(BaseModel):
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(null=True, blank=True)
     correlation_id = models.UUIDField(null=True, blank=True)
-    details = models.JSONField(default=dict, null=True, blank=True)
-    changes = models.JSONField(default=dict, null=True, blank=True)
+    details = models.JSONField(null=True, blank=True)
+    changes = models.JSONField(null=True, blank=True)
     # — Hash chain —
     content_hash = models.CharField(max_length=64, null=True, blank=True)
     previous_hash = models.CharField(max_length=64, null=True, blank=True)
@@ -208,10 +275,20 @@ class SecurityEvents(BaseModel):
         "auth_core.Organizations",
         on_delete=models.CASCADE,
         related_name="security_events_organization_set",
-        null=True,
-        blank=True,
     )
     user_id = models.CharField(max_length=255, null=True, blank=True)
+    action_taken = models.TextField(null=True, blank=True)
+    description = models.TextField()
+    event_type = models.TextField()
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.TextField(null=True, blank=True)
+    resource = models.TextField(null=True, blank=True)
+    severity = models.TextField(default='low')
+    source_ip = models.TextField(null=True, blank=True)
+    status = models.TextField(default='open')
+    user_agent = models.TextField(null=True, blank=True)
+    user_email = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "security_events"
@@ -246,8 +323,30 @@ class RateLimitEvents(BaseModel):
 class AutomationRules(BaseModel):
     """Migrated from drizzle: automation-rules-schema.ts"""
 
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True)
     organization_id = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='draft')
+    priority = models.IntegerField(default=100, null=True, blank=True)
+    target_entity = models.CharField(max_length=50)
+    target_filter = models.JSONField(null=True, blank=True)
+    trigger_type = models.CharField(max_length=50)
+    trigger_config = models.JSONField(null=True, blank=True)
+    conditions = models.JSONField(null=True, blank=True)
+    actions = models.JSONField(null=True, blank=True)
+    max_executions = models.IntegerField(null=True, blank=True)
+    executions_count = models.IntegerField(default=0, null=True, blank=True)
+    last_executed_at = models.DateTimeField(null=True, blank=True)
+    active_from = models.DateTimeField(null=True, blank=True)
+    active_until = models.DateTimeField(null=True, blank=True)
+    timezone = models.CharField(max_length=50, default='UTC', null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    award_type_id = models.UUIDField(null=True, blank=True)
+    credit_amount = models.IntegerField(default=0, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    last_triggered_at = models.DateTimeField(null=True, blank=True)
+    schedule = models.CharField(max_length=255, null=True, blank=True)
+    trigger_count = models.IntegerField(default=0, null=True, blank=True)
 
     class Meta:
         db_table = "automation_rules"
@@ -290,7 +389,18 @@ class AutomationSchedules(BaseModel):
 class ExternalInvoices(BaseModel):
     """Migrated from drizzle: accounting.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    invoice_number = models.CharField(max_length=255)
+    customer_id = models.CharField(max_length=255)
+    customer_name = models.CharField(max_length=500)
+    invoice_date = models.DateField()
+    due_date = models.DateField(null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    balance_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=50)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_invoices"
@@ -300,7 +410,14 @@ class ExternalInvoices(BaseModel):
 class ExternalPayments(BaseModel):
     """Migrated from drizzle: accounting.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    customer_id = models.CharField(max_length=255)
+    customer_name = models.CharField(max_length=500)
+    payment_date = models.DateField()
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_payments"
@@ -310,7 +427,15 @@ class ExternalPayments(BaseModel):
 class ExternalCustomers(BaseModel):
     """Migrated from drizzle: accounting.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    name = models.CharField(max_length=500)
+    company_name = models.CharField(max_length=500, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    balance = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_customers"
@@ -320,7 +445,16 @@ class ExternalCustomers(BaseModel):
 class ExternalAccounts(BaseModel):
     """Migrated from drizzle: accounting.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    account_name = models.CharField(max_length=500)
+    account_type = models.CharField(max_length=100)
+    account_sub_type = models.CharField(max_length=100, null=True, blank=True)
+    classification = models.CharField(max_length=100, null=True, blank=True)
+    current_balance = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_accounts"
@@ -330,7 +464,18 @@ class ExternalAccounts(BaseModel):
 class ExternalCommunicationChannels(BaseModel):
     """Migrated from drizzle: communication.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_provider = models.CharField(max_length=50)
+    external_id = models.CharField(max_length=255)
+    channel_name = models.CharField(max_length=255)
+    channel_type = models.CharField(max_length=50, null=True, blank=True)
+    is_archived = models.BooleanField(default=False, null=True, blank=True)
+    creator_id = models.CharField(max_length=255, null=True, blank=True)
+    member_count = models.IntegerField(default=0, null=True, blank=True)
+    topic = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    parent_channel_id = models.CharField(max_length=255, null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_communication_channels"
@@ -340,7 +485,20 @@ class ExternalCommunicationChannels(BaseModel):
 class ExternalCommunicationMessages(BaseModel):
     """Migrated from drizzle: communication.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_provider = models.CharField(max_length=50)
+    external_id = models.CharField(max_length=255)
+    channel_id = models.UUIDField(null=True, blank=True)
+    user_id = models.CharField(max_length=255, null=True, blank=True)
+    message_text = models.TextField(null=True, blank=True)
+    message_type = models.CharField(max_length=50, null=True, blank=True)
+    timestamp = models.DateTimeField()
+    thread_id = models.CharField(max_length=255, null=True, blank=True)
+    reply_count = models.IntegerField(default=0, null=True, blank=True)
+    reaction_count = models.IntegerField(default=0, null=True, blank=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_communication_messages"
@@ -350,7 +508,22 @@ class ExternalCommunicationMessages(BaseModel):
 class ExternalCommunicationUsers(BaseModel):
     """Migrated from drizzle: communication.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_provider = models.CharField(max_length=50)
+    external_id = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, null=True, blank=True)
+    display_name = models.CharField(max_length=255, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    first_name = models.CharField(max_length=100, null=True, blank=True)
+    last_name = models.CharField(max_length=100, null=True, blank=True)
+    title = models.CharField(max_length=255, null=True, blank=True)
+    avatar_url = models.TextField(null=True, blank=True)
+    is_bot = models.BooleanField(default=False, null=True, blank=True)
+    is_admin = models.BooleanField(default=False, null=True, blank=True)
+    is_deleted = models.BooleanField(default=False, null=True, blank=True)
+    status_text = models.CharField(max_length=255, null=True, blank=True)
+    status_emoji = models.CharField(max_length=50, null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_communication_users"
@@ -360,7 +533,19 @@ class ExternalCommunicationUsers(BaseModel):
 class ExternalCommunicationFiles(BaseModel):
     """Migrated from drizzle: communication.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_provider = models.CharField(max_length=50)
+    external_id = models.CharField(max_length=255)
+    channel_id = models.UUIDField(null=True, blank=True)
+    user_id = models.CharField(max_length=255, null=True, blank=True)
+    file_name = models.CharField(max_length=500)
+    file_type = models.CharField(max_length=50, null=True, blank=True)
+    mime_type = models.CharField(max_length=100, null=True, blank=True)
+    file_size = models.IntegerField(null=True, blank=True)
+    file_url = models.TextField(null=True, blank=True)
+    download_url = models.TextField(null=True, blank=True)
+    comment_count = models.IntegerField(default=0, null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_communication_files"
@@ -370,7 +555,14 @@ class ExternalCommunicationFiles(BaseModel):
 class ExternalDocumentSites(BaseModel):
     """Migrated from drizzle: documents.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    description = models.TextField(null=True, blank=True)
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    last_modified_at = models.DateTimeField(null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
+    site_name = models.CharField(max_length=255)
+    site_url = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "external_document_sites"
@@ -380,7 +572,16 @@ class ExternalDocumentSites(BaseModel):
 class ExternalDocumentLibraries(BaseModel):
     """Migrated from drizzle: documents.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    drive_type = models.CharField(max_length=50, null=True, blank=True)
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    last_synced_at = models.DateTimeField(default=timezone.now)
+    library_name = models.CharField(max_length=255)
+    library_url = models.TextField(null=True, blank=True)
+    site_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "external_document_libraries"
@@ -390,7 +591,22 @@ class ExternalDocumentLibraries(BaseModel):
 class ExternalDocumentFiles(BaseModel):
     """Migrated from drizzle: documents.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    created_by_email = models.CharField(max_length=255, null=True, blank=True)
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    file_name = models.CharField(max_length=500)
+    file_size = models.IntegerField(null=True, blank=True)
+    file_url = models.TextField(null=True, blank=True)
+    folder_child_count = models.IntegerField(null=True, blank=True)
+    is_folder = models.BooleanField(default=False, null=True, blank=True)
+    last_modified_at = models.DateTimeField(null=True, blank=True)
+    last_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
+    library_id = models.UUIDField(null=True, blank=True)
+    mime_type = models.CharField(max_length=100, null=True, blank=True)
+    parent_path = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "external_document_files"
@@ -400,7 +616,17 @@ class ExternalDocumentFiles(BaseModel):
 class ExternalDocumentPermissions(BaseModel):
     """Migrated from drizzle: documents.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    file_id = models.UUIDField(null=True, blank=True)
+    granted_to = models.CharField(max_length=255, null=True, blank=True)
+    group_id = models.CharField(max_length=255, null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
+    permission_type = models.CharField(max_length=50, null=True, blank=True)
+    roles = models.CharField(max_length=255, null=True, blank=True)
+    scope = models.CharField(max_length=50, null=True, blank=True)
+    user_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "external_document_permissions"
@@ -410,7 +636,33 @@ class ExternalDocumentPermissions(BaseModel):
 class ExternalEmployees(BaseModel):
     """Migrated from drizzle: hris.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['WORKDAY', 'BAMBOOHR', 'ADP', 'CERIDIAN', 'UKG']],
+    )
+    employee_id = models.CharField(max_length=100, null=True, blank=True)
+    first_name = models.CharField(max_length=100, null=True, blank=True)
+    last_name = models.CharField(max_length=100, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    position = models.CharField(max_length=255, null=True, blank=True)
+    department = models.CharField(max_length=255, null=True, blank=True)
+    location = models.CharField(max_length=255, null=True, blank=True)
+    hire_date = models.DateTimeField(null=True, blank=True)
+    employment_status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['active', 'inactive', 'on_leave', 'terminated', 'suspended']],
+        null=True,
+        blank=True,
+    )
+    work_schedule = models.CharField(max_length=100, null=True, blank=True)
+    supervisor_id = models.CharField(max_length=255, null=True, blank=True)
+    supervisor_name = models.CharField(max_length=255, null=True, blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    raw_data = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "external_employees"
@@ -420,7 +672,20 @@ class ExternalEmployees(BaseModel):
 class ExternalPositions(BaseModel):
     """Migrated from drizzle: hris.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['WORKDAY', 'BAMBOOHR', 'ADP', 'CERIDIAN', 'UKG']],
+    )
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    department = models.CharField(max_length=255, null=True, blank=True)
+    job_profile = models.CharField(max_length=255, null=True, blank=True)
+    effective_date = models.DateTimeField(null=True, blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    raw_data = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "external_positions"
@@ -430,7 +695,20 @@ class ExternalPositions(BaseModel):
 class ExternalDepartments(BaseModel):
     """Migrated from drizzle: hris.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['WORKDAY', 'BAMBOOHR', 'ADP', 'CERIDIAN', 'UKG']],
+    )
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=100, null=True, blank=True)
+    manager_id = models.CharField(max_length=255, null=True, blank=True)
+    manager_name = models.CharField(max_length=255, null=True, blank=True)
+    parent_department_id = models.CharField(max_length=255, null=True, blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    raw_data = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "external_departments"
@@ -440,7 +718,29 @@ class ExternalDepartments(BaseModel):
 class ExternalBenefitPlans(BaseModel):
     """Migrated from drizzle: insurance.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    plan_name = models.CharField(max_length=500)
+    plan_type = models.CharField(max_length=100)
+    coverage_level = models.CharField(max_length=100, null=True, blank=True)
+    effective_date = models.DateField()
+    termination_date = models.DateField(null=True, blank=True)
+    premium = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    employer_contribution = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    employee_contribution = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(max_length=50)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "external_benefit_plans"
@@ -450,7 +750,26 @@ class ExternalBenefitPlans(BaseModel):
 class ExternalBenefitEnrollments(BaseModel):
     """Migrated from drizzle: insurance.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    employee_id = models.CharField(max_length=255)
+    employee_name = models.CharField(max_length=500, null=True, blank=True)
+    plan_id = models.CharField(max_length=255)
+    plan_name = models.CharField(max_length=500, null=True, blank=True)
+    coverage_level = models.CharField(max_length=100, null=True, blank=True)
+    enrollment_date = models.DateField()
+    effective_date = models.DateField()
+    termination_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=50)
+    premium = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    employee_contribution = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "external_benefit_enrollments"
@@ -460,7 +779,16 @@ class ExternalBenefitEnrollments(BaseModel):
 class ExternalBenefitDependents(BaseModel):
     """Migrated from drizzle: insurance.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    employee_id = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    date_of_birth = models.DateField(null=True, blank=True)
+    relationship = models.CharField(max_length=100, null=True, blank=True)
+    status = models.CharField(max_length=50)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "external_benefit_dependents"
@@ -470,7 +798,19 @@ class ExternalBenefitDependents(BaseModel):
 class ExternalBenefitCoverage(BaseModel):
     """Migrated from drizzle: insurance.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    enrollment_id = models.CharField(max_length=255, null=True, blank=True)
+    employee_id = models.CharField(max_length=255)
+    plan_id = models.CharField(max_length=255)
+    plan_type = models.CharField(max_length=100, null=True, blank=True)
+    coverage_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    deductible = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    effective_date = models.DateField()
+    termination_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=50)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "external_benefit_coverage"
@@ -480,7 +820,26 @@ class ExternalBenefitCoverage(BaseModel):
 class ExternalInsuranceClaims(BaseModel):
     """Migrated from drizzle: insurance.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    claim_number = models.CharField(max_length=255)
+    employee_id = models.CharField(max_length=255)
+    employee_name = models.CharField(max_length=500, null=True, blank=True)
+    policy_number = models.CharField(max_length=255, null=True, blank=True)
+    claim_type = models.CharField(max_length=100, null=True, blank=True)
+    service_date = models.DateField(null=True, blank=True)
+    submission_date = models.DateField()
+    processed_date = models.DateField(null=True, blank=True)
+    claim_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    approved_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    paid_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    denied_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=50)
+    denial_reason = models.TextField(null=True, blank=True)
+    provider_id = models.CharField(max_length=255, null=True, blank=True)
+    provider_name = models.CharField(max_length=500, null=True, blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "external_insurance_claims"
@@ -490,7 +849,18 @@ class ExternalInsuranceClaims(BaseModel):
 class ExternalInsurancePolicies(BaseModel):
     """Migrated from drizzle: insurance.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    policy_number = models.CharField(max_length=255)
+    policy_type = models.CharField(max_length=100, null=True, blank=True)
+    employee_id = models.CharField(max_length=255)
+    effective_date = models.DateField()
+    termination_date = models.DateField(null=True, blank=True)
+    coverage_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    premium = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=50)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "external_insurance_policies"
@@ -500,7 +870,18 @@ class ExternalInsurancePolicies(BaseModel):
 class ExternalInsuranceBeneficiaries(BaseModel):
     """Migrated from drizzle: insurance.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    policy_id = models.CharField(max_length=255)
+    employee_id = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    relationship = models.CharField(max_length=100, null=True, blank=True)
+    percentage = models.IntegerField()
+    is_primary = models.BooleanField(default=False)
+    status = models.CharField(max_length=50)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "external_insurance_beneficiaries"
@@ -510,7 +891,18 @@ class ExternalInsuranceBeneficiaries(BaseModel):
 class ExternalBenefitUtilization(BaseModel):
     """Migrated from drizzle: insurance.ts"""
 
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    external_id = models.CharField(max_length=255)
+    external_provider = models.CharField(max_length=50)
+    employee_id = models.CharField(max_length=255)
+    policy_id = models.CharField(max_length=255, null=True, blank=True)
+    benefit_type = models.CharField(max_length=100, null=True, blank=True)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    maximum_benefit = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    utilized = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    remaining = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "external_benefit_utilization"
@@ -520,7 +912,18 @@ class ExternalBenefitUtilization(BaseModel):
 class ExternalLmsCourses(BaseModel):
     """Migrated from drizzle: lms.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_provider = models.CharField(max_length=50)
+    external_id = models.CharField(max_length=255)
+    course_name = models.CharField(max_length=500)
+    description = models.TextField(null=True, blank=True)
+    difficulty_level = models.CharField(max_length=50, null=True, blank=True)
+    duration_minutes = models.IntegerField(null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+    last_updated_at = models.DateTimeField(null=True, blank=True)
+    provider = models.CharField(max_length=255, null=True, blank=True)
+    category_id = models.CharField(max_length=255, null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_lms_courses"
@@ -530,7 +933,17 @@ class ExternalLmsCourses(BaseModel):
 class ExternalLmsEnrollments(BaseModel):
     """Migrated from drizzle: lms.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_provider = models.CharField(max_length=50)
+    external_id = models.CharField(max_length=255)
+    course_id = models.CharField(max_length=255)
+    learner_id = models.CharField(max_length=255)
+    enrolled_at = models.DateTimeField()
+    status = models.CharField(max_length=50)
+    progress_percentage = models.IntegerField(default=0, null=True, blank=True)
+    last_accessed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_lms_enrollments"
@@ -540,7 +953,16 @@ class ExternalLmsEnrollments(BaseModel):
 class ExternalLmsProgress(BaseModel):
     """Migrated from drizzle: lms.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_provider = models.CharField(max_length=50)
+    external_id = models.CharField(max_length=255)
+    course_id = models.CharField(max_length=255)
+    learner_id = models.CharField(max_length=255)
+    content_id = models.CharField(max_length=255, null=True, blank=True)
+    progress_percentage = models.IntegerField(default=0, null=True, blank=True)
+    time_spent_seconds = models.IntegerField(default=0, null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_lms_progress"
@@ -550,7 +972,15 @@ class ExternalLmsProgress(BaseModel):
 class ExternalLmsCompletions(BaseModel):
     """Migrated from drizzle: lms.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_provider = models.CharField(max_length=50)
+    external_id = models.CharField(max_length=255)
+    course_id = models.CharField(max_length=255)
+    learner_id = models.CharField(max_length=255)
+    completed_at = models.DateTimeField()
+    certificate_id = models.CharField(max_length=255, null=True, blank=True)
+    grade = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_lms_completions"
@@ -560,7 +990,14 @@ class ExternalLmsCompletions(BaseModel):
 class ExternalLmsLearners(BaseModel):
     """Migrated from drizzle: lms.ts"""
 
-    org_id = models.UUIDField(null=True, blank=True)
+    org_id = models.UUIDField()
+    external_provider = models.CharField(max_length=50)
+    external_id = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=100, null=True, blank=True)
+    last_name = models.CharField(max_length=100, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    profile_url = models.TextField(null=True, blank=True)
+    last_synced_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = "external_lms_learners"
@@ -575,6 +1012,28 @@ class IntegrationConfigs(BaseModel):
         on_delete=models.CASCADE,
         related_name="integration_configs_organization_set",
     )
+    type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'hris', 'accounting', 'insurance', 'pension', 'lms', 'communication',
+            'document_management', 'calendar', 'social_media', 'payment',
+        ]],
+    )
+    provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'workday', 'bamboohr', 'adp', 'ceridian_dayforce', 'ukg_pro', 'quickbooks', 'xero',
+            'sage_intacct', 'freshbooks', 'wave', 'sunlife', 'manulife', 'blue_cross',
+            'green_shield', 'canada_life', 'otpp', 'cpp_qpp', 'provincial_pension',
+            'linkedin_learning', 'udemy', 'coursera', 'slack', 'microsoft_teams', 'sharepoint',
+            'google_drive', 'dropbox', 'custom',
+        ]],
+    )
+    credentials = models.JSONField()
+    settings = models.JSONField(null=True, blank=True)
+    webhook_url = models.TextField(null=True, blank=True)
+    enabled = models.BooleanField(default=True, null=True, blank=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = "integration_configs"
@@ -589,6 +1048,36 @@ class IntegrationSyncLog(BaseModel):
         on_delete=models.CASCADE,
         related_name="integration_sync_log_organization_set",
     )
+    completed_at = models.DateTimeField(null=True, blank=True)
+    cursor = models.TextField(null=True, blank=True)
+    error = models.TextField(null=True, blank=True)
+    orgs = ArrayField(models.TextField(), null=True, blank=True)
+    provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'workday', 'bamboohr', 'adp', 'ceridian_dayforce', 'ukg_pro', 'quickbooks', 'xero',
+            'sage_intacct', 'freshbooks', 'wave', 'sunlife', 'manulife', 'blue_cross',
+            'green_shield', 'canada_life', 'otpp', 'cpp_qpp', 'provincial_pension',
+            'linkedin_learning', 'udemy', 'coursera', 'slack', 'microsoft_teams', 'sharepoint',
+            'google_drive', 'dropbox', 'custom',
+        ]],
+    )
+    records_created = models.IntegerField(default=0, null=True, blank=True)
+    records_failed = models.IntegerField(default=0, null=True, blank=True)
+    records_processed = models.IntegerField(default=0, null=True, blank=True)
+    records_updated = models.IntegerField(default=0, null=True, blank=True)
+    started_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'synced', 'pending', 'failed', 'disconnected', 'idle', 'running', 'success', 'partial',
+            'cancelled', 'in_progress',
+        ]],
+    )
+    sync_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['full', 'incremental', 'real_time']],
+    )
 
     class Meta:
         db_table = "integration_sync_log"
@@ -598,11 +1087,35 @@ class IntegrationSyncLog(BaseModel):
 class WebhookEvents(BaseModel):
     """Migrated from drizzle: integrations.ts"""
 
+    # The primary key is the provider's own event id (a string), not a generated UUID.
+    id = models.TextField(primary_key=True)
     organization = models.ForeignKey(
         "auth_core.Organizations",
         on_delete=models.CASCADE,
         related_name="webhook_events_organization_set",
     )
+    error = models.TextField(null=True, blank=True)
+    event_type = models.TextField()
+    payload = models.JSONField()
+    processed_at = models.DateTimeField(null=True, blank=True)
+    provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'workday', 'bamboohr', 'adp', 'ceridian_dayforce', 'ukg_pro', 'quickbooks', 'xero',
+            'sage_intacct', 'freshbooks', 'wave', 'sunlife', 'manulife', 'blue_cross',
+            'green_shield', 'canada_life', 'otpp', 'cpp_qpp', 'provincial_pension',
+            'linkedin_learning', 'udemy', 'coursera', 'slack', 'microsoft_teams', 'sharepoint',
+            'google_drive', 'dropbox', 'custom',
+        ]],
+    )
+    received_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    signature = models.TextField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['received', 'processing', 'processed', 'failed', 'ignored']],
+        default='received',
+    )
+    verified = models.BooleanField(default=False, null=True, blank=True)
 
     class Meta:
         db_table = "webhook_events"
@@ -616,6 +1129,25 @@ class IntegrationSyncSchedules(BaseModel):
         "auth_core.Organizations",
         on_delete=models.CASCADE,
         related_name="integration_sync_schedules_organization_set",
+    )
+    enabled = models.BooleanField(default=True, null=True, blank=True)
+    last_run_at = models.DateTimeField(null=True, blank=True)
+    next_run_at = models.DateTimeField(null=True, blank=True)
+    orgs = ArrayField(models.TextField(), null=True, blank=True)
+    provider = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'workday', 'bamboohr', 'adp', 'ceridian_dayforce', 'ukg_pro', 'quickbooks', 'xero',
+            'sage_intacct', 'freshbooks', 'wave', 'sunlife', 'manulife', 'blue_cross',
+            'green_shield', 'canada_life', 'otpp', 'cpp_qpp', 'provincial_pension',
+            'linkedin_learning', 'udemy', 'coursera', 'slack', 'microsoft_teams', 'sharepoint',
+            'google_drive', 'dropbox', 'custom',
+        ]],
+    )
+    schedule = models.TextField()
+    sync_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['full', 'incremental', 'real_time']],
     )
 
     class Meta:
@@ -633,6 +1165,18 @@ class IntegrationApiKeys(BaseModel):
         null=True,
         blank=True,
     )
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    key_hash = models.CharField(max_length=64)
+    key_prefix = models.CharField(max_length=10)
+    scopes = ArrayField(models.TextField())
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    usage_count = models.IntegerField(default=0, null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoked_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "integration_api_keys"
@@ -649,6 +1193,17 @@ class IntegrationWebhooks(BaseModel):
         null=True,
         blank=True,
     )
+    created_by = models.CharField(max_length=255)
+    delivery_count = models.IntegerField(default=0, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    events = ArrayField(models.TextField())
+    failure_count = models.IntegerField(default=0, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    last_failure_at = models.DateTimeField(null=True, blank=True)
+    last_success_at = models.DateTimeField(null=True, blank=True)
+    last_triggered_at = models.DateTimeField(null=True, blank=True)
+    secret = models.CharField(max_length=255)
+    url = models.TextField()
 
     class Meta:
         db_table = "integration_webhooks"
@@ -672,7 +1227,59 @@ class WebhookDeliveries(BaseModel):
 class SupportTickets(BaseModel):
     """Migrated from drizzle: support.ts"""
 
-    ticket_number = models.CharField(max_length=255, null=True, blank=True)
+    ticket_number = models.CharField(max_length=255, blank=True)
+    organization_id = models.UUIDField()
+    organization_name = models.CharField(max_length=255, null=True, blank=True)
+    requestor_user_id = models.TextField(null=True, blank=True)
+    requestor_email = models.CharField(max_length=255)
+    requestor_name = models.CharField(max_length=255, null=True, blank=True)
+    subject = models.CharField(max_length=500)
+    description = models.TextField()
+    category = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'bug_report', 'feature_request', 'technical_support', 'account_issue',
+            'billing_question', 'data_issue', 'performance', 'security_concern', 'training_request',
+            'other',
+        ]],
+    )
+    priority = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['low', 'medium', 'high', 'urgent', 'critical']],
+        default='medium',
+    )
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'open', 'in_progress', 'waiting_customer', 'waiting_internal', 'resolved', 'closed',
+            'cancelled',
+        ]],
+        default='open',
+    )
+    source = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['email', 'web_form', 'phone', 'chat', 'internal', 'api']],
+    )
+    assigned_to_user_id = models.TextField(null=True, blank=True)
+    assigned_to_name = models.CharField(max_length=255, null=True, blank=True)
+    assigned_at = models.DateTimeField(null=True, blank=True)
+    sla_response_by = models.DateTimeField(null=True, blank=True)
+    sla_resolve_by = models.DateTimeField(null=True, blank=True)
+    first_response_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    response_sla_breach = models.BooleanField(default=False, null=True, blank=True)
+    resolution_sla_breach = models.BooleanField(default=False, null=True, blank=True)
+    response_time_minutes = models.IntegerField(null=True, blank=True)
+    resolution_time_minutes = models.IntegerField(null=True, blank=True)
+    tags = models.JSONField(default=list, null=True, blank=True)
+    attachments = models.JSONField(default=list, null=True, blank=True)
+    satisfaction_rating = models.IntegerField(null=True, blank=True)
+    satisfaction_comment = models.TextField(null=True, blank=True)
+    satisfaction_responded_at = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "support_tickets"
@@ -687,6 +1294,13 @@ class TicketComments(BaseModel):
         on_delete=models.CASCADE,
         related_name="ticket_comments_ticket_set",
     )
+    attachments = models.JSONField(default=list, null=True, blank=True)
+    author_email = models.CharField(max_length=255, null=True, blank=True)
+    author_name = models.CharField(max_length=255, null=True, blank=True)
+    author_user_id = models.TextField(null=True, blank=True)
+    comment = models.TextField()
+    is_automated = models.BooleanField(default=False, null=True, blank=True)
+    is_internal = models.BooleanField(default=False, null=True, blank=True)
 
     class Meta:
         db_table = "ticket_comments"
@@ -701,6 +1315,13 @@ class TicketHistory(BaseModel):
         on_delete=models.CASCADE,
         related_name="ticket_history_ticket_set",
     )
+    action = models.CharField(max_length=100)
+    changed_by_name = models.CharField(max_length=255, null=True, blank=True)
+    changed_by_user_id = models.TextField(null=True, blank=True)
+    field = models.CharField(max_length=100, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    new_value = models.TextField(null=True, blank=True)
+    old_value = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "ticket_history"
@@ -710,7 +1331,35 @@ class TicketHistory(BaseModel):
 class SlaPolicies(BaseModel):
     """Migrated from drizzle: support.ts"""
 
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True)
+    business_hours_only = models.BooleanField(default=True, null=True, blank=True)
+    category = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'bug_report', 'feature_request', 'technical_support', 'account_issue',
+            'billing_question', 'data_issue', 'performance', 'security_concern', 'training_request',
+            'other',
+        ]],
+        null=True,
+        blank=True,
+    )
+    created_by = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    escalation_enabled = models.BooleanField(default=False, null=True, blank=True)
+    escalation_threshold_minutes = models.IntegerField(null=True, blank=True)
+    escalation_to_user_id = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    is_default = models.BooleanField(default=False, null=True, blank=True)
+    organization_tier = models.CharField(max_length=50, null=True, blank=True)
+    priority = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['low', 'medium', 'high', 'urgent', 'critical']],
+        null=True,
+        blank=True,
+    )
+    resolution_time_minutes = models.IntegerField()
+    response_time_minutes = models.IntegerField()
+    timezone = models.CharField(max_length=100, default='UTC', null=True, blank=True)
 
     class Meta:
         db_table = "sla_policies"
@@ -723,7 +1372,27 @@ class SlaPolicies(BaseModel):
 class KnowledgeBaseArticles(BaseModel):
     """Migrated from drizzle: support.ts"""
 
-    title = models.CharField(max_length=255, null=True, blank=True)
+    title = models.CharField(max_length=255, blank=True)
+    author_name = models.CharField(max_length=255, null=True, blank=True)
+    author_user_id = models.TextField(null=True, blank=True)
+    category = models.CharField(max_length=100)
+    content = models.TextField()
+    created_by = models.TextField(null=True, blank=True)
+    helpful_count = models.IntegerField(default=0, null=True, blank=True)
+    last_reviewed_at = models.DateTimeField(null=True, blank=True)
+    meta_description = models.TextField(null=True, blank=True)
+    meta_keywords = models.JSONField(default=list, null=True, blank=True)
+    not_helpful_count = models.IntegerField(default=0, null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+    slug = models.CharField(max_length=500)
+    status = models.CharField(max_length=50, default='draft')
+    subcategory = models.CharField(max_length=100, null=True, blank=True)
+    summary = models.TextField(null=True, blank=True)
+    tags = models.JSONField(default=list, null=True, blank=True)
+    updated_by = models.TextField(null=True, blank=True)
+    version = models.IntegerField(default=1, null=True, blank=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
+    visibility = models.CharField(max_length=50, default='public')
 
     class Meta:
         db_table = "knowledge_base_articles"
@@ -741,6 +1410,25 @@ class WebhookSubscriptions(BaseModel):
         on_delete=models.CASCADE,
         related_name="webhook_subscriptions_organization_set",
     )
+    auth_secret = models.TextField(null=True, blank=True)
+    auth_type = models.CharField(max_length=50, default='bearer', null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    custom_headers = models.JSONField(null=True, blank=True)
+    delivery_failure_count = models.IntegerField(default=0, null=True, blank=True)
+    delivery_success_count = models.IntegerField(default=0, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    enabled = models.BooleanField(default=True, null=True, blank=True)
+    events = ArrayField(models.TextField())
+    filters = models.JSONField(null=True, blank=True)
+    last_delivery_at = models.DateTimeField(null=True, blank=True)
+    last_failure_at = models.DateTimeField(null=True, blank=True)
+    last_failure_reason = models.TextField(null=True, blank=True)
+    max_retries = models.IntegerField(default=3, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    retry_backoff = models.CharField(max_length=50, default='exponential', null=True, blank=True)
+    retry_enabled = models.BooleanField(default=True, null=True, blank=True)
+    url = models.CharField(max_length=500)
 
     class Meta:
         db_table = "webhook_subscriptions"
@@ -755,6 +1443,31 @@ class ApiIntegrations(BaseModel):
         on_delete=models.CASCADE,
         related_name="api_integrations_organization_set",
     )
+    api_endpoint = models.CharField(max_length=500, null=True, blank=True)
+    api_version = models.CharField(max_length=50, null=True, blank=True)
+    auth_type = models.CharField(max_length=50, null=True, blank=True)
+    connection_status = models.CharField(max_length=50, default='not_tested', null=True, blank=True)
+    connection_type = models.CharField(max_length=50)
+    created_by = models.CharField(max_length=255)
+    credentials = models.JSONField(null=True, blank=True)
+    enabled = models.BooleanField(default=True, null=True, blank=True)
+    error_count = models.IntegerField(default=0, null=True, blank=True)
+    field_mapping = models.JSONField()
+    file_format = models.CharField(max_length=50, null=True, blank=True)
+    integration_type = models.CharField(max_length=50)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
+    last_sync_record_count = models.IntegerField(null=True, blank=True)
+    last_sync_status = models.CharField(max_length=50, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    provider = models.CharField(max_length=100, null=True, blank=True)
+    records_synced_total = models.IntegerField(default=0, null=True, blank=True)
+    sftp_host = models.CharField(max_length=255, null=True, blank=True)
+    sftp_path = models.CharField(max_length=500, null=True, blank=True)
+    sftp_port = models.IntegerField(null=True, blank=True)
+    sync_direction = models.CharField(max_length=50, default='inbound', null=True, blank=True)
+    sync_frequency = models.CharField(max_length=50, null=True, blank=True)
+    sync_schedule = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = "api_integrations"
@@ -769,6 +1482,21 @@ class IntegrationSyncLogs(BaseModel):
         on_delete=models.CASCADE,
         related_name="integration_sync_logs_integration_set",
     )
+    completed_at = models.DateTimeField(null=True, blank=True)
+    data_summary = models.JSONField(null=True, blank=True)
+    direction = models.CharField(max_length=50)
+    duration_ms = models.IntegerField(null=True, blank=True)
+    error_summary = models.TextField(null=True, blank=True)
+    errors = models.JSONField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    records_failed = models.IntegerField(default=0, null=True, blank=True)
+    records_processed = models.IntegerField(default=0, null=True, blank=True)
+    records_skipped = models.IntegerField(default=0, null=True, blank=True)
+    records_succeeded = models.IntegerField(default=0, null=True, blank=True)
+    started_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    status = models.CharField(max_length=50)
+    sync_type = models.CharField(max_length=50)
+    triggered_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = "integration_sync_logs"
@@ -783,6 +1511,21 @@ class ApiAccessTokens(BaseModel):
         on_delete=models.CASCADE,
         related_name="api_access_tokens_organization_set",
     )
+    allowed_ips = ArrayField(models.TextField(), null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    enabled = models.BooleanField(default=True, null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    rate_limit = models.IntegerField(default=1000, null=True, blank=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoked_by = models.CharField(max_length=255, null=True, blank=True)
+    scopes = ArrayField(models.TextField())
+    token_hash = models.CharField(max_length=255)
+    token_prefix = models.CharField(max_length=10)
+    usage_count = models.IntegerField(default=0, null=True, blank=True)
 
     class Meta:
         db_table = "api_access_tokens"

@@ -17,7 +17,8 @@ import { AlertTriangle, AlertCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface HazardPriorityBadgeProps {
-  priority: "low" | "medium" | "high" | "critical";
+  /** The hazard level as stored (low, moderate, high, critical, extreme). */
+  priority: string;
   showIcon?: boolean;
   className?: string;
 }
@@ -60,7 +61,17 @@ export function HazardPriorityBadge({
   showIcon = true,
   className 
 }: HazardPriorityBadgeProps) {
-  const config = PRIORITY_CONFIG[priority] ?? PRIORITY_CONFIG.low;
+  const config = PRIORITY_CONFIG[priority];
+
+  // A level this screen does not know is shown as it is stored, not as "Low".
+  if (!config) {
+    return (
+      <Badge className={cn("bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 font-semibold capitalize", className)}>
+        {priority.replace(/_/g, " ")}
+      </Badge>
+    );
+  }
+
   const Icon = config.icon;
 
   return (

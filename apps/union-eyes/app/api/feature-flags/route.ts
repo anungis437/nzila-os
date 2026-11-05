@@ -8,11 +8,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { isDeployedRuntime, isLocalQaRuntime } from '@/lib/runtime/production-guard';
 import { evaluateFeatures, LRO_FEATURES, AI_FEATURES } from '@/lib/services/feature-flags';
 import {
   ErrorCode,
   standardErrorResponse,
 } from '@/lib/api/standardized-responses';
+
+const KNOWN_FLAGS: ReadonlySet<string> = new Set<string>(['pilot-mode', ...Object.values(LRO_FEATURES), ...Object.values(AI_FEATURES)]);
 
 export const GET = withApiAuth(async (request: NextRequest, context: BaseAuthContext) => {
   try {
@@ -24,8 +27,13 @@ export const GET = withApiAuth(async (request: NextRequest, context: BaseAuthCon
     // used by pilot context and E2E assertions.
     const requestedFlag = request.nextUrl.searchParams.get('flag')?.trim();
     if (requestedFlag) {
+      // Only a flag the application defines can be asked about: any signed-in user used to probe any flag name, including the names of
+      // unreleased or pilot features, and learn whether it was on for them.
+      if (!KNOWN_FLAGS.has(requestedFlag)) {
+        return standardErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, 'Unknown feature flag');
+      }
       const isPilotRuntime = ['pilot', 'demo'].includes((process.env.NZILA_MODE ?? '').toLowerCase());
-      const isQaTestEnv = (process.env.QA_TEST_ENV ?? '').toLowerCase() === 'true' || process.env.NODE_ENV === 'test';
+      const isQaTestEnv = isLocalQaRuntime() || (process.env.NODE_ENV === 'test' && !isDeployedRuntime());
 
       let enabled = false;
       if (requestedFlag === 'pilot-mode') {

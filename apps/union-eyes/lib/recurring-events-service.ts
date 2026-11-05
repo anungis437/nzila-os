@@ -274,6 +274,7 @@ throw error;
  */
 export async function deleteFutureInstances(
   parentEventId: string,
+  organizationId: string,
   fromDate: Date
 ): Promise<number> {
   try {
@@ -283,6 +284,7 @@ export async function deleteFutureInstances(
       .where(
         and(
           eq(calendarEvents.parentEventId, parentEventId),
+          eq(calendarEvents.organizationId, organizationId),
           gte(calendarEvents.startTime, fromDate)
         )
       );
@@ -296,7 +298,7 @@ export async function deleteFutureInstances(
           cancelledAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(calendarEvents.id, instance.id));
+        .where(and(eq(calendarEvents.id, instance.id), eq(calendarEvents.organizationId, organizationId)));
     }
 
     return instances.length;
@@ -310,13 +312,14 @@ throw error;
  */
 export async function addRecurrenceException(
   parentEventId: string,
+  organizationId: string,
   exceptionDate: Date
 ): Promise<void> {
   try {
     const [parentEvent] = await db
       .select()
       .from(calendarEvents)
-      .where(eq(calendarEvents.id, parentEventId))
+      .where(and(eq(calendarEvents.id, parentEventId), eq(calendarEvents.organizationId, organizationId)))
       .limit(1);
 
     if (!parentEvent) {
@@ -335,7 +338,7 @@ export async function addRecurrenceException(
           recurrenceExceptions: exceptions,
           updatedAt: new Date(),
         })
-        .where(eq(calendarEvents.id, parentEventId));
+        .where(and(eq(calendarEvents.id, parentEventId), eq(calendarEvents.organizationId, organizationId)));
     }
 
     // Cancel instance on exception date
@@ -345,6 +348,7 @@ export async function addRecurrenceException(
       .where(
         and(
           eq(calendarEvents.parentEventId, parentEventId),
+          eq(calendarEvents.organizationId, organizationId),
           gte(calendarEvents.startTime, new Date(dateString)),
           lte(calendarEvents.startTime, new Date(dateString + 'T23:59:59'))
         )
@@ -359,7 +363,7 @@ export async function addRecurrenceException(
           cancelledAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(calendarEvents.id, instanceOnDate[0].id));
+        .where(and(eq(calendarEvents.id, instanceOnDate[0].id), eq(calendarEvents.organizationId, organizationId)));
     }
   } catch (error) {
 throw error;

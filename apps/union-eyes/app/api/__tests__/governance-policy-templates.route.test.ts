@@ -11,7 +11,7 @@ vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
 vi.mock('@/db/db', () => ({ db: m.db }));
 vi.mock('@/db/schema', () => ({ governancePolicies: { organizationId: 'organizationId', status: 'status', createdAt: 'createdAt' } }));
-vi.mock('@/lib/audit-logger', () => ({ auditDataMutation: m.auditDataMutation }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.auditDataMutation }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return { ...actual, eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), desc: vi.fn(() => 'desc'), count: vi.fn(() => 'count'), sql: Object.assign(vi.fn(() => 'sql'), { mapWith: vi.fn() }) };
@@ -25,7 +25,7 @@ describe('governance/policy-templates route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.withRLSContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
+    m.withRLSContext.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn(m.db));
     m.auditDataMutation.mockResolvedValue(undefined);
     m.db.select
       .mockImplementationOnce(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => [{ total: 1 }]) })) }))

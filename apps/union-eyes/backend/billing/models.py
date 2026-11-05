@@ -9,6 +9,8 @@ import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
+from decimal import Decimal
+from django.utils import timezone
 
 try:
     from pgvector.django import VectorField
@@ -41,7 +43,31 @@ class OrganizationModel(BaseModel):
 
 class AutopaySettings(BaseModel):
     """Migrated from drizzle: autopay-settings-schema.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    day_of_month = models.CharField(max_length=2, default='1', null=True, blank=True)
+    enabled = models.BooleanField(default=False)
+    failure_count = models.CharField(max_length=255, default='0', null=True, blank=True)
+    frequency = models.CharField(max_length=50, default='monthly', null=True, blank=True)
+    last_failure_reason = models.TextField(null=True, blank=True)
+    last_payment_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    last_payment_date = models.DateTimeField(null=True, blank=True)
+    last_payment_status = models.CharField(max_length=50, null=True, blank=True)
+    max_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    next_payment_date = models.DateTimeField(null=True, blank=True)
+    notify_before_payment = models.BooleanField(default=True, null=True, blank=True)
+    notify_days_before = models.CharField(max_length=255, default='3', null=True, blank=True)
+    payment_method_brand = models.CharField(max_length=50, null=True, blank=True)
+    payment_method_last4 = models.CharField(max_length=4, null=True, blank=True)
+    payment_method_type = models.CharField(max_length=50, default='card', null=True, blank=True)
+    stripe_customer_id = models.CharField(max_length=255, null=True, blank=True)
+    stripe_payment_method_id = models.CharField(max_length=255, null=True, blank=True)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'autopay_settings'
@@ -49,7 +75,38 @@ class AutopaySettings(BaseModel):
 
 class ClcPerCapitaBenchmarks(BaseModel):
     """Migrated from drizzle: clc-partnership-schema.ts"""
-    organization_id = models.CharField(max_length=255, null=True, blank=True)
+    organization_id = models.CharField(max_length=255, blank=True)
+    active_members = models.IntegerField(null=True, blank=True)
+    currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
+    dues_paying_members = models.IntegerField(null=True, blank=True)
+    fiscal_year = models.IntegerField()
+    is_verified = models.BooleanField(default=False, null=True, blank=True)
+    national_average_rate = models.DecimalField(
+        max_digits=10,
+        decimal_places=4,
+        null=True,
+        blank=True,
+    )
+    organization_name = models.CharField(max_length=500)
+    organization_type = models.CharField(max_length=100, null=True, blank=True)
+    per_capita_rate = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    percentile_rank = models.IntegerField(null=True, blank=True)
+    period_end = models.DateTimeField(null=True, blank=True)
+    period_start = models.DateTimeField(null=True, blank=True)
+    provincial_average_rate = models.DecimalField(
+        max_digits=10,
+        decimal_places=4,
+        null=True,
+        blank=True,
+    )
+    quarter = models.IntegerField(null=True, blank=True)
+    sector_comparison = models.CharField(max_length=50, null=True, blank=True)
+    size_category_comparison = models.CharField(max_length=50, null=True, blank=True)
+    source = models.CharField(max_length=50, default='clc_partnership', null=True, blank=True)
+    sync_id = models.CharField(max_length=100, null=True, blank=True)
+    total_members = models.IntegerField()
+    total_remittance = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    verification_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'clc_per_capita_benchmarks'
@@ -57,7 +114,34 @@ class ClcPerCapitaBenchmarks(BaseModel):
 
 class ClcUnionDensity(BaseModel):
     """Migrated from drizzle: clc-partnership-schema.ts"""
-    sector = models.CharField(max_length=255, null=True, blank=True)
+    sector = models.CharField(max_length=255, blank=True)
+    coverage_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    density_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    industry_code = models.CharField(max_length=20, null=True, blank=True)
+    jurisdiction = models.CharField(max_length=10)
+    month = models.IntegerField(null=True, blank=True)
+    month_over_month_change = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    national_density = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    provincial_density = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    region_name = models.CharField(max_length=255, null=True, blank=True)
+    source = models.CharField(max_length=50, default='clc_partnership', null=True, blank=True)
+    sub_sector = models.CharField(max_length=100, null=True, blank=True)
+    sync_id = models.CharField(max_length=100, null=True, blank=True)
+    total_workforce = models.IntegerField(null=True, blank=True)
+    union_covered = models.IntegerField(null=True, blank=True)
+    union_members = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField()
+    year_over_year_change = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         db_table = 'clc_union_density'
@@ -65,7 +149,33 @@ class ClcUnionDensity(BaseModel):
 
 class ClcBargainingTrends(BaseModel):
     """Migrated from drizzle: clc-partnership-schema.ts"""
-    sector = models.CharField(max_length=255, null=True, blank=True)
+    sector = models.CharField(max_length=255, blank=True)
+    average_duration_months = models.IntegerField(null=True, blank=True)
+    average_wage_increase = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    bargaining_unit_size = models.CharField(max_length=50, null=True, blank=True)
+    cola_settlements = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    median_wage_increase = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    quarter = models.IntegerField(null=True, blank=True)
+    range_high = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    range_low = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    settled_agreements = models.IntegerField(null=True, blank=True)
+    source = models.CharField(max_length=50, default='clc_partnership', null=True, blank=True)
+    strikes_lockouts = models.IntegerField(null=True, blank=True)
+    sub_sector = models.CharField(max_length=100, null=True, blank=True)
+    sync_id = models.CharField(max_length=100, null=True, blank=True)
+    total_agreements = models.IntegerField(null=True, blank=True)
+    unsettled_agreements = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField()
 
     class Meta:
         db_table = 'clc_bargaining_trends'
@@ -73,6 +183,14 @@ class ClcBargainingTrends(BaseModel):
 
 class ClcSyncLog(OrganizationModel):
     """Tenant sync audit used by the current CLC collection routes."""
+    # The per-capita declaration (clc-per-capita-schema.ts) records a sync that names no organization, and the column is nullable: such a sync is recorded, not refused.
+    organization = models.ForeignKey(
+        "auth_core.Organizations",
+        on_delete=models.CASCADE,
+        related_name="%(class)ss",
+        null=True,
+        blank=True,
+    )
     sync_type = models.CharField(
         max_length=255,
         null=True,
@@ -107,6 +225,21 @@ class ClcSyncLog(OrganizationModel):
     verified_at = models.DateTimeField(null=True, blank=True)
     verified_by = models.CharField(max_length=255, null=True, blank=True)
     initiated_by = models.CharField(max_length=255, null=True, blank=True)
+    access_token_used = models.CharField(max_length=50, null=True, blank=True)
+    action = models.CharField(max_length=50, null=True, blank=True)
+    affiliate_code = models.CharField(max_length=50, null=True, blank=True)
+    changes = models.TextField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    conflicts = models.TextField(null=True, blank=True)
+    duration = models.IntegerField(null=True, blank=True)
+    error = models.TextField(null=True, blank=True)
+    parameters = models.TextField(null=True, blank=True)
+    records_inserted = models.IntegerField(default=0, null=True, blank=True)
+    records_updated = models.IntegerField(default=0, null=True, blank=True)
+    started_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    sync_id = models.CharField(max_length=100, null=True, blank=True)
+    synced_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    token_refreshed = models.BooleanField(default=False, null=True, blank=True)
 
     class Meta:
         db_table = 'clc_sync_log'
@@ -116,7 +249,12 @@ class ClcOauthTokens(BaseModel):
     """Migrated from drizzle: clc-partnership-schema.ts"""
     access_token = models.TextField()
     refresh_token = models.TextField(null=True, blank=True)
-    token_type = models.CharField(max_length=255, null=True, blank=True)
+    token_type = models.CharField(max_length=255, null=True, blank=True, db_default='Bearer')
+    expires_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    refresh_expires_at = models.DateTimeField(null=True, blank=True)
+    scopes = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'clc_oauth_tokens'
@@ -133,7 +271,26 @@ class PerCapitaRemittances(BaseModel):
     total_members = models.IntegerField()
     good_standing_members = models.IntegerField()
     remittable_members = models.IntegerField()
-    per_capita_rate = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    per_capita_rate = models.DecimalField(max_digits=19, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
+    clc_account_code = models.CharField(max_length=50, null=True, blank=True)
+    gl_account = models.CharField(max_length=50, null=True, blank=True)
+    status = models.CharField(max_length=20, default='pending', null=True, blank=True)
+    approval_status = models.CharField(max_length=20, default='draft', null=True, blank=True)
+    submitted_date = models.DateTimeField(null=True, blank=True)
+    approved_date = models.DateTimeField(null=True, blank=True)
+    approved_by = models.CharField(max_length=255, null=True, blank=True)
+    rejected_date = models.DateTimeField(null=True, blank=True)
+    rejected_by = models.CharField(max_length=255, null=True, blank=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+    paid_date = models.DateTimeField(null=True, blank=True)
+    payment_method = models.CharField(max_length=50, null=True, blank=True)
+    payment_reference = models.CharField(max_length=100, null=True, blank=True)
+    remittance_file_url = models.TextField(null=True, blank=True)
+    receipt_file_url = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'per_capita_remittances'
@@ -141,7 +298,14 @@ class PerCapitaRemittances(BaseModel):
 
 class ClcChartOfAccounts(BaseModel):
     """Migrated from drizzle: clc-per-capita-schema.ts"""
-    account_code = models.CharField(max_length=255, null=True, blank=True)
+    account_code = models.CharField(max_length=255, blank=True)
+    account_name = models.CharField(max_length=255)
+    account_type = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
+    financial_statement_line = models.CharField(max_length=100, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    parent_account_code = models.CharField(max_length=50, null=True, blank=True)
+    statistics_canada_code = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         db_table = 'clc_chart_of_accounts'
@@ -150,7 +314,16 @@ class ClcChartOfAccounts(BaseModel):
 class RemittanceApprovals(BaseModel):
     """Migrated from drizzle: clc-per-capita-schema.ts"""
     remittance_id = models.UUIDField()
-    approver_user_id = models.CharField(max_length=255, null=True, blank=True)
+    approver_user_id = models.CharField(max_length=255, blank=True)
+    action = models.CharField(max_length=20)
+    approval_level = models.CharField(max_length=20, null=True, blank=True)
+    approver_role = models.CharField(max_length=50, null=True, blank=True)
+    comment = models.TextField(null=True, blank=True)
+    flagged_issues = models.TextField(null=True, blank=True)
+    rejection_reason = models.TextField(null=True, blank=True)
+    requested_changes = models.TextField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='pending', null=True, blank=True)
 
     class Meta:
         db_table = 'remittance_approvals'
@@ -159,6 +332,31 @@ class RemittanceApprovals(BaseModel):
 class ClcWebhookLog(BaseModel):
     """Migrated from drizzle: clc-per-capita-schema.ts"""
     webhook_id = models.CharField(max_length=255, null=True, blank=True)
+    affiliate_code = models.CharField(max_length=50, null=True, blank=True)
+    external_webhook_id = models.CharField(max_length=100, null=True, blank=True)
+    http_status_code = models.IntegerField(null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
+    next_retry_at = models.DateTimeField(null=True, blank=True)
+    organization_id = models.UUIDField(null=True, blank=True)
+    payload = models.JSONField(null=True, blank=True)
+    payload_hash = models.TextField(null=True, blank=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    processing_duration = models.IntegerField(null=True, blank=True)
+    processing_error = models.TextField(null=True, blank=True)
+    received_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    requires_manual_review = models.BooleanField(default=False, null=True, blank=True)
+    response_body = models.JSONField(null=True, blank=True)
+    response_time = models.IntegerField(null=True, blank=True)
+    retry_count = models.IntegerField(default=0, null=True, blank=True)
+    review_notes = models.TextField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.CharField(max_length=255, null=True, blank=True)
+    signature = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=20, default='received')
+    sync_log_id = models.UUIDField(null=True, blank=True)
+    type = models.CharField(max_length=50, null=True, blank=True)
+    webhook_event_type = models.CharField(max_length=100, null=True, blank=True)
+    webhook_url = models.CharField(max_length=500, null=True, blank=True)
 
     class Meta:
         db_table = 'clc_webhook_log'
@@ -168,6 +366,14 @@ class OrganizationContacts(BaseModel):
     """Migrated from drizzle: clc-per-capita-schema.ts"""
     organization_id = models.UUIDField()
     user_id = models.CharField(max_length=255, null=True, blank=True)
+    email = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    is_primary = models.BooleanField(default=False, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    receive_reminders = models.BooleanField(default=True, null=True, blank=True)
+    receive_reports = models.BooleanField(default=False, null=True, blank=True)
+    role = models.CharField(max_length=100)
 
     class Meta:
         db_table = 'organization_contacts'
@@ -176,7 +382,14 @@ class OrganizationContacts(BaseModel):
 class ClcOrganizationSyncLog(BaseModel):
     """Migrated from drizzle: clc-sync-audit-schema.ts"""
     organization_id = models.UUIDField(null=True, blank=True)
-    affiliate_code = models.CharField(max_length=255, null=True, blank=True)
+    affiliate_code = models.CharField(max_length=255, blank=True)
+    action = models.CharField(max_length=20)
+    changes = models.TextField(null=True, blank=True)
+    conflicts = models.JSONField(null=True, blank=True)
+    duration = models.IntegerField()
+    error = models.TextField(null=True, blank=True)
+    synced_at = models.DateTimeField(default=timezone.now)
+    synced_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'clc_organization_sync_log'
@@ -186,6 +399,100 @@ class ChartOfAccounts(BaseModel):
     """Migrated from drizzle: clc-sync-audit-schema.ts"""
     organization_id = models.UUIDField()
     account_code = models.CharField(max_length=255, null=True, blank=True)
+    account_number = models.CharField(max_length=50)
+    account_name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'asset', 'liability', 'equity', 'revenue', 'expense', 'cost_of_goods_sold',
+            'other_income', 'other_expense', 'contra_asset', 'contra_liability',
+        ]],
+    )
+    sub_type = models.CharField(max_length=100, null=True, blank=True)
+    parent_account_id = models.UUIDField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['active', 'inactive', 'archived', 'deleted']],
+        default='active',
+    )
+    normal_balance = models.CharField(max_length=10, null=True, blank=True)
+    is_sub_account = models.BooleanField(default=False, null=True, blank=True)
+    allow_transactions = models.BooleanField(default=True, null=True, blank=True)
+    require_cost_center = models.BooleanField(default=False, null=True, blank=True)
+    require_department = models.BooleanField(default=False, null=True, blank=True)
+    require_approval = models.BooleanField(default=False, null=True, blank=True)
+    require_invoice = models.BooleanField(default=False, null=True, blank=True)
+    is_reconciled_daily = models.BooleanField(default=False, null=True, blank=True)
+    last_reconciled_at = models.DateTimeField(null=True, blank=True)
+    last_reconciled_balance = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    gl_code = models.CharField(max_length=50, null=True, blank=True)
+    sap_code = models.CharField(max_length=50, null=True, blank=True)
+    quickbooks_code = models.CharField(max_length=50, null=True, blank=True)
+    opening_balance = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    opening_balance_date = models.DateTimeField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
+    account_category = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'dues_revenue', 'per_capita_revenue', 'other_revenue', 'salaries_wages',
+            'administrative', 'legal_professional', 'strike_fund', 'education_training',
+            'organizing', 'political_action', 'assets', 'liabilities', 'equity',
+        ]],
+        null=True,
+        blank=True,
+    )
+    account_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'asset', 'liability', 'equity', 'revenue', 'expense', 'cost_of_goods_sold',
+            'other_income', 'other_expense', 'contra_asset', 'contra_liability',
+        ]],
+        null=True,
+        blank=True,
+    )
+    balance = models.DecimalField(
+        max_digits=19,
+        decimal_places=4,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    balance_date = models.DateTimeField(null=True, blank=True)
+    clc_category = models.CharField(max_length=100, null=True, blank=True)
+    connector_id = models.UUIDField(null=True, blank=True)
+    currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
+    display_order = models.IntegerField(default=0, null=True, blank=True)
+    external_id = models.CharField(max_length=255, null=True, blank=True)
+    external_provider = models.CharField(max_length=50, null=True, blank=True)
+    external_system_id = models.CharField(max_length=255, null=True, blank=True)
+    financial_statement_line = models.CharField(max_length=100, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    is_clc_standard = models.BooleanField(default=False, null=True, blank=True)
+    is_header = models.BooleanField(default=False, null=True, blank=True)
+    is_system = models.BooleanField(default=False, null=True, blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
+    level = models.IntegerField(default=0, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    parent_account_code = models.CharField(max_length=50, null=True, blank=True)
+    sort_order = models.IntegerField(null=True, blank=True)
+    statcan_mapping = models.CharField(max_length=50, null=True, blank=True)
+    statistics_canada_code = models.CharField(max_length=50, null=True, blank=True)
+    synced_at = models.DateTimeField(null=True, blank=True)
+    tax_classification = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         db_table = 'chart_of_accounts'
@@ -210,6 +517,34 @@ class ClcApiConfig(BaseModel):
 class DonationCampaigns(BaseModel):
     """Migrated from drizzle: cms-website-schema.ts"""
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='donation_campaigns_organization_set')
+    title = models.TextField()
+    slug = models.TextField()
+    description = models.TextField(null=True, blank=True)
+    campaign_type = models.TextField()
+    goal_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    current_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    currency = models.TextField(default='CAD', null=True, blank=True)
+    featured_image = models.TextField(null=True, blank=True)
+    video_url = models.TextField(null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    status = models.TextField(default='active')
+    allow_recurring = models.BooleanField(default=True, null=True, blank=True)
+    suggested_amounts = ArrayField(models.IntegerField(), null=True, blank=True)
+    custom_fields = models.JSONField(default=list, null=True, blank=True)
+    thank_you_message = models.TextField(null=True, blank=True)
+    email_template_id = models.UUIDField(null=True, blank=True)
+    page_content = models.JSONField(default=list, null=True, blank=True)
+    seo_config = models.JSONField(default=dict, null=True, blank=True)
+    stripe_product_id = models.TextField(null=True, blank=True)
+    stripe_price_ids = models.JSONField(default=dict, null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'donation_campaigns'
@@ -218,6 +553,26 @@ class DonationCampaigns(BaseModel):
 class Donations(BaseModel):
     """Migrated from drizzle: cms-website-schema.ts"""
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='donations_organization_set')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    campaign_id = models.UUIDField(null=True, blank=True)
+    currency = models.TextField(default='CAD', null=True, blank=True)
+    custom_data = models.JSONField(default=dict, null=True, blank=True)
+    donor_email = models.TextField(null=True, blank=True)
+    donor_name = models.TextField(null=True, blank=True)
+    donor_phone = models.TextField(null=True, blank=True)
+    is_anonymous = models.BooleanField(default=False, null=True, blank=True)
+    is_recurring = models.BooleanField(default=False, null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
+    payment_method = models.TextField(null=True, blank=True)
+    payment_status = models.TextField(default='pending')
+    receipt_sent = models.BooleanField(default=False, null=True, blank=True)
+    receipt_url = models.TextField(null=True, blank=True)
+    recurring_interval = models.TextField(null=True, blank=True)
+    stripe_customer_id = models.TextField(null=True, blank=True)
+    stripe_payment_intent_id = models.TextField(null=True, blank=True)
+    stripe_subscription_id = models.TextField(null=True, blank=True)
+    tax_receipt_issued_at = models.DateTimeField(null=True, blank=True)
+    tax_receipt_number = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'donations'
@@ -226,6 +581,13 @@ class Donations(BaseModel):
 class DonationReceipts(BaseModel):
     """Migrated from drizzle: cms-website-schema.ts"""
     organization = models.ForeignKey('auth_core.Organizations', on_delete=models.CASCADE, related_name='donation_receipts_organization_set')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    donation_id = models.UUIDField()
+    issue_date = models.DateField()
+    pdf_url = models.TextField(null=True, blank=True)
+    receipt_number = models.TextField()
+    receipt_type = models.TextField()
+    sent_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'donation_receipts'
@@ -241,7 +603,7 @@ class StripeConnectAccounts(BaseModel):
     account_name = models.TextField()
     country = models.TextField(default="CA")
     currency = models.TextField(default="CAD")
-    separate_account = models.BooleanField(default=False)
+    separate_account = models.BooleanField(default=True)
     trust_account_designation = models.BooleanField(default=False)
     bank_account_last4 = models.TextField(null=True, blank=True)
     bank_name = models.TextField(null=True, blank=True)
@@ -261,10 +623,10 @@ class PaymentClassificationPolicy(BaseModel):
     policy_description = models.TextField(null=True, blank=True)
     effective_date = models.DateTimeField()
     expiry_date = models.DateTimeField(null=True, blank=True)
-    enforce_strict_separation = models.BooleanField(default=False)
+    enforce_strict_separation = models.BooleanField(default=True)
     allow_operational_fallback = models.BooleanField(default=False)
-    require_trust_account = models.BooleanField(default=False)
-    automatic_classification = models.BooleanField(default=False)
+    require_trust_account = models.BooleanField(default=True)
+    automatic_classification = models.BooleanField(default=True)
     approved_by = models.TextField()
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
@@ -280,7 +642,7 @@ class PaymentRoutingRules(BaseModel):
     payment_category = models.TextField()
     destination_account = models.ForeignKey('StripeConnectAccounts', on_delete=models.CASCADE, related_name='payment_routing_rules_destination_account_set')
     destination_account_type = models.TextField()
-    routing_mandatory = models.BooleanField(default=False)
+    routing_mandatory = models.BooleanField(default=True)
     fallback_account = models.ForeignKey('StripeConnectAccounts', on_delete=models.CASCADE, related_name='payment_routing_rules_fallback_account_set', null=True, blank=True)
     allow_fallback = models.BooleanField(default=False)
     routing_priority = models.TextField(default="1")
@@ -312,7 +674,7 @@ class SeparatedPaymentTransactions(BaseModel):
     correct_account_used = models.BooleanField(default=False)
     payment_status = models.TextField(default="pending")
     failure_reason = models.TextField(null=True, blank=True)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField()
 
     class Meta:
@@ -331,7 +693,7 @@ class WhiplashViolations(BaseModel):
     actual_account = models.ForeignKey('StripeConnectAccounts', on_delete=models.CASCADE, related_name='whiplash_violations_actual_account_set', null=True, blank=True)
     violation_description = models.TextField()
     amount_involved = models.TextField(null=True, blank=True)
-    correction_required = models.BooleanField(default=False)
+    correction_required = models.BooleanField(default=True)
     correction_action = models.TextField(null=True, blank=True)
     violation_status = models.TextField(default="open")
     detected_by = models.TextField(null=True, blank=True)
@@ -377,7 +739,7 @@ class AccountBalanceReconciliation(BaseModel):
     account_type = models.TextField()
     stripe_reported_balance = models.TextField()
     system_calculated_balance = models.TextField()
-    balance_match = models.BooleanField(default=False)
+    balance_match = models.BooleanField()
     discrepancy_amount = models.TextField(null=True, blank=True)
     discrepancy_reason = models.TextField(null=True, blank=True)
     reconciliation_status = models.TextField(default="pending")
@@ -399,7 +761,7 @@ class WhiplashPreventionAudit(BaseModel):
     transaction = models.ForeignKey('SeparatedPaymentTransactions', on_delete=models.CASCADE, related_name='whiplash_prevention_audit_transaction_set', null=True, blank=True)
     performed_by = models.TextField()
     compliance_impact = models.TextField(null=True, blank=True)
-    metadata = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'whiplash_prevention_audit'
@@ -408,6 +770,26 @@ class WhiplashPreventionAudit(BaseModel):
 class CostCenters(BaseModel):
     """Migrated from drizzle: accounting.ts"""
     organization_id = models.UUIDField()
+    code = models.CharField(max_length=50)
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'department', 'project', 'location', 'program', 'fund', 'grant', 'other',
+        ]],
+    )
+    parent_cost_center_id = models.UUIDField(null=True, blank=True)
+    manager = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=50, default='active')
+    budget_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    budget_period = models.CharField(max_length=50, null=True, blank=True)
+    budget_start_date = models.DateTimeField(null=True, blank=True)
+    budget_end_date = models.DateTimeField(null=True, blank=True)
+    warning_threshold = models.IntegerField(default=80, null=True, blank=True)
+    external_code = models.CharField(max_length=100, null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'cost_centers'
@@ -415,7 +797,36 @@ class CostCenters(BaseModel):
 
 class GlAccountMappings(BaseModel):
     """Migrated from drizzle: accounting.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    account_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'asset', 'liability', 'equity', 'revenue', 'expense', 'cost_of_goods_sold',
+            'other_income', 'other_expense', 'contra_asset', 'contra_liability',
+        ]],
+        null=True,
+        blank=True,
+    )
+    auto_sync = models.BooleanField(default=True, null=True, blank=True)
+    chart_of_accounts_id = models.UUIDField(null=True, blank=True)
+    connector_id = models.UUIDField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    credit_account = models.CharField(max_length=50, null=True, blank=True)
+    debit_account = models.CharField(max_length=50, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    erp_account_code = models.CharField(max_length=100, null=True, blank=True)
+    erp_account_id = models.UUIDField(null=True, blank=True)
+    erp_system_code = models.CharField(max_length=50, null=True, blank=True)
+    gl_account_number = models.CharField(max_length=50, null=True, blank=True)
+    gl_cost_center = models.CharField(max_length=50, null=True, blank=True)
+    gl_department = models.CharField(max_length=50, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    local_account_type = models.CharField(max_length=100, null=True, blank=True)
+    local_transaction_type = models.CharField(max_length=100, null=True, blank=True)
+    union_eyes_account = models.CharField(max_length=255, null=True, blank=True)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
+    valid_from = models.DateTimeField(null=True, blank=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'gl_account_mappings'
@@ -423,7 +834,38 @@ class GlAccountMappings(BaseModel):
 
 class GlTransactionLog(BaseModel):
     """Migrated from drizzle: accounting.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    chart_of_accounts_id = models.UUIDField()
+    transaction_date = models.DateTimeField()
+    transaction_number = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
+    debit_amount = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    credit_amount = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    cost_center_id = models.UUIDField(null=True, blank=True)
+    invoice_number = models.CharField(max_length=100, null=True, blank=True)
+    receipt_number = models.CharField(max_length=100, null=True, blank=True)
+    purchase_order_number = models.CharField(max_length=100, null=True, blank=True)
+    source_system = models.CharField(max_length=100, null=True, blank=True)
+    source_record_id = models.CharField(max_length=100, null=True, blank=True)
+    is_posted = models.BooleanField(default=False, null=True, blank=True)
+    posted_at = models.DateTimeField(null=True, blank=True)
+    posted_by = models.CharField(max_length=255, null=True, blank=True)
+    is_reconciled = models.BooleanField(default=False, null=True, blank=True)
+    reconciled_at = models.DateTimeField(null=True, blank=True)
+    reconciled_by = models.CharField(max_length=255, null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'gl_transaction_log'
@@ -431,7 +873,43 @@ class GlTransactionLog(BaseModel):
 
 class GlTrialBalance(BaseModel):
     """Migrated from drizzle: accounting.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    chart_of_accounts_id = models.UUIDField()
+    period_end_date = models.DateTimeField()
+    opening_balance = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    debit_total = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    credit_total = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    closing_balance = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    is_finalized = models.BooleanField(default=False, null=True, blank=True)
+    finalized_at = models.DateTimeField(null=True, blank=True)
+    finalized_by = models.CharField(max_length=255, null=True, blank=True)
+    is_balanced = models.BooleanField(default=False, null=True, blank=True)
+    balance = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'gl_trial_balance'
@@ -439,7 +917,12 @@ class GlTrialBalance(BaseModel):
 
 class OrganizationBillingConfig(BaseModel):
     """Migrated from drizzle: billing-config.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    billing_day_of_month = models.IntegerField(null=True, blank=True)
+    billing_frequency = models.CharField(max_length=20, default='monthly')
+    enabled = models.BooleanField(default=True, null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    timezone = models.CharField(max_length=50, default='America/Toronto', null=True, blank=True)
 
     class Meta:
         db_table = 'organization_billing_config'
@@ -453,7 +936,64 @@ class DuesTransactions(BaseModel):
     member_id = models.TextField()
     assignment_id = models.UUIDField(null=True, blank=True)
     rule_id = models.UUIDField(null=True, blank=True)
-    transaction_type = models.CharField(choices=TRANSACTION_TYPE_CHOICES, max_length=20, null=True, blank=True)
+    transaction_type = models.CharField(choices=TRANSACTION_TYPE_CHOICES, max_length=20, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    due_date = models.DateField()
+    status = models.CharField(max_length=50, default='pending')
+    payment_date = models.DateTimeField(null=True, blank=True)
+    payment_method = models.CharField(max_length=50, null=True, blank=True)
+    payment_reference = models.CharField(max_length=255, null=True, blank=True)
+    processor_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['stripe', 'whop', 'paypal', 'square', 'manual']],
+        null=True,
+        blank=True,
+    )
+    processor_payment_id = models.CharField(max_length=255, null=True, blank=True)
+    processor_customer_id = models.CharField(max_length=255, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, null=True, blank=True)
+    dues_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    cope_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        null=True,
+        blank=True,
+    )
+    pac_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        null=True,
+        blank=True,
+    )
+    strike_fund_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        null=True,
+        blank=True,
+    )
+    late_fee_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        null=True,
+        blank=True,
+    )
+    adjustment_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        null=True,
+        blank=True,
+    )
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    paid_date = models.DateTimeField(null=True, blank=True)
+    receipt_url = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'dues_transactions'
@@ -461,7 +1001,61 @@ class DuesTransactions(BaseModel):
 
 class Payments(BaseModel):
     """Migrated from drizzle: payments.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    member_id = models.CharField(max_length=255, null=True, blank=True)
+    amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
+    type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'dues', 'strike_fund', 'subscription', 'stipend', 'honorarium', 'rebate', 'other',
+        ]],
+    )
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'pending', 'processing', 'completed', 'failed', 'refunded', 'disputed', 'unmatched',
+            'cancelled',
+        ]],
+        default='pending',
+    )
+    method = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'stripe', 'bank_transfer', 'check', 'cash', 'direct_debit', 'payroll_deduction',
+            'ewallet',
+        ]],
+    )
+    stripe_payment_intent_id = models.TextField(null=True, blank=True)
+    stripe_price_id = models.TextField(null=True, blank=True)
+    stripe_invoice_id = models.TextField(null=True, blank=True)
+    bank_deposit_id = models.TextField(null=True, blank=True)
+    check_number = models.TextField(null=True, blank=True)
+    reference_number = models.TextField(null=True, blank=True)
+    processor_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['stripe', 'whop', 'paypal', 'square', 'manual']],
+        null=True,
+        blank=True,
+    )
+    processor_customer_id = models.CharField(max_length=255, null=True, blank=True)
+    payment_cycle_id = models.UUIDField(null=True, blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    paid_date = models.DateTimeField(null=True, blank=True)
+    reconciliation_status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'unreconciled', 'pending_review', 'reconciled', 'orphaned', 'disputed',
+        ]],
+        default='unreconciled',
+        null=True,
+        blank=True,
+    )
+    reconciliation_date = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    failure_reason = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'payments'
@@ -469,7 +1063,16 @@ class Payments(BaseModel):
 
 class PaymentCycles(BaseModel):
     """Migrated from drizzle: payments.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    closed_at = models.DateTimeField(null=True, blank=True)
+    cycle_type = models.CharField(max_length=50, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    due_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    is_closed = models.BooleanField(default=False, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    start_date = models.DateTimeField()
 
     class Meta:
         db_table = 'payment_cycles'
@@ -477,7 +1080,29 @@ class PaymentCycles(BaseModel):
 
 class PaymentMethods(BaseModel):
     """Migrated from drizzle: payments.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    member_id = models.CharField(max_length=255)
+    type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'stripe', 'bank_transfer', 'check', 'cash', 'direct_debit', 'payroll_deduction',
+            'ewallet',
+        ]],
+    )
+    is_default = models.BooleanField(default=False, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    stripe_payment_method_id = models.TextField(null=True, blank=True)
+    stripe_billing_details = models.JSONField(null=True, blank=True)
+    processor_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['stripe', 'whop', 'paypal', 'square', 'manual']],
+        null=True,
+        blank=True,
+    )
+    processor_method_id = models.CharField(max_length=255, null=True, blank=True)
+    bank_account_token = models.TextField(null=True, blank=True)
+    bank_account_last_4 = models.CharField(max_length=4, null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'payment_methods'
@@ -485,7 +1110,28 @@ class PaymentMethods(BaseModel):
 
 class BankReconciliation(BaseModel):
     """Migrated from drizzle: payments.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    bank_deposit_id = models.TextField()
+    bank_statement_date = models.DateTimeField()
+    deposit_amount = models.DecimalField(max_digits=19, decimal_places=2)
+    deposit_currency = models.CharField(max_length=3, default='CAD', null=True, blank=True)
+    matched_payment_ids = ArrayField(models.UUIDField(), null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    reconciled_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    reconciled_at = models.DateTimeField(null=True, blank=True)
+    reconciled_by = models.CharField(max_length=255, null=True, blank=True)
+    reconciliation_notes = models.TextField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'unreconciled', 'pending_review', 'reconciled', 'orphaned', 'disputed',
+        ]],
+        default='unreconciled',
+        null=True,
+        blank=True,
+    )
+    unmatched_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    unmatched_payment_ids = ArrayField(models.UUIDField(), null=True, blank=True)
 
     class Meta:
         db_table = 'bank_reconciliation'
@@ -493,7 +1139,16 @@ class BankReconciliation(BaseModel):
 
 class PaymentDisputes(BaseModel):
     """Migrated from drizzle: payments.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    description = models.TextField(null=True, blank=True)
+    filed_by = models.CharField(max_length=255, null=True, blank=True)
+    payment_id = models.UUIDField()
+    reason = models.TextField()
+    resolution_notes = models.TextField(null=True, blank=True)
+    resolved_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=50)
 
     class Meta:
         db_table = 'payment_disputes'
@@ -509,7 +1164,28 @@ class StripeWebhookEvents(BaseModel):
 
 class StrikeFundDisbursements(BaseModel):
     """Migrated from drizzle: taxes.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
+    organization_id = models.UUIDField()
+    strike_id = models.UUIDField(null=True, blank=True)
+    strike_name = models.TextField(null=True, blank=True)
+    strike_start_date = models.DateTimeField(null=True, blank=True)
+    strike_end_date = models.DateTimeField(null=True, blank=True)
+    payment_date = models.DateTimeField()
+    payment_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=50)
+    payment_reference = models.CharField(max_length=100, null=True, blank=True)
+    tax_year = models.CharField(max_length=4)
+    tax_month = models.CharField(max_length=2)
+    week_number = models.CharField(max_length=10)
+    weekly_total = models.DecimalField(max_digits=10, decimal_places=2)
+    exceeds_threshold = models.BooleanField(default=False)
+    requires_tax_slip = models.BooleanField(default=False)
+    t4a_generated = models.BooleanField(default=False)
+    t4a_generated_at = models.DateTimeField(null=True, blank=True)
+    rl1_generated = models.BooleanField(default=False)
+    rl1_generated_at = models.DateTimeField(null=True, blank=True)
+    province = models.CharField(max_length=2)
+    is_quebec_resident = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'strike_fund_disbursements'
@@ -517,7 +1193,39 @@ class StrikeFundDisbursements(BaseModel):
 
 class T4aTaxSlips(BaseModel):
     """Migrated from drizzle: taxes.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
+    amendment_reason = models.TextField(null=True, blank=True)
+    box_022_income_tax_deducted = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
+    box_028_other_income = models.DecimalField(max_digits=10, decimal_places=2)
+    cra_confirmation_number = models.CharField(max_length=50, null=True, blank=True)
+    cra_filing_date = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    delivered_to_member = models.BooleanField(default=False)
+    delivery_method = models.CharField(max_length=50, null=True, blank=True)
+    filed_with_cra = models.BooleanField(default=False)
+    generated_at = models.DateTimeField(default=timezone.now)
+    generated_by = models.CharField(max_length=255)
+    is_amendment = models.BooleanField(default=False)
+    original_slip_id = models.UUIDField(null=True, blank=True)
+    payer_address = models.TextField()
+    payer_business_number = models.CharField(max_length=15)
+    payer_city = models.CharField(max_length=100)
+    payer_name = models.TextField()
+    payer_postal_code = models.CharField(max_length=10)
+    payer_province = models.CharField(max_length=2)
+    pdf_url = models.TextField(null=True, blank=True)
+    recipient_address = models.TextField()
+    recipient_city = models.CharField(max_length=100)
+    recipient_name = models.TextField()
+    recipient_postal_code = models.CharField(max_length=10)
+    recipient_province = models.CharField(max_length=2)
+    recipient_sin = models.CharField(max_length=11, null=True, blank=True)
+    tax_year = models.CharField(max_length=4)
+    xml_url = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 't4a_tax_slips'
@@ -525,7 +1233,37 @@ class T4aTaxSlips(BaseModel):
 
 class Rl1TaxSlips(BaseModel):
     """Migrated from drizzle: taxes.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
+    amendment_reason = models.TextField(null=True, blank=True)
+    box_e_quebec_income_tax_deducted = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
+    box_o_other_income = models.DecimalField(max_digits=10, decimal_places=2)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    delivered_to_member = models.BooleanField(default=False)
+    delivery_method = models.CharField(max_length=50, null=True, blank=True)
+    filed_with_revenu_quebec = models.BooleanField(default=False)
+    generated_at = models.DateTimeField(default=timezone.now)
+    generated_by = models.CharField(max_length=255)
+    is_amendment = models.BooleanField(default=False)
+    original_slip_id = models.UUIDField(null=True, blank=True)
+    payer_address = models.TextField()
+    payer_city = models.CharField(max_length=100)
+    payer_name = models.TextField()
+    payer_postal_code = models.CharField(max_length=10)
+    payer_quebec_enterprise_number = models.CharField(max_length=10)
+    pdf_url = models.TextField(null=True, blank=True)
+    recipient_address = models.TextField()
+    recipient_city = models.CharField(max_length=100)
+    recipient_name = models.TextField()
+    recipient_postal_code = models.CharField(max_length=10)
+    recipient_sin = models.CharField(max_length=11, null=True, blank=True)
+    revenu_quebec_confirmation_number = models.CharField(max_length=50, null=True, blank=True)
+    revenu_quebec_filing_date = models.DateTimeField(null=True, blank=True)
+    tax_year = models.CharField(max_length=4)
+    xml_url = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'rl1_tax_slips'
@@ -533,7 +1271,26 @@ class Rl1TaxSlips(BaseModel):
 
 class TaxYearEndProcessing(BaseModel):
     """Migrated from drizzle: taxes.ts"""
-    tax_year = models.CharField(max_length=255, null=True, blank=True)
+    tax_year = models.CharField(max_length=255, blank=True)
+    compliance_status = models.CharField(max_length=20, default='pending')
+    deadline_missed = models.BooleanField(default=False)
+    member_delivery_completed_at = models.DateTimeField(null=True, blank=True)
+    member_delivery_started_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    processed_by = models.CharField(max_length=255, null=True, blank=True)
+    processing_completed_at = models.DateTimeField(null=True, blank=True)
+    processing_started_at = models.DateTimeField(null=True, blank=True)
+    rl1_filed_at = models.DateTimeField(null=True, blank=True)
+    rl1_filing_confirmed = models.BooleanField(default=False)
+    rl1_filing_deadline = models.DateTimeField()
+    rl1_slips_generated = models.CharField(max_length=10, default='0')
+    rl1_total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    slips_delivered_to_members = models.CharField(max_length=10, default='0')
+    t4a_filed_at = models.DateTimeField(null=True, blank=True)
+    t4a_filing_confirmed = models.BooleanField(default=False)
+    t4a_filing_deadline = models.DateTimeField()
+    t4a_slips_generated = models.CharField(max_length=10, default='0')
+    t4a_total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
 
     class Meta:
         db_table = 'tax_year_end_processing'
@@ -541,7 +1298,21 @@ class TaxYearEndProcessing(BaseModel):
 
 class WeeklyThresholdTracking(BaseModel):
     """Migrated from drizzle: taxes.ts"""
-    user_id = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, blank=True)
+    exceeds_threshold = models.BooleanField(default=False)
+    payment_count = models.CharField(max_length=10, default='0')
+    requires_rl1 = models.BooleanField(default=False)
+    requires_t4a = models.BooleanField(default=False)
+    tax_year = models.CharField(max_length=4)
+    threshold_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('500.00'),
+    )
+    week_end_date = models.DateTimeField()
+    week_number = models.CharField(max_length=10)
+    week_start_date = models.DateTimeField()
+    weekly_total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
 
     class Meta:
         db_table = 'weekly_threshold_tracking'
@@ -549,8 +1320,19 @@ class WeeklyThresholdTracking(BaseModel):
 
 class CurrencyEnforcementPolicy(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
-    enforcement_enabled = models.BooleanField(default=False)
-    mandatory_currency = models.CharField(max_length=255, null=True, blank=True)
+    enforcement_enabled = models.BooleanField(default=True)
+    mandatory_currency = models.CharField(max_length=255, blank=True, default='CAD')
+    allow_foreign_currency = models.BooleanField(default=False)
+    foreign_currency_reason = models.TextField(null=True, blank=True)
+    fx_rate_source = models.CharField(max_length=50, default='bank_of_canada')
+    fx_rate_update_frequency = models.CharField(max_length=20, default='daily')
+    t106_filing_required = models.BooleanField(default=True)
+    t106_threshold_cad = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('1000000.00'),
+    )
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'currency_enforcement_policy'
@@ -559,7 +1341,14 @@ class CurrencyEnforcementPolicy(BaseModel):
 class BankOfCanadaRates(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
     rate_date = models.DateTimeField()
-    currency = models.CharField(max_length=255, null=True, blank=True)
+    currency = models.CharField(max_length=255, blank=True)
+    buy_rate = models.DecimalField(max_digits=15, decimal_places=8, null=True, blank=True)
+    data_quality = models.CharField(max_length=20, default='official')
+    imported_at = models.DateTimeField(default=timezone.now)
+    imported_by = models.CharField(max_length=255, null=True, blank=True)
+    noon_rate = models.DecimalField(max_digits=15, decimal_places=8)
+    sell_rate = models.DecimalField(max_digits=15, decimal_places=8, null=True, blank=True)
+    source = models.CharField(max_length=50, default='bank_of_canada_api')
 
     class Meta:
         db_table = 'bank_of_canada_rates'
@@ -568,7 +1357,18 @@ class BankOfCanadaRates(BaseModel):
 class TransactionCurrencyConversions(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
     transaction_id = models.UUIDField(unique=True)
-    transaction_type = models.CharField(max_length=255, null=True, blank=True)
+    transaction_type = models.CharField(max_length=255, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.CharField(max_length=255, null=True, blank=True)
+    cad_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    conversion_method = models.CharField(max_length=50, default='noon_rate')
+    exception_approved = models.BooleanField(default=False)
+    exception_reason = models.TextField(null=True, blank=True)
+    fx_rate_date = models.DateTimeField()
+    fx_rate_source = models.CharField(max_length=50, default='bank_of_canada')
+    fx_rate_used = models.DecimalField(max_digits=15, decimal_places=8)
+    original_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    original_currency = models.CharField(max_length=3)
 
     class Meta:
         db_table = 'transaction_currency_conversions'
@@ -576,7 +1376,19 @@ class TransactionCurrencyConversions(BaseModel):
 
 class CurrencyEnforcementViolations(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
-    violation_type = models.CharField(max_length=255, null=True, blank=True)
+    violation_type = models.CharField(max_length=255, blank=True)
+    attempted_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    attempted_at = models.DateTimeField(default=timezone.now)
+    attempted_by = models.CharField(max_length=255)
+    attempted_currency = models.CharField(max_length=3, null=True, blank=True)
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
+    resolution = models.TextField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=20, default='pending')
+    transaction_id = models.UUIDField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    violation_description = models.TextField()
 
     class Meta:
         db_table = 'currency_enforcement_violations'
@@ -584,7 +1396,28 @@ class CurrencyEnforcementViolations(BaseModel):
 
 class T106FilingTracking(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
-    fiscal_year = models.CharField(max_length=255, null=True, blank=True)
+    fiscal_year = models.CharField(max_length=255, blank=True)
+    confirmation_number = models.CharField(max_length=50, null=True, blank=True)
+    filed_by = models.CharField(max_length=255, null=True, blank=True)
+    filed_date = models.DateTimeField(null=True, blank=True)
+    filing_due_date = models.DateTimeField(null=True, blank=True)
+    filing_status = models.CharField(max_length=20, default='not_required')
+    prepared_by = models.CharField(max_length=255, null=True, blank=True)
+    reportable_transaction_count = models.CharField(max_length=10, default='0')
+    reportable_transaction_ids = models.JSONField(null=True, blank=True)
+    reviewed_by = models.CharField(max_length=255, null=True, blank=True)
+    t106_filing_required = models.BooleanField(default=False)
+    t106_threshold_exceeded = models.BooleanField(default=False)
+    total_cad_equivalent = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
+    total_foreign_transactions = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00'),
+    )
 
     class Meta:
         db_table = 't106_filing_tracking'
@@ -593,7 +1426,22 @@ class T106FilingTracking(BaseModel):
 class TransferPricingDocumentation(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
     transaction_id = models.UUIDField()
-    transaction_type = models.CharField(max_length=255, null=True, blank=True)
+    transaction_type = models.CharField(max_length=255, blank=True)
+    arms_length_confirmed = models.BooleanField(default=False)
+    arms_length_method = models.CharField(max_length=50, null=True, blank=True)
+    arms_length_required = models.BooleanField(default=True)
+    cad_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    comparable_transactions = models.JSONField(null=True, blank=True)
+    documented_at = models.DateTimeField(default=timezone.now)
+    documented_by = models.CharField(max_length=255)
+    from_party = models.UUIDField()
+    pricing_justification = models.TextField()
+    review_notes = models.TextField(null=True, blank=True)
+    review_required = models.BooleanField(default=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.CharField(max_length=255, null=True, blank=True)
+    supporting_documents = models.JSONField(null=True, blank=True)
+    to_party = models.UUIDField()
 
     class Meta:
         db_table = 'transfer_pricing_documentation'
@@ -601,7 +1449,15 @@ class TransferPricingDocumentation(BaseModel):
 
 class FxRateAuditLog(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
-    action_type = models.CharField(max_length=255, null=True, blank=True)
+    action_type = models.CharField(max_length=255, blank=True)
+    action_description = models.TextField(null=True, blank=True)
+    currency = models.CharField(max_length=3, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    new_rate = models.DecimalField(max_digits=15, decimal_places=8, null=True, blank=True)
+    old_rate = models.DecimalField(max_digits=15, decimal_places=8, null=True, blank=True)
+    performed_by = models.CharField(max_length=255, null=True, blank=True)
+    performed_by_role = models.CharField(max_length=50, null=True, blank=True)
+    rate_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'fx_rate_audit_log'
@@ -609,7 +1465,16 @@ class FxRateAuditLog(BaseModel):
 
 class CurrencyEnforcementAudit(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
-    action_type = models.CharField(max_length=255, null=True, blank=True)
+    action_type = models.CharField(max_length=255, blank=True)
+    action_description = models.TextField()
+    affected_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    affected_currency = models.CharField(max_length=3, null=True, blank=True)
+    compliance_impact = models.CharField(max_length=20, null=True, blank=True)
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    performed_by = models.CharField(max_length=255)
+    performed_by_role = models.CharField(max_length=50, null=True, blank=True)
+    transaction_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = 'currency_enforcement_audit'
@@ -617,7 +1482,14 @@ class CurrencyEnforcementAudit(BaseModel):
 
 class ExchangeRates(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
-    from_currency = models.CharField(max_length=255, null=True, blank=True)
+    from_currency = models.CharField(max_length=255, blank=True)
+    data_quality = models.CharField(max_length=20, default='official', null=True, blank=True)
+    effective_date = models.DateTimeField()
+    exchange_rate = models.CharField(max_length=20)
+    provider = models.CharField(max_length=100, null=True, blank=True)
+    rate_source = models.CharField(max_length=50)
+    rate_timestamp = models.DateTimeField()
+    to_currency = models.CharField(max_length=3, default='CAD')
 
     class Meta:
         db_table = 'exchange_rates'
@@ -627,7 +1499,19 @@ class CrossBorderTransactions(BaseModel):
     """Migrated from drizzle: transfer-pricing.ts"""
     transaction_date = models.DateTimeField()
     amount_cents = models.IntegerField()
-    original_currency = models.CharField(max_length=255, null=True, blank=True)
+    original_currency = models.CharField(max_length=255, null=True, blank=True, db_default='CAD')
+    cad_equivalent_cents = models.IntegerField()
+    counterparty_name = models.TextField(null=True, blank=True)
+    cra_reporting_status = models.CharField(max_length=50, default='pending')
+    description = models.TextField(null=True, blank=True)
+    from_country_code = models.CharField(max_length=2, default='CA')
+    from_party_type = models.CharField(max_length=50)
+    requires_t106 = models.BooleanField(default=False)
+    t106_filed = models.BooleanField(default=False)
+    t106_filing_date = models.DateTimeField(null=True, blank=True)
+    to_country_code = models.CharField(max_length=2)
+    to_party_type = models.CharField(max_length=50)
+    transaction_type = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         db_table = 'cross_border_transactions'
@@ -636,6 +1520,12 @@ class CrossBorderTransactions(BaseModel):
 class AccountMappings(BaseModel):
     """Migrated from drizzle: chart-of-accounts.ts"""
     organization_id = models.UUIDField(null=True, blank=True)
+    credit_account_code = models.CharField(max_length=50)
+    debit_account_code = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    transaction_category = models.CharField(max_length=100, null=True, blank=True)
+    transaction_type = models.CharField(max_length=100)
 
     class Meta:
         db_table = 'account_mappings'
@@ -699,7 +1589,28 @@ class BankReconciliations(BaseModel):
 
 class SyncJobs(BaseModel):
     """Migrated from drizzle: erp.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    completed_at = models.DateTimeField(null=True, blank=True)
+    connector_id = models.UUIDField()
+    direction = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['push', 'pull', 'bidirectional']],
+    )
+    entity_type = models.CharField(max_length=100)
+    errors = models.JSONField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    records_failed = models.IntegerField(default=0)
+    records_processed = models.IntegerField(default=0)
+    records_succeeded = models.IntegerField(default=0)
+    started_at = models.DateTimeField()
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'synced', 'pending', 'failed', 'disconnected', 'idle', 'running', 'success', 'partial',
+            'cancelled', 'in_progress',
+        ]],
+        default='pending',
+    )
 
     class Meta:
         db_table = 'sync_jobs'
@@ -707,7 +1618,22 @@ class SyncJobs(BaseModel):
 
 class FinancialAuditLog(BaseModel):
     """Migrated from drizzle: erp.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    action = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'create', 'update', 'delete', 'sync', 'approve', 'reject', 'void', 'reverse',
+        ]],
+    )
+    changes = models.JSONField(null=True, blank=True)
+    entity_type = models.CharField(max_length=100)
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    org_id = models.UUIDField()
+    timestamp = models.DateTimeField(default=timezone.now)
+    user_agent = models.TextField(null=True, blank=True)
+    user_id = models.CharField(max_length=255)
+    user_name = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'financial_audit_log'
@@ -715,7 +1641,13 @@ class FinancialAuditLog(BaseModel):
 
 class CurrencyExchangeRates(BaseModel):
     """Migrated from drizzle: erp.ts"""
-    organization_id = models.UUIDField(null=True, blank=True)
+    organization_id = models.UUIDField()
+    base_currency = models.CharField(max_length=3)
+    effective_date = models.DateTimeField()
+    metadata = models.JSONField(null=True, blank=True)
+    rate = models.DecimalField(max_digits=19, decimal_places=8)
+    source = models.CharField(max_length=100)
+    target_currency = models.CharField(max_length=3)
 
     class Meta:
         db_table = 'currency_exchange_rates'
@@ -723,9 +1655,24 @@ class CurrencyExchangeRates(BaseModel):
 
 class FmvPolicy(BaseModel):
     """Migrated from drizzle: trust-fmv.ts"""
-    policy_enabled = models.BooleanField(default=False)
-    fmv_verification_required = models.BooleanField(default=False)
-    competitive_bidding_threshold = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    policy_enabled = models.BooleanField(default=True)
+    fmv_verification_required = models.BooleanField(default=True)
+    competitive_bidding_threshold = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        default=Decimal('10000.00'),
+    )
+    appraisal_required = models.BooleanField(default=True)
+    appraisal_threshold = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('50000.00'),
+    )
+    cpi_base_year = models.CharField(max_length=4, default='2002')
+    cpi_escalator_enabled = models.BooleanField(default=True)
+    cpi_update_frequency = models.CharField(max_length=20, default='monthly')
+    minimum_bids_required = models.CharField(max_length=2, default='3')
+    updated_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'fmv_policy'
@@ -733,7 +1680,17 @@ class FmvPolicy(BaseModel):
 
 class CpiData(BaseModel):
     """Migrated from drizzle: trust-fmv.ts"""
-    period_year = models.CharField(max_length=255, null=True, blank=True)
+    period_year = models.CharField(max_length=255, blank=True)
+    base_year = models.CharField(max_length=4, default='2002')
+    cpi_change = models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
+    cpi_value = models.DecimalField(max_digits=10, decimal_places=4)
+    cpi_year_over_year = models.DecimalField(max_digits=6, decimal_places=4, null=True, blank=True)
+    data_quality = models.CharField(max_length=20, default='official')
+    imported_at = models.DateTimeField(default=timezone.now)
+    imported_by = models.CharField(max_length=255, null=True, blank=True)
+    period_date = models.DateTimeField()
+    period_month = models.CharField(max_length=2)
+    source = models.CharField(max_length=50, default='statistics_canada')
 
     class Meta:
         db_table = 'cpi_data'
@@ -741,7 +1698,28 @@ class CpiData(BaseModel):
 
 class FmvBenchmarks(BaseModel):
     """Migrated from drizzle: trust-fmv.ts"""
-    item_category = models.CharField(max_length=255, null=True, blank=True)
+    item_category = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    comparable_transactions = models.JSONField(null=True, blank=True)
+    cpi_adjusted = models.BooleanField(default=False)
+    cpi_adjustment_factor = models.DecimalField(
+        max_digits=10,
+        decimal_places=6,
+        null=True,
+        blank=True,
+    )
+    data_sources = models.JSONField(null=True, blank=True)
+    effective_from = models.DateTimeField()
+    effective_to = models.DateTimeField(null=True, blank=True)
+    fmv_high = models.DecimalField(max_digits=15, decimal_places=2)
+    fmv_low = models.DecimalField(max_digits=15, decimal_places=2)
+    fmv_median = models.DecimalField(max_digits=15, decimal_places=2)
+    item_description = models.TextField()
+    item_specifications = models.JSONField(null=True, blank=True)
+    original_fmv = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    region = models.CharField(max_length=50)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'fmv_benchmarks'
@@ -749,7 +1727,26 @@ class FmvBenchmarks(BaseModel):
 
 class ProcurementRequests(BaseModel):
     """Migrated from drizzle: trust-fmv.ts"""
-    request_number = models.CharField(max_length=255, null=True, blank=True)
+    request_number = models.CharField(max_length=255, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.CharField(max_length=255, null=True, blank=True)
+    award_justification = models.TextField(null=True, blank=True)
+    awarded_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    awarded_at = models.DateTimeField(null=True, blank=True)
+    awarded_to = models.CharField(max_length=255, null=True, blank=True)
+    bidding_deadline = models.DateTimeField(null=True, blank=True)
+    bids_received = models.CharField(max_length=2, default='0')
+    budget_approved = models.BooleanField(default=False)
+    estimated_value = models.DecimalField(max_digits=15, decimal_places=2)
+    minimum_bids_required = models.CharField(max_length=2, default='3')
+    procurement_method = models.CharField(max_length=50, default='competitive_bidding')
+    procurement_type = models.CharField(max_length=50)
+    request_description = models.TextField()
+    request_title = models.TextField()
+    requested_at = models.DateTimeField(default=timezone.now)
+    requested_by = models.CharField(max_length=255)
+    requested_by_department = models.CharField(max_length=100, null=True, blank=True)
+    status = models.CharField(max_length=20, default='draft')
 
     class Meta:
         db_table = 'procurement_requests'
@@ -761,6 +1758,25 @@ class ProcurementBids(BaseModel):
     bidder_name = models.TextField()
     bidder_contact = models.TextField()
     bidder_email = models.CharField(max_length=255, null=True, blank=True)
+    bid_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    bid_documents = models.JSONField(null=True, blank=True)
+    bid_notes = models.TextField(null=True, blank=True)
+    bid_status = models.CharField(max_length=20, default='submitted')
+    bid_valid_until = models.DateTimeField(null=True, blank=True)
+    bidder_phone = models.CharField(max_length=20, null=True, blank=True)
+    evaluated_at = models.DateTimeField(null=True, blank=True)
+    evaluated_by = models.CharField(max_length=255, null=True, blank=True)
+    evaluation_notes = models.TextField(null=True, blank=True)
+    evaluation_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    fmv_benchmark_id = models.UUIDField(null=True, blank=True)
+    fmv_variance_percentage = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    submitted_at = models.DateTimeField(default=timezone.now)
+    within_fmv_range = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'procurement_bids'
@@ -768,7 +1784,23 @@ class ProcurementBids(BaseModel):
 
 class IndependentAppraisals(BaseModel):
     """Migrated from drizzle: trust-fmv.ts"""
-    item_type = models.CharField(max_length=255, null=True, blank=True)
+    item_type = models.CharField(max_length=255, blank=True)
+    appraisal_date = models.DateTimeField()
+    appraisal_method = models.CharField(max_length=50)
+    appraisal_notes = models.TextField(null=True, blank=True)
+    appraisal_report = models.TextField(null=True, blank=True)
+    appraisal_valid_until = models.DateTimeField(null=True, blank=True)
+    appraised_value = models.DecimalField(max_digits=15, decimal_places=2)
+    appraiser_company = models.TextField(null=True, blank=True)
+    appraiser_contact = models.TextField(null=True, blank=True)
+    appraiser_credentials = models.TextField(null=True, blank=True)
+    appraiser_name = models.TextField()
+    item_description = models.TextField()
+    item_specifications = models.JSONField(null=True, blank=True)
+    procurement_request_id = models.UUIDField(null=True, blank=True)
+    review_notes = models.TextField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'independent_appraisals'
@@ -779,7 +1811,17 @@ class CpiAdjustedPricing(BaseModel):
     item_id = models.UUIDField()
     item_description = models.TextField()
     contract_id = models.UUIDField(null=True, blank=True)
-    original_price = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    original_price = models.DecimalField(max_digits=19, decimal_places=2)
+    adjusted_price = models.DecimalField(max_digits=15, decimal_places=2)
+    adjustment_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    adjustment_approved = models.BooleanField(default=False)
+    adjustment_date = models.DateTimeField()
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.CharField(max_length=255, null=True, blank=True)
+    cpi_change_percentage = models.DecimalField(max_digits=6, decimal_places=4)
+    current_cpi = models.DecimalField(max_digits=10, decimal_places=4)
+    original_cpi = models.DecimalField(max_digits=10, decimal_places=4)
+    original_price_date = models.DateTimeField()
 
     class Meta:
         db_table = 'cpi_adjusted_pricing'
@@ -787,7 +1829,17 @@ class CpiAdjustedPricing(BaseModel):
 
 class FmvViolations(BaseModel):
     """Migrated from drizzle: trust-fmv.ts"""
-    violation_type = models.CharField(max_length=255, null=True, blank=True)
+    violation_type = models.CharField(max_length=255, blank=True)
+    detected_at = models.DateTimeField(default=timezone.now)
+    detected_by = models.CharField(max_length=255, null=True, blank=True)
+    procurement_request_id = models.UUIDField(null=True, blank=True)
+    resolution = models.TextField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.CharField(max_length=255, null=True, blank=True)
+    severity = models.CharField(max_length=20, default='medium')
+    status = models.CharField(max_length=20, default='pending')
+    transaction_id = models.UUIDField(null=True, blank=True)
+    violation_description = models.TextField()
 
     class Meta:
         db_table = 'fmv_violations'
@@ -795,7 +1847,16 @@ class FmvViolations(BaseModel):
 
 class FmvAuditLog(BaseModel):
     """Migrated from drizzle: trust-fmv.ts"""
-    action_type = models.CharField(max_length=255, null=True, blank=True)
+    action_type = models.CharField(max_length=255, blank=True)
+    action_description = models.TextField()
+    appraisal_id = models.UUIDField(null=True, blank=True)
+    bid_id = models.UUIDField(null=True, blank=True)
+    compliance_impact = models.CharField(max_length=20, null=True, blank=True)
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    performed_by = models.CharField(max_length=255)
+    performed_by_role = models.CharField(max_length=50, null=True, blank=True)
+    procurement_request_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = 'fmv_audit_log'
@@ -808,7 +1869,16 @@ class DuesRates(BaseModel):
     unit_id = models.UUIDField(null=True, blank=True)
     rate_name = models.TextField()
     rate_type = models.TextField()
-    amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=19, decimal_places=2)
+    classification = models.TextField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    effective_from = models.DateTimeField()
+    effective_to = models.DateTimeField(null=True, blank=True)
+    employment_type = models.TextField(null=True, blank=True)
+    last_modified_by = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    status = models.TextField(default='active')
 
     class Meta:
         db_table = 'dues_rates'
@@ -822,7 +1892,27 @@ class MemberDuesLedger(BaseModel):
     transaction_type = models.TextField()
     transaction_date = models.DateTimeField()
     effective_date = models.DateTimeField()
-    amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=19, decimal_places=2)
+    balance_before = models.DecimalField(max_digits=10, decimal_places=2)
+    balance_after = models.DecimalField(max_digits=10, decimal_places=2)
+    period_start = models.DateTimeField(null=True, blank=True)
+    period_end = models.DateTimeField(null=True, blank=True)
+    fiscal_year = models.IntegerField(null=True, blank=True)
+    fiscal_month = models.IntegerField(null=True, blank=True)
+    reference_type = models.TextField(null=True, blank=True)
+    reference_id = models.UUIDField(null=True, blank=True)
+    invoice_number = models.TextField(null=True, blank=True)
+    receipt_number = models.TextField(null=True, blank=True)
+    payment_method = models.TextField(null=True, blank=True)
+    payment_reference = models.TextField(null=True, blank=True)
+    description = models.TextField()
+    notes = models.TextField(null=True, blank=True)
+    is_reversed = models.BooleanField(default=False, null=True, blank=True)
+    reversal_id = models.UUIDField(null=True, blank=True)
+    reversed_transaction_id = models.UUIDField(null=True, blank=True)
+    status = models.TextField(default='posted')
+    metadata = models.JSONField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'member_dues_ledger'
@@ -832,7 +1922,44 @@ class MemberArrears(BaseModel):
     """Migrated from drizzle: dues-finance-schema.ts"""
     user_id = models.TextField(unique=True)
     organization_id = models.UUIDField()
-    total_owed = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    total_owed = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        db_default=Decimal('0'),
+        default=Decimal('0'),
+    )
+    over_30_days = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    over_60_days = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    over_90_days = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    in_grace_period = models.BooleanField(default=False, null=True, blank=True)
+    grace_period_ends = models.DateTimeField(null=True, blank=True)
+    arrears_status = models.TextField(default='current')
+    first_arrears_date = models.DateTimeField(null=True, blank=True)
+    last_payment_date = models.DateTimeField(null=True, blank=True)
+    suspension_date = models.DateTimeField(null=True, blank=True)
+    reinstatement_date = models.DateTimeField(null=True, blank=True)
+    has_payment_plan = models.BooleanField(default=False, null=True, blank=True)
+    payment_plan_id = models.UUIDField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    last_calculated_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'member_arrears'
@@ -848,7 +1975,27 @@ class EmployerRemittances(BaseModel):
     fiscal_month = models.IntegerField()
     remittance_date = models.DateTimeField()
     remittance_number = models.TextField(null=True, blank=True)
-    total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    total_amount = models.DecimalField(max_digits=19, decimal_places=2)
+    member_count = models.IntegerField()
+    file_name = models.TextField(null=True, blank=True)
+    file_url = models.TextField(null=True, blank=True)
+    file_hash = models.TextField(null=True, blank=True)
+    processing_status = models.TextField(default='pending')
+    processed_at = models.DateTimeField(null=True, blank=True)
+    processed_by = models.TextField(null=True, blank=True)
+    records_total = models.IntegerField(null=True, blank=True)
+    records_processed = models.IntegerField(null=True, blank=True)
+    records_matched = models.IntegerField(null=True, blank=True)
+    records_exception = models.IntegerField(null=True, blank=True)
+    expected_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    variance = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    is_reconciled = models.BooleanField(default=False, null=True, blank=True)
+    reconciled_at = models.DateTimeField(null=True, blank=True)
+    reconciled_by = models.TextField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    last_modified_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'employer_remittances'
@@ -864,7 +2011,16 @@ class RemittanceLineItems(BaseModel):
     user_id = models.TextField(null=True, blank=True)
     match_confidence = models.IntegerField(null=True, blank=True)
     match_method = models.TextField(null=True, blank=True)
-    amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    amount = models.DecimalField(max_digits=19, decimal_places=2)
+    period_start = models.DateTimeField(null=True, blank=True)
+    period_end = models.DateTimeField(null=True, blank=True)
+    line_status = models.TextField(default='pending')
+    exception_reason = models.TextField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.TextField(null=True, blank=True)
+    resolution_notes = models.TextField(null=True, blank=True)
+    ledger_transaction_id = models.UUIDField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'remittance_line_items'
@@ -880,6 +2036,17 @@ class RemittanceExceptions(BaseModel):
     employee_number = models.TextField(null=True, blank=True)
     employee_name = models.TextField(null=True, blank=True)
     amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    expected_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    description = models.TextField()
+    details = models.JSONField(null=True, blank=True)
+    status = models.TextField(default='open')
+    assigned_to = models.TextField(null=True, blank=True)
+    priority = models.IntegerField(default=3, null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.TextField(null=True, blank=True)
+    resolution_action = models.TextField(null=True, blank=True)
+    resolution_notes = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'remittance_exceptions'
@@ -890,7 +2057,30 @@ class PaymentPlans(BaseModel):
     user_id = models.TextField()
     organization_id = models.UUIDField()
     plan_name = models.TextField()
-    total_owed = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    total_owed = models.DecimalField(max_digits=19, decimal_places=2)
+    installment_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    installment_count = models.IntegerField()
+    frequency = models.TextField(default='monthly')
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True)
+    installments_paid = models.IntegerField(default=0, null=True, blank=True)
+    total_paid = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0'),
+        null=True,
+        blank=True,
+    )
+    remaining_balance = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.TextField(default='active')
+    last_payment_date = models.DateTimeField(null=True, blank=True)
+    next_payment_due = models.DateTimeField()
+    agreement_accepted_at = models.DateTimeField(null=True, blank=True)
+    agreement_accepted_by = models.TextField(null=True, blank=True)
+    terms_url = models.TextField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    created_by = models.TextField(null=True, blank=True)
+    last_modified_by = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'payment_plans'
@@ -910,6 +2100,9 @@ class FinancialPeriods(BaseModel):
     locked_at = models.DateTimeField(null=True, blank=True)
     locked_by = models.TextField(null=True, blank=True)
     total_revenue = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
+    total_arrears = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    member_count = models.IntegerField(null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'financial_periods'

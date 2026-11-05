@@ -152,19 +152,26 @@ describe("queueNotification", () => {
 describe("sendNotification", () => {
   it("throws when the notification is not found", async () => {
     enqueue([]); // not found
-    await expect(sendNotification("missing")).rejects.toThrow("not found");
+    await expect(sendNotification("missing", "org-1")).rejects.toThrow("not found");
+  });
+
+  it("throws when the row belongs to another tenant", async () => {
+    enqueue([
+      { id: "n1", status: "pending", channels: ["email"], data: "{}", attempts: 0, type: "payment_confirmation", userId: "u1", tenantId: "org-2" },
+    ]);
+    await expect(sendNotification("n1", "org-1")).rejects.toThrow("not found");
   });
 
   it("throws when already sent", async () => {
-    enqueue([{ id: "n1", status: "sent" }]);
-    await expect(sendNotification("n1")).rejects.toThrow("already sent");
+    enqueue([{ id: "n1", status: "sent", tenantId: "org-1" }]);
+    await expect(sendNotification("n1", "org-1")).rejects.toThrow("already sent");
   });
 
   it("throws on invalid data JSON", async () => {
     enqueue([
-      { id: "n1", status: "pending", channels: ["email"], data: "not-json", attempts: 0, type: "payment_confirmation" },
+      { id: "n1", status: "pending", channels: ["email"], data: "not-json", attempts: 0, type: "payment_confirmation", tenantId: "org-1" },
     ]);
-    await expect(sendNotification("n1")).rejects.toThrow("Invalid notification data format");
+    await expect(sendNotification("n1", "org-1")).rejects.toThrow("Invalid notification data format");
   });
 
   it("sends through email and sms channels via default templates", async () => {
@@ -180,7 +187,7 @@ describe("sendNotification", () => {
         tenantId: "org-1",
       },
     ]);
-    const result = await sendNotification("n1");
+    const result = await sendNotification("n1", "org-1");
     expect(result.success).toBe(true);
     expect(result.channelResults).toHaveLength(2);
     expect(result.channelResults.every((r) => r.success)).toBe(true);
@@ -201,7 +208,7 @@ describe("sendNotification", () => {
         tenantId: "org-1",
       },
     ]);
-    const result = await sendNotification("n2");
+    const result = await sendNotification("n2", "org-1");
     expect(result.success).toBe(false);
     expect(result.channelResults[0].success).toBe(false);
   });
@@ -219,7 +226,7 @@ describe("sendNotification", () => {
         tenantId: "org-1",
       },
     ]);
-    const result = await sendNotification("n3");
+    const result = await sendNotification("n3", "org-1");
     expect(result.channelResults[0].success).toBe(true);
     expect(h.sendResendEmail).not.toHaveBeenCalled();
   });
@@ -250,7 +257,7 @@ describe("sendNotification", () => {
         },
       ], // getTemplate returns a stored template
     );
-    const result = await sendNotification("n4");
+    const result = await sendNotification("n4", "org-1");
     expect(result.success).toBe(true);
     expect(result.channelResults[0].channel).toBe("in_app");
   });
@@ -268,7 +275,7 @@ describe("sendNotification", () => {
         tenantId: "org-1",
       },
     ]);
-    const result = await sendNotification("n5");
+    const result = await sendNotification("n5", "org-1");
     expect(result.success).toBe(true);
   });
 
@@ -288,7 +295,7 @@ describe("sendNotification", () => {
           tenantId: "org-1",
         },
       ]);
-      const result = await sendNotification("n5b");
+      const result = await sendNotification("n5b", "org-1");
       expect(result.success).toBe(true);
       expect(result.channelResults[0].channel).toBe("push");
     } finally {
@@ -310,7 +317,7 @@ describe("sendNotification", () => {
         tenantId: "org-1",
       },
     ]);
-    const result = await sendNotification("n6");
+    const result = await sendNotification("n6", "org-1");
     expect(result.success).toBe(false);
   });
 });
@@ -332,13 +339,13 @@ describe("processPendingNotifications", () => {
         },
       ], // sendNotification lookup
     );
-    const processed = await processPendingNotifications();
+    const processed = await processPendingNotifications("org-1");
     expect(processed).toBe(1);
   });
 
   it("continues when a notification fails to send", async () => {
     enqueue([{ id: "bad" }]); // pending; sendNotification lookup returns [] -> throws -> caught
-    const processed = await processPendingNotifications();
+    const processed = await processPendingNotifications("org-1");
     expect(processed).toBe(0);
   });
 });
@@ -363,7 +370,7 @@ describe("retryFailedNotifications", () => {
         },
       ],
     );
-    const retried = await retryFailedNotifications();
+    const retried = await retryFailedNotifications("org-1");
     expect(retried).toBe(1);
   });
 });

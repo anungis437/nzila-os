@@ -47,8 +47,8 @@ const AVG_TOKENS_PER_REQUEST = 250; // Conservative estimate
 // Initialize Redis client (reuse existing Upstash configuration)
 const redis = (() => {
   if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
-    // Only warn if we&apos;re not in test/build environment
-    if (process.env.NODE_ENV !== 'test' && !process.env.BUILDING) {
+    // Only warn if we're not in a test or `next build` environment
+    if (process.env.NODE_ENV !== 'test' && process.env.NEXT_PHASE !== 'phase-production-build') {
       logger.warn('Redis not configured - embedding cache will be disabled', {
         component: 'embedding-cache',
         message: 'Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for caching',

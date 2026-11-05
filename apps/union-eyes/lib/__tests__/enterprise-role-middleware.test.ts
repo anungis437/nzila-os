@@ -10,8 +10,8 @@ const mocks = vi.hoisted(() => ({
   mockGetMemberEffectivePermissions: vi.fn(),
   mockLogPermissionCheck: vi.fn(),
   mockIncrementExceptionUsage: vi.fn(),
+  mockFindLivePermissionException: vi.fn(),
   mockWithOrgAuth: vi.fn(),
-  mockDbExecute: vi.fn(),
 }));
 
 vi.mock('../organization-middleware', () => ({
@@ -29,20 +29,14 @@ vi.mock('@/db/queries/enhanced-rbac-queries', () => ({
   getMemberEffectivePermissions: mocks.mockGetMemberEffectivePermissions,
   logPermissionCheck: mocks.mockLogPermissionCheck,
   incrementExceptionUsage: mocks.mockIncrementExceptionUsage,
-}));
-
-vi.mock('@/db/db', () => ({
-  db: { execute: mocks.mockDbExecute },
-}));
-
-vi.mock('drizzle-orm', () => ({
-  sql: (..._a: any[]) => 'query',
+  findLivePermissionException: mocks.mockFindLivePermissionException,
 }));
 
 vi.mock('../logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+import { logger } from '../logger';
 import {
   withEnhancedRoleAuth,
   withPermission,
@@ -74,7 +68,8 @@ describe('enterprise-role-middleware', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.mockLogPermissionCheck.mockResolvedValue(undefined);
-    mocks.mockDbExecute.mockResolvedValue([]);
+    mocks.mockFindLivePermissionException.mockResolvedValue(null);
+    mocks.mockIncrementExceptionUsage.mockResolvedValue(true);
   });
 
   // ── withEnhancedRoleAuth ──────────────────────────────────────────────────
@@ -179,6 +174,78 @@ describe('enterprise-role-middleware', () => {
       const wrapped = withPermission('read', handler);
       const response = await wrapped(new NextRequest('http://localhost/api/test'));
       expect(response.status).toBe(403);
+    });
+  });
+
+  // ── permission exceptions ─────────────────────────────────────────────────
+  describe('withPermission: permission exceptions', () => {
+    const asMember = (permissions: string[] = ['read']) => {
+      mocks.mockWithOrgAuth.mockReturnValue({ organizationId: 'org-1', userId: 'u1', memberId: 'm1' });
+      mocks.mockGetMemberRoles.mockResolvedValue([{ roleName: 'Member', roleLevel: 10 }]);
+      mocks.mockGetMemberHighestRoleLevel.mockResolvedValue(10);
+      mocks.mockGetMemberEffectivePermissions.mockResolvedValue(permissions);
+    };
+    const call = (options: Parameters<typeof withPermission>[2] = { resourceType: 'claim' }) => {
+      const handler = vi.fn().mockResolvedValue(NextResponse.json({ ok: true }));
+      return { handler, run: () => withPermission('edit_all_claims', handler, options)(new NextRequest('http://localhost/api/test')) };
+    };
+
+    it('grants through a live exception, counts the use in the organization, and records how it was granted', async () => {
+      asMember();
+      mocks.mockFindLivePermissionException.mockResolvedValue('ex-1');
+      const { handler, run } = call({ resourceType: 'claim', resourceId: 'c-1' });
+      expect((await run()).status).toBe(200);
+      expect(mocks.mockFindLivePermissionException).toHaveBeenCalledWith('m1', 'org-1', 'edit_all_claims', 'claim', 'c-1');
+      expect(mocks.mockIncrementExceptionUsage).toHaveBeenCalledWith('ex-1', 'org-1');
+      expect(mocks.mockLogPermissionCheck).toHaveBeenCalledWith(expect.objectContaining({ granted: true, grantMethod: 'exception', organizationId: 'org-1' }));
+      expect(handler).toHaveBeenCalled();
+    });
+
+    it('does not use an exception when a role already grants the permission', async () => {
+      asMember(['edit_all_claims']);
+      const { run } = call();
+      expect((await run()).status).toBe(200);
+      expect(mocks.mockFindLivePermissionException).not.toHaveBeenCalled();
+      expect(mocks.mockLogPermissionCheck).toHaveBeenCalledWith(expect.objectContaining({ granted: true, grantMethod: 'role' }));
+    });
+
+    it('does not look for an exception when exceptions are off or no resource type is named', async () => {
+      asMember();
+      for (const options of [{ resourceType: 'claim', allowExceptions: false }, {}]) {
+        const { handler, run } = call(options);
+        expect((await run()).status).toBe(403);
+        expect(handler).not.toHaveBeenCalled();
+      }
+      expect(mocks.mockFindLivePermissionException).not.toHaveBeenCalled();
+    });
+
+    it('denies when the exception ran out between the lookup and the count (the last use went to another request)', async () => {
+      asMember();
+      mocks.mockFindLivePermissionException.mockResolvedValue('ex-1');
+      mocks.mockIncrementExceptionUsage.mockResolvedValue(false);
+      const { handler, run } = call();
+      expect((await run()).status).toBe(403);
+      expect(handler).not.toHaveBeenCalled();
+      expect(mocks.mockLogPermissionCheck).toHaveBeenCalledWith(expect.objectContaining({ granted: false, denialReason: 'Missing permission: edit_all_claims' }));
+    });
+
+    it('fails closed, and says so, when the exception lookup fails', async () => {
+      asMember();
+      mocks.mockFindLivePermissionException.mockRejectedValue(new Error('relation does not exist'));
+      const { handler, run } = call();
+      expect((await run()).status).toBe(403);
+      expect(handler).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith('Permission exception lookup failed', expect.objectContaining({ organizationId: 'org-1', permission: 'edit_all_claims' }));
+    });
+
+    it('denies, and says so, when the use of an exception cannot be counted', async () => {
+      asMember();
+      mocks.mockFindLivePermissionException.mockResolvedValue('ex-1');
+      mocks.mockIncrementExceptionUsage.mockRejectedValue(new Error('permission denied for table permission_exceptions'));
+      const { handler, run } = call();
+      expect((await run()).status).toBe(403);
+      expect(handler).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith('Permission exception usage could not be counted', expect.objectContaining({ organizationId: 'org-1' }));
     });
   });
 

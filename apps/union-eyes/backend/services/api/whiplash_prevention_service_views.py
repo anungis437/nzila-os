@@ -12,7 +12,7 @@ from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
-from rest_framework.permissions import IsAuthenticated
+from core.isolation import DenyAllPermission
 from rest_framework.response import Response
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,7 @@ from billing.models import (
     WhiplashViolations,
 )
 from core.models import AuditLogs
+from core.api_projection import api_columns
 
 
 class WhiplashPreventionServicePagination(CursorPagination):
@@ -52,7 +53,10 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
     - GET /api/services/whiplash-prevention-service/prevention_audit/ — Get whiplash prevention audit trail
     """
 
-    permission_classes = [IsAuthenticated]
+    # CONTAINED (convergence tranche 9): nothing calls this ViewSet (the application calls one Django service endpoint,
+    # governance-service/check_status), and its write paths take unscoped input. Reopen only with a reviewed, tenant-scoped,
+    # role-gated design.
+    permission_classes = [DenyAllPermission]
     pagination_class = WhiplashPreventionServicePagination
 
     def paginate_queryset(self, queryset):
@@ -209,13 +213,13 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by("-created_at"))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response(
                 {
                     "count": queryset.count(),
-                    "results": list(queryset.order_by("-created_at").values()[:100]),
+                    "results": list(queryset.order_by("-created_at").values(*api_columns(queryset))[:100]),
                 },
                 status=status.HTTP_200_OK,
             )
@@ -371,13 +375,13 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by("-created_at"))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response(
                 {
                     "count": queryset.count(),
-                    "results": list(queryset.order_by("-created_at").values()[:100]),
+                    "results": list(queryset.order_by("-created_at").values(*api_columns(queryset))[:100]),
                 },
                 status=status.HTTP_200_OK,
             )
@@ -451,13 +455,13 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by("-created_at"))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response(
                 {
                     "count": queryset.count(),
-                    "results": list(queryset.order_by("-created_at").values()[:100]),
+                    "results": list(queryset.order_by("-created_at").values(*api_columns(queryset))[:100]),
                 },
                 status=status.HTTP_200_OK,
             )
@@ -493,13 +497,13 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by("-created_at"))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response(
                 {
                     "count": queryset.count(),
-                    "results": list(queryset.order_by("-created_at").values()[:100]),
+                    "results": list(queryset.order_by("-created_at").values(*api_columns(queryset))[:100]),
                 },
                 status=status.HTTP_200_OK,
             )
@@ -535,13 +539,13 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by("-created_at"))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response(
                 {
                     "count": queryset.count(),
-                    "results": list(queryset.order_by("-created_at").values()[:100]),
+                    "results": list(queryset.order_by("-created_at").values(*api_columns(queryset))[:100]),
                 },
                 status=status.HTTP_200_OK,
             )
@@ -577,13 +581,13 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by("-created_at"))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response(
                 {
                     "count": queryset.count(),
-                    "results": list(queryset.order_by("-created_at").values()[:100]),
+                    "results": list(queryset.order_by("-created_at").values(*api_columns(queryset))[:100]),
                 },
                 status=status.HTTP_200_OK,
             )
@@ -619,13 +623,13 @@ class WhiplashPreventionServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by("-created_at"))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response(
                 {
                     "count": queryset.count(),
-                    "results": list(queryset.order_by("-created_at").values()[:100]),
+                    "results": list(queryset.order_by("-created_at").values(*api_columns(queryset))[:100]),
                 },
                 status=status.HTTP_200_OK,
             )

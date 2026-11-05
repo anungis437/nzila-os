@@ -328,7 +328,9 @@ export async function generateDecisionBrief(orgId: string): Promise<DecisionBrie
       ? `${recommendations.length} continuity planning action${recommendations.length > 1 ? 's' : ''} have been identified.`
       : 'No critical continuity gaps detected at this time.',
     topRec ? `Highest priority: ${topRec.headline}.` : '',
-    `Forecast: continuity health is ${forecast.trendDirection} over the next 12 months.`,
+    forecast.trendDirection === 'insufficient_data'
+      ? 'Forecast: no continuity trend is reported because no measured history is held.'
+      : `Forecast: continuity health is ${forecast.trendDirection} over the next 12 months.`,
   ].filter(Boolean).join(' ');
 
   return {

@@ -250,7 +250,7 @@ export const workItemSchema = z.object({
   urgencySignals: z.array(urgencySignalSchema),
   riskSignals: z.array(riskSignalSchema),
   strategicSignals: z.array(strategicSignalSchema),
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
 })
 
 // ─── Intake Submission Schema ────────────────────────────────────
@@ -266,7 +266,7 @@ export const intakeSubmissionSchema = z.object({
   urgencyIndicators: z.array(urgencySignalSchema),
   status: z.enum(['new', 'under_review', 'awaiting_member_info', 'converted', 'closed_no_case']),
   linkedWorkItemId: z.string().optional(),
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
 })
 
 // ─── Official Work Item Schema ───────────────────────────────────
@@ -289,5 +289,5 @@ export const officialWorkItemSchema = z.object({
   urgencySignals: z.array(urgencySignalSchema),
   riskSignals: z.array(riskSignalSchema),
   strategicSignals: z.array(strategicSignalSchema),
-  metadata: z.record(z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
 })

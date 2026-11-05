@@ -45,19 +45,6 @@ describe('marketing-notifications — success paths', () => {
       success: true,
     });
   });
-  it('sendConsentGrantedNotification maps known + unknown data types', async () => {
-    expect(
-      await m.sendConsentGrantedNotification('org', 'u1', 'a@x.com', 'A', ['impact_metrics', 'custom']),
-    ).toEqual({ success: true });
-  });
-  it('sendConsentRevokedNotification (with + without reason)', async () => {
-    expect(
-      await m.sendConsentRevokedNotification('org', 'u1', 'a@x.com', 'A', ['impact_metrics'], 'too much'),
-    ).toEqual({ success: true });
-    expect(
-      await m.sendConsentRevokedNotification('org', 'u1', 'a@x.com', 'A', ['impact_metrics']),
-    ).toEqual({ success: true });
-  });
   it('sendTestimonialApprovedNotification truncates long quotes', async () => {
     const longQuote = 'x'.repeat(200);
     expect(
@@ -75,6 +62,12 @@ describe('marketing-notifications — success paths', () => {
   });
 });
 
+describe('marketing-notifications — the consent notifiers are gone', () => {
+  it('exports no consent notifier: nothing records or withdraws a data-sharing consent, so nothing can confirm one', () => {
+    expect(Object.keys(m).filter((name) => /consent/i.test(name))).toEqual([]);
+  });
+});
+
 describe('marketing-notifications — error paths', () => {
   beforeEach(() =>
     h.getService.mockReturnValue({
@@ -87,8 +80,6 @@ describe('marketing-notifications — error paths', () => {
     const calls: Array<() => Promise<{ success: boolean; error?: string }>> = [
       () => m.sendPilotApprovalNotification('org', 'a@x.com', 'A', 'Org', 'p1'),
       () => m.sendPilotRejectionNotification('org', 'a@x.com', 'A', 'Org', 'p1'),
-      () => m.sendConsentGrantedNotification('org', 'u1', 'a@x.com', 'A', ['x']),
-      () => m.sendConsentRevokedNotification('org', 'u1', 'a@x.com', 'A', ['x']),
       () => m.sendTestimonialApprovedNotification('org', 'a@x.com', 'A', 't1', 'q'),
       () => m.sendCaseStudyPublishedNotification('org', ['a@x.com'], 'slug', 'Title', 'Org'),
     ];

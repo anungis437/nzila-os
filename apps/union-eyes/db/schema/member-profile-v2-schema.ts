@@ -20,11 +20,11 @@ export const memberContactPreferences = pgTable('member_contact_preferences', {
   preferredContactMethod: text('preferred_contact_method').notNull().default('email'), // email, phone, sms, mail, in_person
   preferredLanguage: text('preferred_language').default('en'),
   
-  // Channel Opt-ins
-  emailOptIn: boolean('email_opt_in').default(true),
+  // Channel Opt-ins: consent is never assumed, so every channel starts opted out
+  emailOptIn: boolean('email_opt_in').default(false),
   smsOptIn: boolean('sms_opt_in').default(false),
-  phoneOptIn: boolean('phone_opt_in').default(true),
-  mailOptIn: boolean('mail_opt_in').default(true),
+  phoneOptIn: boolean('phone_opt_in').default(false),
+  mailOptIn: boolean('mail_opt_in').default(false),
   
   // Notification Preferences
   notificationPreferences: jsonb('notification_preferences').$type<{
@@ -63,8 +63,8 @@ export const memberContactPreferences = pgTable('member_contact_preferences', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   lastModifiedBy: text('last_modified_by'),
 });
 
@@ -89,7 +89,7 @@ export const memberEmploymentDetails = pgTable('member_employment_details', {
   costCenter: text('cost_center'),
   
   // Seniority
-  seniorityDate: timestamp('seniority_date'),
+  seniorityDate: timestamp('seniority_date', { withTimezone: true }),
   seniorityYears: integer('seniority_years'),
   seniorityPoints: integer('seniority_points'),
   
@@ -107,17 +107,17 @@ export const memberEmploymentDetails = pgTable('member_employment_details', {
   
   // Employment Status
   employmentStatus: text('employment_status').notNull().default('active'), // active, leave, layoff, suspended, terminated
-  statusEffectiveDate: timestamp('status_effective_date'),
+  statusEffectiveDate: timestamp('status_effective_date', { withTimezone: true }),
   statusReason: text('status_reason'),
-  expectedReturnDate: timestamp('expected_return_date'),
+  expectedReturnDate: timestamp('expected_return_date', { withTimezone: true }),
   
   // Benefits Eligibility
   benefitsEligible: boolean('benefits_eligible').default(true),
-  benefitsEnrollmentDate: timestamp('benefits_enrollment_date'),
+  benefitsEnrollmentDate: timestamp('benefits_enrollment_date', { withTimezone: true }),
   pensionPlanEnrolled: boolean('pension_plan_enrolled').default(false),
   
   // Probation
-  probationEndDate: timestamp('probation_end_date'),
+  probationEndDate: timestamp('probation_end_date', { withTimezone: true }),
   isProbationary: boolean('is_probationary').default(false),
   
   // Special Designations
@@ -130,8 +130,8 @@ export const memberEmploymentDetails = pgTable('member_employment_details', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   lastModifiedBy: text('last_modified_by'),
 });
 
@@ -149,8 +149,8 @@ export const memberConsents = pgTable('member_consents', {
   
   // Consent Status
   granted: boolean('granted').notNull(),
-  grantedAt: timestamp('granted_at'),
-  revokedAt: timestamp('revoked_at'),
+  grantedAt: timestamp('granted_at', { withTimezone: true }),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
   
   // Consent Details
   consentVersion: text('consent_version'), // Version of policy/terms consented to
@@ -163,7 +163,7 @@ export const memberConsents = pgTable('member_consents', {
   witnessedBy: text('witnessed_by'),
   
   // Expiry
-  expiresAt: timestamp('expires_at'),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
   requiresRenewal: boolean('requires_renewal').default(false),
   
   // Metadata
@@ -171,7 +171,7 @@ export const memberConsents = pgTable('member_consents', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   createdBy: text('created_by'),
 });
 
@@ -187,7 +187,7 @@ export const memberConsents = pgTable('member_consents', {
 // but incomplete subset) now re-exports this one instead of re-declaring.
 export const memberDocuments = pgTable('member_documents', {
   id: uuid('id').primaryKey().defaultRandom(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 
   // Member Reference
   userId: text('user_id').notNull(),
@@ -199,8 +199,8 @@ export const memberDocuments = pgTable('member_documents', {
   fileSize: integer('file_size').notNull(),
   fileType: text('file_type').notNull(),
   category: text('category'),
-  uploadedAt: timestamp('uploaded_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  uploadedAt: timestamp('uploaded_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 
   // Document Details
   documentType: text('document_type'),
@@ -243,7 +243,7 @@ export const memberHistoryEvents = pgTable('member_history_events', {
   // Event Details
   eventType: text('event_type').notNull(), // status_change, profile_update, case_filed, document_added, payment, election
   eventCategory: text('event_category').notNull(), // employment, membership, engagement, administrative
-  eventDate: timestamp('event_date').notNull(),
+  eventDate: timestamp('event_date', { withTimezone: true }).notNull(),
   
   // Event Data
   eventTitle: text('event_title').notNull(),
@@ -271,7 +271,7 @@ export const memberHistoryEvents = pgTable('member_history_events', {
   metadata: jsonb('metadata').$type<Record<string, any>>(),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   createdBy: text('created_by'),
 });
 

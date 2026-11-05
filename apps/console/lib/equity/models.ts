@@ -93,7 +93,7 @@ export enum WorkflowType {
  * Shareholder entity schema
  */
 export const ShareholderSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   type: z.nativeEnum(ShareholderType),
   name: z.string().min(1),
   email: z.string().email().optional(),
@@ -170,8 +170,8 @@ export type ShareClassDefinition = z.infer<typeof ShareClassDefinitionSchema>
  * Individual share holding
  */
 export const ShareHoldingSchema = z.object({
-  id: z.string().uuid(),
-  shareholderId: z.string().uuid(),
+  id: z.guid(),
+  shareholderId: z.guid(),
   shareClass: z.nativeEnum(ShareClass),
   
   // Share counts
@@ -215,16 +215,16 @@ export type ShareHolding = z.infer<typeof ShareHoldingSchema>
  * Share ledger entry (append-only record)
  */
 export const ShareLedgerEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   transactionType: z.nativeEnum(EquityTransactionType),
   
   // Before state (for audit)
-  fromHolderId: z.string().uuid().optional(),
+  fromHolderId: z.guid().optional(),
   fromClass: z.nativeEnum(ShareClass).optional(),
   fromShares: z.number().int().nonnegative().optional(),
   
   // After state
-  toHolderId: z.string().uuid(),
+  toHolderId: z.guid(),
   toClass: z.nativeEnum(ShareClass),
   toShares: z.number().int().nonnegative(),
   
@@ -237,15 +237,15 @@ export const ShareLedgerEntrySchema = z.object({
   totalConsideration: z.number().nonnegative().optional(),
   
   // Reference to approval/authorization
-  approvalId: z.string().uuid().optional(),
-  resolutionId: z.string().uuid().optional(),
+  approvalId: z.guid().optional(),
+  resolutionId: z.guid().optional(),
   
   // Notes
   description: z.string(),
   
   // Audit
   createdAt: z.string().datetime(),
-  createdBy: z.string().uuid(),
+  createdBy: z.guid(),
 })
 
 export type ShareLedgerEntry = z.infer<typeof ShareLedgerEntrySchema>
@@ -254,7 +254,7 @@ export type ShareLedgerEntry = z.infer<typeof ShareLedgerEntrySchema>
  * Cap table snapshot for reporting
  */
 export const CapTableSnapshotSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   snapshotDate: z.string().datetime(),
   
   // Summary totals
@@ -276,7 +276,7 @@ export const CapTableSnapshotSchema = z.object({
   
   // Ownership summary
   ownership: z.array(z.object({
-    shareholderId: z.string().uuid(),
+    shareholderId: z.guid(),
     shareholderName: z.string(),
     totalShares: z.number().int().nonnegative(),
     percentage: z.number().min(0).max(100),
@@ -286,7 +286,7 @@ export const CapTableSnapshotSchema = z.object({
   
   // Metadata
   generatedAt: z.string().datetime(),
-  generatedBy: z.string().uuid(),
+  generatedBy: z.guid(),
   notes: z.string().optional(),
 })
 

@@ -554,7 +554,7 @@ export function generateCallerInventories(wheelhouse: string) {
     }),
   )
   const financialRootPattern =
-    /^apps\/union-eyes\/(?:(?:services\/financial-service\/src\/index\.ts)|(?:app\/api\/(?:billing|finance|payments|donations|remittances|arrears|dues|strike-funds|stipends|pension)\/)|(?:actions\/(?:stripe-actions|whop-actions|credits-actions|profiles-actions|rewards-actions)\.ts))/
+    /^apps\/union-eyes\/(?:(?:services\/financial-service\/src\/index\.ts)|(?:app\/api\/(?:billing|finance|payments|donations|remittances|arrears|dues|strike-funds|stipends|pension)\/)|(?:actions\/(?:rewards-actions)\.ts))/
   const obviousNonFinancialRootPattern =
     /^apps\/union-eyes\/app\/api\/(?:auth\/|organizations\/|users\/me\/organizations\/|notifications\/)/
   const financialCallers = actors.filter(

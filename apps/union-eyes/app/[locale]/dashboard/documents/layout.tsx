@@ -14,12 +14,33 @@ import { ReactNode } from "react";
 import { requireUser } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 
-export default async function DashboardDocumentsLayout({ children }: { children: ReactNode }) {
+export default async function DashboardDocumentsLayout({
+  children,
+  params,
+}: {
+  children: ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
   try {
     await requireUser();
   } catch {
     redirect("/login");
   }
 
-  return <>{children}</>;
+  const { locale } = await params;
+  const french = locale.toLowerCase().startsWith("fr");
+
+  return (
+    <>
+      <nav className="flex flex-col gap-2 px-4 pt-4 text-sm sm:flex-row sm:gap-4" data-testid="document-portal-nav">
+        <a className="underline" href={`/${locale}/dashboard/documents`}>
+          {french ? "Bibliotheque du personnel" : "Staff library"}
+        </a>
+        <a className="underline" href={`/${locale}/dashboard/documents/portal`}>
+          {french ? "Documents du portail" : "Portal documents"}
+        </a>
+      </nav>
+      {children}
+    </>
+  );
 }

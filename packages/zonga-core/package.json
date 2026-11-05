@@ -25,13 +25,13 @@
     "@nzila/commerce-events": "workspace:*",
     "@nzila/onboarding-core": "workspace:*",
     "@nzila/org": "workspace:*",
-    "zod": "^3.24.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "typescript": "^6",
     "vitest": "^5.0.5",
-    "@typescript-eslint/eslint-plugin": "^8.71.2",
-    "@typescript-eslint/parser": "^8.71.2",
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/parser": "^8.72.1",
     "eslint": "^10"
   }
 }

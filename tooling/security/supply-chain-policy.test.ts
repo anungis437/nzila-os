@@ -188,10 +188,11 @@ describe('security audit policy: fail closed', () => {
   })
 
   it('rejects an expired waiver without extending its validity', () => {
-    const afterExpiry = new Date('2026-11-05T12:00:00Z')
+    // Fixture advisory 1108110 (xlsx, high) is a live waiver valid through 2026-11-26 UTC.
+    const afterExpiry = new Date('2026-11-27T12:00:00Z')
     const result = checkVulnerabilityPolicy(fixture('audit-waived-package.json'), afterExpiry)
     expect(result.passed).toBe(false)
-    expect(result.expiredWaivers).toContain('1240912')
+    expect(result.expiredWaivers).toContain('1108110')
     expect(result.unwaived).toBe(1)
   })
 })

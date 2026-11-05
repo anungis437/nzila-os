@@ -1,4 +1,5 @@
 import { db } from "@/db/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
 import {
   cbaIntelSources,
   sourceTypeEnum,
@@ -100,9 +101,9 @@ export async function getSourceBySlug(slug: string): Promise<CbaIntelSource | nu
 // Create
 // ---------------------------------------------------------------------------
 
-export async function createSource(data: NewCbaIntelSource): Promise<CbaIntelSource> {
+export async function createSource(data: NewCbaIntelSource, exec: RLSTx = db): Promise<CbaIntelSource> {
   try {
-    const [source] = await db.insert(cbaIntelSources).values(data).returning();
+    const [source] = await exec.insert(cbaIntelSources).values(data).returning();
     return source;
   } catch (error) {
     logger.error("Error creating CBA intelligence source", { error, slug: data.slug });
@@ -117,9 +118,10 @@ export async function createSource(data: NewCbaIntelSource): Promise<CbaIntelSou
 export async function updateSource(
   id: string,
   data: Partial<NewCbaIntelSource>,
+  exec: RLSTx = db,
 ): Promise<CbaIntelSource | null> {
   try {
-    const [updated] = await db
+    const [updated] = await exec
       .update(cbaIntelSources)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(cbaIntelSources.id, id))
@@ -172,9 +174,9 @@ export async function updateSourceHealth(
 // Deactivate
 // ---------------------------------------------------------------------------
 
-export async function deactivateSource(id: string): Promise<boolean> {
+export async function deactivateSource(id: string, exec: RLSTx = db): Promise<boolean> {
   try {
-    const [updated] = await db
+    const [updated] = await exec
       .update(cbaIntelSources)
       .set({ isActive: false, updatedAt: new Date() })
       .where(eq(cbaIntelSources.id, id))

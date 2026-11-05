@@ -9,7 +9,7 @@ import type { DocumentFilters } from "@/lib/services/cba-intelligence/document-s
 const listQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().max(100).optional(),
-  sourceId: z.string().uuid().optional(),
+  sourceId: z.guid().optional(),
   documentType: z.string().optional(),
   processingStatus: z.string().optional(),
   jurisdiction: z.string().optional(),
@@ -33,6 +33,6 @@ export const GET = withApi(
   },
   async ({ query }) => {
     const { page, limit, ...filters } = query;
-    return { data: await listDocuments(filters as DocumentFilters, { page, limit }) };
+    return await listDocuments(filters as DocumentFilters, { page, limit });
   },
 );

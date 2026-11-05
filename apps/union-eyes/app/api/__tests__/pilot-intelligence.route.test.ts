@@ -47,6 +47,8 @@ const mockDb = {
 };
 
 vi.mock('@/db', () => ({ db: mockDb }));
+// The declared audit commits with the write (B97); its writer has its own coverage.
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: (fn: (tx?: unknown) => Promise<unknown>) => fn(mockDb),
@@ -60,6 +62,7 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
 }));
 vi.mock('@/lib/api-auth-guard', () => ({
   hasMinRole: m.hasMinRole,
+  getCurrentUser: vi.fn(async () => ({ id: 'steward-1', organizationId: 'test-org' })),
   withApiAuth: vi.fn(
     (handler: (req: NextRequest, ctx?: { params?: Promise<{ id: string }> | { id: string } }) => Promise<Response>) =>
       (req: NextRequest, ctx?: { params?: Promise<{ id: string }> | { id: string } }) => handler(req, ctx)

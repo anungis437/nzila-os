@@ -138,5 +138,5 @@ export const providerManifestSchema = z.object({
   healthCheckUrl: z.string().url().optional(),
   documentationUrl: z.string().url().optional(),
   iconUrl: z.string().url().optional(),
-  metadata: z.record(z.string()).default({}),
+  metadata: z.record(z.string()).prefault({}),
 })

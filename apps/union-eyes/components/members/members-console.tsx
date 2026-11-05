@@ -1,18 +1,28 @@
 "use client";
 
-import React from 'react';
 /**
  * Members Directory Console (client component)
  * Rendered by the server-side page wrapper after auth check.
+ *
+ * Reads GET /api/members, which answers { success, data: { members, total }, timestamp } with the directory the caller may see (a steward:
+ * members in their cases; chief steward and above: the organization). One request of up to 200 members is made. `total` is the number of
+ * members the caller may see, so when it is more than what was loaded the screen says so: its totals, its filters and its export cover the
+ * loaded members.
+ *
+ * A field the caller may not see, or the record does not have, is null and is shown as nothing or as a dash. No default is made up for it,
+ * and a response that is not the route's is an error with a retry, never an empty directory.
  */
 
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
+import Link from "next/link";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import { useOrganization } from "@/lib/hooks/use-organization";
 import { buildMembersFetchUrl } from "@/lib/members/build-members-fetch-url";
+import { generateCSV, type CSVColumn } from "@/lib/csv-export";
+import { ApiShapeError, envelopeData, readApiError } from "@/lib/client/api-envelope";
+import { asRecord, countOrNull, humanize, optionalString, requiredString } from "@/lib/client/row-fields";
 import {
   Users,
   Search,
@@ -24,111 +34,181 @@ import {
   Calendar,
   Shield,
   Award,
-  MessageSquare,
-  FileText,
   ChevronDown,
-  UserPlus,
   Download,
-  MoreVertical,
   Clock,
   TrendingUp,
   Loader2,
   AlertCircle,
 } from "lucide-react";
- 
+
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
-type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
-type MemberStatus = "active" | "inactive" | "on-leave";
-type Department = "Manufacturing" | "Logistics" | "Administration" | "Maintenance" | "Customer Service" | "IT";
+/** How many members one request asks for: the most the route gives. */
+const PAGE_LIMIT = 200;
 
-type LooseMembersResponse = Record<string, unknown>;
+const COPY = {
+  en: {
+    partial: (loaded: number, total: number) => `Only the first ${loaded} of ${total} members were loaded. The totals, the filters and the export on this page cover those ${loaded} members.`,
+    noMatches: "No members match your search or filters.",
+    clearFilters: "Clear filters",
+    exportMembers: (n: number) => `Export ${n} member${n === 1 ? "" : "s"} (CSV)`,
+    viewProfile: "View profile",
+    sendEmail: "Send email",
+    call: "Call",
+    seniority: "Seniority",
+    expand: "Expand",
+    collapse: "Collapse",
+  },
+  fr: {
+    partial: (loaded: number, total: number) => `Seuls les ${loaded} premiers membres sur ${total} ont été chargés. Les totaux, les filtres et l’exportation de cette page portent sur ces ${loaded} membres.`,
+    noMatches: "Aucun membre ne correspond à votre recherche ou à vos filtres.",
+    clearFilters: "Effacer les filtres",
+    exportMembers: (n: number) => `Exporter ${n} membre${n > 1 ? "s" : ""} (CSV)`,
+    viewProfile: "Voir le profil",
+    sendEmail: "Envoyer un courriel",
+    call: "Appeler",
+    seniority: "Ancienneté",
+    expand: "Développer",
+    collapse: "Réduire",
+  },
+} as const;
 
-interface Member {
+/** A member as the directory route projects it: what the caller may not see, or the record does not have, is null. */
+interface DirectoryMember {
   id: string;
-  name: string;
-  email: string;
-  phone: string;
-  role: MemberRole;
-  status: MemberStatus;
-  department: Department;
-  position: string;
-  hireDate: string;
-  seniority: number;
-  location: string;
-  steward?: string;
-  activeCases: number;
-  joinDate: string;
-  membershipNumber: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  role: string;
+  status: string;
+  department: string | null;
+  position: string | null;
+  membershipNumber: string | null;
+  /** Employment facts that only an officer may see. */
+  hireDate: string | null;
+  unionJoinDate: string | null;
+  seniority: number | null;
 }
 
-function looksLikeMemberRecord(value: unknown): boolean {
-  if (!value || typeof value !== 'object') return false;
-  const obj = value as Record<string, unknown>;
-  return (
-    typeof obj.name === 'string' ||
-    typeof obj.email === 'string' ||
-    typeof obj.membershipNumber === 'string' ||
-    typeof obj.membership_number === 'string'
-  );
+interface Directory {
+  members: DirectoryMember[];
+  /** How many members the caller may see, which is more than were loaded when the directory is longer than one request. */
+  total: number;
+  mayHaveMore: boolean;
 }
 
-function findMemberArrayInPayload(payload: unknown, depth = 0): unknown[] {
-  if (depth > 6 || payload == null) return [];
-
-  if (Array.isArray(payload)) {
-    if (payload.length > 0 && looksLikeMemberRecord(payload[0])) {
-      return payload;
-    }
-
-    for (const item of payload) {
-      const found = findMemberArrayInPayload(item, depth + 1);
-      if (found.length > 0) return found;
-    }
-    return [];
-  }
-
-  if (typeof payload !== 'object') return [];
-
-  for (const value of Object.values(payload as Record<string, unknown>)) {
-    const found = findMemberArrayInPayload(value, depth + 1);
-    if (found.length > 0) return found;
-  }
-
-  return [];
+function toMember(value: unknown): DirectoryMember {
+  const row = asRecord(value, "member");
+  return {
+    id: requiredString(row, "id"),
+    name: optionalString(row, "name"),
+    email: optionalString(row, "email"),
+    phone: optionalString(row, "phone"),
+    role: requiredString(row, "role"),
+    status: requiredString(row, "status"),
+    department: optionalString(row, "department"),
+    position: optionalString(row, "position"),
+    membershipNumber: optionalString(row, "membershipNumber"),
+    hireDate: optionalString(row, "hireDate"),
+    unionJoinDate: optionalString(row, "unionJoinDate"),
+    seniority: countOrNull(row, "seniority"),
+  };
 }
+
+async function loadDirectory(organizationId: string): Promise<Directory> {
+  const base = buildMembersFetchUrl(organizationId);
+  const response = await fetch(`${base}${base.includes("?") ? "&" : "?"}limit=${PAGE_LIMIT}`);
+  if (!response.ok) throw new Error(await readApiError(response, `The directory could not be loaded (HTTP ${response.status}).`));
+  const payload = envelopeData(await response.json());
+  if (!Array.isArray(payload.members)) throw new ApiShapeError("no members");
+  const members = payload.members.map(toMember);
+  const { total } = payload;
+  if (typeof total !== "number" || !Number.isInteger(total) || total < 0) throw new ApiShapeError("no total");
+  return { members, total, mayHaveMore: total > members.length };
+}
+
+const titleCase = (words: string) => words.replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+/** A calendar date from a stored timestamp, in UTC: dates of employment are days, and a local time zone must not move them. */
+function formatDate(value: string, locale: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString(locale, { timeZone: "UTC" });
+}
+
+function initialsOf(member: DirectoryMember): string {
+  const source = member.name ?? member.email ?? "";
+  const letters = source.split(/\s+/).filter((part) => part !== "").slice(0, 2).map((part) => part.charAt(0));
+  return letters.join("").toUpperCase();
+}
+
+function downloadCsv(csv: string, filename: string) {
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+const EXPORT_COLUMNS: CSVColumn<DirectoryMember>[] = [
+  { header: "Name", accessor: (m) => m.name },
+  { header: "Email", accessor: (m) => m.email },
+  { header: "Phone", accessor: (m) => m.phone },
+  { header: "Role", accessor: (m) => m.role },
+  { header: "Status", accessor: (m) => m.status },
+  { header: "Department", accessor: (m) => m.department },
+  { header: "Position", accessor: (m) => m.position },
+  { header: "Membership number", accessor: (m) => m.membershipNumber },
+  { header: "Union join date", accessor: (m) => m.unionJoinDate?.slice(0, 10) },
+  { header: "Hire date", accessor: (m) => m.hireDate?.slice(0, 10) },
+  { header: "Seniority", accessor: (m) => m.seniority },
+];
+
+const ROLE_ORDER = ["member", "steward", "officer", "admin", "super_admin"];
+
+const ROLE_STYLE: Record<string, { color: string; icon: ReactElement }> = {
+  member: { color: "text-blue-700 bg-blue-100 border-blue-200", icon: <Users className="w-3 h-3" /> },
+  steward: { color: "text-purple-700 bg-purple-100 border-purple-200", icon: <Shield className="w-3 h-3" /> },
+  officer: { color: "text-orange-700 bg-orange-100 border-orange-200", icon: <Award className="w-3 h-3" /> },
+  admin: { color: "text-red-700 bg-red-100 border-red-200", icon: <Shield className="w-3 h-3" /> },
+  super_admin: { color: "text-red-900 bg-red-200 border-red-300", icon: <Shield className="w-3 h-3" /> },
+};
+const UNKNOWN_ROLE_STYLE = { color: "text-gray-700 bg-gray-100 border-gray-200", icon: <Users className="w-3 h-3" /> };
+
+const STATUS_STYLE: Record<string, { color: string; dotColor: string }> = {
+  active: { color: "text-green-700 bg-green-100 border-green-200", dotColor: "bg-green-500" },
+  inactive: { color: "text-gray-700 bg-gray-100 border-gray-200", dotColor: "bg-gray-500" },
+  "on-leave": { color: "text-yellow-700 bg-yellow-100 border-yellow-200", dotColor: "bg-yellow-500" },
+};
+const UNKNOWN_STATUS_STYLE = { color: "text-gray-700 bg-gray-100 border-gray-200", dotColor: "bg-gray-500" };
 
 export default function MembersConsole({ organizationId: orgIdProp }: { organizationId?: string } = {}) {
   const t = useTranslations();
   const { organizationId, userOrganizations, isLoading: orgLoading } = useOrganization();
   const effectiveOrganizationId = orgIdProp ?? organizationId ?? userOrganizations[0]?.id ?? null;
-  const router = useRouter();
   const locale = useLocale();
-  
-  // Role configuration with translated labels
-  const roleConfig: Record<MemberRole, { label: string; color: string; icon: React.ReactElement }> = {
-    member: { label: t('members.roleMember'), color: "text-blue-700 bg-blue-100 border-blue-200", icon: <Users className="w-3 h-3" /> },
-    steward: { label: t('members.roleSteward'), color: "text-purple-700 bg-purple-100 border-purple-200", icon: <Shield className="w-3 h-3" /> },
-    officer: { label: t('members.roleOfficer'), color: "text-orange-700 bg-orange-100 border-orange-200", icon: <Award className="w-3 h-3" /> },
-    admin: { label: t('members.roleAdmin'), color: "text-red-700 bg-red-100 border-red-200", icon: <Shield className="w-3 h-3" /> },
-    super_admin: { label: "Super Admin", color: "text-red-900 bg-red-200 border-red-300", icon: <Shield className="w-3 h-3" /> }
+  const copy = locale.toLowerCase().startsWith("fr") ? COPY.fr : COPY.en;
+
+  const roleLabel = (role: string): string => {
+    switch (role) {
+      case "member": return t("members.roleMember");
+      case "steward": return t("members.roleSteward");
+      case "officer": return t("members.roleOfficer");
+      case "admin": return t("members.roleAdmin");
+      default: return titleCase(humanize(role));
+    }
   };
 
-  // Status configuration with translated labels
-  const statusConfig: Record<MemberStatus, { label: string; color: string; dotColor: string }> = {
-    active: { label: t('members.statusActive'), color: "text-green-700 bg-green-100 border-green-200", dotColor: "bg-green-500" },
-    inactive: { label: t('members.statusInactive'), color: "text-gray-700 bg-gray-100 border-gray-200", dotColor: "bg-gray-500" },
-    "on-leave": { label: t('members.statusOnLeave'), color: "text-yellow-700 bg-yellow-100 border-yellow-200", dotColor: "bg-yellow-500" }
+  const statusLabel = (status: string): string => {
+    switch (status) {
+      case "active": return t("members.statusActive");
+      case "inactive": return t("members.statusInactive");
+      case "on-leave": return t("members.statusOnLeave");
+      default: return titleCase(humanize(status));
+    }
   };
-  
+
   // Fetch members from the single authoritative endpoint. `/api/members`
   // resolves the caller's own organization from the authenticated session
   // when no `organizationId` query param is supplied (see
@@ -136,15 +216,9 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
   // organizations client-side, and a failed request must surface as a real
   // error rather than silently falling back to a different endpoint or an
   // empty "no members" result.
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     (orgIdProp || !orgLoading) ? ['members', effectiveOrganizationId ?? 'auto'] as const : null,
-    async ([, orgId]) => {
-      const response = await fetch(buildMembersFetchUrl(orgId));
-      if (!response.ok) {
-        throw new Error(`Failed to load members (HTTP ${response.status})`);
-      }
-      return response.json();
-    },
+    ([, orgId]) => loadDirectory(orgId),
     {
       refreshInterval: 30000,
       revalidateOnFocus: true,
@@ -155,133 +229,13 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
 
   // Local UI state
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState<Department | "all">("all");
-  const [selectedRole, setSelectedRole] = useState<MemberRole | "all">("all");
-  const [selectedStatus, setSelectedStatus] = useState<MemberStatus | "all">("all");
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
+  const [selectedRole, setSelectedRole] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
-  const responseData = (data ?? null) as LooseMembersResponse | null;
-
-  // Extract members from API response (supports multiple envelope shapes)
-  const getArray = (obj: unknown, ...keys: string[]): unknown[] | null => {
-    let cur: unknown = obj;
-    for (const k of keys) {
-      if (cur && typeof cur === 'object') {
-        cur = (cur as Record<string, unknown>)[k];
-      } else {
-        return null;
-      }
-    }
-    return Array.isArray(cur) ? cur : null;
-  };
-
-  const getNumber = (obj: unknown, ...keys: string[]): number | undefined => {
-    let cur: unknown = obj;
-    for (const k of keys) {
-      if (cur && typeof cur === 'object') {
-        cur = (cur as Record<string, unknown>)[k];
-      } else {
-        return undefined;
-      }
-    }
-    return typeof cur === 'number' ? cur : undefined;
-  };
-
-  const rawMembers: Record<string, unknown>[] = (
-    getArray(responseData, 'data', 'members') ??
-    getArray(responseData, 'members') ??
-    getArray(responseData, 'data', 'data', 'members') ??
-    getArray(responseData, 'data', 'result', 'members') ??
-    getArray(responseData, 'result', 'members') ??
-    getArray(responseData, 'payload', 'members') ??
-    getArray(responseData, 'data', 'data') ??
-    getArray(responseData, 'data') ??
-    findMemberArrayInPayload(responseData)
-  ) as Record<string, unknown>[];
-
-  const members: Member[] = rawMembers.map((m: Record<string, unknown>) => {
-    const metadata = (m?.metadata && typeof m.metadata === 'object' ? m.metadata : {}) as Record<string, unknown>;
-    return {
-      id: m.id as string,
-      name: (m.name || m.full_name || 'Unknown Member') as string,
-      email: (m.email || '') as string,
-      phone: (m.phone || '') as string,
-      role: (m.role || 'member') as MemberRole,
-      status: (m.status || 'active') as MemberStatus,
-      department: (m.department || 'Administration') as Department,
-      position: (m.position || 'Union Member') as string,
-      hireDate: (m.hireDate || m.hire_date || m.createdAt || m.created_at || '') as string,
-      seniority: Number(m.seniority || 0),
-      location: (m.location || metadata.location || '') as string,
-      activeCases: Number(metadata.activeCases || metadata.active_cases || 0),
-      joinDate: (m.unionJoinDate || m.union_join_date || m.joinedAt || m.joined_at || m.createdAt || m.created_at || '') as string,
-      membershipNumber: (m.membershipNumber || m.membership_number || '') as string,
-      steward: metadata.steward as string | undefined,
-    };
-  });
-
-  const memberCount =
-    getNumber(responseData, 'data', 'stats', 'total') ??
-    getNumber(responseData, 'data', 'data', 'stats', 'total') ??
-    getNumber(responseData, 'data', 'result', 'stats', 'total') ??
-    getNumber(responseData, 'data', 'total') ??
-    getNumber(responseData, 'data', 'data', 'total') ??
-    getNumber(responseData, 'total') ??
-    members.length;
-
-  const activeMemberCount =
-    getNumber(responseData, 'data', 'stats', 'active') ??
-    getNumber(responseData, 'data', 'data', 'stats', 'active') ??
-    getNumber(responseData, 'data', 'result', 'stats', 'active') ??
-    members.filter(m => m.status === 'active').length;
-
-  // Filter members
-  const normalizedSearch = searchQuery.trim().toLowerCase();
-
-  const filteredMembers = members.filter(member => {
-    const name = String(member.name || '').toLowerCase();
-    const email = String(member.email || '').toLowerCase();
-    const position = String(member.position || '').toLowerCase();
-    const membershipNumber = String(member.membershipNumber || '').toLowerCase();
-
-    const matchesSearch =
-      normalizedSearch.length === 0 ||
-      name.includes(normalizedSearch) ||
-      email.includes(normalizedSearch) ||
-      position.includes(normalizedSearch) ||
-      membershipNumber.includes(normalizedSearch);
-    
-    const matchesDepartment = selectedDepartment === "all" || member.department === selectedDepartment;
-    const matchesRole = selectedRole === "all" || member.role === selectedRole;
-    const matchesStatus = selectedStatus === "all" || member.status === selectedStatus;
-    
-    return matchesSearch && matchesDepartment && matchesRole && matchesStatus;
-  });
-
-  const hasDefaultFilters =
-    normalizedSearch.length === 0 &&
-    selectedDepartment === 'all' &&
-    selectedRole === 'all' &&
-    selectedStatus === 'all';
-
-  const visibleMembers =
-    filteredMembers.length === 0 && members.length > 0 && hasDefaultFilters
-      ? members
-      : filteredMembers;
-
-  // Calculate stats
-  const totalMembers = memberCount;
-  const activeMembers = activeMemberCount;
-  const stewardsCount = members.filter(m => m.role === "steward").length;
-  const avgSeniority = members.length > 0 
-    ? Math.round(members.reduce((sum, m) => sum + m.seniority, 0) / members.length)
-    : 0;
-
-  // Get unique departments
-  const departments = Array.from(new Set(members.map(m => m.department))).sort();
-
   // Loading state
-  if (orgLoading || isLoading) {
+  if (orgLoading || isLoading || (!data && !error)) {
     return (
       <div className="flex items-center justify-center">
         <div className="text-center">
@@ -292,16 +246,17 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
     );
   }
 
-  // Error state
-  if (error) {
+  // Error state: a directory that could not be had is not an empty directory.
+  if (error || !data) {
     return (
-      <div className="flex items-center justify-center">
+      <div role="alert" className="flex items-center justify-center">
         <div className="text-center max-w-md">
           <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('members.errorLoadingMembers')}</h2>
-          <p className="text-gray-600 mb-4">{error.message}</p>
+          <p className="text-gray-600 mb-4">{error instanceof Error ? error.message : ""}</p>
           <button
-            onClick={() => window.location.reload()}
+            type="button"
+            onClick={() => { void mutate(); }}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             {t('common.retry')}
@@ -310,6 +265,48 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
       </div>
     );
   }
+
+  const { members, total, mayHaveMore } = data;
+
+  // Filter members
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+
+  const filteredMembers = members.filter(member => {
+    const matchesSearch =
+      normalizedSearch.length === 0 ||
+      [member.name, member.email, member.position, member.membershipNumber].some((field) => field?.toLowerCase().includes(normalizedSearch));
+
+    const matchesDepartment = selectedDepartment === "all" || member.department === selectedDepartment;
+    const matchesRole = selectedRole === "all" || member.role === selectedRole;
+    const matchesStatus = selectedStatus === "all" || member.status === selectedStatus;
+
+    return matchesSearch && matchesDepartment && matchesRole && matchesStatus;
+  });
+
+  // The options are what the loaded members have, not a fixed list of departments and statuses that no member may have.
+  const departments = Array.from(new Set(members.flatMap((m) => (m.department === null ? [] : [m.department])))).sort();
+  const roles = Array.from(new Set(members.map((m) => m.role))).sort((a, b) => {
+    const rank = (role: string) => (ROLE_ORDER.includes(role) ? ROLE_ORDER.indexOf(role) : ROLE_ORDER.length);
+    return rank(a) - rank(b) || a.localeCompare(b);
+  });
+  const statuses = Array.from(new Set(members.map((m) => m.status))).sort();
+
+  // Calculate stats over the loaded members
+  const totalLabel = `${members.length}${mayHaveMore ? "+" : ""}`;
+  const activeMembers = members.filter(m => m.status === "active").length;
+  const stewardsCount = members.filter(m => m.role === "steward").length;
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedDepartment("all");
+    setSelectedRole("all");
+    setSelectedStatus("all");
+  };
+
+  const exportDirectory = () => {
+    const day = new Date().toISOString().slice(0, 10);
+    downloadCsv(generateCSV(filteredMembers, EXPORT_COLUMNS), `members-directory-${day}.csv`);
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -331,22 +328,17 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
               {t('members.directoryDescription')}
             </p>
           </div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <button
-              onClick={() => window.location.href = '/dashboard/members/new'}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
-            >
-              <UserPlus className="w-5 h-5" />
-              {t('members.addMember')}
-            </button>
-          </motion.div>
         </div>
 
+        {mayHaveMore && (
+          <div role="status" className="mb-6 flex items-start gap-2 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>{copy.partial(members.length, total)}</p>
+          </div>
+        )}
+
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -357,7 +349,7 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">{t('members.totalMembers')}</p>
-                    <p className="text-3xl font-bold text-blue-600">{totalMembers}</p>
+                    <p className="text-3xl font-bold text-blue-600">{totalLabel}</p>
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <Users className="w-6 h-6 text-blue-600" />
@@ -406,33 +398,13 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
               </CardContent>
             </Card>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">{t('members.avgSeniority')}</p>
-                    <p className="text-3xl font-bold text-orange-600">{avgSeniority}y</p>
-                  </div>
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <Award className="w-6 h-6 text-orange-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
 
         {/* Search and Filters */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.4 }}
         >
           <Card className="bg-white/80 backdrop-blur-sm border-white/50 shadow-lg mb-8">
             <CardContent className="p-6">
@@ -459,7 +431,7 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
                   <select
                     id="department-filter"
                     value={selectedDepartment}
-                    onChange={(e) => setSelectedDepartment(e.target.value as Department | "all")}
+                    onChange={(e) => setSelectedDepartment(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="all">{t('members.allDepartments')}</option>
@@ -478,14 +450,13 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
                   <select
                     id="role-filter"
                     value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value as MemberRole | "all")}
+                    onChange={(e) => setSelectedRole(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="all">{t('members.allRoles')}</option>
-                    <option value="member">{t('members.members')}</option>
-                    <option value="steward">{t('members.stewards')}</option>
-                    <option value="officer">{t('members.officers')}</option>
-                    <option value="admin">{t('members.admins')}</option>
+                    {roles.map(role => (
+                      <option key={role} value={role}>{roleLabel(role)}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -498,30 +469,27 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
                   <select
                     id="status-filter"
                     value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value as MemberStatus | "all")}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="all">{t('members.allStatus')}</option>
-                    <option value="active">{t('members.active')}</option>
-                    <option value="on-leave">{t('members.onLeave')}</option>
-                    <option value="inactive">{t('members.inactive')}</option>
+                    {statuses.map(status => (
+                      <option key={status} value={status}>{statusLabel(status)}</option>
+                    ))}
                   </select>
                 </div>
               </div>
 
-              {/* Quick Actions */}
+              {/* Quick Actions: the export is of the members listed below, as filtered */}
               <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  <UserPlus className="w-4 h-4" />
-                  {t('members.addMember')}
-                </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <button
+                  type="button"
+                  onClick={exportDirectory}
+                  disabled={filteredMembers.length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                >
                   <Download className="w-4 h-4" />
-                  {t('members.exportDirectory')}
-                </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                  <FileText className="w-4 h-4" />
-                  {t('members.printDirectory')}
+                  {copy.exportMembers(filteredMembers.length)}
                 </button>
               </div>
             </CardContent>
@@ -532,12 +500,12 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-600">
-              {t('members.showingResults', { filtered: filteredMembers.length, total: totalMembers })}
+              {t('members.showingResults', { filtered: filteredMembers.length, total: totalLabel })}
             </p>
           </div>
 
           <AnimatePresence>
-            {visibleMembers.length === 0 ? (
+            {filteredMembers.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -547,30 +515,33 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
                   <CardContent className="p-12 text-center">
                     <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      No Members Found
+                      {members.length === 0 ? t('members.noMembers') : copy.noMatches}
                     </h3>
-                    <p className="text-gray-600 mb-6">
-                      Try adjusting your search or filters to find members.
-                    </p>
-                    <button
-                      onClick={() => {
-                        setSearchQuery("");
-                        setSelectedDepartment("all");
-                        setSelectedRole("all");
-                        setSelectedStatus("all");
-                      }}
-                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Clear All Filters
-                    </button>
+                    {members.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={clearFilters}
+                        className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        {copy.clearFilters}
+                      </button>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
             ) : (
-              visibleMembers.map((member, index) => {
+              filteredMembers.map((member, index) => {
                 const isExpanded = expandedMember === member.id;
-                const roleInfo = roleConfig[member.role] || { label: member.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), color: "text-gray-700 bg-gray-100 border-gray-200", icon: <Users className="w-3 h-3" /> };
-                const statusInfo = statusConfig[member.status] || { label: member.status, color: "text-gray-700 bg-gray-100 border-gray-200", dotColor: "bg-gray-500" };
+                const roleStyle = ROLE_STYLE[member.role] ?? UNKNOWN_ROLE_STYLE;
+                const statusStyle = STATUS_STYLE[member.status] ?? UNKNOWN_STATUS_STYLE;
+                const toggle = () => setExpandedMember(isExpanded ? null : member.id);
+
+                const details: Array<[string, string]> = [];
+                if (member.membershipNumber !== null) details.push([t('members.memberNumber'), member.membershipNumber]);
+                if (member.unionJoinDate !== null) details.push([t('members.joinDate'), formatDate(member.unionJoinDate, locale)]);
+                if (member.hireDate !== null) details.push([t('members.hireDate'), formatDate(member.hireDate, locale)]);
+                if (member.seniority !== null) details.push([copy.seniority, String(member.seniority)]);
+                details.push([t('members.status'), statusLabel(member.status)], [t('members.role'), roleLabel(member.role)]);
 
                 return (
                   <motion.div
@@ -585,60 +556,64 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
                         {/* Member Header */}
                         <div 
                           className="cursor-pointer"
-                          onClick={() => setExpandedMember(isExpanded ? null : member.id)}
+                          onClick={toggle}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex items-start gap-4 flex-1">
                               {/* Avatar */}
                               <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                                {initialsOf(member)}
                               </div>
 
                               {/* Member Info */}
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
+                                <div className="flex flex-wrap items-center gap-2 mb-2">
                                   <h3 className="text-xl font-bold text-gray-900">
-                                    {member.name}
+                                    {member.name ?? member.email ?? "—"}
                                   </h3>
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${statusInfo.color}`}>
-                                    <span className={`w-2 h-2 rounded-full ${statusInfo.dotColor}`}></span>
-                                    {statusInfo.label}
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${statusStyle.color}`}>
+                                    <span className={`w-2 h-2 rounded-full ${statusStyle.dotColor}`}></span>
+                                    {statusLabel(member.status)}
                                   </span>
-                                  <span className={`px-2 py-1 rounded-lg text-xs font-medium border flex items-center gap-1 ${roleInfo.color}`}>
-                                    {roleInfo.icon}
-                                    {roleInfo.label}
+                                  <span className={`px-2 py-1 rounded-lg text-xs font-medium border flex items-center gap-1 ${roleStyle.color}`}>
+                                    {roleStyle.icon}
+                                    {roleLabel(member.role)}
                                   </span>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                                  <div className="flex items-center gap-2 text-gray-700">
-                                    <Briefcase className="w-4 h-4 text-gray-400" />
-                                    <span>{member.position}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-gray-700">
-                                    <MapPin className="w-4 h-4 text-gray-400" />
-                                    <span>{member.department}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-gray-700">
-                                    <Calendar className="w-4 h-4 text-gray-400" />
-                                    <span>{member.seniority} years seniority</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-gray-700">
-                                    <Mail className="w-4 h-4 text-gray-400" />
-                                    <a href={`mailto:${member.email}`} className="text-blue-600 hover:underline">
-                                      {member.email}
-                                    </a>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-gray-700">
-                                    <Phone className="w-4 h-4 text-gray-400" />
-                                    <a href={`tel:${member.phone}`} className="text-blue-600 hover:underline">
-                                      {member.phone}
-                                    </a>
-                                  </div>
-                                  {member.activeCases > 0 && (
-                                    <div className="flex items-center gap-2 text-orange-600">
-                                      <FileText className="w-4 h-4" />
-                                      <span className="font-medium">{member.activeCases} active case{member.activeCases !== 1 ? 's' : ''}</span>
+                                  {member.position !== null && (
+                                    <div className="flex items-center gap-2 text-gray-700">
+                                      <Briefcase className="w-4 h-4 text-gray-400" />
+                                      <span>{member.position}</span>
+                                    </div>
+                                  )}
+                                  {member.department !== null && (
+                                    <div className="flex items-center gap-2 text-gray-700">
+                                      <MapPin className="w-4 h-4 text-gray-400" />
+                                      <span>{member.department}</span>
+                                    </div>
+                                  )}
+                                  {member.seniority !== null && (
+                                    <div className="flex items-center gap-2 text-gray-700">
+                                      <Calendar className="w-4 h-4 text-gray-400" />
+                                      <span>{copy.seniority}: {member.seniority}</span>
+                                    </div>
+                                  )}
+                                  {member.email !== null && (
+                                    <div className="flex items-center gap-2 text-gray-700">
+                                      <Mail className="w-4 h-4 text-gray-400" />
+                                      <a href={`mailto:${member.email}`} onClick={(e) => e.stopPropagation()} className="text-blue-600 hover:underline">
+                                        {member.email}
+                                      </a>
+                                    </div>
+                                  )}
+                                  {member.phone !== null && (
+                                    <div className="flex items-center gap-2 text-gray-700">
+                                      <Phone className="w-4 h-4 text-gray-400" />
+                                      <a href={`tel:${member.phone}`} onClick={(e) => e.stopPropagation()} className="text-blue-600 hover:underline">
+                                        {member.phone}
+                                      </a>
                                     </div>
                                   )}
                                 </div>
@@ -646,8 +621,14 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
                             </div>
 
                             <button
+                              type="button"
                               className="ml-4 text-blue-600 hover:text-blue-700"
-                              aria-label={isExpanded ? "Collapse" : "Expand"}
+                              aria-label={isExpanded ? copy.collapse : copy.expand}
+                              aria-expanded={isExpanded}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggle();
+                              }}
                             >
                               <motion.div
                                 animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -669,117 +650,42 @@ export default function MembersConsole({ organizationId: orgIdProp }: { organiza
                               transition={{ duration: 0.3 }}
                               className="border-t border-gray-200 pt-6 mt-6"
                             >
-                              {/* Detailed Information */}
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <div className="space-y-3">
-                                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Member Information</h4>
-                                  <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Membership Number:</span>
-                                      <span className="font-medium text-gray-900">{member.membershipNumber}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Join Date:</span>
-                                      <span className="font-medium text-gray-900">
-                                        {new Date(member.joinDate).toLocaleDateString()}
-                                      </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Hire Date:</span>
-                                      <span className="font-medium text-gray-900">
-                                        {new Date(member.hireDate).toLocaleDateString()}
-                                      </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Location:</span>
-                                      <span className="font-medium text-gray-900">{member.location}</span>
-                                    </div>
+                              <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm mb-6">
+                                {details.map(([label, value]) => (
+                                  <div key={label} className="flex justify-between">
+                                    <dt className="text-gray-600">{label}:</dt>
+                                    <dd className="font-medium text-gray-900">{value}</dd>
                                   </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Union Details</h4>
-                                  <div className="space-y-2 text-sm">
-                                    {member.steward && (
-                                      <div className="flex justify-between">
-                                        <span className="text-gray-600">Assigned Steward:</span>
-                                        <span className="font-medium text-blue-600">{member.steward}</span>
-                                      </div>
-                                    )}
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Active Cases:</span>
-                                      <span className="font-medium text-gray-900">{member.activeCases}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Member Status:</span>
-                                      <span className={`font-medium ${member.status === 'active' ? 'text-green-600' : 'text-gray-600'}`}>
-                                        {statusInfo.label}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
+                                ))}
+                              </dl>
 
                               {/* Action Buttons */}
                               <div className="flex flex-wrap gap-3">
-                                <a
-                                  href={`mailto:${member.email}`}
-                                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                <Link
+                                  href={`/${locale}/dashboard/members/${member.id}`}
+                                  className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                                 >
-                                  <Mail className="w-5 h-5" />
-                                  Send Email
-                                </a>
-                                <a
-                                  href={`tel:${member.phone}`}
-                                  className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                >
-                                  <Phone className="w-5 h-5" />
-                                  Call Member
-                                </a>
-                                <a
-                                  href={`mailto:${member.email}?subject=${encodeURIComponent(`Message for ${member.name}`)}`}
-                                  className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                                >
-                                  <MessageSquare className="w-5 h-5" />
-                                  Send Message
-                                </a>
-                                {member.activeCases > 0 && (
-                                  <button
-                                    onClick={() => router.push(`/${locale}/dashboard/members/${member.id}`)}
-                                    className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                                  <Users className="w-5 h-5" />
+                                  {copy.viewProfile}
+                                </Link>
+                                {member.email !== null && (
+                                  <a
+                                    href={`mailto:${member.email}`}
+                                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                   >
-                                    <FileText className="w-5 h-5" />
-                                    View Cases
-                                  </button>
+                                    <Mail className="w-5 h-5" />
+                                    {copy.sendEmail}
+                                  </a>
                                 )}
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                                      <MoreVertical className="w-5 h-5" />
-                                      More Options
-                                    </button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                    <DropdownMenuItem onClick={() => router.push(`/${locale}/dashboard/members/${member.id}`)}>
-                                      <Users className="w-4 h-4 mr-2" />
-                                      View Profile
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => router.push(`/${locale}/members/${member.id}/edit`)}>
-                                      <Briefcase className="w-4 h-4 mr-2" />
-                                      Edit Member
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => window.open(`mailto:${member.email}`, '_self')}>
-                                      <Mail className="w-4 h-4 mr-2" />
-                                      Send Email
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => window.open(`tel:${member.phone}`, '_self')}>
-                                      <Phone className="w-4 h-4 mr-2" />
-                                      Call
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                {member.phone !== null && (
+                                  <a
+                                    href={`tel:${member.phone}`}
+                                    className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                  >
+                                    <Phone className="w-5 h-5" />
+                                    {copy.call}
+                                  </a>
+                                )}
                               </div>
                             </motion.div>
                           )}

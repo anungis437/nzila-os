@@ -5,6 +5,7 @@ import {
   createAwardTypeSchema,
   updateAwardTypeSchema,
   createAwardSchema,
+  nominatePeerSchema,
   approveAwardSchema,
   issueAwardSchema,
   revokeAwardSchema,
@@ -136,6 +137,33 @@ describe('rewards-schemas', () => {
 
     it('rejects empty recipientUserId', () => {
       expect(() => createAwardSchema.parse({ ...valid, recipientUserId: '' })).toThrow();
+    });
+  });
+
+  // ── nominatePeerSchema ─────────────────────────────────
+  describe('nominatePeerSchema', () => {
+    const valid = { awardTypeId: uuid, recipientUserId: 'user1', reason: 'Stayed late to help' };
+
+    it('accepts what the nomination form sends, and trims the reason', () => {
+      expect(nominatePeerSchema.parse({ ...valid, reason: '  Stayed late to help  ' })).toEqual(valid);
+    });
+
+    it('takes no organization or program: those are the signed-in member and the award type', () => {
+      expect(nominatePeerSchema.parse({ ...valid, orgId: 'other', organizationId: 'other', programId: uuid })).toEqual(valid);
+    });
+
+    it.each([
+      ['a snake_case field name', { award_type_id: uuid, recipient_user_id: 'user1', message: 'x' }],
+      ['an award type that is not a uuid', { ...valid, awardTypeId: 'peer' }],
+      ['no recipient', { ...valid, recipientUserId: '' }],
+      ['a blank reason', { ...valid, reason: '   ' }],
+      ['a reason over 500 characters', { ...valid, reason: 'x'.repeat(501) }],
+    ])('rejects %s', (_what, input) => {
+      expect(nominatePeerSchema.safeParse(input).success).toBe(false);
+    });
+
+    it('accepts a reason of exactly 500 characters', () => {
+      expect(nominatePeerSchema.safeParse({ ...valid, reason: 'x'.repeat(500) }).success).toBe(true);
     });
   });
 

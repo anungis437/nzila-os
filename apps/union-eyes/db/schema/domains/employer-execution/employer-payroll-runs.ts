@@ -53,6 +53,8 @@ export const employerPayrollRuns = pgTable(
     immutableSnapshotLocked: boolean("immutable_snapshot_locked").notNull().default(false),
     approvedBy: text("approved_by"),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
+    executedBy: text("executed_by"),
+    executedAt: timestamp("executed_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -98,31 +100,5 @@ export const employerPayrollRunItems = pgTable(
   }),
 );
 
-export const employerPayrollAdjustments = pgTable(
-  "employer_payroll_adjustments",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    organizationId: uuid("organization_id").notNull(),
-    payrollRunId: uuid("payroll_run_id")
-      .notNull()
-      .references(() => employerPayrollRuns.id, { onDelete: "cascade" }),
-    payrollRunItemId: uuid("payroll_run_item_id")
-      .notNull()
-      .references(() => employerPayrollRunItems.id, { onDelete: "cascade" }),
-    reasonCode: varchar("reason_code", { length: 120 }).notNull(),
-    amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
-    adjustmentTrace: jsonb("adjustment_trace").$type<Record<string, unknown>>().notNull().default({}),
-    createdBy: text("created_by"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => ({
-    orgIdx: index("employer_payroll_adjustments_org_idx").on(table.organizationId),
-    runIdx: index("employer_payroll_adjustments_run_idx").on(table.payrollRunId),
-    itemIdx: index("employer_payroll_adjustments_item_idx").on(table.payrollRunItemId),
-  }),
-);
-
 export type EmployerPayrollRun = typeof employerPayrollRuns.$inferSelect;
 export type EmployerPayrollRunItem = typeof employerPayrollRunItems.$inferSelect;
-export type EmployerPayrollAdjustment = typeof employerPayrollAdjustments.$inferSelect;

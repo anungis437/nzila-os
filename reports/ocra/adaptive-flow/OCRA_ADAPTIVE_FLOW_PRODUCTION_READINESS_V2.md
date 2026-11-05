@@ -33,7 +33,7 @@ We took the recommended zero-migration path: a `_adaptive` sub-key inside the ex
 - Persistence helpers: [apps/union-eyes/lib/icra/adaptation/persistedAdaptiveContext.ts](../../../apps/union-eyes/lib/icra/adaptation/persistedAdaptiveContext.ts)
 - Reconstruction engine: [apps/union-eyes/lib/icra/adaptation/reconstructAdaptiveContext.ts](../../../apps/union-eyes/lib/icra/adaptation/reconstructAdaptiveContext.ts)
 - Submit-route integration: [apps/union-eyes/app/api/icra/submit/route.ts](../../../apps/union-eyes/app/api/icra/submit/route.ts)
-- Server action: [apps/union-eyes/actions/icra/get-adaptive-resolution.ts](../../../apps/union-eyes/actions/icra/get-adaptive-resolution.ts)
+- Server action: `apps/union-eyes/actions/icra/get-adaptive-resolution.ts` (removed in a0404b79b, 2026-11-04)
 
 The resolver returns `AdaptiveContextResolution { source, adaptiveContext, fallbackUsed, compatibilityWarnings }` where `source ∈ { 'persisted', 'reconstructed', 'rerouted', 'safe_default' }`. Reconstruction is pure and version-aware: on a question-bank version drift, the resolver reroutes from the persisted profile bands; on missing persistence or shape mismatch, it reconstructs from the form selections; on total failure, it returns a safe default flagged with `fallbackUsed = true`.
 
@@ -41,7 +41,7 @@ The resolver returns `AdaptiveContextResolution { source, adaptiveContext, fallb
 
 A locale-safe Adaptive Interpretation block now renders on the results page between `EmailResultsCard` and `ICRAProfile`. Bands and counts only; never free text or org names. Bilingual at parity (en-CA / fr-CA).
 
-- Component: [apps/union-eyes/components/icra/AdaptiveInterpretationBlock.tsx](../../../apps/union-eyes/components/icra/AdaptiveInterpretationBlock.tsx)
+- Component: `apps/union-eyes/components/icra/AdaptiveInterpretationBlock.tsx` (removed in a0404b79b, 2026-11-04)
 - Result page: [apps/union-eyes/app/[locale]/continuity-assessment/results/[id]/page.tsx](../../../apps/union-eyes/app/%5Blocale%5D/continuity-assessment/results/%5Bid%5D/page.tsx)
 
 ### ✅ Note 4 — PDF Adaptive Interpretation Context section

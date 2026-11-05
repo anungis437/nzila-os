@@ -59,7 +59,6 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
   currentUser: async () => null,
   getAuth: m.platformAuth,
   authMiddleware: () => async () => {},
-  clerkMiddleware: () => async () => {},
   createRouteMatcher: () => () => false,
 }));
 vi.mock('@/lib/api-auth-guard', async (orig) => {
@@ -82,6 +81,8 @@ vi.mock('drizzle-orm', async (importOriginal) => {
 
 vi.mock('@/db/schema', () => ({
   userConsents: {
+    // The generic CRUD gate classifies a table by its SQL name.
+    [Symbol.for('drizzle:Name')]: 'user_consents',
     id: { name: 'id' },
     userId: { name: 'userId' },
     organizationId: { name: 'organizationId' },
@@ -89,6 +90,9 @@ vi.mock('@/db/schema', () => ({
     status: { name: 'status' },
   },
 }));
+
+// The durable audit write is proven against real PostgreSQL elsewhere.
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 
 vi.mock('@/db/db', () => {
   const fakeDb = {

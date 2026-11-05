@@ -1,37 +1,23 @@
 /**
- * Monthly Per-Capita Cron Job
- * Protected by withApi cron auth (Phase 7 — Workflow Realignment).
- * Purpose: Automatically calculate per-capita remittances on 1st of each month
- * Schedule: Runs at midnight UTC on the 1st day of every month
+ * POST /api/cron/monthly-per-capita
+ *
+ * Not implemented, and not scheduled. The affiliate (per-capita) remittance capability is NOT_IMPLEMENTED (UE-FIN-AFFILIATE-REMITTANCES in
+ * lib/reality/capability-registry.ts: it needs a qualified model with institutional recipients, payable/receivable recognition and
+ * acknowledgment), yet this job inserted and recalculated per_capita_remittances rows and marked them overdue for every organization
+ * with a parent, which are financial records nothing qualified. It now writes nothing and answers HTTP 501 to an administrator;
+ * the schedule entry was removed from lib/operations/scheduled-jobs.json so no monthly run fails for it.
  */
 
-import { processMonthlyPerCapita } from '@/services/clc/per-capita-calculator';
-import { markOverdueRemittances } from '@/services/clc/per-capita-calculator';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 
-// =====================================================================================
-// GET - Monthly per-capita calculation
-// =====================================================================================
+export const dynamic = 'force-dynamic';
 
-const handler = withApi(
+export const POST = withApi(
   {
-    auth: { cron: true },
-    openapi: { tags: ['Cron'], summary: 'Calculate monthly per-capita remittances' },
+    auth: { required: true, minRole: 'admin' },
+    openapi: { tags: ['Cron'], summary: 'Monthly per-capita remittances (not implemented)' },
   },
   async () => {
-    const result = await processMonthlyPerCapita();
-    const overdueCount = await markOverdueRemittances();
-
-    return {
-      success: true,
-      timestamp: new Date().toISOString(),
-      calculation: result,
-      overdueMarked: overdueCount,
-    };
+    throw ApiError.notImplemented('Monthly per-capita remittance calculation is not implemented: the affiliate remittance model has not been qualified. Nothing was calculated or written.');
   },
 );
-
-export const GET = handler;
-// POST for manual triggering
-export const POST = handler;
-

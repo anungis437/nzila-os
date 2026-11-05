@@ -11,22 +11,28 @@
  * different — possibly another organization's — clause, as long as they
  * knew or guessed its id).
  *
- * POST/DELETE run in the caller's tenant RLS context. Child writes are
- * owner-only under ue_shared_library_child_write. GET stays on the system
- * role because federation/congress parent visibility is not in
- * ue_shared_library_select and must not be added by weakening RLS.
+ * GET/POST/DELETE run in the caller's tenant RLS context. Child writes are
+ * owner-only under ue_shared_library_child_write. The current select policy
+ * admits the same permitted sharing visibility as canReadSharedClause.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
+import type { db } from '@/db/db';
 import { clauseLibraryTags, sharedClauseLibrary } from '@/db/schema/domains/agreements/shared-library';
-import { eq, and } from 'drizzle-orm';
-import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
+import { eq, and, sql } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { canReadSharedClause, isSharedClauseOwner } from '@/lib/clause-library/sharing-authority';
+import { parseClauseTagBody } from '@/lib/clause-library/tag-body';
 
 export const dynamic = 'force-dynamic';
 
-async function getClauseAuthorityRow(id: string) {
-  const [clause] = await db
+// clause_library_tags has no organization column: a tag belongs to its clause, and the clause to its source
+// organization. The statement proves that ownership itself.
+const tagOfOwnedClause = (clauseId: string, organizationId: string) =>
+  sql`${clauseLibraryTags.clauseId} IN (SELECT id FROM shared_clause_library WHERE id = ${clauseId} AND source_organization_id = ${organizationId})`;
+
+async function getClauseAuthorityRow(id: string, executor: typeof db) {
+  const [clause] = await executor
     .select({
       id: sharedClauseLibrary.id,
       sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
@@ -49,17 +55,17 @@ export const GET = withApi(
     const id = url.pathname.split('/clause-library/')[1]?.split('/tags')[0];
     if (!organizationId) throw ApiError.badRequest('Organization context required');
 
-    // PRIVILEGED_CROSS_TENANT_REVIEW: federation/congress readers are not
-    // visible under ue_shared_library_select / child select. Keep this read
-    // on the system role. Do not widen the runtime policy.
-    return withSystemContext(async () => {
-      const clause = await getClauseAuthorityRow(id);
+    // As the tenant: the clause and its tags are admitted by the select policies (cache 0048 covers federation and congress), and
+    // canReadSharedClause asks the same database function.
+    return withRLSContext({ organizationId }, async (tx) => {
+      const clause = await getClauseAuthorityRow(id, tx);
       if (!clause || !(await canReadSharedClause(organizationId, clause))) {
         throw ApiError.notFound('clause', id);
       }
 
-      const tags = await db
-        .select()
+      // The tag names and ids only: the author's user id is owner-internal and a reader of a shared clause does not receive it.
+      const tags = await tx
+        .select({ id: clauseLibraryTags.id, clauseId: clauseLibraryTags.clauseId, tagName: clauseLibraryTags.tagName })
         .from(clauseLibraryTags)
         .where(eq(clauseLibraryTags.clauseId, id));
 
@@ -76,8 +82,7 @@ export const POST = withApi(
   async ({ request, userId, organizationId }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/clause-library/')[1]?.split('/tags')[0];
-    const body = await request.json();
-    const tagName = body.tagName || body.tag;
+    const { tagName } = parseClauseTagBody(await request.json().catch(() => null), 'add');
     if (!organizationId) throw ApiError.badRequest('Organization context required');
     if (!userId) throw ApiError.badRequest('Authenticated user is required to add a tag.');
 
@@ -85,13 +90,13 @@ export const POST = withApi(
       throw ApiError.badRequest('tagName is required');
     }
 
-    return withRLSContext({ organizationId }, async () => {
-      const clause = await getClauseAuthorityRow(id);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const clause = await getClauseAuthorityRow(id, tx);
       if (!clause || !isSharedClauseOwner(organizationId, clause)) {
         throw ApiError.notFound('clause', id);
       }
 
-      const [tag] = await db
+      const [tag] = await tx
         .insert(clauseLibraryTags)
         .values({
           clauseId: id,
@@ -106,6 +111,15 @@ export const POST = withApi(
         throw ApiError.notFound('clause', id);
       }
 
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.tag.add',
+        resourceType: 'clause_library_tags',
+        resourceId: tag.id,
+        details: { clauseId: id, tagName: tag.tagName },
+      });
+
       return { tag };
     });
   },
@@ -116,38 +130,44 @@ export const DELETE = withApi(
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Remove a tag from a clause' },
   },
-  async ({ request, organizationId }) => {
+  async ({ request, userId, organizationId }) => {
     const url = new URL(request.url);
     const id = url.pathname.split('/clause-library/')[1]?.split('/tags')[0];
-    const body = await request.json();
-    const tagName = body.tagName || body.tag;
-    const tagId = body.tagId;
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const { tagName, tagId } = parseClauseTagBody(await request.json().catch(() => null), 'remove');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    if (!tagId && !tagName) throw ApiError.badRequest('tagId or tagName required');
 
-    return withRLSContext({ organizationId }, async () => {
-      const clause = await getClauseAuthorityRow(id);
+    return withRLSContext({ organizationId }, async (tx) => {
+      const clause = await getClauseAuthorityRow(id, tx);
       if (!clause || !isSharedClauseOwner(organizationId, clause)) {
         throw ApiError.notFound('clause', id);
       }
 
-      if (tagId) {
-        // clauseId is required here (not just tagId) — a tag row must
-        // belong to THIS clause to be deletable via this route.
-        await db
-          .delete(clauseLibraryTags)
-          .where(and(eq(clauseLibraryTags.id, tagId), eq(clauseLibraryTags.clauseId, id)));
-      } else if (tagName) {
-        await db
-          .delete(clauseLibraryTags)
-          .where(
-            and(
-              eq(clauseLibraryTags.clauseId, id),
-              eq(clauseLibraryTags.tagName, tagName.trim()),
-            ),
-          );
-      } else {
-        throw ApiError.badRequest('tagId or tagName required');
+      // clauseId is required here (not just tagId) — a tag row must
+      // belong to THIS clause to be deletable via this route.
+      const removed = await tx
+        .delete(clauseLibraryTags)
+        .where(
+          and(
+            eq(clauseLibraryTags.clauseId, id),
+            tagOfOwnedClause(id, organizationId),
+            tagId ? eq(clauseLibraryTags.id, tagId) : eq(clauseLibraryTags.tagName, tagName!),
+          ),
+        )
+        .returning({ id: clauseLibraryTags.id, tagName: clauseLibraryTags.tagName });
+
+      if (removed.length === 0) {
+        throw ApiError.notFound('tag', tagId ?? tagName ?? 'unknown');
       }
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'clause_library.tag.remove',
+        resourceType: 'clause_library_tags',
+        resourceId: removed[0].id,
+        details: { clauseId: id, tagName: removed[0].tagName, removedCount: removed.length },
+      });
 
       return { success: true };
     });

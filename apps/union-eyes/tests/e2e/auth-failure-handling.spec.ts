@@ -12,6 +12,7 @@
  */
 import { expect, test } from '@playwright/test'
 import {
+  assertDeniedOrNotImplemented,
   assertPermissionDenied,
   cleanupDatabaseConnections,
   ensureServerReady,
@@ -151,7 +152,8 @@ test.describe('UE E2E — auth and session failure handling', () => {
     const roleUpdate = await request.post('/api/admin/update-role', {
       data: { userId: UE_TEST_USERS.memberPrimary.userId, role: 'steward' },
     })
-    assertPermissionDenied(roleUpdate.status())
+    // A steward passes the route's minRole, and the route answers 501: it is not implemented and changes no role.
+    assertDeniedOrNotImplemented(roleUpdate.status())
   })
 })
 

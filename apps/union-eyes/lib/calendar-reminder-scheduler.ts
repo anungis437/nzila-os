@@ -235,6 +235,7 @@ throw error;
  */
 export async function rescheduleEventReminders(
   eventId: string,
+  organizationId: string,
   newStartTime: Date
 ): Promise<number> {
   try {
@@ -245,7 +246,7 @@ export async function rescheduleEventReminders(
     const [event] = await db
       .select()
       .from(calendarEvents)
-      .where(eq(calendarEvents.id, eventId))
+      .where(and(eq(calendarEvents.id, eventId), eq(calendarEvents.organizationId, organizationId)))
       .limit(1);
 
     if (!event) {
@@ -258,7 +259,7 @@ export async function rescheduleEventReminders(
       .set({
         startTime: newStartTime,
       })
-      .where(eq(calendarEvents.id, eventId));
+      .where(and(eq(calendarEvents.id, eventId), eq(calendarEvents.organizationId, organizationId)));
 
     // Schedule new reminders
     return await scheduleEventReminders(eventId);

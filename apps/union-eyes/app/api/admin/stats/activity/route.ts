@@ -1,47 +1,34 @@
 /**
  * GET /api/admin/stats/activity
- * Returns recent activity: latest member additions, org changes, etc.
+ * Returns recent activity across organizations (latest member additions) for platform administrators.
+ *
+ * Authorized by platform-staff authority, not a role title; runs under the system role with its audit record in the same transaction; gives an
+ * abbreviated name and no e-mail address (lib/platform/user-directory.ts).
  */
-import { db } from '@/db/db';
-import { organizationMembers, organizations } from '@/db/schema';
-import { desc, sql } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
+import { performAtomicPlatformRead } from '@/lib/audit/audited-platform-read';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
+import { recentMemberActivity } from '@/lib/platform/user-directory';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
   async (ctx) => {
+    const actor = await requirePlatformStaffAuthority(ctx, 'platform.member_activity.read');
     const url = new URL(ctx.request.url);
-    const limit = Math.min(Number(url.searchParams.get('limit') ?? '10'), 50);
+    const requested = Number(url.searchParams.get('limit') ?? '10');
+    const limit = Number.isFinite(requested) ? Math.min(Math.max(Math.trunc(requested), 1), 50) : 10;
 
-    // Recent member additions as activity feed
-    const recentMembers = await db
-      .select({
-        id: organizationMembers.id,
-        name: organizationMembers.name,
-        email: organizationMembers.email,
-        role: organizationMembers.role,
-        organizationId: organizationMembers.organizationId,
-        orgName: organizations.name,
-        createdAt: organizationMembers.createdAt,
-      })
-      .from(organizationMembers)
-      .leftJoin(organizations, sql`${organizations.id}::text = ${organizationMembers.organizationId}::text`)
-      .orderBy(desc(organizationMembers.createdAt))
-      .limit(limit);
-
-    const activity = recentMembers.map((m) => ({
-      id: m.id,
-      type: 'member_added',
-      description: `${m.name} joined ${m.orgName ?? 'organization'} as ${m.role}`,
-      user: m.name,
-      email: m.email,
-      organizationName: m.orgName,
-      timestamp: m.createdAt,
-    }));
-
-    return activity;
+    return performAtomicPlatformRead(
+      actor,
+      {
+        action: 'platform.member_activity.read',
+        resourceType: 'organization_members',
+        details: { limit },
+        resultDetails: (rows: unknown[]) => ({ returned: rows.length }),
+      },
+      (tx) => recentMemberActivity(tx, limit),
+    );
   },
 );
-

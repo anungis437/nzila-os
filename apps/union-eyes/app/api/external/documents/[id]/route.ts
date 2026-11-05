@@ -1,6 +1,5 @@
 import { and, eq, isNull } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { db } from '@/db/db';
 import { documentLinks, documents } from '@/db/schema/documents-schema';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
 import {
@@ -8,6 +7,7 @@ import {
   externalForbidden,
   resolveExternalDocumentResource,
 } from '@/lib/external-resource-route-utils';
+import { isDocumentId } from '@/lib/documents/canonical-journey';
 import { authorizeExternalDocumentAccess } from '@/lib/services/external-resource-authorization-service';
 
 export const GET = withExternalMatterResourceAuth(
@@ -22,8 +22,12 @@ export const GET = withExternalMatterResourceAuth(
     if (context.matterType !== 'grievance') {
       return NextResponse.json({ error: 'Unsupported matter type' }, { status: 400 });
     }
+    // A malformed identifier names no document: it is answered here, not as a database error.
+    if (!isDocumentId(params.id)) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
 
-    const decision = await authorizeExternalDocumentAccess({
+    const decision = await authorizeExternalDocumentAccess(context.tx, {
       actor: context.actor,
       organizationId: context.organizationId,
       matterType: context.matterType,
@@ -35,7 +39,7 @@ export const GET = withExternalMatterResourceAuth(
       return externalForbidden();
     }
 
-    const [row] = await db
+    const [row] = await context.tx
       .select({
         id: documents.id,
         title: documents.title,

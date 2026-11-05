@@ -53,6 +53,8 @@ export interface ClauseSearchOptions {
 export interface ClauseComparisonRequest {
   clauseIds: string[];
   analysisType: "similarities" | "differences" | "best_practices" | "all";
+  /** When set, only clauses of this organization are compared. */
+  organizationId?: string;
 }
 
 export interface ClauseComparisonResult {
@@ -61,6 +63,8 @@ export interface ClauseComparisonResult {
   differences: Array<{ description: string; clauseIds: string[]; impact: string }>;
   bestPractices: Array<{ description: string; clauseId: string; reason: string }>;
   recommendations: string[];
+  /** What the comparison actually did: it groups clauses by type and compares no wording. */
+  analysis?: 'grouped_by_type_only';
 }
 
 // ============================================================================
@@ -88,7 +92,7 @@ export async function getClauseById(
         viewCount: sql`${cbaClause.viewCount} + 1`,
         updatedAt: new Date()
       })
-      .where(eq(cbaClause.id, id));
+      .where(and(eq(cbaClause.id, id), eq(cbaClause.organizationId, clause.organizationId)));
 
     return clause;
   } catch (error) {
@@ -100,15 +104,17 @@ export async function getClauseById(
 /**
  * Get clauses by CBA ID
  */
+// A clause is named by its agreement and by the organization that holds it: a clause written against another organization's agreement id never appears here.
 export async function getClausesByCBAId(
   cbaId: string,
+  organizationId: string,
   _options: ClauseSearchOptions = {}
 ): Promise<Clause[]> {
   try {
     const clauses = await db
       .select()
       .from(cbaClause)
-      .where(eq(cbaClause.cbaId, cbaId))
+      .where(and(eq(cbaClause.cbaId, cbaId), eq(cbaClause.organizationId, organizationId)))
       .orderBy(asc(cbaClause.orderIndex), asc(cbaClause.clauseNumber));
 
     return clauses;
@@ -236,6 +242,7 @@ export async function bulkCreateClauses(clauses: NewClause[]): Promise<Clause[]>
  */
 export async function updateClause(
   id: string,
+  organizationId: string,
   data: Partial<NewClause>
 ): Promise<Clause | null> {
   try {
@@ -245,7 +252,7 @@ export async function updateClause(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(cbaClause.id, id))
+      .where(and(eq(cbaClause.id, id), eq(cbaClause.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -258,11 +265,11 @@ export async function updateClause(
 /**
  * Delete a clause
  */
-export async function deleteClause(id: string): Promise<boolean> {
+export async function deleteClause(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(cbaClause)
-      .where(eq(cbaClause.id, id));
+      .where(and(eq(cbaClause.id, id), eq(cbaClause.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -390,7 +397,11 @@ export async function compareClauses(
     const clauses = await db
       .select()
       .from(cbaClause)
-      .where(inArray(cbaClause.id, request.clauseIds));
+      .where(
+        request.organizationId
+          ? and(inArray(cbaClause.id, request.clauseIds), eq(cbaClause.organizationId, request.organizationId))
+          : inArray(cbaClause.id, request.clauseIds),
+      );
 
     if (clauses.length === 0) {
       throw new Error("No clauses found for comparison");
@@ -422,12 +433,9 @@ export async function compareClauses(
       }
     });
 
-    // Basic recommendations
-    result.recommendations.push(
-      "Consider standardizing clause language across CBAs",
-      "Review clauses with lower confidence scores for accuracy",
-      "Ensure all key terms are consistently defined"
-    );
+    // No text analysis exists: the comparison is grouping by clause type. Differences, best practices and recommendations stay
+    // empty rather than carry fixed sentences that read as findings about these clauses.
+    result.analysis = 'grouped_by_type_only';
 
     return result;
   } catch (error) {

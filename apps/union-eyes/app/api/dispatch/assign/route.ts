@@ -7,8 +7,9 @@
 import { z } from "zod";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
 import { hasMinRole } from "@/lib/api-auth-guard";
-import { auditDataMutation } from "@/lib/audit-logger";
-import { assignWorkersToDispatch } from "@/lib/services/dispatch-engine";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { assignWorkersToDispatch, DispatchAssignmentError } from "@/lib/services/dispatch-engine";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -16,8 +17,8 @@ import {
 } from "@/lib/api/standardized-responses";
 
 const assignSchema = z.object({
-  requestId: z.string().uuid(),
-  memberIds: z.array(z.string().uuid()).min(1),
+  requestId: z.guid(),
+  memberIds: z.array(z.guid()).min(1),
 });
 
 export const POST = withOrganizationAuth(async (request, context) => {
@@ -35,25 +36,31 @@ export const POST = withOrganizationAuth(async (request, context) => {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid input", parsed.error.flatten());
     }
 
-    const assignments = await assignWorkersToDispatch(
-      organizationId,
-      parsed.data.requestId,
-      parsed.data.memberIds,
-    );
-
-    await auditDataMutation({
-      userId,
-      organizationId,
-      resource: "dispatch_assignments",
-      action: "create",
-      resourceId: parsed.data.requestId,
-      newState: { assignedMembers: parsed.data.memberIds },
+    // The assignments, the request status change and the audit record commit together.
+    const assignments = await withRLSContext({ organizationId }, async (tx) => {
+      const rows = await assignWorkersToDispatch(
+        organizationId,
+        parsed.data.requestId,
+        parsed.data.memberIds,
+        tx,
+      );
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: "dispatch.assign",
+        resourceType: "dispatch_assignments",
+        resourceId: parsed.data.requestId,
+        details: { assignedMembers: parsed.data.memberIds },
+      });
+      return rows;
     });
 
     return standardSuccessResponse(assignments);
   } catch (error) {
-    if (error instanceof Error && error.message === "Dispatch request not found.") {
-      return standardErrorResponse(ErrorCode.NOT_FOUND, "Dispatch request not found");
+    if (error instanceof DispatchAssignmentError) {
+      if (error.reason === "not_found") return standardErrorResponse(ErrorCode.NOT_FOUND, "Dispatch request not found");
+      if (error.reason === "not_members") return standardErrorResponse(ErrorCode.VALIDATION_ERROR, error.message);
+      return standardErrorResponse(ErrorCode.CONFLICT, error.message);
     }
     return standardErrorResponse(ErrorCode.INTERNAL_ERROR, "Failed to assign dispatch workers");
   }

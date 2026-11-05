@@ -20,6 +20,7 @@ const saveSignatureSchema = z.object({
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "officer" },
     openapi: { tags: ["Correspondence"], summary: "Get user signatures" },
   },

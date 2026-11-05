@@ -8,13 +8,13 @@ export const FINANCIAL_STATUS_VALUES = ['pending', 'completed', 'failed', 'rever
 export type FinancialStatus = (typeof FINANCIAL_STATUS_VALUES)[number]
 
 export const financialRecordSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   transactionType: z.string().min(1),
   amountMinor: z.number().int(),
   currency: z.string().length(3),
   orgId: z.string().min(1),
   sourceModule: z.string().min(1),
-  entityId: z.string().uuid().optional(),
+  entityId: z.guid().optional(),
   entityType: z.string().optional(),
   counterpartyId: z.string().optional(),
   provider: z.string().optional(),

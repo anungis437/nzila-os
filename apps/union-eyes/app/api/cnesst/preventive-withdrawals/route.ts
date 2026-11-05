@@ -16,7 +16,6 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ['CNESST', 'Preventive Withdrawal'],
   orgScoped: true,
-  ownerColumn: 'workerId',
   readRole: 'steward',
   writeRole: 'steward',
 });

@@ -123,6 +123,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
       membershipId: 'membership-row-1',
       authUserId: 'real-auth-user-999',
       organizationId: 'org-a',
+      actorUserId: 'platform-admin-1',
       newLocalStatus: 'inactive',
     });
   });
@@ -142,6 +143,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
       membershipId: 'membership-row-1',
       authUserId: 'real-auth-user-999',
       organizationId: 'org-a',
+      actorUserId: 'platform-admin-1',
       newLocalStatus: 'deleted',
     });
   });
@@ -162,6 +164,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
       membershipId: 'membership-row-1',
       authUserId: 'real-auth-user-999',
       organizationId: 'org-a',
+      actorUserId: 'platform-admin-1',
     });
   });
 

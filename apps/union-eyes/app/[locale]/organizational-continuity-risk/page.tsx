@@ -34,6 +34,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { COPY } from '@/lib/icra/copy';
+import { icraPriceLabel } from '@/lib/icra/pricing';
 import HumanScenesCarousel from './_components/HumanScenesCarousel';
 
 // Organizational imagery — classical, calm, never stock-cliché.
@@ -183,7 +184,7 @@ export default async function OrganizationalContinuityRiskPage({
     {
       id: 'executive_continuity_brief',
       name: isFr ? 'Note de continuité executive' : 'Leadership Briefing Report',
-      price: isFr ? '1 200 $' : '$1,200',
+      price: icraPriceLabel('executive_continuity_brief', isFr),
       description: isFr
         ? 'Analyse organisationnelle approfondie avec analyse de la dette de continuité, des dépendances et des risques de modernisation.'
         : 'In-depth organizational analysis with governance entropy, continuity debt, dependency review, and modernization risk.',
@@ -197,7 +198,7 @@ export default async function OrganizationalContinuityRiskPage({
     {
       id: 'institutional_continuity_diagnostic',
       name: isFr ? 'Diagnostic organisationnel de continuité' : 'Full Diagnostic & Action Plan',
-      price: isFr ? '6 500 $' : '$6,500',
+      price: icraPriceLabel('institutional_continuity_diagnostic', isFr),
       description: isFr
         ? 'Engagement complet avec revue facilitée, atelier et cartographie de la mémoire organisationnelle.'
         : 'Full engagement with facilitated review, workshop, and organizational memory lineage mapping.',

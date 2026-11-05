@@ -46,6 +46,7 @@ vi.mock('@/lib/api-auth-guard', async (orig) => {
   return {
     ...actual,
     hasMinRole: m.hasMinRole,
+    getCurrentUser: vi.fn(async () => ({ id: 'steward-1', organizationId: 'test-org' })),
     withApiAuth: vi.fn((handler: (req: NextRequest, ctx?: any) => Promise<Response>) => (req: NextRequest, ctx?: any) => handler(req, ctx)),
   };
 });
@@ -62,6 +63,8 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
   getPilotClaimedOrganizationId: vi.fn(() => 'test-org'),
   getPilotEffectiveOrganizationId: vi.fn(() => 'test-org'),
 }));
+// The declared audit commits with the write (B97); its writer has its own coverage.
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
 async function loadRoute() {
@@ -109,6 +112,39 @@ describe('pilot/apply/[id]/reference-profile route', () => {
     const payload = await response.json();
     expect(response.status).toBe(200);
     expect(payload.data.referenceProfile.pilotId).toBe('p1');
+    expect(payload.data.referenceProfile.dataSource).toBe('pilot_metrics');
+  });
+
+  // DEF-0B10-PIL-REFERENCE-PROFILE-PRESENTS-A-DEFAULT-TESTIMONIAL-A-SIX-HOUR-FLOOR-AND-SCORE-DERIVED-FIGURES-AS-PILOT-OUTCOMES
+  it('GET invents no testimonial, time saved or measured outcome for a pilot with no stored metrics', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect(
+      [{ id: 'p1', organizationName: 'Org One', organizationType: 'local', contactName: 'Casey', contactEmail: 'c@example.com', memberCount: 100, jurisdictions: [], sectors: [], currentSystem: 'legacy', challenges: [], goals: [], readinessScore: 70, responses: {} }],
+      [],
+    );
+
+    const response = await GET(new NextRequest('http://localhost/api/pilot/apply/p1/reference-profile'), { params: Promise.resolve({ id: 'p1' }) });
+    const { data } = await response.json();
+
+    expect(data.referenceProfile.testimonial).toBeNull();
+    expect(data.referenceProfile.timeSaved).toBeNull();
+    expect(data.referenceProfile.dataSource).toBe('application_signals_not_measured');
+    expect(data.caseStudy.outcomes).toEqual([]);
+    expect(data.caseStudy.title).not.toContain('90-day');
+    expect(data.caseStudy.quote).toBeNull();
+  });
+
+  it('GET shows a supplied quote only as unattested', async () => {
+    const { GET } = await loadRoute();
+    m.queueSelect(
+      [{ id: 'p1', organizationName: 'Org One', organizationType: 'local', contactName: 'Casey', contactEmail: 'c@example.com', memberCount: 100, jurisdictions: [], sectors: [], currentSystem: 'legacy', challenges: [], goals: [], readinessScore: 70, responses: { referenceTestimonialQuote: 'It helped.' } }],
+      [],
+    );
+
+    const response = await GET(new NextRequest('http://localhost/api/pilot/apply/p1/reference-profile'), { params: Promise.resolve({ id: 'p1' }) });
+    const { data } = await response.json();
+
+    expect(data.referenceProfile.testimonial).toEqual({ quote: 'It helped.', author: null, role: null, attested: false });
   });
 
   it('POST skips persist when identical checksum already exists', async () => {

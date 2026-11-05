@@ -24,7 +24,7 @@ export interface HubSpotDeal { name: string; amount: number; stage: string; cont
 export interface FinancialHubSpotEngagementNote { contactEmail: string; body: string; timestamp?: string }
 
 export const HubSpotContactSchema = BaseHubSpotContactSchema
-export const HubSpotDealSchema = z.object({ name: z.string(), amount: z.number(), stage: z.string(), contactEmail: z.string().optional(), properties: z.record(z.string()).optional() })
+export const HubSpotDealSchema = z.object({ name: z.string(), amount: z.number(), stage: z.string(), contactEmail: z.string().optional(), properties: z.record(z.string(), z.string()).optional() })
 export const HubSpotEngagementNoteSchema = z.object({ contactEmail: z.string().email(), body: z.string(), timestamp: z.string().optional() })
 
 // ── Client ──────────────────────────────────────────────────────────────────

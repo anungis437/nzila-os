@@ -55,7 +55,7 @@ export async function handleAcceptInvite(request: NextRequest) {
 
 const createSchema = z.object({
   email: z.string().email(),
-  organizationId: z.string().uuid(),
+  organizationId: z.guid(),
   role: z.string().optional(),
   invitedBy: z.string().min(1),
 })

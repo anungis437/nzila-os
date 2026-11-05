@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { folder, root } from '../bootstrap-v2/source'
@@ -25,6 +25,7 @@ type Guard =
   | 'WITH_API'
   | 'WITH_API_PUBLIC'
   | 'WITH_API_CRON'
+  | 'WITH_API_MACHINE'
   | 'LEGACY_ROLE_WRAPPER'
   | 'ORGANIZATION_MIDDLEWARE'
   | 'REQUIRE_API_AUTH'
@@ -36,6 +37,7 @@ type Guard =
 
 const GUARD_PATTERNS: [Guard, RegExp][] = [
   ['WITH_API_CRON', /withApi\s*\(\s*\{[^}]*cron\s*:\s*true/s],
+  ['WITH_API_MACHINE', /withApi\s*\(\s*\{[^}]*machine\s*:/s],
   ['WITH_API_PUBLIC', /withApi\s*\(\s*\{[^}]*required\s*:\s*false/s],
   ['WITH_API', /\bwithApi\s*\(/],
   ['ORGANIZATION_MIDDLEWARE', /\bwithOrganizationAuth\s*\(/],
@@ -154,6 +156,10 @@ function bindControl(
       basis: 'withApi required:false; public by design',
     },
     WITH_API_CRON: { control: 'CRON_CREDENTIAL', basis: 'withApi auth.cron credential' },
+    WITH_API_MACHINE: {
+      control: 'MACHINE_CREDENTIAL',
+      basis: 'withApi auth.machine: the route\'s declared credential verifier decides the caller; no user session is read',
+    },
     LEGACY_ROLE_WRAPPER: {
       control: 'ROLE_AUTHORIZATION',
       basis: 'role wrapper over canonical session',
@@ -202,6 +208,7 @@ const IDENTITY_MUTATION =
 const FINANCIAL =
   /(dues|billing|invoice|payment|remittance|expense|budget|ledger|donation|fee|per_capita|payroll|stipend|tax)/i
 const SENSITIVE_OPERATIONS = new Set(['INSERT', 'UPDATE', 'DELETE'])
+const SERVER_ACTION_MARKER = /['"]use server['"]|\bcreateSecureServerAction\s*\(/
 
 export function buildCallerControlGraph() {
   const actorMap = JSON.parse(
@@ -216,8 +223,15 @@ export function buildCallerControlGraph() {
       tables?: { name: string; operation: string }[]
     }[]
   }
-  const callers = actorMap.actors.map((actor) => {
-    const source = readFileSync(path.join(root, ...actor.sourcePath.split('/')), 'utf8')
+  // The map is a frozen snapshot of the root callers. An actor whose code has been removed, or whose module no longer carries a server-action marker (a server action is an
+  // endpoint any client can call; a plain exported function is not), is not a root caller any more: it is left out of the graph and counted.
+  const sourceOf = (actor: { sourcePath: string }) => readFileSync(path.join(root, ...actor.sourcePath.split('/')), 'utf8')
+  const present = actorMap.actors.filter((actor) => {
+    if (!existsSync(path.join(root, ...actor.sourcePath.split('/')))) return false
+    return actor.kind !== 'SERVER_ACTION' || SERVER_ACTION_MARKER.test(sourceOf(actor))
+  })
+  const callers = present.map((actor) => {
+    const source = sourceOf(actor)
     const guard = classifyGuard(source)
     const context = classifyContext(source)
     const mutatedTables = [
@@ -235,7 +249,7 @@ export function buildCallerControlGraph() {
     const exceptionReasons: string[] = []
     if (['NONE', 'DIRECT_AUTH_ONLY', 'WITH_API_PUBLIC'].includes(guard))
       exceptionReasons.push('BYPASSES_SHARED_AUTHORIZATION_GUARD')
-    if (guard === 'WITH_API_CRON' || guard === 'WEBHOOK_SIGNATURE')
+    if (guard === 'WITH_API_CRON' || guard === 'WITH_API_MACHINE' || guard === 'WEBHOOK_SIGNATURE')
       exceptionReasons.push('NON_HUMAN_CREDENTIAL_GUARD')
     if (context.system) exceptionReasons.push('PRIVILEGED_SYSTEM_AUTHORITY')
     if (context.tenant && context.explicit) exceptionReasons.push('MANUAL_DATABASE_CONTEXT')
@@ -289,6 +303,7 @@ export function buildCallerControlGraph() {
       reasonCounts[reason] = (reasonCounts[reason] ?? 0) + 1
   const summary = {
     rootCallers: callers.length,
+    retiredRootCallers: actorMap.actors.length - present.length,
     mutatingRootCallers: mutatingCallers.length,
     mutatingWithSharedControlPath: mutatingCallers.filter((caller) => caller.sharedControlBound)
       .length,

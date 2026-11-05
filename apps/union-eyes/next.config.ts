@@ -17,11 +17,17 @@ const isDev = process.env.NODE_ENV === 'development';
 // Detect that HTTP build and drop the HTTPS-upgrade headers. Defaults to SECURE:
 // the headers are only skipped when an explicit test flag is present at BUILD
 // time or the canonical app URL is http://localhost, so real production builds
-// (https origin, no QA flags) always enforce HTTPS.
+// (https origin, no QA flags) always enforce HTTPS. A build that names a deployed
+// identity (production, staging, pilot or demo) enforces HTTPS whatever the flags
+// say: a stray QA flag in a release build must not drop HSTS from the shipped app.
+const deployedBuild = ['UE_ENVIRONMENT', 'NEXT_PUBLIC_APP_ENV', 'TARGET_ENVIRONMENT'].some((name) =>
+  /^(production|prod|staging|pilot|demo)(\s|$)/i.test((process.env[name] ?? '').trim()),
+);
 const isHttpTestBuild =
-  process.env.QA_TEST_ENV === 'true' ||
-  process.env.PLAYWRIGHT_TEST_AUTH === 'true' ||
-  (process.env.NEXT_PUBLIC_APP_URL ?? '').startsWith('http://localhost');
+  !deployedBuild &&
+  (process.env.QA_TEST_ENV === 'true' ||
+    process.env.PLAYWRIGHT_TEST_AUTH === 'true' ||
+    (process.env.NEXT_PUBLIC_APP_URL ?? '').startsWith('http://localhost'));
 const enforceHttpsUpgrade = !isDev && !isHttpTestBuild;
 
 // Bundle Analyzer - Enable with ANALYZE=true environment variable
@@ -44,7 +50,7 @@ const unionEyesHosts = {
 //
 // SECURITY IMPROVEMENTS IMPLEMENTED (Feb 2026):
 // ✅ Removed 'unsafe-eval' from script-src (XSS attack vector eliminated)
-// ✅ Migrated from Clerk to Microsoft Entra ID (Jun 2026)
+// ✅ Authentication provider: Microsoft Entra ID
 //
 // REMAINING SECURITY TRADEOFFS:
 // 1. script-src 'unsafe-inline' - Required by NextAuth/Entra redirect flows
@@ -285,7 +291,6 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       '@radix-ui/react-accordion',
       '@radix-ui/react-alert-dialog',
-      '@radix-ui/react-avatar',
       '@radix-ui/react-checkbox',
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',

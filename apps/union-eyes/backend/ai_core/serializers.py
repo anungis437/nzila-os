@@ -37,35 +37,40 @@ class AbTestEventsSerializer(serializers.ModelSerializer):
 class AccessibilityAuditsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessibilityAudits
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AccessibilityIssuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessibilityIssues
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'audit_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class WcagSuccessCriteriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = WcagSuccessCriteria
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'criteria_number', 'criteria_title',
+            'criteria_description', 'level', 'wcag_version', 'principle', 'guideline',
+            'understanding_url', 'how_to_meet_url', 'testing_procedure', 'common_failures',
+            'sufficient_techniques', 'keywords',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AccessibilityTestSuitesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessibilityTestSuites
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AccessibilityUserTestingSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessibilityUserTesting
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -86,21 +91,21 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
 class KnowledgeBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = KnowledgeBase
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ChatbotSuggestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatbotSuggestions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ChatbotAnalyticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatbotAnalytics
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -114,14 +119,14 @@ class AiSafetyFiltersSerializer(serializers.ModelSerializer):
 class AiUsageMetricsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AiUsageMetrics
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AiRateLimitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AiRateLimits
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -135,12 +140,12 @@ class AiBudgetsSerializer(serializers.ModelSerializer):
 class MlPredictionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MlPredictions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ModelMetadataSerializer(serializers.ModelSerializer):
     class Meta:
         model = ModelMetadata
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']

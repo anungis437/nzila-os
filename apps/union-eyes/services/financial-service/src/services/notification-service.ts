@@ -21,6 +21,7 @@ import {
   inAppNotifications,
 } from '../db/schema';
 import { eq, and, desc } from 'drizzle-orm';
+import { inOrganization } from '../jobs/tenant-scope';
 import { getFromEmail, sendResendEmail } from '@/lib/email-service';
 import twilio from 'twilio';
 import { logger } from '@/lib/logger';
@@ -141,14 +142,15 @@ export async function queueNotification(request: NotificationRequest): Promise<s
 /**
  * Process pending notifications
  */
-export async function processPendingNotifications(batchSize: number = 50): Promise<number> {
-  // Get pending notifications due for delivery
+export async function processPendingNotifications(tenantId: string, batchSize: number = 50): Promise<number> {
+  // Get pending notifications due for delivery for the caller tenant only.
   const pending = await db
     .select()
     .from(notificationQueue)
     .where(
       and(
         eq(notificationQueue.status, 'pending'),
+        inOrganization(notificationQueue.tenantId, tenantId),
         // scheduledFor <= now
       )
     )
@@ -159,7 +161,7 @@ export async function processPendingNotifications(batchSize: number = 50): Promi
 
   for (const notification of pending) {
     try {
-      await sendNotification(notification.id);
+      await sendNotification(notification.id, tenantId);
       processed++;
     } catch (error) {
       logger.error('Failed to send notification', { error, notificationId: notification.id });
@@ -173,14 +175,14 @@ export async function processPendingNotifications(batchSize: number = 50): Promi
 /**
  * Send a queued notification
  */
-export async function sendNotification(notificationId: string): Promise<SendNotificationResult> {
-  // Get notification from queue
+export async function sendNotification(notificationId: string, tenantId: string): Promise<SendNotificationResult> {
+  // The tenant is the caller's. A row loaded by id from another tenant is not found.
   const [notification] = await db
     .select()
     .from(notificationQueue)
-    .where(eq(notificationQueue.id, notificationId));
+    .where(and(eq(notificationQueue.id, notificationId), inOrganization(notificationQueue.tenantId, tenantId)));
 
-  if (!notification) {
+  if (!notification || notification.tenantId !== tenantId) {
     throw new Error(`Notification ${notificationId} not found`);
   }
 
@@ -195,7 +197,7 @@ export async function sendNotification(notificationId: string): Promise<SendNoti
       attempts: notification.attempts + 1,
       lastAttemptAt: new Date(),
     } as any as Partial<typeof notificationQueue.$inferInsert>)
-    .where(eq(notificationQueue.id, notificationId));
+    .where(and(eq(notificationQueue.id, notificationId), inOrganization(notificationQueue.tenantId, tenantId)));
 
   const channelResults: SendNotificationResult['channelResults'] = [];
   let data: Record<string, unknown>;
@@ -263,7 +265,7 @@ export async function sendNotification(notificationId: string): Promise<SendNoti
         .map(r => `${r.channel}: ${r.error}`)
         .join('; '),
     } as any as Partial<typeof notificationQueue.$inferInsert>)
-    .where(eq(notificationQueue.id, notificationId));
+    .where(and(eq(notificationQueue.id, notificationId), inOrganization(notificationQueue.tenantId, tenantId)));
 
   return {
     success: anySucceeded,
@@ -805,13 +807,14 @@ export async function getNotificationHistory(
 /**
  * Retry failed notifications
  */
-export async function retryFailedNotifications(maxAttempts: number = 3): Promise<number> {
+export async function retryFailedNotifications(tenantId: string, maxAttempts: number = 3): Promise<number> {
   const failed = await db
     .select()
     .from(notificationQueue)
     .where(
       and(
         eq(notificationQueue.status, 'failed'),
+        inOrganization(notificationQueue.tenantId, tenantId),
         // attempts < maxAttempts
       )
     )
@@ -825,7 +828,7 @@ export async function retryFailedNotifications(maxAttempts: number = 3): Promise
     }
 
     try {
-      await sendNotification(notification.id);
+      await sendNotification(notification.id, tenantId);
       retried++;
     } catch (error) {
       logger.error(`Retry failed for notification ${notification.id}:`, error);

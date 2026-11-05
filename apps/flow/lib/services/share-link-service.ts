@@ -69,7 +69,7 @@ export async function createShareLink(
   orgId: string,
 ): Promise<ShareLinkCreateResult> {
   const parsed = z.object({
-    quoteId: z.string().uuid(),
+    quoteId: z.guid(),
     expiresInDays: z.number().int().min(1).max(90).default(SHOPMOICA_SETTINGS.shareLinkExpiryDays),
     createdBy: z.string().min(1),
   }).parse(input)

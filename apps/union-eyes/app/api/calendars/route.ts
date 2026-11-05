@@ -23,6 +23,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     openapi: { tags: ['Scheduling'], summary: 'List calendars', description: 'Returns calendars visible to the caller: shared/org calendars plus the caller\'s own personal calendars.' },
   },

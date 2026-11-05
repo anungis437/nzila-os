@@ -1,9 +1,9 @@
 /**
  * GET /api/health-safety/inspections/stats
  * Summary statistics for safety inspections.
- * Returns { total, scheduled, completed, overdue, complianceRate, avgScore }.
+ * Returns { total, scheduled, completed, overdue, complianceRate, avgScore }; complianceRate and avgScore are null when nothing was scored.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -19,7 +19,9 @@ export const GET = withApi(
     },
   },
   async ({ organizationId }) => {
-    const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
+    // With no organization the query used to run unscoped (1=1) and count every tenant's rows; it now refuses.
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const orgFilter = sql`organization_id = ${organizationId}`;
 
     const rows = Array.from(
       await withRLSContext(async () =>
@@ -44,12 +46,13 @@ export const GET = withApi(
       scheduled: Number(row.scheduled ?? 0),
       completed: Number(row.completed ?? 0),
       overdue: Number(row.overdue ?? 0),
+      // Unknown is not zero: with no inspection scored there is no rate and no average to give.
       complianceRate: row.compliance_rate != null
         ? Math.round(Number(row.compliance_rate) * 10) / 10
-        : 0,
+        : null,
       avgScore: row.avg_score != null
         ? Math.round(Number(row.avg_score) * 10) / 10
-        : 0,
+        : null,
     };
   },
 );

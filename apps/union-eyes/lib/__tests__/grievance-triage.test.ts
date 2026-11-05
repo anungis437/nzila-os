@@ -41,6 +41,8 @@ function makeQueryProxy(): Record<string, unknown> {
   });
 }
 
+vi.mock("@/lib/services/case-access-service", () => ({ getEffectiveCaseAccess: vi.fn(async () => ({ canViewCase: true })) }));
+
 vi.mock("@/db/db", () => ({ db: { ...makeDbChain(), query: makeQueryProxy() } }));
 
 vi.mock("drizzle-orm", () => ({
@@ -65,6 +67,7 @@ vi.mock("@/lib/ai/ai-client", () => ({
     component: "test",
     action: "mock",
   })),
+  toGatewayDataClass: vi.fn(() => 'regulated'),
   UE_APP_KEY: "union-eyes",
   UE_PROFILES: {
     GRIEVANCE_TRIAGE: "ue-grievance-triage",
@@ -98,6 +101,14 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+const { withRls } = vi.hoisted(() => ({ withRls: vi.fn() }));
+vi.mock("@/lib/db/with-rls-context", () => ({ withRLSContext: withRls }));
+vi.mock("@/lib/audit/atomic-audit", () => ({ persistAtomicAudit: vi.fn().mockResolvedValue(undefined) }));
+vi.mock("@/lib/audit/operation-audit", () => ({
+  performAuditedOperation: async (_op: unknown, fn: () => Promise<unknown>) => fn(),
+}));
+
+
 // Import after mocks
 import {
   analyzeGrievance,
@@ -108,8 +119,11 @@ import {
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe("Grievance Triage AI", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    // The tenant transaction hands the service the same connection stub the rest of this file mocks
+    const { db } = await import("@/db/db");
+    withRls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(db));
   });
 
   describe("exports", () => {
@@ -129,7 +143,7 @@ describe("Grievance Triage AI", () => {
   describe("analyzeGrievance", () => {
     it("calls AI client with the correct profile", async () => {
       mockGenerate.mockResolvedValue({
-        text: JSON.stringify({
+        content: JSON.stringify({
           suggestedPriority: "high",
           suggestedCategory: "wages",
           complexity: "complex",
@@ -151,6 +165,7 @@ describe("Grievance Triage AI", () => {
       const callArgs = mockGenerate.mock.calls[0][0];
       expect(callArgs.profileKey).toBe("ue-grievance-triage");
       expect(callArgs.orgId).toBe("00000000-0000-0000-0000-000000000000");
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 
@@ -158,6 +173,7 @@ describe("Grievance Triage AI", () => {
     it("returns an array", async () => {
       const result = await getTriageHistory("gr-1", "org-1");
       expect(Array.isArray(result)).toBe(true);
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 

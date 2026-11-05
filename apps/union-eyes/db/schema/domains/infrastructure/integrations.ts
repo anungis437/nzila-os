@@ -89,8 +89,8 @@ export const integrationConfigs = pgTable('integration_configs', {
   webhookUrl: text('webhook_url'),
   enabled: boolean('enabled').default(true),
   lastSyncAt: timestamp('last_sync_at'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 export const integrationSyncLog = pgTable('integration_sync_log', {
@@ -134,8 +134,8 @@ export const integrationSyncSchedules = pgTable('integration_sync_schedules', {
   enabled: boolean('enabled').default(true),
   lastRunAt: timestamp('last_run_at'),
   nextRunAt: timestamp('next_run_at'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 /**
@@ -156,7 +156,7 @@ export const integrationApiKeys = pgTable(
     lastUsedAt: timestamp('last_used_at'),
     usageCount: integer('usage_count').default(0),
     createdBy: varchar('created_by', { length: 255 }).notNull(),
-    createdAt: timestamp('created_at').defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     revokedAt: timestamp('revoked_at'),
     revokedBy: varchar('revoked_by', { length: 255 }),
   },
@@ -186,35 +186,12 @@ export const integrationWebhooks = pgTable(
     lastSuccessAt: timestamp('last_success_at'),
     lastFailureAt: timestamp('last_failure_at'),
     createdBy: varchar('created_by', { length: 255 }).notNull(),
-    createdAt: timestamp('created_at').defaultNow(),
-    updatedAt: timestamp('updated_at').defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   },
   (table) => ({
     orgIdx: index('integration_webhooks_org_idx').on(table.organizationId),
     activeIdx: index('integration_webhooks_active_idx').on(table.isActive),
-  })
-);
-
-/**
- * Webhook Delivery Log - audit trail of webhook deliveries
- */
-export const webhookDeliveries = pgTable(
-  'webhook_deliveries',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    webhookId: uuid('webhook_id').notNull().references(() => integrationWebhooks.id, { onDelete: 'cascade' }),
-    eventType: varchar('event_type', { length: 100 }).notNull(),
-    payload: jsonb('payload').notNull(),
-    statusCode: integer('status_code'),
-    responseBody: text('response_body'),
-    error: text('error'),
-    attemptNumber: integer('attempt_number').default(1),
-    deliveredAt: timestamp('delivered_at').defaultNow(),
-    duration: integer('duration'), // milliseconds
-  },
-  (table) => ({
-    webhookIdx: index('webhook_deliveries_webhook_idx').on(table.webhookId),
-    deliveredAtIdx: index('webhook_deliveries_delivered_at_idx').on(table.deliveredAt),
   })
 );
 
@@ -231,8 +208,6 @@ export type IntegrationApiKey = typeof integrationApiKeys.$inferSelect;
 export type NewIntegrationApiKey = typeof integrationApiKeys.$inferInsert;
 export type IntegrationWebhook = typeof integrationWebhooks.$inferSelect;
 export type NewIntegrationWebhook = typeof integrationWebhooks.$inferInsert;
-export type WebhookDelivery = typeof webhookDeliveries.$inferSelect;
-export type NewWebhookDelivery = typeof webhookDeliveries.$inferInsert;
 
 // ============================================================================
 // INTEGRATION PARTNERS (console dashboard)

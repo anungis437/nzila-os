@@ -347,7 +347,7 @@ export class InvoiceGenerator {
             <!-- Footer -->
             <div class="footer">
               <p>Thank you for your payment!</p>
-              <p>Questions? Contact us at ${data.unionEmail || 'info@union.com'}</p>
+              <p>${data.unionEmail ? `Questions? Contact us at ${data.unionEmail}` : 'Questions? Contact your union office.'}</p>
             </div>
           </div>
         </body>

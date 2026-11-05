@@ -9,7 +9,7 @@
  */
 
 import { db } from '@/db';
-import { eq, lte } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { memberLocationConsent, locationTracking } from '@/db/schema/geofence-privacy-schema';
 
 export interface LocationConsentRequest {
@@ -46,8 +46,7 @@ export async function requestLocationPermission(
   const existingConsent = await db.query.memberLocationConsent
     .findFirst({
       where: eq(memberLocationConsent.userId, userId)
-    })
-    .catch(() => null);
+    });
 
   if (existingConsent && existingConsent.consentStatus === 'opted_in') {
     return {
@@ -112,35 +111,11 @@ export async function trackLocation(
     });
 
     return { success: true };
-  } catch (error) {
+  } catch {
+    // Do not expose database error details to a member-facing caller.
     return {
       success: false,
-      error: `Failed to track location: ${error}`
-    };
-  }
-}
-
-/**
- * Purge expired location data (run hourly)
- * Ensures data is not kept longer than 24 hours
- */
-export async function purgeExpiredLocations(): Promise<{
-  purgedCount: number;
-  message: string;
-}> {
-  try {
-    const _result = await db
-      .delete(locationTracking)
-      .where(lte(locationTracking.expiresAt, new Date()));
-
-    return {
-      purgedCount: 0, // Drizzle doesn&apos;t return count, but deletion happened
-      message: 'Expired location data purged (24-hour TTL enforced)'
-    };
-  } catch (error) {
-    return {
-      purgedCount: 0,
-      message: `Error purging locations: ${error}`
+      error: 'Failed to track location. Please retry or contact support.'
     };
   }
 }
@@ -161,10 +136,10 @@ export async function revokeLocationConsent(
       success: true,
       message: 'Location tracking disabled. You can re-enable anytime.'
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
-      message: `Error revoking consent: ${error}`
+      message: 'Unable to revoke location consent. Please retry or contact support.'
     };
   }
 }
@@ -184,8 +159,7 @@ export async function getLocationConsentStatus(
   const consent = await db.query.memberLocationConsent
     .findFirst({
       where: eq(memberLocationConsent.userId, userId)
-    })
-    .catch(() => null);
+    });
 
   return {
     status: (consent?.consentStatus as 'opted_in' | 'opted_out' | 'never_asked') || 'never_asked',
@@ -206,9 +180,9 @@ export async function verifyNoBackgroundTracking(): Promise<{
   message: string;
 }> {
   // Check all location records have trackingType = 'foreground_only'
-  const backgroundRecords = await db.query.locationTracking
-    .findMany()
-    .catch(() => []);
+  // A failed or incomplete compliance read is NOT evidence of compliance.
+  // Let the failure propagate so no report can claim a clean bill of health.
+  const backgroundRecords = await db.query.locationTracking.findMany();
 
   const hasBackgroundTracking = backgroundRecords.some(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

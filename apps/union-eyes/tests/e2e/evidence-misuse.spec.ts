@@ -91,7 +91,7 @@ test.describe('UE E2E — evidence misuse and access control', () => {
       // Must not expose internal infrastructure identifiers
       expect(text).not.toMatch(/postgresql:\/\/|neon\.tech|supabase\.co/i)
       // Must not expose raw connection strings or secrets
-      expect(text).not.toMatch(/password=|secret_key|CLERK_SECRET/i)
+      expect(text).not.toMatch(/password=|secret_key|AUTH_SECRET/i)
       // Must have at least a generated_at or timestamp field (evidence chain requires it)
       const hasTimestamp =
         'generated_at' in payload ||
@@ -99,6 +99,16 @@ test.describe('UE E2E — evidence misuse and access control', () => {
         'timestamp' in payload ||
         'sealed_at' in payload
       expect(hasTimestamp, 'Evidence export must include a timestamp field').toBe(true)
+    } else if (exportResponse.status() === 503) {
+      // No sealed evidence bundle is loaded: the route refuses with 503 and must
+      // assert nothing. It may not claim verification or carry any results.
+      const payload = (await exportResponse.json()) as Record<string, unknown>
+      expect(payload.status).toBe('not_attested')
+      expect(payload.verified).toBe(false)
+      expect(payload.error).toBe('VERIFIED_EVIDENCE_UNAVAILABLE')
+      const text = JSON.stringify(payload)
+      expect(text).not.toMatch(/postgresql:\/\/|neon\.tech|supabase\.co/i)
+      expect(text).not.toMatch(/password=|secret_key|AUTH_SECRET/i)
     } else {
       // 404 (no evidence yet) or 401/403 are acceptable
       expect([401, 403, 404]).toContain(exportResponse.status())

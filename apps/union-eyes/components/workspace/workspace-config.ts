@@ -154,7 +154,6 @@ export const WORKSPACE_TABS: readonly WorkspaceTabConfig[] = [
     },
     deepWork: [
       { label: "Members roster", href: "/dashboard/members" },
-      { label: "Member service", href: "/dashboard/member" },
       { label: "Stewards", href: "/dashboard/stewards" },
       { label: "Member requests (Inbox)", href: "/dashboard/inbox" },
     ],
@@ -242,7 +241,6 @@ export const WORKSPACE_TABS: readonly WorkspaceTabConfig[] = [
     },
     deepWork: [
       { label: "Documents", href: "/dashboard/documents" },
-      { label: "Agreements", href: "/dashboard/agreements" },
       { label: "Clause Library", href: "/dashboard/clause-library" },
       { label: "Knowledge Base", href: "/dashboard/knowledge-base" },
       { label: "Precedents", href: "/dashboard/precedents" },

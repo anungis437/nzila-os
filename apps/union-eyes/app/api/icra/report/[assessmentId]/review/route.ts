@@ -6,19 +6,23 @@
  * POST /api/icra/report/[assessmentId]/review
  *
  * Governance review mutation for the deterministic report AI slot.
- * Requires the cron secret and writes an explicit approval/rejection decision
- * into the persisted assessment context so downstream PDF rendering can
- * surface approved AI-assisted narrative only after human review.
+ * Requires an authenticated platform administrator (a person, not a shared secret) and writes an explicit approval/rejection
+ * decision into the persisted assessment context so downstream PDF rendering can surface approved AI-assisted narrative only
+ * after human review. The reviewer role is derived from that verified authority, never taken from the request body, and the
+ * audit actor is the reviewer's own identity.
  */
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-import { timingSafeEqual } from 'crypto';
+import { auth } from '@nzila/platform-auth/entra/server';
+import { requireSystemAdmin } from '@/lib/api-auth-guard';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { logger } from '@/lib/logger';
 import { ALL_QUESTIONS } from '@/lib/icra/questions';
 import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
@@ -37,18 +41,8 @@ interface RouteContext {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function authorize(request: Request): boolean {
-  const header = request.headers.get('x-cron-secret') ?? request.headers.get('authorization')?.replace('Bearer ', '') ?? '';
-  const expected = process.env.CRON_SECRET_KEY ?? process.env.CRON_SECRET ?? '';
-  if (!expected) return false;
-  const actualBuf = Buffer.from(header);
-  const expectedBuf = Buffer.from(expected);
-  return actualBuf.length === expectedBuf.length && timingSafeEqual(actualBuf, expectedBuf);
-}
-
-function normalizeReviewerRole(role: unknown): ReviewerRole {
-  return role === 'governance_reviewer' || role === 'exec_sponsor' ? role : 'facilitator';
-}
+/** A platform administrator reviews as the governance reviewer: that is the authority they hold. The body cannot claim another. */
+const VERIFIED_REVIEWER_ROLE: ReviewerRole = 'governance_reviewer';
 
 export async function POST(request: Request, { params }: RouteContext) {
   const { assessmentId } = await params;
@@ -57,8 +51,14 @@ export async function POST(request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: 'Invalid assessment ID.' }, { status: 400 });
   }
 
-  if (!authorize(request)) {
-    return NextResponse.json({ error: 'Invalid cron secret.' }, { status: 401 });
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+  }
+  try {
+    await requireSystemAdmin();
+  } catch {
+    return NextResponse.json({ error: 'Report review requires platform governance authority.' }, { status: 403 });
   }
 
   let body: unknown;
@@ -74,6 +74,10 @@ export async function POST(request: Request, { params }: RouteContext) {
     reviewerRole?: unknown;
   };
 
+  // A role named in the body is only ever a claim; it is accepted when it matches the verified authority and refused otherwise.
+  if (parsed.reviewerRole !== undefined && parsed.reviewerRole !== VERIFIED_REVIEWER_ROLE) {
+    return NextResponse.json({ error: 'reviewerRole is derived from verified authority and cannot be asserted.' }, { status: 403 });
+  }
   if (parsed.action !== 'approve' && parsed.action !== 'reject') {
     return NextResponse.json({ error: 'Invalid review action.' }, { status: 400 });
   }
@@ -83,6 +87,10 @@ export async function POST(request: Request, { params }: RouteContext) {
   const summary = parsed.summary.trim();
   const action = parsed.action;
 
+  // The organization the reviewer is acting in comes from the identity scope, not from the platform authority's database transaction: it is resolved
+  // before that transaction opens, and only used (to key the audit record) for an assessment nobody has claimed.
+  const actingOrganizationId = await getOrganizationIdForUser(userId).catch(() => null);
+
   try {
     return await withSystemContext(async (tx) => {
     const [assessment] = await tx
@@ -90,6 +98,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         id: icraAssessments.id,
         organizationContext: icraAssessments.organizationContext,
         locale: icraAssessments.locale,
+        claimedOrgId: icraAssessments.claimedOrgId,
       })
       .from(icraAssessments)
       .where(eq(icraAssessments.id, assessmentId))
@@ -126,8 +135,19 @@ export async function POST(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: 'Report AI slot could not be resolved.' }, { status: 422 });
     }
 
+    // Every review decision is audited. The audit chain is organization-keyed: a claimed assessment is audited against the organization
+    // that claimed it, and an unclaimed prospect assessment against the organization the reviewing platform administrator is acting in
+    // (as for any platform operation). A reviewer acting in no organization cannot record a decision, so none is made unrecorded.
+    const auditOrganizationId = assessment.claimedOrgId ?? actingOrganizationId;
+    if (!auditOrganizationId) {
+      return NextResponse.json(
+        { error: 'A review decision needs an acting organization to be recorded against. Select an organization and retry.' },
+        { status: 409 },
+      );
+    }
+
     const updated = applyAdaptiveReportReviewDecision(slot, {
-      reviewerRole: normalizeReviewerRole(parsed.reviewerRole),
+      reviewerRole: VERIFIED_REVIEWER_ROLE,
       status: action === 'approve' ? 'approved' : 'rejected',
       summary,
       reviewedAt: new Date().toISOString(),
@@ -143,9 +163,26 @@ export async function POST(request: Request, { params }: RouteContext) {
       .set({ organizationContext: updatedOrganizationContext })
       .where(eq(icraAssessments.id, assessmentId));
 
+    // The decision is stored in the assessment row above and its audit record is written in the same transaction, so the decision
+    // cannot commit without it. The summary text is the reviewer's own words and is not copied into the audit record.
+    await persistAtomicAudit(tx, {
+      organizationId: auditOrganizationId,
+      userId,
+      action: 'icra.report.review',
+      resourceType: 'icra_assessments',
+      resourceId: assessmentId,
+      details: {
+        decision: action,
+        reviewerRole: VERIFIED_REVIEWER_ROLE,
+        reviewStatus: updated.reviewWorkflow.status,
+        assessmentClaimed: Boolean(assessment.claimedOrgId),
+      },
+    });
+
     logger.info('icra.report.review_recorded', {
       assessmentId,
       action,
+      reviewerUserId: userId,
     });
 
     return NextResponse.json(

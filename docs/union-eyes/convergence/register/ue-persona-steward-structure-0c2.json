@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-PERSONA-STEWARD-STRUCTURE-RECOMMENDATION",
+  "gate": "0C.2",
+  "status": "RECOMMENDATION_ONLY_NOT_SELECTED",
+  "anchorCommit": "fe8469cff34c561b2beccddb965e13355d74bb09",
+  "decisionId": "DEC-PD-01",
+  "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+  "question": "Should Steward be a distinct product persona with its own canonical action universe, or a scoped level or role within Representative 2.2?",
+  "evidence": {
+    "recoveryDecision": "NO_AUTHORITATIVE_STEWARD_ACTION_UNIVERSE",
+    "authoritativeStewardActions": 0,
+    "recoveredEvidenceIds": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7",
+      "S8"
+    ],
+    "recoveryInference": {
+      "class": "UNVERIFIED_INFERENCE",
+      "statement": "The repository treats the steward as the level-1 staff role under Representative 2.2. That reading rests on the evidence below and is not an institutional decision. It does not define a single steward action.",
+      "basisEvidence": [
+        "S1",
+        "S2",
+        "S8"
+      ]
+    },
+    "stewardContracts": 55,
+    "stewardContractsNamingRepresentativeCounterpart": 55,
+    "stewardContractsInSharedObligations": 28,
+    "stewardContractsWithoutSharedObligation": 27,
+    "historicalStewardIdentifiers": 0
+  },
+  "options": [
+    {
+      "id": "OPT-A-DISTINCT-PERSONA",
+      "title": "Distinct persona with an independent action universe",
+      "description": "Steward has its own canonical, its own identifiers, its own workspace and its own authority statements, ratified separately from Representative 2.2.",
+      "consequences": {
+        "workflows": "Two parallel workflow definitions for the same case, assignment, evidence and correspondence steps. A change to a shared step must be made twice.",
+        "navigation": "Seven steward destinations that duplicate seven representative destinations with narrower content.",
+        "authority": "Risk that a second authority statement implies a second source of authority. Every steward action would still need to defer to the Representative 2.2 mandate.",
+        "continuity": "A case moving between a steward and a representative changes persona definitions mid-flight and needs an explicit bridge.",
+        "delegatedAccess": "Two delegation vocabularies to keep aligned.",
+        "testing": "Duplicate acceptance suites and negative suites. Most steward tests restate representative tests."
+      },
+      "tradeOffs": [
+        "Clear product identity for a front-line user.",
+        "Highest chance of drift and duplicate ownership.",
+        "Implies, to a reader, a distinct office that no source names."
+      ]
+    },
+    {
+      "id": "OPT-B-LEVEL-WITHIN-REPRESENTATIVE",
+      "title": "Scoped level within Representative 2.2 only",
+      "description": "Steward is the level-1 capacity of Representative 2.2. No separate canonical, no separate workspace and no separate identifiers.",
+      "consequences": {
+        "workflows": "One workflow definition. Level 1 differences are filters.",
+        "navigation": "One navigation set, narrowed by capability.",
+        "authority": "One authority statement. The steward limit is expressed as what a level-1 capacity lacks.",
+        "continuity": "No persona change when a case moves between levels.",
+        "delegatedAccess": "One delegation vocabulary.",
+        "testing": "One acceptance suite with a level-1 profile. The steward-specific denials need a place to live."
+      },
+      "tradeOffs": [
+        "Least duplication and no implied office.",
+        "The front-line experience (queue, narrowed destinations, denials) has no named home.",
+        "Throws away the 55 steward contracts as a separate review unit and removes the only place that states the steward denials."
+      ]
+    },
+    {
+      "id": "OPT-C-SCOPED-PROFILE",
+      "title": "Scoped profile of Representative 2.2 with its own presentation profile and acceptance profile",
+      "description": "Representative 2.2 is the single authority universe. Steward is a named profile of it: a workspace, a queue and a set of narrowing and denial contracts. Every steward contract names the Representative 2.2 parent it narrows and adds no power. The profile has its own acceptance and negative-test profile.",
+      "consequences": {
+        "workflows": "One workflow definition owned by Representative 2.2. The steward profile lists only the steps a steward takes and the steps a steward is denied.",
+        "navigation": "Navigation is one capability-conditional set. The steward workspace is a presentation filter of it.",
+        "authority": "Authority has one source. A steward contract can only restate or narrow a parent. A contract that adds a power is invalid.",
+        "continuity": "A case moving between a steward and a supervising representative keeps one definition. The handoff is a normal Representative 2.2 handoff.",
+        "delegatedAccess": "One delegation vocabulary, with the steward limits stated once in the profile.",
+        "testing": "Shared acceptance suite plus a steward profile suite that proves the narrowing and the denials. Tenant and relationship tests run once for both."
+      },
+      "tradeOffs": [
+        "Keeps the front-line experience reviewable and the denials explicit.",
+        "Needs the shared-obligation mapping to stay accurate. The product owner must accept that Steward is not a separate institutional office.",
+        "The Steward package becomes dependent on the Representative 2.2 package, so the order of decision matters (DEC-PD-0C2-10)."
+      ]
+    }
+  ],
+  "recommendation": {
+    "optionId": "OPT-C-SCOPED-PROFILE",
+    "recommendationOnly": true,
+    "rationale": "Every one of the 55 steward contracts names a Representative 2.2 counterpart, the recovered evidence places the steward at level 1 of the Representative 2.2 policy layer, and the proposed identity model already states that the workspace is a presentation choice that implies no office. The profile keeps what is useful about a distinct Steward experience and removes the duplicate authority statements.",
+    "changesBaselineProposal": "The proposed Steward baseline (DEC-PD-01 option 1) treats Steward as its own persona. Option C keeps the Steward contracts and the Steward package as a reviewable unit, and changes how the package is ratified and owned: the Representative 2.2 package is the authority universe and the Steward package is a profile of it.",
+    "notSelected": true,
+    "notRatified": true
+  },
+  "selected": null,
+  "ratified": false
+}

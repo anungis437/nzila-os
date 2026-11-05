@@ -7,46 +7,107 @@
  * - Payment failure
  * - Payment retry scheduled
  * - Admin intervention alerts
+ *
+ * Each helper answers what became of the notice (`DuesNotificationOutcome`). A notice the provider did not accept, or that could not be sent, is a
+ * failure the caller can see and record: the helpers never throw (a notice must not block the payment or the job that asked for it) and never report a
+ * notice as sent that was refused, suppressed, bounced or of unknown outcome.
  * 
  * @module lib/services/dues-notifications
  */
 
-import { getNotificationService } from '@/lib/services/notification-service';
+import { v5 as uuidv5 } from 'uuid';
+import { getNotificationService, type NotificationPayload } from '@/lib/services/notification-service';
 import { DuesNotificationTemplates, DuesNotificationData } from '@/lib/notification-templates/dues-notifications';
 import { db } from '@/db';
+import { withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { duesTransactions } from '@/db/schema/domains/finance/dues';
-import { eq, and, inArray, or } from 'drizzle-orm';
+import { eq, and, inArray, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
-async function getOrganizationNotificationContext(organizationId: string): Promise<{
+/** What became of the notices one helper sent. */
+export interface DuesNotificationOutcome {
+  /** The member-facing (or, for the admin notice, at least one administrator's) email was accepted by the provider. */
+  delivered: boolean;
+  /** Why each notice that did not go out did not, one entry per notice: the channel and the reason. */
+  failures: string[];
+}
+
+export interface DuesNotificationOptions {
+  /**
+   * Names this notice (for example `dues-retry:<transaction>:<failure count>`). Given one, every send carries a stable idempotency key derived from it, so
+   * a repeat after the provider accepted the message, or after an attempt whose outcome is unknown, never calls the provider again.
+   */
+  dedupeKey?: string;
+}
+
+// A namespace for the idempotency keys of dues notices; the keys are uuids because the delivery ledger keys its rows by uuid.
+const DEDUPE_NAMESPACE = '5d1c1f2e-62a4-4f3b-9c52-2f6f0b9e7a11';
+
+/** The uuid idempotency key of one notice: the same parts always give the same key. */
+export function duesNotificationKey(...parts: string[]): string {
+  return uuidv5(parts.join('|'), DEDUPE_NAMESPACE);
+}
+
+interface Delivery {
+  channel: 'email' | 'push';
+  ok: boolean;
+  detail?: string;
+}
+
+/** One send, answered by its delivery status: only an accepted (sent) or delivered message is a success. */
+async function deliver(channel: Delivery['channel'], payload: NotificationPayload, dedupeKey?: string): Promise<Delivery> {
+  try {
+    const response = await getNotificationService().send(
+      dedupeKey ? { ...payload, idempotencyKey: dedupeKey } : payload,
+      { systemSteps: true },
+    );
+    if (response?.status === 'sent' || response?.status === 'delivered') return { channel, ok: true };
+    const reason = response?.failureReason ? `: ${response.failureReason}` : '';
+    return { channel, ok: false, detail: `${response?.status ?? 'no delivery status'}${reason}` };
+  } catch (error) {
+    return { channel, ok: false, detail: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+function outcomeOf(deliveries: Delivery[]): DuesNotificationOutcome {
+  return {
+    delivered: deliveries.some((delivery) => delivery.channel === 'email' && delivery.ok),
+    failures: deliveries.filter((delivery) => !delivery.ok).map((delivery) => `${delivery.channel}: ${delivery.detail}`),
+  };
+}
+
+const notFound = (reason: string): DuesNotificationOutcome => ({ delivered: false, failures: [reason] });
+const failed = (error: unknown): DuesNotificationOutcome => ({
+  delivered: false,
+  failures: [error instanceof Error ? error.message : String(error)],
+});
+
+const keyFor = (options: DuesNotificationOptions | undefined, ...parts: string[]) =>
+  options?.dedupeKey ? duesNotificationKey(options.dedupeKey, ...parts) : undefined;
+
+async function getOrganizationNotificationContext(organizationId: string, database: RLSTx = db): Promise<{
   organizationName: string;
   adminEmails: string[];
 }> {
-  const [org] = await db
+  const [org] = await database
     .select({
-      id: organizations.id,
       name: organizations.name,
-      slug: organizations.slug,
       email: organizations.email,
     })
     .from(organizations)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .where(or(eq(organizations.id, organizationId as any), eq(organizations.slug, organizationId)))
+    .where(eq(organizations.id, organizationId as any))
     .limit(1);
 
-  const orgIdentifiers = new Set<string>();
-  orgIdentifiers.add(organizationId);
-  if (org?.id) orgIdentifiers.add(String(org.id));
-  if (org?.slug) orgIdentifiers.add(org.slug);
-
+  // organization_members.organization_id is the organization uuid; the organization slug is not stored there
   const adminRoles = ['admin', 'super_admin', 'billing_manager', 'billing_specialist'];
-  const adminMembers = await db
+  const adminMembers = await database
     .select({ email: organizationMembers.email })
     .from(organizationMembers)
     .where(
       and(
-        inArray(organizationMembers.organizationId, Array.from(orgIdentifiers)),
+        eq(organizationMembers.organizationId, organizationId),
         inArray(organizationMembers.role, adminRoles)
       )
     );
@@ -63,22 +124,14 @@ async function getOrganizationNotificationContext(organizationId: string): Promi
   };
 }
 
-// =============================================================================
-// NOTIFICATION HELPERS
-// =============================================================================
-
 /**
- * Send payment confirmation notification
- * Called when a payment is successfully processed
+ * The dues transaction, the member it belongs to, and the organization's name and administrators, read in one short system transaction.
+ * These notices are sent by a payment webhook or a job, which has no tenant session: the system role reads across the organization, and the
+ * transaction ends before any notice is sent (each delivery step then runs in its own short system transaction, see NotificationService.send).
  */
-export async function sendPaymentConfirmation(
-  transactionId: string
-): Promise<void> {
-  try {
-    logger.info('Sending payment confirmation', { transactionId });
-
-    // Get transaction and member details
-    const result = await db
+async function loadDuesNotificationContext(transactionId: string) {
+  return withSystemContext(async (tx) => {
+    const [found] = await tx
       .select({
         transaction: duesTransactions,
         memberName: organizationMembers.name,
@@ -88,21 +141,46 @@ export async function sendPaymentConfirmation(
       .from(duesTransactions)
       .innerJoin(
         organizationMembers,
-        eq(duesTransactions.memberId, organizationMembers.id)
+        and(
+          // dues_transactions.member_id is text; organization_members.id is a uuid
+          eq(duesTransactions.memberId, sql`${organizationMembers.id}::text`),
+          eq(organizationMembers.organizationId, duesTransactions.organizationId)
+        )
       )
       .where(eq(duesTransactions.id, transactionId))
       .limit(1);
+    if (!found) return null;
+    const organization = await getOrganizationNotificationContext(found.transaction.organizationId, tx);
+    return { ...found, ...organization };
+  });
+}
 
-    if (!result || result.length === 0) {
+// =============================================================================
+// NOTIFICATION HELPERS
+// =============================================================================
+
+/**
+ * Send payment confirmation notification
+ * Called when a payment is successfully processed
+ */
+export async function sendPaymentConfirmation(
+  transactionId: string,
+  options?: DuesNotificationOptions,
+): Promise<DuesNotificationOutcome> {
+  try {
+    logger.info('Sending payment confirmation', { transactionId });
+
+    // Get transaction and member details
+    const loaded = await loadDuesNotificationContext(transactionId);
+
+    if (!loaded) {
       logger.warn('Transaction not found for payment confirmation', {
         transactionId,
       });
-      return;
+      return notFound('transaction not found');
     }
 
-    const { transaction, memberName, memberEmail, memberMetadata } = result[0];
-    const notificationService = getNotificationService();
-    const { organizationName } = await getOrganizationNotificationContext(transaction.organizationId);
+    const { transaction, memberName, memberEmail, memberMetadata, organizationName } = loaded;
     const template = DuesNotificationTemplates.DUES_PAYMENT_CONFIRMATION;
 
     const data: DuesNotificationData = {
@@ -123,8 +201,10 @@ export async function sendPaymentConfirmation(
       receiptUrl: transaction.receiptUrl || undefined,
     };
 
+    const deliveries: Delivery[] = [];
+
     // Send email
-    await notificationService.send({
+    deliveries.push(await deliver('email', {
       organizationId: transaction.organizationId,
       recipientId: transaction.memberId,
       recipientEmail: memberEmail,
@@ -139,13 +219,13 @@ export async function sendPaymentConfirmation(
         type: 'dues_payment_confirmation',
         transactionId: transaction.id,
       },
-    });
+    }, keyFor(options, 'email')));
 
     // Send push notification if available
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const metadata = (memberMetadata as any) || {};
     if (metadata.firebaseToken) {
-      await notificationService.send({
+      deliveries.push(await deliver('push', {
         organizationId: transaction.organizationId,
         recipientId: transaction.memberId,
         recipientFirebaseToken: metadata.firebaseToken,
@@ -158,19 +238,23 @@ export async function sendPaymentConfirmation(
           type: 'dues_payment_confirmation',
           transactionId: transaction.id,
         },
-      });
+      }, keyFor(options, 'push')));
     }
 
-    logger.info('Payment confirmation sent', {
-      transactionId,
-      memberId: transaction.memberId,
-    });
+    const outcome = outcomeOf(deliveries);
+    if (outcome.delivered) {
+      logger.info('Payment confirmation sent', { transactionId, memberId: transaction.memberId, failures: outcome.failures });
+    } else {
+      logger.warn('Payment confirmation was not delivered', { transactionId, memberId: transaction.memberId, failures: outcome.failures });
+    }
+    return outcome;
   } catch (error) {
     logger.error('Error sending payment confirmation', {
       error,
       transactionId,
     });
-    // Don&apos;t throw - notification failure shouldn't block payment processing
+    // Don't throw - notification failure shouldn't block payment processing
+    return failed(error);
   }
 }
 
@@ -182,8 +266,9 @@ export async function sendPaymentFailure(
   transactionId: string,
   errorMessage: string,
   retryScheduled: boolean = false,
-  retryDate?: string
-): Promise<void> {
+  retryDate?: string,
+  options?: DuesNotificationOptions,
+): Promise<DuesNotificationOutcome> {
   try {
     logger.info('Sending payment failure notification', {
       transactionId,
@@ -191,31 +276,16 @@ export async function sendPaymentFailure(
     });
 
     // Get transaction and member details
-    const result = await db
-      .select({
-        transaction: duesTransactions,
-        memberName: organizationMembers.name,
-        memberEmail: organizationMembers.email,
-        memberMetadata: organizationMembers.metadata,
-      })
-      .from(duesTransactions)
-      .innerJoin(
-        organizationMembers,
-        eq(duesTransactions.memberId, organizationMembers.id)
-      )
-      .where(eq(duesTransactions.id, transactionId))
-      .limit(1);
+    const loaded = await loadDuesNotificationContext(transactionId);
 
-    if (!result || result.length === 0) {
+    if (!loaded) {
       logger.warn('Transaction not found for payment failure notification', {
         transactionId,
       });
-      return;
+      return notFound('transaction not found');
     }
 
-    const { transaction, memberName, memberEmail, memberMetadata } = result[0];
-    const notificationService = getNotificationService();
-    const { organizationName } = await getOrganizationNotificationContext(transaction.organizationId);
+    const { transaction, memberName, memberEmail, memberMetadata, organizationName } = loaded;
 
     // Choose template based on retry status
     const template = retryScheduled
@@ -240,8 +310,10 @@ export async function sendPaymentFailure(
       paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://unioneyes.app'}/dashboard/dues/pay/${transaction.id}`,
     };
 
+    const deliveries: Delivery[] = [];
+
     // Send email
-    await notificationService.send({
+    deliveries.push(await deliver('email', {
       organizationId: transaction.organizationId,
       recipientId: transaction.memberId,
       recipientEmail: memberEmail,
@@ -256,13 +328,13 @@ export async function sendPaymentFailure(
         type: retryScheduled ? 'dues_payment_retry_scheduled' : 'dues_payment_failed',
         transactionId: transaction.id,
       },
-    });
+    }, keyFor(options, 'email')));
 
     // Send push notification
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const memberMeta = (memberMetadata as any) || {};
     if (memberMeta.firebaseToken) {
-      await notificationService.send({
+      deliveries.push(await deliver('push', {
         organizationId: transaction.organizationId,
         recipientId: transaction.memberId,
         recipientFirebaseToken: memberMeta.firebaseToken,
@@ -270,27 +342,30 @@ export async function sendPaymentFailure(
         priority: 'high',
         title: retryScheduled ? 'Payment Retry Scheduled' : '⚠️ Payment Failed',
         body: retryScheduled
-          ? `We&apos;ll retry your payment on ${retryDate}`
+          ? `We'll retry your payment on ${retryDate}`
           : `Your payment of $${transaction.totalAmount} failed`,
         templateId: template.id,
         metadata: {
           type: retryScheduled ? 'dues_payment_retry_scheduled' : 'dues_payment_failed',
           transactionId: transaction.id,
         },
-      });
+      }, keyFor(options, 'push')));
     }
 
-    logger.info('Payment failure notification sent', {
-      transactionId,
-      memberId: transaction.memberId,
-      retryScheduled,
-    });
+    const outcome = outcomeOf(deliveries);
+    if (outcome.delivered) {
+      logger.info('Payment failure notification sent', { transactionId, memberId: transaction.memberId, retryScheduled, failures: outcome.failures });
+    } else {
+      logger.warn('Payment failure notification was not delivered', { transactionId, memberId: transaction.memberId, retryScheduled, failures: outcome.failures });
+    }
+    return outcome;
   } catch (error) {
     logger.error('Error sending payment failure notification', {
       error,
       transactionId,
     });
-    // Don&apos;t throw
+    // Don't throw
+    return failed(error);
   }
 }
 
@@ -299,37 +374,24 @@ export async function sendPaymentFailure(
  * Called when a member needs admin assistance (max retries reached)
  */
 export async function sendAdminIntervention(
-  transactionId: string
-): Promise<void> {
+  transactionId: string,
+  options?: DuesNotificationOptions,
+): Promise<DuesNotificationOutcome> {
   try {
     logger.info('Sending admin intervention notification', { transactionId });
 
     // Get transaction and member details
-    const result = await db
-      .select({
-        transaction: duesTransactions,
-        memberName: organizationMembers.name,
-        memberEmail: organizationMembers.email,
-      })
-      .from(duesTransactions)
-      .innerJoin(
-        organizationMembers,
-        eq(duesTransactions.memberId, organizationMembers.id)
-      )
-      .where(eq(duesTransactions.id, transactionId))
-      .limit(1);
+    const loaded = await loadDuesNotificationContext(transactionId);
 
-    if (!result || result.length === 0) {
+    if (!loaded) {
       logger.warn('Transaction not found for admin intervention notification', {
         transactionId,
       });
-      return;
+      return notFound('transaction not found');
     }
 
-    const { transaction, memberName, memberEmail } = result[0];
-    const notificationService = getNotificationService();
+    const { transaction, memberName, memberEmail, organizationName, adminEmails } = loaded;
     const template = DuesNotificationTemplates.DUES_ADMIN_INTERVENTION;
-    const { organizationName, adminEmails } = await getOrganizationNotificationContext(transaction.organizationId);
 
     const metadata = (transaction.metadata as Record<string, unknown>) || {};
     const attemptNumber = (metadata.failureCount as number) || 4;
@@ -350,9 +412,9 @@ export async function sendAdminIntervention(
       ? adminEmails
       : [process.env.ADMIN_EMAIL || 'admin@unioneyes.app'];
 
-    await Promise.all(
+    const deliveries = await Promise.all(
       recipients.map((adminEmail) =>
-        notificationService.send({
+        deliver('email', {
           organizationId: transaction.organizationId,
           recipientEmail: adminEmail,
           type: 'email',
@@ -367,21 +429,34 @@ export async function sendAdminIntervention(
             transactionId: transaction.id,
             memberId: transaction.memberId,
           },
-        })
+        }, keyFor(options, 'admin', adminEmail))
       )
     );
 
-    logger.info('Admin intervention notification sent', {
-      transactionId,
-      memberId: transaction.memberId,
-      attemptNumber,
-    });
+    const outcome = outcomeOf(deliveries);
+    if (outcome.delivered) {
+      logger.info('Admin intervention notification sent', {
+        transactionId,
+        memberId: transaction.memberId,
+        attemptNumber,
+        failures: outcome.failures,
+      });
+    } else {
+      logger.warn('Admin intervention notification was not delivered', {
+        transactionId,
+        memberId: transaction.memberId,
+        attemptNumber,
+        failures: outcome.failures,
+      });
+    }
+    return outcome;
   } catch (error) {
     logger.error('Error sending admin intervention notification', {
       error,
       transactionId,
     });
-    // Don&apos;t throw
+    // Don't throw
+    return failed(error);
   }
 }
 

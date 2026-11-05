@@ -3,8 +3,7 @@
  * Reads strings from `marketing.rolePages.{role}.*` so all 5 for-* pages
  * render correctly in every supported locale.
  *
- * Mirrors the structure of `app/(marketing)/components/role-page-content.tsx`
- * but is i18n-driven. Use this component from `app/[locale]/(marketing)/for-*` pages.
+ * Use this component from `app/[locale]/(marketing)/for-*` pages.
  */
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';

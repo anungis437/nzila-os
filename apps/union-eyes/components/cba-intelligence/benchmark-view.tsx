@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
+import type { BenchmarkResult } from "@/lib/services/cba-intelligence/benchmark-service";
+import { ApiShapeError, apiErrorMessage, envelopeData, failureText, readApiError } from "@/lib/client/api-envelope";
 import {
   Card,
   CardContent,
@@ -44,47 +46,17 @@ import {
 // Types
 // ---------------------------------------------------------------------------
 
-interface ComparableAgreement {
-  id: string;
-  title: string;
-  employer: string | null;
-  unionName: string | null;
-  jurisdiction: string | null;
-  sector: string | null;
-  matchScore: number;
-}
-
-interface BenchmarkResult {
-  targetAgreementId: string;
-  comparableCount: number;
-  comparables: ComparableAgreement[];
-  wageIncreaseP25: number | null;
-  wageIncreaseP50: number | null;
-  wageIncreaseP75: number | null;
-  medianWageIncrease: number | null;
-  avgTermMonths: number | null;
-  clauseFamilyCoverage: Record<string, number>;
-  insufficientData?: boolean;
-  requiredComparables?: number;
-}
-
-interface BenchmarkResponse {
-  success: boolean;
-  data: BenchmarkResult;
-}
-
+/** A saved benchmark, as GET /api/cba-intelligence/benchmark/[id]?history=true answers (the snapshot's decimal columns arrive as text). */
 interface BenchmarkHistory {
   id: string;
   snapshotVersion: number;
   comparableCount: number;
-  wageIncreaseP50: string | null;
   medianWageIncrease: string | null;
   createdAt: string;
 }
 
-interface BenchmarkHistoryResponse {
-  success: boolean;
-  data: BenchmarkHistory[];
+interface BenchmarkHistoryPage {
+  items: BenchmarkHistory[];
 }
 
 // ---------------------------------------------------------------------------
@@ -106,8 +78,9 @@ function formatPct(v: number | null | string): string {
 // Component
 // ---------------------------------------------------------------------------
 
-export function BenchmarkView() {
+export function BenchmarkView({ canSaveSnapshot = false }: { canSaveSnapshot?: boolean }) {
   const t = useTranslations("benchmarkView");
+  const locale = useLocale();
   const [agreementId, setAgreementId] = useState("");
   const [jurisdiction, setJurisdiction] = useState("all");
   const [sector, setSector] = useState("");
@@ -120,51 +93,63 @@ export function BenchmarkView() {
   if (sector) queryParams.set("sector", sector);
 
   const {
-    data: benchmarkData,
+    data: result,
     isLoading,
     error,
     refetch,
-  } = useQuery<BenchmarkResponse>({
+  } = useQuery<BenchmarkResult>({
     queryKey: ["cba-intel-benchmark", agreementId, jurisdiction, sector],
-    queryFn: () =>
-      fetch(
-        `/api/cba-intelligence/benchmark/${agreementId}?${queryParams}`,
-      ).then((r) => r.json()),
+    // A refusal (an agreement that does not exist, an entitlement the organization lacks) is shown as it is stated, not retried.
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch(`/api/cba-intelligence/benchmark/${agreementId}?${queryParams}`);
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, t("errorLoad")));
+      const benchmark: BenchmarkResult = envelopeData(body) as unknown as BenchmarkResult;
+      return benchmark;
+    },
     enabled: !!agreementId,
   });
 
   const {
-    data: historyData,
+    data: history = [],
+    error: historyError,
     refetch: refetchHistory,
-  } = useQuery<BenchmarkHistoryResponse>({
+  } = useQuery<BenchmarkHistory[]>({
     queryKey: ["cba-intel-benchmark-history", agreementId],
-    queryFn: () =>
-      fetch(
-        `/api/cba-intelligence/benchmark/${agreementId}?history=true`,
-      ).then((r) => r.json()),
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch(`/api/cba-intelligence/benchmark/${agreementId}?history=true`);
+      const body: unknown = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(apiErrorMessage(body, t("errorHistory")));
+      const page: BenchmarkHistoryPage = envelopeData(body) as unknown as BenchmarkHistoryPage;
+      if (!Array.isArray(page.items)) throw new ApiShapeError("no snapshots");
+      return page.items;
+    },
     enabled: !!agreementId && showHistory,
   });
 
-  const result = benchmarkData?.data;
-  const history = historyData?.data ?? [];
-
+  // Saving a snapshot writes to the platform-wide dataset: it is a POST, and platform authority is checked by the route; the button is only offered to those who hold it.
   async function handleSaveSnapshot() {
     setIsSaving(true);
     setSaveError(null);
 
     try {
-      const response = await fetch(
-        `/api/cba-intelligence/benchmark/${agreementId}?save=true&${queryParams}`,
-      );
+      const response = await fetch(`/api/cba-intelligence/benchmark/${agreementId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jurisdiction: jurisdiction === "all" ? undefined : jurisdiction, sector: sector || undefined }),
+      });
 
       if (!response.ok) {
-        throw new Error(`Failed to save benchmark snapshot (${response.status})`);
+        setSaveError(await readApiError(response, t("errorSave")));
+        return;
       }
 
       setShowHistory(true);
       await refetchHistory();
-    } catch (saveSnapshotError) {
-      setSaveError(saveSnapshotError instanceof Error ? saveSnapshotError.message : t("errorLoad"));
+    } catch {
+      setSaveError(t("errorSave"));
     } finally {
       setIsSaving(false);
     }
@@ -241,8 +226,8 @@ export function BenchmarkView() {
           </div>
         )}
         {error && (
-          <div className="text-center py-8 text-red-500">
-            {t("errorLoad")}
+          <div role="alert" className="text-center py-8 text-red-500">
+            {failureText(error, t("errorLoad"))}
           </div>
         )}
 
@@ -266,7 +251,7 @@ export function BenchmarkView() {
               <Card>
                 <CardContent className="pt-4">
                   <div className="text-sm text-muted-foreground">{t("summary.wageP50")}</div>
-                  <div className="text-2xl font-bold">{formatPct(result.wageIncreaseP50)}</div>
+                  <div className="text-2xl font-bold">{formatPct(result.medianWageIncrease)}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -320,16 +305,14 @@ export function BenchmarkView() {
                     </TableHeader>
                     <TableBody>
                       {result.comparables.map((c) => (
-                        <TableRow key={c.id}>
+                        <TableRow key={c.agreementId}>
                           <TableCell className="font-medium">{c.title}</TableCell>
-                          <TableCell>{c.employer ?? "—"}</TableCell>
-                          <TableCell>{c.unionName ?? "—"}</TableCell>
-                          <TableCell>{c.jurisdiction ?? "—"}</TableCell>
+                          <TableCell>{c.employer}</TableCell>
+                          <TableCell>{c.union}</TableCell>
+                          <TableCell>{c.jurisdiction || "—"}</TableCell>
                           <TableCell>
-                            <Badge
-                              variant={c.matchScore >= 80 ? "default" : c.matchScore >= 50 ? "secondary" : "outline"}
-                            >
-                              {c.matchScore}%
+                            <Badge variant={c.comparability === "exact" ? "default" : "secondary"}>
+                              {t(`comparability.${c.comparability}`)}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -342,22 +325,30 @@ export function BenchmarkView() {
 
             {/* Actions */}
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                disabled={isSaving}
-                onClick={() => void handleSaveSnapshot()}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {isSaving ? t("computing") : t("actions.saveSnapshot")}
-              </Button>
+              {canSaveSnapshot && (
+                <Button
+                  variant="outline"
+                  disabled={isSaving}
+                  onClick={() => void handleSaveSnapshot()}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {isSaving ? t("computing") : t("actions.saveSnapshot")}
+                </Button>
+              )}
               <Button variant="outline" onClick={() => setShowHistory(!showHistory)}>
                 {showHistory ? t("actions.hideHistory") : t("actions.showHistory")}
               </Button>
             </div>
 
             {saveError && (
-              <div className="text-sm text-red-500">
+              <div role="alert" className="text-sm text-red-500">
                 {saveError}
+              </div>
+            )}
+
+            {showHistory && historyError && (
+              <div role="alert" className="text-sm text-red-500">
+                {failureText(historyError, t("errorHistory"))}
               </div>
             )}
 
@@ -380,9 +371,9 @@ export function BenchmarkView() {
                         <TableRow key={h.id}>
                           <TableCell>{t("history.versionShort", { version: h.snapshotVersion })}</TableCell>
                           <TableCell>{h.comparableCount}</TableCell>
-                          <TableCell>{formatPct(h.wageIncreaseP50)}</TableCell>
+                          <TableCell>{formatPct(h.medianWageIncrease)}</TableCell>
                           <TableCell>
-                            {new Date(h.createdAt).toLocaleDateString("en-CA")}
+                            {new Date(h.createdAt).toLocaleDateString(locale)}
                           </TableCell>
                         </TableRow>
                       ))}

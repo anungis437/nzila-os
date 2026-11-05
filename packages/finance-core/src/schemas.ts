@@ -33,7 +33,7 @@ export const FinanceAccountSchema = z.object({
   balanceCents: z.number().int(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const BalanceSnapshotSchema = z.object({
@@ -69,7 +69,7 @@ export const TransactionSchema = z.object({
   idempotencyKey: z.string(),
   createdAt: z.string(),
   settledAt: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const PaymentIntentSchema = z.object({
@@ -82,7 +82,7 @@ export const PaymentIntentSchema = z.object({
   externalRef: z.string().optional(),
   createdAt: z.string(),
   expiresAt: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const TransferRequestSchema = z.object({

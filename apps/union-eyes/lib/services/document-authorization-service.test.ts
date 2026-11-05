@@ -62,7 +62,6 @@ describe('document-authorization-service', () => {
       organizationId: 'org-1',
       actor: {
         userId: 'user-1',
-        isStewardPlus: false,
       },
       documents: [
         {
@@ -92,7 +91,6 @@ describe('document-authorization-service', () => {
       organizationId: 'org-1',
       actor: {
         userId: 'user-2',
-        isStewardPlus: false,
       },
       documents: [
         {
@@ -121,7 +119,6 @@ describe('document-authorization-service', () => {
       organizationId: 'org-1',
       actor: {
         userId: 'user-3',
-        isStewardPlus: false,
       },
       documents: [
         {

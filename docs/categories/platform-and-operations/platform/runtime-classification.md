@@ -99,7 +99,7 @@ Major P0 clusters:
 
 | Domain | Count | Examples |
 |--------|-------|---------|
-| **Payments/Billing** | 18 | `billing/subscriptions`, `payments/webhooks/stripe`, `payments/webhooks/paypal`, `stripe/webhooks`, `whop/webhooks`, `whop/create-checkout` |
+| **Payments/Billing** | 18 | `billing/subscriptions`, `payments/webhooks/stripe`, `payments/webhooks/paypal`, `stripe/webhooks` |
 | **Voting/Elections** | 12 | `voting/sessions/*/vote`, `voting/sessions/*/results`, `governance/council-elections`, `governance/elections` |
 | **Financial/Tax** | 14 | `tax/t4a`, `tax/t106`, `tax/slips`, `tax/rl-1`, `tax/cra-export`, `tax/cope-receipts`, `financial/reports`, `financial/vendors` |
 | **AI Operations** | 16 | `ai/summarize`, `ai/classify`, `ai/extract-clauses`, `ai/copilot`, `ai/match-precedents`, `ai/semantic-search`, `ai/mamba` |
@@ -116,7 +116,7 @@ Major P0 clusters:
 
 ---
 
-## Webhook Handlers (26 total — all classified P0 or P1)
+## Webhook Handlers (25 total — all classified P0 or P1)
 
 | App | Path | Tier | Reason |
 |-----|------|------|--------|
@@ -134,7 +134,6 @@ Major P0 clusters:
 | union-eyes | `webhooks/clc` | P1 | Labour council events |
 | union-eyes | `webhooks/signatures` | P0 | Legal signatures |
 | union-eyes | `webhooks/stripe` | P0 | Payment mutations |
-| union-eyes | `whop/webhooks` | P0 | Payment mutations |
 | union-eyes | v2 mirrors of above | Same | Same |
 
 ---

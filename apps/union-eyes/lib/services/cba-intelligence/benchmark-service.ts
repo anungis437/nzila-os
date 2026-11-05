@@ -5,7 +5,7 @@ import {
   cbaIntelWageAdjustments,
   cbaIntelClauses,
 } from "@/db/schema";
-import { eq, and, sql, desc, type SQL, ne, ilike } from "drizzle-orm";
+import { eq, and, sql, desc, inArray, type SQL, ne, ilike } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
@@ -24,6 +24,7 @@ export interface BenchmarkFilters {
 
 export interface ComparableAgreement {
   agreementId: string;
+  title: string;
   employer: string;
   union: string;
   jurisdiction: string;
@@ -38,7 +39,12 @@ export interface BenchmarkResult {
   targetAgreementId: string;
   comparables: ComparableAgreement[];
   comparableCount: number;
+  /** The wage increase the comparables' middle one has: their 50th percentile. */
   medianWageIncrease: number | null;
+  /** The wage increase a quarter of the comparables are at or below. */
+  wageIncreaseP25: number | null;
+  /** The wage increase three quarters of the comparables are at or below. */
+  wageIncreaseP75: number | null;
   avgTermMonths: number | null;
   clauseFamilyCoverage: Record<string, number>;
   targetWageIncrease: number | null;
@@ -48,6 +54,16 @@ export interface BenchmarkResult {
   insufficientData?: boolean;
   /** the minComparables threshold that wasn't met */
   requiredComparables?: number;
+}
+
+/** The value a share `p` (0–1) of the sorted values are at or below, interpolated between the two values it falls between, to the three decimals the snapshot keeps. */
+function percentile(sorted: number[], p: number): number | null {
+  if (sorted.length === 0) return null;
+  const position = (sorted.length - 1) * p;
+  const lower = Math.floor(position);
+  const upper = Math.ceil(position);
+  const value = sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
+  return Math.round(value * 1000) / 1000;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,7 +118,7 @@ export async function findComparableAgreements(
     const wageRows = await db
       .select()
       .from(cbaIntelWageAdjustments)
-      .where(sql`${cbaIntelWageAdjustments.agreementId} = ANY(${allIds})`);
+      .where(inArray(cbaIntelWageAdjustments.agreementId, allIds));
 
     const clauseRows = await db
       .select({
@@ -110,7 +126,7 @@ export async function findComparableAgreements(
         clauseFamily: cbaIntelClauses.clauseFamily,
       })
       .from(cbaIntelClauses)
-      .where(sql`${cbaIntelClauses.agreementId} = ANY(${allIds})`);
+      .where(inArray(cbaIntelClauses.agreementId, allIds));
 
     // Index wages & clauses by agreement
     const wagesByAgreement = new Map<string, typeof wageRows>();
@@ -140,6 +156,7 @@ export async function findComparableAgreements(
 
       return {
         agreementId: row.id,
+        title: row.title,
         employer: row.employerNormalized ?? "Unknown",
         union: row.unionNormalized ?? "Unknown",
         jurisdiction: row.jurisdiction ?? "",
@@ -174,6 +191,8 @@ export async function findComparableAgreements(
         comparables: filtered,
         comparableCount: filtered.length,
         medianWageIncrease: null,
+        wageIncreaseP25: null,
+        wageIncreaseP75: null,
         avgTermMonths: null,
         clauseFamilyCoverage: {},
         targetWageIncrease: null,
@@ -194,10 +213,9 @@ export async function findComparableAgreements(
       .map((c) => c.termMonths)
       .filter((v): v is number => v != null);
 
-    const medianWageIncrease =
-      wageIncreases.length > 0
-        ? wageIncreases[Math.floor(wageIncreases.length / 2)]
-        : null;
+    const medianWageIncrease = percentile(wageIncreases, 0.5);
+    const wageIncreaseP25 = percentile(wageIncreases, 0.25);
+    const wageIncreaseP75 = percentile(wageIncreases, 0.75);
 
     const avgTermMonths =
       termValues.length > 0
@@ -235,6 +253,8 @@ export async function findComparableAgreements(
       comparables: filtered,
       comparableCount: filtered.length,
       medianWageIncrease,
+      wageIncreaseP25,
+      wageIncreaseP75,
       avgTermMonths,
       clauseFamilyCoverage,
       targetWageIncrease,
@@ -273,7 +293,7 @@ export async function saveBenchmarkSnapshot(
         comparableCount: result.comparableCount,
         comparables: result.comparables.map((c) => ({
           agreementId: c.agreementId,
-          title: `${c.employer} / ${c.union}`,
+          title: c.title,
           employer: c.employer,
           union: c.union,
           jurisdiction: c.jurisdiction,
@@ -339,7 +359,9 @@ export async function getBenchmarkSnapshots(
       .limit(limit)
       .offset(offset);
 
-    return { items, total: count, page, limit };
+    // The snapshots belong to the platform-wide dataset: who saved one is platform information and is not returned to a tenant reader.
+    const visible = items.map(({ computedBy: _computedBy, ...snapshot }) => snapshot);
+    return { items: visible, total: count, page, limit };
   } catch (error) {
     logger.error("Error fetching benchmark snapshots", { error, agreementId });
     throw new Error("Failed to fetch benchmark snapshots");

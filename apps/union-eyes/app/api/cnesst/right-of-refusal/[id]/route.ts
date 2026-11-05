@@ -16,6 +16,7 @@ const { GET, PATCH, DELETE } = crudRoutes({
   tags: ['CNESST', 'Right of Refusal'],
   orgScoped: true,
   itemRoute: true,
+  retainOnDelete: true,
   readRole: 'steward',
   writeRole: 'steward',
 });

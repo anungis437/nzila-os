@@ -2,12 +2,20 @@
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import {
   exitInterviews,
   exitInterviewEvents,
   exitInterviewStatusEnum,
 } from '@/db/schema';
-import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY, normalizeRole, hasMinRole } from '@/lib/api-auth-guard';
+import {
+  interviewListCondition,
+  projectInterview,
+  resolveInterviewReader,
+  UNRECORDED_LEVEL,
+} from '@/lib/knowledge-transfer/governance/interview-access';
 import { createExitInterviewSchema, listQuerySchema } from './schemas';
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +28,7 @@ function hasStewardPrivileges(role: string | null): boolean {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     query: listQuerySchema,
     entitlement: 'union_knowledge_suite',
@@ -45,12 +54,10 @@ export const GET = withApi(
       }
     }
 
+    // The sensitivity floor and the consent condition apply to every row of the list, as they do to the item.
     const stewardPlus = hasStewardPrivileges(user?.role ?? null);
-    if (!stewardPlus) {
-      conditions.push(
-        inArray(exitInterviews.status, ['published', 'archived']),
-      );
-    }
+    const reader = await resolveInterviewReader(userId ?? null, stewardPlus, hasMinRole);
+    conditions.push(interviewListCondition(reader));
 
     if (query.mine === 'true') {
       conditions.push(eq(exitInterviews.createdBy, userId!));
@@ -63,7 +70,7 @@ export const GET = withApi(
       .orderBy(desc(exitInterviews.createdAt))
       .limit(200);
 
-    return { data: rows, total: rows.length };
+    return { data: rows.map((row) => projectInterview(row, reader, row.createdBy === userId)), total: rows.length };
   },
 );
 
@@ -81,25 +88,39 @@ export const POST = withApi(
   async ({ organizationId, userId, body }) => {
     const now = new Date();
 
-    const [created] = await db
-      .insert(exitInterviews)
-      .values({
-        ...body,
-        organizationId: organizationId!,
-        createdBy: userId!,
-        updatedBy: userId!,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+    const created = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [row] = await tx
+        .insert(exitInterviews)
+        .values({
+          ...body,
+          // A new interview is unclassified until an administrator sets its level through the governance step, so it starts at
+          // the most protective readable level instead of the column default (public_internal).
+          sensitivityLevel: UNRECORDED_LEVEL,
+          organizationId: organizationId!,
+          createdBy: userId!,
+          updatedBy: userId!,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
-    await db.insert(exitInterviewEvents).values({
-      interviewId: created.id,
-      organizationId: organizationId!,
-      eventType: 'created',
-      actorUserId: userId!,
-      notes: 'Exit interview draft created',
-      payload: { status: created.status },
+      await tx.insert(exitInterviewEvents).values({
+        interviewId: row.id,
+        organizationId: organizationId!,
+        eventType: 'created',
+        actorUserId: userId!,
+        notes: 'Exit interview draft created',
+        payload: { status: row.status },
+      });
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'exit_interview.create',
+        resourceType: 'exit_interviews',
+        resourceId: row.id,
+        details: { status: row.status },
+      });
+      return row;
     });
 
     return { data: created };

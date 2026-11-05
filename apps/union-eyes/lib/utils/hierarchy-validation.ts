@@ -10,7 +10,7 @@
 
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema-organizations';
-import { eq, sql } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 
 // =============================================================================
@@ -130,7 +130,7 @@ export async function fixOrphanedOrganizations(orphanIds: string[]): Promise<num
       hierarchyPath: sql`ARRAY[id]`,
       hierarchyLevel: 0,
     })
-    .where(sql`id = ANY(${orphanIds})`);
+    .where(inArray(organizations.id, orphanIds));
 
   logger.warn('Fixed orphaned organizations', { count: orphanIds.length, orphanIds });
   return orphanIds.length;

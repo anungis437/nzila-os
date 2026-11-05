@@ -1,17 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { caller, declared, resetCaller } from './support/with-api-stub';
+
+const DOCUMENT = '11111111-1111-4111-8111-111111111111';
+const CASE = '22222222-2222-4222-8222-222222222222';
 
 const m = vi.hoisted(() => ({
-  withOrganizationAuth: vi.fn(),
-  requireEntitlement: vi.fn(),
   hasMinRole: vi.fn(),
   isDocumentVisibleByPolicy: vi.fn(),
   normalizeDocumentTitle: vi.fn(),
   toGovernanceLabel: vi.fn(),
   getEffectiveCaseAccess: vi.fn(),
   getDocumentMutabilityBlockReason: vi.fn(),
-  auditCaseMutation: vi.fn(),
-  standardErrorResponse: vi.fn(),
-  standardSuccessResponse: vi.fn(),
+  persistAtomicAudit: vi.fn(),
+  loadUploaderNames: vi.fn(),
   selectQueue: [] as unknown[][],
   updateReturningQueue: [] as unknown[][],
 }));
@@ -21,13 +22,15 @@ function makeSelectChain(rows: unknown[]) {
     from: vi.fn(() => chain),
     leftJoin: vi.fn(() => chain),
     where: vi.fn(() => chain),
-    limit: vi.fn(async () => rows),
+    // A bounded read can also be locked (`.for('update')`); both resolve to the same rows.
+    limit: vi.fn(() => Object.assign(Promise.resolve(rows), { for: vi.fn(async () => rows) })),
     orderBy: vi.fn(async () => rows),
   };
   return chain;
 }
 
-const mockDb: any = {
+// The transaction the route is handed: every statement it makes goes through it.
+const mockTx: any = {
   select: vi.fn(() => makeSelectChain((m.selectQueue.shift() ?? []) as unknown[])),
   update: vi.fn(() => ({
     set: vi.fn(() => ({
@@ -38,18 +41,20 @@ const mockDb: any = {
   })),
 };
 
-vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
+// The ambient handle must never be reached by this route: a statement on it would run outside the organization's transaction.
+const ambient = new Proxy({}, { get: () => { throw new Error('the ambient database handle was used'); } });
+vi.mock('@/db/db', () => ({ db: ambient }));
+vi.mock('@/db', () => ({ db: ambient }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (a: any, b?: any) => {
     const fn = typeof a === 'function' ? a : b;
-    return fn({});
+    return fn(mockTx);
   },
   withSystemContext: async (fn: any) => fn({}),
 }));
 
-vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/services/document-governance-service', () => ({
   isDocumentVisibleByPolicy: m.isDocumentVisibleByPolicy,
   normalizeDocumentTitle: m.normalizeDocumentTitle,
@@ -57,20 +62,13 @@ vi.mock('@/lib/services/document-governance-service', () => ({
 }));
 vi.mock('@/lib/services/case-access-service', () => ({ getEffectiveCaseAccess: m.getEffectiveCaseAccess }));
 vi.mock('@/lib/services/document-retention-guard', () => ({ getDocumentMutabilityBlockReason: m.getDocumentMutabilityBlockReason }));
-vi.mock('@/lib/audited-case-mutations', () => ({
-  auditCaseMutation: m.auditCaseMutation,
-  CaseAuditEvent: { DOCUMENT_LABEL_CHANGED: 'DOCUMENT_LABEL_CHANGED' },
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/documents/uploader-names', () => ({ loadUploaderNames: m.loadUploaderNames }));
 vi.mock('@/db/schema/documents-schema', () => ({
   documents: { id: 'id', title: 'title', filename: 'filename', name: 'name', fileUrl: 'fileUrl', documentType: 'documentType', privacyLabel: 'privacyLabel', uploadedBy: 'uploadedBy', createdAt: 'createdAt', updatedAt: 'updatedAt', organizationId: 'organizationId', metadata: 'metadata', deletedAt: 'deletedAt' },
   documentAccessGrants: { id: 'id', organizationId: 'organizationId', documentId: 'documentId', userId: 'userId', status: 'status', canView: 'canView', revokedAt: 'revokedAt', expiresAt: 'expiresAt' },
   documentLinks: { documentId: 'documentId', linkedEntityType: 'linkedEntityType', linkedEntityId: 'linkedEntityId' },
   documentVersions: { organizationId: 'organizationId', documentId: 'documentId', versionNo: 'versionNo' },
-}));
-vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { FORBIDDEN: 'FORBIDDEN', VALIDATION_ERROR: 'VALIDATION_ERROR', NOT_FOUND: 'NOT_FOUND', CONFLICT: 'CONFLICT' },
-  standardErrorResponse: m.standardErrorResponse,
-  standardSuccessResponse: m.standardSuccessResponse,
 }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -81,85 +79,213 @@ async function loadRoute() {
   return import('../documents/repository/[id]/route');
 }
 
+const get = (id: string) => new Request(`http://localhost/api/documents/repository/${id}`);
+const patch = (id: string, body: unknown) => new Request(`http://localhost/api/documents/repository/${id}`, {
+  method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+});
+const params = (id: string) => ({ params: { id } });
+
 describe('documents/repository/[id] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.role = 'steward';
     m.selectQueue = [];
     m.updateReturningQueue = [];
-    m.withOrganizationAuth.mockImplementation((handler: any) => (_req: Request, context: any = { organizationId: 'org_1', userId: 'u1' }, params: any = { id: 'd1' }) => handler(_req, context, params));
-    m.requireEntitlement.mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(true);
     m.isDocumentVisibleByPolicy.mockReturnValue(true);
     m.normalizeDocumentTitle.mockReturnValue('Doc');
     m.toGovernanceLabel.mockReturnValue('public_internal');
     m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: true, canViewCase: true, canViewPrivateDocuments: true });
     m.getDocumentMutabilityBlockReason.mockReturnValue(null);
-    m.auditCaseMutation.mockResolvedValue(undefined);
-    m.standardErrorResponse.mockImplementation((code: string, message: string) => new Response(JSON.stringify({ code, message }), { status: code === 'FORBIDDEN' ? 403 : code === 'NOT_FOUND' ? 404 : code === 'CONFLICT' ? 409 : 400 }));
-    m.standardSuccessResponse.mockImplementation((data: unknown) => new Response(JSON.stringify(data), { status: 200 }));
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.loadUploaderNames.mockResolvedValue({});
   });
 
-  it('GET returns 403 when member read permission is denied', async () => {
-    const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+  it('declares a member floor for the read, a steward floor for the label change, and the case-suite entitlement', async () => {
+    await loadRoute();
+    expect(declared.map((options) => options.auth?.minRole)).toEqual(['member', 'steward']);
+    expect(declared.map((options) => options.entitlement)).toEqual(['grievance_case_suite', 'grievance_case_suite']);
+  });
 
-    const response = await GET(new Request('http://localhost/api/documents/repository/d1'), { organizationId: 'org_1', userId: 'u1' }, { id: 'd1' });
+  it('GET returns 403 when the member floor is not met', async () => {
+    const { GET } = await loadRoute();
+    caller.role = 'guest';
+
+    const response = await GET(get(DOCUMENT), params(DOCUMENT));
     expect(response.status).toBe(403);
+    expect(mockTx.select).not.toHaveBeenCalled();
+  });
+
+  it('GET answers a malformed document id as a bad request, not a database error', async () => {
+    const { GET } = await loadRoute();
+
+    const response = await GET(get('d1'), params('d1'));
+    expect(response.status).toBe(400);
+    expect(mockTx.select).not.toHaveBeenCalled();
   });
 
   it('GET returns 404 when document does not exist', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([]);
 
-    const response = await GET(new Request('http://localhost/api/documents/repository/d1'), { organizationId: 'org_1', userId: 'u1' }, { id: 'd1' });
+    const response = await GET(get(DOCUMENT), params(DOCUMENT));
     expect(response.status).toBe(404);
   });
 
   it('GET returns visible document with versions', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push(
-      [{ id: 'd1', privacyLabel: 'public_internal', linkedEntityType: null, linkedEntityId: null, title: 'Doc' }],
+      [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: null, linkedEntityId: null, title: 'Doc' }],
       [],
       [{ id: 'v1', versionNo: 2 }],
     );
 
-    const response = await GET(new Request('http://localhost/api/documents/repository/d1'), { organizationId: 'org_1', userId: 'u1' }, { id: 'd1' });
+    const response = await GET(get(DOCUMENT), params(DOCUMENT));
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json.versions).toHaveLength(1);
+    expect(json.data.versions).toHaveLength(1);
+  });
+
+  it('GET names the uploader of the document and of each version for a representative', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push(
+      [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: null, linkedEntityId: null, title: 'Doc', uploadedBy: 'u-doc' }],
+      [],
+      [{ id: 'v2', versionNo: 2, uploadedBy: 'u-v2' }, { id: 'v1', versionNo: 1, uploadedBy: 'u-gone' }],
+    );
+    m.loadUploaderNames.mockResolvedValue({ 'u-doc': 'Alice Steward', 'u-v2': 'Bob Officer' });
+
+    const json = await (await GET(get(DOCUMENT), params(DOCUMENT))).json();
+
+    expect(m.loadUploaderNames).toHaveBeenCalledWith('org_1', ['u-doc', 'u-v2', 'u-gone']);
+    expect(json.data).toMatchObject({ uploadedBy: 'u-doc', uploadedByName: 'Alice Steward' });
+    // Someone who is no longer a member has no name to show; the id is not offered in its place.
+    expect(json.data.versions).toMatchObject([
+      { versionNo: 2, uploadedBy: 'u-v2', uploadedByName: 'Bob Officer' },
+      { versionNo: 1, uploadedBy: 'u-gone', uploadedByName: null },
+    ]);
+  });
+
+  it('GET shows a member neither the uploader id nor a name, on the document or on its versions', async () => {
+    const { GET } = await loadRoute();
+    m.hasMinRole.mockResolvedValue(false);
+    m.selectQueue.push(
+      [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: null, linkedEntityId: null, title: 'Doc', uploadedBy: 'u-doc' }],
+      [],
+      [{ id: 'v1', versionNo: 1, uploadedBy: 'u-v1' }],
+    );
+
+    const json = await (await GET(get(DOCUMENT), params(DOCUMENT))).json();
+
+    expect(m.loadUploaderNames).not.toHaveBeenCalled();
+    expect(json.data).not.toHaveProperty('uploadedBy');
+    expect(json.data).not.toHaveProperty('uploadedByName');
+    expect(json.data.versions[0]).not.toHaveProperty('uploadedBy');
+    expect(json.data.versions[0]).not.toHaveProperty('uploadedByName');
+  });
+
+  it('GET decides a case-linked document with the case kernel, for the caller of the organization', async () => {
+    const { GET } = await loadRoute();
+    caller.userId = 'u7';
+    m.selectQueue.push(
+      [{ id: DOCUMENT, privacyLabel: 'public_internal', linkedEntityType: 'grievance', linkedEntityId: CASE, title: 'Doc' }],
+      [],
+      [],
+    );
+
+    const response = await GET(get(DOCUMENT), params(DOCUMENT));
+    expect(response.status).toBe(200);
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledWith({ organizationId: 'org_1', grievanceId: CASE, userId: 'u7' });
+  });
+
+  it('GET returns 403 when the classification policy does not let the caller see the document', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ id: DOCUMENT, privacyLabel: 'privileged', linkedEntityType: null, linkedEntityId: null, title: 'Doc' }], []);
+    m.isDocumentVisibleByPolicy.mockReturnValue(false);
+
+    const response = await GET(get(DOCUMENT), params(DOCUMENT));
+    expect(response.status).toBe(403);
+  });
+
+  it('PATCH returns 403 below the steward floor', async () => {
+    const { PATCH } = await loadRoute();
+    caller.role = 'member';
+
+    const response = await PATCH(patch(DOCUMENT, { privacyLabel: 'team_confidential' }), params(DOCUMENT));
+    expect(response.status).toBe(403);
+    expect(mockTx.select).not.toHaveBeenCalled();
+  });
+
+  it('PATCH answers a malformed document id as a bad request', async () => {
+    const { PATCH } = await loadRoute();
+
+    const response = await PATCH(patch('d1', { privacyLabel: 'team_confidential' }), params('d1'));
+    expect(response.status).toBe(400);
+    expect(mockTx.select).not.toHaveBeenCalled();
   });
 
   it('PATCH returns 400 for invalid payload', async () => {
     const { PATCH } = await loadRoute();
-    const response = await PATCH(new Request('http://localhost/api/documents/repository/d1', {
-      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ privacyLabel: 'invalid' }),
-    }), { organizationId: 'org_1', userId: 'u1' }, { id: 'd1' });
+    const response = await PATCH(patch(DOCUMENT, { privacyLabel: 'invalid' }), params(DOCUMENT));
 
     expect(response.status).toBe(400);
   });
 
-  it('PATCH returns 409 when retention guard blocks update', async () => {
+  it('PATCH returns 404 when the document is not in the organization', async () => {
     const { PATCH } = await loadRoute();
-    m.selectQueue.push([{ id: 'd1', privacyLabel: 'public_internal', metadata: {}, linkedEntityType: null, linkedEntityId: null }]);
-    m.getDocumentMutabilityBlockReason.mockReturnValueOnce('legal_hold');
+    m.selectQueue.push([]);
 
-    const response = await PATCH(new Request('http://localhost/api/documents/repository/d1', {
-      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ privacyLabel: 'team_confidential' }),
-    }), { organizationId: 'org_1', userId: 'u1' }, { id: 'd1' });
+    const response = await PATCH(patch(DOCUMENT, { privacyLabel: 'team_confidential' }), params(DOCUMENT));
 
-    expect(response.status).toBe(409);
+    expect(response.status).toBe(404);
+    expect(mockTx.update).not.toHaveBeenCalled();
   });
 
-  it('PATCH updates label and returns updated document', async () => {
+  it('PATCH returns 403 when the caller is not the primary owner of the linked case', async () => {
     const { PATCH } = await loadRoute();
-    m.selectQueue.push([{ id: 'd1', privacyLabel: 'public_internal', metadata: {}, linkedEntityType: 'grievance', linkedEntityId: 'g1' }]);
-    m.updateReturningQueue.push([{ id: 'd1', privacyLabel: 'team_confidential' }]);
+    m.selectQueue.push([{ id: DOCUMENT, privacyLabel: 'public_internal', metadata: {}, linkedEntityType: 'grievance', linkedEntityId: CASE }]);
+    m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false });
 
-    const response = await PATCH(new Request('http://localhost/api/documents/repository/d1', {
-      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ privacyLabel: 'team_confidential' }),
-    }), { organizationId: 'org_1', userId: 'u1' }, { id: 'd1' });
+    const response = await PATCH(patch(DOCUMENT, { privacyLabel: 'team_confidential' }), params(DOCUMENT));
+
+    expect(response.status).toBe(403);
+    expect(mockTx.update).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('PATCH returns 409 when retention guard blocks update', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: DOCUMENT, privacyLabel: 'public_internal', metadata: {}, linkedEntityType: null, linkedEntityId: null }]);
+    m.getDocumentMutabilityBlockReason.mockReturnValueOnce('legal_hold');
+
+    const response = await PATCH(patch(DOCUMENT, { privacyLabel: 'team_confidential' }), params(DOCUMENT));
+
+    expect(response.status).toBe(409);
+    expect(mockTx.update).not.toHaveBeenCalled();
+  });
+
+  it('PATCH updates label and returns the updated document, audited in the same transaction', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: DOCUMENT, privacyLabel: 'public_internal', metadata: {}, linkedEntityType: 'grievance', linkedEntityId: CASE }]);
+    m.updateReturningQueue.push([{ id: DOCUMENT, privacyLabel: 'team_confidential' }]);
+
+    const response = await PATCH(patch(DOCUMENT, { privacyLabel: 'team_confidential' }), params(DOCUMENT));
 
     expect(response.status).toBe(200);
-    expect(m.auditCaseMutation).toHaveBeenCalled();
+    // The response data is the updated document itself (not a one-element list).
+    expect((await response.json()).data).toMatchObject({ id: DOCUMENT, privacyLabel: 'team_confidential' });
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockTx, expect.objectContaining({ action: 'document.label_change', organizationId: 'org_1', userId: 'u1', resourceId: DOCUMENT }));
+  });
+
+  it('PATCH fails when the in-transaction audit record cannot be written', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: DOCUMENT, privacyLabel: 'public_internal', metadata: {}, linkedEntityType: null, linkedEntityId: null }]);
+    m.updateReturningQueue.push([{ id: DOCUMENT, privacyLabel: 'team_confidential' }]);
+    m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit write failed'));
+
+    const response = await PATCH(patch(DOCUMENT, { privacyLabel: 'team_confidential' }), params(DOCUMENT));
+
+    expect(response.status).toBe(500);
   });
 });

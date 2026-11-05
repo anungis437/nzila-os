@@ -3,7 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   cognitionRegistry: { all: vi.fn() },
+  isSystemAdmin: vi.fn(),
 }));
+
+vi.mock('@/lib/api-auth-guard', () => ({ isSystemAdmin: m.isSystemAdmin }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
 vi.mock('@nzila/organizational-cognition-core', () => ({
@@ -21,12 +24,22 @@ async function loadRoute() {
 describe('cognition/health route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.isSystemAdmin.mockResolvedValue(true);
     m.withApi.mockImplementation((_cfg: unknown, handler: () => Promise<unknown>) =>
       () => handler());
     m.cognitionRegistry.all.mockReturnValue([
       { domains: ['ops', 'compliance'] },
       { domains: ['ops'] },
     ]);
+  });
+
+  // DEF-0B5-COGNITION-HEALTH-PLATFORM-POSTURE-TO-ORG-OFFICER
+  it('tells an organization officer only the status, not the platform posture', async () => {
+    m.isSystemAdmin.mockResolvedValue(false);
+    const { GET } = await loadRoute();
+    const result = await GET();
+
+    expect(Object.keys(result.data).sort()).toEqual(['checkedAt', 'status']);
   });
 
   it('returns a healthy cognition payload', async () => {

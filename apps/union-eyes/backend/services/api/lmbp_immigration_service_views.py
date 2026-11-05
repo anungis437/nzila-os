@@ -25,7 +25,7 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from core.isolation import DenyAllPermission
 from rest_framework.response import Response
 
 
@@ -37,7 +37,10 @@ class LmbpImmigrationServiceViewSet(viewsets.ViewSet):
     GSS application tracking, mentorship programs, and compliance reporting.
     """
 
-    permission_classes = [IsAuthenticated]
+    # CONTAINED (convergence tranche 9): nothing calls this ViewSet (the application calls one Django service endpoint,
+    # governance-service/check_status), and its write paths take unscoped input. Reopen only with a reviewed, tenant-scoped,
+    # role-gated design.
+    permission_classes = [DenyAllPermission]
 
     # ------------------------------------------------------------------
     # Foreign Workers

@@ -90,6 +90,7 @@ from .models import (
     VotingSessions,
     Worksites,
 )
+from core.testing import create_valid
 
 
 # ---------------------------------------------------------------------------
@@ -102,19 +103,19 @@ def _org(**overrides):
         organization_type="union",
     )
     defaults.update(overrides)
-    return Organizations.objects.create(**defaults)
+    return create_valid(Organizations, **defaults)
 
 
 def _member(org, **overrides):
     defaults = dict(organization=org, user_id=f"user_{uuid.uuid4().hex[:8]}")
     defaults.update(overrides)
-    return OrganizationMembers.objects.create(**defaults)
+    return create_valid(OrganizationMembers, **defaults)
 
 
 # ===== 1. AwardTemplates (__str__ = name) =====
 class TestAwardTemplatesCreate(TestCase):
     def test_create(self):
-        obj = AwardTemplates.objects.create(name="Gold Star")
+        obj = create_valid(AwardTemplates, name="Gold Star")
         self.assertIsNotNone(obj.id)
         self.assertIsNotNone(obj.created_at)
         self.assertEqual(obj.name, "Gold Star")
@@ -122,58 +123,58 @@ class TestAwardTemplatesCreate(TestCase):
 
 class TestAwardTemplatesStr(TestCase):
     def test_str(self):
-        obj = AwardTemplates.objects.create(name="Silver Medal")
+        obj = create_valid(AwardTemplates, name="Silver Medal")
         self.assertEqual(str(obj), "Silver Medal")
 
 
 # ===== 2. AwardHistory (FK → AwardTemplates) =====
 class TestAwardHistoryCreate(TestCase):
     def test_create(self):
-        tmpl = AwardTemplates.objects.create(name="T")
-        obj = AwardHistory.objects.create(template=tmpl)
+        tmpl = create_valid(AwardTemplates, name="T")
+        obj = create_valid(AwardHistory, template=tmpl)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.template, tmpl)
 
 
 class TestAwardHistoryStr(TestCase):
     def test_str(self):
-        tmpl = AwardTemplates.objects.create(name="T")
-        obj = AwardHistory.objects.create(template=tmpl)
+        tmpl = create_valid(AwardTemplates, name="T")
+        obj = create_valid(AwardHistory, template=tmpl)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 3. RewardWalletLedger =====
 class TestRewardWalletLedgerCreate(TestCase):
     def test_create(self):
-        obj = RewardWalletLedger.objects.create()
+        obj = create_valid(RewardWalletLedger)
         self.assertIsNotNone(obj.id)
 
 
 class TestRewardWalletLedgerStr(TestCase):
     def test_str(self):
-        obj = RewardWalletLedger.objects.create()
+        obj = create_valid(RewardWalletLedger)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 4. BudgetPool (__str__ = name) =====
 class TestBudgetPoolCreate(TestCase):
     def test_create(self):
-        obj = BudgetPool.objects.create(name="Annual Awards")
+        obj = create_valid(BudgetPool, name="Annual Awards")
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.name, "Annual Awards")
 
 
 class TestBudgetPoolStr(TestCase):
     def test_str(self):
-        obj = BudgetPool.objects.create(name="Q4 Budget")
+        obj = create_valid(BudgetPool, name="Q4 Budget")
         self.assertEqual(str(obj), "Q4 Budget")
 
 
 # ===== 5. BudgetReservations (FK → BudgetPool) =====
 class TestBudgetReservationsCreate(TestCase):
     def test_create(self):
-        pool = BudgetPool.objects.create(name="P")
-        obj = BudgetReservations.objects.create(pool=pool, reserved_amount=5000)
+        pool = create_valid(BudgetPool, name="P")
+        obj = create_valid(BudgetReservations, pool=pool, reserved_amount=5000)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.reserved_amount, 5000)
         self.assertEqual(obj.pool, pool)
@@ -181,145 +182,145 @@ class TestBudgetReservationsCreate(TestCase):
 
 class TestBudgetReservationsStr(TestCase):
     def test_str(self):
-        pool = BudgetPool.objects.create(name="P")
-        obj = BudgetReservations.objects.create(pool=pool, reserved_amount=100)
+        pool = create_valid(BudgetPool, name="P")
+        obj = create_valid(BudgetReservations, pool=pool, reserved_amount=100)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 6. Calendars =====
 class TestCalendarsCreate(TestCase):
     def test_create(self):
-        obj = Calendars.objects.create()
+        obj = create_valid(Calendars)
         self.assertIsNotNone(obj.id)
 
 
 class TestCalendarsStr(TestCase):
     def test_str(self):
-        obj = Calendars.objects.create()
+        obj = create_valid(Calendars)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 7. CalendarEvents (FK → Calendars) =====
 class TestCalendarEventsCreate(TestCase):
     def test_create(self):
-        cal = Calendars.objects.create()
-        obj = CalendarEvents.objects.create(calendar=cal)
+        cal = create_valid(Calendars)
+        obj = create_valid(CalendarEvents, calendar=cal)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.calendar, cal)
 
 
 class TestCalendarEventsStr(TestCase):
     def test_str(self):
-        cal = Calendars.objects.create()
-        obj = CalendarEvents.objects.create(calendar=cal)
+        cal = create_valid(Calendars)
+        obj = create_valid(CalendarEvents, calendar=cal)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 8. EventAttendees (FK → CalendarEvents) =====
 class TestEventAttendeesCreate(TestCase):
     def test_create(self):
-        cal = Calendars.objects.create()
-        ev = CalendarEvents.objects.create(calendar=cal)
-        obj = EventAttendees.objects.create(event=ev)
+        cal = create_valid(Calendars)
+        ev = create_valid(CalendarEvents, calendar=cal)
+        obj = create_valid(EventAttendees, event=ev)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.event, ev)
 
 
 class TestEventAttendeesStr(TestCase):
     def test_str(self):
-        cal = Calendars.objects.create()
-        ev = CalendarEvents.objects.create(calendar=cal)
-        obj = EventAttendees.objects.create(event=ev)
+        cal = create_valid(Calendars)
+        ev = create_valid(CalendarEvents, calendar=cal)
+        obj = create_valid(EventAttendees, event=ev)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 9. MeetingRooms =====
 class TestMeetingRoomsCreate(TestCase):
     def test_create(self):
-        obj = MeetingRooms.objects.create()
+        obj = create_valid(MeetingRooms)
         self.assertIsNotNone(obj.id)
 
 
 class TestMeetingRoomsStr(TestCase):
     def test_str(self):
-        obj = MeetingRooms.objects.create()
+        obj = create_valid(MeetingRooms)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 10. RoomBookings (FK → MeetingRooms) =====
 class TestRoomBookingsCreate(TestCase):
     def test_create(self):
-        room = MeetingRooms.objects.create()
-        obj = RoomBookings.objects.create(room=room)
+        room = create_valid(MeetingRooms)
+        obj = create_valid(RoomBookings, room=room)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.room, room)
 
 
 class TestRoomBookingsStr(TestCase):
     def test_str(self):
-        room = MeetingRooms.objects.create()
-        obj = RoomBookings.objects.create(room=room)
+        room = create_valid(MeetingRooms)
+        obj = create_valid(RoomBookings, room=room)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 11. CalendarSharing (FK → Calendars) =====
 class TestCalendarSharingCreate(TestCase):
     def test_create(self):
-        cal = Calendars.objects.create()
-        obj = CalendarSharing.objects.create(calendar=cal)
+        cal = create_valid(Calendars)
+        obj = create_valid(CalendarSharing, calendar=cal)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.calendar, cal)
 
 
 class TestCalendarSharingStr(TestCase):
     def test_str(self):
-        cal = Calendars.objects.create()
-        obj = CalendarSharing.objects.create(calendar=cal)
+        cal = create_valid(Calendars)
+        obj = create_valid(CalendarSharing, calendar=cal)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 12. ExternalCalendarConnections =====
 class TestExternalCalendarConnectionsCreate(TestCase):
     def test_create(self):
-        obj = ExternalCalendarConnections.objects.create(user_id="user_abc")
+        obj = create_valid(ExternalCalendarConnections, user_id="user_abc")
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.user_id, "user_abc")
 
 
 class TestExternalCalendarConnectionsStr(TestCase):
     def test_str(self):
-        obj = ExternalCalendarConnections.objects.create(user_id="u")
+        obj = create_valid(ExternalCalendarConnections, user_id="u")
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 13. EventReminders (FK → CalendarEvents) =====
 class TestEventRemindersCreate(TestCase):
     def test_create(self):
-        cal = Calendars.objects.create()
-        ev = CalendarEvents.objects.create(calendar=cal)
-        obj = EventReminders.objects.create(event=ev)
+        cal = create_valid(Calendars)
+        ev = create_valid(CalendarEvents, calendar=cal)
+        obj = create_valid(EventReminders, event=ev)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.event, ev)
 
 
 class TestEventRemindersStr(TestCase):
     def test_str(self):
-        cal = Calendars.objects.create()
-        ev = CalendarEvents.objects.create(calendar=cal)
-        obj = EventReminders.objects.create(event=ev)
+        cal = create_valid(Calendars)
+        ev = create_valid(CalendarEvents, calendar=cal)
+        obj = create_valid(EventReminders, event=ev)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 14. CongressMemberships =====
 class TestCongressMembershipsCreate(TestCase):
     def test_create(self):
-        obj = CongressMemberships.objects.create()
+        obj = create_valid(CongressMemberships)
         self.assertIsNotNone(obj.id)
 
 
 class TestCongressMembershipsStr(TestCase):
     def test_str(self):
-        obj = CongressMemberships.objects.create()
+        obj = create_valid(CongressMemberships)
         self.assertIsInstance(str(obj), str)
 
 
@@ -327,189 +328,189 @@ class TestCongressMembershipsStr(TestCase):
 class TestHolidaysCreate(TestCase):
     def test_create(self):
         org = _org(slug="holidays-org")
-        obj = Holidays.objects.create(organization=org)
+        obj = create_valid(Holidays, organization=org)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization, org)
 
 
 class TestHolidaysStr(TestCase):
     def test_str(self):
-        obj = Holidays.objects.create()
+        obj = create_valid(Holidays)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 16–23. Simple UUID org models (no FK, no required) =====
 class TestStewardAssignmentsCreate(TestCase):
     def test_create(self):
-        obj = StewardAssignments.objects.create()
+        obj = create_valid(StewardAssignments)
         self.assertIsNotNone(obj.id)
 
 
 class TestStewardAssignmentsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(StewardAssignments.objects.create()), str)
+        self.assertIsInstance(str(create_valid(StewardAssignments)), str)
 
 
 class TestOutreachSequencesCreate(TestCase):
     def test_create(self):
-        obj = OutreachSequences.objects.create()
+        obj = create_valid(OutreachSequences)
         self.assertIsNotNone(obj.id)
 
 
 class TestOutreachSequencesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(OutreachSequences.objects.create()), str)
+        self.assertIsInstance(str(create_valid(OutreachSequences)), str)
 
 
 class TestOutreachEnrollmentsCreate(TestCase):
     def test_create(self):
-        obj = OutreachEnrollments.objects.create()
+        obj = create_valid(OutreachEnrollments)
         self.assertIsNotNone(obj.id)
 
 
 class TestOutreachEnrollmentsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(OutreachEnrollments.objects.create()), str)
+        self.assertIsInstance(str(create_valid(OutreachEnrollments)), str)
 
 
 class TestOutreachStepsLogCreate(TestCase):
     def test_create(self):
-        obj = OutreachStepsLog.objects.create()
+        obj = create_valid(OutreachStepsLog)
         self.assertIsNotNone(obj.id)
 
 
 class TestOutreachStepsLogStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(OutreachStepsLog.objects.create()), str)
+        self.assertIsInstance(str(create_valid(OutreachStepsLog)), str)
 
 
 class TestFieldNotesCreate(TestCase):
     def test_create(self):
-        obj = FieldNotes.objects.create()
+        obj = create_valid(FieldNotes)
         self.assertIsNotNone(obj.id)
 
 
 class TestFieldNotesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(FieldNotes.objects.create()), str)
+        self.assertIsInstance(str(create_valid(FieldNotes)), str)
 
 
 class TestOrganizerTasksCreate(TestCase):
     def test_create(self):
-        obj = OrganizerTasks.objects.create()
+        obj = create_valid(OrganizerTasks)
         self.assertIsNotNone(obj.id)
 
 
 class TestOrganizerTasksStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(OrganizerTasks.objects.create()), str)
+        self.assertIsInstance(str(create_valid(OrganizerTasks)), str)
 
 
 class TestTaskCommentsCreate(TestCase):
     def test_create(self):
-        obj = TaskComments.objects.create()
+        obj = create_valid(TaskComments)
         self.assertIsNotNone(obj.id)
 
 
 class TestTaskCommentsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(TaskComments.objects.create()), str)
+        self.assertIsInstance(str(create_valid(TaskComments)), str)
 
 
 class TestMemberRelationshipScoresCreate(TestCase):
     def test_create(self):
-        obj = MemberRelationshipScores.objects.create()
+        obj = create_valid(MemberRelationshipScores)
         self.assertIsNotNone(obj.id)
 
 
 class TestMemberRelationshipScoresStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(MemberRelationshipScores.objects.create()), str)
+        self.assertIsInstance(str(create_valid(MemberRelationshipScores)), str)
 
 
 # ===== 24–29. Survey/Poll models =====
 class TestSurveysCreate(TestCase):
     def test_create(self):
-        obj = Surveys.objects.create()
+        obj = create_valid(Surveys)
         self.assertIsNotNone(obj.id)
 
 
 class TestSurveysStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(Surveys.objects.create()), str)
+        self.assertIsInstance(str(create_valid(Surveys)), str)
 
 
 class TestSurveyQuestionsCreate(TestCase):
     def test_create(self):
-        obj = SurveyQuestions.objects.create()
+        obj = create_valid(SurveyQuestions)
         self.assertIsNotNone(obj.id)
 
 
 class TestSurveyQuestionsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(SurveyQuestions.objects.create()), str)
+        self.assertIsInstance(str(create_valid(SurveyQuestions)), str)
 
 
 class TestSurveyResponsesCreate(TestCase):
     def test_create(self):
-        obj = SurveyResponses.objects.create()
+        obj = create_valid(SurveyResponses)
         self.assertIsNotNone(obj.id)
 
 
 class TestSurveyResponsesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(SurveyResponses.objects.create()), str)
+        self.assertIsInstance(str(create_valid(SurveyResponses)), str)
 
 
 class TestSurveyAnswersCreate(TestCase):
     def test_create(self):
-        obj = SurveyAnswers.objects.create()
+        obj = create_valid(SurveyAnswers)
         self.assertIsNotNone(obj.id)
 
 
 class TestSurveyAnswersStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(SurveyAnswers.objects.create()), str)
+        self.assertIsInstance(str(create_valid(SurveyAnswers)), str)
 
 
 class TestPollsCreate(TestCase):
     def test_create(self):
-        obj = Polls.objects.create()
+        obj = create_valid(Polls)
         self.assertIsNotNone(obj.id)
 
 
 class TestPollsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(Polls.objects.create()), str)
+        self.assertIsInstance(str(create_valid(Polls)), str)
 
 
 class TestPollVotesCreate(TestCase):
     def test_create(self):
-        obj = PollVotes.objects.create()
+        obj = create_valid(PollVotes)
         self.assertIsNotNone(obj.id)
 
 
 class TestPollVotesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(PollVotes.objects.create()), str)
+        self.assertIsInstance(str(create_valid(PollVotes)), str)
 
 
 # ===== 30. MemberLocationConsent =====
 class TestMemberLocationConsentCreate(TestCase):
     def test_create(self):
-        obj = MemberLocationConsent.objects.create()
+        obj = create_valid(MemberLocationConsent)
         self.assertIsNotNone(obj.id)
 
 
 class TestMemberLocationConsentStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(MemberLocationConsent.objects.create()), str)
+        self.assertIsInstance(str(create_valid(MemberLocationConsent)), str)
 
 
 # ===== 31. Federations (__str__ = name) =====
 class TestFederationsCreate(TestCase):
     def test_create(self):
-        obj = Federations.objects.create(
+        obj = create_valid(Federations,
             organization_id=uuid.uuid4(), name="National Federation"
         )
         self.assertIsNotNone(obj.id)
@@ -518,14 +519,14 @@ class TestFederationsCreate(TestCase):
 
 class TestFederationsStr(TestCase):
     def test_str(self):
-        obj = Federations.objects.create(organization_id=uuid.uuid4(), name="NF")
+        obj = create_valid(Federations, organization_id=uuid.uuid4(), name="NF")
         self.assertEqual(str(obj), "NF")
 
 
 # ===== 32. FederationMemberships =====
 class TestFederationMembershipsCreate(TestCase):
     def test_create(self):
-        obj = FederationMemberships.objects.create(
+        obj = create_valid(FederationMemberships,
             federation_id=uuid.uuid4(),
             union_organization_id=uuid.uuid4(),
         )
@@ -535,7 +536,7 @@ class TestFederationMembershipsCreate(TestCase):
 
 class TestFederationMembershipsStr(TestCase):
     def test_str(self):
-        obj = FederationMemberships.objects.create(
+        obj = create_valid(FederationMemberships,
             federation_id=uuid.uuid4(),
             union_organization_id=uuid.uuid4(),
         )
@@ -545,20 +546,20 @@ class TestFederationMembershipsStr(TestCase):
 # ===== 33. FederationExecutives =====
 class TestFederationExecutivesCreate(TestCase):
     def test_create(self):
-        obj = FederationExecutives.objects.create(federation_id=uuid.uuid4())
+        obj = create_valid(FederationExecutives, federation_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestFederationExecutivesStr(TestCase):
     def test_str(self):
-        obj = FederationExecutives.objects.create(federation_id=uuid.uuid4())
+        obj = create_valid(FederationExecutives, federation_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 34. FederationMeetings (__str__ = title) =====
 class TestFederationMeetingsCreate(TestCase):
     def test_create(self):
-        obj = FederationMeetings.objects.create(
+        obj = create_valid(FederationMeetings,
             federation_id=uuid.uuid4(), title="Annual General Meeting"
         )
         self.assertIsNotNone(obj.id)
@@ -567,7 +568,7 @@ class TestFederationMeetingsCreate(TestCase):
 
 class TestFederationMeetingsStr(TestCase):
     def test_str(self):
-        obj = FederationMeetings.objects.create(
+        obj = create_valid(FederationMeetings,
             federation_id=uuid.uuid4(), title="AGM 2025"
         )
         self.assertEqual(str(obj), "AGM 2025")
@@ -576,7 +577,7 @@ class TestFederationMeetingsStr(TestCase):
 # ===== 35. FederationRemittances =====
 class TestFederationRemittancesCreate(TestCase):
     def test_create(self):
-        obj = FederationRemittances.objects.create(
+        obj = create_valid(FederationRemittances,
             federation_id=uuid.uuid4(),
             from_organization_id=uuid.uuid4(),
             to_organization_id=uuid.uuid4(),
@@ -594,7 +595,7 @@ class TestFederationRemittancesCreate(TestCase):
 
 class TestFederationRemittancesStr(TestCase):
     def test_str(self):
-        obj = FederationRemittances.objects.create(
+        obj = create_valid(FederationRemittances,
             federation_id=uuid.uuid4(),
             from_organization_id=uuid.uuid4(),
             to_organization_id=uuid.uuid4(),
@@ -610,7 +611,7 @@ class TestFederationRemittancesStr(TestCase):
 # ===== 36. FederationCampaigns (__str__ = name) =====
 class TestFederationCampaignsCreate(TestCase):
     def test_create(self):
-        obj = FederationCampaigns.objects.create(
+        obj = create_valid(FederationCampaigns,
             federation_id=uuid.uuid4(), name="Solidarity Drive"
         )
         self.assertIsNotNone(obj.id)
@@ -618,7 +619,7 @@ class TestFederationCampaignsCreate(TestCase):
 
 class TestFederationCampaignsStr(TestCase):
     def test_str(self):
-        obj = FederationCampaigns.objects.create(
+        obj = create_valid(FederationCampaigns,
             federation_id=uuid.uuid4(), name="Drive 2025"
         )
         self.assertEqual(str(obj), "Drive 2025")
@@ -627,7 +628,7 @@ class TestFederationCampaignsStr(TestCase):
 # ===== 37. FederationCommunications (__str__ = title) =====
 class TestFederationCommunicationsCreate(TestCase):
     def test_create(self):
-        obj = FederationCommunications.objects.create(
+        obj = create_valid(FederationCommunications,
             federation_id=uuid.uuid4(), title="Bulletin #12"
         )
         self.assertIsNotNone(obj.id)
@@ -635,7 +636,7 @@ class TestFederationCommunicationsCreate(TestCase):
 
 class TestFederationCommunicationsStr(TestCase):
     def test_str(self):
-        obj = FederationCommunications.objects.create(
+        obj = create_valid(FederationCommunications,
             federation_id=uuid.uuid4(), title="Bulletin"
         )
         self.assertEqual(str(obj), "Bulletin")
@@ -644,7 +645,7 @@ class TestFederationCommunicationsStr(TestCase):
 # ===== 38. FederationResources (__str__ = title) =====
 class TestFederationResourcesCreate(TestCase):
     def test_create(self):
-        obj = FederationResources.objects.create(
+        obj = create_valid(FederationResources,
             federation_id=uuid.uuid4(), title="Training Guide"
         )
         self.assertIsNotNone(obj.id)
@@ -652,7 +653,7 @@ class TestFederationResourcesCreate(TestCase):
 
 class TestFederationResourcesStr(TestCase):
     def test_str(self):
-        obj = FederationResources.objects.create(
+        obj = create_valid(FederationResources,
             federation_id=uuid.uuid4(), title="Guide"
         )
         self.assertEqual(str(obj), "Guide")
@@ -661,90 +662,90 @@ class TestFederationResourcesStr(TestCase):
 # ===== 39. VotingSessions (__str__ = title) =====
 class TestVotingSessionsCreate(TestCase):
     def test_create(self):
-        obj = VotingSessions.objects.create(title="Board Election 2025")
+        obj = create_valid(VotingSessions, title="Board Election 2025")
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.title, "Board Election 2025")
 
 
 class TestVotingSessionsStr(TestCase):
     def test_str(self):
-        obj = VotingSessions.objects.create(title="Election")
+        obj = create_valid(VotingSessions, title="Election")
         self.assertEqual(str(obj), "Election")
 
 
 # ===== 40. VotingOptions (FK → VotingSessions) =====
 class TestVotingOptionsCreate(TestCase):
     def test_create(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = VotingOptions.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(VotingOptions, session=session)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.session, session)
 
 
 class TestVotingOptionsStr(TestCase):
     def test_str(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = VotingOptions.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(VotingOptions, session=session)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 41. VoterEligibility (FK → VotingSessions) =====
 class TestVoterEligibilityCreate(TestCase):
     def test_create(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = VoterEligibility.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(VoterEligibility, session=session)
         self.assertIsNotNone(obj.id)
 
 
 class TestVoterEligibilityStr(TestCase):
     def test_str(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = VoterEligibility.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(VoterEligibility, session=session)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 42. Votes (FK → VotingSessions) =====
 class TestVotesCreate(TestCase):
     def test_create(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = Votes.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(Votes, session=session)
         self.assertIsNotNone(obj.id)
 
 
 class TestVotesStr(TestCase):
     def test_str(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = Votes.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(Votes, session=session)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 43. VotingNotifications (FK → VotingSessions) =====
 class TestVotingNotificationsCreate(TestCase):
     def test_create(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = VotingNotifications.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(VotingNotifications, session=session)
         self.assertIsNotNone(obj.id)
 
 
 class TestVotingNotificationsStr(TestCase):
     def test_str(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = VotingNotifications.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(VotingNotifications, session=session)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 44. VotingAuditLog (FK → VotingSessions) =====
 class TestVotingAuditLogCreate(TestCase):
     def test_create(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = VotingAuditLog.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(VotingAuditLog, session=session)
         self.assertIsNotNone(obj.id)
 
 
 class TestVotingAuditLogStr(TestCase):
     def test_str(self):
-        session = VotingSessions.objects.create(title="S")
-        obj = VotingAuditLog.objects.create(session=session)
+        session = create_valid(VotingSessions, title="S")
+        obj = create_valid(VotingAuditLog, session=session)
         self.assertIsInstance(str(obj), str)
 
 
@@ -752,7 +753,7 @@ class TestVotingAuditLogStr(TestCase):
 class TestOrganizingCampaignsCreate(TestCase):
     def test_create(self):
         org = _org(slug="orgcamp")
-        obj = OrganizingCampaigns.objects.create(organization=org)
+        obj = create_valid(OrganizingCampaigns, organization=org)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.organization, org)
 
@@ -760,174 +761,174 @@ class TestOrganizingCampaignsCreate(TestCase):
 class TestOrganizingCampaignsStr(TestCase):
     def test_str(self):
         org = _org(slug="orgcamp-s")
-        obj = OrganizingCampaigns.objects.create(organization=org)
+        obj = create_valid(OrganizingCampaigns, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class TestOrganizingContactsCreate(TestCase):
     def test_create(self):
         org = _org(slug="orgcon")
-        obj = OrganizingContacts.objects.create(organization=org)
+        obj = create_valid(OrganizingContacts, organization=org)
         self.assertIsNotNone(obj.id)
 
 
 class TestOrganizingContactsStr(TestCase):
     def test_str(self):
         org = _org(slug="orgcon-s")
-        obj = OrganizingContacts.objects.create(organization=org)
+        obj = create_valid(OrganizingContacts, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class TestCardSigningEventsCreate(TestCase):
     def test_create(self):
         org = _org(slug="cardsign")
-        obj = CardSigningEvents.objects.create(organization=org)
+        obj = create_valid(CardSigningEvents, organization=org)
         self.assertIsNotNone(obj.id)
 
 
 class TestCardSigningEventsStr(TestCase):
     def test_str(self):
         org = _org(slug="cardsign-s")
-        obj = CardSigningEvents.objects.create(organization=org)
+        obj = create_valid(CardSigningEvents, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class TestNlrbClrbFilingsCreate(TestCase):
     def test_create(self):
         org = _org(slug="nlrb")
-        obj = NlrbClrbFilings.objects.create(organization=org)
+        obj = create_valid(NlrbClrbFilings, organization=org)
         self.assertIsNotNone(obj.id)
 
 
 class TestNlrbClrbFilingsStr(TestCase):
     def test_str(self):
         org = _org(slug="nlrb-s")
-        obj = NlrbClrbFilings.objects.create(organization=org)
+        obj = create_valid(NlrbClrbFilings, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class TestUnionRepresentationVotesCreate(TestCase):
     def test_create(self):
         org = _org(slug="urv")
-        obj = UnionRepresentationVotes.objects.create(organization=org)
+        obj = create_valid(UnionRepresentationVotes, organization=org)
         self.assertIsNotNone(obj.id)
 
 
 class TestUnionRepresentationVotesStr(TestCase):
     def test_str(self):
         org = _org(slug="urv-s")
-        obj = UnionRepresentationVotes.objects.create(organization=org)
+        obj = create_valid(UnionRepresentationVotes, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class TestFieldOrganizerActivitiesCreate(TestCase):
     def test_create(self):
         org = _org(slug="foa")
-        obj = FieldOrganizerActivities.objects.create(organization=org)
+        obj = create_valid(FieldOrganizerActivities, organization=org)
         self.assertIsNotNone(obj.id)
 
 
 class TestFieldOrganizerActivitiesStr(TestCase):
     def test_str(self):
         org = _org(slug="foa-s")
-        obj = FieldOrganizerActivities.objects.create(organization=org)
+        obj = create_valid(FieldOrganizerActivities, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class TestEmployerResponsesCreate(TestCase):
     def test_create(self):
         org = _org(slug="empresp")
-        obj = EmployerResponses.objects.create(organization=org)
+        obj = create_valid(EmployerResponses, organization=org)
         self.assertIsNotNone(obj.id)
 
 
 class TestEmployerResponsesStr(TestCase):
     def test_str(self):
         org = _org(slug="empresp-s")
-        obj = EmployerResponses.objects.create(organization=org)
+        obj = create_valid(EmployerResponses, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 class TestOrganizingCampaignMilestonesCreate(TestCase):
     def test_create(self):
         org = _org(slug="ocm")
-        obj = OrganizingCampaignMilestones.objects.create(organization=org)
+        obj = create_valid(OrganizingCampaignMilestones, organization=org)
         self.assertIsNotNone(obj.id)
 
 
 class TestOrganizingCampaignMilestonesStr(TestCase):
     def test_str(self):
         org = _org(slug="ocm-s")
-        obj = OrganizingCampaignMilestones.objects.create(organization=org)
+        obj = create_valid(OrganizingCampaignMilestones, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 53–57. Recognition/Rewards models (UUID org) =====
 class TestRecognitionProgramsCreate(TestCase):
     def test_create(self):
-        obj = RecognitionPrograms.objects.create()
+        obj = create_valid(RecognitionPrograms)
         self.assertIsNotNone(obj.id)
 
 
 class TestRecognitionProgramsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(RecognitionPrograms.objects.create()), str)
+        self.assertIsInstance(str(create_valid(RecognitionPrograms)), str)
 
 
 class TestRecognitionAwardTypesCreate(TestCase):
     def test_create(self):
-        obj = RecognitionAwardTypes.objects.create()
+        obj = create_valid(RecognitionAwardTypes)
         self.assertIsNotNone(obj.id)
 
 
 class TestRecognitionAwardTypesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(RecognitionAwardTypes.objects.create()), str)
+        self.assertIsInstance(str(create_valid(RecognitionAwardTypes)), str)
 
 
 class TestRecognitionAwardsCreate(TestCase):
     def test_create(self):
-        obj = RecognitionAwards.objects.create()
+        obj = create_valid(RecognitionAwards)
         self.assertIsNotNone(obj.id)
 
 
 class TestRecognitionAwardsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(RecognitionAwards.objects.create()), str)
+        self.assertIsInstance(str(create_valid(RecognitionAwards)), str)
 
 
 class TestRewardBudgetEnvelopesCreate(TestCase):
     def test_create(self):
-        obj = RewardBudgetEnvelopes.objects.create()
+        obj = create_valid(RewardBudgetEnvelopes)
         self.assertIsNotNone(obj.id)
 
 
 class TestRewardBudgetEnvelopesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(RewardBudgetEnvelopes.objects.create()), str)
+        self.assertIsInstance(str(create_valid(RewardBudgetEnvelopes)), str)
 
 
 class TestRewardRedemptionsCreate(TestCase):
     def test_create(self):
-        obj = RewardRedemptions.objects.create()
+        obj = create_valid(RewardRedemptions)
         self.assertIsNotNone(obj.id)
 
 
 class TestRewardRedemptionsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(RewardRedemptions.objects.create()), str)
+        self.assertIsInstance(str(create_valid(RewardRedemptions)), str)
 
 
 # ===== 58. MemberAddresses =====
 class TestMemberAddressesCreate(TestCase):
     def test_create(self):
-        obj = MemberAddresses.objects.create()
+        obj = create_valid(MemberAddresses)
         self.assertIsNotNone(obj.id)
 
 
 class TestMemberAddressesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(MemberAddresses.objects.create()), str)
+        self.assertIsInstance(str(create_valid(MemberAddresses)), str)
 
 
 # ===== 59. MemberEmployment (FK → Org + OrganizationMembers + Employers + Worksites + BargainingUnits) =====
@@ -935,7 +936,7 @@ class TestMemberEmploymentCreate(TestCase):
     def test_create(self):
         org = _org(slug="me-org")
         member = _member(org)
-        obj = MemberEmployment.objects.create(
+        obj = create_valid(MemberEmployment,
             organization=org,
             member=member,
             hire_date=date(2020, 1, 15),
@@ -952,7 +953,7 @@ class TestMemberEmploymentStr(TestCase):
     def test_str(self):
         org = _org(slug="me-org-s")
         member = _member(org)
-        obj = MemberEmployment.objects.create(
+        obj = create_valid(MemberEmployment,
             organization=org,
             member=member,
             hire_date=date(2020, 1, 1),
@@ -966,7 +967,7 @@ class TestEmploymentHistoryCreate(TestCase):
     def test_create(self):
         org = _org(slug="eh-org")
         member = _member(org)
-        obj = EmploymentHistory.objects.create(organization=org, member=member)
+        obj = create_valid(EmploymentHistory, organization=org, member=member)
         self.assertIsNotNone(obj.id)
 
 
@@ -974,7 +975,7 @@ class TestEmploymentHistoryStr(TestCase):
     def test_str(self):
         org = _org(slug="eh-org-s")
         member = _member(org)
-        obj = EmploymentHistory.objects.create(organization=org, member=member)
+        obj = create_valid(EmploymentHistory, organization=org, member=member)
         self.assertIsInstance(str(obj), str)
 
 
@@ -983,7 +984,7 @@ class TestMemberLeavesCreate(TestCase):
     def test_create(self):
         org = _org(slug="ml-org")
         member = _member(org)
-        obj = MemberLeaves.objects.create(
+        obj = create_valid(MemberLeaves,
             organization=org,
             member=member,
             leave_type="vacation",
@@ -998,7 +999,7 @@ class TestMemberLeavesStr(TestCase):
     def test_str(self):
         org = _org(slug="ml-org-s")
         member = _member(org)
-        obj = MemberLeaves.objects.create(
+        obj = create_valid(MemberLeaves,
             organization=org,
             member=member,
             leave_type="sick",
@@ -1011,34 +1012,34 @@ class TestMemberLeavesStr(TestCase):
 class TestJobClassificationsCreate(TestCase):
     def test_create(self):
         org = _org(slug="jc-org")
-        obj = JobClassifications.objects.create(organization=org)
+        obj = create_valid(JobClassifications, organization=org)
         self.assertIsNotNone(obj.id)
 
 
 class TestJobClassificationsStr(TestCase):
     def test_str(self):
         org = _org(slug="jc-org-s")
-        obj = JobClassifications.objects.create(organization=org)
+        obj = create_valid(JobClassifications, organization=org)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 63. MemberSegments (__str__ = name) =====
 class TestMemberSegmentsCreate(TestCase):
     def test_create(self):
-        obj = MemberSegments.objects.create(
+        obj = create_valid(MemberSegments,
             organization_id=uuid.uuid4(),
             name="Active Full-Time",
             created_by="admin",
         )
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.name, "Active Full-Time")
-        self.assertFalse(obj.is_active)
+        self.assertTrue(obj.is_active)
         self.assertEqual(obj.execution_count, 0)
 
 
 class TestMemberSegmentsStr(TestCase):
     def test_str(self):
-        obj = MemberSegments.objects.create(
+        obj = create_valid(MemberSegments,
             organization_id=uuid.uuid4(),
             name="Seg1",
             created_by="a",
@@ -1049,56 +1050,56 @@ class TestMemberSegmentsStr(TestCase):
 # ===== 64. SegmentExecutions (FK → MemberSegments) =====
 class TestSegmentExecutionsCreate(TestCase):
     def test_create(self):
-        seg = MemberSegments.objects.create(
+        seg = create_valid(MemberSegments,
             organization_id=uuid.uuid4(),
             name="S",
             created_by="a",
         )
-        obj = SegmentExecutions.objects.create(segment=seg)
+        obj = create_valid(SegmentExecutions, segment=seg)
         self.assertIsNotNone(obj.id)
         self.assertEqual(obj.segment, seg)
 
 
 class TestSegmentExecutionsStr(TestCase):
     def test_str(self):
-        seg = MemberSegments.objects.create(
+        seg = create_valid(MemberSegments,
             organization_id=uuid.uuid4(),
             name="S",
             created_by="a",
         )
-        obj = SegmentExecutions.objects.create(segment=seg)
+        obj = create_valid(SegmentExecutions, segment=seg)
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 65. SegmentExports (FK → MemberSegments nullable) =====
 class TestSegmentExportsCreate(TestCase):
     def test_create(self):
-        obj = SegmentExports.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(SegmentExports, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestSegmentExportsStr(TestCase):
     def test_str(self):
-        obj = SegmentExports.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(SegmentExports, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 66–68. Training models (UUID org) =====
 class TestTrainingCoursesCreate(TestCase):
     def test_create(self):
-        obj = TrainingCourses.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(TrainingCourses, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestTrainingCoursesStr(TestCase):
     def test_str(self):
-        obj = TrainingCourses.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(TrainingCourses, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 class TestCourseSessionsCreate(TestCase):
     def test_create(self):
-        obj = CourseSessions.objects.create(
+        obj = create_valid(CourseSessions,
             organization_id=uuid.uuid4(),
             course_id=uuid.uuid4(),
         )
@@ -1107,7 +1108,7 @@ class TestCourseSessionsCreate(TestCase):
 
 class TestCourseSessionsStr(TestCase):
     def test_str(self):
-        obj = CourseSessions.objects.create(
+        obj = create_valid(CourseSessions,
             organization_id=uuid.uuid4(),
             course_id=uuid.uuid4(),
         )
@@ -1116,114 +1117,114 @@ class TestCourseSessionsStr(TestCase):
 
 class TestCourseRegistrationsCreate(TestCase):
     def test_create(self):
-        obj = CourseRegistrations.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(CourseRegistrations, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestCourseRegistrationsStr(TestCase):
     def test_str(self):
-        obj = CourseRegistrations.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(CourseRegistrations, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 class TestMemberCertificationsCreate(TestCase):
     def test_create(self):
-        obj = MemberCertifications.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(MemberCertifications, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestMemberCertificationsStr(TestCase):
     def test_str(self):
-        obj = MemberCertifications.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(MemberCertifications, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 class TestTrainingProgramsCreate(TestCase):
     def test_create(self):
-        obj = TrainingPrograms.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(TrainingPrograms, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestTrainingProgramsStr(TestCase):
     def test_str(self):
-        obj = TrainingPrograms.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(TrainingPrograms, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 class TestProgramEnrollmentsCreate(TestCase):
     def test_create(self):
-        obj = ProgramEnrollments.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(ProgramEnrollments, organization_id=uuid.uuid4())
         self.assertIsNotNone(obj.id)
 
 
 class TestProgramEnrollmentsStr(TestCase):
     def test_str(self):
-        obj = ProgramEnrollments.objects.create(organization_id=uuid.uuid4())
+        obj = create_valid(ProgramEnrollments, organization_id=uuid.uuid4())
         self.assertIsInstance(str(obj), str)
 
 
 # ===== 69–73. Union structure models =====
 class TestEmployersCreate(TestCase):
     def test_create(self):
-        obj = Employers.objects.create(organization_id=_org().id)
+        obj = create_valid(Employers, organization_id=_org().id)
         self.assertIsNotNone(obj.id)
 
 
 class TestEmployersStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(Employers.objects.create(organization_id=_org().id)), str)
+        self.assertIsInstance(str(create_valid(Employers, organization_id=_org().id)), str)
 
 
 class TestWorksitesCreate(TestCase):
     def test_create(self):
-        obj = Worksites.objects.create(organization_id=_org().id)
+        obj = create_valid(Worksites, organization_id=_org().id)
         self.assertIsNotNone(obj.id)
 
 
 class TestWorksitesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(Worksites.objects.create(organization_id=_org().id)), str)
+        self.assertIsInstance(str(create_valid(Worksites, organization_id=_org().id)), str)
 
 
 class TestBargainingUnitsCreate(TestCase):
     def test_create(self):
-        obj = BargainingUnits.objects.create(organization_id=_org().id)
+        obj = create_valid(BargainingUnits, organization_id=_org().id)
         self.assertIsNotNone(obj.id)
 
 
 class TestBargainingUnitsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(BargainingUnits.objects.create(organization_id=_org().id)), str)
+        self.assertIsInstance(str(create_valid(BargainingUnits, organization_id=_org().id)), str)
 
 
 class TestCommitteesCreate(TestCase):
     def test_create(self):
-        obj = Committees.objects.create(organization_id=_org().id)
+        obj = create_valid(Committees, organization_id=_org().id)
         self.assertIsNotNone(obj.id)
 
 
 class TestCommitteesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(Committees.objects.create(organization_id=_org().id)), str)
+        self.assertIsInstance(str(create_valid(Committees, organization_id=_org().id)), str)
 
 
 class TestCommitteeMembershipsCreate(TestCase):
     def test_create(self):
-        obj = CommitteeMemberships.objects.create()
+        obj = create_valid(CommitteeMemberships)
         self.assertIsNotNone(obj.id)
 
 
 class TestCommitteeMembershipsStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(CommitteeMemberships.objects.create()), str)
+        self.assertIsInstance(str(create_valid(CommitteeMemberships)), str)
 
 
 class TestRoleTenureHistoryCreate(TestCase):
     def test_create(self):
-        obj = RoleTenureHistory.objects.create()
+        obj = create_valid(RoleTenureHistory)
         self.assertIsNotNone(obj.id)
 
 
 class TestRoleTenureHistoryStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(RoleTenureHistory.objects.create()), str)
+        self.assertIsInstance(str(create_valid(RoleTenureHistory)), str)

@@ -22,8 +22,8 @@ import { createLogger } from '@nzila/os-core'
 const logger = createLogger('stripe:refunds')
 
 const RequestRefundSchema = z.object({
-  orgId: z.string().uuid(),
-  paymentId: z.string().uuid(),
+  orgId: z.guid(),
+  paymentId: z.guid(),
   amountCents: z.number().int().min(1),
   reason: z.enum(['duplicate', 'fraudulent', 'requested_by_customer']).optional(),
 })

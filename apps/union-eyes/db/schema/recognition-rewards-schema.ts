@@ -178,7 +178,7 @@ export const recognitionAwards = pgTable(
     awardTypeId: uuid('award_type_id')
       .notNull()
       .references(() => recognitionAwardTypes.id, { onDelete: 'restrict' }),
-    recipientUserId: varchar('recipient_user_id', { length: 255 }).notNull(), // Clerk user ID
+    recipientUserId: varchar('recipient_user_id', { length: 255 }).notNull(), // Auth user ID
     issuerUserId: varchar('issuer_user_id', { length: 255 }), // Nullable for automated
     reason: text('reason').notNull(),
     status: awardStatusEnum('status').notNull().default('pending'),
@@ -216,7 +216,7 @@ export const rewardWalletLedger = pgTable(
     orgId: uuid('org_id')
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
-    userId: varchar('user_id', { length: 255 }).notNull(), // Clerk user ID
+    userId: varchar('user_id', { length: 255 }).notNull(), // Auth user ID
     eventType: walletEventTypeEnum('event_type').notNull(),
     amountCredits: integer('amount_credits').notNull(),
     balanceAfter: integer('balance_after').notNull(),
@@ -228,7 +228,7 @@ export const rewardWalletLedger = pgTable(
       .defaultNow(),
   },
   (table) => ({
-    orgUserIdx: index('reward_wallet_ledger_org_user_idx').on(
+    orgUserIdx: index('reward_wallet_ledger_org_user_id_idx').on(
       table.orgId,
       table.userId
     ),
@@ -303,7 +303,7 @@ export const rewardRedemptions = pgTable(
     orgId: uuid('org_id')
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
-    userId: varchar('user_id', { length: 255 }).notNull(), // Clerk user ID
+    userId: varchar('user_id', { length: 255 }).notNull(), // Auth user ID
     programId: uuid('program_id')
       .notNull()
       .references(() => recognitionPrograms.id, { onDelete: 'restrict' }),
@@ -416,8 +416,8 @@ export const automationRules = pgTable(
     triggerCount: integer('trigger_count').notNull().default(0),
     
     // Audit
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     createdBy: varchar('created_by', { length: 255 }), // User ID - matches users.userId VARCHAR(255)
   },
   (t) => ({

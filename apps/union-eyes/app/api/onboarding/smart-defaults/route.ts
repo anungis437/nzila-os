@@ -1,53 +1,25 @@
 /**
- * Smart Defaults API
- * 
- * GET /api/onboarding/smart-defaults?organizationType=xxx&memberCount=xxx
- * 
- * Get intelligent default configuration:
- * - Rate limits based on size
- * - Recommended features
- * - Suggested integrations
+ * GET /api/onboarding/smart-defaults
+ *
+ * Not implemented. This path advertises an operation of its own but was a literal table of features, integrations and limits keyed by organization type, presented as intelligent defaults that no other code defines or reads. It answered with that other behaviour as though
+ * it were the operation, so it now answers HTTP 501 and changes and returns nothing.
  */
+import { withApi, ApiError } from '@/lib/api/framework';
 
-import { NextResponse } from 'next/server';
-import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
-import { getSmartDefaults } from '@/lib/utils/smart-onboarding';
-import { logger } from '@/lib/logger';
- 
-import {
-  ErrorCode,
-  standardErrorResponse,
-} from '@/lib/api/standardized-responses';
+export const dynamic = 'force-dynamic';
 
-export const GET = withRoleAuth('member' as MemberRole, async (request, context) => {
-  const { userId, organizationId: _organizationId } = context;
+const handler = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    openapi: {
+      tags: ['Not implemented'],
+      summary: '/api/onboarding/smart-defaults (not implemented)',
+      description: 'Not implemented: answers 501.',
+    },
+  },
+  async () => {
+    throw ApiError.notImplemented('/api/onboarding/smart-defaults is not implemented: it performed no operation of its own.');
+  },
+);
 
-  try {
-    const { searchParams } = new URL(request.url);
-    const organizationType = searchParams.get('organizationType') || 'local';
-    const memberCountStr = searchParams.get('memberCount');
-    const memberCount = memberCountStr ? parseInt(memberCountStr, 10) : undefined;
-
-    const defaults = getSmartDefaults(organizationType, memberCount);
-
-    logger.info('Smart defaults generated', { 
-      userId,
-      organizationType,
-      memberCount,
-    });
-
-    return NextResponse.json({
-      success: true,
-      defaults,
-      metadata: {
-        organizationType,
-        memberCount: memberCount || 'not specified',
-      },
-    });
-
-  } catch (error) {
-    logger.error('Smart defaults generation failed', { error });
-    return standardErrorResponse(ErrorCode.INTERNAL_ERROR, 'Internal server error');
-  }
-});
-
+export const GET = handler;

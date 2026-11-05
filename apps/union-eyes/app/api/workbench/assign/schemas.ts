@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
 export const assignSchema = z.object({
-  claimId: z.string().uuid(),
+  claimId: z.guid(),
   assignTo: z.string().optional(),
 })

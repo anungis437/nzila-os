@@ -1,0 +1,35 @@
+{
+  "record": "UE_VS_NATIVE_EXECUTION_EVIDENCE",
+  "version": 1,
+  "mission": "UE-FULL-PLATFORM-CONVERGENCE-TO-STAGING-2026",
+  "executor": "VS Code Copilot (single integration agent)",
+  "testedCommit": "1df40bbe1",
+  "branch": "agents/ue-cursor-final-closure",
+  "pullRequest": 1014,
+  "environment": {
+    "os": "Windows",
+    "node": "v24.13.1",
+    "postgres": ["postgres 16 (disposable, fresh database per suite)", "postgres 15 (disposable, fresh database per suite)"],
+    "schema": "Django migrate plus the approved Drizzle bootstrap (combined schema), including scoped cache migration 0030"
+  },
+  "results": [
+    { "id": "tenant-isolation-remediation", "pg16": "24/24", "pg15": "24/24", "adds": "precedent sharing (grant, public, revocation, negative disclosure), dues settlement concurrency, pension retirement eligibility" },
+    { "id": "organizations-read-authority", "pg16": "5/5", "pg15": "5/5" },
+    { "id": "rewards-anniversary-concurrency", "pg16": "2/2", "pg15": "2/2", "mutationCheck": "with the advisory lock removed the same test records 18 awards (6 runs x 3 members) instead of 3" },
+    { "id": "atomic-audit-fault", "pg16": "6/6" },
+    { "id": "authority-kernel-combined", "pg16": "10/10" },
+    { "id": "authority-kernel-storage", "pg16": "11/11" },
+    { "id": "canonical-schema-census", "pg16": "4/4" },
+    { "id": "document-intake", "pg16": "10/10" },
+    { "id": "finance-duties", "pg16": "21/21" },
+    { "id": "location-retention", "pg16": "5/5" },
+    { "id": "message-lifecycle-combined", "pg16": "26 passed, 1 skipped", "skipReason": "Canonical V2 predicate topology not installed; NOT proven." },
+    { "id": "thread-assignment", "pg16": "3/3" },
+    { "id": "workaid-union-side", "pg16": "5/5" }
+  ],
+  "notRunHere": [
+    "authority-kernel-django-audit, automation-rules-ownership-migration, p4-authority-state-attest, rls-0108-schema-compatibility, round58-complete-production-geometry-remediation: they need environment (Django audit runner, production-geometry database) this run did not provide; last recorded in vs-native-execution-8f8cb18aa.json",
+    "PG15 for the suites above marked pg16 only"
+  ],
+  "limits": "Native here means the unmodified route or service code against a real PostgreSQL and the deployed runtime and system roles, with only the transport substituted. It is not an HTTP or browser run (E2E_VERIFIED stays 0)."
+}

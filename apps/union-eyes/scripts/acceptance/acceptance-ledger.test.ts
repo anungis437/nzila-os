@@ -8,10 +8,16 @@ const controls = buildAcceptanceControls()
 
 describe('compressed acceptance model (G2-G4, G6)', () => {
   it('binds every mutating root caller to a shared control (unmapped = 0)', () => {
-    expect(controls.summary.mutatingCallers).toBe(512)
-    expect(controls.summary.mutatingBound).toBe(512)
+    expect(controls.summary.mutatingCallers).toBe(470)
+    expect(controls.summary.mutatingBound).toBe(controls.summary.mutatingCallers)
     expect(controls.summary.mutatingUnmapped).toBe(0)
     expect(controls.summary.unresolvedControls).toEqual([])
+  })
+
+  // The actor map is a frozen snapshot (873 actors): one whose code was removed, or whose module stopped being a server action, is not a root caller any more.
+  it('leaves out, and counts, the actors of the frozen map that are no longer root callers', () => {
+    expect(controls.summary.retiredRootCallers).toBe(28)
+    expect(controls.summary.rootCallers + controls.summary.retiredRootCallers).toBe(873)
   })
 
   it('places every exception caller in exactly one deduplicated exception class', () => {

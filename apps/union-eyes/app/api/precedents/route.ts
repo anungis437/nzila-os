@@ -1,43 +1,63 @@
 /**
  * Precedents API Routes - Main endpoints for arbitration decisions
  * GET /api/precedents - List precedents with filtering
- * POST /api/precedents - Create a new precedent
+ * POST /api/precedents - Create a new precedent (platform content managers only)
  */
 
 import { NextResponse } from "next/server";
 import { 
   listPrecedents, 
-  createPrecedent,
   getPrecedentStatistics,
   getMostCitedPrecedents,
   getPrecedentsByIssueType
 } from "@/lib/services/precedent-service";
+import { createPrecedentAudited } from "@/lib/services/precedent-audited-service";
+import { tribunalTypeEnum, decisionTypeEnum, outcomeEnum, precedentValueEnum } from "@/db/schema";
 import { z } from "zod";
-import { withRoleAuth } from '@/lib/api-auth-guard';
+import { toPublicPrecedentSummary } from "@/lib/precedents/public-decision-view";
+import { withApi } from '@/lib/api/framework';
+import { logger } from '@/lib/logger';
 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
 import {
   ErrorCode,
   standardErrorResponse,
   standardSuccessResponse,
 } from '@/lib/api/standardized-responses';
-export const GET = withRoleAuth('member', async (request, _context) => {
+// DEF-0B11-PRP-PRECEDENT-COLLECTION-GET-TAKES-UNBOUNDED-LIMIT-AND-PAGE-FROM-THE-QUERY-STRING
+// Reject rather than silently clamp invalid pagination: a caller must not request an unbounded scan.
+function boundedPositiveInt(raw: string | null, fallback: number, max: number): number | null {
+  if (raw === null) return fallback;
+  if (!/^[1-9][0-9]{0,5}$/.test(raw)) return null;
+  const parsed = Number(raw);
+  return Number.isSafeInteger(parsed) && parsed <= max ? parsed : null;
+}
+
+// A list filter must name declared values of its column: the database refuses anything else, and that must not come back as a server fault.
+function declaredValues(raw: string, allowed: readonly string[]): string[] | null {
+  const values = raw.split(",");
+  return values.every((value) => allowed.includes(value)) ? values : null;
+}
+
+// The precedent reads run in the caller organization's tenant transaction (`rlsOrgContext`): the decisions table is tenant-scoped.
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    rlsOrgContext: true,
+    openapi: { tags: ['Precedents'], summary: 'List, filter and rank arbitration precedents' },
+  },
+  async ({ request }) => {
   try {
       const { searchParams } = new URL(request.url);
       
+      const page = boundedPositiveInt(searchParams.get("page"), 1, 10000);
+      const mostCited = searchParams.get("mostCited") === "true";
+      const limit = boundedPositiveInt(searchParams.get("limit"), mostCited ? 10 : 20, 100);
+      if (page === null || limit === null) {
+        return NextResponse.json({ error: "Invalid pagination: page must be 1..10000 and limit 1..100" }, { status: 400 });
+      }
+
       // Check for special modes
       const statistics = searchParams.get("statistics") === "true";
-      const mostCited = searchParams.get("mostCited") === "true";
       const issueType = searchParams.get("issueType");
 
       // Return statistics
@@ -48,16 +68,16 @@ export const GET = withRoleAuth('member', async (request, _context) => {
 
       // Return most cited
       if (mostCited) {
-        const limit = parseInt(searchParams.get("limit") || "10");
+        // Reuse validated, bounded collection limit.
         const precedents = await getMostCitedPrecedents(limit);
-        return NextResponse.json({ precedents });
+        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary) });
       }
 
       // Return by issue type
       if (issueType) {
-        const limit = parseInt(searchParams.get("limit") || "20");
+        // Reuse validated, bounded collection limit.
         const precedents = await getPrecedentsByIssueType(issueType, limit);
-        return NextResponse.json({ precedents, count: precedents.length });
+        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary), count: precedents.length });
       }
 
       // Build filters
@@ -66,22 +86,30 @@ export const GET = withRoleAuth('member', async (request, _context) => {
       
       const tribunal = searchParams.get("tribunal");
       if (tribunal) {
-        filters.tribunal = tribunal.split(",");
+        const values = declaredValues(tribunal, tribunalTypeEnum.enumValues);
+        if (!values) return NextResponse.json({ error: "Invalid tribunal filter" }, { status: 400 });
+        filters.tribunal = values;
       }
 
       const decisionType = searchParams.get("decisionType");
       if (decisionType) {
-        filters.decisionType = decisionType.split(",");
+        const values = declaredValues(decisionType, decisionTypeEnum.enumValues);
+        if (!values) return NextResponse.json({ error: "Invalid decisionType filter" }, { status: 400 });
+        filters.decisionType = values;
       }
 
       const outcome = searchParams.get("outcome");
       if (outcome) {
-        filters.outcome = outcome.split(",");
+        const values = declaredValues(outcome, outcomeEnum.enumValues);
+        if (!values) return NextResponse.json({ error: "Invalid outcome filter" }, { status: 400 });
+        filters.outcome = values;
       }
 
       const precedentValue = searchParams.get("precedentValue");
       if (precedentValue) {
-        filters.precedentValue = precedentValue.split(",");
+        const values = declaredValues(precedentValue, precedentValueEnum.enumValues);
+        if (!values) return NextResponse.json({ error: "Invalid precedentValue filter" }, { status: 400 });
+        filters.precedentValue = values;
       }
 
       const arbitrator = searchParams.get("arbitrator");
@@ -124,138 +152,90 @@ export const GET = withRoleAuth('member', async (request, _context) => {
       if (dateTo) {
         filters.dateTo = new Date(dateTo);
       }
+      if ([filters.dateFrom, filters.dateTo].some((date) => date instanceof Date && Number.isNaN(date.getTime()))) {
+        return NextResponse.json({ error: "Invalid date filter" }, { status: 400 });
+      }
 
       // Pagination
-      const page = parseInt(searchParams.get("page") || "1");
-      const limit = parseInt(searchParams.get("limit") || "20");
+      // Reuse validated, bounded collection page and limit.
       const sortBy = searchParams.get("sortBy") || "decisionDate";
-      const sortOrder = (searchParams.get("sortOrder") || "desc") as "asc" | "desc";
+      const sortOrder = searchParams.get("sortOrder") || "desc";
+      if (!["decisionDate", "citationCount", "createdAt"].includes(sortBy) || !["asc", "desc"].includes(sortOrder)) {
+        return NextResponse.json({ error: "Invalid sort field or order" }, { status: 400 });
+      }
 
-      const result = await listPrecedents(filters, { page, limit, sortBy, sortOrder });
+      const result = await listPrecedents(filters, { page, limit, sortBy, sortOrder: sortOrder as "asc" | "desc" });
 
-      return NextResponse.json(result);
+      return NextResponse.json({ ...result, precedents: result.precedents.map(toPublicPrecedentSummary) });
     } catch (error) {
-return standardErrorResponse(
-      ErrorCode.INTERNAL_ERROR,
-      'Internal server error',
-      error
-    );
+      logger.error('Failed to list the precedents', { error });
+      return standardErrorResponse(
+        ErrorCode.INTERNAL_ERROR,
+        'Internal server error',
+        error
+      );
     }
-});
+  },
+);
 
 
+// The precedent library is shared across tenants, so only a platform-elevated role may add to it.
 const precedentsSchema = z.object({
-  caseNumber: z.unknown().optional(),
-  caseTitle: z.string().min(1, 'caseTitle is required'),
-  tribunal: z.unknown().optional(),
-  decisionType: z.boolean().optional(),
-  decisionDate: z.boolean().optional(),
-  arbitrator: z.unknown().optional(),
-  union: z.unknown().optional(),
-  employer: z.unknown().optional(),
-  outcome: z.unknown().optional(),
-  precedentValue: z.unknown().optional(),
-  fullText: z.unknown().optional(),
+  caseNumber: z.string().min(1).max(100),
+  caseTitle: z.string().min(1, 'caseTitle is required').max(500),
+  tribunal: z.enum(tribunalTypeEnum.enumValues),
+  decisionType: z.enum(decisionTypeEnum.enumValues),
+  decisionDate: z.coerce.date(),
+  filingDate: z.coerce.date().optional(),
+  hearingDate: z.coerce.date().optional(),
+  arbitrator: z.string().min(1).max(200),
+  panelMembers: z.array(z.string()).optional(),
+  grievor: z.string().max(300).optional(),
+  union: z.string().min(1).max(300),
+  employer: z.string().min(1).max(300),
+  outcome: z.enum(outcomeEnum.enumValues),
+  precedentValue: z.enum(precedentValueEnum.enumValues),
+  keyFindings: z.array(z.string()).optional(),
+  issueTypes: z.array(z.string()).optional(),
+  fullText: z.string().min(1),
+  summary: z.string().optional(),
+  headnote: z.string().optional(),
+  precedentSummary: z.string().optional(),
+  reasoning: z.string().optional(),
+  keyFacts: z.string().optional(),
+  sector: z.string().max(100).optional(),
+  jurisdiction: z.string().max(50).optional(),
+  language: z.string().max(10).optional(),
 });
 
-export const POST = withRoleAuth('steward', async (request, _context) => {
+// Adding a precedent opens its own tenant transaction and writes its audit record in it (createPrecedentAudited), so the wrapper opens none.
+export const POST = withApi(
+  {
+    auth: { minRole: 'content_manager' },
+    openapi: { tags: ['Precedents'], summary: 'Create a precedent draft awaiting review' },
+  },
+  async ({ request, userId, organizationId }) => {
   try {
-      const body = await request.json();
-    // Validate request body
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'A JSON body is required');
+    }
     const validation = precedentsSchema.safeParse(body);
     if (!validation.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
-    
-    const { caseNumber: _caseNumber, caseTitle: _caseTitle, tribunal: _tribunal, decisionType: _decisionType, decisionDate: _decisionDate, arbitrator: _arbitrator, union: _union, employer: _employer, outcome: _outcome, precedentValue: _precedentValue, fullText: _fullText } = validation.data;
 
-      // Validate required fields
-      if (!body.caseNumber) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'caseNumber is required'
-    );
-      }
-
-      if (!body.caseTitle) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'caseTitle is required'
-    );
-      }
-
-      if (!body.tribunal) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'tribunal is required'
-    );
-      }
-
-      if (!body.decisionType) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'decisionType is required'
-    );
-      }
-
-      if (!body.decisionDate) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'decisionDate is required'
-    );
-      }
-
-      if (!body.arbitrator) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'arbitrator is required'
-    );
-      }
-
-      if (!body.union) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'union is required'
-    );
-      }
-
-      if (!body.employer) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'employer is required'
-    );
-      }
-
-      if (!body.outcome) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'outcome is required'
-    );
-      }
-
-      if (!body.precedentValue) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'precedentValue is required'
-    );
-      }
-
-      if (!body.fullText) {
-        return standardErrorResponse(
-      ErrorCode.MISSING_REQUIRED_FIELD,
-      'fullText is required'
-    );
-      }
-
-      // Create precedent
-      const precedent = await createPrecedent(body);
+      // Create a non-public draft. Publication requires an independent reviewed workflow. 
+      const precedent = await createPrecedentAudited({ organizationId: organizationId!, userId: userId! }, validation.data);
 
       return standardSuccessResponse(
-      {  precedent  }
+      { precedent, publicationStatus: 'pending_review', publiclyDiscoverable: false }
     );
     } catch (error) {
 // Handle unique constraint violations
@@ -267,11 +247,12 @@ export const POST = withRoleAuth('steward', async (request, _context) => {
     );
       }
 
+      logger.error('Failed to create the precedent', { error });
       return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Internal server error',
       error
     );
     }
-});
-
+  },
+);

@@ -195,6 +195,7 @@ export function OrganizationalMemoryExplorer() {
   const [hasSearched, setHasSearched] = useState(false);
 
   const [expertiseDomains, setExpertiseDomains] = useState<ExpertiseDomain[]>([]);
+  const [domainsFailed, setDomainsFailed] = useState(false);
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -204,7 +205,7 @@ export function OrganizationalMemoryExplorer() {
     async function loadDomains() {
       try {
         const res = await fetch('/api/exit-interviews/expertise-map', { cache: 'no-store' });
-        if (!res.ok) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const payload = await res.json() as { data: { domains: ExpertiseDomain[] } };
         // Show single-source and high-risk topics prominently
         const sorted = [...(payload.data.domains ?? [])].sort((a, b) => {
@@ -212,8 +213,9 @@ export function OrganizationalMemoryExplorer() {
           return (order[a.riskLevel as keyof typeof order] ?? 3) - (order[b.riskLevel as keyof typeof order] ?? 3);
         });
         setExpertiseDomains(sorted.slice(0, 40));
+        setDomainsFailed(false);
       } catch {
-        // ignore
+        setDomainsFailed(true);
       }
     }
     void loadDomains();
@@ -379,8 +381,15 @@ export function OrganizationalMemoryExplorer() {
         </div>
       )}
 
+      {/* The topic list could not be read: say so, and do not present the empty-library notice in its place */}
+      {domainsFailed && !hasSearched && (
+        <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" data-testid="topics-load-failed">
+          The knowledge areas could not be loaded. You can still search.
+        </p>
+      )}
+
       {/* Empty state when no search */}
-      {!hasSearched && expertiseDomains.length === 0 && (
+      {!hasSearched && expertiseDomains.length === 0 && !domainsFailed && (
         <div className="rounded-lg border bg-muted/20 p-12 text-center text-sm text-muted-foreground">
           <p className="font-medium text-base">Organizational memory is building</p>
           <p className="mt-2 max-w-md mx-auto">

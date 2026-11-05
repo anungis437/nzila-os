@@ -29,7 +29,7 @@
     "@nzila/platform-decision-engine": "workspace:*",
     "@nzila/platform-intelligence": "workspace:*",
     "@nzila/platform-context-orchestrator": "workspace:*",
-    "zod": "^3.25.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^25",

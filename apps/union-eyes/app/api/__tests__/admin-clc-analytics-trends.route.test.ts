@@ -2,15 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  withRoleAuth: vi.fn(),
   checkRateLimit: vi.fn(),
   createRateLimitHeaders: vi.fn(),
   analyzeMultiYearTrends: vi.fn(),
   logApiAuditEvent: vi.fn(),
-  standardErrorResponse: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   createRateLimitHeaders: m.createRateLimitHeaders,
@@ -18,10 +16,8 @@ vi.mock('@/lib/rate-limiter', () => ({
 }));
 vi.mock('@/services/clc/compliance-reports', () => ({ analyzeMultiYearTrends: m.analyzeMultiYearTrends }));
 vi.mock('@/lib/middleware/api-security', () => ({ logApiAuditEvent: m.logApiAuditEvent }));
-vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR', INTERNAL_ERROR: 'INTERNAL_ERROR' },
-  standardErrorResponse: m.standardErrorResponse,
-}));
+
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
 async function loadRoute() {
   return import('../admin/clc/analytics/trends/route');
@@ -30,13 +26,29 @@ async function loadRoute() {
 describe('admin/clc/analytics/trends route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withRoleAuth.mockImplementation((_role: string, handler: any) =>
-      (request: NextRequest, context: any = { userId: 'u1' }) => handler(request, context));
+    resetCaller();
+    caller.organizationId = 'org-a';
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-remaining': '49' });
     m.analyzeMultiYearTrends.mockResolvedValue({ years: 3, trend: [] });
-    m.standardErrorResponse.mockImplementation((code: string, message: string) =>
-      new Response(JSON.stringify({ code, message }), { status: code === 'VALIDATION_ERROR' ? 400 : 500 }));
+  });
+
+  it('declares what it asks of the wrapper: an admin, in the caller organization\'s tenant transaction', async () => {
+    await loadRoute();
+    const config = declared.find((entry) => entry.openapi?.summary === 'CLC multi-year remittance trends (3, 5 or 10 years)');
+    expect(config?.auth).toEqual({ minRole: 'admin' });
+    expect(config?.rlsOrgContext).toBe(true);
+  });
+
+  it('refuses a caller below the admin role without reading tenant reports', async () => {
+    caller.role = 'officer';
+    const { GET } = await loadRoute();
+
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/trends?years=3'));
+
+    expect(response.status).toBe(403);
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();
   });
 
   it('returns 429 when rate limited', async () => {
@@ -64,7 +76,23 @@ describe('admin/clc/analytics/trends route', () => {
 
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({ years: 3, trend: [] });
-    expect(m.analyzeMultiYearTrends).toHaveBeenCalledWith({ years: 5 });
+    expect(m.analyzeMultiYearTrends).toHaveBeenCalledWith({ years: 5, organizationId: 'org-a' });
+  });
+
+  it('refuses missing organization context without reading tenant reports', async () => {
+    caller.organizationId = null;
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/trends?years=5'));
+    expect(response.status).toBe(403);
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();
+  });
+
+  it('rejects trailing characters in a trend period', async () => {
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/admin/clc/analytics/trends?years=5junk'));
+    expect(response.status).toBe(400);
+    expect(m.analyzeMultiYearTrends).not.toHaveBeenCalled();
   });
 
   it('returns 500 when trend analysis fails', async () => {

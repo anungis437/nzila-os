@@ -49,13 +49,17 @@ export interface DocumentVersion {
   id: string;
   versionNumber: number;
   createdAt: Date;
-  createdBy: {
+  /** Who filed this version; absent when the viewer may not see it or the person is no longer a member. */
+  createdBy?: {
     id: string;
     name: string;
     avatar?: string;
   };
-  size: number;
+  /** The size of the stored file; absent where the version record does not carry it. */
+  size?: number;
   comment?: string;
+  /** The recorded checksum of this version's content. */
+  contentHash?: string;
   changes?: {
     type: "created" | "updated" | "minor" | "major";
     summary?: string;
@@ -75,6 +79,8 @@ export interface DocumentVersionControlProps {
   document: DocumentInfo;
   versions: DocumentVersion[];
   onDownload?: (version: DocumentVersion) => void;
+  /** Which versions can be downloaded; every version when it is not given. */
+  canDownload?: (version: DocumentVersion) => boolean;
   onRestore?: (version: DocumentVersion) => Promise<void>;
   onPreview?: (version: DocumentVersion) => void;
   onCompare?: (version1: DocumentVersion, version2: DocumentVersion) => void;
@@ -84,6 +90,7 @@ export function DocumentVersionControl({
   document,
   versions,
   onDownload,
+  canDownload,
   onRestore,
   onPreview,
   onCompare,
@@ -134,7 +141,7 @@ export function DocumentVersionControl({
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-2xl font-bold">Version History</h2>
           <div className="flex gap-2">
-            {!compareMode ? (
+            {!onCompare ? null : !compareMode ? (
               <Button
                 variant="outline"
                 onClick={() => setCompareMode(true)}
@@ -245,12 +252,16 @@ export function DocumentVersionControl({
                 compareMode={compareMode}
                 isSelected={compareVersions.some((v) => v.id === version.id)}
                 onSelect={() => handleCompareSelect(version)}
-                onDownload={() => onDownload?.(version)}
-                onPreview={() => onPreview?.(version)}
-                onRestore={() => {
-                  setSelectedVersion(version);
-                  setRestoreDialogOpen(true);
-                }}
+                onDownload={onDownload && (canDownload?.(version) ?? true) ? () => onDownload(version) : undefined}
+                onPreview={onPreview ? () => onPreview(version) : undefined}
+                onRestore={
+                  onRestore
+                    ? () => {
+                        setSelectedVersion(version);
+                        setRestoreDialogOpen(true);
+                      }
+                    : undefined
+                }
               />
             ))}
           </div>
@@ -278,7 +289,7 @@ export function DocumentVersionControl({
                   </Badge>
                 </div>
                 <div className="text-sm text-gray-600">
-                  by {selectedVersion.createdBy.name}
+                  {selectedVersion.createdBy ? `by ${selectedVersion.createdBy.name}` : null}
                 </div>
                 {selectedVersion.comment && (
                   <div className="text-sm mt-2">{selectedVersion.comment}</div>
@@ -340,9 +351,9 @@ function VersionItem({
   compareMode: boolean;
   isSelected: boolean;
   onSelect: () => void;
-  onDownload: () => void;
-  onPreview: () => void;
-  onRestore: () => void;
+  onDownload?: () => void;
+  onPreview?: () => void;
+  onRestore?: () => void;
 }) {
   const changeTypeConfig = {
     created: { label: "Created", color: "bg-green-500" },
@@ -399,16 +410,24 @@ function VersionItem({
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center gap-3 text-sm">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-gray-400" />
-                <span className="font-medium">{version.createdBy.name}</span>
-              </div>
-              <span className="text-gray-400">•</span>
-              <span className="text-gray-600">
-                {formatFileSize(version.size)}
-              </span>
-              <span className="text-gray-400">•</span>
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              {version.createdBy && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-400" />
+                    <span className="font-medium">{version.createdBy.name}</span>
+                  </div>
+                  <span className="text-gray-400">•</span>
+                </>
+              )}
+              {typeof version.size === "number" && (
+                <>
+                  <span className="text-gray-600">
+                    {formatFileSize(version.size)}
+                  </span>
+                  <span className="text-gray-400">•</span>
+                </>
+              )}
               <span className="text-gray-600">
                 {format(version.createdAt, "MMM d, yyyy 'at' h:mm a")}
               </span>
@@ -421,31 +440,41 @@ function VersionItem({
               </p>
             )}
 
+            {version.contentHash && (
+              <div className="text-xs text-gray-500 break-all">
+                Content hash: <span className="font-mono">{version.contentHash}</span>
+              </div>
+            )}
+
             {version.changes?.summary && (
               <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
                 {version.changes.summary}
               </div>
             )}
 
-            {!compareMode && (
+            {!compareMode && (onPreview || onDownload || (onRestore && !version.isCurrent)) && (
               <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onPreview}
-                >
-                  <Eye className="h-3 w-3 mr-1" />
-                  Preview
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onDownload}
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Download
-                </Button>
-                {!version.isCurrent && (
+                {onPreview && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onPreview}
+                  >
+                    <Eye className="h-3 w-3 mr-1" />
+                    Preview
+                  </Button>
+                )}
+                {onDownload && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onDownload}
+                  >
+                    <Download className="h-3 w-3 mr-1" />
+                    Download
+                  </Button>
+                )}
+                {onRestore && !version.isCurrent && (
                   <Button
                     variant="outline"
                     size="sm"

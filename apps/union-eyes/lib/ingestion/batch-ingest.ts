@@ -16,6 +16,7 @@
  */
 
 import { db } from '@/db/db';
+import { createHash } from 'crypto';
 import { sql, eq } from 'drizzle-orm';
 import { organizations } from '@/db/schema-organizations';
 import {
@@ -70,6 +71,18 @@ function toUTCIso(dateStr: string | undefined, fallback: Date): string {
   return isNaN(d.getTime()) ? fallback.toISOString() : d.toISOString();
 }
 
+// grievances.grievance_number is unique across every organization, so the number given to a case that arrives without one names its organization and source system,
+// and the same case always gets the same number (a number from the source is kept as it is: a collision with one already in use fails that record, with the database's reason).
+function importedGrievanceNumber(organizationId: string, sourceSystem: string, externalId: string): string {
+  const digest = createHash('sha256').update(`${organizationId}|${sourceSystem}|${externalId}`).digest('hex').slice(0, 10);
+  return `IMP-${digest}-${externalId.slice(0, 30)}`;
+}
+
+// A document that arrives without an id in its source system is still one document on a re-import: its id is derived from the case and what it is.
+function derivedDocumentId(caseExternalId: string, name: string, fileUrl: string): string {
+  return `derived:${createHash('sha256').update(JSON.stringify([caseExternalId, name, fileUrl])).digest('hex').slice(0, 32)}`;
+}
+
 // ─── Organization Validation (§8) ───────────────────────────────────────────
 
 async function verifyOrganization(orgId: string): Promise<boolean> {
@@ -82,6 +95,11 @@ async function verifyOrganization(orgId: string): Promise<boolean> {
 }
 
 // ─── Ingest Single Grievance Record ─────────────────────────────────────────
+
+// The statements of one record run on `tx`, a nested transaction of the import's transaction: a savepoint. A statement that fails aborts a PostgreSQL transaction, and
+// postgres.js also rejects the transaction that ran it even when the error was caught, so a failed record is contained only by its own savepoint, through the driver's
+// own nested transaction (a raw SAVEPOINT statement is not enough): the failure rolls back to it, nothing of the record is left, and the records after it still import.
+type Executor = Pick<typeof db, 'execute'>;
 
 async function ingestGrievanceRecord(
   record: IngestionGrievanceRecord,
@@ -101,159 +119,8 @@ async function ingestGrievanceRecord(
       };
     }
 
-    // §1: Compute fingerprint for idempotency
-    const fingerprint = computeRecordFingerprint(record);
-
-    // §4: Map status through state bridge
-    const { grievanceStatus } = mapImportStatus(record.status);
-
-    // §7: User resolution fallback
-    const grievantName = record.grievant_name?.trim() || record.filed_by?.trim() || UNASSIGNED_LABEL;
-    const grievantEmail = record.grievant_email?.trim() || undefined;
-
-    // §1: Upsert with ON CONFLICT on (organization_id, external_case_id)
-    // Use raw SQL for the actual upsert since Drizzle's onConflictDoUpdate
-    // doesn't support partial index targets cleanly
-    const grievanceNumber = record.grievance_number?.trim()
-      || `IMP-${externalId.substring(0, 20)}`;
-
-    const filedDate = toUTCIso(record.filed_date, importTime);
-    const incidentDate = record.incident_date ? toUTCIso(record.incident_date, importTime) : null;
-
-    const priority = ['low', 'medium', 'high', 'urgent'].includes(record.priority ?? '')
-      ? record.priority!
-      : 'medium';
-
-    const step = ['step_1', 'step_2', 'step_3', 'final', 'arbitration'].includes(record.step ?? '')
-      ? record.step!
-      : null;
-
-    const insertResult = await db.execute(sql`
-      INSERT INTO grievances (
-        grievance_number, external_case_id, import_fingerprint,
-        organization_id, type, status, priority, step,
-        title, description, background, desired_outcome,
-        grievant_name, grievant_email,
-        incident_date, filed_date,
-        source_system, imported_at, import_batch_id,
-        created_at, updated_at
-      ) VALUES (
-        ${grievanceNumber}, ${externalId}, ${fingerprint},
-        ${opts.organizationId},
-        ${record.type}::grievance_type,
-        ${grievanceStatus}::grievance_status,
-        ${priority}::grievance_priority,
-        ${step ? sql`${step}::grievance_step` : sql`NULL`},
-        ${record.title.trim()}, ${record.description.trim()},
-        ${record.timeline ? 'Imported from ' + (opts.sourceSystem ?? 'external system') : null},
-        ${record.timeline ? null : null},
-        ${grievantName}, ${grievantEmail ?? null},
-        ${incidentDate ? sql`${incidentDate}::timestamptz` : sql`NULL`},
-        ${filedDate}::timestamptz,
-        ${opts.sourceSystem}, ${importTime.toISOString()}::timestamptz, ${batchId}::uuid,
-        NOW(), NOW()
-      )
-      ON CONFLICT (organization_id, external_case_id)
-        WHERE external_case_id IS NOT NULL
-      DO UPDATE SET
-        status = EXCLUDED.status,
-        priority = EXCLUDED.priority,
-        title = EXCLUDED.title,
-        description = EXCLUDED.description,
-        grievant_name = EXCLUDED.grievant_name,
-        grievant_email = EXCLUDED.grievant_email,
-        import_fingerprint = EXCLUDED.import_fingerprint,
-        imported_at = EXCLUDED.imported_at,
-        import_batch_id = EXCLUDED.import_batch_id,
-        updated_at = NOW()
-      RETURNING id
-    `);
-
-    const grievanceId = (insertResult as any as Array<{ id: string }>)[0]?.id;
-    if (!grievanceId) {
-      return { status: 'failed', error: 'No grievance ID returned from upsert' };
-    }
-
-    // §5: Timeline reconstruction — insert deduplicated events
-    if (record.timeline?.length) {
-      let seq = 0;
-      for (const ev of record.timeline) {
-        const eventDate = toUTCIso(ev.date, importTime);
-        const contentHash = computeTimelineEventHash(ev);
-        const action = ev.action?.trim() || 'status_change';
-        const actor = ev.actor?.trim() || SYSTEM_USER;
-        const description = ev.notes?.trim() || `${action} event`;
-
-        await db.execute(sql`
-          INSERT INTO grievance_timeline_events (
-            grievance_id, organization_id, event_type, event_date,
-            actor, description, content_hash,
-            source_system, import_batch_id, sequence_number
-          ) VALUES (
-            ${grievanceId}::uuid, ${opts.organizationId}::uuid,
-            ${action}, ${eventDate}::timestamptz,
-            ${actor}, ${description}, ${contentHash},
-            ${opts.sourceSystem}, ${batchId}::uuid, ${seq}
-          )
-          ON CONFLICT (grievance_id, event_date, event_type, content_hash)
-          DO NOTHING
-        `);
-        seq++;
-      }
-    }
-
-    // §4: Synthetic history event for imported status
-    const statusEventHash = computeTimelineEventHash({
-      date: filedDate,
-      action: 'imported',
-      actor: SYSTEM_USER,
-      notes: `Imported with status '${grievanceStatus}' from ${opts.sourceSystem}`,
-    });
-
-    await db.execute(sql`
-      INSERT INTO grievance_timeline_events (
-        grievance_id, organization_id, event_type, event_date,
-        actor, description, content_hash,
-        source_system, import_batch_id, sequence_number
-      ) VALUES (
-        ${grievanceId}::uuid, ${opts.organizationId}::uuid,
-        'imported', ${filedDate}::timestamptz,
-        ${SYSTEM_USER},
-        ${'Imported with status \'' + grievanceStatus + '\' from ' + opts.sourceSystem},
-        ${statusEventHash},
-        ${opts.sourceSystem}, ${batchId}::uuid, ${9999}
-      )
-      ON CONFLICT (grievance_id, event_date, event_type, content_hash)
-      DO NOTHING
-    `);
-
-    // §6: Document normalization — insert linked documents
-    if (record.documents?.length) {
-      for (const doc of record.documents) {
-        const docName = doc.name?.trim() || 'Untitled Document';
-        const docType = doc.file_type?.trim() || 'other';
-        const externalDocId = doc.external_id?.trim() || null;
-
-        await db.execute(sql`
-          INSERT INTO documents (
-            organization_id, name, file_url, file_type,
-            document_type, source_system, external_document_id,
-            imported_at, import_batch_id,
-            uploaded_by, linked_case_id, is_orphan
-          ) VALUES (
-            ${opts.organizationId}::uuid,
-            ${docName}, ${doc.file_url ?? ''},
-            ${docType}, ${docType},
-            ${opts.sourceSystem}, ${externalDocId},
-            ${importTime.toISOString()}::timestamptz, ${batchId}::uuid,
-            ${opts.createdBy}, ${grievanceId}::uuid, false
-          )
-          ON CONFLICT DO NOTHING
-        `);
-      }
-    }
-
-    return { status: 'succeeded', resolvedId: grievanceId };
+    const resolvedId = await db.transaction((tx) => writeGrievanceRecord(tx, record, batchId, opts, importTime));
+    return { status: 'succeeded', resolvedId };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.error('Ingestion record failed', {
@@ -264,6 +131,192 @@ async function ingestGrievanceRecord(
     });
     return { status: 'failed', error: message };
   }
+}
+
+/** Writes one record (the case, its timeline, its documents) and returns the case's id; throws, so the savepoint rolls back, when any part of it cannot be written. */
+async function writeGrievanceRecord(
+  tx: Executor,
+  record: IngestionGrievanceRecord,
+  batchId: string,
+  opts: IngestionOptions,
+  importTime: Date,
+): Promise<string> {
+  const externalId = record.external_case_id;
+
+  // §1: Compute fingerprint for idempotency
+  const fingerprint = computeRecordFingerprint(record);
+
+  // §4: Map status through state bridge
+  const { grievanceStatus } = mapImportStatus(record.status);
+
+  // §7: User resolution fallback
+  const grievantName = record.grievant_name?.trim() || record.filed_by?.trim() || UNASSIGNED_LABEL;
+  const grievantEmail = record.grievant_email?.trim() || undefined;
+
+  // §1: Upsert with ON CONFLICT on (organization_id, source_system, external_case_id): the unique key of platform 0077 (a partial index, so the writer is raw SQL:
+  // Drizzle's onConflictDoUpdate does not support a partial index target cleanly). grievances.type/status/priority/step are plain varchar, not enums, so no casts.
+  const grievanceNumber = record.grievance_number?.trim()
+    || importedGrievanceNumber(opts.organizationId, opts.sourceSystem, externalId);
+
+  const filedDate = toUTCIso(record.filed_date, importTime);
+  const incidentDate = record.incident_date ? toUTCIso(record.incident_date, importTime) : null;
+
+  const priority = ['low', 'medium', 'high', 'urgent'].includes(record.priority ?? '')
+    ? record.priority!
+    : 'medium';
+
+  const step = ['step_1', 'step_2', 'step_3', 'final', 'arbitration'].includes(record.step ?? '')
+    ? record.step!
+    : null;
+
+  const insertResult = await tx.execute(sql`
+    INSERT INTO grievances (
+      grievance_number, external_case_id, import_fingerprint,
+      organization_id, type, status, priority, step,
+      title, description,
+      grievant_name, grievant_email,
+      incident_date, filed_date,
+      source_system, imported_at, import_batch_id,
+      created_at, updated_at
+    ) VALUES (
+      ${grievanceNumber}, ${externalId}, ${fingerprint},
+      ${opts.organizationId}::uuid,
+      ${record.type}, ${grievanceStatus}, ${priority}, ${step},
+      ${record.title.trim()}, ${record.description.trim()},
+      ${grievantName}, ${grievantEmail ?? null},
+      ${incidentDate ? sql`${incidentDate}::timestamptz` : sql`NULL`},
+      ${filedDate}::timestamptz,
+      ${opts.sourceSystem}, ${importTime.toISOString()}::timestamptz, ${batchId}::uuid,
+      NOW(), NOW()
+    )
+    ON CONFLICT (organization_id, source_system, external_case_id)
+      WHERE external_case_id IS NOT NULL
+    DO UPDATE SET
+      status = EXCLUDED.status,
+      priority = EXCLUDED.priority,
+      title = EXCLUDED.title,
+      description = EXCLUDED.description,
+      grievant_name = EXCLUDED.grievant_name,
+      grievant_email = EXCLUDED.grievant_email,
+      import_fingerprint = EXCLUDED.import_fingerprint,
+      imported_at = EXCLUDED.imported_at,
+      import_batch_id = EXCLUDED.import_batch_id,
+      updated_at = NOW()
+    RETURNING id
+  `);
+
+  const grievanceId = (insertResult as any as Array<{ id: string }>)[0]?.id;
+  if (!grievanceId) {
+    throw new Error('No grievance ID returned from upsert');
+  }
+
+  // §5: Timeline reconstruction — insert deduplicated events
+  if (record.timeline?.length) {
+    let seq = 0;
+    for (const ev of record.timeline) {
+      const eventDate = toUTCIso(ev.date, importTime);
+      const contentHash = computeTimelineEventHash(ev);
+      const action = ev.action?.trim() || 'status_change';
+      const actor = ev.actor?.trim() || SYSTEM_USER;
+      const description = ev.notes?.trim() || `${action} event`;
+
+      await tx.execute(sql`
+        INSERT INTO grievance_timeline_events (
+          grievance_id, organization_id, event_type, event_date,
+          actor, description, content_hash,
+          source_system, import_batch_id, sequence_number
+        ) VALUES (
+          ${grievanceId}::uuid, ${opts.organizationId}::uuid,
+          ${action}, ${eventDate}::timestamptz,
+          ${actor}, ${description}, ${contentHash},
+          ${opts.sourceSystem}, ${batchId}::uuid, ${seq}
+        )
+        ON CONFLICT (grievance_id, event_date, event_type, content_hash)
+        DO NOTHING
+      `);
+      seq++;
+    }
+  }
+
+  // §4: Synthetic history event for imported status
+  const statusEventHash = computeTimelineEventHash({
+    date: filedDate,
+    action: 'imported',
+    actor: SYSTEM_USER,
+    notes: `Imported with status '${grievanceStatus}' from ${opts.sourceSystem}`,
+  });
+
+  await tx.execute(sql`
+    INSERT INTO grievance_timeline_events (
+      grievance_id, organization_id, event_type, event_date,
+      actor, description, content_hash,
+      source_system, import_batch_id, sequence_number
+    ) VALUES (
+      ${grievanceId}::uuid, ${opts.organizationId}::uuid,
+      'imported', ${filedDate}::timestamptz,
+      ${SYSTEM_USER},
+      ${'Imported with status \'' + grievanceStatus + '\' from ' + opts.sourceSystem},
+      ${statusEventHash},
+      ${opts.sourceSystem}, ${batchId}::uuid, ${9999}
+    )
+    ON CONFLICT (grievance_id, event_date, event_type, content_hash)
+    DO NOTHING
+  `);
+
+  // §6: Document normalization. A document is the canonical set the upload routes write: the documents row (one per organization, source system and external id,
+  // so a re-import finds it again), its first version (the file as the source holds it, unverified), and the document_links row that makes it the case's.
+  if (record.documents?.length) {
+    for (const doc of record.documents) {
+      const docName = doc.name?.trim() || 'Untitled Document';
+      const docType = doc.file_type?.trim() || 'other';
+      const fileUrl = doc.file_url?.trim() ?? '';
+      const externalDocId = doc.external_id?.trim() || derivedDocumentId(externalId, docName, fileUrl);
+
+      const stored = await tx.execute(sql`
+        INSERT INTO documents (
+          organization_id, name, title, file_url, file_type, document_type,
+          uploaded_by, source_system, external_document_id, imported_at, import_batch_id
+        ) VALUES (
+          ${opts.organizationId}::uuid, ${docName}, ${docName}, ${fileUrl}, ${docType}, ${docType},
+          ${opts.createdBy}, ${opts.sourceSystem}, ${externalDocId},
+          ${importTime.toISOString()}::timestamptz, ${batchId}::uuid
+        )
+        ON CONFLICT (organization_id, source_system, external_document_id)
+          WHERE external_document_id IS NOT NULL
+        DO UPDATE SET
+          name = EXCLUDED.name,
+          title = EXCLUDED.title,
+          file_url = EXCLUDED.file_url,
+          file_type = EXCLUDED.file_type,
+          document_type = EXCLUDED.document_type,
+          imported_at = EXCLUDED.imported_at,
+          import_batch_id = EXCLUDED.import_batch_id,
+          updated_at = NOW()
+        RETURNING id
+      `);
+      const documentId = (stored as any as Array<{ id: string }>)[0]?.id;
+      if (!documentId) {
+        throw new Error(`No document ID returned for '${docName}'`);
+      }
+
+      // A document with no file reference is a record of a document, not a stored file: it has no version.
+      if (fileUrl) {
+        await tx.execute(sql`
+          INSERT INTO document_versions (organization_id, document_id, version_no, storage_key, content_hash, uploaded_by)
+          VALUES (${opts.organizationId}::uuid, ${documentId}::uuid, 1, ${fileUrl}, ${'unverified:' + documentId}, ${opts.createdBy})
+          ON CONFLICT (document_id, version_no) DO NOTHING
+        `);
+      }
+
+      await tx.execute(sql`
+        INSERT INTO document_links (organization_id, document_id, linked_entity_type, linked_entity_id, linked_by)
+        VALUES (${opts.organizationId}::uuid, ${documentId}::uuid, 'grievance', ${grievanceId}::uuid, ${opts.createdBy})
+        ON CONFLICT (document_id, linked_entity_type, linked_entity_id) DO NOTHING
+      `);
+    }
+  }
+
+  return grievanceId;
 }
 
 // ─── Main Entry Point ───────────────────────────────────────────────────────

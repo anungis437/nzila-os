@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiErrorMessage } from '@/lib/client/api-envelope';
 
 interface AttachmentMetadata {
   url: string;
@@ -25,9 +26,12 @@ interface FileUploadProps {
   disabled?: boolean;
 }
 
+/** One array for every render that is not given any: a default written inline is a new array each time, which would re-run the effect that copies it into state. */
+const NO_ATTACHMENTS: AttachmentMetadata[] = [];
+
 export function FileUpload({
   claimId,
-  existingAttachments = [],
+  existingAttachments = NO_ATTACHMENTS,
   onUploadComplete,
   onDeleteComplete,
   maxFiles = 10,
@@ -82,13 +86,14 @@ export function FileUpload({
         body: formData,
       });
 
-      const data = await response.json();
+      const data = (await response.json().catch(() => null)) as { data?: { attachment?: AttachmentMetadata } } | null;
 
       if (!response.ok) {
-        throw new Error(data.error || 'Upload failed');
+        throw new Error(apiErrorMessage(data, 'Upload failed'));
       }
 
-      const newAttachment = data?.data?.attachment ?? data?.attachment;
+      // The route answers { success, data: { attachment }, timestamp }.
+      const newAttachment = data?.data?.attachment;
       if (!newAttachment) {
         throw new Error('Upload completed without attachment metadata');
       }
@@ -118,10 +123,10 @@ toast({
         { method: 'DELETE' }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Delete failed');
+        throw new Error(apiErrorMessage(data, 'Delete failed'));
       }
 
       setAttachments(prev => prev.filter(a => a.url !== attachment.url));

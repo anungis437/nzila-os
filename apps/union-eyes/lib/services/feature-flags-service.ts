@@ -386,6 +386,5 @@ export const FEATURE_FLAGS = {
   VOICE_TRANSCRIPTION: 'voice-transcription',
   ML_PREDICTIONS: 'ml-predictions',
   STRIPE_PAYMENTS: 'stripe-payments',
-  WHOP_PAYMENTS: 'whop-payments',
 } as const;
 

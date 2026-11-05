@@ -27,6 +27,6 @@ export const GET = withApi(
       staleDays: query.staleDays ?? 30,
       expiredDays: query.expiredDays ?? 90,
     };
-    return { data: await getFreshnessOverview(thresholds) };
+    return await getFreshnessOverview(thresholds);
   },
 );

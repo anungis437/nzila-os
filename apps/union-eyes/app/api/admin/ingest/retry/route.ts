@@ -8,18 +8,17 @@
  */
 
 import { withApi, z, ApiError } from '@/lib/api/framework';
-import { withOrgOwnedContext as withSystemContext } from '@/lib/db/org-owned-context';
-import { db } from '@/db/db';
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, sql } from 'drizzle-orm';
 import {
   ingestionBatches,
   ingestionRecords,
 } from '@/db/schema/ingestion-schema';
-import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 const retryBodySchema = z.object({
-  batch_id: z.string().uuid(),
-  record_ids: z.array(z.string().uuid()).min(1).max(500).optional(),
+  batch_id: z.guid(),
+  record_ids: z.array(z.guid()).min(1).max(500).optional(),
 });
 
 export const POST = withApi(
@@ -38,93 +37,79 @@ export const POST = withApi(
       throw ApiError.badRequest('Organization context required');
     }
 
-    // Verify batch exists and belongs to this org
-    const [batch] = await withSystemContext(async () =>
-      db
-        .select()
+    // The batch lookup, the failed-record read, the reset and the audit record are one tenant transaction (runtime role, the caller's
+    // organization): every failed record is re-queued with its audit record, or none is.
+    const failedCount = await withRLSContext({ organizationId }, async (tx) => {
+      const [batch] = await tx
+        .select({ id: ingestionBatches.id })
         .from(ingestionBatches)
         .where(
           and(
             eq(ingestionBatches.id, body.batch_id),
             eq(ingestionBatches.organizationId, organizationId),
           ),
-        ),
-    );
+        );
 
-    if (!batch) {
-      throw ApiError.notFound('Batch not found');
-    }
+      if (!batch) {
+        throw ApiError.notFound('Batch not found');
+      }
 
-    // Get failed records
-    const conditions = [
-      eq(ingestionRecords.batchId, body.batch_id),
-      eq(ingestionRecords.status, 'failed'),
-    ];
-    if (body.record_ids) {
-      conditions.push(inArray(ingestionRecords.id, body.record_ids));
-    }
+      const conditions = [
+        eq(ingestionRecords.batchId, body.batch_id),
+        eq(ingestionRecords.status, 'failed'),
+      ];
+      if (body.record_ids) {
+        conditions.push(inArray(ingestionRecords.id, body.record_ids));
+      }
 
-    const failedRecords = await withSystemContext(async () =>
-      db
-        .select()
+      const failedRecords = await tx
+        .select({ id: ingestionRecords.id })
         .from(ingestionRecords)
-        .where(and(...conditions)),
-    );
+        .where(and(...conditions));
 
-    if (failedRecords.length === 0) {
+      if (failedRecords.length === 0) {
+        return 0;
+      }
+
+      await tx
+        .update(ingestionRecords)
+        .set({ status: 'pending', errorMessage: null, errorDetails: null, processedAt: null })
+        .where(
+          and(
+            eq(ingestionRecords.batchId, body.batch_id),
+            sql`${ingestionRecords.batchId} IN (SELECT id FROM ingestion_batches WHERE organization_id = ${organizationId})`,
+            inArray(ingestionRecords.id, failedRecords.map((record) => record.id)),
+          ),
+        );
+      await persistAtomicAudit(tx, {
+        userId: userId ?? 'system:ingest-retry',
+        organizationId,
+        resourceType: 'ingestion_batch',
+        resourceId: body.batch_id,
+        action: 'ingest.retry',
+        details: { recordCount: failedRecords.length, recordIds: body.record_ids ?? 'all_failed' },
+      });
+      return failedRecords.length;
+    });
+
+    if (failedCount === 0) {
       return {
         retried: 0,
+        queued: 0,
         succeeded: 0,
         failed: 0,
-        message: 'No failed records found to retry',
+        message: 'No failed records found to queue for retry',
       };
     }
 
-    // Audit the retry attempt
-    await auditLog({
-      eventType: AuditEventType.DATA_BULK_UPDATE,
-      severity: AuditSeverity.MEDIUM,
-      userId: userId ?? undefined,
-      organizationId,
-      resource: 'ingestion_batch',
-      resourceId: body.batch_id,
-      action: 'retry',
-      details: {
-        recordCount: failedRecords.length,
-        recordIds: body.record_ids ?? 'all_failed',
-      },
-      outcome: 'success',
-    });
-
-    // Mark records as pending for retry
-    let retrySucceeded = 0;
-    let retryFailed = 0;
-
-    for (const record of failedRecords) {
-      try {
-        // Reset to pending
-        await withSystemContext(async () =>
-          db
-            .update(ingestionRecords)
-            .set({
-              status: 'pending',
-              errorMessage: null,
-              errorDetails: null,
-              processedAt: null,
-            })
-            .where(eq(ingestionRecords.id, record.id)),
-        );
-        retrySucceeded++;
-      } catch {
-        retryFailed++;
-      }
-    }
-
+    // Re-queuing is NOT processing: report pending work, never a successful replay.
+    // The legacy 'retried' count is retained as an alias for callers already using it.
     return {
-      retried: failedRecords.length,
-      succeeded: retrySucceeded,
-      failed: retryFailed,
-      message: `${retrySucceeded} records queued for retry`,
+      retried: failedCount,
+      queued: failedCount,
+      succeeded: 0,
+      failed: 0,
+      message: `${failedCount} records queued for retry; processing has not completed`,
     };
   },
 );

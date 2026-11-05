@@ -119,7 +119,10 @@ export const arbitrationDecisions = pgTable("arbitration_decisions", {
   embedding: text("embedding"), // Vector embedding as text
   
   // Public access
-  isPublic: boolean("is_public").default(true),
+  // Private by default (platform 0051): a new decision is not published to every organization.
+  isPublic: boolean("is_public").default(false),
+  // The organization that supplied the decision; NULL for a platform-supplied one (platform 0051).
+  sourceOrganizationId: uuid("source_organization_id"),
   accessRestrictions: text("access_restrictions"),
   
   // Audit
@@ -283,50 +286,5 @@ export const cbaFootnotes = pgTable("cba_footnotes", {
   sourceIdx: index("cba_footnotes_source_idx").on(table.sourceClauseId),
   targetClauseIdx: index("cba_footnotes_target_clause_idx").on(table.targetClauseId),
   targetDecisionIdx: index("cba_footnotes_target_decision_idx").on(table.targetDecisionId),
-}));
-
-// Claim-to-precedent analysis (connects claims module to CBA intelligence)
-export const claimPrecedentAnalysis = pgTable("claim_precedent_analysis", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  claimId: uuid("claim_id").notNull(), // References claims.claim_id
-  
-  // Matching decisions
-  precedentMatches: jsonb("precedent_matches").$type<Array<{
-    decisionId: string;
-    relevanceScore: number;
-    matchingFactors: string[];
-    divergingFactors?: string[];
-  }>>(),
-  
-  // Success probability
-  successProbability: decimal("success_probability", { precision: 5, scale: 2 }),
-  confidenceLevel: varchar("confidence_level", { length: 50 }), // high, medium, low
-  
-  // Strategy suggestions
-  suggestedStrategy: text("suggested_strategy"),
-  potentialRemedies: jsonb("potential_remedies").$type<Array<{
-    remedy: string;
-    likelihood: string;
-    estimatedValue?: number;
-  }>>(),
-  
-  // Arbitrator insights
-  arbitratorTendencies: jsonb("arbitrator_tendencies").$type<{
-    arbitratorId?: string;
-    arbitratorName?: string;
-    successRate?: number;
-    avgAward?: number;
-    relevantPatterns?: string[];
-  }>(),
-  
-  // Similar CBAs
-  relevantCbaClauseIds: jsonb("relevant_cba_clause_ids").$type<string[]>(),
-  
-  // Audit
-  analyzedAt: timestamp("analyzed_at", { withTimezone: true }).notNull().defaultNow(),
-  analyzedBy: varchar("analyzed_by", { length: 50 }).notNull().default("ai_system"),
-  lastUpdated: timestamp("last_updated", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  claimIdx: index("claim_precedent_claim_idx").on(table.claimId),
 }));
 

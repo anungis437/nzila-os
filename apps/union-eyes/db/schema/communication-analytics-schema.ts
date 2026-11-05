@@ -88,8 +88,7 @@ export const userEngagementScores = pgTable('user_engagement_scores', {
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
   userId: varchar('user_id', { length: 255 }) // User ID - matches users.userId VARCHAR(255)
-    .notNull()
-    .references(() => profiles.userId, { onDelete: 'cascade' }),
+    .notNull(),
   
   // Engagement scores (0-100)
   overallScore: integer('overall_score').default(0),
@@ -129,8 +128,7 @@ export const communicationPreferences = pgTable('communication_preferences', {
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
   userId: varchar('user_id', { length: 255 }) // User ID - matches users.userId VARCHAR(255)
-    .notNull()
-    .references(() => profiles.userId, { onDelete: 'cascade' }),
+    .notNull(),
   
   // Channel preferences
   emailEnabled: boolean('email_enabled').default(true),

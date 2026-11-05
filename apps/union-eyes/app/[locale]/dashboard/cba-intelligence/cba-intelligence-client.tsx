@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { SourceRegistryTable } from "@/components/cba-intelligence/source-registry-table";
@@ -10,6 +9,7 @@ import { ReviewQueue } from "@/components/cba-intelligence/review-queue";
 import { BenchmarkView } from "@/components/cba-intelligence/benchmark-view";
 import { FreshnessDashboard } from "@/components/cba-intelligence/freshness-dashboard";
 import { OperationalHealthPanel } from "@/components/cba-intelligence/operational-health-panel";
+import { useOperationalHealth } from "@/components/cba-intelligence/use-operational-health";
 import { Database } from "lucide-react";
 
 type HealthLevel = "healthy" | "warning" | "critical";
@@ -17,13 +17,6 @@ type HealthLevel = "healthy" | "warning" | "critical";
 interface HealthCheck {
   name: string;
   level: HealthLevel;
-}
-
-interface OperationalHealthResponse {
-  success: boolean;
-  data: {
-    checks: HealthCheck[];
-  };
 }
 
 export interface CbaTabHealth {
@@ -67,14 +60,14 @@ function TabSeverityBadge({ level }: { level: HealthLevel }) {
   );
 }
 
-export function CbaIntelligenceClient() {
-  const { data: healthData } = useQuery<OperationalHealthResponse>({
-    queryKey: ["cba-intel-operational-health"],
-    queryFn: () => fetch("/api/cba-intelligence/health").then((r) => r.json()),
-    refetchInterval: 60_000,
-  });
+/**
+ * `canCurate`: the viewer holds the platform authority that curates the dataset (every organization reads the one shared dataset). Reviewing it, saving its
+ * benchmark snapshots and naming a review status to list are that authority's; the controls are offered to those who hold it, not to everyone who may read.
+ */
+export function CbaIntelligenceClient({ canCurate = false }: { canCurate?: boolean }) {
+  const { data: health } = useOperationalHealth();
 
-  const tabHealth = deriveCbaTabHealth(healthData?.data?.checks ?? []);
+  const tabHealth = deriveCbaTabHealth(health?.checks ?? []);
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -97,17 +90,19 @@ export function CbaIntelligenceClient() {
       <OperationalHealthPanel />
 
       <Tabs defaultValue="sources" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className={`grid w-full ${canCurate ? "grid-cols-6" : "grid-cols-5"}`}>
           <TabsTrigger value="sources">Sources</TabsTrigger>
           <TabsTrigger value="ingestion">
             Ingestion
             <TabSeverityBadge level={tabHealth.ingestion} />
           </TabsTrigger>
           <TabsTrigger value="agreements">Agreements</TabsTrigger>
-          <TabsTrigger value="review">
-            Review
-            <TabSeverityBadge level={tabHealth.review} />
-          </TabsTrigger>
+          {canCurate && (
+            <TabsTrigger value="review">
+              Review
+              <TabSeverityBadge level={tabHealth.review} />
+            </TabsTrigger>
+          )}
           <TabsTrigger value="benchmark">Benchmark</TabsTrigger>
           <TabsTrigger value="freshness">
             Freshness
@@ -121,13 +116,15 @@ export function CbaIntelligenceClient() {
           <IngestionMonitor />
         </TabsContent>
         <TabsContent value="agreements">
-          <AgreementExplorer />
+          <AgreementExplorer canCurate={canCurate} />
         </TabsContent>
-        <TabsContent value="review">
-          <ReviewQueue />
-        </TabsContent>
+        {canCurate && (
+          <TabsContent value="review">
+            <ReviewQueue />
+          </TabsContent>
+        )}
         <TabsContent value="benchmark">
-          <BenchmarkView />
+          <BenchmarkView canSaveSnapshot={canCurate} />
         </TabsContent>
         <TabsContent value="freshness">
           <FreshnessDashboard />

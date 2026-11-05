@@ -2,86 +2,87 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Loader2 } from 'lucide-react';
- 
- 
 import { initiateRedemption } from '@/actions/rewards-actions';
-import { validateRedirectUrl } from '@/lib/utils/sanitize';
+import { initiateRedemptionSchema } from '@/lib/validation/rewards-schemas';
 
 interface RedemptionFormProps {
   balance: number;
   mode: 'shopify' | 'manual';
-  userId: string;
-  orgId: string;
+  /** The organization's active rewards program: the redemption is recorded against it. */
+  programId: string;
+  /** Where the member is sent to check out; the page leaves this out and the browser navigates. */
+  navigate?: (url: string) => void;
 }
 
-export function RedemptionForm({ balance, mode, userId: _userId, orgId: _orgId }: RedemptionFormProps) {
+const goTo = (url: string) => window.location.assign(url);
+
+export function RedemptionForm({ balance, mode, programId, navigate = goTo }: RedemptionFormProps) {
   const t = useTranslations('rewards.redeem.form');
-  const locale = useLocale();
+  const tr = useTranslations('rewards.redemption');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [credits, setCredits] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
+  const [credits, setCredits] = useState('');
+  const [notes, setNotes] = useState('');
+  const [recorded, setRecorded] = useState<{ credits: number } | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError(null);
+    setRecorded(null);
 
-    const creditsNum = parseInt(credits, 10);
-
-    if (isNaN(creditsNum) || creditsNum <= 0) {
-      setError(t('errors.invalidAmount', { defaultValue: 'Please enter a valid amount' }));
+    // Exactly what the action accepts, checked with the schema the action checks with.
+    const parsed = initiateRedemptionSchema.safeParse({
+      programId,
+      creditsToSpend: Number(credits),
+      providerDetails: notes.trim() ? { requestNotes: notes.trim() } : undefined,
+    });
+    if (!parsed.success) {
+      setError(t('errors.invalidAmount'));
       return;
     }
-
-    if (creditsNum > balance) {
-      setError(
-        t('errors.insufficientBalance', {
-          defaultValue: 'You do not have enough credits',
-        })
-      );
+    if (parsed.data.creditsToSpend > balance) {
+      setError(t('errors.insufficientBalance'));
       return;
     }
 
     setLoading(true);
-
     try {
-      const result = await initiateRedemption({
-        credits_to_redeem: creditsNum,
-        request_notes: notes || undefined,
-      });
+      const result = await initiateRedemption(parsed.data);
 
-      if (!result.success) {
-        setError(result.error || t('errors.failed', { defaultValue: 'Failed to initiate redemption' }));
-        setLoading(false);
+      // Credits were spent only when the action returns the redemption it recorded.
+      if (!(result.success && 'data' in result && result.data?.id)) {
+        setError(('error' in result && result.error) || t('errors.failed'));
         return;
       }
 
-      // If Shopify mode, redirect to catalog/checkout
-      if (mode === 'shopify' && result.data?.checkout_url) {
-        // Redirect to Shopify checkout with pre-applied discount
-        const safeUrl = validateRedirectUrl(result.data.checkout_url);
-        if (!safeUrl) { setError('Untrusted checkout URL'); setLoading(false); return; }
-        window.location.href = safeUrl;
-      } else {
-        // Manual mode or no checkout URL: redirect to wallet with success message
-        router.push(`/${locale}/dashboard/rewards?redemption=success`);
+      const checkoutUrl = result.data.checkout_url;
+      if (mode === 'shopify' && checkoutUrl) {
+        // The server built this address on the configured store and checked it; it is not a value from the form.
+        navigate(checkoutUrl);
+        return;
       }
-    } catch (err) {
-      setError((err as Error).message || t('errors.unknown', { defaultValue: 'An error occurred' }));
+
+      setRecorded({ credits: parsed.data.creditsToSpend });
+      setCredits('');
+      setNotes('');
+      router.refresh();
+    } catch {
+      setError(t('errors.unknown'));
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="space-y-6">
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -89,41 +90,37 @@ export function RedemptionForm({ balance, mode, userId: _userId, orgId: _orgId }
         </Alert>
       )}
 
+      {recorded && (
+        <Alert role="status">
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertDescription>{tr('recorded', { credits: recorded.credits.toLocaleString() })}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-2">
-        <Label htmlFor="credits">
-          {t('creditsLabel', { defaultValue: 'Credits to Redeem' })}
-        </Label>
+        <Label htmlFor="credits">{t('creditsLabel')}</Label>
         <Input
           id="credits"
           type="number"
           min="1"
           max={balance}
+          step="1"
           placeholder="0"
           value={credits}
-          onChange={(e) => setCredits(e.target.value)}
+          onChange={(event) => setCredits(event.target.value)}
           required
           disabled={loading}
         />
-        <p className="text-xs text-muted-foreground">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {(t as any)('creditsHelper', {
-            defaultValue: 'Maximum: {balance} credits',
-            values: { balance: balance.toLocaleString() },
-          })}
-        </p>
+        <p className="text-xs text-muted-foreground">{t('creditsHelper', { balance: balance.toLocaleString() })}</p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes">
-          {t('notesLabel', { defaultValue: 'Notes (Optional)' })}
-        </Label>
+        <Label htmlFor="notes">{t('notesLabel')}</Label>
         <Textarea
           id="notes"
-          placeholder={t('notesPlaceholder', {
-            defaultValue: 'Add any special requests or notes...',
-          })}
+          placeholder={t('notesPlaceholder')}
           value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          onChange={(event) => setNotes(event.target.value)}
           disabled={loading}
           rows={3}
         />
@@ -131,17 +128,10 @@ export function RedemptionForm({ balance, mode, userId: _userId, orgId: _orgId }
 
       <Button type="submit" disabled={loading || balance === 0} className="w-full">
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {mode === 'shopify'
-          ? t('submitShopify', { defaultValue: 'Continue to Shop Moi Ça' })
-          : t('submitManual', { defaultValue: 'Submit Redemption Request' })}
+        {mode === 'shopify' ? t('submitShopify') : t('submitManual')}
       </Button>
 
-      {balance === 0 && (
-        <p className="text-sm text-center text-muted-foreground">
-          {t('noBalance', { defaultValue: 'You need credits to redeem' })}
-        </p>
-      )}
+      {balance === 0 && <p className="text-sm text-center text-muted-foreground">{t('noBalance')}</p>}
     </form>
   );
 }
-

@@ -181,14 +181,14 @@ describe("clause-intelligence", () => {
       const updateSet = vi.fn().mockReturnValue({ where: updateWhere });
       mocks.mockUpdate.mockReturnValueOnce({ set: updateSet });
 
-      const result = await linkClauseToGrievance("gr-1", "cl-1");
+      const result = await linkClauseToGrievance("gr-1", "cl-1", "org-1");
       expect(result).toEqual({ grievanceId: "gr-1", clauseId: "cl-1", linked: true });
     });
 
     it("throws when clause not found", async () => {
       const c = chain_sfw([]);
       mocks.mockSelect.mockReturnValueOnce({ from: c.from });
-      await expect(linkClauseToGrievance("gr-1", "cl-bad")).rejects.toThrow("Clause not found");
+      await expect(linkClauseToGrievance("gr-1", "cl-bad", "org-1")).rejects.toThrow("Clause not found");
     });
   });
 });

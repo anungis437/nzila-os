@@ -13,6 +13,7 @@ import {
   CATALOG_ADMISSION_PUBLIC_ERROR,
   evaluateCatalogAdmission,
 } from '@/lib/operations/catalog-admission'
+import { probeCache } from '@/lib/operations/service-probes'
 
 const APP = 'union-eyes'
 const logger = createLogger('union-eyes.health')
@@ -83,50 +84,16 @@ async function checkAuth(): Promise<HealthCheckState> {
   return hasAuthSecret ? 'ok' : 'degraded'
 }
 
-async function checkRedis(): Promise<{ state: HealthCheckState; ms?: number; note?: string }> {
-  const hasRedis =
-    Boolean(process.env.UPSTASH_REDIS_REST_URL) ||
-    Boolean(process.env.KV_REST_API_URL) ||
-    Boolean(process.env.REDIS_URL)
-  if (!hasRedis) return { state: 'ok', note: 'Redis not configured — optional for this deployment' }
-
-  try {
-    const start = Date.now()
-    const url = (
-      process.env.UPSTASH_REDIS_REST_URL ??
-      process.env.KV_REST_API_URL ??
-      ''
-    ).replace(/\/$/, '')
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN ?? ''
-    if (!url || !token) return { state: 'degraded', note: 'Redis URL or token missing' }
-
-    const res = await fetch(`${url}/ping`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-      signal: AbortSignal.timeout(2000),
-    })
-    return res.ok
-      ? { state: 'ok', ms: Date.now() - start }
-      : { state: 'degraded', note: `ping returned ${res.status}`, ms: Date.now() - start }
-  } catch (err) {
-    return { state: 'degraded', note: err instanceof Error ? err.message : 'unreachable' }
-  }
-}
-
 async function checkBackend(): Promise<{ state: HealthCheckState; ms?: number; note?: string }> {
   const mode = (process.env.NZILA_MODE ?? process.env.UE_ENVIRONMENT ?? '').toLowerCase()
   const deploymentType = (process.env.NZILA_DEPLOYMENT_TYPE ?? '').toLowerCase()
-  const featureProfile = (process.env.FEATURE_PROFILE ?? '').toLowerCase()
 
   // Operational package: no customer-branded demo profile is honoured. The
   // sibling @nzila/union-eyes-demo package owns the demo runtime entirely.
-  const isDemoRuntime =
-    mode === 'demo' ||
-    deploymentType.includes('demo') ||
-    featureProfile.includes('demo')
+  const isDemoRuntime = mode === 'demo' || deploymentType.includes('demo')
 
   if (isDemoRuntime) {
-    const reason = deploymentType || mode || featureProfile || 'demo-runtime'
+    const reason = deploymentType || mode || 'demo-runtime'
     return { state: 'ok', note: `Django probe skipped for demo runtime (${reason})` }
   }
 
@@ -152,7 +119,7 @@ export async function GET() {
   const [dbResult, authResult, redisResult, backendResult, catalogResult] = await Promise.allSettled([
     checkDb(),
     checkAuth(),
-    checkRedis(),
+    probeCache(),
     checkBackend(),
     checkCatalogAuthority(),
   ])

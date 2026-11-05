@@ -117,3 +117,21 @@ export async function deleteBlob(pathOrUrl: string): Promise<void> {
   const blockBlob = client.getBlockBlobClient(blobPath)
   await blockBlob.deleteIfExists()
 }
+
+export class BlobTooLargeError extends Error {
+  constructor(public readonly sizeBytes: number, public readonly maxBytes: number) {
+    super(`Blob is ${sizeBytes} bytes, over the ${maxBytes} byte limit for a streamed read`)
+    this.name = 'BlobTooLargeError'
+  }
+}
+
+/**
+ * Reads a blob into memory for a response the server itself serves, so the grant is checked at the moment of the read and no
+ * storage link leaves the server. The size is checked first: a streamed read is bounded, a larger file is refused.
+ */
+export async function readBlobBounded(blobPath: string, maxBytes: number, containerName: string = UE_CONTAINER): Promise<Buffer> {
+  const client = container(containerName).getBlockBlobClient(blobPath)
+  const { contentLength } = await client.getProperties()
+  if (typeof contentLength === 'number' && contentLength > maxBytes) throw new BlobTooLargeError(contentLength, maxBytes)
+  return client.downloadToBuffer()
+}

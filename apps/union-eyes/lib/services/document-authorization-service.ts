@@ -7,7 +7,6 @@ import { isDocumentVisibleByPolicy, toGovernanceLabel } from '@/lib/services/doc
 
 export interface DocumentAuthorizationActor {
   userId: string;
-  isStewardPlus: boolean;
 }
 
 export interface AuthorizationCandidateDocument {
@@ -102,10 +101,8 @@ export async function authorizeDocumentsForActor<T extends AuthorizationCandidat
       toGovernanceLabel({ privacyLabel: document.privacyLabel } as Partial<Document>),
       {
         isOrgMember: true,
-        isStewardPlus: params.actor.isStewardPlus,
         isPrimaryOwner: caseAccess?.isPrimaryOwner ?? false,
         hasCaseAccess:
-          params.actor.isStewardPlus ||
           document.linkedEntityType !== 'grievance' ||
           Boolean(caseAccess?.canViewCase),
         canViewPrivateDocuments: caseAccess?.canViewPrivateDocuments ?? false,
@@ -130,9 +127,7 @@ export async function authorizeDocumentsForActor<T extends AuthorizationCandidat
           ? 'primary_owner_access'
           : caseAccess?.canViewCase
             ? 'case_access'
-            : params.actor.isStewardPlus
-              ? 'steward_access'
-              : 'org_scope_access',
+            : 'org_scope_access',
     };
   });
 }

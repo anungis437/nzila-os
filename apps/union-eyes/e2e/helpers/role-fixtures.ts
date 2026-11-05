@@ -13,7 +13,10 @@ export type StakeholderRole =
   | 'staff'
   | 'executive'
   | 'governance'
-  | 'admin';
+  | 'admin'
+  | 'finance'
+  | 'platform'
+  | 'federation';
 
 export type StakeholderFixture = {
   key: StakeholderRole;
@@ -71,6 +74,15 @@ export const STAKEHOLDER_FIXTURES: Record<StakeholderRole, StakeholderFixture> =
     locale: 'en-CA',
     expectedExperience: 'governance',
   },
+  finance: {
+    key: 'finance',
+    userRole: 'secretary_treasurer',
+    userId: UE_TEST_USERS.financePreparer.userId,
+    orgId: UE_TEST_USERS.financePreparer.orgId,
+    email: UE_TEST_USERS.financePreparer.email,
+    locale: 'en-CA',
+    expectedExperience: 'executive',
+  },
   admin: {
     key: 'admin',
     userRole: 'admin',
@@ -80,59 +92,94 @@ export const STAKEHOLDER_FIXTURES: Record<StakeholderRole, StakeholderFixture> =
     locale: 'en-CA',
     expectedExperience: 'admin',
   },
+  platform: {
+    key: 'platform',
+    userRole: 'platform_lead',
+    userId: UE_TEST_USERS.platformOperator.userId,
+    orgId: UE_TEST_USERS.platformOperator.orgId,
+    email: UE_TEST_USERS.platformOperator.email,
+    locale: 'en-CA',
+    expectedExperience: 'admin',
+  },
+  federation: {
+    key: 'federation',
+    userRole: 'fed_executive',
+    userId: UE_TEST_USERS.federationExecutive.userId,
+    orgId: UE_TEST_USERS.federationExecutive.orgId,
+    email: UE_TEST_USERS.federationExecutive.email,
+    locale: 'en-CA',
+    expectedExperience: 'governance',
+  },
 };
 
 export const STAKEHOLDER_ORDER: StakeholderRole[] = [
+  'platform',
+  'federation',
   'member',
   'steward',
   'staff',
   'executive',
   'governance',
   'admin',
+  'finance',
 ];
 
 // These labels intentionally validate the user-facing IA contract.
+const EXECUTIVE_LABELS = [
+    'Today',
+    'Members & Service',
+    'Governance & Organization',
+    'Bargaining & Collective Action',
+    'Finance & Resources',
+    'Communications & Relations',
+    'Continuity & Intelligence',
+  ];
+
 export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
+  // The treasurer role is in the executive experience; the finance duties come from the mandate, not from this navigation.
+  finance: EXECUTIVE_LABELS,
+  // 'Exports' is not here: the export page behind it is a not-available notice (UE-MOVEMENT-INSIGHTS-LEGISLATIVE-BRIEF), so no navigation advertises it.
+  platform: ['Organization', 'Pilot Configuration', 'Policies', 'Audit'],
+  federation: ['Governance Continuity Overview', 'Governance Trust & Explainability', 'Governance Continuity Review', 'OCRA Continuity Signals', 'Institutional Intelligence Reports', 'Profile & Settings'],
   member: [
     'Home',
-    'My Cases',
-    'Open Representation Case',
+    'My Representation',
     'Messages',
-    'Documents',
-    'Profile & Settings',
+    'My Documents',
+    'My Union',
+    'Help & Resources',
+    'Profile',
+    'Preferences',
+    'Privacy',
   ],
   steward: [
-    'Operations (Casework Console)',
-    'Operations Queue (Representation Cases)',
-    'Operations Priorities (Commitments & Deadlines)',
-    'Members',
-    'Documents',
-    'Operations Communications',
-    'Institutional Intelligence Reports',
-    'Notifications',
+    'Today',
+    'Representation',
+    'Members & Workplaces',
+    'Communications',
+    'Documents & Evidence',
+    'Tasks & Deadlines',
+    'Knowledge & Guidance',
     'Profile & Settings',
   ],
   staff: [
-    'Operations (Casework Console)',
-    'Operations Queue (Representation Cases)',
-    'Operations Priorities (Commitments & Deadlines)',
-    'Members',
-    'Documents',
-    'Operations Communications',
-    'Institutional Intelligence Reports',
-    'Notifications',
+    'Today',
+    'Representation',
+    'Members & Workplaces',
+    'Communications',
+    'Documents & Evidence',
+    'Tasks & Deadlines',
+    'Knowledge & Guidance',
     'Profile & Settings',
   ],
   executive: [
-    'OCRA Intelligence (Executive Overview)',
-    'OCRA Signals (Continuity Insights)',
-    'Operations Continuity',
-    'Governance Continuity',
-    'Operations Outcomes (Member Outcomes Ledger)',
-    'Onboarding Survivability (Leadership Continuity)',
-    'Institutional Intelligence Reports',
-    'Governance Trust & Oversight',
-    'Profile & Settings',
+    'Today',
+    'Members & Service',
+    'Governance & Organization',
+    'Bargaining & Collective Action',
+    'Finance & Resources',
+    'Communications & Relations',
+    'Continuity & Intelligence',
   ],
   governance: [
     'Governance Continuity Overview',
@@ -147,11 +194,12 @@ export const REQUIRED_VISIBLE_LABELS: Record<StakeholderRole, string[]> = {
     'Pilot Configuration',
     'Policies',
     'Audit',
-    'Exports',
   ],
 };
 
 export const FORBIDDEN_LABELS: Record<StakeholderRole, string[]> = {
+  platform: ['Open Representation Case', 'Raw FSM', 'Workflow Builder'],
+  federation: ['Open Representation Case', 'Raw FSM', 'Workflow Builder', 'System Status'],
   member: [
     'Continuity Insights',
     'Governance Visibility',
@@ -181,6 +229,7 @@ export const FORBIDDEN_LABELS: Record<StakeholderRole, string[]> = {
     'System Status',
     'Pilot Configuration',
     'Operations Continuity',
+    'Workspace',
   ],
   governance: [
     'Raw FSM',
@@ -193,6 +242,15 @@ export const FORBIDDEN_LABELS: Record<StakeholderRole, string[]> = {
     'Raw FSM',
     'Workflow Builder',
     'Exports',
+  ],
+  // The treasurer lands in the executive experience (see REQUIRED_VISIBLE_LABELS.finance), so it is held to the executive's limits.
+  finance: [
+    'Raw FSM',
+    'Workflow Builder',
+    'System Status',
+    'Pilot Configuration',
+    'Operations Continuity',
+    'Workspace',
   ],
 };
 

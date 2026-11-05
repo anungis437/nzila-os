@@ -14,6 +14,7 @@
  */
 
 import type { ReportTierId } from './types';
+import { ICRA_PAID_REPORT_PRICES } from './pricing';
 
 export interface ReportTierDefinition {
   id: ReportTierId;
@@ -63,7 +64,7 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
     name: 'Leadership Briefing Report',
     tagline:
       'An evidence-backed report for leadership conversations that need more than a gut feel.',
-    priceLabel: '$1,200 CAD',
+    priceLabel: ICRA_PAID_REPORT_PRICES.executive_continuity_brief.label,
     includes: [
       'Everything in the Free Readiness Check',
       'Governance Entropy Analysis — continuity drift indicators and governance inconsistency patterns',
@@ -90,7 +91,7 @@ export const REPORT_TIERS: Record<ReportTierId, ReportTierDefinition> = {
     name: 'Full Diagnostic & Action Plan',
     tagline:
       'A guided review for organizations ready to act on what they’ve learned.',
-    priceLabel: '$6,500 CAD',
+    priceLabel: ICRA_PAID_REPORT_PRICES.institutional_continuity_diagnostic.label,
     includes: [
       'Everything in the Leadership Briefing Report',
       'Facilitated leadership continuity review session',

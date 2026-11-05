@@ -15,22 +15,23 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { 
+  AlertCircle,
   AlertTriangle, 
   ClipboardCheck,
-  Users,
-  Calendar,
   FileWarning,
   CheckCircle2,
   RefreshCw,
-  Plus,
-  Download
+  Plus
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/logger";
+import { apiErrorMessage } from "@/lib/client/api-envelope";
 import { SafetyMetricsCard } from "./SafetyMetricsCard";
 import { IncidentTrendChart } from "./IncidentTrendChart";
 import { IncidentListTable } from "./IncidentListTable";
@@ -42,15 +43,21 @@ import { cn } from "@/lib/utils";
 export interface SafetyMetrics {
   totalIncidents: number;
   incidentTrend: "up" | "down" | "stable";
-  incidentChange: number;
+  /** Percent against the previous period; null when that period had no incident, so there is nothing to compare with. */
+  incidentChange: number | null;
   openHazards: number;
   hazardTrend: "up" | "down" | "stable";
+  /** Inspections scheduled in the period, up to today (those already completed included). */
   inspectionsDue: number;
   inspectionsCompleted: number;
-  inspectionComplianceRate: number;
-  daysWithoutIncident: number;
+  /** null when nothing was measured (no inspections in the period). */
+  inspectionComplianceRate: number | null;
+  /** null when no incident is on record. */
+  daysWithoutIncident: number | null;
   criticalAlerts: number;
-  trainingCompliance: number;
+  /** null: training compliance is not measured. */
+  trainingCompliance: number | null;
+  /** Equipment below its reorder level. */
   ppeInventoryLow: number;
 }
 
@@ -59,89 +66,106 @@ export interface HealthSafetyDashboardProps {
   period?: "7d" | "30d" | "90d" | "12m";
 }
 
+const PERIOD_LABELS = {
+  "7d": "Last 7 days",
+  "30d": "Last 30 days",
+  "90d": "Last 90 days",
+  "12m": "Last 12 months",
+} as const;
+
+const TRENDS: readonly unknown[] = ["up", "down", "stable"];
+const isCount = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
+const isCountOrNull = (value: unknown): value is number | null => value === null || isCount(value);
+
+/** The route's answer, checked: a figure it did not send is never shown as if it had been measured. */
+function isSafetyMetrics(value: unknown): value is SafetyMetrics {
+  if (typeof value !== "object" || value === null) return false;
+  const m = value as Record<string, unknown>;
+  return (
+    isCount(m.totalIncidents) &&
+    TRENDS.includes(m.incidentTrend) &&
+    isCountOrNull(m.incidentChange) &&
+    isCount(m.openHazards) &&
+    TRENDS.includes(m.hazardTrend) &&
+    isCount(m.inspectionsDue) &&
+    isCount(m.inspectionsCompleted) &&
+    isCountOrNull(m.inspectionComplianceRate) &&
+    isCountOrNull(m.daysWithoutIncident) &&
+    isCount(m.criticalAlerts) &&
+    isCountOrNull(m.trainingCompliance) &&
+    isCount(m.ppeInventoryLow)
+  );
+}
+
+type Outcome = { kind: "ready"; metrics: SafetyMetrics } | { kind: "error"; message: string | null };
+
+async function readMetrics(organizationId: string, period: string): Promise<Outcome> {
+  try {
+    const response = await fetch(`/api/health-safety/dashboard?organizationId=${organizationId}&period=${period}`);
+    const body: unknown = await response.json();
+    if (!response.ok) {
+      return { kind: "error", message: apiErrorMessage(body, "") || null };
+    }
+    // withApi wraps the route's { success, metrics } as { success, data, timestamp }.
+    const metrics = (body as { data?: { metrics?: unknown } } | null)?.data?.metrics;
+    if (!isSafetyMetrics(metrics)) {
+      logger.error("Health & safety dashboard answered with an unexpected body");
+      return { kind: "error", message: null };
+    }
+    return { kind: "ready", metrics };
+  } catch (error) {
+    logger.error("Failed to load the health & safety dashboard", error);
+    return { kind: "error", message: null };
+  }
+}
+
 export function HealthSafetyDashboard({
   organizationId,
   period = "30d"
 }: HealthSafetyDashboardProps) {
   const { toast } = useToast();
-  const [metrics, setMetrics] = React.useState<SafetyMetrics | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const requestKey = `${organizationId}|${period}`;
+  // The answer belongs to the organization and period it was read for: another one's is never shown while this one loads.
+  const [loaded, setLoaded] = React.useState<{ key: string; outcome: Outcome } | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
-  const [selectedPeriod] = React.useState(period);
+  const latestRequest = React.useRef(0);
 
-  const loadDashboardData = React.useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `/api/health-safety/dashboard?organizationId=${organizationId}&period=${selectedPeriod}`
-      );
-      
-      if (!response.ok) {
-        throw new Error("Failed to load dashboard data");
-      }
-
-      const json = await response.json();
-      const data = json.data ?? json;
-      if (data.success ?? json.success) {
-        setMetrics(data.metrics);
-      } else {
-        throw new Error(data.error || json.error || "Failed to load metrics");
-      }
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to load health & safety dashboard",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [organizationId, selectedPeriod, toast]);
+  const load = React.useCallback(async (): Promise<boolean> => {
+    latestRequest.current += 1;
+    const request = latestRequest.current;
+    const outcome = await readMetrics(organizationId, period);
+    if (request !== latestRequest.current) return false;
+    setLoaded({ key: requestKey, outcome });
+    return outcome.kind === "ready";
+  }, [organizationId, period, requestKey]);
 
   React.useEffect(() => {
-    loadDashboardData();
-  }, [loadDashboardData]);
+    void load();
+    return () => {
+      latestRequest.current += 1;
+    };
+  }, [load]);
 
   async function refreshDashboard() {
     setIsRefreshing(true);
-    await loadDashboardData();
+    const refreshed = await load();
     setIsRefreshing(false);
-    toast({
-      title: "Dashboard Refreshed",
-      description: "Health & safety data has been updated"
-    });
-  }
-
-  async function exportReport() {
-    try {
-      const response = await fetch(
-        `/api/health-safety/reports/export?organizationId=${organizationId}&period=${selectedPeriod}`,
-        { method: 'POST' }
-      );
-      
-      if (!response.ok) throw new Error("Export failed");
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `health-safety-report-${selectedPeriod}.pdf`;
-      a.click();
-      
+    if (refreshed) {
       toast({
-        title: "Report Exported",
-        description: "Your health & safety report has been downloaded"
-      });
-    } catch {
-      toast({
-        title: "Export Failed",
-        description: "Unable to export report",
-        variant: "destructive"
+        title: "Dashboard Refreshed",
+        description: "Health & safety data has been updated"
       });
     }
   }
 
-  if (isLoading) {
+  function retry() {
+    setLoaded(null);
+    void load();
+  }
+
+  const outcome = loaded?.key === requestKey ? loaded.outcome : null;
+
+  if (outcome === null) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
@@ -152,13 +176,24 @@ export function HealthSafetyDashboard({
     );
   }
 
-  if (!metrics) {
+  if (outcome.kind === "error") {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-muted-foreground">No data available</p>
+      <div role="alert" className="flex h-96 flex-col items-center justify-center gap-3 text-center">
+        <AlertCircle className="h-8 w-8 text-destructive" />
+        <p className="font-medium">The health &amp; safety dashboard could not be loaded.</p>
+        {outcome.message ? <p className="text-sm text-muted-foreground">{outcome.message}</p> : null}
+        <Button variant="outline" size="sm" onClick={retry}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Try again
+        </Button>
       </div>
     );
   }
+
+  const { metrics } = outcome;
+  const periodLabel = PERIOD_LABELS[period];
+  const complianceRate = metrics.inspectionComplianceRate;
+  const trainingRate = metrics.trainingCompliance;
 
   return (
     <div className="space-y-6">
@@ -172,14 +207,6 @@ export function HealthSafetyDashboard({
         >
           <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
           Refresh
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={exportReport}
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Export Report
         </Button>
       </div>
 
@@ -196,8 +223,8 @@ export function HealthSafetyDashboard({
             <p className="text-sm text-red-600 dark:text-red-400">
               You have {metrics.criticalAlerts} critical safety alert{metrics.criticalAlerts !== 1 ? 's' : ''} requiring immediate attention.
             </p>
-            <Button variant="destructive" size="sm" className="mt-3">
-              View Alerts
+            <Button variant="destructive" size="sm" className="mt-3" asChild>
+              <Link href="/dashboard/health-safety/incidents">View incidents</Link>
             </Button>
           </CardContent>
         </Card>
@@ -211,31 +238,29 @@ export function HealthSafetyDashboard({
           trend={metrics.incidentTrend}
           trendValue={metrics.incidentChange}
           icon={FileWarning}
-          description={`Last ${selectedPeriod}`}
-          variant={metrics.incidentTrend === "down" ? "success" : "warning"}
+          description={periodLabel}
+          variant={metrics.totalIncidents === 0 || metrics.incidentTrend === "down" ? "success" : "warning"}
         />
         <SafetyMetricsCard
           title="Open Hazards"
           value={metrics.openHazards}
-          trend={metrics.hazardTrend}
           icon={AlertTriangle}
           description="Requires action"
           variant={metrics.openHazards === 0 ? "success" : "warning"}
         />
         <SafetyMetricsCard
           title="Inspection Compliance"
-          value={`${metrics.inspectionComplianceRate}%`}
-          subtitle={`${metrics.inspectionsCompleted}/${metrics.inspectionsDue + metrics.inspectionsCompleted}`}
+          value={complianceRate === null ? "—" : `${complianceRate}%`}
+          subtitle={metrics.inspectionsDue > 0 ? `${metrics.inspectionsCompleted} of ${metrics.inspectionsDue}` : undefined}
           icon={ClipboardCheck}
-          description="Completed on time"
-          variant={metrics.inspectionComplianceRate >= 90 ? "success" : "warning"}
+          description={complianceRate === null ? "No inspections scheduled in this period" : "Scheduled inspections completed"}
+          variant={complianceRate === null ? "default" : complianceRate >= 90 ? "success" : "warning"}
         />
         <SafetyMetricsCard
           title="Days Without Incident"
-          value={metrics.daysWithoutIncident}
+          value={metrics.daysWithoutIncident ?? '—'}
           icon={CheckCircle2}
-          description="Current streak"
-          variant="success"
+          description={metrics.daysWithoutIncident === null ? "No incident on record" : "Since the latest incident"}
         />
       </div>
 
@@ -261,7 +286,7 @@ export function HealthSafetyDashboard({
             <CardContent>
               <IncidentTrendChart 
                 organizationId={organizationId} 
-                period={selectedPeriod}
+                period={period}
               />
             </CardContent>
           </Card>
@@ -273,21 +298,21 @@ export function HealthSafetyDashboard({
                 <CardTitle className="text-sm font-medium">Training Compliance</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{metrics.trainingCompliance}%</div>
+                <div className="text-2xl font-bold">{trainingRate === null ? 'Not measured' : `${trainingRate}%`}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Members up-to-date with safety training
+                  {trainingRate === null ? "Safety training completion is not recorded" : "Members up-to-date with safety training"}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Inspections Due</CardTitle>
+                <CardTitle className="text-sm font-medium">Inspections Scheduled</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{metrics.inspectionsDue}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Require scheduling or completion
+                  {metrics.inspectionsCompleted} completed · {periodLabel.toLowerCase()}
                 </p>
               </CardContent>
             </Card>
@@ -297,15 +322,11 @@ export function HealthSafetyDashboard({
                 <CardTitle className="text-sm font-medium">PPE Inventory</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {metrics.ppeInventoryLow > 0 ? (
-                    <span className="text-orange-600">{metrics.ppeInventoryLow} Low</span>
-                  ) : (
-                    <span className="text-green-600">Good</span>
-                  )}
+                <div className={cn("text-2xl font-bold", metrics.ppeInventoryLow > 0 && "text-orange-600")}>
+                  {metrics.ppeInventoryLow}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Items requiring reorder
+                  Items below reorder level
                 </p>
               </CardContent>
             </Card>
@@ -338,24 +359,26 @@ export function HealthSafetyDashboard({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">OH&S Training Compliance</span>
-                      <Badge variant={metrics.trainingCompliance >= 90 ? "default" : "secondary"}>
-                        {metrics.trainingCompliance}%
+                      <Badge variant={trainingRate !== null && trainingRate >= 90 ? "default" : "secondary"}>
+                        {trainingRate === null ? 'Not measured' : `${trainingRate}%`}
                       </Badge>
                     </div>
-                    <Progress value={metrics.trainingCompliance} className="h-2" />
+                    {trainingRate !== null && <Progress value={trainingRate} className="h-2" />}
                     <p className="text-xs text-muted-foreground">Members with up-to-date safety training</p>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Inspection Compliance</span>
-                      <Badge variant={metrics.inspectionComplianceRate >= 90 ? "default" : "secondary"}>
-                        {metrics.inspectionComplianceRate}%
+                      <Badge variant={complianceRate !== null && complianceRate >= 90 ? "default" : "secondary"}>
+                        {complianceRate === null ? 'Not measured' : `${complianceRate}%`}
                       </Badge>
                     </div>
-                    <Progress value={metrics.inspectionComplianceRate} className="h-2" />
+                    {complianceRate !== null && <Progress value={complianceRate} className="h-2" />}
                     <p className="text-xs text-muted-foreground">
-                      {metrics.inspectionsCompleted} of {metrics.inspectionsDue + metrics.inspectionsCompleted} inspections completed on time
+                      {metrics.inspectionsDue === 0
+                        ? "No inspections were scheduled in this period"
+                        : `${metrics.inspectionsCompleted} of ${metrics.inspectionsDue} scheduled inspections completed`}
                     </p>
                   </div>
 
@@ -363,13 +386,13 @@ export function HealthSafetyDashboard({
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">PPE Inventory Status</span>
                       <Badge variant={metrics.ppeInventoryLow === 0 ? "default" : "secondary"}>
-                        {metrics.ppeInventoryLow === 0 ? "Fully stocked" : `${metrics.ppeInventoryLow} low`}
+                        {metrics.ppeInventoryLow === 0 ? "None low" : `${metrics.ppeInventoryLow} low`}
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {metrics.ppeInventoryLow > 0
                         ? `${metrics.ppeInventoryLow} PPE item(s) below reorder level`
-                        : "All PPE items above reorder levels"}
+                        : "No PPE item is below its reorder level"}
                     </p>
                   </div>
                 </div>
@@ -382,8 +405,12 @@ export function HealthSafetyDashboard({
                   <CardTitle className="text-sm font-medium">Days Without Incident</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{metrics.daysWithoutIncident}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Current safety streak</p>
+                  <div className={cn("text-2xl font-bold", metrics.daysWithoutIncident !== null && "text-green-600")}>
+                    {metrics.daysWithoutIncident ?? '—'}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {metrics.daysWithoutIncident === null ? "No incident on record" : "Since the latest incident"}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -422,21 +449,17 @@ export function HealthSafetyDashboard({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Report Incident
+            <Button size="sm" asChild>
+              <Link href="/dashboard/health-safety/incidents/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Report Incident
+              </Link>
             </Button>
-            <Button size="sm" variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Report Hazard
-            </Button>
-            <Button size="sm" variant="outline">
-              <Calendar className="h-4 w-4 mr-2" />
-              Schedule Inspection
-            </Button>
-            <Button size="sm" variant="outline">
-              <Users className="h-4 w-4 mr-2" />
-              View Committee Schedule
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/dashboard/health-safety/hazards?report=1">
+                <Plus className="h-4 w-4 mr-2" />
+                Report Hazard
+              </Link>
             </Button>
           </div>
         </CardContent>

@@ -9,19 +9,12 @@ export const metadata: Metadata = {
   description: 'Create your UnionEyes account — a decision system for labour leadership.',
 }
 
-const stats = [
-  { value: '200+', label: 'Locals' },
-  { value: '50K+', label: 'Members' },
-  { value: '99.9%', label: 'Uptime' },
-]
-
 export default function SignUpPage() {
   return (
     <AuthPageLayout
       appName="UnionEyes"
       tagline="A Decision System for Labour Leadership"
       subtitle="From intake to outcome — casework, intelligence, and member services in one system."
-      stats={stats}
       isSignUp
     >
       <SignupForm />

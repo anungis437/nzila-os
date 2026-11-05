@@ -128,20 +128,16 @@ async function updateWithContext(input: UpdatePolicyInput): Promise<UpdatePolicy
 
   const after = await getOrgAuthPolicy(input.organizationId)
 
-  // Audit with diff
-  try {
-    await withAuthSavepoint(async () => db.insert(authAuditLog).values({
-      userId: input.actorUserId,
-      eventType: 'org_policy_updated',
-      metadata: {
-        organizationId: input.organizationId,
-        before,
-        after,
-      },
-    }))
-  } catch {
-    // best-effort
-  }
+  // The diff record is part of the change: if it cannot be written the policy update rolls back.
+  await withAuthSavepoint(async () => db.insert(authAuditLog).values({
+    userId: input.actorUserId,
+    eventType: 'org_policy_updated',
+    metadata: {
+      organizationId: input.organizationId,
+      before,
+      after,
+    },
+  }))
 
   return { success: true, policy: after }
 }

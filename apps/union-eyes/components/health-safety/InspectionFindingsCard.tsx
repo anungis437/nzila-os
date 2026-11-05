@@ -27,7 +27,7 @@ export interface InspectionFinding {
   date: Date;
   location: string;
   inspector: string;
-  complianceRate: number;
+  complianceRate: number | null;
   passCount: number;
   failCount: number;
   naCount: number;
@@ -44,7 +44,7 @@ export function InspectionFindingsCard({
   finding,
   onViewDetails
 }: InspectionFindingsCardProps) {
-  const isGoodCompliance = finding.complianceRate >= 90;
+  const isGoodCompliance = finding.complianceRate !== null && finding.complianceRate >= 90;
   const hasCriticalIssues = finding.criticalIssues > 0;
 
   return (
@@ -56,7 +56,7 @@ export function InspectionFindingsCard({
           <div className="space-y-1 flex-1">
             <CardTitle className="text-base">{finding.title}</CardTitle>
             <CardDescription className="text-xs">
-              {format(finding.date, "PPP")} • {finding.location}
+              {[format(finding.date, "PPP"), finding.location].filter((part) => part !== "").join(" • ")}
             </CardDescription>
           </div>
           <Badge variant={
@@ -77,16 +77,18 @@ export function InspectionFindingsCard({
               "font-bold",
               isGoodCompliance ? "text-green-600" : "text-orange-600"
             )}>
-              {finding.complianceRate}%
+              {finding.complianceRate === null ? "—" : `${finding.complianceRate}%`}
             </span>
           </div>
-          <Progress 
-            value={finding.complianceRate} 
-            className={cn(
-              "h-2",
-              isGoodCompliance ? "bg-green-100" : "bg-orange-100"
-            )}
-          />
+          {finding.complianceRate !== null && (
+            <Progress 
+              value={finding.complianceRate} 
+              className={cn(
+                "h-2",
+                isGoodCompliance ? "bg-green-100" : "bg-orange-100"
+              )}
+            />
+          )}
         </div>
 
         {/* Critical Issues Alert */}
@@ -128,19 +130,21 @@ export function InspectionFindingsCard({
 
         {/* Inspector */}
         <div className="text-xs text-muted-foreground">
-          Inspector: {finding.inspector}
+          Inspector: {finding.inspector !== "" ? finding.inspector : "not recorded"}
         </div>
 
-        {/* View Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={() => onViewDetails?.(finding.id)}
-        >
-          <Eye className="h-4 w-4 mr-2" />
-          View Full Report
-        </Button>
+        {/* Offered only where the host screen can open the report */}
+        {onViewDetails && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => onViewDetails(finding.id)}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            View Full Report
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

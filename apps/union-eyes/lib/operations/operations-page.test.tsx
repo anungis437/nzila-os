@@ -143,12 +143,14 @@ describe('operations page failure handling', () => {
 });
 
 describe('platform services read path', () => {
-  it('reads on the application connection (runtime identity) outside the V2 context', async () => {
-    h.execute.mockResolvedValue([{ service_name: 'a', status: 'healthy', updated_at: null }]);
+  it('reads on the application connection (runtime identity) outside the V2 context, with no role switch', async () => {
+    const txExecute = vi.fn().mockResolvedValueOnce([{ service_name: 'a', status: 'healthy', updated_at: null }]);
+    h.transaction.mockImplementation(async (fn: (tx: unknown) => unknown) => fn({ execute: txExecute }));
     const { loadPlatformServices } = await vi.importActual<typeof import('./platform-services')>('./platform-services');
     const overview = await loadPlatformServices();
-    expect(h.execute).toHaveBeenCalledTimes(1);
-    expect(h.transaction).not.toHaveBeenCalled();
+    expect(txExecute).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(txExecute.mock.calls[0])).not.toContain('SET LOCAL ROLE');
+    expect(h.execute).not.toHaveBeenCalled();
     expect(h.withSystemContext).not.toHaveBeenCalled();
     expect(overview).toMatchObject({ totalServices: 1, healthyServices: 1 });
   });
@@ -166,7 +168,7 @@ describe('platform services read path', () => {
   });
 
   it('propagates a database failure instead of returning an empty overview', async () => {
-    h.execute.mockRejectedValue(new Error('permission denied for table platform_services'));
+    h.transaction.mockImplementation(async (fn: (tx: unknown) => unknown) => fn({ execute: vi.fn().mockRejectedValue(new Error('permission denied for table platform_services')) }));
     const { loadPlatformServices } = await vi.importActual<typeof import('./platform-services')>('./platform-services');
     await expect(loadPlatformServices()).rejects.toThrow('permission denied');
   });

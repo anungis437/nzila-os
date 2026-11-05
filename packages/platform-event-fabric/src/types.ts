@@ -139,19 +139,19 @@ export interface EventSchemaDefinition {
 // ── Zod Schemas ─────────────────────────────────────────────────────────────
 
 export const PlatformEventMetadataSchema = z.object({
-  tenantId: z.string().uuid(),
-  orgId: z.string().uuid().optional(),
+  tenantId: z.guid(),
+  orgId: z.guid().optional(),
   actorId: z.string().min(1),
-  correlationId: z.string().uuid(),
-  causationId: z.string().uuid().optional(),
+  correlationId: z.guid(),
+  causationId: z.guid().optional(),
   source: z.string().min(1),
   version: z.number().int().positive(),
 })
 
 export const PlatformEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   type: z.string().min(1),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   metadata: PlatformEventMetadataSchema,
   createdAt: z.string().datetime(),
 })

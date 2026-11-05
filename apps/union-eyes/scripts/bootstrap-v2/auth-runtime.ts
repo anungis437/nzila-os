@@ -93,10 +93,12 @@ export async function proveAuthExecutionBoundary(clients: AuthProofClients) {
   await owner.query(`
     INSERT INTO user_management.users(user_id,email,password_hash)
       VALUES ('auth-proof-a','auth-proof-a@example.invalid','synthetic-hash'),
-             ('auth-proof-b','auth-proof-b@example.invalid','synthetic-hash');
-    INSERT INTO user_management.organization_users(user_id,organization_id)
-      VALUES ('auth-proof-a','11111111-1111-4111-8111-111111111111'),
-             ('auth-proof-b','22222222-2222-4222-8222-222222222222');
+             ('auth-proof-b','auth-proof-b@example.invalid','synthetic-hash'),
+             ('auth-proof-inviter','auth-proof-inviter@example.invalid','synthetic-hash');
+    INSERT INTO user_management.organization_users(user_id,organization_id,role)
+      VALUES ('auth-proof-a','11111111-1111-4111-8111-111111111111','member'),
+             ('auth-proof-b','22222222-2222-4222-8222-222222222222','member'),
+             ('auth-proof-inviter','11111111-1111-4111-8111-111111111111','admin');
     INSERT INTO user_management.user_sessions(user_id,session_token,session_token_hash,expires_at)
       VALUES ('auth-proof-a',repeat('a',64),repeat('a',64),now()+interval '1 day'),
              ('auth-proof-b',repeat('b',64),repeat('b',64),now()+interval '1 day');
@@ -106,7 +108,8 @@ export async function proveAuthExecutionBoundary(clients: AuthProofClients) {
     INSERT INTO user_management.magic_links(email,user_id,token_hash,expires_at)
       VALUES ('auth-proof-a@example.invalid','auth-proof-a',repeat('e',64),now()+interval '1 hour');
     INSERT INTO user_management.invites(email,organization_id,invited_by,token_hash,expires_at)
-      VALUES ('auth-proof-a@example.invalid','11111111-1111-4111-8111-111111111111','auth-proof-b',repeat('f',64),now()+interval '1 hour');
+      VALUES ('auth-proof-a@example.invalid','11111111-1111-4111-8111-111111111111','auth-proof-inviter',repeat('f',64),now()+interval '1 hour'),
+             ('auth-proof-a@example.invalid','11111111-1111-4111-8111-111111111111','auth-proof-b',repeat('7',64),now()+interval '1 hour');
     INSERT INTO user_management.mfa_challenges(user_id,token_hash,expires_at)
       VALUES ('auth-proof-a',repeat('1',64),now()+interval '5 minutes');
   `)
@@ -244,11 +247,20 @@ export async function proveAuthExecutionBoundary(clients: AuthProofClients) {
   await check('invite bearer cannot forge organization or platform role', async () => {
     const context: AuthExecutionContext = { phase: 'redemption', selector: { kind: 'invite', tokenHash: 'f'.repeat(64) } }
     await denied(() => scoped(auth, context, client => client.query(`INSERT INTO user_management.organization_users(user_id,organization_id,role,invited_by)
-      VALUES ('auth-proof-a','33333333-3333-4333-8333-333333333333','admin','auth-proof-b')`)))
+      VALUES ('auth-proof-a','33333333-3333-4333-8333-333333333333','admin','auth-proof-inviter')`)))
     await denied(() => scoped(auth, context, client => client.query(`UPDATE user_management.organization_users SET role='coo'`)))
     await scoped(auth, context, async client => {
-      assert.equal((await client.query(`UPDATE user_management.organization_users SET role='member',invited_by='auth-proof-b'`)).rowCount, 1)
+      assert.equal((await client.query(`UPDATE user_management.organization_users SET role='member',invited_by='auth-proof-inviter'`)).rowCount, 1)
     })
+    // An invitation whose inviter is not an active administrator of the invited organization confers nothing.
+    const deadInviter: AuthExecutionContext = { phase: 'redemption', selector: { kind: 'invite', tokenHash: '7'.repeat(64) } }
+    await scoped(auth, deadInviter, async client => {
+      assert.equal((await client.query('SELECT 1 FROM user_management.invites')).rowCount, 0)
+      assert.equal((await client.query(`UPDATE user_management.invites SET accepted_at=now()`)).rowCount, 0)
+      assert.equal((await client.query(`UPDATE user_management.organization_users SET role='member',invited_by='auth-proof-b'`)).rowCount, 0)
+    })
+    await denied(() => scoped(auth, deadInviter, client => client.query(`INSERT INTO user_management.organization_users(user_id,organization_id,role,invited_by)
+      VALUES ('auth-proof-a','11111111-1111-4111-8111-111111111111','member','auth-proof-b')`)))
   })
   await check('tenant administrator is active, actor-bound and organization-bound', async () => {
     await owner.query(`UPDATE user_management.organization_users SET role='admin' WHERE user_id='auth-proof-a'`)

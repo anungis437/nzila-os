@@ -107,7 +107,7 @@ router.get(
         return res.status(400).json({
           success: false,
           error: 'Invalid date range',
-          details: validation.error.errors,
+          details: validation.error.issues,
         });
       }
 
@@ -181,7 +181,7 @@ router.get(
         return res.status(400).json({
           success: false,
           error: 'Invalid date range',
-          details: validation.error.errors,
+          details: validation.error.issues,
         });
       }
 
@@ -225,7 +225,7 @@ router.get(
         return res.status(400).json({
           success: false,
           error: 'Invalid date range',
-          details: validation.error.errors,
+          details: validation.error.issues,
         });
       }
 
@@ -286,7 +286,7 @@ router.get(
         return res.status(400).json({
           success: false,
           error: 'Invalid date range',
-          details: validation.error.errors,
+          details: validation.error.issues,
         });
       }
 

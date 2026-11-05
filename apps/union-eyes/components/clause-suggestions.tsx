@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Search, Link as LinkIcon, Loader2 } from "lucide-react";
+import { BookOpen, Check, Search, Link as LinkIcon, Loader2 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -18,6 +19,7 @@ interface ClauseResult {
 interface ClauseSuggestionsProps {
   grievanceId: string;
   description?: string;
+  /** Called after the clause is linked to the grievance. */
   onLink?: (clauseId: string) => void;
 }
 
@@ -28,9 +30,12 @@ export function ClauseSuggestions({
   description,
   onLink,
 }: ClauseSuggestionsProps) {
+  const t = useTranslations("clauseSuggestions");
   const [clauses, setClauses] = useState<ClauseResult[]>([]);
+  const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [linking, setLinking] = useState<string | null>(null);
+  const [linked, setLinked] = useState<ReadonlySet<string>>(new Set());
   const [searchText, setSearchText] = useState(description ?? "");
   const [error, setError] = useState<string | null>(null);
 
@@ -41,16 +46,17 @@ export function ClauseSuggestions({
       const res = await fetch(`/api/grievances/${grievanceId}/suggest-clauses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description: searchText }),
+        body: JSON.stringify({ description: searchText.trim() }),
       });
-      const json = await res.json();
-      if (json.data) {
+      const json = (await res.json().catch(() => null)) as { data?: ClauseResult[] } | null;
+      if (res.ok && Array.isArray(json?.data)) {
         setClauses(json.data);
+        setSearched(true);
       } else {
-        setError(json.error?.message ?? "Failed to find clauses");
+        setError(t("findFailed"));
       }
     } catch {
-      setError("Network error");
+      setError(t("findFailed"));
     } finally {
       setLoading(false);
     }
@@ -58,15 +64,21 @@ export function ClauseSuggestions({
 
   async function handleLink(clauseId: string) {
     setLinking(clauseId);
+    setError(null);
     try {
       const res = await fetch(`/api/grievances/${grievanceId}/suggest-clauses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description: searchText, linkClauseId: clauseId }),
+        body: JSON.stringify({ clauseId }),
       });
       if (res.ok) {
+        setLinked((previous) => new Set(previous).add(clauseId));
         onLink?.(clauseId);
+      } else {
+        setError(t("linkFailed"));
       }
+    } catch {
+      setError(t("linkFailed"));
     } finally {
       setLinking(null);
     }
@@ -76,7 +88,7 @@ export function ClauseSuggestions({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm">
-          <BookOpen className="h-4 w-4" /> Contract Clause Intelligence
+          <BookOpen className="h-4 w-4" /> {t("title")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -86,7 +98,8 @@ export function ClauseSuggestions({
             type="text"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder="Describe the issue or paste grievance text…"
+            placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
             className="flex-1 rounded border px-3 py-2 text-sm"
           />
           <button
@@ -99,17 +112,22 @@ export function ClauseSuggestions({
             ) : (
               <Search className="h-3 w-3" />
             )}
-            {loading ? "Searching…" : "Find Clauses"}
+            {loading ? t("searching") : t("find")}
           </button>
         </div>
 
-        {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
-
-        {clauses.length === 0 && !loading && (
-          <p className="text-sm text-gray-400">
-            Enter grievance details above and click &quot;Find Clauses&quot; to search CBA
-            articles by semantic similarity or keyword match.
+        {error && (
+          <p role="alert" className="mb-3 text-sm text-red-600">
+            {error}
           </p>
+        )}
+
+        {!searched && !loading && (
+          <p className="text-sm text-gray-400">{t("intro")}</p>
+        )}
+
+        {searched && clauses.length === 0 && !loading && (
+          <p className="text-sm text-gray-500">{t("none")}</p>
         )}
 
         {clauses.length > 0 && (
@@ -124,8 +142,8 @@ export function ClauseSuggestions({
                     <p className="text-sm font-medium">{clause.title}</p>
                     {(clause.articleNumber || clause.sectionNumber) && (
                       <p className="text-xs text-gray-500">
-                        {clause.articleNumber && `Art. ${clause.articleNumber}`}
-                        {clause.sectionNumber && ` § ${clause.sectionNumber}`}
+                        {clause.articleNumber && t("article", { number: clause.articleNumber })}
+                        {clause.sectionNumber && ` ${t("section", { number: clause.sectionNumber })}`}
                       </p>
                     )}
                     <p className="mt-1 text-xs text-gray-600 line-clamp-3">
@@ -133,22 +151,29 @@ export function ClauseSuggestions({
                     </p>
                     {clause.similarity !== undefined && (
                       <p className="mt-1 text-xs text-purple-600">
-                        Relevance: {(clause.similarity * 100).toFixed(0)}%
+                        {t("relevance", { percent: (clause.similarity * 100).toFixed(0) })}
                       </p>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleLink(clause.id)}
-                    disabled={linking === clause.id}
-                    className="ml-3 flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    {linking === clause.id ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <LinkIcon className="h-3 w-3" />
-                    )}
-                    Link
-                  </button>
+                  {linked.has(clause.id) ? (
+                    <span className="ml-3 flex items-center gap-1 text-xs text-green-700">
+                      <Check className="h-3 w-3" />
+                      {t("linked")}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleLink(clause.id)}
+                      disabled={linking === clause.id}
+                      className="ml-3 flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      {linking === clause.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <LinkIcon className="h-3 w-3" />
+                      )}
+                      {t("link")}
+                    </button>
+                  )}
                 </div>
               </li>
             ))}

@@ -82,17 +82,21 @@ class AiBudgetsContainmentTests(unittest.TestCase):
         )
 
 
-class AiBudgetsSchemaParityTests(unittest.TestCase):
-    """Locks the proven schema drift between the Django model and the
-    real physical table (db/migrations/0079_ai_cost_tracking_phase1.sql /
-    db/schema/domains/ml/chatbot.ts). If this test starts failing because
-    the model gained the missing columns, the containment reasoning above
-    must be re-evaluated — a schema fix does not by itself prove a legitimate
-    consumer or organization-ownership enforcement exists."""
+class AiBudgetsSchemaConvergenceTests(unittest.TestCase):
+    """The model describes the physical table (db/migrations/0079_ai_cost_tracking_phase1.sql /
+    db/schema/domains/ml/chatbot.ts).
 
-    EXPECTED_STALE_FIELDS = {"id", "created_at", "updated_at", "organization_id"}
+    This used to lock the proven drift between the model and the table so that a model regeneration would trigger a
+    re-review of the containment reasoning above. The regeneration happened (`manage.py ue_converge_models`, proven
+    against PostgreSQL by `manage.py ue_physical_parity --strict`). The re-review's outcome is unchanged: a schema fix
+    does not by itself prove a legitimate consumer or organization-ownership enforcement exists, so the view stays
+    contained (the tests above), and these tests hold the model to its table instead of to its drift."""
 
-    REQUIRED_PHYSICAL_COLUMNS_MISSING_FROM_MODEL = {
+    PHYSICAL_COLUMNS = {
+        "id",
+        "created_at",
+        "updated_at",
+        "organization_id",
         "monthly_limit_usd",
         "current_spend_usd",
         "alert_threshold",
@@ -101,22 +105,17 @@ class AiBudgetsSchemaParityTests(unittest.TestCase):
         "billing_period_end",
     }
 
-    def test_model_field_set_matches_known_stale_snapshot(self):
-        actual_fields = {f.name for f in AiBudgets._meta.get_fields()}
-        self.assertEqual(actual_fields, self.EXPECTED_STALE_FIELDS)
+    def test_model_describes_its_physical_columns(self):
+        actual_columns = {f.column for f in AiBudgets._meta.concrete_fields}
+        self.assertLessEqual(self.PHYSICAL_COLUMNS, actual_columns)
 
-    def test_model_is_missing_required_physical_columns(self):
-        actual_fields = {f.name for f in AiBudgets._meta.get_fields()}
-        missing = self.REQUIRED_PHYSICAL_COLUMNS_MISSING_FROM_MODEL - actual_fields
-        self.assertEqual(missing, self.REQUIRED_PHYSICAL_COLUMNS_MISSING_FROM_MODEL)
-
-    def test_organization_id_is_not_a_real_foreign_key_on_the_model(self):
+    def test_organization_id_is_a_required_bare_uuid_not_a_foreign_key(self):
         # Unlike sibling models in this app (e.g. MlPredictions.organization
         # is a real ForeignKey), AiBudgets.organization_id is a bare
-        # UUIDField — the model was never taught the FK relationship either.
+        # UUIDField. The column is NOT NULL, and the model now says so.
         field = AiBudgets._meta.get_field("organization_id")
         self.assertEqual(field.get_internal_type(), "UUIDField")
-        self.assertTrue(field.null)
+        self.assertFalse(field.null)
 
 
 if __name__ == "__main__":

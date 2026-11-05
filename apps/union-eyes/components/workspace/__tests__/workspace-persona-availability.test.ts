@@ -359,10 +359,14 @@ describe("workspace deep-work path coherence", () => {
       "/dashboard/operations",
       "/dashboard/inbox",
       "/dashboard/intelligence",
+      // Deep link only (#1104): the page's server role guard and the APIs' commercial_reporting entitlement decide access.
+      "/dashboard/cba-intelligence",
       "/dashboard/members",
       "/dashboard/documents",
       "/dashboard/correspondence",
+      "/dashboard/clause-library",
       "/dashboard/notifications",
+      "/dashboard/messages/staff",
       "/dashboard/settings",
       "/dashboard/profile",
     ];

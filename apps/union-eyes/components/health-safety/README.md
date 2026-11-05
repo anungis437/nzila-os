@@ -23,17 +23,15 @@ import {
 - `SafetyMetricsCard` - Reusable KPI display card
 - `IncidentTrendChart` - Data visualization for trends
 
-#### 2. **Incident Management** (5 components)
+#### 2. **Incident Management** (4 components)
 - `IncidentListTable` - Paginated incident listing
 - `IncidentReportForm` - Comprehensive incident reporting
-- `IncidentDetailView` - Full incident details
 - `IncidentStatusBadge` - Status indicator
 - `IncidentTimelineViewer` - Activity timeline
 
-#### 3. **Inspection Management** (4 components)
+#### 3. **Inspection Management** (3 components)
 - `InspectionScheduleCalendar` - Calendar view for inspections
-- `InspectionChecklist` - Interactive checklist
-- `InspectionReportViewer` - Report display
+- `InspectionReportViewer` - One inspection as recorded: checklist results, recorded score, findings and notes
 - `InspectionFindingsCard` - Summary card
 
 #### 4. **Hazard Management** (3 components)
@@ -41,11 +39,17 @@ import {
 - `HazardsList` - Grid view of hazards
 - `HazardPriorityBadge` - Priority indicator
 
-#### 5. **Additional Features** (4 components)
-- `PPEDistributionTracker` - PPE inventory management
-- `SafetyCommitteeMeetingScheduler` - Meeting scheduler
-- `SafetyTrainingRecordsViewer` - Training tracking
-- `CorrectiveActionTracker` - Action item management
+> **Not offered:** corrective-action tracking (the `corrective_actions` table is neither declared in the schema nor authorised for the
+> tenant runtime role), report / PDF exports (no export service or authority model covers members' health data), hazard photos and
+> incident attachments (no upload route stores a file), incident drafts (nothing restored them), scheduling an inspection (no screen for it
+> exists), and a detail page for a hazard or an incident (none exists; `HazardsList` and `IncidentListTable` show a View button only when
+> the host passes `onViewDetails`). The UI offers none of these.
+
+> **Reading the routes:** the routes answer through `withApi` as `{ success, data, timestamp }` (a CRUD list: `data.data` rows and
+> `data.pagination`), and fail with `{ code, message }`. The screens read them with `@/lib/client/api-envelope`, `@/lib/client/row-fields` (a
+> record that lacks a column the database never leaves empty is an error, not a record with an invented value) and `use-stats.ts`
+> (statistics keyed by organization and attempt). A list or figure that could not be loaded is shown as an error with a retry, and an
+> unknown figure (an average over nothing, a rate nobody scored) is a dash: neither is shown as an empty list or a zero.
 
 ## 🚀 Quick Start
 
@@ -71,13 +75,12 @@ import { IncidentReportForm } from "@/components/health-safety";
 
 export default function ReportIncidentPage() {
   const handleSubmit = async (data) => {
-    // Handle submission
+    // POST toIncidentRequest(data) to /api/health-safety/incidents and throw when it refuses: the form stays open and shows the reason.
     console.log("Incident reported:", data);
   };
 
   return (
     <IncidentReportForm
-      organizationId="org_123"
       onSubmit={handleSubmit}
       onCancel={() => router.back()}
     />
@@ -97,18 +100,15 @@ export default function HazardsPage() {
     <div>
       {showForm ? (
         <HazardReportForm
-          organizationId="org_123"
-          onSubmit={(data) => {
-            // Handle submission
+          onSubmit={async (data) => {
+            // POST the fields to /api/health-safety/hazards and throw when it refuses: the form stays open and shows the reason.
+            // Never send organizationId: the route takes the organization from the session and rejects a body that names one.
             setShowForm(false);
           }}
           onCancel={() => setShowForm(false)}
         />
       ) : (
-        <HazardsList
-          organizationId="org_123"
-          onViewDetails={(id) => router.push(`/hazards/${id}`)}
-        />
+        <HazardsList organizationId="org_123" />
       )}
     </div>
   );
@@ -133,7 +133,6 @@ interface HealthSafetyDashboardProps {
 - Real-time safety metrics
 - Incident trend visualization
 - Tabbed navigation (Overview, Incidents, Inspections, Hazards)
-- Export functionality
 
 ---
 
@@ -144,42 +143,17 @@ interface HealthSafetyDashboardProps {
 **Props**:
 ```typescript
 interface IncidentReportFormProps {
-  organizationId: string;
-  initialData?: Partial<IncidentReport>;
-  incidentId?: string;
-  onSubmit: (data: IncidentReport) => void | Promise<void>;
+  initialData?: Partial<IncidentFormData>;
+  /** Saves the report; throws when it is refused, so the form stays open and shows the reason. */
+  onSubmit: (data: IncidentFormData) => Promise<void>;
   onCancel?: () => void;
 }
 ```
 
 **Features**:
 - Multi-section form (Details, Injuries, Witnesses, Actions, Reporter)
-- File attachments
-- Auto-save drafts
 - Form validation with zod
-
----
-
-### InspectionChecklist
-
-**Purpose**: Interactive checklist for inspections
-
-**Props**:
-```typescript
-interface InspectionChecklistProps {
-  inspectionId: string;
-  items: ChecklistItem[];
-  onComplete: (results: ChecklistResults) => void | Promise<void>;
-  onSaveDraft?: (results: Partial<ChecklistResults>) => void;
-}
-```
-
-**Features**:
-- Pass/Fail/N/A selection
-- Photo attachments per item
-- Progress tracking
-- Auto-save
-- Category grouping
+- No attachments and no draft: no route stores a file and nothing restored a draft. See `incident-payload.ts` for how the fields reach the incidents route
 
 ---
 
@@ -191,79 +165,17 @@ interface InspectionChecklistProps {
 ```typescript
 interface HazardsListProps {
   organizationId: string;
+  /** Without it a hazard is listed but cannot be opened: there is no button. */
   onViewDetails?: (hazardId: string) => void;
 }
 ```
 
 **Features**:
-- Search functionality
-- Status and priority filtering
-- Responsive grid layout
+- Search
+- Status filter (reported, assessed, assigned, resolved, closed) and level filter (low, moderate, high, critical, extreme): the values the routes store
+- Responsive grid, a page at a time
 - Priority badges
-
----
-
-### PPEDistributionTracker
-
-**Purpose**: Track PPE inventory and distribution
-
-**Props**:
-```typescript
-interface PPEDistributionTrackerProps {
-  organizationId: string;
-  onDistribute?: (itemId: string) => void;
-  onReorder?: (itemId: string) => void;
-}
-```
-
-**Features**:
-- Stock level monitoring
-- Low/critical stock alerts
-- Distribution history
-- Reorder recommendations
-
----
-
-### SafetyTrainingRecordsViewer
-
-**Purpose**: Display employee training records
-
-**Props**:
-```typescript
-interface SafetyTrainingRecordsViewerProps {
-  organizationId: string;
-  employeeId?: string;
-  onViewCertificate?: (recordId: string) => void;
-}
-```
-
-**Features**:
-- Compliance rate tracking
-- Expiry alerts
-- Certificate downloads
-- Training history
-
----
-
-### CorrectiveActionTracker
-
-**Purpose**: Track follow-up actions
-
-**Props**:
-```typescript
-interface CorrectiveActionTrackerProps {
-  organizationId: string;
-  sourceType?: "incident" | "inspection" | "hazard";
-  sourceId?: string;
-  onViewAction?: (actionId: string) => void;
-}
-```
-
-**Features**:
-- Priority and deadline tracking
-- Assignment management
-- Progress monitoring
-- Overdue alerts
+- An error with a retry when the list cannot be loaded
 
 ## 🔌 API Integration
 
@@ -297,9 +209,6 @@ All components integrate with the following API endpoints:
 
 ### Training
 - `GET /api/health-safety/training/records?organizationId={id}`
-
-### Corrective Actions
-- `GET /api/health-safety/corrective-actions?organizationId={id}`
 
 ## 🎨 Styling
 

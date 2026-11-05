@@ -49,6 +49,7 @@ paths = [
   '''.*DJANGO_.*\.md$''',              # Django settings guides
   '''content/internal/cupe3906-bylaws-raw\.html$''',  # Scraped HTML with third-party New Relic tracking keys
   '''lib/api-docs/openapi-config\.ts$''',             # API docs with placeholder curl Authorization examples
+  '''docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN\.json$''', # sha256 source commitments; generic-api-key matches paths that contain "auth"
 ]
 
 commits = [

@@ -3,7 +3,7 @@
  * Summary statistics for workplace incidents within a rolling window.
  * Returns { total, reported, investigating, resolved, closed, avgResolutionTime }.
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -33,7 +33,9 @@ export const GET = withApi(
     const url = new URL(request.url);
     const period = url.searchParams.get('period') || '30d';
     const startISO = getStartDateISO(period);
-    const orgFilter = organizationId ? sql`organization_id = ${organizationId}` : sql`1=1`;
+    // With no organization the query used to run unscoped (1=1) and count every tenant's rows; it now refuses.
+    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    const orgFilter = sql`organization_id = ${organizationId}`;
 
     const rows = Array.from(
       await withRLSContext(async () =>
@@ -47,7 +49,7 @@ export const GET = withApi(
             avg(EXTRACT(EPOCH FROM (closed_date - reported_date)) / 86400.0)
               FILTER (WHERE closed_date IS NOT NULL) AS avg_resolution_days
           FROM workplace_incidents
-          WHERE ${orgFilter} AND incident_date >= ${startISO}::timestamptz
+          WHERE ${orgFilter} AND status <> 'archived' AND incident_date >= ${startISO}::timestamptz
         `)
       )
     );
@@ -62,7 +64,7 @@ export const GET = withApi(
       closed: Number(row.closed ?? 0),
       avgResolutionTime: row.avg_resolution_days != null
         ? Math.round(Number(row.avg_resolution_days) * 10) / 10
-        : 0,
+        : null, // Unknown is not zero: no route records the dates this is measured from.
     };
   },
 );

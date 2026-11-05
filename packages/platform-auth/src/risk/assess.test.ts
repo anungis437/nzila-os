@@ -6,7 +6,7 @@
  * of stub select() chains that return the counts we want to exercise each
  * signal.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const { mockSelect } = vi.hoisted(() => ({
   mockSelect: vi.fn(),
@@ -53,6 +53,46 @@ function mockSelectOnce(rows: unknown[]) {
 describe('assessRisk', () => {
   beforeEach(() => {
     mockSelect.mockReset()
+  })
+
+  describe('the QA/E2E risk bypass (UE_E2E_RISK_BYPASS)', () => {
+    const KEYS = ['UE_E2E_RISK_BYPASS', 'UE_ENVIRONMENT', 'NEXT_PUBLIC_APP_ENV', 'TARGET_ENVIRONMENT', 'NZILA_MODE', 'UE_DEPLOYMENT_TYPE', 'NZILA_DEPLOYMENT_TYPE', 'NODE_ENV'] as const
+    const saved: Record<string, string | undefined> = {}
+    beforeEach(() => {
+      for (const key of KEYS) {
+        saved[key] = process.env[key]
+        delete process.env[key]
+      }
+    })
+    afterEach(() => {
+      for (const key of KEYS) {
+        if (saved[key] === undefined) delete process.env[key]
+        else Object.assign(process.env, { [key]: saved[key] })
+      }
+    })
+    const risk = () => assessRisk({ userId: 'u1', ipAddress: '203.0.113.1', userAgent: '', userRoles: ['admin'] })
+
+    it('skips the scorer in a demo, staging or local process that asks for it', async () => {
+      for (const identity of [{ UE_ENVIRONMENT: 'staging', NODE_ENV: 'production' }, { UE_ENVIRONMENT: 'demo', NODE_ENV: 'production' }, { UE_ENVIRONMENT: 'local', NODE_ENV: 'development' }]) {
+        Object.assign(process.env, identity, { UE_E2E_RISK_BYPASS: 'true' })
+        expect(await risk(), JSON.stringify(identity)).toMatchObject({ tier: 'low', recommendedAction: 'allow', reasons: ['qa_test_env_bypass'] })
+        expect(mockSelect).not.toHaveBeenCalled()
+      }
+    })
+
+    it('is impossible on a production deployment: any identity saying production, or an unlabeled production container, scores the login', async () => {
+      for (const identity of [{ UE_ENVIRONMENT: 'production' }, { UE_ENVIRONMENT: 'prod', NODE_ENV: 'production' }, { NEXT_PUBLIC_APP_ENV: 'production' }, { NZILA_MODE: 'production' }, { UE_DEPLOYMENT_TYPE: 'prod' }, { NODE_ENV: 'production' }, { UE_ENVIRONMENT: 'staging', TARGET_ENVIRONMENT: 'production' }]) {
+        for (const key of KEYS) delete process.env[key]
+        Object.assign(process.env, identity, { UE_E2E_RISK_BYPASS: 'true' })
+        mockSelect.mockReset()
+        mockSelectOnce([{ count: 12 }])
+        mockSelectOnce([{ count: 0 }])
+        const result = await risk()
+        expect(result.reasons, JSON.stringify(identity)).not.toContain('qa_test_env_bypass')
+        expect(result.tier, JSON.stringify(identity)).toBe('high')
+        expect(result.recommendedAction, JSON.stringify(identity)).toBe('soft_lockout')
+      }
+    })
   })
 
   it('returns tier=low / allow when no signals fire', async () => {

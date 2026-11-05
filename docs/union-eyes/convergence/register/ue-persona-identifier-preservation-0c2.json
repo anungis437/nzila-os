@@ -1,0 +1,1871 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-PERSONA-HISTORICAL-IDENTIFIER-PRESERVATION",
+  "gate": "0C.2",
+  "anchorCommit": "fe8469cff34c561b2beccddb965e13355d74bb09",
+  "note": "The 182 historical persona identifiers of the completion matrix and the evidence status each currently carries. An identifier whose historical source is incomplete is preserved and never dropped. Mapping an identifier to a proposed requirement does not recover the historical definition.",
+  "total": 182,
+  "perPersona": {
+    "financial-officer": 38,
+    "governance-officer": 30,
+    "member": 10,
+    "officer-executive": 26,
+    "representative": 56,
+    "senior-representative": 22
+  },
+  "digestSha256": "635e2f43f34c6e4344ba4cd706d4f11d73b5f8282a1e408d250cfd308351e2f9",
+  "unresolvedPersonas": [
+    {
+      "persona": "steward",
+      "resolved": false,
+      "canonicalFileFound": false,
+      "identifiers": 0,
+      "individuallyDefined": 0,
+      "groupedOnly": 0,
+      "unspecified": 0,
+      "trackingCapability": "UE-OMIT-STEWARD-CANONICAL-ABSENT"
+    },
+    {
+      "persona": "representative",
+      "resolved": false,
+      "canonicalFileFound": false,
+      "identifiers": 56,
+      "individuallyDefined": 39,
+      "groupedOnly": 17,
+      "unspecified": 0,
+      "trackingCapability": "UE-OMIT-REP-CANONICAL-ABSENT"
+    },
+    {
+      "persona": "financial-officer",
+      "resolved": false,
+      "canonicalFileFound": false,
+      "identifiers": 38,
+      "individuallyDefined": 4,
+      "groupedOnly": 6,
+      "unspecified": 28,
+      "trackingCapability": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED"
+    }
+  ],
+  "identifiers": [
+    {
+      "id": "M01",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-A-004",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "M02",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "M03",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "M04",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-M04-MEMBER-REQUESTS",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "M05",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "M06",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "M07",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "M08",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "M09",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "M10",
+      "persona": "member",
+      "source": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "REP-NAV-1",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-NAV-2",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-NAV-3",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-NAV-4",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-CORRESPONDENCE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-NAV-5",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-NAV-6",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-NAV-7",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-01",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-02",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-03",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-04",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-05",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-06",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-07",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-08",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-09",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-10",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-11",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-12",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-CORRESPONDENCE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-13",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-CORRESPONDENCE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-14",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-CORRESPONDENCE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-15",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-16",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-17",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-18",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-19",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-010",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-20",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-21",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-22",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-23",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-REP-TRANSITION-REASON-LEAK",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-24",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "REP-ACT-25",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R01",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R02",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R03",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R04",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R05",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R06",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R07",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R08",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R09",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R10",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R11",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R12",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R13",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R14",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R15",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R16",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R17",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R18",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R19",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R20",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R21",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R22",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R23",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "R24",
+      "persona": "representative",
+      "source": "docs/union-eyes/convergence/UE_REPRESENTATIVE_2_2_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-REP-CANONICAL-ABSENT",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "SR01",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR02",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR03",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR04",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR05",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR06",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR07",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR08",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR09",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR10",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-DEADLINE-OVERDUE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR11",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR12",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR13",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR15",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR16",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR17",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR18",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR19",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR20",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR21",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR14",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "SR22",
+      "persona": "senior-representative",
+      "source": "docs/union-eyes/reality-remediation/32_UE_SENIOR_REPRESENTATIVE_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O01",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O02",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O03",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O04",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O05",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O06",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O07",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O08",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O09",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-009",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O10",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O11",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O12",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O13",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O14",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O15",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O16",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O17",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O18",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O19",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O20",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O21",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O22",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O23",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O24",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O25",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "O26",
+      "persona": "officer-executive",
+      "source": "apps/union-eyes/lib/executive/capability-matrix.ts",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "F01",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F02",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F03",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F04",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F05",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F06",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F07",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F08",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-003",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F09",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-001",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F10",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F11",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F12",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F13",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F14",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F15",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F16",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F17",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F18",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "GROUPED_ONLY",
+      "capabilityId": "UE-OMIT-FINANCE-UNAVAILABLE",
+      "mandatory": true,
+      "recoveryLevel": "GROUPED_ONLY",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F19",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-003",
+      "mandatory": true,
+      "recoveryLevel": "INDIVIDUALLY_DEFINED",
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F20",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F21",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F22",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F23",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F24",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F25",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F26",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F27",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "F28",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ01",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ02",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ03",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ04",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ05",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ06",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ07",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ08",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ09",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "FJ10",
+      "persona": "financial-officer",
+      "source": "docs/union-eyes/financial-officer/UE_FINANCIAL_OFFICER_2_1_CONVERGENCE_DISPOSITION.md",
+      "matrixDefinition": "UNSPECIFIED",
+      "capabilityId": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": true
+    },
+    {
+      "id": "G01",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G02",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G03",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G04",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G05",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G06",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G07",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-REVIEW-INTAKE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G08",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-REVIEW-INTAKE",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G09",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G10",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-B-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G11",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-009",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G12",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-009",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G13",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G14",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G15",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G16",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G17",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-003",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G18",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-F-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G19",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G20",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G21",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-D-003",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G22",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-003",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G23",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-K-005",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G24",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G25",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G26",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G27",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-G-002",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G28",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G29",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-CAP-I-001",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    },
+    {
+      "id": "G30",
+      "persona": "governance-officer",
+      "source": "docs/union-eyes/governance-officer/UE-GOVERNANCE-OFFICER-CANONICAL-2.1.md",
+      "matrixDefinition": "INDIVIDUAL",
+      "capabilityId": "UE-OMIT-A11Y-BILINGUAL",
+      "mandatory": true,
+      "recoveryLevel": null,
+      "mappedToProposedBaseline": false
+    }
+  ]
+}

@@ -73,41 +73,6 @@ This will:
 4. Download background patterns
 5. Create ATTRIBUTIONS.md with full credits
 
-## 🔧 Image Components
-
-The project includes optimized image components in `components/ui/optimized-image.tsx`:
-
-- **OptimizedImage**: General-purpose image with Next.js optimization
-- **AvatarImage**: Circular avatars for testimonials
-- **HeroImage**: Large hero sections with optional overlay
-- **FeatureIcon**: SVG illustrations for feature cards
-
-### Usage Examples
-
-```tsx
-// Hero image with overlay
-<HeroImage
-  src="/images/hero/hero-teamwork.jpg"
-  alt="Team collaboration"
-  overlay={true}
-  className="h-[600px]"
-/>
-
-// Avatar in testimonials
-<AvatarImage
-  src="/images/testimonials/avatar-maria.jpg"
-  alt="Maria T."
-  size="md"
-/>
-
-// Feature illustration
-<FeatureIcon
-  src="/images/features/claims.svg"
-  alt="Claims tracking"
-  size={120}
-/>
-```
-
 ## ⚡ Performance
 
 All images are optimized using Next.js Image component:
@@ -120,10 +85,7 @@ All images are optimized using Next.js Image component:
 
 ## 📜 Attribution
 
-Per licensing requirements, all images are credited in:
-
-1. `/public/images/ATTRIBUTIONS.md` - Full detailed credits
-2. Attribution footer on public pages - Visible credits
+All images are credited in `/public/images/ATTRIBUTIONS.md`.
 
 ## 🔄 Updating Images
 

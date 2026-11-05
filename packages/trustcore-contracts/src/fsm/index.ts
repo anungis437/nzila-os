@@ -35,7 +35,7 @@ export type TrustOpsTransitionTrigger = z.infer<typeof TrustOpsTransitionTrigger
 
 /** Pure contract describing an attempted FSM transition (input). */
 export const TrustOpsTransitionInputSchema = z.object({
-  mandateId: z.string().uuid(),
+  mandateId: z.guid(),
   fromStage: TrustOpsMandateStageSchema,
   toStage: TrustOpsMandateStageSchema,
   trigger: TrustOpsTransitionTriggerSchema,

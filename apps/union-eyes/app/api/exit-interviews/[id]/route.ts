@@ -2,8 +2,11 @@
 import { and, asc, eq } from 'drizzle-orm';
 import { withApi, z, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewEvents, exitInterviewDocuments } from '@/db/schema';
-import { ROLE_HIERARCHY, normalizeRole } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY, normalizeRole, hasMinRole } from '@/lib/api-auth-guard';
+import { canReadInterview, projectInterview, resolveInterviewReader } from '@/lib/knowledge-transfer/governance/interview-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +36,7 @@ function hasStewardPrivileges(role: string | null): boolean {
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'member' },
     entitlement: 'union_knowledge_suite',
     openapi: {
@@ -54,10 +58,11 @@ export const GET = withApi(
 
     const stewardPlus = hasStewardPrivileges(user?.role ?? null);
     const isOwner = row.createdBy === userId;
-    const isPublished = row.status === 'published' || row.status === 'archived';
+    const reader = await resolveInterviewReader(userId ?? null, stewardPlus, hasMinRole);
 
-    if (!stewardPlus && !isOwner && !isPublished) {
-      throw ApiError.forbidden('You do not have permission to access this interview');
+    // Sensitivity floor, consent and workflow state: an interview the caller may not read does not exist for them.
+    if (!canReadInterview(row, reader)) {
+      throw ApiError.notFound('Exit interview');
     }
 
     const [events, documents] = await Promise.all([
@@ -73,12 +78,15 @@ export const GET = withApi(
         .orderBy(asc(exitInterviewDocuments.createdAt)),
     ]);
 
-    return { data: { ...row, events, documents } };
+    // The workflow events (who reviewed and when) belong to the people who manage the interview; attachments follow the
+    // interview's own gate.
+    return { data: { ...projectInterview(row, reader, isOwner), events: stewardPlus || isOwner ? events : [], documents } };
   },
 );
 
 export const PATCH = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'steward' },
     body: patchSchema,
     entitlement: 'union_knowledge_suite',
@@ -110,22 +118,35 @@ export const PATCH = withApi(
       throw ApiError.conflict('Only draft interviews can be edited');
     }
 
-    const [updated] = await db
-      .update(exitInterviews)
-      .set({
-        ...body,
-        updatedBy: userId!,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
-      .returning();
+    // The edit, its event and its audit commit together, and only while the interview is still a draft.
+    const updated = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const [row] = await tx
+        .update(exitInterviews)
+        .set({
+          ...body,
+          updatedBy: userId!,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!), eq(exitInterviews.status, 'draft')))
+        .returning();
+      if (!row) throw ApiError.conflict('Only draft interviews can be edited');
 
-    await db.insert(exitInterviewEvents).values({
-      interviewId: params.id,
-      organizationId: organizationId!,
-      eventType: 'updated',
-      actorUserId: userId!,
-      notes: 'Exit interview draft updated',
+      await tx.insert(exitInterviewEvents).values({
+        interviewId: params.id,
+        organizationId: organizationId!,
+        eventType: 'updated',
+        actorUserId: userId!,
+        notes: 'Exit interview draft updated',
+      });
+      await persistAtomicAudit(tx, {
+        organizationId: organizationId!,
+        userId: userId!,
+        action: 'exit_interview.update',
+        resourceType: 'exit_interviews',
+        resourceId: params.id,
+        details: { fields: Object.keys(body) },
+      });
+      return row;
     });
 
     return { data: updated };

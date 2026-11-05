@@ -40,6 +40,9 @@ jobs:
     name: Pilot Contract Tests
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The agent-coordination contract proves commit ancestry (integration provenance), which needs full history.
+          fetch-depth: 0
       - uses: ./.github/actions/setup-monorepo
 
       - name: Contract - RLS Org Isolation (INV-31)
@@ -121,6 +124,10 @@ jobs:
         run: pnpm --filter @nzila/union-eyes test
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          # Every test passes, but vitest workers exhaust Node's default heap on
+          # the full union-eyes suite and the job exits 1. Same limit as the
+          # unit-coverage job in ci.yml.
+          NODE_OPTIONS: '--max-old-space-size=6144'
 
       - name: Financial Service Tests
         run: pnpm --filter financial-service test

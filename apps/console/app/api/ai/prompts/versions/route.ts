@@ -14,10 +14,10 @@ import { requirePlatformRole } from '@/lib/api-guards'
 import { activatePromptVersion, listPromptVersions } from '@nzila/ai-core'
 
 const CreateVersionSchema = z.object({
-  promptId: z.string().uuid(),
+  promptId: z.guid(),
   template: z.string().min(1),
   systemTemplate: z.string().optional(),
-  outputSchema: z.record(z.unknown()).optional(),
+  outputSchema: z.record(z.string(), z.unknown()).optional(),
   allowedFeatures: z.array(z.string()).optional(),
   defaultParams: z.object({
     temperature: z.number().optional(),
@@ -27,7 +27,7 @@ const CreateVersionSchema = z.object({
 })
 
 const ActivateVersionSchema = z.object({
-  versionId: z.string().uuid(),
+  versionId: z.guid(),
 })
 
 export async function GET(req: NextRequest) {

@@ -13,11 +13,13 @@
 
 import { withApi } from '@/lib/api/framework';
 import { analyzeSuccessionFragility } from '@/lib/knowledge-transfer/succession/succession-analyzer';
+import { limitModelRun } from '@/lib/organizational-operating-intelligence/aggregate-guard';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'officer' },
     entitlement: 'union_knowledge_suite',
     openapi: {
@@ -27,8 +29,9 @@ export const GET = withApi(
         'Organizational succession readiness analysis based on published exit interviews.',
     },
   },
-  async ({ organizationId }) => {
-    const report = await analyzeSuccessionFragility(organizationId!);
-    return { data: report };
+  async ({ organizationId, userId }) => {
+    await limitModelRun(organizationId!);
+    const report = await analyzeSuccessionFragility(organizationId!, userId ?? undefined);
+    return report;
   },
 );

@@ -5,6 +5,9 @@ import {
   getBenchmarkSnapshots,
 } from "@/lib/services/cba-intelligence/benchmark-service";
 import { getAgreementById } from "@/lib/services/cba-intelligence/extraction-service";
+import { canReadUnreviewed } from "@/lib/services/cba-intelligence/review-visibility";
+import { requireSystemAdmin } from "@/lib/api-auth-guard";
+import { performAtomicAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 
 // ---------------------------------------------------------------------------
 // GET /api/cba-intelligence/benchmark/[id] — Compute or retrieve benchmark
@@ -16,10 +19,8 @@ const querySchema = z.object({
   union: z.string().optional(),
   employerClass: z.string().optional(),
   minComparables: z.coerce.number().int().positive().optional(),
-  save: z
-    .string()
-    .optional()
-    .transform((v) => v === "true"),
+  // A read does not write. Saving a snapshot is POST (platform authority, audited); a request that still asks a GET to save is refused.
+  save: z.undefined({ error: "Saving a benchmark snapshot is POST /api/cba-intelligence/benchmark/[id]" }),
   history: z
     .string()
     .optional()
@@ -41,27 +42,75 @@ export const GET = withApi(
   async ({ params, query, userId }) => {
     const agreementId = params.id;
 
+    // The benchmark of an agreement no reviewer has approved, and its saved history, are the curators' to read: to anyone else it does not exist.
+    const agreement = await getAgreementById(agreementId);
+    if (!agreement || (agreement.reviewStatus !== "approved" && !(await canReadUnreviewed(userId)))) throw ApiError.notFound("Agreement not found");
+
     // Return saved snapshots if requested
     if (query.history) {
       const snapshots = await getBenchmarkSnapshots(agreementId, {
         page: query.page,
         limit: query.limit,
       });
-      return { data: snapshots };
+      return snapshots;
     }
 
-    const agreement = await getAgreementById(agreementId);
-    if (!agreement) throw ApiError.notFound("Agreement not found");
-
-    const { save, history: _history, page: _page, limit: _limit, ...filters } = query;
+    const { history: _history, page: _page, limit: _limit, ...filters } = query;
     const result = await findComparableAgreements(agreementId, filters as Record<string, unknown>);
 
-    // Persist snapshot if requested
-    if (save && userId) {
-      const snapshot = await saveBenchmarkSnapshot(result, userId);
-      return { data: { ...result, snapshotId: snapshot.id } };
-    }
+    return result;
+  },
+);
 
-    return { data: result };
+const saveSchema = z.object({
+  jurisdiction: z.string().optional(),
+  sector: z.string().optional(),
+  union: z.string().optional(),
+  employerClass: z.string().optional(),
+  minComparables: z.number().int().positive().optional(),
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/cba-intelligence/benchmark/[id] — Compute and persist a snapshot
+// The snapshots belong to the platform-wide CBA dataset (no organization column), so persisting one is platform authority (requireSystemAdmin), and
+// the intent is written in the same transaction as the snapshot: a snapshot whose audit cannot be written is not stored. The dataset is global
+// reference data that the application's runtime role reads and writes, and the system role holds no grant on it, so the transaction is the acting
+// organization's (the audit record is keyed to it): platform authority is checked above, the role that executes is the runtime role.
+// ---------------------------------------------------------------------------
+export const POST = withApi(
+  {
+    auth: { minRole: "steward" },
+    entitlement: "commercial_reporting",
+    body: saveSchema,
+    successStatus: 201,
+    openapi: { tags: ["CBA Intelligence"], summary: "Compute and save a benchmark snapshot" },
+  },
+  async ({ params, body, userId, organizationId }) => {
+    await requireSystemAdmin();
+    if (!userId) throw ApiError.unauthorized("User context required");
+    const agreement = await getAgreementById(params.id);
+    if (!agreement) throw ApiError.notFound("Agreement not found");
+    try {
+      return await performAtomicAuditedOperation(
+        {
+          organizationId,
+          userId,
+          action: "cba_benchmark.snapshot",
+          resourceType: "cba_intel_benchmark_snapshots",
+          resourceId: params.id,
+          details: { filters: Object.keys(body) },
+          resultDetails: (result) => ({ snapshotId: result.snapshotId, comparableCount: result.comparableCount }),
+        },
+        async () => {
+          const result = await findComparableAgreements(params.id, body as Record<string, unknown>);
+          const snapshot = await saveBenchmarkSnapshot(result, userId);
+          return { ...result, snapshotId: snapshot.id };
+        },
+      );
+    } catch (error) {
+      const refused = operationAuditResponse(error);
+      if (refused) throw ApiError.conflict(refused.body.error.message);
+      throw error;
+    }
   },
 );

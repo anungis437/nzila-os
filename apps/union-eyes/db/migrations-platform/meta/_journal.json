@@ -113,6 +113,461 @@
       "when": 1758710000000,
       "tag": "0012_knowledge_transfer_runtime_relations",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1758720000000,
+      "tag": "0013_authority_kernel_storage",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1758730000000,
+      "tag": "0014_message_thread_triage",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1758740000000,
+      "tag": "0015_payments_transaction_source",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1758750000000,
+      "tag": "0016_documents_org_id_mirror",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1758760000000,
+      "tag": "0017_dues_transactions_ledger_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1758770000000,
+      "tag": "0018_declared_shape_tranche_1",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1758780000000,
+      "tag": "0019_declared_shape_tranche_2",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1758790000000,
+      "tag": "0020_declared_shape_tranche_3",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1758800000000,
+      "tag": "0021_employer_execution_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1758810000000,
+      "tag": "0022_document_intake_and_transcription",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1758820000000,
+      "tag": "0023_signature_provider_acknowledgment",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1758830000000,
+      "tag": "0025_message_thread_lifecycle_and_retention",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1758840000000,
+      "tag": "0027_workaid_union_side_disclosure",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1758850000000,
+      "tag": "0028_location_deletion_log_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1758860000000,
+      "tag": "0029_message_thread_authority_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1758870000000,
+      "tag": "0030_message_retention_authority_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1758880000000,
+      "tag": "0031_reachable_stub_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1758890000000,
+      "tag": "0032_notification_callback_identity",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1758900000000,
+      "tag": "0033_election_certificate_successions",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1758910000000,
+      "tag": "0034_election_organization_ownership",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1758920000000,
+      "tag": "0035_election_supersession_authority_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1758930000000,
+      "tag": "0036_workaid_consent_wording_proposals",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1758940000000,
+      "tag": "0037_workaid_referral_scope",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1758950000000,
+      "tag": "0038_gate0_integrity_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1758960000000,
+      "tag": "0039_committee_memberships_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1758970000000,
+      "tag": "0040_gate0_integrity_enforcement",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1758980000000,
+      "tag": "0041_room_bookings_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1758990000000,
+      "tag": "0042_tenant_scoped_uniqueness",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1759000000000,
+      "tag": "0043_knowledge_transfer_owner",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1759010000000,
+      "tag": "0044_anti_scab_author",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1759020000000,
+      "tag": "0045_contact_submissions",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1759030000000,
+      "tag": "0046_row_integrity",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1759040000000,
+      "tag": "0047_ml_prediction_feedback",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1759050000000,
+      "tag": "0048_sso_scim_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1759060000000,
+      "tag": "0049_claim_status_transitions",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1759070000000,
+      "tag": "0050_survey_anonymity",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1759080000000,
+      "tag": "0051_arbitration_decision_owner",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1759090000000,
+      "tag": "0052_shared_clause_versions",
+      "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1759100000000,
+      "tag": "0053_email_address_suppressions",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1759110000000,
+      "tag": "0054_public_intake_audit_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1759120000000,
+      "tag": "0055_workbook_holder_notice",
+      "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1759130000000,
+      "tag": "0056_workbook_capability",
+      "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1759140000000,
+      "tag": "0057_workbook_holder_notice_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1759150000000,
+      "tag": "0058_pilot_fixture_rows",
+      "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1759160000000,
+      "tag": "0059_scim_provisioned_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1759170000000,
+      "tag": "0060_reachable_stub_shape_2",
+      "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1759180000000,
+      "tag": "0061_declared_absent_relations",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1759190000000,
+      "tag": "0062_declared_enum_convergence",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1759200000000,
+      "tag": "0063_declared_shape_convergence",
+      "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1759210000000,
+      "tag": "0064_declared_unique_keys",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1759220000000,
+      "tag": "0065_declared_absent_relations_2",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1759230000000,
+      "tag": "0066_declared_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1759240000000,
+      "tag": "0067_declared_checks",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1759250000000,
+      "tag": "0068_declared_foreign_keys",
+      "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1759260000000,
+      "tag": "0069_declared_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1759270000000,
+      "tag": "0070_unambiguous_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1759280000000,
+      "tag": "0071_conservative_consent_defaults",
+      "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1759290000000,
+      "tag": "0072_declared_not_null_2",
+      "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1759300000000,
+      "tag": "0073_declared_defaults",
+      "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1759310000000,
+      "tag": "0074_model_defaults_physical",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1759320000000,
+      "tag": "0075_enhanced_rbac_relations",
+      "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1759330000000,
+      "tag": "0076_enhanced_rbac_catalog",
+      "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1759340000000,
+      "tag": "0077_ingestion_traceability",
+      "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1759350000000,
+      "tag": "0078_staging_proof_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1759360000000,
+      "tag": "0079_deadline_reminders_pending_partial",
+      "breakpoints": true
     }
   ]
 }

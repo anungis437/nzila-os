@@ -208,13 +208,101 @@ export function compileAuthBootstrapSql(options: {
   policy('user_sessions', roles.issuance, 'SELECT', newlyProvisioned)
   policy('user_sessions', roles.issuance, 'INSERT', `${newlyProvisioned} AND organization_id IS NULL`)
 
+  // An invitation is delegated authority, not a bearer-only capability: it is honoured only while the
+  // inviter is still an active administrator of the invited organization. The bearer cannot read
+  // memberships, so a no-argument definer predicate reads only the invite selected by its own hash.
+  const inviteReader = q(roles.orgAuthorityReader)
+  const inviterLive = 'user_management.auth_invite_inviter_live()'
+  grant('invites', roles.orgAuthorityReader, 'SELECT (token_hash, organization_id, invited_by)')
+  grant('organization_users', roles.orgAuthorityReader, 'SELECT (user_id, organization_id, role, is_active)')
+  grant('users', roles.orgAuthorityReader, 'SELECT (user_id, is_active, lifecycle_state)')
+  const readerInvite = `${selector('invite')} AND token_hash=${setting('token_hash')}`
+  policy('invites', roles.orgAuthorityReader, 'SELECT', readerInvite)
+  const readerInviter = (column: string) => `${selector('invite')} AND EXISTS (SELECT FROM user_management.invites i
+    WHERE i.token_hash=${setting('token_hash')} AND i.invited_by=${column})`
+  statements.push(`CREATE POLICY auth_v2_invite_reader_memberships ON user_management.organization_users FOR SELECT TO ${inviteReader}
+      USING (${readerInviter('organization_users.user_id')} AND EXISTS (SELECT FROM user_management.invites i
+        WHERE i.token_hash=${setting('token_hash')} AND i.organization_id=organization_users.organization_id));
+    CREATE POLICY auth_v2_invite_reader_users ON user_management.users FOR SELECT TO ${inviteReader}
+      USING (${readerInviter('users.user_id')});
+    GRANT CREATE ON SCHEMA user_management TO ${inviteReader};
+    CREATE FUNCTION ${inviterLive} RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
+      SELECT EXISTS (SELECT FROM user_management.invites i
+        JOIN user_management.organization_users a ON a.user_id=i.invited_by AND a.organization_id=i.organization_id
+        JOIN user_management.users u ON u.user_id=a.user_id
+        WHERE i.token_hash=${setting('token_hash')}
+          AND a.is_active AND a.role='admin' AND u.is_active AND u.lifecycle_state='active') $auth$;
+    ALTER FUNCTION ${inviterLive} OWNER TO ${inviteReader};
+    REVOKE CREATE ON SCHEMA user_management FROM ${inviteReader};
+    REVOKE ALL ON FUNCTION ${inviterLive} FROM PUBLIC;
+    GRANT EXECUTE ON FUNCTION ${inviterLive} TO ${q(roles.redemption)};
+    GRANT SELECT (accepted_at, revoked_at) ON user_management.invites TO ${inviteReader};
+    GRANT UPDATE (revoked_at) ON user_management.invites TO ${inviteReader};
+    CREATE POLICY auth_v2_invite_reader_revoke_select ON user_management.invites FOR SELECT TO ${inviteReader}
+      USING (invited_by=current_setting('nzila.auth_invite_revoke_user',true)
+        AND (current_setting('nzila.auth_invite_revoke_org',true)='*'
+          OR organization_id::text=current_setting('nzila.auth_invite_revoke_org',true)));
+    CREATE POLICY auth_v2_invite_revoke ON user_management.invites FOR UPDATE TO ${inviteReader}
+      USING (accepted_at IS NULL AND revoked_at IS NULL
+        AND invited_by=current_setting('nzila.auth_invite_revoke_user',true)
+        AND (current_setting('nzila.auth_invite_revoke_org',true)='*'
+          OR organization_id::text=current_setting('nzila.auth_invite_revoke_org',true)))
+      WITH CHECK (accepted_at IS NULL AND revoked_at IS NOT NULL
+        AND invited_by=current_setting('nzila.auth_invite_revoke_user',true)
+        AND (current_setting('nzila.auth_invite_revoke_org',true)='*'
+          OR organization_id::text=current_setting('nzila.auth_invite_revoke_org',true)));
+    CREATE FUNCTION user_management.auth_revoke_pending_invites(target_user text, target_org uuid)
+      RETURNS void LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
+      BEGIN
+        IF target_user IS NULL OR btrim(target_user)='' THEN RETURN; END IF;
+        PERFORM pg_advisory_xact_lock(hashtextextended('auth-inviter:' || target_user, 0));
+        PERFORM set_config('nzila.auth_invite_revoke_user', target_user, true);
+        PERFORM set_config('nzila.auth_invite_revoke_org', COALESCE(target_org::text, '*'), true);
+        UPDATE user_management.invites
+          SET revoked_at=statement_timestamp()
+          WHERE invited_by=target_user AND accepted_at IS NULL AND revoked_at IS NULL
+            AND (target_org IS NULL OR organization_id=target_org);
+      END $auth$;
+    ALTER FUNCTION user_management.auth_revoke_pending_invites(text,uuid) OWNER TO ${inviteReader};
+    REVOKE ALL ON FUNCTION user_management.auth_revoke_pending_invites(text,uuid) FROM PUBLIC;
+    CREATE FUNCTION user_management.auth_revoke_invites_on_user_change()
+      RETURNS trigger LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
+      BEGIN
+        IF OLD.is_active IS TRUE AND OLD.lifecycle_state='active'
+          AND (NEW.is_active IS NOT TRUE OR NEW.lifecycle_state IS DISTINCT FROM 'active') THEN
+          PERFORM user_management.auth_revoke_pending_invites(OLD.user_id, NULL);
+        END IF;
+        RETURN NEW;
+      END $auth$;
+    ALTER FUNCTION user_management.auth_revoke_invites_on_user_change() OWNER TO ${inviteReader};
+    REVOKE ALL ON FUNCTION user_management.auth_revoke_invites_on_user_change() FROM PUBLIC;
+    GRANT EXECUTE ON FUNCTION user_management.auth_revoke_invites_on_user_change() TO ${q(roles.lifecycle)};
+    CREATE TRIGGER auth_revoke_invites_on_user_change
+      BEFORE UPDATE OF is_active, lifecycle_state ON user_management.users
+      FOR EACH ROW EXECUTE FUNCTION user_management.auth_revoke_invites_on_user_change();
+    CREATE FUNCTION user_management.auth_revoke_invites_on_membership_change()
+      RETURNS trigger LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=pg_catalog AS $auth$
+      BEGIN
+        IF OLD.role='admin' AND OLD.is_active IS TRUE
+          AND (NEW.role IS DISTINCT FROM 'admin' OR NEW.is_active IS NOT TRUE) THEN
+          PERFORM user_management.auth_revoke_pending_invites(OLD.user_id, OLD.organization_id);
+        END IF;
+        RETURN NEW;
+      END $auth$;
+    ALTER FUNCTION user_management.auth_revoke_invites_on_membership_change() OWNER TO ${inviteReader};
+    REVOKE ALL ON FUNCTION user_management.auth_revoke_invites_on_membership_change() FROM PUBLIC;
+    GRANT EXECUTE ON FUNCTION user_management.auth_revoke_invites_on_membership_change() TO ${q(roles.system)}, ${q(roles.redemption)};
+    CREATE TRIGGER auth_revoke_invites_on_membership_change
+      BEFORE UPDATE OF role, is_active ON user_management.organization_users
+      FOR EACH ROW EXECUTE FUNCTION user_management.auth_revoke_invites_on_membership_change();`)
+
   // A bearer is authority only over the live row selected by its hash. Lock
   // that row before side effects; consumption is the final transactional write.
   const live = (kind: string, table: string, sentinel: string) => `${selector(kind)} AND
     ${table}.token_hash=${setting('token_hash')} AND ${table}.expires_at>now() AND ${table}.${sentinel} IS NULL`
   const resetLive = live('reset', 'r', 'used_at')
   const magicLive = `${live('magic-link', 'm', 'used_at')} AND m.purpose='login' AND m.attempts<5`
-  const inviteLive = `${live('invite', 'i', 'accepted_at')} AND i.revoked_at IS NULL`
+  const inviteLive = `${live('invite', 'i', 'accepted_at')} AND i.revoked_at IS NULL AND ${inviterLive}`
   const mfaLive = `${live('mfa', 'c', 'consumed_at')} AND c.attempts<5`
   const bearerEmail = `email IN (
     SELECT m.email FROM user_management.magic_links m WHERE ${magicLive}
@@ -234,7 +322,7 @@ export function compileAuthBootstrapSql(options: {
   ]) {
     grant(table!, roles.redemption, `SELECT, UPDATE (${columns})`)
     for (const op of ['SELECT', 'UPDATE'])
-      policy(table!, roles.redemption, op, `${selector(kind!)} AND ${token}`)
+      policy(table!, roles.redemption, op, `${selector(kind!)} AND ${token}${table === 'invites' ? ` AND ${inviterLive}` : ''}`)
   }
   grant('users', roles.redemption, `SELECT, INSERT (user_id,email,password_hash,first_name,last_name,display_name,email_verified,is_active),
     UPDATE (password_hash,password_changed_at,failed_login_attempts,account_locked_until)`)

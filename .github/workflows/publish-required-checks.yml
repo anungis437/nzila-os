@@ -47,6 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags origin "$PR_BASE_SHA" "$PR_HEAD_SHA"
-          MA_CHANGED_PATHS="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
-          export MA_CHANGED_PATHS
+          MA_CHANGED_PATHS_FILE="$RUNNER_TEMP/ma-changed-paths.txt"
+          git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA" > "$MA_CHANGED_PATHS_FILE"
+          export MA_CHANGED_PATHS_FILE
           node tooling/ci/merge-authority/publish.mjs publish-pull-request

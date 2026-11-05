@@ -1,9 +1,8 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from 'next';
-import { requireUser } from '@/lib/api-auth-guard';
-import { getBalance, listLedger } from '@/lib/services/rewards/wallet-service';
-import { getTotalEarned, getTotalRedeemed } from '@/lib/utils/rewards-stats-utils';
+import { requireOrganizationScope } from '@/lib/page-data/organization-scope';
+import { loadWalletOverview } from '@/lib/rewards/page-reads';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,27 +21,12 @@ export default async function RewardsWalletPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const user = await requireUser();
-  const userId = user.userId;
-  const orgId = user.organizationId ?? '';
+  const { userId, organizationId } = await requireOrganizationScope();
 
   const t = await getTranslations('rewards');
 
-  // Fetch wallet data — guard against schema mismatch (wallet table may be incomplete in this environment)
-  let balance = 0;
-  let ledgerEntries: Awaited<ReturnType<typeof listLedger>>['entries'] = [];
-  let totalEarned = 0;
-  let totalRedeemed = 0;
-
-  try {
-    balance = await getBalance(orgId, userId);
-    const result = await listLedger(orgId, userId, 20, 0);
-    ledgerEntries = result.entries;
-    totalEarned = await getTotalEarned(userId, orgId);
-    totalRedeemed = await getTotalRedeemed(userId, orgId);
-  } catch {
-    // Wallet data unavailable — render page with empty state
-  }
+  // A database failure surfaces as an error: it is not an empty wallet.
+  const { balance, entries: ledgerEntries, totalEarned, totalRedeemed } = await loadWalletOverview(organizationId, userId);
 
   return (
     <div className="container mx-auto py-8 space-y-8">

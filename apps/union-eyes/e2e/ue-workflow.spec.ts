@@ -70,11 +70,12 @@ test.describe('UnionEyes QA E2E Flows', () => {
     assertRoleGatedReadStatus(response.status())
   })
 
-  test('6) export audit pack route is role and org constrained', async ({ request }) => {
+  test('6) the unimplemented exports route answers 501, not a success', async ({ request }) => {
     await loginAsTestUser(request, UE_TEST_USERS.memberPrimary.email)
 
     const response = await request.get('/api/exports')
 
-    expect([200, 403, 404]).toContain(response.status())
+    // app/api/exports/route.ts performs no operation of its own; a NOT_IMPLEMENTED capability answers 501 (CLAUDE.md).
+    expect(response.status()).toBe(501)
   })
 })

@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 import type { RLSTx } from '@/lib/db/with-rls-context'
-import { appendMandatoryAudit } from '@/lib/audit/mandatory-audit'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { toCents } from '@/lib/decimal-safe'
 import { DUES_CURRENCY, DUES_PAYMENT_KIND } from './dues-payment-service'
 
@@ -129,6 +129,9 @@ export async function settleDuesPaymentIntent(
         WHERE organization_id = ${row.organization_id}::uuid AND user_id = ${row.member_id} AND status = 'posted'`,
   )) as unknown as { balance: string }[]
   const before = balance[0]?.balance ?? '0'
+  // The provider has collected this amount, so it is always posted. If the member's balance fell in the meantime (another
+  // payment settled first) the ledger shows a credit and the audit record says how much was paid beyond the balance.
+  const overpaidCents = Math.max(0, toCents(row.amount) - Math.max(0, toCents(before)))
   const ledger = (await tx.execute(
     sql`INSERT INTO member_dues_ledger
           (user_id, organization_id, transaction_type, transaction_date, effective_date, amount,
@@ -141,7 +144,7 @@ export async function settleDuesPaymentIntent(
         RETURNING id::text AS id`,
   )) as unknown as { id: string }[]
 
-  await appendMandatoryAudit(tx, {
+  await persistAtomicAudit(tx, {
     organizationId: row.organization_id,
     action: 'dues.settle',
     resourceType: 'dues_transactions',
@@ -154,6 +157,7 @@ export async function settleDuesPaymentIntent(
       paymentIntentId: pi.id,
       stripeEventId: eventId,
       ledgerEntryId: ledger[0]?.id,
+      ...(overpaidCents > 0 ? { overpaidCents } : {}),
     },
   })
   return 'settled'
@@ -172,7 +176,7 @@ export async function recordDuesPaymentProviderOutcome(
     sql`UPDATE dues_transactions SET status = ${status}, updated_at = now()
         WHERE id = ${row.id}::uuid AND status = 'pending'`,
   )
-  await appendMandatoryAudit(tx, {
+  await persistAtomicAudit(tx, {
     organizationId: row.organization_id,
     action: `dues.payment_${status}`,
     resourceType: 'dues_transactions',
@@ -189,7 +193,7 @@ export async function recordDuesSettlementDenial(
   eventId: string,
 ): Promise<void> {
   if (!error.organizationId) return
-  await appendMandatoryAudit(tx, {
+  await persistAtomicAudit(tx, {
     organizationId: error.organizationId,
     action: 'dues.settlement_denied',
     resourceType: 'dues_transactions',

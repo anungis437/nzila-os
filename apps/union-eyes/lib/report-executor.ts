@@ -86,6 +86,8 @@ export interface ExecutionResult {
   rowCount?: number;
   executionTimeMs: number;
   error?: string;
+  /** `invalid` when the configuration was refused before any query ran; `failed` when the query itself failed. */
+  kind?: 'invalid' | 'failed';
   sql?: string; // For debugging
 }
 
@@ -131,9 +133,9 @@ export const DATA_SOURCES: DataSourceMetadata[] = [
       { id: 'resolved_at', name: 'Resolved Date', column: 'resolved_at', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: true },
       { id: 'member_id', name: 'Member ID', column: 'member_id', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
       { id: 'assigned_to', name: 'Assigned To', column: 'assigned_to', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: true },
-      { id: 'outcome', name: 'Outcome', column: 'outcome', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: true },
+      { id: 'outcome', name: 'Outcome', column: 'resolution_outcome', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: true },
     ],
-    joinable: ['organization_members', 'claim_deadlines', 'claim_notes'],
+    joinable: ['organization_members', 'claim_deadlines'],
   },
   {
     id: 'organization_members',
@@ -141,8 +143,7 @@ export const DATA_SOURCES: DataSourceMetadata[] = [
     table: 'organization_members',
     fields: [
       { id: 'id', name: 'Member ID', column: 'id', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
-      { id: 'first_name', name: 'First Name', column: 'first_name', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
-      { id: 'last_name', name: 'Last Name', column: 'last_name', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
+      { id: 'name', name: 'Name', column: 'name', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
       { id: 'email', name: 'Email', column: 'email', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
       { id: 'hire_date', name: 'Hire Date', column: 'hire_date', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: true },
       { id: 'role', name: 'Role', column: 'role', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
@@ -159,7 +160,7 @@ export const DATA_SOURCES: DataSourceMetadata[] = [
       { id: 'id', name: 'Deadline ID', column: 'id', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
       { id: 'claim_id', name: 'Claim ID', column: 'claim_id', type: 'string', aggregatable: false, filterable: true, sortable: true, nullable: false },
       { id: 'deadline_type', name: 'Type', column: 'deadline_type', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
-      { id: 'current_deadline', name: 'Deadline Date', column: 'current_deadline', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: false },
+      { id: 'current_deadline', name: 'Deadline Date', column: 'due_date', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: false },
       { id: 'status', name: 'Status', column: 'status', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
       { id: 'priority', name: 'Priority', column: 'priority', type: 'string', aggregatable: true, filterable: true, sortable: true, nullable: false },
       { id: 'completed_at', name: 'Completed Date', column: 'completed_at', type: 'date', aggregatable: true, filterable: true, sortable: true, nullable: true },
@@ -211,6 +212,9 @@ function isKnownColumnReference(ref: string): boolean {
   return false;
 }
 
+/** Upper bound on rows one ad-hoc report returns, whatever limit the caller names. */
+const MAX_REPORT_ROWS = 10000;
+
 export class ReportExecutor {
   private organizationId: string;
 
@@ -224,32 +228,31 @@ export class ReportExecutor {
   async execute(config: ReportConfig): Promise<ExecutionResult> {
     const startTime = Date.now();
 
+    let query: SQL;
     try {
-      // Validate configuration
       this.validateConfig(config);
+      query = this.buildQuery(config);
+    } catch (error) {
+      return {
+        success: false,
+        executionTimeMs: Date.now() - startTime,
+        error: error instanceof Error && error.message ? error.message : 'Invalid report configuration',
+        kind: 'invalid',
+      };
+    }
 
-      // Build SQL query from config
-      const query = this.buildQuery(config);
-
-      // Execute query
+    try {
       const results = await db.execute(query);
-
-      const executionTimeMs = Date.now() - startTime;
-
       return {
         success: true,
         data: results as unknown as Record<string, unknown>[],
         rowCount: results.length,
-        executionTimeMs,
+        executionTimeMs: Date.now() - startTime,
         sql: query.queryChunks.join(' '), // For debugging
       };
-    } catch (error) {
-      const executionTimeMs = Date.now() - startTime;
-return {
-        success: false,
-        executionTimeMs,
-        error: error.message || 'Report execution failed',
-      };
+    } catch {
+      // The database message can name tables and columns; the caller is told only that the report failed.
+      return { success: false, executionTimeMs: Date.now() - startTime, error: 'Report execution failed', kind: 'failed' };
     }
   }
 
@@ -321,7 +324,13 @@ return {
     const dataSource = DATA_SOURCES.find(ds => ds.id === config.dataSourceId)!;
     const baseTable = dataSource.table;
 
-    // Build SELECT clause
+    // A selected field may be qualified only with the base table or a table this query joins.
+    const queryTables = new Set<string>([baseTable, ...(config.joins ?? []).map((j) => j.table)]);
+    for (const field of config.fields) {
+      if (field.table && !queryTables.has(field.table)) {
+        throw new Error(`Invalid field table: ${field.table}`);
+      }
+    }
     const selectFields = this.buildSelectClause(config.fields, dataSource, config.groupBy);
 
     // Build FROM clause
@@ -329,7 +338,7 @@ return {
 
     // Build JOIN clauses
     if (config.joins && config.joins.length > 0) {
-      fromClause = this.buildJoinClause(fromClause, config.joins);
+      fromClause = this.buildJoinClause(fromClause, config.joins, dataSource);
     }
 
     // Build WHERE clause (filters)
@@ -364,7 +373,7 @@ return {
     }
 
     // Build LIMIT/OFFSET clause
-    const limit = config.limit || 1000; // Default limit
+    const limit = Math.min(Math.max(1, Math.trunc(Number(config.limit)) || 1000), MAX_REPORT_ROWS); // Default 1000
     const offset = config.offset || 0;
 
     // Assemble complete query
@@ -442,7 +451,8 @@ return {
             fieldSQL = sql`STRING_AGG(${safeColumnName(columnName)}, ', ')`;
             break;
           default:
-            fieldSQL = safeColumnName(columnName);
+            // An aggregation this switch does not run is refused, never answered with the plain column: that listed rows under an aggregate's name.
+            throw new Error(`Unsupported aggregation: ${String(field.aggregation)}`);
         }
       } else {
         // Regular field
@@ -469,11 +479,14 @@ return {
   /**
    * Build JOIN clause
    */
-  private buildJoinClause(fromClause: SQL, joins: JoinConfig[]): SQL {
+  private buildJoinClause(fromClause: SQL, joins: JoinConfig[], baseSource: DataSourceMetadata): SQL {
     const ALLOWED_JOIN_TYPES = ['INNER', 'LEFT', 'RIGHT', 'FULL'];
     const ALLOWED_OPERATORS = ['=', '!=', '>', '<', '>=', '<='];
-    
+
     let result = fromClause;
+    // A table may be joined only from the base source or a source already in the query, along a declared relationship.
+    const reachable = new Set<string>(baseSource.joinable ?? []);
+    const inQuery = new Set<string>([baseSource.table]);
 
     for (const join of joins) {
       const joinType = join.type.toUpperCase();
@@ -490,9 +503,12 @@ return {
       }
 
       // SECURITY FIX: Validate table exists in DATA_SOURCES
-      const tableExists = DATA_SOURCES.some(ds => ds.table === join.table);
-      if (!tableExists) {
+      const joinSource = DATA_SOURCES.find((ds) => ds.table === join.table);
+      if (!joinSource) {
         throw new Error(`Invalid join table: ${join.table}`);
+      }
+      if (!reachable.has(join.table) || inQuery.has(join.table)) {
+        throw new Error(`Invalid join table: ${join.table} is not joinable from ${baseSource.table}`);
       }
 
       // SECURITY (Round 59B): hard-allowlist the join's on-fields against
@@ -504,7 +520,12 @@ return {
         throw new Error(`Invalid join field: ${join.on.rightField}`);
       }
 
-      result = sql`${result} ${sql.raw(joinType)} JOIN ${safeTableName(join.table)} ON ${safeColumnName(join.on.leftField)} ${sql.raw(operator)} ${safeColumnName(join.on.rightField)}`;
+      // SECURITY: the organization predicate on the base table does not reach a joined table, and a caller-chosen
+      // `!=`/`<` join would pair every base row with rows of other organizations. Every joined table is bound to the
+      // caller's organization inside its own ON clause.
+      result = sql`${result} ${sql.raw(joinType)} JOIN ${safeTableName(join.table)} ON ${safeColumnName(join.on.leftField)} ${sql.raw(operator)} ${safeColumnName(join.on.rightField)} AND ${safeTableName(join.table)}.organization_id = ${this.organizationId}`;
+      inQuery.add(join.table);
+      for (const next of joinSource.joinable ?? []) reachable.add(next);
     }
 
     return result;
@@ -573,7 +594,8 @@ return {
           condition = sql`${safeColumnName(fieldName)} BETWEEN ${filter.values![0]} AND ${filter.values![1]}`;
           break;
         default:
-          continue;
+          // An operator this switch does not know is refused, never skipped: skipping dropped the filter and returned every row.
+          throw new Error(`Unsupported filter operator: ${String((filter as { operator: unknown }).operator)}`);
       }
 
       // Handle logical operator transitions

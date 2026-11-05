@@ -142,16 +142,16 @@ export const evidenceArtifactSchema = z.object({
   mimeType: z.string().min(1),
   blobPath: z.string().min(1),
   collectedAt: z.string().datetime(),
-  metadata: z.record(z.string()),
+  metadata: z.record(z.string(), z.string()),
 })
 
 export const evidencePackIndexSchema = z.object({
   packId: z.string().min(1),
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   controlFamily: z.string().min(1),
   eventType: z.string().min(1),
   eventId: z.string().min(1),
-  runId: z.string().uuid(),
+  runId: z.guid(),
   createdBy: z.string().min(1),
   createdAt: z.string().datetime(),
   summary: z.string(),

@@ -1,11 +1,15 @@
 /**
  * Member Detail Page
- * View detailed member profile with claims history
+ *
+ * One member of the organization, read from GET /api/members/{id} (the CRUD item route, which answers withApi's { success, data: { data: row } }),
+ * with the claims filed by or assigned to the member from GET /api/members/{id}/claims (a plain list: { success, data: [claims] }). Each is
+ * read strictly. A call that failed is said to have failed, with the route's reason and a retry: it is never shown as a member that does not
+ * exist or as a member with no claims. A figure the record does not hold is a dash, not a date in 1970 or "null years".
  */
 "use client";
 
-
 export const dynamic = 'force-dynamic';
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from 'next-intl';
 import useSWR from "swr";
@@ -19,98 +23,162 @@ import {
   Shield,
   FileText,
   ArrowLeft,
-  Edit,
   Clock,
   AlertCircle,
   TrendingUp,
   Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
-type MemberRole = "member" | "steward" | "officer" | "admin" | "super_admin";
-type MemberStatus = "active" | "inactive" | "on-leave";
+import { envelopeRow, readApiError } from "@/lib/client/api-envelope";
+import { ApiShapeError, asRecord, countOrNull, humanize, isRecord, optionalString, requiredDate, requiredString } from "@/lib/client/row-fields";
 
 interface Member {
   id: string;
   name: string;
   email: string;
-  phone: string;
-  role: MemberRole;
-  status: MemberStatus;
-  department: string;
-  position: string;
-  hireDate: string;
-  seniority: number;
-  membershipNumber: string;
-  unionJoinDate: string;
+  phone: string | null;
+  role: string;
+  status: string;
+  department: string | null;
+  position: string | null;
+  hireDate: Date | null;
+  /** Years, when the record holds them: null is unknown, not zero. */
+  seniority: number | null;
+  membershipNumber: string | null;
+  unionJoinDate: Date | null;
 }
 
 interface Claim {
   id: string;
-  claimNumber: string;
-  title: string;
+  claimId: string;
+  /** Legacy claims were filed before numbering. */
+  claimNumber: string | null;
+  claimType: string | null;
   status: string;
   priority: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date | null;
 }
+
+const optionalDate = (row: Record<string, unknown>, key: string): Date | null => (row[key] === null ? null : requiredDate(row, key));
+
+function toMember(row: Record<string, unknown>): Member {
+  return {
+    id: requiredString(row, "id"),
+    name: requiredString(row, "name"),
+    email: requiredString(row, "email"),
+    phone: optionalString(row, "phone"),
+    role: requiredString(row, "role"),
+    status: requiredString(row, "status"),
+    department: optionalString(row, "department"),
+    position: optionalString(row, "position"),
+    hireDate: optionalDate(row, "hireDate"),
+    seniority: countOrNull(row, "seniority"),
+    membershipNumber: optionalString(row, "membershipNumber"),
+    unionJoinDate: optionalDate(row, "unionJoinDate"),
+  };
+}
+
+function toClaim(raw: unknown): Claim {
+  const row = asRecord(raw, "claim");
+  return {
+    id: requiredString(row, "id"),
+    claimId: requiredString(row, "claimId"),
+    claimNumber: optionalString(row, "claimNumber"),
+    claimType: optionalString(row, "claimType"),
+    status: requiredString(row, "status"),
+    priority: requiredString(row, "priority"),
+    createdAt: optionalDate(row, "createdAt"),
+  };
+}
+
+class ReadError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+    this.name = "ReadError";
+  }
+}
+
+async function getJson(url: string): Promise<unknown> {
+  const response = await fetch(url);
+  if (!response.ok) throw new ReadError(await readApiError(response, `Request failed with status ${response.status}`), response.status);
+  return response.json();
+}
+
+const memberFetcher = async (url: string): Promise<Member> => toMember(envelopeRow(await getJson(url)));
+
+const claimsFetcher = async (url: string): Promise<Claim[]> => {
+  const body = await getJson(url);
+  if (!isRecord(body) || !Array.isArray(body.data)) throw new ApiShapeError("no list");
+  return body.data.map(toClaim);
+};
+
+const NEUTRAL = "text-gray-700 bg-gray-100 border-gray-200";
+const ROLE_COLORS: Record<string, string> = {
+  member: "text-blue-700 bg-blue-100 border-blue-200",
+  steward: "text-purple-700 bg-purple-100 border-purple-200",
+  officer: "text-orange-700 bg-orange-100 border-orange-200",
+  admin: "text-red-700 bg-red-100 border-red-200",
+  super_admin: "text-red-900 bg-red-200 border-red-300",
+};
+const STATUS_COLORS: Record<string, string> = {
+  active: "text-green-700 bg-green-100 border-green-200",
+  inactive: NEUTRAL,
+  "on-leave": "text-yellow-700 bg-yellow-100 border-yellow-200",
+  on_leave: "text-yellow-700 bg-yellow-100 border-yellow-200",
+};
+
+const CLAIM_STATUS_COLORS: Record<string, string> = {
+  resolved: "bg-green-100 text-green-700",
+  closed: "bg-green-100 text-green-700",
+  rejected: "bg-red-100 text-red-700",
+  under_review: "bg-blue-100 text-blue-700",
+  assigned: "bg-blue-100 text-blue-700",
+  investigation: "bg-blue-100 text-blue-700",
+  pending_documentation: "bg-yellow-100 text-yellow-700",
+};
+
+const PRIORITY_DOTS: Record<string, string> = {
+  critical: "bg-red-600",
+  high: "bg-red-500",
+  medium: "bg-yellow-500",
+  low: "bg-green-500",
+};
+
+const UNKNOWN = "—";
 
 export default function MemberDetailPage() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('memberDetailPage');
-  const memberId = params.id as string;
+  const memberId = encodeURIComponent(params.id as string);
 
-  const roleConfig: Record<MemberRole, { label: string; color: string }> = {
-    member: { label: t('role.member'), color: "text-blue-700 bg-blue-100 border-blue-200" },
-    steward: { label: t('role.steward'), color: "text-purple-700 bg-purple-100 border-purple-200" },
-    officer: { label: t('role.officer'), color: "text-orange-700 bg-orange-100 border-orange-200" },
-    admin: { label: t('role.admin'), color: "text-red-700 bg-red-100 border-red-200" },
-    super_admin: { label: t('role.superAdmin'), color: "text-red-900 bg-red-200 border-red-300" }
+  // The roles and statuses the screen has words for; any other code is shown as its own words.
+  const roleLabels: Record<string, string> = {
+    member: t('role.member'),
+    steward: t('role.steward'),
+    officer: t('role.officer'),
+    admin: t('role.admin'),
+    super_admin: t('role.superAdmin'),
+  };
+  const statusLabels: Record<string, string> = {
+    active: t('status.active'),
+    inactive: t('status.inactive'),
+    "on-leave": t('status.onLeave'),
+    on_leave: t('status.onLeave'),
   };
 
-  const statusConfig: Record<MemberStatus, { label: string; color: string }> = {
-    active: { label: t('status.active'), color: "text-green-700 bg-green-100 border-green-200" },
-    inactive: { label: t('status.inactive'), color: "text-gray-700 bg-gray-100 border-gray-200" },
-    "on-leave": { label: t('status.onLeave'), color: "text-yellow-700 bg-yellow-100 border-yellow-200" }
-  };
+  // The dates a member record holds are calendar days kept as midnight UTC: shown in the viewer's zone, one of them would be the day before.
+  const formatDay = (date: Date | null) => (date ? date.toLocaleDateString(locale, { timeZone: "UTC" }) : UNKNOWN);
 
-  const defaultBadge = { label: t('unknownBadge'), color: "text-gray-700 bg-gray-100 border-gray-200" };
+  const memberKey = `/api/members/${memberId}`;
+  const claimsKey = `/api/members/${memberId}/claims`;
+  const { data: member, error: memberError, isLoading: memberLoading, mutate: reloadMember } = useSWR<Member, Error>(memberKey, memberFetcher, { shouldRetryOnError: false });
+  const { data: claims, error: claimsError, isLoading: claimsLoading, mutate: reloadClaims } = useSWR<Claim[], Error>(claimsKey, claimsFetcher, { shouldRetryOnError: false });
 
-  const getRoleConfig = (role: string | null | undefined) => {
-    if (!role) return defaultBadge;
-    return roleConfig[role as MemberRole] ?? { ...defaultBadge, label: role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
-  };
-
-  const getStatusConfig = (status: string | null | undefined) => {
-    if (!status) return defaultBadge;
-    return statusConfig[status as MemberStatus] ?? { ...defaultBadge, label: status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) };
-  };
-
-  // Fetch member data
-  const { data: memberData, error: memberError, isLoading: memberLoading } = useSWR(
-    `/api/members/${memberId}`,
-    fetcher
-  );
-
-  // Fetch member's claims
-  const { data: claimsData, error: _claimsError, isLoading: claimsLoading } = useSWR(
-    `/api/members/${memberId}/claims`,
-    fetcher
-  );
-
-  // CRUD factory returns { data: row } inside the withApi envelope { success, data: { data: row } }
-  const member: Member | null = memberData?.success ? (memberData.data?.data ?? memberData.data) : null;
-  // Claims list returns array directly inside the envelope
-  const claimsRaw = claimsData?.success ? claimsData.data : [];
-  const claims: Claim[] = Array.isArray(claimsRaw) ? claimsRaw : (claimsRaw?.data ?? []);
-
-  if (memberLoading) {
+  if (memberLoading || (!member && !memberError)) {
     return (
-      <div className="flex items-center justify-center">
+      <div role="status" aria-label={t('loadingMessage')} className="flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
           <p className="text-lg text-gray-600">{t('loadingMessage')}</p>
@@ -120,22 +188,36 @@ export default function MemberDetailPage() {
   }
 
   if (memberError || !member) {
+    const notFound = memberError instanceof ReadError && memberError.status === 404;
     return (
       <div className="flex items-center justify-center">
-        <div className="text-center max-w-md">
+        <div role="alert" className="text-center max-w-md">
           <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('notFoundTitle')}</h2>
-          <p className="text-gray-600 mb-4">{t('notFoundDescription')}</p>
-          <button
-            onClick={() => router.push(`/${locale}/dashboard/members`)}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            {t('backToMembers')}
-          </button>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{notFound ? t('notFoundTitle') : t('loadFailedTitle')}</h2>
+          <p className="text-gray-600 mb-4">{notFound ? t('notFoundDescription') : memberError?.message}</p>
+          <div className="flex items-center justify-center gap-3">
+            {!notFound && (
+              <button
+                onClick={() => void reloadMember()}
+                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                {t('retryButton')}
+              </button>
+            )}
+            <button
+              onClick={() => router.push(`/${locale}/dashboard/members`)}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {t('backToMembers')}
+            </button>
+          </div>
         </div>
       </div>
     );
   }
+
+  const roleClass = ROLE_COLORS[member.role] ?? NEUTRAL;
+  const statusClass = STATUS_COLORS[member.status] ?? NEUTRAL;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -154,22 +236,12 @@ export default function MemberDetailPage() {
             {t('backToMembers')}
           </button>
 
-          <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3 mb-2">
+            <User className="w-10 h-10 text-blue-600" />
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <User className="w-10 h-10 text-blue-600" />
-                <div>
-                  <h1 className="text-4xl font-bold text-gray-900">{member.name}</h1>
-                  <p className="text-lg text-gray-600">{member.position}</p>
-                </div>
-              </div>
+              <h1 className="text-4xl font-bold text-gray-900">{member.name}</h1>
+              {member.position && <p className="text-lg text-gray-600">{member.position}</p>}
             </div>
-            <button
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Edit className="w-4 h-4" />
-              {t('editProfileButton')}
-            </button>
           </div>
         </div>
 
@@ -182,14 +254,14 @@ export default function MemberDetailPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('statusTitle')}</h3>
                 <div className="space-y-3">
                   <div>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getRoleConfig(member.role).color}`}>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border capitalize ${roleClass}`}>
                       <Shield className="w-3 h-3 mr-2" />
-                      {getRoleConfig(member.role).label}
+                      {roleLabels[member.role] ?? humanize(member.role)}
                     </span>
                   </div>
                   <div>
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusConfig(member.status).color}`}>
-                      {getStatusConfig(member.status).label}
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border capitalize ${statusClass}`}>
+                      {statusLabels[member.status] ?? humanize(member.status)}
                     </span>
                   </div>
                 </div>
@@ -234,23 +306,21 @@ export default function MemberDetailPage() {
                     <Briefcase className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm text-gray-600">{t('departmentLabel')}</p>
-                      <p className="text-gray-900">{member.department}</p>
+                      <p className="text-gray-900">{member.department ?? UNKNOWN}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Calendar className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm text-gray-600">{t('hireDateLabel')}</p>
-                      <p className="text-gray-900">
-                        {new Date(member.hireDate).toLocaleDateString()}
-                      </p>
+                      <p className="text-gray-900">{formatDay(member.hireDate)}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <TrendingUp className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm text-gray-600">{t('seniorityLabel')}</p>
-                      <p className="text-gray-900">{t('seniorityYears', { years: member.seniority })}</p>
+                      <p className="text-gray-900">{member.seniority === null ? UNKNOWN : t('seniorityYears', { years: member.seniority })}</p>
                     </div>
                   </div>
                 </div>
@@ -264,13 +334,11 @@ export default function MemberDetailPage() {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-600">{t('membershipNumberLabel')}</p>
-                    <p className="text-gray-900 font-mono">{member.membershipNumber}</p>
+                    <p className="text-gray-900 font-mono">{member.membershipNumber ?? UNKNOWN}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">{t('unionJoinDateLabel')}</p>
-                    <p className="text-gray-900">
-                      {new Date(member.unionJoinDate).toLocaleDateString()}
-                    </p>
+                    <p className="text-gray-900">{formatDay(member.unionJoinDate)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -283,12 +351,26 @@ export default function MemberDetailPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">{t('claimsHistoryTitle')}</h3>
-                  <span className="text-sm text-gray-600">
-                    {claims.length === 1 ? t('claimCountOne', { count: claims.length }) : t('claimCountOther', { count: claims.length })}
-                  </span>
+                  {claims !== undefined && !claimsError && (
+                    <span className="text-sm text-gray-600">
+                      {claims.length === 1 ? t('claimCountOne', { count: claims.length }) : t('claimCountOther', { count: claims.length })}
+                    </span>
+                  )}
                 </div>
 
-                {claimsLoading ? (
+                {claimsError ? (
+                  <div role="alert" className="text-center py-12">
+                    <AlertCircle className="w-10 h-10 text-red-600 mx-auto mb-3" />
+                    <p className="text-gray-900 font-medium">{t('claimsLoadFailed')}</p>
+                    <p className="text-gray-600 text-sm mb-4">{claimsError.message}</p>
+                    <button
+                      onClick={() => void reloadClaims()}
+                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      {t('retryButton')}
+                    </button>
+                  </div>
+                ) : claimsLoading || claims === undefined ? (
                   <div className="text-center py-12">
                     <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-2" />
                     <p className="text-gray-600">{t('loadingClaims')}</p>
@@ -299,49 +381,42 @@ export default function MemberDetailPage() {
                     <p className="text-gray-600">{t('noClaimsFound')}</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <ul className="space-y-4">
                     {claims.map((claim) => (
-                      <motion.div
+                      <motion.li
                         key={claim.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => router.push(`/dashboard/claims/${claim.id}`)}
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{claim.claimNumber}</h4>
-                            <p className="text-gray-600 text-sm">{claim.title}</p>
+                        <Link
+                          href={`/${locale}/dashboard/claims/${encodeURIComponent(claim.claimId)}`}
+                          className="block border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{claim.claimNumber ?? t('noClaimNumber')}</h4>
+                              {claim.claimType && <p className="text-gray-600 text-sm capitalize">{humanize(claim.claimType)}</p>}
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${CLAIM_STATUS_COLORS[claim.status] ?? "bg-gray-100 text-gray-700"}`}>
+                              {humanize(claim.status)}
+                            </span>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            claim.status === 'resolved' 
-                              ? 'bg-green-100 text-green-700' 
-                              : claim.status === 'in-progress'
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-gray-100 text-gray-700'
-                          }`}>
-                            {claim.status}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {t('createdDateLabel', { date: new Date(claim.createdAt).toLocaleDateString() })}
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            {claim.createdAt && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {t('createdDateLabel', { date: claim.createdAt.toLocaleDateString(locale) })}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <span className={`w-2 h-2 rounded-full ${PRIORITY_DOTS[claim.priority] ?? "bg-gray-400"}`} />
+                              {t('priorityLabel', { priority: humanize(claim.priority) })}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <span className={`w-2 h-2 rounded-full ${
-                              claim.priority === 'high' 
-                                ? 'bg-red-500' 
-                                : claim.priority === 'medium'
-                                ? 'bg-yellow-500'
-                                : 'bg-green-500'
-                            }`} />
-                            {t('priorityLabel', { priority: claim.priority })}
-                          </div>
-                        </div>
-                      </motion.div>
+                        </Link>
+                      </motion.li>
                     ))}
-                  </div>
+                  </ul>
                 )}
               </CardContent>
             </Card>

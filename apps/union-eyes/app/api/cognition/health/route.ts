@@ -6,6 +6,7 @@ import {
   COGNITION_CONTRACT_VERSION,
 } from '@nzila/organizational-cognition-core';
 import { withApi } from '@/lib/api/framework';
+import { isSystemAdmin } from '@/lib/api-auth-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,12 @@ export const GET = withApi(
       (d) => !enginesByDomain[d],
     );
     const status: 'ok' | 'degraded' = missingDomains.length === 0 ? 'ok' : 'degraded';
+
+    // The registry, ontology and contract versions and the engine counts are platform runtime posture: an organization officer is
+    // told whether the service is healthy, and only a platform administrator reads the detail.
+    if (!(await isSystemAdmin())) {
+      return { data: { status, checkedAt: new Date().toISOString() } };
+    }
 
     return {
       data: {

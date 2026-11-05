@@ -9,6 +9,7 @@ import uuid
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.search import SearchVectorField
+from django.utils import timezone
 
 try:
     from pgvector.django import VectorField
@@ -41,7 +42,40 @@ class OrganizationModel(BaseModel):
 
 class ArbitrationPrecedents(BaseModel):
     """Migrated from drizzle: arbitration-precedents-schema.ts"""
-    source_organization_id = models.UUIDField(null=True, blank=True)
+    source_organization_id = models.UUIDField()
+    source_decision_id = models.UUIDField(null=True, blank=True)
+    case_number = models.CharField(max_length=100, null=True, blank=True)
+    case_title = models.CharField(max_length=500)
+    decision_date = models.DateField()
+    is_parties_anonymized = models.BooleanField(default=False, null=True, blank=True)
+    union_name = models.CharField(max_length=200, null=True, blank=True)
+    employer_name = models.CharField(max_length=200, null=True, blank=True)
+    arbitrator_name = models.CharField(max_length=200)
+    jurisdiction = models.CharField(max_length=50)
+    grievance_type = models.CharField(max_length=100)
+    issue_summary = models.TextField()
+    union_position = models.TextField(null=True, blank=True)
+    employer_position = models.TextField(null=True, blank=True)
+    outcome = models.CharField(max_length=50)
+    decision_summary = models.TextField()
+    reasoning = models.TextField(null=True, blank=True)
+    precedential_value = models.CharField(max_length=20, default='medium', null=True, blank=True)
+    key_principles = ArrayField(models.TextField(), null=True, blank=True)
+    related_legislation = models.TextField(null=True, blank=True)
+    cited_cases = ArrayField(models.UUIDField(), null=True, blank=True)
+    citation_count = models.IntegerField(default=0, null=True, blank=True)
+    document_url = models.CharField(max_length=500, null=True, blank=True)
+    document_path = models.CharField(max_length=500, null=True, blank=True)
+    redacted_document_url = models.CharField(max_length=500, null=True, blank=True)
+    redacted_document_path = models.CharField(max_length=500, null=True, blank=True)
+    has_redacted_version = models.BooleanField(default=False, null=True, blank=True)
+    sharing_level = models.CharField(max_length=50, default='federation')
+    shared_with_org_ids = ArrayField(models.UUIDField(), null=True, blank=True)
+    sector = models.CharField(max_length=100, null=True, blank=True)
+    province = models.CharField(max_length=2, null=True, blank=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
+    download_count = models.IntegerField(default=0, null=True, blank=True)
+    created_by = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'arbitration_precedents'
@@ -49,7 +83,8 @@ class ArbitrationPrecedents(BaseModel):
 
 class PrecedentTags(BaseModel):
     """Migrated from drizzle: arbitration-precedents-schema.ts"""
-    precedent_id = models.UUIDField(null=True, blank=True)
+    precedent_id = models.UUIDField()
+    tag_name = models.CharField(max_length=100)
 
     class Meta:
         db_table = 'precedent_tags'
@@ -57,7 +92,14 @@ class PrecedentTags(BaseModel):
 
 class PrecedentCitations(BaseModel):
     """Migrated from drizzle: arbitration-precedents-schema.ts"""
-    precedent_id = models.UUIDField(null=True, blank=True)
+    precedent_id = models.UUIDField()
+    citation_context = models.TextField(null=True, blank=True)
+    citation_type = models.CharField(max_length=50, null=True, blank=True)
+    cited_at = models.DateTimeField(default=timezone.now)
+    cited_by = models.CharField(max_length=255)
+    citing_claim_id = models.UUIDField(null=True, blank=True)
+    citing_organization_id = models.UUIDField()
+    citing_precedent_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = 'precedent_citations'
@@ -67,6 +109,52 @@ class Negotiations(BaseModel):
     """Migrated from drizzle: bargaining-negotiations-schema.ts"""
     organization_id = models.UUIDField()
     expiring_cba = models.ForeignKey('CollectiveAgreements', on_delete=models.CASCADE, related_name='negotiations_expiring_cba_set', null=True, blank=True)
+    resulting_cba_id = models.UUIDField(null=True, blank=True)
+    title = models.CharField(max_length=500)
+    description = models.TextField(null=True, blank=True)
+    union_name = models.CharField(max_length=300)
+    union_local = models.CharField(max_length=100, null=True, blank=True)
+    employer_name = models.CharField(max_length=300)
+    bargaining_unit_size = models.IntegerField(null=True, blank=True)
+    notice_given_date = models.DateTimeField(null=True, blank=True)
+    first_session_date = models.DateTimeField(null=True, blank=True)
+    target_completion_date = models.DateTimeField(null=True, blank=True)
+    tentative_agreement_date = models.DateTimeField(null=True, blank=True)
+    ratification_date = models.DateTimeField(null=True, blank=True)
+    completion_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'scheduled', 'active', 'impasse', 'conciliation', 'tentative', 'ratified', 'rejected',
+            'strike_lockout', 'completed', 'abandoned',
+        ]],
+        default='scheduled',
+    )
+    current_round = models.IntegerField(default=1, null=True, blank=True)
+    total_sessions = models.IntegerField(default=0, null=True, blank=True)
+    key_issues = models.JSONField(null=True, blank=True)
+    strike_vote_passed = models.BooleanField(default=False, null=True, blank=True)
+    strike_vote_date = models.DateTimeField(null=True, blank=True)
+    strike_vote_yes_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    mandate_expiry = models.DateTimeField(null=True, blank=True)
+    estimated_cost = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    maximum_cost = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    progress_summary = models.TextField(null=True, blank=True)
+    last_activity_date = models.DateTimeField(null=True, blank=True)
+    tags = models.JSONField(null=True, blank=True)
+    confidentiality_level = models.CharField(
+        max_length=50,
+        default='restricted',
+        null=True,
+        blank=True,
+    )
+    created_by = models.CharField(max_length=255)
+    last_modified_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'negotiations'
@@ -75,6 +163,41 @@ class Negotiations(BaseModel):
 class BargainingProposals(BaseModel):
     """Migrated from drizzle: bargaining-negotiations-schema.ts"""
     negotiation = models.ForeignKey('Negotiations', on_delete=models.CASCADE, related_name='bargaining_proposals_negotiation_set')
+    proposal_number = models.CharField(max_length=50)
+    title = models.CharField(max_length=500)
+    description = models.TextField()
+    proposal_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'union_demand', 'management_offer', 'joint_proposal', 'mediator_proposal',
+        ]],
+    )
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'draft', 'submitted', 'under_review', 'accepted', 'rejected', 'counter_offered',
+            'withdrawn', 'superseded',
+        ]],
+        default='draft',
+    )
+    related_clause_id = models.UUIDField(null=True, blank=True)
+    clause_category = models.CharField(max_length=100, null=True, blank=True)
+    current_language = models.TextField(null=True, blank=True)
+    proposed_language = models.TextField()
+    rationale = models.TextField(null=True, blank=True)
+    estimated_cost = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    costing_notes = models.TextField(null=True, blank=True)
+    union_position = models.CharField(max_length=50, null=True, blank=True)
+    management_position = models.CharField(max_length=50, null=True, blank=True)
+    submitted_date = models.DateTimeField(null=True, blank=True)
+    response_deadline = models.DateTimeField(null=True, blank=True)
+    resolved_date = models.DateTimeField(null=True, blank=True)
+    parent_proposal_id = models.UUIDField(null=True, blank=True)
+    superseded_by_id = models.UUIDField(null=True, blank=True)
+    attachments = models.JSONField(null=True, blank=True)
+    internal_notes = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    last_modified_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'bargaining_proposals'
@@ -83,6 +206,36 @@ class BargainingProposals(BaseModel):
 class TentativeAgreements(BaseModel):
     """Migrated from drizzle: bargaining-negotiations-schema.ts"""
     negotiation = models.ForeignKey('Negotiations', on_delete=models.CASCADE, related_name='tentative_agreements_negotiation_set')
+    agreement_number = models.CharField(max_length=50)
+    title = models.CharField(max_length=500)
+    clause_category = models.CharField(max_length=100)
+    agreed_language = models.TextField()
+    previous_language = models.TextField(null=True, blank=True)
+    related_proposal_ids = models.JSONField(null=True, blank=True)
+    related_clause_id = models.UUIDField(null=True, blank=True)
+    requires_ratification = models.BooleanField(default=True, null=True, blank=True)
+    ratified = models.BooleanField(default=False, null=True, blank=True)
+    ratification_date = models.DateTimeField(null=True, blank=True)
+    ratification_vote_yes = models.IntegerField(null=True, blank=True)
+    ratification_vote_no = models.IntegerField(null=True, blank=True)
+    ratification_notes = models.TextField(null=True, blank=True)
+    annual_cost = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    implementation_cost = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    costing_approved = models.BooleanField(default=False, null=True, blank=True)
+    agreed_date = models.DateTimeField(default=timezone.now)
+    effective_date = models.DateTimeField(null=True, blank=True)
+    union_signed_by = models.CharField(max_length=255, null=True, blank=True)
+    union_signed_date = models.DateTimeField(null=True, blank=True)
+    employer_signed_by = models.CharField(max_length=255, null=True, blank=True)
+    employer_signed_date = models.DateTimeField(null=True, blank=True)
+    attachments = models.JSONField(null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    last_modified_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'tentative_agreements'
@@ -91,6 +244,36 @@ class TentativeAgreements(BaseModel):
 class NegotiationSessions(BaseModel):
     """Migrated from drizzle: bargaining-negotiations-schema.ts"""
     negotiation = models.ForeignKey('Negotiations', on_delete=models.CASCADE, related_name='negotiation_sessions_negotiation_set')
+    actual_end_date = models.DateTimeField(null=True, blank=True)
+    actual_start_date = models.DateTimeField(null=True, blank=True)
+    agenda = models.JSONField(null=True, blank=True)
+    attachments = models.JSONField(null=True, blank=True)
+    bargaining_note_id = models.UUIDField(null=True, blank=True)
+    cancellation_reason = models.TextField(null=True, blank=True)
+    cancelled = models.BooleanField(default=False, null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    employer_attendees = models.JSONField(null=True, blank=True)
+    is_virtual = models.BooleanField(default=False, null=True, blank=True)
+    last_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    location = models.CharField(max_length=300, null=True, blank=True)
+    meeting_link = models.TextField(null=True, blank=True)
+    next_steps = models.TextField(null=True, blank=True)
+    outcomes = models.JSONField(null=True, blank=True)
+    proposals_discussed = models.JSONField(null=True, blank=True)
+    scheduled_date = models.DateTimeField()
+    scheduled_end_date = models.DateTimeField(null=True, blank=True)
+    session_number = models.IntegerField()
+    session_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'opening', 'negotiation', 'caucus', 'conciliation', 'information', 'closing',
+            'ratification',
+        ]],
+    )
+    status = models.CharField(max_length=50, default='scheduled', null=True, blank=True)
+    summary = models.TextField(null=True, blank=True)
+    title = models.CharField(max_length=300)
+    union_attendees = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'negotiation_sessions'
@@ -99,6 +282,27 @@ class NegotiationSessions(BaseModel):
 class BargainingTeamMembers(BaseModel):
     """Migrated from drizzle: bargaining-negotiations-schema.ts"""
     negotiation = models.ForeignKey('Negotiations', on_delete=models.CASCADE, related_name='bargaining_team_members_negotiation_set')
+    created_by = models.CharField(max_length=255)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    expertise = models.JSONField(null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    is_chief = models.BooleanField(default=False, null=True, blank=True)
+    member_id = models.UUIDField(null=True, blank=True)
+    name = models.CharField(max_length=255)
+    notes = models.TextField(null=True, blank=True)
+    organization = models.CharField(max_length=300, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    role = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'chief_negotiator', 'committee_member', 'researcher', 'note_taker', 'subject_expert',
+            'observer', 'legal_counsel', 'financial_advisor',
+        ]],
+    )
+    start_date = models.DateTimeField(default=timezone.now)
+    title = models.CharField(max_length=200, null=True, blank=True)
+    worksite = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         db_table = 'bargaining_team_members'
@@ -108,6 +312,34 @@ class CbaClauses(BaseModel):
     """Migrated from drizzle: cba-clauses-schema.ts"""
     organization_id = models.UUIDField()
     cba = models.ForeignKey('CollectiveAgreements', on_delete=models.CASCADE, related_name='cba_clauses_cba_set')
+    clause_number = models.CharField(max_length=50)
+    clause_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'wages_compensation', 'benefits_insurance', 'working_conditions',
+            'grievance_arbitration', 'seniority_promotion', 'health_safety', 'union_rights',
+            'management_rights', 'duration_renewal', 'vacation_leave', 'hours_scheduling',
+            'disciplinary_procedures', 'training_development', 'pension_retirement', 'overtime',
+            'job_security', 'technological_change', 'workplace_rights', 'other',
+        ]],
+    )
+    title = models.CharField(max_length=500)
+    content = models.TextField()
+    content_plain_text = models.TextField(null=True, blank=True)
+    content_hash = models.CharField(max_length=64, null=True, blank=True)
+    page_number = models.IntegerField(null=True, blank=True)
+    article_number = models.CharField(max_length=50, null=True, blank=True)
+    section_hierarchy = models.JSONField(null=True, blank=True)
+    parent_clause_id = models.UUIDField(null=True, blank=True)
+    order_index = models.IntegerField(default=0)
+    embedding = models.TextField(null=True, blank=True)
+    confidence_score = models.DecimalField(max_digits=5, decimal_places=4, null=True, blank=True)
+    orgs = models.JSONField(null=True, blank=True)
+    key_terms = models.JSONField(null=True, blank=True)
+    related_clause_ids = models.JSONField(null=True, blank=True)
+    interpretation_notes = models.TextField(null=True, blank=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
+    citation_count = models.IntegerField(default=0, null=True, blank=True)
 
     class Meta:
         db_table = 'cba_clauses'
@@ -115,7 +347,23 @@ class CbaClauses(BaseModel):
 
 class ClauseComparisons(BaseModel):
     """Migrated from drizzle: cba-clauses-schema.ts"""
-    comparison_name = models.CharField(max_length=255, null=True, blank=True)
+    comparison_name = models.CharField(max_length=255, blank=True)
+    organization_id = models.UUIDField()
+    clause_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'wages_compensation', 'benefits_insurance', 'working_conditions',
+            'grievance_arbitration', 'seniority_promotion', 'health_safety', 'union_rights',
+            'management_rights', 'duration_renewal', 'vacation_leave', 'hours_scheduling',
+            'disciplinary_procedures', 'training_development', 'pension_retirement', 'overtime',
+            'job_security', 'technological_change', 'workplace_rights', 'other',
+        ]],
+    )
+    clause_ids = models.JSONField()
+    analysis_results = models.JSONField(null=True, blank=True)
+    industry_average = models.JSONField(null=True, blank=True)
+    market_position = models.CharField(max_length=50, null=True, blank=True)
+    created_by = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'clause_comparisons'
@@ -124,6 +372,16 @@ class ClauseComparisons(BaseModel):
 class WageProgressions(BaseModel):
     """Migrated from drizzle: cba-clauses-schema.ts"""
     cba = models.ForeignKey('CollectiveAgreements', on_delete=models.CASCADE, related_name='wage_progressions_cba_set')
+    annual_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    classification = models.CharField(max_length=200)
+    classification_code = models.CharField(max_length=50, null=True, blank=True)
+    clause_id = models.UUIDField(null=True, blank=True)
+    effective_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True)
+    hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    premiums = models.JSONField(null=True, blank=True)
+    step = models.IntegerField()
 
     class Meta:
         db_table = 'wage_progressions'
@@ -132,6 +390,15 @@ class WageProgressions(BaseModel):
 class BenefitComparisons(BaseModel):
     """Migrated from drizzle: cba-clauses-schema.ts"""
     cba = models.ForeignKey('CollectiveAgreements', on_delete=models.CASCADE, related_name='benefit_comparisons_cba_set')
+    annual_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    benefit_name = models.CharField(max_length=200)
+    benefit_type = models.CharField(max_length=100)
+    clause_id = models.UUIDField(null=True, blank=True)
+    coverage_details = models.JSONField(null=True, blank=True)
+    effective_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True)
+    industry_benchmark = models.CharField(max_length=50, null=True, blank=True)
+    monthly_premium = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     class Meta:
         db_table = 'benefit_comparisons'
@@ -139,7 +406,63 @@ class BenefitComparisons(BaseModel):
 
 class ArbitrationDecisions(BaseModel):
     """Migrated from drizzle: cba-intelligence-schema.ts"""
-    case_number = models.CharField(max_length=255, null=True, blank=True)
+    case_number = models.CharField(max_length=255, blank=True)
+    source_organization_id = models.UUIDField(null=True, blank=True)
+    is_public = models.BooleanField(default=False, null=True, blank=True)
+    access_restrictions = models.TextField(null=True, blank=True)
+    imported_from = models.CharField(max_length=200, null=True, blank=True)
+    case_title = models.CharField(max_length=500)
+    tribunal = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'fpslreb', 'provincial_labour_board', 'private_arbitrator', 'court_federal',
+            'court_provincial', 'other',
+        ]],
+    )
+    decision_type = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'grievance', 'unfair_practice', 'certification', 'judicial_review', 'interpretation',
+            'scope_bargaining', 'other',
+        ]],
+    )
+    decision_date = models.DateTimeField()
+    filing_date = models.DateTimeField(null=True, blank=True)
+    hearing_date = models.DateTimeField(null=True, blank=True)
+    arbitrator = models.CharField(max_length=200)
+    panel_members = models.JSONField(null=True, blank=True)
+    grievor = models.CharField(max_length=300, null=True, blank=True)
+    union = models.CharField(max_length=300)
+    employer = models.CharField(max_length=300)
+    outcome = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'grievance_upheld', 'grievance_denied', 'partial_success', 'dismissed', 'withdrawn',
+            'settled',
+        ]],
+    )
+    remedy = models.JSONField(null=True, blank=True)
+    key_findings = models.JSONField(null=True, blank=True)
+    issue_types = models.JSONField(null=True, blank=True)
+    precedent_value = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['high', 'medium', 'low']],
+    )
+    legal_citations = models.JSONField(null=True, blank=True)
+    related_decisions = models.JSONField(null=True, blank=True)
+    cba_references = models.JSONField(null=True, blank=True)
+    full_text = models.TextField()
+    summary = models.TextField(null=True, blank=True)
+    headnote = models.TextField(null=True, blank=True)
+    precedent_summary = models.TextField(null=True, blank=True)
+    reasoning = models.TextField(null=True, blank=True)
+    key_facts = models.TextField(null=True, blank=True)
+    sector = models.CharField(max_length=100, null=True, blank=True)
+    jurisdiction = models.CharField(max_length=50, null=True, blank=True)
+    language = models.CharField(max_length=10, default='en')
+    citation_count = models.IntegerField(default=0, null=True, blank=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
+    embedding = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = 'arbitration_decisions'
@@ -147,7 +470,52 @@ class ArbitrationDecisions(BaseModel):
 
 class ArbitratorProfiles(BaseModel):
     """Migrated from drizzle: cba-intelligence-schema.ts"""
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True)
+    average_award_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    avg_decision_days = models.IntegerField(null=True, blank=True)
+    biography = models.TextField(null=True, blank=True)
+    common_remedies = models.JSONField(null=True, blank=True)
+    contact_info = models.JSONField(null=True, blank=True)
+    credentials = models.JSONField(null=True, blank=True)
+    decision_patterns = models.JSONField(null=True, blank=True)
+    decision_range_max = models.IntegerField(null=True, blank=True)
+    decision_range_min = models.IntegerField(null=True, blank=True)
+    employer_success_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    grievor_success_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    highest_award_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    jurisdictions = models.JSONField(null=True, blank=True)
+    last_decision_date = models.DateTimeField(null=True, blank=True)
+    median_award_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    median_decision_days = models.IntegerField(null=True, blank=True)
+    primary_sectors = models.JSONField(null=True, blank=True)
+    specializations = models.JSONField(null=True, blank=True)
+    total_decisions = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'arbitrator_profiles'
@@ -159,6 +527,27 @@ class ArbitratorProfiles(BaseModel):
 class BargainingNotes(BaseModel):
     """Migrated from drizzle: cba-intelligence-schema.ts"""
     cba = models.ForeignKey('CollectiveAgreements', on_delete=models.CASCADE, related_name='bargaining_notes_cba_set', null=True, blank=True)
+    organization_id = models.UUIDField()
+    session_date = models.DateTimeField()
+    session_type = models.CharField(max_length=100)
+    session_number = models.IntegerField(null=True, blank=True)
+    title = models.CharField(max_length=300)
+    content = models.TextField()
+    attendees = models.JSONField(null=True, blank=True)
+    related_clause_ids = models.JSONField(null=True, blank=True)
+    related_decision_ids = models.JSONField(null=True, blank=True)
+    tags = models.JSONField(null=True, blank=True)
+    confidentiality_level = models.CharField(
+        max_length=50,
+        default='internal',
+        null=True,
+        blank=True,
+    )
+    embedding = models.TextField(null=True, blank=True)
+    key_insights = models.JSONField(null=True, blank=True)
+    attachments = models.JSONField(null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    last_modified_by = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'bargaining_notes'
@@ -167,6 +556,16 @@ class BargainingNotes(BaseModel):
 class CbaFootnotes(BaseModel):
     """Migrated from drizzle: cba-intelligence-schema.ts"""
     source_clause = models.ForeignKey('CbaClauses', on_delete=models.CASCADE, related_name='cba_footnotes_source_clause_set')
+    click_count = models.IntegerField(default=0, null=True, blank=True)
+    context = models.TextField(null=True, blank=True)
+    created_by = models.CharField(max_length=255)
+    end_offset = models.IntegerField(null=True, blank=True)
+    footnote_number = models.IntegerField()
+    footnote_text = models.TextField()
+    link_type = models.CharField(max_length=50)
+    start_offset = models.IntegerField(null=True, blank=True)
+    target_clause_id = models.UUIDField(null=True, blank=True)
+    target_decision_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = 'cba_footnotes'
@@ -175,7 +574,56 @@ class CbaFootnotes(BaseModel):
 class CollectiveAgreements(BaseModel):
     """Migrated from drizzle: collective-agreements-schema.ts"""
     organization_id = models.UUIDField()
-    cba_number = models.CharField(max_length=255, null=True, blank=True)
+    cba_number = models.CharField(max_length=100, blank=True)
+    title = models.CharField(max_length=500)
+    jurisdiction = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'federal', 'ontario', 'bc', 'alberta', 'quebec', 'manitoba', 'saskatchewan',
+            'nova_scotia', 'new_brunswick', 'pei', 'newfoundland', 'northwest_territories', 'yukon',
+            'nunavut',
+        ]],
+    )
+    language = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in ['en', 'fr', 'bilingual']],
+        default='en',
+    )
+    employer_name = models.CharField(max_length=300)
+    employer_id = models.CharField(max_length=100, null=True, blank=True)
+    union_name = models.CharField(max_length=300)
+    union_local = models.CharField(max_length=100, null=True, blank=True)
+    union_id = models.CharField(max_length=100, null=True, blank=True)
+    effective_date = models.DateTimeField()
+    expiry_date = models.DateTimeField()
+    signed_date = models.DateTimeField(null=True, blank=True)
+    ratification_date = models.DateTimeField(null=True, blank=True)
+    industry_sector = models.CharField(max_length=200)
+    sector = models.CharField(max_length=200, null=True, blank=True)
+    employee_coverage = models.IntegerField(null=True, blank=True)
+    bargaining_unit_description = models.TextField(null=True, blank=True)
+    document_url = models.TextField(null=True, blank=True)
+    document_hash = models.CharField(max_length=64, null=True, blank=True)
+    raw_text = models.TextField(null=True, blank=True)
+    structured_data = models.JSONField(null=True, blank=True)
+    embedding = models.TextField(null=True, blank=True)
+    summary_generated = models.TextField(null=True, blank=True)
+    key_terms = models.JSONField(null=True, blank=True)
+    ai_processed = models.BooleanField(default=False, null=True, blank=True)
+    status = models.CharField(
+        max_length=63,
+        choices=[(value, value) for value in [
+            'active', 'expired', 'under_negotiation', 'ratified_pending', 'archived',
+        ]],
+        default='active',
+    )
+    is_public = models.BooleanField(default=False, null=True, blank=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
+    last_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    version = models.IntegerField(default=1)
+    superseded_by = models.UUIDField(null=True, blank=True)
+    precedes_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = 'collective_agreements'
@@ -187,6 +635,12 @@ class CollectiveAgreements(BaseModel):
 class CbaVersionHistory(BaseModel):
     """Migrated from drizzle: collective-agreements-schema.ts"""
     cba = models.ForeignKey('CollectiveAgreements', on_delete=models.CASCADE, related_name='cba_version_history_cba_set')
+    change_description = models.TextField()
+    change_type = models.CharField(max_length=50)
+    created_by = models.CharField(max_length=255)
+    new_data = models.JSONField(null=True, blank=True)
+    previous_data = models.JSONField(null=True, blank=True)
+    version = models.IntegerField()
 
     class Meta:
         db_table = 'cba_version_history'
@@ -195,6 +649,14 @@ class CbaVersionHistory(BaseModel):
 class CbaContacts(BaseModel):
     """Migrated from drizzle: collective-agreements-schema.ts"""
     cba = models.ForeignKey('CollectiveAgreements', on_delete=models.CASCADE, related_name='cba_contacts_cba_set')
+    contact_type = models.CharField(max_length=50)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
+    is_primary = models.BooleanField(default=False, null=True, blank=True)
+    name = models.CharField(max_length=200)
+    organization = models.CharField(max_length=300, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    title = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         db_table = 'cba_contacts'
@@ -202,7 +664,28 @@ class CbaContacts(BaseModel):
 
 class SharedClauseLibrary(BaseModel):
     """Migrated from drizzle: shared-library.ts"""
-    source_organization_id = models.UUIDField(null=True, blank=True)
+    source_organization_id = models.UUIDField()
+    sharing_level = models.CharField(max_length=50, default='private')
+    shared_with_org_ids = ArrayField(models.UUIDField(), null=True, blank=True)
+    source_cba_id = models.UUIDField(null=True, blank=True)
+    original_clause_id = models.UUIDField(null=True, blank=True)
+    clause_number = models.CharField(max_length=50, null=True, blank=True)
+    clause_title = models.CharField(max_length=500)
+    clause_text = models.TextField()
+    clause_type = models.CharField(max_length=100)
+    is_anonymized = models.BooleanField(default=False, null=True, blank=True)
+    original_employer_name = models.CharField(max_length=200, null=True, blank=True)
+    anonymized_employer_name = models.CharField(max_length=200, null=True, blank=True)
+    effective_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    sector = models.CharField(max_length=100, null=True, blank=True)
+    province = models.CharField(max_length=2, null=True, blank=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
+    citation_count = models.IntegerField(default=0, null=True, blank=True)
+    comparison_count = models.IntegerField(default=0, null=True, blank=True)
+    version = models.IntegerField(default=1, null=True, blank=True)
+    previous_version_id = models.UUIDField(null=True, blank=True)
+    created_by = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'shared_clause_library'
@@ -210,7 +693,9 @@ class SharedClauseLibrary(BaseModel):
 
 class ClauseLibraryTags(BaseModel):
     """Migrated from drizzle: shared-library.ts"""
-    clause_id = models.UUIDField(null=True, blank=True)
+    clause_id = models.UUIDField()
+    tag_name = models.CharField(max_length=100)
+    created_by = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'clause_library_tags'

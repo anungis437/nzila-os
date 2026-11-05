@@ -1,4 +1,10 @@
 import { getRoleLevel, UserRole } from '../auth/roles';
+import {
+  EXECUTIVE_ALLOWED_PREFIXES,
+  EXECUTIVE_HOME_HREF,
+  getExecutiveNavigation,
+  meetsExecutiveDestinationRole,
+} from '../executive/executive-navigation';
 
 export type DashboardExperience = 'member' | 'staff' | 'executive' | 'governance' | 'admin';
 
@@ -26,7 +32,6 @@ const ADMIN_ROLES = new Set([
 
 const GOVERNANCE_ROLES = new Set([
   'governance',
-  'officer',
   'compliance_manager',
   'security_manager',
   'clc_executive',
@@ -41,6 +46,7 @@ const EXECUTIVE_ROLES = new Set([
   'president',
   'vice_president',
   'secretary_treasurer',
+  'officer',
   'national_officer',
 ]);
 
@@ -83,22 +89,22 @@ export function getDashboardExperience(role?: string | null): DashboardExperienc
 
 /**
  * Doctrine orientation hub (Club360 seven-tab Workspace).
- * This is not the post-login role execution home, except for `member`,
- * where the two routes coincide. EC-G03 labels that split; it does not
- * retarget either surface.
+ * This is not the post-login role execution home for any role. Members do not
+ * have the hub at all: they start at their own Home (/dashboard) and the hub is not in their
+ * navigation or allow-list.
  */
 export const WORKSPACE_ORIENTATION_HUB_PATH = '/dashboard/workspace' as const;
 
 /**
  * Role execution homes — the routes `getRoleLandingPath` returns.
- * Targets are unchanged by EC-G03. Staff, executive, governance, and admin
- * land off the Workspace hub on purpose. Do not silently rewrite these to
- * the hub (that redirect belongs to G-04, which is out of this slice).
+ * Staff, executive, governance, and admin land off the Workspace hub on
+ * purpose. Do not silently rewrite these to the hub (that redirect belongs to
+ * G-04, which is out of this slice). Members start at their own Home.
  */
 export const ROLE_EXECUTION_HOME_BY_EXPERIENCE = {
-  member: WORKSPACE_ORIENTATION_HUB_PATH,
+  member: '/dashboard',
   staff: '/dashboard/workbench',
-  executive: '/dashboard/intelligence',
+  executive: EXECUTIVE_HOME_HREF,
   governance: '/dashboard/governance',
   admin: '/dashboard/admin/organizations',
 } as const satisfies Record<DashboardExperience, string>;
@@ -109,7 +115,7 @@ export type DualNavHomes = {
   roleHomeHref: string;
   /** Workspace orientation hub. Always `/dashboard/workspace`. */
   orientationHubHref: typeof WORKSPACE_ORIENTATION_HUB_PATH;
-  /** True only for member, where landing and the hub are the same route. */
+  /** Always false now that members no longer land on the hub; kept for consumers. */
   roleHomeIsOrientationHub: boolean;
 };
 
@@ -121,62 +127,63 @@ export type DualNavHomes = {
  */
 export function getDualNavHomes(role?: string | null): DualNavHomes {
   const experience = getDashboardExperience(role);
-  const roleHomeHref = ROLE_EXECUTION_HOME_BY_EXPERIENCE[experience];
+  const roleHomeHref = getRoleLandingPath(role);
   return {
     experience,
     roleHomeHref,
     orientationHubHref: WORKSPACE_ORIENTATION_HUB_PATH,
-    roleHomeIsOrientationHub: roleHomeHref === WORKSPACE_ORIENTATION_HUB_PATH,
+    roleHomeIsOrientationHub: false,
   };
 }
 
+/**
+ * Where a role lands. The role execution home of its experience, unless that destination's own guard refuses the role: the dashboard root sends every
+ * non-member to its landing, so a landing that redirects the role back to the root would bounce it between the two for ever. Such a role lands on
+ * the first destination it may open.
+ */
 export function getRoleLandingPath(role?: string | null): string {
-  // Role execution home. Not rewritten to the Workspace orientation hub.
-  // The sidebar highlights the nav item whose href matches this path.
-  return ROLE_EXECUTION_HOME_BY_EXPERIENCE[getDashboardExperience(role)];
+  const experience = getDashboardExperience(role);
+  const home = ROLE_EXECUTION_HOME_BY_EXPERIENCE[experience];
+  const normalized = (role ?? 'member').toLowerCase();
+  if (meetsDestinationRole(home, normalized, experience)) return home;
+  const [first] = getVisibleNavigationForExperience(experience, false, normalized);
+  return first ? first.href.split('?')[0] : '/dashboard';
 }
 
 export function getNavigationForExperience(experience: DashboardExperience): NavigationItem[] {
   if (experience === 'member') {
     return [
-      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard' },
-      { label: 'Home', href: '/dashboard/inbox' },
-      { label: 'My Cases', href: '/dashboard/inbox?type=intake' },
-      { label: 'Open Representation Case', href: '/dashboard/claims/new' },
-      { label: 'Messages', href: '/dashboard/inbox?type=message' },
-      { label: 'Documents', href: '/dashboard/documents' },
-      { label: 'Profile & Settings', href: '/dashboard/settings' },
+      { label: 'Home', href: '/dashboard' },
+      { label: 'My Representation', href: '/dashboard/claims' },
+      { label: 'Messages', href: '/dashboard/messages' },
+      { label: 'My Documents', href: '/dashboard/documents' },
+      { label: 'My Union', href: '/dashboard/union' },
+      { label: 'Help & Resources', href: '/dashboard/help' },
+      // Account controls are not primary destinations (UE-MEMBER-CANONICAL-2.1).
+      { label: 'Profile', href: '/dashboard/profile', group: 'Account' },
+      { label: 'Preferences', href: '/dashboard/preferences', group: 'Account' },
+      { label: 'Privacy', href: '/dashboard/privacy', group: 'Account' },
     ];
   }
 
   if (experience === 'staff') {
+    // UE-REPRESENTATIVE-CANONICAL-2.2: seven invariant destinations. Each maps to an existing
+    // route; legacy routes (notifications, intake queue, workspace hub) stay reachable by deep link.
     return [
-      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
-      { label: 'Operations (Casework Console)', href: '/dashboard/workbench', group: 'Operations' },
-      { label: 'Operations Queue (Representation Cases)', href: '/dashboard/inbox?type=intake', group: 'Operations' },
-      { label: 'Operations Priorities (Commitments & Deadlines)', href: '/dashboard/priorities', group: 'Operations' },
-      { label: 'Members', href: '/dashboard/members', group: 'Operations' },
-      { label: 'Documents', href: '/dashboard/documents', group: 'Operations' },
-      { label: 'Operations Communications', href: '/dashboard/correspondence', group: 'Operations' },
-      { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
-      { label: 'Notifications', href: '/dashboard/notifications', group: 'Operations' },
+      { label: 'Today', href: '/dashboard/inbox', group: 'Operations' },
+      { label: 'Representation', href: '/dashboard/workbench', group: 'Operations' },
+      { label: 'Members & Workplaces', href: '/dashboard/members', group: 'Operations' },
+      { label: 'Communications', href: '/dashboard/correspondence', group: 'Operations' },
+      { label: 'Documents & Evidence', href: '/dashboard/documents', group: 'Operations' },
+      { label: 'Tasks & Deadlines', href: '/dashboard/priorities', group: 'Operations' },
+      { label: 'Knowledge & Guidance', href: '/dashboard/clause-library', group: 'Operations' },
       { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
     ];
   }
 
   if (experience === 'executive') {
-    return [
-      { label: 'Workspace', href: '/dashboard/workspace', icon: 'dashboard', group: 'Workspace' },
-      { label: 'OCRA Intelligence (Executive Overview)', href: '/dashboard/intelligence?scope=executive', group: 'OCRA' },
-      { label: 'OCRA Signals (Continuity Insights)', href: '/dashboard/continuity-intelligence', group: 'OCRA' },
-      { label: 'Operations Continuity', href: '/dashboard/executive-operating-intelligence', group: 'Operations' },
-      { label: 'Governance Continuity', href: '/dashboard/governance-center', group: 'Governance Continuity' },
-      { label: 'Operations Outcomes (Member Outcomes Ledger)', href: '/dashboard/outcomes', group: 'Operations' },
-      { label: 'Onboarding Survivability (Leadership Continuity)', href: '/dashboard/leadership', group: 'Operations' },
-      { label: 'Institutional Intelligence Reports', href: '/dashboard/intelligence', group: 'Operations' },
-      { label: 'Governance Trust & Oversight', href: '/dashboard/trust', group: 'Governance Continuity' },
-      { label: 'Profile & Settings', href: '/dashboard/settings', group: 'Settings' },
-    ];
+    // UE-OFFICER-EXECUTIVE-CANONICAL-2.1: exactly seven destinations (lib/executive).
+    return getExecutiveNavigation();
   }
 
   if (experience === 'governance') {
@@ -200,7 +207,6 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
     { label: 'Policies', href: '/dashboard/governance' },
     { label: 'Audit', href: '/dashboard/audits' },
     { label: 'Security', href: '/dashboard/security' },
-    { label: 'Exports', href: '/dashboard/movement-insights/export' },
     { label: 'Integrations', href: '/dashboard/integrations' },
     { label: 'System Status', href: '/dashboard/operations' },
   ];
@@ -209,14 +215,16 @@ export function getNavigationForExperience(experience: DashboardExperience): Nav
 const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
   member: [
     '/dashboard',
-    '/dashboard/workspace',
-    '/dashboard/inbox',
     '/dashboard/claims',
     '/dashboard/claims/new',
     '/dashboard/documents',
+    '/dashboard/messages',
+    '/dashboard/union',
+    '/dashboard/help',
     '/dashboard/settings',
     '/dashboard/profile',
-    '/dashboard/support',
+    '/dashboard/preferences',
+    '/dashboard/privacy',
   ],
   staff: [
     '/dashboard',
@@ -226,27 +234,18 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/operations',
     '/dashboard/inbox',
     '/dashboard/intelligence',
+    // Existing server-side CBA role and entitlement guards remain authoritative.
+    '/dashboard/cba-intelligence', // Non-primary deep link; not a frozen staff destination.
     '/dashboard/members',
     '/dashboard/documents',
     '/dashboard/correspondence',
+    '/dashboard/clause-library',
     '/dashboard/notifications',
+    '/dashboard/messages/staff',
     '/dashboard/settings',
     '/dashboard/profile',
   ],
-  executive: [
-    '/dashboard',
-    '/dashboard/workspace',
-    '/dashboard/intelligence',
-    '/dashboard/continuity-intelligence',
-    '/dashboard/executive-operating-intelligence',
-    '/dashboard/operations',
-    '/dashboard/governance-center',
-    '/dashboard/outcomes',
-    '/dashboard/leadership',
-    '/dashboard/trust',
-    '/dashboard/settings',
-    '/dashboard/profile',
-  ],
+  executive: [...EXECUTIVE_ALLOWED_PREFIXES],
   governance: [
     '/dashboard',
     '/dashboard/workspace',
@@ -255,6 +254,7 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/workbench',
     '/dashboard/continuity-intelligence',
     '/dashboard/intelligence',
+    '/dashboard/cba-intelligence', // Eligible governance reader deep link; page/API enforce access.
     '/dashboard/audits',
     '/dashboard/settings',
     '/dashboard/profile',
@@ -267,9 +267,9 @@ const ALLOWED_PREFIXES_BY_EXPERIENCE: Record<DashboardExperience, string[]> = {
     '/dashboard/admin/members',
     '/dashboard/admin/onboarding',
     '/dashboard/governance',
+    '/dashboard/cba-intelligence', // Eligible admin deep link; not a sidebar destination.
     '/dashboard/audits',
     '/dashboard/security',
-    '/dashboard/movement-insights/export',
     '/dashboard/integrations',
     '/dashboard/operations',
     '/dashboard/settings',
@@ -322,12 +322,34 @@ export function canAccessDashboardPath(pathname: string, experience: DashboardEx
 const PLATFORM_LEAD_ROLES = ['app_owner', 'coo', 'cto', 'platform_lead'];
 const SUPPORT_MANAGER_ROLES = [...PLATFORM_LEAD_ROLES, 'customer_success_director', 'support_manager'];
 const INTEGRATION_MANAGER_ROLES = [...SUPPORT_MANAGER_ROLES, 'data_analytics_manager', 'billing_manager', 'integration_manager'];
+// The security page admits security_manager and above (levels in lib/auth/roles.ts): the integration, billing and data managers rank below it.
+const SECURITY_ROLES = [...PLATFORM_LEAD_ROLES, 'customer_success_director', 'security_manager'];
 const PLATFORM_NAVIGATION_ROLES: Record<string, readonly string[]> = {
   '/dashboard/operations': PLATFORM_LEAD_ROLES,
   '/dashboard/admin/members': SUPPORT_MANAGER_ROLES,
   '/dashboard/integrations': INTEGRATION_MANAGER_ROLES,
-  '/dashboard/security': [...INTEGRATION_MANAGER_ROLES, 'compliance_manager', 'security_manager'],
+  '/dashboard/security': SECURITY_ROLES,
 };
+
+/**
+ * Destinations whose own page guard admits fewer roles than the experience that lists them: pathname -> the least role that guard admits.
+ * scripts/runtime/nav-guard-census.ts holds this table to the guards in the pages and layouts, so a destination is never offered to a role it would redirect.
+ */
+export const DESTINATION_MIN_ROLE: Readonly<Record<string, UserRole>> = {
+  '/dashboard/workbench': UserRole.STEWARD,
+  '/dashboard/members': UserRole.STEWARD,
+  '/dashboard/correspondence': UserRole.STEWARD,
+  // The clause library page redirects below steward; do not advertise it to those roles.
+  '/dashboard/clause-library': UserRole.STEWARD,
+  '/dashboard/audits': UserRole.ADMIN,
+};
+
+function meetsDestinationRole(pathname: string, role: string, experience: DashboardExperience): boolean {
+  const min = DESTINATION_MIN_ROLE[pathname];
+  if (min && getRoleLevel(role as UserRole) < getRoleLevel(min)) return false;
+  // The executive table states the executive menu's own requirement for a href that other experiences list under their own guard.
+  return experience !== 'executive' || meetsExecutiveDestinationRole(pathname, role);
+}
 
 /**
  * Single source of truth for which navigation entries are actually visible.
@@ -347,7 +369,7 @@ export function getVisibleNavigationForExperience(
     const pathname = item.href.split('?')[0];
     const platformRoles = PLATFORM_NAVIGATION_ROLES[pathname];
     if (platformRoles && !platformRoles.includes(role)) return false;
-    if (pathname === '/dashboard/audits' && getRoleLevel(role as UserRole) < getRoleLevel(UserRole.ADMIN)) return false;
+    if (!meetsDestinationRole(pathname, role, experience)) return false;
     return canAccessDashboardPath(pathname, experience, isPilotMode);
   });
 }

@@ -14,7 +14,8 @@ export type GovernancePersonalityType =
   | 'continuity_reactive'        // Responds to challenges, less proactive
   | 'governance_maturing'        // On a growth trajectory
   | 'resilience_fragile'         // Governance gaps risk organizational stability
-  | 'continuity_progressive';    // Leading-edge, adaptive governance culture
+  | 'continuity_progressive'     // Leading-edge, adaptive governance culture
+  | 'insufficient_data';         // Too little recorded activity to characterize
 
 /** Governance stability rating. */
 export type GovernanceStabilityRating = 'highly_stable' | 'stable' | 'variable' | 'unstable' | 'insufficient_data';

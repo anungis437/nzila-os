@@ -6,7 +6,7 @@ import { LoginForm } from '../login-form';
 
 const { signInWithEntra } = vi.hoisted(() => ({ signInWithEntra: vi.fn() }));
 vi.mock('@nzila/platform-auth/entra/client', () => ({ signInWithEntra }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => '/login' }));
 vi.mock('next/image', () => ({ default: () => null }));
 vi.mock('next/link', () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 
@@ -17,7 +17,7 @@ describe('Microsoft sign-in from the Union Eyes login form', () => {
   it('starts the existing Entra client action with the normal destination', async () => {
     render(<LoginForm />);
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Microsoft' }));
-    await waitFor(() => expect(signInWithEntra).toHaveBeenCalledWith('/en-CA/dashboard/priorities'));
+    await waitFor(() => expect(signInWithEntra).toHaveBeenCalledWith('/en-CA/dashboard'));
     expect(signInWithEntra).toHaveBeenCalledTimes(1);
   });
 
@@ -28,7 +28,7 @@ describe('Microsoft sign-in from the Union Eyes login form', () => {
   });
 
   it('uses the same Entra action when organizational policy requires SSO', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ password: false, magicLink: false, sso: true, ssoRequired: true }) }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ password: false, magicLink: false, sso: true, passwordReset: false, ssoRequired: true, inviteRequired: false, userExists: null }) }));
     render(<LoginForm />);
     fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'sso-probe@example.test' } });
     await screen.findByText(/organization requires/i);

@@ -14,11 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import {
-  Calendar,
   Plus,
   Cloud,
-  CloudOff,
-  RefreshCw,
   ChevronDown,
   ChevronRight,
 } from 'lucide-react';
@@ -30,9 +27,6 @@ interface Calendar {
   color: string;
   isDefault: boolean;
   visibility: boolean;
-  syncEnabled?: boolean;
-  syncStatus?: 'synced' | 'syncing' | 'failed' | 'pending';
-  provider?: 'google' | 'microsoft' | 'local';
 }
 
 interface CalendarSidebarProps {
@@ -41,7 +35,6 @@ interface CalendarSidebarProps {
   onSelectCalendar: (calendarId: string) => void;
   onToggleVisibility: (calendarId: string, visible: boolean) => void;
   onCreateCalendar: () => void;
-  onSyncCalendar?: (calendarId: string) => void;
   onManageSync?: () => void;
 }
 
@@ -51,12 +44,10 @@ export function CalendarSidebar({
   onSelectCalendar,
   onToggleVisibility,
   onCreateCalendar,
-  onSyncCalendar,
   onManageSync,
 }: CalendarSidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     myCalendars: true,
-    synced: true,
   });
 
   const toggleSection = (section: string) => {
@@ -65,9 +56,6 @@ export function CalendarSidebar({
       [section]: !prev[section],
     }));
   };
-
-  const localCalendars = calendars.filter(cal => !cal.provider || cal.provider === 'local');
-  const syncedCalendars = calendars.filter(cal => cal.provider && cal.provider !== 'local');
 
   return (
     <div className="w-64 border-r bg-muted/10 p-4 space-y-6">
@@ -95,7 +83,7 @@ export function CalendarSidebar({
 
         {expandedSections.myCalendars && (
           <div className="space-y-1 pl-2">
-            {localCalendars.map(calendar => (
+            {calendars.map(calendar => (
               <CalendarItem
                 key={calendar.id}
                 calendar={calendar}
@@ -104,48 +92,14 @@ export function CalendarSidebar({
                 onToggleVisibility={onToggleVisibility}
               />
             ))}
-            {localCalendars.length === 0 && (
+            {calendars.length === 0 && (
               <p className="text-sm text-muted-foreground py-2">No calendars yet</p>
             )}
           </div>
         )}
       </div>
 
-      {/* Synced Calendars Section */}
-      {syncedCalendars.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => toggleSection('synced')}
-              className="flex items-center space-x-2 text-sm font-semibold hover:text-primary"
-            >
-              {expandedSections.synced ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-              <span>Synced Calendars</span>
-            </button>
-          </div>
-
-          {expandedSections.synced && (
-            <div className="space-y-1 pl-2">
-              {syncedCalendars.map(calendar => (
-                <CalendarItem
-                  key={calendar.id}
-                  calendar={calendar}
-                  selected={calendar.id === selectedCalendarId}
-                  onSelect={onSelectCalendar}
-                  onToggleVisibility={onToggleVisibility}
-                  onSync={onSyncCalendar}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Sync Management */}
+      {/* Connected external calendars (sync itself is not available: see CalendarSyncManager) */}
       {onManageSync && (
         <div className="pt-4 border-t">
           <Button
@@ -172,7 +126,6 @@ interface CalendarItemProps {
   selected: boolean;
   onSelect: (calendarId: string) => void;
   onToggleVisibility: (calendarId: string, visible: boolean) => void;
-  onSync?: (calendarId: string) => void;
 }
 
 function CalendarItem({
@@ -180,23 +133,7 @@ function CalendarItem({
   selected,
   onSelect,
   onToggleVisibility,
-  onSync,
 }: CalendarItemProps) {
-  const getSyncIcon = () => {
-    if (!calendar.syncEnabled) return null;
-
-    switch (calendar.syncStatus) {
-      case 'syncing':
-        return <RefreshCw className="h-3 w-3 animate-spin" />;
-      case 'failed':
-        return <CloudOff className="h-3 w-3 text-destructive" />;
-      case 'synced':
-        return <Cloud className="h-3 w-3 text-green-600" />;
-      default:
-        return <Cloud className="h-3 w-3 text-muted-foreground" />;
-    }
-  };
-
   return (
     <div
       className={cn(
@@ -228,22 +165,6 @@ function CalendarItem({
             </Badge>
           )}
         </div>
-      </div>
-
-      <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {getSyncIcon()}
-        {onSync && calendar.syncEnabled && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onSync(calendar.id);
-            }}
-            className="p-1 hover:bg-background rounded"
-            title="Sync now"
-          >
-            <RefreshCw className="h-3 w-3" />
-          </button>
-        )}
       </div>
     </div>
   );

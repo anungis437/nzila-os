@@ -109,68 +109,6 @@ export const lrbAgreements = pgTable("lrb_agreements", {
 });
 
 /**
- * LRB Employers Table
- * 
- * Tracks employers that appear in LRB agreements.
- */
-export const lrbEmployers = pgTable("lrb_employers", {
-  id: uuid("id").primaryKey().defaultRandom(),
-
-  // Employer Information
-  employerName: varchar("employer_name", { length: 500 }).notNull(),
-  employerNameAlt: varchar("employer_name_alt", { length: 500 }), // AKA names
-  
-  // Location
-  jurisdiction: varchar("jurisdiction", { length: 10 }).notNull(),
-  city: varchar("city", { length: 100 }),
-  province: varchar("province", { length: 100 }),
-  
-  // Industry
-  industryCode: varchar("industry_code", { length: 20 }),
-  industryName: varchar("industry_name", { length: 255 }),
-  
-  // Statistics
-  totalAgreements: integer("total_agreements").default(0),
-  activeAgreements: integer("active_agreements").default(0),
-  
-  // Last Seen
-  lastAgreementDate: varchar("last_agreement_date", { length: 20 }),
-  firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
-  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
-});
-
-/**
- * LRB Unions Table
- * 
- * Tracks unions that appear in LRB agreements.
- */
-export const lrbUnions = pgTable("lrb_unions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-
-  // Union Information
-  unionName: varchar("union_name", { length: 500 }).notNull(),
-  unionCode: varchar("union_code", { length: 50 }),
-  acronym: varchar("acronym", { length: 20 }),
-  
-  // Affiliation
-  parentOrganization: varchar("parent_organization", { length: 500 }),
-  affiliationLevel: varchar("affiliation_level", { length: 50 }), // National, Provincial, Local
-  
-  // Jurisdiction
-  primaryJurisdiction: varchar("primary_jurisdiction", { length: 10 }),
-  
-  // Statistics
-  totalAgreements: integer("total_agreements").default(0),
-  activeAgreements: integer("active_agreements").default(0),
-  totalMembers: integer("total_members"), // Approximate
-  
-  // Last Seen
-  lastAgreementDate: varchar("last_agreement_date", { length: 20 }),
-  firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
-  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
-});
-
-/**
  * LRB Sync Log Table
  * 
  * Tracks sync operations for LRB data sources.
@@ -217,11 +155,7 @@ export type Sector = typeof sectorEnum[keyof typeof sectorEnum];
 export type LRBAgreement = typeof lrbAgreements.$inferSelect;
 export type LRBAgreementInsert = typeof lrbAgreements.$inferInsert;
 
-export type LRBEmployer = typeof lrbEmployers.$inferSelect;
-export type LRBEmployerInsert = typeof lrbEmployers.$inferInsert;
 
-export type LRBUnion = typeof lrbUnions.$inferSelect;
-export type LRBUnionInsert = typeof lrbUnions.$inferInsert;
 
 export type LRBSyncLog = typeof lrbSyncLog.$inferSelect;
 export type LRBSyncLogInsert = typeof lrbSyncLog.$inferInsert;

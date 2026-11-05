@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// The route answers a path value that is not a UUID as not found, so the tests use a real identifier.
+const A1 = '00000000-0000-4000-8000-0000000000a1';
 import { createHash } from 'crypto';
 
 const TOKEN = 'test-capability-token';
@@ -64,7 +67,7 @@ describe('icra/[assessmentId]/profile route', () => {
     mockTx({ capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }, []);
     const { GET } = await loadRoute();
 
-    const response = await GET(req(false), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await GET(req(false), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(401);
   });
@@ -73,7 +76,7 @@ describe('icra/[assessmentId]/profile route', () => {
     mockTx(null, []);
     const { GET } = await loadRoute();
 
-    const response = await GET(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await GET(req(), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(404);
   });
@@ -82,7 +85,7 @@ describe('icra/[assessmentId]/profile route', () => {
     mockTx({ capabilityTokenHash: TOKEN_HASH, capabilityTokenExpiresAt: FUTURE }, []);
     const { GET } = await loadRoute();
 
-    const response = await GET(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await GET(req(), { params: Promise.resolve({ assessmentId: A1 }) });
 
     expect(response.status).toBe(404);
   });
@@ -94,7 +97,7 @@ describe('icra/[assessmentId]/profile route', () => {
     );
     const { GET } = await loadRoute();
 
-    const response = await GET(req(), { params: Promise.resolve({ assessmentId: 'a1' }) });
+    const response = await GET(req(), { params: Promise.resolve({ assessmentId: A1 }) });
     const payload = await response.json();
 
     expect(response.status).toBe(200);

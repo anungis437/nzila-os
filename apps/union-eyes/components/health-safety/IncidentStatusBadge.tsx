@@ -15,11 +15,16 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export interface IncidentStatusBadgeProps {
-  status: "open" | "investigating" | "resolved" | "closed" | "pending";
+  /** The incident status as stored: reported, investigating or closed (resolved and open are read too). */
+  status: string;
   className?: string;
 }
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+  reported: {
+    label: "Reported",
+    className: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
+  },
   open: {
     label: "Open",
     className: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
@@ -43,7 +48,16 @@ const STATUS_CONFIG = {
 };
 
 export function IncidentStatusBadge({ status, className }: IncidentStatusBadgeProps) {
-  const config = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
+  const config = STATUS_CONFIG[status];
+
+  // A status this screen does not know is shown as it is stored, not relabelled "Pending".
+  if (!config) {
+    return (
+      <Badge className={cn("bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 capitalize", className)}>
+        {status.replace(/_/g, " ")}
+      </Badge>
+    );
+  }
 
   return (
     <Badge className={cn(config.className, className)}>

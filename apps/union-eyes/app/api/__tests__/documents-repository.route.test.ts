@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { caller, declared, resetCaller } from './support/with-api-stub';
 
 const TEST_ORG_ID = '00000000-0000-0000-0000-000000000001';
 const TEST_USER_ID = 'user_test_001';
@@ -7,9 +8,12 @@ const TEST_USER_ID = 'user_test_001';
 const m = vi.hoisted(() => {
   const state = {
     selectQueue: [] as unknown[][],
+    blobInUse: false,
   };
 
-  const nextSelect = () => Promise.resolve((state.selectQueue.shift() ?? []) as unknown[]);
+  // A queued result is consumed by the next statement; with none queued, a statement finds nothing, except that the stored file is
+  // reported as held by another version while a test says it is.
+  const nextSelect = () => Promise.resolve((state.selectQueue.length ? state.selectQueue.shift()! : state.blobInUse ? [{ id: 'v-other' }] : []) as unknown[]);
 
   const createSelectChain = () => {
     const chain = {
@@ -17,6 +21,8 @@ const m = vi.hoisted(() => {
       leftJoin: vi.fn(() => chain),
       where: vi.fn(() => chain),
       orderBy: vi.fn(() => chain),
+      limit: vi.fn(() => chain),
+      offset: vi.fn(() => chain),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;
@@ -24,14 +30,14 @@ const m = vi.hoisted(() => {
 
   return {
     state,
-    requireEntitlement: vi.fn(),
     hasMinRole: vi.fn(),
     getEffectiveCaseAccess: vi.fn(),
     isDocumentVisibleByPolicy: vi.fn(),
     normalizeDocumentTitle: vi.fn(),
     toGovernanceLabel: vi.fn(),
     resolveStoredBlob: vi.fn(),
-    auditCaseMutation: vi.fn(),
+    persistAtomicAudit: vi.fn(),
+    loadUploaderNames: vi.fn(),
     withRLSContext: vi.fn(),
     queueSelect: (...results: unknown[][]) => state.selectQueue.push(...results),
     resetQueues: () => {
@@ -41,21 +47,12 @@ const m = vi.hoisted(() => {
   };
 });
 
-const mockDb = {
-  select: vi.fn(() => m.createSelectChain()),
-};
-
-vi.mock('@/db/db', () => ({ db: mockDb }));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({
-  requireEntitlement: m.requireEntitlement,
-}));
+// The ambient handle must never be reached by this route: a statement on it would run outside the organization's transaction.
+const ambient = new Proxy({}, { get: () => { throw new Error('the ambient database handle was used'); } });
+vi.mock('@/db/db', () => ({ db: ambient }));
+vi.mock('@/db', () => ({ db: ambient }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
-vi.mock('@/lib/organization-middleware', () => ({
-  withOrganizationAuth: vi.fn(
-    (handler: (req: NextRequest, ctx: { organizationId: string; userId: string }) => Promise<Response>) =>
-      (req: NextRequest) => handler(req, { organizationId: TEST_ORG_ID, userId: TEST_USER_ID })
-  ),
-}));
 vi.mock('@/lib/services/case-access-service', () => ({
   getEffectiveCaseAccess: m.getEffectiveCaseAccess,
 }));
@@ -66,11 +63,13 @@ vi.mock('@/lib/services/document-governance-service', () => ({
 }));
 vi.mock('@/lib/services/document-blob-integrity-service', () => ({
   resolveStoredBlob: m.resolveStoredBlob,
+  storedBlobFailure: (error: { code?: string; message?: string }) => ({
+    status: error?.code === 'CONTENT_HASH_MISMATCH' ? 'conflict' : 'validation',
+    message: error?.message ?? 'Invalid storage payload',
+  }),
 }));
-vi.mock('@/lib/audited-case-mutations', () => ({
-  auditCaseMutation: m.auditCaseMutation,
-  CaseAuditEvent: { CASE_ATTACHMENT_UPLOADED: 'CASE_ATTACHMENT_UPLOADED' },
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+vi.mock('@/lib/documents/uploader-names', () => ({ loadUploaderNames: m.loadUploaderNames }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
 }));
@@ -82,13 +81,18 @@ async function loadRoute() {
 describe('documents/repository route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.userId = TEST_USER_ID;
+    caller.organizationId = TEST_ORG_ID;
+    caller.role = 'member';
     m.resetQueues();
-    m.requireEntitlement.mockResolvedValue(undefined);
+    m.state.blobInUse = false;
     m.hasMinRole.mockResolvedValue(true);
     m.getEffectiveCaseAccess.mockResolvedValue({
       isPrimaryOwner: true,
       canViewCase: true,
       canViewPrivateDocuments: true,
+      canUploadDocuments: true,
     });
     m.toGovernanceLabel.mockImplementation(({ privacyLabel }: { privacyLabel?: string }) => privacyLabel ?? 'team_confidential');
     m.isDocumentVisibleByPolicy.mockReturnValue(true);
@@ -98,11 +102,13 @@ describe('documents/repository route', () => {
       blobPath: 'org/documents/test.pdf',
       contentHash: 'sha256:test',
     });
-    m.auditCaseMutation.mockResolvedValue(undefined);
+    m.persistAtomicAudit.mockResolvedValue(undefined);
+    m.loadUploaderNames.mockResolvedValue({});
 
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => {
       let insertCall = 0;
       const tx = {
+        select: vi.fn(() => m.createSelectChain()),
         insert: vi.fn(() => ({
           values: vi.fn(() => {
             insertCall += 1;
@@ -110,6 +116,9 @@ describe('documents/repository route', () => {
               return {
                 returning: vi.fn(async () => [{ id: 'doc-1', privacyLabel: 'team_confidential', documentType: 'policy' }]),
               };
+            }
+            if (insertCall === 2) {
+              return { returning: vi.fn(async () => [{ id: 'version-1' }]) };
             }
             return Promise.resolve(undefined);
           }),
@@ -119,19 +128,25 @@ describe('documents/repository route', () => {
     });
   });
 
+  it('declares a member floor and the case-suite entitlement, and holds no transaction of its own across storage checks', async () => {
+    await loadRoute();
+    expect(declared.map((options) => options.auth?.minRole)).toEqual(['member', 'member']);
+    expect(declared.map((options) => options.entitlement)).toEqual(['grievance_case_suite', 'grievance_case_suite']);
+    expect(declared.map((options) => Boolean(options.rlsOrgContext))).toEqual([false, false]);
+  });
+
   it('returns forbidden on GET when caller lacks member role', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+    caller.role = 'guest';
 
     const response = await GET(new NextRequest('http://localhost/api/documents/repository'));
 
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.withRLSContext).not.toHaveBeenCalled();
   }, 60000);
 
   it('returns only visible documents after policy checks', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
     m.queueSelect([
       {
         id: 'doc-1',
@@ -169,11 +184,75 @@ describe('documents/repository route', () => {
     expect(payload.success).toBe(true);
     expect(payload.data).toHaveLength(1);
     expect(payload.data[0]).toMatchObject({ id: 'doc-1', title: 'Doc One' });
+    // Role seniority is not an input to document visibility.
+    for (const call of m.isDocumentVisibleByPolicy.mock.calls) {
+      expect(call[1]).not.toHaveProperty('isStewardPlus');
+    }
+  });
+
+  it('names the uploader of each document for a representative, and gives no name for someone who is no longer a member', async () => {
+    const { GET } = await loadRoute();
+    const row = (id: string, uploadedBy: string) => ({
+      id, title: id, name: id, filename: `${id}.pdf`, documentType: 'policy', privacyLabel: 'team_confidential', uploadedBy,
+      createdAt: new Date('2026-06-01T00:00:00.000Z'), updatedAt: new Date('2026-06-01T00:00:00.000Z'),
+      linkedEntityType: null, linkedEntityId: null,
+    });
+    m.queueSelect([row('doc-1', 'u-known'), row('doc-2', 'u-gone')]);
+    m.loadUploaderNames.mockResolvedValue({ 'u-known': 'Alice Steward' });
+
+    const payload = await (await GET(new NextRequest('http://localhost/api/documents/repository'))).json();
+
+    expect(m.loadUploaderNames).toHaveBeenCalledWith(TEST_ORG_ID, ['u-known', 'u-gone']);
+    expect(payload.data).toMatchObject([
+      { id: 'doc-1', uploadedBy: 'u-known', uploadedByName: 'Alice Steward' },
+      { id: 'doc-2', uploadedBy: 'u-gone', uploadedByName: null },
+    ]);
+  });
+
+  it('shows a member neither the uploader id nor a name, and does not look the names up', async () => {
+    const { GET } = await loadRoute();
+    m.hasMinRole.mockResolvedValue(false);
+    m.queueSelect([{
+      id: 'doc-1', title: 'Doc One', name: 'Doc One', filename: 'doc1.pdf', documentType: 'policy', privacyLabel: 'team_confidential', uploadedBy: 'u-other',
+      createdAt: new Date('2026-06-01T00:00:00.000Z'), updatedAt: new Date('2026-06-01T00:00:00.000Z'),
+      linkedEntityType: null, linkedEntityId: null,
+    }]);
+
+    const payload = await (await GET(new NextRequest('http://localhost/api/documents/repository'))).json();
+
+    expect(m.loadUploaderNames).not.toHaveBeenCalled();
+    expect(payload.data[0]).not.toHaveProperty('uploadedBy');
+    expect(payload.data[0]).not.toHaveProperty('uploadedByName');
+  });
+
+  it('answers an unknown label filter as a bad request, not as a database error', async () => {
+    const { GET } = await loadRoute();
+
+    const response = await GET(new NextRequest('http://localhost/api/documents/repository?label=not_a_label'));
+
+    expect(response.status).toBe(400);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
+  it('makes the case decision once per case for documents of a page that share it', async () => {
+    const { GET } = await loadRoute();
+    const row = (id: string) => ({
+      id, title: id, name: id, filename: `${id}.pdf`, documentType: 'policy', privacyLabel: 'team_confidential', uploadedBy: TEST_USER_ID,
+      createdAt: new Date('2026-06-01T00:00:00.000Z'), updatedAt: new Date('2026-06-01T00:00:00.000Z'),
+      linkedEntityType: 'grievance', linkedEntityId: '00000000-0000-0000-0000-0000000000aa',
+    });
+    m.queueSelect([row('doc-1'), row('doc-2'), row('doc-3')]);
+
+    const response = await GET(new NextRequest('http://localhost/api/documents/repository'));
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).data).toHaveLength(3);
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledTimes(1);
   });
 
   it('returns forbidden on POST when caller lacks upload role', async () => {
     const { POST } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+    caller.role = 'guest';
 
     const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
       method: 'POST',
@@ -182,7 +261,7 @@ describe('documents/repository route', () => {
     }));
 
     expect(response.status).toBe(403);
-    await expect(response.json()).resolves.toMatchObject({ code: 'FORBIDDEN' });
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
   });
 
   it('returns validation error when POST payload is invalid', async () => {
@@ -218,6 +297,33 @@ describe('documents/repository route', () => {
     await expect(response.json()).resolves.toMatchObject({ code: 'VALIDATION_ERROR', message: 'Blob does not exist' });
   });
 
+  it('answers 409 and creates nothing when the stored file is already attached to another document version', async () => {
+    const { POST } = await loadRoute();
+    m.state.blobInUse = true;
+    const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', blobPath: 'documents/x/doc1.pdf', documentType: 'policy', mimeType: 'application/pdf', privacyLabel: 'team_confidential',
+      }),
+    }));
+    expect(response.status).toBe(409);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('rejects a claimed content hash that is not a SHA-256 digest before touching storage', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', blobPath: 'documents/x/doc1.pdf', contentHash: 'manual:123', documentType: 'policy', mimeType: 'application/pdf', privacyLabel: 'team_confidential',
+      }),
+    }));
+    expect(response.status).toBe(400);
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+  });
+
   it('creates linked grievance documents and emits case audit event', async () => {
     const { POST } = await loadRoute();
 
@@ -240,9 +346,60 @@ describe('documents/repository route', () => {
     expect(response.status).toBe(200);
     expect(payload.success).toBe(true);
     expect(payload.data).toMatchObject({ id: 'doc-1' });
-    expect(m.auditCaseMutation).toHaveBeenCalledWith(expect.objectContaining({
-      caseId: '00000000-0000-0000-0000-0000000000aa',
-      action: 'create',
+    expect(m.persistAtomicAudit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      action: 'document.upload',
+      resourceId: 'doc-1',
+      details: expect.objectContaining({ linkedEntityType: 'grievance', linkedEntityId: '00000000-0000-0000-0000-0000000000aa' }),
     }));
+  });
+
+  it('does not file a document against a case the kernel does not let the principal add evidence to', async () => {
+    const { POST } = await loadRoute();
+    m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false, canUploadDocuments: false });
+    const response = await POST(new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', fileUrl: 'https://blob.example/doc1.pdf', documentType: 'policy', mimeType: 'application/pdf',
+        privacyLabel: 'team_confidential', linkedEntityType: 'grievance', linkedEntityId: '00000000-0000-0000-0000-0000000000aa',
+      }),
+    }));
+    expect(response.status).toBe(404);
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+  });
+
+  const CASE_ID = '00000000-0000-0000-0000-0000000000aa';
+  const filed = (linkedEntityType: string, linkedEntityId: string) =>
+    new NextRequest('http://localhost/api/documents/repository', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Doc One', filename: 'doc1.pdf', fileUrl: 'https://blob.example/doc1.pdf', documentType: 'policy', mimeType: 'application/pdf',
+        privacyLabel: 'team_confidential', linkedEntityType, linkedEntityId,
+      }),
+    });
+
+  it('applies the case decision when another link type names a case of the organization', async () => {
+    const { POST } = await loadRoute();
+    m.getEffectiveCaseAccess.mockResolvedValue({ isPrimaryOwner: false, canViewCase: true, canViewPrivateDocuments: false, canUploadDocuments: false });
+    for (const type of ['member', 'other', 'policy_library', 'template_library', 'collective_agreement']) {
+      m.queueSelect([{ id: CASE_ID }]);
+      const response = await POST(filed(type, CASE_ID));
+      expect(response.status, type).toBe(404);
+    }
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledWith({ organizationId: TEST_ORG_ID, grievanceId: CASE_ID, userId: TEST_USER_ID });
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.resolveStoredBlob).not.toHaveBeenCalled();
+  });
+
+  it('files under another link type when the id is not a case, or when the principal may add evidence to the case', async () => {
+    const { POST } = await loadRoute();
+    m.queueSelect([]);
+    expect((await POST(filed('policy_library', '00000000-0000-0000-0000-0000000000bb'))).status).toBe(200);
+    expect(m.getEffectiveCaseAccess).not.toHaveBeenCalled();
+    m.queueSelect([{ id: CASE_ID }]);
+    expect((await POST(filed('other', CASE_ID))).status).toBe(200);
+    expect(m.getEffectiveCaseAccess).toHaveBeenCalledTimes(1);
   });
 });

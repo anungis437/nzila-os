@@ -111,31 +111,7 @@
       "expiresOn": "2026-11-17"
     },
     {
-      "path": "apps/union-eyes/actions/credits-actions.ts",
-      "owner": "@nzila/union-eyes",
-      "justification": "UE uses auth() — resolveOrgContext migration pending [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
-      "expiresOn": "2026-11-17"
-    },
-    {
       "path": "apps/union-eyes/actions/member-employment-actions.ts",
-      "owner": "@nzila/union-eyes",
-      "justification": "UE uses auth() — resolveOrgContext migration pending [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
-      "expiresOn": "2026-11-17"
-    },
-    {
-      "path": "apps/union-eyes/actions/member-segments-actions.ts",
-      "owner": "@nzila/union-eyes",
-      "justification": "UE uses auth() — resolveOrgContext migration pending [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
-      "expiresOn": "2026-11-17"
-    },
-    {
-      "path": "apps/union-eyes/actions/pending-profiles-actions.ts",
-      "owner": "@nzila/union-eyes",
-      "justification": "UE uses requireAuth() — resolveOrgContext migration pending [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
-      "expiresOn": "2026-11-17"
-    },
-    {
-      "path": "apps/union-eyes/actions/profiles-actions.ts",
       "owner": "@nzila/union-eyes",
       "justification": "UE uses auth() — resolveOrgContext migration pending [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
       "expiresOn": "2026-11-17"
@@ -147,21 +123,9 @@
       "expiresOn": "2026-11-17"
     },
     {
-      "path": "apps/union-eyes/actions/stripe-actions.ts",
-      "owner": "@nzila/union-eyes",
-      "justification": "UE uses auth() — resolveOrgContext migration pending [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
-      "expiresOn": "2026-11-17"
-    },
-    {
       "path": "apps/union-eyes/actions/admin-actions.ts",
       "owner": "@nzila/union-eyes",
       "justification": "UE uses requireAdmin() — resolveOrgContext migration pending [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
-      "expiresOn": "2026-11-17"
-    },
-    {
-      "path": "apps/union-eyes/actions/whop-actions.ts",
-      "owner": "@nzila/union-eyes",
-      "justification": "UE uses auth from api-auth-guard — resolveOrgContext migration pending [bridge: owner-accepted (Aubert Nungisa) 2026-10-04 baseline-gate-closure; path verified present; real fix tracked] [bridge-2: owner-accepted (Aubert Nungisa) 2026-10-18 tool-fabric-pr-941 baseline-gate-closure; time-boxed to 2026-11-17; path verified present; real fix tracked via ledger owner remediation, independent of Tool Fabric]",
       "expiresOn": "2026-11-17"
     },
     {

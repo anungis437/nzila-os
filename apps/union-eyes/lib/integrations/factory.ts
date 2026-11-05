@@ -32,7 +32,6 @@ import { IndustrialAllianceAdapter } from './adapters/insurance/ia-adapter';
 import { SlackAdapter } from './adapters/communication/slack-adapter';
 import { TeamsAdapter } from './adapters/communication/teams-adapter';
 import { LinkedInLearningAdapter } from './adapters/lms/linkedin-learning-adapter';
-import { SharePointAdapter } from './adapters/documents/sharepoint-adapter';
 
 /**
  * Integration Factory
@@ -244,7 +243,13 @@ export class IntegrationFactory {
 
       // Document Management
       case IntegrationProvider.SHAREPOINT:
-        return new SharePointAdapter(organizationId, { ...config?.credentials, ...config?.settings } as Record<string, unknown>);
+        // No adapter exists: the one that did was never registered or approved, its storage tables hold no database authority, and
+        // its Graph sync was never activated, so it was removed rather than left constructible.
+        throw new IntegrationError(
+          'SharePoint integration is not implemented',
+          provider,
+          'NOT_IMPLEMENTED'
+        );
 
       default:
         throw new IntegrationError(

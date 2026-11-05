@@ -3,14 +3,14 @@ import { z } from 'zod'
 // ─── Audit Entry Schema ─────────────────────────────────────────────────────
 
 export const auditEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   timestamp: z.string().datetime(),
   actorId: z.string().min(1),
   orgId: z.string().min(1),
   action: z.string().min(1),
   resource: z.string().min(1),
   resourceId: z.string().optional(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   prevHash: z.string(),
   hash: z.string(),
   // Absent means the historical, top-level-only v1 hash contract.
@@ -30,7 +30,7 @@ export const auditInputSchema = z.object({
   action: z.string().min(1),
   resource: z.string().min(1),
   resourceId: z.string().optional(),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   traceId: z.string().optional(),
   spanId: z.string().optional(),
 })
@@ -40,13 +40,13 @@ export type AuditInput = z.infer<typeof auditInputSchema>
 // ─── Root Hash Snapshot ─────────────────────────────────────────────────────
 
 export const rootHashSnapshotSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   orgId: z.string().min(1),
   timestamp: z.string().datetime(),
   entryCount: z.number().int().nonnegative(),
   rootHash: z.string(),
-  firstEntryId: z.string().uuid(),
-  lastEntryId: z.string().uuid(),
+  firstEntryId: z.guid(),
+  lastEntryId: z.guid(),
 })
 
 export type RootHashSnapshot = z.infer<typeof rootHashSnapshotSchema>
@@ -59,9 +59,9 @@ export const verificationResultSchema = z.object({
   // Optional on historical serialized verification reports; current verifiers always emit both.
   hashCoverage: z.enum(['FULL', 'LEGACY_PARTIAL']).optional(),
   legacyEntriesChecked: z.number().int().nonnegative().optional(),
-  firstEntry: z.string().uuid().optional(),
-  lastEntry: z.string().uuid().optional(),
-  brokenAt: z.string().uuid().optional(),
+  firstEntry: z.guid().optional(),
+  lastEntry: z.guid().optional(),
+  brokenAt: z.guid().optional(),
   error: z.string().optional(),
 })
 

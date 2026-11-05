@@ -5,20 +5,21 @@
  * that every API route backing a page has proper auth gating, and that
  * all CRUD routes reference valid database schema tables.
  *
- * Representative personas (one per tier):
- *   member (10)             — base union member
- *   health_safety_rep (30)  — specialised representative
- *   bargaining_committee(40)— front-line rep
- *   steward (50)            — front-line rep with write access
- *   officer (60)            — senior representative
- *   admin (95)              — local executive
- *   platform_lead (270)     — Nzila Ventures operations
+ * Representative personas (one per tier; levels are those the application enforces, from getRoleLevel in apps/union-eyes/lib/auth/roles.ts):
+ *   member                  — base union member
+ *   health_safety_rep       — specialised representative
+ *   bargaining_committee    — front-line rep
+ *   steward                 — front-line rep with write access
+ *   officer                 — senior representative
+ *   admin                   — local executive
+ *   platform_lead           — Nzila Ventures operations
  *
  * @invariant PERSONA_ACCESS_001
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import { UserRole, getRoleLevel } from '../../apps/union-eyes/lib/auth/roles'
 import { ROOT, walkSync, readContent, relPath, safeJoin, formatViolations, type Violation } from './governance-helpers'
 
 // ── Configuration ───────────────────────────────────────────────────────────
@@ -27,43 +28,15 @@ const UE_DIR = join(ROOT, 'apps', 'union-eyes')
 const DASHBOARD_DIR = join(UE_DIR, 'app', '[locale]', 'dashboard')
 const API_DIR = join(UE_DIR, 'app', 'api')
 
-// ── Role Hierarchy (mirrors api-auth-guard.ts) ──────────────────────────────
+// ── Role Hierarchy (the levels the application enforces) ────────────────────
 
-const ROLE_HIERARCHY: Record<string, number> = {
-  app_owner: 300,
-  coo: 295,
-  cto: 290,
-  platform_lead: 270,
-  customer_success_director: 260,
-  support_manager: 250,
-  data_analytics_manager: 240,
-  billing_manager: 230,
-  integration_manager: 220,
-  compliance_manager: 210,
-  security_manager: 200,
-  support_agent: 180,
-  data_analyst: 170,
-  billing_specialist: 160,
-  integration_specialist: 150,
-  content_manager: 145,
-  training_coordinator: 140,
-  system_admin: 135,
-  clc_executive: 130,
-  clc_staff: 120,
-  fed_executive: 115,
-  fed_staff: 105,
-  national_officer: 100,
-  admin: 95,
-  president: 90,
-  vice_president: 85,
-  secretary_treasurer: 85,
-  chief_steward: 70,
-  officer: 60,
-  steward: 50,
-  bargaining_committee: 40,
-  health_safety_rep: 30,
-  member: 10,
-}
+/**
+ * Not a copy: lib/api-auth-guard.ts (ROLE_HIERARCHY, hasMinRole) and the page guards rank roles by getRoleLevel, so this test reads the same numbers. A hand-written mirror had
+ * drifted (app_owner 300 against 250, system_admin 135 against 200, secretary_treasurer level with vice_president) and judged the matrix by an order the application does not use.
+ */
+const ROLE_HIERARCHY: Record<string, number> = Object.fromEntries(
+  (Object.values(UserRole) as string[]).map((role) => [role, getRoleLevel(role as UserRole)]),
+)
 
 // ── Personas ────────────────────────────────────────────────────────────────
 
@@ -75,13 +48,13 @@ interface Persona {
 }
 
 const PERSONAS: Persona[] = [
-  { name: 'Base Member',       role: 'member',                level: 10,  description: 'Regular union member — dues, receipts, basic access' },
-  { name: 'H&S Rep',           role: 'health_safety_rep',     level: 30,  description: 'Health & safety representative' },
-  { name: 'Bargaining Rep',    role: 'bargaining_committee',  level: 40,  description: 'Bargaining committee member — negotiations access' },
-  { name: 'Steward',           role: 'steward',               level: 50,  description: 'Front-line steward — write access to most resources' },
-  { name: 'Officer',           role: 'officer',               level: 60,  description: 'Senior representative — leadership dashboard, pilot' },
-  { name: 'Local Admin',       role: 'admin',                 level: 95,  description: 'Local union executive — full org-level access' },
-  { name: 'Platform Lead',     role: 'platform_lead',         level: 270, description: 'Nzila Ventures ops — cross-org access' },
+  { name: 'Base Member',       role: 'member',                level: ROLE_HIERARCHY.member,               description: 'Regular union member — dues, receipts, basic access' },
+  { name: 'H&S Rep',           role: 'health_safety_rep',     level: ROLE_HIERARCHY.health_safety_rep,    description: 'Health & safety representative' },
+  { name: 'Bargaining Rep',    role: 'bargaining_committee',  level: ROLE_HIERARCHY.bargaining_committee, description: 'Bargaining committee member — negotiations access' },
+  { name: 'Steward',           role: 'steward',               level: ROLE_HIERARCHY.steward,              description: 'Front-line steward — write access to most resources' },
+  { name: 'Officer',           role: 'officer',               level: ROLE_HIERARCHY.officer,              description: 'Senior representative — leadership dashboard, pilot' },
+  { name: 'Local Admin',       role: 'admin',                 level: ROLE_HIERARCHY.admin,                description: 'Local union executive — full org-level access' },
+  { name: 'Platform Lead',     role: 'platform_lead',         level: ROLE_HIERARCHY.platform_lead,        description: 'Nzila Ventures ops — cross-org access' },
 ]
 
 // ── Page → Minimum Role Mapping ─────────────────────────────────────────────
@@ -110,6 +83,13 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'structure/page.tsx',                          minRole: 'member',               description: 'Structure management' },
   { path: 'leadership/page.tsx',                         minRole: 'member',               description: 'Leadership view (API gates officer)' },
   { path: 'settings/communications/page.tsx',            minRole: 'member',               description: 'Notification preferences' },
+  { path: 'executive/page.tsx',                          minRole: 'officer',              description: 'Executive destination (page requires officer)' },
+  { path: 'help/page.tsx',                               minRole: 'member',               description: 'Help (any authenticated user)' },
+  { path: 'messages/page.tsx',                           minRole: 'member',               description: 'Member messages (participant-scoped by the API)' },
+  { path: 'messages/staff/page.tsx',                     minRole: 'steward',              description: 'Staff conversation workspace (case-policy staff guard; every API call decides again from live membership, designation and assignment)' },
+  { path: 'preferences/page.tsx',                        minRole: 'member',               description: 'Personal preferences' },
+  { path: 'privacy/page.tsx',                            minRole: 'member',               description: 'Personal privacy and information rights' },
+  { path: 'union/page.tsx',                              minRole: 'member',               description: 'Union destination (member experience; API gates by authority)' },
 
   // ── Dues & receipts (any authenticated member) ─────────────────────────
   { path: 'dues/page.tsx',                               minRole: 'member',               description: 'Member dues dashboard' },
@@ -185,12 +165,12 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'admin/rewards/members/page.tsx',              minRole: 'admin',                description: 'Member wallet balances' },
   { path: 'admin/rewards/programs/page.tsx',             minRole: 'admin',                description: 'Recognition program management' },
   { path: 'admin/rewards/reports/page.tsx',              minRole: 'admin',                description: 'Rewards reports & insights' },
-  { path: 'admin/rewards/settings/page.tsx',             minRole: 'admin',                description: 'Program settings configuration' },
   { path: 'admin/rewards/shopify/page.tsx',              minRole: 'admin',                description: 'Shopify integration config' },
 
   // ── Member-facing pages (any authenticated member) ─────────────────────
   { path: 'cases/page.tsx',                              minRole: 'member',               description: 'Cases alias — server redirect to /dashboard/claims (requireUser)' },
   { path: 'documents/page.tsx',                          minRole: 'member',               description: 'Document library root — auth by layout, API routes gate per-op (read→member, write→steward)' },
+  { path: 'documents/portal/page.tsx',                   minRole: 'member',               description: 'Member document portal over the canonical repository — auth by layout; every read, download and upload is authorized per document by the repository routes' },
   { path: 'inbox/page.tsx',                              minRole: 'member',               description: 'Unified signal feed — auth by layout, InboxConsole uses Suspense for useSearchParams' },
   { path: 'priorities/page.tsx',                         minRole: 'member',               description: 'Priorities console — auth by layout, PrioritiesConsole uses Suspense for useSearchParams' },
   { path: 'work/page.tsx',                               minRole: 'member',               description: 'Wave 3 casework alias — auth by layout, renders WorkbenchConsole or InboxConsole by role' },
@@ -209,6 +189,11 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'elections/[id]/page.tsx',                     minRole: 'member',               description: 'Election detail (client-side)' },
   { path: 'financial/page.tsx',                          minRole: 'member',               description: 'Financial overview' },
   { path: 'finance/page.tsx',                            minRole: 'member',               description: 'Finance dashboard (client-side)' },
+  { path: 'finance/remittances/page.tsx',                minRole: 'secretary_treasurer',  description: 'Union remittances: principal financial authority panel (layout-guarded; every API call decides again from the kernel)' },
+  { path: 'claims/workaid/page.tsx',                     minRole: 'member',               description: 'Member WorkAid journey (requireUser; referral, consent and disclosure are decided by the API)' },
+  { path: 'union/reviews/page.tsx',                      minRole: 'member',               description: 'Member review intake (requireMemberPage; a member follows only their own review)' },
+  { path: 'governance/reviews/page.tsx',                 minRole: 'steward',              description: 'Oversight review intake (governance layout floor; the list is a kernel decision on a live monitor mandate)' },
+  { path: 'workbench/workaid/page.tsx',                  minRole: 'steward',              description: 'Staff WorkAid journey (hasMinRole steward; counsel-side activation is separate)' },
   { path: 'finance/allocation/page.tsx',                 minRole: 'member',               description: 'Finance allocation (client-side)' },
   { path: 'finance/billing/page.tsx',                    minRole: 'member',               description: 'Finance billing (client-side)' },
   { path: 'finance/exports/page.tsx',                    minRole: 'member',               description: 'Finance exports (client-side)' },
@@ -220,7 +205,6 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'notifications/page.tsx',                      minRole: 'member',               description: 'Notifications console' },
   { path: 'organizing/page.tsx',                         minRole: 'member',               description: 'Organizing dashboard' },
   { path: 'organizing/[campaignId]/page.tsx',            minRole: 'member',               description: 'Campaign detail' },
-  { path: 'pay/page.tsx',                                minRole: 'member',               description: 'Payment flow (client-side)' },
   { path: 'pension/page.tsx',                            minRole: 'member',               description: 'Pension member console' },
   { path: 'pension/trustee/page.tsx',                    minRole: 'member',               description: 'Pension trustee portal' },
   { path: 'profile/page.tsx',                            minRole: 'member',               description: 'User profile settings' },
@@ -324,17 +308,6 @@ const PAGE_ACCESS_MATRIX: PageRule[] = [
   { path: 'governance-center/page.tsx',                  minRole: 'officer',              description: 'Governance center' },
   { path: 'governance-culture/page.tsx',                 minRole: 'officer',              description: 'Governance culture dashboard' },
   { path: 'governance-recommendations/page.tsx',         minRole: 'officer',              description: 'Governance recommendations workspace' },
-  // ── UE Governance Lifecycle (officer-level governance pages) ──────────────
-  { path: 'governance/lifecycle/page.tsx',               minRole: 'officer',              description: 'UE governance policy lifecycle overview' },
-  { path: 'governance/lifecycle/registry/page.tsx',      minRole: 'officer',              description: 'UE governance policy registry' },
-  { path: 'governance/lifecycle/replay/page.tsx',        minRole: 'officer',              description: 'UE governance policy replay' },
-  { path: 'governance/lifecycle/snapshot/page.tsx',      minRole: 'officer',              description: 'UE governance policy snapshot' },
-  { path: 'governance/lifecycle/timeline/page.tsx',      minRole: 'officer',              description: 'UE governance policy event timeline' },
-  { path: 'governance/lifecycle/approvals/page.tsx',     minRole: 'officer',              description: 'UE governance policy approvals' },
-  { path: 'governance/lifecycle/conflicts/page.tsx',     minRole: 'officer',              description: 'UE governance policy conflicts' },
-  { path: 'governance/lifecycle/deprecation/page.tsx',   minRole: 'officer',              description: 'UE governance policy deprecation' },
-  { path: 'governance/lifecycle/drift/page.tsx',         minRole: 'officer',              description: 'UE governance policy drift detection' },
-  { path: 'governance/lifecycle/lineage/page.tsx',       minRole: 'officer',              description: 'UE governance policy lineage' },
   { path: 'institutional-intelligence/page.tsx',         minRole: 'officer',              description: 'Institutional intelligence dashboard' },
   { path: 'institutional-memory/page.tsx',               minRole: 'officer',              description: 'Institutional memory workspace' },
   { path: 'institutional-operating-intelligence/page.tsx', minRole: 'vice_president',     description: 'Institutional operating intelligence workspace' },
@@ -366,6 +339,8 @@ interface ApiRouteRule {
   expectedMinRole: string
   /** Dashboard page(s) that depend on this route */
   backingPage: string
+  /** A named journey is unavailable; contract asserts explicit 501, never a fake CRUD-backed success. */
+  unavailableUntilImplemented?: boolean
 }
 
 const API_ROUTE_MATRIX: ApiRouteRule[] = [
@@ -373,9 +348,9 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'messaging/campaigns',  expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'communications/campaigns' },
   { apiPath: 'messaging/templates',  expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'communications/templates' },
   { apiPath: 'messaging/preferences',expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'settings/communications' },
-  { apiPath: 'organizing/notes',     expectedAuthPattern: 'crudRoutes',           expectedMinRole: 'member',               backingPage: 'organizing/notes' },
+  { apiPath: 'organizing/notes',     expectedAuthPattern: 'withApi',              expectedMinRole: 'officer',              backingPage: 'organizing/notes', unavailableUntilImplemented: true },
   { apiPath: 'activities',           expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
-  { apiPath: 'dues/calculate',       expectedAuthPattern: 'withRoleAuth',         expectedMinRole: 'steward',              backingPage: 'admin/dues' },
+  { apiPath: 'dues/calculate',       expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin/dues (own record; any other member needs the named financial role)' },
   { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
 ]
 
@@ -575,6 +550,14 @@ describe('PERSONA_ACCESS_001 — API routes backing dashboard have auth and DB s
       })
 
       it(`API ${rule.apiPath} — imports from DB schema (DB-connected)`, () => {
+        if (rule.unavailableUntilImplemented) {
+          // An unavailable business journey must not masquerade as a working database-backed API.
+          // Preserve its explicit 501 until a real notes model, authority and storage are implemented.
+          expect(content).toContain('ApiError.notImplemented(')
+          expect(content).toMatch(/required:\s*true/)
+          expect(content).not.toContain('crudRoutes(')
+          return
+        }
         const hasSchemaImport =
           content.includes('@/db/schema') ||
           content.includes('@/db/db') ||

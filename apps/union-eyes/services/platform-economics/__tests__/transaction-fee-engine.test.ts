@@ -1,33 +1,57 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { PgDialect } from 'drizzle-orm/pg-core';
+import type { SQL } from 'drizzle-orm';
 
 const h = vi.hoisted(() => {
   const queue: unknown[] = [];
-  const makeChain = () => {
+  // The values of every UPDATE ... SET and the rows INSERTed into fee_adjustments, in the order the engine wrote them.
+  const updates: Array<Record<string, unknown>> = [];
+  const adjustmentRows: Array<Record<string, unknown>> = [];
+  // What the database reports for the INSERT into fee_adjustments, which has no RETURNING, and how it answers the write-owned helper's
+  // normalisation select (assigned below, where the SQL dialect is available).
+  const adjustmentInsert = { count: 1 };
+  const database = { normalize: (_shape: Record<string, unknown>): Record<string, unknown> => ({}) };
+  const isFeeAdjustments = (table: unknown) => (table as Record<symbol, unknown> | undefined)?.[Symbol.for('drizzle:Name')] === 'fee_adjustments';
+  const makeChain = (hooks: { answer?: () => unknown; set?: (values: unknown) => void; values?: (values: unknown) => void } = {}) => {
     const chain: Record<string, unknown> = {};
     for (const m of ['select', 'from', 'where', 'limit', 'orderBy', 'insert', 'update', 'set', 'values', 'returning', 'delete']) {
       chain[m] = () => chain;
     }
+    chain.set = (values: unknown) => {
+      hooks.set?.(values);
+      return chain;
+    };
+    chain.values = (values: unknown) => {
+      hooks.values?.(values);
+      return chain;
+    };
     chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {
-      const v = queue.length ? queue.shift() : [];
+      const v = hooks.answer ? hooks.answer() : queue.length ? queue.shift() : [];
       return (v instanceof Error ? Promise.reject(v) : Promise.resolve(v)).then(res, rej);
     };
     return chain;
   };
-  const tx = {
-    select: () => makeChain(),
-    insert: () => makeChain(),
-    update: () => makeChain(),
+  const handle = {
+    select: (shape?: Record<string, unknown>) =>
+      shape && 'createdAtValue' in shape ? makeChain({ answer: () => [database.normalize(shape)] }) : makeChain(),
+    insert: (table: unknown) =>
+      isFeeAdjustments(table)
+        ? makeChain({
+            answer: () => Object.assign([], { count: adjustmentInsert.count }),
+            values: (values) => adjustmentRows.push(values as Record<string, unknown>),
+          })
+        : makeChain(),
+    update: () => makeChain({ set: (values) => updates.push(values as Record<string, unknown>) }),
+    delete: () => makeChain(),
   };
   const db = {
-    select: () => makeChain(),
-    insert: () => makeChain(),
-    update: () => makeChain(),
-    delete: () => makeChain(),
-    transaction: (fn: (t: typeof tx) => Promise<unknown>) => fn(tx),
+    ...handle,
+    transaction: (fn: (t: typeof handle) => Promise<unknown>) => fn(handle),
   };
   const auditLog = vi.fn();
-  const appendLedgerEntry = vi.fn(async () => 'ledger-1');
-  return { queue, db, auditLog, appendLedgerEntry };
+  const persistAtomicAudit = vi.fn(async (_tx: unknown, _entry: Record<string, unknown>) => undefined);
+  const appendLedgerEntry = vi.fn(async (_entry: Record<string, unknown>, _tx?: unknown) => 'ledger-1');
+  return { queue, updates, adjustmentRows, adjustmentInsert, database, db, auditLog, persistAtomicAudit, appendLedgerEntry };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
@@ -57,6 +81,7 @@ vi.mock('@/lib/audit-logger', () => ({
   AuditSeverity: { HIGH: 'high' },
 }));
 vi.mock('../ledger-service', () => ({ appendLedgerEntry: h.appendLedgerEntry }));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('uuid', () => ({ v4: () => '00000000-1111-2222-3333-444444444444' }));
 
 import {
@@ -72,9 +97,25 @@ import {
 
 const pushSel = (...items: unknown[]) => h.queue.push(...items);
 
+// PostgreSQL answers the helper's normalisation select with one row: each bound parameter (cast to its column's type, which is not modelled)
+// and the transaction's timestamp. The row therefore carries exactly what the engine asked to be recorded.
+const dialect = new PgDialect();
+h.database.normalize = (shape) =>
+  Object.fromEntries(
+    Object.entries(shape).map(([column, expression]) => {
+      const { params } = dialect.sqlToQuery(expression as SQL);
+      if (params.length > 0) return [column, params[0]];
+      return [column, column === 'createdAtValue' ? '2025-01-15 12:00:00+00' : new Date('2025-01-15T12:00:00Z')];
+    }),
+  );
+
 beforeEach(() => {
   h.queue.length = 0;
+  h.updates.length = 0;
+  h.adjustmentRows.length = 0;
+  h.adjustmentInsert.count = 1;
   h.auditLog.mockReset();
+  h.persistAtomicAudit.mockClear();
   h.appendLedgerEntry.mockClear();
 });
 
@@ -173,13 +214,21 @@ describe('platform-economics/transaction-fee-engine', () => {
       expect(h.appendLedgerEntry).not.toHaveBeenCalled();
     });
 
-    it('captures a new fee event and bridges to the ledger', async () => {
+    it('captures a new fee event and writes its ledger entry and its audit record in the transaction that wrote the event', async () => {
       pushSel([]); // no existing
       pushSel([{ id: 'evt-1' }]); // insert returning
       const result = await captureTransactionFee(baseInput);
       expect(result.id).toBe('evt-1');
       expect(h.appendLedgerEntry).toHaveBeenCalledTimes(1);
-      expect(h.auditLog).toHaveBeenCalledTimes(1);
+      expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
+      expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ organizationId: 'o1', action: 'fee_captured', resourceType: 'transaction_fee_event', resourceId: 'evt-1' }),
+      );
+      // The ledger entry and the audit record are handed the transaction the event was written in, so none of the three commits alone.
+      expect(h.appendLedgerEntry.mock.calls[0][1]).toBeDefined();
+      expect(h.appendLedgerEntry.mock.calls[0][1]).toBe(h.persistAtomicAudit.mock.calls[0][0]);
+      expect(h.auditLog).not.toHaveBeenCalled();
     });
   });
 
@@ -192,18 +241,88 @@ describe('platform-economics/transaction-fee-engine', () => {
     it('reverses a full fee', async () => {
       pushSel([{ id: 'evt-1', organizationId: 'o1', grossAmountCad: '100.00', feeAmountCad: '2.00', billingPeriodId: 'bp1' }]); // select
       pushSel([{ id: 'evt-1', status: 'reversed' }]); // update returning
-      pushSel([{ id: 'adj-1' }]); // adjustment returning
+      // The adjustment insert (no RETURNING) answers with the row it wrote and reports exactly one row.
       const result = await reverseTransactionFee('evt-1', 'refund-1', 'reason', 'approver');
-      expect(result.adjustment.id).toBe('adj-1');
+      // The whole fee is reversed, as a negative adjustment, and the event is marked reversed.
+      expect(result.event.status).toBe('reversed');
+      expect(h.updates).toEqual([{ status: 'reversed' }]);
+      expect(result.adjustment).toMatchObject({
+        feeEventId: 'evt-1',
+        organizationId: 'o1',
+        adjustmentType: 'reversal',
+        amountCad: '-2.00',
+        reason: 'reason',
+        sourceRefundId: 'refund-1',
+        approvedBy: 'approver',
+      });
+      expect(h.adjustmentRows).toEqual([expect.objectContaining({ id: result.adjustment.id, adjustmentType: 'reversal', amountCad: '-2.00' })]);
+      // The contra entry in the ledger carries the same amount, and it and the audit record are written in the transaction that wrote the adjustment.
       expect(h.appendLedgerEntry).toHaveBeenCalledTimes(1);
+      expect(h.appendLedgerEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          organizationId: 'o1',
+          billingPeriodId: 'bp1',
+          costType: 'transaction_fee',
+          eventType: 'reversal',
+          sourceId: 'evt-1',
+          unitPriceCad: '-2.00',
+          amountCad: '-2.00',
+          metadata: expect.objectContaining({ originalFeeAmountCad: '2.00', reversalAmountCad: '2.00', isPartial: false }),
+        }),
+        expect.anything(),
+      );
+      expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
+      expect(h.persistAtomicAudit).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          organizationId: 'o1',
+          userId: 'approver',
+          action: 'fee_reversed',
+          resourceId: 'evt-1',
+          details: expect.objectContaining({ reversalAmount: '-2.00', isPartial: false, sourceRefundId: 'refund-1', reason: 'reason' }),
+        }),
+      );
+      expect(h.appendLedgerEntry.mock.calls[0][1]).toBe(h.persistAtomicAudit.mock.calls[0][0]);
+      expect(h.auditLog).not.toHaveBeenCalled();
     });
 
     it('reverses a partial fee proportionally', async () => {
       pushSel([{ id: 'evt-1', organizationId: 'o1', grossAmountCad: '100.00', feeAmountCad: '2.00', billingPeriodId: null }]); // select
       pushSel([{ id: 'evt-1', status: 'captured' }]); // update returning
-      pushSel([{ id: 'adj-1' }]); // adjustment returning
       const result = await reverseTransactionFee('evt-1', 'refund-1', 'partial', undefined, '50.00');
-      expect(result.adjustment.id).toBe('adj-1');
+      // A refund of half the gross reverses half the fee, and the event stays captured for further refunds.
+      expect(result.adjustment).toMatchObject({ adjustmentType: 'partial_reversal', amountCad: '-1.00', reason: 'partial', approvedBy: null, approvedAt: null });
+      expect(h.updates).toEqual([{ status: 'captured' }]);
+      expect(h.adjustmentRows).toEqual([expect.objectContaining({ id: result.adjustment.id, adjustmentType: 'partial_reversal', amountCad: '-1.00' })]);
+      expect(h.appendLedgerEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          amountCad: '-1.00',
+          metadata: expect.objectContaining({ originalFeeAmountCad: '2.00', reversalAmountCad: '1.00', isPartial: true }),
+        }),
+        expect.anything(),
+      );
+    });
+
+    it.each([
+      ['25.00', '100.00', '2.00', '-0.50'],
+      ['33.33', '100.00', '3.00', '-1.00'],
+      ['10.00', '40.00', '1.60', '-0.40'],
+    ])('reverses a refund of %s on a %s sale with a %s fee as %s', async (refund, gross, fee, expected) => {
+      pushSel([{ id: 'evt-1', organizationId: 'o1', grossAmountCad: gross, feeAmountCad: fee, billingPeriodId: 'bp1' }]);
+      pushSel([{ id: 'evt-1', status: 'captured' }]);
+      const result = await reverseTransactionFee('evt-1', 'refund-1', 'partial', undefined, refund);
+      expect(result.adjustment.amountCad).toBe(expected);
+      expect(h.appendLedgerEntry).toHaveBeenCalledWith(expect.objectContaining({ amountCad: expected }), expect.anything());
+    });
+
+    it('records no reversal when the adjustment insert does not report exactly one row', async () => {
+      h.adjustmentInsert.count = 0;
+      pushSel([{ id: 'evt-1', organizationId: 'o1', grossAmountCad: '100.00', feeAmountCad: '2.00', billingPeriodId: 'bp1' }]);
+      pushSel([{ id: 'evt-1', status: 'reversed' }]);
+      await expect(reverseTransactionFee('evt-1', 'refund-1', 'reason', 'approver')).rejects.toThrow('FEE_ADJUSTMENT_EXACT_INSERT_COUNT_REQUIRED');
+      // Nothing follows an adjustment that was not recorded: no contra entry in the ledger and no audit record of a reversal.
+      expect(h.appendLedgerEntry).not.toHaveBeenCalled();
+      expect(h.persistAtomicAudit).not.toHaveBeenCalled();
     });
   });
 

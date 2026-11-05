@@ -8,8 +8,16 @@ const mocks = vi.hoisted(() => {
     mockWarn: vi.fn(),
     mockError: vi.fn(),
     mockDebug: vi.fn(),
+    suppressed: vi.fn(),
   };
 });
+
+// Disclosed addition (F06 A2): the sending function consults the platform-wide address suppression list. The list is a seam here; its own
+// behaviour is proven in lib/communications/__tests__/address-suppression.test.ts and the native database test.
+vi.mock('@/lib/communications/address-suppression', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/communications/address-suppression')>()),
+  suppressedAddressHashes: mocks.suppressed,
+}));
 
 vi.mock('resend', () => ({
   Resend: class {
@@ -29,7 +37,35 @@ vi.mock('@/lib/logger', () => ({
 describe('email-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.suppressed.mockResolvedValue(new Set());
     process.env.RESEND_API_KEY = 'test-key-123';
+  });
+
+  describe('platform-wide address suppression', () => {
+    const hash = async (a: string) => (await import('@/lib/communications/address-suppression')).addressSha256(a);
+    const send = async (to: { email: string; name: string }[]) => (await import('../email-service')).sendEmail({ to, subject: 'S', html: '<p>x</p>' });
+
+    it('does not send to an address that is suppressed, and says so', async () => {
+      mocks.suppressed.mockResolvedValue(new Set([await hash('Complained@Example.com')]));
+      const result = await send([{ email: 'complained@example.com', name: 'C' }]);
+      expect(result).toMatchObject({ success: false, code: 'ADDRESS_SUPPRESSED' });
+      expect(mocks.mockSend).not.toHaveBeenCalled();
+    });
+
+    it('sends to the recipients that are not suppressed and drops only the suppressed one', async () => {
+      mocks.mockSend.mockResolvedValue({ data: { id: 'm-9' }, error: null });
+      mocks.suppressed.mockResolvedValue(new Set([await hash('bad@example.com')]));
+      const result = await send([{ email: 'bad@example.com', name: 'Bad' }, { email: 'good@example.com', name: 'Good' }]);
+      expect(result.success).toBe(true);
+      expect(mocks.mockSend.mock.calls[0][0].to).toEqual(['Good <good@example.com>']);
+    });
+
+    it('refuses to send, rather than sending unchecked, when the suppression list cannot be read', async () => {
+      mocks.suppressed.mockRejectedValue(new Error('database unavailable'));
+      const result = await send([{ email: 'a@example.com', name: 'A' }]);
+      expect(result).toMatchObject({ success: false, code: 'SUPPRESSION_CHECK_UNAVAILABLE' });
+      expect(mocks.mockSend).not.toHaveBeenCalled();
+    });
   });
 
   it('sendEmail returns success with messageId', async () => {

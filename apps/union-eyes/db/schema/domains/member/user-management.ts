@@ -51,22 +51,22 @@ export const users = userManagementSchema.table("users", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (table) => ({
   checkEmail: check("valid_email", 
-    sql`${table.email} ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'`),
+    sql`${table.email} ~* '^[^@[:space:]]+@[^@[:space:]]+\\.[^@[:space:]]+$'`),
   checkPhone: check("valid_phone", 
     sql`${table.phone} IS NULL OR ${table.phone} ~ '^\\+?[1-9]\\d{1,14}$'`),
 }));
 
 // Organization users table - links users to organizations with roles
-// NOTE: userId uses VARCHAR to support Clerk user IDs (format: "user_xxxxx")
+// NOTE: userId uses VARCHAR to support external auth provider user IDs (format: "user_xxxxx")
 export const organizationUsers = userManagementSchema.table("organization_users", {
   organizationUserId: uuid("organization_user_id").primaryKey().defaultRandom(),
   organizationId: uuid("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  userId: varchar("user_id", { length: 255 }).notNull(), // Changed from uuid to support Clerk IDs
+  userId: varchar("user_id", { length: 255 }).notNull(), // Changed from uuid to support external auth provider IDs
   role: varchar("role", { length: 50 }).notNull().default("member"),
   permissions: jsonb("permissions").default(sql`'[]'::jsonb`),
   isActive: boolean("is_active").default(true),
   isPrimary: boolean("is_primary").default(false), // Indicates if this is the user's primary organization
-  invitedBy: varchar("invited_by", { length: 255 }).references(() => users.userId),
+  invitedBy: varchar("invited_by", { length: 255 }),
   invitedAt: timestamp("invited_at", { withTimezone: true }),
   joinedAt: timestamp("joined_at", { withTimezone: true }),
   lastAccessAt: timestamp("last_access_at", { withTimezone: true }),
@@ -79,7 +79,7 @@ export { userSessions };
 // Password reset tokens - secure token-based password recovery
 export const passwordResetTokens = userManagementSchema.table("password_reset_tokens", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.userId, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
   tokenHash: text("token_hash").notNull().unique(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   usedAt: timestamp("used_at", { withTimezone: true }),
@@ -92,7 +92,7 @@ export const passwordResetTokens = userManagementSchema.table("password_reset_to
 // Auth audit log - tracks authentication events for security monitoring
 export const authAuditLog = userManagementSchema.table("auth_audit_log", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).references(() => users.userId, { onDelete: "set null" }),
+  userId: varchar("user_id", { length: 255 }),
   eventType: varchar("event_type", { length: 50 }).notNull(),
   ipAddress: varchar("ip_address", { length: 45 }),
   userAgent: text("user_agent"),

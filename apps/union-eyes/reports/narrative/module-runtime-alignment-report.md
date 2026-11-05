@@ -99,7 +99,7 @@ Companion report: `phase4-alignment-report.md` (marketing surfaces — 87 files,
 
 ### mobile/bottom-nav
 
-- Path: [apps/union-eyes/components/mobile/BottomNav.tsx](../../components/mobile/BottomNav.tsx#L12-L40)
+- Path: `apps/union-eyes/components/mobile/BottomNav.tsx` lines 12-40 (removed in a0404b79b, 2026-11-04)
 - Maturity: **35 / 100** ← **second-largest drift surface, plus structural bug**
 - Posture: hard-coded labels not driven by `getNavigationForExperience()`; uses insurance-SaaS vocabulary ("Claims") and the hrefs are missing the `/dashboard` prefix (likely already routing through middleware fallback).
 - Scores by rule:

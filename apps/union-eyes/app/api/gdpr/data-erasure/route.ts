@@ -11,6 +11,7 @@ const { GET, POST } = crudRoutes({
   pk: 'id',
   tags: ["Compliance"],
   orgScoped: true,
+  unscopedByDesign: 'data subject requests are subject-owned and refused without an owner column by CRUD governance; no organization discriminator',
   readRole: 'member',
   writeRole: 'steward',
 });

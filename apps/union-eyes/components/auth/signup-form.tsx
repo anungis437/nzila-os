@@ -1,11 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { defaultLocale, locales } from '@/i18n/config';
+import { localeOfPath, postJson, UNEXPECTED_MESSAGE } from './auth-client';
 
 export function SignupForm() {
   const router = useRouter();
+  const pathname = usePathname();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -19,22 +22,17 @@ export function SignupForm() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName, lastName }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Signup failed');
+      const answer = await postJson('/api/auth/signup', { email, password, firstName, lastName }, 'Signup failed');
+      if (!answer.ok) {
+        setError(answer.message);
         return;
       }
-
-      router.push('/en-CA/dashboard');
-    } catch {
-      setError('Something went wrong. Please try again.');
+      // The route answers 201 { user, message } and signs the new account in; an answer that names no user is not an account.
+      if (typeof answer.data.user !== 'object' || answer.data.user === null) {
+        setError(UNEXPECTED_MESSAGE);
+        return;
+      }
+      router.push(`/${localeOfPath(pathname, locales, defaultLocale)}/dashboard`);
     } finally {
       setLoading(false);
     }

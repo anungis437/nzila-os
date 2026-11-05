@@ -5,9 +5,13 @@
  * PATCH /api/dues/remittances/:id — Update remittance status/notes/reconciliation
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
-import { db } from '@/db';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { employerRemittances } from '@/db/schema/dues-finance-schema';
 import { eq, and } from 'drizzle-orm';
+import { ErrorCode } from '@/lib/api/errors';
 import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
 
@@ -15,18 +19,21 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
-    auth: { minRole: 'member' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     openapi: { tags: ['Dues'], summary: 'Get an employer remittance by ID' },
   },
-  async ({ organizationId, params }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ organizationId, userId, params }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = await params;
 
-    const [remittance] = await db
-      .select()
-      .from(employerRemittances)
-      .where(and(eq(employerRemittances.id, id), eq(employerRemittances.organizationId, organizationId)));
+    const [remittance] = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', resourceId: id });
+      return tx
+        .select()
+        .from(employerRemittances)
+        .where(and(eq(employerRemittances.id, id), eq(employerRemittances.organizationId, organizationId)));
+    });
 
     if (!remittance) throw ApiError.notFound('Remittance not found');
 
@@ -34,44 +41,53 @@ export const GET = withApi(
   },
 );
 
-const patchSchema = z.object({
-  processingStatus: z.enum(['pending', 'processing', 'completed', 'failed', 'requires_review']).optional(),
-  notes: z.string().optional(),
-  isReconciled: z.boolean().optional(),
-  reconciledAt: z.coerce.date().optional(),
-  reconciledBy: z.string().optional(),
-  expectedAmount: z.string().optional(),
-  variance: z.string().optional(),
-  recordsTotal: z.number().int().optional(),
-  recordsProcessed: z.number().int().optional(),
-  recordsMatched: z.number().int().optional(),
-  recordsException: z.number().int().optional(),
-  metadata: z.record(z.unknown()).optional(),
-});
+// Reconciliation, totals and result counters are outputs of a processing engine, never caller input.
+// Unknown keys (isReconciled, reconciledAt/By, variance, expectedAmount, records*) are rejected.
+const patchSchema = z
+  .object({
+    processingStatus: z.enum(['requires_review', 'failed']).optional(),
+    notes: z.string().optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strict();
 
 export const PATCH = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     openapi: { tags: ['Dues'], summary: 'Update an employer remittance' },
   },
   async ({ organizationId, userId, params, request }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const { id } = await params;
 
     const body = patchSchema.parse(await request.json());
 
-    const [existing] = await db
-      .select()
-      .from(employerRemittances)
-      .where(and(eq(employerRemittances.id, id), eq(employerRemittances.organizationId, organizationId)));
-
-    if (!existing) throw ApiError.notFound('Remittance not found');
-
-    const [updated] = await db
-      .update(employerRemittances)
-      .set({ ...body, updatedAt: new Date(), lastModifiedBy: userId ?? undefined })
-      .where(eq(employerRemittances.id, id))
-      .returning();
+    const updated = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', resourceId: id });
+      const [existing] = await tx
+        .select({ processedBy: employerRemittances.processedBy, reconciledBy: employerRemittances.reconciledBy })
+        .from(employerRemittances)
+        .where(and(eq(employerRemittances.id, id), eq(employerRemittances.organizationId, organizationId)));
+      if (!existing) throw ApiError.notFound('Remittance not found');
+      if (existing.processedBy === userId || existing.reconciledBy === userId) {
+        throw new ApiError(ErrorCode.FORBIDDEN, 'The caller already participated in this remittance.', { code: 'SEGREGATION_OF_DUTIES' });
+      }
+      const [row] = await tx
+        .update(employerRemittances)
+        .set({ ...body, updatedAt: new Date(), lastModifiedBy: userId ?? undefined })
+        .where(and(eq(employerRemittances.id, id), eq(employerRemittances.organizationId, organizationId)))
+        .returning();
+      if (!row) throw ApiError.notFound('Remittance not found');
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId: userId!,
+        action: 'dues.remittance.update',
+        resourceType: 'employer_remittances',
+        resourceId: id,
+        details: { fields: Object.keys(body) },
+      });
+      return row;
+    });
 
     logger.info('Employer remittance updated', { remittanceId: id, organizationId });
 

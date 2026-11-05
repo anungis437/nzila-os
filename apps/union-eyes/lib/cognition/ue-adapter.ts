@@ -17,7 +17,7 @@ import {
   type CaseRiskInput,
   type StewardWorkloadInput,
 } from '@nzila/ue-cognition';
-import { db } from '@/db/db';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
 import { stewards } from '@/db/schema/domains/member/stewards';
@@ -88,12 +88,21 @@ function mapEventToMemory(
 /**
  * Score case risk for a single grievance. Pulls events from
  * `grievance_events` and assigned-steward workload ratio when available.
+ * Every statement runs in the organization's own transaction: outside one the handle has no organization and row-level security shows nothing.
  */
-export async function scoreGrievanceRisk(
+export function scoreGrievanceRisk(
   organizationId: string,
   grievanceId: string,
 ): Promise<ReturnType<typeof computeCaseRisk> | null> {
-  const [g] = await db
+  return withRLSContext({ organizationId }, (tx) => scoreGrievanceRiskIn(tx, organizationId, grievanceId));
+}
+
+async function scoreGrievanceRiskIn(
+  tx: RLSTx,
+  organizationId: string,
+  grievanceId: string,
+): Promise<ReturnType<typeof computeCaseRisk> | null> {
+  const [g] = await tx
     .select()
     .from(grievances)
     .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)))
@@ -102,7 +111,7 @@ export async function scoreGrievanceRisk(
 
   const subject = caseSubject(organizationId, g.id);
 
-  const evs = await db
+  const evs = await tx
     .select({ id: grievanceEvents.id, eventType: grievanceEvents.eventType, createdAt: grievanceEvents.createdAt })
     .from(grievanceEvents)
     .where(eq(grievanceEvents.grievanceId, g.id))
@@ -134,7 +143,7 @@ export async function scoreGrievanceRisk(
   // Steward workload ratio (best-effort).
   let workloadRatio: number | null = null;
   if (g.unionRepId) {
-    const [sw] = await db
+    const [sw] = await tx
       .select({ current: stewards.currentCaseload, max: stewards.maxCaseload })
       .from(stewards)
       .where(and(eq(stewards.userId, g.unionRepId), eq(stewards.orgId, organizationId)))
@@ -163,57 +172,61 @@ export async function scoreGrievanceRisk(
 /**
  * Compute workload snapshots for every active steward in an org.
  */
-export async function scoreStewardWorkloads(organizationId: string) {
-  const rows = await db
-    .select({
-      stewardId: stewards.id,
-      userId: stewards.userId,
-      current: stewards.currentCaseload,
-      max: stewards.maxCaseload,
-    })
-    .from(stewards)
-    .where(and(eq(stewards.orgId, organizationId), eq(stewards.active, true)));
+export function scoreStewardWorkloads(organizationId: string) {
+  return withRLSContext({ organizationId }, async (tx) => {
+    const rows = await tx
+      .select({
+        stewardId: stewards.id,
+        userId: stewards.userId,
+        current: stewards.currentCaseload,
+        max: stewards.maxCaseload,
+      })
+      .from(stewards)
+      .where(and(eq(stewards.orgId, organizationId), eq(stewards.active, true)));
 
-  const out: ReturnType<typeof computeStewardWorkload>[] = [];
-  for (const r of rows) {
-    // Pull assigned grievance ids via stewardAssignments.
-    const assigned = await db
-      .select({ grievanceId: stewardAssignments.grievanceId })
-      .from(stewardAssignments)
-      .where(eq(stewardAssignments.stewardId, r.stewardId));
-    const input: StewardWorkloadInput = {
-      stewardId: r.stewardId,
-      subject: stewardSubject(organizationId, r.stewardId),
-      currentCaseload: r.current ?? 0,
-      maxCaseload: r.max ?? 1,
-      assignedCaseIds: assigned.map((a) => a.grievanceId).filter((id): id is string => !!id),
-      avgResponseDays: null,
-    };
-    out.push(computeStewardWorkload(input));
-  }
-  return out;
+    const out: ReturnType<typeof computeStewardWorkload>[] = [];
+    for (const r of rows) {
+      // Pull assigned grievance ids via stewardAssignments.
+      const assigned = await tx
+        .select({ grievanceId: stewardAssignments.grievanceId })
+        .from(stewardAssignments)
+        .where(and(eq(stewardAssignments.organizationId, organizationId), eq(stewardAssignments.stewardId, r.stewardId)));
+      const input: StewardWorkloadInput = {
+        stewardId: r.stewardId,
+        subject: stewardSubject(organizationId, r.stewardId),
+        currentCaseload: r.current ?? 0,
+        maxCaseload: r.max ?? 1,
+        assignedCaseIds: assigned.map((a) => a.grievanceId).filter((id): id is string => !!id),
+        avgResponseDays: null,
+      };
+      out.push(computeStewardWorkload(input));
+    }
+    return out;
+  });
 }
 
 /**
  * Score every grievance modified in the last `windowDays` for the org.
  * Used by the executive summary + KPI snapshot routes.
  */
-export async function scoreOrgRecentCases(organizationId: string, windowDays: number) {
+export function scoreOrgRecentCases(organizationId: string, windowDays: number) {
   const since = new Date(Date.now() - windowDays * 86_400_000);
-  const rows = await db
-    .select({ id: grievances.id })
-    .from(grievances)
-    .where(and(
-      eq(grievances.organizationId, organizationId),
-      gte(grievances.updatedAt, since),
-    ))
-    .limit(200);
-  const out: Array<NonNullable<Awaited<ReturnType<typeof scoreGrievanceRisk>>>> = [];
-  for (const r of rows) {
-    const snap = await scoreGrievanceRisk(organizationId, r.id);
-    if (snap) out.push(snap);
-  }
-  return out;
+  return withRLSContext({ organizationId }, async (tx) => {
+    const rows = await tx
+      .select({ id: grievances.id })
+      .from(grievances)
+      .where(and(
+        eq(grievances.organizationId, organizationId),
+        gte(grievances.updatedAt, since),
+      ))
+      .limit(200);
+    const out: Array<NonNullable<Awaited<ReturnType<typeof scoreGrievanceRiskIn>>>> = [];
+    for (const r of rows) {
+      const snap = await scoreGrievanceRiskIn(tx, organizationId, r.id);
+      if (snap) out.push(snap);
+    }
+    return out;
+  });
 }
 
 void sql

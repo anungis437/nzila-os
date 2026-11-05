@@ -109,7 +109,7 @@ export const mobileNotifications = pgTable('mobile_notifications', {
   sentAt: timestamp('sent_at'),
   deliveredAt: timestamp('delivered_at'),
   failedAt: timestamp('failed_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [
   index('idx_mobile_notifications_device_id').on(table.deviceId),
   index('idx_mobile_notifications_user_id').on(table.userId),
@@ -149,7 +149,7 @@ export const mobileSyncQueue = pgTable('mobile_sync_queue', {
   maxRetries: integer('max_retries').default(3),
   
   // Timestamps
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   processedAt: timestamp('processed_at'),
 }, (table) => [
   index('idx_mobile_sync_queue_device_id').on(table.deviceId),
@@ -249,8 +249,8 @@ export const mobileAppConfig = pgTable('mobile_app_config', {
   forceUpdateMessage: text('force_update_message'),
   
   // Timestamps
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 // Type exports

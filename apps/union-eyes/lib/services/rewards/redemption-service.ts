@@ -1,15 +1,23 @@
 /**
  * Redemption Service
- * Handles member redemption lifecycle
+ * Handles member redemption lifecycle. Every state change commits with its audit record in one transaction.
  */
 
 import { db } from '@/db';
+import type { RLSTx } from '@/lib/db/with-rls-context';
 import {
   rewardRedemptions,
   type RewardRedemption,
 } from '@/db/schema';
-import { eq, and, desc, count } from 'drizzle-orm';
+import { eq, and, desc, count, inArray, sql } from 'drizzle-orm';
 import { applyLedgerEntry } from './wallet-service';
+import { auditRewards, rewardsActor } from './audit';
+import { UserFacingError } from '@/lib/errors/user-facing-error';
+import { creditsToReturn } from './shopify-redemption-rules';
+
+/** Adds keys to the stored provider payload without discarding what is already there (the checkout URL, the order, earlier refunds). */
+const mergedPayload = (patch: Record<string, unknown>) =>
+  sql`coalesce(${rewardRedemptions.providerPayloadJson}, '{}'::jsonb) || ${JSON.stringify(patch)}::jsonb`;
 
 export interface InitiateRedemptionOptions {
   orgId: string;
@@ -56,6 +64,15 @@ export async function initiateRedemption(
       })
       .returning();
 
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId,
+      action: 'rewards.redemption.initiate',
+      resourceType: 'reward_redemptions',
+      resourceId: redemption.id,
+      details: { programId, provider, creditsSpent: creditsToSpend },
+    });
+
     return redemption;
   });
 }
@@ -68,28 +85,41 @@ export async function updateRedemptionCheckout(
   redemptionId: string,
   orgId: string,
   checkoutId: string,
-  checkoutUrl: string
+  checkoutUrl: string,
+  actorUserId?: string
 ): Promise<RewardRedemption> {
-  const [updated] = await db
-    .update(rewardRedemptions)
-    .set({
-      providerCheckoutId: checkoutId,
-      status: 'pending_payment',
-      providerPayloadJson: {
-        checkoutId,
-        checkoutUrl,
-      },
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(rewardRedemptions.id, redemptionId),
-        eq(rewardRedemptions.orgId, orgId)
+  return await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(rewardRedemptions)
+      .set({
+        providerCheckoutId: checkoutId,
+        status: 'pending_payment',
+        providerPayloadJson: {
+          checkoutId,
+          checkoutUrl,
+        },
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(rewardRedemptions.id, redemptionId),
+          eq(rewardRedemptions.orgId, orgId),
+          eq(rewardRedemptions.status, 'initiated')
+        )
       )
-    )
-    .returning();
+      .returning();
+    if (!updated) throw new UserFacingError('Redemption not found or not awaiting checkout');
 
-  return updated;
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actorUserId),
+      action: 'rewards.redemption.checkout',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: { checkoutId },
+    });
+    return updated;
+  });
 }
 
 /**
@@ -100,25 +130,38 @@ export async function markRedemptionOrdered(
   redemptionId: string,
   orgId: string,
   orderId: string,
-  orderPayload: Record<string, unknown>
+  orderPayload: Record<string, unknown>,
+  actorUserId?: string
 ): Promise<RewardRedemption> {
-  const [updated] = await db
-    .update(rewardRedemptions)
-    .set({
-      status: 'ordered',
-      providerOrderId: orderId,
-      providerPayloadJson: orderPayload,
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(rewardRedemptions.id, redemptionId),
-        eq(rewardRedemptions.orgId, orgId)
+  return await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(rewardRedemptions)
+      .set({
+        status: 'ordered',
+        providerOrderId: orderId,
+        providerPayloadJson: mergedPayload({ order: orderPayload }),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(rewardRedemptions.id, redemptionId),
+          eq(rewardRedemptions.orgId, orgId),
+          inArray(rewardRedemptions.status, ['initiated', 'pending_payment'])
+        )
       )
-    )
-    .returning();
+      .returning();
+    if (!updated) throw new UserFacingError('Redemption not found or not awaiting payment');
 
-  return updated;
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actorUserId, 'system:shopify-webhook'),
+      action: 'rewards.redemption.ordered',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: { orderId },
+    });
+    return updated;
+  });
 }
 
 /**
@@ -128,24 +171,43 @@ export async function markRedemptionOrdered(
 export async function markRedemptionFulfilled(
   redemptionId: string,
   orgId: string,
-  fulfillmentPayload: Record<string, unknown>
+  fulfillmentPayload: Record<string, unknown>,
+  actorUserId?: string
 ): Promise<RewardRedemption> {
-  const [updated] = await db
-    .update(rewardRedemptions)
-    .set({
-      status: 'fulfilled',
-      providerPayloadJson: fulfillmentPayload,
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(rewardRedemptions.id, redemptionId),
-        eq(rewardRedemptions.orgId, orgId)
+  return await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(rewardRedemptions)
+      .set({
+        status: 'fulfilled',
+        providerPayloadJson: mergedPayload({ fulfillment: fulfillmentPayload }),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(rewardRedemptions.id, redemptionId),
+          eq(rewardRedemptions.orgId, orgId),
+          eq(rewardRedemptions.status, 'ordered')
+        )
       )
-    )
-    .returning();
+      .returning();
+    if (!updated) throw new UserFacingError('Redemption not found or not awaiting fulfilment');
 
-  return updated;
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actorUserId, 'system:shopify-webhook'),
+      action: 'rewards.redemption.fulfilled',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: {},
+    });
+    return updated;
+  });
+}
+
+export interface CancelRedemptionActor {
+  userId: string;
+  /** When set, only the member who owns the redemption may cancel it; anyone else sees "not found". */
+  mustOwn?: boolean;
 }
 
 /**
@@ -155,7 +217,8 @@ export async function markRedemptionFulfilled(
 export async function cancelRedemption(
   redemptionId: string,
   orgId: string,
-  reason: string
+  reason: string,
+  actor?: CancelRedemptionActor
 ): Promise<{
   redemption: RewardRedemption;
   newBalance: number;
@@ -169,13 +232,35 @@ export async function cancelRedemption(
       ),
     });
 
-    if (!redemption) {
-      throw new Error('Redemption not found');
+    if (!redemption || (actor?.mustOwn && redemption.userId !== actor.userId)) {
+      throw new UserFacingError('Redemption not found');
     }
 
     if (!['initiated', 'pending_payment'].includes(redemption.status)) {
-      throw new Error(`Cannot cancel redemption with status: ${redemption.status}`);
+      throw new UserFacingError(`Cannot cancel redemption with status: ${redemption.status}`);
     }
+
+    // Update redemption status first: the status predicate stops a concurrent cancel or order from also refunding.
+    const [updated] = await tx
+      .update(rewardRedemptions)
+      .set({
+        status: 'cancelled',
+        providerPayloadJson: {
+          ...((redemption.providerPayloadJson || {}) as Record<string, unknown>),
+          cancelledReason: reason,
+          cancelledAt: new Date().toISOString(),
+        },
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(rewardRedemptions.id, redemptionId),
+          eq(rewardRedemptions.orgId, orgId),
+          eq(rewardRedemptions.status, redemption.status)
+        )
+      )
+      .returning();
+    if (!updated) throw new UserFacingError('Cannot cancel redemption: it was changed concurrently');
 
     // Refund credits
     const ledgerEntry = await applyLedgerEntry(tx, {
@@ -188,20 +273,14 @@ export async function cancelRedemption(
       memo: `Redemption cancelled: ${reason}`,
     });
 
-    // Update redemption status
-    const [updated] = await tx
-      .update(rewardRedemptions)
-      .set({
-        status: 'cancelled',
-        providerPayloadJson: {
-          ...((redemption.providerPayloadJson || {}) as Record<string, unknown>),
-          cancelledReason: reason,
-          cancelledAt: new Date().toISOString(),
-        },
-        updatedAt: new Date(),
-      })
-      .where(eq(rewardRedemptions.id, redemptionId))
-      .returning();
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actor?.userId),
+      action: 'rewards.redemption.cancel',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: { reason, creditsRefunded: redemption.creditsSpent, memberUserId: redemption.userId },
+    });
 
     return {
       redemption: updated,
@@ -210,69 +289,103 @@ export async function cancelRedemption(
   });
 }
 
+interface RecordedRefund { refund_id: string; refund_cents: number; credits: number; at: string }
+
 /**
- * Process refund from Shopify webhook
- * Returns credits to user wallet
+ * Process a refund from the Shopify webhook and return the matching share of the credits to the member's wallet.
+ *
+ * A refund of part of the order returns that share, a later refund returns its own share, and the redemption becomes refunded only
+ * when everything spent has come back. Each refund is applied once by its Shopify refund id; a repeated delivery, or another refund
+ * event for the same order, never returns credits twice and never returns more than was spent.
  */
 export async function processRedemptionRefund(
   redemptionId: string,
   orgId: string,
-  refundPayload: Record<string, unknown>
+  refundPayload: { refund_id: string; refund_cents: number; currency?: unknown },
+  actorUserId?: string
 ): Promise<{
   redemption: RewardRedemption;
-  newBalance: number;
+  /** The wallet balance after this refund; null when the refund was already applied or returned no credits. */
+  newBalance: number | null;
+  creditsReturned: number;
 }> {
   return await db.transaction(async (tx) => {
-    // Get redemption
-    const redemption = await tx.query.rewardRedemptions.findFirst({
-      where: and(
-        eq(rewardRedemptions.id, redemptionId),
-        eq(rewardRedemptions.orgId, orgId)
-      ),
-    });
-
-    if (!redemption) {
-      throw new Error('Redemption not found');
+    const [redemption] = await tx
+      .select()
+      .from(rewardRedemptions)
+      .where(and(eq(rewardRedemptions.id, redemptionId), eq(rewardRedemptions.orgId, orgId)))
+      .limit(1)
+      .for('update');
+    if (!redemption) throw new UserFacingError('Redemption not found');
+    if (redemption.status !== 'ordered' && redemption.status !== 'fulfilled' && redemption.status !== 'refunded') {
+      throw new UserFacingError('Redemption has no paid order to refund');
     }
 
-    if (redemption.status === 'refunded') {
-      // Already refunded (idempotency)
-      return {
-        redemption,
-        newBalance: 0, // Will be recalculated below
-      };
+    const payload = (redemption.providerPayloadJson ?? {}) as { order?: { line_items_total_cents?: number }; refunds?: RecordedRefund[] };
+    const refunds = Array.isArray(payload.refunds) ? payload.refunds : [];
+    if (refunds.some((entry) => entry.refund_id === refundPayload.refund_id)) {
+      return { redemption, newBalance: null, creditsReturned: 0 };
     }
 
-    // Refund credits
-    const ledgerEntry = await applyLedgerEntry(tx, {
-      orgId: redemption.orgId,
-      userId: redemption.userId,
-      eventType: 'refund',
-      amountCredits: redemption.creditsSpent,
-      sourceType: 'redemption',
-      sourceId: redemption.id,
-      memo: `Redemption refunded via Shopify`,
+    const creditsReturned = creditsToReturn({
+      creditsSpent: redemption.creditsSpent,
+      creditsAlreadyReturned: refunds.reduce((sum, entry) => sum + entry.credits, 0),
+      refundCents: refundPayload.refund_cents,
+      orderCents: payload.order?.line_items_total_cents ?? 0,
     });
+    const totalReturned = refunds.reduce((sum, entry) => sum + entry.credits, 0) + creditsReturned;
+    const entry: RecordedRefund = {
+      refund_id: refundPayload.refund_id,
+      refund_cents: refundPayload.refund_cents,
+      credits: creditsReturned,
+      at: new Date().toISOString(),
+    };
 
-    // Update redemption status
+    // The status predicate stops a concurrent change from being overwritten; the row lock above already serialises refunds.
     const [updated] = await tx
       .update(rewardRedemptions)
       .set({
-        status: 'refunded',
-        providerPayloadJson: {
-          ...((redemption.providerPayloadJson || {}) as Record<string, unknown>),
-          refundPayload,
-          refundedAt: new Date().toISOString(),
-        },
+        status: totalReturned >= redemption.creditsSpent ? 'refunded' : redemption.status,
+        providerPayloadJson: mergedPayload({ refunds: [...refunds, entry] }),
         updatedAt: new Date(),
       })
-      .where(eq(rewardRedemptions.id, redemptionId))
+      .where(and(
+        eq(rewardRedemptions.id, redemptionId),
+        eq(rewardRedemptions.orgId, orgId),
+        eq(rewardRedemptions.status, redemption.status)
+      ))
       .returning();
+    if (!updated) throw new UserFacingError('Redemption refund conflicts with a concurrent change');
 
-    return {
-      redemption: updated,
-      newBalance: ledgerEntry.balanceAfter,
-    };
+    const ledgerEntry = creditsReturned > 0
+      ? await applyLedgerEntry(tx, {
+          orgId: redemption.orgId,
+          userId: redemption.userId,
+          eventType: 'refund',
+          amountCredits: creditsReturned,
+          sourceType: 'redemption',
+          sourceId: redemption.id,
+          memo: `Shopify refund ${refundPayload.refund_id}`,
+        })
+      : null;
+
+    await auditRewards(tx, {
+      organizationId: orgId,
+      userId: rewardsActor(actorUserId, 'system:shopify-webhook'),
+      action: 'rewards.redemption.refund',
+      resourceType: 'reward_redemptions',
+      resourceId: redemptionId,
+      details: {
+        refundId: refundPayload.refund_id,
+        refundCents: refundPayload.refund_cents,
+        creditsReturned,
+        creditsReturnedTotal: totalReturned,
+        creditsSpent: redemption.creditsSpent,
+        memberUserId: redemption.userId,
+      },
+    });
+
+    return { redemption: updated, newBalance: ledgerEntry?.balanceAfter ?? null, creditsReturned };
   });
 }
 
@@ -307,6 +420,27 @@ export async function getRedemptionByIdInternal(
 }
 
 /**
+ * Resolves a legacy discount-code reference (the first 12 hex characters of the id) inside one organization, among redemptions that
+ * are still waiting for payment. It answers only when exactly one matches, so a short reference can never pick a record by chance.
+ */
+export async function getAwaitingRedemptionByIdPrefix(
+  prefix: string,
+  orgId: string
+): Promise<RewardRedemption | null> {
+  if (!/^[0-9a-f]{12}$/i.test(prefix)) return null;
+  const rows = await db
+    .select()
+    .from(rewardRedemptions)
+    .where(and(
+      eq(rewardRedemptions.orgId, orgId),
+      inArray(rewardRedemptions.status, ['initiated', 'pending_payment']),
+      sql`replace(${rewardRedemptions.id}::text, '-', '') like ${prefix.toLowerCase() + '%'}`
+    ))
+    .limit(2);
+  return rows.length === 1 ? rows[0] : null;
+}
+
+/**
  * Get redemption by provider order ID
  */
 export async function getRedemptionByOrderId(
@@ -332,31 +466,28 @@ export async function listUserRedemptions(
   orgId: string,
   userId: string,
   limit = 20,
-  offset = 0
+  offset = 0,
+  status?: RewardRedemption['status'],
+  tx: RLSTx = db,
 ): Promise<{
   redemptions: RewardRedemption[];
   total: number;
 }> {
-  const redemptions = await db.query.rewardRedemptions.findMany({
-    where: and(
-      eq(rewardRedemptions.orgId, orgId),
-      eq(rewardRedemptions.userId, userId)
-    ),
+  const own = status
+    ? and(eq(rewardRedemptions.orgId, orgId), eq(rewardRedemptions.userId, userId), eq(rewardRedemptions.status, status))
+    : and(eq(rewardRedemptions.orgId, orgId), eq(rewardRedemptions.userId, userId));
+  const redemptions = await tx.query.rewardRedemptions.findMany({
+    where: own,
     orderBy: [desc(rewardRedemptions.createdAt)],
     limit,
     offset,
   });
 
   // Get total count
-  const [{ total: totalCount }] = await db
+  const [{ total: totalCount }] = await tx
     .select({ total: count() })
     .from(rewardRedemptions)
-    .where(
-      and(
-        eq(rewardRedemptions.orgId, orgId),
-        eq(rewardRedemptions.userId, userId)
-      )
-    );
+    .where(own);
 
   return {
     redemptions,

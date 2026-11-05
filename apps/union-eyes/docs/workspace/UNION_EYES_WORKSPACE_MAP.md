@@ -75,7 +75,6 @@ Continuity, Financial, Documents.
 | `/dashboard/financial` | Financial | deep-work surface | keep |
 | `/dashboard/strike-fund` | Financial | deep-work surface | subordinate |
 | `/dashboard/pension` | Financial | deep-work surface | subordinate |
-| `/dashboard/pay` | Financial | source surface | review later |
 | `/dashboard/billing-admin` | Financial | source surface | review later |
 | `/dashboard/documents` | Documents | deep-work surface | keep |
 | `/dashboard/agreements` | Documents | deep-work surface | keep |

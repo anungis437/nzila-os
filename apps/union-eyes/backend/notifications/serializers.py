@@ -9,84 +9,87 @@ from .models import (NotificationLog, CommunicationPreferences, MessageTemplates
 class NotificationLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'remittance_id', 'organization_id', 'type']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CommunicationPreferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommunicationPreferences
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MessageTemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageTemplates
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CampaignsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaigns
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MessageLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CommunicationChannelsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommunicationChannels
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MessageThreadsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageThreads
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'subject', 'member_id', 'staff_id', 'organization_id',
+            'status', 'priority', 'category', 'is_archived', 'last_message_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MessagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Messages
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'thread']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MessageReadReceiptsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageReadReceipts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'message']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MessageParticipantsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageParticipants
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'thread']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MessageNotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessageNotifications
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id', 'message']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class NewsletterTemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = NewsletterTemplates
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -114,7 +117,7 @@ class NewsletterCampaignsSerializer(serializers.ModelSerializer):
 class NewsletterRecipientsSerializer(serializers.ModelSerializer):
     class Meta:
         model = NewsletterRecipients
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'campaign_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -135,56 +138,61 @@ class UserNotificationPreferencesSerializer(serializers.ModelSerializer):
 class NotificationTrackingSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationTracking
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'organization_id', 'recipient_id', 'type', 'status',
+            'priority', 'subject', 'body', 'html_body', 'template_id', 'template_data',
+            'provider_id', 'external_message_id', 'action_url', 'action_label', 'sent_at',
+            'delivered_at', 'failure_reason', 'failure_count', 'last_failure_at', 'metadata',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class InAppNotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = InAppNotifications
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class NotificationHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationHistory
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class NotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notifications
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class NotificationTemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationTemplates
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class NotificationQueueSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationQueue
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class NotificationDeliveryLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationDeliveryLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class NotificationBouncesSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationBounces
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -192,20 +200,21 @@ class PushDevicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PushDevices
         fields = '__all__'
+        extra_kwargs = {'device_token': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PushNotificationTemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PushNotificationTemplates
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PushNotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PushNotifications
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -233,7 +242,7 @@ class SmsCampaignsSerializer(serializers.ModelSerializer):
 class SmsMessagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SmsMessages
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -261,7 +270,7 @@ class SmsOptOutsSerializer(serializers.ModelSerializer):
 class SmsRateLimitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SmsRateLimits
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -269,13 +278,18 @@ class MobileDevicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = MobileDevices
         fields = '__all__'
+        extra_kwargs = {'device_token': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MobileNotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MobileNotifications
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'user_id', 'organization_id', 'title', 'body', 'data',
+            'priority', 'badge', 'sound', 'status', 'provider_response', 'scheduled_at', 'sent_at',
+            'delivered_at', 'failed_at', 'device',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -296,7 +310,7 @@ class MobileAnalyticsSerializer(serializers.ModelSerializer):
 class MobileAppConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = MobileAppConfig
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 

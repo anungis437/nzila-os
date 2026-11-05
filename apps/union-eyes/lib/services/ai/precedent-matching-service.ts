@@ -21,9 +21,9 @@ import {
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
-import { db } from '@/db';
 import { arbitrationDecisions } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { inArray } from 'drizzle-orm';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { semanticPrecedentSearch } from './vector-search-service';
 import type { OutcomeEnum, PrecedentValueEnum } from '@/db/schema/domains/agreements';
 import { logger } from '@/lib/logger';
@@ -123,9 +123,16 @@ export async function matchClaimToPrecedents(
     throw new Error('Weights must sum to 1.0');
   }
 
+  // The decisions a caller may see are decided by row-level security in its organization's context: a match that does not say whose context to use sees none.
+  const organizationId = claim.organizationId;
+  if (!organizationId) {
+    throw new Error('organizationId is required to match precedents');
+  }
+
   try {
     // Step 1: Semantic search for similar cases
     const semanticResults = await semanticPrecedentSearch(claim.facts, {
+      organizationId,
       limit: limit * 2, // Get more candidates for filtering
       threshold: 0.5,
       issueType,
@@ -133,14 +140,20 @@ export async function matchClaimToPrecedents(
     });
 
     // Step 2: Extract keywords from claim
-    const keywords = await extractClaimKeywords(claim.facts, claim.organizationId);
+    const keywords = await extractClaimKeywords(claim.facts, organizationId);
+
+    // The candidate decisions are read once, in the organization's own context, before the provider is asked about any of them.
+    const candidates = semanticResults.length === 0
+      ? []
+      : await withRLSContext({ organizationId }, (tx) =>
+          tx.select().from(arbitrationDecisions).where(inArray(arbitrationDecisions.id, semanticResults.map((result) => result.id))),
+        );
+    const decisionById = new Map(candidates.map((row) => [row.id, row]));
 
     // Step 3: Score each precedent using hybrid approach
     const scoredMatches = await Promise.all(
       semanticResults.map(async result => {
-        const precedent = await db.query.arbitrationDecisions.findFirst({
-          where: eq(arbitrationDecisions.id, result.id),
-        });
+        const precedent = decisionById.get(result.id);
 
         if (!precedent) return null;
 
@@ -209,8 +222,9 @@ export async function matchClaimToPrecedents(
       })
       .slice(0, limit);
   } catch (error) {
+    // A failed search is not "no precedents": the caller is told.
     logger.error('Error matching claim to precedents', { error, issueType });
-    return [];
+    throw error;
   }
 }
 
@@ -230,7 +244,7 @@ async function extractClaimKeywords(
       profileKey: UE_PROFILES.PRECEDENT_KEYWORDS,
       promptKey: UE_PROFILES.PRECEDENT_KEYWORDS,
       input: `Extract 10-15 key legal terms and concepts from this grievance/claim:\n\n${claimText}`,
-      dataClass: 'internal',
+      dataClass: 'regulated',
     });
 
     const result = response.data as Record<string, unknown>;
@@ -328,7 +342,7 @@ PRECEDENT: ${precedent.caseTitle}
 Facts: ${precedent.keyFacts}
 Reasoning: ${precedent.reasoning}
 Outcome: ${precedent.outcome}`,
-      dataClass: 'internal',
+      dataClass: 'regulated',
     });
 
     const result = response.data as Record<string, unknown>;
@@ -445,7 +459,7 @@ RELEVANT PRECEDENTS:
 ${precedentSummaries}
 
 Provide analysis.`,
-      dataClass: 'internal',
+      dataClass: 'regulated',
     });
 
     const result = response.data as Record<string, unknown>;
@@ -518,10 +532,12 @@ Generate memorandum.`,
       dataClass: 'regulated',
     });
 
-    return response.content || 'Memorandum generation failed';
+    if (!response.content) throw new Error('The model returned no memorandum');
+    return response.content;
   } catch (error) {
+    // A memorandum that could not be written is an error, not text that reads like one.
     logger.error('Error generating memorandum', { error });
-    return 'Failed to generate legal memorandum';
+    throw error;
   }
 }
 

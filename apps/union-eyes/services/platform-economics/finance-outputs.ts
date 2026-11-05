@@ -58,11 +58,15 @@ export interface MasterInvoiceExport {
       amount: string;
       costType: string;
     }>;
+    /** The charges before any discount or subsidy: every line that is not an adjustment. */
     subtotal: string;
+    /** The discount line the billing service writes (a negative `credit` line), as a positive amount. */
     discount: string;
+    /** The subsidy line the billing service writes (a negative `subsidy` line), as a positive amount. */
     subsidy: string;
+    tax: string;
     total: string;
-    currency: 'CAD';
+    currency: string;
     paymentStatus: string;
     paidAmount: string;
     balanceDue: string;
@@ -72,12 +76,14 @@ export interface MasterInvoiceExport {
 export interface AllocationStatementExport {
   meta: ExportMeta;
   allocationRunId: string;
+  /** The allocation method of the lines: one name when every line used it, `mixed` when they differ. */
   method: string;
   costPool: string;
   lines: Array<{
     localId: string;
     localName: string;
     basisValue: string;
+    /** The allocation weight, as a percentage. */
     sharePercent: string;
     allocatedAmount: string;
   }>;
@@ -91,14 +97,12 @@ export interface ChargebackReportExport {
   chargebacks: Array<{
     chargebackId: string;
     periodLabel: string;
-    grossAmount: string;
-    subsidyApplied: string;
-    netAmount: string;
+    /** What the allocation charged this local for the period. A statement records one amount: the subsidy is applied to the cost pool before it is allocated. */
+    amount: string;
+    currency: string;
     status: string;
   }>;
-  totalGross: string;
-  totalSubsidy: string;
-  totalNet: string;
+  totalAmount: string;
 }
 
 export interface GlJournalRow {
@@ -143,6 +147,10 @@ function computeHash(data: any): string {
     .digest('hex');
 }
 
+/** Money is numeric(14,2): whole cents, summed as integers so a total never carries a float's error. */
+const toCents = (value: unknown): number => Math.round(Number(String(value ?? '0')) * 100);
+const fromCents = (cents: number): string => (cents / 100).toFixed(2);
+
 function makeMeta(
   exportType: ExportType,
   organizationId: string,
@@ -172,8 +180,9 @@ export async function exportMasterInvoice(
   const [invoice] = await db.execute(sql`
     SELECT
       pi.id, pi.invoice_number, pi.billing_period_id,
-      pi.issue_date, pi.due_date, pi.subtotal_cad, pi.discount_cad,
-      pi.subsidy_cad, pi.total_cad, pi.status, pi.paid_amount_cad, pi.balance_due_cad,
+      pi.issue_date, pi.due_date, pi.subtotal, pi.tax_amount,
+      pi.total_amount, pi.status, pi.currency, pi.amount_paid,
+      (pi.total_amount - pi.amount_paid)::text AS balance_due,
       bp.label AS period_label,
       o.name AS org_name
     FROM platform_invoices pi
@@ -187,14 +196,26 @@ export async function exportMasterInvoice(
     throw new Error(`Invoice ${invoiceId} not found for org ${organizationId}`);
   }
 
+  // Charges first, then adjustments; the invoice lines are written in one transaction, so no column orders them further.
   const lineItems = await db.execute(sql`
-    SELECT description, quantity, unit_price_cad, amount_cad, cost_type
+    SELECT description, quantity, unit_price, amount, cost_type
     FROM platform_invoice_line_items
     WHERE invoice_id = ${invoiceId}
-    ORDER BY line_number
+    ORDER BY (amount < 0), cost_type, description, id
   `);
 
   const rows = lineItems as any as Array<Record<string, unknown>>;
+
+  // The billing service records a discount as a negative `credit` line and a subsidy as a negative `subsidy` line, and stores the invoice's subtotal net of both.
+  let chargesCents = 0;
+  let discountCents = 0;
+  let subsidyCents = 0;
+  for (const r of rows) {
+    const cents = toCents(r.amount);
+    if (cents < 0 && r.cost_type === 'credit') discountCents -= cents;
+    else if (cents < 0 && r.cost_type === 'subsidy') subsidyCents -= cents;
+    else chargesCents += cents;
+  }
 
   const result: MasterInvoiceExport['invoice'] = {
     invoiceNumber: String(invoice.invoice_number),
@@ -205,18 +226,19 @@ export async function exportMasterInvoice(
     lineItems: rows.map((r) => ({
       description: String(r.description),
       quantity: String(r.quantity),
-      unitPrice: String(r.unit_price_cad),
-      amount: String(r.amount_cad),
+      unitPrice: String(r.unit_price),
+      amount: String(r.amount),
       costType: String(r.cost_type),
     })),
-    subtotal: String(invoice.subtotal_cad),
-    discount: String(invoice.discount_cad),
-    subsidy: String(invoice.subsidy_cad),
-    total: String(invoice.total_cad),
-    currency: 'CAD',
+    subtotal: fromCents(chargesCents),
+    discount: fromCents(discountCents),
+    subsidy: fromCents(subsidyCents),
+    tax: String(invoice.tax_amount),
+    total: String(invoice.total_amount),
+    currency: String(invoice.currency),
     paymentStatus: String(invoice.status),
-    paidAmount: String(invoice.paid_amount_cad),
-    balanceDue: String(invoice.balance_due_cad),
+    paidAmount: String(invoice.amount_paid),
+    balanceDue: String(invoice.balance_due),
   };
 
   const meta = makeMeta(
@@ -250,7 +272,7 @@ export async function exportAllocationStatement(
 ): Promise<AllocationStatementExport> {
   const [run] = await db.execute(sql`
     SELECT
-      ar.id, ar.billing_period_id, ar.method, ar.total_cost_pool_cad,
+      ar.id, ar.billing_period_id, ar.total_amount,
       bp.label AS period_label
     FROM allocation_runs ar
     JOIN billing_periods bp ON bp.id = ar.billing_period_id
@@ -262,20 +284,23 @@ export async function exportAllocationStatement(
     throw new Error(`Allocation run ${allocationRunId} not found`);
   }
 
+  // The method belongs to each line (a run may allocate different cost types differently); the lines also carry the name the run recorded.
   const lines = await db.execute(sql`
     SELECT
       arl.local_id,
-      o.name AS local_name,
+      COALESCE(arl.local_name, o.name) AS local_name,
+      arl.method,
       arl.basis_value,
-      arl.share_percent,
-      arl.allocated_amount_cad
+      arl.weight,
+      arl.allocated_amount
     FROM allocation_run_lines arl
     LEFT JOIN organizations o ON o.id = arl.local_id
-    WHERE arl.allocation_run_id = ${allocationRunId}
-    ORDER BY arl.allocated_amount_cad DESC
+    WHERE arl.run_id = ${allocationRunId}
+    ORDER BY arl.allocated_amount DESC, arl.local_id, arl.cost_type
   `);
 
   const rows = lines as any as Array<Record<string, unknown>>;
+  const methods = [...new Set(rows.map((r) => String(r.method)))];
 
   const meta = makeMeta(
     'allocation_statement',
@@ -298,16 +323,16 @@ export async function exportAllocationStatement(
   return {
     meta,
     allocationRunId,
-    method: String(run.method),
-    costPool: String(run.total_cost_pool_cad),
+    method: methods.length === 1 ? methods[0] : methods.length === 0 ? 'none' : 'mixed',
+    costPool: String(run.total_amount),
     lines: rows.map((r) => ({
       localId: String(r.local_id),
       localName: String(r.local_name ?? ''),
       basisValue: String(r.basis_value),
-      sharePercent: String(r.share_percent),
-      allocatedAmount: String(r.allocated_amount_cad),
+      sharePercent: String(r.weight),
+      allocatedAmount: String(r.allocated_amount),
     })),
-    total: String(run.total_cost_pool_cad),
+    total: String(run.total_amount),
   };
 }
 
@@ -328,9 +353,8 @@ export async function exportChargebackReport(
     SELECT
       cs.id AS chargeback_id,
       bp.label AS period_label,
-      cs.gross_amount_cad,
-      cs.subsidy_applied_cad,
-      cs.net_amount_cad,
+      cs.total_amount,
+      cs.currency,
       cs.status,
       o.name AS local_name
     FROM chargeback_statements cs
@@ -339,23 +363,14 @@ export async function exportChargebackReport(
     WHERE cs.organization_id = ${organizationId}
       AND cs.local_id = ${localId}
       ${periodFilter}
-    ORDER BY bp.start_date DESC
+    ORDER BY bp.period_start DESC, cs.created_at DESC, cs.id
   `);
 
   const data = rows as any as Array<Record<string, unknown>>;
   const localName = data.length > 0 ? String(data[0].local_name) : localId;
 
-  let totalGrossCents = 0;
-  let totalSubsidyCents = 0;
-  let totalNetCents = 0;
-  for (const r of data) {
-    totalGrossCents += Math.round(Number(String(r.gross_amount_cad ?? '0')) * 100);
-    totalSubsidyCents += Math.round(Number(String(r.subsidy_applied_cad ?? '0')) * 100);
-    totalNetCents += Math.round(Number(String(r.net_amount_cad ?? '0')) * 100);
-  }
-  const totalGross = totalGrossCents / 100;
-  const totalSubsidy = totalSubsidyCents / 100;
-  const totalNet = totalNetCents / 100;
+  let totalCents = 0;
+  for (const r of data) totalCents += toCents(r.total_amount);
 
   const meta = makeMeta(
     'chargeback_report',
@@ -382,14 +397,11 @@ export async function exportChargebackReport(
     chargebacks: data.map((r) => ({
       chargebackId: String(r.chargeback_id),
       periodLabel: String(r.period_label),
-      grossAmount: String(r.gross_amount_cad),
-      subsidyApplied: String(r.subsidy_applied_cad),
-      netAmount: String(r.net_amount_cad),
+      amount: String(r.total_amount),
+      currency: String(r.currency),
       status: String(r.status),
     })),
-    totalGross: totalGross.toFixed(2),
-    totalSubsidy: totalSubsidy.toFixed(2),
-    totalNet: totalNet.toFixed(2),
+    totalAmount: fromCents(totalCents),
   };
 }
 
@@ -410,7 +422,7 @@ export async function exportGlJournal(
       CASE WHEN pl.amount_cad::numeric >= 0 THEN pl.amount_cad ELSE '0.00' END AS debit,
       CASE WHEN pl.amount_cad::numeric < 0 THEN ABS(pl.amount_cad::numeric)::text ELSE '0.00' END AS credit,
       COALESCE(cc.code, '') AS cost_center,
-      COALESCE(pl.source_id, pl.id::text) AS reference
+      COALESCE(pl.source_id::text, pl.id::text) AS reference
     FROM platform_cost_ledger_entries pl
     LEFT JOIN cost_centers cc ON cc.id = pl.cost_center_id
     LEFT JOIN gl_account_mappings ga ON ga.organization_id = pl.organization_id

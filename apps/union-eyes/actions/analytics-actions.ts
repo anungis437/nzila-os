@@ -8,6 +8,7 @@
  */
 
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import {
   analyticsMetrics,
@@ -27,6 +28,8 @@ import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { revalidatePath } from 'next/cache';
 import { logger } from '@/lib/logger';
+import { UserFacingError } from '@/lib/errors/user-facing-error';
+import { safeActionMessage } from '@/lib/actions/safe-action-error';
 
 /**
  * Get current user's organization ID
@@ -41,11 +44,29 @@ import { logger } from '@/lib/logger';
  * membership in. getOrganizationIdForUser() always resolves via a verified
  * organization_members row.
  */
-async function getCurrentUserOrgId(): Promise<string> {
-  const { userId } = await auth();
-  if (!userId) throw new Error('Unauthorized');
+/**
+ * A caller that already resolved an organization (an API route behind its role guard) names it as expectedOrganizationId: the
+ * action resolves independently, and a disagreement (a user with more than one membership whose selection changed between
+ * the two resolutions) refuses the call instead of writing to a different organization than the one the caller was authorized in.
+ */
+function assertSameOrganization(resolved: string, expected: string | undefined): string {
+  if (expected && expected !== resolved) throw new UserFacingError('Organization context changed during the request');
+  return resolved;
+}
 
-  return getOrganizationIdForUser(userId);
+async function getCurrentUserOrgId(expectedOrganizationId?: string): Promise<string> {
+  const { userId } = await auth();
+  if (!userId) throw new UserFacingError('Unauthorized');
+
+  return assertSameOrganization(await getOrganizationIdForUser(userId), expectedOrganizationId);
+}
+
+/** The acting user and the organization verified for them; every write is audited to this pair. */
+async function getActor(expectedOrganizationId?: string): Promise<{ userId: string; orgId: string }> {
+  const { userId } = await auth();
+  if (!userId) throw new UserFacingError('Unauthorized');
+
+  return { userId, orgId: assertSameOrganization(await getOrganizationIdForUser(userId), expectedOrganizationId) };
 }
 
 /**
@@ -57,9 +78,10 @@ export async function calculateMetrics(params: {
   periodType: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
   periodStart: Date;
   periodEnd: Date;
+  expectedOrganizationId?: string;
 }) {
   try {
-    const orgId = await getCurrentUserOrgId();
+    const { userId, orgId } = await getActor(params.expectedOrganizationId);
     
     // Calculate metric value based on type
     let metricValue: number;
@@ -79,7 +101,7 @@ export async function calculateMetrics(params: {
         );
         metricValue = claimsCount.length;
         metricUnit = 'count';
-        metadata = { claimIds: claimsCount.map(c => c.claimId) };
+        metadata = { claimsCount: claimsCount.length };
         break;
         
       case 'resolution_time':
@@ -124,7 +146,7 @@ export async function calculateMetrics(params: {
         break;
         
       default:
-        throw new Error(`Unsupported metric type: ${params.metricType}`);
+        throw new UserFacingError(`Unsupported metric type: ${params.metricType}`);
     }
     
     // Get comparison value from previous period
@@ -156,7 +178,7 @@ export async function calculateMetrics(params: {
     
     // Store metric with RLS context
     const [metric] = await withRLSContext({ organizationId: orgId }, async (db) => {
-      return db.insert(analyticsMetrics).values({
+      const stored = await db.insert(analyticsMetrics).values({
         organizationId: orgId,
         metricType: params.metricType,
         metricName: params.metricName,
@@ -169,6 +191,15 @@ export async function calculateMetrics(params: {
         comparisonValue: comparisonValue?.toString(),
         trend
       }).returning();
+      await persistAtomicAudit(db, {
+        organizationId: orgId,
+        userId,
+        action: 'analytics.metric.calculate',
+        resourceType: 'analytics_metrics',
+        resourceId: stored[0].id,
+        details: { metricType: params.metricType, metricName: params.metricName, periodType: params.periodType },
+      });
+      return stored;
     });
     
     revalidatePath('/dashboard/analytics');
@@ -176,7 +207,7 @@ export async function calculateMetrics(params: {
     return { success: true, metric };
   } catch (error) {
     logger.error('Error calculating metrics', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'calculateMetrics' }) };
   }
 }
 
@@ -189,7 +220,7 @@ export async function generatePredictions(params: {
   modelName?: 'linear_regression' | 'moving_average' | 'ensemble';
 }) {
   try {
-    const orgId = await getCurrentUserOrgId();
+    const { userId, orgId } = await getActor();
     
     // Get historical data based on prediction type with RLS context
     const historicalMetrics = await withRLSContext({ organizationId: orgId }, async (db) =>
@@ -229,15 +260,17 @@ export async function generatePredictions(params: {
     
     // Store predictions in database
     const lastDate = timeSeriesData[timeSeriesData.length - 1].date;
-    const storedPredictions: any[] = [];
-    
-    for (let i = 0; i < predictions.length; i++) {
-      const pred = predictions[i];
-      const targetDate = new Date(lastDate);
-      targetDate.setDate(targetDate.getDate() + i + 1);
-      
-      const [stored] = await withRLSContext({ organizationId: orgId }, async (db) =>
-        db.insert(mlPredictions).values({
+
+    // Every prediction and their audit record commit together
+    const storedPredictions = await withRLSContext({ organizationId: orgId }, async (db) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rows: any[] = [];
+      for (let i = 0; i < predictions.length; i++) {
+        const pred = predictions[i];
+        const targetDate = new Date(lastDate);
+        targetDate.setDate(targetDate.getDate() + i + 1);
+
+        const [stored] = await db.insert(mlPredictions).values({
           organizationId: orgId,
           predictionType: params.predictionType,
           predictionDate: targetDate,
@@ -245,18 +278,26 @@ export async function generatePredictions(params: {
           lowerBound: pred.confidenceInterval.lower.toString(),
           upperBound: pred.confidenceInterval.upper.toString(),
           confidence: pred.confidenceScore.toString(),
-        }).returning()
-      );
-      
-      storedPredictions.push(stored);
-    }
+        }).returning();
+
+        rows.push(stored);
+      }
+      await persistAtomicAudit(db, {
+        organizationId: orgId,
+        userId,
+        action: 'analytics.predictions.generate',
+        resourceType: 'ml_predictions',
+        details: { predictionType: params.predictionType, count: rows.length, model: modelName },
+      });
+      return rows;
+    });
     
     revalidatePath('/dashboard/analytics');
     
     return { success: true, predictions: storedPredictions };
   } catch (error) {
     logger.error('Error generating predictions', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'generatePredictions' }) };
   }
 }
 
@@ -268,7 +309,7 @@ export async function detectMetricTrends(params: {
   daysBack?: number;
 }) {
   try {
-    const orgId = await getCurrentUserOrgId();
+    const { userId, orgId } = await getActor();
     const daysBack = params.daysBack || 30;
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - daysBack);
@@ -300,8 +341,8 @@ export async function detectMetricTrends(params: {
     const trendResult = detectTrend(timeSeriesData);
     
     // Store trend analysis with RLS context
-    const [storedTrend] = await withRLSContext({ organizationId: orgId }, async (db) =>
-      db.insert(trendAnalyses).values({
+    const [storedTrend] = await withRLSContext({ organizationId: orgId }, async (db) => {
+      const stored = await db.insert(trendAnalyses).values({
         organizationId: orgId,
         analysisType: 'trend',
         dataSource: params.metricType,
@@ -318,15 +359,24 @@ export async function detectMetricTrends(params: {
         insights: generateTrendInsights(trendResult),
         recommendations: generateTrendRecommendations(trendResult),
         confidence: trendResult.confidence.toString()
-      }).returning()
-    );
+      }).returning();
+      await persistAtomicAudit(db, {
+        organizationId: orgId,
+        userId,
+        action: 'analytics.trend.detect',
+        resourceType: 'trend_analyses',
+        resourceId: stored[0].id,
+        details: { metricType: params.metricType, daysBack },
+      });
+      return stored;
+    });
     
     revalidatePath('/dashboard/analytics');
     
     return { success: true, trend: storedTrend };
   } catch (error) {
     logger.error('Error detecting trends', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'detectMetricTrends' }) };
   }
 }
 
@@ -348,12 +398,12 @@ export async function createKPI(params: {
 }) {
   try {
     const { userId } = await auth();
-    if (!userId) throw new Error('Unauthorized');
+    if (!userId) throw new UserFacingError('Unauthorized');
     
     const orgId = await getCurrentUserOrgId();
     
-    const [kpi] = await withRLSContext({ organizationId: orgId }, async (db) =>
-      db.insert(kpiConfigurations).values({
+    const [kpi] = await withRLSContext({ organizationId: orgId }, async (db) => {
+      const stored = await db.insert(kpiConfigurations).values({
         organizationId: orgId,
         createdBy: userId,
         name: params.name,
@@ -367,15 +417,24 @@ export async function createKPI(params: {
         criticalThreshold: params.criticalThreshold?.toString(),
         alertEnabled: params.alertEnabled || false,
         alertRecipients: params.alertRecipients || []
-      }).returning()
-    );
+      }).returning();
+      await persistAtomicAudit(db, {
+        organizationId: orgId,
+        userId,
+        action: 'analytics.kpi.create',
+        resourceType: 'kpi_configurations',
+        resourceId: stored[0].id,
+        details: { name: params.name, metricType: params.metricType, alertEnabled: params.alertEnabled || false },
+      });
+      return stored;
+    });
     
     revalidatePath('/dashboard/analytics/kpis');
     
     return { success: true, kpi };
   } catch (error) {
     logger.error('Error creating KPI', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'createKPI' }) };
   }
 }
 
@@ -388,9 +447,10 @@ export async function getAnalyticsMetrics(params: {
   startDate?: Date;
   endDate?: Date;
   limit?: number;
+  expectedOrganizationId?: string;
 }) {
   try {
-    const orgId = await getCurrentUserOrgId();
+    const orgId = await getCurrentUserOrgId(params.expectedOrganizationId);
     
     const metrics = await withRLSContext({ organizationId: orgId }, async (db) => {
       const conditions = [eq(analyticsMetrics.organizationId, orgId)];
@@ -418,10 +478,29 @@ export async function getAnalyticsMetrics(params: {
       });
     });
     
-    return { success: true, metrics };
+    // A member may read aggregate metric values, never underlying claim IDs
+    // or arbitrary metadata left by historical versions of the calculator.
+    // Explicit allowlisting also protects records created before the redaction migration.
+    const publicMetrics = metrics.map((metric) => {
+      const raw = metric.metadata && typeof metric.metadata === 'object' && !Array.isArray(metric.metadata)
+        ? metric.metadata as Record<string, unknown>
+        : {};
+      let metadata: Record<string, number | null> = {};
+      if (metric.metricType === 'claims_volume') {
+        const claimsCount = Number(metric.metricValue);
+        metadata = { claimsCount: Number.isFinite(claimsCount) ? claimsCount : null };
+      } else if (metric.metricType === 'resolution_time' && raw.claimsResolved != null) {
+        const claimsResolved = Number(raw.claimsResolved);
+        if (Number.isFinite(claimsResolved) && claimsResolved >= 0) {
+          metadata = { claimsResolved };
+        }
+      }
+      return { ...metric, metadata };
+    });
+    return { success: true, metrics: publicMetrics };
   } catch (error) {
     logger.error('Error fetching analytics metrics', error as Error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { success: false, error: safeActionMessage(error, { action: 'getAnalyticsMetrics' }) };
   }
 }
 

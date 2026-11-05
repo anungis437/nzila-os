@@ -36,12 +36,12 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/components/ui/use-toast';
+import { readApiError } from '@/lib/client/api-envelope';
 
 const kpiSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -51,14 +51,17 @@ const kpiSchema = z.object({
   visualizationType: z.enum(['line', 'bar', 'pie', 'gauge', 'number']),
   targetValue: z.string().optional(),
   warningThreshold: z.string().optional(),
-  criticalThreshold: z.string().optional(),
-  alertEnabled: z.boolean(),
-  alertRecipients: z.string().optional()
+  criticalThreshold: z.string().optional()
 });
 
 type KPIFormValues = z.infer<typeof kpiSchema>;
 
-export function KPIBuilderDialog() {
+interface KPIBuilderDialogProps {
+  /** Called after a KPI was created, so the caller can read the list again. */
+  onCreated?: () => void;
+}
+
+export function KPIBuilderDialog({ onCreated }: KPIBuilderDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -70,14 +73,14 @@ export function KPIBuilderDialog() {
       description: '',
       metricType: 'claims_volume',
       dataSource: 'claims',
-      visualizationType: 'number',
-      alertEnabled: false
+      visualizationType: 'number'
     }
   });
 
   async function onSubmit(values: KPIFormValues) {
     setIsSubmitting(true);
     try {
+      // Nothing evaluates a KPI's thresholds or sends an alert (the target route refuses alertEnabled: true), so no alert is requested.
       const response = await fetch('/api/analytics/kpis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,26 +98,19 @@ export function KPIBuilderDialog() {
           criticalThreshold: values.criticalThreshold
             ? Number(values.criticalThreshold)
             : undefined,
-          alertRecipients: values.alertRecipients
-            ? values.alertRecipients.split(',').map((e) => e.trim())
-            : []
+          alertEnabled: false
         })
       });
 
-      const data = await response.json();
+      if (!response.ok) throw new Error(await readApiError(response, 'Failed to create KPI'));
 
-      if (data.success) {
-        toast({
-          title: 'KPI Created',
-          description: 'Your custom KPI has been created successfully'
-        });
-        setOpen(false);
-        form.reset();
-        // Refresh the page to show new KPI
-        window.location.reload();
-      } else {
-        throw new Error(data.error);
-      }
+      toast({
+        title: 'KPI Created',
+        description: 'Your custom KPI has been created successfully'
+      });
+      setOpen(false);
+      form.reset();
+      onCreated?.();
     } catch (error) {
       toast({
         title: 'Error',
@@ -298,47 +294,6 @@ export function KPIBuilderDialog() {
                 )}
               />
             </div>
-
-            {/* Alerts */}
-            <FormField
-              control={form.control}
-              name="alertEnabled"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Enable Alerts</FormLabel>
-                    <FormDescription>
-                      Send notifications when thresholds are exceeded
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {form.watch('alertEnabled') && (
-              <FormField
-                control={form.control}
-                name="alertRecipients"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Alert Recipients</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="email1@example.com, email2@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Comma-separated email addresses
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
 
             <DialogFooter>
               <Button
