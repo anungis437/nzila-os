@@ -10,7 +10,7 @@
  */
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import * as child_process from 'node:child_process'
+
 
 const ROOT = path.resolve(__dirname, '..', '..')
 
@@ -53,11 +53,16 @@ function readUtf8(filePath: string): string {
   if (!isWithinBase(realInput, realRoot)) {
     throw new Error('Security input resolves outside repository root')
   }
-  return child_process.execFileSync(
-    process.execPath,
-    ['-e', 'const fs=require("node:fs");process.stdout.write(fs.readFileSync(process.argv[1],"utf8"));', realInput],
-    { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 },
-  )
+  // Read from one validated file descriptor, not a second process reopening a
+  // path after validation. O_NOFOLLOW rejects a final-component symlink swap;
+  // O_NONBLOCK avoids hanging on a substituted FIFO/device.
+  const fd = fs.openSync(realInput, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK)
+  try {
+    if (!fs.fstatSync(fd).isFile()) throw new Error('Security input must be a regular file')
+    return fs.readFileSync(fd, { encoding: 'utf8' })
+  } finally {
+    fs.closeSync(fd)
+  }
 }
 
 // ── License Policy ────────────────────────────────────────────────────────
