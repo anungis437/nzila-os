@@ -43,36 +43,38 @@ type CasePriority = "low" | "medium" | "high" | "urgent";
 type SortField = "submittedDate" | "priority" | "status" | "title";
 type SortOrder = "asc" | "desc";
 
-// Database claim type from API
+// A claim as /api/workbench/assigned sends it: dates are text. A claim the caller holds only in triage (access: 'triage') carries the triage fields alone, so the rest are optional.
+// The queue carries no notes: a case's notes are read from the case itself (see loadNotes).
 interface DbClaim {
   claimId: string;
   claimNumber: string;
   organizationId: string;
-  memberId: string;
-  isAnonymous: boolean;
+  access?: 'case' | 'triage';
   claimType: string;
   status: string;
   priority: string;
-  incidentDate: Date;
-  location: string;
-  description: string;
-  desiredOutcome: string;
-  witnessesPresent: boolean;
-  witnessDetails: string | null;
-  previouslyReported: boolean;
-  previousReportDetails: string | null;
-  assignedTo: string | null;
-  assignedAt: Date | null;
-  resolutionNotes: string | null;
-  resolutionDate: Date | null;
-  attachments: string[];
-  voiceTranscriptions: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  closedAt: Date | null;
+  isAnonymous?: boolean | null;
+  assignedTo?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  memberId?: string | null;
+  description?: string | null;
+  memberName?: string | null;
+  memberEmail?: string | null;
+  memberPhone?: string | null;
 }
+
+/** What /api/workbench/assigned answers (the framework wraps it as { data }): the queue, and what the caller may do with it. */
+interface WorkbenchAnswer {
+  data?: { claims?: DbClaim[]; capabilities?: { canAssign?: boolean } };
+}
+
+/** The notes of a case as the case's own notes route lists them: its history, newest first, of which the entries of type "note" are the notes. */
+interface CaseNotesAnswer {
+  notes?: Array<{ updateType?: string | null; message?: string | null }>;
+}
+
+type CaseNotes = { status: 'loading' } | { status: 'ready'; notes: string[] } | { status: 'unavailable' };
 
 interface Case {
   id: string;
@@ -83,15 +85,14 @@ interface Case {
   priority: CasePriority;
   category: string;
   submittedDate: string;
-  lastUpdate: string;
   memberId: string;
   memberName: string;
   memberEmail: string;
   memberPhone: string;
   assignedTo: string | null;
-  notes: string[];
   daysOpen: number;
   claimType: string;
+  triage: boolean;
 }
 
 // Map database claim types to UI-friendly labels
@@ -131,7 +132,7 @@ const mapDbPriorityToUi = (dbPriority: string): CasePriority => {
 };
 
 // Calculate days open
-const calculateDaysOpen = (createdAt: Date): number => {
+const calculateDaysOpen = (createdAt: string): number => {
   const created = new Date(createdAt);
   const now = new Date();
   const diffTime = Math.abs(now.getTime() - created.getTime());
@@ -140,22 +141,23 @@ const calculateDaysOpen = (createdAt: Date): number => {
 };
 
 // Convert database claim to UI case (now with member details from API)
-const mapDbClaimToCase = (claim: DbClaim & { memberName?: string; memberEmail?: string; memberPhone?: string }, t: (key: string) => string): Case => ({
+const mapDbClaimToCase = (claim: DbClaim, t: (key: string) => string): Case => ({
   id: claim.claimNumber,
   claimId: claim.claimId,
+  triage: claim.access === 'triage',
   title: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.untitledCase'),
-  description: claim.description,
+  description: claim.description ?? '',
   status: mapDbStatusToUi(claim.status),
   priority: mapDbPriorityToUi(claim.priority),
   category: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.generalCase'),
   submittedDate: new Date(claim.createdAt).toISOString(),
-  lastUpdate: new Date(claim.updatedAt).toISOString(),
-  memberId: claim.memberId,
-  memberName: claim.memberName || t(claim.isAnonymous ? 'workbench.anonymousMember' : 'workbench.unknownMember'),
-  memberEmail: claim.memberEmail || (claim.isAnonymous ? "" : ""),
-  memberPhone: claim.memberPhone || (claim.isAnonymous ? "" : ""),
+  memberId: claim.memberId ?? '',
+  memberName: claim.access === 'triage'
+    ? t('workbench.restrictedMember')
+    : claim.memberName || t(claim.isAnonymous ? 'workbench.anonymousMember' : 'workbench.unknownMember'),
+  memberEmail: claim.memberEmail || "",
+  memberPhone: claim.memberPhone || "",
   assignedTo: claim.assignedTo || null,
-  notes: claim.resolutionNotes ? [claim.resolutionNotes] : [],
   daysOpen: calculateDaysOpen(claim.createdAt),
   claimType: claim.claimType || '',
 });
@@ -188,6 +190,36 @@ const statusConfig: Record<CaseStatus, { icon: React.ReactElement; color: string
   }
 };
 
+/** The notes of one open case: read from the case when its details open, so while they load or when they cannot be read the panel says so, and a case with no notes shows nothing. */
+function CaseNotesPanel({ state }: { state: CaseNotes | undefined }) {
+  const t = useTranslations();
+  if (!state || state.status === 'loading') {
+    return <p role="status" className="mb-6 text-sm text-gray-600">{t('workbench.caseNotesLoading')}</p>;
+  }
+  if (state.status === 'unavailable') {
+    return <p role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{t('workbench.caseNotesUnavailable')}</p>;
+  }
+  if (state.notes.length === 0) return null;
+  return (
+    <div className="mb-6">
+      <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <MessageSquare className="w-4 h-4" />
+        {t('workbench.caseNotes', { count: state.notes.length })}
+      </h4>
+      <div className="space-y-2">
+        {state.notes.map((note, idx) => (
+          <div key={idx} className="bg-green-50 p-3 rounded-lg text-sm text-gray-700">
+            <div className="flex items-start gap-2">
+              <FileText className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
+              <p>{note}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function WorkbenchConsole() {
   const t = useTranslations();
   const locale = useLocale();
@@ -207,6 +239,9 @@ export default function WorkbenchConsole() {
   const [newNote, setNewNote] = useState<Record<string, string>>({});
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [escalatingId, setEscalatingId] = useState<string | null>(null);
+  const [canAssign, setCanAssign] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [caseNotes, setCaseNotes] = useState<Record<string, CaseNotes>>({});
 
   const priorityConfig: Record<CasePriority, { label: string; color: string; icon: React.ReactElement }> = {
     low: { label: t('workbench.priorities.low'), color: "text-gray-600 bg-gray-100", icon: <Flag className="w-3 h-3" /> },
@@ -233,9 +268,10 @@ export default function WorkbenchConsole() {
           throw new Error(`Failed to fetch assigned claims: ${response.statusText}`);
         }
 
-        const data = await response.json();
-        const claims = data.data?.claims ?? data.claims;
+        const answer = (await response.json()) as WorkbenchAnswer;
+        const claims = answer.data?.claims;
         if (!Array.isArray(claims)) throw new Error(loadingErrorMessage);
+        setCanAssign(answer.data?.capabilities?.canAssign === true);
         const mappedCases = claims.map(claim => mapDbClaimToCase(claim, t));
         setCases(mappedCases);
       } catch (err) {
@@ -297,14 +333,38 @@ export default function WorkbenchConsole() {
       : '/api/workbench/assigned';
     const response = await fetch(url);
     if (response.ok) {
-      const data = await response.json();
-      const claims = data.data?.claims ?? data.claims;
+      const answer = (await response.json()) as WorkbenchAnswer;
+      const claims = answer.data?.claims;
       if (!Array.isArray(claims)) {
         setError(t('workbench.errorLoadingCases'));
         return;
       }
       setCases(claims.map(claim => mapDbClaimToCase(claim, t)));
     }
+  };
+
+  // The queue does not carry a case's notes: they are read from the case when its details are opened, and again after a note is added.
+  const loadNotes = async (claimId: string) => {
+    setCaseNotes(current => ({ ...current, [claimId]: { status: 'loading' } }));
+    try {
+      const res = await fetch(`/api/cases/${claimId}/notes`);
+      if (!res.ok) throw new Error(`Failed to fetch case notes: ${res.statusText}`);
+      const answer = (await res.json()) as CaseNotesAnswer;
+      if (!Array.isArray(answer.notes)) throw new Error('Unexpected case notes response');
+      // The route lists the case's history newest first; the notes are shown oldest first, as they were written.
+      const notes = answer.notes
+        .filter((entry): entry is { updateType: 'note'; message: string } => entry.updateType === 'note' && typeof entry.message === 'string')
+        .map(entry => entry.message)
+        .reverse();
+      setCaseNotes(current => ({ ...current, [claimId]: { status: 'ready', notes } }));
+    } catch {
+      setCaseNotes(current => ({ ...current, [claimId]: { status: 'unavailable' } }));
+    }
+  };
+
+  const toggleCase = (caseItem: Case, isExpanded: boolean) => {
+    setExpandedCase(isExpanded ? null : caseItem.id);
+    if (!isExpanded && !caseItem.triage) void loadNotes(caseItem.claimId);
   };
 
   const handleAssignToMe = async (caseItem: Case) => {
@@ -316,8 +376,13 @@ export default function WorkbenchConsole() {
         body: JSON.stringify({ assigneeId: user?.id ?? '', reason: 'Self-assigned from case queue' }),
       });
       if (res.ok) {
+        setActionError(null);
         await refetchCases();
+      } else {
+        setActionError(t('workbench.assignDenied'));
       }
+    } catch {
+      setActionError(t('workbench.actionFailed'));
     } finally {
       setActionLoading(null);
     }
@@ -334,13 +399,14 @@ export default function WorkbenchConsole() {
         body: JSON.stringify({ text: note }),
       });
       if (res.ok) {
-        setCases(cases.map(c =>
-          c.id === caseItem.id
-            ? { ...c, notes: [...c.notes, note], lastUpdate: new Date().toISOString().split('T')[0] }
-            : c
-        ));
+        setActionError(null);
         setNewNote({ ...newNote, [caseItem.id]: '' });
+        await loadNotes(caseItem.claimId);
+      } else {
+        setActionError(t('workbench.actionFailed'));
       }
+    } catch {
+      setActionError(t('workbench.actionFailed'));
     } finally {
       setActionLoading(null);
     }
@@ -355,8 +421,13 @@ export default function WorkbenchConsole() {
         body: JSON.stringify({ targetStatus }),
       });
       if (res.ok) {
+        setActionError(null);
         await refetchCases();
+      } else {
+        setActionError(t('workbench.actionFailed'));
       }
+    } catch {
+      setActionError(t('workbench.actionFailed'));
     } finally {
       setActionLoading(null);
     }
@@ -371,8 +442,13 @@ export default function WorkbenchConsole() {
         body: JSON.stringify({ notes: 'Escalated from case queue' }),
       });
       if (res.ok) {
+        setActionError(null);
         await refetchCases();
+      } else {
+        setActionError(t('workbench.actionFailed'));
       }
+    } catch {
+      setActionError(t('workbench.actionFailed'));
     } finally {
       setEscalatingId(null);
     }
@@ -396,6 +472,7 @@ export default function WorkbenchConsole() {
       >
         {/* Header */}
         <PageHeading title={t('workbench.title')} description={t('workbench.subtitle')} />
+        <a className="inline-flex text-sm underline" href={`/${locale}/dashboard/workbench/workaid`}>{t('workAidPage.openJourney')}</a>
 
         {/* Loading State */}
         {isLoading && (
@@ -427,6 +504,10 @@ export default function WorkbenchConsole() {
               </div>
             </div>
           </motion.div>
+        )}
+
+        {actionError && (
+          <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{actionError}</p>
         )}
 
         {/* Empty State */}
@@ -777,7 +858,7 @@ export default function WorkbenchConsole() {
                               aria-label={`${isExpanded ? t('workbench.collapse') : t('workbench.expand')} ${caseItem.id}`}
                               aria-expanded={isExpanded}
                               aria-controls={isExpanded ? `case-details-${encodeURIComponent(caseItem.claimId)}` : undefined}
-                              onClick={() => setExpandedCase(isExpanded ? null : caseItem.id)}
+                              onClick={() => toggleCase(caseItem, isExpanded)}
                             >
                               <motion.div
                                 animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -800,6 +881,23 @@ export default function WorkbenchConsole() {
                               transition={{ duration: 0.3 }}
                               className="border-t border-gray-200 pt-6 mt-4"
                             >
+                              {caseItem.triage ? (
+                                <div className="space-y-3">
+                                  <p role="note" className="rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
+                                    {t('workbench.restrictedMatterNotice')}
+                                  </p>
+                                  {canAssign && !caseItem.assignedTo && (
+                                    <button
+                                      onClick={() => handleAssignToMe(caseItem)}
+                                      disabled={actionLoading === caseItem.id}
+                                      className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                    >
+                                      {actionLoading === caseItem.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserCheck className="w-5 h-5" />}
+                                      {t('workbench.assignToMe')}
+                                    </button>
+                                  )}
+                                </div>
+                              ) : (<>
                               {/* Member Contact Info */}
                               <div className="bg-blue-50 p-4 rounded-lg mb-6">
                                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -827,24 +925,7 @@ export default function WorkbenchConsole() {
                               </div>
 
                               {/* Case Notes */}
-                              {caseItem.notes.length > 0 && (
-                                <div className="mb-6">
-                                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                    <MessageSquare className="w-4 h-4" />
-                                    {t('workbench.caseNotes', { count: caseItem.notes.length })}
-                                  </h4>
-                                  <div className="space-y-2">
-                                    {caseItem.notes.map((note, idx) => (
-                                      <div key={idx} className="bg-green-50 p-3 rounded-lg text-sm text-gray-700">
-                                        <div className="flex items-start gap-2">
-                                          <FileText className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
-                                          <p>{note}</p>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
+                              <CaseNotesPanel state={caseNotes[caseItem.claimId]} />
 
                               {/* Add Note */}
                               <div className="mb-6">
@@ -879,7 +960,7 @@ export default function WorkbenchConsole() {
 
                               {/* Action Buttons */}
                               <div className="flex flex-wrap gap-3">
-                                {!caseItem.assignedTo && caseItem.memberId !== user?.id && (
+                                {canAssign && !caseItem.assignedTo && caseItem.memberId !== user?.id && (
                                   <button
                                     onClick={() => handleAssignToMe(caseItem)}
                                     disabled={actionLoading === caseItem.id}
@@ -921,6 +1002,7 @@ export default function WorkbenchConsole() {
                                   </button>
                                 )}
                               </div>
+                              </>)}
                             </motion.div>
                           )}
                         </AnimatePresence>

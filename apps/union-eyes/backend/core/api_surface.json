@@ -1,0 +1,5955 @@
+{
+ "generatedBy": "core/emit_api_surface.py",
+ "serializers": {
+  "ai_core.serializers.AccessibilityAuditsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "accessibility_audits",
+   "write_only": []
+  },
+  "ai_core.serializers.AccessibilityIssuesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "audit_id",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "audit_id"
+   ],
+   "table": "accessibility_issues",
+   "write_only": []
+  },
+  "ai_core.serializers.AccessibilityTestSuitesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "accessibility_test_suites",
+   "write_only": []
+  },
+  "ai_core.serializers.AccessibilityUserTestingSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "accessibility_user_testing",
+   "write_only": []
+  },
+  "ai_core.serializers.AiRateLimitsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "ai_rate_limits",
+   "write_only": []
+  },
+  "ai_core.serializers.AiUsageMetricsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "ai_usage_metrics",
+   "write_only": []
+  },
+  "ai_core.serializers.ChatbotAnalyticsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "chatbot_analytics",
+   "write_only": []
+  },
+  "ai_core.serializers.ChatbotSuggestionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "chatbot_suggestions",
+   "write_only": []
+  },
+  "ai_core.serializers.KnowledgeBaseSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "knowledge_base",
+   "write_only": []
+  },
+  "ai_core.serializers.MlPredictionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "ml_predictions",
+   "write_only": []
+  },
+  "ai_core.serializers.ModelMetadataSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "model_metadata",
+   "write_only": []
+  },
+  "ai_core.serializers.WcagSuccessCriteriaSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "common_failures",
+    "created_at",
+    "criteria_description",
+    "criteria_number",
+    "criteria_title",
+    "guideline",
+    "how_to_meet_url",
+    "id",
+    "keywords",
+    "level",
+    "principle",
+    "sufficient_techniques",
+    "testing_procedure",
+    "understanding_url",
+    "updated_at",
+    "wcag_version"
+   ],
+   "required": [
+    "criteria_description",
+    "criteria_number",
+    "criteria_title",
+    "guideline",
+    "level",
+    "principle"
+   ],
+   "table": "wcag_success_criteria",
+   "write_only": []
+  },
+  "analytics.serializers.AnalyticsMetricsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "analytics_metrics",
+   "write_only": []
+  },
+  "analytics.serializers.AnalyticsScheduledReportsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "analytics_scheduled_reports",
+   "write_only": []
+  },
+  "analytics.serializers.BenchmarkCategoriesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "calculation_method",
+    "category_group",
+    "category_name",
+    "color",
+    "created_at",
+    "description",
+    "display_name",
+    "display_order",
+    "higher_is_better",
+    "icon",
+    "id",
+    "is_active",
+    "unit_type",
+    "updated_at"
+   ],
+   "required": [
+    "category_group",
+    "category_name",
+    "display_name",
+    "unit_type"
+   ],
+   "table": "benchmark_categories",
+   "write_only": []
+  },
+  "analytics.serializers.BenchmarkDataSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "benchmark_category_id",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "benchmark_data",
+   "write_only": []
+  },
+  "analytics.serializers.CommunicationAnalyticsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "communication_analytics",
+   "write_only": []
+  },
+  "analytics.serializers.ComparativeAnalysesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "comparative_analyses",
+   "write_only": []
+  },
+  "analytics.serializers.InsightRecommendationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "insight_recommendations",
+   "write_only": []
+  },
+  "analytics.serializers.KpiConfigurationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "kpi_configurations",
+   "write_only": []
+  },
+  "analytics.serializers.OrganizationBenchmarkSnapshotsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "organization_benchmark_snapshots",
+   "write_only": []
+  },
+  "analytics.serializers.PageAnalyticsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "page_analytics",
+   "write_only": []
+  },
+  "analytics.serializers.ReportDeliveryHistorySerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "report_delivery_history",
+   "write_only": []
+  },
+  "analytics.serializers.ReportExecutionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "report_id",
+    "updated_at"
+   ],
+   "required": [
+    "report_id"
+   ],
+   "table": "report_executions",
+   "write_only": []
+  },
+  "analytics.serializers.ReportSharesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "report_id",
+    "updated_at"
+   ],
+   "required": [
+    "report_id"
+   ],
+   "table": "report_shares",
+   "write_only": []
+  },
+  "analytics.serializers.ReportTemplatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "report_templates",
+   "write_only": []
+  },
+  "analytics.serializers.ScheduledReportsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "report_id",
+    "updated_at"
+   ],
+   "required": [
+    "report_id"
+   ],
+   "table": "scheduled_reports",
+   "write_only": []
+  },
+  "analytics.serializers.TrendAnalysesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "trend_analyses",
+   "write_only": []
+  },
+  "analytics.serializers.UserEngagementScoresSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "user_engagement_scores",
+   "write_only": []
+  },
+  "auth_core.serializers.CrossOrgAccessLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "cross_org_access_log",
+   "write_only": []
+  },
+  "auth_core.serializers.FeatureFlagsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "allowed_organizations",
+    "allowed_users",
+    "created_at",
+    "description",
+    "enabled",
+    "id",
+    "name",
+    "percentage",
+    "tags",
+    "type",
+    "updated_at"
+   ],
+   "required": [
+    "name"
+   ],
+   "table": "feature_flags",
+   "write_only": []
+  },
+  "auth_core.serializers.MemberConsentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "consent_category",
+    "consent_method",
+    "consent_text",
+    "consent_type",
+    "consent_version",
+    "created_at",
+    "created_by",
+    "expires_at",
+    "granted",
+    "granted_at",
+    "id",
+    "ip_address",
+    "metadata",
+    "organization_id",
+    "requires_renewal",
+    "revoked_at",
+    "updated_at",
+    "user_agent",
+    "user_id",
+    "witnessed_by"
+   ],
+   "required": [
+    "consent_category",
+    "consent_type",
+    "granted",
+    "organization_id",
+    "user_id"
+   ],
+   "table": "member_consents",
+   "write_only": []
+  },
+  "auth_core.serializers.MemberContactPreferencesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "accessibility_needs",
+    "alternative_email",
+    "alternative_phone",
+    "best_contact_times",
+    "created_at",
+    "email_opt_in",
+    "emergency_contact_name",
+    "emergency_contact_phone",
+    "emergency_contact_relation",
+    "id",
+    "interpreter_language",
+    "interpreter_required",
+    "last_modified_by",
+    "mail_opt_in",
+    "metadata",
+    "notification_preferences",
+    "organization_id",
+    "phone_opt_in",
+    "preferred_contact_method",
+    "preferred_language",
+    "sms_opt_in",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "organization_id",
+    "user_id"
+   ],
+   "table": "member_contact_preferences",
+   "write_only": []
+  },
+  "auth_core.serializers.MemberEmploymentDetailsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "benefits_eligible",
+    "benefits_enrollment_date",
+    "classification",
+    "committee_member",
+    "cost_center",
+    "created_at",
+    "department",
+    "division",
+    "employment_status",
+    "expected_return_date",
+    "hours_per_week",
+    "id",
+    "is_probationary",
+    "job_code",
+    "job_title",
+    "last_modified_by",
+    "metadata",
+    "officer",
+    "organization_id",
+    "pay_grade",
+    "pension_plan_enrolled",
+    "probation_end_date",
+    "seniority_date",
+    "seniority_points",
+    "seniority_years",
+    "shift_end",
+    "shift_start",
+    "shift_type",
+    "status_effective_date",
+    "status_reason",
+    "steward",
+    "supervisor_contact",
+    "supervisor_id",
+    "supervisor_name",
+    "updated_at",
+    "user_id",
+    "work_days",
+    "work_location_id"
+   ],
+   "required": [
+    "classification",
+    "organization_id",
+    "user_id"
+   ],
+   "table": "member_employment_details",
+   "write_only": []
+  },
+  "auth_core.serializers.MemberHistoryEventsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "actor_id",
+    "actor_name",
+    "created_at",
+    "created_by",
+    "event_category",
+    "event_data",
+    "event_date",
+    "event_description",
+    "event_title",
+    "event_type",
+    "id",
+    "is_public",
+    "metadata",
+    "organization_id",
+    "updated_at",
+    "user_id",
+    "visible_to_member"
+   ],
+   "required": [
+    "event_category",
+    "event_date",
+    "event_title",
+    "event_type",
+    "organization_id",
+    "user_id"
+   ],
+   "table": "member_history_events",
+   "write_only": []
+  },
+  "auth_core.serializers.MfaConfigurationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "organization",
+    "user_id"
+   ],
+   "table": "mfa_configurations",
+   "write_only": []
+  },
+  "auth_core.serializers.OauthProvidersSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "provider_id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "oauth_providers",
+   "write_only": []
+  },
+  "auth_core.serializers.OrganizationMembersSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "deleted_at",
+    "department",
+    "email",
+    "exempt_from_per_capita",
+    "exemption_approved_by",
+    "exemption_reason",
+    "hire_date",
+    "id",
+    "is_primary",
+    "joined_at",
+    "location",
+    "member_category",
+    "membership_number",
+    "metadata",
+    "name",
+    "organization",
+    "phone",
+    "position",
+    "role",
+    "seniority",
+    "status",
+    "union_join_date",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "organization",
+    "role",
+    "status",
+    "user_id"
+   ],
+   "table": "organization_members",
+   "write_only": []
+  },
+  "auth_core.serializers.OrganizationSharingGrantsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "grantor_org_id",
+    "id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "organization_sharing_grants",
+   "write_only": []
+  },
+  "auth_core.serializers.OrganizationSharingSettingsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "organization_sharing_settings",
+   "write_only": []
+  },
+  "auth_core.serializers.OrganizationUsersSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "organization_user_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "organization_users",
+   "write_only": []
+  },
+  "auth_core.serializers.ProfilesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "billing_cycle_end",
+    "billing_cycle_start",
+    "created_at",
+    "email",
+    "id",
+    "membership",
+    "next_credit_renewal",
+    "payment_provider",
+    "plan_duration",
+    "status",
+    "stripe_customer_id",
+    "stripe_subscription_id",
+    "updated_at",
+    "usage_credits",
+    "used_credits",
+    "user_id",
+    "whop_membership_id",
+    "whop_user_id"
+   ],
+   "required": [
+    "user_id"
+   ],
+   "table": "profiles",
+   "write_only": []
+  },
+  "auth_core.serializers.ScimConfigurationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "scim_configurations",
+   "write_only": []
+  },
+  "auth_core.serializers.ScimEventsLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "config",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "config"
+   ],
+   "table": "scim_events_log",
+   "write_only": []
+  },
+  "auth_core.serializers.SsoSessionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "provider",
+    "updated_at"
+   ],
+   "required": [
+    "provider"
+   ],
+   "table": "sso_sessions",
+   "write_only": []
+  },
+  "auth_core.serializers.UserSessionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "session_id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "user_sessions",
+   "write_only": []
+  },
+  "auth_core.serializers.UsersSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "users",
+   "write_only": []
+  },
+  "bargaining.serializers.ArbitrationDecisionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "case_number",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "arbitration_decisions",
+   "write_only": []
+  },
+  "bargaining.serializers.ArbitrationPrecedentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "source_organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "source_organization_id"
+   ],
+   "table": "arbitration_precedents",
+   "write_only": []
+  },
+  "bargaining.serializers.BargainingNotesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "cba",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "bargaining_notes",
+   "write_only": []
+  },
+  "bargaining.serializers.BargainingProposalsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "negotiation",
+    "updated_at"
+   ],
+   "required": [
+    "negotiation"
+   ],
+   "table": "bargaining_proposals",
+   "write_only": []
+  },
+  "bargaining.serializers.CbaClausesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "cba",
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "cba",
+    "organization_id"
+   ],
+   "table": "cba_clauses",
+   "write_only": []
+  },
+  "bargaining.serializers.ClauseComparisonsHistorySerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "clause_comparisons_history",
+   "write_only": []
+  },
+  "bargaining.serializers.CollectiveAgreementsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "cba_number",
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "collective_agreements",
+   "write_only": []
+  },
+  "bargaining.serializers.NegotiationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "expiring_cba",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "negotiations",
+   "write_only": []
+  },
+  "bargaining.serializers.TentativeAgreementsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "negotiation",
+    "updated_at"
+   ],
+   "required": [
+    "negotiation"
+   ],
+   "table": "tentative_agreements",
+   "write_only": []
+  },
+  "billing.serializers.AccountMappingsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "account_mappings",
+   "write_only": []
+  },
+  "billing.serializers.BankAccountsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "bank_accounts",
+   "write_only": []
+  },
+  "billing.serializers.BankReconciliationSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "bank_reconciliation",
+   "write_only": []
+  },
+  "billing.serializers.BankReconciliationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "bank_reconciliations",
+   "write_only": []
+  },
+  "billing.serializers.BankTransactionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "bank_account",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "bank_account"
+   ],
+   "table": "bank_transactions",
+   "write_only": []
+  },
+  "billing.serializers.ChartOfAccountsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "account_code",
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "chart_of_accounts",
+   "write_only": []
+  },
+  "billing.serializers.ClcApiConfigSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "clc_api_config",
+   "write_only": []
+  },
+  "billing.serializers.ClcChartOfAccountsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "account_code",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "clc_chart_of_accounts",
+   "write_only": []
+  },
+  "billing.serializers.ClcOrganizationSyncLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "affiliate_code",
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "clc_organization_sync_log",
+   "write_only": []
+  },
+  "billing.serializers.ClcRemittanceMappingSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "clc_remittance_mapping",
+   "write_only": []
+  },
+  "billing.serializers.ClcSyncLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "data_hash",
+    "direction",
+    "error_details",
+    "error_message",
+    "id",
+    "initiated_by",
+    "is_verified",
+    "organization",
+    "records_failed",
+    "records_processed",
+    "records_skipped",
+    "records_succeeded",
+    "status",
+    "sync_data",
+    "sync_end_date",
+    "sync_start_date",
+    "sync_type",
+    "updated_at",
+    "verification_notes",
+    "verification_status",
+    "verified_at",
+    "verified_by"
+   ],
+   "required": [
+    "direction"
+   ],
+   "table": "clc_sync_log",
+   "write_only": []
+  },
+  "billing.serializers.ClcWebhookLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "webhook_id"
+   ],
+   "required": [],
+   "table": "clc_webhook_log",
+   "write_only": []
+  },
+  "billing.serializers.CostCentersSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "cost_centers",
+   "write_only": []
+  },
+  "billing.serializers.DonationCampaignsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "donation_campaigns",
+   "write_only": []
+  },
+  "billing.serializers.DonationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "donations",
+   "write_only": []
+  },
+  "billing.serializers.DuesRatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "amount",
+    "created_at",
+    "id",
+    "local_id",
+    "organization_id",
+    "rate_name",
+    "rate_type",
+    "unit_id",
+    "updated_at"
+   ],
+   "required": [
+    "amount",
+    "organization_id",
+    "rate_name",
+    "rate_type"
+   ],
+   "table": "dues_rates",
+   "write_only": []
+  },
+  "billing.serializers.DuesTransactionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "assignment_id",
+    "created_at",
+    "id",
+    "member_id",
+    "organization_id",
+    "rule_id",
+    "transaction_type",
+    "updated_at"
+   ],
+   "required": [
+    "member_id",
+    "organization_id"
+   ],
+   "table": "dues_transactions",
+   "write_only": []
+  },
+  "billing.serializers.EmployerRemittancesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "employer_id",
+    "fiscal_month",
+    "fiscal_year",
+    "id",
+    "organization_id",
+    "period_end",
+    "period_start",
+    "remittance_date",
+    "remittance_number",
+    "total_amount",
+    "updated_at"
+   ],
+   "required": [
+    "employer_id",
+    "fiscal_month",
+    "fiscal_year",
+    "organization_id",
+    "period_end",
+    "period_start",
+    "remittance_date",
+    "total_amount"
+   ],
+   "table": "employer_remittances",
+   "write_only": []
+  },
+  "billing.serializers.ErpConnectorsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "erp_connectors",
+   "write_only": []
+  },
+  "billing.serializers.ErpInvoicesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "erp_invoices",
+   "write_only": []
+  },
+  "billing.serializers.FinancialAuditLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "financial_audit_log",
+   "write_only": []
+  },
+  "billing.serializers.FinancialPeriodsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "closed_at",
+    "closed_by",
+    "created_at",
+    "fiscal_month",
+    "fiscal_year",
+    "id",
+    "local_id",
+    "locked_at",
+    "locked_by",
+    "organization_id",
+    "period_end",
+    "period_start",
+    "status",
+    "total_revenue",
+    "updated_at"
+   ],
+   "required": [
+    "fiscal_month",
+    "fiscal_year",
+    "organization_id",
+    "period_end",
+    "period_start"
+   ],
+   "table": "financial_periods",
+   "write_only": []
+  },
+  "billing.serializers.GlAccountMappingsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "gl_account_mappings",
+   "write_only": []
+  },
+  "billing.serializers.GlTransactionLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "gl_transaction_log",
+   "write_only": []
+  },
+  "billing.serializers.GlTrialBalanceSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "gl_trial_balance",
+   "write_only": []
+  },
+  "billing.serializers.JournalEntriesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "journal_entries",
+   "write_only": []
+  },
+  "billing.serializers.JournalEntryLinesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "entry",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "entry"
+   ],
+   "table": "journal_entry_lines",
+   "write_only": []
+  },
+  "billing.serializers.MemberArrearsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "total_owed",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "organization_id",
+    "user_id"
+   ],
+   "table": "member_arrears",
+   "write_only": []
+  },
+  "billing.serializers.MemberDuesLedgerSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "amount",
+    "created_at",
+    "effective_date",
+    "id",
+    "organization_id",
+    "transaction_date",
+    "transaction_type",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "amount",
+    "effective_date",
+    "organization_id",
+    "transaction_date",
+    "transaction_type",
+    "user_id"
+   ],
+   "table": "member_dues_ledger",
+   "write_only": []
+  },
+  "billing.serializers.OrganizationBillingConfigSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "organization_billing_config",
+   "write_only": []
+  },
+  "billing.serializers.OrganizationContactsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "organization_contacts",
+   "write_only": []
+  },
+  "billing.serializers.PaymentCyclesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "payment_cycles",
+   "write_only": []
+  },
+  "billing.serializers.PaymentDisputesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "payment_disputes",
+   "write_only": []
+  },
+  "billing.serializers.PaymentMethodsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "payment_methods",
+   "write_only": []
+  },
+  "billing.serializers.PaymentPlansSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "plan_name",
+    "total_owed",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "organization_id",
+    "plan_name",
+    "total_owed",
+    "user_id"
+   ],
+   "table": "payment_plans",
+   "write_only": []
+  },
+  "billing.serializers.PerCapitaRemittancesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "due_date",
+    "from_organization_id",
+    "good_standing_members",
+    "id",
+    "organization_id",
+    "per_capita_rate",
+    "remittable_members",
+    "remittance_month",
+    "remittance_year",
+    "to_organization_id",
+    "total_members",
+    "updated_at"
+   ],
+   "required": [
+    "due_date",
+    "from_organization_id",
+    "good_standing_members",
+    "organization_id",
+    "per_capita_rate",
+    "remittable_members",
+    "remittance_month",
+    "remittance_year",
+    "to_organization_id",
+    "total_members"
+   ],
+   "table": "per_capita_remittances",
+   "write_only": []
+  },
+  "billing.serializers.RemittanceExceptionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "amount",
+    "created_at",
+    "employee_name",
+    "employee_number",
+    "exception_type",
+    "id",
+    "line_item_id",
+    "organization_id",
+    "remittance_id",
+    "severity",
+    "updated_at"
+   ],
+   "required": [
+    "exception_type",
+    "organization_id",
+    "remittance_id"
+   ],
+   "table": "remittance_exceptions",
+   "write_only": []
+  },
+  "billing.serializers.RemittanceLineItemsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "amount",
+    "created_at",
+    "employee_name",
+    "employee_number",
+    "employment_type",
+    "id",
+    "match_confidence",
+    "match_method",
+    "organization_id",
+    "remittance_id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "amount",
+    "organization_id",
+    "remittance_id"
+   ],
+   "table": "remittance_line_items",
+   "write_only": []
+  },
+  "billing.serializers.StripeWebhookEventsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "stripe_webhook_events",
+   "write_only": []
+  },
+  "compliance.serializers.ConflictReviewCommitteeSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "conflict_review_committee",
+   "write_only": []
+  },
+  "compliance.serializers.ConflictTrainingSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "conflict_training",
+   "write_only": []
+  },
+  "compliance.serializers.ConsentRecordsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "subject_type",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "consent_records",
+   "write_only": []
+  },
+  "compliance.serializers.CorrectiveActionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "action_number",
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "corrective_actions",
+   "write_only": []
+  },
+  "compliance.serializers.CouncilElectionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "candidates",
+    "contested_results",
+    "created_at",
+    "election_date",
+    "election_year",
+    "id",
+    "participation_rate",
+    "positions_available",
+    "total_votes",
+    "updated_at",
+    "verification_date",
+    "verified_by",
+    "winners"
+   ],
+   "required": [
+    "candidates",
+    "election_date",
+    "election_year",
+    "positions_available",
+    "total_votes",
+    "winners"
+   ],
+   "table": "council_elections",
+   "write_only": []
+  },
+  "compliance.serializers.DataAnonymizationLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "organization_id",
+    "user_id"
+   ],
+   "table": "data_anonymization_log",
+   "write_only": []
+  },
+  "compliance.serializers.DataProcessingRecordsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "data_processing_records",
+   "write_only": []
+  },
+  "compliance.serializers.DataResidencyConfigsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "data_residency_configs",
+   "write_only": []
+  },
+  "compliance.serializers.DataRetentionPoliciesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "data_retention_policies",
+   "write_only": []
+  },
+  "compliance.serializers.DataSubjectAccessRequestsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "data_subject_access_requests",
+   "write_only": []
+  },
+  "compliance.serializers.DsrActivityLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "request",
+    "updated_at"
+   ],
+   "required": [
+    "request"
+   ],
+   "table": "dsr_activity_log",
+   "write_only": []
+  },
+  "compliance.serializers.DsrRequestsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "request_type",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "dsr_requests",
+   "write_only": []
+  },
+  "compliance.serializers.GeofenceEventsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "geofence_events",
+   "write_only": []
+  },
+  "compliance.serializers.GoldenSharesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "certificate_number",
+    "consecutive_compliance_years",
+    "conversion_date",
+    "council_members",
+    "created_at",
+    "dividend_rights",
+    "holder_type",
+    "id",
+    "issue_date",
+    "redemption_value",
+    "share_class",
+    "status",
+    "sunset_clause_active",
+    "sunset_clause_duration",
+    "sunset_triggered_date",
+    "transferable",
+    "updated_at",
+    "voting_power_ordinary_matters",
+    "voting_power_reserved_matters"
+   ],
+   "required": [
+    "certificate_number",
+    "council_members",
+    "issue_date"
+   ],
+   "table": "golden_shares",
+   "write_only": []
+  },
+  "compliance.serializers.GovernanceEventsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "created_by",
+    "description",
+    "event_date",
+    "event_type",
+    "golden_share_id",
+    "id",
+    "impact",
+    "impact_description",
+    "mission_audit_id",
+    "notifications_sent",
+    "reserved_matter_vote_id",
+    "stakeholders",
+    "title",
+    "updated_at"
+   ],
+   "required": [
+    "description",
+    "event_date",
+    "event_type",
+    "title"
+   ],
+   "table": "governance_events",
+   "write_only": []
+  },
+  "compliance.serializers.GssApplicationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "actual_decision_date",
+    "application_number",
+    "compliance_flags",
+    "created_at",
+    "created_by",
+    "decision_details",
+    "documents",
+    "employer_id",
+    "expected_decision_date",
+    "foreign_worker_id",
+    "gss_category",
+    "id",
+    "met2_week_target",
+    "position_details",
+    "processing_days",
+    "status",
+    "submission_date",
+    "updated_at"
+   ],
+   "required": [
+    "application_number",
+    "employer_id",
+    "expected_decision_date",
+    "foreign_worker_id",
+    "gss_category",
+    "submission_date"
+   ],
+   "table": "gss_applications",
+   "write_only": []
+  },
+  "compliance.serializers.HazardReportsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "report_number",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "hazard_reports",
+   "write_only": []
+  },
+  "compliance.serializers.IndigenousMemberDataSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "indigenous_member_data",
+   "write_only": []
+  },
+  "compliance.serializers.InjuryLogsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "log_number",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "injury_logs",
+   "write_only": []
+  },
+  "compliance.serializers.LocationTrackingSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "location_tracking",
+   "write_only": []
+  },
+  "compliance.serializers.LrbEmployersSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "employer_name",
+    "id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "lrb_employers",
+   "write_only": []
+  },
+  "compliance.serializers.LrbUnionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "union_name",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "lrb_unions",
+   "write_only": []
+  },
+  "compliance.serializers.MissionAuditsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "audit_date",
+    "audit_period_end",
+    "audit_period_start",
+    "audit_report_pdf_url",
+    "audit_year",
+    "auditor_certification",
+    "auditor_firm",
+    "auditor_name",
+    "auditor_notes",
+    "auditor_opinion",
+    "consecutive_years_after_audit",
+    "corrective_actions",
+    "created_at",
+    "data_violation_details",
+    "data_violations",
+    "data_violations_pass",
+    "data_violations_threshold",
+    "id",
+    "impacts_consecutive_compliance",
+    "member_satisfaction_pass",
+    "member_satisfaction_percent",
+    "member_satisfaction_threshold",
+    "member_survey_responses",
+    "member_survey_sample_size",
+    "overall_pass",
+    "supporting_documents_urls",
+    "total_revenue",
+    "union_revenue",
+    "union_revenue_pass",
+    "union_revenue_percent",
+    "union_revenue_threshold",
+    "updated_at"
+   ],
+   "required": [
+    "audit_date",
+    "audit_period_end",
+    "audit_period_start",
+    "audit_year",
+    "auditor_firm",
+    "auditor_name",
+    "auditor_opinion",
+    "data_violations_pass",
+    "member_satisfaction_pass",
+    "member_satisfaction_percent",
+    "overall_pass",
+    "union_revenue_pass",
+    "union_revenue_percent"
+   ],
+   "table": "mission_audits",
+   "write_only": []
+  },
+  "compliance.serializers.PciDssCardholderDataFlowSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "pci_dss_cardholder_data_flow",
+   "write_only": []
+  },
+  "compliance.serializers.PpeEquipmentSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "item_number",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "ppe_equipment",
+   "write_only": []
+  },
+  "compliance.serializers.ProvincialConsentSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "provincial_consent",
+   "write_only": []
+  },
+  "compliance.serializers.ProvincialDataHandlingSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "provincial_data_handling",
+   "write_only": []
+  },
+  "compliance.serializers.ReservedMatterVotesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "description",
+    "id",
+    "matter_type",
+    "proposed_by",
+    "title",
+    "updated_at"
+   ],
+   "required": [
+    "description",
+    "matter_type",
+    "title"
+   ],
+   "table": "reserved_matter_votes",
+   "write_only": []
+  },
+  "compliance.serializers.SafetyAuditsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "audit_number",
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "safety_audits",
+   "write_only": []
+  },
+  "compliance.serializers.SafetyCertificationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "certification_number",
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "safety_certifications",
+   "write_only": []
+  },
+  "compliance.serializers.SafetyCommitteeMeetingsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "meeting_number",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "safety_committee_meetings",
+   "write_only": []
+  },
+  "compliance.serializers.SafetyInspectionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "inspection_number",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "safety_inspections",
+   "write_only": []
+  },
+  "compliance.serializers.SafetyPoliciesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "policy_number",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "safety_policies",
+   "write_only": []
+  },
+  "compliance.serializers.SafetyTrainingRecordsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "record_number",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "safety_training_records",
+   "write_only": []
+  },
+  "compliance.serializers.WorkplaceIncidentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "incident_number",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "workplace_incidents",
+   "write_only": []
+  },
+  "content.serializers.BoardPacketDistributionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "packet",
+    "updated_at"
+   ],
+   "required": [
+    "packet"
+   ],
+   "table": "board_packet_distributions",
+   "write_only": []
+  },
+  "content.serializers.BoardPacketSectionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "packet",
+    "updated_at"
+   ],
+   "required": [
+    "packet"
+   ],
+   "table": "board_packet_sections",
+   "write_only": []
+  },
+  "content.serializers.BoardPacketTemplatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "name",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "board_packet_templates",
+   "write_only": []
+  },
+  "content.serializers.CaseStudiesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "slug",
+    "title",
+    "updated_at"
+   ],
+   "required": [
+    "slug",
+    "title"
+   ],
+   "table": "case_studies",
+   "write_only": []
+  },
+  "content.serializers.CmsBlocksSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "cms_blocks",
+   "write_only": []
+  },
+  "content.serializers.CmsMediaLibrarySerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "cms_media_library",
+   "write_only": []
+  },
+  "content.serializers.CmsNavigationMenusSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "cms_navigation_menus",
+   "write_only": []
+  },
+  "content.serializers.CmsPagesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "cms_pages",
+   "write_only": []
+  },
+  "content.serializers.CmsTemplatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "cms_templates",
+   "write_only": []
+  },
+  "content.serializers.DocumentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "access_level",
+    "blob_container",
+    "blob_path",
+    "category",
+    "contains_legal_privilege",
+    "contains_medical_sensitive",
+    "contains_pii",
+    "content_text",
+    "content_type",
+    "created_at",
+    "deleted_at",
+    "description",
+    "disciplinary_sensitive",
+    "document_type",
+    "file_size",
+    "file_type",
+    "file_url",
+    "filename",
+    "folder_id",
+    "id",
+    "is_confidential",
+    "medical_sensitive",
+    "member_pii",
+    "metadata",
+    "mime_type",
+    "name",
+    "organization_id",
+    "privacy_label",
+    "sha256",
+    "size_bytes",
+    "status",
+    "tags",
+    "title",
+    "updated_at",
+    "uploaded_at",
+    "uploaded_by"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "documents",
+   "write_only": []
+  },
+  "content.serializers.EventCheckInsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "event_check_ins",
+   "write_only": []
+  },
+  "content.serializers.EventRegistrationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "event_registrations",
+   "write_only": []
+  },
+  "content.serializers.ImpactMetricsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "impact_metrics",
+   "write_only": []
+  },
+  "content.serializers.JobApplicationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "job_applications",
+   "write_only": []
+  },
+  "content.serializers.JobPostingsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "job_postings",
+   "write_only": []
+  },
+  "content.serializers.JobSavedSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "job_saved",
+   "write_only": []
+  },
+  "content.serializers.MemberDocumentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "category",
+    "created_at",
+    "file_name",
+    "file_size",
+    "file_type",
+    "file_url",
+    "id",
+    "organization_id",
+    "updated_at",
+    "uploaded_at",
+    "user_id"
+   ],
+   "required": [
+    "file_name",
+    "file_size",
+    "file_type",
+    "file_url",
+    "uploaded_at",
+    "user_id"
+   ],
+   "table": "member_documents",
+   "write_only": []
+  },
+  "content.serializers.OrganizerImpactsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "user_id"
+   ],
+   "table": "organizer_impacts",
+   "write_only": []
+  },
+  "content.serializers.PilotApplicationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "challenges",
+    "commercial_terms_approved_at",
+    "commercial_terms_approved_by",
+    "contact_email",
+    "contact_name",
+    "contact_phone",
+    "created_at",
+    "current_system",
+    "goals",
+    "id",
+    "jurisdictions",
+    "member_count",
+    "organization_name",
+    "organization_type",
+    "readiness_score",
+    "sectors",
+    "updated_at",
+    "verified_at",
+    "verified_by",
+    "verified_member_count",
+    "verified_organization",
+    "verified_pilot_amount",
+    "verified_subscription_plan_id"
+   ],
+   "required": [
+    "challenges",
+    "contact_email",
+    "contact_name",
+    "goals",
+    "jurisdictions",
+    "member_count",
+    "organization_name",
+    "organization_type",
+    "sectors"
+   ],
+   "table": "pilot_applications",
+   "write_only": []
+  },
+  "content.serializers.PilotMetricsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "pilot_id",
+    "updated_at"
+   ],
+   "required": [
+    "pilot_id"
+   ],
+   "table": "pilot_metrics",
+   "write_only": []
+  },
+  "content.serializers.PublicEventsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "public_events",
+   "write_only": []
+  },
+  "content.serializers.SignatureTemplatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "signature_templates",
+   "write_only": []
+  },
+  "content.serializers.SignatureWebhooksLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "document",
+    "event_type",
+    "id",
+    "provider",
+    "updated_at"
+   ],
+   "required": [
+    "event_type",
+    "provider"
+   ],
+   "table": "signature_webhooks_log",
+   "write_only": []
+  },
+  "content.serializers.SocialAnalyticsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "social_analytics",
+   "write_only": []
+  },
+  "content.serializers.SocialCampaignsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "social_campaigns",
+   "write_only": []
+  },
+  "content.serializers.SocialEngagementSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "social_engagement",
+   "write_only": []
+  },
+  "content.serializers.SocialFeedsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "social_feeds",
+   "write_only": []
+  },
+  "content.serializers.SocialPostsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "social_posts",
+   "write_only": []
+  },
+  "content.serializers.TestimonialsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "approved_at",
+    "author",
+    "created_at",
+    "featured",
+    "id",
+    "organization",
+    "organization_type",
+    "photo",
+    "quote",
+    "role",
+    "type",
+    "updated_at",
+    "visibility"
+   ],
+   "required": [
+    "author",
+    "quote",
+    "role",
+    "type"
+   ],
+   "table": "testimonials",
+   "write_only": []
+  },
+  "content.serializers.WebsiteSettingsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "website_settings",
+   "write_only": []
+  },
+  "core.serializers.AlertActionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "alert_rule",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "alert_rule"
+   ],
+   "table": "alert_actions",
+   "write_only": []
+  },
+  "core.serializers.AlertConditionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "alert_rule",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "alert_rule"
+   ],
+   "table": "alert_conditions",
+   "write_only": []
+  },
+  "core.serializers.AlertEscalationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "alert_escalations",
+   "write_only": []
+  },
+  "core.serializers.AlertExecutionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "alert_rule",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "alert_rule"
+   ],
+   "table": "alert_executions",
+   "write_only": []
+  },
+  "core.serializers.AlertRulesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "alert_rules",
+   "write_only": []
+  },
+  "core.serializers.ApiAccessTokensSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "api_access_tokens",
+   "write_only": []
+  },
+  "core.serializers.AuditLogsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "action",
+    "audit_id",
+    "changes",
+    "content_hash",
+    "correlation_id",
+    "created_at",
+    "details",
+    "id",
+    "ip_address",
+    "organization",
+    "previous_hash",
+    "resource_id",
+    "resource_type",
+    "updated_at",
+    "user_agent",
+    "user_id"
+   ],
+   "required": [],
+   "table": "audit_logs",
+   "write_only": []
+  },
+  "core.serializers.AutomationExecutionLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "rule",
+    "triggered_by",
+    "updated_at"
+   ],
+   "required": [
+    "rule"
+   ],
+   "table": "automation_execution_log",
+   "write_only": []
+  },
+  "core.serializers.AutomationSchedulesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "rule",
+    "schedule_type",
+    "updated_at"
+   ],
+   "required": [
+    "rule"
+   ],
+   "table": "automation_schedules",
+   "write_only": []
+  },
+  "core.serializers.ExternalAccountsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "external_accounts",
+   "write_only": []
+  },
+  "core.serializers.ExternalCommunicationFilesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "org_id",
+    "updated_at"
+   ],
+   "required": [
+    "org_id"
+   ],
+   "table": "external_communication_files",
+   "write_only": []
+  },
+  "core.serializers.ExternalCommunicationMessagesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "org_id",
+    "updated_at"
+   ],
+   "required": [
+    "org_id"
+   ],
+   "table": "external_communication_messages",
+   "write_only": []
+  },
+  "core.serializers.ExternalDocumentFilesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "org_id",
+    "updated_at"
+   ],
+   "required": [
+    "org_id"
+   ],
+   "table": "external_document_files",
+   "write_only": []
+  },
+  "core.serializers.ExternalDocumentPermissionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "org_id",
+    "updated_at"
+   ],
+   "required": [
+    "org_id"
+   ],
+   "table": "external_document_permissions",
+   "write_only": []
+  },
+  "core.serializers.FailedLoginAttemptsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "attempt_id",
+    "created_at",
+    "email",
+    "id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "failed_login_attempts",
+   "write_only": []
+  },
+  "core.serializers.IntegrationSyncLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "integration_sync_log",
+   "write_only": []
+  },
+  "core.serializers.IntegrationSyncLogsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "integration",
+    "updated_at"
+   ],
+   "required": [
+    "integration"
+   ],
+   "table": "integration_sync_logs",
+   "write_only": []
+  },
+  "core.serializers.RateLimitEventsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "event_id",
+    "id",
+    "identifier",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "rate_limit_events",
+   "write_only": []
+  },
+  "core.serializers.WebhookDeliveriesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "webhook"
+   ],
+   "required": [
+    "webhook"
+   ],
+   "table": "webhook_deliveries",
+   "write_only": []
+  },
+  "core.serializers.WebhookSubscriptionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "webhook_subscriptions",
+   "write_only": []
+  },
+  "core.serializers.WorkflowDefinitionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "workflow_definitions",
+   "write_only": []
+  },
+  "core.serializers.WorkflowExecutionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "workflow_definition"
+   ],
+   "required": [
+    "workflow_definition"
+   ],
+   "table": "workflow_executions",
+   "write_only": []
+  },
+  "grievances.serializers.ArbitrationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "arbitration_number",
+    "created_at",
+    "grievance",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "grievance"
+   ],
+   "table": "arbitrations",
+   "write_only": []
+  },
+  "grievances.serializers.ClaimDeadlinesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "alert_count",
+    "claim_id",
+    "completed_at",
+    "completed_by",
+    "completion_notes",
+    "created_at",
+    "days_overdue",
+    "days_until_due",
+    "deadline_name",
+    "deadline_rule_id",
+    "deadline_type",
+    "due_date",
+    "escalated_at",
+    "escalated_to",
+    "event_date",
+    "extension_count",
+    "id",
+    "is_overdue",
+    "last_alert_sent",
+    "last_extension_date",
+    "last_extension_reason",
+    "organization_id",
+    "original_deadline",
+    "priority",
+    "status",
+    "total_extension_days",
+    "updated_at"
+   ],
+   "required": [
+    "claim_id",
+    "due_date",
+    "event_date",
+    "organization_id",
+    "original_deadline"
+   ],
+   "table": "claim_deadlines",
+   "write_only": []
+  },
+  "grievances.serializers.ClaimPrecedentAnalysisSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "claim_id",
+    "created_at",
+    "id",
+    "precedent_matches",
+    "success_probability",
+    "updated_at"
+   ],
+   "required": [
+    "claim_id"
+   ],
+   "table": "claim_precedent_analysis",
+   "write_only": []
+  },
+  "grievances.serializers.ClaimUpdatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "claim",
+    "created_at",
+    "id",
+    "update_id",
+    "updated_at"
+   ],
+   "required": [
+    "claim"
+   ],
+   "table": "claim_updates",
+   "write_only": []
+  },
+  "grievances.serializers.ClaimsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "ai_analysis",
+    "ai_score",
+    "assigned_at",
+    "assigned_to",
+    "attachments",
+    "claim_amount",
+    "claim_id",
+    "claim_number",
+    "claim_type",
+    "closed_at",
+    "complexity_score",
+    "court_costs",
+    "created_at",
+    "description",
+    "desired_outcome",
+    "filed_date",
+    "id",
+    "idempotency_hash",
+    "incident_date",
+    "is_anonymous",
+    "legal_costs",
+    "location",
+    "member_id",
+    "merit_confidence",
+    "metadata",
+    "organization_id",
+    "precedent_match",
+    "previous_report_details",
+    "previously_reported",
+    "priority",
+    "progress",
+    "resolution_outcome",
+    "resolved_at",
+    "settlement_amount",
+    "status",
+    "updated_at",
+    "voice_transcriptions",
+    "witness_details",
+    "witnesses_present"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "claims",
+   "write_only": []
+  },
+  "grievances.serializers.DeadlineAlertsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "deadline_id",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "deadline_id"
+   ],
+   "table": "deadline_alerts",
+   "write_only": []
+  },
+  "grievances.serializers.DeadlineExtensionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "deadline_id",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "deadline_id"
+   ],
+   "table": "deadline_extensions",
+   "write_only": []
+  },
+  "grievances.serializers.DeadlineRulesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "allows_extension",
+    "business_days_only",
+    "claim_type",
+    "created_at",
+    "created_by",
+    "days_from_event",
+    "description",
+    "escalate_to_role",
+    "escalation_delay_days",
+    "event_type",
+    "id",
+    "is_active",
+    "is_system_rule",
+    "max_extension_days",
+    "organization_id",
+    "priority_level",
+    "requires_approval",
+    "rule_code",
+    "rule_name",
+    "step_number",
+    "updated_at"
+   ],
+   "required": [
+    "days_from_event",
+    "organization_id"
+   ],
+   "table": "deadline_rules",
+   "write_only": []
+  },
+  "grievances.serializers.DefensibilityPacksSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "case_id",
+    "case_number",
+    "created_at",
+    "id",
+    "pack_id",
+    "updated_at"
+   ],
+   "required": [
+    "case_id"
+   ],
+   "table": "defensibility_packs",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceApprovalsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "transition",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id",
+    "transition"
+   ],
+   "table": "grievance_approvals",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceAssignmentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "assigned_to",
+    "claim",
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "claim",
+    "organization_id"
+   ],
+   "table": "grievance_assignments",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceCommunicationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "claim",
+    "communication_type",
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "claim",
+    "organization_id"
+   ],
+   "table": "grievance_communications",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceDeadlinesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "deadline_type",
+    "due_date",
+    "grievance",
+    "id",
+    "status",
+    "updated_at"
+   ],
+   "required": [
+    "due_date",
+    "grievance"
+   ],
+   "table": "grievance_deadlines",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceDocumentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "claim",
+    "created_at",
+    "document_name",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "claim",
+    "organization_id"
+   ],
+   "table": "grievance_documents",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceResponsesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "grievance",
+    "id",
+    "responding_party",
+    "response_number",
+    "updated_at"
+   ],
+   "required": [
+    "grievance",
+    "response_number"
+   ],
+   "table": "grievance_responses",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceSettlementsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "claim",
+    "created_at",
+    "id",
+    "organization_id",
+    "settlement_type",
+    "updated_at"
+   ],
+   "required": [
+    "claim",
+    "organization_id"
+   ],
+   "table": "grievance_settlements",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceStagesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at",
+    "workflow"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "grievance_stages",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceTimelineSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "event_type",
+    "grievance",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "grievance"
+   ],
+   "table": "grievance_timeline",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceTransitionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "claim",
+    "created_at",
+    "from_stage",
+    "id",
+    "notes",
+    "organization_id",
+    "reason",
+    "to_stage",
+    "transitioned_by",
+    "trigger_type",
+    "updated_at"
+   ],
+   "required": [
+    "claim",
+    "organization_id",
+    "to_stage",
+    "trigger_type"
+   ],
+   "table": "grievance_transitions",
+   "write_only": []
+  },
+  "grievances.serializers.GrievanceWorkflowsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "name",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "grievance_workflows",
+   "write_only": []
+  },
+  "grievances.serializers.GrievancesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "attachments",
+    "background",
+    "cba_article",
+    "cba_id",
+    "cba_section",
+    "closed_at",
+    "created_at",
+    "created_by",
+    "description",
+    "desired_outcome",
+    "employer_id",
+    "employer_name",
+    "employer_rep_id",
+    "escalated_at",
+    "filed_date",
+    "grievance_number",
+    "grievant_email",
+    "grievant_id",
+    "grievant_name",
+    "group_grievance_id",
+    "has_legal_implications",
+    "id",
+    "incident_date",
+    "is_arbitration_eligible",
+    "is_confidential",
+    "is_group_grievance",
+    "last_updated_by",
+    "meeting_date",
+    "organization_id",
+    "priority",
+    "related_grievance_ids",
+    "resolved_at",
+    "response_deadline",
+    "status",
+    "step",
+    "timeline",
+    "title",
+    "type",
+    "union_rep_id",
+    "updated_at",
+    "workplace_id",
+    "workplace_name"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "grievances",
+   "write_only": []
+  },
+  "grievances.serializers.PackDownloadLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "case_number",
+    "created_at",
+    "id",
+    "log_id",
+    "pack_id",
+    "updated_at"
+   ],
+   "required": [
+    "pack_id"
+   ],
+   "table": "pack_download_log",
+   "write_only": []
+  },
+  "grievances.serializers.PackVerificationLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "case_number",
+    "created_at",
+    "id",
+    "pack_id",
+    "updated_at",
+    "verification_id"
+   ],
+   "required": [
+    "pack_id"
+   ],
+   "table": "pack_verification_log",
+   "write_only": []
+  },
+  "grievances.serializers.SettlementsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "arbitration",
+    "created_at",
+    "grievance",
+    "id",
+    "settlement_type",
+    "status",
+    "updated_at"
+   ],
+   "required": [
+    "grievance",
+    "settlement_type"
+   ],
+   "table": "settlements",
+   "write_only": []
+  },
+  "notifications.serializers.CampaignsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "campaigns",
+   "write_only": []
+  },
+  "notifications.serializers.CommunicationChannelsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "communication_channels",
+   "write_only": []
+  },
+  "notifications.serializers.CommunicationPreferencesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "communication_preferences",
+   "write_only": []
+  },
+  "notifications.serializers.InAppNotificationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "organization_id",
+    "user_id"
+   ],
+   "table": "in_app_notifications",
+   "write_only": []
+  },
+  "notifications.serializers.MessageLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "message_log",
+   "write_only": []
+  },
+  "notifications.serializers.MessageNotificationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "message",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "message",
+    "user_id"
+   ],
+   "table": "message_notifications",
+   "write_only": []
+  },
+  "notifications.serializers.MessageParticipantsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "thread",
+    "updated_at"
+   ],
+   "required": [
+    "thread"
+   ],
+   "table": "message_participants",
+   "write_only": []
+  },
+  "notifications.serializers.MessageReadReceiptsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "message",
+    "updated_at"
+   ],
+   "required": [
+    "message"
+   ],
+   "table": "message_read_receipts",
+   "write_only": []
+  },
+  "notifications.serializers.MessageTemplatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "message_templates",
+   "write_only": []
+  },
+  "notifications.serializers.MessageThreadsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "category",
+    "created_at",
+    "id",
+    "is_archived",
+    "last_message_at",
+    "member_id",
+    "organization_id",
+    "priority",
+    "staff_id",
+    "status",
+    "subject",
+    "updated_at"
+   ],
+   "required": [
+    "member_id",
+    "organization_id",
+    "subject"
+   ],
+   "table": "message_threads",
+   "write_only": []
+  },
+  "notifications.serializers.MessagesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "thread",
+    "updated_at"
+   ],
+   "required": [
+    "thread"
+   ],
+   "table": "messages",
+   "write_only": []
+  },
+  "notifications.serializers.MobileAppConfigSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "mobile_app_config",
+   "write_only": []
+  },
+  "notifications.serializers.MobileNotificationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "badge",
+    "body",
+    "created_at",
+    "data",
+    "delivered_at",
+    "device",
+    "failed_at",
+    "id",
+    "organization_id",
+    "priority",
+    "provider_response",
+    "scheduled_at",
+    "sent_at",
+    "sound",
+    "status",
+    "title",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "status",
+    "title",
+    "user_id"
+   ],
+   "table": "mobile_notifications",
+   "write_only": []
+  },
+  "notifications.serializers.NewsletterRecipientsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "campaign_id",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "campaign_id"
+   ],
+   "table": "newsletter_recipients",
+   "write_only": []
+  },
+  "notifications.serializers.NewsletterTemplatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "newsletter_templates",
+   "write_only": []
+  },
+  "notifications.serializers.NotificationBouncesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "notification_bounces",
+   "write_only": []
+  },
+  "notifications.serializers.NotificationDeliveryLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "notification_delivery_log",
+   "write_only": []
+  },
+  "notifications.serializers.NotificationHistorySerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "notification_history",
+   "write_only": []
+  },
+  "notifications.serializers.NotificationLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "remittance_id",
+    "type",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "notification_log",
+   "write_only": []
+  },
+  "notifications.serializers.NotificationQueueSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "notification_queue",
+   "write_only": []
+  },
+  "notifications.serializers.NotificationTemplatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "notification_templates",
+   "write_only": []
+  },
+  "notifications.serializers.NotificationTrackingSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "action_label",
+    "action_url",
+    "body",
+    "created_at",
+    "delivered_at",
+    "external_message_id",
+    "failure_count",
+    "failure_reason",
+    "html_body",
+    "id",
+    "last_failure_at",
+    "metadata",
+    "organization_id",
+    "priority",
+    "provider_id",
+    "recipient_id",
+    "sent_at",
+    "status",
+    "subject",
+    "template_data",
+    "template_id",
+    "type",
+    "updated_at"
+   ],
+   "required": [
+    "body",
+    "organization_id",
+    "type"
+   ],
+   "table": "notification_tracking",
+   "write_only": []
+  },
+  "notifications.serializers.NotificationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "notifications",
+   "write_only": []
+  },
+  "notifications.serializers.PushNotificationTemplatesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "push_notification_templates",
+   "write_only": []
+  },
+  "notifications.serializers.PushNotificationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "push_notifications",
+   "write_only": []
+  },
+  "notifications.serializers.SmsMessagesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "sms_messages",
+   "write_only": []
+  },
+  "notifications.serializers.SmsRateLimitsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "sms_rate_limits",
+   "write_only": []
+  },
+  "services.compliance_snapshot.serializers.ComplianceSnapshotSerializer": {
+   "read_only": [
+    "created_at",
+    "created_by",
+    "hash",
+    "id",
+    "integrity_valid",
+    "metadata",
+    "org_id",
+    "previous_hash",
+    "sequence_number",
+    "snapshot_payload",
+    "snapshot_type"
+   ],
+   "readable": [
+    "created_at",
+    "created_by",
+    "hash",
+    "id",
+    "integrity_valid",
+    "metadata",
+    "org_id",
+    "previous_hash",
+    "sequence_number",
+    "snapshot_payload",
+    "snapshot_type"
+   ],
+   "required": [],
+   "table": "compliance_snapshots",
+   "write_only": []
+  },
+  "services.events.serializers.EventSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "integrity_valid",
+    "signature_hash"
+   ],
+   "readable": [
+    "actor_id",
+    "correlation_id",
+    "created_at",
+    "event_type",
+    "id",
+    "integrity_valid",
+    "metadata",
+    "org_id",
+    "payload",
+    "signature_hash"
+   ],
+   "required": [
+    "actor_id",
+    "event_type",
+    "org_id"
+   ],
+   "table": "domain_events",
+   "write_only": []
+  },
+  "services.evidence_pack.serializers.EvidencePackSerializer": {
+   "read_only": [
+    "artifact_count",
+    "created_at",
+    "id",
+    "pack_hash",
+    "seal_valid",
+    "sealed_at",
+    "sealed_by",
+    "total_size_bytes",
+    "updated_at"
+   ],
+   "readable": [
+    "artifact_count",
+    "created_at",
+    "description",
+    "id",
+    "metadata",
+    "org_id",
+    "pack_hash",
+    "pack_type",
+    "period_end",
+    "period_start",
+    "requested_by",
+    "seal_valid",
+    "sealed_at",
+    "sealed_by",
+    "status",
+    "title",
+    "total_size_bytes",
+    "updated_at"
+   ],
+   "required": [
+    "org_id",
+    "pack_type",
+    "title"
+   ],
+   "table": "evidence_packs",
+   "write_only": []
+  },
+  "services.integration_control_plane.serializers.IntegrationIdempotencyKeySerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "is_expired"
+   ],
+   "readable": [
+    "created_at",
+    "expires_at",
+    "id",
+    "integration",
+    "is_expired",
+    "org_id",
+    "request_hash",
+    "response_status"
+   ],
+   "required": [
+    "expires_at",
+    "org_id",
+    "request_hash"
+   ],
+   "table": "integration_idempotency_keys",
+   "write_only": []
+  },
+  "services.integration_control_plane.serializers.IntegrationRegistrySerializer": {
+   "read_only": [
+    "consecutive_failures",
+    "created_at",
+    "failure_count",
+    "id",
+    "last_failure_at",
+    "last_failure_reason",
+    "last_success_at",
+    "updated_at"
+   ],
+   "readable": [
+    "consecutive_failures",
+    "created_at",
+    "endpoint_url",
+    "failure_count",
+    "id",
+    "integration_type",
+    "last_failure_at",
+    "last_failure_reason",
+    "last_success_at",
+    "max_retries",
+    "metadata",
+    "name",
+    "org_id",
+    "retry_policy",
+    "status",
+    "updated_at"
+   ],
+   "required": [
+    "integration_type",
+    "name",
+    "org_id"
+   ],
+   "table": "integration_registry",
+   "write_only": []
+  },
+  "unions.serializers.BargainingUnitsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "bargaining_units",
+   "write_only": []
+  },
+  "unions.serializers.CalendarEventsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "calendar",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "calendar"
+   ],
+   "table": "calendar_events",
+   "write_only": []
+  },
+  "unions.serializers.CalendarSharingSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "calendar",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "calendar"
+   ],
+   "table": "calendar_sharing",
+   "write_only": []
+  },
+  "unions.serializers.CardSigningEventsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "card_signing_events",
+   "write_only": []
+  },
+  "unions.serializers.CommitteeMembershipsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "committee_id",
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "committee_id"
+   ],
+   "table": "committee_memberships",
+   "write_only": []
+  },
+  "unions.serializers.CommitteesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "committees",
+   "write_only": []
+  },
+  "unions.serializers.CourseSessionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "course_id",
+    "created_at",
+    "id",
+    "organization_id",
+    "session_code",
+    "updated_at"
+   ],
+   "required": [
+    "course_id",
+    "organization_id"
+   ],
+   "table": "course_sessions",
+   "write_only": []
+  },
+  "unions.serializers.EmployerResponsesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "employer_responses",
+   "write_only": []
+  },
+  "unions.serializers.EmployersSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "employers",
+   "write_only": []
+  },
+  "unions.serializers.EmploymentHistorySerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "change_type",
+    "created_at",
+    "id",
+    "member",
+    "member_employment",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "member",
+    "organization"
+   ],
+   "table": "employment_history",
+   "write_only": []
+  },
+  "unions.serializers.EventRemindersSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "event",
+    "id",
+    "updated_at"
+   ],
+   "required": [
+    "event"
+   ],
+   "table": "event_reminders",
+   "write_only": []
+  },
+  "unions.serializers.ExternalCalendarConnectionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [
+    "organization_id",
+    "user_id"
+   ],
+   "table": "external_calendar_connections",
+   "write_only": []
+  },
+  "unions.serializers.FederationCampaignsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "federation_id",
+    "id",
+    "name",
+    "updated_at"
+   ],
+   "required": [
+    "federation_id"
+   ],
+   "table": "federation_campaigns",
+   "write_only": []
+  },
+  "unions.serializers.FederationCommunicationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "federation_id",
+    "id",
+    "title",
+    "updated_at"
+   ],
+   "required": [
+    "federation_id"
+   ],
+   "table": "federation_communications",
+   "write_only": []
+  },
+  "unions.serializers.FederationExecutivesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "federation_id",
+    "id",
+    "profile_user_id",
+    "updated_at"
+   ],
+   "required": [
+    "federation_id"
+   ],
+   "table": "federation_executives",
+   "write_only": []
+  },
+  "unions.serializers.FederationMeetingsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "federation_id",
+    "id",
+    "title",
+    "updated_at"
+   ],
+   "required": [
+    "federation_id"
+   ],
+   "table": "federation_meetings",
+   "write_only": []
+  },
+  "unions.serializers.FederationMembershipsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "federation_id",
+    "id",
+    "membership_number",
+    "status",
+    "union_organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "federation_id",
+    "union_organization_id"
+   ],
+   "table": "federation_memberships",
+   "write_only": []
+  },
+  "unions.serializers.FederationResourcesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "federation_id",
+    "id",
+    "title",
+    "updated_at"
+   ],
+   "required": [
+    "federation_id"
+   ],
+   "table": "federation_resources",
+   "write_only": []
+  },
+  "unions.serializers.FederationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "name",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "federations",
+   "write_only": []
+  },
+  "unions.serializers.FieldNotesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "field_notes",
+   "write_only": []
+  },
+  "unions.serializers.FieldOrganizerActivitiesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "field_organizer_activities",
+   "write_only": []
+  },
+  "unions.serializers.HolidaysSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "holidays",
+   "write_only": []
+  },
+  "unions.serializers.JobClassificationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "bargaining_unit",
+    "created_at",
+    "id",
+    "job_code",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "job_classifications",
+   "write_only": []
+  },
+  "unions.serializers.MemberAddressesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "member_addresses",
+   "write_only": []
+  },
+  "unions.serializers.MemberCertificationsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "member_id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "member_certifications",
+   "write_only": []
+  },
+  "unions.serializers.MemberEmploymentSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "bargaining_unit",
+    "created_at",
+    "employer",
+    "employment_status",
+    "employment_type",
+    "expected_return_date",
+    "hire_date",
+    "id",
+    "member",
+    "organization",
+    "seniority_date",
+    "seniority_years",
+    "termination_date",
+    "updated_at",
+    "worksite"
+   ],
+   "required": [
+    "hire_date",
+    "member",
+    "organization",
+    "seniority_date"
+   ],
+   "table": "member_employment",
+   "write_only": []
+  },
+  "unions.serializers.MemberLeavesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "actual_return_date",
+    "approved_by",
+    "created_at",
+    "end_date",
+    "expected_return_date",
+    "id",
+    "is_approved",
+    "leave_type",
+    "member",
+    "member_employment",
+    "organization",
+    "start_date",
+    "updated_at"
+   ],
+   "required": [
+    "leave_type",
+    "member",
+    "organization",
+    "start_date"
+   ],
+   "table": "member_leaves",
+   "write_only": []
+  },
+  "unions.serializers.MemberLocationConsentSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "updated_at",
+    "user_id"
+   ],
+   "required": [],
+   "table": "member_location_consent",
+   "write_only": []
+  },
+  "unions.serializers.MemberRelationshipScoresSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "member_relationship_scores",
+   "write_only": []
+  },
+  "unions.serializers.MemberSegmentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "created_by",
+    "description",
+    "execution_count",
+    "filters",
+    "id",
+    "is_active",
+    "is_public",
+    "last_executed_at",
+    "name",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "created_by",
+    "filters",
+    "name",
+    "organization_id"
+   ],
+   "table": "member_segments",
+   "write_only": []
+  },
+  "unions.serializers.NlrbClrbFilingsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "nlrb_clrb_filings",
+   "write_only": []
+  },
+  "unions.serializers.OrganizingCampaignMilestonesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "organizing_campaign_milestones",
+   "write_only": []
+  },
+  "unions.serializers.OrganizingCampaignsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "organizing_campaigns",
+   "write_only": []
+  },
+  "unions.serializers.OrganizingContactsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "organizing_contacts",
+   "write_only": []
+  },
+  "unions.serializers.OutreachEnrollmentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "outreach_enrollments",
+   "write_only": []
+  },
+  "unions.serializers.OutreachSequencesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "outreach_sequences",
+   "write_only": []
+  },
+  "unions.serializers.OutreachStepsLogSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "outreach_steps_log",
+   "write_only": []
+  },
+  "unions.serializers.PollVotesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "poll_votes",
+   "write_only": []
+  },
+  "unions.serializers.PollsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "polls",
+   "write_only": []
+  },
+  "unions.serializers.ProgramEnrollmentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "member_id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "program_enrollments",
+   "write_only": []
+  },
+  "unions.serializers.RoleTenureHistorySerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "role_tenure_history",
+   "write_only": []
+  },
+  "unions.serializers.SegmentExecutionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "segment",
+    "updated_at"
+   ],
+   "required": [
+    "segment"
+   ],
+   "table": "segment_executions",
+   "write_only": []
+  },
+  "unions.serializers.SegmentExportsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "segment",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "segment_exports",
+   "write_only": []
+  },
+  "unions.serializers.StewardAssignmentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "steward_assignments",
+   "write_only": []
+  },
+  "unions.serializers.SurveyAnswersSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "survey_answers",
+   "write_only": []
+  },
+  "unions.serializers.SurveyQuestionsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "survey_questions",
+   "write_only": []
+  },
+  "unions.serializers.SurveyResponsesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "survey_responses",
+   "write_only": []
+  },
+  "unions.serializers.SurveysSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "surveys",
+   "write_only": []
+  },
+  "unions.serializers.TaskCommentsSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [],
+   "table": "task_comments",
+   "write_only": []
+  },
+  "unions.serializers.UnionRepresentationVotesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization",
+    "updated_at"
+   ],
+   "required": [
+    "organization"
+   ],
+   "table": "union_representation_votes",
+   "write_only": []
+  },
+  "unions.serializers.WorksitesSerializer": {
+   "read_only": [
+    "created_at",
+    "id",
+    "updated_at"
+   ],
+   "readable": [
+    "created_at",
+    "id",
+    "organization_id",
+    "updated_at"
+   ],
+   "required": [
+    "organization_id"
+   ],
+   "table": "worksites",
+   "write_only": []
+  }
+ }
+}

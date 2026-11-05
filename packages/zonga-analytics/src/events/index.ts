@@ -80,8 +80,8 @@ export interface SessionEvent extends AnalyticsEvent {
 // ── Schemas ─────────────────────────────────────────────────────────────────
 
 export const playEventSchema = z.object({
-  assetId: z.string().uuid(),
-  creatorId: z.string().uuid(),
+  assetId: z.guid(),
+  creatorId: z.guid(),
   durationMs: z.number().int().nonnegative(),
   positionMs: z.number().int().nonnegative(),
   completionPercent: z.number().min(0).max(100),
@@ -93,8 +93,8 @@ export const playEventSchema = z.object({
 })
 
 export const skipEventSchema = z.object({
-  assetId: z.string().uuid(),
-  creatorId: z.string().uuid(),
+  assetId: z.guid(),
+  creatorId: z.guid(),
   positionMs: z.number().int().nonnegative(),
   durationMs: z.number().int().positive(),
   reason: z.enum(['manual', 'queue_next', 'dislike']).optional(),

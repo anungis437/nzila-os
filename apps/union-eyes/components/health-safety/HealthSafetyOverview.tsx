@@ -22,21 +22,14 @@ import { Button } from "@/components/ui/button";
 import {
   Shield,
   Plus,
-  Download,
 } from "lucide-react";
 import { 
   HealthSafetyDashboard,
 } from "@/components/health-safety";
-import { toast } from "sonner";
 
 export default function HealthSafetyOverview() {
   const organizationId = useOrganizationId();
   const [period] = useState<"7d" | "30d" | "90d" | "12m">("30d");
-
-  const handleExportData = () => {
-    toast.info("Exporting health & safety data...");
-    // Implement export functionality
-  };
 
   if (!organizationId) {
     return (
@@ -70,20 +63,12 @@ export default function HealthSafetyOverview() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={handleExportData}
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export Data
-            </Button>
-            <Link href="/dashboard/health-safety/incidents/new">
-              <Button className="flex items-center gap-2 bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+            <Button className="flex items-center gap-2 bg-linear-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700" asChild>
+              <Link href="/dashboard/health-safety/incidents/new">
                 <Plus className="h-4 w-4" />
                 Report Incident
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </motion.div>
 

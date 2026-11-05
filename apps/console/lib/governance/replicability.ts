@@ -44,7 +44,7 @@ export const DivergenceSchema = z.object({
   originalValue: z.unknown(),           // Value in template
   currentValue: z.unknown(),            // Current value in instance
   divergedAt: z.string().datetime(),   // When divergence occurred
-  divergedBy: z.string().uuid(),        // Who made the change
+  divergedBy: z.guid(),        // Who made the change
   reason: z.string().optional(),       // Why it was changed
 })
 
@@ -55,12 +55,12 @@ export type Divergence = z.infer<typeof DivergenceSchema>
  */
 export const ReplicabilityMetadataSchema = z.object({
   // Identity
-  replicationId: z.string().uuid(),      // Unique ID for this replication chain
+  replicationId: z.guid(),      // Unique ID for this replication chain
   version: z.string(),                   // Semantic version of this artifact
   
   // Template relationship
   isTemplate: z.boolean().default(false),
-  sourceId: z.string().uuid().optional(),     // ID of source template
+  sourceId: z.guid().optional(),     // ID of source template
   sourceVersion: z.string().optional(),        // Version of source template
   relation: z.nativeEnum(ReplicationRelation).optional(),
   
@@ -76,13 +76,13 @@ export const ReplicabilityMetadataSchema = z.object({
   autoSyncWithTemplate: z.boolean().default(false),  // Auto-update from template
   
   // Provenance
-  createdBy: z.string().uuid(),
+  createdBy: z.guid(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   
   // Access control
   isPublic: z.boolean().default(false),      // Can other orgs clone this?
-  allowedCloners: z.array(z.string().uuid()).default([]), // Specific orgs allowed
+  allowedCloners: z.array(z.guid()).default([]), // Specific orgs allowed
   
   // Audit
   cloneCount: z.number().int().nonnegative().default(0),
@@ -96,9 +96,9 @@ export type ReplicabilityMetadata = z.infer<typeof ReplicabilityMetadataSchema>
  */
 export const ReplicableWorkflowSchema = z.object({
   // Original workflow fields (embedded)
-  id: z.string().uuid(),
+  id: z.guid(),
   workflowType: z.string(),
-  requestorId: z.string().uuid(),
+  requestorId: z.guid(),
   requestorName: z.string(),
   requestDate: z.string().datetime(),
   action: z.string(),
@@ -111,7 +111,7 @@ export const ReplicableWorkflowSchema = z.object({
     order: z.number().int(),
     type: z.enum(['APPROVAL', 'NOTICE', 'WAIT', 'DOCUMENT']),
     actor: z.enum(['board', 'shareholders', 'specific', 'system']),
-    actorId: z.string().uuid().optional(),
+    actorId: z.guid().optional(),
     status: z.string(),
     required: z.boolean(),
     description: z.string(),
@@ -139,7 +139,7 @@ export type ReplicableWorkflow = z.infer<typeof ReplicableWorkflowSchema>
  */
 export const ReplicableResolutionSchema = z.object({
   // Original resolution fields
-  id: z.string().uuid(),
+  id: z.guid(),
   resolutionNumber: z.string(),
   type: z.string(),
   title: z.string(),
@@ -160,15 +160,15 @@ export const ReplicableResolutionSchema = z.object({
   quorumMet: z.boolean(),
   approved: z.boolean(),
   signatures: z.array(z.object({
-    signerId: z.string().uuid(),
+    signerId: z.guid(),
     signerName: z.string(),
     signerRole: z.string(),
     signedAt: z.string().datetime(),
     signatureHash: z.string().optional(),
   })),
-  workflowId: z.string().uuid().optional(),
+  workflowId: z.guid().optional(),
   relatedAction: z.string().optional(),
-  meetingId: z.string().uuid().optional(),
+  meetingId: z.guid().optional(),
   meetingDate: z.string().datetime().optional(),
   status: z.enum(['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'FILED']),
   effectiveDate: z.string().datetime().optional(),
@@ -186,7 +186,7 @@ export type ReplicableResolution = z.infer<typeof ReplicableResolutionSchema>
  * Template registry entry
  */
 export const TemplateRegistryEntrySchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   name: z.string(),
   description: z.string(),
   type: z.nativeEnum(ReplicableType),
@@ -204,7 +204,7 @@ export const TemplateRegistryEntrySchema = z.object({
   avgCompletionTime: z.number().optional(), // in hours
   
   // Validation
-  validationRules: z.record(z.string(), z.unknown()).default({}),
+  validationRules: z.record(z.string(), z.unknown()).prefault({}),
   isValid: z.boolean().default(true),
   lastValidated: z.string().datetime().optional(),
   validationErrors: z.array(z.string()).default([]),

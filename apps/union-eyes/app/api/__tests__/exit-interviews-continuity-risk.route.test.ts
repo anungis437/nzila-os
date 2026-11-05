@@ -20,10 +20,10 @@ describe('exit-interviews/continuity-risk route', () => {
     m.detectContinuityRisks.mockResolvedValue({ score: 0.2, signals: [] });
   });
 
-  it('returns a continuity risk report', async () => {
+  it('returns the continuity risk report itself; the framework wraps it as the data of the answer', async () => {
     const { GET } = await loadRoute();
     const result = await GET({ organizationId: 'org_1', user: { role: 'officer' } });
 
-    expect(result).toEqual({ data: { score: 0.2, signals: [] } });
+    expect(result).toEqual({ score: 0.2, signals: [] });
   });
 });

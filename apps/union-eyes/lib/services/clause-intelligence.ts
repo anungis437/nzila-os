@@ -10,6 +10,8 @@
  */
 
 import { db } from "@/db/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
+import { ApiError } from "@/lib/api/errors";
 import {
   cbaClause,
 } from "@/db/schema/domains/agreements/clauses";
@@ -203,31 +205,33 @@ export async function findRelevantClauses(
 export async function linkClauseToGrievance(
   grievanceId: string,
   clauseId: string,
+  organizationId: string,
+  exec: RLSTx = db,
 ) {
-  const [clause] = await db
+  const [clause] = await exec
     .select({
       cbaId: cbaClause.cbaId,
       clauseNumber: cbaClause.clauseNumber,
       articleNumber: cbaClause.articleNumber,
     })
     .from(cbaClause)
-    .where(eq(cbaClause.id, clauseId));
+    .where(and(eq(cbaClause.id, clauseId), eq(cbaClause.organizationId, organizationId)));
 
-  if (!clause) throw new Error("Clause not found.");
+  if (!clause) throw ApiError.notFound("Clause");
 
   // Import grievances table to update
   const { grievances } = await import(
     "@/db/schema/domains/claims/grievances"
   );
 
-  await db
+  await exec
     .update(grievances)
     .set({
       cbaId: clause.cbaId,
       cbaArticle: clause.articleNumber ?? clause.clauseNumber,
       cbaSection: clause.clauseNumber,
     })
-    .where(eq(grievances.id, grievanceId));
+    .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)));
 
   return { grievanceId, clauseId, linked: true };
 }

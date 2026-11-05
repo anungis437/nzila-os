@@ -19,7 +19,7 @@ import { createLogger } from '@nzila/os-core'
 const logger = createLogger('api.audit.verify-entity-chain')
 
 const VerifyEntityChainSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
 })
 
 export async function POST(req: NextRequest) {

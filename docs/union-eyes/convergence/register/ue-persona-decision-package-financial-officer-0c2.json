@@ -1,0 +1,2680 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-PERSONA-DECISION-PACKAGE",
+  "gate": "0C.2",
+  "packageId": "UE-FINANCIAL-OFFICER-PROPOSED-CANONICAL-2.1-R1",
+  "version": "2.1-R1",
+  "persona": "financial-officer",
+  "displayName": "Financial Officer 2.1",
+  "status": "PROPOSED_FOR_RATIFICATION",
+  "anchorCommit": "fe8469cff34c561b2beccddb965e13355d74bb09",
+  "preparedOn": "2026-10-27",
+  "selfRatification": false,
+  "banner": "PROPOSED FOR RATIFICATION. This package is prepared for a decision by an authorized product owner. It is not a ratified canonical, not the recovered historical canonical and not an institutional authorization. Engineering cannot accept it.",
+  "lineage": {
+    "proposedBaselineFile": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-financial-officer.json",
+    "proposedBaselineSha256": "01e11c12ce91b8ec96ff9d0af68595296effbc36e6f05def07ea0a02f677c216",
+    "proposedBaselineStatus": "PROPOSED_NOT_ADOPTED",
+    "baselineArtifactChangedByGate0C2": false,
+    "historicalIdentifier": "UE-FINANCIAL-OFFICER-CANONICAL-2.1",
+    "historicalCanonicalRecovered": false,
+    "relationship": "RECONSTRUCTION_CANDIDATE_OF_CITED_HISTORICAL_CANONICAL",
+    "statement": "UE-FINANCIAL-OFFICER-CANONICAL-2.1 is cited by a frozen disposition and its text was not recovered. This package is a reconstruction candidate built from the proposed baseline and is not that document.",
+    "reconciliation": {
+      "file": "docs/union-eyes/convergence/register/ue-persona-requirement-reconciliation-0c2.json",
+      "sha256": "1195f5f987fce1a5399bf6ac8cde26accc57bd03ee7bc11d733c5fa331751fa0"
+    },
+    "completionMatrixPersonaState": {
+      "resolved": false,
+      "trackingCapability": "UE-OMIT-FINANCE-RANGE-UNSPECIFIED"
+    }
+  },
+  "actionUniverse": {
+    "requirements": 55,
+    "byKind": {
+      "DENIAL": 5,
+      "DOMAIN": 29,
+      "JOURNEY": 10,
+      "NAVIGATION": 7,
+      "SCENARIO": 4
+    },
+    "byAuthorityClass": {
+      "ENGINEERING_REQUIREMENT": 1,
+      "IMPLEMENTED_SOURCE_BEHAVIOR": 5,
+      "PROPOSED_PERMISSION": 49
+    },
+    "byImplementationStatus": {
+      "NOT_IMPLEMENTED": 27,
+      "PARTIAL_SOURCE": 11,
+      "SOURCE_PRESENT": 8,
+      "UNAVAILABLE_501": 9
+    },
+    "byEvidenceClassification": {
+      "HISTORICAL_DIRECT": 7,
+      "NEW_DESIGN_NO_HISTORICAL_SOURCE": 9,
+      "RECONSTRUCTED_UNDER_HISTORICAL_LABEL": 39
+    },
+    "requirementIds": [
+      "FO-NAV-1",
+      "FO-NAV-2",
+      "FO-NAV-3",
+      "FO-NAV-4",
+      "FO-NAV-5",
+      "FO-NAV-6",
+      "FO-NAV-7",
+      "F01",
+      "F02",
+      "F03",
+      "F04",
+      "F05",
+      "F06",
+      "F07",
+      "F08",
+      "F09",
+      "F10",
+      "F11",
+      "F12",
+      "F13",
+      "F14",
+      "F15",
+      "F16",
+      "F17",
+      "F18",
+      "F19",
+      "F20",
+      "F21",
+      "F22",
+      "F23",
+      "F24",
+      "F25",
+      "F26",
+      "F27",
+      "F28",
+      "FO-BND-WORKAID",
+      "FO-DENY-01",
+      "FO-DENY-02",
+      "FO-DENY-03",
+      "FO-DENY-04",
+      "FO-DENY-05",
+      "FJ01",
+      "FJ02",
+      "FJ03",
+      "FJ04",
+      "FJ05",
+      "FJ06",
+      "FJ07",
+      "FJ08",
+      "FJ09",
+      "FJ10",
+      "FO-SCN-CAPE",
+      "FO-SCN-CUPE",
+      "FO-SCN-LIUNA",
+      "FO-SCN-SMALL-LOCAL"
+    ]
+  },
+  "authorityClassLegend": {
+    "ENGINEERING_REQUIREMENT": "A requirement the engineering gates must build or prove. It grants nothing.",
+    "IMPLEMENTED_SOURCE_BEHAVIOR": "Behavior that source already shows. It is not a statement that the behavior is complete or qualified.",
+    "PROPOSED_PERMISSION": "A permission proposed for product acceptance that stays inactive until the named institutional decision is adopted.",
+    "ADOPTED_INSTITUTIONAL_AUTHORIZATION": "Not used. No institutional authorization has been adopted and none can be created by this package."
+  },
+  "visibilityWorkflowMatrix": [
+    {
+      "domain": "IDENTITY_ELIGIBILITY",
+      "label": "Identity and eligibility",
+      "coverage": "COVERED",
+      "summary": "A role title carries no financial authority. Each financial duty needs a live issued mandate or appointment. No financial mandate has been issued and nothing in this package issues one.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "FO-NAV-7",
+        "F01",
+        "F28",
+        "FO-DENY-03"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 1,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 1,
+        "PROPOSED_PERMISSION": 2,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "ORG_FEDERATION_SCOPE",
+      "label": "Organization and federation scope",
+      "coverage": "PARTIAL",
+      "summary": "Finance is bounded to the active organization. Affiliate remittances are UNAVAILABLE_501 and the four organization scenarios are hypotheses with no source backing.",
+      "gapDecisionIds": [
+        "DEC-PD-0C2-07"
+      ],
+      "requirementIds": [
+        "F10",
+        "FO-SCN-CAPE",
+        "FO-SCN-CUPE",
+        "FO-SCN-LIUNA",
+        "FO-SCN-SMALL-LOCAL"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 5,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "label": "Case, member and document visibility",
+      "coverage": "COVERED",
+      "summary": "Balances, member financial records and reports are visible only for the accounts and fields a live mandate names. A view duty does not carry a report, member-level rows or an export.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "FO-NAV-1",
+        "FO-NAV-2",
+        "FO-NAV-3",
+        "FO-NAV-4",
+        "FO-NAV-5",
+        "FO-NAV-6",
+        "F03",
+        "F08",
+        "F22"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 9,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "RECORD_CREATION_UPDATE",
+      "label": "Record creation and updates",
+      "coverage": "COVERED",
+      "summary": "Accounts, dues, charges, receipts, remittance sources, vendors, invoices and tax records are prepared under a prepare duty. Preparation is separate from approval and execution.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "F02",
+        "F04",
+        "F05",
+        "F07",
+        "F09",
+        "F11",
+        "F12",
+        "F13",
+        "F14",
+        "F23"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 10,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "DELEGATION_SUBSTITUTION",
+      "label": "Delegation and substitution",
+      "coverage": "PARTIAL",
+      "summary": "A financial duty cannot be delegated. A permanent change goes through succession and revocation. A temporary absence has no specified path.",
+      "gapDecisionIds": [
+        "DEC-PD-0C2-08"
+      ],
+      "requirementIds": [
+        "FO-DENY-04"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 1,
+        "PROPOSED_PERMISSION": 0,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "label": "Confidentiality and privileged records",
+      "coverage": "COVERED",
+      "summary": "Financial personal data, banking fields and member-level rows are separate grants. External accounting export is a separate duty-checked action. Platform billing is not union finance.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "F25"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 1,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "label": "Financial or administrative approvals",
+      "coverage": "COVERED",
+      "summary": "View, prepare, approve, execute, reconcile and audit stay separate duties. Whether one principal may hold two is decided by a separation rule evaluated against the actual transaction. No real mandate, payment or export is authorized.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "F15",
+        "F16",
+        "F17",
+        "F18",
+        "F20",
+        "F24",
+        "FO-DENY-01",
+        "FO-DENY-02"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 2,
+        "PROPOSED_PERMISSION": 6,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "label": "Audit and accountability",
+      "coverage": "COVERED",
+      "summary": "Financial evidence, the audit trail, auditor and trustee duties and reconciliation are specified. A capability that is unavailable never reports success.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "F19",
+        "F21",
+        "F27",
+        "FO-DENY-05"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 1,
+        "PROPOSED_PERMISSION": 3,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "label": "Notifications and workflow transitions",
+      "coverage": "PARTIAL",
+      "summary": "Arrears follow-up is the only notification specified. Approval, execution and reconciliation name workflow states without a notification rule.",
+      "gapDecisionIds": [
+        "DEC-PD-0C2-09"
+      ],
+      "requirementIds": [
+        "F06",
+        "FJ01",
+        "FJ02",
+        "FJ03",
+        "FJ04",
+        "FJ05",
+        "FJ06",
+        "FJ07",
+        "FJ08",
+        "FJ09",
+        "FJ10"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 11,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "REVOCATION_TERMINATION_HISTORY",
+      "label": "Revocation, termination and historical access",
+      "coverage": "COVERED",
+      "summary": "Succession and revocation, the mandate oversight view and the audit access that survives a mandate are specified. Revocation ends the duty on the next request and keeps the historical record.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "F26"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 1,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "label": "Cross-persona handoffs",
+      "coverage": "COVERED",
+      "summary": "The WorkAid boundary holds no referral power for the Financial Officer. Member financial records meet representation only through explicit denials and the audit trail.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "FO-BND-WORKAID"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 1,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    }
+  ],
+  "actionVisibilityRows": [
+    {
+      "requirementId": "FO-NAV-1",
+      "kind": "NAVIGATION",
+      "title": "Accounts & Cash",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership. The entry shows only what live mandates name; the entry itself confers no duty.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Accounts & Cash lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-2",
+      "kind": "NAVIGATION",
+      "title": "Budgets & Spending",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership. The entry shows only what live mandates name; the entry itself confers no duty.",
+      "sharedObligation": null,
+      "implementationStatus": "UNAVAILABLE_501",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Budgets & Spending lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-3",
+      "kind": "NAVIGATION",
+      "title": "Funds & Programs",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership. The entry shows only what live mandates name; the entry itself confers no duty.",
+      "sharedObligation": null,
+      "implementationStatus": "UNAVAILABLE_501",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Funds & Programs lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-4",
+      "kind": "NAVIGATION",
+      "title": "Dues & Remittances",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership. The entry shows only what live mandates name; the entry itself confers no duty.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Dues & Remittances lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-5",
+      "kind": "NAVIGATION",
+      "title": "Approvals & Payments",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership. The entry shows only what live mandates name; the entry itself confers no duty.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Approvals & Payments lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-6",
+      "kind": "NAVIGATION",
+      "title": "Reports & Records",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership. The entry shows only what live mandates name; the entry itself confers no duty.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Reports & Records lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-7",
+      "kind": "NAVIGATION",
+      "title": "Mandates & Oversight",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership. The entry shows only what live mandates name; the entry itself confers no duty.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Mandates & Oversight lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "F01",
+      "kind": "DOMAIN",
+      "title": "Financial mandate register",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_ADMINISTRATION",
+      "visibilityAndAuthority": "A live issuance rule (DEC-IA-16). The holder activates. No mandate is issued from a request body or derived from a role title.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The register lists each mandate with its status. With none issued it says that no financial mandate has been issued."
+    },
+    {
+      "requirementId": "F02",
+      "kind": "DOMAIN",
+      "title": "Chart of accounts and fund structure",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, view duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The list of accounts the mandate names, each with type and currency."
+    },
+    {
+      "requirementId": "F03",
+      "kind": "DOMAIN",
+      "title": "Cash position and account balances",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_VIEW",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the view duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Balances with their as-of time. Unknown values are labelled unknown and never zero."
+    },
+    {
+      "requirementId": "F04",
+      "kind": "DOMAIN",
+      "title": "Dues rates and billing cycle",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The cycle shows its period, rates, counts and status."
+    },
+    {
+      "requirementId": "F05",
+      "kind": "DOMAIN",
+      "title": "Member dues charges and late fees",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The member account shows the charge with its reason and status."
+    },
+    {
+      "requirementId": "F06",
+      "kind": "DOMAIN",
+      "title": "Arrears follow-up and payment plans",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The arrears list with each member’s state; the plan shows its schedule."
+    },
+    {
+      "requirementId": "F07",
+      "kind": "DOMAIN",
+      "title": "Payment receipts and allocation",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The payment shows what it settles and what remains."
+    },
+    {
+      "requirementId": "F08",
+      "kind": "DOMAIN",
+      "title": "Member financial record access",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_VIEW",
+      "visibilityAndAuthority": "A live view mandate that names the account, or the member viewing their own record. Presidents and administrators receive no access by title (DEC-IA-27).",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The record with as-of times. A record outside the mandate does not appear."
+    },
+    {
+      "requirementId": "F09",
+      "kind": "DOMAIN",
+      "title": "Employer remittance source preservation",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The record shows source preserved and unparsed. A duplicate hash is refused."
+    },
+    {
+      "requirementId": "F10",
+      "kind": "DOMAIN",
+      "title": "Affiliate remittances",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "UNAVAILABLE_501",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The remittance shows its state. Submission and export are not available until adopted."
+    },
+    {
+      "requirementId": "F11",
+      "kind": "DOMAIN",
+      "title": "Budgets",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "UNAVAILABLE_501",
+      "engineeringGate": 5,
+      "functionalAcceptance": "A budget with its lines and status. Currently a not-available state."
+    },
+    {
+      "requirementId": "F12",
+      "kind": "DOMAIN",
+      "title": "Expenses",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "UNAVAILABLE_501",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The expense shows its state. Currently a not-available state."
+    },
+    {
+      "requirementId": "F13",
+      "kind": "DOMAIN",
+      "title": "Vendors",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "UNAVAILABLE_501",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The vendor list with status. Currently a not-available state."
+    },
+    {
+      "requirementId": "F14",
+      "kind": "DOMAIN",
+      "title": "Vendor invoices and payables",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The payable shows its match and state. Currently a not-available state."
+    },
+    {
+      "requirementId": "F15",
+      "kind": "DOMAIN",
+      "title": "Payment approval",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_APPROVE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The payment shows its approvals. A refusal says which rule applies."
+    },
+    {
+      "requirementId": "F16",
+      "kind": "DOMAIN",
+      "title": "Payment execution",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_EXECUTE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the execute duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The payment shows executed with the executor. A refusal says which rule applies."
+    },
+    {
+      "requirementId": "F17",
+      "kind": "DOMAIN",
+      "title": "Strike fund",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "UNAVAILABLE_501",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The fund page shows a not-available state until a qualified engine exists."
+    },
+    {
+      "requirementId": "F18",
+      "kind": "DOMAIN",
+      "title": "Restricted funds and stipends",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "UNAVAILABLE_501",
+      "engineeringGate": 5,
+      "functionalAcceptance": "A not-available state until adopted."
+    },
+    {
+      "requirementId": "F19",
+      "kind": "DOMAIN",
+      "title": "Trustees",
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "TRUSTEE_APPOINTMENT_DUTY",
+      "visibilityAndAuthority": "A recorded trustee appointment and a live mandate naming the duty. Trustee administration needs an independent authority (DEC-IA-22).",
+      "sharedObligation": null,
+      "implementationStatus": "UNAVAILABLE_501",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The register shows appointments. Changes are not available until an administration authority exists."
+    },
+    {
+      "requirementId": "F20",
+      "kind": "DOMAIN",
+      "title": "Reconciliation",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_RECONCILE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the reconcile duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The queue shows items and variances. Counts claimed by a caller are never accepted as verified."
+    },
+    {
+      "requirementId": "F21",
+      "kind": "DOMAIN",
+      "title": "Audit and review access",
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "AUDITOR_APPOINTMENT_DUTY",
+      "visibilityAndAuthority": "A recorded auditor appointment and a live mandate naming the audit duty and period (DEC-IA-23).",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Records within the audit scope with a findings list."
+    },
+    {
+      "requirementId": "F22",
+      "kind": "DOMAIN",
+      "title": "Financial statements and reports",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_VIEW",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the view duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The report states its scope, period and as-of time. Missing data is shown as missing."
+    },
+    {
+      "requirementId": "F23",
+      "kind": "DOMAIN",
+      "title": "Tax slips and receipts",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, execute duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Not offered until the institution adopts the registration."
+    },
+    {
+      "requirementId": "F24",
+      "kind": "DOMAIN",
+      "title": "Pension and benefit finance",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_PREPARE",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the prepare, approve duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Not offered under the financial baseline until adopted."
+    },
+    {
+      "requirementId": "F25",
+      "kind": "DOMAIN",
+      "title": "External accounting export",
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_VIEW",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the view, execute duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Not offered until the institution authorizes an export target."
+    },
+    {
+      "requirementId": "F26",
+      "kind": "DOMAIN",
+      "title": "Succession and revocation",
+      "domain": "REVOCATION_TERMINATION_HISTORY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_ADMINISTRATION",
+      "visibilityAndAuthority": "A live issuance rule (DEC-IA-28) for the mandates concerned. Succession is never automatic.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The register shows the revoked mandates and the reason."
+    },
+    {
+      "requirementId": "F27",
+      "kind": "DOMAIN",
+      "title": "Financial evidence and audit trail",
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "FINANCIAL_MANDATE_AUDIT",
+      "visibilityAndAuthority": "A live financial mandate naming the account and the audit, view duty. A role title, including the Secretary-Treasurer title, is never a mandate. Where no live mandate exists the answer is that no financial mandate has been issued.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 5,
+      "functionalAcceptance": "A list of duties with actor and time."
+    },
+    {
+      "requirementId": "F28",
+      "kind": "DOMAIN",
+      "title": "Language, mobile and accessibility",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "ENGINEERING_REQUIREMENT",
+      "authorizationBasis": "SELF_SCOPED",
+      "visibilityAndAuthority": "The person’s own settings.",
+      "sharedObligation": {
+        "id": "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "No untranslated labels and no inaccessible control."
+    },
+    {
+      "requirementId": "FO-BND-WORKAID",
+      "kind": "DOMAIN",
+      "title": "WorkAid boundary",
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "WORKAID_REFERRAL_WITH_CONSENT",
+      "visibilityAndAuthority": "A case relationship and a live consent. A financial duty alone never discloses a record to a specialist.",
+      "sharedObligation": {
+        "id": "SHR-0C2-WORKAID-REFERRAL",
+        "role": "NARROWING",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 7,
+      "functionalAcceptance": "The holder is told a financial duty does not share records with specialists."
+    },
+    {
+      "requirementId": "FO-DENY-01",
+      "kind": "DENIAL",
+      "title": "No financial authority from a role title",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "Eligibility is not authority. This contract states what a title or entitlement never grants.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FO-DENY-02",
+      "kind": "DENIAL",
+      "title": "No union financial authority from platform billing or entitlement",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "PLATFORM_BOUNDARY_NO_AUTHORITY",
+      "visibilityAndAuthority": "Eligibility is not authority. This contract states what a title or entitlement never grants.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FO-DENY-03",
+      "kind": "DENIAL",
+      "title": "No bypass of a separation rule in force",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "Eligibility is not authority. This contract states what a title or entitlement never grants.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FO-DENY-04",
+      "kind": "DENIAL",
+      "title": "No delegation of a financial duty",
+      "domain": "DELEGATION_SUBSTITUTION",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "Eligibility is not authority. This contract states what a title or entitlement never grants.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FO-DENY-05",
+      "kind": "DENIAL",
+      "title": "No success where the capability is unavailable",
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ROLE_ELIGIBILITY_ONLY",
+      "visibilityAndAuthority": "Eligibility is not authority. This contract states what a title or entitlement never grants.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FJ01",
+      "kind": "JOURNEY",
+      "title": "FJ01: Issue and activate a financial mandate",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The mandate is live and the holder can take only the named duties. SEP-SW-08 refuses activation by the issuer or approver."
+    },
+    {
+      "requirementId": "FJ02",
+      "kind": "JOURNEY",
+      "title": "FJ02: Run a dues billing cycle",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The member sees only their own record."
+    },
+    {
+      "requirementId": "FJ03",
+      "kind": "JOURNEY",
+      "title": "FJ03: Receive and reconcile an employer remittance",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Where SEP-PI-10 is adopted, an auditor who took part in the remittance is refused."
+    },
+    {
+      "requirementId": "FJ04",
+      "kind": "JOURNEY",
+      "title": "FJ04: Follow up a member in arrears",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Where SEP-PI-07 is adopted, the preparer is refused as approver."
+    },
+    {
+      "requirementId": "FJ05",
+      "kind": "JOURNEY",
+      "title": "FJ05: Pay an expense",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "SEP-SW-03 refuses a reconciler who took part in this transaction."
+    },
+    {
+      "requirementId": "FJ06",
+      "kind": "JOURNEY",
+      "title": "FJ06: Pay a vendor",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "SEP-SW-02 refuses an executor who prepared or approved the payment."
+    },
+    {
+      "requirementId": "FJ07",
+      "kind": "JOURNEY",
+      "title": "FJ07: Disburse from a strike or restricted fund",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "SEP-SW-02 refuses an executor who prepared or approved it."
+    },
+    {
+      "requirementId": "FJ08",
+      "kind": "JOURNEY",
+      "title": "FJ08: Remit to an affiliate",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Submission is a separate duty. SEP-SW-02 applies where the submission is a payment transaction."
+    },
+    {
+      "requirementId": "FJ09",
+      "kind": "JOURNEY",
+      "title": "FJ09: Close a period with independent review",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The statements state their scope. Reading is authorized separately from reconciling and from any export (F25)."
+    },
+    {
+      "requirementId": "FJ10",
+      "kind": "JOURNEY",
+      "title": "FJ10: Revoke financial authority on departure",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "The new holder takes only the named duties. SEP-SW-08 refuses activation by the issuer or approver."
+    },
+    {
+      "requirementId": "FO-SCN-CAPE",
+      "kind": "SCENARIO",
+      "title": "CAPE: national structure with Labour Relations Officers",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "CAPE: national structure with Labour Relations Officers"
+    },
+    {
+      "requirementId": "FO-SCN-CUPE",
+      "kind": "SCENARIO",
+      "title": "CUPE: local with affiliate remittances",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "CUPE: local with affiliate remittances"
+    },
+    {
+      "requirementId": "FO-SCN-LIUNA",
+      "kind": "SCENARIO",
+      "title": "LIUNA: territory funds and benefit administration",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "LIUNA: territory funds and benefit administration"
+    },
+    {
+      "requirementId": "FO-SCN-SMALL-LOCAL",
+      "kind": "SCENARIO",
+      "title": "Small local: too few people to separate duties",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 5,
+      "functionalAcceptance": "Small local: too few people to separate duties"
+    }
+  ],
+  "functionalAcceptanceCriteria": [
+    {
+      "requirementId": "FO-NAV-1",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Accounts & Cash lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-2",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Budgets & Spending lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-3",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Funds & Programs lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-4",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Dues & Remittances lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-5",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Approvals & Payments lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-6",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Reports & Records lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "FO-NAV-7",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Mandates & Oversight lists only the accounts and duties of the principal’s live mandates. With none, the entry is absent."
+    },
+    {
+      "requirementId": "F01",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The register lists each mandate with its status. With none issued it says that no financial mandate has been issued."
+    },
+    {
+      "requirementId": "F02",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The list of accounts the mandate names, each with type and currency."
+    },
+    {
+      "requirementId": "F03",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Balances with their as-of time. Unknown values are labelled unknown and never zero."
+    },
+    {
+      "requirementId": "F04",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The cycle shows its period, rates, counts and status."
+    },
+    {
+      "requirementId": "F05",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The member account shows the charge with its reason and status."
+    },
+    {
+      "requirementId": "F06",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The arrears list with each member’s state; the plan shows its schedule."
+    },
+    {
+      "requirementId": "F07",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The payment shows what it settles and what remains."
+    },
+    {
+      "requirementId": "F08",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The record with as-of times. A record outside the mandate does not appear."
+    },
+    {
+      "requirementId": "F09",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The record shows source preserved and unparsed. A duplicate hash is refused."
+    },
+    {
+      "requirementId": "F10",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The remittance shows its state. Submission and export are not available until adopted."
+    },
+    {
+      "requirementId": "F11",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A budget with its lines and status. Currently a not-available state."
+    },
+    {
+      "requirementId": "F12",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The expense shows its state. Currently a not-available state."
+    },
+    {
+      "requirementId": "F13",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The vendor list with status. Currently a not-available state."
+    },
+    {
+      "requirementId": "F14",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The payable shows its match and state. Currently a not-available state."
+    },
+    {
+      "requirementId": "F15",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The payment shows its approvals. A refusal says which rule applies."
+    },
+    {
+      "requirementId": "F16",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The payment shows executed with the executor. A refusal says which rule applies."
+    },
+    {
+      "requirementId": "F17",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The fund page shows a not-available state until a qualified engine exists."
+    },
+    {
+      "requirementId": "F18",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A not-available state until adopted."
+    },
+    {
+      "requirementId": "F19",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The register shows appointments. Changes are not available until an administration authority exists."
+    },
+    {
+      "requirementId": "F20",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The queue shows items and variances. Counts claimed by a caller are never accepted as verified."
+    },
+    {
+      "requirementId": "F21",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Records within the audit scope with a findings list."
+    },
+    {
+      "requirementId": "F22",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The report states its scope, period and as-of time. Missing data is shown as missing."
+    },
+    {
+      "requirementId": "F23",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Not offered until the institution adopts the registration."
+    },
+    {
+      "requirementId": "F24",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Not offered under the financial baseline until adopted."
+    },
+    {
+      "requirementId": "F25",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Not offered until the institution authorizes an export target."
+    },
+    {
+      "requirementId": "F26",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The register shows the revoked mandates and the reason."
+    },
+    {
+      "requirementId": "F27",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A list of duties with actor and time."
+    },
+    {
+      "requirementId": "F28",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "No untranslated labels and no inaccessible control."
+    },
+    {
+      "requirementId": "FO-BND-WORKAID",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The holder is told a financial duty does not share records with specialists."
+    },
+    {
+      "requirementId": "FO-DENY-01",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FO-DENY-02",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FO-DENY-03",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FO-DENY-04",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FO-DENY-05",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The person is told that no financial mandate has been issued to them, and how to request one."
+    },
+    {
+      "requirementId": "FJ01",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The mandate is live and the holder can take only the named duties. SEP-SW-08 refuses activation by the issuer or approver."
+    },
+    {
+      "requirementId": "FJ02",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The member sees only their own record."
+    },
+    {
+      "requirementId": "FJ03",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Where SEP-PI-10 is adopted, an auditor who took part in the remittance is refused."
+    },
+    {
+      "requirementId": "FJ04",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Where SEP-PI-07 is adopted, the preparer is refused as approver."
+    },
+    {
+      "requirementId": "FJ05",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "SEP-SW-03 refuses a reconciler who took part in this transaction."
+    },
+    {
+      "requirementId": "FJ06",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "SEP-SW-02 refuses an executor who prepared or approved the payment."
+    },
+    {
+      "requirementId": "FJ07",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "SEP-SW-02 refuses an executor who prepared or approved it."
+    },
+    {
+      "requirementId": "FJ08",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Submission is a separate duty. SEP-SW-02 applies where the submission is a payment transaction."
+    },
+    {
+      "requirementId": "FJ09",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The statements state their scope. Reading is authorized separately from reconciling and from any export (F25)."
+    },
+    {
+      "requirementId": "FJ10",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The new holder takes only the named duties. SEP-SW-08 refuses activation by the issuer or approver."
+    },
+    {
+      "requirementId": "FO-SCN-CAPE",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "CAPE: national structure with Labour Relations Officers"
+    },
+    {
+      "requirementId": "FO-SCN-CUPE",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "CUPE: local with affiliate remittances"
+    },
+    {
+      "requirementId": "FO-SCN-LIUNA",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "LIUNA: territory funds and benefit administration"
+    },
+    {
+      "requirementId": "FO-SCN-SMALL-LOCAL",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Small local: too few people to separate duties"
+    }
+  ],
+  "negativeSecurityAndTenantIsolationCriteria": [
+    {
+      "id": "NSC-FO-01",
+      "class": "TENANT_ISOLATION",
+      "statement": "In a synthetic two-organization fixture, a mandate holder in organization A cannot view, prepare, approve or export an account, charge, receipt or report of organization B.",
+      "requirementIds": [
+        "F03",
+        "F08",
+        "F15",
+        "F22"
+      ]
+    },
+    {
+      "id": "NSC-FO-02",
+      "class": "ROLE_TITLE_IS_NOT_MANDATE",
+      "statement": "A principal with a finance, treasurer or officer role title and no live mandate performs no financial action and sees no financial navigation.",
+      "requirementIds": [
+        "FO-DENY-01",
+        "FO-NAV-1",
+        "F01"
+      ]
+    },
+    {
+      "id": "NSC-FO-03",
+      "class": "SEPARATION_RULE",
+      "statement": "Where an institution has adopted a separation rule, the same principal is refused both halves of the protected pair on the same transaction, and the refusal names the rule.",
+      "requirementIds": [
+        "FO-DENY-03",
+        "F15",
+        "F16",
+        "FJ01",
+        "FJ05"
+      ]
+    },
+    {
+      "id": "NSC-FO-04",
+      "class": "PLATFORM_BILLING_IS_NOT_UNION_FINANCE",
+      "statement": "Nzila platform billing and entitlement confer no union financial authority and are never offered as a union finance destination.",
+      "requirementIds": [
+        "FO-DENY-02",
+        "FO-NAV-1"
+      ]
+    },
+    {
+      "id": "NSC-FO-05",
+      "class": "REPORT_EXPORT_MEMBER_ROWS_ARE_SEPARATE",
+      "statement": "A view duty does not carry a report, member-level rows or an export. Each is checked as its own duty and field grant.",
+      "requirementIds": [
+        "F08",
+        "F22",
+        "F25"
+      ]
+    },
+    {
+      "id": "NSC-FO-06",
+      "class": "UNAVAILABLE_IS_NOT_SUCCESS",
+      "statement": "A capability that is NOT_IMPLEMENTED or answers HTTP 501 never reports success, and its navigation entry is not advertised as usable.",
+      "requirementIds": [
+        "FO-DENY-05",
+        "F10",
+        "F11",
+        "F17"
+      ]
+    },
+    {
+      "id": "NSC-FO-07",
+      "class": "NO_REAL_MANDATE_OR_PAYMENT",
+      "statement": "No real financial mandate is issued and no real payment, payment rail or external accounting export is executed from any test or fixture.",
+      "requirementIds": [
+        "F01",
+        "F16",
+        "F25"
+      ]
+    },
+    {
+      "id": "NSC-FO-08",
+      "class": "REVOKED_MANDATE",
+      "statement": "After a mandate is revoked or succeeded, the holder’s next request is refused and the historical record stays.",
+      "requirementIds": [
+        "F26",
+        "FJ10"
+      ]
+    },
+    {
+      "id": "NSC-FO-09",
+      "class": "NO_DELEGATION",
+      "statement": "A financial duty cannot be delegated or lent, and an attempt is refused and audited.",
+      "requirementIds": [
+        "FO-DENY-04"
+      ]
+    },
+    {
+      "id": "NSC-FO-10",
+      "class": "HIERARCHY_IS_NOT_SCOPE",
+      "statement": "A mandate holder in a local, region or national office gains no view of, and no duty over, another organization’s finances from the organization hierarchy. Cross-organization finance scope exists only as an issued instrument (DEC-PD-0C2-07).",
+      "requirementIds": [
+        "F03",
+        "F10",
+        "F22"
+      ]
+    }
+  ],
+  "dependenciesOnOtherPersonas": [
+    {
+      "onPersona": "representative",
+      "via": "RELATED_REQUIREMENT",
+      "ids": [
+        "FO-BND-WORKAID->R18",
+        "FO-BND-WORKAID->REP-ACT-24"
+      ]
+    },
+    {
+      "onPersona": "representative",
+      "via": "SHARED_OBLIGATION",
+      "ids": [
+        "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "SHR-0C2-WORKAID-REFERRAL"
+      ]
+    },
+    {
+      "onPersona": "steward",
+      "via": "SHARED_OBLIGATION",
+      "ids": [
+        "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "SHR-0C2-WORKAID-REFERRAL"
+      ]
+    }
+  ],
+  "sharedObligationsInvolved": [
+    "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+    "SHR-0C2-WORKAID-REFERRAL"
+  ],
+  "outstandingProductDecisions": {
+    "baseline": [
+      {
+        "id": "DEC-IA-16",
+        "title": "Financial mandate issuance rule",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-IA-24",
+        "title": "Strike and restricted funds authority",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-IA-25",
+        "title": "Affiliate remittance and per-capita authority",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-IA-26",
+        "title": "Pension and benefit financial administration",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-IA-31",
+        "title": "Financial adoption by organization",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-09",
+        "title": "Financial Officer domain map",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-10",
+        "title": "Financial navigation names",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-11",
+        "title": "Financial journeys FJ01–FJ10",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-13",
+        "title": "Financial reporting scope",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-14",
+        "title": "Organization scenario coverage",
+        "status": "OUTSTANDING"
+      }
+    ],
+    "raisedByGate0C2": [
+      {
+        "id": "DEC-PD-0C2-07",
+        "title": "Finance scope across affiliates and multiple organizations",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      },
+      {
+        "id": "DEC-PD-0C2-08",
+        "title": "Absent mandate holder without delegation",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      },
+      {
+        "id": "DEC-PD-0C2-09",
+        "title": "Financial notifications and workflow transitions",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      },
+      {
+        "id": "DEC-PD-0C2-10",
+        "title": "Order of product acceptance and the Steward structure",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      }
+    ]
+  },
+  "outstandingInstitutionalAuthorityDecisions": {
+    "note": "These are institutional decisions. A product acceptance of this package cannot issue them. They are outstanding and stay so.",
+    "baseline": [
+      {
+        "id": "DEC-IA-12",
+        "title": "WorkAid referral authority and consent wording",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-16",
+        "title": "Financial mandate issuance rule",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-17",
+        "title": "Delegation of financial duties",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-18",
+        "title": "Monetary limits and required approvals",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-19",
+        "title": "Expenditure approval policy",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-20",
+        "title": "Payment execution and rails",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-21",
+        "title": "Reconciliation authority",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-22",
+        "title": "Trustee authority and administration",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-23",
+        "title": "Auditor appointment and access scope",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-24",
+        "title": "Strike and restricted funds authority",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-25",
+        "title": "Affiliate remittance and per-capita authority",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-26",
+        "title": "Pension and benefit financial administration",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-27",
+        "title": "Dues data access for presidents and administrators",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-28",
+        "title": "Financial succession and revocation",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-29",
+        "title": "External accounting export and retention",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-30",
+        "title": "Tax slip issuance authority",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-31",
+        "title": "Financial adoption by organization",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      }
+    ],
+    "inventoryLevelInstitutionalDecisionsOutstanding": 79
+  },
+  "knownSourceGaps": {
+    "sourceGaps": [
+      {
+        "id": "GAP-FO-CANONICAL-CITED-NOT-RECOVERED",
+        "kind": "IRREDUCIBLE_HISTORICAL",
+        "statement": "UE-FINANCIAL-OFFICER-CANONICAL-2.1 is cited as FROZEN (design only) and exists in no ref. The package is a reconstruction candidate and is not that document."
+      },
+      {
+        "id": "GAP-FO-IDENTIFIERS-UNSPECIFIED",
+        "kind": "IRREDUCIBLE_HISTORICAL",
+        "statement": "Of the 38 historical identifiers, four carry their own title or status, six carry only group labels and twenty-eight have no individual meaning in any source. F01 to F28 meanings are new design under a historical status or group."
+      },
+      {
+        "id": "GAP-FO-NO-FINANCE-SOURCE",
+        "kind": "SOURCE",
+        "statement": "No source describes any organization’s finance structure. The four organization scenarios are hypotheses. The existing finance page is Nzila platform billing and is not union finance."
+      },
+      {
+        "id": "GAP-FO-NO-CAPABILITY-OWNER",
+        "kind": "ENGINEERING_OWNERSHIP",
+        "statement": "The navigation and several domain contracts have no implementation capability. Their completion owner is the Financial Officer tracking capability UE-OMIT-FINANCE-RANGE-UNSPECIFIED until a finance capability exists."
+      }
+    ],
+    "historicalEvidenceByClass": {
+      "DIRECT_INDIVIDUAL": 7,
+      "GROUP_LABEL_ONLY": 6,
+      "NAME_RANGE_ONLY": 15,
+      "NONE": 9,
+      "STATUS_ONLY": 18
+    },
+    "implementationStatusCounts": {
+      "NOT_IMPLEMENTED": 27,
+      "PARTIAL_SOURCE": 11,
+      "SOURCE_PRESENT": 8,
+      "UNAVAILABLE_501": 9
+    },
+    "irreducibleHistoricalUncertainty": [
+      "GAP-FO-CANONICAL-CITED-NOT-RECOVERED",
+      "GAP-FO-IDENTIFIERS-UNSPECIFIED"
+    ],
+    "identifiersWithNoRecoverableDefinition": [
+      "F01",
+      "F02",
+      "F03",
+      "F04",
+      "F05",
+      "F06",
+      "F07",
+      "F11",
+      "F12",
+      "F13",
+      "F14",
+      "F15",
+      "F16",
+      "F17",
+      "F18",
+      "F20",
+      "F21",
+      "F22",
+      "F23",
+      "F24",
+      "F25",
+      "F26",
+      "F27",
+      "F28",
+      "FJ01",
+      "FJ02",
+      "FJ03",
+      "FJ04",
+      "FJ05",
+      "FJ06",
+      "FJ07",
+      "FJ08",
+      "FJ09",
+      "FJ10"
+    ]
+  },
+  "implementationObligationsByGate": [
+    {
+      "gate": 5,
+      "name": "Finance operating model",
+      "requirementIds": [
+        "FO-NAV-1",
+        "FO-NAV-2",
+        "FO-NAV-3",
+        "FO-NAV-4",
+        "FO-NAV-5",
+        "FO-NAV-6",
+        "FO-NAV-7",
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09",
+        "F10",
+        "F11",
+        "F12",
+        "F13",
+        "F14",
+        "F15",
+        "F16",
+        "F17",
+        "F18",
+        "F19",
+        "F20",
+        "F21",
+        "F22",
+        "F23",
+        "F24",
+        "F25",
+        "F26",
+        "F27",
+        "F28",
+        "FO-DENY-01",
+        "FO-DENY-02",
+        "FO-DENY-03",
+        "FO-DENY-04",
+        "FO-DENY-05",
+        "FJ01",
+        "FJ02",
+        "FJ03",
+        "FJ04",
+        "FJ05",
+        "FJ06",
+        "FJ07",
+        "FJ08",
+        "FJ09",
+        "FJ10",
+        "FO-SCN-CAPE",
+        "FO-SCN-CUPE",
+        "FO-SCN-LIUNA",
+        "FO-SCN-SMALL-LOCAL"
+      ],
+      "implementationStatusCounts": {
+        "NOT_IMPLEMENTED": 27,
+        "PARTIAL_SOURCE": 10,
+        "SOURCE_PRESENT": 8,
+        "UNAVAILABLE_501": 9
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 7,
+      "name": "WorkAid union-side completion",
+      "requirementIds": [
+        "FO-BND-WORKAID"
+      ],
+      "implementationStatusCounts": {
+        "PARTIAL_SOURCE": 1
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    }
+  ],
+  "stewardStructure": null,
+  "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+  "consultedRolesAdvisoryOnly": [
+    "Union Eyes finance product lead",
+    "Institution finance lead, advisory only and without power to issue a financial mandate"
+  ],
+  "approvalOptions": [
+    {
+      "id": "APPROVE",
+      "resultingState": "ACCEPTED_BY_AUTHORIZED_PRODUCT_OWNER",
+      "effect": "Establishes the named artifact version as the engineering canonical for this persona. Settles or explicitly defers each listed product decision. Issues no institutional authority and activates nothing."
+    },
+    {
+      "id": "REJECT",
+      "resultingState": "REJECTED_BY_AUTHORIZED_PRODUCT_OWNER",
+      "effect": "The artifact version is not the engineering canonical. The persona stays unresolved and its Gate 0 blocker stays."
+    },
+    {
+      "id": "RETURN_FOR_REWORK",
+      "resultingState": "RETURNED_FOR_REWORK",
+      "effect": "The named reasons are recorded and a new artifact version is prepared. The returned version stays preserved."
+    }
+  ],
+  "productApprovalDoesNot": [
+    "Issue, approve or activate any of the 79 outstanding institutional decisions or the 32 baseline institutional authority decisions.",
+    "Issue a financial mandate, a triage designation, a supervisory mandate, a delegation, an appointment or any other instrument.",
+    "Create, name or fill an institutional office, including a steward office.",
+    "Change an implementation status, a security status, a release disposition or a runtime qualification status.",
+    "Resolve any ratchet, test or route defect."
+  ],
+  "claims": {
+    "implementationComplete": false,
+    "runtimeQualification": "NOT_QUALIFIED",
+    "securityStatusChanged": false,
+    "institutionalAuthorityGranted": false,
+    "productSpecificationRatified": false
+  }
+}

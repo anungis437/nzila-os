@@ -83,4 +83,38 @@ describe('clamav security scanner', () => {
     const result = await assertBufferSafeForUpload(Buffer.from('sample'), 'file.pdf');
     expect(result.status).toBe('unavailable');
   });
+
+  describe.each([
+    ['production', { UE_ENVIRONMENT: 'production', NODE_ENV: 'production' }],
+    ['staging', { UE_ENVIRONMENT: 'staging', NODE_ENV: 'production' }],
+    ['a production build labelled development', { UE_ENVIRONMENT: 'development', NODE_ENV: 'production' }],
+  ])('on %s', (_label, env) => {
+    it('refuses the upload when the scanner is unavailable, whatever CLAMAV_FAIL_OPEN says', async () => {
+      const previous = { ...process.env };
+      Object.assign(process.env, env, { CLAMAV_URL: 'http://clamav:3310', CLAMAV_FAIL_OPEN: 'true' });
+      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('connect ECONNREFUSED')));
+      try {
+        await expect(assertBufferSafeForUpload(Buffer.from('sample'), 'file.pdf')).rejects.toMatchObject({ name: 'MalwareScanError' });
+      } finally {
+        for (const key of ['UE_ENVIRONMENT', 'NODE_ENV', 'CLAMAV_URL', 'CLAMAV_FAIL_OPEN']) {
+          if (previous[key] === undefined) delete process.env[key];
+          else process.env[key] = previous[key];
+        }
+      }
+    });
+
+    it('refuses the upload when CLAMAV_URL is missing, whatever CLAMAV_FAIL_OPEN says', async () => {
+      const previous = { ...process.env };
+      Object.assign(process.env, env, { CLAMAV_FAIL_OPEN: 'true' });
+      delete process.env.CLAMAV_URL;
+      try {
+        await expect(assertBufferSafeForUpload(Buffer.from('sample'), 'file.pdf')).rejects.toMatchObject({ name: 'MalwareScanError' });
+      } finally {
+        for (const key of ['UE_ENVIRONMENT', 'NODE_ENV', 'CLAMAV_FAIL_OPEN']) {
+          if (previous[key] === undefined) delete process.env[key];
+          else process.env[key] = previous[key];
+        }
+      }
+    });
+  });
 });

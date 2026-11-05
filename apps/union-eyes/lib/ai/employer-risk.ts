@@ -17,14 +17,15 @@
  * @module lib/ai/employer-risk
  */
 
-import { db } from '@/db/db';
 import { eq, and, gte, desc, count, sql as _sql } from 'drizzle-orm';
-import { buildOrgAiTrace, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
-import { employerRiskScores, type EmployerRiskScoreInsert } from '@/db/schema/domains/ml/employer-risk-scores';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { buildOrgAiTrace, toGatewayDataClass, getAiClient, UE_APP_KEY, UE_PROFILES, UE_SYSTEM_ORG_ID } from '@/lib/ai/ai-client';
+import { employerRiskScores } from '@/db/schema/domains/ml/employer-risk-scores';
 import { employers } from '@/db/schema/union-structure-schema';
 import { complianceAlerts } from '@/db/schema/domains/compliance/employer-compliance';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
+import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { logger } from '@/lib/logger';
 
 // ============================================================================
@@ -68,26 +69,32 @@ export async function calculateEmployerRisk(
 ): Promise<AiResponseEnvelope<RiskResult>> {
   const { employerId, organizationId, userId } = input;
 
-  // 1. Fetch employer
-  const employer = await db.query.employers.findFirst({
-    where: and(eq(employers.id, employerId), eq(employers.organizationId, organizationId)),
+  // 1. Fetch the employer and derive the raw signals in the organization's own context; the provider is called after it ends
+  const read = await withRLSContext({ organizationId }, async (tx) => {
+    const found = await tx.query.employers.findFirst({
+      where: and(eq(employers.id, employerId), eq(employers.organizationId, organizationId)),
+    });
+    return found ? { employer: found, signals: await deriveRiskSignals(employerId, organizationId, tx) } : null;
   });
-  if (!employer) throw new Error(`Employer ${employerId} not found in org ${organizationId}`);
-
-  // 2. Derive raw signals
-  const signals = await deriveRiskSignals(employerId, organizationId);
-
+  if (!read) throw new Error(`Employer ${employerId} not found in org ${organizationId}`);
+  const { employer, signals } = read;
   // 3. Call AI for weighted scoring + explanation
   const ai = getAiClient();
   const prompt = buildRiskPrompt(employer, signals);
-  const aiResult = await ai.generate({
+  const aiResult = await performAuditedOperation({
+    organizationId,
+    userId,
+    action: 'ai.employer_risk.generate',
+    resourceType: 'ai_invocations',
+    resourceId: employerId,
+  }, () => ai.generate({
     orgId: UE_SYSTEM_ORG_ID,
     trace: buildOrgAiTrace(organizationId),
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.EMPLOYER_RISK,
     input: prompt,
-    dataClass: 'internal',
-  });
+    dataClass: toGatewayDataClass('confidential'),
+  }));
 
   const parsed = parseRiskResponse(aiResult.content ?? '', signals);
 
@@ -103,25 +110,9 @@ export async function calculateEmployerRisk(
     modelVersion: MODEL_VERSION,
   });
 
-  // 5. Persist
-  const insert: EmployerRiskScoreInsert = {
-    organizationId,
-    employerId,
-    overallScore: parsed.result.overallScore.toFixed(4),
-    riskBand: parsed.result.riskBand,
-    trendDirection: parsed.result.trendDirection,
-    signalsJson: parsed.result.signals,
-    grievanceCount30d: parsed.result.grievanceCount30d,
-    complianceAlertCount30d: parsed.result.complianceAlertCount30d,
-    arbitrationCount12m: parsed.result.arbitrationCount12m,
-    confidence: parsed.confidence.toFixed(4),
-    explanation: parsed.explanation,
-    modelVersion: MODEL_VERSION,
-    profileKey: UE_PROFILES.EMPLOYER_RISK,
-    auditRef,
-  };
-
-  await db.insert(employerRiskScores).values(insert);
+  // HTTP GET is observational. Do not materialize an AI report or risk score in
+  // the database as a side effect of reading it; explicit governed persistence
+  // requires a separately authorized, audited command.
 
   return buildAiEnvelope(parsed.result, {
     confidence: parsed.confidence,
@@ -132,17 +123,20 @@ export async function calculateEmployerRisk(
 }
 
 /**
- * Derive raw risk signals from the database (no AI involved).
+ * Derive raw risk signals from the database (no AI involved), inside `tx` or, without one, the organization's own context.
  */
 export async function deriveRiskSignals(
   employerId: string,
   organizationId: string,
+  tx?: RLSTx,
 ): Promise<{ grievanceCount30d: number; complianceAlertCount30d: number; arbitrationCount12m: number }> {
+  if (!tx) return withRLSContext({ organizationId }, (own) => deriveRiskSignals(employerId, organizationId, own));
+
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const twelveMonthsAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
 
-  const [gCount] = await db
+  const [gCount] = await tx
     .select({ value: count() })
     .from(grievances)
     .where(
@@ -153,7 +147,7 @@ export async function deriveRiskSignals(
       ),
     );
 
-  const [aCount] = await db
+  const [aCount] = await tx
     .select({ value: count() })
     .from(complianceAlerts)
     .where(
@@ -164,7 +158,7 @@ export async function deriveRiskSignals(
       ),
     );
 
-  const [arbCount] = await db
+  const [arbCount] = await tx
     .select({ value: count() })
     .from(grievances)
     .where(
@@ -187,27 +181,31 @@ export async function deriveRiskSignals(
  * Get latest risk score for an employer.
  */
 export async function getLatestRiskScore(employerId: string, organizationId: string) {
-  return db.query.employerRiskScores.findFirst({
-    where: and(
-      eq(employerRiskScores.employerId, employerId),
-      eq(employerRiskScores.organizationId, organizationId),
-    ),
-    orderBy: [desc(employerRiskScores.createdAt)],
-  });
+  return withRLSContext({ organizationId }, (tx) =>
+    tx.query.employerRiskScores.findFirst({
+      where: and(
+        eq(employerRiskScores.employerId, employerId),
+        eq(employerRiskScores.organizationId, organizationId),
+      ),
+      orderBy: [desc(employerRiskScores.createdAt)],
+    }),
+  );
 }
 
 /**
  * Get risk history for an employer (for trend charts).
  */
 export async function getRiskHistory(employerId: string, organizationId: string, limit = 20) {
-  return db.query.employerRiskScores.findMany({
-    where: and(
-      eq(employerRiskScores.employerId, employerId),
-      eq(employerRiskScores.organizationId, organizationId),
-    ),
-    orderBy: [desc(employerRiskScores.createdAt)],
-    limit,
-  });
+  return withRLSContext({ organizationId }, (tx) =>
+    tx.query.employerRiskScores.findMany({
+      where: and(
+        eq(employerRiskScores.employerId, employerId),
+        eq(employerRiskScores.organizationId, organizationId),
+      ),
+      orderBy: [desc(employerRiskScores.createdAt)],
+      limit,
+    }),
+  );
 }
 
 /**

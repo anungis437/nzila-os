@@ -3,8 +3,8 @@ import { withRoleAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
 import { logger } from "@/lib/logger";
 import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
-import { pilotFeedback } from "@/db/schema";
-import { trackPilotEvent } from "@/lib/services/pilot-tracking";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
+import { pilotFeedback, pilotEvents } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 /**
@@ -16,8 +16,17 @@ import { eq, sql } from "drizzle-orm";
  */
 export const POST = withRoleAuth('member', async (req, context: BaseAuthContext) => {
   try {
-    const body = await req.json();
-    const { easeRating, category, comment, trigger } = body;
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "A JSON object is required" }, { status: 400 });
+    }
+    const { easeRating, category, trigger } = body as Record<string, unknown> & { easeRating: number; category?: string; trigger: string };
+    // The comment is free text kept as written: it must be text and is bounded.
+    const rawComment = (body as Record<string, unknown>).comment;
+    if (rawComment !== undefined && rawComment !== null && (typeof rawComment !== "string" || rawComment.length > 2000)) {
+      return NextResponse.json({ error: "comment must be text of at most 2000 characters" }, { status: 400 });
+    }
+    const comment = typeof rawComment === "string" && rawComment.trim().length > 0 ? rawComment.trim() : null;
     const userId = context.userId;
     const organizationId = context.organizationId;
 
@@ -28,7 +37,7 @@ export const POST = withRoleAuth('member', async (req, context: BaseAuthContext)
       );
     }
 
-    if (easeRating < 1 || easeRating > 5) {
+    if (!Number.isInteger(easeRating) || easeRating < 1 || easeRating > 5) {
       return NextResponse.json({ error: "easeRating must be 1–5" }, { status: 400 });
     }
 
@@ -48,38 +57,46 @@ export const POST = withRoleAuth('member', async (req, context: BaseAuthContext)
       );
     }
 
-    await withRLSContext(async () => {
-      await db.insert(pilotFeedback).values({
-        userId,
+    // The feedback row, its usage events and the audit record are one unit: any failure rolls all of it back.
+    await withRLSContext({ organizationId }, async (tx) => {
+      const [row] = await tx
+        .insert(pilotFeedback)
+        .values({
+          userId,
+          organizationId,
+          easeRating,
+          category: category ?? null,
+          comment: comment ?? null,
+          trigger,
+        })
+        .returning({ id: pilotFeedback.id });
+
+      const sessionId = `server:pilot-feedback:${trigger}`;
+      await tx.insert(pilotEvents).values([
+        {
+          organizationId,
+          userId,
+          sessionId,
+          eventType: 'feedback_submitted',
+          metadata: { easeRating, category: category ?? null, trigger },
+        },
+        {
+          organizationId,
+          userId,
+          sessionId,
+          eventType: 'feature_used',
+          metadata: { feature: 'pilot_feedback', trigger },
+        },
+      ]);
+
+      await persistAtomicAudit(tx, {
         organizationId,
-        easeRating,
-        category: category ?? null,
-        comment: comment ?? null,
-        trigger,
+        userId,
+        action: 'pilot.feedback.submit',
+        resourceType: 'pilot_feedback',
+        resourceId: row?.id,
+        details: { easeRating, category: category ?? null, trigger },
       });
-    });
-
-    await trackPilotEvent({
-      userId,
-      organizationId,
-      sessionId: `server:pilot-feedback:${trigger}`,
-      eventType: 'feedback_submitted',
-      metadata: {
-        easeRating,
-        category: category ?? null,
-        trigger,
-      },
-    });
-
-    await trackPilotEvent({
-      userId,
-      organizationId,
-      sessionId: `server:pilot-feedback:${trigger}`,
-      eventType: 'feature_used',
-      metadata: {
-        feature: 'pilot_feedback',
-        trigger,
-      },
     });
 
     return NextResponse.json({ ok: true });
@@ -116,12 +133,14 @@ export const GET = withRoleAuth('admin', async (req, context: BaseAuthContext) =
       WHERE organization_id = ${orgId}
     `));
 
-    const recent = await withRLSContext(async () => db
+    const recentRows = await withRLSContext(async () => db
       .select()
       .from(pilotFeedback)
       .where(eq(pilotFeedback.organizationId, orgId))
       .orderBy(sql`created_at DESC`)
       .limit(10));
+    // The administrator reads what was said, not who said it: the author's user id is not returned.
+    const recent = (recentRows as Array<Record<string, unknown>>).map(({ userId: _author, ...entry }) => entry);
 
     return NextResponse.json({
       summary: (summary as Record<string, unknown>[])[0] ?? {},

@@ -20,9 +20,9 @@ import { cn } from "@/lib/utils";
 // ─── Types ────────────────────────────────────────────────────
 
 export interface ComplianceMetrics {
-  deadlineAdherence: number; // percentage 0-100
+  deadlineAdherence: number | null; // percentage 0-100; null when nothing was measured
   avgResponseTime: number;   // days
-  documentationRate: number; // percentage 0-100
+  documentationRate: number | null; // percentage 0-100; null when nothing was measured
   openAlerts: number;
 }
 
@@ -41,7 +41,8 @@ export interface ComplianceSummaryCardProps {
 
 // ─── Helpers ──────────────────────────────────────────────────
 
-function adherenceColor(pct: number): string {
+function adherenceColor(pct: number | null): string {
+  if (pct === null) return "text-muted-foreground";
   if (pct >= 90) return "text-green-600";
   if (pct >= 70) return "text-amber-600";
   return "text-red-600";
@@ -71,7 +72,7 @@ export function ComplianceSummaryCard({
     {
       icon: Clock,
       label: t("deadlineAdherence"),
-      value: `${metrics.deadlineAdherence}%`,
+      value: metrics.deadlineAdherence === null ? "—" : `${metrics.deadlineAdherence}%`,
       color: adherenceColor(metrics.deadlineAdherence),
     },
     {
@@ -83,7 +84,7 @@ export function ComplianceSummaryCard({
     {
       icon: FileText,
       label: t("documentationRate"),
-      value: `${metrics.documentationRate}%`,
+      value: metrics.documentationRate === null ? "—" : `${metrics.documentationRate}%`,
       color: adherenceColor(metrics.documentationRate),
     },
     {

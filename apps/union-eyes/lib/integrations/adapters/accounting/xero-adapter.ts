@@ -259,7 +259,7 @@ export class XeroAdapter extends BaseIntegration {
             await db
               .update(externalInvoices)
               .set(invoiceData)
-              .where(eq(externalInvoices.id, existing.id));
+              .where(and(eq(externalInvoices.id, existing.id), eq(externalInvoices.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalInvoices).values({
@@ -342,7 +342,7 @@ export class XeroAdapter extends BaseIntegration {
             await db
               .update(externalPayments)
               .set(paymentData)
-              .where(eq(externalPayments.id, existing.id));
+              .where(and(eq(externalPayments.id, existing.id), eq(externalPayments.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalPayments).values({
@@ -406,7 +406,7 @@ export class XeroAdapter extends BaseIntegration {
             await db
               .update(externalCustomers)
               .set(customerData)
-              .where(eq(externalCustomers.id, existing.id));
+              .where(and(eq(externalCustomers.id, existing.id), eq(externalCustomers.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalCustomers).values({
@@ -471,7 +471,7 @@ export class XeroAdapter extends BaseIntegration {
             await db
               .update(externalAccounts)
               .set(accountData)
-              .where(eq(externalAccounts.id, existing.id));
+              .where(and(eq(externalAccounts.id, existing.id), eq(externalAccounts.organizationId, this.config!.organizationId)));
             updated++;
           } else {
             await db.insert(externalAccounts).values({

@@ -9,8 +9,10 @@
 import { eq } from 'drizzle-orm';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { db } from '@/db';
 import { workbooks } from '@/db/schema/workbook-schema';
+import { isUuid } from '@/lib/page-data/uuid';
+import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
+import { readWorkbookCapabilityCookie } from '@/lib/workbook/workbook-capability';
 import { WORKBOOK_COPY, isFrench, type Locale } from '@/lib/workbook/copy';
 
 export const dynamic = 'force-dynamic';
@@ -24,13 +26,24 @@ export default async function WorkbookHubPage({
   const fr = isFrench(locale);
   const l: Locale = fr ? 'fr-CA' : 'en-CA';
 
-  const [wb] = await db
-    .select({ id: workbooks.id, reportTierId: workbooks.reportTierId, status: workbooks.status })
-    .from(workbooks)
-    .where(eq(workbooks.id, id))
-    .limit(1);
+  // An identifier that is not a uuid names no workbook.
+  if (!isUuid(id)) notFound();
 
-  if (!wb) notFound();
+  // The workbook is reached by whoever holds the authority for it (the bearer capability of an unclaimed workbook, the claimant, or a
+  // steward of the claiming organization), and read inside the execution context that matches that authority. A refusal is the generic
+  // not-found, as on the module pages: the response never says which workbooks exist.
+  const capability = await readWorkbookCapabilityCookie(id);
+  const loaded = await withClaimedWorkbookAccess({ workbookId: id, operation: 'read', capability }, async (authority) => {
+    const [row] = await authority.tx
+      .select({ id: workbooks.id, reportTierId: workbooks.reportTierId, status: workbooks.status })
+      .from(workbooks)
+      .where(eq(workbooks.id, id))
+      .limit(1);
+    return row ?? null;
+  });
+
+  if (!loaded.ok || !loaded.value) notFound();
+  const wb = loaded.value;
 
   const isPaid = wb.reportTierId === 'workbook_self_guided';
 

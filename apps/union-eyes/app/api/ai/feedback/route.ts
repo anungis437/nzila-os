@@ -2,23 +2,26 @@
  * /api/ai/feedback — AI response feedback
  *
  * POST: Submit thumbs-up/down feedback on an AI-generated response.
- * GET:  Retrieve feedback records for a given query_id.
+ * GET:  Retrieve the caller's feedback for a given query_id.
  *
  * Feedback is stored as rows in the `ai_usage_metrics` table with
  * operation = 'feedback' so it co-locates with the original AI call
  * and can be queried / reported by the same analytics pipeline.
+ *
+ * `ai_usage_metrics` is an append-only metering ledger (the runtime role may select and insert, never update): a user who changes their feedback on a
+ * query adds a newer row, and the newest row is the user's current feedback. Earlier rows stay as the history of the change.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { withRoleAuth, BaseAuthContext } from '@/lib/api-auth-guard';
+import { withApi } from '@/lib/api/framework';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
-import { db } from '@/db/db';
 import { aiUsageMetrics } from '@/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
 import { AI_FEATURES } from '@/lib/services/feature-flags';
 import { enforceAISafety } from '@nzila/policies';
@@ -26,164 +29,174 @@ import { enforceAISafety } from '@nzila/policies';
 export const dynamic = 'force-dynamic';
 
 const feedbackPostSchema = z.object({
-  query_id: z.string().uuid('query_id must be a valid UUID'),
+  query_id: z.guid('query_id must be a valid UUID'),
   rating: z.enum(['good', 'bad']),
   comment: z.string().max(2000).optional(),
 });
 
-export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
-  // Rate limit (lighter bucket – feedback is cheap)
-  const rateLimitResult = await checkRateLimit(
-    `ai-completion:${context.userId}`,
-    RATE_LIMITS.AI_COMPLETION,
-  );
-  if (!rateLimitResult.allowed) {
-    return NextResponse.json(
-      { error: 'Rate limit exceeded. Please try again later.' },
-      { status: 429, headers: createRateLimitHeaders(rateLimitResult) },
+// Both handlers keep what a caller with no active organization was answered (400, below): `requireOrg: false` leaves that to them, not the wrapper's 403.
+export const POST = withApi(
+  {
+    auth: { minRole: 'member' },
+    requireOrg: false,
+    body: feedbackPostSchema,
+    registry: { audience: 'member', productionStatus: 'active', evidenceRequired: false, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'Submit feedback on an AI response' },
+  },
+  async ({ user, userId, organizationId, body }) => {
+    // Rate limit (lighter bucket – feedback is cheap)
+    const rateLimitResult = await checkRateLimit(
+      `ai-completion:${userId}`,
+      RATE_LIMITS.AI_COMPLETION,
     );
-  }
-
-    // OWASP AI: Org presence check + feature flag + AI safety gate
-    if (!context.organizationId) {
-      return NextResponse.json({ error: 'No active organization' }, { status: 400 });
-    }
-    const blocked = await guardAiFeature(AI_FEATURES.AI_FEEDBACK, { userId: context.userId, organizationId: context.organizationId });
-    if (blocked) return blocked;
-    enforceAISafety({ origin: 'feedback', action: 'POST', organizationId: context.organizationId, userId: context.userId, userRole: 'member', dataClass: 'internal' });
-
-  try {
-    const body = await request.json();
-    const validation = feedbackPostSchema.safeParse(body);
-    if (!validation.success) {
-      return standardErrorResponse(
-        ErrorCode.VALIDATION_ERROR,
-        'Invalid feedback request',
-        validation.error.errors,
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please try again later.' },
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) },
       );
     }
 
-    const { query_id, rating, comment } = validation.data;
-    const orgId = context.organizationId as string;
+    // OWASP AI: Org presence check + feature flag + AI safety gate
+    if (!organizationId) {
+      return NextResponse.json({ error: 'No active organization' }, { status: 400 });
+    }
+    const blocked = await guardAiFeature(AI_FEATURES.AI_FEEDBACK, { userId: userId!, organizationId });
+    if (blocked) return blocked;
+    enforceAISafety({ origin: 'feedback', action: 'POST', organizationId, userId, userRole: user?.role ?? 'member', dataClass: 'internal' });
 
-    // Check for duplicate feedback from same user on same query
-    const existing = await db
-      .select({ id: aiUsageMetrics.id })
-      .from(aiUsageMetrics)
-      .where(
-        and(
-          eq(aiUsageMetrics.requestId, query_id),
-          eq(aiUsageMetrics.operation, 'feedback'),
-          eq(aiUsageMetrics.userId, context.userId!),
-        ),
-      )
-      .limit(1);
+    try {
+      const { query_id, rating, comment } = body;
+      const orgId = organizationId;
+      const feedbackUserId = userId as string;
 
-    if (existing.length > 0) {
-      // Update existing feedback
-      await withRLSContext(async () => db.execute(sql`
-        UPDATE ai_usage_metrics
-        SET metadata = jsonb_set(
-          jsonb_set(metadata, '{rating}', ${JSON.stringify(rating)}::jsonb),
-          '{comment}', ${JSON.stringify(comment ?? null)}::jsonb
-        ),
-        created_at = now()
-        WHERE id = ${existing[0].id}
-      `));
+      // The feedback row and its audit record commit together; a user's feedback is written onto the user's own organization and never onto another
+      // user's row. Feedback the user already gave on this query is not rewritten: the new row follows it.
+      const saved = await withRLSContext({ organizationId: orgId }, async (tx) => {
+        const [previous] = await tx
+          .select({ id: aiUsageMetrics.id })
+          .from(aiUsageMetrics)
+          .where(
+            and(
+              eq(aiUsageMetrics.requestId, query_id),
+              eq(aiUsageMetrics.operation, 'feedback'),
+              eq(aiUsageMetrics.userId, feedbackUserId),
+              eq(aiUsageMetrics.organizationId, orgId),
+            ),
+          )
+          .limit(1);
+
+        const [inserted] = await tx
+          .insert(aiUsageMetrics)
+          .values({
+            organizationId: orgId,
+            provider: 'internal',
+            model: 'feedback',
+            operation: 'feedback',
+            tokensInput: 0,
+            tokensOutput: 0,
+            tokensTotal: 0,
+            estimatedCost: '0',
+            requestId: query_id,
+            userId: feedbackUserId,
+            metadata: { rating, comment: comment ?? null },
+          })
+          .returning({ id: aiUsageMetrics.id });
+        await persistAtomicAudit(tx, {
+          organizationId: orgId,
+          userId: feedbackUserId,
+          action: previous ? 'ai.feedback.update' : 'ai.feedback.create',
+          resourceType: 'ai_usage_metrics',
+          resourceId: inserted.id,
+          details: { queryId: query_id, rating, ...(previous ? { supersedes: previous.id } : {}) },
+        });
+        return { id: inserted.id, updated: Boolean(previous) };
+      });
 
       return NextResponse.json({
-        id: existing[0].id,
+        id: saved.id,
         query_id,
         rating,
         comment: comment ?? null,
-        updated: true,
+        ...(saved.updated ? { updated: true } : { created: true }),
       });
+    } catch (error) {
+      logger.error('Feedback submission failed', { error });
+      return NextResponse.json({ error: 'Failed to submit feedback' }, { status: 500 });
     }
+  },
+);
 
-    // Insert new feedback row
-    const inserted = await db
-      .insert(aiUsageMetrics)
-      .values({
-        organizationId: orgId,
-        provider: 'internal',
-        model: 'feedback',
-        operation: 'feedback',
-        tokensInput: 0,
-        tokensOutput: 0,
-        tokensTotal: 0,
-        estimatedCost: '0',
-        requestId: query_id,
-        userId: context.userId,
-        metadata: { rating, comment: comment ?? null },
-      })
-      .returning({ id: aiUsageMetrics.id });
+export const GET = withApi(
+  {
+    auth: { minRole: 'member' },
+    requireOrg: false,
+    registry: { audience: 'member', productionStatus: 'active', evidenceRequired: false, orgScoping: 'caller-org' },
+    openapi: { tags: ['AI'], summary: 'The caller\'s current feedback on an AI response' },
+  },
+  async ({ request, userId, organizationId }) => {
+    try {
+      // ROUND 48 SECURITY FIX: this endpoint previously had zero tenant
+      // scoping — any authenticated member of ANY organization could read
+      // another organization's AI feedback rows (rating/comment/userId) by
+      // guessing/enumerating a query_id. Feedback must be scoped to the
+      // caller's own organization.
+      if (!organizationId) {
+        return standardErrorResponse(
+          ErrorCode.VALIDATION_ERROR,
+          'No active organization',
+        );
+      }
 
-    return NextResponse.json({
-      id: inserted[0].id,
-      query_id,
-      rating,
-      comment: comment ?? null,
-      created: true,
-    });
-  } catch (error) {
-    logger.error('Feedback submission failed', { error });
-    return NextResponse.json({ error: 'Failed to submit feedback' }, { status: 500 });
-  }
-});
+      if (!userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
 
-export const GET = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
-  try {
-    // ROUND 48 SECURITY FIX: this endpoint previously had zero tenant
-    // scoping — any authenticated member of ANY organization could read
-    // another organization's AI feedback rows (rating/comment/userId) by
-    // guessing/enumerating a query_id. Feedback must be scoped to the
-    // caller's own organization.
-    if (!context.organizationId) {
-      return standardErrorResponse(
-        ErrorCode.VALIDATION_ERROR,
-        'No active organization',
-      );
-    }
+      const { searchParams } = new URL(request.url);
+      const queryId = searchParams.get('query_id');
 
-    const { searchParams } = new URL(request.url);
-    const queryId = searchParams.get('query_id');
+      if (!queryId) {
+        return standardErrorResponse(
+          ErrorCode.VALIDATION_ERROR,
+          'query_id parameter is required',
+        );
+      }
 
-    if (!queryId) {
-      return standardErrorResponse(
-        ErrorCode.VALIDATION_ERROR,
-        'query_id parameter is required',
-      );
-    }
-
-    const rows = await db
-      .select({
-        id: aiUsageMetrics.id,
-        requestId: aiUsageMetrics.requestId,
-        userId: aiUsageMetrics.userId,
-        metadata: aiUsageMetrics.metadata,
-        createdAt: aiUsageMetrics.createdAt,
-      })
-      .from(aiUsageMetrics)
-      .where(
-        and(
-          eq(aiUsageMetrics.requestId, queryId),
-          eq(aiUsageMetrics.operation, 'feedback'),
-          eq(aiUsageMetrics.organizationId, context.organizationId),
-        ),
+      // The caller's current feedback on the query: the newest row, in the organization's own context.
+      const rows = await withRLSContext({ organizationId }, (tx) =>
+        tx
+          .select({
+            id: aiUsageMetrics.id,
+            requestId: aiUsageMetrics.requestId,
+            userId: aiUsageMetrics.userId,
+            metadata: aiUsageMetrics.metadata,
+            createdAt: aiUsageMetrics.createdAt,
+          })
+          .from(aiUsageMetrics)
+          .where(
+            and(
+              eq(aiUsageMetrics.requestId, queryId),
+              eq(aiUsageMetrics.operation, 'feedback'),
+              eq(aiUsageMetrics.organizationId, organizationId),
+              eq(aiUsageMetrics.userId, userId),
+            ),
+          )
+          .orderBy(desc(aiUsageMetrics.createdAt))
+          .limit(1),
       );
 
-    const feedback = rows.map((r) => ({
-      id: r.id,
-      query_id: r.requestId,
-      user_id: r.userId,
-      rating: (r.metadata as Record<string, unknown>)?.rating ?? null,
-      comment: (r.metadata as Record<string, unknown>)?.comment ?? null,
-      created_at: r.createdAt,
-    }));
+      const feedback = rows.map((r) => ({
+        id: r.id,
+        query_id: r.requestId,
+        user_id: r.userId,
+        rating: (r.metadata as Record<string, unknown>)?.rating ?? null,
+        comment: (r.metadata as Record<string, unknown>)?.comment ?? null,
+        created_at: r.createdAt,
+      }));
 
-    return NextResponse.json({ query_id: queryId, feedback, count: feedback.length });
-  } catch (error) {
-    logger.error('Feedback retrieval failed', { error });
-    return NextResponse.json({ error: 'Failed to retrieve feedback' }, { status: 500 });
-  }
-});
+      return NextResponse.json({ query_id: queryId, feedback, count: feedback.length });
+    } catch (error) {
+      logger.error('Feedback retrieval failed', { error });
+      return NextResponse.json({ error: 'Failed to retrieve feedback' }, { status: 500 });
+    }
+  },
+);

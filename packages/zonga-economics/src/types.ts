@@ -255,7 +255,7 @@ export const RecordRevenueEventSchema = z.object({
   creatorId: z.string().nullish(),
   listenerId: z.string().nullish(),
   externalRef: z.string().nullish(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type RecordRevenueEventInput = z.infer<typeof RecordRevenueEventSchema>
 

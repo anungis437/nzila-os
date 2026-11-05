@@ -75,15 +75,17 @@ export interface DocumentTemplate {
   name: string;
   category: string;
   description?: string;
-  content: string;
-  variables: string[];
+  /** The template text and the variables in it: known only where a template store exists. */
+  content?: string;
+  variables?: string[];
   createdAt: Date;
   updatedAt: Date;
-  createdBy: {
+  createdBy?: {
     id: string;
     name: string;
   };
-  usageCount: number;
+  /** How many times it was used; absent where nothing counts uses. */
+  usageCount?: number | null;
   lastUsed?: Date;
 }
 
@@ -132,13 +134,14 @@ export function DocumentTemplateManager({
 
   const stats = React.useMemo(() => {
     const totalTemplates = templates.length;
-    const totalUsage = templates.reduce((sum, t) => sum + t.usageCount, 0);
-    const mostUsed = templates.reduce(
-      (max, t) => (t.usageCount > max.usageCount ? t : max),
-      templates[0]
+    const counted = templates.filter((template) => typeof template.usageCount === "number");
+    const totalUsage = counted.reduce((sum, template) => sum + (template.usageCount ?? 0), 0);
+    const mostUsed = counted.reduce<DocumentTemplate | undefined>(
+      (max, template) => (!max || (template.usageCount ?? 0) > (max.usageCount ?? 0) ? template : max),
+      undefined,
     );
 
-    return { totalTemplates, totalUsage, mostUsed };
+    return { totalTemplates, totalUsage, mostUsed, hasUsage: counted.length > 0 };
   }, [templates]);
 
   return (
@@ -149,28 +152,30 @@ export function DocumentTemplateManager({
           <h2 className="text-2xl font-bold">Document Templates</h2>
           <p className="text-gray-600 mt-1">Manage and organize document templates</p>
         </div>
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Template
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-            <TemplateEditor
-              categories={categories}
-              onSave={async (data) => {
-                await onCreateTemplate?.(data);
-                setCreateDialogOpen(false);
-              }}
-              onCancel={() => setCreateDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        {onCreateTemplate && (
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                New Template
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+              <TemplateEditor
+                categories={categories}
+                onSave={async (data) => {
+                  await onCreateTemplate(data);
+                  setCreateDialogOpen(false);
+                }}
+                onCancel={() => setCreateDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Stats: usage figures appear only where uses are counted */}
+      <div className={stats.hasUsage ? "grid grid-cols-3 gap-4" : "grid grid-cols-1 gap-4 sm:max-w-xs"}>
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -185,30 +190,34 @@ export function DocumentTemplateManager({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+        {stats.hasUsage && (
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">{stats.totalUsage}</div>
+                  <div className="text-sm text-gray-600">Total Usage</div>
+                </div>
               </div>
-              <div>
-                <div className="text-2xl font-bold">{stats.totalUsage}</div>
-                <div className="text-sm text-gray-600">Total Usage</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card>
-          <CardContent className="p-6">
-            <div>
-              <div className="font-semibold truncate">{stats.mostUsed?.name || "N/A"}</div>
-              <div className="text-sm text-gray-600">
-                Most Used ({stats.mostUsed?.usageCount || 0} times)
+        {stats.hasUsage && stats.mostUsed && (
+          <Card>
+            <CardContent className="p-6">
+              <div>
+                <div className="font-semibold truncate">{stats.mostUsed.name}</div>
+                <div className="text-sm text-gray-600">
+                  Most Used ({stats.mostUsed.usageCount ?? 0} times)
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Filters */}
@@ -249,8 +258,8 @@ export function DocumentTemplateManager({
             key={template.id}
             template={template}
             onUse={() => onUseTemplate?.(template)}
-            onEdit={() => setEditingTemplate(template)}
-            onDelete={() => onDeleteTemplate?.(template.id)}
+            onEdit={onUpdateTemplate ? () => setEditingTemplate(template) : undefined}
+            onDelete={onDeleteTemplate ? () => void onDeleteTemplate(template.id) : undefined}
             onPreview={() => onPreviewTemplate?.(template)}
           />
         ))}
@@ -264,25 +273,29 @@ export function DocumentTemplateManager({
             <p className="text-gray-600 mb-4">
               {searchTerm
                 ? "Try adjusting your search terms"
-                : "Create your first template to get started"}
+                : onCreateTemplate
+                  ? "Create your first template to get started"
+                  : "Documents filed as templates in the repository appear here"}
             </p>
-            <Button onClick={() => setCreateDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Template
-            </Button>
+            {onCreateTemplate && (
+              <Button onClick={() => setCreateDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Template
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
 
       {/* Edit Dialog */}
-      {editingTemplate && (
+      {onUpdateTemplate && editingTemplate && (
         <Dialog open={!!editingTemplate} onOpenChange={() => setEditingTemplate(null)}>
           <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
             <TemplateEditor
               template={editingTemplate}
               categories={categories}
               onSave={async (data) => {
-                await onUpdateTemplate?.(editingTemplate.id, data);
+                await onUpdateTemplate(editingTemplate.id, data);
                 setEditingTemplate(null);
               }}
               onCancel={() => setEditingTemplate(null)}
@@ -303,10 +316,11 @@ function TemplateCard({
 }: {
   template: DocumentTemplate;
   onUse: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   onPreview: () => void;
 }) {
+  const variables = template.variables ?? [];
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
@@ -328,32 +342,36 @@ function TemplateCard({
         )}
 
         <div className="space-y-2 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600">Variables:</span>
-            <span className="font-medium">{template.variables.length}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600">Used:</span>
-            <span className="font-medium">{template.usageCount} times</span>
-          </div>
+          {variables.length > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">Variables:</span>
+              <span className="font-medium">{variables.length}</span>
+            </div>
+          )}
+          {typeof template.usageCount === "number" && (
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">Used:</span>
+              <span className="font-medium">{template.usageCount} times</span>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-gray-600">Updated:</span>
             <span className="font-medium">{format(template.updatedAt, "MMM d, yyyy")}</span>
           </div>
         </div>
 
-        {template.variables.length > 0 && (
+        {variables.length > 0 && (
           <div>
             <div className="text-xs text-gray-600 mb-1">Variables:</div>
             <div className="flex flex-wrap gap-1">
-              {template.variables.slice(0, 3).map((variable) => (
+              {variables.slice(0, 3).map((variable) => (
                 <Badge key={variable} variant="outline" className="text-xs">
                   {variable}
                 </Badge>
               ))}
-              {template.variables.length > 3 && (
+              {variables.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{template.variables.length - 3} more
+                  +{variables.length - 3} more
                 </Badge>
               )}
             </div>
@@ -368,12 +386,16 @@ function TemplateCard({
           <Button size="sm" variant="outline" onClick={onPreview}>
             <Eye className="h-3 w-3" />
           </Button>
-          <Button size="sm" variant="outline" onClick={onEdit}>
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button size="sm" variant="outline" onClick={onDelete}>
-            <Trash2 className="h-3 w-3" />
-          </Button>
+          {onEdit && (
+            <Button size="sm" variant="outline" onClick={onEdit}>
+              <Edit className="h-3 w-3" />
+            </Button>
+          )}
+          {onDelete && (
+            <Button size="sm" variant="outline" onClick={onDelete}>
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -395,13 +417,21 @@ function TemplateEditor({
 
   const form = useForm<TemplateFormData>({
     resolver: zodResolver(templateSchema),
-    defaultValues: template || {
-      name: "",
-      category: "",
-      description: "",
-      content: "",
-      variables: [],
-    },
+    defaultValues: template
+      ? {
+          name: template.name,
+          category: template.category,
+          description: template.description ?? "",
+          content: template.content ?? "",
+          variables: template.variables ?? [],
+        }
+      : {
+          name: "",
+          category: "",
+          description: "",
+          content: "",
+          variables: [],
+        },
   });
 
   const content = form.watch("content");

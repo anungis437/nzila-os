@@ -48,14 +48,14 @@ export const POST = withApi(
     entitlement: 'union_knowledge_suite',
     body: CopilotQuerySchema,
   },
-  async ({ organizationId, body }) => {
+  async ({ organizationId, userId, body }) => {
     const result = await processCopilotQuery(organizationId!, {
       query: body.query,
       sessionId: body.sessionId,
       conversationId: body.conversationId,
       priorMessages: body.priorMessages,
       graphContext: body.graphContext,
-    });
+    }, userId!);
     return { data: result };
   },
 );
@@ -71,12 +71,12 @@ export const GET = withApi(
     entitlement: 'union_knowledge_suite',
     query: GetCopilotQuerySchema,
   },
-  async ({ organizationId, query }) => {
+  async ({ organizationId, userId, query }) => {
     if (query.conversationId) {
-      const messages = await loadConversationHistory(organizationId!, query.conversationId);
+      const messages = await loadConversationHistory(organizationId!, query.conversationId, userId!);
       return { data: { messages } };
     }
-    const conversations = await listConversations(organizationId!, query.limit);
+    const conversations = await listConversations(organizationId!, userId!, query.limit);
     return { data: { conversations } };
   },
 );

@@ -53,9 +53,12 @@ function defineFoundationalEngine<TPayload>(spec: FoundationalEngineSpec<TPayloa
     domain: spec.domain,
     compute: async (organizationId: string) => {
       const payload = await spec.invoke(organizationId);
+      // No constant: confidence is the amount of evidence the engine reports having read, capped at 100, and 0 when it reports none.
+      const reported = payload as { interviewsAnalyzed?: number; entriesAnalyzed?: number; interviewCount?: number } | null;
+      const evidence = Number(reported?.interviewsAnalyzed ?? reported?.entriesAnalyzed ?? reported?.interviewCount ?? 0);
       return {
         payload,
-        confidenceScore: 60,
+        confidenceScore: Number.isFinite(evidence) ? Math.max(0, Math.min(100, Math.round(evidence))) : 0,
         interpretationGuidance: spec.interpretationGuidance,
       };
     },

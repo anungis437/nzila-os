@@ -7,7 +7,10 @@
  */
 
 import { auth } from '@nzila/platform-auth/entra/server';
+import { redirect } from 'next/navigation';
+import { hasMinRole } from '@/lib/api-auth-guard';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { isUuid } from '@/lib/page-data/uuid';
 import {
   buildExecutiveSummary,
   computeKpiSnapshot,
@@ -97,8 +100,12 @@ export default async function CognitionPage({ params }: PageProps) {
     return <div className="p-8 text-sm">{t('states.signInRequired')}</div>;
   }
   const orgId = await getOrganizationIdForUser(session.userId);
-  if (!orgId) {
+  if (!isUuid(orgId)) {
     return <div className="p-8 text-sm">{t('states.noOrganizationContext')}</div>;
+  }
+  // The data below is the officer-level workload and case-risk data the cognition API serves behind the same floor; a member does not read it.
+  if (!(await hasMinRole('officer'))) {
+    redirect('/dashboard');
   }
   const subject = { tenantId: 'union-eyes', orgId };
 

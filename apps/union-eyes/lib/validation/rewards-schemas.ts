@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { partialWithoutDefaults } from './partial-without-defaults';
 
 // =====================================================
 // Program Schemas
@@ -16,50 +17,57 @@ export const createProgramSchema = z.object({
   currency: z.string().length(3).default('CAD'),
 });
 
-export const updateProgramSchema = createProgramSchema.partial();
+export const updateProgramSchema = partialWithoutDefaults(createProgramSchema);
 
 // =====================================================
 // Award Type Schemas
 // =====================================================
 
 export const createAwardTypeSchema = z.object({
-  programId: z.string().uuid(),
+  programId: z.guid(),
   name: z.string().min(1).max(255),
   kind: z.enum(['milestone', 'peer', 'admin', 'automated']),
   defaultCreditAmount: z.number().int().positive(),
   requiresApproval: z.boolean().default(false),
-  rulesJson: z.record(z.any()).optional(),
+  rulesJson: z.record(z.string(), z.any()).optional(),
 });
 
-export const updateAwardTypeSchema = createAwardTypeSchema.partial().omit({ programId: true });
+export const updateAwardTypeSchema = partialWithoutDefaults(createAwardTypeSchema).omit({ programId: true });
 
 // =====================================================
 // Award Schemas
 // =====================================================
 
 export const createAwardSchema = z.object({
-  programId: z.string().uuid(),
-  awardTypeId: z.string().uuid(),
+  programId: z.guid(),
+  awardTypeId: z.guid(),
   recipientUserId: z.string().min(1).max(255),
   reason: z.string().min(1),
-  metadataJson: z.record(z.any()).optional(),
+  metadataJson: z.record(z.string(), z.any()).optional(),
 });
 
 export const approveAwardSchema = z.object({
-  awardId: z.string().uuid(),
+  awardId: z.guid(),
+});
+
+/** A member's nomination of a colleague for a peer award: what the nomination form sends, and all it may send. The program is the award type's own. */
+export const nominatePeerSchema = z.object({
+  awardTypeId: z.guid(),
+  recipientUserId: z.string().min(1).max(255),
+  reason: z.string().trim().min(1).max(500),
 });
 
 export const issueAwardSchema = z.object({
-  awardId: z.string().uuid(),
+  awardId: z.guid(),
 });
 
 export const revokeAwardSchema = z.object({
-  awardId: z.string().uuid(),
+  awardId: z.guid(),
   reason: z.string().min(1),
 });
 
 export const rejectAwardSchema = z.object({
-  awardId: z.string().uuid(),
+  awardId: z.guid(),
   reason: z.string().min(1),
 });
 
@@ -68,7 +76,7 @@ export const rejectAwardSchema = z.object({
 // =====================================================
 
 const budgetEnvelopeBaseSchema = z.object({
-  programId: z.string().uuid(),
+  programId: z.guid(),
   name: z.string().min(1).max(255),
   scopeType: z.enum(['org', 'local', 'department', 'manager']).default('org'),
   scopeRefId: z.string().max(255).optional(),
@@ -86,20 +94,20 @@ export const createBudgetEnvelopeSchema = budgetEnvelopeBaseSchema.refine(
   }
 );
 
-export const updateBudgetEnvelopeSchema = budgetEnvelopeBaseSchema.partial();
+export const updateBudgetEnvelopeSchema = partialWithoutDefaults(budgetEnvelopeBaseSchema);
 
 // =====================================================
 // Redemption Schemas
 // =====================================================
 
 export const initiateRedemptionSchema = z.object({
-  programId: z.string().uuid(),
+  programId: z.guid(),
   creditsToSpend: z.number().int().positive(),
-  providerDetails: z.record(z.any()).optional(),
+  providerDetails: z.record(z.string(), z.any()).optional(),
 });
 
 export const cancelRedemptionSchema = z.object({
-  redemptionId: z.string().uuid(),
+  redemptionId: z.guid(),
   reason: z.string().min(1),
 });
 
@@ -120,7 +128,7 @@ export const awardStatusQuerySchema = z.object({
 export const reportQuerySchema = z.object({
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
-  programId: z.string().uuid().optional(),
+  programId: z.guid().optional(),
 });
 
 // =====================================================
@@ -144,6 +152,7 @@ export type UpdateProgramInput = z.infer<typeof updateProgramSchema>;
 export type CreateAwardTypeInput = z.infer<typeof createAwardTypeSchema>;
 export type UpdateAwardTypeInput = z.infer<typeof updateAwardTypeSchema>;
 export type CreateAwardInput = z.infer<typeof createAwardSchema>;
+export type NominatePeerInput = z.infer<typeof nominatePeerSchema>;
 export type ApproveAwardInput = z.infer<typeof approveAwardSchema>;
 export type IssueAwardInput = z.infer<typeof issueAwardSchema>;
 export type RevokeAwardInput = z.infer<typeof revokeAwardSchema>;

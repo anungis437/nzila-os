@@ -8,7 +8,8 @@
  */
 
 import { z } from 'zod';
-import { withApi } from '@/lib/api/framework';
+import { PROVENANCE_KEY } from '@/lib/knowledge-transfer/cognition-memory/memory-models';
+import { withApi, ApiError } from '@/lib/api/framework';
 import {
   loadCognitionMemory,
   saveCognitionMemory,
@@ -19,9 +20,11 @@ export const dynamic = 'force-dynamic';
 
 const GetMemoryQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  memoryType: z.string().optional(),
-  sessionId: z.string().optional(),
+  memoryType: z.string().max(60).optional(),
+  sessionId: z.string().max(100).optional(),
 });
+
+const MAX_PAYLOAD_BYTES = 16 * 1024;
 
 const SaveMemorySchema = z.object({
   memoryType: z.enum([
@@ -35,13 +38,18 @@ const SaveMemorySchema = z.object({
   ]),
   title: z.string().min(1).max(200),
   contextSummary: z.string().max(2000).optional(),
-  payload: z.record(z.unknown()).optional(),
+  // Everything here is the officer's own statement: it is bounded, and it cannot carry the key the server reserves for authorship.
+  payload: z
+    .record(z.string(), z.unknown())
+    .refine((value) => !(PROVENANCE_KEY in value), { message: `${PROVENANCE_KEY} is reserved` })
+    .refine((value) => JSON.stringify(value).length <= MAX_PAYLOAD_BYTES, { message: 'payload must be at most 16 KB' })
+    .optional(),
   resilienceScoreAtCapture: z.number().int().min(0).max(100).optional(),
-  tags: z.array(z.string()).optional(),
-  keyInsights: z.array(z.string()).optional(),
-  sessionId: z.string().optional(),
+  tags: z.array(z.string().min(1).max(64)).max(20).optional(),
+  keyInsights: z.array(z.string().min(1).max(500)).max(20).optional(),
+  sessionId: z.string().max(100).optional(),
   /** Archive an existing entry by ID */
-  archiveId: z.string().uuid().optional(),
+  archiveId: z.guid().optional(),
 });
 
 export const GET = withApi(
@@ -66,9 +74,10 @@ export const POST = withApi(
     entitlement: 'union_knowledge_suite',
     body: SaveMemorySchema,
   },
-  async ({ organizationId, body }) => {
+  async ({ organizationId, userId, body }) => {
     if (body.archiveId) {
-      await archiveCognitionMemory(organizationId!, body.archiveId);
+      const archived = await archiveCognitionMemory(organizationId!, body.archiveId, userId!);
+      if (!archived) throw ApiError.notFound('Memory entry', body.archiveId);
       return { data: { archived: true, id: body.archiveId } };
     }
     const entry = await saveCognitionMemory(organizationId!, {
@@ -80,7 +89,7 @@ export const POST = withApi(
       tags: body.tags,
       keyInsights: body.keyInsights,
       sessionId: body.sessionId,
-    });
+    }, userId!);
     return { data: entry };
   },
 );

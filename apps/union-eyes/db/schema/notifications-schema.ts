@@ -7,7 +7,8 @@
  * - Notification history/audit log
  */
 
-import { pgTable, text, timestamp, boolean, jsonb, uuid, pgEnum, integer } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, jsonb, uuid, pgEnum, integer, uniqueIndex } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { organizations } from '../schema-organizations';
 
 // ============================================
@@ -98,8 +99,8 @@ export const userNotificationPreferences = pgTable('user_notification_preference
   securityAlerts: boolean('security_alerts').notNull().default(true),
   
   // Metadata
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================
@@ -134,18 +135,18 @@ export const notificationTracking = pgTable('notification_tracking', {
   actionLabel: text('action_label'),
   
   // Delivery tracking
-  sentAt: timestamp('sent_at'),
-  deliveredAt: timestamp('delivered_at'),
+  sentAt: timestamp('sent_at', { withTimezone: true }),
+  deliveredAt: timestamp('delivered_at', { withTimezone: true }),
   failureReason: text('failure_reason'),
   failureCount: integer('failure_count').default(0),
-  lastFailureAt: timestamp('last_failure_at'),
+  lastFailureAt: timestamp('last_failure_at', { withTimezone: true }),
   
   // Additional metadata
   metadata: jsonb('metadata'),
   
   // Tracking fields
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================
@@ -176,42 +177,15 @@ export const inAppNotifications = pgTable('in_app_notifications', {
   readAt: timestamp('read_at'),
   
   // Timestamps
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   expiresAt: timestamp('expires_at'), // Optional expiration
-});
+}, (table) => ({
+  // A system-written notice carries data.dedupeKey, so writing it twice stores it once (migration 20261103).
+  dedupeUq: uniqueIndex('uq_in_app_notifications_dedupe').on(table.organizationId, table.userId, sql`(${table.data}->>'dedupeKey')`).where(sql`${table.data} ? 'dedupeKey'`),
+}));
 
-// ============================================
-// Notification History (Audit Log)
-// ============================================
-
-export const notificationHistory = pgTable('notification_history', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  
-  // Recipient info
-  userId: text('user_id'), // Nullable for system-wide notifications
-  organizationId: uuid('organization_id').references(() => organizations.id, {
-    onDelete: 'cascade',
-  }),
-  recipient: text('recipient').notNull(), // Email, phone, or user ID
-  
-  // Notification details
-  channel: notificationChannelEnum('channel').notNull(),
-  subject: text('subject'),
-  template: text('template'),
-  
-  // Status
-  status: notificationStatusEnum('status').notNull(),
-  error: text('error'), // Error message if failed
-  
-  // Delivery tracking
-  sentAt: timestamp('sent_at').notNull(),
-  deliveredAt: timestamp('delivered_at'),
-  openedAt: timestamp('opened_at'),
-  clickedAt: timestamp('clicked_at'),
-  
-  // External IDs for tracking
-  metadata: jsonb('metadata'), // e.g., { twilioSid, sendgridId, channels: [] }
-});
+// notification_history is not declared in this barrel. The physical relation stays.
+// services/financial-service still declares its own notification_history. Do not DROP it.
 
 export type NotificationTracking = typeof notificationTracking.$inferSelect;
 export type NewNotificationTracking = typeof notificationTracking.$inferInsert;
@@ -249,7 +223,7 @@ export const notifications = pgTable('notifications', {
   status: notificationScheduleStatusEnum('status').notNull().default('scheduled'),
   
   // Timestamps
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   sentAt: timestamp('sent_at'),
 });
 
@@ -265,9 +239,6 @@ export type NewUserNotificationPreferences = typeof userNotificationPreferences.
 
 export type InAppNotification = typeof inAppNotifications.$inferSelect;
 export type NewInAppNotification = typeof inAppNotifications.$inferInsert;
-
-export type NotificationHistory = typeof notificationHistory.$inferSelect;
-export type NewNotificationHistory = typeof notificationHistory.$inferInsert;
 
 // ============================================
 // Notification Templates
@@ -322,8 +293,8 @@ export const notificationTemplates = pgTable('notification_templates', {
   retryDelaySeconds: text('retry_delay_seconds').default('300'),
   
   // Metadata
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   createdBy: text('created_by'),
   updatedBy: text('updated_by'),
 });
@@ -367,8 +338,8 @@ export const notificationQueue = pgTable('notification_queue', {
   errorMessage: text('error_message'),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================
@@ -399,7 +370,7 @@ export const notificationDeliveryLog = pgTable('notification_delivery_log', {
   metadata: jsonb('metadata'),
   
   // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================
@@ -412,32 +383,6 @@ export const notificationBounceTypeEnum = pgEnum('notification_bounce_type', [
   'complaint',
   'manual',
 ]);
-
-export const notificationBounces = pgTable('notification_bounces', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  
-  // Bounce details
-  email: text('email').notNull(),
-  bounceType: notificationBounceTypeEnum('bounce_type').notNull(),
-  bounceSubType: text('bounce_sub_type'),
-  
-  // Timeline
-  firstBouncedAt: timestamp('first_bounced_at').notNull(),
-  lastBouncedAt: timestamp('last_bounced_at').notNull(),
-  bounceCount: text('bounce_count').notNull().default('1'),
-  
-  // Status
-  isActive: boolean('is_active').notNull().default(true),
-  suppressUntil: timestamp('suppress_until'),
-  suppressionReason: text('suppression_reason'),
-  
-  // Audit
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
 
 // ============================================
 // Indexes

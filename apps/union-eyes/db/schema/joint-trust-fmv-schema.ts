@@ -26,7 +26,7 @@ export const fmvPolicy = pgTable("fmv_policy", {
   appraisalRequired: boolean("appraisal_required").notNull().default(true),
   appraisalThreshold: decimal("appraisal_threshold", { precision: 15, scale: 2 }).notNull().default("50000.00"), // >$50k requires independent appraisal
   
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   updatedBy: varchar("updated_by", { length: 255 }),
 });
 
@@ -55,7 +55,7 @@ export const cpiData = pgTable("cpi_data", {
   importedAt: timestamp("imported_at").notNull().defaultNow(),
   importedBy: varchar("imported_by", { length: 255 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // FMV Benchmarks (market value references)
@@ -93,8 +93,8 @@ export const fmvBenchmarks = pgTable("fmv_benchmarks", {
   reviewedBy: varchar("reviewed_by", { length: 255 }),
   reviewedAt: timestamp("reviewed_at"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Procurement requests (3-bid process)
@@ -135,8 +135,8 @@ export const procurementRequests = pgTable("procurement_requests", {
   awardedAt: timestamp("awarded_at"),
   awardJustification: text("award_justification"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Procurement bids
@@ -175,7 +175,7 @@ export const procurementBids = pgTable("procurement_bids", {
   bidStatus: varchar("bid_status", { length: 20 }).notNull().default("submitted"), // "submitted", "under_review", "accepted", "rejected"
   
   submittedAt: timestamp("submitted_at").notNull().defaultNow(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Independent appraisals (for high-value items)
@@ -211,7 +211,7 @@ export const independentAppraisals = pgTable("independent_appraisals", {
   reviewedAt: timestamp("reviewed_at"),
   reviewNotes: text("review_notes"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // CPI-adjusted pricing (auto-escalation)
@@ -242,7 +242,7 @@ export const cpiAdjustedPricing = pgTable("cpi_adjusted_pricing", {
   approvedBy: varchar("approved_by", { length: 255 }),
   approvedAt: timestamp("approved_at"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // FMV compliance violations
@@ -270,7 +270,7 @@ export const fmvViolations = pgTable("fmv_violations", {
   detectedBy: varchar("detected_by", { length: 255 }),
   detectedAt: timestamp("detected_at").notNull().defaultNow(),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // FMV audit log
@@ -297,6 +297,6 @@ export const fmvAuditLog = pgTable("fmv_audit_log", {
   metadata: jsonb("metadata"),
   ipAddress: varchar("ip_address", { length: 45 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

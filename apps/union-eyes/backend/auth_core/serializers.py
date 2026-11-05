@@ -37,28 +37,31 @@ class AddressChangeHistorySerializer(serializers.ModelSerializer):
 class FeatureFlagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeatureFlags
-        fields = '__all__'
+        fields = [
+            'id', 'updated_at', 'name', 'type', 'enabled', 'percentage', 'allowed_organizations',
+            'allowed_users', 'description', 'tags', 'created_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class OrganizationSharingSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationSharingSettings
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CrossOrgAccessLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = CrossOrgAccessLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class OrganizationSharingGrantsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationSharingGrants
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'grantor_org_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -79,70 +82,107 @@ class PendingProfilesSerializer(serializers.ModelSerializer):
 class ProfilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profiles
-        fields = '__all__'
+        fields = [
+            'id', 'user_id', 'email', 'membership', 'payment_provider', 'stripe_customer_id',
+            'stripe_subscription_id', 'whop_user_id', 'whop_membership_id', 'plan_duration',
+            'billing_cycle_start', 'billing_cycle_end', 'next_credit_renewal', 'usage_credits',
+            'used_credits', 'status', 'created_at', 'updated_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class OrganizationUsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationUsers
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_user_id', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class UserSessionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSessions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'session_id', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class OauthProvidersSerializer(serializers.ModelSerializer):
     class Meta:
         model = OauthProviders
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'provider_id', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MemberContactPreferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberContactPreferences
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'user_id', 'organization_id',
+            'preferred_contact_method', 'preferred_language', 'email_opt_in', 'sms_opt_in',
+            'phone_opt_in', 'mail_opt_in', 'notification_preferences', 'best_contact_times',
+            'alternative_email', 'alternative_phone', 'emergency_contact_name',
+            'emergency_contact_phone', 'emergency_contact_relation', 'accessibility_needs',
+            'interpreter_required', 'interpreter_language', 'metadata', 'last_modified_by',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MemberEmploymentDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberEmploymentDetails
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'user_id', 'organization_id', 'classification',
+            'job_title', 'job_code', 'pay_grade', 'work_location_id', 'department', 'division',
+            'cost_center', 'seniority_date', 'seniority_years', 'seniority_points', 'shift_type',
+            'shift_start', 'shift_end', 'work_days', 'hours_per_week', 'supervisor_name',
+            'supervisor_id', 'supervisor_contact', 'employment_status', 'status_effective_date',
+            'status_reason', 'expected_return_date', 'benefits_eligible',
+            'benefits_enrollment_date', 'pension_plan_enrolled', 'probation_end_date',
+            'is_probationary', 'steward', 'officer', 'committee_member', 'metadata',
+            'last_modified_by',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MemberConsentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberConsents
-        fields = '__all__'
+        fields = [
+            'id', 'updated_at', 'user_id', 'organization_id', 'consent_type', 'consent_category',
+            'granted', 'granted_at', 'revoked_at', 'consent_version', 'consent_text',
+            'consent_method', 'ip_address', 'user_agent', 'witnessed_by', 'expires_at',
+            'requires_renewal', 'metadata', 'created_at', 'created_by',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MemberHistoryEventsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberHistoryEvents
-        fields = '__all__'
+        fields = [
+            'id', 'updated_at', 'user_id', 'organization_id', 'event_type', 'event_category',
+            'event_date', 'event_title', 'event_description', 'event_data', 'actor_id',
+            'actor_name', 'is_public', 'visible_to_member', 'metadata', 'created_at', 'created_by',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class OrganizationMembersSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationMembers
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'user_id', 'role', 'status', 'membership_number',
+            'is_primary', 'member_category', 'exempt_from_per_capita', 'exemption_reason',
+            'exemption_approved_by', 'name', 'email', 'phone', 'department', 'location', 'position',
+            'hire_date', 'seniority', 'union_join_date', 'metadata', 'joined_at', 'deleted_at',
+            'organization',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -150,32 +190,33 @@ class SsoProvidersSerializer(serializers.ModelSerializer):
     class Meta:
         model = SsoProviders
         fields = '__all__'
+        extra_kwargs = {'oidc_client_secret': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ScimConfigurationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScimConfigurations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SsoSessionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SsoSessions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'provider']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ScimEventsLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScimEventsLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'config']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MfaConfigurationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MfaConfigurations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']

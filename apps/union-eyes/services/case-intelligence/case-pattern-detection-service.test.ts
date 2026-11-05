@@ -82,7 +82,7 @@ describe('case-intelligence case-pattern-detection-service', () => {
     const { findSimilarCases } = await import('./case-pattern-detection-service');
     const result = await findSimilarCases({
       context: { caseId: 'case-root', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
       limit: 10,
     });
 
@@ -123,7 +123,7 @@ describe('case-intelligence case-pattern-detection-service', () => {
     const { findSimilarCases } = await import('./case-pattern-detection-service');
     const result = await findSimilarCases({
       context: { caseId: 'case-root', orgId: 'org-1', actorId: 'user-1' },
-      actor: { userId: 'user-1', isStewardPlus: false },
+      actor: { userId: 'user-1' },
       limit: 10,
     });
 

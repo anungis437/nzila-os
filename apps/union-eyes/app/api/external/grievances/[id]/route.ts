@@ -1,6 +1,5 @@
 import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
 import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-utils';
@@ -12,8 +11,18 @@ export const GET = withExternalMatterResourceAuth(
     resolve: resolveExternalGrievanceResource,
   },
   async (_request, context) => {
-    const [row] = await db
-      .select()
+    // Select only approved external columns. grievances.description is internal union material,
+    // not a reviewed counsel-safe summary; never fetch it under an external view grant.
+    const [row] = await context.tx
+      .select({
+        id: grievances.id,
+        caseNumber: grievances.grievanceNumber,
+        title: grievances.title,
+        status: grievances.status,
+        step: grievances.step,
+        filedDate: grievances.filedDate,
+        responseDeadline: grievances.responseDeadline,
+      })
       .from(grievances)
       .where(
         and(

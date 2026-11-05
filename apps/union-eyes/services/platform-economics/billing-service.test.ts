@@ -42,6 +42,7 @@ const dbMock = vi.hoisted(() => {
         where() { return c; },
         orderBy() { return c; },
         limit() { return c; },
+        offset() { return c; },
         groupBy() { return c; },
         values(v: any) { c._values = v; return c; },
         set(v: any) { c._set = v; return c; },
@@ -84,9 +85,6 @@ vi.mock('@/db/schema', () => {
     platformPayments: t('platformPayments'),
     paymentAllocations: t('paymentAllocations'),
     subscriptionPlans: t('subscriptionPlans'),
-    usageAggregates: t('usageAggregates'),
-    usageEvents: t('usageEvents'),
-    usageMeters: t('usageMeters'),
     organizations: t('organizations'),
   };
 });
@@ -107,6 +105,9 @@ vi.mock('@/lib/audit-logger', () => ({
   AuditEventType: { DATA_CREATE: 'data_create', DATA_UPDATE: 'data_update', PAYMENT_PROCESSED: 'payment_processed' },
   AuditSeverity: { HIGH: 'high', CRITICAL: 'critical' },
 }));
+
+const persistAtomicAudit = vi.fn().mockResolvedValue(undefined);
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: (...a: unknown[]) => persistAtomicAudit(...a) }));
 
 const appendLedgerEntry = vi.fn().mockResolvedValue(undefined);
 vi.mock('./ledger-service', () => ({
@@ -261,11 +262,6 @@ describe('generateInvoice', () => {
       id: 'plan-1', name: 'Pro', code: 'PRO', baseFee: '100.00',
       perLocalFee: '10.00', perSeatFee: '5.00', perModuleFee: '2.00', updatedAt: new Date('2025-01-01'),
     }];
-    state.selects.usageAggregates = [{
-      id: 'agg-1', meterId: 'meter-1', billableQuantity: '10', unitPrice: '1.00',
-      totalAmount: '10.00', status: 'final', meterCode: 'API', meterUnit: 'calls',
-    }];
-    state.selects.usageEvents = [{ id: 'ue-1' }, { id: 'ue-2' }];
     state.inserts.platformInvoices = [{ id: 'inv-new', invoiceNumber: 'INV-X' }];
   }
 
@@ -278,7 +274,7 @@ describe('generateInvoice', () => {
 
   it('throws when the billing period is closed', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1', netTermsDays: 30 }];
-    state.selects.billingPeriods = [{ id: 'bp-1', isClosed: true, label: '2025-01' }];
+    state.selects.billingPeriods = [{ id: 'bp-1', isClosed: true, label: '2025-01', organizationId: 'org-1' }];
     await expect(generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1' })).rejects.toThrow(
       /is closed/,
     );
@@ -286,11 +282,18 @@ describe('generateInvoice', () => {
 
   it('throws when an invoice already exists for the org+period', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1', netTermsDays: 30 }];
-    state.selects.billingPeriods = [{ id: 'bp-1', isClosed: false, label: '2025-01' }];
+    state.selects.billingPeriods = [{ id: 'bp-1', isClosed: false, label: '2025-01', organizationId: 'org-1' }];
     state.selects.platformInvoices = [{ id: 'inv-1', invoiceNumber: 'INV-EXISTING' }];
     await expect(generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1' })).rejects.toThrow(
       /already exists/,
     );
+  });
+
+  it('rejects an invoice against a foreign billing period', async () => {
+    happyState();
+    state.selects.billingPeriods = [{ id: 'bp-1', organizationId: 'other-org', isClosed: false }];
+    await expect(generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1' })).rejects.toThrow('Billing period not found for organization');
+    expect(auditLog).not.toHaveBeenCalled();
   });
 
   it('throws when there is no active contract', async () => {
@@ -317,14 +320,17 @@ describe('generateInvoice', () => {
     );
   });
 
-  it('generates an invoice with base/local/seat/module/usage lines, discount and subsidy', async () => {
+  it('generates an invoice with base/local/seat/module lines, discount and subsidy, and reads no metering table (metering is not implemented)', async () => {
     happyState();
     const r = await generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1', createdBy: 'admin-1' });
     expect(r.id).toBe('inv-new');
     expect(appendLedgerEntry).toHaveBeenCalled();
-    expect(auditLog).toHaveBeenCalledWith(
+    // The audit record is written inside the invoice transaction (DEF-0B3-BILLING-AUDIT-NOT-ATOMIC).
+    expect(persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({ action: 'invoice_generated', resourceId: 'inv-new' }),
     );
+    expect(auditLog).not.toHaveBeenCalledWith(expect.objectContaining({ action: 'invoice_generated' }));
   });
 });
 
@@ -345,11 +351,13 @@ describe('recordPayment', () => {
     await expect(recordPayment(base)).rejects.toThrow(/No billing account/);
   });
 
-  it('returns the existing payment for a duplicate idempotency key', async () => {
+  it('refuses an existing keyed payment until its invoice allocation can be verified', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1' }];
-    state.selects.platformPayments = [{ id: 'pay-existing' }];
-    const r = await recordPayment({ ...base, idempotencyKey: 'idem-1' });
-    expect(r.id).toBe('pay-existing');
+    state.selects.platformPayments = [{ id: 'pay-existing', organizationId: 'org-1', amount: '100.00' }];
+    await expect(recordPayment({ ...base, idempotencyKey: 'idem-1' }))
+      .rejects.toThrow(/requires verified invoice allocation/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
   });
 
   it('throws when the invoice is not found', async () => {
@@ -369,6 +377,17 @@ describe('recordPayment', () => {
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
     await expect(recordPayment({ ...base, amount: '0.00' })).rejects.toThrow(/must be positive/);
   });
+
+  it.each(['-1.00', '1.001', 'NaN', 'Infinity', '1e3', '999999999999999999999'])(
+    'refuses malformed direct payment %s without ledger or audit writes',
+    async (amount) => {
+      state.selects.billingAccounts = [{ id: 'acct-1' }];
+      state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
+      await expect(recordPayment({ ...base, amount })).rejects.toThrow(/CAD amount|safe CAD limits/);
+      expect(appendLedgerEntry).not.toHaveBeenCalled();
+      expect(auditLog).not.toHaveBeenCalled();
+    },
+  );
 
   it('records a full payment, marks invoice paid, bridges ledger and audits', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1' }];
@@ -410,11 +429,42 @@ describe('reconcileExternalInvoicePayment', () => {
     await expect(reconcileExternalInvoicePayment(base)).rejects.toThrow(/not found/);
   });
 
-  it('returns the existing payment when the external ref was already recorded', async () => {
+  it('refuses an existing external reference until its invoice allocation is verified', async () => {
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1' }];
-    state.selects.platformPayments = [{ id: 'pay-existing' }];
-    const r = await reconcileExternalInvoicePayment(base);
-    expect(r.id).toBe('pay-existing');
+    state.selects.platformPayments = [{ id: 'pay-existing', organizationId: 'org-1', amount: '100.00' }];
+    await expect(reconcileExternalInvoicePayment(base)).rejects.toThrow(
+      'External payment replay requires verified invoice allocation',
+    );
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  it('refuses a conflicting external payment amount without ledger or audit side effects', async () => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1' }];
+    state.selects.platformPayments = [{ id: 'pay-existing', organizationId: 'org-1', amount: '99.00' }];
+    await expect(reconcileExternalInvoicePayment(base)).rejects.toThrow(
+      'External payment reference conflicts with the requested organization or amount',
+    );
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  it.each(['0.00', '-1.00', '1.001', 'NaN'])('refuses invalid completed external amount %s without writes', async (amount) => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
+    state.selects.platformPayments = [];
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    await expect(reconcileExternalInvoicePayment({ ...base, amount })).rejects.toThrow(/amount/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  it('refuses negative failed external payments without writes', async () => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1' }];
+    state.selects.platformPayments = [];
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    await expect(reconcileExternalInvoicePayment({ ...base, amount: '-10.00', status: 'failed' })).rejects.toThrow(/amount/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(auditLog).not.toHaveBeenCalled();
   });
 
   it('records a completed external payment and allocates it', async () => {
@@ -476,25 +526,32 @@ describe('queries', () => {
   });
 
   it('getInvoiceWithLineItems returns the invoice with line items', async () => {
-    state.selects.platformInvoices = [{ id: 'inv-1', subtotal: '10.00' }];
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', subtotal: '10.00' }];
     state.selects.platformInvoiceLineItems = [{ id: 'li-1', amount: '10.00' }];
-    const r = await getInvoiceWithLineItems('inv-1');
+    const r = await getInvoiceWithLineItems('inv-1', 'org-1');
     expect(r?.id).toBe('inv-1');
     expect(r?.lineItems).toHaveLength(1);
   });
 
+  it('does not reveal foreign invoice line items', async () => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'other-org', subtotal: '10.00' }];
+    state.selects.platformInvoiceLineItems = [{ id: 'secret-line' }];
+    expect(await getInvoiceWithLineItems('inv-1', 'org-1')).toBeNull();
+    expect(await replayInvoiceDeterministically('inv-1', 'org-1')).toBeNull();
+  });
+
   it('replayInvoiceDeterministically returns null when invoice missing', async () => {
     state.selects.platformInvoices = [];
-    expect(await replayInvoiceDeterministically('inv-x')).toBeNull();
+    expect(await replayInvoiceDeterministically('inv-x', 'org-1')).toBeNull();
   });
 
   it('replayInvoiceDeterministically recomputes subtotal and reports a match', async () => {
-    state.selects.platformInvoices = [{ id: 'inv-1', subtotal: '10.00', totalAmount: '10.00', metadata: { pricingRuleVersion: 'v1' } }];
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', subtotal: '10.00', totalAmount: '10.00', metadata: { pricingRuleVersion: 'v1' } }];
     state.selects.platformInvoiceLineItems = [{
       id: 'li-1', amount: '10.00', costType: 'usage_fee',
       metadata: { usageAggregateId: 'agg-1', usageEventIds: ['ue-1', 'ue-2'] },
     }];
-    const r = await replayInvoiceDeterministically('inv-1');
+    const r = await replayInvoiceDeterministically('inv-1', 'org-1');
     expect(r?.recomputed.isMatch).toBe(true);
     expect(r?.recomputed.subtotal).toBe('10.00');
     expect(r?.lineage[0].usageEventIds).toEqual(['ue-1', 'ue-2']);

@@ -16,6 +16,7 @@ const h = vi.hoisted(() => {
       "where",
       "limit",
       "orderBy",
+      "for",
       "set",
       "values",
       "returning",
@@ -33,6 +34,8 @@ const h = vi.hoisted(() => {
     select: vi.fn(() => makeChain()),
     insert: vi.fn(() => makeChain()),
     update: vi.fn(() => makeChain()),
+    // The handler reconciles inside one transaction; the transaction shares the same result queue.
+    transaction: vi.fn(async (work: (tx: any) => Promise<unknown>) => work(db)),
   };
   const schema: any = new Proxy(
     {},
@@ -48,9 +51,8 @@ const h = vi.hoisted(() => {
     },
   );
   const parser = { parseCSV: vi.fn(), parseExcel: vi.fn(), parseXML: vi.fn() };
-  const engine = { reconcile: vi.fn(), generateReport: vi.fn() };
   const multerConfig: { value: any } = { value: undefined };
-  return { queue, db, schema, parser, engine, multerConfig };
+  return { queue, db, schema, parser, multerConfig };
 });
 
 vi.mock("multer", () => {
@@ -67,10 +69,6 @@ vi.mock("@union-claims/financial", () => ({
     parseExcel = h.parser.parseExcel;
     parseXML = h.parser.parseXML;
   },
-  ReconciliationEngine: class {
-    reconcile = h.engine.reconcile;
-    generateReport = h.engine.generateReport;
-  },
 }));
 vi.mock("../../db", () => ({ db: h.db, schema: h.schema }));
 vi.mock("@/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
@@ -78,6 +76,9 @@ vi.mock("@/lib/logger", () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: 
 import remittancesRouter from "../../routes/remittances";
 
 const UUID = "11111111-1111-1111-1111-111111111111";
+const UUID2 = "33333333-3333-3333-3333-333333333333";
+// A strict (RFC 4122) UUID: the report only accepts recorded transaction references of this form.
+const MATCHED_ID = "22222222-2222-4222-8222-222222222222";
 const ADMIN = { organizationId: "org-1", userId: "u1", id: "u1", role: "admin" };
 const MEMBER = { organizationId: "org-1", userId: "u1", id: "u1", role: "member" };
 const NO_ORG = { userId: "u1", role: "admin" };
@@ -103,11 +104,10 @@ beforeEach(() => {
   h.db.select.mockClear();
   h.db.insert.mockClear();
   h.db.update.mockClear();
+  h.db.transaction.mockClear();
   h.parser.parseCSV.mockReset();
   h.parser.parseExcel.mockReset();
   h.parser.parseXML.mockReset();
-  h.engine.reconcile.mockReset();
-  h.engine.generateReport.mockReset();
 });
 
 describe("remittances routes", () => {
@@ -172,87 +172,136 @@ describe("remittances routes", () => {
     expect(r.statusCode).toBe(400);
   });
 
-  it("reconciles a remittance via auto-match", async () => {
-    enqueue(
-      [{ id: "r1", totalAmount: "50", remittanceDate: "2025-02-01", remittancePeriodStart: "2025-01-01", remittancePeriodEnd: "2025-01-31" }],
-      [{ id: "t1", totalAmount: "50", memberId: "m1" }],
-      [],
-      [{ id: "r1", reconciliationStatus: "reconciled" }],
-    );
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: ADMIN,
-      params: { id: "r1" },
-      body: { autoMatch: true },
+  describe("reconcile", () => {
+    const remittance = (over: Record<string, unknown> = {}) => ({
+      id: "r1",
+      totalAmount: "50",
+      remittanceDate: "2025-02-01",
+      remittancePeriodStart: "2025-01-01",
+      remittancePeriodEnd: "2025-01-31",
+      ...over,
     });
-    expect(r.statusCode).toBe(200);
-    expect((r.body as any).data.status).toBe("reconciled");
-  });
+    const pending = (over: Record<string, unknown> = {}) => ({ id: "r1", reconciliationStatus: "pending", metadata: { carried: "yes" }, ...over });
+    // The nth update chain started by the handler: 0 marks the dues transactions paid, 1 records the reconciliation on the remittance.
+    const updateSet = (nth: number) => h.db.update.mock.results[nth].value.set.mock.calls[0][0];
+    const reconcile = (body: unknown) =>
+      invokeRoute(remittancesRouter, "post", "/:id/reconcile", { user: ADMIN, params: { id: "r1" }, body });
 
-  it("reconciles a remittance with explicit transaction ids", async () => {
-    enqueue(
-      [{ id: "r1", totalAmount: "30", remittanceDate: "2025-02-01", remittancePeriodStart: "2025-01-01", remittancePeriodEnd: "2025-01-31" }],
-      [{ id: "t1", totalAmount: "50", memberId: "m1" }],
-      [],
-      [{ id: "r1", reconciliationStatus: "variance_detected" }],
-    );
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: ADMIN,
-      params: { id: "r1" },
-      body: { transactionIds: [UUID], autoMatch: false },
+    it("reconciles by auto-match in one transaction: transactions paid, evidence recorded, existing metadata kept", async () => {
+      enqueue([remittance()], [{ id: "t1", totalAmount: "50", memberId: "m1" }], [pending()], [{ id: "t1" }], [{ id: "r1", reconciliationStatus: "reconciled" }]);
+      const r = await reconcile({ autoMatch: true });
+      expect(r.statusCode).toBe(200);
+      expect((r.body as any).data).toMatchObject({ status: "reconciled", matchedTransactions: 1, matchedAmount: 50, expectedAmount: 50, variance: 0 });
+      expect(h.db.transaction).toHaveBeenCalledTimes(1);
+      expect(h.db.update).toHaveBeenCalledTimes(2);
+      expect(updateSet(0)).toMatchObject({ paidDate: "2025-02-01", status: "paid", notes: "Paid via remittance r1" });
+      expect(updateSet(1)).toMatchObject({
+        reconciliationStatus: "reconciled",
+        varianceAmount: "0.00",
+        reconciledBy: "u1",
+        metadata: { carried: "yes", matchedTransactions: 1, matchedTransactionIds: ["t1"], matchedAmount: 50 },
+      });
     });
-    expect(r.statusCode).toBe(200);
-    expect((r.body as any).data.status).toBe("variance_detected");
-  });
 
-  it("returns 404 reconciling a missing remittance", async () => {
-    enqueue([]);
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: ADMIN,
-      params: { id: "x" },
-      body: { autoMatch: true },
+    it("records a variance for an explicit transaction list that does not add up", async () => {
+      enqueue([remittance({ totalAmount: "30" })], [{ id: UUID, totalAmount: "50", memberId: "m1" }], [pending({ metadata: null })], [{ id: UUID }], [{ id: "r1", reconciliationStatus: "variance_detected" }]);
+      const r = await reconcile({ transactionIds: [UUID], autoMatch: false });
+      expect(r.statusCode).toBe(200);
+      expect((r.body as any).data).toMatchObject({ status: "variance_detected", variance: -20, matchedAmount: 50, expectedAmount: 30 });
+      expect(updateSet(1)).toMatchObject({ reconciliationStatus: "variance_detected", varianceAmount: "-20.00", metadata: { matchedTransactionIds: [UUID] } });
     });
-    expect(r.statusCode).toBe(404);
-  });
 
-  it("returns 400 when remittance already reconciled", async () => {
-    enqueue([{ id: "r1", reconciliationStatus: "reconciled" }]);
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: ADMIN,
-      params: { id: "r1" },
-      body: { autoMatch: true },
+    it("compares exact cents, so 0.10 plus 0.20 matches 0.30", async () => {
+      enqueue([remittance({ totalAmount: "0.30" })], [{ id: "t1", totalAmount: "0.10", memberId: "m1" }, { id: "t2", totalAmount: "0.20", memberId: "m2" }], [pending()], [{ id: "t1" }, { id: "t2" }], [{ id: "r1", reconciliationStatus: "reconciled" }]);
+      const r = await reconcile({});
+      expect((r.body as any).data).toMatchObject({ status: "reconciled", variance: 0, matchedAmount: 0.3 });
+      expect(updateSet(1).varianceAmount).toBe("0.00");
     });
-    expect(r.statusCode).toBe(400);
-  });
 
-  it("returns 400 when no matching transactions found", async () => {
-    enqueue(
-      [{ id: "r1", totalAmount: "50", remittancePeriodStart: "2025-01-01", remittancePeriodEnd: "2025-01-31" }],
-      [],
-    );
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: ADMIN,
-      params: { id: "r1" },
-      body: { autoMatch: true },
+    it("refuses an explicit list in which any transaction is unavailable, and changes nothing", async () => {
+      enqueue([remittance()], [{ id: UUID, totalAmount: "10.00", memberId: "m1" }]);
+      const r = await reconcile({ transactionIds: [UUID, UUID2], autoMatch: false });
+      expect(r.statusCode).toBe(409);
+      expect((r.body as any).error).toBe("One or more transactions are unavailable for reconciliation");
+      expect(h.db.transaction).not.toHaveBeenCalled();
+      expect(h.db.update).not.toHaveBeenCalled();
     });
-    expect(r.statusCode).toBe(400);
-  });
 
-  it("returns 401 reconciling without auth context", async () => {
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: NO_ORG,
-      params: { id: "r1" },
-      body: {},
+    it("refuses a duplicate transaction id as a validation error before reading anything", async () => {
+      const r = await reconcile({ transactionIds: [UUID, UUID] });
+      expect(r.statusCode).toBe(400);
+      expect((r.body as any).error).toBe("Validation error");
+      expect(h.db.select).not.toHaveBeenCalled();
     });
-    expect(r.statusCode).toBe(401);
-  });
 
-  it("denies reconciliation for non-admins", async () => {
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: MEMBER,
-      params: { id: "r1" },
-      body: {},
+    it("refuses a batch over the limit", async () => {
+      enqueue([remittance()], Array.from({ length: 501 }, (_, i) => ({ id: `t${i}`, totalAmount: "1.00", memberId: "m" })));
+      const r = await reconcile({});
+      expect(r.statusCode).toBe(413);
+      expect(h.db.transaction).not.toHaveBeenCalled();
     });
-    expect(r.statusCode).toBe(403);
+
+    it("fails closed on a dues transaction without a total: a generic 500, nothing written", async () => {
+      enqueue([remittance()], [{ id: "t1", memberId: "m1" }]);
+      const r = await reconcile({});
+      expect(r.statusCode).toBe(500);
+      expect(r.body).toEqual({ success: false, error: "Internal server error" });
+      expect(h.db.transaction).not.toHaveBeenCalled();
+      expect(h.db.update).not.toHaveBeenCalled();
+    });
+
+    it("writes nothing when the remittance was reconciled by someone else after it was read", async () => {
+      enqueue([remittance()], [{ id: "t1", totalAmount: "50", memberId: "m1" }], [pending({ reconciliationStatus: "reconciled" })]);
+      const r = await reconcile({});
+      expect(r.statusCode).toBe(500);
+      expect(h.db.update).not.toHaveBeenCalled();
+    });
+
+    it("never records the reconciliation when a transaction changed underneath it (the transaction rolls back)", async () => {
+      enqueue([remittance()], [{ id: "t1", totalAmount: "25", memberId: "m1" }, { id: "t2", totalAmount: "25", memberId: "m2" }], [pending()], [{ id: "t1" }]);
+      const r = await reconcile({});
+      expect(r.statusCode).toBe(500);
+      expect(h.db.update).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns 404 for a missing remittance", async () => {
+      enqueue([]);
+      const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
+        user: ADMIN,
+        params: { id: "x" },
+        body: { autoMatch: true },
+      });
+      expect(r.statusCode).toBe(404);
+    });
+
+    it("returns 400 when the remittance is already reconciled", async () => {
+      enqueue([{ id: "r1", reconciliationStatus: "reconciled" }]);
+      expect((await reconcile({ autoMatch: true })).statusCode).toBe(400);
+    });
+
+    it("returns 400 when no matching transactions are found", async () => {
+      enqueue([remittance()], []);
+      expect((await reconcile({ autoMatch: true })).statusCode).toBe(400);
+    });
+
+    it("returns 401 without auth context", async () => {
+      const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
+        user: NO_ORG,
+        params: { id: "r1" },
+        body: {},
+      });
+      expect(r.statusCode).toBe(401);
+    });
+
+    it("denies reconciliation for non-admins", async () => {
+      const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
+        user: MEMBER,
+        params: { id: "r1" },
+        body: {},
+      });
+      expect(r.statusCode).toBe(403);
+      expect(h.db.select).not.toHaveBeenCalled();
+    });
   });
 
   it("updates a remittance", async () => {
@@ -367,94 +416,6 @@ describe("remittances routes", () => {
     expect(reject.mock.calls[0][0]).toBeInstanceOf(Error);
   });
 
-  // ---- second /:id/reconcile handler (ReconciliationEngine) via matchIndex ----
-  it("auto-reconciles using the reconciliation engine", async () => {
-    enqueue(
-      [{ id: "r1", remittanceDate: "2025-02-01", remittancePeriodStart: "2025-01-01", remittancePeriodEnd: "2025-01-31" }],
-      [{ id: "t1", memberId: "m1", amount: "50", periodStart: "2025-01-01", periodEnd: "2025-01-31" }],
-      [],
-      [],
-    );
-    h.engine.reconcile.mockResolvedValue({
-      success: true,
-      matches: [{ transactionId: "t1" }],
-      variances: [],
-      summary: { totalVariance: 0, matchedCount: 1 },
-    });
-    h.engine.generateReport.mockReturnValue("REPORT");
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: ADMIN,
-      params: { id: "r1" },
-      body: { records: [{ memberId: "m1", amount: 50 }] },
-      matchIndex: 1,
-    });
-    expect(r.statusCode).toBe(200);
-    expect(h.engine.reconcile).toHaveBeenCalled();
-  });
-
-  it("auto-reconciles without applying matches when autoApply is false", async () => {
-    enqueue(
-      [{ id: "r1", remittanceDate: "2025-02-01", remittancePeriodStart: "2025-01-01", remittancePeriodEnd: "2025-01-31" }],
-      [{ id: "t1", memberId: "m1", amount: "50", periodStart: "2025-01-01", periodEnd: "2025-01-31" }],
-    );
-    h.engine.reconcile.mockResolvedValue({
-      success: true,
-      matches: [{ transactionId: "t1" }],
-      variances: [{ id: "v1" }],
-      summary: { totalVariance: 5, matchedCount: 1 },
-    });
-    h.engine.generateReport.mockReturnValue("REPORT");
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: ADMIN,
-      params: { id: "r1" },
-      body: { records: [{ memberId: "m1", amount: 50 }], autoApply: false },
-      matchIndex: 1,
-    });
-    expect(r.statusCode).toBe(200);
-  });
-
-  it("returns 404 in engine reconcile when remittance is missing", async () => {
-    enqueue([]);
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: ADMIN,
-      params: { id: "x" },
-      body: { records: [{}] },
-      matchIndex: 1,
-    });
-    expect(r.statusCode).toBe(404);
-  });
-
-  it("returns 400 in engine reconcile when no records provided", async () => {
-    enqueue([{ id: "r1", remittancePeriodStart: "2025-01-01", remittancePeriodEnd: "2025-01-31" }]);
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: ADMIN,
-      params: { id: "r1" },
-      body: { records: [] },
-      matchIndex: 1,
-    });
-    expect(r.statusCode).toBe(400);
-  });
-
-  it("returns 401 in engine reconcile without org context", async () => {
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: NO_ORG,
-      params: { id: "r1" },
-      body: { records: [{}] },
-      matchIndex: 1,
-    });
-    expect(r.statusCode).toBe(401);
-  });
-
-  it("denies engine reconcile for non-admins", async () => {
-    const r = await invokeRoute(remittancesRouter, "post", "/:id/reconcile", {
-      user: MEMBER,
-      params: { id: "r1" },
-      body: { records: [{}] },
-      matchIndex: 1,
-    });
-    expect(r.statusCode).toBe(403);
-  });
-
   // ---- report route ----
   it("generates a JSON report", async () => {
     enqueue([{ id: "r1", totalAmount: "100", varianceAmount: "0", memberCount: 5 }]);
@@ -490,5 +451,32 @@ describe("remittances routes", () => {
   it("returns 401 generating a report without org context", async () => {
     const r = await invokeRoute(remittancesRouter, "get", "/:id/report", { user: NO_ORG, params: { id: "r1" }, query: {} });
     expect(r.statusCode).toBe(401);
+  });
+
+  it("reports the transactions named by the recorded references of a reconciled remittance", async () => {
+    enqueue(
+      [{ id: "r1", totalAmount: "50", varianceAmount: "0.00", memberCount: 1, reconciliationStatus: "reconciled", metadata: { matchedTransactionIds: [MATCHED_ID] } }],
+      [{ id: MATCHED_ID, memberId: "m1", amount: "50.00", status: "paid", paidDate: "2025-02-01" }],
+    );
+    const r = await invokeRoute(remittancesRouter, "get", "/:id/report", { user: ADMIN, params: { id: "r1" }, query: {} });
+    expect(r.statusCode).toBe(200);
+    expect((r.body as any).data.summary).toMatchObject({ matchedCount: 1, totalReconciled: 50 });
+    expect((r.body as any).data.transactions).toEqual([{ id: MATCHED_ID, memberId: "m1", amount: "50.00", status: "paid", paidDate: "2025-02-01" }]);
+  });
+
+  it("refuses a report for a reconciled remittance that carries no transaction references, instead of reporting zero matches", async () => {
+    enqueue([{ id: "r1", totalAmount: "50", reconciliationStatus: "reconciled", metadata: { matchedTransactions: 3 } }]);
+    const r = await invokeRoute(remittancesRouter, "get", "/:id/report", { user: ADMIN, params: { id: "r1" }, query: {} });
+    expect(r.statusCode).toBe(409);
+    expect((r.body as any).error).toBe("Reconciliation evidence unavailable");
+  });
+
+  it("refuses a report when a recorded reference no longer resolves to a transaction of this organisation", async () => {
+    enqueue(
+      [{ id: "r1", totalAmount: "50", reconciliationStatus: "variance_detected", metadata: { matchedTransactionIds: [MATCHED_ID] } }],
+      [],
+    );
+    const r = await invokeRoute(remittancesRouter, "get", "/:id/report", { user: ADMIN, params: { id: "r1" }, query: {} });
+    expect(r.statusCode).toBe(409);
   });
 });

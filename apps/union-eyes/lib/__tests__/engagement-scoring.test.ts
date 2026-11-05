@@ -33,6 +33,7 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   gte: vi.fn(),
   and: vi.fn(),
+  inArray: vi.fn(),
   sql: (strings: TemplateStringsArray, ...values: any[]) => ({ strings, values }),
   relations: vi.fn(() => ({})),
 }));

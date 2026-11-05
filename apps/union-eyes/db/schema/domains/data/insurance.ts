@@ -59,8 +59,8 @@ export const externalBenefitPlans = pgTable(
     
     // Metadata
     lastSyncedAt: timestamp('last_synced_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orgProviderIdx: index('external_benefit_plans_org_provider_idx').on(
@@ -110,8 +110,8 @@ export const externalBenefitEnrollments = pgTable(
     
     // Metadata
     lastSyncedAt: timestamp('last_synced_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orgProviderIdx: index('external_benefit_enrollments_org_provider_idx').on(
@@ -156,8 +156,8 @@ export const externalBenefitDependents = pgTable(
     
     // Metadata
     lastSyncedAt: timestamp('last_synced_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orgProviderIdx: index('external_benefit_dependents_org_provider_idx').on(
@@ -203,8 +203,8 @@ export const externalBenefitCoverage = pgTable(
     
     // Metadata
     lastSyncedAt: timestamp('last_synced_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orgProviderIdx: index('external_benefit_coverage_org_provider_idx').on(
@@ -258,8 +258,8 @@ export const externalInsuranceClaims = pgTable(
     
     // Metadata
     lastSyncedAt: timestamp('last_synced_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orgProviderIdx: index('external_insurance_claims_org_provider_idx').on(
@@ -307,8 +307,8 @@ export const externalInsurancePolicies = pgTable(
     
     // Metadata
     lastSyncedAt: timestamp('last_synced_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orgProviderIdx: index('external_insurance_policies_org_provider_idx').on(
@@ -354,8 +354,8 @@ export const externalInsuranceBeneficiaries = pgTable(
     
     // Metadata
     lastSyncedAt: timestamp('last_synced_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orgProviderIdx: index('external_insurance_beneficiaries_org_provider_idx').on(
@@ -401,8 +401,8 @@ export const externalBenefitUtilization = pgTable(
     
     // Metadata
     lastSyncedAt: timestamp('last_synced_at'),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orgProviderIdx: index('external_benefit_utilization_org_provider_idx').on(

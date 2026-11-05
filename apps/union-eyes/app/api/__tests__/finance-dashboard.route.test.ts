@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { declaredOptions } from './with-api-double';
 
 const m = vi.hoisted(() => ({
-  withMinRole: vi.fn(),
   requireEntitlement: vi.fn(),
   getLedgerSummary: vi.fn(),
   getBillingAccount: vi.fn(),
@@ -11,13 +11,9 @@ const m = vi.hoisted(() => ({
   generateDuesAlignmentReport: vi.fn(),
 }));
 
-class MockEntitlementError extends Error {}
-
-vi.mock('@/lib/api-auth-guard', () => ({ withMinRole: m.withMinRole }));
-vi.mock('@/services/platform-economics/entitlement-guard', () => ({
-  requireEntitlement: m.requireEntitlement,
-  EntitlementError: MockEntitlementError,
-}));
+vi.mock('@/lib/api/framework', async () => (await import('./with-api-double')).frameworkDouble);
+vi.mock('@/lib/api/standardized-responses', async () => (await import('./standard-responses-double')).standardResponsesDouble());
+vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
 vi.mock('@/services/platform-economics', () => ({
   getLedgerSummary: m.getLedgerSummary,
   getBillingAccount: m.getBillingAccount,
@@ -27,35 +23,17 @@ vi.mock('@/services/platform-economics', () => ({
 vi.mock('@/services/platform-economics/dues-alignment', () => ({
   generateDuesAlignmentReport: m.generateDuesAlignmentReport,
 }));
-vi.mock('@/lib/api/standardized-responses', () => ({
-  ErrorCode: {
-    AUTH_REQUIRED: 'AUTH_REQUIRED',
-    FORBIDDEN: 'FORBIDDEN',
-    INTERNAL_ERROR: 'INTERNAL_ERROR',
-  },
-  standardErrorResponse: (code: string, message: string, error?: unknown) =>
-    new Response(JSON.stringify({ code, message, error }), {
-      status: code === 'AUTH_REQUIRED' ? 401 : code === 'FORBIDDEN' ? 403 : 500,
-      headers: { 'content-type': 'application/json' },
-    }),
-  standardSuccessResponse: (data: unknown) =>
-    new Response(JSON.stringify({ data }), {
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    }),
-}));
 
 async function loadRoute() {
   return import('../finance/dashboard/route');
 }
 
+const PERIOD = '550e8400-e29b-41d4-a716-446655440020';
+const ctx = { organizationId: 'org_1', userId: 'user_1' };
+
 describe('finance/dashboard route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withMinRole.mockImplementation(
-      (_role: string, handler: (req: NextRequest, ctx: any) => Promise<Response>) =>
-        (req: NextRequest, ctx: any = { organizationId: 'org_1', userId: 'user_1' }) => handler(req, ctx),
-    );
     m.requireEntitlement.mockResolvedValue(undefined);
     m.getBillingAccount.mockResolvedValue({ id: 'ba_1' });
     m.getLedgerSummary.mockResolvedValue({ period: 'current', net: 1200 });
@@ -67,64 +45,66 @@ describe('finance/dashboard route', () => {
     });
   });
 
-  it('returns 401 when organization context is missing', async () => {
+  it('asks the wrapper for a secretary-treasurer, the entitlement and the organization\'s own tenant transaction', async () => {
     const { GET } = await loadRoute();
-    const response = await GET(
-      new NextRequest('http://localhost/api/finance/dashboard'),
-      { userId: 'user_1' },
-    );
-
-    expect(response.status).toBe(401);
+    expect(declaredOptions(GET)).toMatchObject({
+      auth: { minRole: 'secretary_treasurer' },
+      entitlement: 'financial_intelligence_suite',
+      rlsOrgContext: true,
+      registry: { audience: 'officer', evidenceRequired: true },
+    });
   });
 
-  it('returns 403 when entitlement check fails', async () => {
+  it('returns 403 when the entitlement check fails, and reads nothing', async () => {
     const { GET } = await loadRoute();
-    m.requireEntitlement.mockRejectedValueOnce(new MockEntitlementError('Entitlement missing'));
+    m.requireEntitlement.mockRejectedValueOnce(new Error('Entitlement missing'));
 
-    const response = await GET(
-      new NextRequest('http://localhost/api/finance/dashboard'),
-      { organizationId: 'org_1', userId: 'user_1' },
-    );
+    const response = await GET(new NextRequest('http://localhost/api/finance/dashboard'), ctx);
 
     expect(response.status).toBe(403);
+    expect(m.getBillingAccount).not.toHaveBeenCalled();
   });
 
-  it('returns dashboard payload with requested periodId', async () => {
+  it('returns the dashboard of the caller organization for the requested period', async () => {
     const { GET } = await loadRoute();
 
-    const response = await GET(
-      new NextRequest('http://localhost/api/finance/dashboard?periodId=period_1'),
-      { organizationId: 'org_1', userId: 'user_1' },
-    );
+    const response = await GET(new NextRequest(`http://localhost/api/finance/dashboard?periodId=${PERIOD}`), ctx);
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(m.getLedgerSummary).toHaveBeenCalledWith({ organizationId: 'org_1', billingPeriodId: 'period_1' });
+    expect(m.getBillingAccount).toHaveBeenCalledWith('org_1');
+    expect(m.getLedgerSummary).toHaveBeenCalledWith({ organizationId: 'org_1', billingPeriodId: PERIOD });
+    expect(m.generateDuesAlignmentReport).toHaveBeenCalledWith('org_1', PERIOD);
     expect(payload.data.duesAlignment.anomalyCount).toBe(1);
   });
 
-  it('returns dashboard payload without periodId', async () => {
+  it('returns the dashboard without a period', async () => {
     const { GET } = await loadRoute();
 
-    const response = await GET(
-      new NextRequest('http://localhost/api/finance/dashboard'),
-      { organizationId: 'org_1', userId: 'user_1' },
-    );
+    const response = await GET(new NextRequest('http://localhost/api/finance/dashboard'), ctx);
     const payload = await response.json();
 
     expect(response.status).toBe(200);
+    expect(m.getLedgerSummary).not.toHaveBeenCalled();
+    expect(m.generateDuesAlignmentReport).toHaveBeenCalledWith('org_1', 'current');
     expect(payload.data.billingAccount.id).toBe('ba_1');
     expect(payload.data.recentChargebacks).toHaveLength(1);
+  });
+
+  it('answers a period id that is not a uuid as a client error, never as a database fault', async () => {
+    const { GET } = await loadRoute();
+
+    const response = await GET(new NextRequest('http://localhost/api/finance/dashboard?periodId=period_1'), ctx);
+
+    expect(response.status).toBe(400);
+    expect(m.getBillingAccount).not.toHaveBeenCalled();
   });
 
   it('returns 500 for unexpected service errors', async () => {
     const { GET } = await loadRoute();
     m.getInvoices.mockRejectedValueOnce(new Error('db down'));
 
-    const response = await GET(
-      new NextRequest('http://localhost/api/finance/dashboard'),
-      { organizationId: 'org_1', userId: 'user_1' },
-    );
+    const response = await GET(new NextRequest('http://localhost/api/finance/dashboard'), ctx);
 
     expect(response.status).toBe(500);
   });

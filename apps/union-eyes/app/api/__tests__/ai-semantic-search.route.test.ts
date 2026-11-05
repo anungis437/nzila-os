@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
-  withRoleAuth: vi.fn(),
   checkRateLimit: vi.fn(),
   createRateLimitHeaders: vi.fn(),
   checkEntitlement: vi.fn(),
@@ -11,11 +10,12 @@ const m = vi.hoisted(() => ({
   semanticPrecedentSearch: vi.fn(),
   unifiedSemanticSearch: vi.fn(),
   findSimilarClauses: vi.fn(),
-  db: { select: vi.fn() },
+  withRLSContext: vi.fn(),
+  tx: { select: vi.fn() },
   selectQueue: [] as unknown[][],
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ withRoleAuth: m.withRoleAuth, BaseAuthContext: {} }));
+vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
   RATE_LIMITS: { AI_COMPLETION: { limit: 10 } },
@@ -31,7 +31,9 @@ vi.mock('@/lib/services/ai/vector-search-service', () => ({
   findSimilarClauses: m.findSimilarClauses,
 }));
 vi.mock('@/lib/services/feature-flags', () => ({ AI_FEATURES: { AI_SEMANTIC_SEARCH: 'SEARCH' } }));
-vi.mock('@/db/db', () => ({ db: m.db }));
+vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext }));
+
+const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
 async function loadRoute() {
   return import('../ai/semantic-search/route');
@@ -40,8 +42,9 @@ async function loadRoute() {
 describe('ai/semantic-search route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCaller();
+    caller.role = 'member';
     m.selectQueue = [];
-    m.withRoleAuth.mockImplementation((_role: string, handler: any) => (request: any, ctx: any = { userId: 'u1', organizationId: 'org_1' }) => handler(request, ctx));
     m.checkRateLimit.mockResolvedValue({ allowed: true });
     m.createRateLimitHeaders.mockReturnValue({});
     m.checkEntitlement.mockResolvedValue({ allowed: true });
@@ -55,14 +58,48 @@ describe('ai/semantic-search route', () => {
     const createSelectChain = () => {
       const chain: {
         from: () => unknown;
+        where: () => unknown;
         then: (resolve: (value: unknown[]) => unknown, reject: (reason: unknown) => unknown) => Promise<unknown>;
       } = {
         from: () => chain,
+        where: () => chain,
         then: (resolve, reject) => Promise.resolve((m.selectQueue.shift() ?? []) as unknown[]).then(resolve, reject),
       };
       return chain;
     };
-    m.db.select = vi.fn(() => createSelectChain());
+    m.tx.select = vi.fn(() => createSelectChain());
+    m.withRLSContext.mockImplementation(async (_scope: unknown, run: (tx: typeof m.tx) => Promise<unknown>) => run(m.tx));
+  });
+
+  it('declares what it asks of the wrapper: a member in an organization, and a validated body on the search', async () => {
+    await loadRoute();
+    const search = declared.find((entry) => entry.openapi?.summary === 'Semantic search over clauses and precedents');
+    const status = declared.find((entry) => entry.openapi?.summary === 'Semantic search index status of the organization');
+
+    expect(search?.auth).toEqual({ minRole: 'member' });
+    expect(search?.body).toBeDefined();
+    expect(search?.requireOrg).toBeUndefined();
+    expect(search?.entitlement).toBeUndefined();
+    expect(status?.auth).toEqual({ minRole: 'member' });
+    expect(status?.requireOrg).toBeUndefined();
+  });
+
+  it('is refused for a caller with no active organization before any limit, entitlement or search is touched', async () => {
+    caller.organizationId = null;
+    const { POST, GET } = await loadRoute();
+
+    const search = await POST(new Request('http://localhost/api/ai/semantic-search', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: 'vacation clause', searchType: 'clauses' }),
+    }));
+    const status = await GET(new Request('http://localhost/api/ai/semantic-search'));
+
+    expect(search.status).toBe(403);
+    expect(status.status).toBe(403);
+    expect(m.checkRateLimit).not.toHaveBeenCalled();
+    expect(m.checkEntitlement).not.toHaveBeenCalled();
+    expect(m.semanticClauseSearch).not.toHaveBeenCalled();
+    expect(m.withRLSContext).not.toHaveBeenCalled();
   });
 
   it('returns 429 when rate-limited', async () => {
@@ -89,6 +126,20 @@ describe('ai/semantic-search route', () => {
     expect(payload.feature).toBe('ai_semantic_search');
   });
 
+  it('answers 501, not 500, when the database cannot search by similarity', async () => {
+    const { POST } = await loadRoute();
+    const { VectorSearchUnavailableError, CLAUSE_EMBEDDING } = await import('@/lib/ai/vector-readiness');
+    m.semanticClauseSearch.mockRejectedValueOnce(new VectorSearchUnavailableError(CLAUSE_EMBEDDING));
+
+    const response = await POST(new Request('http://localhost/api/ai/semantic-search', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: 'vacation clause', searchType: 'clauses' }),
+    }));
+
+    expect(response.status).toBe(501);
+    expect(JSON.stringify(await response.json())).toContain('cba_clauses.embedding');
+  });
+
   it('returns blocked response when AI feature guard denies', async () => {
     const { POST } = await loadRoute();
     m.guardAiFeature.mockResolvedValueOnce(new Response(JSON.stringify({ error: 'blocked' }), { status: 403 }));
@@ -99,6 +150,15 @@ describe('ai/semantic-search route', () => {
     }));
 
     expect(response.status).toBe(403);
+  });
+
+  it('never honours an organization supplied in the body filters', async () => {
+    const { POST } = await loadRoute();
+    await POST(new Request('http://localhost/api/ai/semantic-search', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: 'vacation clause', searchType: 'clauses', filters: { organizationId: 'org_other' } }),
+    }));
+    expect(m.semanticClauseSearch).toHaveBeenCalledWith('vacation clause', expect.objectContaining({ filters: expect.objectContaining({ organizationId: 'org_1' }) }));
   });
 
   it('searches clauses semantically', async () => {
@@ -165,14 +225,11 @@ describe('ai/semantic-search route', () => {
     expect(response.status).toBe(400);
   });
 
-  it('reports semantic index readiness via GET', async () => {
+  it('reports semantic index readiness via GET, counted in the caller\'s own organization context', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push(
-      [
-        { id: 'c1', embedding: [0.1, 0.2] },
-        { id: 'c2', embedding: null },
-      ],
-      [{ id: 'p1' }],
+      [{ total: 2, withEmbeddings: 1 }],
+      [{ total: 1 }],
     );
 
     const response = await GET(new Request('http://localhost/api/ai/semantic-search'));
@@ -180,8 +237,19 @@ describe('ai/semantic-search route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.status).toBe('ready');
-    expect(payload.clauses.total).toBe(2);
-    expect(payload.clauses.withEmbeddings).toBe(1);
+    expect(payload.clauses).toEqual({ total: 2, withEmbeddings: 1, percentage: 50 });
     expect(payload.precedents.total).toBe(1);
+    expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
+    expect(m.tx.select).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports the index as pending when no clause has an embedding yet', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([{ total: 3, withEmbeddings: 0 }], [{ total: 0 }]);
+
+    const payload = await (await GET(new Request('http://localhost/api/ai/semantic-search'))).json();
+
+    expect(payload.status).toBe('pending');
+    expect(payload.clauses).toEqual({ total: 3, withEmbeddings: 0, percentage: 0 });
   });
 });

@@ -1,7 +1,7 @@
 /**
  * bulk action endpoint for claims
  */
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,9 +14,8 @@ export const POST = withApi(
       description: 'Performs the bulk action.',
     },
   },
-  async ({ request }) => {
-    await request.json().catch(() => ({}));
-    return { action: 'bulk', status: 'accepted' };
+  async () => {
+    throw ApiError.notImplemented('Bulk claim operations are not implemented: no claim was changed.');
   },
 );
 
@@ -30,6 +29,6 @@ export const GET = withApi(
     },
   },
   async () => {
-    return [];
+    throw ApiError.notImplemented('Bulk claim operations are not implemented: there is no status to report.');
   },
 );

@@ -34,7 +34,6 @@ const BROKEN_FILES = [
   'social-media/analytics/route.ts',
   'social-media/campaigns/route.ts',
   'social-media/posts/route.ts',
-  'whop/create-checkout/route.ts',
 ];
 
 // ─── Role level to name mapping ───────────────────────────────────────────────

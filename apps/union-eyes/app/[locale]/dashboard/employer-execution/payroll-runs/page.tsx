@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/api-auth-guard";
+import { requireOrganizationScope } from "@/lib/page-data/organization-scope";
 import { getTranslations } from "next-intl/server";
-import { db } from "@/db";
-import { employerPayrollRuns } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { listPayrollRuns } from "@/lib/employer-execution/page-reads";
 import { PayrollRunWizard } from "@/components/employer-execution";
 
 export const dynamic = "force-dynamic";
@@ -15,15 +13,9 @@ type PageProps = {
 export default async function EmployerExecutionPayrollRunsPage({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "employerExecutionPayrollRunsPage" });
-  const context = await requireUser();
-  const organizationId = context.organizationId;
+  const { organizationId } = await requireOrganizationScope();
 
-  const runs = await db
-    .select()
-    .from(employerPayrollRuns)
-    .where(eq(employerPayrollRuns.organizationId, organizationId))
-    .orderBy(desc(employerPayrollRuns.createdAt))
-    .limit(50);
+  const runs = await listPayrollRuns(organizationId);
 
   return (
     <div className="space-y-6">

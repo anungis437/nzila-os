@@ -1,0 +1,282 @@
+{
+  "version": "0.1",
+  "fixturePolicy": "synthetic only; no real claimant data; fake external IDs deliberately invalid",
+  "scenarios": [
+    {
+      "id": "WA-S01",
+      "title": "Inadequate referral packet, routine",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-001",
+      "institution": "UNION-A",
+      "claims": [
+        {
+          "claimKey": "A-CLAIM-001",
+          "externalNumber": "FAKE-WSIB-000001",
+          "historical": false
+        }
+      ],
+      "missing": [
+        "WorkAidMedicalAuthorization",
+        "PhotoID"
+      ],
+      "targetTests": [
+        "WA-T002",
+        "WA-T003",
+        "WA-T006",
+        "WA-T012"
+      ]
+    },
+    {
+      "id": "WA-S02",
+      "title": "Multiple claims and denied decisions",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-002",
+      "institution": "UNION-A",
+      "claims": [
+        {
+          "claimKey": "A-CLAIM-002",
+          "externalNumber": "FAKE-WSIB-000002",
+          "historical": false,
+          "decisions": [
+            "A-D1",
+            "A-D2",
+            "A-D3"
+          ]
+        },
+        {
+          "claimKey": "A-CLAIM-003",
+          "externalNumber": "FAKE-WSIB-000003",
+          "historical": true,
+          "decisions": [
+            "B-D1",
+            "B-D2"
+          ]
+        }
+      ],
+      "targetTests": [
+        "WA-T007",
+        "WA-T008",
+        "WA-T027",
+        "WA-T034"
+      ]
+    },
+    {
+      "id": "WA-S03",
+      "title": "Next-day receipt verification and duplicate workers",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-003",
+      "institution": "UNION-A",
+      "claims": [
+        {
+          "claimKey": "A-CLAIM-004",
+          "externalNumber": "FAKE-WSIB-000004"
+        }
+      ],
+      "submissions": [
+        {
+          "type": "DOA",
+          "version": 1,
+          "sendStatus": "SENT_REPORTED",
+          "receiptStatus": "UNCONFIRMED"
+        },
+        {
+          "type": "ITO",
+          "version": 1,
+          "sendStatus": "PREPARED",
+          "receiptStatus": null
+        }
+      ],
+      "targetTests": [
+        "WA-T037",
+        "WA-T038",
+        "WA-T039",
+        "WA-T040",
+        "WA-T045"
+      ]
+    },
+    {
+      "id": "WA-S04",
+      "title": "Two organizations, similar names, incompatible grants",
+      "synthetic": true,
+      "members": [
+        {
+          "memberKey": "FAKE-A",
+          "institution": "UNION-A",
+          "name": "Test Person"
+        },
+        {
+          "memberKey": "FAKE-B",
+          "institution": "UNION-B",
+          "name": "Test Person"
+        }
+      ],
+      "targetTests": [
+        "WA-T014",
+        "WA-T019",
+        "WA-T020",
+        "WA-T021",
+        "WA-T069"
+      ]
+    },
+    {
+      "id": "WA-S05",
+      "title": "Restricted medical document and lawful worker request",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-005",
+      "institution": "UNION-B",
+      "documents": [
+        {
+          "documentKey": "DOC-PRO-01",
+          "dataClass": "RESTRICTED_PROFESSIONAL",
+          "publication": "NONE"
+        },
+        {
+          "documentKey": "DOC-MEMBER-01",
+          "dataClass": "APPROVED_STATUS",
+          "publication": "MEMBER"
+        }
+      ],
+      "targetTests": [
+        "WA-T023",
+        "WA-T024",
+        "WA-T049",
+        "WA-T051",
+        "WA-T053"
+      ]
+    },
+    {
+      "id": "WA-S06",
+      "title": "Objection timelines with varying sources",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-006",
+      "institution": "UNION-A",
+      "decisions": [
+        {
+          "decisionKey": "D-RTW",
+          "issueKind": "RETURN_TO_WORK",
+          "rule": "REQUIRES_HUMAN_CONFIRMATION"
+        },
+        {
+          "decisionKey": "D-OTHER",
+          "issueKind": "OTHER",
+          "rule": "REQUIRES_HUMAN_CONFIRMATION"
+        },
+        {
+          "decisionKey": "D-LEGACY",
+          "issueKind": "TIME_LIMIT_EXCEPTION_WINDOW",
+          "rule": "REQUIRES_HUMAN_CONFIRMATION"
+        }
+      ],
+      "targetTests": [
+        "WA-T028",
+        "WA-T029",
+        "WA-T030",
+        "WA-T036"
+      ]
+    },
+    {
+      "id": "WA-S07",
+      "title": "Offline receipt notification and changed assignee",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-007",
+      "institution": "UNION-A",
+      "notificationStatus": "FAILED_RETRY_PENDING",
+      "assignedTo": "FAKE-WORKAID-STAFF-2",
+      "targetTests": [
+        "WA-T042",
+        "WA-T043",
+        "WA-T044",
+        "WA-T045",
+        "WA-T046",
+        "WA-T048"
+      ]
+    },
+    {
+      "id": "WA-S08",
+      "title": "ARO denial to Tribunal review, not automatic filing",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-008",
+      "institution": "UNION-A",
+      "aroDecision": "ADVERSE",
+      "tribunalStatus": "NEEDS_AUTHORIZED_PROFESSIONAL_ASSESSMENT",
+      "targetTests": [
+        "WA-T035",
+        "WA-T036",
+        "WA-T065"
+      ]
+    },
+    {
+      "id": "WA-S09",
+      "title": "Urgent incomplete referral",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-009",
+      "institution": "UNION-A",
+      "missing": [
+        "GovernmentPhotoID"
+      ],
+      "urgency": "OBJECTION_DATE_REVIEW_NEEDED",
+      "targetTests": [
+        "WA-T011",
+        "WA-T016",
+        "WA-T017"
+      ]
+    },
+    {
+      "id": "WA-S10",
+      "title": "Revocation while cached signed URL and reminder exists",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-010",
+      "institution": "UNION-A",
+      "grantStatus": "REVOKED",
+      "targetTests": [
+        "WA-T018",
+        "WA-T025",
+        "WA-T047",
+        "WA-T050",
+        "WA-T068"
+      ]
+    },
+    {
+      "id": "WA-S11",
+      "title": "Other employer history must not leak into ITO",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-011",
+      "institution": "UNION-A",
+      "claims": [
+        {
+          "claimKey": "A-CLAIM-011",
+          "employerKey": "EMPLOYER-X",
+          "disputed": true
+        },
+        {
+          "claimKey": "A-CLAIM-012",
+          "employerKey": "EMPLOYER-Y",
+          "historical": true
+        }
+      ],
+      "targetTests": [
+        "WA-T071",
+        "WA-T072",
+        "WA-T073"
+      ]
+    },
+    {
+      "id": "WA-S12",
+      "title": "WSIAT notice and later appeal confirmation",
+      "synthetic": true,
+      "memberKey": "FAKE-MEMBER-012",
+      "institution": "UNION-A",
+      "noa": {
+        "finalWsibDecisionAttached": false,
+        "requiredSignatureReviewed": false
+      },
+      "coa": {
+        "status": "NOT_STARTED"
+      },
+      "targetTests": [
+        "WA-T079",
+        "WA-T080"
+      ]
+    }
+  ]
+}

@@ -58,9 +58,11 @@ export default function AIUsagePage() {
       setLoading(true);
       const res = await fetch(`/api/admin/ai-usage?page=${p}&limit=${LIMIT}`);
       if (!res.ok) throw new Error('Failed to fetch AI usage data');
-      const json = await res.json();
-      setEntries(json.data?.entries ?? []);
-      setTotal(json.data?.total ?? 0);
+      const json = (await res.json()) as { data?: { entries?: AIUsageEntry[]; total?: number } };
+      const data = json.data;
+      if (!data || !Array.isArray(data.entries) || typeof data.total !== 'number') throw new Error('Unexpected AI usage response');
+      setEntries(data.entries);
+      setTotal(data.total);
     } catch {
       toast.error('Failed to load AI usage log');
     } finally {

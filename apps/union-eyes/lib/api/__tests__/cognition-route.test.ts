@@ -27,9 +27,13 @@ describe('lib/api/cognition-route', () => {
 
     const result = await route.handler({ organizationId: 'org-9' });
     expect(engine).toHaveBeenCalledWith('org-9');
-    expect(result).toEqual({
+    // The payload is the answer's own `data` (withApi does not wrap a built response again), and the rest of the envelope rides in `meta`.
+    const answer = await (result as Response).json();
+    expect(answer).toMatchObject({
+      success: true,
       data: { score: 1, org: 'org-9' },
-      explainability: { reasoning: 'because', governance: 'ok' },
+      meta: { explainability: { reasoning: 'because', governance: 'ok' } },
     });
+    expect(answer.data).not.toHaveProperty('data');
   });
 });

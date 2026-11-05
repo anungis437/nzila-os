@@ -6,16 +6,25 @@
 import type { CAJurisdiction } from '@/lib/jurisdiction-helpers-client';
 
 /**
+ * The organization types in the CLC hierarchy, as the organization_type enum of the database lists them (organization-types-parity.test.ts holds the two together):
+ *   platform    SaaS platform provider (Nzila Ventures)
+ *   congress    CLC national level
+ *   federation  Provincial/territorial federations (OFL, BCFED)
+ *   union       National/international unions (CUPE, Unifor, UFCW)
+ *   local       Local unions/chapters
+ *   region      Regional councils
+ *   district    District labour councils
+ */
+export const ORGANIZATION_TYPES = ['platform', 'congress', 'federation', 'union', 'local', 'region', 'district'] as const;
+
+/**
  * Organization types in the CLC hierarchy
  */
-export type OrganizationType = 
-  | 'platform'     // SaaS platform provider (Nzila Ventures)
-  | 'congress'      // CLC national level
-  | 'federation'    // Provincial/territorial federations (OFL, BCFED)
-  | 'union'         // National/international unions (CUPE, Unifor, UFCW)
-  | 'local'         // Local unions/chapters
-  | 'region'        // Regional councils
-  | 'district';     // District labour councils
+export type OrganizationType = (typeof ORGANIZATION_TYPES)[number];
+
+export function isOrganizationType(value: unknown): value is OrganizationType {
+  return typeof value === 'string' && (ORGANIZATION_TYPES as readonly string[]).includes(value);
+}
 
 // Re-export for convenience
 export type { CAJurisdiction };

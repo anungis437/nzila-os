@@ -3,6 +3,9 @@
  */
 
 import { withApi, ApiError, z, RATE_LIMITS } from '@/lib/api/framework';
+import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
+import { requireLiveFinancialMandate } from '@/lib/finance/require-live-financial-mandate';
+import { withRLSContext } from '@/lib/db/with-rls-context';
 import { runReconciliation } from '@/services/platform-economics';
 
 export const dynamic = 'force-dynamic';
@@ -14,9 +17,10 @@ const reconcileSchema = z.object({
 
 export const POST = withApi(
   {
-    auth: { minRole: 'admin' },
+    auth: { roles: FINANCIAL_MEMBER_DATA_ROLES },
     entitlement: 'financial_intelligence_suite',
     body: reconcileSchema,
+    rlsOrgContext: true,
     rateLimit: RATE_LIMITS.FINANCIAL_WRITE,
     openapi: {
       tags: ['Dues'],
@@ -24,7 +28,10 @@ export const POST = withApi(
     },
   },
   async ({ body, organizationId, userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    await withRLSContext({ organizationId, userId }, (tx) =>
+      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', requiresLedger: true }),
+    );
     const result = await runReconciliation({
       organizationId,
       periodStart: body.periodStart,

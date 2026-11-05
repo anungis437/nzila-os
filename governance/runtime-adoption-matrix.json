@@ -382,8 +382,6 @@
         "payments/webhooks/stripe",
         "payments/webhooks/paypal",
         "stripe/webhooks",
-        "whop/webhooks",
-        "whop/create-checkout",
         "voting/sessions",
         "governance/council-elections",
         "governance/elections",
@@ -439,8 +437,7 @@
         "stripe/webhooks",
         "webhooks/clc",
         "webhooks/signatures",
-        "webhooks/stripe",
-        "whop/webhooks"
+        "webhooks/stripe"
       ],
       "cronRoutes": [
         "cron/analytics/daily-metrics",

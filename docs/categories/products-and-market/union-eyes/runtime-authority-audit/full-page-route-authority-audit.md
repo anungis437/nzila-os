@@ -56,7 +56,7 @@ equivalent dashboard surface. **All 10 are retire candidates.**
 
 ## Other (debug, sentry, nested specials)
 
-`/sentry-example-page` — keep (Sentry tunnel verification).
+`/sentry-example-page` — removed (a development-only page whose API never existed; `UE-DEV-SENTRY-EXAMPLE` is `REMOVED`).
 `debug/*` — internal diagnostic; gate behind admin in Wave 2.
 
 ## Mandatory sections checklist

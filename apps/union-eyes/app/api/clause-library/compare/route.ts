@@ -12,45 +12,43 @@
  * check at all).
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { db } from '@/db/db';
 import { sharedClauseLibrary, clauseLibraryTags } from '@/db/schema/domains/agreements/shared-library';
-import { organizations } from '@/db/schema-organizations';
-import { eq, inArray, sql } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import { canReadSharedClause } from '@/lib/clause-library/sharing-authority';
+import { and, eq, inArray, sql } from 'drizzle-orm';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { canReadSharedClause, sourceNamesFor } from '@/lib/clause-library/sharing-authority';
+import { commonKeywords } from '@/lib/clause-library/common-keywords';
+import { clauseDifferences } from '@/lib/clause-library/comparison-differences';
+import { clauseSourceProjection } from '@/lib/clause-library/source-projection';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = withApi(
-  {
-    auth: { required: true, minRole: 'steward' },
-    openapi: { tags: ['Clause-library'], summary: 'Compare endpoint (GET stub)' },
-  },
-  async () => {
-    return { message: 'Use POST with clauseIds array to compare clauses' };
-  },
-);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'steward' },
     openapi: { tags: ['Clause-library'], summary: 'Compare multiple clauses' },
   },
-  async ({ request, organizationId }) => {
-    const body = await request.json();
-    const { clauseIds } = body;
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ request, userId, organizationId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
+    const body = await request.json().catch(() => null);
+    const clauseIds: unknown = body?.clauseIds;
 
-    if (!clauseIds || !Array.isArray(clauseIds) || clauseIds.length < 2) {
+    if (!Array.isArray(clauseIds) || clauseIds.length < 2) {
       throw ApiError.badRequest('At least 2 clause IDs are required');
+    }
+    if (!clauseIds.every((id) => typeof id === 'string' && UUID.test(id))) {
+      throw ApiError.badRequest('Every clause ID must be a valid id');
     }
 
     if (clauseIds.length > 10) {
       throw ApiError.badRequest('Maximum 10 clauses can be compared at once');
     }
 
-    return withSystemContext(async () => {
-      const rows = await db
+    // As the tenant: the policy already withholds what this organization may not read, and the per-row rule below states the same rule.
+    return withRLSContext({ organizationId }, async (tx) => {
+      const rows = await tx
         .select({
           id: sharedClauseLibrary.id,
           clauseNumber: sharedClauseLibrary.clauseNumber,
@@ -58,16 +56,15 @@ export const POST = withApi(
           clauseText: sharedClauseLibrary.clauseText,
           clauseType: sharedClauseLibrary.clauseType,
           sharingLevel: sharedClauseLibrary.sharingLevel,
+          isAnonymized: sharedClauseLibrary.isAnonymized,
           sharedWithOrgIds: sharedClauseLibrary.sharedWithOrgIds,
           sector: sharedClauseLibrary.sector,
           province: sharedClauseLibrary.province,
           effectiveDate: sharedClauseLibrary.effectiveDate,
           expiryDate: sharedClauseLibrary.expiryDate,
           sourceOrganizationId: sharedClauseLibrary.sourceOrganizationId,
-          organizationName: organizations.name,
         })
         .from(sharedClauseLibrary)
-        .leftJoin(organizations, eq(sharedClauseLibrary.sourceOrganizationId, organizations.id))
         .where(inArray(sharedClauseLibrary.id, clauseIds));
 
       const authorizedRows = (
@@ -78,16 +75,21 @@ export const POST = withApi(
       if (authorizedIds.length === 0) {
         return {
           clauses: [],
-          analysis: { statistics: { totalClauses: 0, averageTextLength: 0, uniqueTypes: 0, uniqueSectors: 0 }, commonKeywords: [] },
+          analysis: {
+            statistics: { totalClauses: 0, averageTextLength: 0, uniqueTypes: 0, uniqueSectors: 0, uniqueProvinces: 0 },
+            commonKeywords: [],
+            differences: clauseDifferences([]),
+          },
         };
       }
 
       // Fetch tags for authorized clauses only.
-      const allTags = await db
+      const allTags = await tx
         .select()
         .from(clauseLibraryTags)
         .where(inArray(clauseLibraryTags.clauseId, authorizedIds));
 
+      const sourceNames = await sourceNamesFor(authorizedRows, organizationId);
       const clauses = authorizedRows.map((r) => ({
         id: r.id,
         clauseNumber: r.clauseNumber,
@@ -99,19 +101,33 @@ export const POST = withApi(
         province: r.province,
         effectiveDate: r.effectiveDate,
         expiryDate: r.expiryDate,
-        sourceOrganization: { id: r.sourceOrganizationId, organizationName: r.organizationName },
+        sourceOrganization: clauseSourceProjection({ ...r, organizationName: sourceNames.get(r.sourceOrganizationId) ?? null }, organizationId),
         tags: allTags.filter((t) => t.clauseId === r.id).map((t) => ({ tagName: t.tagName })),
       }));
 
-      // Increment comparison count only on the authorized subset actually returned.
-      await db
-        .update(sharedClauseLibrary)
-        .set({ comparisonCount: sql`${sharedClauseLibrary.comparisonCount} + 1` })
-        .where(inArray(sharedClauseLibrary.id, authorizedIds));
+      // The usage counter is the owner own record: a comparison by another organization is a read and changes nothing
+      // it owns, so only the caller own clauses are counted.
+      for (const authorized of authorizedRows.filter((row) => row.sourceOrganizationId === organizationId)) {
+        await tx
+          .update(sharedClauseLibrary)
+          .set({ comparisonCount: sql`${sharedClauseLibrary.comparisonCount} + 1` })
+          .where(
+            and(
+              eq(sharedClauseLibrary.id, authorized.id),
+              eq(sharedClauseLibrary.sourceOrganizationId, authorized.sourceOrganizationId),
+            ),
+          );
+      }
+      await persistAtomicAudit(tx as RLSTx, {
+        organizationId,
+        userId,
+        action: 'clause_library.compare',
+        resourceType: 'shared_clause_library',
+        details: { clauseIds: authorizedIds },
+      });
 
       // Basic analysis
-      const types = new Set(clauses.map((c) => c.clauseType));
-      const sectorSet = new Set(clauses.map((c) => c.sector).filter(Boolean));
+      const differences = clauseDifferences(clauses);
       const totalTextLength = clauses.reduce((sum, c) => sum + (c.clauseText?.length || 0), 0);
 
       return {
@@ -120,10 +136,12 @@ export const POST = withApi(
           statistics: {
             totalClauses: clauses.length,
             averageTextLength: clauses.length > 0 ? Math.round(totalTextLength / clauses.length) : 0,
-            uniqueTypes: types.size,
-            uniqueSectors: sectorSet.size,
+            uniqueTypes: differences.clauseTypes.length,
+            uniqueSectors: differences.sectors.length,
+            uniqueProvinces: differences.provinces.length,
           },
-          commonKeywords: [],
+          commonKeywords: commonKeywords(clauses.map((c) => c.clauseText)),
+          differences,
         },
       };
     });

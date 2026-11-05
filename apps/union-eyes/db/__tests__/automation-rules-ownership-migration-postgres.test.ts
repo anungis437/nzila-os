@@ -326,7 +326,7 @@ describeOrSkip("P3.2 ownership migration (disposable PostgreSQL)", () => {
     const before = await execFileAsync(
       "pnpm",
       ["exec", "tsx", "scripts/apply-round59-rls-geometry-gap-closure.ts"],
-      { cwd: appRoot, env: { ...process.env, RLS_ENFORCEMENT_ADMIN_DATABASE_URL: isolatedUrl } },
+      { cwd: appRoot, env: { ...process.env, RLS_ENFORCEMENT_ADMIN_DATABASE_URL: isolatedUrl }, shell: process.platform === "win32" },
     ).catch((error: { stderr?: string; stdout?: string }) => error);
     expect(`${before.stdout ?? ""}${before.stderr ?? ""}`).toContain(
       "column verified_organization_id not found on pilot_applications",
@@ -361,7 +361,7 @@ describeOrSkip("P3.2 ownership migration (disposable PostgreSQL)", () => {
     const after = await execFileAsync(
       "pnpm",
       ["exec", "tsx", "scripts/apply-round59-rls-geometry-gap-closure.ts"],
-      { cwd: appRoot, env: { ...process.env, RLS_ENFORCEMENT_ADMIN_DATABASE_URL: isolatedUrl } },
+      { cwd: appRoot, env: { ...process.env, RLS_ENFORCEMENT_ADMIN_DATABASE_URL: isolatedUrl }, shell: process.platform === "win32" },
     );
     expect(after.stdout).toContain("All gap tables in the GAPS list closed and verified");
   });

@@ -135,14 +135,14 @@ export interface PolicyEvaluator {
 // ── Zod Schemas ─────────────────────────────────────────────────────────────
 
 export const AIRunRequestSchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.guid(),
   operationType: z.enum(
     Object.values(AIOperationTypes) as [string, ...string[]],
   ),
   modelId: z.string().min(1),
   entityType: z.string().min(1),
-  entityId: z.string().uuid(),
-  input: z.record(z.unknown()),
+  entityId: z.guid(),
+  input: z.record(z.string(), z.unknown()),
   requestedBy: z.string().min(1),
 })
 

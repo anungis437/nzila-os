@@ -1,52 +1,21 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-const m = vi.hoisted(() => ({
-  withApi: vi.fn(),
-  expireTrials: vi.fn(),
-  logger: { info: vi.fn() },
-}));
+const m = vi.hoisted(() => ({ withApi: vi.fn(), expireTrials: vi.fn() }));
 
 vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
-  ApiError: { badRequest: (message: string) => new Error(message) },
+  ApiError: { notImplemented: (message: string) => Object.assign(new Error(message), { code: 'NOT_IMPLEMENTED' }) },
 }));
 vi.mock('@/services/platform-economics/subscription-lifecycle-service', () => ({ expireTrials: m.expireTrials }));
-vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
-async function loadRoute() {
-  return import('../billing/credits/check-expired/route');
-}
-
-describe('billing/credits/check-expired route', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: any) => Promise<unknown>) => (ctx: any) => handler(ctx));
-    m.expireTrials.mockResolvedValue([{ organizationId: 'org_1', action: 'expired' }]);
-  });
-
-  it('throws when organization context is missing', async () => {
-    const { POST } = await loadRoute();
-
-    await expect(POST({})).rejects.toThrow('Organization context required');
-  });
-
-  it('returns expired trial actions and count', async () => {
-    const { POST } = await loadRoute();
-
-    const result = await POST({ organizationId: 'org_1', userId: 'u1' });
-
-    expect(result).toMatchObject({ data: { expiredCount: 1, actions: [{ organizationId: 'org_1', action: 'expired' }] } });
-    expect(m.expireTrials).toHaveBeenCalledWith('org_1', expect.any(Function));
-    expect(m.logger.info).toHaveBeenCalled();
-  });
-
-  it('returns empty actions when no trials expire', async () => {
-    const { POST } = await loadRoute();
-    m.expireTrials.mockResolvedValueOnce([]);
-
-    const result = await POST({ organizationId: 'org_1', userId: 'u1' });
-
-    expect(result).toMatchObject({ data: { expiredCount: 0, actions: [] } });
-    expect(m.logger.info).toHaveBeenCalledWith('Expired trials check completed', expect.objectContaining({ expiredCount: 0 }));
+// Replaced: the previous tests asserted that the route expired trials after a payment-method check that always answered "none".
+describe('billing/credits/check-expired route (not implemented)', () => {
+  // DEF-0B3-TRIAL-EXPIRY-PLACEHOLDER-PAYMENT-CHECK
+  it('answers 501 and cancels no trial, because there is no payment-method record to consult', async () => {
+    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: unknown) => Promise<unknown>) => (ctx: unknown) => handler(ctx));
+    const { POST } = await import('../billing/credits/check-expired/route');
+    await expect((POST as any)({ organizationId: 'org_1', userId: 'u1' })).rejects.toMatchObject({ code: 'NOT_IMPLEMENTED' });
+    expect(m.expireTrials).not.toHaveBeenCalled();
+    expect(m.withApi.mock.calls[0][0]).toMatchObject({ auth: { required: true, minRole: 'steward' }, entitlement: 'financial_intelligence_suite' });
   });
 });

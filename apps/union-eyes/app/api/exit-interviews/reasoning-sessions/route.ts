@@ -40,8 +40,9 @@ export const GET = withApi(
     entitlement: 'union_knowledge_suite',
     query: GetSessionsQuerySchema,
   },
-  async ({ organizationId, query }) => {
+  async ({ organizationId, userId, query }) => {
     const sessions = await listReasoningSessions(organizationId!, {
+      ownerUserId: userId!,
       status: query.status,
       limit: query.limit,
     });
@@ -55,12 +56,12 @@ export const POST = withApi(
     entitlement: 'union_knowledge_suite',
     body: CreateSessionSchema,
   },
-  async ({ organizationId, body }) => {
+  async ({ organizationId, userId, body }) => {
     const session = await createReasoningSession(organizationId!, {
       title: body.title,
       focus: body.focus,
       contextDescription: body.contextDescription,
-    });
+    }, userId!);
     return { data: session };
   },
 );

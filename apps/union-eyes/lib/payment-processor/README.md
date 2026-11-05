@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Payment Processor Abstraction Layer provides a unified interface for integrating multiple payment processors (Stripe, Whop, PayPal, Square, etc.) into the UnionEyes application.
+The Payment Processor Abstraction Layer provides a unified interface for integrating multiple payment processors (Stripe, PayPal, Square, etc.) into the UnionEyes application.
 
 ## Why We Need This
 
@@ -74,7 +74,7 @@ const paymentIntent = await processor.createPaymentIntent({
    ┌────┴─────┐            ┌──────┴──────┐
    ▼          ▼            ▼             ▼
 ┌────────┐ ┌────────┐  ┌────────┐  ┌────────┐
-│Stripe  │ │Whop    │  │PayPal  │  │Square  │
+│Stripe  │ │Manual  │  │PayPal  │  │Square  │
 │Processor│ │Processor│  │Processor│  │Processor│
 └────────┘ └────────┘  └────────┘  └────────┘
 ```
@@ -86,7 +86,6 @@ const paymentIntent = await processor.createPaymentIntent({
 | Processor | Status | Capabilities |
 |-----------|--------|--------------|
 | **Stripe** | ✅ Fully Implemented | Payment intents, refunds, customers, payment methods, webhooks |
-| **Whop** | ✅ Webhook Only | Marketplace payments, subscriptions |
 | **PayPal** | 🚧 Placeholder | Ready for implementation |
 | **Square** | 🚧 Placeholder | Ready for implementation |
 | **Manual** | 🚧 Placeholder | Cheque, bank transfer tracking |
@@ -114,10 +113,6 @@ export async function register() {
 # Stripe (Primary)
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Whop (Marketplace)
-WHOP_API_KEY=whop_...
-WHOP_WEBHOOK_SECRET=...
 
 # PayPal (Future)
 PAYPAL_CLIENT_ID=...
@@ -202,7 +197,6 @@ interface PaymentIntent {
 ```typescript
 enum PaymentProcessorType {
   STRIPE = 'stripe',
-  WHOP = 'whop',
   PAYPAL = 'paypal',
   SQUARE = 'square',
   MANUAL = 'manual',
@@ -424,8 +418,6 @@ class MockProcessor extends BasePaymentProcessor {
 
 ## Refactoring Existing Routes
 
-See: [`lib/payment-processor/examples/refactored-dues-payment-route.ts`](./examples/refactored-dues-payment-route.ts)
-
 **Key Changes:**
 1. Import `PaymentProcessorFactory` instead of `stripe`
 2. Get processor instance via factory
@@ -482,14 +474,13 @@ for (const processorType of processors) {
 - **Stripe API**: https://stripe.com/docs/api
 - **PayPal API**: https://developer.paypal.com/docs/api/
 - **Square API**: https://developer.squareup.com/docs/
-- **Whop API**: https://whop.com/docs
 
 ---
 
 ## Support
 
 For questions or issues with the payment processor abstraction:
-1. Check the examples in `lib/payment-processor/examples/`
-2. Review processor capabilities via `processor.capabilities`
-3. Check logs for detailed error information
-4. See [Stripe processor](./processors/stripe-processor.ts) for full implementation example
+1. Review processor capabilities via `processor.capabilities`
+2. Check logs for detailed error information
+3. See [Stripe processor](./processors/stripe-processor.ts) for full implementation example
+4. Read the unit tests in `lib/payment-processor/__tests__/`

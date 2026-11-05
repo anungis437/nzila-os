@@ -1,227 +1,132 @@
 "use client";
 
 /**
- * Phase 5B: Arbitration Precedents Main Page
- * Integrates search, view, compare, and document management
+ * Arbitration precedents: search, view and compare.
+ *
+ * The list comes from GET /api/precedents, the route that filters (see precedent-filters.ts for what it honours), and a decision from
+ * GET /api/arbitration/precedents/:id (see precedent-record.ts for both response shapes). A request that fails is shown as a failure with
+ * a way to retry; it is never shown as "no precedents". Every word comes from the message catalogs (the `precedents` namespace).
+ *
+ * Adding, editing, sharing and deleting a decision are not offered here. Nothing on this screen could complete them: the list route is
+ * read-only for members, a write needs the platform content_manager role, and the generic write route refuses a field that is not a
+ * column of arbitration_decisions (which has no sharing or summary columns for the edit and share forms to write).
  */
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useTranslations } from 'next-intl';
-import { Plus, Scale, Settings } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useFormatter, useTranslations } from "next-intl";
+import { Scale, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PrecedentSearch } from "@/components/precedents/PrecedentSearch";
 import { PrecedentViewer } from "@/components/precedents/PrecedentViewer";
 import { PrecedentCompareView } from "@/components/precedents/PrecedentCompareView";
+import { fetchPrecedentComparison } from "@/components/precedents/precedent-comparison";
+import {
+  NO_FILTERS,
+  issueTypeLabel,
+  jurisdictionLabel,
+  listParams,
+  outcomeColor,
+  outcomeLabel,
+  type PrecedentFilters,
+} from "@/components/precedents/precedent-filters";
+import { formatDay } from "@/components/precedents/precedent-format";
+import { readPrecedent, readPrecedentList, type PrecedentRecord } from "@/components/precedents/precedent-record";
 import { JurisdictionPreferences } from "@/components/precedents/JurisdictionPreferences";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/lib/hooks/use-toast";
-import { format } from "date-fns";
+import { useToast } from "@/components/ui/use-toast";
+import { envelopeData, readApiError } from "@/lib/client/api-envelope";
 
-interface SearchFilters {
-  query: string;
-  grievanceTypes: string[];
-  outcomes: string[];
-  jurisdictions: string[];
-  precedentLevels: string[];
-  sectors: string[];
-  sharingLevels: string[];
-  arbitratorName: string;
-  fromDate: string;
-  toDate: string;
-}
+const MAX_COMPARED = 10;
+const PAGE_SIZE = 20;
 
-const OUTCOME_COLORS = {
-  upheld: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  dismissed: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  partially_upheld:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  settled: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  withdrawn: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
-};
+const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
-// Normalize arbitrationDecisions fields to arbitrationPrecedents field names
-interface PrecedentRecord {
-  id: string;
-  isOwner: boolean;
-  caseNumber?: string;
-  caseTitle?: string;
-  decisionDate?: string;
-  issueSummary?: string;
-  decisionSummary?: string;
-  summary?: string;
-  precedentSummary?: string;
-  sharingLevel?: string;
-  sharedWithOrgIds?: string[];
-  decisionDocumentUrl?: string;
-  redactedDocumentUrl?: string;
-  organization?: { name?: string };
-  union?: string;
-  issueTypes?: string[];
-  grievanceType?: string;
-  outcome?: string;
-  jurisdiction?: string;
-  [key: string]: unknown;
-}
-
-function normalizePrecedent(p: Record<string, unknown> | null): PrecedentRecord | null {
-  if (!p) return null;
-  return {
-    ...p,
-    arbitratorName: p.arbitratorName || p.arbitrator,
-    unionName: p.unionName || p.union,
-    employerName: p.employerName || p.employer,
-    grievanceType: p.grievanceType || (Array.isArray(p.issueTypes) ? p.issueTypes[0] : null),
-    issueSummary: p.issueSummary || p.summary || p.precedentSummary,
-    decisionSummary: p.decisionSummary || p.summary,
-    precedentLevel: p.precedentLevel || p.precedentValue,
-    grievorNames: p.grievorNames || p.grievor,
-    sharingLevel: p.sharingLevel || (p.isPublic ? 'public' : 'private'),
-  } as unknown as PrecedentRecord;
+function LoadFailure({ title, body, detail, onRetry }: { title: string; body: string; detail: string; onRetry: () => void }) {
+  const t = useTranslations("precedents");
+  return (
+    <Alert variant="destructive" role="alert">
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription className="space-y-2">
+        <p>{body}</p>
+        <p className="text-xs">{detail}</p>
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          {t("console.retry")}
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
 }
 
 export function PrecedentsConsole() {
-  const t = useTranslations();
+  const t = useTranslations("precedents");
+  const format = useFormatter();
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<"browse" | "view" | "compare" | "setup">("browse");
-  const [searchFilters, setSearchFilters] = useState<SearchFilters>({
-    query: "",
-    grievanceTypes: [],
-    outcomes: [],
-    jurisdictions: [],
-    precedentLevels: [],
-    sectors: [],
-    sharingLevels: [],
-    arbitratorName: "",
-    fromDate: "",
-    toDate: "",
-  });
+  const [searchFilters, setSearchFilters] = useState<PrecedentFilters>(NO_FILTERS);
   const [selectedPrecedentId, setSelectedPrecedentId] = useState<string | null>(null);
   const [selectedPrecedentIds, setSelectedPrecedentIds] = useState<string[]>([]);
   const [comparisonNotes, setComparisonNotes] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [precedentsData, setPrecedentsData] = useState<{
-    precedents?: PrecedentRecord[];
-    total?: number;
-    page?: number;
-    limit?: number;
-    pagination?: { totalPages: number };
-  } | null>(null);
+  const [precedentsData, setPrecedentsData] = useState<{ precedents: PrecedentRecord[]; totalPages: number } | null>(null);
   const [isLoadingPrecedents, setIsLoadingPrecedents] = useState(false);
+  const [listError, setListError] = useState<string | null>(null);
+  const [listReload, setListReload] = useState(0);
   const [selectedPrecedent, setSelectedPrecedent] = useState<PrecedentRecord | null>(null);
-  const [comparisonData, setComparisonData] = useState<{
-    precedents: React.ComponentProps<typeof PrecedentCompareView>['precedents'];
-    analysis?: React.ComponentProps<typeof PrecedentCompareView>['analysis'];
-  } | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [isSavingEdit, setIsSavingEdit] = useState(false);
-  const [isSavingShare, setIsSavingShare] = useState(false);
-  const [editForm, setEditForm] = useState({
-    caseNumber: "",
-    caseTitle: "",
-    decisionDate: "",
-    issueSummary: "",
-    decisionSummary: "",
-  });
-  const [shareForm, setShareForm] = useState({
-    sharingLevel: "private",
-    sharedWithOrgIds: "",
-  });
+  const [isLoadingPrecedent, setIsLoadingPrecedent] = useState(false);
+  const [precedentError, setPrecedentError] = useState<string | null>(null);
+  const [precedentReload, setPrecedentReload] = useState(0);
+  const [comparisonData, setComparisonData] = useState<PrecedentRecord[] | null>(null);
+  const [isLoadingComparison, setIsLoadingComparison] = useState(false);
+  const [comparisonError, setComparisonError] = useState<string | null>(null);
+  const comparisonRequest = useRef(0);
   const [showJurisdictionSetup, setShowJurisdictionSetup] = useState(false);
   const [jurisdictionPrefsLoaded, setJurisdictionPrefsLoaded] = useState(false);
-  const pageSize = 20;
+  const [jurisdictionPrefsFailed, setJurisdictionPrefsFailed] = useState(false);
+  const [jurisdictionPrefsSeveral, setJurisdictionPrefsSeveral] = useState(false);
 
-  // Use ref to track if we're currently fetching to prevent race conditions
-  const isFetchingRef = useRef(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const lastFetchParamsRef = useRef<string>("");
-
-  // Create stable filter key for dependency tracking
-  const filterKey = useMemo(
-    () =>
-      JSON.stringify({
-        query: searchFilters.query,
-        grievanceTypes: searchFilters.grievanceTypes,
-        outcomes: searchFilters.outcomes,
-        jurisdictions: searchFilters.jurisdictions,
-        precedentLevels: searchFilters.precedentLevels,
-        sectors: searchFilters.sectors,
-        sharingLevels: searchFilters.sharingLevels,
-        arbitratorName: searchFilters.arbitratorName,
-        fromDate: searchFilters.fromDate,
-        toDate: searchFilters.toDate,
-        page: currentPage,
-      }),
-    [
-      searchFilters.query,
-      searchFilters.grievanceTypes,
-      searchFilters.outcomes,
-      searchFilters.jurisdictions,
-      searchFilters.precedentLevels,
-      searchFilters.sectors,
-      searchFilters.sharingLevels,
-      searchFilters.arbitratorName,
-      searchFilters.fromDate,
-      searchFilters.toDate,
-      currentPage,
-    ]
-  );
+  // The query the list is read with; it changes exactly when a filter or the page does.
+  const listQuery = useMemo(() => listParams(searchFilters, currentPage, PAGE_SIZE).toString(), [searchFilters, currentPage]);
 
   // Prevent hydration issues
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Load jurisdiction preferences and auto-apply to filters
+  // Load the saved jurisdiction preference and apply it where the list can honour it
   useEffect(() => {
     if (!mounted || jurisdictionPrefsLoaded) return;
     const loadPrefs = async () => {
       try {
         const res = await fetch("/api/precedents/jurisdiction-preferences");
-        if (!res.ok) return;
-        const json = await res.json();
-        const data = json.data ?? json;
+        if (!res.ok) throw new Error(await readApiError(res, `HTTP ${res.status}`));
+        const data = envelopeData(await res.json());
+        setJurisdictionPrefsFailed(false);
 
         if (!data.isConfigured) {
           setShowJurisdictionSetup(true);
-          setJurisdictionPrefsLoaded(true);
           return;
         }
 
-        if (data.autoApply && data.preferredJurisdictions?.length > 0) {
-          // Build the effective jurisdiction list
-          let jurisdictions: string[] = [...data.preferredJurisdictions];
-          if (data.includeNational && !jurisdictions.includes("federal")) {
-            jurisdictions = ["federal", ...jurisdictions];
+        const preferred = Array.isArray(data.preferredJurisdictions)
+          ? data.preferredJurisdictions.filter((jurisdiction): jurisdiction is string => typeof jurisdiction === "string")
+          : [];
+        if (data.autoApply === true && preferred.length > 0) {
+          const jurisdictions = data.includeNational === true && !preferred.includes("federal") ? ["federal", ...preferred] : preferred;
+          if (jurisdictions.length === 1) {
+            setSearchFilters((prev) => ({ ...prev, jurisdiction: jurisdictions[0] }));
+          } else {
+            // The list takes one jurisdiction at a time, so several saved ones cannot be applied together, and the page says so.
+            setJurisdictionPrefsSeveral(true);
           }
-          setSearchFilters((prev) => ({
-            ...prev,
-            jurisdictions,
-          }));
         }
       } catch {
-        // Preferences not available — proceed without filtering
+        // The results are then not filtered by the member's preferences, and the page says so.
+        setJurisdictionPrefsFailed(true);
       } finally {
         setJurisdictionPrefsLoaded(true);
       }
@@ -231,133 +136,56 @@ export function PrecedentsConsole() {
 
   // Fetch precedent list
   useEffect(() => {
+    if (!mounted) return;
+    const controller = new AbortController();
     const fetchPrecedents = async () => {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: pageSize.toString(),
-        ...(searchFilters.query && { search: searchFilters.query }),
-        ...(searchFilters.grievanceTypes.length > 0 && {
-          grievanceTypes: searchFilters.grievanceTypes.join(","),
-        }),
-        ...(searchFilters.outcomes.length > 0 && {
-          outcomes: searchFilters.outcomes.join(","),
-        }),
-        ...(searchFilters.jurisdictions.length > 0 && {
-          jurisdictions: searchFilters.jurisdictions.join(","),
-        }),
-        ...(searchFilters.precedentLevels.length > 0 && {
-          precedentLevels: searchFilters.precedentLevels.join(","),
-        }),
-        ...(searchFilters.sectors.length > 0 && {
-          sectors: searchFilters.sectors.join(","),
-        }),
-        ...(searchFilters.sharingLevels.length > 0 && {
-          sharingLevels: searchFilters.sharingLevels.join(","),
-        }),
-        ...(searchFilters.arbitratorName && {
-          arbitrator: searchFilters.arbitratorName,
-        }),
-        ...(searchFilters.fromDate && { fromDate: searchFilters.fromDate }),
-        ...(searchFilters.toDate && { toDate: searchFilters.toDate }),
-      });
-
-      const paramsString = params.toString();
-
-      // Prevent duplicate fetches with same parameters
-      if (isFetchingRef.current || lastFetchParamsRef.current === paramsString) {
-        return;
-      }
-
-      lastFetchParamsRef.current = paramsString;
-
-      // Cancel any previous fetch
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      abortControllerRef.current = new AbortController();
-      isFetchingRef.current = true;
       setIsLoadingPrecedents(true);
-
+      setListError(null);
       try {
-        const response = await fetch(`/api/arbitration/precedents?${params}`, {
-          signal: abortControllerRef.current.signal,
-        });
-
-        if (response.ok) {
-          const json = await response.json();
-          // Unwrap withApi envelope: { success, data: { data: rows, pagination } }
-          const payload = json.data ?? json;
-          const items = payload.data ?? payload.precedents ?? [];
-          setPrecedentsData({
-            precedents: items.map(normalizePrecedent),
-            pagination: payload.pagination ?? null,
-          });
-        } else if (response.status === 401) {
-          setPrecedentsData({
-            precedents: [],
-            total: 0,
-            page: currentPage,
-            limit: pageSize,
-          });
-        } else {
-          setPrecedentsData({
-            precedents: [],
-            total: 0,
-            page: currentPage,
-            limit: pageSize,
-          });
-        }
+        const response = await fetch(`/api/precedents?${listQuery}`, { signal: controller.signal });
+        if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+        setPrecedentsData(readPrecedentList(await response.json()));
       } catch (error) {
-        // Ignore abort errors
-        if (error instanceof Error && error.name !== "AbortError") {
-          setPrecedentsData({
-            precedents: [],
-            total: 0,
-            page: currentPage,
-            limit: pageSize,
-          });
-        }
+        // A request that a newer one replaced says nothing about the list.
+        if (controller.signal.aborted) return;
+        setPrecedentsData(null);
+        setListError(errorText(error));
       } finally {
-        isFetchingRef.current = false;
-        setIsLoadingPrecedents(false);
+        if (!controller.signal.aborted) setIsLoadingPrecedents(false);
       }
     };
 
-    // Only fetch if mounted (prevents SSR issues)
-    if (mounted) {
-      fetchPrecedents();
-    }
-
-    // Cleanup function to abort fetch on unmount
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterKey, mounted, pageSize]);
+    fetchPrecedents();
+    return () => controller.abort();
+  }, [listQuery, mounted, listReload]);
 
   // Fetch selected precedent details
   useEffect(() => {
+    if (!selectedPrecedentId) return;
+    const controller = new AbortController();
     const fetchPrecedent = async () => {
-      if (!selectedPrecedentId) return;
-
+      setSelectedPrecedent(null);
+      setPrecedentError(null);
+      setIsLoadingPrecedent(true);
       try {
-        const response = await fetch(`/api/arbitration/precedents/${selectedPrecedentId}`);
-        if (response.ok) {
-          const json = await response.json();
-          setSelectedPrecedent(normalizePrecedent(json.data ?? json));
-        }
-      } catch (_error) {
-        // silently fail
+        const response = await fetch(`/api/arbitration/precedents/${encodeURIComponent(selectedPrecedentId)}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+        setSelectedPrecedent(readPrecedent(await response.json()));
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setPrecedentError(errorText(error));
+      } finally {
+        if (!controller.signal.aborted) setIsLoadingPrecedent(false);
       }
     };
 
     fetchPrecedent();
-  }, [selectedPrecedentId]);
+    return () => controller.abort();
+  }, [selectedPrecedentId, precedentReload]);
 
-  const handleSearch = useCallback((filters: SearchFilters) => {
+  const handleFiltersChange = useCallback((filters: PrecedentFilters) => {
     setSearchFilters(filters);
     setCurrentPage(1);
   }, []);
@@ -367,188 +195,68 @@ export function PrecedentsConsole() {
     setActiveTab("view");
   };
 
+  const warnMaxReached = () =>
+    toast({ title: t("console.maxReachedTitle"), description: t("console.maxReached", { max: MAX_COMPARED }), variant: "destructive" });
+
   const handleToggleCompare = (precedentId: string) => {
-    setSelectedPrecedentIds((prev) => {
-      if (prev.includes(precedentId)) {
-        return prev.filter((id) => id !== precedentId);
-      }
-      if (prev.length >= 10) {
-        toast({
-          title: "Maximum reached",
-          description: "You can compare up to 10 precedents at once.",
-          variant: "destructive",
-        });
-        return prev;
-      }
-      return [...prev, precedentId];
-    });
+    if (selectedPrecedentIds.includes(precedentId)) {
+      setSelectedPrecedentIds(selectedPrecedentIds.filter((id) => id !== precedentId));
+      return;
+    }
+    if (selectedPrecedentIds.length >= MAX_COMPARED) {
+      warnMaxReached();
+      return;
+    }
+    setSelectedPrecedentIds([...selectedPrecedentIds, precedentId]);
   };
 
-  const fetchComparison = async () => {
-    if (selectedPrecedentIds.length < 2) return;
-
+  const fetchComparison = async (ids: readonly string[]) => {
+    // Only the newest request may answer: an older one that finishes later must not replace, or fail over, the comparison asked for last.
+    const request = ++comparisonRequest.current;
+    setComparisonData(null);
+    setComparisonError(null);
+    setIsLoadingComparison(true);
     try {
-      const response = await fetch("/api/arbitration/precedents/compare", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          precedentIds: selectedPrecedentIds,
-          notes: comparisonNotes,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setComparisonData(data);
-      }
-    } catch (_error) {
-      // silently fail
+      const precedents = await fetchPrecedentComparison(ids);
+      if (request === comparisonRequest.current) setComparisonData(precedents);
+    } catch (error) {
+      if (request === comparisonRequest.current) setComparisonError(errorText(error));
+    } finally {
+      if (request === comparisonRequest.current) setIsLoadingComparison(false);
     }
   };
 
-  const handleStartComparison = () => {
-    if (selectedPrecedentIds.length < 2) {
-      toast({
-        title: "Select more precedents",
-        description: "Please select at least 2 precedents to compare.",
-        variant: "destructive",
-      });
+  // Takes the selection it should compare, so a decision added a moment ago is part of it.
+  const startComparison = (ids: readonly string[]) => {
+    if (ids.length < 2) {
+      toast({ title: t("console.selectMoreTitle"), description: t("console.selectMore"), variant: "destructive" });
       return;
     }
     setActiveTab("compare");
-    fetchComparison();
+    fetchComparison(ids);
+  };
+
+  // The viewer's Compare adds the decision being read to the selection, then compares if there are now two or more.
+  const handleCompareViewed = () => {
+    if (!selectedPrecedent) return;
+    if (selectedPrecedentIds.includes(selectedPrecedent.id)) {
+      startComparison(selectedPrecedentIds);
+      return;
+    }
+    if (selectedPrecedentIds.length >= MAX_COMPARED) {
+      warnMaxReached();
+      return;
+    }
+    const ids = [...selectedPrecedentIds, selectedPrecedent.id];
+    setSelectedPrecedentIds(ids);
+    startComparison(ids);
   };
 
   const handleRemoveFromComparison = (precedentId: string) => {
-    setSelectedPrecedentIds((prev) => prev.filter((id) => id !== precedentId));
-  };
-
-  const handleDownloadDocument = async (documentType: "decision" | "redacted") => {
-    if (!selectedPrecedent) return;
-
-    const url =
-      documentType === "decision"
-        ? selectedPrecedent.decisionDocumentUrl
-        : selectedPrecedent.redactedDocumentUrl;
-
-    if (!url) {
-      toast({
-        title: "Document not available",
-        description: `No ${documentType} document found for this precedent.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Open document in new tab
-    window.open(url, "_blank");
-  };
-
-  const openEditDialog = () => {
-    if (!selectedPrecedent) return;
-    setEditForm({
-      caseNumber: selectedPrecedent.caseNumber || "",
-      caseTitle: selectedPrecedent.caseTitle || "",
-      decisionDate: selectedPrecedent.decisionDate
-        ? selectedPrecedent.decisionDate.slice(0, 10)
-        : "",
-      issueSummary: selectedPrecedent.issueSummary || "",
-      decisionSummary: selectedPrecedent.decisionSummary || "",
-    });
-    setIsEditDialogOpen(true);
-  };
-
-  const openShareDialog = () => {
-    if (!selectedPrecedent) return;
-    setShareForm({
-      sharingLevel: selectedPrecedent.sharingLevel || "private",
-      sharedWithOrgIds: Array.isArray(selectedPrecedent.sharedWithOrgIds)
-        ? selectedPrecedent.sharedWithOrgIds.join(", ")
-        : "",
-    });
-    setIsShareDialogOpen(true);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!selectedPrecedent) return;
-    try {
-      setIsSavingEdit(true);
-      const response = await fetch(`/api/arbitration/precedents/${selectedPrecedent.id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            caseNumber: editForm.caseNumber || null,
-            caseTitle: editForm.caseTitle || null,
-            decisionDate: editForm.decisionDate || null,
-            issueSummary: editForm.issueSummary || null,
-            decisionSummary: editForm.decisionSummary || null,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update precedent");
-      }
-
-      const updated = await response.json();
-      setSelectedPrecedent(normalizePrecedent(updated.data ?? updated));
-      toast({
-        title: "Precedent updated",
-        description: "Your changes have been saved.",
-      });
-      setIsEditDialogOpen(false);
-    } catch (_error) {
-      toast({
-        title: "Update failed",
-        description: "Could not update precedent. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSavingEdit(false);
-    }
-  };
-
-  const handleSaveShare = async () => {
-    if (!selectedPrecedent) return;
-    try {
-      setIsSavingShare(true);
-      const sharedWithOrgIds = shareForm.sharedWithOrgIds
-        .split(",")
-        .map((id) => id.trim())
-        .filter(Boolean);
-
-      const response = await fetch(`/api/arbitration/precedents/${selectedPrecedent.id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sharingLevel: shareForm.sharingLevel,
-            sharedWithOrgIds: sharedWithOrgIds.length > 0 ? sharedWithOrgIds : null,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update sharing settings");
-      }
-
-      const updated = await response.json();
-      setSelectedPrecedent(normalizePrecedent(updated.data ?? updated));
-      toast({
-        title: "Sharing updated",
-        description: "Precedent sharing settings have been updated.",
-      });
-      setIsShareDialogOpen(false);
-    } catch (_error) {
-      toast({
-        title: "Update failed",
-        description: "Could not update sharing settings. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSavingShare(false);
-    }
+    const remaining = selectedPrecedentIds.filter((id) => id !== precedentId);
+    setSelectedPrecedentIds(remaining);
+    setComparisonData((prev) => (prev ? prev.filter((precedent) => precedent.id !== precedentId) : prev));
+    if (remaining.length < 2) setActiveTab("browse");
   };
 
   const handleExportComparison = () => {
@@ -556,8 +264,7 @@ export function PrecedentsConsole() {
     const report = {
       generatedAt: new Date().toISOString(),
       notes: comparisonNotes,
-      analysis: comparisonData.analysis,
-      precedents: comparisonData.precedents,
+      precedents: comparisonData,
     };
     const blob = new Blob([JSON.stringify(report, null, 2)], {
       type: "application/json",
@@ -572,47 +279,11 @@ export function PrecedentsConsole() {
     URL.revokeObjectURL(url);
   };
 
-  const handleDeletePrecedent = async () => {
-    if (!selectedPrecedent) return;
-
-    try {
-      const response = await fetch(
-        `/api/arbitration/precedents/${selectedPrecedent.id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (response.ok) {
-        toast({
-          title: "Precedent deleted",
-          description: "The precedent has been successfully deleted.",
-        });
-        setSelectedPrecedentId(null);
-        setActiveTab("browse");
-        // Refresh list
-        lastFetchParamsRef.current = "";
-      } else {
-        toast({
-          title: "Delete failed",
-          description: "Failed to delete the precedent. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (_error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while deleting the precedent.",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (!mounted) {
     return (
       <div className="container mx-auto py-6">
         <div className="flex items-center justify-center h-96">
-          <div className="text-muted-foreground">Loading...</div>
+          <div className="text-muted-foreground">{t("console.loading")}</div>
         </div>
       </div>
     );
@@ -621,28 +292,32 @@ export function PrecedentsConsole() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Scale className="h-8 w-8" />
-            {t('precedents.title')}
-          </h1>
-          <p className="text-muted-foreground">
-            {t('precedents.subtitle')}
-          </p>
-        </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          {t('precedents.addPrecedent')}
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <Scale className="h-8 w-8" />
+          {t("title")}
+        </h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Search */}
-      <PrecedentSearch
-        onSearch={handleSearch}
-        isLoading={isLoadingPrecedents}
-        initialJurisdictions={searchFilters.jurisdictions}
-      />
+      <PrecedentSearch filters={searchFilters} onChange={handleFiltersChange} />
+
+      {/* The member's saved jurisdictions could not be read, so the results below are not filtered by them */}
+      {jurisdictionPrefsFailed && (
+        <Alert role="status">
+          <AlertTitle>{t("console.prefsFailedTitle")}</AlertTitle>
+          <AlertDescription>{t("console.prefsFailed")}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Several saved jurisdictions cannot be applied together: the list filters by one at a time */}
+      {jurisdictionPrefsSeveral && (
+        <Alert role="status">
+          <AlertTitle>{t("console.prefsFailedTitle")}</AlertTitle>
+          <AlertDescription>{t("console.prefsSeveral")}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Jurisdiction Setup Banner — shown when user hasn't configured preferences */}
       {showJurisdictionSetup && (
@@ -651,20 +326,12 @@ export function PrecedentsConsole() {
             <div className="flex items-center gap-3">
               <Settings className="h-5 w-5 text-primary" />
               <div>
-                <p className="font-medium text-sm">Set up your jurisdiction preferences</p>
-                <p className="text-sm text-muted-foreground">
-                  Select your province and jurisdiction level to see the most relevant precedents first.
-                </p>
+                <p className="font-medium text-sm">{t("console.setupTitle")}</p>
+                <p className="text-sm text-muted-foreground">{t("console.setupBody")}</p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setActiveTab("setup" as "browse");
-              }}
-            >
-              Configure
+            <Button variant="outline" size="sm" onClick={() => setActiveTab("setup")}>
+              {t("console.configure")}
             </Button>
           </CardContent>
         </Card>
@@ -675,18 +342,17 @@ export function PrecedentsConsole() {
         <Card>
           <CardContent className="flex items-center justify-between py-4">
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">{selectedPrecedentIds.length} {t('precedents.selected')}</Badge>
-              <span className="text-sm text-muted-foreground">{t('precedents.forComparison')}</span>
+              <Badge variant="secondary">
+                {selectedPrecedentIds.length} {t("selected")}
+              </Badge>
+              <span className="text-sm text-muted-foreground">{t("forComparison")}</span>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setSelectedPrecedentIds([])}>
-                {t('precedents.clear')}
+                {t("clear")}
               </Button>
-              <Button
-                onClick={handleStartComparison}
-                disabled={selectedPrecedentIds.length < 2}
-              >
-                {t('precedents.compare')}
+              <Button onClick={() => startComparison(selectedPrecedentIds)} disabled={selectedPrecedentIds.length < 2}>
+                {t("compare")}
               </Button>
             </div>
           </CardContent>
@@ -696,51 +362,48 @@ export function PrecedentsConsole() {
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "browse" | "view" | "compare" | "setup")}>
         <TabsList>
-          <TabsTrigger value="browse">{t('precedents.browse')}</TabsTrigger>
+          <TabsTrigger value="browse">{t("browse")}</TabsTrigger>
           <TabsTrigger value="view" disabled={!selectedPrecedentId}>
-            {t('precedents.view')}
+            {t("view")}
           </TabsTrigger>
           <TabsTrigger value="compare" disabled={selectedPrecedentIds.length < 2}>
-            {t('precedents.compare')} ({selectedPrecedentIds.length})
+            {t("compare")} ({selectedPrecedentIds.length})
           </TabsTrigger>
           <TabsTrigger value="setup">
             <Settings className="mr-1.5 h-3.5 w-3.5" />
-            Jurisdictions
+            {t("console.jurisdictionsTab")}
           </TabsTrigger>
         </TabsList>
 
         {/* Browse Tab */}
         <TabsContent value="browse" className="space-y-4">
           {isLoadingPrecedents ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {t('precedents.loadingPrecedents')}
-            </div>
-          ) : !precedentsData?.precedents?.length ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {t('precedents.noPrecedentsFound')}
-            </div>
+            <div className="text-center py-12 text-muted-foreground">{t("loadingPrecedents")}</div>
+          ) : listError !== null ? (
+            <LoadFailure
+              title={t("console.listFailedTitle")}
+              body={t("console.listFailed")}
+              detail={listError}
+              onRetry={() => setListReload((count) => count + 1)}
+            />
+          ) : !precedentsData?.precedents.length ? (
+            <div className="text-center py-12 text-muted-foreground">{t("noPrecedentsFound")}</div>
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-2">
-                {precedentsData?.precedents?.map((precedent: PrecedentRecord) => (
-                  <Card
-                    key={precedent.id}
-                    className="cursor-pointer hover:shadow-md transition-shadow"
-                  >
+                {precedentsData.precedents.map((precedent: PrecedentRecord) => (
+                  <Card key={precedent.id} className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <CardTitle className="text-lg">
-                            <span className="text-muted-foreground mr-2">
-                              {precedent.caseNumber}
-                            </span>
+                            <span className="text-muted-foreground mr-2">{precedent.caseNumber}</span>
                             {precedent.caseTitle}
                           </CardTitle>
-                          <CardDescription className="mt-1">
-                            {precedent.organization?.name || precedent.union}
-                          </CardDescription>
+                          <CardDescription className="mt-1">{precedent.union}</CardDescription>
                         </div>
                         <Checkbox
+                          aria-label={t("console.selectForComparison", { name: precedent.caseNumber ?? precedent.caseTitle ?? precedent.id })}
                           checked={selectedPrecedentIds.includes(precedent.id)}
                           onCheckedChange={() => handleToggleCompare(precedent.id)}
                           onClick={(e) => e.stopPropagation()}
@@ -750,39 +413,17 @@ export function PrecedentsConsole() {
                     <CardContent onClick={() => handleViewPrecedent(precedent.id)}>
                       <div className="space-y-2">
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {precedent.issueSummary || precedent.decisionSummary || precedent.summary || precedent.precedentSummary}
+                          {precedent.summary ?? precedent.headnote ?? precedent.precedentSummary}
                         </p>
                         <div className="flex flex-wrap gap-2">
-                          <Badge variant="outline">
-                            {(precedent.grievanceType || (Array.isArray(precedent.issueTypes) ? precedent.issueTypes[0] : null) || '')
-                              .split("_")
-                              .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-                              .join(" ")}
-                          </Badge>
-                          <Badge
-                            className={
-                              OUTCOME_COLORS[
-                                precedent.outcome as keyof typeof OUTCOME_COLORS
-                              ] || ""
-                            }
-                          >
-                            {precedent.outcome
-                              ?.split("_")
-                              .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-                              .join(" ")}
-                          </Badge>
-                          {precedent.decisionDate && (
-                            <Badge variant="secondary">
-                              {format(new Date(precedent.decisionDate), "MMM yyyy")}
+                          {precedent.issueTypes?.map((issueType) => (
+                            <Badge key={issueType} variant="outline">
+                              {issueTypeLabel(issueType)}
                             </Badge>
-                          )}
-                          {precedent.jurisdiction && (
-                            <Badge variant="outline">
-                              {precedent.jurisdiction === "federal"
-                                ? "Federal"
-                                : precedent.jurisdiction.toUpperCase()}
-                            </Badge>
-                          )}
+                          ))}
+                          {precedent.outcome && <Badge className={outcomeColor(precedent.outcome)}>{outcomeLabel(precedent.outcome, t)}</Badge>}
+                          {precedent.decisionDate && <Badge variant="secondary">{formatDay(format, precedent.decisionDate, "month")}</Badge>}
+                          {precedent.jurisdiction && <Badge variant="outline">{jurisdictionLabel(precedent.jurisdiction, t)}</Badge>}
                         </div>
                       </div>
                     </CardContent>
@@ -791,66 +432,58 @@ export function PrecedentsConsole() {
               </div>
 
               {/* Pagination */}
-              {precedentsData?.pagination && (
-                <div className="flex justify-center gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    {t('precedents.previous')}
-                  </Button>
-                  <div className="flex items-center px-4 text-sm text-muted-foreground">
-                    {t('precedents.pageXofY', { current: currentPage, total: precedentsData.pagination.totalPages })}
-                  </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => setCurrentPage((p) => p + 1)}
-                    disabled={currentPage >= precedentsData.pagination.totalPages}
-                  >
-                    {t('precedents.next')}
-                  </Button>
+              <div className="flex justify-center gap-2">
+                <Button variant="outline" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                  {t("previous")}
+                </Button>
+                <div className="flex items-center px-4 text-sm text-muted-foreground">
+                  {t("pageXofY", { current: currentPage, total: precedentsData.totalPages })}
                 </div>
-              )}
+                <Button variant="outline" onClick={() => setCurrentPage((p) => p + 1)} disabled={currentPage >= precedentsData.totalPages}>
+                  {t("next")}
+                </Button>
+              </div>
             </>
           )}
         </TabsContent>
 
         {/* View Tab */}
         <TabsContent value="view" className="space-y-6">
-          {selectedPrecedent && (
-            <PrecedentViewer
-              precedent={selectedPrecedent}
-              isOwner={selectedPrecedent.isOwner}
-              onEdit={() => {
-                openEditDialog();
-              }}
-              onDelete={handleDeletePrecedent}
-              onCompare={() => {
-                handleToggleCompare(selectedPrecedent.id);
-                handleStartComparison();
-              }}
-              onShare={() => {
-                openShareDialog();
-              }}
-              onDownloadDocument={handleDownloadDocument}
+          {isLoadingPrecedent ? (
+            <div className="text-center py-12 text-muted-foreground">{t("loadingPrecedents")}</div>
+          ) : precedentError !== null ? (
+            <LoadFailure
+              title={t("console.viewFailedTitle")}
+              body={t("console.viewFailed")}
+              detail={precedentError}
+              onRetry={() => setPrecedentReload((count) => count + 1)}
             />
+          ) : (
+            selectedPrecedent && <PrecedentViewer precedent={selectedPrecedent} onCompare={handleCompareViewed} />
           )}
         </TabsContent>
 
         {/* Compare Tab */}
         <TabsContent value="compare">
-          {comparisonData && (
-            <PrecedentCompareView
-              precedents={comparisonData.precedents}
-              analysis={comparisonData.analysis}
-              onRemovePrecedent={handleRemoveFromComparison}
-              onExport={() => {
-                handleExportComparison();
-              }}
-              comparisonNotes={comparisonNotes}
-              onNotesChange={setComparisonNotes}
+          {isLoadingComparison ? (
+            <div className="text-center py-12 text-muted-foreground">{t("loadingPrecedents")}</div>
+          ) : comparisonError !== null ? (
+            <LoadFailure
+              title={t("console.comparisonFailedTitle")}
+              body={t("console.comparisonFailed")}
+              detail={comparisonError}
+              onRetry={() => fetchComparison(selectedPrecedentIds)}
             />
+          ) : (
+            comparisonData && (
+              <PrecedentCompareView
+                precedents={comparisonData}
+                onRemovePrecedent={handleRemoveFromComparison}
+                onExport={handleExportComparison}
+                comparisonNotes={comparisonNotes}
+                onNotesChange={setComparisonNotes}
+              />
+            )
           )}
         </TabsContent>
 
@@ -863,122 +496,10 @@ export function PrecedentsConsole() {
               // Reload preferences and re-apply filters
               setJurisdictionPrefsLoaded(false);
               setActiveTab("browse");
-              // Reset fetch params so precedents reload
-              lastFetchParamsRef.current = "";
             }}
           />
         </TabsContent>
       </Tabs>
-
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Edit Precedent</DialogTitle>
-            <DialogDescription>
-              Update key fields for this precedent. Changes are saved immediately.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Case Number</label>
-              <Input
-                value={editForm.caseNumber}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, caseNumber: e.target.value }))}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Case Title</label>
-              <Input
-                value={editForm.caseTitle}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, caseTitle: e.target.value }))}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Decision Date</label>
-              <Input
-                type="date"
-                value={editForm.decisionDate}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, decisionDate: e.target.value }))}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Issue Summary</label>
-              <Textarea
-                value={editForm.issueSummary}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, issueSummary: e.target.value }))}
-              />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Decision Summary</label>
-              <Textarea
-                value={editForm.decisionSummary}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, decisionSummary: e.target.value }))}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit} disabled={isSavingEdit}>
-              {isSavingEdit ? "Saving..." : "Save Changes"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Share Precedent</DialogTitle>
-            <DialogDescription>
-              Control how this precedent is shared across organizations.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Sharing Level</label>
-              <Select
-                value={shareForm.sharingLevel}
-                onValueChange={(value) =>
-                  setShareForm((prev) => ({ ...prev, sharingLevel: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select sharing level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="private">Private</SelectItem>
-                  <SelectItem value="federation">Federation</SelectItem>
-                  <SelectItem value="congress">Congress</SelectItem>
-                  <SelectItem value="public">Public</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Shared With Organization IDs</label>
-              <Input
-                placeholder="comma-separated org IDs"
-                value={shareForm.sharedWithOrgIds}
-                onChange={(e) =>
-                  setShareForm((prev) => ({ ...prev, sharedWithOrgIds: e.target.value }))
-                }
-              />
-              <p className="text-xs text-muted-foreground">
-                Required for private sharing. Leave empty for broader levels.
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsShareDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveShare} disabled={isSavingShare}>
-              {isSavingShare ? "Saving..." : "Save Sharing"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

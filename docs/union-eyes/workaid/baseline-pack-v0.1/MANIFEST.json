@@ -1,0 +1,48 @@
+{
+  "pack": "WA-PREP-01",
+  "version": "0.1",
+  "snapshotDate": "2026-10-23",
+  "referenceMainSha": "38a824918cf2e7d7cfb7fcb0e796cbde45433be8",
+  "stagingOrLiveTouched": false,
+  "acceptanceCases": 80,
+  "syntheticScenarios": 12,
+  "adversarialFindings": 31,
+  "releaseReadiness": "NO_GO",
+  "files": [
+    {
+      "name": "README.md",
+      "bytes": 2190,
+      "sha256": "e722c8647c78104565be7778852c22fb34f655dc7f19bb5b16484e067c9d6305"
+    },
+    {
+      "name": "WORKAID_ACCEPTANCE_MATRIX.csv",
+      "bytes": 17597,
+      "sha256": "d723aaa82409171daae1635b9bb939161b613ace359554bbb12095d7233058bc"
+    },
+    {
+      "name": "WORKAID_ADVERSARIAL_REVIEW_R1.md",
+      "bytes": 12165,
+      "sha256": "bc3cbadad7ab1a219616448742cdaa87521fe6a289c6bf69bb625a9f0ae38558"
+    },
+    {
+      "name": "WORKAID_ADVERSARIAL_REVIEW_R2.md",
+      "bytes": 6720,
+      "sha256": "eed997fc47ad5f1e76817e5275a17994ea9d13fc442f5f589a1184af684a5b91"
+    },
+    {
+      "name": "WORKAID_PRODUCT_SPEC_v0.1.md",
+      "bytes": 24897,
+      "sha256": "e8285ea8d33dcde84db2410ce207805111b338e4cd34d1094a86cc1218a7fc8f"
+    },
+    {
+      "name": "WORKAID_SYNTHETIC_SCENARIOS.json",
+      "bytes": 6684,
+      "sha256": "51576f802d1b8105c2ff384505213903569b928f6407cbb315517a2dae8f2836"
+    },
+    {
+      "name": "WORKAID_VSCODE_AGENT_MISSION.md",
+      "bytes": 4526,
+      "sha256": "8337594e4b4fe55e1ec29f81fff40aed51197fd068ec14e05966ee2c19cd9f2e"
+    }
+  ]
+}

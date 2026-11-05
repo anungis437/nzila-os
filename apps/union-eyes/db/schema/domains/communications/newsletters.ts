@@ -88,32 +88,6 @@ export const engagementEventEnum = pgEnum('newsletter_engagement_event', [
 // ============================================================================
 
 /**
- * Newsletter Templates
- * Reusable email templates with HTML content, JSON structure, and variables
- */
-export const newsletterTemplates = pgTable('newsletter_templates', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  category: varchar('category', { length: 100 }),
-  thumbnailUrl: text('thumbnail_url'),
-  htmlContent: text('html_content').notNull(),
-  jsonStructure: jsonb('json_structure'), // Block-based editor structure
-  variables: jsonb('variables').$type<TemplateVariable[]>().default([]),
-  isSystem: boolean('is_system').default(false),
-  isActive: boolean('is_active').default(true),
-  usageCount: integer('usage_count').default(0),
-  createdBy: text('created_by').references(() => profiles.userId, {
-    onDelete: 'set null',
-  }),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-});
-
-/**
  * Distribution Lists
  * Subscriber groups for targeted newsletter campaigns
  */
@@ -130,9 +104,7 @@ export const newsletterDistributionLists = pgTable(
     filterCriteria: jsonb('filter_criteria').$type<ListFilterCriteria>(),
     subscriberCount: integer('subscriber_count').default(0),
     isActive: boolean('is_active').default(true),
-    createdBy: text('created_by').references(() => profiles.userId, {
-      onDelete: 'set null',
-    }),
+    createdBy: text('created_by'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   }
@@ -152,8 +124,7 @@ export const newsletterListSubscribers = pgTable(
         onDelete: 'cascade',
       }),
     profileId: text('profile_id')
-      .notNull()
-      .references(() => profiles.userId, { onDelete: 'cascade' }),
+      .notNull(),
     email: varchar('email', { length: 255 }).notNull(),
     status: varchar('status', { length: 50 }).default('subscribed'),
     subscribedAt: timestamp('subscribed_at', { withTimezone: true }).defaultNow(),
@@ -172,9 +143,7 @@ export const newsletterCampaigns = pgTable('newsletter_campaigns', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  templateId: uuid('template_id').references(() => newsletterTemplates.id, {
-    onDelete: 'set null',
-  }),
+  templateId: uuid('template_id'),
   name: varchar('name', { length: 255 }).notNull(),
   subject: varchar('subject', { length: 500 }).notNull(),
   previewText: varchar('preview_text', { length: 500 }),
@@ -205,9 +174,7 @@ export const newsletterCampaigns = pgTable('newsletter_campaigns', {
   tags: varchar('tags', { length: 100 }).array(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: jsonb('metadata').$type<Record<string, any>>().default({}),
-  createdBy: text('created_by').references(() => profiles.userId, {
-    onDelete: 'set null',
-  }),
+  createdBy: text('created_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
@@ -221,9 +188,7 @@ export const newsletterRecipients = pgTable('newsletter_recipients', {
   campaignId: uuid('campaign_id')
     .notNull()
     .references(() => newsletterCampaigns.id, { onDelete: 'cascade' }),
-  profileId: text('profile_id').references(() => profiles.userId, {
-    onDelete: 'set null',
-  }),
+  profileId: text('profile_id'),
   email: varchar('email', { length: 255 }).notNull(),
   status: varchar('status', { length: 50 }).default('pending'),
   sentAt: timestamp('sent_at', { withTimezone: true }),
@@ -249,9 +214,7 @@ export const newsletterEngagement = pgTable('newsletter_engagement', {
   recipientId: uuid('recipient_id')
     .notNull()
     .references(() => newsletterRecipients.id, { onDelete: 'cascade' }),
-  profileId: text('profile_id').references(() => profiles.userId, {
-    onDelete: 'set null',
-  }),
+  profileId: text('profile_id'),
   eventType: varchar('event_type', { length: 50 }).notNull(),
   eventData: jsonb('event_data').$type<EngagementEventData>(),
   ipAddress: inet('ip_address'),
@@ -262,21 +225,6 @@ export const newsletterEngagement = pgTable('newsletter_engagement', {
 // ============================================================================
 // RELATIONS
 // ============================================================================
-
-export const newsletterTemplatesRelations = relations(
-  newsletterTemplates,
-  ({ one, many }) => ({
-    organization: one(organizations, {
-      fields: [newsletterTemplates.organizationId],
-      references: [organizations.id],
-    }),
-    creator: one(profiles, {
-      fields: [newsletterTemplates.createdBy],
-      references: [profiles.userId],
-    }),
-    campaigns: many(newsletterCampaigns),
-  })
-);
 
 export const newsletterDistributionListsRelations = relations(
   newsletterDistributionLists,
@@ -313,10 +261,6 @@ export const newsletterCampaignsRelations = relations(
     organization: one(organizations, {
       fields: [newsletterCampaigns.organizationId],
       references: [organizations.id],
-    }),
-    template: one(newsletterTemplates, {
-      fields: [newsletterCampaigns.templateId],
-      references: [newsletterTemplates.id],
     }),
     creator: one(profiles, {
       fields: [newsletterCampaigns.createdBy],
@@ -364,8 +308,6 @@ export const newsletterEngagementRelations = relations(
 // TYPES
 // ============================================================================
 
-export type NewsletterTemplate = typeof newsletterTemplates.$inferSelect;
-export type NewNewsletterTemplate = typeof newsletterTemplates.$inferInsert;
 
 export type NewsletterDistributionList =
   typeof newsletterDistributionLists.$inferSelect;

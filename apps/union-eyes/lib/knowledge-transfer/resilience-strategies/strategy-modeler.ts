@@ -200,8 +200,9 @@ export async function buildResilienceRoadmap(orgId: string): Promise<ResilienceR
   // Select which strategies are relevant based on current state
   const strategyPriority: StrategyType[] = [];
 
-  // Always recommend documentation as foundational
-  if (resilienceIndex.dimensions.find((d) => d.name === 'Documentation Maturity')?.score ?? 0 < 65) {
+  // A low or unmeasured documentation score selects the documentation strategy; a high one does not.
+  const documentationScore = resilienceIndex.dimensions.find((d) => d.name === 'Documentation Maturity')?.score;
+  if (documentationScore === undefined || !Number.isFinite(documentationScore) || documentationScore < 65) {
     strategyPriority.push('documentation_foundation');
   }
   if (singleSourceCount >= 3) strategyPriority.push('knowledge_decentralization');

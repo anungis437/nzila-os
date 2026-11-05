@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockSendResendEmail = vi.hoisted(() => vi.fn());
+const mockGetResendClient = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
@@ -8,6 +9,7 @@ vi.mock('@/lib/logger', () => ({
 
 vi.mock('@/lib/email-service', () => ({
   sendResendEmail: mockSendResendEmail,
+  getResendClient: mockGetResendClient,
   getFromEmail: (label?: string) => label ? `${label} <noreply@unioneyes.app>` : 'noreply@unioneyes.app',
 }));
 
@@ -177,9 +179,12 @@ describe('ResendAdapter', () => {
     expect(result.error).toBe('Network error');
   });
 
-  it('verifyConnection returns true when client exists', async () => {
-    const ok = await adapter.verifyConnection();
-    expect(ok).toBe(true);
+  it('verifyConnection is true only while a Resend API key is configured', async () => {
+    mockGetResendClient.mockReturnValue({});
+    expect(await adapter.verifyConnection()).toBe(true);
+
+    mockGetResendClient.mockReturnValue(null);
+    expect(await adapter.verifyConnection()).toBe(false);
   });
 
   it('sendBatch iterates and returns all results', async () => {
@@ -206,6 +211,21 @@ describe('SendGridAdapter', () => {
     adapter = new SendGridAdapter('sg_test_key');
     global.fetch = vi.fn();
   });
+
+
+  it('passes one-click unsubscribe headers to SendGrid without dropping them', async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true, headers: { get: () => 'sg-1' }, json: () => Promise.resolve({}),
+    });
+    const headers = {
+      'List-Unsubscribe': '<https://app.unioneyes.app/api/communications/unsubscribe/u?campaignId=c&token=abc>',
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    };
+    await adapter.send({ ...testMessage, headers });
+    const body = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body);
+    expect(body.headers).toEqual(headers);
+  });
+
 
   it('has name "sendgrid"', () => {
     expect(adapter.name).toBe('sendgrid');

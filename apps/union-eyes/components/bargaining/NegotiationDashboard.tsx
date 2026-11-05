@@ -17,6 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, Calendar, Users, FileText, AlertTriangle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { recordedDay } from "@/lib/client/day";
 
 interface Negotiation {
   id: string;
@@ -35,6 +36,14 @@ interface NegotiationDashboardProps {
   organizationId: string;
 }
 
+/** What GET /api/bargaining/negotiations answers: the framework's `data` holds the generic writer's own { data: rows, pagination } (most recent first). */
+interface NegotiationsAnswer {
+  data?: { data?: Negotiation[]; pagination?: { total?: number } };
+}
+
+/** How many of the most recent negotiations the dashboard loads (the route allows at most 100 a page). */
+const PAGE_SIZE = 50;
+
 const statusColors: Record<string, string> = {
   scheduled: "bg-gray-500",
   active: "bg-blue-500",
@@ -52,6 +61,7 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
   const locale = useLocale();
   const t = useTranslations("negotiationDashboard");
   const [negotiations, setNegotiations] = useState<Negotiation[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,14 +72,19 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
   const fetchNegotiations = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/bargaining/negotiations?limit=50`);
+      const response = await fetch(`/api/bargaining/negotiations?limit=${PAGE_SIZE}`);
       
       if (!response.ok) {
         throw new Error("Failed to fetch negotiations");
       }
       
-      const data = await response.json();
-      setNegotiations(data.negotiations || []);
+      const answer = (await response.json()) as NegotiationsAnswer;
+      const rows = answer.data?.data;
+      if (!Array.isArray(rows)) {
+        throw new Error("Failed to fetch negotiations");
+      }
+      setNegotiations(rows);
+      setTotal(answer.data?.pagination?.total ?? rows.length);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -125,6 +140,13 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
         </Button>
       </div>
 
+      {/* Only the most recent negotiations are loaded: say so rather than let the counts pass for the whole */}
+      {total > negotiations.length && (
+        <Alert>
+          <AlertDescription>{t("partialNote", { shown: negotiations.length, total })}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -133,7 +155,7 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{negotiations.length}</div>
+            <div className="text-2xl font-bold">{total}</div>
           </CardContent>
         </Card>
 
@@ -210,7 +232,7 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
                       {negotiation.firstSessionDate && (
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {t("started", { date: format(new Date(negotiation.firstSessionDate), "MMM d, yyyy") })}
+                          {t("started", { date: format(recordedDay(negotiation.firstSessionDate), "MMM d, yyyy") })}
                         </span>
                       )}
                       <span>{t("round", { round: negotiation.currentRound, sessions: negotiation.totalSessions })}</span>
@@ -273,7 +295,7 @@ export function NegotiationDashboard({ organizationId }: NegotiationDashboardPro
                     </Badge>
                     {negotiation.targetCompletionDate && (
                       <span className="text-sm text-muted-foreground">
-                        {t("target", { date: format(new Date(negotiation.targetCompletionDate), "MMM d, yyyy") })}
+                        {t("target", { date: format(recordedDay(negotiation.targetCompletionDate), "MMM d, yyyy") })}
                       </span>
                     )}
                   </div>

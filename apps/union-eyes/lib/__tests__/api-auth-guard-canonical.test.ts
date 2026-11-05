@@ -162,7 +162,7 @@ describe('canonical imperative API authentication', () => {
 
   it('permits the actual direct admin handler with canonical platform authority', async () => {
     mocks.organization.mockResolvedValue({ ...actor, role: 'app_owner', isSystemAdmin: true })
-    expect((await clearCache()).status).toBe(200)
+    expect((await clearCache()).status).toBe(501)
   })
 
   it('denies the actual direct admin handler when canonical authority was revoked', async () => {

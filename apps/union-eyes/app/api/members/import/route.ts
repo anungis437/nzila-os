@@ -11,7 +11,7 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { db } from '@/db';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { organizationMembers } from '@/db/schema-organizations';
 import { logger } from '@/lib/logger';
 import crypto from 'crypto';
@@ -38,8 +38,8 @@ export const POST = withApi(
     auth: { minRole: 'steward' },
     openapi: { tags: ['Members'], summary: 'Import members from CSV file' },
   },
-  async ({ request, organizationId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+  async ({ request, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -58,18 +58,20 @@ export const POST = withApi(
     }
 
     const jobId = crypto.randomUUID();
-    let processed = 0;
     let skipped = 0;
 
     // Resolve auth client for user lookups; fall back to provisional UUIDs if unavailable
     const authClient = adminClient;
 
+    const candidates: Array<{ userId: string; name: string; email: string }> = [];
     for (const row of rows) {
       const email = (row['email'] ?? row['Email'] ?? '').trim();
       const name  = (row['name']  ?? row['Name']  ?? row['full_name'] ?? '').trim();
       const role  = (row['role']  ?? row['Role']  ?? 'member').trim().toLowerCase();
 
       if (!email) { skipped++; continue; }
+      // An import is not a way to grant authority: only plain membership can be imported.
+      if (role !== 'member') { skipped++; continue; }
 
       // Look up the auth user by email; fall back to a provisional UUID if not found
       let resolvedUserId: string = crypto.randomUUID();
@@ -79,24 +81,40 @@ export const POST = withApi(
       } catch {
         // Keep the provisional UUID
       }
-
-      try {
-        await withRLSContext(async () =>
-          db.insert(organizationMembers).values({
-            organizationId,
-            userId: resolvedUserId,
-            name: name || email,
-            email,
-            role,
-            status: 'active',
-          }).onConflictDoNothing()
-        );
-        processed++;
-      } catch (err) {
-        logger.warn('Member import row skipped', { email, err });
-        skipped++;
-      }
+      candidates.push({ userId: resolvedUserId, name: name || email, email });
     }
+
+    // The memberships and the audit record commit together; a failed audit leaves no imported members.
+    const processed = await withRLSContext({ organizationId }, async (tx) => {
+      let inserted = 0;
+      for (const candidate of candidates) {
+        const created = await tx
+          .insert(organizationMembers)
+          .values({
+            organizationId,
+            userId: candidate.userId,
+            name: candidate.name,
+            email: candidate.email,
+            role: 'member',
+            status: 'active',
+          })
+          .onConflictDoNothing()
+          .returning({ id: organizationMembers.id });
+        if (created.length > 0) inserted++;
+      }
+      if (inserted > 0) {
+        await persistAtomicAudit(tx, {
+          organizationId,
+          userId,
+          action: 'member.import',
+          resourceType: 'organization_members',
+          resourceId: jobId,
+          details: { jobId, imported: inserted, rows: rows.length },
+        });
+      }
+      return inserted;
+    });
+    skipped += candidates.length - processed;
 
     logger.info('Members imported', { jobId, processed, skipped, organizationId });
 

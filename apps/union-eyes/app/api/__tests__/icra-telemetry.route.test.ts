@@ -7,7 +7,7 @@ const m = vi.hoisted(() => ({
   hashIp: vi.fn(),
 }));
 
-vi.mock('@/lib/rate-limit', () => ({ rateLimit: m.rateLimit }));
+vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.rateLimit }));
 vi.mock('@/lib/icra/observability', () => ({ fireAndForgetEvent: m.fireAndForgetEvent, hashIp: m.hashIp }));
 
 async function loadRoute() {
@@ -17,13 +17,13 @@ async function loadRoute() {
 describe('icra/telemetry route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.rateLimit.mockReturnValue({ success: true });
+    m.rateLimit.mockResolvedValue({ allowed: true });
     m.hashIp.mockReturnValue('ip_hash_1');
   });
 
   it('returns 204 when rate-limited', async () => {
     const { POST } = await loadRoute();
-    m.rateLimit.mockReturnValueOnce({ success: false });
+    m.rateLimit.mockResolvedValueOnce({ allowed: false, resetIn: 60 });
 
     const response = await POST(new NextRequest('http://localhost/api/icra/telemetry', { method: 'POST' }));
     expect(response.status).toBe(204);

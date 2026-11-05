@@ -32,7 +32,11 @@ describe('worksites collection route', () => {
       tags: ['Organization'],
       orgScoped: true,
       readRole: 'member',
+      // The site manager's contact and the working notes are omitted from every response (batch B24).
+      omitFromResponse: ['siteManagerName', 'siteManagerEmail', 'siteManagerPhone', 'notes', 'customFields'],
       writeRole: 'steward',
+      // The employer must be the caller organization's (batch B25).
+      beforeCreate: expect.any(Function),
     });
   });
 

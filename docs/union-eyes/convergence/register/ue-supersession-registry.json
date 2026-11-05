@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "note": "Every retired artifact, its canonical replacement, how consumers were handled, the retirement commit and how the retirement is verified. Historical migrations, audit records and legal evidence are never listed here: they are preserved.",
+  "retired": [
+    {
+      "artifact": "apps/union-eyes/lib/authority/store/identity.ts#resolveInternalPrincipal, resolveAuthorityPrincipal, listActiveOrganizations",
+      "replacement": "apps/union-eyes/lib/authority/store/platform-identity.ts (consumes the platform-auth verified binding)",
+      "consumerMigration": "No application consumers existed; the kernel's own tests were rewritten against the verified-binding contract.",
+      "commit": "b6bb51acd",
+      "verification": "ratchet RETIRED-KERNEL-RESOLVERS (zero occurrences) in tooling/scripts/check-ue-convergence.mjs"
+    },
+    {
+      "artifact": "generated scaffold handlers returning { status: 'accepted' } (13 app/api route.ts files)",
+      "replacement": "ApiError.notImplemented (HTTP 501), recorded as UE-ACTION-* in apps/union-eyes/lib/reality/capability-registry.ts",
+      "consumerMigration": "Dashboards already treat a non-OK response as an error toast; no consumer relied on the false success.",
+      "commit": "01b7a0ecb",
+      "verification": "anti-theatre rule R-9 (error severity) in tooling/reality/anti-theatre-scan.ts"
+    },
+    {
+      "artifact": "apps/union-eyes/test-analytics.cjs",
+      "replacement": "none (unreferenced scratch script with hard-coded local database credentials)",
+      "consumerMigration": "Zero references in package scripts, source or CI.",
+      "commit": "4cced851a",
+      "verification": "file absent; git grep finds no reference"
+    },
+    {
+      "artifact": "apps/union-eyes/test-analytics2.cjs",
+      "replacement": "none (unreferenced scratch script with hard-coded local database credentials)",
+      "consumerMigration": "Zero references in package scripts, source or CI.",
+      "commit": "4cced851a",
+      "verification": "file absent; git grep finds no reference"
+    },
+    {
+      "artifact": "apps/union-eyes/push-org-staging.mjs",
+      "replacement": "tooling/scripts/run-union-eyes-drizzle-bootstrap.mjs (the approved installation path)",
+      "consumerMigration": "Zero references. It ran drizzle-kit push and auto-answered No to destructive prompts, which bypasses the migration ledger.",
+      "commit": "4cced851a",
+      "verification": "file absent; register entry UE-CONV-H-003 tracks the remaining db:push entrypoint"
+    },
+    {
+      "artifact": "Clerk identity provider (packages, credentials, seed credentials, locale text)",
+      "replacement": "Entra through packages/platform-auth",
+      "consumerMigration": "Organization binding, webhook alias, Whop metadata and legacy-env detection retained as documented, logged compatibility; see UE-CONV-A-006.",
+      "commit": "24ca3f9b5",
+      "verification": "ratchet RETIRED-CLERK-PROVIDER allowlist"
+    }
+  ]
+}

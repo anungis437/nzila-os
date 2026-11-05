@@ -1,8 +1,6 @@
-import { requireUser } from "@/lib/api-auth-guard";
+import { requireOrganizationScope } from "@/lib/page-data/organization-scope";
 import { getTranslations } from "next-intl/server";
-import { db } from "@/db";
-import { employerExecutionProfiles } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { listExecutionProfiles } from "@/lib/employer-execution/page-reads";
 
 export const dynamic = "force-dynamic";
 
@@ -23,14 +21,9 @@ type PageProps = {
 export default async function EmployerExecutionSettingsPage({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "employerExecutionSettingsPage" });
-  const context = await requireUser();
-  const organizationId = context.organizationId;
+  const { organizationId } = await requireOrganizationScope();
 
-  const profiles = await db
-    .select()
-    .from(employerExecutionProfiles)
-    .where(eq(employerExecutionProfiles.organizationId, organizationId))
-    .limit(20);
+  const profiles = await listExecutionProfiles(organizationId);
 
   return (
     <div className="space-y-6">

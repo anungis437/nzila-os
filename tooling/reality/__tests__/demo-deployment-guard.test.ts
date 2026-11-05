@@ -5,19 +5,19 @@ describe('evaluateDemoGuard', () => {
   it('allows demo profile in development', () => {
     const r = evaluateDemoGuard({
       targetEnvironment: 'development',
-      ueFeatureProfile: 'cupe4373',
+      ueFeatureProfile: 'demo',
       publicDemoProfile: undefined,
       nodeEnv: 'development',
     });
     expect(r.ok).toBe(true);
-    expect(r.demoProfileDetected).toBe('cupe4373');
+    expect(r.demoProfileDetected).toBe('demo');
   });
 
   it('allows demo profile in local', () => {
     const r = evaluateDemoGuard({
       targetEnvironment: 'local',
       ueFeatureProfile: undefined,
-      publicDemoProfile: 'cupe4373',
+      publicDemoProfile: 'demo',
       nodeEnv: 'development',
     });
     expect(r.ok).toBe(true);
@@ -26,19 +26,19 @@ describe('evaluateDemoGuard', () => {
   it('rejects demo profile in staging', () => {
     const r = evaluateDemoGuard({
       targetEnvironment: 'staging',
-      ueFeatureProfile: 'cupe4373',
+      ueFeatureProfile: 'demo',
       publicDemoProfile: undefined,
       nodeEnv: 'production',
     });
     expect(r.ok).toBe(false);
-    expect(r.reason).toContain('cupe4373');
+    expect(r.reason).toContain('demo');
     expect(r.reason).toContain('staging');
   });
 
   it('rejects demo profile in pilot', () => {
     const r = evaluateDemoGuard({
       targetEnvironment: 'pilot',
-      ueFeatureProfile: 'cupe4373',
+      ueFeatureProfile: 'demo',
       publicDemoProfile: undefined,
       nodeEnv: 'production',
     });
@@ -59,7 +59,7 @@ describe('evaluateDemoGuard', () => {
   it('defaults to production when target is missing', () => {
     const r = evaluateDemoGuard({
       targetEnvironment: undefined,
-      ueFeatureProfile: 'cupe4373',
+      ueFeatureProfile: 'demo',
       publicDemoProfile: undefined,
       nodeEnv: undefined,
     });
@@ -95,7 +95,7 @@ describe('assertDemoDeploymentGuard', () => {
     expect(() =>
       assertDemoDeploymentGuard({
         UE_TARGET_ENVIRONMENT: 'production',
-        UE_FEATURE_PROFILE: 'cupe4373',
+        UE_FEATURE_PROFILE: 'demo',
       } as NodeJS.ProcessEnv),
     ).toThrow(/demo-deployment-guard/);
   });
@@ -104,7 +104,7 @@ describe('assertDemoDeploymentGuard', () => {
     expect(() =>
       assertDemoDeploymentGuard({
         UE_TARGET_ENVIRONMENT: 'development',
-        UE_FEATURE_PROFILE: 'cupe4373',
+        UE_FEATURE_PROFILE: 'demo',
       } as NodeJS.ProcessEnv),
     ).not.toThrow();
   });

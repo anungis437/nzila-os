@@ -30,10 +30,6 @@ export default async function DebugPage({ params }: PageProps) {
   const userId = authContext.userId;
   const orgId = authContext.organizationId;
   const user = await currentUser();
-  
-  // Get assigned claims — requires org slug; skipped in debug page (dev tool only, no slug available).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const assignedClaims: any[] = [];
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -81,28 +77,6 @@ export default async function DebugPage({ params }: PageProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("claimsCard.title")}</CardTitle>
-          <CardDescription>{t("claimsCard.description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {assignedClaims.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("claimsCard.none")}</p>
-          ) : (
-            <div className="space-y-2">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {assignedClaims.map((claim: any) => (
-                <div key={claim.id} className="p-3 border rounded">
-                  <p className="font-medium">{claim.claimNumber}</p>
-                  <p className="text-sm text-muted-foreground">{claim.title}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>{t("dbCard.title")}</CardTitle>
           <CardDescription>{t("dbCard.description")}</CardDescription>
         </CardHeader>
@@ -112,7 +86,7 @@ export default async function DebugPage({ params }: PageProps) {
             <p className="text-sm font-medium">{t("dbCard.step2")}</p>
             <code className="block mt-1 p-3 bg-muted rounded text-xs font-mono whitespace-pre">
 {`UPDATE users 
-SET user_id = 'your_clerk_user_id_here'
+SET user_id = 'your_user_id_here'
 WHERE email = 'your.email@example.com';`}
             </code>
           </div>
@@ -121,7 +95,7 @@ WHERE email = 'your.email@example.com';`}
             <p className="text-sm font-medium">{t("dbCard.step3")}</p>
             <code className="block mt-1 p-3 bg-muted rounded text-xs font-mono whitespace-pre">
 {`UPDATE claims 
-SET assigned_to = 'your_clerk_user_id_here'
+SET assigned_to = 'your_user_id_here'
 WHERE claim_number = 'CLM-2025-004';`}
             </code>
           </div>

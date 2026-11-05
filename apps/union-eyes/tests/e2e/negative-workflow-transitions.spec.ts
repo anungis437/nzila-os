@@ -36,7 +36,7 @@ test.describe('UE E2E — negative workflow transitions (FSM invariant)', () => 
   test('triage → resolved is blocked — must go via under_review (NEG-FSM-TRIAGE-DIRECT-RESOLVE)', async ({
     request,
   }) => {
-    await loginAsTestUser(request, UE_E2E_USERS.admin)
+    await loginAsTestUser(request, UE_E2E_USERS.steward)
 
     // Attempt to jump from triage directly to resolved (skipping under_review)
     const skip = await request.post('/api/workflow/transition', {
@@ -123,7 +123,7 @@ test.describe('UE E2E — negative workflow transitions (FSM invariant)', () => 
   test('re-submitting a resolved case without reopen is rejected (NEG-FSM-RESUBMIT-CLOSED)', async ({
     request,
   }) => {
-    await loginAsTestUser(request, UE_E2E_USERS.admin)
+    await loginAsTestUser(request, UE_E2E_USERS.steward)
 
     // Ensure the case is resolved
     await request.post('/api/workflow/transition', {

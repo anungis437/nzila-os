@@ -35,8 +35,8 @@ const h = vi.hoisted(() => {
     delete: () => makeChain(),
     transaction: (fn: (t: typeof tx) => Promise<unknown>) => fn(tx),
   };
-  const auditLog = vi.fn();
-  return { queue, db, auditLog };
+  const persistAtomicAudit = vi.fn();
+  return { queue, db, tx, persistAtomicAudit };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
@@ -56,11 +56,7 @@ vi.mock('drizzle-orm', async (orig) => ({
   sql: vi.fn(() => ({})),
   desc: vi.fn(() => ({})),
 }));
-vi.mock('@/lib/audit-logger', () => ({
-  auditLog: h.auditLog,
-  AuditEventType: { DATA_CREATE: 'data_create' },
-  AuditSeverity: { HIGH: 'high' },
-}));
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.persistAtomicAudit }));
 vi.mock('uuid', () => ({ v4: () => '00000000-1111-2222-3333-444444444444' }));
 
 import {
@@ -85,25 +81,61 @@ const baseInput = {
 
 beforeEach(() => {
   h.queue.length = 0;
-  h.auditLog.mockReset();
+  h.persistAtomicAudit.mockReset();
 });
 
 describe('platform-economics/ledger-service', () => {
   describe('appendLedgerEntry', () => {
-    it('inserts an entry and writes an audit log', async () => {
+    it('inserts an entry and writes the audit in the same transaction', async () => {
       pushSel([]); // insert
-      const id = await appendLedgerEntry(baseInput);
+      const id = await appendLedgerEntry({ ...baseInput, createdBy: 'user-1' });
       expect(id).toBe('00000000-1111-2222-3333-444444444444');
-      expect(h.auditLog).toHaveBeenCalledTimes(1);
+      expect(h.persistAtomicAudit).toHaveBeenCalledTimes(1);
+      expect(h.persistAtomicAudit).toHaveBeenCalledWith(h.tx, expect.objectContaining({
+        action: 'ledger_entry_appended',
+        resourceType: 'platform_cost_ledger',
+        resourceId: id,
+        organizationId: 'o1',
+        userId: 'user-1',
+        details: expect.objectContaining({
+          costType: 'compute',
+          eventType: 'usage',
+          amountCad: '10.00',
+        }),
+      }));
+    });
+
+    it('returns no entry id when the audit write fails', async () => {
+      pushSel([]);
+      h.persistAtomicAudit.mockRejectedValueOnce(new Error('audit failed'));
+      await expect(appendLedgerEntry(baseInput)).rejects.toThrow('audit failed');
     });
   });
 
   describe('appendLedgerEntries', () => {
-    it('inserts multiple entries inside a transaction', async () => {
+    it('inserts multiple entries and audits each one inside the transaction', async () => {
       pushSel([]); // insert 1
       pushSel([]); // insert 2
-      const ids = await appendLedgerEntries([baseInput, baseInput]);
+      const ids = await appendLedgerEntries([baseInput, { ...baseInput, amountCad: '4.00' }]);
       expect(ids).toHaveLength(2);
+      expect(h.persistAtomicAudit).toHaveBeenCalledTimes(2);
+      expect(h.persistAtomicAudit).toHaveBeenNthCalledWith(1, h.tx, expect.objectContaining({
+        action: 'ledger_entry_appended',
+        resourceId: ids[0],
+        details: expect.objectContaining({ amountCad: '10.00' }),
+      }));
+      expect(h.persistAtomicAudit).toHaveBeenNthCalledWith(2, h.tx, expect.objectContaining({
+        action: 'ledger_entry_appended',
+        resourceId: ids[1],
+        details: expect.objectContaining({ amountCad: '4.00' }),
+      }));
+    });
+
+    it('rejects the batch when an entry audit write fails', async () => {
+      pushSel([]);
+      pushSel([]);
+      h.persistAtomicAudit.mockRejectedValueOnce(new Error('audit failed'));
+      await expect(appendLedgerEntries([baseInput, baseInput])).rejects.toThrow('audit failed');
     });
   });
 
@@ -135,6 +167,12 @@ describe('platform-economics/ledger-service', () => {
       pushSel([]); // insert (appendLedgerEntry)
       const id = await reverseLedgerEntry('e1', 'mistake', 'user-1');
       expect(id).toBe('00000000-1111-2222-3333-444444444444');
+      expect(h.persistAtomicAudit).toHaveBeenCalledWith(h.tx, expect.objectContaining({
+        action: 'ledger_entry_appended',
+        resourceId: id,
+        userId: 'user-1',
+        details: expect.objectContaining({ eventType: 'reversal', amountCad: '-10.00' }),
+      }));
     });
   });
 

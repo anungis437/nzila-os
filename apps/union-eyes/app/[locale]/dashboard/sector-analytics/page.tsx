@@ -17,6 +17,7 @@ import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { requireUser, isSystemAdmin } from '@/lib/api-auth-guard';
 import { getLocale, getTranslations } from 'next-intl/server';
+import { UsageTelemetryNotice } from '@/components/platform/usage-telemetry-notice';
 
 /* ── Types ── */
 interface OrgRow {
@@ -30,7 +31,6 @@ interface OrgRow {
   clcAffiliated: boolean;
   subscriptionTier: string | null;
   ticketCount: number;
-  loginCount: number;
 }
 
 interface SectorSummary {
@@ -55,11 +55,6 @@ interface GrievanceStats {
   open: number;
   resolved: number;
   inArbitration: number;
-}
-
-interface SettlementStats {
-  total: number;
-  totalMonetaryValue: number;
 }
 
 interface Overview {
@@ -109,19 +104,12 @@ async function loadOrganizations(): Promise<OrgRow[]> {
         COALESCE(o.active_member_count, 0)::int as active_member_count,
         COALESCE(o.clc_affiliated, false) as clc_affiliated,
         o.subscription_tier,
-        COALESCE(st.ticket_count, 0)::int as ticket_count,
-        COALESCE(le.login_count, 0)::int as login_count
+        COALESCE(st.ticket_count, 0)::int as ticket_count
       FROM organizations o
       LEFT JOIN (
         SELECT organization_id, COUNT(*)::int as ticket_count
         FROM support_tickets GROUP BY organization_id
       ) st ON st.organization_id = o.id
-      LEFT JOIN (
-        SELECT organization_id, COUNT(*)::int as login_count
-        FROM platform_login_events
-        WHERE logged_in_at >= now() - interval '30 days'
-        GROUP BY organization_id
-      ) le ON le.organization_id = o.id
       WHERE o.organization_type NOT IN ('platform', 'congress')
       ORDER BY o.member_count DESC NULLS LAST
     `)
@@ -136,7 +124,6 @@ async function loadOrganizations(): Promise<OrgRow[]> {
     clcAffiliated: Boolean(r.clc_affiliated),
     subscriptionTier: r.subscription_tier ? String(r.subscription_tier) : null,
     ticketCount: Number(r.ticket_count),
-    loginCount: Number(r.login_count),
   }));
 }
 
@@ -201,21 +188,6 @@ async function loadGrievanceStats(): Promise<GrievanceStats> {
   };
 }
 
-async function loadSettlementStats(): Promise<SettlementStats> {
-  const rows = Array.from(
-    await db.execute(sql`
-      SELECT COUNT(*)::int as total,
-        COALESCE(SUM(monetary_amount), 0)::numeric as total_value
-      FROM settlements
-    `)
-  );
-  const r = rows[0] as Record<string, unknown>;
-  return {
-    total: Number(r.total),
-    totalMonetaryValue: Number(r.total_value),
-  };
-}
-
 /* ── Helpers ── */
 function formatSector(s: string) {
   return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -223,14 +195,6 @@ function formatSector(s: string) {
 
 function formatNumber(value: number, locale: string) {
   return new Intl.NumberFormat(locale).format(value);
-}
-
-function formatCurrency(value: number, locale: string) {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: 'CAD',
-    maximumFractionDigits: 0,
-  }).format(value);
 }
 
 /* ── Page ── */
@@ -248,14 +212,13 @@ export default async function SectorAnalyticsPage(props: {
   const searchParams = await props.searchParams;
   const tab = typeof searchParams.tab === 'string' ? searchParams.tab : 'overview';
 
-  const [overview, orgs, sectors, cba, grievances, settlements] = await withSystemContext(() =>
+  const [overview, orgs, sectors, cba, grievances] = await withSystemContext(() =>
     Promise.all([
       loadOverview(),
       loadOrganizations(),
       loadSectorBreakdown(),
       loadCbaStats(),
       loadGrievanceStats(),
-      loadSettlementStats(),
     ])
   );
 
@@ -393,17 +356,9 @@ export default async function SectorAnalyticsPage(props: {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">{t('bargainingSummary.settlementsAndGrievancesTitle')}</CardTitle>
+                <CardTitle className="text-lg">{t('bargainingTab.grievancePipelineTitle')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingSummary.totalSettlements')}</span>
-                  <span className="font-semibold">{settlements.total}</span>
-                </div>
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingSummary.settlementValue')}</span>
-                  <span className="font-semibold text-green-600">{formatCurrency(settlements.totalMonetaryValue, locale)}</span>
-                </div>
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
                   <span>{t('bargainingSummary.grievancesResolved')}</span>
                   <span className="font-semibold text-green-600">{grievances.resolved}</span>
@@ -492,6 +447,8 @@ export default async function SectorAnalyticsPage(props: {
 
       {/* ── Organizations Tab ── */}
       {tab === 'organizations' && (
+        <div className="space-y-4">
+        <UsageTelemetryNotice />
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{t('organizationsTab.title')}</CardTitle>
@@ -508,7 +465,6 @@ export default async function SectorAnalyticsPage(props: {
                     <th className="pb-2 font-medium">{t('table.members')}</th>
                     <th className="pb-2 font-medium">{t('table.active')}</th>
                     <th className="pb-2 font-medium">CLC</th>
-                    <th className="pb-2 font-medium">{t('table.logins30d')}</th>
                     <th className="pb-2 font-medium">{t('table.tickets')}</th>
                   </tr>
                 </thead>
@@ -530,7 +486,6 @@ export default async function SectorAnalyticsPage(props: {
                       <td className="py-2">{formatNumber(o.memberCount, locale)}</td>
                       <td className="py-2">{formatNumber(o.activeMemberCount, locale)}</td>
                       <td className="py-2">{o.clcAffiliated ? '✓' : '—'}</td>
-                      <td className="py-2">{o.loginCount}</td>
                       <td className="py-2">{o.ticketCount}</td>
                     </tr>
                   ))}
@@ -539,9 +494,10 @@ export default async function SectorAnalyticsPage(props: {
             </div>
           </CardContent>
         </Card>
+        </div>
       )}
 
-      {/* ── Bargaining & Settlements Tab ── */}
+      {/* ── Bargaining Tab ── */}
       {tab === 'bargaining' && (
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -600,31 +556,6 @@ export default async function SectorAnalyticsPage(props: {
                 <div className="flex justify-between p-2 bg-muted rounded text-sm">
                   <span>{t('bargainingTab.resolvedSettled')}</span>
                   <span className="font-bold text-green-600">{grievances.resolved}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">{t('bargainingTab.settlementSummaryTitle')}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingSummary.totalSettlements')}</span>
-                  <span className="font-bold">{settlements.total}</span>
-                </div>
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingTab.totalMonetaryValue')}</span>
-                  <span className="font-bold text-green-600">{formatCurrency(settlements.totalMonetaryValue, locale)}</span>
-                </div>
-                <div className="flex justify-between p-2 bg-muted rounded text-sm">
-                  <span>{t('bargainingTab.averageSettlement')}</span>
-                  <span className="font-bold">
-                    {formatCurrency(
-                      settlements.total > 0 ? Math.round(settlements.totalMonetaryValue / settlements.total) : 0,
-                      locale,
-                    )}
-                  </span>
                 </div>
               </CardContent>
             </Card>

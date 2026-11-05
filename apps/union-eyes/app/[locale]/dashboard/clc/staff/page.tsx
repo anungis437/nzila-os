@@ -7,9 +7,9 @@ import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Building2, 
-  Users, 
+import {
+  Building2,
+  Users,
   RefreshCw,
   CheckCircle,
   AlertCircle,
@@ -19,7 +19,6 @@ import {
   TrendingUp,
   Calendar,
   Settings,
-  DollarSign
 } from 'lucide-react';
 import Link from 'next/link';
 import { getUserRoleInOrganization } from '@/lib/organization-utils';
@@ -32,7 +31,7 @@ import { logger } from '@/lib/logger';
 
 export const metadata: Metadata = {
   title: 'CLC Staff Dashboard | UnionEyes',
-  description: 'CLC staff operations dashboard - sync, remittances, and operational support',
+  description: 'CLC staff operations dashboard - remittance approvals and sync history',
 };
 
 async function checkCLCStaffAccess(userId: string, orgId: string): Promise<boolean> {
@@ -45,6 +44,22 @@ async function checkCLCStaffAccess(userId: string, orgId: string): Promise<boole
   }
 }
 
+interface SyncActivity {
+  id: string;
+  affiliateCode: string;
+  action: string;
+  syncedAt: string;
+  error: string | null;
+}
+
+interface OperationalMetrics {
+  failedSyncs: number;
+  lastSyncTime: string | null;
+  pendingApprovals: number;
+  overdueRemittances: number;
+  recentActivity: SyncActivity[];
+}
+
 // This is a Model A (national/cross-affiliate) dashboard, not Model B
 // (org-scoped): getCLCOperationalMetrics() below deliberately ignores
 // orgId and returns cross-org aggregates. That is only safe because
@@ -52,7 +67,9 @@ async function checkCLCStaffAccess(userId: string, orgId: string): Promise<boole
 // an ordinary tenant to its own organizationMembers row — proven in
 // lib/auth/__tests__/clc-national-role-boundary.test.ts (PR #752 round 5),
 // not merely assumed from the role name.
-async function getCLCOperationalMetrics(_orgId: string) {
+//
+// null means the figures could not be read. They are not zero: a failed read must not show as "no failed syncs, nothing awaiting review".
+async function getCLCOperationalMetrics(): Promise<OperationalMetrics | null> {
   try {
     // clc_organization_sync_log is SYSTEM_ONLY (nullable organization_id,
     // cross-affiliate sync audit log — see db/rls-storage-authority-manifest.ts).
@@ -62,81 +79,67 @@ async function getCLCOperationalMetrics(_orgId: string) {
     // table may never be read via the ordinary db import regardless of
     // how privileged the caller's role is.
     return await withSystemContext(async (tx) => {
-    // Query sync log for failed syncs in last 24 hours
-    const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const [failedSyncStats] = await tx
-      .select({ count: count() })
-      .from(clcOrganizationSyncLog)
-      .where(
-        and(
-          eq(clcOrganizationSyncLog.action, 'failed'),
-          sql`${clcOrganizationSyncLog.syncedAt} >= ${last24Hours}`
-        )
-      );
+      const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const [failedSyncStats] = await tx
+        .select({ count: count() })
+        .from(clcOrganizationSyncLog)
+        .where(
+          and(
+            eq(clcOrganizationSyncLog.action, 'failed'),
+            sql`${clcOrganizationSyncLog.syncedAt} >= ${last24Hours}`
+          )
+        );
 
-    // Get most recent sync
-    const [mostRecentSync] = await tx
-      .select({
-        syncedAt: clcOrganizationSyncLog.syncedAt,
-        action: clcOrganizationSyncLog.action,
-      })
-      .from(clcOrganizationSyncLog)
-      .orderBy(desc(clcOrganizationSyncLog.syncedAt))
-      .limit(1);
+      const [mostRecentSync] = await tx
+        .select({ syncedAt: clcOrganizationSyncLog.syncedAt })
+        .from(clcOrganizationSyncLog)
+        .orderBy(desc(clcOrganizationSyncLog.syncedAt))
+        .limit(1);
 
-    // Count pending approvals
-    const [pendingApprovalStats] = await tx
-      .select({ count: count() })
-      .from(remittanceApprovals)
-      .where(eq(remittanceApprovals.status, 'pending'));
+      const [pendingApprovalStats] = await tx
+        .select({ count: count() })
+        .from(remittanceApprovals)
+        .where(eq(remittanceApprovals.status, 'pending'));
 
-    // Count overdue remittances (past due date and not paid)
-    const today = new Date().toISOString().split('T')[0];
-    const [overdueStats] = await tx
-      .select({ count: count() })
-      .from(perCapitaRemittances)
-      .where(
-        and(
-          lte(perCapitaRemittances.dueDate, today),
-          sql`${perCapitaRemittances.status} NOT IN ('paid', 'approved')`
-        )
-      );
+      // Past due and not yet approved or paid
+      const today = new Date().toISOString().split('T')[0];
+      const [overdueStats] = await tx
+        .select({ count: count() })
+        .from(perCapitaRemittances)
+        .where(
+          and(
+            lte(perCapitaRemittances.dueDate, today),
+            sql`${perCapitaRemittances.status} NOT IN ('paid', 'approved')`
+          )
+        );
 
-    // Get recent sync activity (last 10 syncs)
-    const recentSyncs = await tx
-      .select({
-        id: clcOrganizationSyncLog.id,
-        affiliateCode: clcOrganizationSyncLog.affiliateCode,
-        action: clcOrganizationSyncLog.action,
-        duration: clcOrganizationSyncLog.duration,
-        syncedAt: clcOrganizationSyncLog.syncedAt,
-        error: clcOrganizationSyncLog.error,
-      })
-      .from(clcOrganizationSyncLog)
-      .orderBy(desc(clcOrganizationSyncLog.syncedAt))
-      .limit(10);
+      const recentSyncs = await tx
+        .select({
+          id: clcOrganizationSyncLog.id,
+          affiliateCode: clcOrganizationSyncLog.affiliateCode,
+          action: clcOrganizationSyncLog.action,
+          syncedAt: clcOrganizationSyncLog.syncedAt,
+          error: clcOrganizationSyncLog.error,
+        })
+        .from(clcOrganizationSyncLog)
+        .orderBy(desc(clcOrganizationSyncLog.syncedAt))
+        .limit(10);
 
       return {
-        pendingSyncs: 0, // This would need a separate queue table to track
-        failedSyncs: failedSyncStats?.count || 0,
-        lastSyncTime: mostRecentSync?.syncedAt || null,
-        pendingApprovals: pendingApprovalStats?.count || 0,
-        overdueRemittances: overdueStats?.count || 0,
-        recentActivity: recentSyncs || [],
+        failedSyncs: Number(failedSyncStats?.count ?? 0),
+        lastSyncTime: mostRecentSync?.syncedAt ?? null,
+        pendingApprovals: Number(pendingApprovalStats?.count ?? 0),
+        overdueRemittances: Number(overdueStats?.count ?? 0),
+        recentActivity: recentSyncs,
       };
     });
   } catch (error) {
     logger.error('Error fetching CLC operational metrics:', error);
-    return {
-      pendingSyncs: 0,
-      failedSyncs: 0,
-      lastSyncTime: null,
-      pendingApprovals: 0,
-      overdueRemittances: 0,
-      recentActivity: [],
-    };
+    return null;
   }
 }
+
+const DASH = '—';
 
 export default async function CLCStaffDashboardPage() {
   const user = await requireUser();
@@ -149,7 +152,7 @@ export default async function CLCStaffDashboardPage() {
   }
 
   const t = await getTranslations('clc.staff');
-  const metrics = await getCLCOperationalMetrics(orgId);
+  const metrics = await getCLCOperationalMetrics();
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -176,27 +179,34 @@ export default async function CLCStaffDashboardPage() {
         </div>
       </div>
 
+      {metrics === null && (
+        <div role="alert" className="flex items-start gap-3 rounded-md border border-red-300 bg-red-50 p-4 text-red-900">
+          <AlertCircle aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" />
+          <div>
+            <p className="font-semibold">The operational figures could not be read</p>
+            <p className="text-sm">Nothing below is a count: a dash means the figure was not read. Reload the page to try again.</p>
+          </div>
+        </div>
+      )}
+
       {/* Operational Status Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t('metrics.pendingSyncs', { defaultValue: 'Pending Syncs' })}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Failed Syncs (24h)</CardTitle>
             <RefreshCw className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.pendingSyncs}</div>
-            <p className="text-xs text-muted-foreground">
-              {metrics.failedSyncs > 0 && (
-                <span className="text-red-600 font-medium">
-                  {metrics.failedSyncs} failed
-                </span>
-              )}
-              {metrics.failedSyncs === 0 && (
-                <span className="text-green-600">All syncs successful</span>
-              )}
-            </p>
+            <div className="text-2xl font-bold">{metrics === null ? DASH : metrics.failedSyncs}</div>
+            {metrics !== null && (
+              <p className="text-xs text-muted-foreground">
+                {metrics.failedSyncs > 0 ? (
+                  <span className="text-red-600 font-medium">Check the recent activity below</span>
+                ) : (
+                  <span className="text-green-600">No failed syncs recorded</span>
+                )}
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -209,11 +219,11 @@ export default async function CLCStaffDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {metrics.lastSyncTime ? new Date(metrics.lastSyncTime).toLocaleDateString() : 'N/A'}
+              {metrics === null || metrics.lastSyncTime === null ? DASH : new Date(metrics.lastSyncTime).toLocaleDateString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {t('metrics.syncStatus', { defaultValue: 'Automated daily sync' })}
-            </p>
+            {metrics !== null && metrics.lastSyncTime === null && (
+              <p className="text-xs text-muted-foreground">No sync has been recorded</p>
+            )}
           </CardContent>
         </Card>
 
@@ -225,7 +235,7 @@ export default async function CLCStaffDashboardPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.pendingApprovals}</div>
+            <div className="text-2xl font-bold">{metrics === null ? DASH : metrics.pendingApprovals}</div>
             <p className="text-xs text-muted-foreground">
               {t('metrics.remittancesAwaitingReview', { defaultValue: 'Remittances awaiting review' })}
             </p>
@@ -240,132 +250,16 @@ export default async function CLCStaffDashboardPage() {
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.overdueRemittances}</div>
-            <p className="text-xs text-muted-foreground">
-              {metrics.overdueRemittances > 0 ? (
-                <span className="text-orange-600">{t('metrics.requiresFollowUp', { defaultValue: 'Requires follow-up' })}</span>
-              ) : (
-                <span className="text-green-600">{t('metrics.allOnTrack', { defaultValue: 'All on track' })}</span>
-              )}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Staff Operations */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Affiliate Sync Operations */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <RefreshCw className="h-5 w-5" />
-              {t('sync.title', { defaultValue: 'Affiliate Synchronization' })}
-            </CardTitle>
-            <CardDescription>
-              {t('sync.description', { defaultValue: 'Manage data sync between CLC and affiliate systems' })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <div className="font-medium">{t('sync.manualSync', { defaultValue: 'Manual Sync' })}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {t('sync.manualSyncDesc', { defaultValue: 'Trigger immediate affiliate data sync' })}
-                  </div>
-                </div>
-                <Button size="sm">
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  {t('sync.syncNow', { defaultValue: 'Sync Now' })}
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <div className="font-medium">{t('sync.syncLogs', { defaultValue: 'View Sync Logs' })}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {t('sync.syncLogsDesc', { defaultValue: 'Review sync history and errors' })}
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/dashboard/admin/clc-sync-logs">
-                    {t('sync.viewLogs', { defaultValue: 'View Logs' })}
-                  </Link>
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <div className="font-medium">{t('sync.syncSettings', { defaultValue: 'Sync Settings' })}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {t('sync.syncSettingsDesc', { defaultValue: 'Configure sync schedules and mappings' })}
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/dashboard/admin/settings/clc-sync">
-                    {t('sync.configure', { defaultValue: 'Configure' })}
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Remittance Processing */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
-              {t('remittances.title', { defaultValue: 'Remittance Processing' })}
-            </CardTitle>
-            <CardDescription>
-              {t('remittances.description', { defaultValue: 'Review and process per-capita remittances' })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <div className="font-medium">{t('remittances.reviewQueue', { defaultValue: 'Review Queue' })}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {metrics.pendingApprovals} {t('remittances.pending', { defaultValue: 'pending review' })}
-                  </div>
-                </div>
-                <Button size="sm" asChild>
-                  <Link href="/dashboard/admin/clc-remittances">
-                    {t('remittances.review', { defaultValue: 'Review' })}
-                  </Link>
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <div className="font-medium">{t('remittances.overdueFollowUp', { defaultValue: 'Overdue Follow-up' })}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {metrics.overdueRemittances} {t('remittances.overdueItems', { defaultValue: 'overdue items' })}
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/dashboard/admin/clc-remittances?filter=overdue">
-                    {t('remittances.followUp', { defaultValue: 'Follow Up' })}
-                  </Link>
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <div className="font-medium">{t('remittances.bulkImport', { defaultValue: 'Bulk Import' })}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {t('remittances.bulkImportDesc', { defaultValue: 'Import remittance data from CSV' })}
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/dashboard/admin/clc-remittances/import">
-                    {t('remittances.import', { defaultValue: 'Import' })}
-                  </Link>
-                </Button>
-              </div>
-            </div>
+            <div className="text-2xl font-bold">{metrics === null ? DASH : metrics.overdueRemittances}</div>
+            {metrics !== null && (
+              <p className="text-xs text-muted-foreground">
+                {metrics.overdueRemittances > 0 ? (
+                  <span className="text-orange-600">{t('metrics.requiresFollowUp', { defaultValue: 'Requires follow-up' })}</span>
+                ) : (
+                  <span className="text-green-600">{t('metrics.allOnTrack', { defaultValue: 'All on track' })}</span>
+                )}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -377,51 +271,11 @@ export default async function CLCStaffDashboardPage() {
             <CheckCircle className="h-6 w-6" />
             {t('workflow.title', { defaultValue: 'Approval Workflow' })}
           </h2>
-          <p className="text-muted-foreground mt-1">
-            {t('workflow.description', { defaultValue: 'Review and approve pending remittances' })}
-          </p>
         </div>
-        <CLCApprovalWorkflow
-          {...{
-            organizationId: orgId,
-            onApprove: async (id: string) => {
-              'use server';
-              const { revalidatePath } = await import('next/cache');
-              const { logger: log } = await import('@/lib/logger');
-              const { z } = await import('zod');
-              const safeId = z.string().uuid().parse(id);
-              try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/api/v2/clc/remittances/${safeId}/approve`, { method: 'POST' });
-                if (!res.ok) throw new Error(`Approve failed: ${res.status}`);
-                log.info('Approved remittance', { id: safeId });
-              } catch (error) {
-                log.error('Failed to approve remittance', { id: safeId, error });
-                throw error;
-              }
-              revalidatePath('/dashboard/clc/staff');
-            },
-            onReject: async (id: string) => {
-              'use server';
-              const { revalidatePath } = await import('next/cache');
-              const { logger: log } = await import('@/lib/logger');
-              const { z } = await import('zod');
-              const safeId = z.string().uuid().parse(id);
-              try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/api/v2/clc/remittances/${safeId}/reject`, { method: 'POST' });
-                if (!res.ok) throw new Error(`Reject failed: ${res.status}`);
-                log.info('Rejected remittance', { id: safeId });
-              } catch (error) {
-                log.error('Failed to reject remittance', { id: safeId, error });
-                throw error;
-              }
-              revalidatePath('/dashboard/clc/staff');
-            },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any}
-        />
+        <CLCApprovalWorkflow />
       </div>
 
-      {/* Recent Activity */}
+      {/* Sync history */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -429,30 +283,30 @@ export default async function CLCStaffDashboardPage() {
             {t('activity.title', { defaultValue: 'Recent Activity' })}
           </CardTitle>
           <CardDescription>
-            {t('activity.description', { defaultValue: 'Latest sync operations and remittance processing' })}
+            {t('activity.description', { defaultValue: 'Latest affiliate sync operations' })}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {metrics.recentActivity.length === 0 ? (
+          {metrics === null ? (
+            <p className="text-center py-8 text-muted-foreground">{DASH}</p>
+          ) : metrics.recentActivity.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>{t('activity.noActivity', { defaultValue: 'No recent activity' })}</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {(metrics.recentActivity as any[]).map((activity: { description: string; timestamp: string; status: string }, index: number) => (
-                <div key={index} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-accent transition-colors">
+              {metrics.recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-center gap-3 p-3 border rounded-lg">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Database className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium">{activity.description}</div>
-                    <div className="text-sm text-muted-foreground">{activity.timestamp}</div>
+                    <div className="font-medium">{activity.affiliateCode}</div>
+                    <div className="text-sm text-muted-foreground">{new Date(activity.syncedAt).toLocaleString()}</div>
+                    {activity.error !== null && <div className="text-sm text-red-700">{activity.error}</div>}
                   </div>
-                  <Badge variant={activity.status === 'success' ? 'default' : 'destructive'}>
-                    {activity.status}
-                  </Badge>
+                  <Badge variant={activity.action === 'failed' ? 'destructive' : 'default'}>{activity.action}</Badge>
                 </div>
               ))}
             </div>
@@ -483,27 +337,9 @@ export default async function CLCStaffDashboardPage() {
               </Link>
             </Button>
             <Button variant="outline" className="justify-start" asChild>
-              <Link href="/dashboard/admin/clc-analytics">
-                <TrendingUp className="mr-2 h-4 w-4" />
-                {t('quickLinks.analytics', { defaultValue: 'View Analytics' })}
-              </Link>
-            </Button>
-            <Button variant="outline" className="justify-start" asChild>
               <Link href="/dashboard/admin/organizations">
                 <Users className="mr-2 h-4 w-4" />
                 {t('quickLinks.organizations', { defaultValue: 'Organization Admin' })}
-              </Link>
-            </Button>
-            <Button variant="outline" className="justify-start" asChild>
-              <Link href="/dashboard/admin/settings">
-                <Settings className="mr-2 h-4 w-4" />
-                {t('quickLinks.settings', { defaultValue: 'System Settings' })}
-              </Link>
-            </Button>
-            <Button variant="outline" className="justify-start" asChild>
-              <Link href="/dashboard/cross-union-analytics">
-                <Database className="mr-2 h-4 w-4" />
-                {t('quickLinks.crossUnion', { defaultValue: 'Cross-Union Data' })}
               </Link>
             </Button>
           </div>

@@ -1,256 +1,152 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
-  Bell,
-  CheckCircle,
   AlertTriangle,
-  Clock,
-  FileText,
-  Scale,
-  Users,
-  Calendar,
-  MessageSquare,
+  Bell,
   CheckCheck,
+  CheckCircle,
   Filter,
-  Trash2,
-  Settings,
   Info,
-  TrendingUp,
   Loader2,
   RefreshCw,
+  Settings,
+  Trash2,
 } from 'lucide-react';
+import { ApiShapeError, readApiError } from '@/lib/client/api-envelope';
+import { humanize } from '@/lib/client/row-fields';
+import { inboxFrom, type Inbox } from '@/lib/notifications/inbox-record';
+import { announceInboxChanged } from '@/lib/notifications/unread-count';
 
-type NotificationType =
-  | 'case_update'
-  | 'deadline'
-  | 'grievance'
-  | 'vote'
-  | 'meeting'
-  | 'system'
-  | 'message'
-  | 'achievement'
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'error';
+// The values of the type column that every writer of the inbox uses. A row of any other type is shown as the text it holds, never as one of these.
+const KNOWN_TYPES = ['info', 'success', 'warning', 'error'] as const;
+type KnownType = (typeof KNOWN_TYPES)[number];
+const isKnownType = (type: string): type is KnownType => (KNOWN_TYPES as readonly string[]).includes(type);
 
-type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
+const TYPE_STYLE: Record<KnownType, { icon: ReactElement; color: string }> = {
+  info: { icon: <Info className="w-5 h-5" />, color: 'bg-blue-100 text-blue-700' },
+  success: { icon: <CheckCircle className="w-5 h-5" />, color: 'bg-green-100 text-green-700' },
+  warning: { icon: <AlertTriangle className="w-5 h-5" />, color: 'bg-yellow-100 text-yellow-700' },
+  error: { icon: <AlertTriangle className="w-5 h-5" />, color: 'bg-red-100 text-red-700' },
+};
+const OTHER_STYLE = { icon: <Bell className="w-5 h-5" />, color: 'bg-gray-100 text-gray-700' };
 
-interface Notification {
-  id: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  createdAt: string;
-  read: boolean;
-  readAt: string | null;
-  actionUrl: string | null;
-  actionLabel: string | null;
-  data: Record<string, unknown> | null;
-  expiresAt: string | null;
-}
+/** What the user is told about a failure: the server's own message when it gave one, else the screen's wording. */
+const reason = (err: unknown, fallback: string) =>
+  err instanceof Error && !(err instanceof ApiShapeError) && err.message ? err.message : fallback;
 
-interface ApiResponse {
-  notifications: Notification[];
-  unreadCount: number;
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
+/** The inbox as read, with the filter it was read for. */
+type Loaded = Inbox & { view: string };
 
 export default function NotificationsConsole() {
   const t = useTranslations();
   const params = useParams<{ locale?: string }>();
   const localePrefix = params?.locale ? `/${params.locale}` : '';
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [showUnreadOnly, setShowUnreadOnly] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [typeFilter, setTypeFilter] = useState<'all' | KnownType>('all');
+  const [unreadOnly, setUnreadOnly] = useState(false);
+  const [inbox, setInbox] = useState<Loaded | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const notificationTypeConfig: Record<
-    string,
-    { icon: React.ReactElement; color: string; label: string }
-  > = {
-    case_update: {
-      icon: <FileText className="w-5 h-5" />,
-      color: 'bg-blue-100 text-blue-700',
-      label: t('notifications.types.caseUpdate'),
-    },
-    deadline: {
-      icon: <Clock className="w-5 h-5" />,
-      color: 'bg-red-100 text-red-700',
-      label: t('notifications.types.deadline'),
-    },
-    grievance: {
-      icon: <Scale className="w-5 h-5" />,
-      color: 'bg-purple-100 text-purple-700',
-      label: t('notifications.types.grievance'),
-    },
-    vote: {
-      icon: <CheckCircle className="w-5 h-5" />,
-      color: 'bg-green-100 text-green-700',
-      label: t('notifications.types.vote'),
-    },
-    meeting: {
-      icon: <Calendar className="w-5 h-5" />,
-      color: 'bg-orange-100 text-orange-700',
-      label: t('notifications.types.meeting'),
-    },
-    system: {
-      icon: <Settings className="w-5 h-5" />,
-      color: 'bg-gray-100 text-gray-700',
-      label: t('notifications.types.system'),
-    },
-    message: {
-      icon: <MessageSquare className="w-5 h-5" />,
-      color: 'bg-indigo-100 text-indigo-700',
-      label: t('notifications.types.message'),
-    },
-    achievement: {
-      icon: <TrendingUp className="w-5 h-5" />,
-      color: 'bg-emerald-100 text-emerald-700',
-      label: t('notifications.types.achievement'),
-    },
-    info: {
-      icon: <Info className="w-5 h-5" />,
-      color: 'bg-blue-100 text-blue-700',
-      label: 'Info',
-    },
-    success: {
-      icon: <CheckCircle className="w-5 h-5" />,
-      color: 'bg-green-100 text-green-700',
-      label: 'Success',
-    },
-    warning: {
-      icon: <AlertTriangle className="w-5 h-5" />,
-      color: 'bg-yellow-100 text-yellow-700',
-      label: 'Warning',
-    },
-    error: {
-      icon: <AlertTriangle className="w-5 h-5" />,
-      color: 'bg-red-100 text-red-700',
-      label: 'Error',
-    },
-  };
-
-  const priorityConfig: Record<
-    NotificationPriority,
-    { color: string; label: string }
-  > = {
-    low: { color: 'bg-gray-100 text-gray-700', label: t('notifications.priority.low') },
-    medium: { color: 'bg-blue-100 text-blue-700', label: t('notifications.priority.medium') },
-    high: { color: 'bg-orange-100 text-orange-700', label: t('notifications.priority.high') },
-    urgent: { color: 'bg-red-100 text-red-700', label: t('notifications.priority.urgent') },
-  };
-
-  const categories = [
-    { id: 'all', label: t('common.all'), icon: <Bell className="w-4 h-4" /> },
-    {
-      id: 'case_update',
-      label: t('notifications.categories.cases'),
-      icon: <FileText className="w-4 h-4" />,
-    },
-    {
-      id: 'grievance',
-      label: t('notifications.categories.grievances'),
-      icon: <Scale className="w-4 h-4" />,
-    },
-    {
-      id: 'deadline',
-      label: t('notifications.categories.deadlines'),
-      icon: <Clock className="w-4 h-4" />,
-    },
-    { id: 'vote', label: t('notifications.categories.votes'), icon: <CheckCircle className="w-4 h-4" /> },
-    {
-      id: 'meeting',
-      label: t('notifications.categories.meetings'),
-      icon: <Calendar className="w-4 h-4" />,
-    },
-  ];
-
-  const fetchNotifications = useCallback(async () => {
-    try {
-      setError(null);
-      const params = new URLSearchParams();
-      if (showUnreadOnly) params.set('unreadOnly', 'true');
-      if (selectedCategory !== 'all') params.set('type', selectedCategory);
-      params.set('limit', '100');
-
-      const res = await fetch(`/api/notifications?${params.toString()}`);
-      if (!res.ok) throw new Error('Failed to fetch notifications');
-      const json = await res.json();
-      // withApi wraps responses in { success, data: { ... } }
-      const data: ApiResponse = json.data ?? json;
-      setNotifications(data.notifications ?? []);
-      setUnreadCount(data.unreadCount ?? 0);
-    } catch {
-      setError('Unable to load notifications');
-    } finally {
-      setLoading(false);
-    }
-  }, [showUnreadOnly, selectedCategory]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  // The clock that "x minutes ago" is counted from; it advances each minute so the wording does not go stale on a page that stays open.
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    const timer = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const filteredNotifications = notifications;
+  const view = `${typeFilter}|${unreadOnly}`;
 
-  const markAsRead = useCallback(async (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true, readAt: new Date().toISOString() } : n))
+  const read = useCallback(async (): Promise<Loaded> => {
+    const query = new URLSearchParams({ limit: '100' });
+    if (unreadOnly) query.set('unreadOnly', 'true');
+    if (typeFilter !== 'all') query.set('type', typeFilter);
+    const response = await fetch(`/api/notifications?${query.toString()}`);
+    if (!response.ok) throw new Error(await readApiError(response, ''));
+    return { ...inboxFrom(await response.json()), view: `${typeFilter}|${unreadOnly}` };
+  }, [typeFilter, unreadOnly]);
+
+  useEffect(() => {
+    let current = true;
+    read().then(
+      (next) => {
+        if (!current) return;
+        setInbox(next);
+        setLoadError(null);
+        setLoading(false);
+      },
+      (err: unknown) => {
+        if (!current) return;
+        setLoadError(reason(err, t('notifications.loadFailed')));
+        setLoading(false);
+      },
     );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
-    try {
-      await fetch(`/api/notifications/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ read: true }),
-      });
-    } catch {
-      // Silently handle — optimistic update already applied
-    }
-  }, []);
+    return () => {
+      current = false;
+    };
+  }, [read, t]);
 
-  const markAllAsRead = useCallback(async () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true, readAt: new Date().toISOString() })));
-    setUnreadCount(0);
+  // Counts and rows are the server's: after anything changes, the inbox is read again instead of patched up locally.
+  const reload = useCallback(async () => {
     try {
-      await fetch('/api/notifications/mark-all-read', { method: 'POST' });
-    } catch {
-      // Silently handle — optimistic update already applied
+      setInbox(await read());
+      setLoadError(null);
+    } catch (err) {
+      setLoadError(reason(err, t('notifications.loadFailed')));
     }
-  }, []);
+  }, [read, t]);
 
-  const deleteNotification = useCallback(async (id: string) => {
-    const wasUnread = notifications.find((n) => n.id === id && !n.read);
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-    if (wasUnread) setUnreadCount((prev) => Math.max(0, prev - 1));
+  const retry = () => {
+    setLoading(true);
+    setLoadError(null);
+    void reload().finally(() => setLoading(false));
+  };
+
+  const act = async (call: () => Promise<Response>, fallback: string) => {
+    setBusy(true);
+    setActionError(null);
     try {
-      await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
-    } catch {
-      // Silently handle — optimistic update already applied
+      const response = await call();
+      if (!response.ok) throw new Error(await readApiError(response, ''));
+      // The route did it: the header's unread count is read again, whether or not this screen's own re-read succeeds.
+      announceInboxChanged();
+      await reload();
+    } catch (err) {
+      setActionError(reason(err, fallback));
+    } finally {
+      setBusy(false);
     }
-  }, [notifications]);
+  };
+
+  const markAsRead = (id: string) =>
+    act(
+      () =>
+        fetch(`/api/notifications/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ read: true }),
+        }),
+      t('notifications.markReadFailed'),
+    );
+
+  const markAllAsRead = () => act(() => fetch('/api/notifications/mark-all-read', { method: 'POST' }), t('notifications.markAllReadFailed'));
+
+  const deleteNotification = (id: string) =>
+    act(() => fetch(`/api/notifications/${id}`, { method: 'DELETE' }), t('notifications.deleteFailed'));
 
   const getTimeAgo = (dateStr: string) => {
-    const now = new Date();
     const time = new Date(dateStr);
-    const diffInMinutes = Math.floor(
-      (now.getTime() - time.getTime()) / (1000 * 60)
-    );
+    if (Number.isNaN(time.getTime())) return '—';
+    const diffInMinutes = Math.floor((now - time.getTime()) / (1000 * 60));
 
     if (diffInMinutes < 1) return t('notifications.justNow');
     if (diffInMinutes < 60) return t('notifications.minutesAgo', { minutes: diffInMinutes });
@@ -258,8 +154,17 @@ export default function NotificationsConsole() {
     return t('notifications.daysAgo', { days: Math.floor(diffInMinutes / 1440) });
   };
 
-  const getTypeConfig = (type: string) =>
-    notificationTypeConfig[type] || notificationTypeConfig.info;
+  const typeStyle = (type: string) => (isKnownType(type) ? TYPE_STYLE[type] : OTHER_STYLE);
+  const typeLabel = (type: string) => (isKnownType(type) ? t(`notifications.types.${type}`) : humanize(type));
+
+  const filters: { id: 'all' | KnownType; label: string; icon: ReactElement }[] = [
+    { id: 'all', label: t('common.all'), icon: <Bell className="w-4 h-4" /> },
+    ...KNOWN_TYPES.map((type) => ({ id: type, label: t(`notifications.types.${type}`), icon: TYPE_STYLE[type].icon })),
+  ];
+  const filtered = typeFilter !== 'all' || unreadOnly;
+  // Rows and counts that belong to the previous filter stay on screen, dimmed and inert, until the answer for the chosen one arrives.
+  const stale = inbox !== null && inbox.view !== view;
+  const locked = busy || stale;
 
   if (loading) {
     return (
@@ -267,14 +172,14 @@ export default function NotificationsConsole() {
         <div className="max-w-5xl mx-auto flex items-center justify-center min-h-100">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            <p className="text-gray-600">{t('common.loading')}...</p>
+            <p className="text-gray-600">{t('common.loading')}</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (loadError !== null || inbox === null) {
     return (
       <div className="p-8">
         <div className="max-w-5xl mx-auto">
@@ -282,9 +187,9 @@ export default function NotificationsConsole() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
               <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">{error}</h2>
+            <h2 role="alert" className="text-xl font-semibold text-gray-900 mb-2">{loadError ?? t('notifications.loadFailed')}</h2>
             <button
-              onClick={() => { setLoading(true); fetchNotifications(); }}
+              onClick={retry}
               className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
@@ -311,10 +216,11 @@ export default function NotificationsConsole() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {unreadCount > 0 && (
+              {inbox.unreadCount > 0 && (
                 <button
-                  onClick={markAllAsRead}
-                  className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200 transition-colors"
+                  onClick={() => void markAllAsRead()}
+                  disabled={locked}
+                  className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200 transition-colors disabled:opacity-50"
                 >
                   <CheckCheck className="w-4 h-4" />
                   {t('notifications.markAllRead')}
@@ -323,15 +229,14 @@ export default function NotificationsConsole() {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          {/* Stats: both figures are the route's own counts */}
+          <div className={`grid grid-cols-2 gap-4 mb-6 ${stale ? 'opacity-50' : ''}`} aria-busy={stale}>
             <Card className="p-4 bg-white/80 backdrop-blur-sm border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">{t('common.total')}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {notifications.length}
-                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{inbox.total}</p>
+                  {filtered && <p className="text-xs text-gray-500">{t('notifications.matching')}</p>}
                 </div>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Bell className="w-6 h-6 text-blue-600" />
@@ -343,83 +248,30 @@ export default function NotificationsConsole() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">{t('notifications.unread')}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {unreadCount}
-                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{inbox.unreadCount}</p>
                 </div>
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                   <AlertTriangle className="w-6 h-6 text-orange-600" />
                 </div>
               </div>
             </Card>
-
-            <Card className="p-4 bg-white/80 backdrop-blur-sm border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">{t('notifications.urgent')}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {
-                      notifications.filter((n) => 
-                        (n.data as Record<string, unknown>)?.priority === 'urgent'
-                      ).length
-                    }
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-red-600" />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-white/80 backdrop-blur-sm border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">{t('notifications.today')}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {
-                      notifications.filter(
-                        (n) =>
-                          new Date(n.createdAt).toDateString() ===
-                          new Date().toDateString()
-                      ).length
-                    }
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-            </Card>
           </div>
 
-          {/* Category Filters */}
+          {/* Type Filters */}
           <div className="flex items-center gap-3 mb-4 overflow-x-auto pb-2">
-            {categories.map((category) => (
+            {filters.map((filter) => (
               <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
+                key={filter.id}
+                onClick={() => setTypeFilter(filter.id)}
+                aria-pressed={typeFilter === filter.id}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                  selectedCategory === category.id
+                  typeFilter === filter.id
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                     : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
-                {category.icon}
-                {category.label}
-                {category.id !== 'all' && (
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs ${
-                      selectedCategory === category.id
-                        ? 'bg-white/20'
-                        : 'bg-gray-100'
-                    }`}
-                  >
-                    {
-                      notifications.filter((n) => n.type === category.id)
-                        .length
-                    }
-                  </span>
-                )}
+                {filter.icon}
+                {filter.label}
               </button>
             ))}
           </div>
@@ -427,9 +279,10 @@ export default function NotificationsConsole() {
           {/* Unread Only Toggle */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowUnreadOnly(!showUnreadOnly)}
+              onClick={() => setUnreadOnly(!unreadOnly)}
+              aria-pressed={unreadOnly}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                showUnreadOnly
+                unreadOnly
                   ? 'bg-orange-100 text-orange-700 border border-orange-200'
                   : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
               }`}
@@ -440,10 +293,16 @@ export default function NotificationsConsole() {
           </div>
         </div>
 
+        {actionError !== null && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{actionError}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Notifications List */}
-        <div className="space-y-3">
+        <div className={`space-y-3 ${stale ? 'opacity-50' : ''}`} aria-busy={stale}>
           <AnimatePresence mode="popLayout">
-            {filteredNotifications.length === 0 ? (
+            {inbox.notifications.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -454,18 +313,15 @@ export default function NotificationsConsole() {
                     <CheckCircle className="w-8 h-8 text-green-600" />
                   </div>
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                    {t('notifications.allCaughtUp')}
+                    {!filtered ? t('notifications.noNotifications') : typeFilter === 'all' ? t('notifications.allCaughtUp') : t('notifications.noMatch')}
                   </h2>
-                  <p className="text-gray-600">
-                    {showUnreadOnly
-                      ? t('notifications.noUnread')
-                      : t('notifications.noMatch')}
-                  </p>
-                  {(selectedCategory !== 'all' || showUnreadOnly) && (
+                  {!filtered && <p className="text-gray-600">{t('notifications.youreAllCaughtUp')}</p>}
+                  {filtered && typeFilter === 'all' && <p className="text-gray-600">{t('notifications.noUnread')}</p>}
+                  {filtered && (
                     <button
                       onClick={() => {
-                        setSelectedCategory('all');
-                        setShowUnreadOnly(false);
+                        setTypeFilter('all');
+                        setUnreadOnly(false);
                       }}
                       className="mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm"
                     >
@@ -475,7 +331,7 @@ export default function NotificationsConsole() {
                 </Card>
               </motion.div>
             ) : (
-              filteredNotifications.map((notification) => (
+              inbox.notifications.map((notification) => (
                 <motion.div
                   key={notification.id}
                   layout
@@ -485,21 +341,21 @@ export default function NotificationsConsole() {
                   transition={{ duration: 0.2 }}
                 >
                   <Card
-                    className={`p-5 bg-white/80 backdrop-blur-sm border-gray-200 hover:shadow-lg transition-all cursor-pointer ${
+                    className={`p-5 bg-white/80 backdrop-blur-sm border-gray-200 hover:shadow-lg transition-all ${
                       !notification.read
-                        ? 'border-l-4 border-l-blue-600'
+                        ? 'cursor-pointer border-l-4 border-l-blue-600'
                         : 'border-l-4 border-l-transparent'
                     }`}
-                    onClick={() => markAsRead(notification.id)}
+                    onClick={notification.read || locked ? undefined : () => void markAsRead(notification.id)}
                   >
                     <div className="flex gap-4">
                       {/* Icon */}
                       <div
                         className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${
-                          getTypeConfig(notification.type).color
+                          typeStyle(notification.type).color
                         }`}
                       >
-                        {getTypeConfig(notification.type).icon}
+                        {typeStyle(notification.type).icon}
                       </div>
 
                       {/* Content */}
@@ -530,56 +386,7 @@ export default function NotificationsConsole() {
                               {notification.message}
                             </p>
                           </div>
-
-                          {/* Priority Badge */}
-                          {notification.data && (
-                            (notification.data as Record<string, unknown>).priority === 'high' ||
-                            (notification.data as Record<string, unknown>).priority === 'urgent'
-                          ) && (
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                                priorityConfig[
-                                  ((notification.data as Record<string, unknown>).priority as NotificationPriority) || 'low'
-                                ]?.color || 'bg-gray-100 text-gray-700'
-                              }`}
-                            >
-                              {priorityConfig[
-                                ((notification.data as Record<string, unknown>).priority as NotificationPriority) || 'low'
-                              ]?.label || ''}
-                            </span>
-                          )}
                         </div>
-
-                        {/* Metadata */}
-                        {notification.data && (
-                          <div className="flex flex-wrap gap-3 mb-3">
-                            {(notification.data as Record<string, unknown>).caseNumber ? (
-                              <div className="flex items-center gap-1 text-xs text-gray-600">
-                                <FileText className="w-3 h-3" />
-                                {String((notification.data as Record<string, unknown>).caseNumber)}
-                              </div>
-                            ) : null}
-                            {(notification.data as Record<string, unknown>).daysRemaining !==
-                              undefined && (
-                              <div
-                                className={`flex items-center gap-1 text-xs ${
-                                  ((notification.data as Record<string, unknown>).daysRemaining as number) <= 3
-                                    ? 'text-red-600 font-medium'
-                                    : 'text-gray-600'
-                                }`}
-                              >
-                                <Clock className="w-3 h-3" />
-                                {t('notifications.daysLeft', { days: (notification.data as Record<string, unknown>).daysRemaining as number })}
-                              </div>
-                            )}
-                            {(notification.data as Record<string, unknown>).memberName ? (
-                              <div className="flex items-center gap-1 text-xs text-gray-600">
-                                <Users className="w-3 h-3" />
-                                {String((notification.data as Record<string, unknown>).memberName)}
-                              </div>
-                            ) : null}
-                          </div>
-                        )}
 
                         {/* Footer */}
                         <div className="flex items-center justify-between gap-3">
@@ -589,10 +396,10 @@ export default function NotificationsConsole() {
                             </span>
                             <span
                               className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                getTypeConfig(notification.type).color
+                                typeStyle(notification.type).color
                               }`}
                             >
-                              {getTypeConfig(notification.type).label}
+                              {typeLabel(notification.type)}
                             </span>
                           </div>
 
@@ -606,16 +413,18 @@ export default function NotificationsConsole() {
                                 }}
                                 className="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
                               >
-                                {notification.actionLabel || 'View'}
+                                {notification.actionLabel || t('common.view')}
                               </Link>
                             )}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                deleteNotification(notification.id);
+                                void deleteNotification(notification.id);
                               }}
-                              className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                              title="Delete notification"
+                              disabled={locked}
+                              className="p-1 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                              title={t('notifications.deleteNotification')}
+                              aria-label={t('notifications.deleteNotification')}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -630,41 +439,21 @@ export default function NotificationsConsole() {
           </AnimatePresence>
         </div>
 
-        {/* Help Section */}
-        <Card className="mt-8 p-6 bg-blue-50/80 backdrop-blur-sm border-blue-200">
-          <div className="flex gap-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-              <Info className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Notification Settings
-              </h3>
-              <ul className="space-y-1 text-sm text-gray-700">
-                <li>
-                  • <strong>Urgent</strong> notifications require immediate
-                  action (deadlines, critical updates)
-                </li>
-                <li>
-                  • <strong>High priority</strong> notifications should be
-                  reviewed within 24 hours
-                </li>
-                <li>
-                  • Click any notification to mark as read and view details
-                </li>
-                <li>
-                  • Configure notification preferences in{' '}
-                  <Link
-                    href={`${localePrefix}/dashboard/settings`}
-                    className="text-blue-600 hover:underline"
-                  >
-                    Settings
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </Card>
+        {inbox.notifications.length < inbox.total && (
+          <p className="mt-4 text-sm text-gray-500">
+            {t('notifications.showingNewest', { shown: inbox.notifications.length, total: inbox.total })}
+          </p>
+        )}
+
+        <div className="mt-8">
+          <Link
+            href={`${localePrefix}/dashboard/settings/communications`}
+            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+          >
+            <Settings className="w-4 h-4" />
+            {t('notifications.preferencesLink')}
+          </Link>
+        </div>
       </div>
     </div>
   );

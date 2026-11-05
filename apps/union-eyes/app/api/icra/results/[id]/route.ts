@@ -12,13 +12,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
 import type { OrganizationalContinuityProfile } from '@/lib/icra/types';
-import { rateLimit } from '@/lib/rate-limit';
+import { checkRateLimit } from '@/lib/rate-limiter';
+import { clientAddress } from '@/lib/public-intake/guard';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
-  extractCapabilityToken,
-  checkCapability,
   capabilityDenialStatus,
 } from '@/lib/icra/assessment-capability';
+import { authorizeAssessmentAccess } from '@/lib/icra/assessment-access';
 import { logger } from '@/lib/logger';
 
 interface Params {
@@ -34,9 +34,14 @@ export async function GET(req: NextRequest, { params }: Params): Promise<NextRes
     return NextResponse.json({ error: 'Invalid assessment ID.' }, { status: 400 });
   }
 
-  const rl = rateLimit(req, { maxRequests: 20, windowSeconds: 60 });
-  if (!rl.success) {
-    return NextResponse.json({ error: 'Rate limit exceeded.' }, { status: 429 });
+  const rl = await checkRateLimit(`icra-results:${clientAddress(req)}`, {
+    limit: 20,
+    window: 60,
+    identifier: 'icra-results',
+    failOpen: process.env.NODE_ENV !== 'production',
+  });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: rl.error ? 'Temporarily unavailable.' : 'Rate limit exceeded.' }, { status: rl.error ? 503 : 429 });
   }
 
   try {
@@ -45,13 +50,15 @@ export async function GET(req: NextRequest, { params }: Params): Promise<NextRes
         .select({
           capabilityTokenHash: icraAssessments.capabilityTokenHash,
           capabilityTokenExpiresAt: icraAssessments.capabilityTokenExpiresAt,
+          claimedAt: icraAssessments.claimedAt,
+          claimedOrgId: icraAssessments.claimedOrgId,
+          claimedByUserId: icraAssessments.claimedByUserId,
         })
         .from(icraAssessments)
         .where(eq(icraAssessments.id, id))
         .limit(1);
 
-      const presented = extractCapabilityToken(req, id);
-      const capCheck = checkCapability(presented, assessment);
+      const capCheck = await authorizeAssessmentAccess(req, id, assessment);
       if (!capCheck.ok) {
         return NextResponse.json(
           { error: 'Not authorized to view these results' },

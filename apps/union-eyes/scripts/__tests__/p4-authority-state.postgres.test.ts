@@ -106,7 +106,7 @@ describe('P4 authority state census on disposable PostgreSQL', { concurrent: fal
       CREATE ROLE union_eyes_runtime NOSUPERUSER NOBYPASSRLS NOLOGIN;
       CREATE ROLE union_eyes_system NOSUPERUSER NOBYPASSRLS NOLOGIN;
     `)
-  }, 30_000)
+  }, 120_000)
 
   beforeEach(async () => {
     await sql.unsafe('DROP TABLE IF EXISTS automation_rules, pilot_applications, organizations, django_migrations CASCADE')

@@ -14,6 +14,7 @@ import {
   members
 } from '../db/schema';
 import { eq, and, lt, sql } from 'drizzle-orm';
+import { inOrganization } from './tenant-scope';
 import { queueNotification } from '../services/notification-service';
 import { logger } from '@/lib/logger';
 import { JobCancellationService } from '../services/job-cancellation-service';
@@ -159,7 +160,7 @@ export async function processArrearsManagement(params: {
               totalOwed: currentTotal.toString(),
               notes: `Multiple overdue transactions, ${daysOverdue} days overdue. Last notification: ${scanDate.toISOString()}`,
             })
-            .where(eq(arrears.id, existingArrears[0].id));
+            .where(and(eq(arrears.id, existingArrears[0].id), inOrganization(arrears.tenantId, tenantId)));
 
           logger.info(`Updated arrears record for member ${record.memberId}`);
         }
@@ -188,7 +189,7 @@ export async function processArrearsManagement(params: {
         await db
           .update(duesTransactions)
           .set({ status: 'overdue', updatedAt: scanDate.toISOString() })
-          .where(eq(duesTransactions.id, record.transactionId));
+          .where(and(eq(duesTransactions.id, record.transactionId), eq(duesTransactions.organizationId, tenantId)));
 
       } catch (recordError) {
         logger.error(`Error processing overdue transaction ${record.transactionId}`, { error: recordError });

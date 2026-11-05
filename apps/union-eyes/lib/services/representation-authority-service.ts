@@ -1,11 +1,11 @@
 import { and, eq } from 'drizzle-orm';
-import { db } from '@/db/db';
 import {
   representationAuthorities,
   type NewRepresentationAuthority,
   type RepresentationAuthority,
 } from '@/db/schema/representation-authority-schema';
-import { auditLog, AuditSeverity } from '@/lib/audit-logger';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const RepresentationAuthorityAuditEvent = {
   AUTHORITY_CREATED: 'representation_authority.created',
@@ -80,14 +80,17 @@ export function evaluateRepresentationAuthority(input: {
   return { valid: true, reason: 'ok' };
 }
 
+// Each lifecycle change commits together with its audit record.
 export async function createRepresentationAuthority(input: NewRepresentationAuthority) {
-  const [created] = await db.insert(representationAuthorities).values(input).returning();
-  await auditRepresentationAuthorityEvent({
-    event: RepresentationAuthorityAuditEvent.AUTHORITY_CREATED,
-    authority: created,
-    actorId: input.createdBy,
+  return withRLSContext({ organizationId: input.organizationId }, async (tx) => {
+    const [created] = await tx.insert(representationAuthorities).values(input).returning();
+    await auditRepresentationAuthorityEvent(tx, {
+      event: RepresentationAuthorityAuditEvent.AUTHORITY_CREATED,
+      authority: created,
+      actorId: input.createdBy,
+    });
+    return created;
   });
-  return created;
 }
 
 export async function activateRepresentationAuthority(params: {
@@ -95,26 +98,28 @@ export async function activateRepresentationAuthority(params: {
   organizationId: string;
   actorId: string;
 }) {
-  const [updated] = await db
-    .update(representationAuthorities)
-    .set({ status: 'active', updatedAt: new Date() })
-    .where(
-      and(
-        eq(representationAuthorities.id, params.authorityId),
-        eq(representationAuthorities.organizationId, params.organizationId),
-      ),
-    )
-    .returning();
+  return withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+    const [updated] = await tx
+      .update(representationAuthorities)
+      .set({ status: 'active', updatedAt: new Date() })
+      .where(
+        and(
+          eq(representationAuthorities.id, params.authorityId),
+          eq(representationAuthorities.organizationId, params.organizationId),
+        ),
+      )
+      .returning();
 
-  if (updated) {
-    await auditRepresentationAuthorityEvent({
-      event: RepresentationAuthorityAuditEvent.AUTHORITY_ACTIVATED,
-      authority: updated,
-      actorId: params.actorId,
-    });
-  }
+    if (updated) {
+      await auditRepresentationAuthorityEvent(tx, {
+        event: RepresentationAuthorityAuditEvent.AUTHORITY_ACTIVATED,
+        authority: updated,
+        actorId: params.actorId,
+      });
+    }
 
-  return updated ?? null;
+    return updated ?? null;
+  });
 }
 
 export async function revokeRepresentationAuthority(params: {
@@ -123,45 +128,45 @@ export async function revokeRepresentationAuthority(params: {
   actorId: string;
 }) {
   const now = new Date();
-  const [updated] = await db
-    .update(representationAuthorities)
-    .set({
-      status: 'revoked',
-      revokedAt: now,
-      revokedBy: params.actorId,
-      updatedAt: now,
-    })
-    .where(
-      and(
-        eq(representationAuthorities.id, params.authorityId),
-        eq(representationAuthorities.organizationId, params.organizationId),
-      ),
-    )
-    .returning();
+  return withRLSContext({ organizationId: params.organizationId }, async (tx) => {
+    const [updated] = await tx
+      .update(representationAuthorities)
+      .set({
+        status: 'revoked',
+        revokedAt: now,
+        revokedBy: params.actorId,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(representationAuthorities.id, params.authorityId),
+          eq(representationAuthorities.organizationId, params.organizationId),
+        ),
+      )
+      .returning();
 
-  if (updated) {
-    await auditRepresentationAuthorityEvent({
-      event: RepresentationAuthorityAuditEvent.AUTHORITY_REVOKED,
-      authority: updated,
-      actorId: params.actorId,
-    });
-  }
+    if (updated) {
+      await auditRepresentationAuthorityEvent(tx, {
+        event: RepresentationAuthorityAuditEvent.AUTHORITY_REVOKED,
+        authority: updated,
+        actorId: params.actorId,
+      });
+    }
 
-  return updated ?? null;
+    return updated ?? null;
+  });
 }
 
-export async function auditRepresentationAuthorityEvent(params: {
+export async function auditRepresentationAuthorityEvent(tx: RLSTx, params: {
   event: RepresentationAuthorityAuditEventType;
   authority: RepresentationAuthority;
   actorId: string;
   correlationId?: string;
 }) {
-  return auditLog({
-    eventType: params.event,
-    severity: AuditSeverity.MEDIUM,
+  return persistAtomicAudit(tx, {
     userId: params.actorId,
     organizationId: params.authority.organizationId,
-    resource: 'representation_authorities',
+    resourceType: 'representation_authorities',
     resourceId: params.authority.id,
     action: params.event,
     details: {
@@ -174,6 +179,5 @@ export async function auditRepresentationAuthorityEvent(params: {
       status: params.authority.status,
       correlationId: params.correlationId,
     },
-    outcome: 'success',
   });
 }

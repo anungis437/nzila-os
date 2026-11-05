@@ -8,7 +8,7 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
+  uniqueIndex,
   uuid,
   varchar,
   foreignKey,
@@ -69,7 +69,7 @@ export const trainingCourses = pgTable("training_courses", {
       foreignColumns: [organizations.id],
       name: "training_courses_organization_id_fkey"
     }),
-    trainingCoursesCourseCodeKey: unique("training_courses_course_code_key").on(table.courseCode),
+    uqTrainingCoursesOrgCode: uniqueIndex("uq_training_courses_org_course_code").on(table.organizationId, table.courseCode),
   }
 });
 
@@ -134,7 +134,7 @@ export const courseSessions = pgTable("course_sessions", {
       foreignColumns: [organizations.id],
       name: "course_sessions_organization_id_fkey"
     }),
-    courseSessionsSessionCodeKey: unique("course_sessions_session_code_key").on(table.sessionCode),
+    uqCourseSessionsOrgCode: uniqueIndex("uq_course_sessions_org_session_code").on(table.organizationId, table.sessionCode),
   }
 });
 
@@ -193,6 +193,8 @@ export const courseRegistrations = pgTable("course_registrations", {
     idxCourseRegistrationsOrg: index("idx_course_registrations_org").using("btree", table.organizationId.asc().nullsLast()),
     idxCourseRegistrationsSession: index("idx_course_registrations_session").using("btree", table.sessionId.asc().nullsLast()),
     idxCourseRegistrationsStatus: index("idx_course_registrations_status").using("btree", table.registrationStatus.asc().nullsLast()),
+    // One registration per member and session; the capacity trigger is in platform migration 0040.
+    uqCourseRegistrationsMemberSession: uniqueIndex("uq_course_registrations_member_session").on(table.organizationId, table.memberId, table.sessionId),
     courseRegistrationsCourseIdFkey: foreignKey({
       columns: [table.courseId],
       foreignColumns: [trainingCourses.id],
@@ -277,7 +279,7 @@ export const memberCertifications = pgTable("member_certifications", {
       foreignColumns: [courseSessions.id],
       name: "member_certifications_session_id_fkey"
     }),
-    memberCertificationsCertificationNumberKey: unique("member_certifications_certification_number_key").on(table.certificationNumber),
+    uqMemberCertificationsOrgNumber: uniqueIndex("uq_member_certifications_org_certification_number").on(table.organizationId, table.certificationNumber),
   }
 });
 
@@ -310,49 +312,6 @@ export const trainingPrograms = pgTable("training_programs", {
       columns: [table.organizationId],
       foreignColumns: [organizations.id],
       name: "training_programs_organization_id_fkey"
-    }),
-  }
-});
-
-// Program Enrollments Table
-export const programEnrollments = pgTable("program_enrollments", {
-  id: uuid("id").defaultRandom().primaryKey().notNull(),
-  organizationId: uuid("organization_id").notNull(),
-  memberId: varchar("member_id", { length: 255 }).notNull(),
-  programId: uuid("program_id").notNull(),
-  enrollmentDate: date("enrollment_date").notNull(),
-  enrollmentStatus: varchar("enrollment_status", { length: 50 }).default('enrolled'),
-  coursesCompleted: jsonb("courses_completed"),
-  coursesCompletedCount: integer("courses_completed_count").default(0),
-  electivesCompletedCount: integer("electives_completed_count").default(0),
-  progressPercentage: numeric("progress_percentage", { precision: 5, scale: 2 }).default('0.00'),
-  completed: boolean("completed").default(false),
-  completionDate: date("completion_date"),
-  certificationId: uuid("certification_id"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
-},
-(table) => {
-  return {
-    idxProgramEnrollmentsMember: index("idx_program_enrollments_member").using("btree", table.memberId.asc().nullsLast()),
-    idxProgramEnrollmentsOrg: index("idx_program_enrollments_org").using("btree", table.organizationId.asc().nullsLast()),
-    idxProgramEnrollmentsProgram: index("idx_program_enrollments_program").using("btree", table.programId.asc().nullsLast()),
-    idxProgramEnrollmentsStatus: index("idx_program_enrollments_status").using("btree", table.enrollmentStatus.asc().nullsLast()),
-    programEnrollmentsCertificationIdFkey: foreignKey({
-      columns: [table.certificationId],
-      foreignColumns: [memberCertifications.id],
-      name: "program_enrollments_certification_id_fkey"
-    }),
-    programEnrollmentsOrganizationIdFkey: foreignKey({
-      columns: [table.organizationId],
-      foreignColumns: [organizations.id],
-      name: "program_enrollments_organization_id_fkey"
-    }),
-    programEnrollmentsProgramIdFkey: foreignKey({
-      columns: [table.programId],
-      foreignColumns: [trainingPrograms.id],
-      name: "program_enrollments_program_id_fkey"
     }),
   }
 });
@@ -409,26 +368,10 @@ export const memberCertificationsRelations = relations(memberCertifications, ({ 
   }),
 }));
 
-export const trainingProgramsRelations = relations(trainingPrograms, ({ one, many }) => ({
+export const trainingProgramsRelations = relations(trainingPrograms, ({ one }) => ({
   organization: one(organizations, {
     fields: [trainingPrograms.organizationId],
     references: [organizations.id],
-  }),
-  enrollments: many(programEnrollments),
-}));
-
-export const programEnrollmentsRelations = relations(programEnrollments, ({ one }) => ({
-  program: one(trainingPrograms, {
-    fields: [programEnrollments.programId],
-    references: [trainingPrograms.id],
-  }),
-  organization: one(organizations, {
-    fields: [programEnrollments.organizationId],
-    references: [organizations.id],
-  }),
-  certification: one(memberCertifications, {
-    fields: [programEnrollments.certificationId],
-    references: [memberCertifications.id],
   }),
 }));
 

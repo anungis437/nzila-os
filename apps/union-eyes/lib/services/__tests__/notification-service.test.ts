@@ -18,6 +18,9 @@ const mocks = vi.hoisted(() => ({
   mockFetch: vi.fn(),
   mockCatch: vi.fn(),
   mockFirebaseSend: vi.fn(),
+  systemOpen: 0,
+  // Whether the caller holds a tenant transaction (the fake of db/tenant-context-storage returns the same mocked handle while it does).
+  callerOpen: true,
 }));
 
 vi.mock('@/db', () => ({
@@ -27,6 +30,24 @@ vi.mock('@/db', () => ({
     update: mocks.mockUpdate,
     delete: mocks.mockDelete,
   },
+}));
+
+// A delivery step of a caller with no `systemSteps` runs on the transaction the caller holds.
+vi.mock('@/db/system-context-storage', () => ({ getActiveSystemDb: () => undefined }));
+vi.mock('@/db/tenant-context-storage', () => ({
+  getActiveTenantDb: () => (mocks.callerOpen ? { insert: mocks.mockInsert, select: mocks.mockSelect, update: mocks.mockUpdate, delete: mocks.mockDelete } : undefined),
+}));
+
+// A system step is a short transaction of its own: the fake counts how many are open at any moment.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: vi.fn(async (operation: (tx: unknown) => Promise<unknown>) => {
+    mocks.systemOpen += 1;
+    try {
+      return await operation({ insert: mocks.mockInsert, select: mocks.mockSelect, update: mocks.mockUpdate, delete: mocks.mockDelete });
+    } finally {
+      mocks.systemOpen -= 1;
+    }
+  }),
 }));
 
 vi.mock('uuid', () => ({
@@ -60,6 +81,14 @@ vi.mock('@/db/schema/domains/communications', () => ({
   },
   notificationDeliveryLog: { id: 'id' },
   notificationTemplates: { id: 'id', templateKey: 'template_key' },
+  userNotificationPreferences: {
+    userId: 'preference_user_id',
+    organizationId: 'preference_organization_id',
+    emailEnabled: 'email_enabled',
+    smsEnabled: 'sms_enabled',
+    pushEnabled: 'push_enabled',
+    inAppEnabled: 'in_app_enabled',
+  },
 }));
 
 vi.mock('@/db/schema', () => ({
@@ -759,6 +788,7 @@ describe('NotificationService', () => {
           action: 'NOTIFICATION_SENT',
           userId: 'user-1',
         }),
+        expect.anything(),
       );
     });
 
@@ -781,6 +811,7 @@ describe('NotificationService', () => {
         expect.objectContaining({
           description: expect.stringContaining('+15550001111'),
         }),
+        expect.anything(),
       );
     });
 
@@ -807,56 +838,238 @@ describe('NotificationService', () => {
         expect.objectContaining({
           description: expect.stringContaining('member-42'),
         }),
+        expect.anything(),
       );
     });
 
-    it('executes persistence and audit catch callbacks without failing send', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
-        name: 'mock',
-        send: vi.fn().mockResolvedValue({ id: 'msg-catch', status: 'sent', sentAt: new Date() }),
-      });
-
-      mocks.mockInsert.mockReturnValue({
-        values: vi.fn(() => Promise.reject(new Error('insert catch path'))),
-      });
-      mocks.mockCreateAuditLog.mockRejectedValue(new Error('audit catch path'));
-
-      await expect(service.send({ ...emailPayload, userId: 'user-2' })).resolves.toEqual(
-        expect.objectContaining({ status: 'sent' }),
-      );
-    });
-    it('handles non-Error catch values from persistence and audit callbacks', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
-        name: 'mock',
-        send: vi.fn().mockResolvedValue({ id: 'msg-catch-string', status: 'sent', sentAt: new Date() }),
-      });
-
-      mocks.mockInsert.mockReturnValue({
-        values: vi.fn(() => Promise.reject('insert string failure')),
-      });
-      mocks.mockCreateAuditLog.mockRejectedValue('audit string failure');
-
-      await expect(service.send({ ...emailPayload, userId: 'user-2' })).resolves.toEqual(
-        expect.objectContaining({ status: 'sent' }),
-      );
-    });
-
-    it('handles synchronous database persistence errors and still returns provider response', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (service as any).providers.set('email', {
-        name: 'mock',
-        send: vi.fn().mockResolvedValue({ id: 'msg-sync-db', status: 'sent', sentAt: new Date() }),
-      });
-
+    // A webhook or a job has no tenant session: each database step of the delivery is its own short system transaction, committed before the
+    // provider is called, and none is open while it is.
+    it('with systemSteps, runs every database step in its own short system transaction and calls the provider with none open', async () => {
+      const { withSystemContext } = await import('@/lib/db/with-rls-context');
+      const openDuringProvider: number[] = [];
+      const openDuringInsert: number[] = [];
       mocks.mockInsert.mockImplementation(() => {
-        throw new Error('sync insert failure');
+        openDuringInsert.push(mocks.systemOpen);
+        return { values: vi.fn(() => Promise.resolve([])) };
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', {
+        name: 'mock',
+        send: vi.fn(async () => {
+          openDuringProvider.push(mocks.systemOpen);
+          return { id: 'msg-sys', status: 'sent', sentAt: new Date() };
+        }),
+      });
+      mocks.mockCreateAuditLog.mockResolvedValue(undefined);
+
+      const response = await service.send({ ...emailPayload, userId: 'user-1' }, { systemSteps: true });
+
+      expect(response.status).toBe('sent');
+      expect(openDuringProvider).toEqual([0]);
+      expect(openDuringInsert.length).toBeGreaterThanOrEqual(3);
+      expect(openDuringInsert.every((open) => open === 1)).toBe(true);
+      expect(vi.mocked(withSystemContext).mock.calls.length).toBeGreaterThanOrEqual(openDuringInsert.length);
+      // The audit entry is written on the system step's transaction, not on the ambient handle.
+      expect(mocks.mockCreateAuditLog).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'NOTIFICATION_SENT' }),
+        expect.objectContaining({ insert: mocks.mockInsert }),
+      );
+    });
+
+    it('without systemSteps, opens no system transaction of its own', async () => {
+      const { withSystemContext } = await import('@/lib/db/with-rls-context');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', {
+        name: 'mock',
+        send: vi.fn().mockResolvedValue({ id: 'msg-amb', status: 'sent', sentAt: new Date() }),
       });
 
-      await expect(service.send({ ...emailPayload })).resolves.toEqual(
-        expect.objectContaining({ id: 'msg-sync-db', status: 'sent' }),
-      );
+      await service.send({ ...emailPayload, userId: 'user-1' });
+
+      expect(withSystemContext).not.toHaveBeenCalled();
+    });
+
+    it('without systemSteps and with no transaction held by the caller, writes nothing and sends nothing instead of using the pooled connection', async () => {
+      const providerSend = vi.fn().mockResolvedValue({ id: 'msg-none', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send: providerSend });
+      mocks.callerOpen = false;
+      try {
+        await expect(service.send({ ...emailPayload, userId: 'user-1' })).rejects.toThrow(/needs a tenant or system transaction/);
+      } finally {
+        mocks.callerOpen = true;
+      }
+      expect(providerSend).not.toHaveBeenCalled();
+      expect(mocks.mockInsert).not.toHaveBeenCalled();
+    });
+
+    it('does not call the provider when the delivery ledger rejects the attempt', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'msg-catch', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockInsert.mockReturnValue({
+        values: vi.fn(() => Promise.reject(new Error('ledger down'))),
+      });
+
+      await expect(service.send(emailPayload)).rejects.toThrow('ledger down');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('records provider submission as accepted and confirmed delivery as delivered', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'msg-accepted', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+
+      await service.send(emailPayload);
+
+      const events = mocks.mockValues.mock.calls.map((call) => call[0]?.event);
+      expect(events).toContain('attempted');
+      expect(events).toContain('accepted');
+      expect(events).not.toContain('sent');
+      expect(send).toHaveBeenCalledOnce();
+    });
+
+    function historySelect() {
+      mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
+      mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
+      mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
+    }
+
+    it('does not call the provider again when the prior attempt has no outcome', async () => {
+      const send = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockLimit.mockResolvedValue([
+        { event: 'attempted', organizationId: 'org-1', notificationId: '11111111-1111-4111-8111-111111111111', externalEventId: null },
+      ]);
+      historySelect();
+
+      const result = await service.send({
+        ...emailPayload,
+        idempotencyKey: '11111111-1111-4111-8111-111111111111',
+      });
+
+      expect(result.status).toBe('uncertain');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('returns uncertain and does not resend when the provider accepted but the ledger write failed', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'provider-msg-1', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      const key = '22222222-2222-4222-8222-222222222222';
+      let inserts = 0;
+      mocks.mockInsert.mockImplementation(() => ({
+        values: () => {
+          inserts += 1;
+          if (inserts >= 3) return Promise.reject(new Error('acceptance lost'));
+          return Promise.resolve();
+        },
+      }));
+      mocks.mockLimit
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { event: 'attempted', organizationId: 'org-1', notificationId: key, externalEventId: 'provider-msg-1' },
+        ]);
+      historySelect();
+
+      const first = await service.send({ ...emailPayload, idempotencyKey: key });
+      const second = await service.send({ ...emailPayload, idempotencyKey: key });
+
+      expect(first.status).toBe('uncertain');
+      expect(first.providerMessageId).toBe('provider-msg-1');
+      expect(first.status).not.toBe('delivered');
+      expect(second.status).toBe('uncertain');
+      expect(send).toHaveBeenCalledOnce();
+    });
+
+    it('does not call the provider when another worker already claimed the delivery', async () => {
+      const send = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockLimit.mockResolvedValue([]);
+      historySelect();
+      mocks.mockInsert.mockReturnValue({
+        values: () => Promise.reject(Object.assign(new Error('duplicate key value violates unique constraint'), { code: '23505' })),
+      });
+      const returning = vi.fn().mockResolvedValue([]);
+      mocks.mockSet.mockReturnValue({ where: vi.fn().mockReturnValue({ returning }) });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await service.send({
+        ...emailPayload,
+        idempotencyKey: '33333333-3333-4333-8333-333333333333',
+      });
+
+      expect(result.status).toBe('uncertain');
+      expect(result.failureReason).toContain('claimed');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('does not resend a confirmed failure when another worker already took the retry', async () => {
+      const send = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      const key = '55555555-5555-4555-8555-555555555555';
+      mocks.mockLimit.mockResolvedValue([
+        { event: 'failed', organizationId: 'org-1', notificationId: key },
+      ]);
+      historySelect();
+      const returning = vi.fn().mockResolvedValue([]);
+      mocks.mockSet.mockReturnValue({ where: vi.fn().mockReturnValue({ returning }) });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await service.send({ ...emailPayload, idempotencyKey: key });
+
+      expect(result.status).toBe('uncertain');
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('sends a queued notice when its queue row already exists and no outcome is recorded', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'provider-msg', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      const key = '44444444-4444-4444-8444-444444444444';
+      let inserts = 0;
+      mocks.mockInsert.mockImplementation(() => ({
+        values: () => {
+          inserts += 1;
+          if (inserts === 1) {
+            return Promise.reject(Object.assign(new Error('duplicate key value violates unique constraint'), { code: '23505' }));
+          }
+          return Promise.resolve();
+        },
+      }));
+      mocks.mockLimit.mockResolvedValue([]);
+      historySelect();
+      const returning = vi.fn().mockResolvedValue([{ id: key }]);
+      mocks.mockSet.mockReturnValue({ where: vi.fn().mockReturnValue({ returning }) });
+      mocks.mockUpdate.mockReturnValue({ set: mocks.mockSet });
+
+      const result = await service.send({ ...emailPayload, idempotencyKey: key });
+
+      expect(result.status).toBe('sent');
+      expect(result.status).not.toBe('delivered');
+      expect(send).toHaveBeenCalledOnce();
+    });
+
+    it('does not record a preference suppression as a successful send', async () => {
+      const send = vi.fn().mockResolvedValue({ id: 'msg-pref', status: 'sent', sentAt: new Date() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (service as any).providers.set('email', { name: 'mock', send });
+      mocks.mockLimit.mockResolvedValue([
+        { emailEnabled: false, smsEnabled: false, pushEnabled: true, inAppEnabled: true },
+      ]);
+      mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
+      mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });
+      mocks.mockSelect.mockReturnValue({ from: mocks.mockFrom });
+
+      const result = await service.send({ ...emailPayload, recipientId: 'user-1' });
+
+      expect(result.status).not.toBe('sent');
+      expect(result.failureReason).toContain('suppressed');
+      expect(send).not.toHaveBeenCalled();
+      expect(mocks.mockValues.mock.calls.map((call) => call[0]?.event)).toContain('suppressed');
     });
   });
 
@@ -871,31 +1084,27 @@ describe('NotificationService', () => {
       expect(mocks.mockInsert).toHaveBeenCalled();
     });
 
-    it('handles queued insert rejection callback and still returns ID', async () => {
+    it('does not return a queue id when the queue insert is rejected', async () => {
       mocks.mockInsert.mockReturnValue({
         values: vi.fn(() => Promise.reject(new Error('queue catch path'))),
       });
 
-      const id = await service.queue({
+      await expect(service.queue({
         organizationId: 'org-1',
         type: 'email',
         body: 'Queued notification',
-      });
-
-      expect(id).toBe('notif-uuid');
+      })).rejects.toThrow('queue catch path');
     });
-    it('handles queue insert callback rejection with non-Error reason', async () => {
+    it('does not return a queue id when the queue insert rejects with a non-Error', async () => {
       mocks.mockInsert.mockReturnValue({
         values: vi.fn(() => Promise.reject('queue string failure')),
       });
 
-      const id = await service.queue({
+      await expect(service.queue({
         organizationId: 'org-1',
         type: 'email',
         body: 'Queued notification',
-      });
-
-      expect(id).toBe('notif-uuid');
+      })).rejects.toBe('queue string failure');
     });
 
     it('throws when queue insert fails synchronously', async () => {
@@ -1480,6 +1689,7 @@ describe('processPendingNotifications', () => {
           },
         },
       ])
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
     mocks.mockWhere.mockReturnValue({ limit: mocks.mockLimit });
     mocks.mockFrom.mockReturnValue({ where: mocks.mockWhere });

@@ -12,7 +12,7 @@
 
 import { db } from '@/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { generateStatusUpdateMessage } from '@/lib/member-experience/timeline-builder';
 import type { ClaimStatus } from '@/lib/workflow-engine';
 import { logger } from '@/lib/logger';
@@ -40,6 +40,7 @@ export interface TimelineStatusEntry {
  * Called automatically by updateClaimStatus() in workflow-engine.ts
  * 
  * @param claimId - Claim ID (maps to grievances.id)
+ * @param organizationId - Organization that owns the claim; the write is bound to it
  * @param previousStatus - Previous status
  * @param newStatus - New status
  * @param actorId - User ID who made the change
@@ -49,6 +50,7 @@ export interface TimelineStatusEntry {
  */
 export async function addTimelineEntry(
   claimId: string,
+  organizationId: string,
   previousStatus: ClaimStatus,
   newStatus: ClaimStatus,
   actorId: string,
@@ -67,7 +69,7 @@ export async function addTimelineEntry(
     const [grievance] = await db
       .select()
       .from(grievances)
-      .where(eq(grievances.id, claimId))
+      .where(and(eq(grievances.id, claimId), eq(grievances.organizationId, organizationId)))
       .limit(1);
 
     if (!grievance) {
@@ -102,7 +104,7 @@ export async function addTimelineEntry(
         timeline: statusHistory as any as Array<{ date: string; action: string; actor: string; notes?: string }>,
         updatedAt: new Date(),
       })
-      .where(eq(grievances.id, claimId));
+      .where(and(eq(grievances.id, claimId), eq(grievances.organizationId, organizationId)));
 
     return { success: true };
   } catch (error) {

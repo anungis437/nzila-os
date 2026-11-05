@@ -33,7 +33,7 @@ export const evidenceSourceRefSchema = z.object({
 })
 
 export const methodologyVersionRefSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   authorityId: z.string().min(1),
   methodologyId: z.string().min(1),
   version: z.string().min(1),
@@ -72,7 +72,7 @@ export const coraConclusionDraftSchema = z
     evidence: z
       .array(
         z.object({
-          evidenceId: z.string().uuid(),
+          evidenceId: z.guid(),
           payloadSha256: z.string().regex(/^[a-f0-9]{64}$/),
         }),
       )

@@ -13,23 +13,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Hoisted mocks ────────────────────────────────────────────────────────────
 
-const { mockFindFirst } = vi.hoisted(() => ({
+const { mockFindFirst, mockWithRLSContext } = vi.hoisted(() => ({
   mockFindFirst: vi.fn(),
+  mockWithRLSContext: vi.fn(),
 }));
 
-vi.mock('@/db/db', () => ({
-  db: {
-    query: {
-      organizations: { findFirst: mockFindFirst },
-    },
-    insert: vi.fn(() => ({ values: vi.fn(() => ({ returning: vi.fn() })) })),
-    update: vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(() => ({ returning: vi.fn() })) })) })),
-    select: vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(async () => []),
-      })),
-    })),
-  },
+// The organization's own row is read in that organization's context: the wrapper hands its callback the transaction.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: mockWithRLSContext,
 }));
 
 vi.mock('@/db/schema-organizations', () => ({
@@ -54,12 +45,17 @@ import {
   featureRequiresCredits,
   checkEntitlement,
   checkEntitlements,
-  consumeCredits,
-  addCredits,
-  resetCreditsForBillingCycle,
+  getOrganizationCredits,
   TIER_FEATURES,
+  TIER_CREDITS,
   CREDIT_COSTS,
 } from '../entitlements';
+
+beforeEach(() => {
+  mockWithRLSContext.mockImplementation(async (_context: unknown, work: (tx: unknown) => Promise<unknown>) =>
+    work({ query: { organizations: { findFirst: mockFindFirst } } }),
+  );
+});
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
@@ -159,78 +155,47 @@ describe('checkEntitlements (batch)', () => {
   });
 });
 
-describe('consumeCredits', () => {
+describe('getOrganizationCredits', () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
-  it('succeeds and returns remaining credits', async () => {
-    mockFindFirst.mockResolvedValue({
-      subscriptionTier: 'basic',
-      settings: { credits: 50 },
-    });
-    const result = await consumeCredits('org-1', 5);
-    expect(result.success).toBe(true);
-    expect(result.remainingCredits).toBe(45);
+  it('reads the balance from the organization\'s settings, in that organization\'s own context', async () => {
+    mockFindFirst.mockResolvedValue({ subscriptionTier: 'basic', settings: { credits: 50 } });
+    const balance = await getOrganizationCredits('org-1');
+    expect(balance).toMatchObject({ organizationId: 'org-1', tier: 'basic', credits: 50 });
+    expect(mockWithRLSContext).toHaveBeenCalledWith({ organizationId: 'org-1' }, expect.any(Function));
   });
 
-  it('returns insufficient credits error when balance too low', async () => {
-    mockFindFirst.mockResolvedValue({
-      subscriptionTier: 'basic',
-      settings: { credits: 2 },
-    });
-    const result = await consumeCredits('org-1', 10, 'ai_summarize');
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('Insufficient credits');
+  it('gives an organization with no recorded balance its tier default', async () => {
+    mockFindFirst.mockResolvedValue({ subscriptionTier: 'professional', settings: {} });
+    expect((await getOrganizationCredits('org-1')).credits).toBe(TIER_CREDITS.professional);
   });
 
-  it('enterprise tier always succeeds (unlimited)', async () => {
-    mockFindFirst.mockResolvedValue({ subscriptionTier: 'enterprise', settings: {} });
-    const result = await consumeCredits('org-1', 9999);
-    expect(result.success).toBe(true);
-    expect(result.remainingCredits).toBe(0);
+  it('reports unlimited (0) for the enterprise tier', async () => {
+    mockFindFirst.mockResolvedValue({ subscriptionTier: 'enterprise', settings: { credits: 7 } });
+    expect(await getOrganizationCredits('org-1')).toMatchObject({ tier: 'enterprise', credits: 0 });
+  });
+
+  it('fails when the organization cannot be read, rather than inventing a free-tier balance', async () => {
+    mockFindFirst.mockRejectedValue(new Error('database unavailable'));
+    await expect(getOrganizationCredits('org-1')).rejects.toThrow('database unavailable');
   });
 });
 
-describe('addCredits', () => {
+describe('the credit check inside checkEntitlement', () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
-  it('adds credits and returns new balance', async () => {
-    mockFindFirst.mockResolvedValue({ subscriptionTier: 'basic', settings: { credits: 20 } });
-    const result = await addCredits('org-1', 30, 'purchase');
-    expect(result.success).toBe(true);
-    expect(result.newBalance).toBe(50);
+  it('allows a credit-requiring feature while the balance is positive and reports it', async () => {
+    mockFindFirst.mockResolvedValue({ subscriptionTier: 'professional', settings: { credits: 12 } });
+    expect(await checkEntitlement('org-1', 'ai_summarize')).toMatchObject({ allowed: true, currentCredits: 12 });
   });
 
-  it('enterprise tier returns 0 (unlimited)', async () => {
-    mockFindFirst.mockResolvedValue({ subscriptionTier: 'enterprise', settings: {} });
-    const result = await addCredits('org-1', 100);
-    expect(result.success).toBe(true);
-    expect(result.newBalance).toBe(0);
-  });
-});
-
-describe('resetCreditsForBillingCycle', () => {
-  beforeEach(() => { vi.clearAllMocks(); });
-
-  it('resets credits to tier default', async () => {
-    mockFindFirst.mockResolvedValue({ subscriptionTier: 'basic', settings: { credits: 5 } });
-    const result = await resetCreditsForBillingCycle('org-1');
-    expect(result.success).toBe(true);
-    expect(result.newCredits).toBeGreaterThan(0);
+  it('denies it, with a way to buy more, when the balance is spent', async () => {
+    mockFindFirst.mockResolvedValue({ subscriptionTier: 'professional', settings: { credits: 0 } });
+    expect(await checkEntitlement('org-1', 'ai_summarize')).toMatchObject({ allowed: false, currentCredits: 0, upgradeUrl: '/pricing?tab=credits' });
   });
 
-  it('enterprise tier returns 0 (unlimited)', async () => {
-    mockFindFirst.mockResolvedValue({ subscriptionTier: 'enterprise', settings: {} });
-    const result = await resetCreditsForBillingCycle('org-1');
-    expect(result.success).toBe(true);
-    expect(result.newCredits).toBe(0);
-  });
-
-  it('returns failure on db error', async () => {
-    // getOrganizationCredits catches errors and returns defaults (free tier),
-    // but the update chain also needs to resolve; enterprise short-circuit shows error path
-    mockFindFirst.mockResolvedValue({ subscriptionTier: 'enterprise', settings: {} });
-    const result = await resetCreditsForBillingCycle('org-1');
-    expect(result.success).toBe(true);
-    expect(result.newCredits).toBe(0);
+  it('denies, and says so, when the organization cannot be read: a failed check is never an allowance', async () => {
+    mockFindFirst.mockRejectedValue(new Error('database unavailable'));
+    expect(await checkEntitlement('org-1', 'ai_summarize')).toMatchObject({ allowed: false, reason: expect.stringContaining('Error checking entitlements') });
   });
 });

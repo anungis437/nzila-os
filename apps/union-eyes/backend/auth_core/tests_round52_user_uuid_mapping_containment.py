@@ -6,7 +6,7 @@ family).
 user_uuid_mapping's sole TypeScript consumer in this app,
 lib/utils/user-uuid-helpers.ts's getOrCreateUserUuid, has zero production
 callers anywhere (git-grep confirmed) -- dead TS code. The generated Django
-ViewSet allowed full CRUD (including UPDATE of the clerkUserId->userUuid
+ViewSet allowed full CRUD (including UPDATE of the legacy-id->userUuid
 mapping -- an identity-reassignment / account-takeover-equivalent
 operation) to any authenticated user, with no legitimate consumer of its
 own -- contained via DenyAllPermission.

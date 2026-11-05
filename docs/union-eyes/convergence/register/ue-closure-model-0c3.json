@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-CLOSURE-MODEL",
+  "gate": "GATE-0C.3",
+  "version": 1,
+  "anchorCommit": "f90f74d135c209812b4728585c076ea410704719",
+  "preparedOn": "2026-10-27",
+  "status": "MODEL_NOT_A_VERDICT",
+  "note": "Two separate levels of closure. Gate 0 scope-lock completion is about whether the scope is fully described, owned and honestly unresolved. Release acceptance additionally needs authorized decisions, repairs, runtime proof and credentialed acceptance. A Gate 0 verdict is never a release authorization.",
+  "gate0Verdict": "IN_PROGRESS",
+  "separation": "A Gate 0 verdict is never a release authorization.",
+  "lineage": {
+    "assessmentSha256": "4e5fd0b979c7bc1f7e9cd3f905b8710b88dacd7a9a0948682e6ed21ad45eb8d8",
+    "debtIndexSha256": "457ecd54a080199bd1ebfa276c0eaa170a9a0fe1021b2e49c682e70fe7f5d4d8",
+    "decisionIndexSha256": "b94d5433e7151b097b25d0ba62855b1f3716fd63c2384bc4a20547bc21678db0",
+    "challengeTreatmentSha256": "46871016035772ae87b29b8ef4607b2c65db3ffc400d0aea7b2f1761c5654bf5",
+    "carbonRecordSha256": "65a78d5766d9f25cfd775bfc2f5e8439acfaa0b7d823517659cc65f72b130106"
+  },
+  "level1": {
+    "name": "GATE_0_SCOPE_LOCK_COMPLETION",
+    "criteria": [
+      {
+        "id": "EXHAUSTIVE_ROUTE_INVENTORY",
+        "label": "An exhaustive canonical route-method inventory.",
+        "requirement": "Every route-method operation of the canonical universe has exactly one classification.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidence": [
+          "1646 route-method operations, each in exactly one of six classes, 0 awaiting classification."
+        ],
+        "remainingItems": []
+      },
+      {
+        "id": "OWNERSHIP_OR_EXCEPTION",
+        "label": "Engineering ownership or an explicit non-authorizing exception for every operation.",
+        "requirement": "Every operation is OWNED, retired, stubbed, system or a decision-bound scope exception, and no exception is counted as owned.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidence": [
+          "1505 owned, 97 retired, 31 stubbed, 9 system and 4 non-authorizing decision-bound scope exceptions."
+        ],
+        "remainingItems": [
+          "4 carbon operations wait on UE-INST-CARBON-ACCOUNTING-SCOPE."
+        ]
+      },
+      {
+        "id": "PERSONA_TRACEABILITY",
+        "label": "Traceable persona specifications and product decisions.",
+        "requirement": "Each persona has a ratified canonical, or its proposed baseline is carried as a blocker with its product decisions.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidence": [
+          "3 unresolved personas each carry a proposed baseline, a decision package and a versioned decision record."
+        ],
+        "remainingItems": [
+          "steward has no ratified canonical.",
+          "representative has no ratified canonical.",
+          "financial-officer has no ratified canonical."
+        ]
+      },
+      {
+        "id": "HISTORICAL_UNCERTAINTY",
+        "label": "Preserved historical source uncertainty.",
+        "requirement": "Unrecovered canonicals, grouped-only identifiers and conflicted identifiers keep their evidence status.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidence": [
+          "The 182 historical identifiers, the unrecovered canonicals and the 0B and 0C tranche records keep their evidence status and their hashes."
+        ],
+        "remainingItems": []
+      },
+      {
+        "id": "DOWNSTREAM_OWNERSHIP",
+        "label": "Complete downstream defect and obligation ownership.",
+        "requirement": "Every defect, release-blocking item and tracked ratchet or test defect has an engineering owner, a target gate, a source reference and an acceptance condition.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidence": [
+          "150 unique release-debt items each carry an engineering owner, a target gate, a source reference and an acceptance condition."
+        ],
+        "remainingItems": [
+          "The 71 proposed dispositions are not accepted; ownership does not depend on their acceptance."
+        ]
+      },
+      {
+        "id": "UNRESOLVED_DECISIONS_EXPLICIT",
+        "label": "Explicit unresolved institutional decisions.",
+        "requirement": "Every outstanding decision is listed with its state and no decision is adopted by implication.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidence": [
+          "138 decision records are listed with their state; 0 are adopted."
+        ],
+        "remainingItems": []
+      },
+      {
+        "id": "NO_FABRICATED_ACCEPTANCE",
+        "label": "No fabricated acceptance.",
+        "requirement": "No persona baseline, disposition, challenge, decision or capability status is represented as accepted without independent approval evidence.",
+        "state": "SATISFIED_BY_RECORD",
+        "evidence": [
+          "No persona, disposition, challenge, decision or carbon option is recorded as accepted or selected."
+        ],
+        "remainingItems": []
+      }
+    ],
+    "criteriaSatisfiedByRecord": 7,
+    "certificationBlockers": [
+      {
+        "id": "PERSONA-STEWARD",
+        "kind": "PRODUCT_OWNER_DECISION",
+        "description": "steward has no ratified canonical. The product owner decides the proposed package; this gate does not."
+      },
+      {
+        "id": "PERSONA-REPRESENTATIVE",
+        "kind": "PRODUCT_OWNER_DECISION",
+        "description": "representative has no ratified canonical. The product owner decides the proposed package; this gate does not."
+      },
+      {
+        "id": "PERSONA-FINANCIAL-OFFICER",
+        "kind": "PRODUCT_OWNER_DECISION",
+        "description": "financial-officer has no ratified canonical. The product owner decides the proposed package; this gate does not."
+      },
+      {
+        "id": "CARBON-DECISION-BOUND-EXCEPTIONS",
+        "kind": "INSTITUTIONAL_DECISION",
+        "description": "4 carbon operations stay decision-bound exceptions until UE-INST-CARBON-ACCOUNTING-SCOPE is decided by the deciding authority."
+      },
+      {
+        "id": "GATE-0C3-INDEPENDENT-REVIEW",
+        "kind": "INDEPENDENT_REVIEW",
+        "description": "The Gate 0C.3 registers are not accepted until an independent adversarial review accepts them."
+      }
+    ],
+    "certifiable": false,
+    "note": "The criteria describe what the record must show. The blockers are the unfinished Gate 0 scope that the completion matrix carries. Both must clear before a Gate 0 certification is proposed."
+  },
+  "level2": {
+    "name": "RELEASE_ACCEPTANCE",
+    "additionalTo": "GATE_0_SCOPE_LOCK_COMPLETION",
+    "criteria": [
+      {
+        "id": "AUTHORIZED_SECURITY_AND_BUSINESS_DECISIONS",
+        "label": "Authorized security and business decisions.",
+        "requirement": "The institutional decisions that the released capabilities depend on are adopted by an authority.",
+        "state": "OPEN",
+        "evidence": "0 of 138 decision records are adopted."
+      },
+      {
+        "id": "CORRECTIVE_IMPLEMENTATION",
+        "label": "Corrective implementation.",
+        "requirement": "The release-blocking repairs are made in source.",
+        "state": "NOT_STARTED",
+        "evidence": "150 repair obligations are open; none is repaired."
+      },
+      {
+        "id": "RUNTIME_TENANT_ISOLATION_PROOF",
+        "label": "Runtime tenant-isolation proof.",
+        "requirement": "Executed row-level-security and cross-organization negative proofs exist for the released operations.",
+        "state": "NOT_STARTED",
+        "evidence": "0 executed isolation proofs are on file; 2 challenged dispositions have no containment proof."
+      },
+      {
+        "id": "NATIVE_DATABASE_AND_MIGRATION_QUALIFICATION",
+        "label": "Native database and migration qualification.",
+        "requirement": "The migrations and database roles are qualified on native PostgreSQL.",
+        "state": "NOT_STARTED",
+        "evidence": "Native verification is false; 94 of 111 capabilities are pending."
+      },
+      {
+        "id": "CREDENTIALED_BROWSER_ACCEPTANCE",
+        "label": "Credentialed browser acceptance.",
+        "requirement": "The persona journeys are accepted in a credentialed browser run.",
+        "state": "NOT_STARTED",
+        "evidence": "Browser verification is false; 76 capabilities are pending."
+      },
+      {
+        "id": "REGRESSION_AND_GOVERNANCE_CONTROLS",
+        "label": "Relevant regression and governance controls.",
+        "requirement": "The regression suites and governance checks that cover the repairs pass.",
+        "state": "OPEN",
+        "evidence": "The focused governance suites run and are not release regression evidence."
+      },
+      {
+        "id": "RELEASE_DEBT_CLOSED_OR_AUTHORIZED",
+        "label": "Closure or authorized disposition of release-blocking debt.",
+        "requirement": "Every release-blocking item is repaired and proven, or carries an authorized release decision.",
+        "state": "OPEN",
+        "evidence": "34 release-blocking register defects, 0 closed obligations and 0 accepted release decisions."
+      }
+    ],
+    "releaseAuthorization": "NOT_GRANTED",
+    "productionGo": false,
+    "readinessGate": {
+      "id": "UE_SAAS_OPERATIONAL_READINESS",
+      "ruling": "NO_GO",
+      "source": "docs/union-eyes/reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md"
+    }
+  }
+}

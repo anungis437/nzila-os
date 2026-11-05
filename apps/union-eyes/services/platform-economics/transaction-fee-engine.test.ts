@@ -137,7 +137,19 @@ vi.mock('./ledger-service', () => ({
   appendLedgerEntry: (...a: unknown[]) => appendLedgerEntry(...a),
 }))
 
+// The audit record of a capture or a reversal is written in the transaction that wrote the fee, not on a connection of its own.
+const persistAtomicAudit = vi.fn().mockResolvedValue(undefined)
+vi.mock('@/lib/audit/atomic-audit', () => ({
+  persistAtomicAudit: (...a: unknown[]) => persistAtomicAudit(...a),
+}))
+
 vi.mock('uuid', () => ({ v4: () => 'abcdef0123456789' }))
+
+// The adjustment is written by the write-owned helper (INSERT without RETURNING: the roles that reverse a fee hold INSERT on fee_adjustments, not SELECT).
+const insertWriteOwnedFeeAdjustment = vi.fn(async (_writer: unknown, _input: Record<string, unknown>) => (state.inserts.feeAdjustments as unknown[])[0])
+vi.mock('./fee-adjustment-insert', () => ({
+  insertWriteOwnedFeeAdjustment: (...a: [unknown, Record<string, unknown>]) => insertWriteOwnedFeeAdjustment(...a),
+}))
 
 import {
   createFeeRule,
@@ -188,7 +200,9 @@ beforeEach(() => {
   state.inserts = {}
   state.updates = {}
   auditLog.mockClear()
+  persistAtomicAudit.mockClear()
   appendLedgerEntry.mockClear()
+  insertWriteOwnedFeeAdjustment.mockClear()
 })
 
 // ===========================================================================
@@ -394,17 +408,21 @@ describe('captureTransactionFee', () => {
     expect(appendLedgerEntry).not.toHaveBeenCalled()
   })
 
-  it('inserts a new fee event, bridges ledger, and audits', async () => {
+  it('inserts a new fee event, bridges ledger, and audits, all in the transaction that wrote the event', async () => {
     state.selects.feeEvents = [] // no existing
     state.inserts.feeEvents = [{ id: 'evt-new' }]
     const r = await captureTransactionFee(base)
     expect(r.id).toBe('evt-new')
     expect(appendLedgerEntry).toHaveBeenCalledWith(
       expect.objectContaining({ costType: 'transaction_fee', eventType: 'fee_captured' }),
+      expect.anything(),
     )
-    expect(auditLog).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'fee_captured', resourceId: 'evt-new' }),
+    expect(persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ organizationId: 'org-1', action: 'fee_captured', resourceType: 'transaction_fee_event', resourceId: 'evt-new' }),
     )
+    expect(appendLedgerEntry.mock.calls[0][1]).toBe(persistAtomicAudit.mock.calls[0][0])
+    expect(auditLog).not.toHaveBeenCalled()
   })
 })
 
@@ -427,13 +445,37 @@ describe('reverseTransactionFee', () => {
     expect(r.adjustment.id).toBe('adj-1')
     expect(appendLedgerEntry).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'reversal', amountCad: '-5.00' }),
+      expect.anything(),
     )
-    expect(auditLog).toHaveBeenCalledWith(
+    expect(persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({
+        organizationId: 'org-1',
+        userId: 'approver-1',
         action: 'fee_reversed',
-        metadata: expect.objectContaining({ isPartial: false }),
+        resourceId: 'evt-1',
+        details: expect.objectContaining({ isPartial: false }),
       }),
     )
+    expect(appendLedgerEntry.mock.calls[0][1]).toBe(persistAtomicAudit.mock.calls[0][0])
+    expect(auditLog).not.toHaveBeenCalled()
+  })
+
+  it('records the reversal through the write-owned helper, which reads nothing back', async () => {
+    state.selects.feeEvents = [feeEvent({ feeAmountCad: '5.00', grossAmountCad: '100.00' })]
+    state.updates.feeEvents = [feeEvent({ status: 'reversed' })]
+    state.inserts.feeAdjustments = [{ id: 'adj-1', adjustmentType: 'reversal' }]
+    await reverseTransactionFee('evt-1', 'refund-1', 'customer refund', 'approver-1')
+    expect(insertWriteOwnedFeeAdjustment).toHaveBeenCalledTimes(1)
+    expect(insertWriteOwnedFeeAdjustment.mock.calls[0][1]).toMatchObject({
+      feeEventId: 'evt-1',
+      organizationId: 'org-1',
+      adjustmentType: 'reversal',
+      amountCad: '-5.00',
+      reason: 'customer refund',
+      sourceRefundId: 'refund-1',
+      approvedBy: 'approver-1',
+    })
   })
 
   it('proportionally reverses a partial refund', async () => {
@@ -447,6 +489,7 @@ describe('reverseTransactionFee', () => {
         amountCad: '-5.00',
         metadata: expect.objectContaining({ isPartial: true }),
       }),
+      expect.anything(),
     )
   })
 
@@ -456,7 +499,7 @@ describe('reverseTransactionFee', () => {
     state.inserts.feeAdjustments = [{ id: 'adj-3' }]
     await reverseTransactionFee('evt-1', 'refund-3', 'edge', 'approver-1', '50.00')
     // ratio -> '0.00', reversal 10.00 * 0 = 0.00
-    expect(appendLedgerEntry).toHaveBeenCalledWith(expect.objectContaining({ amountCad: '-0.00' }))
+    expect(appendLedgerEntry).toHaveBeenCalledWith(expect.objectContaining({ amountCad: '-0.00' }), expect.anything())
   })
 })
 

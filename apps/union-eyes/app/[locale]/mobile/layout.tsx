@@ -43,7 +43,7 @@ export default async function MobileLayout({
   }
 
   return (
-    <OperationalShell profile={null} userEmail="" userRole={userRole} organizationProvince={null}>
+    <OperationalShell userEmail="" userRole={userRole} organizationProvince={null}>
       <OfflineBanner className="static z-auto mb-4" />
       {children}
     </OperationalShell>

@@ -40,6 +40,9 @@ jobs:
     name: Pilot Contract Tests
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The agent-coordination contract proves commit ancestry (integration provenance), which needs full history.
+          fetch-depth: 0
       - uses: ./.github/actions/setup-monorepo
 
       - name: Contract - RLS Org Isolation (INV-31)

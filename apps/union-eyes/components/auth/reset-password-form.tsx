@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { postJson, UNEXPECTED_MESSAGE } from './auth-client';
 
 export function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -31,22 +32,17 @@ export function ResetPasswordForm() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword: password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Failed to reset password');
+      const answer = await postJson('/api/auth/reset-password', { token, newPassword: password }, 'Failed to reset password');
+      if (!answer.ok) {
+        setError(answer.message);
         return;
       }
-
+      // The route confirms with { message: "Password has been reset..." }; an answer without it is not a reset.
+      if (typeof answer.data.message !== 'string') {
+        setError(UNEXPECTED_MESSAGE);
+        return;
+      }
       setSuccess(true);
-    } catch {
-      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }

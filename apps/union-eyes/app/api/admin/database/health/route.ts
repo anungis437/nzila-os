@@ -50,6 +50,20 @@ async function readPrincipal(): Promise<PrincipalInfo> {
   };
 }
 
+/**
+ * What the measured principals say about row-level security. The tenant connection is the one RLS must bind: a superuser, a role that bypasses RLS, or the very
+ * role the system context uses would each let a tenant query see other organizations' rows, so the status says so instead of reporting health because the
+ * queries ran.
+ */
+function principalIssues(tenant: PrincipalInfo, system: PrincipalInfo): string[] {
+  const issues: string[] = [];
+  if (tenant.rolsuper === null || tenant.rolbypassrls === null) issues.push("The tenant connection's role attributes could not be read.");
+  if (tenant.rolsuper) issues.push('The tenant connection is a superuser, so row-level security does not apply to it.');
+  if (tenant.rolbypassrls) issues.push('The tenant connection bypasses row-level security.');
+  if (tenant.currentUser === system.currentUser) issues.push('The tenant and system connections are the same database role.');
+  return issues;
+}
+
 export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
   async () => {
@@ -58,6 +72,8 @@ export const GET = withApi(
     // see db/system-context-storage.ts.
     const tenantPrincipal = await readPrincipal();
     const systemPrincipal = await withSystemContext(() => readPrincipal());
+
+    const issues = principalIssues(tenantPrincipal, systemPrincipal);
 
     return withSystemContext(async () => {
     const sizeResult = await db.execute(
@@ -84,7 +100,8 @@ export const GET = withApi(
       dbSizeMb: Number((dbSizeBytes / (1024 * 1024)).toFixed(2)),
       activeConnections,
       tableCount,
-      status: 'healthy',
+      status: issues.length === 0 ? 'healthy' : 'degraded',
+      issues,
       checkedAt: new Date().toISOString(),
       tenantPrincipal,
       systemPrincipal,

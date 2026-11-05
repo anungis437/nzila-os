@@ -28,7 +28,7 @@ const h = vi.hoisted(() => {
 const pushSel = (...items: unknown[]) => { h.queue.push(...items); };
 
 vi.mock('@/db', () => ({ db: h.db }));
-vi.mock('@/db/schema/indigenous-data-schema', () => new Proxy({}, {
+vi.mock('@/db/schema/domains/compliance/indigenous-data', () => new Proxy({}, {
   has: () => true,
   get: (_t, n) => (n === '__esModule' ? false : new Proxy({}, { get: (_o, c) => ({ __col: c }) })),
 }));

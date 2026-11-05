@@ -41,9 +41,12 @@ import {
   XCircle,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { ApiShapeError, envelopeData, isRecord, readApiError } from '@/lib/client/api-envelope';
+import { formatDay } from '@/lib/client/day';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
+// What GET /api/finance/invoices/:id and .../payments send: the platform_invoices and platform_payments columns, numeric ones as decimal text.
 interface LineItem {
   id: string;
   description: string;
@@ -117,9 +120,11 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const { id, locale } = use(params);
   const router = useRouter();
   const t = useTranslations('financeInvoiceDetailPage');
+  const tCommon = useTranslations('common');
 
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [paymentsError, setPaymentsError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -132,20 +137,30 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setPaymentsError(null);
     try {
       const [invRes, pmtRes] = await Promise.all([
         fetch(`/api/finance/invoices/${id}`),
         fetch(`/api/finance/invoices/${id}/payments`),
       ]);
-      if (!invRes.ok) throw new Error(t('invoiceNotFound'));
-      const invJson = await invRes.json();
-      setInvoice(invJson.data);
+      // The server's own refusal or "not found" is what the page states; a failure is not an invoice that does not exist.
+      if (!invRes.ok) throw new Error(await readApiError(invRes, t('failedToLoadInvoice')));
+      const invoicePayload = envelopeData(await invRes.json());
+      if (!Array.isArray(invoicePayload.lineItems)) throw new ApiShapeError('no line items');
+      setInvoice(invoicePayload as unknown as InvoiceDetail);
 
-      if (pmtRes.ok) {
-        const pmtJson = await pmtRes.json();
-        setPayments(pmtJson.data ?? []);
+      // The payments are a separate read: a failure of it is shown where the payments go, never as "no payments recorded".
+      try {
+        if (!pmtRes.ok) throw new Error(await readApiError(pmtRes, 'Failed to load payments'));
+        const pmtBody: unknown = await pmtRes.json();
+        if (!isRecord(pmtBody) || !Array.isArray(pmtBody.data)) throw new ApiShapeError('no payment list');
+        setPayments(pmtBody.data as Payment[]);
+      } catch (paymentsFailure) {
+        setPayments([]);
+        setPaymentsError(paymentsFailure instanceof Error ? paymentsFailure.message : 'Failed to load payments');
       }
     } catch (err) {
+      setInvoice(null);
       setError(err instanceof Error ? err.message : t('failedToLoadInvoice'));
     } finally {
       setLoading(false);
@@ -169,8 +184,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         }),
       });
       if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        throw new Error(json.message ?? t('failedToRecordPayment'));
+        throw new Error(await readApiError(res, t('failedToRecordPayment')));
       }
       setShowPayForm(false);
       setPayForm({ amount: '', method: 'eft', externalReference: '' });
@@ -225,15 +239,15 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             <div>
               <h1 className="text-xl font-bold">{invoice.invoiceNumber}</h1>
               <p className="text-sm text-muted-foreground">
-                {t('issuedLabel')} {new Date(invoice.issueDate).toLocaleDateString(locale)} ·
-                {t('dueLabel')} {new Date(invoice.dueDate).toLocaleDateString(locale)}
+                {t('issuedLabel')} {formatDay(invoice.issueDate, locale, 'numeric')} ·
+                {t('dueLabel')} {formatDay(invoice.dueDate, locale, 'numeric')}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <StatusIcon status={invoice.status} />
             <Badge variant={statusVariant(invoice.status)} className="capitalize">
-              {t(`invoiceStatus.${invoice.status}`)}
+              {t.has(`invoiceStatus.${invoice.status}`) ? t(`invoiceStatus.${invoice.status}`) : invoice.status}
             </Badge>
           </div>
         </div>
@@ -361,7 +375,16 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
           </div>
         )}
 
-        {payments.length === 0 ? (
+        {paymentsError !== null ? (
+          <div className="p-6 space-y-3">
+            <p role="alert" className="text-sm text-destructive flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" /> {paymentsError}
+            </p>
+            <Button variant="outline" size="sm" onClick={() => void load()}>
+              {tCommon('retry')}
+            </Button>
+          </div>
+        ) : payments.length === 0 ? (
           <p className="p-6 text-sm text-muted-foreground">{t('noPaymentsRecorded')}</p>
         ) : (
           <Table>
@@ -381,7 +404,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                   <TableCell className="text-right font-medium">{formatCurrency(Number(pmt.amount))}</TableCell>
                   <TableCell>
                     <Badge variant={pmt.status === 'completed' ? 'default' : pmt.status === 'failed' ? 'destructive' : 'secondary'}>
-                      {t(`paymentStatus.${pmt.status}`)}
+                      {t.has(`paymentStatus.${pmt.status}`) ? t(`paymentStatus.${pmt.status}`) : pmt.status}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">{pmt.externalReference ?? '—'}</TableCell>

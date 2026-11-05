@@ -6,7 +6,8 @@
     "@kilocode/plugin": "7.2.52"
   },
   "overrides": {
-    "toml": "5.0.1"
+    "toml": "5.0.1",
+    "zod": "4.6.7"
   },
   "name": "nzila-kilo-local-tooling",
   "private": true

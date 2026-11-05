@@ -20,7 +20,7 @@ vi.mock('@/db/db', () => ({
 }));
 
 vi.mock('@/db/schema', () => ({
-  userUuidMapping: { clerkUserId: 'clerk_user_id' },
+  userUuidMapping: { authUserId: 'clerk_user_id' },
 }));
 
 vi.mock('drizzle-orm', () => ({
@@ -33,7 +33,7 @@ describe('getOrCreateUserUuid', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns existing UUID when mapping exists', async () => {
-    mocks.mockFindFirst.mockResolvedValue({ clerkUserId: 'user_abc', userUuid: 'uuid-123' });
+    mocks.mockFindFirst.mockResolvedValue({ authUserId: 'user_abc', userUuid: 'uuid-123' });
     const result = await getOrCreateUserUuid('user_abc');
     expect(result).toBe('uuid-123');
     expect(mocks.mockInsert).not.toHaveBeenCalled();
@@ -41,7 +41,7 @@ describe('getOrCreateUserUuid', () => {
 
   it('creates new mapping when not found', async () => {
     mocks.mockFindFirst.mockResolvedValue(undefined);
-    mocks.mockReturning.mockResolvedValue([{ clerkUserId: 'user_new', userUuid: 'uuid-new' }]);
+    mocks.mockReturning.mockResolvedValue([{ authUserId: 'user_new', userUuid: 'uuid-new' }]);
     mocks.mockValues.mockReturnValue({ returning: mocks.mockReturning });
     mocks.mockInsert.mockReturnValue({ values: mocks.mockValues });
 
@@ -50,13 +50,13 @@ describe('getOrCreateUserUuid', () => {
     expect(mocks.mockInsert).toHaveBeenCalled();
   });
 
-  it('passes clerkUserId to insert values', async () => {
+  it('passes authUserId to insert values', async () => {
     mocks.mockFindFirst.mockResolvedValue(null);
-    mocks.mockReturning.mockResolvedValue([{ clerkUserId: 'user_x', userUuid: 'uuid-x' }]);
+    mocks.mockReturning.mockResolvedValue([{ authUserId: 'user_x', userUuid: 'uuid-x' }]);
     mocks.mockValues.mockReturnValue({ returning: mocks.mockReturning });
     mocks.mockInsert.mockReturnValue({ values: mocks.mockValues });
 
     await getOrCreateUserUuid('user_x');
-    expect(mocks.mockValues).toHaveBeenCalledWith({ clerkUserId: 'user_x' });
+    expect(mocks.mockValues).toHaveBeenCalledWith({ authUserId: 'user_x' });
   });
 });

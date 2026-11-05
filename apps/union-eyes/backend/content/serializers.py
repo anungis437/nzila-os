@@ -16,105 +16,105 @@ class BoardPacketsSerializer(serializers.ModelSerializer):
 class BoardPacketSectionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoardPacketSections
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'packet']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BoardPacketDistributionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoardPacketDistributions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'packet']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BoardPacketTemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoardPacketTemplates
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'name']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CmsTemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = CmsTemplates
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CmsPagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = CmsPages
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CmsBlocksSerializer(serializers.ModelSerializer):
     class Meta:
         model = CmsBlocks
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CmsNavigationMenusSerializer(serializers.ModelSerializer):
     class Meta:
         model = CmsNavigationMenus
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CmsMediaLibrarySerializer(serializers.ModelSerializer):
     class Meta:
         model = CmsMediaLibrary
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PublicEventsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PublicEvents
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class EventRegistrationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventRegistrations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class EventCheckInsSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventCheckIns
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class JobPostingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobPostings
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class JobApplicationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplications
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class JobSavedSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobSaved
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class WebsiteSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = WebsiteSettings
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -128,7 +128,15 @@ class DocumentFoldersSerializer(serializers.ModelSerializer):
 class DocumentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Documents
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'organization_id', 'folder_id', 'title', 'filename',
+            'name', 'file_url', 'file_type', 'content_type', 'mime_type', 'document_type',
+            'size_bytes', 'file_size', 'category', 'tags', 'blob_container', 'blob_path', 'sha256',
+            'description', 'content_text', 'metadata', 'uploaded_by', 'uploaded_at', 'status',
+            'privacy_label', 'access_level', 'contains_pii', 'contains_medical_sensitive',
+            'contains_legal_privilege', 'member_pii', 'medical_sensitive', 'disciplinary_sensitive',
+            'is_confidential', 'deleted_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -142,7 +150,10 @@ class PublicContentSerializer(serializers.ModelSerializer):
 class MemberDocumentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberDocuments
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'organization_id', 'user_id', 'file_name', 'file_url', 'file_size',
+            'file_type', 'category', 'uploaded_at', 'updated_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -170,14 +181,14 @@ class SignatureAuditTrailSerializer(serializers.ModelSerializer):
 class SignatureTemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SignatureTemplates
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SignatureWebhooksLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = SignatureWebhooksLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'provider', 'event_type', 'document']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -213,6 +224,11 @@ class ShopifyConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShopifyConfig
         fields = '__all__'
+        extra_kwargs = {
+            'admin_token_secret_ref': {'write_only': True},
+            'storefront_token_secret_ref': {'write_only': True},
+            'webhook_secret_ref': {'write_only': True},
+        }
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -227,83 +243,94 @@ class SocialAccountsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialAccounts
         fields = '__all__'
+        extra_kwargs = {'access_token': {'write_only': True}, 'refresh_token': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SocialPostsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialPosts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SocialCampaignsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialCampaigns
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SocialAnalyticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialAnalytics
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SocialFeedsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialFeeds
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class SocialEngagementSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialEngagement
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ImpactMetricsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImpactMetrics
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class CaseStudiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaseStudies
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'slug', 'title', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class TestimonialsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Testimonials
-        fields = '__all__'
+        fields = [
+            'id', 'updated_at', 'type', 'quote', 'author', 'role', 'organization',
+            'organization_type', 'photo', 'featured', 'visibility', 'created_at', 'approved_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PilotApplicationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PilotApplications
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'organization_name', 'organization_type',
+            'contact_name', 'contact_email', 'contact_phone', 'member_count', 'jurisdictions',
+            'sectors', 'current_system', 'challenges', 'goals', 'readiness_score', 'verified_by',
+            'verified_at', 'verified_member_count', 'verified_pilot_amount',
+            'verified_subscription_plan_id', 'commercial_terms_approved_by',
+            'commercial_terms_approved_at', 'verified_organization',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PilotMetricsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PilotMetrics
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'pilot_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class OrganizerImpactsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizerImpacts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 

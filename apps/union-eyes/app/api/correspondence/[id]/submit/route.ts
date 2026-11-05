@@ -11,6 +11,7 @@ import {
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: "steward" },
     openapi: { tags: ["Correspondence"], summary: "Submit for review" },
   },

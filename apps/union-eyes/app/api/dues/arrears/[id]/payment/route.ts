@@ -1,34 +1,38 @@
 /**
- * Record Payment for Member in Arrears
+ * Post a Payment to a Member's Arrears
  *
  * POST /api/dues/arrears/[id]/payment
  *
- * Body: { amount: number; notes?: string }
+ * Body: { paymentId: uuid; amount: number; notes?: string }
  *
- * Creates a payment ledger entry and updates the member's arrears record.
+ * Authority is a kernel decision (UE-CONV-D-001), not a role: posting a received payment to the member's dues ledger is
+ * the `execute` duty of the registered payment `paymentId`. The caller must hold a live `financial` mandate naming the
+ * payment's account and the execute duty, must be independent of whoever prepared and approved it, and the amount
+ * claimed must equal the amount on record. The financial step, ledger entry, arrears update and audit record are one
+ * transaction. See lib/authority/store/finance-route-adapter.ts for the answers (404 / 403 / 409 / 501).
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { db } from '@/db';
-import { memberArrears, memberDuesLedger } from '@/db/schema/dues-finance-schema';
-import { eq, and } from 'drizzle-orm';
+import { recordArrearsPayment } from '@/lib/dues/arrears-payment';
+import { financialDutyErrorResponse } from '@/lib/finance/financial-duty-response';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
 const schema = z.object({
+  paymentId: z.guid(),
   amount: z.number().positive(),
   notes: z.string().max(500).optional(),
 });
 
 export const POST = withApi(
   {
-    auth: { minRole: 'steward' },
+    auth: { required: true },
     entitlement: 'financial_intelligence_suite',
-    openapi: { tags: ['Dues'], summary: 'Record a payment for a member in arrears' },
+    openapi: { tags: ['Dues'], summary: 'Execute a registered payment against a member in arrears' },
   },
   async ({ request, params, organizationId, userId }) => {
-    if (!organizationId) throw ApiError.badRequest('Organization context required');
+    if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
 
     const memberId = params.id;
 
@@ -36,59 +40,21 @@ export const POST = withApi(
     const parsed = schema.safeParse(body);
     if (!parsed.success) throw ApiError.badRequest('Invalid request body');
 
-    const { amount, notes } = parsed.data;
+    const { paymentId, amount, notes } = parsed.data;
 
-    // Fetch current arrears balance
-    const [arrears] = await db
-      .select()
-      .from(memberArrears)
-      .where(
-        and(
-          eq(memberArrears.userId, memberId),
-          eq(memberArrears.organizationId, organizationId),
-        ),
+    let outcome;
+    try {
+      outcome = await withRLSContext({ organizationId }, (tx) =>
+        recordArrearsPayment(tx, { userId, organizationId, memberId, paymentId, amount, notes }),
       );
+    } catch (error) {
+      const refusal = financialDutyErrorResponse(error);
+      if (refusal) return refusal;
+      throw error;
+    }
 
-    if (!arrears) throw ApiError.notFound('Arrears record not found');
+    logger.info('Arrears payment recorded', { memberId, paymentId, amount, balanceAfter: outcome.balanceAfter });
 
-    const balanceBefore = parseFloat(arrears.totalOwed ?? '0');
-    const balanceAfter = Math.max(0, balanceBefore - amount);
-    const newStatus = balanceAfter === 0 ? 'current' : arrears.arrearsStatus;
-
-    // Record payment in ledger and update arrears
-    const updated = await withRLSContext(async () => {
-      await db.insert(memberDuesLedger).values({
-        userId: memberId,
-        organizationId,
-        transactionType: 'payment',
-        transactionDate: new Date(),
-        effectiveDate: new Date(),
-        amount: String(amount),
-        balanceBefore: String(balanceBefore),
-        balanceAfter: String(balanceAfter),
-        description: notes ?? 'Arrears payment',
-        notes,
-        paymentMethod: 'manual',
-        createdBy: userId ?? undefined,
-      });
-
-      // Update arrears record
-      const [u] = await db
-        .update(memberArrears)
-        .set({
-          totalOwed: String(balanceAfter),
-          lastPaymentDate: new Date(),
-          arrearsStatus: newStatus,
-          updatedAt: new Date(),
-        })
-        .where(eq(memberArrears.id, arrears.id))
-        .returning();
-
-      return u;
-    });
-
-    logger.info('Arrears payment recorded', { memberId, amount, balanceAfter });
-
-    return { success: true, newBalance: balanceAfter, arrears: updated };
+    return { success: true, newBalance: outcome.balanceAfter, arrears: outcome.arrears };
   },
 );

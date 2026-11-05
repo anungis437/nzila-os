@@ -47,10 +47,10 @@ export const satisfactionSurveys = pgTable(
       .references(() => organizations.id, { onDelete: 'cascade' }),
 
     // Link to claim and people
+    // Both are NULL once an anonymous response is completed (platform 0050): the response is held without them.
     claimId: uuid('claim_id')
-      .notNull()
       .references(() => claims.id, { onDelete: 'cascade' }),
-    memberId: varchar('member_id', { length: 255 }).notNull(), // who fills it out
+    memberId: varchar('member_id', { length: 255 }), // who fills it out
     lroId: varchar('lro_id', { length: 255 }).notNull(), // LRO being rated (assignedTo)
 
     // Status
@@ -103,6 +103,21 @@ export const satisfactionSurveys = pgTable(
       sql`${table.professionalismRating} IS NULL OR (${table.professionalismRating} >= 1 AND ${table.professionalismRating} <= 5)`),
     checkOutcome: check('valid_outcome_rating',
       sql`${table.outcomeRating} IS NULL OR (${table.outcomeRating} >= 1 AND ${table.outcomeRating} <= 5)`),
+  })
+);
+
+// The record that a member has answered the survey for a claim (platform 0050). No answer, response id or timestamp.
+export const satisfactionSurveyResponded = pgTable(
+  'satisfaction_survey_responded',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizationId: uuid('organization_id').notNull(),
+    claimId: uuid('claim_id').notNull(),
+    memberId: varchar('member_id', { length: 255 }).notNull(),
+  },
+  (table) => ({
+    orgIdx: index('satisfaction_survey_responded_org_idx').on(table.organizationId),
+    claimMemberUnique: unique('satisfaction_survey_responded_claim_member_uq').on(table.claimId, table.memberId),
   })
 );
 

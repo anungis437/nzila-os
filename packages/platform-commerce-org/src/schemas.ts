@@ -31,7 +31,7 @@ const EmailTemplateSchema = z.object({
 // ── 2A — OrgCommerceSettings ────────────────────────────────────────────────
 
 export const OrgCommerceSettingsSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   currency: z.string().length(3).default('CAD'),
   locale: z.string().default('en-CA'),
   quotePrefix: z.string().min(1).max(10).default('SQ'),
@@ -49,7 +49,7 @@ export const OrgCommerceSettingsSchema = z.object({
 // ── 2B — OrgQuotePolicy ────────────────────────────────────────────────────
 
 export const OrgQuotePolicySchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   minMarginPercent: z.number().min(0).max(100).default(15),
   approvalRequiredBelowMargin: z.boolean().default(true),
   maxDiscountWithoutApproval: z.number().min(0).max(100).default(25),
@@ -63,13 +63,13 @@ export const OrgQuotePolicySchema = z.object({
       standard: z.number().min(0).max(100).default(25),
       premium: z.number().min(0).max(100).default(35),
     })
-    .default({}),
+    .prefault({}),
 })
 
 // ── 2C — OrgPaymentPolicy ──────────────────────────────────────────────────
 
 export const OrgPaymentPolicySchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   depositRequired: z.boolean().default(true),
   defaultDepositPercent: z.number().min(0).max(100).default(30),
   depositRequiredBeforeProduction: z.boolean().default(true),
@@ -85,8 +85,8 @@ export const OrgPaymentPolicySchema = z.object({
 // ── 2D — OrgSupplierPolicy ─────────────────────────────────────────────────
 
 export const OrgSupplierPolicySchema = z.object({
-  orgId: z.string().uuid(),
-  preferredSupplierIds: z.array(z.string().uuid()).default([]),
+  orgId: z.guid(),
+  preferredSupplierIds: z.array(z.guid()).default([]),
   supplierSelectionStrategy: z
     .enum(['LOWEST_COST', 'FASTEST', 'BALANCED', 'MANUAL'])
     .default('BALANCED'),
@@ -98,18 +98,18 @@ export const OrgSupplierPolicySchema = z.object({
 // ── 2E — OrgCatalogPolicy ──────────────────────────────────────────────────
 
 export const OrgCatalogPolicySchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   enableInternalSkuMapping: z.boolean().default(false),
   defaultMarkupStrategy: z.enum(['FIXED_PERCENT', 'TIERED', 'MANUAL']).default('FIXED_PERCENT'),
   defaultFixedMarkupPercent: z.number().min(0).max(500).default(40),
   defaultDecorationRule: z.string().default('standard'),
-  categoryMappings: z.record(z.string(), z.string()).default({}),
+  categoryMappings: z.record(z.string(), z.string()).prefault({}),
 })
 
 // ── 2F — OrgBrandingConfig ─────────────────────────────────────────────────
 
 export const OrgBrandingConfigSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   companyName: z.string().min(1).default('ShopMoiCa.ca'),
   companyLegalName: z.string().default('Nzila Ventures SENC'),
   displayName: z.string().min(1).default('ShopMoiCa'),
@@ -127,7 +127,7 @@ export const OrgBrandingConfigSchema = z.object({
 // ── 2G — OrgCommunicationTemplates ─────────────────────────────────────────
 
 export const OrgCommunicationTemplatesSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   templates: z.object({
     quoteSent: EmailTemplateSchema.default({
       subject: 'Your quote {{ref}} from {{companyName}}',

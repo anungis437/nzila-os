@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   mockSelect: vi.fn(),
   mockInsert: vi.fn(),
   mockExecute: vi.fn(),
+  mockTransaction: vi.fn(),
 }));
 
 function chain(resolveValue: any): any {
@@ -37,13 +38,16 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
-vi.mock('@/db/db', () => ({
-  db: {
+vi.mock('@/db/db', () => {
+  const db = {
     select: (...a: any[]) => mocks.mockSelect(...a),
     insert: (...a: any[]) => mocks.mockInsert(...a),
     execute: (...a: any[]) => mocks.mockExecute(...a),
-  },
-}));
+    // A nested transaction (a savepoint) runs its work on a handle that executes on the same mock.
+    transaction: (work: (tx: unknown) => Promise<unknown>) => mocks.mockTransaction(work),
+  };
+  return { db };
+});
 
 // Schema mocks — batch-ingest imports these tables for db.insert
 vi.mock('@/db/schema/grievance-schema', () => ({
@@ -109,6 +113,11 @@ describe('ingestGrievanceBatch', () => {
 
     // Default: db.execute returns a single row with id for the grievance upsert
     mocks.mockExecute.mockResolvedValue([{ id: 'grievance-001' }]);
+
+    // Default: a record's nested transaction runs its work on a handle that executes on the same mock
+    mocks.mockTransaction.mockImplementation((work: (tx: unknown) => Promise<unknown>) =>
+      work({ execute: (...a: any[]) => mocks.mockExecute(...a) }),
+    );
   });
 
   // ─── Validation Rejection ──────────────────────────────────────────────
@@ -177,16 +186,15 @@ describe('ingestGrievanceBatch', () => {
 
   // ─── §3: Partial Ingestion ────────────────────────────────────────────
 
-  it('continues on error when continueOnError is true', async () => {
-    // Make the execute mock fail for the first grievance upsert, succeed for the second
-    let executeCalls = 0;
-    mocks.mockExecute.mockImplementation(() => {
-      executeCalls++;
-      // Upsert calls (odd-numbered considering tracking updates interleave)
-      if (executeCalls === 1) {
+  it('continues on error when continueOnError is true: each record runs in its own nested transaction', async () => {
+    // The first grievance upsert fails, the second succeeds.
+    let failedOnce = false;
+    mocks.mockExecute.mockImplementation((query: unknown) => {
+      if (!failedOnce && JSON.stringify(query).includes('INSERT INTO grievances')) {
+        failedOnce = true;
         return Promise.reject(new Error('DB constraint violation'));
       }
-      return Promise.resolve([{ id: `grievance-${executeCalls}` }]);
+      return Promise.resolve([{ id: 'grievance-1' }]);
     });
 
     const result = await ingestGrievanceBatch(
@@ -197,9 +205,22 @@ describe('ingestGrievanceBatch', () => {
       makeOpts({ continueOnError: true }),
     );
 
-    // At least one record should have been processed
     expect(result.totalRecords).toBe(2);
+    expect(result).toMatchObject({ status: 'partial', succeeded: 1, failed: 1 });
+    expect(result.errors).toEqual([{ index: 0, externalId: 'A', error: 'DB constraint violation' }]);
+    // The writes of a record are made on the handle of a nested transaction (a savepoint), one per record; the failed one rolls back to it.
+    expect(mocks.mockTransaction).toHaveBeenCalledTimes(2);
     expect(result.durationMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('does not open a nested transaction for a record that names another organization', async () => {
+    const result = await ingestGrievanceBatch(
+      [makeRecord({ external_case_id: 'A' }), makeRecord({ external_case_id: 'B', organization_id: '00000000-0000-4000-a000-0000000000ff' })],
+      makeOpts({ continueOnError: true }),
+    );
+    expect(result).toMatchObject({ status: 'partial', succeeded: 1, failed: 1 });
+    expect(result.errors[0].error).toMatch(/Organization mismatch/);
+    expect(mocks.mockTransaction).toHaveBeenCalledTimes(1);
   });
 
   // ─── §8: Org Mismatch ────────────────────────────────────────────────

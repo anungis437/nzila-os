@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+// The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 
 const { whereMock, generateMock } = vi.hoisted(() => ({
   whereMock: vi.fn(),
@@ -6,7 +8,7 @@ const { whereMock, generateMock } = vi.hoisted(() => ({
 }));
 
 vi.mock('@/db/db', () => ({
-  db: { select: () => ({ from: () => ({ where: whereMock }) }) },
+  db: { select: () => ({ from: () => ({ where: (...args: unknown[]) => ({ limit: () => whereMock(...args) }) }) }) },
 }));
 vi.mock('@/db/schema', () => ({
   exitInterviews: {

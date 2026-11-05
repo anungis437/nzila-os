@@ -1,5 +1,9 @@
  
 export async function register() {
+  // Every stored calendar day is anchored to UTC midnight and the Django backend runs in UTC (TIME_ZONE = "UTC"). The Node server formats and compares in UTC as well, so a host
+  // set to another zone cannot move a day in an e-mail, a PDF, a receipt or a due-date calculation (day-render census, UE-CONV-H-029). Set before anything reads a date.
+  if (process.env.NEXT_RUNTIME === 'nodejs') process.env.TZ = 'UTC';
+
   // IMPORTANT: OpenTelemetry must be initialized FIRST, before any other imports
   // This ensures auto-instrumentation can wrap all modules correctly
   if (process.env.NEXT_RUNTIME === 'nodejs' && process.env.NEXT_PHASE !== 'phase-production-build') {
@@ -195,8 +199,9 @@ export async function register() {
         logger.warn(pilotDemoRuntime.startupMessage, { runtimeMode: pilotDemoRuntime.runtimeMode });
       }
 
-      // Run database startup checks (optional, can be disabled with env var)
-      if (process.env.SKIP_DB_STARTUP_CHECK !== 'true') {
+      // Run the database startup checks. Only a developer's machine or a test run may skip them (SKIP_DB_STARTUP_CHECK); a deployment always checks.
+      const { skipsDatabaseStartupCheck } = await import('./lib/runtime/startup-checks');
+      if (!skipsDatabaseStartupCheck()) {
         const { runDatabaseStartupChecks } = await import('./lib/db-validator');
         const dbValidation = await runDatabaseStartupChecks();
         
@@ -235,7 +240,9 @@ export async function register() {
           }
         }
       } else if (process.env.NODE_ENV === 'production') {
-        logger.error('Redis not configured - rate limiting will fail-closed in production');
+        // The contract (lib/rate-limiter.ts): an explicit per-route limit REJECTS when Redis is missing or down; only the
+        // catch-all organization limit fails open, and it says so on every request. Health reports the degraded state.
+        logger.error('Redis not configured - rate limiting is degraded: explicit per-route limits reject requests, the catch-all organization limit fails open');
       }
     } catch (error) {
       const { logger } = await import('./lib/logger');
@@ -253,6 +260,24 @@ export async function register() {
     }
 
     await import('./sentry.server.config');
+
+    // Warm the paths the first real request would otherwise pay for (loading the 500-table schema module and opening the
+    // first database connection). Fire-and-forget: it never delays or fails startup, and health still reports truthfully.
+    if (process.env.NODE_ENV === 'production') {
+      void (async () => {
+        try {
+          const started = Date.now();
+          const { db } = await import('@nzila/db');
+          const { sql } = await import('drizzle-orm');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await db.execute(sql`SELECT 1` as any);
+          const { logger } = await import('./lib/logger');
+          logger.info('Startup warm-up complete', { ms: Date.now() - started });
+        } catch {
+          // Warm-up is best effort; the readiness checks remain the authority.
+        }
+      })();
+    }
   }
 
   if (process.env.NEXT_RUNTIME === 'edge') {

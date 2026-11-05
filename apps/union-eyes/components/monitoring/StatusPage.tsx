@@ -54,16 +54,21 @@ export function StatusPage({ labels: labelsProp }: { labels?: StatusLabels } = {
   const l = labelsProp ?? defaultStatusLabels;
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
+  // A degraded system may answer with its status and an error code, so the body decides, not the code; a body that is not a status is a failed check.
   const fetchStatus = async () => {
     try {
       const response = await fetch('/api/status');
-      const data = await response.json();
-      setStatus(data);
+      const data = (await response.json()) as Partial<SystemStatus> | null;
+      if (!data || typeof data.status !== 'string' || !Array.isArray(data.services)) throw new Error('The status answer is not a system status');
+      setStatus(data as SystemStatus);
+      setFailed(false);
       setLastUpdate(new Date());
-    } catch (_error) {
-} finally {
+    } catch {
+      setFailed(true);
+    } finally {
       setLoading(false);
     }
   };
@@ -97,6 +102,14 @@ export function StatusPage({ labels: labelsProp }: { labels?: StatusLabels } = {
 
   return (
     <div className="container mx-auto max-w-4xl space-y-6 py-8">
+      {failed && (
+        <Card role="alert" data-testid="status-check-failed">
+          <CardContent className="pt-6">
+            <p className="text-center text-sm font-medium text-destructive">{l.loadError}</p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Overall Status */}
       <Card>
         <CardHeader>

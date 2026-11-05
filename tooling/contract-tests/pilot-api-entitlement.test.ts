@@ -93,8 +93,11 @@ describe('PILOT_API_003 — Pilot role boundaries enforced', () => {
   })
 
   it('members see only published/archived interviews', () => {
+    // The finished-only member filter moved with the sensitivity and consent gates into the shared interview access policy.
     const routePath = join(UE_APP, 'app', 'api', 'exit-interviews', 'route.ts')
-    const content = readContent(routePath)
+    const policyPath = join(UE_APP, 'lib', 'knowledge-transfer', 'governance', 'interview-access.ts')
+    const content = readContent(routePath) + '\n' + readContent(policyPath)
+    expect(content).toMatch(/interviewListCondition\(/)
     const hasPublishedFilter = /published.*archived|archived.*published/.test(content)
     expect(hasPublishedFilter, 'Members should see only published/archived').toBe(true)
   })

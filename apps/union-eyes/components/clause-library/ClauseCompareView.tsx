@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
+import { recordedDay } from "@/lib/client/day";
 import { X, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,9 +27,10 @@ interface CompareClause {
   effectiveDate?: string;
   expiryDate?: string;
   sharingLevel: string;
-  sourceOrganization: {
-    organizationName: string;
-    organizationLevel: string;
+  /** Absent when the clause is anonymized and shared by another organization: its source is not disclosed (lib/clause-library/source-projection.ts). */
+  sourceOrganization?: {
+    id: string;
+    organizationName: string | null;
   };
   tags?: Array<{ tagName: string }>;
 }
@@ -37,7 +39,6 @@ interface ComparisonAnalysis {
   commonKeywords: string[];
   differences: {
     clauseTypes: string[];
-    organizationLevels: string[];
     sectors: string[];
     provinces: string[];
     dateRanges: string;
@@ -76,6 +77,8 @@ const CLAUSE_TYPE_LABELS: Record<string, string> = {
   pension: "Pension",
   other: "Other",
 };
+
+const ANONYMIZED_SOURCE = "Anonymized";
 
 export function ClauseCompareView({
   clauses,
@@ -124,7 +127,7 @@ export function ClauseCompareView({
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Statistics */}
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-5">
               <div>
                 <div className="text-2xl font-bold">{analysis.statistics.totalClauses}</div>
                 <div className="text-xs text-muted-foreground">Clauses</div>
@@ -140,6 +143,10 @@ export function ClauseCompareView({
               <div>
                 <div className="text-2xl font-bold">{analysis.statistics.uniqueSectors}</div>
                 <div className="text-xs text-muted-foreground">Sectors</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold">{analysis.statistics.uniqueProvinces}</div>
+                <div className="text-xs text-muted-foreground">Provinces</div>
               </div>
             </div>
 
@@ -284,10 +291,7 @@ export function ClauseCompareView({
                   <div className="text-xs font-medium text-muted-foreground mb-1">
                     Organization
                   </div>
-                  <div className="text-sm">{clause.sourceOrganization.organizationName}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {clause.sourceOrganization.organizationLevel}
-                  </div>
+                  <div className="text-sm">{clause.sourceOrganization?.organizationName ?? ANONYMIZED_SOURCE}</div>
                 </div>
 
                 {/* Details Grid */}
@@ -307,13 +311,13 @@ export function ClauseCompareView({
                   {clause.effectiveDate && (
                     <div>
                       <div className="text-xs text-muted-foreground">Effective</div>
-                      <div>{format(new Date(clause.effectiveDate), "MMM yyyy")}</div>
+                      <div>{format(recordedDay(clause.effectiveDate), "MMM yyyy")}</div>
                     </div>
                   )}
                   {clause.expiryDate && (
                     <div>
                       <div className="text-xs text-muted-foreground">Expiry</div>
-                      <div>{format(new Date(clause.expiryDate), "MMM yyyy")}</div>
+                      <div>{format(recordedDay(clause.expiryDate), "MMM yyyy")}</div>
                     </div>
                   )}
                 </div>
@@ -387,7 +391,7 @@ export function ClauseCompareView({
                   <td className="py-2 text-muted-foreground">Organization</td>
                   {clauses.map((clause) => (
                     <td key={clause.id} className="py-2">
-                      {clause.sourceOrganization.organizationName}
+                      {clause.sourceOrganization?.organizationName ?? ANONYMIZED_SOURCE}
                     </td>
                   ))}
                 </tr>
@@ -412,7 +416,7 @@ export function ClauseCompareView({
                   {clauses.map((clause) => (
                     <td key={clause.id} className="py-2">
                       {clause.effectiveDate
-                        ? format(new Date(clause.effectiveDate), "MMM d, yyyy")
+                        ? format(recordedDay(clause.effectiveDate), "MMM d, yyyy")
                         : "-"}
                     </td>
                   ))}

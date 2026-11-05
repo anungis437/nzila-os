@@ -74,24 +74,6 @@ export interface RecurringEventInstance {
   isException: boolean;
 }
 
-export interface MeetingRoom {
-  id: string;
-  name: string;
-  capacity: number;
-  location: string;
-  amenities: string[];
-  isAvailable: boolean;
-}
-
-export interface RoomBooking {
-  id: string;
-  roomId: string;
-  eventId: string;
-  startTime: Date;
-  endTime: Date;
-  bookedBy: string;
-}
-
 export interface AvailabilitySlot {
   start: Date;
   end: Date;
@@ -190,13 +172,14 @@ export async function createCalendar(data: NewCalendar): Promise<Calendar> {
  */
 export async function updateCalendar(
   id: string,
+  organizationId: string,
   data: Partial<NewCalendar>
 ): Promise<Calendar | null> {
   try {
     const [updated] = await db
       .update(calendars)
       .set(data)
-      .where(eq(calendars.id, id))
+      .where(and(eq(calendars.id, id), eq(calendars.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -209,11 +192,11 @@ export async function updateCalendar(
 /**
  * Delete calendar
  */
-export async function deleteCalendar(id: string): Promise<boolean> {
+export async function deleteCalendar(id: string, organizationId: string): Promise<boolean> {
   try {
     await db
       .delete(calendars)
-      .where(eq(calendars.id, id));
+      .where(and(eq(calendars.id, id), eq(calendars.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -603,88 +586,9 @@ export async function getEventAttendees(eventId: string): Promise<EventAttendee[
 // Meeting Rooms
 // ============================================================================
 
-/**
- * List meeting rooms
- */
-export async function listMeetingRooms(
-  filters?: {
-    location?: string;
-    minCapacity?: number;
-    amenities?: string[];
-  }
-): Promise<MeetingRoom[]> {
-  try {
-    // In production, query meeting_rooms table
-    return [];
-  } catch (error) {
-    logger.error("Error listing meeting rooms", { error, filters });
-    throw new Error("Failed to list meeting rooms");
-  }
-}
-
-/**
- * Check room availability
- */
-export async function checkRoomAvailability(
-  roomId: string,
-  _startTime: Date,
-  _endTime: Date
-): Promise<boolean> {
-  try {
-    // In production, query room_bookings table
-    // Check for overlapping bookings
-    return true;
-  } catch (error) {
-    logger.error("Error checking room availability", { error, roomId });
-    throw new Error("Failed to check room availability");
-  }
-}
-
-/**
- * Book meeting room
- */
-export async function bookMeetingRoom(
-  roomId: string,
-  eventId: string,
-  startTime: Date,
-  endTime: Date,
-  bookedBy: string
-): Promise<RoomBooking> {
-  try {
-    const available = await checkRoomAvailability(roomId, startTime, endTime);
-    if (!available) {
-      throw new Error("Room is not available for the requested time");
-    }
-
-    // In production, insert into room_bookings table
-    const booking: RoomBooking = {
-      id: `booking-${Date.now()}`,
-      roomId,
-      eventId,
-      startTime,
-      endTime,
-      bookedBy,
-    };
-
-    return booking;
-  } catch (error) {
-    logger.error("Error booking meeting room", { error, roomId });
-    throw new Error("Failed to book meeting room");
-  }
-}
-
-/**
- * Cancel room booking
- */
-export async function cancelRoomBooking(bookingId: string): Promise<boolean> {
-  try {
-    // In production, delete from room_bookings table
-    return true;
-  } catch (error) {
-    logger.error("Error canceling room booking", { error, bookingId });
-    throw new Error("Failed to cancel room booking");
-  }
-}
+// Room listing, availability and booking live in lib/services/room-booking-service.ts, which applies the room's own rules
+// under the caller's organization. The placeholders that stood here answered "available" for every request, returned a
+// generated booking id without storing anything, and reported a cancellation that cancelled nothing.
 
 // ============================================================================
 // Availability Scheduling
@@ -746,11 +650,12 @@ export async function findCommonAvailability(
  */
 export async function syncExternalCalendar(
   calendarId: string,
+  organizationId: string,
   provider: "google" | "outlook" | "apple"
 ): Promise<{ success: boolean; syncedEvents: number; errors?: string[] }> {
   try {
     const calendar = await getCalendarById(calendarId);
-    if (!calendar) {
+    if (!calendar || calendar.organizationId !== organizationId) {
       throw new Error("Calendar not found");
     }
 
@@ -760,7 +665,7 @@ export async function syncExternalCalendar(
     // 3. Synchronize bidirectionally
     // 4. Update sync status and token
 
-    await updateCalendar(calendarId, {
+    await updateCalendar(calendarId, organizationId, {
       lastSyncAt: new Date(),
       syncStatus: "synced",
     });
@@ -772,7 +677,7 @@ export async function syncExternalCalendar(
   } catch (error) {
     logger.error("Error syncing external calendar", { error, calendarId, provider });
 
-    await updateCalendar(calendarId, {
+    await updateCalendar(calendarId, organizationId, {
       syncStatus: "failed",
     });
 
@@ -785,12 +690,13 @@ export async function syncExternalCalendar(
  */
 export async function enableCalendarSync(
   calendarId: string,
+  organizationId: string,
   provider: "google" | "outlook" | "apple",
   externalCalendarId: string,
   syncToken?: string
 ): Promise<Calendar | null> {
   try {
-    const updated = await updateCalendar(calendarId, {
+    const updated = await updateCalendar(calendarId, organizationId, {
       externalProvider: provider,
       externalCalendarId,
       syncEnabled: true,
@@ -800,7 +706,7 @@ export async function enableCalendarSync(
 
     // Perform initial sync
     if (updated) {
-      await syncExternalCalendar(calendarId, provider);
+      await syncExternalCalendar(calendarId, organizationId, provider);
     }
 
     return updated;
@@ -813,9 +719,9 @@ export async function enableCalendarSync(
 /**
  * Disable calendar sync
  */
-export async function disableCalendarSync(calendarId: string): Promise<Calendar | null> {
+export async function disableCalendarSync(calendarId: string, organizationId: string): Promise<Calendar | null> {
   try {
-    return await updateCalendar(calendarId, {
+    return await updateCalendar(calendarId, organizationId, {
       syncEnabled: false,
       syncStatus: "disconnected",
     });

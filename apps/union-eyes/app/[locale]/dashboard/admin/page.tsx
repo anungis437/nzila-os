@@ -1,12 +1,25 @@
 "use client";
 
+/**
+ * Platform administration console.
+ *
+ * Every figure and list here is read from a route that backs it (/api/admin/stats/*, /api/admin/users, /api/admin/organizations,
+ * /api/admin/database/*), and every one of those routes needs platform authority. A request that fails is shown as the failure it
+ * is, with the reason the route gives, never as "..." or "No users found". What the application does not have behind it (system
+ * settings, a security overview, a reports hub) says so with CapabilityUnavailable instead of showing switches, counts or an audit
+ * trail that nothing produces.
+ */
 
 export const dynamic = 'force-dynamic';
-import { useState, useEffect, useCallback } from "react";
-import { useTranslations } from 'next-intl';
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useLocale, useTranslations } from 'next-intl';
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { CapabilityUnavailable } from "@/components/system/capability-unavailable";
+import { ApiShapeError, envelopeData, isRecord, readApiError } from "@/lib/client/api-envelope";
 import {
   Users,
   Settings,
@@ -16,17 +29,12 @@ import {
   Building2,
   FileText,
   Search,
-  Plus,
-  Edit,
   Trash2,
-  Check,
-  AlertCircle,
   Activity,
-  Download,
   RefreshCw,
-  Info,
   Sparkles,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 
 type AdminSection =
@@ -39,276 +47,550 @@ type AdminSection =
   | "database"
   | "ai-testing";
 
+interface PlatformStats {
+  totalMembers: number;
+  activeOrganizations: number;
+  totalOrganizations: number;
+  totalStorage: number;
+  activeToday: number;
+}
+
+interface ActivityItem {
+  id: string;
+  description: string;
+  timestamp: string | null;
+}
+
 interface LocalSection {
   id: string;
-  number: string;
+  number: string | null;
   name: string;
-  region: string;
+  region: string | null;
   memberCount: number;
   activeCount: number;
-  president: string;
-  contact: string;
-  status: "active" | "inactive";
+  president: string | null;
+  contact: string | null;
+  status: string;
 }
 
 interface SystemUser {
   id: string;
   name: string;
-  email: string;
-  role: "admin" | "lro" | "steward" | "member";
+  email: string | null;
+  role: string;
   organizationId: string;
   organizationName: string;
-  local?: string;
-  status: "active" | "inactive";
-  lastLogin: string | null;
-  joinedAt?: string | null;
+  status: string;
 }
+
+interface DatabaseHealth {
+  dbSizeMb: number;
+  activeConnections: number;
+  tableCount: number;
+  checkedAt: string | null;
+  tenantUser: string | null;
+  systemUser: string | null;
+}
+
+// GET /api/admin/users refuses a search shorter than this (lib/platform/user-directory.ts, kept here because that module is server code).
+const MIN_USER_SEARCH = 3;
+
+// The hub's entries: where each goes, and the catalog key (adminConsolePage.hub.<key>) that words it.
+const HUB_LINKS = [
+  { key: "checklist", href: "/dashboard/admin/onboarding" },
+  { key: "invites", href: "/dashboard/admin/members" },
+  { key: "structure", href: "/dashboard/structure" },
+  { key: "taxonomy", href: "/dashboard/admin/members" },
+] as const;
+
+type LoadSubject = "stats" | "activity" | "users" | "locals" | "health";
+
+/** The page's own words, from the message catalogs (adminConsolePage), in the language of the page. */
+function useCopy() {
+  const t = useTranslations("adminConsolePage");
+  return {
+    retry: t("retry"),
+    loading: t("loading"),
+    notRecorded: t("notRecorded"),
+    couldNotLoad: (subject: LoadSubject) => t(`${subject}Failed`),
+    membersChanged: (count: number) => t("membersChanged", { count }),
+    orgsTotal: (count: number) => t("orgsTotal", { count }),
+    databaseSize: t("databaseSize"),
+    databaseSizeNote: t("databaseSizeNote"),
+    noActivity: t("noActivity"),
+    searchTooShort: t("searchTooShort", { min: MIN_USER_SEARCH }),
+    noUsers: t("noUsers"),
+    noOrganizations: t("noOrganizations"),
+    organization: t("organization"),
+    removeUser: t("removeUser"),
+    toggleStatus: t("toggleStatus"),
+    confirmRemove: t("confirmRemove"),
+    userRemoved: t("userRemoved"),
+    statusUpdated: t("statusUpdated"),
+    removeFailed: t("removeFailed"),
+    statusFailed: t("statusFailed"),
+    setupHubTitle: t("setupHubTitle"),
+    setupHubBody: t("setupHubBody"),
+    hub: HUB_LINKS.map((entry) => ({ href: entry.href, title: t(`hub.${entry.key}.title`), body: t(`hub.${entry.key}.body`) })),
+    databaseTitle: t("databaseTitle"),
+    activeConnections: t("activeConnections"),
+    tables: t("tables"),
+    checkedAt: t("checkedAt"),
+    connectedAs: t("connectedAs"),
+    tenantRole: t("tenantRole"),
+    systemRole: t("systemRole"),
+    refresh: t("refresh"),
+    optimizeTitle: t("optimizeTitle"),
+    optimizeBody: t("optimizeBody"),
+    optimize: t("optimize"),
+    optimizeDone: t("optimizeDone"),
+    optimizeFailed: t("optimizeFailed"),
+    systemTitle: t("systemTitle"),
+    securityTitle: t("securityTitle"),
+    reportsTitle: t("reportsTitle"),
+    aiTitle: t("aiTitle"),
+    aiBody: t("aiBody"),
+  };
+}
+
+// ─── What the routes answer with ─────────────────────────────────────────────
+
+const text = (value: unknown): string | null => (typeof value === "string" && value !== "" ? value : null);
+/** A count arrives as a number, or as a numeric string when it comes from a SQL aggregate. */
+const count = (value: unknown): number | null => {
+  const n = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+  return typeof n === "number" && Number.isFinite(n) ? n : null;
+};
+const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
+/** The rows of a list route: withApi answers { success, data: rows }. */
+function rowsOf(body: unknown): Record<string, unknown>[] {
+  if (!isRecord(body) || !Array.isArray(body.data)) throw new ApiShapeError("no list");
+  return body.data.map((row): Record<string, unknown> => {
+    if (!isRecord(row)) throw new ApiShapeError("a row that is not a record");
+    return row;
+  });
+}
+
+function readStats(body: unknown): PlatformStats {
+  const data = envelopeData(body);
+  const totalMembers = count(data.totalMembers);
+  const activeOrganizations = count(data.activeOrganizations);
+  const totalOrganizations = count(data.totalOrganizations);
+  const totalStorage = count(data.totalStorage);
+  const activeToday = count(data.activeToday);
+  if (totalMembers === null || activeOrganizations === null || totalOrganizations === null || totalStorage === null || activeToday === null) {
+    throw new ApiShapeError("incomplete statistics");
+  }
+  return { totalMembers, activeOrganizations, totalOrganizations, totalStorage, activeToday };
+}
+
+function readActivity(body: unknown): ActivityItem[] {
+  return rowsOf(body).map((row) => {
+    const id = text(row.id);
+    const description = text(row.description);
+    if (!id || !description) throw new ApiShapeError("an activity entry without an id or description");
+    return { id, description, timestamp: text(row.timestamp) };
+  });
+}
+
+function readUsers(body: unknown): SystemUser[] {
+  return rowsOf(body).map((row) => {
+    const id = text(row.id);
+    const name = text(row.name);
+    const role = text(row.role);
+    const organizationId = text(row.organizationId);
+    if (!id || !name || !role || !organizationId) throw new ApiShapeError("a user without the expected fields");
+    return {
+      id,
+      name,
+      email: text(row.email),
+      role,
+      organizationId,
+      organizationName: text(row.organizationName) ?? "",
+      status: text(row.status) ?? "",
+    };
+  });
+}
+
+function readLocals(body: unknown): LocalSection[] {
+  return rowsOf(body).map((row) => {
+    const id = text(row.id);
+    const name = text(row.name);
+    const memberCount = count(row.memberCount);
+    const activeCount = count(row.activeCount);
+    if (!id || !name || memberCount === null || activeCount === null) throw new ApiShapeError("an organization without the expected fields");
+    return {
+      id,
+      number: text(row.number),
+      name,
+      region: text(row.region),
+      memberCount,
+      activeCount,
+      president: text(row.president),
+      contact: text(row.contact),
+      status: text(row.status) ?? "",
+    };
+  });
+}
+
+function readHealth(body: unknown): DatabaseHealth {
+  const data = envelopeData(body);
+  const dbSizeMb = count(data.dbSizeMb);
+  const activeConnections = count(data.activeConnections);
+  const tableCount = count(data.tableCount);
+  if (dbSizeMb === null || activeConnections === null || tableCount === null) throw new ApiShapeError("incomplete database health");
+  const principal = (value: unknown): string | null => (isRecord(value) ? text(value.currentUser) : null);
+  return {
+    dbSizeMb,
+    activeConnections,
+    tableCount,
+    checkedAt: text(data.checkedAt),
+    tenantUser: principal(data.tenantPrincipal),
+    systemUser: principal(data.systemPrincipal),
+  };
+}
+
+interface Remote<T> {
+  loading: boolean;
+  error: string | null;
+  data: T | null;
+}
+
+/** Reads `url` (when there is one) and keeps the outcome: the data, the failure, or neither while it loads. */
+function useRemote<T>(url: string | null, read: (body: unknown) => T, reload: number): Remote<T> {
+  const [state, setState] = useState<Remote<T>>({ loading: url !== null, error: null, data: null });
+  useEffect(() => {
+    if (url === null) return;
+    const controller = new AbortController();
+    const load = async () => {
+      setState({ loading: true, error: null, data: null });
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+        setState({ loading: false, error: null, data: read(await response.json()) });
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setState({ loading: false, error: errorText(error), data: null });
+      }
+    };
+    load();
+    return () => controller.abort();
+  }, [url, read, reload]);
+  return state;
+}
+
+function LoadFailure({ title, detail, retryLabel, onRetry }: { title: string; detail: string; retryLabel: string; onRetry: () => void }) {
+  return (
+    <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      <div className="flex items-start gap-3">
+        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+        <div className="space-y-2">
+          <p className="font-semibold">{title}</p>
+          <p>{detail}</p>
+          <button onClick={onRetry} className="rounded border border-red-300 bg-white px-3 py-1 font-medium hover:bg-red-100">
+            {retryLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── AI endpoint tester ──────────────────────────────────────────────────────
+
+type CallState =
+  | { kind: "idle" }
+  | { kind: "running"; label: string }
+  | { kind: "done"; status: number; ok: boolean; text: string }
+  | { kind: "failed"; message: string };
+
+function useEndpointCall() {
+  const [state, setState] = useState<CallState>({ kind: "idle" });
+  const run = async (label: string, request: () => Promise<Response>) => {
+    setState({ kind: "running", label });
+    try {
+      const response = await request();
+      const raw = await response.text();
+      let shown = raw;
+      try {
+        shown = JSON.stringify(JSON.parse(raw), null, 2);
+      } catch {
+        // Not JSON: the answer is shown exactly as received.
+      }
+      setState({ kind: "done", status: response.status, ok: response.ok, text: shown });
+    } catch (error) {
+      setState({ kind: "failed", message: errorText(error) });
+    }
+  };
+  return [state, run] as const;
+}
+
+function ResultPanel({ state }: { state: CallState }) {
+  const t = useTranslations("adminConsolePage");
+  if (state.kind === "idle") return null;
+  if (state.kind === "running") {
+    return <div className="mt-4 rounded-lg bg-gray-100 p-4 font-mono text-xs">{state.label}</div>;
+  }
+  if (state.kind === "failed") {
+    return (
+      <pre role="alert" className="mt-4 max-h-64 overflow-auto rounded-lg border border-red-200 bg-red-50 p-4 font-mono text-xs">
+        {`${t("ai.networkError")}\n\n${state.message}`}
+      </pre>
+    );
+  }
+  return (
+    <pre
+      role={state.ok ? "status" : "alert"}
+      className={`mt-4 max-h-64 overflow-auto rounded-lg border p-4 font-mono text-xs ${
+        state.ok ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"
+      }`}
+    >
+      {`${state.ok ? t("ai.ok") : t("ai.error")} (${state.status})\n\n${state.text}`}
+    </pre>
+  );
+}
+
+const inputClass = "w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-purple-500";
+const callButtonClass = "rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50";
+
+function AiEndpointTester({ title, body }: { title: string; body: string }) {
+  const t = useTranslations("adminConsolePage");
+  const [queryId, setQueryId] = useState("");
+  const [rating, setRating] = useState("good");
+  const [comment, setComment] = useState("");
+  const [getQueryId, setGetQueryId] = useState("");
+  const [query, setQuery] = useState("");
+  const [maxResults, setMaxResults] = useState("5");
+  const [submitted, submit] = useEndpointCall();
+  const [fetched, fetchFeedback] = useEndpointCall();
+  const [searched, search] = useEndpointCall();
+
+  return (
+    <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
+      <div className="mb-6 flex items-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
+          <Sparkles className="h-6 w-6 text-purple-600" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+          <p className="text-sm text-gray-600">{body}</p>
+        </div>
+      </div>
+
+      <div className="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-6">
+        <h3 className="mb-1 text-lg font-semibold text-gray-900">{t("ai.submitHeading")}</h3>
+        <p className="mb-4 text-sm text-gray-600">POST /api/ai/feedback</p>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="feedback-query-id" className="mb-2 block text-sm font-medium text-gray-700">{t("ai.queryId")}</label>
+            <input id="feedback-query-id" value={queryId} onChange={(e) => setQueryId(e.target.value)} placeholder={t("ai.queryIdPlaceholder")} className={inputClass} />
+          </div>
+          <div>
+            <label htmlFor="feedback-rating" className="mb-2 block text-sm font-medium text-gray-700">{t("ai.rating")}</label>
+            <select id="feedback-rating" value={rating} onChange={(e) => setRating(e.target.value)} className={inputClass}>
+              <option value="good">{t("ai.good")}</option>
+              <option value="bad">{t("ai.bad")}</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="feedback-comment" className="mb-2 block text-sm font-medium text-gray-700">{t("ai.comment")}</label>
+            <input id="feedback-comment" value={comment} onChange={(e) => setComment(e.target.value)} className={inputClass} />
+          </div>
+          <button
+            disabled={queryId.trim() === "" || submitted.kind === "running"}
+            onClick={() =>
+              submit(t("ai.submitting"), () =>
+                fetch("/api/ai/feedback", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ query_id: queryId.trim(), rating, comment: comment || undefined }),
+                }),
+              )
+            }
+            className={callButtonClass}
+          >
+            {t("ai.submit")}
+          </button>
+          <ResultPanel state={submitted} />
+        </div>
+      </div>
+
+      <div className="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-6">
+        <h3 className="mb-1 text-lg font-semibold text-gray-900">{t("ai.getHeading")}</h3>
+        <p className="mb-4 text-sm text-gray-600">GET /api/ai/feedback?query_id=...</p>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="get-feedback-query-id" className="mb-2 block text-sm font-medium text-gray-700">{t("ai.queryId")}</label>
+            <input id="get-feedback-query-id" value={getQueryId} onChange={(e) => setGetQueryId(e.target.value)} placeholder={t("ai.queryIdPlaceholder")} className={inputClass} />
+          </div>
+          <button
+            disabled={getQueryId.trim() === "" || fetched.kind === "running"}
+            onClick={() =>
+              fetchFeedback(t("ai.loadingFeedback"), () =>
+                fetch(`/api/ai/feedback?query_id=${encodeURIComponent(getQueryId.trim())}`, { method: "GET", credentials: "include" }),
+              )
+            }
+            className={callButtonClass}
+          >
+            {t("ai.get")}
+          </button>
+          <ResultPanel state={fetched} />
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-6">
+        <h3 className="mb-1 text-lg font-semibold text-gray-900">{t("ai.searchHeading")}</h3>
+        <p className="mb-4 text-sm text-gray-600">POST /api/ai/search {t("ai.usesOpenAi")}</p>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="search-query" className="mb-2 block text-sm font-medium text-gray-700">{t("ai.searchQuery")}</label>
+            <input id="search-query" value={query} onChange={(e) => setQuery(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label htmlFor="search-max-results" className="mb-2 block text-sm font-medium text-gray-700">{t("ai.maxResults")}</label>
+            <input id="search-max-results" type="number" min="1" max="20" value={maxResults} onChange={(e) => setMaxResults(e.target.value)} className={inputClass} />
+          </div>
+          <button
+            disabled={query.trim() === "" || searched.kind === "running"}
+            onClick={() =>
+              search(t("ai.searching"), () =>
+                fetch("/api/ai/search", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ query: query.trim(), max_results: Number.parseInt(maxResults, 10) }),
+                }),
+              )
+            }
+            className={callButtonClass}
+          >
+            {t("ai.search")}
+          </button>
+          <ResultPanel state={searched} />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── The page ────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
   const t = useTranslations();
-  const [activeSection, setActiveSection] =
-    useState<AdminSection>("overview");
+  const locale = useLocale();
+  const copy = useCopy();
+  const numberLocale = locale.toLowerCase().startsWith("fr") ? "fr-CA" : "en-CA";
+  const [activeSection, setActiveSection] = useState<AdminSection>("overview");
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [systemStats, setSystemStats] = useState<any>(null);
-  const [users, setUsers] = useState<SystemUser[]>([]);
-  const [organizations, setOrganizations] = useState<LocalSection[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [activity, setActivity] = useState<any[]>([]);
-
-  // Load data from API
-  useEffect(() => {
-    if (activeSection === "overview") {
-      loadSystemStats();
-      loadRecentActivity();
-    } else if (activeSection === "users") {
-      loadUsers();
-    } else if (activeSection === "locals") {
-      loadOrganizations();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeSection]);
+  const [search, setSearch] = useState("");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [overviewReload, setOverviewReload] = useState(0);
+  const [usersReload, setUsersReload] = useState(0);
+  const [localsReload, setLocalsReload] = useState(0);
+  const [healthReload, setHealthReload] = useState(0);
 
   // Debounced search
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (activeSection === "users" && searchQuery) {
-        loadUsers();
-      } else if (activeSection === "locals" && searchQuery) {
-        loadOrganizations();
-      }
-    }, 500);
-
+    const timer = setTimeout(() => setSearch(searchQuery.trim()), 500);
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
-  const loadSystemStats = async () => {
-    try {
-      const response = await fetch("/api/admin/stats/overview");
-      if (!response.ok) return;
-      const data = await response.json();
-      if (data.success) {
-        setSystemStats(data.data);
-      }
-    } catch (_error) {
-}
-  };
+  const searchTooShort = search.length > 0 && search.length < MIN_USER_SEARCH;
+  const usersUrl = `/api/admin/users${search.length >= MIN_USER_SEARCH ? `?search=${encodeURIComponent(search)}` : ""}`;
+  const localsUrl = `/api/admin/organizations${search ? `?search=${encodeURIComponent(search)}` : ""}`;
 
-  const loadRecentActivity = async () => {
-    try {
-      const response = await fetch("/api/admin/stats/activity?limit=10");
-      if (!response.ok) return;
-      const data = await response.json();
-      if (data.success) {
-        setActivity(data.data);
-      }
-    } catch (_error) {
-}
-  };
+  const stats = useRemote(activeSection === "overview" ? "/api/admin/stats/overview" : null, readStats, overviewReload);
+  const activity = useRemote(activeSection === "overview" ? "/api/admin/stats/activity?limit=10" : null, readActivity, overviewReload);
+  const users = useRemote(activeSection === "users" ? usersUrl : null, readUsers, usersReload);
+  const locals = useRemote(activeSection === "locals" ? localsUrl : null, readLocals, localsReload);
+  const health = useRemote(activeSection === "database" ? "/api/admin/database/health" : null, readHealth, healthReload);
 
-  const loadUsers = useCallback(async () => {
+  const handleDeleteUser = async (user: SystemUser) => {
+    if (!confirm(copy.confirmRemove)) return;
+    setBusy(`delete-${user.id}`);
     try {
-      setLoading(true);
-      const response = await fetch(
-        `/api/admin/users${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`
-      );
-      const data = await response.json();
-      if (data.success) {
-        setUsers(data.data);
-      }
-    } catch (_error) {
-toast.error("Failed to load users");
+      const response = await fetch(`/api/admin/users/${user.id}?organizationId=${encodeURIComponent(user.organizationId)}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+      toast.success(copy.userRemoved);
+      setUsersReload((n) => n + 1);
+    } catch (error) {
+      toast.error(`${copy.removeFailed}: ${errorText(error)}`);
     } finally {
-      setLoading(false);
-    }
-  }, [searchQuery]);
-
-  const loadOrganizations = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `/api/admin/organizations${searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""}`
-      );
-      const data = await response.json();
-      if (data.success) {
-        setOrganizations(data.data);
-      }
-    } catch (_error) {
-toast.error("Failed to load organizations");
-    } finally {
-      setLoading(false);
-    }
-  }, [searchQuery]);
-
-  const handleDeleteUser = async (userId: string, organizationId: string) => {
-    if (!confirm("Are you sure you want to remove this user?")) return;
-
-    try {
-      const response = await fetch(
-        `/api/admin/users/${userId}?organizationId=${organizationId}`,
-        { method: "DELETE" }
-      );
-      const data = await response.json();
-      if (data.success) {
-        toast.success("User removed successfully");
-        loadUsers();
-      } else {
-        toast.error(data.error || "Failed to remove user");
-      }
-    } catch (_error) {
-toast.error("Failed to remove user");
+      setBusy(null);
     }
   };
 
-  const handleToggleUserStatus = async (userId: string, _organizationId: string) => {
+  const handleToggleUserStatus = async (user: SystemUser) => {
+    setBusy(`status-${user.id}`);
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "toggleStatus" }),
       });
-      const data = await response.json();
-      if (data.success) {
-        toast.success("User status updated");
-        loadUsers();
-      } else {
-        toast.error(data.error || "Failed to update user");
-      }
-    } catch (_error) {
-toast.error("Failed to update user");
-    }
-  };
-
-  const handleClearCache = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/admin/system/cache", {
-        method: "POST",
-      });
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Cache cleared successfully");
-      } else {
-        toast.error(data.error || "Failed to clear cache");
-      }
-    } catch (_error) {
-toast.error("Failed to clear cache");
+      if (!response.ok) throw new Error(await readApiError(response, `HTTP ${response.status}`));
+      toast.success(copy.statusUpdated);
+      setUsersReload((n) => n + 1);
+    } catch (error) {
+      toast.error(`${copy.statusFailed}: ${errorText(error)}`);
     } finally {
-      setLoading(false);
+      setBusy(null);
     }
   };
 
+  // The route states how much it could analyze; that statement, not a general "completed", is what is reported.
   const handleOptimizeDatabase = async () => {
+    setBusy("optimize");
     try {
-      setLoading(true);
-      const response = await fetch("/api/admin/database/optimize", {
-        method: "POST",
-      });
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Database optimization completed");
+      const response = await fetch("/api/admin/database/optimize", { method: "POST" });
+      const body: unknown = await response.json().catch(() => null);
+      const message = isRecord(body) ? text(body.message) ?? text(body.error) : null;
+      if (response.ok && isRecord(body) && body.success === true) {
+        toast.success(message ?? copy.optimizeDone);
+        setHealthReload((n) => n + 1);
       } else {
-        toast.error(data.error || "Failed to optimize database");
+        toast.error(message ?? `${copy.optimizeFailed} (HTTP ${response.status})`);
       }
-    } catch (_error) {
-toast.error("Failed to optimize database");
+    } catch (error) {
+      toast.error(`${copy.optimizeFailed}: ${errorText(error)}`);
     } finally {
-      setLoading(false);
+      setBusy(null);
     }
   };
 
   const adminSections = [
-    {
-      id: "overview",
-      label: t('admin.sections.overview'),
-      icon: <BarChart3 className="w-5 h-5" />,
-      color: "bg-blue-100 text-blue-700",
-    },
-    {
-      id: "users",
-      label: t('admin.sections.userManagement'),
-      icon: <Users className="w-5 h-5" />,
-      color: "bg-purple-100 text-purple-700",
-    },
-    {
-      id: "locals",
-      label: t('admin.sections.localSections'),
-      icon: <Building2 className="w-5 h-5" />,
-      color: "bg-green-100 text-green-700",
-    },
-    {
-      id: "system",
-      label: t('admin.sections.systemSettings'),
-      icon: <Settings className="w-5 h-5" />,
-      color: "bg-orange-100 text-orange-700",
-    },
-    {
-      id: "security",
-      label: t('admin.sections.security'),
-      icon: <Shield className="w-5 h-5" />,
-      color: "bg-red-100 text-red-700",
-    },
-    {
-      id: "reports",
-      label: t('admin.sections.reports'),
-      icon: <FileText className="w-5 h-5" />,
-      color: "bg-indigo-100 text-indigo-700",
-    },
-    {
-      id: "database",
-      label: t('admin.sections.database'),
-      icon: <Database className="w-5 h-5" />,
-      color: "bg-pink-100 text-pink-700",
-    },
-    {
-      id: "ai-testing",
-      label: t('admin.sections.aiTesting'),
-      icon: <Sparkles className="w-5 h-5" />,
-      color: "bg-purple-100 text-purple-700",
-    },
+    { id: "overview", label: t('admin.sections.overview'), icon: <BarChart3 className="w-5 h-5" />, color: "bg-blue-100 text-blue-700" },
+    { id: "users", label: t('admin.sections.userManagement'), icon: <Users className="w-5 h-5" />, color: "bg-purple-100 text-purple-700" },
+    { id: "locals", label: t('admin.sections.localSections'), icon: <Building2 className="w-5 h-5" />, color: "bg-green-100 text-green-700" },
+    { id: "system", label: t('admin.sections.systemSettings'), icon: <Settings className="w-5 h-5" />, color: "bg-orange-100 text-orange-700" },
+    { id: "security", label: t('admin.sections.security'), icon: <Shield className="w-5 h-5" />, color: "bg-red-100 text-red-700" },
+    { id: "reports", label: t('admin.sections.reports'), icon: <FileText className="w-5 h-5" />, color: "bg-indigo-100 text-indigo-700" },
+    { id: "database", label: t('admin.sections.database'), icon: <Database className="w-5 h-5" />, color: "bg-pink-100 text-pink-700" },
+    { id: "ai-testing", label: t('admin.sections.aiTesting'), icon: <Sparkles className="w-5 h-5" />, color: "bg-purple-100 text-purple-700" },
   ];
 
-  const roleConfig = {
+  const roleConfig: Record<string, { label: string; color: string }> = {
     admin: { label: t('admin.roles.admin'), color: "bg-red-100 text-red-700" },
     lro: { label: t('admin.roles.lro'), color: "bg-blue-100 text-blue-700" },
     steward: { label: t('admin.roles.steward'), color: "bg-green-100 text-green-700" },
     member: { label: t('admin.roles.member'), color: "bg-gray-100 text-gray-700" },
   };
 
-  const filteredLocals = organizations.filter(
-    (local) =>
-      local.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      local.number.includes(searchQuery) ||
-      local.region.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchQuery.toLowerCase())
+  const section = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, className: "space-y-6" };
+  const panel = "p-6 bg-white/80 backdrop-blur-sm border-gray-200";
+  const searchBox = (placeholder: string, focus: string) => (
+    <div className="relative mb-6">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 ${focus} focus:border-transparent`}
+      />
+    </div>
   );
 
   return (
@@ -316,322 +598,189 @@ toast.error("Failed to optimize database");
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {t('admin.title')}
-          </h1>
-          <p className="text-gray-600">
-            {t('admin.subtitle')}
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('admin.title')}</h1>
+          <p className="text-gray-600">{t('admin.subtitle')}</p>
         </div>
 
         {/* Navigation */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-8">
-          {adminSections.map((section) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
+          {adminSections.map((entry) => (
             <motion.button
-              key={section.id}
+              key={entry.id}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setActiveSection(section.id as AdminSection)}
+              onClick={() => setActiveSection(entry.id as AdminSection)}
               className={`p-4 rounded-lg transition-all ${
-                activeSection === section.id
+                activeSection === entry.id
                   ? "bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
                   : "bg-white text-gray-700 hover:shadow-md border border-gray-200"
               }`}
             >
-              <div
-                className={`flex items-center justify-center mb-2 ${
-                  activeSection === section.id ? "" : section.color
-                }`}
-              >
-                {section.icon}
-              </div>
-              <p className="text-xs font-medium text-center">
-                {section.label}
-              </p>
+              <div className={`flex items-center justify-center mb-2 ${activeSection === entry.id ? "" : entry.color}`}>{entry.icon}</div>
+              <p className="text-xs font-medium text-center">{entry.label}</p>
             </motion.button>
           ))}
         </div>
 
         {/* Overview Section */}
         {activeSection === "overview" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            {/* System Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">{t('admin.overview.totalMembers')}</p>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {systemStats ? systemStats.totalMembers.toLocaleString() : "..."}
-                    </p>
+          <motion.div {...section}>
+            {stats.error !== null && (
+              <LoadFailure title={copy.couldNotLoad("stats")} detail={stats.error} retryLabel={copy.retry} onRetry={() => setOverviewReload((n) => n + 1)} />
+            )}
+            {stats.error === null && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">{t('admin.overview.totalMembers')}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.data ? stats.data.totalMembers.toLocaleString(numberLocale) : copy.loading}</p>
+                    </div>
+                    <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Users className="w-7 h-7 text-blue-600" />
+                    </div>
                   </div>
-                  <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Users className="w-7 h-7 text-blue-600" />
-                  </div>
-                </div>
-                <p className="text-xs text-green-600 font-medium">
-                  {systemStats && `${systemStats.activeToday} active today`}
-                </p>
-              </Card>
+                  {stats.data && <p className="text-xs text-gray-600 font-medium">{copy.membersChanged(stats.data.activeToday)}</p>}
+                </Card>
 
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {t('admin.overview.localSections')}
-                    </p>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {systemStats ? systemStats.activeOrganizations : "..."}
-                    </p>
+                <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">{t('admin.overview.localSections')}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.data ? stats.data.activeOrganizations.toLocaleString(numberLocale) : copy.loading}</p>
+                    </div>
+                    <div className="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Building2 className="w-7 h-7 text-green-600" />
+                    </div>
                   </div>
-                  <div className="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Building2 className="w-7 h-7 text-green-600" />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-600 font-medium">
-                  {systemStats && `${systemStats.totalOrganizations} total organizations`}
-                </p>
-              </Card>
+                  {stats.data && <p className="text-xs text-gray-600 font-medium">{copy.orgsTotal(stats.data.totalOrganizations)}</p>}
+                </Card>
 
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Storage Used</p>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {systemStats ? `${systemStats.totalStorage.toFixed(1)} GB` : "..."}
-                    </p>
+                <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">{copy.databaseSize}</p>
+                      <p className="text-3xl font-bold text-gray-900">
+                        {stats.data ? `${stats.data.totalStorage.toLocaleString(numberLocale, { maximumFractionDigits: 2 })} GB` : copy.loading}
+                      </p>
+                    </div>
+                    <div className="w-14 h-14 bg-orange-100 rounded-lg flex items-center justify-center">
+                      <Database className="w-7 h-7 text-orange-600" />
+                    </div>
                   </div>
-                  <div className="w-14 h-14 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <Database className="w-7 h-7 text-orange-600" />
-                  </div>
-                </div>
-                <p className="text-xs text-gray-600 font-medium">
-                  Across all organizations
-                </p>
-              </Card>
+                  <p className="text-xs text-gray-600 font-medium">{copy.databaseSizeNote}</p>
+                </Card>
+              </div>
+            )}
 
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {t('admin.overview.systemHealth')}
-                    </p>
-                    <p className="text-3xl font-bold text-green-600">
-                      {systemStats ? "Healthy" : "..."}
-                    </p>
-                  </div>
-                  <div className="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Activity className="w-7 h-7 text-green-600" />
-                  </div>
-                </div>
-                <p className="text-xs text-green-600 font-medium">
-                  {t('admin.overview.allOperational')}
-                </p>
-              </Card>
-            </div>
-
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Admin Setup Hub</h2>
-              <p className="text-sm text-gray-600 mb-5">
-                Complete first-run setup and core administration workflows.
-              </p>
+            <Card className={panel}>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{copy.setupHubTitle}</h2>
+              <p className="text-sm text-gray-600 mb-5">{copy.setupHubBody}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-                <button
-                  onClick={() => (window.location.href = '/dashboard/admin/onboarding')}
-                  className="text-left rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-blue-300 transition-all"
-                >
-                  <p className="font-semibold text-gray-900">Setup Checklist</p>
-                  <p className="text-xs text-gray-600 mt-1">Run first-run wizard and close readiness checklist tasks.</p>
-                </button>
-                <button
-                  onClick={() => (window.location.href = '/dashboard/admin/members')}
-                  className="text-left rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-blue-300 transition-all"
-                >
-                  <p className="font-semibold text-gray-900">User Invites</p>
-                  <p className="text-xs text-gray-600 mt-1">Invite members, stewards, officers, and admins.</p>
-                </button>
-                <button
-                  onClick={() => (window.location.href = '/dashboard/structure')}
-                  className="text-left rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-blue-300 transition-all"
-                >
-                  <p className="font-semibold text-gray-900">Worksites & Employers</p>
-                  <p className="text-xs text-gray-600 mt-1">Manage organization structure and workplace entities.</p>
-                </button>
-                <button
-                  onClick={() => (window.location.href = '/dashboard/admin/members')}
-                  className="text-left rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-blue-300 transition-all"
-                >
-                  <p className="font-semibold text-gray-900">Taxonomy Management</p>
-                  <p className="text-xs text-gray-600 mt-1">Manage role and employment classification workflows.</p>
-                </button>
+                {copy.hub.map((entry) => (
+                  <Link
+                    key={entry.title}
+                    href={`/${locale}${entry.href}`}
+                    className="text-left rounded-lg border border-gray-200 p-4 hover:shadow-sm hover:border-blue-300 transition-all"
+                  >
+                    <p className="font-semibold text-gray-900">{entry.title}</p>
+                    <p className="text-xs text-gray-600 mt-1">{entry.body}</p>
+                  </Link>
+                ))}
               </div>
             </Card>
 
             {/* Recent Activity */}
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                {t('admin.overview.recentActivity')}
-              </h2>
-              <div className="space-y-3">
-                {activity.length > 0 ? (
-                  activity.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {item.action}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {item.user} - {item.organization ?? item.organizationName ?? 'Organization'}
-                        </p>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        {item.timestamp ? new Date(item.timestamp).toLocaleString() : "N/A"}
-                      </p>
+            <Card className={panel}>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('admin.overview.recentActivity')}</h2>
+              {activity.error !== null ? (
+                <LoadFailure title={copy.couldNotLoad("activity")} detail={activity.error} retryLabel={copy.retry} onRetry={() => setOverviewReload((n) => n + 1)} />
+              ) : activity.loading ? (
+                <div className="text-center py-8 text-gray-500">{copy.loading}</div>
+              ) : !activity.data || activity.data.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>{copy.noActivity}</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {activity.data.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                      <p className="text-sm font-medium text-gray-900">{item.description}</p>
+                      <p className="text-xs text-gray-500">{item.timestamp ? new Date(item.timestamp).toLocaleString(numberLocale) : copy.notRecorded}</p>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>Loading activity...</p>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </motion.div>
         )}
 
         {/* User Management Section */}
         {activeSection === "users" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {t('admin.users.title')}
-                </h2>
-                <button className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:shadow-lg transition-all">
-                  <Plus className="w-4 h-4" />
-                  {t('admin.users.addUser')}
-                </button>
-              </div>
+          <motion.div {...section}>
+            <Card className={panel}>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('admin.users.title')}</h2>
+              {searchBox(t('admin.users.searchPlaceholder'), "focus:ring-blue-500")}
+              {searchTooShort && <p className="mb-4 text-sm text-gray-600">{copy.searchTooShort}</p>}
 
-              {/* Search */}
-              <div className="relative mb-6">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={t('admin.users.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* Users Table */}
               <div className="overflow-x-auto">
-                {loading ? (
+                {users.error !== null ? (
+                  <LoadFailure title={copy.couldNotLoad("users")} detail={users.error} retryLabel={copy.retry} onRetry={() => setUsersReload((n) => n + 1)} />
+                ) : users.loading ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                    <span className="ml-3 text-gray-600">Loading users...</span>
+                    <span className="ml-3 text-gray-600">{copy.loading}</span>
                   </div>
-                ) : users.length === 0 ? (
+                ) : !users.data || users.data.length === 0 ? (
                   <div className="text-center py-12 text-gray-500">
                     <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No users found</p>
+                    <p>{copy.noUsers}</p>
                   </div>
                 ) : (
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                          {t('admin.users.table.name')}
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                          {t('admin.users.table.email')}
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                          {t('admin.users.table.role')}
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                          Organization
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                          {t('admin.users.table.lastLogin')}
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                          {t('admin.users.table.status')}
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                          {t('admin.users.table.actions')}
-                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('admin.users.table.name')}</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('admin.users.table.email')}</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('admin.users.table.role')}</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{copy.organization}</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('admin.users.table.status')}</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">{t('admin.users.table.actions')}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredUsers.map((user) => (
-                        <tr
-                          key={`${user.id}-${user.organizationId}`}
-                          className="border-b border-gray-100 hover:bg-gray-50"
-                        >
-                          <td className="py-3 px-4 text-sm font-medium text-gray-900">
-                            {user.name}
-                          </td>
-                          <td className="py-3 px-4 text-sm text-gray-600">
-                            {user.email}
-                          </td>
+                      {users.data.map((user) => (
+                        <tr key={`${user.id}-${user.organizationId}`} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 text-sm font-medium text-gray-900">{user.name}</td>
+                          <td className="py-3 px-4 text-sm text-gray-600">{user.email ?? copy.notRecorded}</td>
                           <td className="py-3 px-4">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                roleConfig[user.role]?.color || "bg-gray-100 text-gray-700"
-                              }`}
-                            >
-                              {roleConfig[user.role]?.label || user.role}
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${roleConfig[user.role]?.color ?? "bg-gray-100 text-gray-700"}`}>
+                              {roleConfig[user.role]?.label ?? user.role}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-sm text-gray-600">
-                            {user.organizationName}
-                          </td>
-                          <td className="py-3 px-4 text-sm text-gray-600">
-                            {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : "Never"}
-                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">{user.organizationName || copy.notRecorded}</td>
                           <td className="py-3 px-4">
                             <button
-                              onClick={() => handleToggleUserStatus(user.id, user.organizationId)}
-                              className={`px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:opacity-80 ${
-                                user.status === "active"
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-gray-100 text-gray-700"
+                              onClick={() => handleToggleUserStatus(user)}
+                              disabled={busy === `status-${user.id}`}
+                              title={copy.toggleStatus}
+                              className={`px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:opacity-80 disabled:opacity-50 ${
+                                user.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
                               }`}
                             >
-                              {user.status}
+                              {user.status || copy.notRecorded}
                             </button>
                           </td>
                           <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <button 
-                                className="p-1 text-blue-600 hover:bg-blue-50 rounded" 
-                                aria-label="Edit user"
-                                onClick={() => window.location.href = `/dashboard/admin/users/${user.id}/edit`}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button 
-                                className="p-1 text-red-600 hover:bg-red-50 rounded" 
-                                aria-label="Delete user"
-                                onClick={() => handleDeleteUser(user.id, user.organizationId)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
+                            <button
+                              className="p-1 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
+                              aria-label={copy.removeUser}
+                              disabled={busy === `delete-${user.id}`}
+                              onClick={() => handleDeleteUser(user)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -645,121 +794,74 @@ toast.error("Failed to optimize database");
 
         {/* Local Sections Management */}
         {activeSection === "locals" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {t('admin.locals.title')}
-                </h2>
-                <button className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:shadow-lg transition-all">
-                  <Plus className="w-4 h-4" />
-                  {t('admin.locals.addLocal')}
-                </button>
-              </div>
+          <motion.div {...section}>
+            <Card className={panel}>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('admin.locals.title')}</h2>
+              {searchBox(t('admin.locals.searchPlaceholder'), "focus:ring-green-500")}
 
-              {/* Search */}
-              <div className="relative mb-6">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={t('admin.locals.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* Locals Grid */}
-              {loading ? (
+              {locals.error !== null ? (
+                <LoadFailure title={copy.couldNotLoad("locals")} detail={locals.error} retryLabel={copy.retry} onRetry={() => setLocalsReload((n) => n + 1)} />
+              ) : locals.loading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-                  <span className="ml-3 text-gray-600">Loading organizations...</span>
+                  <span className="ml-3 text-gray-600">{copy.loading}</span>
                 </div>
-              ) : organizations.length === 0 ? (
+              ) : !locals.data || locals.data.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No organizations found</p>
+                  <p>{copy.noOrganizations}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredLocals.map((local) => (
-                  <Card
-                    key={local.id}
-                    className="p-5 bg-linear-to-br from-white to-gray-50 border-gray-200 hover:shadow-lg transition-all"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
+                  {locals.data.map((local) => (
+                    <Card key={local.id} className="p-5 bg-linear-to-br from-white to-gray-50 border-gray-200 hover:shadow-lg transition-all">
+                      <div className="mb-4">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-lg font-bold text-gray-900">
-                            {t('admin.locals.localPrefix')} {local.number}
+                            {local.number ? `${t('admin.locals.localPrefix')} ${local.number}` : local.name}
                           </h3>
                           <span
                             className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                              local.status === "active"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
+                              local.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
                             }`}
                           >
-                            {local.status}
+                            {local.status || copy.notRecorded}
                           </span>
                         </div>
-                        <p className="text-sm font-medium text-gray-700">
-                          {local.name}
-                        </p>
-                        <p className="text-xs text-gray-600">{local.region}</p>
+                        {local.number && <p className="text-sm font-medium text-gray-700">{local.name}</p>}
+                        <p className="text-xs text-gray-600">{local.region ?? copy.notRecorded}</p>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button className="p-2 text-blue-600 hover:bg-blue-50 rounded" aria-label="Edit local">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 text-gray-600 hover:bg-gray-50 rounded" aria-label="Local settings">
-                          <Settings className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
 
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">{t('admin.locals.totalMembers')}:</span>
-                        <span className="font-semibold text-gray-900">
-                          {local.memberCount.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">{t('admin.locals.activeMembers')}:</span>
-                        <span className="font-semibold text-green-600">
-                          {local.activeCount.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-green-600 h-2 rounded-full transition-all"
-                          style={{ width: `${(local.activeCount / local.memberCount) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-gray-200">
-                      <div className="flex items-center justify-between text-xs">
-                        <div>
-                          <p className="text-gray-600 mb-1">{t('admin.locals.president')}:</p>
-                          <p className="font-medium text-gray-900">
-                            {local.president}
-                          </p>
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">{t('admin.locals.totalMembers')}:</span>
+                          <span className="font-semibold text-gray-900">{local.memberCount.toLocaleString(numberLocale)}</span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-gray-600 mb-1">{t('admin.locals.contact')}:</p>
-                          <p className="font-medium text-blue-600">
-                            {local.contact}
-                          </p>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">{t('admin.locals.activeMembers')}:</span>
+                          <span className="font-semibold text-green-600">{local.activeCount.toLocaleString(numberLocale)}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-green-600 h-2 rounded-full transition-all"
+                            style={{ width: `${local.memberCount > 0 ? Math.min(100, (local.activeCount / local.memberCount) * 100) : 0}%` }}
+                          ></div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
+
+                      <div className="pt-4 border-t border-gray-200">
+                        <div className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="text-gray-600 mb-1">{t('admin.locals.president')}:</p>
+                            <p className="font-medium text-gray-900">{local.president ?? copy.notRecorded}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-gray-600 mb-1">{t('admin.locals.contact')}:</p>
+                            <p className="font-medium text-blue-600">{local.contact ?? copy.notRecorded}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
                   ))}
                 </div>
               )}
@@ -767,121 +869,91 @@ toast.error("Failed to optimize database");
           </motion.div>
         )}
 
-        {/* System Settings */}
+        {/* Sections with nothing behind them */}
         {activeSection === "system" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                {t('admin.system.title')}
-              </h2>
+          <motion.div {...section}>
+            <Card className={panel}>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{copy.systemTitle}</h2>
+              <CapabilityUnavailable locale={locale} capability="UE-ADMIN-SYSTEM-SETTINGS" />
+            </Card>
+          </motion.div>
+        )}
 
-              <div className="space-y-6">
-                {/* General Settings */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    {t('admin.system.general')}
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {t('admin.system.maintenanceMode')}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {t('admin.system.maintenanceModeDesc')}
-                        </p>
-                      </div>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200" aria-label="Toggle maintenance mode">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1" />
-                      </button>
+        {activeSection === "security" && (
+          <motion.div {...section}>
+            <Card className={panel}>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{copy.securityTitle}</h2>
+              <CapabilityUnavailable locale={locale} capability="UE-ADMIN-SECURITY-OVERVIEW" />
+            </Card>
+          </motion.div>
+        )}
+
+        {activeSection === "reports" && (
+          <motion.div {...section}>
+            <Card className={panel}>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{copy.reportsTitle}</h2>
+              <CapabilityUnavailable locale={locale} capability="UE-ADMIN-REPORTS-HUB" />
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Database Section */}
+        {activeSection === "database" && (
+          <motion.div {...section}>
+            <Card className={panel}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">{copy.databaseTitle}</h2>
+                <button
+                  onClick={() => setHealthReload((n) => n + 1)}
+                  className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  {copy.refresh}
+                </button>
+              </div>
+
+              {health.error !== null ? (
+                <LoadFailure title={copy.couldNotLoad("health")} detail={health.error} retryLabel={copy.retry} onRetry={() => setHealthReload((n) => n + 1)} />
+              ) : health.loading || !health.data ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                  <span className="ml-3 text-gray-600">{copy.loading}</span>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-sm text-gray-600">{copy.databaseSize}</p>
+                      <p className="text-xl font-bold text-gray-900">{health.data.dbSizeMb.toLocaleString(numberLocale, { maximumFractionDigits: 2 })} MB</p>
                     </div>
-
-                    <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {t('admin.system.emailNotifications')}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {t('admin.system.emailNotificationsDesc')}
-                        </p>
-                      </div>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600" aria-label="Toggle email notifications">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
-                      </button>
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-sm text-gray-600">{copy.activeConnections}</p>
+                      <p className="text-xl font-bold text-blue-600">{health.data.activeConnections.toLocaleString(numberLocale)}</p>
                     </div>
-
-                    <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {t('admin.system.automaticBackups')}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {t('admin.system.automaticBackupsDesc')}
-                        </p>
-                      </div>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600" aria-label="Toggle automatic backups">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6" />
-                      </button>
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <p className="text-sm text-gray-600">{copy.tables}</p>
+                      <p className="text-xl font-bold text-purple-600">{health.data.tableCount.toLocaleString(numberLocale)}</p>
                     </div>
                   </div>
-                </div>
+                  <p className="mb-8 text-xs text-gray-600">
+                    {health.data.checkedAt && `${copy.checkedAt} ${new Date(health.data.checkedAt).toLocaleString(numberLocale)}. `}
+                    {health.data.tenantUser && health.data.systemUser &&
+                      `${copy.connectedAs}: ${health.data.tenantUser} (${copy.tenantRole}), ${health.data.systemUser} (${copy.systemRole}).`}
+                  </p>
+                </>
+              )}
 
-                {/* Performance */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Performance
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-1">Application Cache</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {systemStats ? `${systemStats.totalStorage.toFixed(1)} GB` : "..."}
-                      </p>
-                      <button 
-                        onClick={handleClearCache}
-                        disabled={loading}
-                        className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                      >
-                        {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-                        Clear Cache
-                      </button>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-1">
-                        Database
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {systemStats ? `${systemStats.totalStorage.toFixed(1)} GB` : "..."}
-                      </p>
-                      <button 
-                        onClick={handleOptimizeDatabase}
-                        disabled={loading}
-                        className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                      >
-                        {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-                        Optimize
-                      </button>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-1">
-                        Active Users Today
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {systemStats ? systemStats.activeToday : "..."}
-                      </p>
-                      <button 
-                        onClick={() => setActiveSection("overview")}
-                        className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              <div className="p-6 border border-gray-200 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">{copy.optimizeTitle}</h3>
+                <p className="text-sm text-gray-600 mb-4">{copy.optimizeBody}</p>
+                <button
+                  onClick={handleOptimizeDatabase}
+                  disabled={busy === "optimize"}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {busy === "optimize" ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                  {copy.optimize}
+                </button>
               </div>
             </Card>
           </motion.div>
@@ -889,814 +961,10 @@ toast.error("Failed to optimize database");
 
         {/* AI Testing Section */}
         {activeSection === "ai-testing" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">AI Endpoints Testing</h2>
-                  <p className="text-sm text-gray-600">Test AI features with your authentication</p>
-                </div>
-              </div>
-
-              {/* Test Feedback POST */}
-              <div className="mb-8 p-6 border border-gray-200 rounded-lg bg-gray-50">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">1. Submit Feedback</h3>
-                <p className="text-sm text-gray-600 mb-4">POST /api/ai/feedback</p>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="feedback-query-id" className="block text-sm font-medium text-gray-700 mb-2">Query ID</label>
-                    <input
-                      type="text"
-                      id="feedback-query-id"
-                      defaultValue="7ba567db-5c19-4f61-b492-385ca10d8ba0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="feedback-rating" className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
-                    <select
-                      id="feedback-rating"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    >
-                      <option value="good">Good</option>
-                      <option value="bad">Bad</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="feedback-comment" className="block text-sm font-medium text-gray-700 mb-2">Comment (optional)</label>
-                    <input
-                      type="text"
-                      id="feedback-comment"
-                      defaultValue="Testing from admin panel"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  
-                  <button
-                    onClick={async () => {
-                      const queryId = (document.getElementById('feedback-query-id') as HTMLInputElement).value;
-                      const rating = (document.getElementById('feedback-rating') as HTMLSelectElement).value;
-                      const comment = (document.getElementById('feedback-comment') as HTMLInputElement).value;
-                      const responseDiv = document.getElementById('feedback-response');
-                      
-                      if (responseDiv) {
-                        responseDiv.style.display = 'block';
-                        responseDiv.className = 'mt-4 p-4 bg-gray-100 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                        responseDiv.textContent = 'Submitting...';
-                      }
-                      
-                      try {
-                        const response = await fetch('/api/ai/feedback', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          credentials: 'include',
-                          body: JSON.stringify({ query_id: queryId, rating, comment: comment || undefined })
-                        });
-                        const data = await response.json();
-                        
-                        if (responseDiv) {
-                          if (response.ok) {
-                            responseDiv.className = 'mt-4 p-4 bg-green-50 border border-green-200 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                            responseDiv.textContent = `âœ… SUCCESS (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
-                          } else {
-                            responseDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                            responseDiv.textContent = `âŒ ERROR (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
-                          }
-                        }
-                      } catch (error) {
-                        if (responseDiv) {
-                          responseDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                          responseDiv.textContent = `âŒ NETWORK ERROR\n\n${error instanceof Error ? error.message : String(error)}`;
-                        }
-                      }
-                    }}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
-                  >
-                    Submit Feedback
-                  </button>
-                  
-                  <div id="feedback-response" className="hidden mt-4 p-4 bg-gray-100 rounded-lg font-mono text-xs overflow-auto max-h-64"></div>
-                </div>
-              </div>
-
-              {/* Test Feedback GET */}
-              <div className="mb-8 p-6 border border-gray-200 rounded-lg bg-gray-50">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">2. Get Feedback</h3>
-                <p className="text-sm text-gray-600 mb-4">GET /api/ai/feedback?query_id=...</p>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="get-feedback-query-id" className="block text-sm font-medium text-gray-700 mb-2">Query ID</label>
-                    <input
-                      type="text"
-                      id="get-feedback-query-id"
-                      defaultValue="7ba567db-5c19-4f61-b492-385ca10d8ba0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  
-                  <button
-                    onClick={async () => {
-                      const queryId = (document.getElementById('get-feedback-query-id') as HTMLInputElement).value;
-                      const responseDiv = document.getElementById('get-feedback-response');
-                      
-                      if (responseDiv) {
-                        responseDiv.style.display = 'block';
-                        responseDiv.className = 'mt-4 p-4 bg-gray-100 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                        responseDiv.textContent = 'Loading...';
-                      }
-                      
-                      try {
-                        const response = await fetch(`/api/ai/feedback?query_id=${queryId}`, {
-                          method: 'GET',
-                          credentials: 'include'
-                        });
-                        const data = await response.json();
-                        
-                        if (responseDiv) {
-                          if (response.ok) {
-                            responseDiv.className = 'mt-4 p-4 bg-green-50 border border-green-200 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                            responseDiv.textContent = `âœ… SUCCESS (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
-                          } else {
-                            responseDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                            responseDiv.textContent = `âŒ ERROR (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
-                          }
-                        }
-                      } catch (error) {
-                        if (responseDiv) {
-                          responseDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                          responseDiv.textContent = `âŒ NETWORK ERROR\n\n${error instanceof Error ? error.message : String(error)}`;
-                        }
-                      }
-                    }}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
-                  >
-                    Get Feedback
-                  </button>
-                  
-                  <div id="get-feedback-response" className="hidden mt-4 p-4 bg-gray-100 rounded-lg font-mono text-xs overflow-auto max-h-64"></div>
-                </div>
-              </div>
-
-              {/* Test Search */}
-              <div className="mb-8 p-6 border border-gray-200 rounded-lg bg-gray-50">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">3. Search Documents</h3>
-                <p className="text-sm text-gray-600 mb-4">POST /api/ai/search (uses OpenAI)</p>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="search-query" className="block text-sm font-medium text-gray-700 mb-2">Search Query</label>
-                    <input
-                      type="text"
-                      id="search-query"
-                      defaultValue="What are employee rights regarding union activities?"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="search-max-results" className="block text-sm font-medium text-gray-700 mb-2">Max Results</label>
-                    <input
-                      type="number"
-                      id="search-max-results"
-                      defaultValue="5"
-                      min="1"
-                      max="20"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                  
-                  <button
-                    onClick={async () => {
-                      const query = (document.getElementById('search-query') as HTMLInputElement).value;
-                      const maxResults = parseInt((document.getElementById('search-max-results') as HTMLInputElement).value);
-                      const responseDiv = document.getElementById('search-response');
-                      
-                      if (responseDiv) {
-                        responseDiv.style.display = 'block';
-                        responseDiv.className = 'mt-4 p-4 bg-gray-100 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                        responseDiv.textContent = 'Searching... (This may take a few seconds with OpenAI)';
-                      }
-                      
-                      try {
-                        const response = await fetch('/api/ai/search', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          credentials: 'include',
-                          body: JSON.stringify({ query, max_results: maxResults })
-                        });
-                        const data = await response.json();
-                        
-                        if (responseDiv) {
-                          if (response.ok) {
-                            responseDiv.className = 'mt-4 p-4 bg-green-50 border border-green-200 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                            responseDiv.textContent = `âœ… SUCCESS (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
-                          } else {
-                            responseDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                            responseDiv.textContent = `âŒ ERROR (${response.status})\n\n${JSON.stringify(data, null, 2)}`;
-                          }
-                        }
-                      } catch (error) {
-                        if (responseDiv) {
-                          responseDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg font-mono text-xs overflow-auto max-h-64';
-                          responseDiv.textContent = `âŒ NETWORK ERROR\n\n${error instanceof Error ? error.message : String(error)}`;
-                        }
-                      }
-                    }}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
-                  >
-                    Search Documents
-                  </button>
-                  
-                  <div id="search-response" className="hidden mt-4 p-4 bg-gray-100 rounded-lg font-mono text-xs overflow-auto max-h-64"></div>
-                </div>
-              </div>
-
-              {/* Test Data Info */}
-              <div className="p-6 bg-blue-50 border border-blue-200 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">ðŸ“Š Test Data Reference</h3>
-                <div className="space-y-2 text-sm text-gray-700">
-                  <p><strong>Query ID:</strong> <code className="bg-white px-2 py-1 rounded">7ba567db-5c19-4f61-b492-385ca10d8ba0</code></p>
-                  <p><strong>Organization ID:</strong> <code className="bg-white px-2 py-1 rounded">test-org-001</code></p>
-                  <p><strong>Documents:</strong> 3 legal documents (NLRA, Unfair Labor Practice, CBA)</p>
-                  <p><strong>Chunks:</strong> 5 searchable text chunks</p>
-                  <p><strong>Existing Feedback:</strong> 2 records with rating=&apos;good&apos;</p>
-                </div>
-              </div>
-            </Card>
+          <motion.div {...section}>
+            <AiEndpointTester title={copy.aiTitle} body={copy.aiBody} />
           </motion.div>
         )}
-
-        {/* Security Section */}
-        {activeSection === "security" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Security & Audit Logs
-              </h2>
-
-              {/* Security Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Security Status</p>
-                      <p className="text-xl font-bold text-green-600">Secure</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-600">No degradation reported</p>
-                </div>
-
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Activity className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Active Sessions</p>
-                      <p className="text-xl font-bold text-blue-600">
-                        {systemStats?.activeToday || "..."}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-600">Users online today</p>
-                </div>
-
-                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <AlertCircle className="w-5 h-5 text-orange-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Security Events</p>
-                      <p className="text-xl font-bold text-orange-600">0</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-600">Last 24 hours</p>
-                </div>
-              </div>
-
-              {/* Audit Log Features */}
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Audit Trail</h3>
-                  <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3 pb-3 border-b border-gray-200">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                          <Activity className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">User Login</p>
-                          <p className="text-xs text-gray-600">admin@union.ca â€¢ {new Date().toLocaleString()}</p>
-                        </div>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">Success</span>
-                      </div>
-
-                      <div className="flex items-start gap-3 pb-3 border-b border-gray-200">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
-                          <Settings className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">Configuration Updated</p>
-                          <p className="text-xs text-gray-600">System settings modified</p>
-                        </div>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">Success</span>
-                      </div>
-
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                          <Users className="w-4 h-4 text-green-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">New User Added</p>
-                          <p className="text-xs text-gray-600">Toronto Central - Member role</p>
-                        </div>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">Success</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Security Features</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Check className="w-5 h-5 text-green-600" />
-                        <p className="font-medium text-gray-900">Admin Role Required</p>
-                      </div>
-                      <p className="text-sm text-gray-600">All admin endpoints validate role</p>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Check className="w-5 h-5 text-green-600" />
-                        <p className="font-medium text-gray-900">Organization Isolation</p>
-                      </div>
-                      <p className="text-sm text-gray-600">Data filtered by organization</p>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Check className="w-5 h-5 text-green-600" />
-                        <p className="font-medium text-gray-900">Audit Logging</p>
-                      </div>
-                      <p className="text-sm text-gray-600">All actions tracked with correlation IDs</p>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Check className="w-5 h-5 text-green-600" />
-                        <p className="font-medium text-gray-900">Soft Deletes</p>
-                      </div>
-                      <p className="text-sm text-gray-600">Data marked deleted, not removed</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Audit Schemas</h3>
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <ul className="space-y-2 text-sm text-gray-700">
-                      <li className="flex items-start gap-2">
-                        <Database className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
-                        <div>
-                          <strong>audit_logs</strong> - Comprehensive activity tracking with old/new values
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Database className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
-                        <div>
-                          <strong>security_events</strong> - Security-specific events with risk scores
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Database className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
-                        <div>
-                          <strong>failed_login_attempts</strong> - Brute force detection and monitoring
-                        </div>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Database className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
-                        <div>
-                          <strong>rate_limit_events</strong> - API rate limiting tracking
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Reports Section */}
-        {activeSection === "reports" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                System Reports & Analytics
-              </h2>
-
-              {/* Report Categories */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <button className="p-6 border-2 border-blue-200 rounded-lg hover:border-blue-400 transition-all text-left bg-linear-to-br from-blue-50 to-white">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Users className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900">Member Reports</h3>
-                  </div>
-                  <p className="text-sm text-gray-600">Track membership statistics, demographics, and engagement</p>
-                </button>
-
-                <button className="p-6 border-2 border-green-200 rounded-lg hover:border-green-400 transition-all text-left bg-linear-to-br from-green-50 to-white">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                      <BarChart3 className="w-6 h-6 text-green-600" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900">Activity Reports</h3>
-                  </div>
-                  <p className="text-sm text-gray-600">User activity, system usage, and peak time analysis</p>
-                </button>
-
-                <button className="p-6 border-2 border-purple-200 rounded-lg hover:border-purple-400 transition-all text-left bg-linear-to-br from-purple-50 to-white">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900">Compliance Reports</h3>
-                  </div>
-                  <p className="text-sm text-gray-600">Audit trails, security events, and data access logs</p>
-                </button>
-              </div>
-
-              {/* Available Reports */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Available Reports</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-gray-600" />
-                      <div>
-                        <p className="font-medium text-gray-900">Active Users by Organization</p>
-                        <p className="text-sm text-gray-600">Last 30 days activity by organization</p>
-                      </div>
-                    </div>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm font-medium">
-                      <Download className="w-4 h-4" />
-                      Generate
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-gray-600" />
-                      <div>
-                        <p className="font-medium text-gray-900">Storage Usage Trend</p>
-                        <p className="text-sm text-gray-600">12-month storage growth analysis</p>
-                      </div>
-                    </div>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm font-medium">
-                      <Download className="w-4 h-4" />
-                      Generate
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-gray-600" />
-                      <div>
-                        <p className="font-medium text-gray-900">User Role Distribution</p>
-                        <p className="text-sm text-gray-600">Breakdown of admins, stewards, officers, and members</p>
-                      </div>
-                    </div>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm font-medium">
-                      <Download className="w-4 h-4" />
-                      Generate
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Report Features */}
-              <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Report Builder Features</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Visual Query Builder</p>
-                      <p className="text-sm text-gray-600">Drag-and-drop interface for report creation</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Multiple Export Formats</p>
-                      <p className="text-sm text-gray-600">CSV, PDF, and Excel output support</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Scheduled Reports</p>
-                      <p className="text-sm text-gray-600">Automatic generation and email delivery</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Custom Filters</p>
-                      <p className="text-sm text-gray-600">Filter by date range, organization, role, and more</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* API Documentation */}
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Report API Endpoints</h3>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 font-mono text-sm">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-1 bg-green-100 text-green-700 rounded font-medium text-xs">GET</span>
-                      <code>/api/reports</code>
-                      <span className="text-gray-600">- List all reports</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium text-xs">POST</span>
-                      <code>/api/reports</code>
-                      <span className="text-gray-600">- Create new report</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium text-xs">POST</span>
-                      <code>/api/reports/execute</code>
-                      <span className="text-gray-600">- Execute report</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-1 bg-green-100 text-green-700 rounded font-medium text-xs">GET</span>
-                      <code>/api/reports/templates</code>
-                      <span className="text-gray-600">- Get report templates</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Database Section */}
-        {activeSection === "database" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Database Management
-              </h2>
-
-              {/* Database Health */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <Database className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Database Size</p>
-                      <p className="text-xl font-bold text-gray-900">
-                        {systemStats ? `${systemStats.totalStorage.toFixed(1)} GB` : "..."}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-600">Azure PostgreSQL Flexible</p>
-                </div>
-
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Activity className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Connections</p>
-                      <p className="text-xl font-bold text-blue-600">12 / 100</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-600">Active / Max</p>
-                </div>
-
-                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <BarChart3 className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Query Performance</p>
-                      <p className="text-xl font-bold text-purple-600">Fast</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-600">Avg response: 45ms</p>
-                </div>
-              </div>
-
-              {/* Database Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="p-6 border border-gray-200 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Optimization</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Run ANALYZE to update query planner statistics and improve performance
-                  </p>
-                  <button 
-                    onClick={handleOptimizeDatabase}
-                    disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                    Optimize Database
-                  </button>
-                </div>
-
-                <div className="p-6 border border-gray-200 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Health Check</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Get detailed database metrics including connection stats and table sizes
-                  </p>
-                  <button 
-                    onClick={async () => {
-                      try {
-                        const response = await fetch("/api/admin/database/health");
-                        const data = await response.json();
-                        if (data.success) {
-                          toast.success("Database health check complete");
-}
-                      } catch (_error) {
-                        toast.error("Failed to fetch database health");
-                      }
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium"
-                  >
-                    <Activity className="w-4 h-4" />
-                    Run Health Check
-                  </button>
-                </div>
-              </div>
-
-              {/* Database Schema */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Schema Organization</h3>
-                <div className="space-y-3">
-                  <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Database className="w-5 h-5 text-blue-600" />
-                      <h4 className="font-semibold text-gray-900">public schema</h4>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">Core application tables</p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">organizations</span>
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">organization_users</span>
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">organization_configurations</span>
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">organization_usage</span>
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">claims</span>
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">notifications</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Database className="w-5 h-5 text-purple-600" />
-                      <h4 className="font-semibold text-gray-900">audit_security schema</h4>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">Audit logs and security events</p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">audit_logs</span>
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">security_events</span>
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">failed_login_attempts</span>
-                      <span className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-mono">rate_limit_events</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Backup Info */}
-              <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Backup & Recovery</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Automated Daily Backups</p>
-                      <p className="text-gray-600">Azure PostgreSQL provides automatic full backups</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Point-in-Time Recovery</p>
-                      <p className="text-gray-600">Restore to any point within 7-35 day retention window</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Geo-Redundant Storage</p>
-                      <p className="text-gray-600">Backups replicated to paired Azure region</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Performance Tips */}
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Optimization Tips</h3>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <ul className="space-y-2 text-sm text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 font-bold mt-0.5">â€¢</span>
-                      <span>Run ANALYZE after bulk data changes to update statistics</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 font-bold mt-0.5">â€¢</span>
-                      <span>Add indexes on frequently filtered columns (status, createdAt, organizationId)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 font-bold mt-0.5">â€¢</span>
-                      <span>Use query limits and pagination for large result sets</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 font-bold mt-0.5">â€¢</span>
-                      <span>Monitor connection pool usage - alert if approaching max connections</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 font-bold mt-0.5">â€¢</span>
-                      <span>Schedule database optimization during off-peak hours</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Help Section */}
-        <Card className="mt-8 p-6 bg-orange-50/80 backdrop-blur-sm border-orange-200">
-          <div className="flex gap-4">
-            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center shrink-0">
-              <Info className="w-5 h-5 text-orange-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Admin Guidelines
-              </h3>
-              <ul className="space-y-1 text-sm text-gray-700">
-                <li>
-                  â€¢ <strong>User Management:</strong> Add, edit, or deactivate
-                  user accounts and assign roles
-                </li>
-                <li>
-                  â€¢ <strong>Local Sections:</strong> Manage local section
-                  details, membership, and leadership
-                </li>
-                <li>
-                  â€¢ <strong>System Settings:</strong> Configure global system
-                  preferences and features
-                </li>
-                <li>
-                  â€¢ <strong>Security:</strong> Monitor access logs and manage
-                  permissions
-                </li>
-                <li>
-                  â€¢ <strong>Reports:</strong> Generate and export system-wide
-                  analytics
-                </li>
-              </ul>
-            </div>
-          </div>
-        </Card>
       </div>
     </div>
   );

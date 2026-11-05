@@ -13,9 +13,8 @@
  * Usage:
  *   npx tsx scripts/seed-clc-demo-environment.ts
  *
- * Production guard: this script aborts immediately if UE_ENVIRONMENT (or fallback
- * NEXT_PUBLIC_APP_ENV / NODE_ENV) resolves to "production" / "prod". Override
- * with ALLOW_PRODUCTION_SEED=1 only for documented one-time recovery.
+ * Production guard: this script aborts immediately against a production deployment (lib/runtime/production-guard.ts);
+ * there is no override.
  *
  * Safe to run repeatedly. Will skip existing records.
  */

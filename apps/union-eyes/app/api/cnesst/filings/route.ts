@@ -15,6 +15,10 @@ const { GET, POST } = crudRoutes({
   tags: ['CNESST'],
   orgScoped: true,
   ownerColumn: 'memberId',
+  // The collection is a steward read: the owner scope applies below that floor, as the item route does, so staff see the organization's filings.
+  staffReadsAll: true,
+  // A steward files on behalf of the member the filing concerns, so staff name the member on create; the member column is otherwise server-owned.
+  staffMayNameOwner: true,
   readRole: 'steward',
   writeRole: 'steward',
 });

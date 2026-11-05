@@ -4872,54 +4872,6 @@
       ]
     },
     {
-      "id": "apps/union-eyes/app/api/dues/payment-methods/route.ts#GET",
-      "sourcePath": "apps/union-eyes/app/api/dues/payment-methods/route.ts",
-      "method": "GET",
-      "bucket": "READ_ONLY_FALSE_POSITIVE_GET",
-      "cases": [
-        {
-          "name": "unauthenticated",
-          "status": 401,
-          "outcome": "PASS"
-        },
-        {
-          "name": "authenticated",
-          "status": 200,
-          "outcome": "PASS"
-        },
-        {
-          "name": "wrong-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Route source has no organization selector to forge"
-        },
-        {
-          "name": "unselected-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Route source is not organization-context sensitive"
-        },
-        {
-          "name": "inactive-member",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Inactive-member case is not applicable to this actor/route shape"
-        },
-        {
-          "name": "valid-write",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Read-only false-positive bucket: no business write case by source proof"
-        },
-        {
-          "name": "persisted-canonical-actor-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Read-only false-positive bucket: no business write persistence case"
-        }
-      ]
-    },
-    {
       "id": "apps/union-eyes/app/api/dues/receipt/[id]/route.ts#GET",
       "sourcePath": "apps/union-eyes/app/api/dues/receipt/[id]/route.ts",
       "method": "GET",
@@ -10164,54 +10116,6 @@
       ]
     },
     {
-      "id": "apps/union-eyes/app/api/payment/status/route.ts#GET",
-      "sourcePath": "apps/union-eyes/app/api/payment/status/route.ts",
-      "method": "GET",
-      "bucket": "READ_ONLY_FALSE_POSITIVE_GET",
-      "cases": [
-        {
-          "name": "unauthenticated",
-          "status": 200,
-          "outcome": "PASS"
-        },
-        {
-          "name": "authenticated",
-          "status": 200,
-          "outcome": "PASS"
-        },
-        {
-          "name": "wrong-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Route source has no organization selector to forge"
-        },
-        {
-          "name": "unselected-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Route source is not organization-context sensitive"
-        },
-        {
-          "name": "inactive-member",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Inactive-member case is not applicable to this actor/route shape"
-        },
-        {
-          "name": "valid-write",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Read-only false-positive bucket: no business write case by source proof"
-        },
-        {
-          "name": "persisted-canonical-actor-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Read-only false-positive bucket: no business write persistence case"
-        }
-      ]
-    },
-    {
       "id": "apps/union-eyes/app/api/pension/retirement-eligibility/route.ts#GET",
       "sourcePath": "apps/union-eyes/app/api/pension/retirement-eligibility/route.ts",
       "method": "GET",
@@ -11063,54 +10967,6 @@
         {
           "name": "authenticated",
           "status": 400,
-          "outcome": "PASS"
-        },
-        {
-          "name": "wrong-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Route source has no organization selector to forge"
-        },
-        {
-          "name": "unselected-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Route source is not organization-context sensitive"
-        },
-        {
-          "name": "inactive-member",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Inactive-member case is not applicable to this actor/route shape"
-        },
-        {
-          "name": "valid-write",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Read-only false-positive bucket: no business write case by source proof"
-        },
-        {
-          "name": "persisted-canonical-actor-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Read-only false-positive bucket: no business write persistence case"
-        }
-      ]
-    },
-    {
-      "id": "apps/union-eyes/app/api/profile/me/route.ts#GET",
-      "sourcePath": "apps/union-eyes/app/api/profile/me/route.ts",
-      "method": "GET",
-      "bucket": "READ_ONLY_FALSE_POSITIVE_GET",
-      "cases": [
-        {
-          "name": "unauthenticated",
-          "status": 401,
-          "outcome": "PASS"
-        },
-        {
-          "name": "authenticated",
-          "status": 200,
           "outcome": "PASS"
         },
         {

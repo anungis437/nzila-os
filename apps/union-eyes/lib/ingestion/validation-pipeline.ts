@@ -73,6 +73,9 @@ const VALID_PRIORITIES = new Set(['low', 'medium', 'high', 'urgent']);
 
 const VALID_STEPS = new Set(['step_1', 'step_2', 'step_3', 'final', 'arbitration']);
 
+// grievances.status is varchar(20): a longer status (a claim's 'pending_documentation') fails the row in the database, so it fails here, with the reason.
+const GRIEVANCE_STATUS_MAX_LENGTH = 20;
+
 // All states valid for import (covers all legacy FSMs)
 const VALID_IMPORT_STATES = new Set([
   // Grievance statuses
@@ -188,9 +191,11 @@ function validateRecord(record: IngestionGrievanceRecord, idx: number): Validati
   if (!record.status?.trim()) {
     issues.push({ index: idx, field: 'status', severity: 'error', message: 'Missing status' });
   } else {
-    const { lifecycleState } = mapImportStatus(record.status);
+    const { lifecycleState, grievanceStatus } = mapImportStatus(record.status);
     if (!lifecycleState) {
       issues.push({ index: idx, field: 'status', severity: 'error', message: `Cannot map status '${record.status}' to any known FSM state` });
+    } else if (grievanceStatus.length > GRIEVANCE_STATUS_MAX_LENGTH) {
+      issues.push({ index: idx, field: 'status', severity: 'error', message: `Status '${record.status}' is stored as '${grievanceStatus}', which is longer than the ${GRIEVANCE_STATUS_MAX_LENGTH} characters a grievance status can hold` });
     }
   }
 

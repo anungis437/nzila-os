@@ -26,8 +26,15 @@ describe('public-routes', () => {
     });
 
     it('includes webhook routes', () => {
-      expect(PUBLIC_API_ROUTES.has('/api/webhooks/stripe')).toBe(true);
-      expect(PUBLIC_API_ROUTES.has('/api/webhooks/clc')).toBe(true);
+      expect(PUBLIC_API_ROUTES.has('/api/payments/webhooks/stripe')).toBe(true);
+      expect(PUBLIC_API_ROUTES.has('/api/payments/webhooks/paypal')).toBe(true);
+      expect(PUBLIC_API_ROUTES.has('/api/communications/webhooks/resend')).toBe(true);
+      expect(PUBLIC_API_ROUTES.has('/api/integrations/shopify/webhooks')).toBe(true);
+    });
+
+    it('opens only the token-authenticated SCIM surface, not the administrator token route', () => {
+      expect(isPublicRoute('/api/scim/v2/00000000-0000-0000-0000-000000000001/Users')).toBe(true);
+      expect(isPublicRoute('/api/enterprise/sso/scim-token')).toBe(false);
     });
 
     it('includes tracking prefix routes', () => {
@@ -43,8 +50,10 @@ describe('public-routes', () => {
     });
 
     it('includes cron routes', () => {
-      expect(CRON_API_ROUTES.has('/api/cron/monthly-dues')).toBe(true);
-      expect(CRON_API_ROUTES.has('/api/cron/overdue-notifications')).toBe(true);
+      expect(CRON_API_ROUTES.has('/api/cron/deadline-reminders')).toBe(true);
+      expect(CRON_API_ROUTES.has('/api/cron/sla-watchdog')).toBe(true);
+      // A retired route (501) is not scheduled, so the edge does not treat it as a cron job.
+      expect(CRON_API_ROUTES.has('/api/cron/monthly-dues')).toBe(false);
     });
   });
 
@@ -78,11 +87,15 @@ describe('public-routes', () => {
   // ── isCronRoute ────────────────────────────────────────────────────────
   describe('isCronRoute', () => {
     it('returns true for exact cron route', () => {
-      expect(isCronRoute('/api/cron/monthly-dues')).toBe(true);
+      expect(isCronRoute('/api/cron/deadline-reminders')).toBe(true);
     });
 
     it('returns true for another cron route', () => {
-      expect(isCronRoute('/api/cron/scheduled-reports')).toBe(true);
+      expect(isCronRoute('/api/cron/document-intake-reaper')).toBe(true);
+    });
+
+    it('returns false for a retired route that is not scheduled', () => {
+      expect(isCronRoute('/api/cron/scheduled-reports')).toBe(false);
     });
 
     it('returns false for non-cron route', () => {

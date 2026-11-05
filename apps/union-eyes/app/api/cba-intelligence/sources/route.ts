@@ -1,10 +1,13 @@
+import { requireSystemAdmin } from "@/lib/api-auth-guard";
 import { withApi, z } from "@/lib/api/framework";
+import { assertPublicHttpUrl } from '@/lib/security/outbound-url';
 import {
   listSources,
   createSource,
   type NewCbaIntelSource,
 } from "@/lib/services/cba-intelligence/source-registry-service";
-import { auditDataMutation } from "@/lib/audit-logger";
+import { withRLSContext } from "@/lib/db/with-rls-context";
+import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 
 // ---------------------------------------------------------------------------
 // GET /api/cba-intelligence/sources — List CBA intelligence sources
@@ -34,13 +37,22 @@ export const GET = withApi(
   },
   async ({ query }) => {
     const { page, limit, ...filters } = query;
-    return { data: await listSources(filters as Record<string, unknown>, { page, limit }) };
+    return await listSources(filters as Record<string, unknown>, { page, limit });
   },
 );
 
 // ---------------------------------------------------------------------------
 // POST /api/cba-intelligence/sources — Register a new source
 // ---------------------------------------------------------------------------
+
+const publicUrl = z.string().url().max(2000).refine((value) => {
+  try {
+    assertPublicHttpUrl(value);
+    return true;
+  } catch {
+    return false;
+  }
+}, 'Must be a public http(s) address');
 
 const createSourceSchema = z.object({
   slug: z.string().min(2).max(100),
@@ -53,17 +65,18 @@ const createSourceSchema = z.object({
   trustTier: z.string(),
   jurisdictions: z.array(z.string()).optional(),
   sectors: z.array(z.string()).optional(),
-  baseUrl: z.string().url().optional(),
-  apiEndpoint: z.string().url().optional(),
-  feedUrl: z.string().url().optional(),
+  // A source address is fetched by the server, so it must be a public http(s) address when it is saved, not only when it is fetched.
+  baseUrl: publicUrl.optional(),
+  apiEndpoint: publicUrl.optional(),
+  feedUrl: publicUrl.optional(),
   updateCadence: z.string().max(100).optional(),
   expectedUpdateDays: z.number().int().positive().optional(),
   robotsNotes: z.string().max(2000).optional(),
   termsUrl: z.string().url().optional(),
   redistributionNotes: z.string().max(2000).optional(),
-  provenanceRules: z.record(z.unknown()).optional(),
+  provenanceRules: z.record(z.string(), z.unknown()).optional(),
   adapterKey: z.string().max(100).optional(),
-  config: z.record(z.unknown()).optional(),
+  config: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const POST = withApi(
@@ -78,14 +91,21 @@ export const POST = withApi(
     },
   },
   async ({ body, userId, organizationId }) => {
-    const source = await createSource(body as any as NewCbaIntelSource);
-    await auditDataMutation({
-      userId: userId!,
-      organizationId: organizationId!,
-      resource: 'cba_intel_sources',
-      action: 'create',
-      details: { slug: body.slug, nameEn: body.nameEn, sourceType: body.sourceType },
+    // The dataset is platform-wide (no organization column): changing it is platform authority, not an organization administrator's.
+    await requireSystemAdmin();
+    // The source and its audit record commit together.
+    const source = await withRLSContext({ organizationId: organizationId! }, async (tx) => {
+      const created = await createSource(body as any as NewCbaIntelSource, tx);
+      await persistAtomicAudit(tx, {
+        userId: userId!,
+        organizationId: organizationId!,
+        resourceType: 'cba_intel_sources',
+        resourceId: created.id,
+        action: 'cba_source.create',
+        details: { slug: body.slug, nameEn: body.nameEn, sourceType: body.sourceType },
+      });
+      return created;
     });
-    return { data: source };
+    return source;
   },
 );

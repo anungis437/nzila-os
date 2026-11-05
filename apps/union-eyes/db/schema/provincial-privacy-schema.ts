@@ -19,8 +19,8 @@ export const provincialPrivacyConfig = pgTable("provincial_privacy_config", {
   dpoRequired: boolean("dpo_required").notNull().default(false), // Quebec Law 25
   piaRequired: boolean("pia_required").notNull().default(false), // Privacy Impact Assessment
   customRules: jsonb("custom_rules"), // Province-specific rules
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // User consent tracking per province
@@ -37,8 +37,8 @@ export const provincialConsent = pgTable("provincial_consent", {
   consentLanguage: varchar("consent_language", { length: 2 }).notNull().default("en"),
   expiresAt: timestamp("expires_at"), // Some consents expire (Quebec Law 25)
   revokedAt: timestamp("revoked_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Privacy breach notifications (72-hour deadline)
@@ -71,8 +71,8 @@ export const privacyBreaches = pgTable("privacy_breaches", {
   incidentReport: text("incident_report"),
   reportedBy: varchar("reported_by", { length: 255 }).notNull(),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Provincial data handling logs (audit trail)
@@ -92,7 +92,7 @@ export const provincialDataHandling = pgTable("provincial_data_handling", {
   performedBy: varchar("performed_by", { length: 255 }).notNull(),
   ipAddress: varchar("ip_address", { length: 45 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Data Subject Access Requests (DSAR)
@@ -128,7 +128,7 @@ export const dataSubjectAccessRequests = pgTable("data_subject_access_requests",
   responseMethod: varchar("response_method", { length: 50 }), // "email", "secure_portal", "mail", "in_person"
   responseDeliveredAt: timestamp("response_delivered_at"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

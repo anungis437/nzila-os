@@ -2381,36 +2381,6 @@
       ]
     },
     {
-      "id": "apps/union-eyes/app/api/whop/create-checkout/route.ts#POST",
-      "sourcePath": "apps/union-eyes/app/api/whop/create-checkout/route.ts",
-      "method": "POST",
-      "bucket": "HTTP_MUTATION_NEEDS_EXPLICIT_FIXTURE",
-      "cases": [
-        {
-          "name": "unauthenticated",
-          "status": 500,
-          "outcome": "FAIL"
-        },
-        {
-          "name": "authenticated",
-          "status": 500,
-          "outcome": "FAIL"
-        },
-        {
-          "name": "forged-org-or-user",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Generic mutation-explicit harness has not yet synthesized a route-specific forged payload"
-        },
-        {
-          "name": "persisted-canonical-actor-org",
-          "status": 0,
-          "outcome": "N/A",
-          "note": "Generic mutation-explicit harness has not yet verified persisted write provenance"
-        }
-      ]
-    },
-    {
       "id": "apps/union-eyes/app/api/workbook/[id]/claim/route.ts#POST",
       "sourcePath": "apps/union-eyes/app/api/workbook/[id]/claim/route.ts",
       "method": "POST",

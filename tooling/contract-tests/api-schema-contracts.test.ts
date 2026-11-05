@@ -47,8 +47,6 @@ const SCHEMA_VALIDATION_PATTERNS = [
 /** Routes exempt from schema validation (token-based or external-API flows). */
 const SCHEMA_EXEMPT_PATHS = [
   '[token]',                    // Token-based public access — validated in service layer
-  'whop/create-checkout',       // Payment initiation — minimal body (planId only)
-  'whop/unauthenticated',       // Unauthenticated payment checkout (pay-first flow)
   'shopify/webhook',            // Shopify webhook — verified via HMAC signature (createHmac)
   '_perf/vitals',               // Anonymous web vitals beacon — manual validation (ALLOWED set + range check)
   'api/icra',                   // ICRA public routes — pseudonymous, rate-limited; no org context required

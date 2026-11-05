@@ -49,7 +49,9 @@ import {
   standardErrorResponse,
 } from './standardized-responses';
 import { ApiError } from './errors';
+import { readBoundedJson, RequestBodyTooLargeError } from './bounded-json';
 import { secretsEqual } from './secret-compare';
+import { expectedCronSecret, presentedCronSecret } from './cron-secret';
 import {
   ROLE_HIERARCHY,
   getCurrentUser,
@@ -84,9 +86,19 @@ import {
  * Every property is optional so the simplest possible route is:
  *   `withApi({}, async () => ({ greeting: 'hello' }))`
  */
+/**
+ * Verifies the credential of a machine caller (an identity provider, a scanner) and resolves to who it is, or throws an ApiError
+ * (unauthorized, forbidden, not found, rate limited). It receives the request and the route params and reads no user session.
+ */
+export type MachineAuthenticator<TMachine = unknown> = (
+  request: NextRequest,
+  params: Record<string, string>,
+) => Promise<TMachine> | TMachine;
+
 export interface WithApiOptions<
   TBody extends z.ZodTypeAny = z.ZodNever,
   TQuery extends z.ZodTypeAny = z.ZodNever,
+  TMachine = unknown,
 > {
   // ── Authentication ────────────────────────────────────────────────────────
 
@@ -100,6 +112,12 @@ export interface WithApiOptions<
     minRole?: UserRole;
     /** Validate cron secret header instead of user auth */
     cron?: boolean;
+    /**
+     * Authenticate a machine caller with its own credential instead of a user session. The route is not public: the verifier decides who the
+     * caller is, and the handler receives it as `machine`. No session is read and no user is attached, so a browser session can never stand in
+     * for the credential. It replaces user authentication entirely and cannot be combined with `required: true`, `roles`, `minRole` or `cron`.
+     */
+    machine?: MachineAuthenticator<TMachine>;
   };
 
   // ── Org Scope ────────────────────────────────────────────────────────────────
@@ -124,8 +142,18 @@ export interface WithApiOptions<
 
   // ── Validation ────────────────────────────────────────────────────────────
 
-  /** Zod schema for request body (automatically parsed from `request.json()`) */
+  /**
+   * Zod schema for request body. The framework reads the JSON through the bounded reader (see `bodyLimitBytes`): a malformed body is
+   * 400, a body larger than the limit is 413, and neither reaches the handler.
+   */
   body?: TBody;
+
+  /**
+   * The most bytes of JSON body the framework reads for this route, counted from the stream whatever Content-Length claims
+   * (default `DEFAULT_JSON_BODY_LIMIT_BYTES`). A larger body is refused with 413 before the handler runs. A route that takes a
+   * bulk payload raises it explicitly; a route that wants a smaller ceiling lowers it.
+   */
+  bodyLimitBytes?: number;
 
   /** Zod schema for URL search params (automatically parsed) */
   query?: TQuery;
@@ -216,6 +244,7 @@ export interface WithApiOptions<
 export interface ApiContext<
   TBody = unknown,
   TQuery = unknown,
+  TMachine = unknown,
 > {
   /** The raw Next.js request */
   request: NextRequest;
@@ -233,18 +262,21 @@ export interface ApiContext<
   params: Record<string, string>;
   /** Trace-id for the request (also sent in response headers) */
   traceId: string;
+  /** The caller verified by `auth.machine`; undefined on every other route. */
+  machine: TMachine;
 }
 
 /**
  * The return value of the handler. Can be:
- * - A plain object → wrapped in `standardSuccessResponse()`
+ * - A plain object (an interface-typed one too) → wrapped in `standardSuccessResponse()`
  * - An array → wrapped in `standardSuccessResponse()` as `data`
  * - A `NextResponse` → passed through unmodified (escape hatch)
  * - `void` / `undefined` → 204 No Content
+ * `Record<string, unknown>` would refuse a value typed by an interface, which has no index signature, so the payloads the engines and services type that way would need a cast.
  */
-type HandlerReturn = Record<string, unknown> | any[] | NextResponse | void | null;
+type HandlerReturn = object | void | null;
 
-type HandlerFn<TBody, TQuery> = (ctx: ApiContext<TBody, TQuery>) => Promise<HandlerReturn> | HandlerReturn;
+type HandlerFn<TBody, TQuery, TMachine = unknown> = (ctx: ApiContext<TBody, TQuery, TMachine>) => Promise<HandlerReturn> | HandlerReturn;
 
 // ─── Trace-ID generator ─────────────────────────────────────────────────────
 
@@ -257,11 +289,31 @@ function generateTraceId(): string {
 // ─── Implementation ──────────────────────────────────────────────────────────
 
 /**
- * The framework parses the body from a clone so the original stream stays readable for
- * handlers and legacy wrappers that delegate here and still call `request.json()`.
+ * The most JSON the framework reads for a route that does not set `bodyLimitBytes`. Generous enough for the largest declared bulk
+ * route; the point is that the read is bounded, not that ordinary bodies come close.
  */
-function bodyReader(request: NextRequest): { json(): Promise<unknown> } {
-  return typeof request.clone === 'function' ? request.clone() : request;
+export const DEFAULT_JSON_BODY_LIMIT_BYTES = 2 * 1024 * 1024;
+
+const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+/**
+ * The framework reads the body from a clone so the original stream stays readable for handlers and legacy wrappers that delegate here
+ * and still call `request.json()`. The read is bounded: more than `limit` bytes is a RequestBodyTooLargeError, whatever the declared
+ * Content-Length says.
+ */
+function readJsonBody(request: NextRequest, limit: number): Promise<unknown> {
+  return readBoundedJson(typeof request.clone === 'function' ? request.clone() : request, limit);
+}
+
+/**
+ * A route without a body schema still gets `ctx.body` when the caller sent JSON (or declared no type), but never a read of an upload
+ * or a binary payload: those are the handler's to stream, and a multi-megabyte file is not a JSON document the framework should buffer.
+ */
+function mayBeJsonBody(request: NextRequest): boolean {
+  const contentType = request.headers?.get?.('content-type');
+  if (!contentType) return true;
+  const type = contentType.split(';')[0]!.trim().toLowerCase();
+  return type === 'application/json' || type.endsWith('+json') || type.startsWith('text/');
 }
 
 /**
@@ -293,12 +345,22 @@ function bodyReader(request: NextRequest): { json(): Promise<unknown> } {
 export function withApi<
   TBody extends z.ZodTypeAny = z.ZodNever,
   TQuery extends z.ZodTypeAny = z.ZodNever,
+  TMachine = unknown,
 >(
-  options: WithApiOptions<TBody, TQuery>,
-  handler: HandlerFn<z.infer<TBody>, z.infer<TQuery>>,
+  options: WithApiOptions<TBody, TQuery, TMachine>,
+  handler: HandlerFn<z.infer<TBody>, z.infer<TQuery>, TMachine>,
 ) {
+  // A machine credential replaces user authentication; mixing the two would leave it unclear which one decides.
+  const machineAuthenticator = options.auth?.machine;
+  if (machineAuthenticator && (options.auth?.cron || options.auth?.required === true || options.auth?.roles || options.auth?.minRole)) {
+    throw new Error('withApi: auth.machine replaces user authentication and cannot be combined with auth.required, roles, minRole or cron');
+  }
   // Pre-compute auth requirements
-  const requireAuth = options.auth?.required !== false && !options.auth?.cron;
+  const requireAuth = options.auth?.required !== false && !options.auth?.cron && !machineAuthenticator;
+  const bodyLimitBytes = options.bodyLimitBytes ?? DEFAULT_JSON_BODY_LIMIT_BYTES;
+  if (!Number.isSafeInteger(bodyLimitBytes) || bodyLimitBytes < 1) {
+    throw new Error('withApi: bodyLimitBytes must be a positive integer number of bytes');
+  }
   const requireCron = options.auth?.cron === true;
   const requireOrg = options.requireOrg ?? requireAuth; // default: enforce org for auth'd routes
   const minRoleLevel = options.auth?.minRole
@@ -338,19 +400,24 @@ export function withApi<
       // Accepts both x-cron-secret and Authorization: Bearer headers.
       // Checks CRON_SECRET_KEY first, falls back to CRON_SECRET for compat.
       if (requireCron) {
-        const xCronHeader = request.headers.get('x-cron-secret');
-        const authBearer = request.headers.get('authorization')?.replace('Bearer ', '');
-        const cronSecret = xCronHeader || authBearer || '';
-        const expected = process.env.CRON_SECRET_KEY ?? process.env.CRON_SECRET ?? '';
-        if (!secretsEqual(cronSecret, expected)) {
+        // The presentation and precedence rule is shared with the edge check and the rewards route (lib/api/cron-secret.ts).
+        if (!secretsEqual(presentedCronSecret(request.headers), expectedCronSecret())) {
           return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Invalid cron secret', undefined, traceId);
         }
+      }
+
+      // ── 2b. Machine authentication ─────────────────────────────────────
+      // The route's own verifier decides who the caller is (for example an identity provider's bearer token bound to one organization). It
+      // throws an ApiError to refuse, which the handler below turns into the response. No session is read, so none can stand in for it.
+      let machine: TMachine = undefined as TMachine;
+      if (machineAuthenticator) {
+        machine = await machineAuthenticator(request, params);
       }
 
       // ── 3. User authentication ─────────────────────────────────────────
       let user: AuthUser | null = null;
 
-      if (requireAuth || !requireCron) {
+      if (requireAuth || (!requireCron && !machineAuthenticator)) {
         try {
           user = await getCurrentUser();
         } catch (error) {
@@ -553,14 +620,24 @@ export function withApi<
       }
 
       // ── 6. Parse & validate body ───────────────────────────────────────
+      // Every read goes through the bounded reader: a body larger than `bodyLimitBytes` is a 413 before the handler runs.
+      const bodyTooLarge = () => {
+        // The reader has stopped reading the clone; stop the original too, so the rest of an oversized upload is not pulled in.
+        void request.body?.cancel().catch(() => undefined);
+        return standardErrorResponse(
+          ErrorCode.PAYLOAD_TOO_LARGE,
+          'Request body exceeds the allowed size',
+          { limitBytes: bodyLimitBytes },
+          traceId,
+        );
+      };
       let body: z.infer<TBody> = undefined as z.infer<TBody>;
       if (options.body) {
-        let rawBody: any;
+        let rawBody: unknown;
         try {
-          // Parse a clone: handlers (and legacy wrappers delegating here) may still read the body.
-          // Parse a clone: handlers may still read the body.
-          rawBody = await bodyReader(request).json();
-        } catch {
+          rawBody = await readJsonBody(request, bodyLimitBytes);
+        } catch (error) {
+          if (error instanceof RequestBodyTooLargeError) return bodyTooLarge();
           return standardErrorResponse(
             ErrorCode.INVALID_FORMAT,
             'Request body must be valid JSON',
@@ -571,8 +648,8 @@ export function withApi<
 
         const result = options.body.safeParse(rawBody);
         if (!result.success) {
-          const fields = result.error.errors.map((e: { path: (string | number)[]; message: string }) => ({
-            path: e.path.join('.'),
+          const fields = result.error.issues.map((e) => ({
+            path: e.path.map(String).join('.'),
             message: e.message,
           }));
           return standardErrorResponse(
@@ -582,13 +659,14 @@ export function withApi<
             traceId,
           );
         }
-        body = result.data;
-      } else if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
-        // No Zod schema provided — still parse JSON body so handlers can
-        // access it via ctx.body without calling request.json() themselves.
+        body = result.data as z.infer<TBody>;
+      } else if (BODY_METHODS.has(request.method) && mayBeJsonBody(request)) {
+        // No Zod schema provided: handlers that read ctx.body (the CRUD factory, older routes) still get the JSON the caller sent, read
+        // through the same bounded reader. Prefer declaring a `body` schema.
         try {
-          body = await bodyReader(request).json();
-        } catch {
+          body = (await readJsonBody(request, bodyLimitBytes)) as z.infer<TBody>;
+        } catch (error) {
+          if (error instanceof RequestBodyTooLargeError) return bodyTooLarge();
           // Body may be empty or non-JSON — leave as undefined
         }
       }
@@ -602,8 +680,8 @@ export function withApi<
         });
         const result = options.query.safeParse(raw);
         if (!result.success) {
-          const fields = result.error.errors.map((e: { path: (string | number)[]; message: string }) => ({
-            path: e.path.join('.'),
+          const fields = result.error.issues.map((e) => ({
+            path: e.path.map(String).join('.'),
             message: e.message,
           }));
           return standardErrorResponse(
@@ -617,7 +695,7 @@ export function withApi<
       }
 
       // ── 8. Execute handler ─────────────────────────────────────────────
-      const ctx: ApiContext<z.infer<TBody>, z.infer<TQuery>> = {
+      const ctx: ApiContext<z.infer<TBody>, z.infer<TQuery>, TMachine> = {
         request,
         user,
         userId: user?.id ?? null,
@@ -626,6 +704,7 @@ export function withApi<
         query,
         params,
         traceId,
+        machine,
       };
 
       const runHandler = async () => handler(ctx);

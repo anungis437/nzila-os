@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => {
   const tables = {
@@ -24,6 +24,7 @@ const mocks = vi.hoisted(() => {
     createSession: vi.fn(),
     setSessionCookie: vi.fn(),
     assessRisk: vi.fn(),
+    issueMfaChallenge: vi.fn(),
   }
 
   function selectBuilder() {
@@ -96,9 +97,9 @@ vi.mock('./session', () => ({
   getSessionFromCookie: vi.fn(),
 }))
 vi.mock('../risk/assess', () => ({ assessRisk: mocks.state.assessRisk }))
-vi.mock('../mfa/service', () => ({ issueMfaChallenge: vi.fn() }))
+vi.mock('../mfa/service', () => ({ issueMfaChallenge: mocks.state.issueMfaChallenge }))
 
-import { login } from './auth-service'
+import { isPlaywrightE2EAuthRequest, login } from './auth-service'
 
 describe('password login auth bootstrap', () => {
   beforeEach(() => {
@@ -161,5 +162,76 @@ describe('password login auth bootstrap', () => {
 
     expect(result).toEqual({ success: false, error: 'Account is deactivated. Contact support.' })
     expect(mocks.state.createSession).not.toHaveBeenCalled()
+  })
+})
+
+describe('the Playwright login shortcut', () => {
+  const names = ['PLAYWRIGHT_TEST_AUTH', 'QA_TEST_ENV', 'UE_ENVIRONMENT', 'NODE_ENV', 'NEXT_PUBLIC_APP_ENV', 'NZILA_MODE']
+  const saved = Object.fromEntries(names.map((name) => [name, process.env[name]]))
+  const agent = 'Mozilla/5.0 playwright-e2e-auth'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mocks.state.userRow = { userId: 'user-1', email: 'person@example.test', firstName: 'Person', lastName: 'Example', passwordHash: 'hash', isActive: true, failedLoginAttempts: 0, accountLockedUntil: null, lifecycleState: 'active' }
+    mocks.state.membershipRow = { organizationId: '11111111-1111-4111-8111-111111111111', role: 'member' }
+    mocks.state.mfaRow = { userId: 'user-1', enabledAt: new Date('2026-01-01T00:00:00Z'), disabledAt: null }
+    mocks.state.policyRow = null
+    mocks.state.verifyPassword.mockResolvedValue(true)
+    mocks.state.assessRisk.mockResolvedValue({ score: 0, tier: 'low', reasons: [], recommendedAction: 'allow' })
+  })
+
+  afterEach(() => {
+    for (const name of names) {
+      if (saved[name] === undefined) delete process.env[name]
+      else process.env[name] = saved[name]
+    }
+  })
+
+  function configure(env: Record<string, string>) {
+    for (const name of names) delete process.env[name]
+    Object.assign(process.env, env)
+  }
+
+  it('is recognised only on a local QA machine, by the test flag, the QA flag and the agent together', () => {
+    configure({ PLAYWRIGHT_TEST_AUTH: 'true', QA_TEST_ENV: 'true', UE_ENVIRONMENT: 'local' })
+    expect(isPlaywrightE2EAuthRequest({ userAgent: agent })).toBe(true)
+    expect(isPlaywrightE2EAuthRequest({ userAgent: 'Mozilla/5.0' })).toBe(false)
+  })
+
+  it.each([
+    ['production', { PLAYWRIGHT_TEST_AUTH: 'true', QA_TEST_ENV: 'true', UE_ENVIRONMENT: 'production' }],
+    ['staging', { PLAYWRIGHT_TEST_AUTH: 'true', QA_TEST_ENV: 'true', UE_ENVIRONMENT: 'staging' }],
+    ['an unlabelled container', { PLAYWRIGHT_TEST_AUTH: 'true', QA_TEST_ENV: 'true' }],
+    ['the test flag alone', { PLAYWRIGHT_TEST_AUTH: 'true' }],
+    ['a local identity without the QA flag', { PLAYWRIGHT_TEST_AUTH: 'true', UE_ENVIRONMENT: 'local' }],
+  ])('is ignored on %s, whatever the User-Agent says', (_label, env) => {
+    configure(env)
+    expect(isPlaywrightE2EAuthRequest({ userAgent: agent })).toBe(false)
+  })
+
+  it('does not let a production request skip MFA by sending the test User-Agent', async () => {
+    configure({ PLAYWRIGHT_TEST_AUTH: 'true', QA_TEST_ENV: 'true', UE_ENVIRONMENT: 'production', NODE_ENV: 'production' })
+    mocks.state.issueMfaChallenge.mockResolvedValue({ challengeToken: 'challenge-1', expiresAt: new Date('2026-09-16T00:00:00Z') })
+
+    const result = await login({ email: 'person@example.test', password: 'Correct123', userAgent: agent })
+
+    expect(result).toMatchObject({ success: true, requiresMfa: true })
+    expect(mocks.state.issueMfaChallenge).toHaveBeenCalled()
+    expect(mocks.state.createSession).not.toHaveBeenCalled()
+  })
+
+  it('skips MFA for the harness on a local QA machine, which is what the shortcut is for', async () => {
+    configure({ PLAYWRIGHT_TEST_AUTH: 'true', QA_TEST_ENV: 'true', UE_ENVIRONMENT: 'local' })
+    mocks.state.createSession.mockResolvedValue({
+      token: 'opaque-session-token',
+      session: { sessionId: 'session-1', userId: 'user-1', organizationId: '11111111-1111-4111-8111-111111111111', expiresAt: new Date('2026-09-16T00:00:00Z') },
+    })
+    mocks.state.setSessionCookie.mockResolvedValue(undefined)
+
+    const result = await login({ email: 'person@example.test', password: 'Correct123', userAgent: agent })
+
+    expect(result.success).toBe(true)
+    expect(mocks.state.issueMfaChallenge).not.toHaveBeenCalled()
+    expect(mocks.state.createSession).toHaveBeenCalled()
   })
 })

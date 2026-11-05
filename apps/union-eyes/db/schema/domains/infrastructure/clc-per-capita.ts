@@ -17,6 +17,7 @@ import {
   index,
   foreignKey,
   unique,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { organizations } from '../../../schema-organizations';
@@ -223,7 +224,7 @@ export const clcWebhookLog = pgTable(
     affiliateCode: varchar('affiliate_code', { length: 50 }),
     status: varchar('status', { length: 20 }).notNull(),
     message: text('message'),
-    payload: text('payload'),
+    payload: jsonb('payload'),
     receivedAt: timestamp('received_at', { withTimezone: true, mode: 'string' }).defaultNow(),
   },
   (table) => ({

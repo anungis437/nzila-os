@@ -13,6 +13,9 @@ import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-
 import { checkEntitlement } from '@/lib/services/entitlements';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
 import { logger } from '@/lib/logger';
+import { checkVoiceDisclosure } from '@/lib/voice/disclosure-consent';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +31,11 @@ const ALLOWED_MIME_TYPES = new Set([
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB (Whisper API limit)
 
 export const POST = withRoleAuth('member', async (request: NextRequest, context: BaseAuthContext) => {
+  const userId = context.userId;
+  const organizationId = context.organizationId;
+  if (!userId || !organizationId) {
+    return NextResponse.json({ error: 'Organization context required' }, { status: 403 });
+  }
   // Rate limit
   const rateLimitResult = await checkRateLimit(
     `ai-completion:${context.userId}`,
@@ -74,6 +82,11 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
       );
     }
 
+    const disclosure = checkVoiceDisclosure(formData);
+    if (!disclosure.allowed) {
+      return NextResponse.json({ error: disclosure.error }, { status: disclosure.status });
+    }
+
     // Check for Azure OpenAI Whisper endpoint (may be in a separate region)
     const endpoint = process.env.AZURE_OPENAI_WHISPER_ENDPOINT || process.env.AZURE_OPENAI_ENDPOINT;
     const apiKey = process.env.AZURE_OPENAI_WHISPER_API_KEY || process.env.AZURE_OPENAI_API_KEY;
@@ -85,6 +98,23 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
         { status: 503 },
       );
     }
+
+    // A failed audit prevents external disclosure; never log or persist audio.
+    await withRLSContext({ organizationId, userId }, (tx) => persistAtomicAudit(tx, {
+      organizationId,
+      userId,
+      action: 'voice.upload.disclosure_acknowledged',
+      resourceType: 'voice_recording',
+      resourceId: userId,
+      details: {
+        noticeVersion: disclosure.notice.version,
+        approvalReference: disclosure.notice.approvalReference,
+        provider: disclosure.notice.provider,
+        participantPermissionAsserted: true,
+        bytes: file.size,
+        contentType: file.type,
+      },
+    }));
 
     // Call Azure OpenAI Whisper API
     const whisperUrl = `${endpoint}/openai/deployments/${whisperDeployment}/audio/transcriptions?api-version=2024-06-01`;
@@ -106,11 +136,8 @@ export const POST = withRoleAuth('member', async (request: NextRequest, context:
     const latencyMs = Date.now() - startMs;
 
     if (!whisperResponse.ok) {
-      const errBody = await whisperResponse.text();
-      logger.error('Whisper transcription failed', {
-        status: whisperResponse.status,
-        body: errBody,
-      });
+      // Provider error bodies may contain sensitive audio/transcription diagnostics.
+      logger.error('Whisper transcription failed', { status: whisperResponse.status });
       return NextResponse.json(
         { error: 'Transcription failed', details: whisperResponse.status === 404 ? 'Whisper deployment not found. Set AZURE_OPENAI_WHISPER_DEPLOYMENT.' : undefined },
         { status: 502 },

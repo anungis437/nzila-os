@@ -13,6 +13,7 @@ import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { stewards } from '@/db/schema/domains/member/stewards';
 import { and, eq, gte, isNotNull, sql } from 'drizzle-orm';
+import { parseWindowDays } from '@/lib/api/window-days';
 
 export const GET = withOrganizationAuth(async (
   request: NextRequest,
@@ -24,7 +25,10 @@ export const GET = withOrganizationAuth(async (
   }
 
   const url = new URL(request.url);
-  const windowDays = Math.max(1, Math.min(365, Number(url.searchParams.get('windowDays') ?? '30')));
+  const windowDays = parseWindowDays(url.searchParams.get('windowDays'));
+  if (windowDays === null) {
+    return NextResponse.json({ error: 'windowDays must be a whole number from 1 to 365' }, { status: 400 });
+  }
   const windowStart = new Date(Date.now() - windowDays * 86_400_000);
 
   // Real observed cycle time (days) over window: avg(resolvedAt - filedDate).

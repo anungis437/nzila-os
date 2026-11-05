@@ -165,11 +165,6 @@ describe('organization-queries — hierarchy lists', () => {
     expect(await q.getOrganizationTree(undefined, 1)).toHaveLength(1);
   });
 
-  it('getUserVisibleOrganizations executes the RLS function query', async () => {
-    push([{ id: 'o1' }, { id: 'o2' }]);
-    expect(await q.getUserVisibleOrganizations('u1')).toHaveLength(2);
-  });
-
   it('getUserPrimaryOrganization returns joined org or null', async () => {
     push([{ organization: { id: 'o1' } }]);
     expect(await q.getUserPrimaryOrganization('u1')).toEqual({ id: 'o1' });

@@ -40,8 +40,8 @@ export function DemoModeOverlay() {
       try {
         const response = await fetch("/api/pilot/onboarding", { credentials: "include" });
         if (!response.ok) return;
-        const payload = await response.json();
-        const nextState = payload?.data?.demo ?? payload?.demo;
+        const payload = (await response.json()) as { data?: { demo?: DemoOverlayState } };
+        const nextState = payload.data?.demo;
         if (!cancelled && nextState) {
           setState({
             isActive: Boolean(nextState.isActive),

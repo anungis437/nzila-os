@@ -37,7 +37,7 @@ export const memoryEventSchema = z.object({
   kind: memoryKindSchema,
   source: memorySourceSchema,
   type: z.string().min(1),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.string(), z.unknown()),
   salience: z.number().min(0),
   tags: z.array(z.string()),
   occurredAt: z.string(),
@@ -48,7 +48,7 @@ export const memoryEventSchema = z.object({
 
 export const preferenceProfileSchema = z.object({
   subject: cognitionSubjectSchema,
-  scores: z.record(z.number().min(-1).max(1)),
+  scores: z.record(z.string(), z.number().min(-1).max(1)),
   sampleSize: z.number().int().min(0),
   computedAt: z.string(),
 })
@@ -70,7 +70,7 @@ export const trajectoryFeaturesSchema = z.object({
   eventCount: z.number().int().min(0),
   distinctTypes: z.number().int().min(0),
   // meanGapDays may be Infinity when n<2; encoded as a finite number or null on round-trip.
-  meanGapDays: z.number(),
+  meanGapDays: z.union([z.number(), z.literal(Number.POSITIVE_INFINITY)]), // zod 4 rejects Infinity; it means "fewer than two events"
   frequencySlope: z.number(),
   recencyDays: z.number().min(0),
   negativeSignal: z.number().min(0),

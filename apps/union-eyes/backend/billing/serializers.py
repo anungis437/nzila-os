@@ -37,7 +37,13 @@ class ClcBargainingTrendsSerializer(serializers.ModelSerializer):
 class ClcSyncLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClcSyncLog
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'sync_type', 'status', 'direction', 'sync_start_date',
+            'sync_end_date', 'records_processed', 'records_succeeded', 'records_failed',
+            'records_skipped', 'error_message', 'error_details', 'data_hash', 'sync_data',
+            'verification_status', 'verification_notes', 'is_verified', 'verified_at',
+            'verified_by', 'initiated_by', 'organization',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -45,20 +51,25 @@ class ClcOauthTokensSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClcOauthTokens
         fields = '__all__'
+        extra_kwargs = {'access_token': {'write_only': True}, 'refresh_token': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PerCapitaRemittancesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PerCapitaRemittances
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'organization_id', 'from_organization_id',
+            'to_organization_id', 'remittance_month', 'remittance_year', 'due_date',
+            'total_members', 'good_standing_members', 'remittable_members', 'per_capita_rate',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ClcChartOfAccountsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClcChartOfAccounts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'account_code']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -72,56 +83,56 @@ class RemittanceApprovalsSerializer(serializers.ModelSerializer):
 class ClcWebhookLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClcWebhookLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'webhook_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class OrganizationContactsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationContacts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'user_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ClcOrganizationSyncLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClcOrganizationSyncLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'affiliate_code']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ChartOfAccountsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChartOfAccounts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'account_code']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ClcRemittanceMappingSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClcRemittanceMapping
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ClcApiConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClcApiConfig
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DonationCampaignsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DonationCampaigns
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DonationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Donations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -191,42 +202,45 @@ class WhiplashPreventionAuditSerializer(serializers.ModelSerializer):
 class CostCentersSerializer(serializers.ModelSerializer):
     class Meta:
         model = CostCenters
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GlAccountMappingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = GlAccountMappings
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GlTransactionLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = GlTransactionLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class GlTrialBalanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = GlTrialBalance
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class OrganizationBillingConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationBillingConfig
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class DuesTransactionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DuesTransactions
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'organization_id', 'member_id', 'assignment_id',
+            'rule_id', 'transaction_type',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -240,35 +254,35 @@ class PaymentsSerializer(serializers.ModelSerializer):
 class PaymentCyclesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentCycles
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PaymentMethodsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentMethods
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BankReconciliationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankReconciliation
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PaymentDisputesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentDisputes
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class StripeWebhookEventsSerializer(serializers.ModelSerializer):
     class Meta:
         model = StripeWebhookEvents
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -380,56 +394,56 @@ class CrossBorderTransactionsSerializer(serializers.ModelSerializer):
 class AccountMappingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountMappings
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ErpConnectorsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ErpConnectors
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class JournalEntriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = JournalEntries
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class JournalEntryLinesSerializer(serializers.ModelSerializer):
     class Meta:
         model = JournalEntryLines
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'entry']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ErpInvoicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ErpInvoices
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BankAccountsSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankAccounts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BankTransactionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankTransactions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'bank_account']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class BankReconciliationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankReconciliations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -443,7 +457,7 @@ class SyncJobsSerializer(serializers.ModelSerializer):
 class FinancialAuditLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinancialAuditLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -493,6 +507,7 @@ class IndependentAppraisalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = IndependentAppraisals
         fields = '__all__'
+        extra_kwargs = {'appraiser_credentials': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -520,54 +535,75 @@ class FmvAuditLogSerializer(serializers.ModelSerializer):
 class DuesRatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = DuesRates
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'organization_id', 'local_id', 'unit_id', 'rate_name',
+            'rate_type', 'amount',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MemberDuesLedgerSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberDuesLedger
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'user_id', 'organization_id', 'transaction_type',
+            'transaction_date', 'effective_date', 'amount',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class MemberArrearsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberArrears
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id', 'organization_id', 'total_owed']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class EmployerRemittancesSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployerRemittances
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'employer_id', 'organization_id', 'period_start',
+            'period_end', 'fiscal_year', 'fiscal_month', 'remittance_date', 'remittance_number',
+            'total_amount',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class RemittanceLineItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = RemittanceLineItems
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'remittance_id', 'organization_id', 'employee_number',
+            'employee_name', 'employment_type', 'user_id', 'match_confidence', 'match_method',
+            'amount',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class RemittanceExceptionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = RemittanceExceptions
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'remittance_id', 'line_item_id', 'organization_id',
+            'exception_type', 'severity', 'employee_number', 'employee_name', 'amount',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class PaymentPlansSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentPlans
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'user_id', 'organization_id', 'plan_name', 'total_owed']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class FinancialPeriodsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinancialPeriods
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'organization_id', 'local_id', 'fiscal_year',
+            'fiscal_month', 'period_start', 'period_end', 'status', 'closed_at', 'closed_by',
+            'locked_at', 'locked_by', 'total_revenue',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']

@@ -10,7 +10,7 @@
  * Handles document sending, tracking, and webhook processing
  */
 
-import { createHash } from "crypto";
+import { ApiError } from "@/lib/api/errors";
 import { logger } from "@/lib/logger";
 
 /**
@@ -582,67 +582,6 @@ export class HelloSignProvider implements SignatureProvider {
 }
 
 /**
- * Internal Signature Provider
- * Simple signature system without external provider
- */
-export class InternalSignatureProvider implements SignatureProvider {
-  name = "internal";
-
-  async createEnvelope(
-    request: CreateEnvelopeRequest
-  ): Promise<EnvelopeResponse> {
-    // Generate internal envelope ID
-    const envelopeId = `internal_${Date.now()}_${createHash("sha256")
-      .update(JSON.stringify(request))
-      .digest("hex")
-      .substring(0, 16)}`;
-
-    // Generate signing URLs
-    const signers = request.signers.map((signer, index) => {
-      const token = createHash("sha256")
-        .update(`${envelopeId}_${signer.email}_${Date.now()}`)
-        .digest("hex");
-
-      return {
-        email: signer.email,
-        signerId: `signer_${index + 1}`,
-        status: "sent",
-        signUrl: `/sign/${envelopeId}?token=${token}`,
-      };
-    });
-
-    return {
-      envelopeId,
-      status: "sent",
-      signers,
-      createdAt: new Date(),
-    };
-  }
-
-  async getEnvelopeStatus(envelopeId: string): Promise<EnvelopeStatus> {
-    // Would query database for status
-    return {
-      envelopeId,
-      status: "sent",
-      signers: [],
-    };
-  }
-
-  async downloadDocument(_envelopeId: string): Promise<Buffer> {
-    // Would retrieve from storage
-    return Buffer.from("");
-  }
-
-  async voidEnvelope(_envelopeId: string, _reason: string): Promise<void> {
-    // Would update database
-  }
-
-  async sendReminder(_envelopeId: string, _signerId: string): Promise<void> {
-    // Would send email reminder
-  }
-}
-
-/**
  * Factory to get the appropriate provider
  */
 export class SignatureProviderFactory {
@@ -666,12 +605,10 @@ export class SignatureProviderFactory {
       this.providers.set("hellosign", new HelloSignProvider(config.hellosign));
     }
 
-    // Always available
-    this.providers.set("internal", new InternalSignatureProvider());
   }
 
   static getProvider(
-    name: "docusign" | "hellosign" | "internal"
+    name: "docusign" | "hellosign"
   ): SignatureProvider {
     const provider = this.providers.get(name);
     if (!provider) {
@@ -681,12 +618,12 @@ export class SignatureProviderFactory {
   }
 
   static getDefaultProvider(): SignatureProvider {
-    // Prefer external providers, fall back to internal
-    return (
-      this.providers.get("docusign") ||
-      this.providers.get("hellosign") ||
-      this.providers.get("internal")!
-    );
+    // There is no built-in signing: an envelope no provider stores or sends would be reported as sent and never signed.
+    const provider = this.providers.get("docusign") || this.providers.get("hellosign");
+    if (!provider) {
+      throw ApiError.notImplemented("No signature provider is configured, so a document cannot be sent for signature");
+    }
+    return provider;
   }
 }
 

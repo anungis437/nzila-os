@@ -13,7 +13,8 @@ import { validateIntakeRequest } from '@nzila/cupe-vocabulary';
 import { getCaseTypeById } from '@nzila/cupe-vocabulary';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { createClaim, getClaimsByMember } from '@/db/queries/claims-queries';
-import { auditDataMutation } from '@/lib/audit-logger';
+import { requireCaseFilingCapacity, caseAuthorizationResponse } from '@/lib/cases/case-authorization';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
@@ -23,6 +24,7 @@ import { createHash } from 'crypto';
 import { claims } from '@/db/schema/claims-schema';
 import { eq, and } from 'drizzle-orm';
 import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { incidentInstant } from '@/lib/cases/incident-instant';
 import { enforceDecision, type DecisionProofAdapter } from '@nzila/decision-core';
 import { createNarProofAdapter, getNarSigningSecret } from '@nzila/nar';
 import { platformDb } from '@nzila/db/platform';
@@ -114,9 +116,9 @@ export async function POST(request: Request) {
 
     const data = validation.data!;
     const canonical = currentStateContextEnabled();
-    if (canonical) {
-      // The client may still send its verified Entra object id. Resolve only that
-      // actor's alias; a caller-supplied member id cannot select another principal.
+    {
+      // Self-service intake always files for the authenticated member, in every deployment mode. The client may still
+      // send its verified Entra object id; a caller-supplied member id can never select another principal.
       const ownEntraObjectId = identityProvider === 'entra'
         ? providerSubject?.split(':')[1] : undefined;
       if (data.memberId !== userId && (!ownEntraObjectId || data.memberId !== ownEntraObjectId)) {
@@ -196,6 +198,8 @@ export async function POST(request: Request) {
 
     // 5. Create claim with RLS context (audit inside transaction for atomicity)
     const { claim, canonicalDecision } = await withRLSContext(async (tx) => {
+      // Filing is open to any active member of the organization; it opens a case for themselves and grants nothing else.
+      await requireCaseFilingCapacity(tx, { userId, organizationId: orgId }, 'member');
       const newClaim = await createClaim(
         {
           organizationId: orgId,
@@ -203,7 +207,7 @@ export async function POST(request: Request) {
           claimType: mapCaseTypeToClaimType(data.caseType),
           priority: data.priority as 'low' | 'medium' | 'high' | 'critical',
           description: data.description,
-          incidentDate: new Date(data.incidentDate),
+          incidentDate: incidentInstant(data.incidentDate),
           location: data.location,
           desiredOutcome: data.desiredOutcome ?? '',
           isAnonymous: data.isAnonymous,
@@ -223,24 +227,23 @@ export async function POST(request: Request) {
       const canonicalDecision = canonical
         ? await decideIntake(newClaim.claimId, createCanonicalNarProofAdapter(tx)) : null;
       if (canonicalDecision && !canonicalDecision.allowed) throw new Error('UE_INTAKE_DECISION_REJECTED');
+      // The claim and this record commit together. A failed audit rolls the intake back.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'case.intake_submitted',
+        resourceType: 'claims',
+        resourceId: newClaim.claimId,
+        details: {
+          event: 'CASE_INTAKE_SUBMITTED',
+          caseType: data.caseType,
+          priority: data.priority,
+          severity,
+          title: data.title,
+          isAnonymous: data.isAnonymous,
+        },
+      });
       return { claim: newClaim, canonicalDecision };
-    });
-
-    // 6. Operational audit trail. The canonical signed claim proof already committed atomically.
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claims',
-      resourceId: claim.claimId,
-      action: 'create',
-      details: {
-        event: 'CASE_INTAKE_SUBMITTED',
-        caseType: data.caseType,
-        priority: data.priority,
-        severity,
-        title: data.title,
-        isAnonymous: data.isAnonymous,
-      },
     });
 
     logger.info('Case intake submitted', {
@@ -281,6 +284,12 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    const refused = caseAuthorizationResponse(error);
+    if (refused) return refused;
+    // An organization without the module is refused, not reported as a server fault.
+    if ((error as { code?: unknown } | null)?.code === 'ENTITLEMENT_REQUIRED') {
+      return NextResponse.json({ error: 'ENTITLEMENT_REQUIRED', message: 'Module access denied' }, { status: 403 });
+    }
     logger.error('Case intake failed', error as Error);
     return NextResponse.json(
       { error: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' },

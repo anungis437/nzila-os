@@ -9,19 +9,12 @@ export const metadata: Metadata = {
   description: 'Log in to UnionEyes — a decision system for labour leadership.',
 };
 
-const stats = [
-  { value: '200+', label: 'Locals' },
-  { value: '50K+', label: 'Members' },
-  { value: '99.9%', label: 'Uptime' },
-];
-
 export default function LoginPage() {
   return (
     <AuthPageLayout
       appName="UnionEyes"
       tagline="A Decision System for Labour Leadership"
       subtitle="From intake to outcome — casework, intelligence, and member services in one system."
-      stats={stats}
     >
       <LoginForm />
     </AuthPageLayout>

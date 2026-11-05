@@ -161,13 +161,13 @@ describe('clause-service', () => {
   describe('getClausesByCBAId', () => {
     it('returns clauses ordered by index and number', async () => {
       mocks.mockSelect.mockReturnValue(chain([CLAUSE]));
-      const result = await getClausesByCBAId('cba1');
+      const result = await getClausesByCBAId('cba1', 'org1');
       expect(result).toEqual([CLAUSE]);
     });
 
     it('throws on error', async () => {
       mocks.mockSelect.mockImplementation(() => { throw new Error('fail'); });
-      await expect(getClausesByCBAId('cba1')).rejects.toThrow('Failed to fetch clauses');
+      await expect(getClausesByCBAId('cba1', 'org1')).rejects.toThrow('Failed to fetch clauses');
     });
   });
 
@@ -229,25 +229,25 @@ describe('clause-service', () => {
     it('updates and returns clause', async () => {
       const updated = { ...CLAUSE, title: 'Updated Wage Rates' };
       mocks.mockUpdate.mockReturnValue(chain([updated]));
-      const result = await updateClause('cl1', { title: 'Updated Wage Rates' } as never);
+      const result = await updateClause('cl1', 'org-1', { title: 'Updated Wage Rates' } as never);
       expect(result).toEqual(updated);
     });
 
     it('returns null when not found', async () => {
       mocks.mockUpdate.mockReturnValue(chain([undefined]));
-      expect(await updateClause('missing', {} as never)).toBeNull();
+      expect(await updateClause('missing', 'org-1', {} as never)).toBeNull();
     });
   });
 
   describe('deleteClause', () => {
     it('deletes and returns true', async () => {
       mocks.mockDelete.mockReturnValue(chain());
-      expect(await deleteClause('cl1')).toBe(true);
+      expect(await deleteClause('cl1', 'org-1')).toBe(true);
     });
 
     it('throws on error', async () => {
       mocks.mockDelete.mockImplementation(() => { throw new Error('fk'); });
-      await expect(deleteClause('cl1')).rejects.toThrow('Failed to delete clause');
+      await expect(deleteClause('cl1', 'org-1')).rejects.toThrow('Failed to delete clause');
     });
   });
 
@@ -328,7 +328,8 @@ describe('clause-service', () => {
       const result = await compareClauses({ clauseIds: ['cl1', 'cl2'], analysisType: 'all' });
       expect(result.clauses).toHaveLength(2);
       expect(result.similarities.length).toBeGreaterThan(0);
-      expect(result.recommendations.length).toBeGreaterThan(0);
+      // No fixed recommendation is attached to a comparison (B80): the service reports what it found and nothing it cannot support.
+      expect(result.recommendations).toHaveLength(0);
     });
 
     it('throws when no clauses found', async () => {
@@ -419,7 +420,7 @@ describe('clause-service', () => {
 
     it('updateClause throws on error', async () => {
       mocks.mockUpdate.mockImplementation(() => { throw new Error('fail'); });
-      await expect(updateClause('cl1', {} as never)).rejects.toThrow('Failed to update clause');
+      await expect(updateClause('cl1', 'org-1', {} as never)).rejects.toThrow('Failed to update clause');
     });
 
     it('searchClauses throws on error', async () => {

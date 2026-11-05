@@ -19,6 +19,7 @@ import { Users } from 'lucide-react';
 import { MarketingHeroSection } from '@/components/marketing/MarketingHeroSection';
 import { OrganizationalContinuityNote } from '@/components/marketing/organizational-continuity-note';
 import { heroImagery } from '@/lib/marketing-hero-imagery';
+import { ICRA_PAID_REPORT_PRICES, icraPriceLabel } from '@/lib/icra/pricing';
 import { buildLocaleAlternates } from '@/lib/marketing-seo';
 import { getUnionEyesSiteTopology } from '@/lib/site-topology';
 import PricingTabs, { type EngagementLayer } from './_components/pricing-tabs';
@@ -118,8 +119,10 @@ const continuityJourney = [
 // SECTION 3.5 — Assessment Ladder (GTM entry funnel)
 // Mirrors the three entry tiers on /organizational-continuity-risk so the
 // pricing page reflects the actual go-to-market motion: a free ICRA reflection,
-// a paid Leadership Briefing Report at $1,200, and a facilitated Organizational
-// Continuity Diagnostic at $6,500. These precede the larger engagement layers.
+// a paid Leadership Briefing Report, and a facilitated Organizational
+// Continuity Diagnostic. The two paid prices are the ones checkout charges
+// (lib/icra/pricing.ts); they are never restated here. These precede the
+// larger engagement layers.
 // ─────────────────────────────────────────────────────────────────────────────
 const assessmentLadder = [
   {
@@ -142,7 +145,7 @@ const assessmentLadder = [
   {
     key: 'executive_continuity_brief',
     name: 'Leadership Briefing Report',
-    price: '$1,200 CAD',
+    price: icraPriceLabel('executive_continuity_brief', false),
     pricePosture: 'One-time · delivered as a governance-readable document',
     summary:
       'A deeper organizational reading of the same assessment — governance entropy, continuity debt, dependency review, and modernization risk surfaced for executive and board conversation.',
@@ -161,7 +164,7 @@ const assessmentLadder = [
   {
     key: 'institutional_continuity_diagnostic',
     name: 'Full Diagnostic & Action Plan',
-    price: '$6,500 CAD',
+    price: icraPriceLabel('institutional_continuity_diagnostic', false),
     pricePosture: 'Facilitated engagement · executive workshop included · 100% credited toward any subsequent engagement if signed within 90 days',
     summary:
       'A full diagnostic engagement: facilitated review, organizational continuity workshop, memory lineage mapping, and an executive briefing note your board can act on. The full fee credits forward toward a subsequent Assessment, Topology, or Platform Engagement if you proceed within 90 days.',
@@ -200,7 +203,7 @@ const frAssessmentLadder = [
   {
     key: 'executive_continuity_brief',
     name: 'Note de continuité exécutive',
-    price: '1 200 $ CAD',
+    price: icraPriceLabel('executive_continuity_brief', true),
     pricePosture: 'Ponctuel · livré sous forme de document lisible par la gouvernance',
     summary:
       "Une lecture organisationnelle approfondie de la même évaluation — entropie de gouvernance, dette de continuité, revue des dépendances et risque de modernisation, mis en forme pour la conversation exécutive.",
@@ -219,7 +222,7 @@ const frAssessmentLadder = [
   {
     key: 'institutional_continuity_diagnostic',
     name: 'Diagnostic organisationnel de continuité',
-    price: '6 500 $ CAD',
+    price: icraPriceLabel('institutional_continuity_diagnostic', true),
     pricePosture: 'Engagement facilité · atelier exécutif inclus · crédité à 100 % sur tout engagement subséquent signé dans les 90 jours',
     summary:
       "Un engagement diagnostic complet : revue facilitée, atelier organisationnel de continuité, cartographie de la lignée mémorielle, et note de synthèse exécutive sur laquelle votre conseil peut agir. Le montant complet est crédité sur un engagement Évaluation, Topologie ou Plateforme subséquent si vous y donnez suite dans les 90 jours.",
@@ -273,7 +276,7 @@ const engagementLayers: EngagementLayer[] = [
       'Modernization pathway evaluation',
       'Confidence-aware operational interpretation',
     ],
-    range: '$35,000–$90,000 CAD · one-time engagement',
+    range: 'Scoped and quoted on request · one-time engagement',
   },
   {
     key: 'platform',
@@ -389,7 +392,7 @@ const frEngagementLayers: EngagementLayer[] = [
     fit: 'Organizations disposant d’une base et nécessitant une profondeur structurelle : analyse des dépendances, parcours de modernisation, interprétation consciente du niveau de confiance.',
     feels: 'Structurel. Interprétatif. Tourné vers l’avenir.',
     deliverables: ['Analyse structurelle de continuité', 'Cartographie de la topologie de continuité', 'Évaluation des parcours de modernisation', 'Interprétation opérationnelle consciente du niveau de confiance'],
-    range: '35 000 $ à 90 000 $ CAD · engagement ponctuel',
+    range: 'Portée et prix établis sur demande · engagement ponctuel',
   },
   {
     key: 'platform', icon: 'layers',
@@ -555,9 +558,10 @@ export default async function LocalePricingPage({
   // Schema.org Service + Offer surface aligned to the GTM funnel on
   // /organizational-continuity-risk. Three concrete tiers (Continuity
   // Reflection / Leadership Briefing Report / Organizational Continuity
-  // Diagnostic) plus four engagement layers (priced as ranges) get exposed
+  // Diagnostic) plus the engagement layers with a published range get exposed
   // as a Service with an AggregateOffer so search engines and procurement
   // crawlers see the real entry funnel — not a generic SaaS price band.
+  // A layer that is quoted on request states no price here either.
   const pricingServiceSchema = {
     '@context': 'https://schema.org',
     '@type': 'Service',
@@ -589,7 +593,7 @@ export default async function LocalePricingPage({
         name: 'Leadership Briefing Report',
         description:
           'Governance-readable deepening of the continuity assessment: governance entropy, continuity debt, organizational dependency review, modernization risk, prioritized recommendations.',
-        price: '1200',
+        price: String(ICRA_PAID_REPORT_PRICES.executive_continuity_brief.amountCents / 100),
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',
         url: `${marketingUrl}/${locale}/organizational-continuity-risk?intendedTier=executive_continuity_brief`,
@@ -599,7 +603,7 @@ export default async function LocalePricingPage({
         name: 'Full Diagnostic & Action Plan',
         description:
           'Facilitated diagnostic engagement: organizational continuity workshop, memory lineage mapping, and executive briefing note your board can act on.',
-        price: '6500',
+        price: String(ICRA_PAID_REPORT_PRICES.institutional_continuity_diagnostic.amountCents / 100),
         priceCurrency: 'CAD',
         availability: 'https://schema.org/InStock',
         url: `${marketingUrl}/${locale}/contact?topic=organizational-continuity-diagnostic`,
@@ -612,17 +616,6 @@ export default async function LocalePricingPage({
         priceCurrency: 'CAD',
         lowPrice: '18000',
         highPrice: '45000',
-        offerCount: 1,
-        url: `${marketingUrl}/${locale}/pricing#engagement-layers`,
-      },
-      {
-        '@type': 'AggregateOffer',
-        name: 'OCRA — Adaptive Continuity Intelligence engagement layer',
-        description:
-          'Structural continuity analysis, continuity topology mapping, modernization pathway evaluation, confidence-aware operational interpretation.',
-        priceCurrency: 'CAD',
-        lowPrice: '35000',
-        highPrice: '90000',
         offerCount: 1,
         url: `${marketingUrl}/${locale}/pricing#engagement-layers`,
       },

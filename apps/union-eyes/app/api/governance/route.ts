@@ -1,19 +1,3 @@
-import { GET as DelegateGET } from './dashboard/route';
-
-function requireOrgAccess(_request: Request): boolean {
-  return true;
-}
-
-function unauthorized(): Response {
-  return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-    status: 401,
-    headers: { 'content-type': 'application/json' },
-  });
-}
-
-export async function GET(request: Request, context: any) {
-  if (!requireOrgAccess(request)) {
-    return unauthorized();
-  }
-  return DelegateGET(request as never, context as never);
-}
+// An alias of another route. The access decision is that route's own; an earlier local always-true access check
+// looked like a gate and decided nothing, so it is removed.
+export { GET } from './dashboard/route';

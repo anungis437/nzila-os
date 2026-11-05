@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@nzila/audit": "workspace:*",
-    "zod": "^3.25.0"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^25",

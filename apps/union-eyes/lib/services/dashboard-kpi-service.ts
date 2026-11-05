@@ -1,4 +1,4 @@
-import { db } from "@/db/db";
+import { withRLSContext } from "@/lib/db/with-rls-context";
 import {
   complianceAlerts,
   employerRemittances,
@@ -31,7 +31,7 @@ const ACTIVE_MEMBER_EXCLUDE = new Set(["inactive", "archived", "deleted", "disab
 const LEADERSHIP_CACHE_TTL_SECONDS = 600;
 const EXECUTIVE_CACHE_TTL_SECONDS = 600;
 const CACHE_NAMESPACE = "dashboard-kpis";
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 
 type DateInput = Date | string | null | undefined;
 
@@ -104,9 +104,11 @@ export interface LeadershipDashboardPayload {
   }>;
   compliance: {
     metrics: {
-      deadlineAdherence: number;
+      /** Null when no alert has been resolved: there is nothing to measure. */
+      deadlineAdherence: number | null;
       avgResponseTime: number;
-      documentationRate: number;
+      /** Null when no alert exists. */
+      documentationRate: number | null;
       openAlerts: number;
     };
     alerts: Array<{
@@ -123,11 +125,14 @@ export interface LeadershipDashboardPayload {
 export interface ExecutiveMetricsPayload {
   totalMembers: number;
   activeGrievances: number;
-  pendingApprovals: number;
-  upcomingMeetings: number;
-  monthlyBudget: {
-    allocated: number;
-    spent: number;
+  /** Strategic goals whose status is at-risk or delayed. This is NOT an approval queue. */
+  atRiskStrategicGoals: number;
+  /** Grievance meeting dates in the next 30 days. These are case meetings, not governance meetings. */
+  grievanceMeetingsNext30Days: number;
+  /** Employer dues remittances for the current month. This is NOT a budget or expenditure. */
+  duesRemittances: {
+    expectedAmount: number;
+    receivedAmount: number;
     currency: string;
   };
   membershipTrend: number;
@@ -158,10 +163,11 @@ export async function getLeadershipDashboardMetrics(args: {
     };
   }
 
-  const [grievanceRows, alertRows] = await Promise.all([
-    db.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(5000),
-    db.select().from(complianceAlerts).where(eq(complianceAlerts.orgId, organizationId)).limit(1000),
-  ]);
+  // Read inside the organization's own transaction: the module-level handle has no organization set, and row-level security then shows no rows.
+  const { grievanceRows, alertRows } = await withRLSContext({ organizationId }, async (tx) => ({
+    grievanceRows: await tx.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(5000),
+    alertRows: await tx.select().from(complianceAlerts).where(eq(complianceAlerts.orgId, organizationId)).limit(1000),
+  }));
 
   const payload = buildLeadershipDashboard(grievanceRows, alertRows, timeframe, now);
   payload.provenance.cache = {
@@ -205,11 +211,11 @@ export async function getExecutiveMetrics(args: {
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   const nextMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
 
-  const [grievanceRows, memberRows, goalRows, remittanceRows] = await Promise.all([
-    db.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(5000),
-    db.select().from(organizationMembers).where(eq(organizationMembers.organizationId, organizationId)).limit(10000),
-    db.select().from(strategicGoals).where(eq(strategicGoals.organizationId, organizationId)).limit(500),
-    db
+  const { grievanceRows, memberRows, goalRows, remittanceRows } = await withRLSContext({ organizationId }, async (tx) => ({
+    grievanceRows: await tx.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(5000),
+    memberRows: await tx.select().from(organizationMembers).where(eq(organizationMembers.organizationId, organizationId)).limit(10000),
+    goalRows: await tx.select().from(strategicGoals).where(eq(strategicGoals.organizationId, organizationId)).limit(500),
+    remittanceRows: await tx
       .select()
       .from(employerRemittances)
       .where(
@@ -219,7 +225,7 @@ export async function getExecutiveMetrics(args: {
           lt(employerRemittances.remittanceDate, nextMonthStart),
         ),
       ),
-  ]);
+  }));
 
   const payload = buildExecutiveMetrics(
     grievanceRows,
@@ -341,9 +347,9 @@ export function buildLeadershipDashboard(
     stewards,
     compliance: {
       metrics: {
-        deadlineAdherence: resolvedAlerts.length > 0 ? Math.round((resolvedWithinThreshold / resolvedAlerts.length) * 100) : 100,
+        deadlineAdherence: resolvedAlerts.length > 0 ? Math.round((resolvedWithinThreshold / resolvedAlerts.length) * 100) : null,
         avgResponseTime: averageRounded(responseTimes),
-        documentationRate: alertRows.length > 0 ? Math.round((documentedAlertCount / alertRows.length) * 100) : 100,
+        documentationRate: alertRows.length > 0 ? Math.round((documentedAlertCount / alertRows.length) * 100) : null,
         openAlerts: openAlerts.length,
       },
       alerts: openAlerts
@@ -414,18 +420,17 @@ export function buildExecutiveMetrics(
 
   const totalMembers = memberRows.filter((member) => !ACTIVE_MEMBER_EXCLUDE.has((member.status ?? "").toLowerCase())).length;
 
-  const pendingApprovals = goalRows.filter((goal) => goal.status === "at-risk" || goal.status === "delayed").length;
+  const atRiskStrategicGoals = goalRows.filter((goal) => goal.status === "at-risk" || goal.status === "delayed").length;
 
-  const upcomingMeetings = grievanceRows.filter((g) => {
+  const grievanceMeetingsNext30Days = grievanceRows.filter((g) => {
     const meetingDate = asDate(g.meetingDate);
     if (!meetingDate) return false;
     const days = diffDays(now, meetingDate);
     return days >= 0 && days <= 30;
   }).length;
 
-  const spent = remittanceRows.reduce((sum, row) => sum + asNumber(row.totalAmount), 0);
-  const allocatedFromExpected = remittanceRows.reduce((sum, row) => sum + asNumber(row.expectedAmount), 0);
-  const allocated = Math.max(allocatedFromExpected, spent);
+  const receivedAmount = remittanceRows.reduce((sum, row) => sum + asNumber(row.totalAmount), 0);
+  const expectedAmount = remittanceRows.reduce((sum, row) => sum + asNumber(row.expectedAmount), 0);
 
   const thisMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   const prevMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
@@ -447,11 +452,11 @@ export function buildExecutiveMetrics(
   return {
     totalMembers,
     activeGrievances,
-    pendingApprovals,
-    upcomingMeetings,
-    monthlyBudget: {
-      allocated,
-      spent,
+    atRiskStrategicGoals,
+    grievanceMeetingsNext30Days,
+    duesRemittances: {
+      expectedAmount,
+      receivedAmount,
       currency: "CAD",
     },
     membershipTrend,

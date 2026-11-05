@@ -22,6 +22,7 @@ import { type PgTransaction } from 'drizzle-orm/pg-core';
 import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@/lib/logger';
+import { UserFacingError } from '@/lib/errors/user-facing-error';
 
 type DbTransaction = PgTransaction<
   PostgresJsQueryResultHKT,
@@ -54,7 +55,7 @@ export async function createBudgetEnvelope(
   });
 
   if (!program || program.orgId !== data.orgId) {
-    throw new Error('Recognition program not found for this organization');
+    throw new UserFacingError('Recognition program not found for this organization');
   }
 
   const [envelope] = await db

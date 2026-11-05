@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => {
     revalidatePath: vi.fn(),
     loggerError: vi.fn(),
     getOrganizationIdForUser: vi.fn(),
+    audit: vi.fn(),
   };
   const q = (resultFn: () => unknown) => (opts: { where?: unknown; orderBy?: unknown }) => {
     if (opts && typeof opts.where === 'function') (opts.where as (...a: unknown[]) => unknown)(stub, helpers);
@@ -42,6 +43,7 @@ const mocks = vi.hoisted(() => {
   return { ...m, fakeDb };
 });
 
+vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: (_ctx: unknown, cb: (db: unknown) => unknown) => cb(mocks.fakeDb),
 }));
@@ -93,6 +95,33 @@ describe('analytics-actions', () => {
     mocks.metricsFindMany.mockReturnValue([]);
     mocks.metricsFindFirst.mockReturnValue(undefined);
     mocks.insertReturning.mockReturnValue([{ id: 'row-1' }]);
+    mocks.audit.mockResolvedValue(undefined);
+  });
+
+  describe('atomic audit', () => {
+    it('calculateMetrics audits the stored metric on the same transaction and fails without the audit', async () => {
+      const params = { metricType: 'claims_volume', metricName: 'Claims', periodType: 'monthly' as const, periodStart: new Date('2024-01-01'), periodEnd: new Date('2024-01-31') };
+      expect((await calculateMetrics(params)).success).toBe(true);
+      expect(mocks.audit).toHaveBeenCalledWith(
+        mocks.fakeDb,
+        expect.objectContaining({ organizationId: 'org-1', userId: 'user-1', action: 'analytics.metric.calculate', resourceId: 'row-1' }),
+      );
+
+      mocks.audit.mockRejectedValueOnce(new Error('audit down'));
+      const failed = await calculateMetrics(params);
+      expect(failed.success).toBe(false);
+      expect(failed.error).toMatch(/^Something went wrong\. Please try again\. \(reference [0-9a-f]{8}\)$/);
+      expect(failed.error).not.toContain('audit down');
+      expect(mocks.loggerError).toHaveBeenCalled();
+    });
+
+    it('createKPI audits the stored configuration on the same transaction', async () => {
+      await createKPI({ name: 'K', metricType: 'claims_volume', dataSource: 'claims', calculation: {}, visualizationType: 'line' });
+      expect(mocks.audit).toHaveBeenCalledWith(
+        mocks.fakeDb,
+        expect.objectContaining({ userId: 'user-1', action: 'analytics.kpi.create', resourceId: 'row-1' }),
+      );
+    });
   });
 
   describe('calculateMetrics', () => {
@@ -304,6 +333,23 @@ describe('analytics-actions', () => {
         limit: 10,
       });
       expect(result.success).toBe(true);
+    });
+
+    it('redacts historical claim identifiers and arbitrary private metadata from member metric reads', async () => {
+      mocks.metricsFindMany.mockReturnValue([
+        { id: 'm1', metricType: 'claims_volume', metricValue: '3', metadata: { claimIds: ['case-secret'], note: 'private' } },
+        { id: 'm2', metricType: 'resolution_time', metricValue: '5.0', metadata: { claimsResolved: 2, claimIds: ['other-secret'] } },
+        { id: 'm3', metricType: 'custom', metricValue: '9', metadata: { memberEmail: 'private@example.invalid' } },
+      ]);
+      const result = await getAnalyticsMetrics({});
+      expect(result.success).toBe(true);
+      const metrics = result.metrics ?? [];
+      expect(metrics.map((metric) => metric.metadata)).toEqual([
+        { claimsCount: 3 }, { claimsResolved: 2 }, {},
+      ]);
+      expect(JSON.stringify(metrics)).not.toContain('case-secret');
+      expect(JSON.stringify(metrics)).not.toContain('other-secret');
+      expect(JSON.stringify(metrics)).not.toContain('private@example.invalid');
     });
 
     it('returns metrics with no filters', async () => {

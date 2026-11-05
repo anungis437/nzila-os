@@ -1,6 +1,5 @@
 import { and, desc, eq, isNull, or, sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { db } from '@/db/db';
 import { documentLinks, documents } from '@/db/schema/documents-schema';
 import { externalDocumentAccessGrants } from '@/db/schema/representation-authority-schema';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
@@ -16,7 +15,7 @@ export const GET = withExternalMatterResourceAuth(
       return NextResponse.json({ error: 'Unsupported matter type' }, { status: 400 });
     }
 
-    const rows = await db
+    const rows = await context.tx
       .select({
         id: documents.id,
         title: documents.title,

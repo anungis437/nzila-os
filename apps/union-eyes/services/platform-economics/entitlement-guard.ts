@@ -389,16 +389,18 @@ export async function checkCoveredOrg(
   organizationId: string,
   contractId: string,
 ): Promise<boolean> {
-  const [covered] = await db
-    .select()
-    .from(contractCoveredOrgs)
-    .where(
-      and(
-        eq(contractCoveredOrgs.contractId, contractId),
-        eq(contractCoveredOrgs.organizationId, organizationId),
-      ),
-    )
-    .limit(1)
+  const [covered] = await withRLSContext({ organizationId }, (tx) =>
+    tx
+      .select()
+      .from(contractCoveredOrgs)
+      .where(
+        and(
+          eq(contractCoveredOrgs.contractId, contractId),
+          eq(contractCoveredOrgs.organizationId, organizationId),
+        ),
+      )
+      .limit(1),
+  )
 
   return !!covered && !covered.deactivatedAt
 }
@@ -409,12 +411,14 @@ export async function checkCoveredOrg(
 export async function listOrgEntitlements(
   organizationId: string,
 ): Promise<EntitlementCheckResult[]> {
-  const entitlements = await db
-    .select()
-    .from(orgEntitlements)
-    .where(
-      and(eq(orgEntitlements.organizationId, organizationId), eq(orgEntitlements.status, 'active')),
-    )
+  const entitlements = await withRLSContext({ organizationId }, (tx) =>
+    tx
+      .select()
+      .from(orgEntitlements)
+      .where(
+        and(eq(orgEntitlements.organizationId, organizationId), eq(orgEntitlements.status, 'active')),
+      ),
+  )
 
   return entitlements.map((e) => ({
     allowed: !(e.expiresAt && e.expiresAt < new Date()),

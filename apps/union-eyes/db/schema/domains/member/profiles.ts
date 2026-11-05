@@ -16,17 +16,17 @@ export const profilesTable = pgTable("profiles", {
   whopMembershipId: text("whop_membership_id"),
   planDuration: text("plan_duration"), // "monthly" or "yearly"
   // Billing cycle tracking
-  billingCycleStart: timestamp("billing_cycle_start"),
-  billingCycleEnd: timestamp("billing_cycle_end"),
+  billingCycleStart: timestamp("billing_cycle_start", { withTimezone: true }),
+  billingCycleEnd: timestamp("billing_cycle_end", { withTimezone: true }),
   // Credit renewal tracking (separate from billing cycle for yearly plans)
-  nextCreditRenewal: timestamp("next_credit_renewal"),
+  nextCreditRenewal: timestamp("next_credit_renewal", { withTimezone: true }),
   // Usage credits tracking
   usageCredits: integer("usage_credits").default(0),
   usedCredits: integer("used_credits").default(0),
   // Subscription status tracking
   status: text("status").default("active"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull()
     .$onUpdate(() => new Date())

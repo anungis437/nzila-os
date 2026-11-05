@@ -23,7 +23,8 @@ export interface SafetyMetricsCardProps {
   value: number | string;
   subtitle?: string;
   trend?: "up" | "down" | "stable";
-  trendValue?: number;
+  /** Percent change, in either direction (its sign is not shown: `trend` says which way). null: no earlier figure to compare with. */
+  trendValue?: number | null;
   icon: LucideIcon;
   description?: string;
   variant?: "default" | "success" | "warning" | "danger";
@@ -87,13 +88,13 @@ export function SafetyMetricsCard({
             {trend === "up" && (
               <>
                 <TrendingUp className="h-3 w-3 text-red-600" />
-                <span className="text-red-600 font-medium">+{trendValue}%</span>
+                <span className="text-red-600 font-medium">{trendValue === null ? "Up" : `+${Math.abs(trendValue)}%`}</span>
               </>
             )}
             {trend === "down" && (
               <>
                 <TrendingDown className="h-3 w-3 text-green-600" />
-                <span className="text-green-600 font-medium">-{trendValue}%</span>
+                <span className="text-green-600 font-medium">{trendValue === null ? "Down" : `-${Math.abs(trendValue)}%`}</span>
               </>
             )}
             {trend === "stable" && (

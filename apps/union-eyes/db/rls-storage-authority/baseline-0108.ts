@@ -27,7 +27,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
   {
     table: "organization_members",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "0108-baseline table (direct org policy, UUID organization_id column — converted from its original TEXT declaration by migration 0002_true_selene.sql, long before 0108 was authored; 0108's stale isText=TRUE call, discovered via the P4 failed-rollout census 2026-09-13, was corrected to FALSE via 0108's own ue_create_direct_org_rls_policy('organization_members', 'organization_id', FALSE) call). Evidence census across 118 real (non-test, non-schema) files: confirmed .insert(organizationMembers) (8 sites), .update(organizationMembers) (5 sites), .delete(organizationMembers) (3 sites), and .from(organizationMembers)/db.query.organizationMembers (60 sites) — core membership table touched by org-management routes, invite acceptance, role updates, and offboarding, all under ordinary authenticated tenant request handling for the tenant-facing paths (no change to that). AUTH_OFFBOARDING_STORAGE_AUTHORITY (round 11): organization_members.status/deletedAt are the storage-side offboarding signal; TENANT_RUNTIME correctly owns both fields for ordinary tenant-initiated changes. PR #752 round 12 correction (invocationAuthority/dbExecutionPrincipal now MIXED, not TENANT_USER/TENANT_RUNTIME): the ONLY reachable status/deletedAt writer, app/api/admin/users/[userId]/route.ts, is PLATFORM_ADMIN-gated (via PLATFORM_ADMIN_USER_IDS, not ordinary tenant admin) and has no ordinary tenant RLS context for an arbitrary target organization — its lookup/mutation of organizationMembers now runs inside withSystemContext() (union_eyes_system), not withRLSContext() (round-11's entry incorrectly still called this TENANT_RUNTIME). Round 11's event-driven enforcement was also itself defective: the route passed organizationMembers.id (the membership row's own UUID) to revokeAllUserSessions()/case-access revocation, both of which are keyed by organizationMembers.userId (the real auth principal) — those calls silently matched zero rows. Fixed this round: the route resolves {membershipId, authUserId, organizationId} explicitly and calls lib/services/member-access-revocation-service.ts's revokeMemberAccess() SYNCHRONOUSLY and fail-closed (non-2xx if any required revocation step fails) — session revocation, authOrganizationUsers.isActive disable, grievance case-access revocation, and local status/deletedAt persistence are no longer certified from an emitted event; lib/events/pilot-event-listeners.ts's former 'member.status_changed' handler is now observability-only (see its file header). lib/services/member-service.ts's updateMember/deleteMember/bulkUpdateMemberStatus (which would bypass this enforcement entirely) confirmed LATENT_UNWIRED — zero real callers anywhere, matching the round-6 bulkUpdateMemberRole precedent. Regression proof: app/api/admin/users/[userId]/__tests__/route.offboarding-parity.test.ts (8 tests: non-platform-admin rejected before any system execution on both PUT+DELETE; authUserId — not membershipId — is what's resolved and passed to revocation; reactivation does not revoke; a failing revocation returns 502 not 200 on both PUT+DELETE; 404 without revocation for a nonexistent member) and lib/services/__tests__/member-access-revocation-service.test.ts (6 failure-injection tests: each of the four revocation steps independently fails closed while the other steps still execute; authUserId, never membershipId, is what session/case-access revocation receive).",
+    reason: "0108-baseline table (direct org policy, UUID organization_id column — converted from its original TEXT declaration by migration 0002_true_selene.sql, long before 0108 was authored; 0108's stale isText=TRUE call, discovered via the P4 failed-rollout census 2026-09-13, was corrected to FALSE via 0108's own ue_create_direct_org_rls_policy('organization_members', 'organization_id', FALSE) call). Evidence census across 118 real (non-test, non-schema) files: confirmed .insert(organizationMembers) (8 sites), .update(organizationMembers) (5 sites), .delete(organizationMembers) (3 sites), and .from(organizationMembers)/db.query.organizationMembers (60 sites) — core membership table touched by org-management routes, invite acceptance, role updates, and offboarding, all under ordinary authenticated tenant request handling for the tenant-facing paths (no change to that). AUTH_OFFBOARDING_STORAGE_AUTHORITY (round 11): organization_members.status/deletedAt are the storage-side offboarding signal; TENANT_RUNTIME correctly owns both fields for ordinary tenant-initiated changes. PR #752 round 12 correction (invocationAuthority/dbExecutionPrincipal now MIXED, not TENANT_USER/TENANT_RUNTIME): the ONLY reachable status/deletedAt writer, app/api/admin/users/[userId]/route.ts, is PLATFORM_ADMIN-gated (via PLATFORM_ADMIN_USER_IDS, not ordinary tenant admin) and has no ordinary tenant RLS context for an arbitrary target organization — its lookup/mutation of organizationMembers now runs inside withSystemContext() (union_eyes_system), not withRLSContext() (round-11's entry incorrectly still called this TENANT_RUNTIME). Round 11's event-driven enforcement was also itself defective: the route passed organizationMembers.id (the membership row's own UUID) to revokeAllUserSessions()/case-access revocation, both of which are keyed by organizationMembers.userId (the real auth principal) — those calls silently matched zero rows. Fixed this round: the route resolves {membershipId, authUserId, organizationId} explicitly and calls lib/services/member-access-revocation-service.ts's revokeMemberAccess() SYNCHRONOUSLY and fail-closed (non-2xx if any required revocation step fails) — session revocation, authOrganizationUsers.isActive disable, grievance case-access revocation, and local status/deletedAt persistence are no longer certified from an emitted event; lib/events/pilot-event-listeners.ts's former 'member.status_changed' handler is now observability-only (see its file header). lib/services/member-service.ts's updateMember/deleteMember/bulkUpdateMemberStatus (which would bypass this enforcement entirely) confirmed LATENT_UNWIRED — zero real callers anywhere, matching the round-6 bulkUpdateMemberRole precedent. Regression proof: app/api/admin/users/[userId]/__tests__/route.offboarding-parity.test.ts (8 tests: non-platform-admin rejected before any system execution on both PUT+DELETE; authUserId — not membershipId — is what's resolved and passed to revocation; reactivation does not revoke; a failing revocation returns 502 not 200 on both PUT+DELETE; 404 without revocation for a nonexistent member) and lib/services/__tests__/member-access-revocation-service.test.ts (6 failure-injection tests: each of the four revocation steps independently fails closed while the other steps still execute; authUserId, never membershipId, is what session/case-access revocation receive). F03-C: SCIM provisioning (app/api/scim/v2/[organizationId]/Users/route.ts) is a session-less machine caller that the tenant role cannot serve and the system role cannot serve here (it holds no INSERT, and is not widened to insert members into any organization), so the people it provisions are not roster rows: they are the system-only directory public.scim_provisioned_users (platform 0059). requiredSystemPrivileges is unchanged.",
     supportingCapability: ["lib/organization-utils.ts","lib/services/member-service.ts","packages/platform-auth/src/invites/service.ts","app/api/admin/users/[userId]/route.ts","lib/services/member-access-revocation-service.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
     requiredSystemPrivileges: ["SELECT","UPDATE"],
@@ -38,7 +38,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
   {
     table: "organizations",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "0108-baseline table (direct org policy keyed on the org's own id per 0108's ue_create_direct_org_rls_policy('organizations', 'id', FALSE) call — INSERT/UPDATE/DELETE all WITH CHECK/USING (id = current_org_id)). CORRECTED 2026-09-02 (round 7): the prior entry described the round-6 census's raw .insert(organizations)/.update(organizations) hit counts as if they were all TENANT_RUNTIME operations — a DML census proves an operation EXISTS, not which principal is authorized to perform it. Re-audited every real call site by reading it directly: app/api/organizations/route.ts's POST (org creation) calls requireSystemAdmin() BEFORE any DB access (the actual authorization decision), but the parent-lookup SELECT and the INSERT then ran through withRLSContext() (tenant runtime) — under the 0108 policy above, a freshly-generated new org's id can never equal the caller's own current_org_id, so that INSERT could never legitimately succeed under enforced RLS. FIXED this round: both now run inside withSystemContext(); requireSystemAdmin() remains the sole authorization decision, evaluated first, never withSystemContext itself. Regression proof: app/api/organizations/__tests__/route.post-system-boundary.test.ts (5 tests: non-admin rejected before any context; unauthenticated rejected before requireSystemAdmin; admin creation uses withSystemContext for both lookup+insert, never withRLSContext; GET unchanged, still withRLSContext only). Other real UPDATE call sites, individually audited: app/api/organizations/[id]/route.ts and app/api/settings/organization/route.ts (withApi minRole 'admin') update only the caller's OWN org id via withRLSContext — correctly TENANT_RUNTIME; lib/services/entitlements.ts's 3 credit-tracking updates run via plain `db` under whichever tenant AI route (app/api/ai/**, app/api/voice/upload) already established withRLSContext for the caller's own org — TENANT_RUNTIME; lib/services/per-capita-calculator.ts's updateLastRemittanceDate is reachable ONLY via app/api/finance/per-capita/inbound/route.ts (withApi minRole 'officer', tenant tier) — TENANT_RUNTIME. Three writers are LATENT (zero real callers, verified by name-search): actions/admin-actions.ts's updateOrg, lib/utils/hierarchy-validation.ts's fixOrphanedOrganizations, and all 3 update sites in services/clc/clc-api-integration.ts (that whole module has zero real callers, matching the round-4 finding for clc_organization_sync_log) — none contribute to the privilege sets below. No .delete(organizations) call site found anywhere (org deactivation is soft, via status/UPDATE).",
+    reason: "0108-baseline table (direct org policy keyed on the org's own id per 0108's ue_create_direct_org_rls_policy('organizations', 'id', FALSE) call — INSERT/UPDATE/DELETE all WITH CHECK/USING (id = current_org_id)). CORRECTED 2026-09-02 (round 7): the prior entry described the round-6 census's raw .insert(organizations)/.update(organizations) hit counts as if they were all TENANT_RUNTIME operations — a DML census proves an operation EXISTS, not which principal is authorized to perform it. Re-audited every real call site by reading it directly: app/api/organizations/route.ts's POST (org creation) calls requireSystemAdmin() BEFORE any DB access (the actual authorization decision), but the parent-lookup SELECT and the INSERT then ran through withRLSContext() (tenant runtime) — under the 0108 policy above, a freshly-generated new org's id can never equal the caller's own current_org_id, so that INSERT could never legitimately succeed under enforced RLS. FIXED this round: both now run inside withSystemContext(); requireSystemAdmin() remains the sole authorization decision, evaluated first, never withSystemContext itself. Regression proof: app/api/organizations/__tests__/route.post-system-boundary.test.ts (5 tests: non-admin rejected before any context; unauthenticated rejected before requireSystemAdmin; admin creation uses withSystemContext for both lookup+insert, never withRLSContext; GET unchanged, still withRLSContext only). Other real UPDATE call sites, individually audited: app/api/organizations/[id]/route.ts and app/api/settings/organization/route.ts (withApi minRole 'admin') update only the caller's OWN org id via withRLSContext — correctly TENANT_RUNTIME; lib/services/entitlements.ts's 3 credit-tracking updates (each replaced the organization's whole settings document with the credit counter, and none had a caller) were removed in UE-CONV-H-019: it now only reads the caller's own organization row, inside its own withRLSContext; lib/services/per-capita-calculator.ts's updateLastRemittanceDate is reachable ONLY via app/api/finance/per-capita/inbound/route.ts (withApi minRole 'officer', tenant tier) — TENANT_RUNTIME. Three writers are LATENT (zero real callers, verified by name-search): actions/admin-actions.ts's updateOrg, lib/utils/hierarchy-validation.ts's fixOrphanedOrganizations, and all 3 update sites in services/clc/clc-api-integration.ts (that whole module has zero real callers, matching the round-4 finding for clc_organization_sync_log) — none contribute to the privilege sets below. No .delete(organizations) call site found anywhere (org deactivation is soft, via status/UPDATE).",
     supportingCapability: ["app/api/organizations/route.ts","app/api/organizations/[id]/route.ts","app/api/settings/organization/route.ts","lib/services/entitlements.ts","lib/organization-utils.ts"],
     requiredRuntimePrivileges: ["SELECT","UPDATE"],
     requiredSystemPrivileges: ["SELECT","INSERT"],
@@ -72,7 +72,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     table: "grievance_deadlines",
     classification: "PARENT_OWNED_RLS_REQUIRED",
     reason: "0108-baseline table, but PARENT-OWNED via grievances.id (grievance_deadlines.grievance_id), not direct-org — it has no organization_id column of its own (confirmed live via information_schema, P4 failed-rollout census 2026-09-13; this table's presumed direct-org call was the source of a second latent 0108 defect once organization_members' isText fix is applied, and was corrected to a bespoke two-hop-style EXISTS(...grievances...) policy in 0108 PART 6b). Distinct from 'claim_deadlines' (a separate, round-5-added table backing the 'deadlines' Drizzle export). MIXED: reachable via ordinary tenant deadline-management code (SELECT/INSERT/UPDATE/DELETE, TENANT_RUNTIME) AND via app/api/cron/deadline-overdue/route.ts (auth: { cron: true }, SYSTEM_SCHEDULE), whose raw SQL SELECT against grievance_deadlines (joined to deadline_reminders) runs inside withSystemContext to detect overdue deadlines — verified by reading that route's SQL directly (see the deadline_reminders/claim_deadlines entries' round-5 correction for the same route).",
-    supportingCapability: ["app/api/cron/deadline-overdue/route.ts","lib/deadline-tracking-system.ts","lib/deadline-service.ts"],
+    supportingCapability: ["app/api/cron/deadline-overdue/route.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE","DELETE"],
     requiredSystemPrivileges: ["SELECT"],
     invocationAuthority: "MIXED",
@@ -144,6 +144,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "safety_training_records",
@@ -177,6 +178,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "injury_logs",
@@ -188,6 +190,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "safety_policies",
@@ -199,6 +202,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "corrective_actions",
@@ -210,6 +214,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "safety_certifications",
@@ -221,13 +226,14 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "message_threads",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "0108-baseline table (direct org policy — the parent for the message_* family below). Reachable via crudRoutes({ readRole: 'member', writeRole: 'steward' }) at app/api/messages/threads/route.ts (GET+POST) and its [threadId] item route (GET+POST), plus a read-only SELECT in lib/gdpr/consent-manager.ts (member's own GDPR data export, reached via app/api/gdpr/data-export/route.ts, withApiAuth). No UPDATE/DELETE call site found; not defaulted to FULL_DML.",
-    supportingCapability: ["app/api/messages/threads/route.ts","app/api/messages/threads/[threadId]/route.ts","lib/gdpr/consent-manager.ts"],
-    requiredRuntimePrivileges: ["SELECT","INSERT"],
+    reason: "0108-baseline table (direct org policy — the parent for the message_* family below). Reachable via crudRoutes({ readRole: 'member', writeRole: 'steward' }) at app/api/messages/threads/route.ts (GET+POST) and its [threadId] item route (GET+POST), plus a read-only SELECT in lib/gdpr/consent-manager.ts (member's own GDPR data export, reached via app/api/gdpr/data-export/route.ts, withApi). UPDATE is granted only for staff assignment (lib/messaging/thread-assignment.ts); platform 0014 installs a trigger that makes tenant, owner, subject and creation immutable and requires an assignment-history record for any staff_id change. No DELETE call site.",
+    supportingCapability: ["app/api/messages/threads/route.ts","app/api/messages/threads/[threadId]/route.ts","app/api/messages/threads/[threadId]/assignment/route.ts","lib/messaging/thread-assignment.ts","lib/gdpr/consent-manager.ts"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
@@ -254,11 +260,12 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "message_read_receipts",
     classification: "PARENT_OWNED_RLS_REQUIRED",
-    reason: "0108-baseline table, parent-owned via messages/message_id per 0108's ue_create_parent_owned_rls_policy('message_read_receipts', 'message_id') call. Sole real reference is lib/gdpr/consent-manager.ts's db.query.messageReadReceipts.findMany({ where: eq(messageReadReceipts.userId, userId) }) — read-only, part of a member's own GDPR data-export request (app/api/gdpr/data-export/route.ts, withApiAuth). No INSERT/UPDATE/DELETE call site found anywhere in the app; not defaulted to FULL_DML.",
+    reason: "0108-baseline table, parent-owned via messages/message_id per 0108's ue_create_parent_owned_rls_policy('message_read_receipts', 'message_id') call. Sole real reference is lib/gdpr/consent-manager.ts's db.query.messageReadReceipts.findMany({ where: eq(messageReadReceipts.userId, userId) }) — read-only, part of a member's own GDPR data-export request (app/api/gdpr/data-export/route.ts, withApi). No INSERT/UPDATE/DELETE call site found anywhere in the app; not defaulted to FULL_DML.",
     supportingCapability: ["lib/gdpr/consent-manager.ts","app/api/gdpr/data-export/route.ts"],
     requiredRuntimePrivileges: ["SELECT"],
     requiredSystemPrivileges: [],
@@ -276,6 +283,7 @@ export const baseline0108Entries: StorageAuthorityEntry[] = [
     invocationAuthority: "NONE",
     dbExecutionPrincipal: "NONE",
     reviewPriority: "NONE",
+    scopeDisposition: "DECLARATION_STALE_OR_NONCANONICAL",
   },
   {
     table: "cross_org_access_log",

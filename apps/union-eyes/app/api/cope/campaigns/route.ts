@@ -13,5 +13,7 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',
+  // The amount raised, the status and the payment-provider identifiers come from recorded donations and the provider, never from a steward's body.
+  writableFields: ['title', 'slug', 'description', 'campaignType', 'goalAmount', 'currency', 'startDate', 'endDate', 'allowRecurring', 'suggestedAmounts', 'thankYouMessage'],
 });
 export { GET, POST };

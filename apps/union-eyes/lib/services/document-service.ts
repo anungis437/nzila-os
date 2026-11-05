@@ -17,9 +17,9 @@ import { documents, documentFolders, documentVersions } from "@/db/schema";
 import { eq, and, or, desc, asc, sql, inArray, count, like } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { logger } from "@/lib/logger";
-import { processImageOCR, processPDFOCR } from "@/lib/services/ocr-service";
 import { downloadBuffer } from "@/lib/blob-client";
-import { extractBlobPathFromUrl } from "@/lib/services/document-blob-integrity-service";
+import { extractTextFromBytes } from "@/lib/documents/ocr-extract";
+import { extractBlobPathFromUrl, isBlobPathOwnedByOrganization } from "@/lib/services/document-blob-integrity-service";
 import { getDocumentMutabilityBlockReason } from "@/lib/services/document-retention-guard";
 
 const DOCUMENT_BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER ?? "union-eyes";
@@ -214,6 +214,7 @@ export async function createDocument(data: NewDocument): Promise<Document> {
  */
 export async function updateDocument(
   id: string,
+  organizationId: string,
   data: Partial<NewDocument>
 ): Promise<Document | null> {
   try {
@@ -223,7 +224,7 @@ export async function updateDocument(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(documents.id, id))
+      .where(and(eq(documents.id, id), eq(documents.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -236,7 +237,7 @@ export async function updateDocument(
 /**
  * Soft delete document
  */
-export async function deleteDocument(id: string): Promise<boolean> {
+export async function deleteDocument(id: string, organizationId: string): Promise<boolean> {
   try {
     const [deleted] = await db
       .update(documents)
@@ -244,7 +245,7 @@ export async function deleteDocument(id: string): Promise<boolean> {
         deletedAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(documents.id, id))
+      .where(and(eq(documents.id, id), eq(documents.organizationId, organizationId)))
       .returning();
 
     return !!deleted;
@@ -257,9 +258,9 @@ export async function deleteDocument(id: string): Promise<boolean> {
 /**
  * Permanently delete document
  */
-export async function permanentlyDeleteDocument(id: string): Promise<boolean> {
+export async function permanentlyDeleteDocument(id: string, organizationId: string): Promise<boolean> {
   try {
-    await db.delete(documents).where(eq(documents.id, id));
+    await db.delete(documents).where(and(eq(documents.id, id), eq(documents.organizationId, organizationId)));
 
     return true;
   } catch (error) {
@@ -365,6 +366,7 @@ export async function createFolder(data: NewDocumentFolder): Promise<DocumentFol
  */
 export async function updateFolder(
   id: string,
+  organizationId: string,
   data: Partial<NewDocumentFolder>
 ): Promise<DocumentFolder | null> {
   try {
@@ -374,7 +376,7 @@ export async function updateFolder(
         ...data,
         updatedAt: new Date(),
       })
-      .where(eq(documentFolders.id, id))
+      .where(and(eq(documentFolders.id, id), eq(documentFolders.organizationId, organizationId)))
       .returning();
 
     return updated || null;
@@ -387,23 +389,23 @@ export async function updateFolder(
 /**
  * Delete folder
  */
-export async function deleteFolder(id: string, deleteContents = false): Promise<boolean> {
+export async function deleteFolder(id: string, organizationId: string, deleteContents = false): Promise<boolean> {
   try {
     if (deleteContents) {
       // Delete all documents in folder
       await db
         .update(documents)
         .set({ deletedAt: new Date() })
-        .where(eq(documents.folderId, id));
+        .where(and(eq(documents.folderId, id), eq(documents.organizationId, organizationId)));
 
       // Recursively delete subfolders
       const subfolders = await db
         .select()
         .from(documentFolders)
-        .where(eq(documentFolders.parentFolderId, id));
+        .where(and(eq(documentFolders.parentFolderId, id), eq(documentFolders.organizationId, organizationId)));
 
       for (const subfolder of subfolders) {
-        await deleteFolder(subfolder.id, true);
+        await deleteFolder(subfolder.id, organizationId, true);
       }
     }
 
@@ -411,7 +413,7 @@ export async function deleteFolder(id: string, deleteContents = false): Promise<
     const [deleted] = await db
       .update(documentFolders)
       .set({ deletedAt: new Date() })
-      .where(eq(documentFolders.id, id))
+      .where(and(eq(documentFolders.id, id), eq(documentFolders.organizationId, organizationId)))
       .returning();
 
     return !!deleted;
@@ -568,9 +570,20 @@ export async function getDocumentVersions(documentId: string, organizationId?: s
 // ============================================================================
 
 /**
- * Process document with OCR
+ * Reads a document's stored file and extracts text from its bytes. INTERNAL: this performs no authorization. A caller
+ * must already hold a decision from resolveOcrAuthority (lib/documents/ocr-authority.ts); the canonical route is
+ * POST /api/documents/[id]/ocr. The result is a machine extraction: untrusted, not document content and not evidence.
+ * Persisting it into the document row is not permitted; transcripts are stored only as revisions
+ * (lib/documents/transcripts.ts).
  */
-export async function processDocumentOCR(documentId: string, organizationId?: string): Promise<OCRResult> {
+export async function processDocumentOCR(
+  documentId: string,
+  organizationId?: string,
+  options?: { persistExtractedText?: boolean },
+): Promise<OCRResult> {
+  if (options?.persistExtractedText === true) {
+    throw new Error("OCR_PERSISTENCE_NOT_PERMITTED");
+  }
   try {
     const document = await db.query.documents.findFirst({
       where:
@@ -590,119 +603,34 @@ export async function processDocumentOCR(documentId: string, organizationId?: st
         : undefined) ??
       extractBlobPathFromUrl(fileUrl);
 
-    if (!blobPath) {
+    if (!organizationId || !blobPath || !isBlobPathOwnedByOrganization(blobPath, organizationId)) {
       throw new Error("Document blob path missing");
     }
 
     const buffer = await downloadBuffer(DOCUMENT_BLOB_CONTAINER, blobPath);
-    const lowerMimeType = (document.mimeType ?? "").toLowerCase();
-    const lowerFileType = (document.fileType ?? "").toLowerCase();
-    const processedAt = new Date();
-
-    let extractedText = "";
-    let confidence = 0;
-    const language = "en";
-    let metadata: Record<string, unknown> = {
-      provider: "native",
-      blobPath,
-    };
-
-    if (lowerMimeType.startsWith("image/")) {
-      const imageResult = await processImageOCR(buffer);
-      extractedText = imageResult.text;
-      confidence = imageResult.confidence;
-      metadata = {
-        provider: "image-ocr",
-        blobPath,
-      };
-    } else if (lowerMimeType.includes("pdf") || lowerFileType === "pdf") {
-      const pdfResult = await processPDFOCR(buffer);
-      extractedText = pdfResult.fullText;
-      confidence = pdfResult.pages.length > 0
-        ? Math.round(pdfResult.pages.reduce((sum, page) => sum + page.confidence, 0) / pdfResult.pages.length)
-        : 0;
-      metadata = {
-        provider: "pdf-ocr",
-        blobPath,
-        pages: pdfResult.pages.length,
-      };
-    } else if (
-      lowerMimeType.startsWith("text/")
-      || lowerMimeType.includes("json")
-      || lowerFileType === "txt"
-      || lowerFileType === "csv"
-      || lowerFileType === "json"
-    ) {
-      extractedText = buffer.toString("utf8");
-      confidence = 100;
-      metadata = {
-        provider: "text-decode",
-        blobPath,
-      };
-    }
-
-    const result: OCRResult = {
-      documentId,
-      text: extractedText,
-      confidence,
-      language,
-      processedAt,
-      metadata,
-    };
-
-    await updateDocument(documentId, {
-      contentText: extractedText,
-      metadata: {
-        ...(document.metadata && typeof document.metadata === "object" ? document.metadata : {}),
-        ocr: {
-          ...metadata,
-          confidence,
-          language,
-          processedAt: processedAt.toISOString(),
-        },
-      },
-    });
-
-    return result;
-  } catch (error) {
-    logger.error("Error processing document OCR", { error, documentId });
-    throw new Error("Failed to process document OCR");
-  }
-}
-
-/**
- * Bulk process documents with OCR
- */
-export async function bulkProcessOCR(documentIds: string[], organizationId?: string): Promise<BulkOperationResult> {
-  const errors: Array<{ id: string; error: string }> = [];
-  let processed = 0;
-
-  try {
-    for (const id of documentIds) {
-      try {
-        if (organizationId) {
-          await processDocumentOCR(id, organizationId);
-        } else {
-          await processDocumentOCR(id);
-        }
-        processed++;
-      } catch (error) {
-        errors.push({
-          id,
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
-      }
-    }
-
+    const extraction = await extractTextFromBytes(buffer, document.mimeType ?? "", document.fileType ?? "");
     return {
-      success: errors.length === 0,
-      processed,
-      failed: errors.length,
-      errors: errors.length > 0 ? errors : undefined,
+      documentId,
+      text: extraction.text,
+      confidence: extraction.confidence,
+      language: extraction.language,
+      processedAt: new Date(),
+      metadata: { provider: extraction.engine, ...extraction.metadata },
     };
   } catch (error) {
-    logger.error("Error in bulk OCR processing", { error, documentIds });
-    throw new Error("Failed to complete bulk OCR processing");
+    if (
+      error instanceof Error
+      && (error.message === "OCR_UNSUPPORTED"
+        || error.message === "Document not found"
+        || error.message === "Document blob path missing")
+    ) {
+      throw error;
+    }
+    logger.error("Error processing document OCR", {
+      documentId,
+      organizationId: organizationId ?? null,
+    });
+    throw new Error("Failed to process document OCR");
   }
 }
 
@@ -845,7 +773,7 @@ export async function bulkUpdateTags(
           newTags = currentTags.filter((t) => !tags.includes(t));
         }
 
-        await updateDocument(doc.id, { tags: newTags });
+        await updateDocument(doc.id, organizationId, { tags: newTags });
       }
     }
 

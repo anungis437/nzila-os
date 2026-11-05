@@ -8,11 +8,12 @@
  * function that can later be swapped for a trained model.
  */
 
-import { db } from "@/db/db";
+import type { RLSTx } from "@/lib/db/with-rls-context";
+import { ApiError } from "@/lib/api/errors";
 import { stewards } from "@/db/schema/domains/member/stewards";
 import { stewardAssignments } from "@/db/schema/union-structure-schema";
 import { grievances } from "@/db/schema/domains/claims/grievances";
-import { eq, and, asc } from "drizzle-orm";
+import { eq, and, asc, sql } from "drizzle-orm";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -90,8 +91,8 @@ export function calculateStewardScore(input: ScoringInput): number {
 /**
  * List active stewards for an organization.
  */
-export async function listStewards(orgId: string) {
-  return db
+export async function listStewards(orgId: string, tx: RLSTx) {
+  return tx
     .select()
     .from(stewards)
     .where(and(eq(stewards.orgId, orgId), eq(stewards.active, true)))
@@ -101,13 +102,16 @@ export async function listStewards(orgId: string) {
 /**
  * Create a new steward profile.
  */
-export async function createSteward(data: {
-  orgId: string;
-  userId: string;
-  region?: string;
-  specialization?: string;
-}) {
-  const [row] = await db
+export async function createSteward(
+  data: {
+    orgId: string;
+    userId: string;
+    region?: string;
+    specialization?: string;
+  },
+  tx: RLSTx,
+) {
+  const [row] = await tx
     .insert(stewards)
     .values({
       orgId: data.orgId,
@@ -121,13 +125,15 @@ export async function createSteward(data: {
 
 /**
  * Recommend the best steward for a given grievance.
+ * Runs on the caller's tenant transaction, so both reads are the caller's organization's.
  */
 export async function recommendSteward(
   orgId: string,
   grievanceId: string,
+  tx: RLSTx,
 ): Promise<StewardCandidate[]> {
   // Fetch the grievance
-  const [grievance] = await db
+  const [grievance] = await tx
     .select()
     .from(grievances)
     .where(
@@ -135,11 +141,11 @@ export async function recommendSteward(
     );
 
   if (!grievance) {
-    throw new Error("Grievance not found or not in this organization.");
+    throw ApiError.notFound("Grievance");
   }
 
   // Fetch active stewards
-  const activeStewards = await db
+  const activeStewards = await tx
     .select()
     .from(stewards)
     .where(and(eq(stewards.orgId, orgId), eq(stewards.active, true)));
@@ -171,14 +177,16 @@ export async function recommendSteward(
 /**
  * Assign a steward to a grievance — inserts assignment row
  * and bumps the steward's currentCaseload.
+ * Runs on the caller's tenant transaction, so the assignment and the caseload change commit with the rest of the assignment.
  */
 export async function assignSteward(
   organizationId: string,
   grievanceId: string,
   stewardId: string,
+  tx: RLSTx,
 ) {
   // Insert assignment
-  const [assignment] = await db
+  const [assignment] = await tx
     .insert(stewardAssignments)
     .values({
       organizationId,
@@ -189,18 +197,11 @@ export async function assignSteward(
     })
     .returning();
 
-  // Increment caseload
-  const [steward] = await db
-    .select()
-    .from(stewards)
-    .where(eq(stewards.id, stewardId));
-
-  if (steward) {
-    await db
-      .update(stewards)
-      .set({ currentCaseload: steward.currentCaseload + 1 })
-      .where(eq(stewards.id, stewardId));
-  }
+  // Increment caseload in the statement itself: a read-then-write would lose a concurrent assignment.
+  await tx
+    .update(stewards)
+    .set({ currentCaseload: sql`${stewards.currentCaseload} + 1` })
+    .where(and(eq(stewards.id, stewardId), eq(stewards.orgId, organizationId)));
 
   return assignment;
 }

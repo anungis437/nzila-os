@@ -96,6 +96,9 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+const { withRls } = vi.hoisted(() => ({ withRls: vi.fn() }));
+vi.mock("@/lib/db/with-rls-context", () => ({ withRLSContext: withRls }));
+
 import {
   calculateEmployerRisk,
   deriveRiskSignals,
@@ -107,8 +110,11 @@ import {
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe("Employer Risk AI", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    // The tenant transaction hands the service the same connection stub the rest of this file mocks
+    const { db } = await import("@/db/db");
+    withRls.mockImplementation(async (_scope: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(db));
   });
 
   describe("classifyRiskBand", () => {
@@ -167,6 +173,7 @@ describe("Employer Risk AI", () => {
       expect(result).toHaveProperty("grievanceCount30d");
       expect(result).toHaveProperty("complianceAlertCount30d");
       expect(result).toHaveProperty("arbitrationCount12m");
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 
@@ -174,6 +181,7 @@ describe("Employer Risk AI", () => {
     it("returns undefined when no scores exist", async () => {
       const result = await getLatestRiskScore("emp-1", "org-1");
       expect(result).toBeUndefined();
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 
@@ -181,6 +189,7 @@ describe("Employer Risk AI", () => {
     it("returns an array", async () => {
       const result = await getRiskHistory("emp-1", "org-1");
       expect(Array.isArray(result)).toBe(true);
+      expect(withRls).toHaveBeenCalledWith({ organizationId: "org-1" }, expect.any(Function));
     });
   });
 });

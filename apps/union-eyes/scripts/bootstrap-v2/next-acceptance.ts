@@ -116,7 +116,7 @@ export function environmentClassifications(env: NodeJS.ProcessEnv) {
       'AWS_ACCESS_KEY_ID',
     ],
     MAIL: ['SMTP_HOST', 'RESEND_API_KEY', 'SENDGRID_API_KEY'],
-    PAYMENT: ['STRIPE_SECRET_KEY', 'WHOP_API_KEY', 'PAYPAL_CLIENT_SECRET'],
+    PAYMENT: ['STRIPE_SECRET_KEY', 'PAYPAL_CLIENT_SECRET'],
     EXTERNAL_API: [
       'AZURE_AD_CLIENT_ID',
       'AZURE_AD_CLIENT_SECRET',

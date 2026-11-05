@@ -10,6 +10,21 @@
  * @module lib/public-routes
  */
 
+import scheduledJobs from './operations/scheduled-jobs.json';
+
+/**
+ * Provider callbacks: routes that carry no session because an external system pushes to them, and that verify the provider's own signature (or HMAC) in the
+ * handler. Each is a route whose guard class is WEBHOOK_SIGNATURE in the route-coverage manifest; lib/__tests__/edge-route-config.test.ts holds the two lists
+ * equal, so a callback added without being listed here, or listed without a route, fails a test. They are public at the edge (CORS, no session required) and are
+ * left out of the API rate limit (lib/rate-limit/proxy-api-guard.ts): a provider's retry burst must reach the handler that verifies it.
+ */
+export const SIGNED_CALLBACK_ROUTES: ReadonlySet<string> = new Set([
+  '/api/payments/webhooks/stripe',      // Stripe payment events (verified via webhook signature)
+  '/api/payments/webhooks/paypal',      // PayPal capture events (verified through PayPal's signature-verification call)
+  '/api/communications/webhooks/resend', // Resend delivery events (verified via the Svix signature)
+  '/api/integrations/shopify/webhooks', // Shopify order events (verified via HMAC)
+]);
+
 /**
  * Public API routes that don&apos;t require authentication
  * 
@@ -27,27 +42,13 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/auth_core/health/',   // Trailing-slash variant used by E2E helpers
   '/api/health/liveness',      // Kubernetes liveness probe
   '/api/status',               // System status endpoint for ops dashboards
-  '/api/docs/openapi.json',    // Public API documentation (describes public endpoints only)
+  // OpenAPI inventory is restricted to administrators at the handler and proxy.
   
   // ========================================================================
   // WEBHOOKS
   // Justification: External systems push events, authenticated via signatures
   // ========================================================================
-  '/api/webhooks/stripe',      // Stripe payment events (verified via webhook signature)
-  '/api/webhooks/clc',         // CLC per-capita updates (verified via API key)
-  '/api/webhooks/signatures',  // DocuSign signature events (verified via webhook signature)
-  '/api/webhooks/whop',        // Whop membership events (verified via webhook signature)
-  '/api/signatures/webhooks/docusign', // Legacy DocuSign webhook endpoint
-  '/api/integrations/shopify/webhooks', // Shopify order events (verified via HMAC)
-  '/api/payments/webhooks/stripe', // Stripe webhook endpoint (consolidated)
-  '/api/whop/webhooks',        // Alternative Whop webhook endpoint
-  
-  // ========================================================================
-  // PUBLIC CHECKOUT/PAYMENT FLOWS
-  // Justification: Guest checkout required for payment processor integrations
-  // ========================================================================
-  '/api/whop/unauthenticated-checkout', // Guest checkout flow (creates session on success)
-  // '/api/whop/create-checkout' is intentionally NOT public (requires authenticated user)
+  ...SIGNED_CALLBACK_ROUTES,
   
   // ========================================================================
   // AUTH ENDPOINTS (email/password)
@@ -64,6 +65,13 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/auth/methods',           // Discover allowed sign-in methods for an email/org
   '/api/auth/mfa/challenge',     // Consume MFA challenge token post-password (token IS the credential)
   
+  // ========================================================================
+  // SCIM PROVISIONING
+  // Justification: the caller is an identity provider with no session. Every handler authenticates the organization's SCIM bearer
+  // token (lib/scim/scim-token.ts) and acts only for the organization that token belongs to.
+  // ========================================================================
+  '/api/scim/v2/',
+
   // ========================================================================
   // PUBLIC TRACKING/ANALYTICS
   // Justification: Email opens/clicks tracking, must work without auth
@@ -102,16 +110,9 @@ export const PUBLIC_API_ROUTES = new Set([
  * SECURITY: These routes check X-CRON-SECRET header matches CRON_SECRET env var
  * Justification: Background jobs must run without user authentication
  */
-export const CRON_API_ROUTES = new Set([
-  '/api/cron/analytics/daily-metrics',  // Daily analytics aggregation
-  '/api/cron/education-reminders',      // Send education course reminders
-  '/api/cron/monthly-dues',             // Process monthly dues payments
-  '/api/cron/monthly-per-capita',       // CLC per-capita reporting
-  '/api/cron/overdue-notifications',    // Send overdue claim notifications
-  '/api/cron/scheduled-reports',        // Generate scheduled reports
-  '/api/rewards/cron',                  // Process rewards point expiration
-  '/api/cron/external-data-sync',       // Sync data from external systems
-]);
+// Derived from the scheduled-jobs manifest, the one place a scheduled route is declared, so the edge check cannot drift from the
+// jobs that are actually scheduled. (The path is matched without its query string.)
+export const CRON_API_ROUTES = new Set<string>(scheduledJobs.jobs.map((job) => job.path.split('?')[0]));
 
 // =============================================================================
 // PUBLIC & CRON ROUTE HELPERS

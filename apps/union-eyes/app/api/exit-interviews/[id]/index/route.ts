@@ -11,7 +11,7 @@
 import { and, eq } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db/db';
-import { exitInterviews, exitInterviewEvents } from '@/db/schema';
+import { exitInterviews } from '@/db/schema';
 import { indexExitInterview } from '@/lib/knowledge-transfer/indexing/semantic-indexer';
 import { isIndexingAllowed } from '@/lib/knowledge-transfer/governance/consent-controls';
 
@@ -19,6 +19,7 @@ export const dynamic = 'force-dynamic';
 
 export const POST = withApi(
   {
+    rlsOrgContext: true,
     auth: { required: true, minRole: 'admin' },
     entitlement: 'union_knowledge_suite',
     openapi: {
@@ -49,18 +50,15 @@ export const POST = withApi(
       };
     }
 
-    const result = await indexExitInterview(params.id, organizationId!, userId!);
+    const result = await indexExitInterview(params.id, organizationId!, userId!, {
+      eventNotes: 'Manual semantic re-index triggered',
+    });
 
-    if (result.indexed) {
-      await db.insert(exitInterviewEvents).values({
-        interviewId: params.id,
-        organizationId: organizationId!,
-        eventType: 'indexed',
-        actorUserId: userId!,
-        notes: 'Manual semantic re-index triggered',
-        payload: { knowledgeBaseId: result.knowledgeBaseId },
-      });
-    }
+    // pgvector is optional: where it is not installed the request cannot be carried out, which is not a failure of this interview.
+    if (!result.indexed && 'unavailable' in result && result.unavailable) throw ApiError.capabilityUnavailable(result.reason);
+
+    // A failed indexing is a failure of the request, not a 200 carrying the error text.
+    if (!result.indexed && 'failed' in result && result.failed) throw ApiError.internal('Indexing failed');
 
     return { data: result };
   },

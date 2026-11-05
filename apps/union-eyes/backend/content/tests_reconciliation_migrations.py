@@ -10,10 +10,12 @@ environment all agree. These tests guard against reintroduction of the
 anomalous ``ue_documents`` / ``ue_votes`` model drift.
 """
 
-from django.test import TransactionTestCase
+from django.test import TestCase
 
 
-class CanonicalTableNameTests(TransactionTestCase):
+class CanonicalTableNameTests(TestCase):
+    # A TestCase rolls back, so nothing needs flushing: TransactionTestCase truncates every table after each test, and the
+    # platform's append-only evidence tables refuse TRUNCATE (ue_authority_no_truncate), so it cannot run on the real schema.
     def test_documents_model_resolves_canonical_table(self):
         from content.models import Documents
 

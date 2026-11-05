@@ -33,8 +33,8 @@ export const swissColdStorage = pgTable("swiss_cold_storage", {
   lastAccessedAt: timestamp("last_accessed_at"),
   lastAccessedBy: varchar("last_accessed_by", { length: 255 }),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Break-glass emergency system
@@ -77,8 +77,8 @@ export const breakGlassSystem = pgTable("break_glass_system", {
   // Status
   status: varchar("status", { length: 20 }).notNull().default("active"), // "active", "testing", "activated"
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Disaster recovery drills
@@ -127,8 +127,8 @@ export const disasterRecoveryDrills = pgTable("disaster_recovery_drills", {
   approvedBy: varchar("approved_by", { length: 255 }),
   approvedAt: timestamp("approved_at"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Key holder registry (for Shamir's Secret Sharing)
@@ -167,8 +167,8 @@ export const keyHolderRegistry = pgTable("key_holder_registry", {
   lastVerifiedAt: timestamp("last_verified_at"),
   nextVerificationDue: timestamp("next_verification_due").notNull(),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Recovery time objectives (RTO) tracking
@@ -192,8 +192,8 @@ export const recoveryTimeObjectives = pgTable("recovery_time_objectives", {
   lastTestResult: varchar("last_test_result", { length: 20 }), // "passed", "failed", "partial"
   actualRecoveryTime: integer("actual_recovery_time"), // Actual time in last test (hours)
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Emergency declarations (used by break-glass service)
@@ -221,8 +221,8 @@ export const emergencyDeclarations = pgTable("emergency_declarations", {
   notificationSent: boolean("notification_sent").notNull().default(false),
   breakGlassActivated: boolean("break_glass_activated").notNull().default(false),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Break-glass activations (Shamir's Secret Sharing records)
@@ -233,8 +233,8 @@ export const breakGlassActivations = pgTable("break_glass_activations", {
   emergencyId: uuid("emergency_id").notNull().references(() => emergencyDeclarations.id),
   
   // Activation details
-  activationInitiatedAt: timestamp("activation_initiated_at").notNull(),
-  activationApprovedAt: timestamp("activation_approved_at"),
+  activationInitiatedAt: timestamp("activation_initiated_at", { withTimezone: true }).notNull(),
+  activationApprovedAt: timestamp("activation_approved_at", { withTimezone: true }),
   activationReason: text("activation_reason").notNull(),
   
   // Key holders' approvals (3 of 5 required)
@@ -243,18 +243,18 @@ export const breakGlassActivations = pgTable("break_glass_activations", {
   requiredSignatures: integer("required_signatures").notNull().default(3),
   signaturesReceived: integer("signatures_received").notNull().default(0),
   
-  // Signature tracking
-  signature1UserId: varchar("signature_1_user_id", { length: 255 }),
-  signature1Timestamp: timestamp("signature_1_timestamp"),
-  signature1IpAddress: varchar("signature_1_ip_address", { length: 45 }),
+  // Signature tracking (the Django compliance model names the first column signature1_user_id, so the series follows it)
+  signature1UserId: varchar("signature1_user_id", { length: 255 }),
+  signature1Timestamp: timestamp("signature1_timestamp"),
+  signature1IpAddress: varchar("signature1_ip_address", { length: 45 }),
   
-  signature2UserId: varchar("signature_2_user_id", { length: 255 }),
-  signature2Timestamp: timestamp("signature_2_timestamp"),
-  signature2IpAddress: varchar("signature_2_ip_address", { length: 45 }),
+  signature2UserId: varchar("signature2_user_id", { length: 255 }),
+  signature2Timestamp: timestamp("signature2_timestamp"),
+  signature2IpAddress: varchar("signature2_ip_address", { length: 45 }),
   
-  signature3UserId: varchar("signature_3_user_id", { length: 255 }),
-  signature3Timestamp: timestamp("signature_3_timestamp"),
-  signature3IpAddress: varchar("signature_3_ip_address", { length: 45 }),
+  signature3UserId: varchar("signature3_user_id", { length: 255 }),
+  signature3Timestamp: timestamp("signature3_timestamp"),
+  signature3IpAddress: varchar("signature3_ip_address", { length: 45 }),
   
   // Recovery log
   recoveryActionsLog: jsonb("recovery_actions_log"), // Detailed log of recovery steps
@@ -271,7 +271,7 @@ export const breakGlassActivations = pgTable("break_glass_activations", {
   auditedBy: varchar("audited_by", { length: 255 }),
   auditReport: text("audit_report"),
   
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

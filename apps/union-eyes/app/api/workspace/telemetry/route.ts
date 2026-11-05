@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
-import { withRoleAuth } from "@/lib/api-auth-guard";
+import { withRoleAuth, type BaseAuthContext } from "@/lib/api-auth-guard";
+import { checkRateLimit, createRateLimitHeaders } from "@/lib/rate-limiter";
 import { logger } from "@/lib/logger";
 import {
   WORKSPACE_ID,
   WORKSPACE_CLIENT_TELEMETRY_EVENTS,
   WORKSPACE_TELEMETRY_PAYLOAD_KEYS,
   isAllowedTelemetryRoute,
+  WORKSPACE_TABS,
   type WorkspaceClientTelemetryEvent,
 } from "@/components/workspace/workspace-config";
 
@@ -29,6 +31,9 @@ import {
 
 const ALLOWED_EVENTS = new Set<string>(WORKSPACE_CLIENT_TELEMETRY_EVENTS);
 const ALLOWED_PAYLOAD_KEYS = new Set<string>(WORKSPACE_TELEMETRY_PAYLOAD_KEYS);
+const ALLOWED_TABS = new Set<string>(WORKSPACE_TABS.map(tab => tab.id));
+const MAX_BODY_BYTES = 2048;
+const TELEMETRY_RATE_LIMIT = { limit: 120, window: 60, identifier: "workspace-telemetry", failOpen: false } as const;
 
 function sanitizePayload(input: unknown): Record<string, string> {
   const safe: Record<string, string> = {};
@@ -44,27 +49,83 @@ function sanitizePayload(input: unknown): Record<string, string> {
       }
       continue;
     }
-    safe[key] = value;
+    if (key === "tab") {
+      if (ALLOWED_TABS.has(value)) safe.tab = value;
+      continue;
+    }
+    // The client does not attest to event time or workspace identity.
+    // Accept neither an arbitrary timestamp nor a forged workspace name.
   }
 
-  // Workspace identifier is always canonical.
   safe.workspace = WORKSPACE_ID;
+  safe.timestamp = new Date().toISOString();
   return safe;
 }
 
-export const POST = withRoleAuth("member", async (req) => {
+export const POST = withRoleAuth("member", async (req, context: BaseAuthContext) => {
+  // Telemetry is optional but must not become an unbounded log-write channel.
+  // An absent identity or unavailable limiter is a refusal, not an invented success.
+  if (!context.userId || !context.organizationId) {
+    return NextResponse.json({ error: "Authenticated organization context required" }, { status: 403 });
+  }
+  let rateLimit;
   try {
-    const body = await req.json();
-    const event = body?.event as string | undefined;
+    rateLimit = await checkRateLimit(
+      `${context.organizationId}:${context.userId}`,
+      TELEMETRY_RATE_LIMIT,
+    );
+  } catch {
+    return NextResponse.json({ error: "Telemetry temporarily unavailable" }, { status: 503 });
+  }
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: rateLimit.error ? "Telemetry temporarily unavailable" : "Telemetry rate limit exceeded" },
+      { status: rateLimit.error ? 503 : 429, headers: createRateLimitHeaders(rateLimit) },
+    );
+  }
+  try {
+    // Bound the actual streamed body, not only Content-Length (which can be absent or forged).
+    const declaredLength = Number(req.headers.get("content-length") ?? "0");
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "Telemetry payload too large" }, { status: 413 });
+    }
+    const reader = req.body?.getReader();
+    const decoder = new TextDecoder();
+    let raw = "";
+    let total = 0;
+    if (reader) {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.byteLength;
+        if (total > MAX_BODY_BYTES) {
+          await reader.cancel();
+          return NextResponse.json({ error: "Telemetry payload too large" }, { status: 413 });
+        }
+        raw += decoder.decode(value, { stream: true });
+      }
+      raw += decoder.decode();
+    }
+    let body: Record<string, unknown>;
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return NextResponse.json({ error: "Invalid telemetry payload" }, { status: 400 });
+      }
+      body = parsed as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ error: "Invalid telemetry JSON" }, { status: 400 });
+    }
+    const event = body.event;
 
-    if (!event || !ALLOWED_EVENTS.has(event)) {
+    if (typeof event !== "string" || !ALLOWED_EVENTS.has(event)) {
       return NextResponse.json(
         { error: `Invalid event. Allowed: ${[...ALLOWED_EVENTS].join(", ")}` },
         { status: 400 },
       );
     }
 
-    const payload = sanitizePayload(body?.payload);
+    const payload = sanitizePayload(body.payload);
 
     logger.info("[workspace/telemetry] event", {
       event: event as WorkspaceClientTelemetryEvent,

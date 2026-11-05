@@ -192,13 +192,13 @@ POST   /api/arrears/:id/payment-plan
 
 ### Dues Calculation Routes
 
-**Blocker**: All dues routes require Clerk JWT authentication
+**Blocker**: All dues routes require JWT authentication
 
 **Options:**
 
-1. Generate valid Clerk JWT token for testing
+1. Generate valid JWT token for testing
 2. Add development bypass (NODE_ENV=development allows test tokens)
-3. Create authenticated test user via Clerk
+3. Create authenticated test user via the auth provider
 
 **Required Tests:**
 

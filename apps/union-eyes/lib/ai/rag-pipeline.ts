@@ -249,6 +249,7 @@ class RAGPipeline {
     topK?: number; 
     jurisdiction?: string;
     type?: string;
+    organizationId?: string;
   }): Promise<SearchResult[]> {
     const topK = options?.topK || this.config.topK;
     
@@ -259,6 +260,13 @@ class RAGPipeline {
     } else {
       results = await this.semanticSearch(query, topK);
     }
+
+    // A chunk ingested for an organization is only ever retrieved for that organization; a search with no
+    // organization never sees organization-owned chunks
+    results = results.filter(r => {
+      const owner = r.chunk.metadata.organizationId;
+      return !owner || owner === options?.organizationId;
+    });
 
     // Filter by metadata if specified
     if (options?.jurisdiction || options?.type) {

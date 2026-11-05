@@ -461,7 +461,7 @@ await job.updateProgress(90);
       const downloadUrl = `/api/gdpr/data-export?requestId=${parameters.requestId}&organizationId=${organizationId}`;
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-      await GdprRequestManager.updateRequestStatus(parameters.requestId, 'completed', {
+      await GdprRequestManager.updateRequestStatus(parameters.requestId, organizationId, 'completed', {
         processedBy: 'system',
         responseData: {
           format: parameters.format,

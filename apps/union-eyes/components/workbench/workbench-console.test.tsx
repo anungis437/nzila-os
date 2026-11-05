@@ -18,25 +18,113 @@ vi.mock('@/lib/hooks/use-organization', () => ({ useOrganization: () => ({ organ
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); language.locale = 'en-CA'; language.messages = null; });
 
 describe('workbench inline case access', () => {
+  const ownedClaim = {
+    claimId: 'owned-case', claimNumber: 'CASE-01', organizationId: 'owned-org', memberId: 'owned-member',
+    claimType: 'grievance_pay', status: 'assigned', priority: 'medium', description: 'Synthetic case summary',
+    createdAt: '2026-10-22T12:00:00Z', updatedAt: '2026-10-22T12:00:00Z',
+    memberName: 'Synthetic member', memberEmail: 'owned@example.test', assignedTo: 'owned-officer',
+  };
+  /** The queue and the case's own notes route, as the application answers them: the case's history comes newest first, and only its entries of type "note" are notes. */
+  const serve = (routes: { notes?: () => { ok: boolean; body?: unknown }; addNote?: () => { ok: boolean } } = {}) => {
+    const calls: Array<{ url: string; method: string }> = [];
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
+      const method = init?.method ?? 'GET';
+      calls.push({ url, method });
+      if (url.startsWith('/api/workbench/assigned')) return { ok: true, json: async () => ({ data: { claims: [ownedClaim] } }) };
+      if (url === '/api/cases/owned-case/notes' && method === 'POST') return { ok: routes.addNote?.().ok ?? true, json: async () => ({}) };
+      if (url === '/api/cases/owned-case/notes') {
+        const answer = routes.notes?.() ?? { ok: true, body: { caseId: 'owned-case', notes: [
+          { updateType: 'note', message: 'Synthetic second note' },
+          { updateType: 'status_change', message: 'Moved to review' },
+          { updateType: 'note', message: 'Synthetic authorized note' },
+        ] } };
+        return { ok: answer.ok, statusText: answer.ok ? 'OK' : 'Forbidden', json: async () => answer.body };
+      }
+      throw new Error(`unexpected request ${method} ${url}`);
+    }));
+    return calls;
+  };
+
   it('opens and closes existing case details by keyboard without advertising a missing route', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { claims: [{
-      claimId: 'owned-case', claimNumber: 'CASE-01', organizationId: 'owned-org', memberId: 'owned-member',
-      claimType: 'grievance_pay', status: 'assigned', priority: 'medium', description: 'Synthetic case summary',
-      createdAt: '2026-10-22T12:00:00Z', updatedAt: '2026-10-22T12:00:00Z', resolutionNotes: 'Synthetic authorized note',
-      memberName: 'Synthetic member', memberEmail: 'owned@example.test', assignedTo: 'owned-officer',
-    }] } }) }));
+    serve();
     render(<WorkbenchConsole />);
     const expand = await screen.findByRole('button', { name: 'workbench.expand CASE-01' });
     expand.focus();
     await userEvent.keyboard('{Enter}');
     expect(expand).toHaveAttribute('aria-expanded', 'true');
-    expect(document.getElementById(expand.getAttribute('aria-controls')!)).toHaveTextContent('Synthetic authorized note');
+    const details = document.getElementById(expand.getAttribute('aria-controls')!)!;
+    await waitFor(() => expect(details).toHaveTextContent('Synthetic authorized note'));
     expect(screen.getByRole('textbox', { name: 'workbench.addNotePlaceholder' })).toBeEnabled();
     expect(document.querySelector('a[href*="/dashboard/cases/"]')).toBeNull();
     expect(screen.queryByRole('button', { name: 'workbench.viewLroGuidelines' })).not.toBeInTheDocument();
     await userEvent.keyboard(' ');
     expect(expand).toHaveAttribute('aria-expanded', 'false');
     await waitFor(() => expect(screen.queryByText('Synthetic authorized note')).not.toBeInTheDocument());
+  });
+
+  it('reads the notes from the case, oldest first, and leaves the rest of its history out', async () => {
+    const calls = serve();
+    render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-01' }));
+    await waitFor(() => expect(screen.getByText('Synthetic authorized note')).toBeVisible());
+    expect(screen.getByText('Synthetic second note')).toBeVisible();
+    expect(screen.queryByText('Moved to review')).not.toBeInTheDocument();
+    expect(screen.getByText('Synthetic authorized note').compareDocumentPosition(screen.getByText('Synthetic second note')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(calls.filter((call) => call.url === '/api/cases/owned-case/notes')).toEqual([{ url: '/api/cases/owned-case/notes', method: 'GET' }]);
+  });
+
+  it('says when the notes of a case could not be read, instead of showing none', async () => {
+    serve({ notes: () => ({ ok: false }) });
+    render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-01' }));
+    // The message sits inside an element that fades in: it exists before it is visible.
+    await waitFor(() => expect(screen.getByText('workbench.caseNotesUnavailable')).toBeVisible());
+    expect(screen.queryByText('workbench.caseNotesLoading')).not.toBeInTheDocument();
+  });
+
+  it('reads the notes again after one is added, and shows a refused note instead of swallowing it', async () => {
+    let accept = true;
+    const calls = serve({ addNote: () => ({ ok: accept }) });
+    render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-01' }));
+    await waitFor(() => expect(screen.getByText('Synthetic authorized note')).toBeVisible());
+    const field = screen.getByRole('textbox', { name: 'workbench.addNotePlaceholder' });
+
+    await userEvent.type(field, 'A third note{Enter}');
+    await waitFor(() => expect(calls.filter((call) => call.url === '/api/cases/owned-case/notes' && call.method === 'GET')).toHaveLength(2));
+    expect(calls.filter((call) => call.method === 'POST')).toHaveLength(1);
+    expect(field).toHaveValue('');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    accept = false;
+    await userEvent.type(field, 'A refused note{Enter}');
+    expect(await screen.findByRole('alert')).toHaveTextContent('workbench.actionFailed');
+    expect(field).toHaveValue('A refused note');
+  });
+
+  it('shows triage-only matters without contact data and offers assignment only when the server allows it', async () => {
+    const triageClaim = {
+      access: 'triage', claimId: 'triage-case', claimNumber: 'CASE-TR', claimType: 'grievance_pay', status: 'submitted',
+      priority: 'medium', createdAt: '2026-10-22T12:00:00Z', updatedAt: '2026-10-22T12:00:00Z', assignedTo: null,
+    };
+    const respond = (canAssign: boolean) => vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true,
+      json: async () => ({ data: { claims: [triageClaim], capabilities: { canAssign } } }) }));
+
+    respond(false);
+    const first = render(<WorkbenchConsole />);
+    const expand = await screen.findByRole('button', { name: 'workbench.expand CASE-TR' });
+    await userEvent.click(expand);
+    expect(screen.getByRole('note')).toHaveTextContent('workbench.restrictedMatterNotice');
+    expect(screen.queryByText('workbench.memberContact')).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox', { name: 'workbench.addNotePlaceholder' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /workbench\.assignToMe/ })).not.toBeInTheDocument();
+    first.unmount();
+
+    respond(true);
+    render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-TR' }));
+    expect(screen.getByRole('button', { name: /workbench\.assignToMe/ })).toBeEnabled();
+    expect(screen.queryByText('workbench.memberContact')).not.toBeInTheDocument();
   });
 
   it('reports malformed data rather than presenting an empty case queue', async () => {

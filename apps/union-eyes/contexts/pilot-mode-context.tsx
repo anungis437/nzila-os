@@ -64,7 +64,7 @@ export function PilotModeProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(ONBOARDING_KEY, "true");
     } catch {
-      // ignore
+      // Storage is unavailable (private mode): the onboarding prompt returns on the next visit, which is harmless.
     }
   };
 

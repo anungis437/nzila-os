@@ -1,3 +1,5 @@
+@allowed(['staging', 'prod'])
+param deploymentEnvironment string
 param location string
 param environmentId string
 param environmentDefaultDomain string
@@ -22,17 +24,10 @@ param clamavMinReplicas int = 1
 param clamavMaxReplicas int = 2
 @description('Optional ingress IP allow-list for the app (CIDR strings). Empty = no restriction.')
 param ingressAllowedIpRanges array = []
-@description('UE_ENVIRONMENT / NEXT_PUBLIC_APP_ENV value.')
-@allowed(['production', 'staging'])
-param runtimeEnvironment string = 'production'
-@description('UE_DEPLOYMENT_TYPE value.')
-@allowed(['prod', 'staging'])
-param deploymentType string = 'prod'
 param prefix string
 @description('Server runtime profile. Qualification exercised the server under "internal"; the owner decides before go-live.')
 @allowed(['internal', 'executive'])
 param featureProfile string = 'internal'
-param cronSchedule string = '*/5 * * * *'
 @description('Stripe is optional at initial launch (client-commercial billing is post-launch). Enable only after the production Stripe secrets exist in Key Vault.')
 param enableStripe bool = false
 param tags object = {}
@@ -133,7 +128,9 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               type: 'Readiness'
-              httpGet: { path: '/api/health', port: 3000 }
+              // Readiness must fail closed when the database, identity or required services are unavailable.
+              // Liveness remains /api/health so a temporary dependency outage does not cause restart loops.
+              httpGet: { path: '/api/ready', port: 3000 }
               initialDelaySeconds: 10
               periodSeconds: 10
             }
@@ -143,15 +140,14 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'PORT', value: '3000' }
             { name: 'AZURE_CLIENT_ID', value: identityClientId }
             { name: 'UE_CANONICAL_BOOTSTRAP_V2', value: '1' }
-            { name: 'UE_ENVIRONMENT', value: runtimeEnvironment }
-            { name: 'UE_DEPLOYMENT_TYPE', value: deploymentType }
+            { name: 'UE_ENVIRONMENT', value: deploymentEnvironment == 'prod' ? 'production' : 'staging' }
+            { name: 'UE_DEPLOYMENT_TYPE', value: deploymentEnvironment }
             { name: 'UE_FEATURE_PROFILE', value: featureProfile }
-            { name: 'NEXT_PUBLIC_APP_ENV', value: runtimeEnvironment }
+            { name: 'NEXT_PUBLIC_APP_ENV', value: deploymentEnvironment == 'prod' ? 'production' : 'staging' }
             { name: 'NEXT_PUBLIC_APP_URL', value: appUrl }
             { name: 'NEXT_PUBLIC_SITE_URL', value: effectiveSiteUrl }
             { name: 'AUTH_URL', value: appUrl }
             { name: 'AUTH_TRUST_HOST', value: 'true' }
-            { name: 'DATABASE_TYPE', value: 'postgresql' }
             { name: 'DB_POOL_MAX', value: '10' }
             { name: 'AZURE_KEY_VAULT_URL', value: keyVaultUri }
             { name: 'AZURE_STORAGE_ACCOUNT_NAME', value: storageAccountName }
@@ -188,10 +184,14 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
   dependsOn: [clamav]
 }
 
-// Scheduled deadline-reminder processing (a Container Apps Job, billed per execution). Nothing
-// else schedules this route.
-resource cron 'Microsoft.App/jobs@2024-03-01' = {
-  name: '${prefix}-cron-deadlines'
+// Scheduled jobs: one Container Apps schedule job per entry of the manifest (apps/union-eyes/lib/operations/scheduled-jobs.json).
+// Every job POSTs its route with the shared cron secret; `curl -f` makes a non-2xx answer fail the job run, so a job that failed
+// is visible as a failed execution instead of a silent success. The manifest is the only place a schedule is declared.
+var scheduledJobs = loadJsonContent('../../../../apps/union-eyes/lib/operations/scheduled-jobs.json').jobs
+
+resource cronJobs 'Microsoft.App/jobs@2024-03-01' = [for job in scheduledJobs: {
+  // Job names are limited to 32 characters, so the environment prefix is truncated. The deadline job keeps its original name.
+  name: contains(job, 'legacyJobSuffix') ? '${prefix}-${job.legacyJobSuffix}' : '${take(prefix, 18)}-${job.code}'
   location: location
   tags: tags
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${identityId}': {} } }
@@ -200,9 +200,9 @@ resource cron 'Microsoft.App/jobs@2024-03-01' = {
     workloadProfileName: 'Consumption'
     configuration: {
       triggerType: 'Schedule'
-      replicaTimeout: 120
+      replicaTimeout: job.timeoutSeconds + 20
       replicaRetryLimit: 1
-      scheduleTriggerConfig: { cronExpression: cronSchedule, parallelism: 1, replicaCompletionCount: 1 }
+      scheduleTriggerConfig: { cronExpression: job.schedule, parallelism: 1, replicaCompletionCount: 1 }
       registries: [{ server: acrLoginServer, identity: identityId }]
       secrets: [
         { name: 'cron-secret', keyVaultUrl: '${kvBase}secrets/cron-secret', identity: identityId }
@@ -215,7 +215,7 @@ resource cron 'Microsoft.App/jobs@2024-03-01' = {
           image: cronImage
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
           command: ['sh', '-c']
-          args: ['curl -fsS --max-time 100 -H "x-cron-secret: $CRON_SECRET" "https://$APP_FQDN/api/cron/deadline-reminders"']
+          args: ['curl -fsS -X POST --max-time ${job.timeoutSeconds} -H "x-cron-secret: $CRON_SECRET" "https://$APP_FQDN${job.path}"']
           env: [
             { name: 'APP_FQDN', value: app.properties.configuration.ingress.fqdn }
             { name: 'CRON_SECRET', secretRef: 'cron-secret' }
@@ -224,8 +224,7 @@ resource cron 'Microsoft.App/jobs@2024-03-01' = {
       ]
     }
   }
-}
-
+}]
 output appName string = app.name
 output appId string = app.id
 output appFqdn string = app.properties.configuration.ingress.fqdn

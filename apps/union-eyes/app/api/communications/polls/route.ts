@@ -13,5 +13,6 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',
+  writableFields: ['question', 'description', 'options', 'allowMultipleVotes', 'requireAuthentication', 'showResultsBeforeVote', 'closesAt'],
 });
 export { GET, POST };

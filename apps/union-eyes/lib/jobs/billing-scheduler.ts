@@ -22,11 +22,12 @@
 
 import { db } from '@/db';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { getActiveSystemDb } from '@/db/system-context-storage';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { organizationBillingConfig } from '@/db/schema/domains/finance/billing-config';
 import { BillingCycleService, type BillingFrequency } from '@/lib/services/billing-cycle-service';
 import { logger } from '@/lib/logger';
-import { eq, and, inArray, or } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { getNotificationService } from '@/lib/services/notification-service';
 
 // =============================================================================
@@ -83,17 +84,17 @@ export class BillingScheduler {
    * withSystemContext is only the execution mechanism.
    *
    * KNOWN LIMITATION (pre-existing, not introduced here):
-   * BillingCycleService.generateBillingCycle() internally calls
-   * withRLSContext()'s no-context overload, which calls auth()
-   * unconditionally and throws if there is no authenticated session — that
-   * check happens before any DB access and does not consult the active
-   * system context. This is fine for the only currently-wired caller (the
-   * platform_lead-authenticated admin route, which has a real session),
-   * but if runMonthlyBilling/runWeeklyBilling/runBiWeeklyBilling are ever
-   * invoked from a truly headless cron trigger with no HTTP session,
-   * generateBillingCycle will throw "Unauthorized" regardless of this
-   * SYSTEM wrapper. Fixing that requires BillingCycleService to offer a
-   * system-aware entrypoint — out of scope for this correction.
+   * BillingCycleService.generateBillingCycle() opens a tenant transaction per
+   * organization with withRLSContext({ organizationId }). That call runs auth()
+   * first and throws if there is no authenticated session, and with
+   * UE_CANONICAL_BOOTSTRAP_V2=1 it also requires the authenticated actor to be a
+   * canonical member of that organization (MEMBERSHIP_REQUIRED otherwise); the
+   * system role holds no INSERT on dues_transactions, so the cycle cannot be
+   * written from the system connection either. This is fine for a
+   * platform_lead session whose user is a member of every organization billed,
+   * but a headless cron trigger, or a platform user who is not a member of an
+   * organization, cannot bill it. Fixing that needs a job-actor binding (or an
+   * explicit system-role grant) from the identity and manifest owners.
    *
    * PERMANENT DEFENSE-IN-DEPTH CONTRACT (PR #752 round 6): SYSTEM_RUNTIME
    * bypasses tenant RLS by design — union_eyes_system's own policies grant
@@ -109,6 +110,9 @@ export class BillingScheduler {
    * RLS policy left to catch it.
    */
   static async runScheduledBilling(frequency: BillingFrequency): Promise<BillingSchedulerResult> {
+    // A caller that already runs as the system role (the platform route) lends this run its transaction; a second one would be an unrelated
+    // transaction on another connection, left idle for the length of the run.
+    if (getActiveSystemDb()) return this.runScheduledBillingInSystemContext(frequency);
     return withSystemContext((_tx) => this.runScheduledBillingInSystemContext(frequency));
   }
 
@@ -386,24 +390,20 @@ export class BillingScheduler {
 
   private static async getBillingRecipients(organizationId: string): Promise<string[]> {
     const [org] = await db
-      .select({ id: organizations.id, slug: organizations.slug, email: organizations.email })
+      .select({ email: organizations.email })
       .from(organizations)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .where(or(eq(organizations.id, organizationId as any), eq(organizations.slug, organizationId)))
+      .where(eq(organizations.id, organizationId as any))
       .limit(1);
 
-    const orgIdentifiers = new Set<string>();
-    orgIdentifiers.add(organizationId);
-    if (org?.id) orgIdentifiers.add(String(org.id));
-    if (org?.slug) orgIdentifiers.add(org.slug);
-
+    // organization_members.organization_id is the organization uuid; the organization slug is not stored there
     const roles = ['admin', 'super_admin', 'billing_manager', 'billing_specialist'];
     const members = await db
       .select({ email: organizationMembers.email })
       .from(organizationMembers)
       .where(
         and(
-          inArray(organizationMembers.organizationId, Array.from(orgIdentifiers)),
+          eq(organizationMembers.organizationId, organizationId),
           inArray(organizationMembers.role, roles)
         )
       );

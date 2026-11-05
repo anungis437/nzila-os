@@ -19,8 +19,8 @@ export const CreditorContactSchema = z
   .partial()
 
 export const TrustOpsCreditorInputSchema = z.object({
-  orgId: z.string().uuid(),
-  mandateId: z.string().uuid(),
+  orgId: z.guid(),
+  mandateId: z.guid(),
   name: z.string().min(1).max(500),
   classification: CreditorClassificationSchema,
   contact: CreditorContactSchema.optional(),
@@ -31,7 +31,7 @@ export const TrustOpsCreditorInputSchema = z.object({
 export type TrustOpsCreditorInput = z.infer<typeof TrustOpsCreditorInputSchema>
 
 export const TrustOpsCreditorRecordSchema = TrustOpsCreditorInputSchema.extend({
-  id: z.string().uuid(),
+  id: z.guid(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })

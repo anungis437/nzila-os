@@ -87,14 +87,14 @@ export type FlowEventType = z.infer<typeof FlowEventType>
 // ── Event Schema ───────────────────────────────────────────────────────────
 
 export const FlowEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.guid(),
   type: FlowEventType,
   actor_id: z.string().min(1),
   org_id: z.string().min(1),
   entity_type: z.string().min(1),
-  entity_id: z.string().uuid(),
+  entity_id: z.guid(),
   timestamp: z.coerce.date(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type FlowEvent = z.infer<typeof FlowEventSchema>
 
@@ -105,7 +105,7 @@ export const EmitEventInput = z.object({
   actor_id: z.string().min(1),
   org_id: z.string().min(1),
   entity_type: z.string().min(1),
-  entity_id: z.string().uuid(),
-  metadata: z.record(z.unknown()).default({}),
+  entity_id: z.guid(),
+  metadata: z.record(z.string(), z.unknown()).prefault({}),
 })
 export type EmitEventInput = z.infer<typeof EmitEventInput>

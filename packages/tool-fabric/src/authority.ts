@@ -49,7 +49,7 @@ export const toolExecutionIntentSchema = z
       port: z.number().int().min(1).max(65535),
       protocol: z.enum(['https', 'tcp']),
     }).strict()).max(16),
-    env: z.object({ allow: z.record(bounded).refine((r) => Object.keys(r).length <= 16) }).strict(),
+    env: z.object({ allow: z.record(z.string(), bounded).refine((r) => Object.keys(r).length <= 16) }).strict(),
     secretRefs: z.array(bounded).max(16),
     timeoutMs: z.number().int().positive().max(300_000),
     resources: resourceLimitsSchema,

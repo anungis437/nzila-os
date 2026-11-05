@@ -9,49 +9,49 @@ from .models import (AlertRules, AlertConditions, AlertActions, AlertEscalations
 class AlertRulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlertRules
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AlertConditionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlertConditions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'alert_rule']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AlertActionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlertActions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'alert_rule']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AlertEscalationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlertEscalations
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AlertExecutionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlertExecutions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'alert_rule']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class WorkflowDefinitionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkflowDefinitions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class WorkflowExecutionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkflowExecutions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'workflow_definition']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -65,7 +65,11 @@ class AlertRecipientsSerializer(serializers.ModelSerializer):
 class AuditLogsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditLogs
-        fields = '__all__'
+        fields = [
+            'id', 'created_at', 'updated_at', 'audit_id', 'action', 'resource_type', 'resource_id',
+            'user_id', 'ip_address', 'user_agent', 'correlation_id', 'details', 'changes',
+            'content_hash', 'previous_hash', 'organization',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -79,14 +83,14 @@ class SecurityEventsSerializer(serializers.ModelSerializer):
 class FailedLoginAttemptsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FailedLoginAttempts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'attempt_id', 'email']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class RateLimitEventsSerializer(serializers.ModelSerializer):
     class Meta:
         model = RateLimitEvents
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'event_id', 'identifier']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -100,14 +104,14 @@ class AutomationRulesSerializer(serializers.ModelSerializer):
 class AutomationExecutionLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AutomationExecutionLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'triggered_by', 'rule']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class AutomationSchedulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AutomationSchedules
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'schedule_type', 'rule']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -135,7 +139,7 @@ class ExternalCustomersSerializer(serializers.ModelSerializer):
 class ExternalAccountsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExternalAccounts
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -149,7 +153,7 @@ class ExternalCommunicationChannelsSerializer(serializers.ModelSerializer):
 class ExternalCommunicationMessagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExternalCommunicationMessages
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'org_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -163,7 +167,7 @@ class ExternalCommunicationUsersSerializer(serializers.ModelSerializer):
 class ExternalCommunicationFilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExternalCommunicationFiles
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'org_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -184,14 +188,14 @@ class ExternalDocumentLibrariesSerializer(serializers.ModelSerializer):
 class ExternalDocumentFilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExternalDocumentFiles
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'org_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ExternalDocumentPermissionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExternalDocumentPermissions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'org_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -311,13 +315,14 @@ class IntegrationConfigsSerializer(serializers.ModelSerializer):
     class Meta:
         model = IntegrationConfigs
         fields = '__all__'
+        extra_kwargs = {'credentials': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class IntegrationSyncLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = IntegrationSyncLog
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -346,13 +351,14 @@ class IntegrationWebhooksSerializer(serializers.ModelSerializer):
     class Meta:
         model = IntegrationWebhooks
         fields = '__all__'
+        extra_kwargs = {'secret': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class WebhookDeliveriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = WebhookDeliveries
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'webhook']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -394,7 +400,7 @@ class KnowledgeBaseArticlesSerializer(serializers.ModelSerializer):
 class WebhookSubscriptionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = WebhookSubscriptions
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
@@ -402,18 +408,19 @@ class ApiIntegrationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApiIntegrations
         fields = '__all__'
+        extra_kwargs = {'credentials': {'write_only': True}}
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class IntegrationSyncLogsSerializer(serializers.ModelSerializer):
     class Meta:
         model = IntegrationSyncLogs
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'integration']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class ApiAccessTokensSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApiAccessTokens
-        fields = '__all__'
+        fields = ['id', 'created_at', 'updated_at', 'organization']
         read_only_fields = ['id', 'created_at', 'updated_at']

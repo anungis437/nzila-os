@@ -41,7 +41,7 @@ describe('pilot/apply/[id]/verify-organization route (PR #752 round 20)', () => 
     const response = await POST(
       new NextRequest('http://localhost/api/pilot/apply/p1/verify-organization', {
         method: 'POST',
-        body: JSON.stringify({ organizationId: VALID_ORG_ID }),
+        body: JSON.stringify({ organizationId: VALID_ORG_ID, basis: 'Contact is the registered local secretary; confirmed by call to the hall' }),
       }),
       { params: { id: 'p1' } },
     );
@@ -71,7 +71,7 @@ describe('pilot/apply/[id]/verify-organization route (PR #752 round 20)', () => 
     const response = await POST(
       new NextRequest('http://localhost/api/pilot/apply/p1/verify-organization', {
         method: 'POST',
-        body: JSON.stringify({ organizationId: VALID_ORG_ID }),
+        body: JSON.stringify({ organizationId: VALID_ORG_ID, basis: 'Contact is the registered local secretary; confirmed by call to the hall' }),
       }),
       { params: { id: 'p1' } },
     );
@@ -82,6 +82,7 @@ describe('pilot/apply/[id]/verify-organization route (PR #752 round 20)', () => 
     expect(m.bindPilotOrganization).toHaveBeenCalledWith({
       pilotId: 'p1',
       organizationId: VALID_ORG_ID,
+    basis: 'Contact is the registered local secretary; confirmed by call to the hall',
       verifiedBy: 'u-sysadmin',
     });
   });
@@ -93,7 +94,7 @@ describe('pilot/apply/[id]/verify-organization route (PR #752 round 20)', () => 
     const response = await POST(
       new NextRequest('http://localhost/api/pilot/apply/p1/verify-organization', {
         method: 'POST',
-        body: JSON.stringify({ organizationId: VALID_ORG_ID }),
+        body: JSON.stringify({ organizationId: VALID_ORG_ID, basis: 'Contact is the registered local secretary; confirmed by call to the hall' }),
       }),
       { params: { id: 'p1' } },
     );

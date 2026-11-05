@@ -10,6 +10,8 @@
  * are kept REAL so their real logic is also exercised.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+// The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
+vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 
 const mocks = vi.hoisted(() => ({
   interviews: [] as unknown[],
@@ -20,12 +22,17 @@ const mocks = vi.hoisted(() => ({
 function makeChain() {
   const chain: Record<string, unknown> = {};
   chain.from = () => chain;
-  chain.where = () => Promise.resolve(mocks.interviews);
+  chain.where = () => ({ limit: () => Promise.resolve(mocks.interviews) });
   return chain;
 }
 
 vi.mock('@/db/db', () => ({
   db: { select: vi.fn(() => makeChain()) },
+}));
+// The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
+vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
+  isUuid: () => true,
+  inOrganization: async (_organizationId: string, work: (tx: unknown) => Promise<unknown>) => work((await import('@/db/db')).db),
 }));
 
 vi.mock('@/db/schema', () => ({

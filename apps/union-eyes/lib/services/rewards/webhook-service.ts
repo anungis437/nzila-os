@@ -6,12 +6,14 @@
 import crypto from 'crypto';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
+  shopifyConfig,
   webhookReceipts,
   type NewWebhookReceipt,
   type WebhookReceipt,
 } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
+import { parseDiscountReference } from './shopify-redemption-rules';
 
 /**
  * Verify Shopify webhook HMAC signature
@@ -79,77 +81,94 @@ export async function isWebhookProcessed(
  */
 export async function recordWebhookProcessed(
   data: NewWebhookReceipt
-): Promise<WebhookReceipt> {
-  return withSystemContext(async (tx) => {
-    const [receipt] = await tx
-      .insert(webhookReceipts)
-      .values({
-        ...data,
-        processedAt: new Date(),
-      })
-      .returning();
-
-    return receipt;
-  });
-}
-
-/**
- * Process webhook with idempotency check
- * Higher-order function that wraps webhook handler
- * 
- * @param provider Webhook provider
- * @param webhookId Unique webhook ID
- * @param eventType Event type (e.g., 'orders/paid')
- * @param payload Webhook payload
- * @param handler Async function to process webhook
- * @returns Result from handler or 'already_processed' string
- */
-export async function processWebhookIdempotent<T>(
-  provider: 'shopify',
-  webhookId: string,
-  eventType: string,
-  payload: Record<string, unknown>,
-  handler: () => Promise<T>
-): Promise<T | 'already_processed'> {
-  // Check if already processed
-  const alreadyProcessed = await isWebhookProcessed(provider, webhookId);
-  
-  if (alreadyProcessed) {
-    logger.info('[WebhookService] Webhook already processed, skipping', {
-      provider,
-      webhookId,
-    });
-    return 'already_processed';
-  }
-
+): Promise<WebhookReceipt | null> {
   try {
-    // Execute handler
-    const result = await handler();
+    return await withSystemContext(async (tx) => {
+      const [receipt] = await tx
+        .insert(webhookReceipts)
+        .values({
+          ...data,
+          processedAt: new Date(),
+        })
+        .returning();
 
-    // Record as processed
-    await recordWebhookProcessed({
-      provider,
-      webhookId,
-      eventType,
-      payloadJson: payload,
+      return receipt ?? null;
     });
-
-    return result;
   } catch (error) {
-    logger.error('[WebhookService] Error processing webhook', {
-      error,
-      provider,
-      webhookId,
-      eventType,
-    });
-    // Do not record as processed if handler fails
+    // A concurrent delivery of the same webhook id may record first; the receipt is the same fact either way.
+    const candidate = error as { code?: string; cause?: { code?: string } };
+    if (candidate?.code === '23505' || candidate?.cause?.code === '23505' || /duplicate key|unique constraint/i.test(String((error as Error)?.message ?? error))) {
+      return null;
+    }
     throw error;
   }
 }
 
+/** What a webhook handler reports. A retryable miss is not an outcome: the provider must deliver the event again. */
+export interface WebhookOutcome {
+  status: 'processed' | 'ignored';
+  reason?: string;
+  /** True when the event cannot be applied yet but may be later (an order event that beat the one that creates the redemption). */
+  retryable?: boolean;
+  [key: string]: unknown;
+}
+
+/**
+ * Process a webhook once.
+ *
+ * The receipt is recorded only after the handler has finished and only for an outcome that is final. A handler that throws records
+ * nothing and the error propagates, so the provider sees a failure and redelivers; an event ignored because the record it refers to
+ * does not exist yet (retryable) is not recorded either, so its redelivery is applied instead of being skipped as already processed.
+ * Handlers are idempotent on their own state, so a delivery repeated before its receipt was written is applied once.
+ *
+ * Only a summary is kept as the receipt (see receiptSummary), never the purchaser's data.
+ */
+export async function processWebhookIdempotent<T extends WebhookOutcome>(
+  provider: 'shopify',
+  webhookId: string,
+  eventType: string,
+  summary: Record<string, unknown>,
+  handler: () => Promise<T>
+): Promise<T | 'already_processed'> {
+  if (await isWebhookProcessed(provider, webhookId)) {
+    logger.info('[WebhookService] Webhook already processed, skipping', { provider, webhookId });
+    return 'already_processed';
+  }
+
+  let result: T;
+  try {
+    result = await handler();
+  } catch (error) {
+    logger.error('[WebhookService] Error processing webhook', { error, provider, webhookId, eventType });
+    throw error;
+  }
+
+  if (result.retryable) return result;
+
+  await recordWebhookProcessed({ provider, webhookId, eventType, payloadJson: summary });
+  return result;
+}
+
+/**
+ * The organization a Shopify shop belongs to. The shop domain header is bound to exactly one organization (a unique index on the
+ * lower-cased domain); a domain no organization has configured, or one that somehow maps to several, resolves to nothing.
+ */
+export async function resolveShopOrganization(shopDomain: string): Promise<string | null> {
+  const domain = shopDomain.trim().toLowerCase();
+  if (!/^[a-z0-9][a-z0-9.-]{0,251}$/.test(domain)) return null;
+  const rows = await withSystemContext(async (tx) =>
+    tx
+      .select({ orgId: shopifyConfig.orgId })
+      .from(shopifyConfig)
+      .where(sql`lower(${shopifyConfig.shopDomain}) = ${domain}`)
+      .limit(2)
+  );
+  return rows.length === 1 ? rows[0].orgId : null;
+}
+
 /**
  * Extract redemption ID from Shopify discount code
- * Discount codes are formatted as "UE{redemption_id}"
+ * Discount codes are formatted as "UE" plus the redemption id without dashes (see shopify-redemption-rules)
  * 
  * @param discountCodes Array of discount code objects from Shopify order
  * @returns Redemption ID or null if not found
@@ -157,25 +176,9 @@ export async function processWebhookIdempotent<T>(
 export function extractRedemptionIdFromDiscount(
   discountCodes: Array<{ code: string; amount?: string }>
 ): string | null {
-  const unionEyesCode = discountCodes.find((dc) =>
-    dc.code.startsWith('UE')
-  );
-
-  if (!unionEyesCode) {
-    return null;
-  }
-
-  // Extract UUID from "UE{uuid}"
-  const redemptionId = unionEyesCode.code.substring(2);
-  
-  // Validate UUID format (basic check)
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!uuidRegex.test(redemptionId)) {
-    logger.warn('[WebhookService] Invalid redemption ID format', { redemptionId });
-    return null;
-  }
-
-  return redemptionId;
+  const reference = parseDiscountReference(discountCodes);
+  // A legacy 12-character reference names no single id; it is resolved inside one organization by the redemption service.
+  return reference?.kind === 'id' ? reference.id : null;
 }
 
 /**

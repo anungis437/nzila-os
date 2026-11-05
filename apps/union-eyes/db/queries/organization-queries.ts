@@ -1,5 +1,3 @@
-"use server";
-
 /**
  * Organization Query Functions
  * 
@@ -9,7 +7,7 @@
  * 
  * Key Features:
  * - Hierarchical queries using database functions (O(1) descendants)
- * - Row-Level Security (RLS) enforcement via get_user_visible_orgs()
+ * - Row-Level Security (RLS) enforcement: every query runs in the caller's tenant transaction
  * - Soft deletes (status='archived')
  * - Automatic hierarchy path maintenance
  * - Type-safe with full TypeScript inference
@@ -328,9 +326,9 @@ export async function getOrganizationDescendants(
   const executeQuery = async (dbOrTx: RLSTx) => {
     try {
       // Use hierarchy_path array containment for efficient descendant lookup
-      // @> operator checks if left array contains right array
+      // @> operator checks if left array contains right array. hierarchy_path is text[]: the id is cast to text[] (text[] @> uuid[] is not an operator).
       const conditions = [
-        sql`${organizations.hierarchyPath} @> ARRAY[${ancestorId}]::uuid[]`,
+        sql`${organizations.hierarchyPath} @> ARRAY[${ancestorId}]::text[]`,
         sql`${organizations.id} != ${ancestorId}`, // Exclude self
       ];
 
@@ -484,7 +482,7 @@ export async function getOrganizationTree(
         // Get subtree: root + all descendants
         const rootCondition = or(
           eq(organizations.id, rootId),
-          sql`${organizations.hierarchyPath} @> ARRAY[${rootId}]::uuid[]`
+          sql`${organizations.hierarchyPath} @> ARRAY[${rootId}]::text[]`
         );
         if (rootCondition) conditions.push(rootCondition);
 
@@ -521,56 +519,6 @@ export async function getOrganizationTree(
     } catch (error) {
       logger.error("Error fetching organization tree", { error, rootId, maxDepth });
       throw new Error("Failed to fetch organization tree");
-    }
-  };
-
-  if (tx) {
-    return executeQuery(tx);
-  } else {
-     
-    return withRLSContext(async (tx: RLSTx) => executeQuery(tx));
-  }
-}
-
-/**
- * Get organizations visible to a user
- * 
- * Uses RLS function get_user_visible_orgs() to return organizations
- * the user has access to (their org + descendants, respecting RLS).
- * 
- * @param userId - User's auth ID (from Supabase Auth)
- * @param tx - Optional transaction context for RLS enforcement
- * @returns Array of organizations user can access
- * 
- * @example
- * ```typescript
- * const myOrgs = await getUserVisibleOrganizations("user-123");
- * // Returns: User's org + all child orgs they can see
- * ```
- */
-export async function getUserVisibleOrganizations(
-  userId: string,
-   
-  tx?: RLSTx
-): Promise<SelectOrganization[]> {
-   
-  const executeQuery = async (dbOrTx: RLSTx) => {
-    try {
-      // Call database function that enforces RLS
-      const result = await dbOrTx.execute<SelectOrganization>(
-        sql`
-          SELECT o.* 
-          FROM organizations o
-          WHERE o.id IN (SELECT get_user_visible_orgs(${userId}))
-            AND o.status = 'active'
-          ORDER BY o.hierarchy_level, o.name
-        `
-      );
-
-      return Array.from(result) as SelectOrganization[];
-    } catch (error) {
-      logger.error("Error fetching user visible organizations", { error, userId });
-      throw new Error(`Failed to fetch organizations for user ${userId}`);
     }
   };
 

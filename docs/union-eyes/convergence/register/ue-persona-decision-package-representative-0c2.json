@@ -1,0 +1,3289 @@
+{
+  "schemaVersion": 1,
+  "register": "UE-PERSONA-DECISION-PACKAGE",
+  "gate": "0C.2",
+  "packageId": "UE-REPRESENTATIVE-PROPOSED-CANONICAL-2.2-R1",
+  "version": "2.2-R1",
+  "persona": "representative",
+  "displayName": "Representative 2.2",
+  "status": "PROPOSED_FOR_RATIFICATION",
+  "anchorCommit": "fe8469cff34c561b2beccddb965e13355d74bb09",
+  "preparedOn": "2026-10-27",
+  "selfRatification": false,
+  "banner": "PROPOSED FOR RATIFICATION. This package is prepared for a decision by an authorized product owner. It is not a ratified canonical, not the recovered historical canonical and not an institutional authorization. Engineering cannot accept it.",
+  "lineage": {
+    "proposedBaselineFile": "docs/union-eyes/convergence/register/ue-persona-proposed-baseline-representative.json",
+    "proposedBaselineSha256": "34f3d145e945a11bf8cba049d16bd66998fe5ee2b2f6a3e817bdebfdf6b891d0",
+    "proposedBaselineStatus": "PROPOSED_NOT_ADOPTED",
+    "baselineArtifactChangedByGate0C2": false,
+    "historicalIdentifier": "UE-REPRESENTATIVE-CANONICAL-2.2",
+    "historicalCanonicalRecovered": false,
+    "relationship": "RECONSTRUCTION_CANDIDATE_OF_CITED_HISTORICAL_CANONICAL",
+    "statement": "UE-REPRESENTATIVE-CANONICAL-2.2 is cited by a frozen disposition and its text was not recovered. This package is a reconstruction candidate built from the proposed baseline and is not that document.",
+    "reconciliation": {
+      "file": "docs/union-eyes/convergence/register/ue-persona-requirement-reconciliation-0c2.json",
+      "sha256": "1195f5f987fce1a5399bf6ac8cde26accc57bd03ee7bc11d733c5fa331751fa0"
+    },
+    "completionMatrixPersonaState": {
+      "resolved": false,
+      "trackingCapability": "UE-OMIT-REP-CANONICAL-ABSENT"
+    }
+  },
+  "actionUniverse": {
+    "requirements": 67,
+    "byKind": {
+      "ACTION": 25,
+      "DOMAIN": 24,
+      "JOURNEY": 7,
+      "NAVIGATION": 7,
+      "SCENARIO": 4
+    },
+    "byAuthorityClass": {
+      "IMPLEMENTED_SOURCE_BEHAVIOR": 28,
+      "PROPOSED_PERMISSION": 39
+    },
+    "byImplementationStatus": {
+      "NOT_IMPLEMENTED": 15,
+      "PARTIAL_SOURCE": 37,
+      "SOURCE_PRESENT": 15
+    },
+    "byEvidenceClassification": {
+      "HISTORICAL_DIRECT": 39,
+      "RECONSTRUCTED_UNDER_HISTORICAL_LABEL": 28
+    },
+    "requirementIds": [
+      "REP-NAV-1",
+      "REP-NAV-2",
+      "REP-NAV-3",
+      "REP-NAV-4",
+      "REP-NAV-5",
+      "REP-NAV-6",
+      "REP-NAV-7",
+      "REP-ACT-01",
+      "REP-ACT-02",
+      "REP-ACT-03",
+      "REP-ACT-04",
+      "REP-ACT-05",
+      "REP-ACT-06",
+      "REP-ACT-07",
+      "REP-ACT-08",
+      "REP-ACT-09",
+      "REP-ACT-10",
+      "REP-ACT-11",
+      "REP-ACT-12",
+      "REP-ACT-13",
+      "REP-ACT-14",
+      "REP-ACT-15",
+      "REP-ACT-16",
+      "REP-ACT-17",
+      "REP-ACT-18",
+      "REP-ACT-19",
+      "REP-ACT-20",
+      "REP-ACT-21",
+      "REP-ACT-22",
+      "REP-ACT-23",
+      "REP-ACT-24",
+      "REP-ACT-25",
+      "R01",
+      "R02",
+      "R03",
+      "R04",
+      "R05",
+      "R06",
+      "R07",
+      "R08",
+      "R09",
+      "R10",
+      "R11",
+      "R12",
+      "R13",
+      "R14",
+      "R15",
+      "R16",
+      "R17",
+      "R18",
+      "R19",
+      "R20",
+      "R21",
+      "R22",
+      "R23",
+      "R24",
+      "REP-JRN-A",
+      "REP-JRN-B",
+      "REP-JRN-C",
+      "REP-JRN-D",
+      "REP-JRN-E",
+      "REP-JRN-F",
+      "REP-JRN-G",
+      "REP-SCN-CAPE",
+      "REP-SCN-CUPE",
+      "REP-SCN-LIUNA",
+      "REP-SCN-SMALL-LOCAL"
+    ]
+  },
+  "authorityClassLegend": {
+    "ENGINEERING_REQUIREMENT": "A requirement the engineering gates must build or prove. It grants nothing.",
+    "IMPLEMENTED_SOURCE_BEHAVIOR": "Behavior that source already shows. It is not a statement that the behavior is complete or qualified.",
+    "PROPOSED_PERMISSION": "A permission proposed for product acceptance that stays inactive until the named institutional decision is adopted.",
+    "ADOPTED_INSTITUTIONAL_AUTHORIZATION": "Not used. No institutional authorization has been adopted and none can be created by this package."
+  },
+  "visibilityWorkflowMatrix": [
+    {
+      "domain": "IDENTITY_ELIGIBILITY",
+      "label": "Identity and eligibility",
+      "coverage": "COVERED",
+      "summary": "A live membership in the active organization is eligibility only. Triage, assignment, collaboration and approval each need a separate issued instrument or a case relationship. Nothing is inferred from the role name or seniority.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "REP-ACT-25",
+        "R01",
+        "R24"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 3,
+        "PROPOSED_PERMISSION": 0,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "ORG_FEDERATION_SCOPE",
+      "label": "Organization and federation scope",
+      "coverage": "PARTIAL",
+      "summary": "Scope dimensions are named and held inactive until an institution adopts them. Workplace and bargaining-unit context is NOT_IMPLEMENTED, and the institutional scenarios have no source backing. Scope is never inferred from office or seniority.",
+      "gapDecisionIds": [
+        "DEC-PD-0C2-04"
+      ],
+      "requirementIds": [
+        "R12",
+        "R16",
+        "REP-SCN-CAPE",
+        "REP-SCN-CUPE",
+        "REP-SCN-LIUNA",
+        "REP-SCN-SMALL-LOCAL"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 6,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "label": "Case, member and document visibility",
+      "coverage": "COVERED",
+      "summary": "Case queues, detail, member profiles, documents and the member-visible projection are filtered by the live case relationship or designation. Triage sees metadata only and cannot open the case.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "REP-NAV-1",
+        "REP-NAV-2",
+        "REP-NAV-3",
+        "REP-NAV-4",
+        "REP-NAV-5",
+        "REP-NAV-6",
+        "REP-NAV-7",
+        "REP-ACT-01",
+        "REP-ACT-10",
+        "REP-ACT-11",
+        "REP-ACT-15",
+        "REP-ACT-23",
+        "R09",
+        "R13",
+        "R20"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 10,
+        "PROPOSED_PERMISSION": 5,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "RECORD_CREATION_UPDATE",
+      "label": "Record creation and updates",
+      "coverage": "COVERED",
+      "summary": "Notes, state advances, correspondence drafts, evidence and meeting records are written on held cases with an atomic audit record. Claim and grievance transitions are the two implemented paths.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "REP-ACT-03",
+        "REP-ACT-06",
+        "REP-ACT-07",
+        "REP-ACT-08",
+        "REP-ACT-12",
+        "REP-ACT-14",
+        "REP-ACT-18",
+        "REP-ACT-19",
+        "R02",
+        "R03",
+        "R04",
+        "R06",
+        "R07",
+        "R10",
+        "R11",
+        "R14",
+        "R15",
+        "R17",
+        "R21"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 12,
+        "PROPOSED_PERMISSION": 7,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "DELEGATION_SUBSTITUTION",
+      "label": "Delegation and substitution",
+      "coverage": "COVERED",
+      "summary": "Collaborator delegation and revocation, supervisory assignment, transfer with continuity and the recusal, territory, privileged-matter and delegation controls are specified. The controls themselves are UNDECIDED_INSTITUTIONAL_OFFICE and need adoption.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "REP-ACT-04",
+        "REP-ACT-05",
+        "REP-ACT-22",
+        "R08",
+        "R22"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 5,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "label": "Confidentiality and privileged records",
+      "coverage": "COVERED",
+      "summary": "Privileged material is excluded by default. Legal hold, retention and sealed evidence export need a governance mandate or the primary handler, and each disclosure to the member is a separate affirmative act.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "REP-ACT-16",
+        "REP-ACT-17"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 1,
+        "PROPOSED_PERMISSION": 1,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "label": "Financial or administrative approvals",
+      "coverage": "PARTIAL",
+      "summary": "Correspondence approval, dispatch and senior review are administrative approvals held by an unnamed institutional office. The package has no explicit financial denial, unlike the Steward and Financial Officer packages.",
+      "gapDecisionIds": [
+        "DEC-PD-0C2-05"
+      ],
+      "requirementIds": [
+        "REP-ACT-13",
+        "REP-ACT-20"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 2,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "label": "Audit and accountability",
+      "coverage": "COVERED",
+      "summary": "Mutations commit with an audit record, sensitive reads are logged, the accountability view shows who did what and workload reporting is limited to what the viewer may see.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "R19",
+        "R23"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 2,
+        "PROPOSED_PERMISSION": 0,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "label": "Notifications and workflow transitions",
+      "coverage": "COVERED",
+      "summary": "Tasks, deadlines, reminders, handover, correspondence states and WorkAid milestones are specified. Overdue handling rests on a scheduler and institutional rules that do not exist yet.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "REP-ACT-02",
+        "R05",
+        "REP-JRN-A",
+        "REP-JRN-B",
+        "REP-JRN-C",
+        "REP-JRN-D",
+        "REP-JRN-E",
+        "REP-JRN-F",
+        "REP-JRN-G"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 9,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "REVOCATION_TERMINATION_HISTORY",
+      "label": "Revocation, termination and historical access",
+      "coverage": "PARTIAL",
+      "summary": "Collaborator revocation, continuity on transfer and mandate identity are specified. The end of a representative’s own mandate and any historical access for a former representative are not.",
+      "gapDecisionIds": [
+        "DEC-PD-0C2-06"
+      ],
+      "requirementIds": [
+        "REP-ACT-09"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 1,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    },
+    {
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "label": "Cross-persona handoffs",
+      "coverage": "COVERED",
+      "summary": "Senior review, closure and transfer with continuity, WorkAid referral, the member-visible projection and the outcomes and precedent record name their counterpart persona.",
+      "gapDecisionIds": [],
+      "requirementIds": [
+        "REP-ACT-21",
+        "REP-ACT-24",
+        "R18"
+      ],
+      "authorityClassCounts": {
+        "ENGINEERING_REQUIREMENT": 0,
+        "IMPLEMENTED_SOURCE_BEHAVIOR": 0,
+        "PROPOSED_PERMISSION": 3,
+        "ADOPTED_INSTITUTIONAL_AUTHORIZATION": 0
+      }
+    }
+  ],
+  "actionVisibilityRows": [
+    {
+      "requirementId": "REP-NAV-1",
+      "kind": "NAVIGATION",
+      "title": "Today",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry confers no authority over anything behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Today opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-2",
+      "kind": "NAVIGATION",
+      "title": "Representation",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry confers no authority over anything behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Representation opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-3",
+      "kind": "NAVIGATION",
+      "title": "Members & Workplaces",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry confers no authority over anything behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Members & Workplaces opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-4",
+      "kind": "NAVIGATION",
+      "title": "Communications",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry confers no authority over anything behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 11,
+      "functionalAcceptance": "Communications opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-5",
+      "kind": "NAVIGATION",
+      "title": "Documents & Evidence",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry confers no authority over anything behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 6,
+      "functionalAcceptance": "Documents & Evidence opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-6",
+      "kind": "NAVIGATION",
+      "title": "Tasks & Deadlines",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry confers no authority over anything behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Tasks & Deadlines opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-7",
+      "kind": "NAVIGATION",
+      "title": "Knowledge & Guidance",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live membership in the active organization. The entry confers no authority over anything behind it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-NAVIGATION",
+        "role": "OWNER",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Knowledge & Guidance opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-ACT-01",
+      "kind": "ACTION",
+      "title": "See actor-scoped case queue",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Each row is a case the representative holds through a live relationship, or a mandate-scoped row for a supervisor. The list narrows; it never grants.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A queue of the representative’s cases. An empty queue says so and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-ACT-02",
+      "kind": "ACTION",
+      "title": "See unassigned-intake triage metadata (grievances)",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_TRIAGE_DESIGNATION",
+      "visibilityAndAuthority": "A live designation. Role, seniority and the steward title are not inputs. Seeing a row grants no action on its case.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 4,
+      "functionalAcceptance": "A metadata list. With no live designation the queue is empty and says why."
+    },
+    {
+      "requirementId": "REP-ACT-03",
+      "kind": "ACTION",
+      "title": "Open grievance detail, events, documents, intelligence",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A kernel decision on the case for read and read_internal. The creator sees only the member-visible view. Intelligence output is internal.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The grievance with the parts the representative may see. A grievance the representative may not read looks the same as a missing one."
+    },
+    {
+      "requirementId": "REP-ACT-04",
+      "kind": "ACTION",
+      "title": "Assign case (workbench, cases)",
+      "domain": "DELEGATION_SUBSTITUTION",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_SUPERVISORY_MANDATE",
+      "visibilityAndAuthority": "A live mandate naming case:assign. Chief steward or business agent status is not an input. Assignment is the only action a mandate carries onto a privileged matter.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CASE-ASSIGNMENT",
+        "role": "OWNER",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 2,
+      "functionalAcceptance": "The case shows its new assignee. A refused assignment explains that the mandate does not cover the case."
+    },
+    {
+      "requirementId": "REP-ACT-05",
+      "kind": "ACTION",
+      "title": "Self-assign",
+      "domain": "DELEGATION_SUBSTITUTION",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_SUPERVISORY_MANDATE",
+      "visibilityAndAuthority": "The same mandate as any assignment. Seeing the queue is not a power to assign. The disposition notes that intake conversion still makes the converter the owner; that behaviour needs a stakeholder decision.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CASE-ASSIGNMENT",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 2,
+      "functionalAcceptance": "Not offered unless the mandate exists. The queue row says no action is available."
+    },
+    {
+      "requirementId": "REP-ACT-06",
+      "kind": "ACTION",
+      "title": "Add note (internal / member-visible)",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "case:write_notes for an internal note. A member communication needs the disclosure decision, which uses case:comment and is taken on the server.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The note appears labelled Internal. Sharing with the member opens the disclosure decision and is not a toggle on the note."
+    },
+    {
+      "requirementId": "REP-ACT-07",
+      "kind": "ACTION",
+      "title": "Advance claim state",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "case:transition on this case. Closing is not a transition a non-primary person can make.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The claim shows its new state. A refused transition names the allowed states."
+    },
+    {
+      "requirementId": "REP-ACT-08",
+      "kind": "ACTION",
+      "title": "Advance grievance state",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "The matter authority and the state machine both allow the change.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The grievance shows its new stage. A refused change names the reachable stages."
+    },
+    {
+      "requirementId": "REP-ACT-09",
+      "kind": "ACTION",
+      "title": "Delegate / revoke collaborator access",
+      "domain": "REVOCATION_TERMINATION_HISTORY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_COLLABORATOR_EXPLICIT",
+      "visibilityAndAuthority": "The grant must be made by someone other than the holder. A person cannot grant themselves access. The grant is a relationship fact, not a role.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 2,
+      "functionalAcceptance": "The case lists its collaborators and expiry. A revoked collaborator loses access immediately."
+    },
+    {
+      "requirementId": "REP-ACT-10",
+      "kind": "ACTION",
+      "title": "Member directory lookup",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DIRECTORY_SCOPE_BY_CASE_RELATIONSHIP",
+      "visibilityAndAuthority": "A steward sees self and the members of assigned cases. Supervisory and officer scopes widen the slice only as the directory policy states.",
+      "sharedObligation": {
+        "id": "SHR-0C2-MEMBER-DIRECTORY",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A short list. A member outside the slice does not appear and nothing says one was omitted."
+    },
+    {
+      "requirementId": "REP-ACT-11",
+      "kind": "ACTION",
+      "title": "Member profile detail, linked cases",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DIRECTORY_SCOPE_BY_CASE_RELATIONSHIP",
+      "visibilityAndAuthority": "The profile is limited to non-sensitive fields. The linked cases are filtered by the case relationship of each.",
+      "sharedObligation": {
+        "id": "SHR-0C2-MEMBER-DIRECTORY",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A profile with only permitted fields and the cases the representative holds."
+    },
+    {
+      "requirementId": "REP-ACT-12",
+      "kind": "ACTION",
+      "title": "Correspondence list / draft",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "A draft about a case needs case:draft_action on that case. A draft without a matter is a personal working copy.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CORRESPONDENCE",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 11,
+      "functionalAcceptance": "The draft appears in the representative’s list marked Draft."
+    },
+    {
+      "requirementId": "REP-ACT-13",
+      "kind": "ACTION",
+      "title": "Correspondence approve / dispatch / delivery / receipt as distinct states",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "UNDECIDED_INSTITUTIONAL_OFFICE",
+      "visibilityAndAuthority": "The institution names the office for approval, signature and dispatch (DEC-IA-14). No role floor is treated as that office.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CORRESPONDENCE",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 11,
+      "functionalAcceptance": "The item shows its current state and the person who set it. A state that is not available is not offered."
+    },
+    {
+      "requirementId": "REP-ACT-14",
+      "kind": "ACTION",
+      "title": "Correspondence thread participants / matter grants",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "THREAD_PARTICIPANT",
+      "visibilityAndAuthority": "Participation follows the conversation row. A matter link does not widen access to the case. Delegation does not confer it.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 11,
+      "functionalAcceptance": "The conversation shows its participants and linked matter."
+    },
+    {
+      "requirementId": "REP-ACT-15",
+      "kind": "ACTION",
+      "title": "Document list / download / search",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DOCUMENT_CASE_RELATIONSHIP_AND_CLASS",
+      "visibilityAndAuthority": "List, download and search are decided by the same rule. A supervisory flag widens only within a mandate scope.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 6,
+      "functionalAcceptance": "A list with no sign of omitted items. A direct link to an unreadable document answers not found."
+    },
+    {
+      "requirementId": "REP-ACT-16",
+      "kind": "ACTION",
+      "title": "Evidence export (claims)",
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_PRIMARY_HANDLER_ONLY",
+      "visibilityAndAuthority": "A kernel decision for export on this case. A collaborator never carries it.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 6,
+      "functionalAcceptance": "A pack with a manifest of what it holds and what was excluded by class."
+    },
+    {
+      "requirementId": "REP-ACT-17",
+      "kind": "ACTION",
+      "title": "Evidence provenance, legal hold, retention",
+      "domain": "CONFIDENTIALITY_PRIVILEGED",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "GOVERNANCE_MANDATE_THREAD_HOLD",
+      "visibilityAndAuthority": "Hold and retention need a live governance mandate. The mandate confers no read of the conversation and cannot be delegated. Provenance needs only the case relationship.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 6,
+      "functionalAcceptance": "Provenance shows source, uploader, time and hash. Hold and retention controls appear only to a mandate holder."
+    },
+    {
+      "requirementId": "REP-ACT-18",
+      "kind": "ACTION",
+      "title": "Tasks / deadlines / reminders / handover",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Each item is bound to a case the representative holds. Granting an extension is a separate institutional decision (DEC-IA-13).",
+      "sharedObligation": {
+        "id": "SHR-0C2-DEADLINES",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Overdue items first, each with its case and basis. A failed load says so and shows no zero."
+    },
+    {
+      "requirementId": "REP-ACT-19",
+      "kind": "ACTION",
+      "title": "Escalate to formal grievance",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "case:transition on this case. A protocol may require approval before filing (DEC-IA-11); the contract does not infer one.",
+      "sharedObligation": {
+        "id": "SHR-0C2-ESCALATION",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 4,
+      "functionalAcceptance": "The case shows the linked grievance with its clock. A refusal names the state that blocks it."
+    },
+    {
+      "requirementId": "REP-ACT-20",
+      "kind": "ACTION",
+      "title": "Request senior review / authorize / record rationale",
+      "domain": "FINANCIAL_ADMIN_APPROVALS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "UNDECIDED_INSTITUTIONAL_OFFICE",
+      "visibilityAndAuthority": "The institution names who may review and who may authorize (DEC-IA-09). Until then a request is recorded and routed and no decision is created.",
+      "sharedObligation": {
+        "id": "SHR-0C2-ESCALATION",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The case shows a pending review and its owner, never an approval."
+    },
+    {
+      "requirementId": "REP-ACT-21",
+      "kind": "ACTION",
+      "title": "Resolution, closure, transfer with continuity",
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_PRIMARY_HANDLER_ONLY",
+      "visibilityAndAuthority": "case:close is primary-handler-only and the source disagrees about who may close (DEC-IA-04). Transfer needs the assign mandate. Resolution needs case:transition.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 2,
+      "functionalAcceptance": "The case shows its outcome, closure state and any transfer. A refused closure explains why."
+    },
+    {
+      "requirementId": "REP-ACT-22",
+      "kind": "ACTION",
+      "title": "Recusal, territory, privileged-matter, delegation",
+      "domain": "DELEGATION_SUBSTITUTION",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "UNDECIDED_INSTITUTIONAL_OFFICE",
+      "visibilityAndAuthority": "The institution names who grants scope, privileged access and delegation (DEC-IA-06, DEC-IA-08, DEC-IA-10). A recusal binds its own declarer and is lifted only by an institutional decision (DEC-IA-07).",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A recusal removes the case from the declarer’s views. A privileged matter is absent from every list without a grant."
+    },
+    {
+      "requirementId": "REP-ACT-23",
+      "kind": "ACTION",
+      "title": "Member-visible projection of steward actions",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_MEMBER_OWN",
+      "visibilityAndAuthority": "The member sees only the member-visible view. A representative preview is a read the representative already holds.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A case page with state, visible notes and safe reasons. A preview is labelled as the member’s view."
+    },
+    {
+      "requirementId": "REP-ACT-24",
+      "kind": "ACTION",
+      "title": "WorkAid referral, acknowledgement, milestones",
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "WORKAID_REFERRAL_WITH_CONSENT",
+      "visibilityAndAuthority": "The case relationship plus a live consent. A union-authored record never opens counsel material. Consent wording is not written here (DEC-IA-12).",
+      "sharedObligation": {
+        "id": "SHR-0C2-WORKAID-REFERRAL",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 7,
+      "functionalAcceptance": "The case shows the referral state the records support. Specialist progress is not shown without an acknowledgement record."
+    },
+    {
+      "requirementId": "REP-ACT-25",
+      "kind": "ACTION",
+      "title": "EN/FR copy, mobile, accessibility, native browser",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "SELF_SCOPED",
+      "visibilityAndAuthority": "The signed-in person’s own settings.",
+      "sharedObligation": {
+        "id": "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "No untranslated labels and no inaccessible control."
+    },
+    {
+      "requirementId": "R01",
+      "kind": "DOMAIN",
+      "title": "Identity and mandates",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "SELF_SCOPED",
+      "visibilityAndAuthority": "The signed-in person’s own authority facts only. Seeing a fact is not holding it.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A list of what the representative can do and why, with expiry dates. An expired item is shown as expired."
+    },
+    {
+      "requirementId": "R02",
+      "kind": "DOMAIN",
+      "title": "Daily workload",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "An entry appears only for a matter the representative holds.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "An ordered list with a reason for each item. A failed section shows an error, not zero."
+    },
+    {
+      "requirementId": "R03",
+      "kind": "DOMAIN",
+      "title": "Intake",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_FILING_CAPACITY",
+      "visibilityAndAuthority": "An active membership whose capacity allows the filing mode. Opening an intake grants no access to anyone else’s case.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The intake is acknowledged with a reference number. A refusal says why."
+    },
+    {
+      "requirementId": "R04",
+      "kind": "DOMAIN",
+      "title": "Assessment",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "case:write_notes on this case. The assessment is internal and the member never sees it.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The case shows the assessment to staff only, labelled Internal."
+    },
+    {
+      "requirementId": "R05",
+      "kind": "DOMAIN",
+      "title": "Triage",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_TRIAGE_DESIGNATION",
+      "visibilityAndAuthority": "A live designation. It exposes queue metadata only and grants no action on any case.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The row shows its category and priority. Without a designation the queue is empty."
+    },
+    {
+      "requirementId": "R06",
+      "kind": "DOMAIN",
+      "title": "Escalation",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "case:transition on this case; a protocol approval is a separate condition where adopted.",
+      "sharedObligation": {
+        "id": "SHR-0C2-ESCALATION",
+        "role": "OWNER",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The case shows the linked grievance and its clock."
+    },
+    {
+      "requirementId": "R07",
+      "kind": "DOMAIN",
+      "title": "Case lifecycle",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "case:transition. Closing is limited to the primary handler and is undecided between the role policy and the kernel (DEC-IA-04).",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The case shows its state and history."
+    },
+    {
+      "requirementId": "R08",
+      "kind": "DOMAIN",
+      "title": "Assignment",
+      "domain": "DELEGATION_SUBSTITUTION",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_SUPERVISORY_MANDATE",
+      "visibilityAndAuthority": "A live mandate. Title and seniority are not inputs.",
+      "sharedObligation": {
+        "id": "SHR-0C2-CASE-ASSIGNMENT",
+        "role": "OWNER_PART",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The case shows its new assignee."
+    },
+    {
+      "requirementId": "R09",
+      "kind": "DOMAIN",
+      "title": "Member relationships",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DIRECTORY_SCOPE_BY_CASE_RELATIONSHIP",
+      "visibilityAndAuthority": "Self and the members of cases the representative holds; wider only as the policy states.",
+      "sharedObligation": {
+        "id": "SHR-0C2-MEMBER-DIRECTORY",
+        "role": "OWNER",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A list of the representative’s members. Others do not appear."
+    },
+    {
+      "requirementId": "R10",
+      "kind": "DOMAIN",
+      "title": "Member updates and notices",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "case:comment on this case, taken on the server for each update. A request flag cannot supply it. Disclosure of a labelled record is separate (DEC-IA-05).",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The update is shown labelled Visible to member and the member is notified without content."
+    },
+    {
+      "requirementId": "R11",
+      "kind": "DOMAIN",
+      "title": "Member conversations",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "THREAD_PARTICIPANT",
+      "visibilityAndAuthority": "Participation follows the conversation row. A legal hold or retention power is separate.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The conversation thread and its state."
+    },
+    {
+      "requirementId": "R12",
+      "kind": "DOMAIN",
+      "title": "Formal correspondence",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "UNDECIDED_INSTITUTIONAL_OFFICE",
+      "visibilityAndAuthority": "The institution names the approving, signing and dispatching offices (DEC-IA-14).",
+      "sharedObligation": {
+        "id": "SHR-0C2-CORRESPONDENCE",
+        "role": "OWNER",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The item shows its state and the person who set it."
+    },
+    {
+      "requirementId": "R13",
+      "kind": "DOMAIN",
+      "title": "Evidence and records",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "DOCUMENT_CASE_RELATIONSHIP_AND_CLASS",
+      "visibilityAndAuthority": "A kernel decision on the linked case and the document classification.",
+      "sharedObligation": {
+        "id": "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "role": "OWNER",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 6,
+      "functionalAcceptance": "The evidence list with source, uploader and time."
+    },
+    {
+      "requirementId": "R14",
+      "kind": "DOMAIN",
+      "title": "Tasks and deadlines",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Bound to a case the representative holds. Extension is granted by an institutional decision (DEC-IA-13).",
+      "sharedObligation": {
+        "id": "SHR-0C2-DEADLINES",
+        "role": "OWNER",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Overdue items first, each with its basis."
+    },
+    {
+      "requirementId": "R15",
+      "kind": "DOMAIN",
+      "title": "Agreements",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Reading the library needs a staff membership. Linking a clause to a case needs the case relationship.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Clause text with its agreement and version."
+    },
+    {
+      "requirementId": "R16",
+      "kind": "DOMAIN",
+      "title": "Workplace and bargaining-unit context",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "DIRECTORY_SCOPE_BY_CASE_RELATIONSHIP",
+      "visibilityAndAuthority": "The same slice as the member directory.",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A not-available state until a worksite engine exists."
+    },
+    {
+      "requirementId": "R17",
+      "kind": "DOMAIN",
+      "title": "Outcomes and precedent",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_PRIMARY_HANDLER_ONLY",
+      "visibilityAndAuthority": "The primary handler. Precedent search across cases needs its own authority and is not defined here.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The case shows its outcome."
+    },
+    {
+      "requirementId": "R18",
+      "kind": "DOMAIN",
+      "title": "WorkAid and specialists",
+      "domain": "CROSS_PERSONA_HANDOFFS",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "WORKAID_REFERRAL_WITH_CONSENT",
+      "visibilityAndAuthority": "Case relationship plus live consent. No consent wording is written here (DEC-IA-12).",
+      "sharedObligation": {
+        "id": "SHR-0C2-WORKAID-REFERRAL",
+        "role": "OWNER",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 7,
+      "functionalAcceptance": "The referral state the records support, never specialist progress without an acknowledgement."
+    },
+    {
+      "requirementId": "R19",
+      "kind": "DOMAIN",
+      "title": "Representative workload reporting",
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "Own cases for a representative; mandate scope for a supervisor.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Counts labelled with their scope. A failed read shows an error."
+    },
+    {
+      "requirementId": "R20",
+      "kind": "DOMAIN",
+      "title": "Guidance and procedure reference",
+      "domain": "CASE_MEMBER_DOCUMENT_VISIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "ACTIVE_MEMBERSHIP_NAVIGATION",
+      "visibilityAndAuthority": "A live staff membership. Entries the organization has not published are not shown.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Guidance entries with their publication date."
+    },
+    {
+      "requirementId": "R21",
+      "kind": "DOMAIN",
+      "title": "Meetings and hearings",
+      "domain": "RECORD_CREATION_UPDATE",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "case:write_notes on this case.",
+      "sharedObligation": null,
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "The meeting appears in the case timeline for staff."
+    },
+    {
+      "requirementId": "R22",
+      "kind": "DOMAIN",
+      "title": "Authority controls",
+      "domain": "DELEGATION_SUBSTITUTION",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": "UNDECIDED_INSTITUTIONAL_OFFICE",
+      "visibilityAndAuthority": "The institution names the granting offices (DEC-IA-06, DEC-IA-07, DEC-IA-08, DEC-IA-10).",
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A recusal removes the case from the declarer’s views."
+    },
+    {
+      "requirementId": "R23",
+      "kind": "DOMAIN",
+      "title": "Accountability view",
+      "domain": "AUDIT_ACCOUNTABILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "CASE_OWNER_OR_ASSIGNEE",
+      "visibilityAndAuthority": "case:read_internal on this case.",
+      "sharedObligation": null,
+      "implementationStatus": "SOURCE_PRESENT",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A chronological list of actions with actor and time."
+    },
+    {
+      "requirementId": "R24",
+      "kind": "DOMAIN",
+      "title": "Language, mobile and accessibility",
+      "domain": "IDENTITY_ELIGIBILITY",
+      "authorityClass": "IMPLEMENTED_SOURCE_BEHAVIOR",
+      "authorizationBasis": "SELF_SCOPED",
+      "visibilityAndAuthority": "The person’s own settings.",
+      "sharedObligation": {
+        "id": "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "role": "OWNER",
+        "ownerPersona": "representative"
+      },
+      "implementationStatus": "PARTIAL_SOURCE",
+      "engineeringGate": 10,
+      "functionalAcceptance": "No untranslated labels and no inaccessible control."
+    },
+    {
+      "requirementId": "REP-JRN-A",
+      "kind": "JOURNEY",
+      "title": "Journey A: a member request is received and, where the institution accepts it, handled as a case",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "An intake, a triage record, an assignment event and an acknowledgement. Whether the same person may hold two of these steps is decided by the rules in force and not assumed here."
+    },
+    {
+      "requirementId": "REP-JRN-B",
+      "kind": "JOURNEY",
+      "title": "Journey B: a case is escalated to a formal grievance where the protocol allows",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "An assessment, a review request and a linked grievance. Any case state change is a configured transition."
+    },
+    {
+      "requirementId": "REP-JRN-C",
+      "kind": "JOURNEY",
+      "title": "Journey C: handover and continuity",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A summary, a relationship change and an acknowledgement."
+    },
+    {
+      "requirementId": "REP-JRN-D",
+      "kind": "JOURNEY",
+      "title": "Journey D: evidence and the member’s view",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "An evidence row, two notes and, once adopted, a disclosure record."
+    },
+    {
+      "requirementId": "REP-JRN-E",
+      "kind": "JOURNEY",
+      "title": "Journey E: conversation and formal correspondence",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A message, a draft, an approval, a dispatch, a delivery and a receipt."
+    },
+    {
+      "requirementId": "REP-JRN-F",
+      "kind": "JOURNEY",
+      "title": "Journey F: a deadline from creation to extension or overdue",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A deadline, a reminder, a completion or an extension request."
+    },
+    {
+      "requirementId": "REP-JRN-G",
+      "kind": "JOURNEY",
+      "title": "Journey G: a specialist referral with consent",
+      "domain": "NOTIFICATIONS_WORKFLOW",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "A consent, a referral, an acknowledgement and a revocation."
+    },
+    {
+      "requirementId": "REP-SCN-CAPE",
+      "kind": "SCENARIO",
+      "title": "CAPE: Labour Relations Officer led assignment",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "CAPE: Labour Relations Officer led assignment"
+    },
+    {
+      "requirementId": "REP-SCN-CUPE",
+      "kind": "SCENARIO",
+      "title": "CUPE: regional and National Representative assistance",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "CUPE: regional and National Representative assistance"
+    },
+    {
+      "requirementId": "REP-SCN-LIUNA",
+      "kind": "SCENARIO",
+      "title": "LIUNA: territory denial",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "LIUNA: territory denial"
+    },
+    {
+      "requirementId": "REP-SCN-SMALL-LOCAL",
+      "kind": "SCENARIO",
+      "title": "Small local: dual-mandate case",
+      "domain": "ORG_FEDERATION_SCOPE",
+      "authorityClass": "PROPOSED_PERMISSION",
+      "authorizationBasis": null,
+      "visibilityAndAuthority": null,
+      "sharedObligation": null,
+      "implementationStatus": "NOT_IMPLEMENTED",
+      "engineeringGate": 10,
+      "functionalAcceptance": "Small local: dual-mandate case"
+    }
+  ],
+  "functionalAcceptanceCriteria": [
+    {
+      "requirementId": "REP-NAV-1",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Today opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-2",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Representation opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-3",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Members & Workplaces opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-4",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Communications opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-5",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Documents & Evidence opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-6",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Tasks & Deadlines opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-NAV-7",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Knowledge & Guidance opens with the representative’s own items. An empty list says it is empty and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-ACT-01",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A queue of the representative’s cases. An empty queue says so and a failed read says it failed."
+    },
+    {
+      "requirementId": "REP-ACT-02",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A metadata list. With no live designation the queue is empty and says why."
+    },
+    {
+      "requirementId": "REP-ACT-03",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The grievance with the parts the representative may see. A grievance the representative may not read looks the same as a missing one."
+    },
+    {
+      "requirementId": "REP-ACT-04",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows its new assignee. A refused assignment explains that the mandate does not cover the case."
+    },
+    {
+      "requirementId": "REP-ACT-05",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Not offered unless the mandate exists. The queue row says no action is available."
+    },
+    {
+      "requirementId": "REP-ACT-06",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The note appears labelled Internal. Sharing with the member opens the disclosure decision and is not a toggle on the note."
+    },
+    {
+      "requirementId": "REP-ACT-07",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The claim shows its new state. A refused transition names the allowed states."
+    },
+    {
+      "requirementId": "REP-ACT-08",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The grievance shows its new stage. A refused change names the reachable stages."
+    },
+    {
+      "requirementId": "REP-ACT-09",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case lists its collaborators and expiry. A revoked collaborator loses access immediately."
+    },
+    {
+      "requirementId": "REP-ACT-10",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A short list. A member outside the slice does not appear and nothing says one was omitted."
+    },
+    {
+      "requirementId": "REP-ACT-11",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A profile with only permitted fields and the cases the representative holds."
+    },
+    {
+      "requirementId": "REP-ACT-12",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The draft appears in the representative’s list marked Draft."
+    },
+    {
+      "requirementId": "REP-ACT-13",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The item shows its current state and the person who set it. A state that is not available is not offered."
+    },
+    {
+      "requirementId": "REP-ACT-14",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The conversation shows its participants and linked matter."
+    },
+    {
+      "requirementId": "REP-ACT-15",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A list with no sign of omitted items. A direct link to an unreadable document answers not found."
+    },
+    {
+      "requirementId": "REP-ACT-16",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A pack with a manifest of what it holds and what was excluded by class."
+    },
+    {
+      "requirementId": "REP-ACT-17",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Provenance shows source, uploader, time and hash. Hold and retention controls appear only to a mandate holder."
+    },
+    {
+      "requirementId": "REP-ACT-18",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Overdue items first, each with its case and basis. A failed load says so and shows no zero."
+    },
+    {
+      "requirementId": "REP-ACT-19",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows the linked grievance with its clock. A refusal names the state that blocks it."
+    },
+    {
+      "requirementId": "REP-ACT-20",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows a pending review and its owner, never an approval."
+    },
+    {
+      "requirementId": "REP-ACT-21",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows its outcome, closure state and any transfer. A refused closure explains why."
+    },
+    {
+      "requirementId": "REP-ACT-22",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A recusal removes the case from the declarer’s views. A privileged matter is absent from every list without a grant."
+    },
+    {
+      "requirementId": "REP-ACT-23",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A case page with state, visible notes and safe reasons. A preview is labelled as the member’s view."
+    },
+    {
+      "requirementId": "REP-ACT-24",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows the referral state the records support. Specialist progress is not shown without an acknowledgement record."
+    },
+    {
+      "requirementId": "REP-ACT-25",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "No untranslated labels and no inaccessible control."
+    },
+    {
+      "requirementId": "R01",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A list of what the representative can do and why, with expiry dates. An expired item is shown as expired."
+    },
+    {
+      "requirementId": "R02",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "An ordered list with a reason for each item. A failed section shows an error, not zero."
+    },
+    {
+      "requirementId": "R03",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The intake is acknowledged with a reference number. A refusal says why."
+    },
+    {
+      "requirementId": "R04",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows the assessment to staff only, labelled Internal."
+    },
+    {
+      "requirementId": "R05",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The row shows its category and priority. Without a designation the queue is empty."
+    },
+    {
+      "requirementId": "R06",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows the linked grievance and its clock."
+    },
+    {
+      "requirementId": "R07",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows its state and history."
+    },
+    {
+      "requirementId": "R08",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows its new assignee."
+    },
+    {
+      "requirementId": "R09",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A list of the representative’s members. Others do not appear."
+    },
+    {
+      "requirementId": "R10",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The update is shown labelled Visible to member and the member is notified without content."
+    },
+    {
+      "requirementId": "R11",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The conversation thread and its state."
+    },
+    {
+      "requirementId": "R12",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The item shows its state and the person who set it."
+    },
+    {
+      "requirementId": "R13",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The evidence list with source, uploader and time."
+    },
+    {
+      "requirementId": "R14",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Overdue items first, each with its basis."
+    },
+    {
+      "requirementId": "R15",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Clause text with its agreement and version."
+    },
+    {
+      "requirementId": "R16",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A not-available state until a worksite engine exists."
+    },
+    {
+      "requirementId": "R17",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The case shows its outcome."
+    },
+    {
+      "requirementId": "R18",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The referral state the records support, never specialist progress without an acknowledgement."
+    },
+    {
+      "requirementId": "R19",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Counts labelled with their scope. A failed read shows an error."
+    },
+    {
+      "requirementId": "R20",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Guidance entries with their publication date."
+    },
+    {
+      "requirementId": "R21",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "The meeting appears in the case timeline for staff."
+    },
+    {
+      "requirementId": "R22",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A recusal removes the case from the declarer’s views."
+    },
+    {
+      "requirementId": "R23",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-AUDIT",
+          "kind": "AUDIT_RECORD_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A chronological list of actions with actor and time."
+    },
+    {
+      "requirementId": "R24",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "No untranslated labels and no inaccessible control."
+    },
+    {
+      "requirementId": "REP-JRN-A",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "An intake, a triage record, an assignment event and an acknowledgement. Whether the same person may hold two of these steps is decided by the rules in force and not assumed here."
+    },
+    {
+      "requirementId": "REP-JRN-B",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "An assessment, a review request and a linked grievance. Any case state change is a configured transition."
+    },
+    {
+      "requirementId": "REP-JRN-C",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A summary, a relationship change and an acknowledgement."
+    },
+    {
+      "requirementId": "REP-JRN-D",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "An evidence row, two notes and, once adopted, a disclosure record."
+    },
+    {
+      "requirementId": "REP-JRN-E",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A message, a draft, an approval, a dispatch, a delivery and a receipt."
+    },
+    {
+      "requirementId": "REP-JRN-F",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A deadline, a reminder, a completion or an extension request."
+    },
+    {
+      "requirementId": "REP-JRN-G",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "A consent, a referral, an acknowledgement and a revocation."
+    },
+    {
+      "requirementId": "REP-SCN-CAPE",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "CAPE: Labour Relations Officer led assignment"
+    },
+    {
+      "requirementId": "REP-SCN-CUPE",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "CUPE: regional and National Representative assistance"
+    },
+    {
+      "requirementId": "REP-SCN-LIUNA",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "LIUNA: territory denial"
+    },
+    {
+      "requirementId": "REP-SCN-SMALL-LOCAL",
+      "evidence": [
+        {
+          "id": "AE-FUNCTIONAL",
+          "kind": "SYNTHETIC_FIXTURE_FUNCTIONAL_TEST"
+        },
+        {
+          "id": "AE-TRUTHFUL-STATE",
+          "kind": "TRUTHFUL_STATE_CHECK"
+        },
+        {
+          "id": "AE-NEGATIVE",
+          "kind": "NEGATIVE_TEST"
+        }
+      ],
+      "statement": "Small local: dual-mandate case"
+    }
+  ],
+  "negativeSecurityAndTenantIsolationCriteria": [
+    {
+      "id": "NSC-REP-01",
+      "class": "TENANT_ISOLATION",
+      "statement": "In a synthetic two-organization fixture, a representative of organization A cannot read, list, search or export a case, member, document or conversation of organization B, and receives no existence signal.",
+      "requirementIds": [
+        "REP-ACT-01",
+        "REP-ACT-03",
+        "REP-ACT-10",
+        "REP-ACT-11",
+        "REP-ACT-15",
+        "R09"
+      ]
+    },
+    {
+      "id": "NSC-REP-02",
+      "class": "SENIORITY_IS_NOT_SCOPE",
+      "statement": "A senior or supervising representative gains no territory, unit or organization scope from office or seniority. Scope exists only as an issued instrument.",
+      "requirementIds": [
+        "R22",
+        "REP-ACT-22",
+        "R16"
+      ]
+    },
+    {
+      "id": "NSC-REP-03",
+      "class": "TRIAGE_IS_METADATA_ONLY",
+      "statement": "A triage designee sees intake metadata only and cannot open the case, its documents or its notes.",
+      "requirementIds": [
+        "REP-ACT-02",
+        "R05"
+      ]
+    },
+    {
+      "id": "NSC-REP-04",
+      "class": "ASSIGNMENT_NEEDS_MANDATE",
+      "statement": "Seeing the unassigned queue is not a power to assign. Assignment and self-assignment are refused without a live supervisory mandate that covers the case.",
+      "requirementIds": [
+        "REP-ACT-04",
+        "REP-ACT-05",
+        "R08"
+      ]
+    },
+    {
+      "id": "NSC-REP-05",
+      "class": "CONFLICT_PRECEDES_AUTHORITY",
+      "statement": "A recusal or adverse-party status on a case denies every action on it before any source of authority is consulted.",
+      "requirementIds": [
+        "REP-ACT-22",
+        "R22"
+      ]
+    },
+    {
+      "id": "NSC-REP-06",
+      "class": "PRIVILEGED_EXCLUDED",
+      "statement": "Privileged material is excluded from representative reads and from the member-visible projection unless a separate disclosure decision is recorded.",
+      "requirementIds": [
+        "REP-ACT-15",
+        "REP-ACT-16",
+        "REP-ACT-17",
+        "REP-ACT-23"
+      ]
+    },
+    {
+      "id": "NSC-REP-07",
+      "class": "DISPOSITION_IS_NOT_DISPATCH",
+      "statement": "Approval, dispatch, delivery and receipt of formal correspondence are distinct states, and a draft is never recorded as dispatched.",
+      "requirementIds": [
+        "REP-ACT-12",
+        "REP-ACT-13",
+        "R12"
+      ]
+    },
+    {
+      "id": "NSC-REP-08",
+      "class": "REVOKED_DELEGATION",
+      "statement": "After a collaborator grant is revoked, the next read or comment on the case is refused and the revocation is audited.",
+      "requirementIds": [
+        "REP-ACT-09"
+      ]
+    },
+    {
+      "id": "NSC-REP-09",
+      "class": "ATOMIC_AUDIT",
+      "statement": "If the audit record cannot be written, the representative mutation is rolled back and nothing persists.",
+      "requirementIds": [
+        "REP-ACT-06",
+        "REP-ACT-07",
+        "REP-ACT-08"
+      ]
+    }
+  ],
+  "dependenciesOnOtherPersonas": [
+    {
+      "onPersona": "financial-officer",
+      "via": "SHARED_OBLIGATION",
+      "ids": [
+        "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "SHR-0C2-WORKAID-REFERRAL"
+      ]
+    },
+    {
+      "onPersona": "steward",
+      "via": "RELATED_REQUIREMENT",
+      "ids": [
+        "R01->STW-NAV-2",
+        "R02->STW-ACT-02",
+        "R03->STW-ACT-28",
+        "R05->STW-ACT-28",
+        "R08->STW-ACT-04",
+        "R09->STW-ACT-34",
+        "R11->STW-ACT-25",
+        "R11->STW-ACT-26",
+        "R12->STW-ACT-27",
+        "R13->STW-ACT-13",
+        "R14->STW-ACT-21",
+        "R15->STW-ACT-36",
+        "R15->STW-ACT-37",
+        "R18->STW-ACT-32",
+        "R19->STW-ACT-03",
+        "R22->STW-ACT-05",
+        "R24->STW-ACT-40",
+        "REP-ACT-01->STW-ACT-01",
+        "REP-ACT-02->STW-ACT-28",
+        "REP-ACT-03->STW-ACT-06",
+        "REP-ACT-03->STW-ACT-07",
+        "REP-ACT-03->STW-ACT-14",
+        "REP-ACT-04->STW-DENY-02",
+        "REP-ACT-05->STW-ACT-30",
+        "REP-ACT-06->STW-ACT-08",
+        "REP-ACT-06->STW-ACT-09",
+        "REP-ACT-07->STW-ACT-10",
+        "REP-ACT-08->STW-ACT-10",
+        "REP-ACT-09->STW-ACT-20",
+        "REP-ACT-10->STW-ACT-34",
+        "REP-ACT-11->STW-ACT-35",
+        "REP-ACT-12->STW-ACT-27",
+        "REP-ACT-13->STW-DENY-05",
+        "REP-ACT-14->STW-ACT-25",
+        "REP-ACT-15->STW-ACT-39",
+        "REP-ACT-16->STW-ACT-38",
+        "REP-ACT-17->STW-ACT-14",
+        "REP-ACT-17->STW-DENY-07",
+        "REP-ACT-18->STW-ACT-21",
+        "REP-ACT-18->STW-ACT-22",
+        "REP-ACT-18->STW-ACT-23",
+        "REP-ACT-18->STW-ACT-24",
+        "REP-ACT-18->STW-ACT-33",
+        "REP-ACT-19->STW-ACT-18",
+        "REP-ACT-20->STW-ACT-19",
+        "REP-ACT-21->STW-ACT-11",
+        "REP-ACT-21->STW-ACT-33",
+        "REP-ACT-22->STW-ACT-05",
+        "REP-ACT-22->STW-DENY-03",
+        "REP-ACT-22->STW-DENY-08",
+        "REP-ACT-23->STW-ACT-09",
+        "REP-ACT-23->STW-ACT-17",
+        "REP-ACT-24->STW-ACT-32",
+        "REP-ACT-25->STW-ACT-40",
+        "REP-NAV-1->STW-NAV-1",
+        "REP-NAV-2->STW-NAV-2",
+        "REP-NAV-3->STW-NAV-3",
+        "REP-NAV-4->STW-NAV-4",
+        "REP-NAV-5->STW-NAV-5",
+        "REP-NAV-6->STW-NAV-6",
+        "REP-NAV-7->STW-NAV-7"
+      ]
+    },
+    {
+      "onPersona": "steward",
+      "via": "SHARED_OBLIGATION",
+      "ids": [
+        "SHR-0C2-CASE-ASSIGNMENT",
+        "SHR-0C2-CORRESPONDENCE",
+        "SHR-0C2-DEADLINES",
+        "SHR-0C2-ESCALATION",
+        "SHR-0C2-EVIDENCE-DOCUMENTS",
+        "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+        "SHR-0C2-MEMBER-DIRECTORY",
+        "SHR-0C2-NAVIGATION",
+        "SHR-0C2-WORKAID-REFERRAL"
+      ]
+    }
+  ],
+  "sharedObligationsInvolved": [
+    "SHR-0C2-CASE-ASSIGNMENT",
+    "SHR-0C2-CORRESPONDENCE",
+    "SHR-0C2-DEADLINES",
+    "SHR-0C2-ESCALATION",
+    "SHR-0C2-EVIDENCE-DOCUMENTS",
+    "SHR-0C2-LANGUAGE-ACCESSIBILITY",
+    "SHR-0C2-MEMBER-DIRECTORY",
+    "SHR-0C2-NAVIGATION",
+    "SHR-0C2-WORKAID-REFERRAL"
+  ],
+  "outstandingProductDecisions": {
+    "baseline": [
+      {
+        "id": "DEC-IA-03",
+        "title": "Who may assign or route cases",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-IA-07",
+        "title": "Recusal lifting and conflict adjudication",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-IA-08",
+        "title": "Temporary delegation, substitute coverage and succession",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-IA-09",
+        "title": "Senior review and approval authority",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-IA-10",
+        "title": "Territory and bargaining-unit mandates per operating model",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-IA-11",
+        "title": "Representation protocol approval",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-01",
+        "title": "Steward as a distinct persona",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-03",
+        "title": "Default visibility of working notes",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-04",
+        "title": "Intake classification",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-05",
+        "title": "Assignment acknowledgement and handoff summary",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-06",
+        "title": "Representative R-domain meanings",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-07",
+        "title": "R18 status vocabulary",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-08",
+        "title": "Journeys A–G acceptance form",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-12",
+        "title": "Deadline extension workflow",
+        "status": "OUTSTANDING"
+      },
+      {
+        "id": "DEC-PD-14",
+        "title": "Organization scenario coverage",
+        "status": "OUTSTANDING"
+      }
+    ],
+    "raisedByGate0C2": [
+      {
+        "id": "DEC-PD-0C2-04",
+        "title": "Representative scope across federations and affiliated organizations",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      },
+      {
+        "id": "DEC-PD-0C2-05",
+        "title": "Explicit denial of financial authority for the representative",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      },
+      {
+        "id": "DEC-PD-0C2-06",
+        "title": "Former representative access and mandate termination",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      },
+      {
+        "id": "DEC-PD-0C2-10",
+        "title": "Order of product acceptance and the Steward structure",
+        "status": "OUTSTANDING",
+        "recommendedOption": null
+      }
+    ]
+  },
+  "outstandingInstitutionalAuthorityDecisions": {
+    "note": "These are institutional decisions. A product acceptance of this package cannot issue them. They are outstanding and stay so.",
+    "baseline": [
+      {
+        "id": "DEC-IA-01",
+        "title": "Who holds a triage designation",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-02",
+        "title": "Self-assignment from triage",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-03",
+        "title": "Who may assign or route cases",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-04",
+        "title": "Who may close a case",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-05",
+        "title": "Member-disclosable labels",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-06",
+        "title": "Privileged-matter access grants",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-07",
+        "title": "Recusal lifting and conflict adjudication",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-08",
+        "title": "Temporary delegation, substitute coverage and succession",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-09",
+        "title": "Senior review and approval authority",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-10",
+        "title": "Territory and bargaining-unit mandates per operating model",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-11",
+        "title": "Representation protocol approval",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-12",
+        "title": "WorkAid referral authority and consent wording",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-13",
+        "title": "Deadline extension approval",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-14",
+        "title": "Correspondence approval, signature and dispatch",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      },
+      {
+        "id": "DEC-IA-15",
+        "title": "Conversation legal hold and retention",
+        "status": "OUTSTANDING",
+        "decisionOwner": "TO_BE_NAMED_BY_INSTITUTION"
+      }
+    ],
+    "inventoryLevelInstitutionalDecisionsOutstanding": 79
+  },
+  "knownSourceGaps": {
+    "sourceGaps": [
+      {
+        "id": "GAP-REP-CANONICAL-CITED-NOT-RECOVERED",
+        "kind": "IRREDUCIBLE_HISTORICAL",
+        "statement": "UE-REPRESENTATIVE-CANONICAL-2.2 is cited as FROZEN by a disposition and exists in no ref. The package is a reconstruction candidate and is not that document."
+      },
+      {
+        "id": "GAP-REP-R-RANGE",
+        "kind": "IRREDUCIBLE_HISTORICAL",
+        "statement": "The first disposition carried the R01 to R24 matrix and was rewritten. Only R01, R02, R09, R13, R14, R15 and R18 carry their own titles. The other seventeen share group labels, and pairing a label to an identifier is an inference."
+      },
+      {
+        "id": "GAP-REP-R18-CONFLICT",
+        "kind": "IRREDUCIBLE_HISTORICAL",
+        "statement": "R18 is recorded BLOCKED in the first disposition and MISSING in the second. The conflict is preserved, not resolved. Both agree nothing is operational."
+      },
+      {
+        "id": "GAP-REP-JOURNEYS-UNDEFINED",
+        "kind": "IRREDUCIBLE_HISTORICAL",
+        "statement": "Journeys A to G and the institutional scenario proofs are named by range only. No journey or scenario is defined in any source."
+      }
+    ],
+    "historicalEvidenceByClass": {
+      "DIRECT_INDIVIDUAL": 39,
+      "GROUP_LABEL_ONLY": 8,
+      "NAME_RANGE_ONLY": 11,
+      "STATUS_ONLY": 9
+    },
+    "implementationStatusCounts": {
+      "NOT_IMPLEMENTED": 15,
+      "PARTIAL_SOURCE": 37,
+      "SOURCE_PRESENT": 15
+    },
+    "irreducibleHistoricalUncertainty": [
+      "GAP-REP-CANONICAL-CITED-NOT-RECOVERED",
+      "GAP-REP-R-RANGE",
+      "GAP-REP-R18-CONFLICT",
+      "GAP-REP-JOURNEYS-UNDEFINED"
+    ],
+    "identifiersWithNoRecoverableDefinition": [
+      "R03",
+      "R04",
+      "R05",
+      "R06",
+      "R07",
+      "R08",
+      "R10",
+      "R11",
+      "R12",
+      "R16",
+      "R17",
+      "R19",
+      "R20",
+      "R21",
+      "R22",
+      "R23",
+      "R24"
+    ]
+  },
+  "implementationObligationsByGate": [
+    {
+      "gate": 2,
+      "name": "Case ownership and representation",
+      "requirementIds": [
+        "REP-ACT-04",
+        "REP-ACT-05",
+        "REP-ACT-09",
+        "REP-ACT-21"
+      ],
+      "implementationStatusCounts": {
+        "NOT_IMPLEMENTED": 1,
+        "PARTIAL_SOURCE": 2,
+        "SOURCE_PRESENT": 1
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 4,
+      "name": "Claims/grievances convergence",
+      "requirementIds": [
+        "REP-ACT-02",
+        "REP-ACT-03",
+        "REP-ACT-06",
+        "REP-ACT-07",
+        "REP-ACT-08",
+        "REP-ACT-19"
+      ],
+      "implementationStatusCounts": {
+        "PARTIAL_SOURCE": 4,
+        "SOURCE_PRESENT": 2
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 6,
+      "name": "Documents, privacy and records",
+      "requirementIds": [
+        "REP-NAV-5",
+        "REP-ACT-15",
+        "REP-ACT-16",
+        "REP-ACT-17",
+        "R13"
+      ],
+      "implementationStatusCounts": {
+        "PARTIAL_SOURCE": 3,
+        "SOURCE_PRESENT": 2
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 7,
+      "name": "WorkAid union-side completion",
+      "requirementIds": [
+        "REP-ACT-24",
+        "R18"
+      ],
+      "implementationStatusCounts": {
+        "PARTIAL_SOURCE": 2
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 10,
+      "name": "Frozen persona journeys",
+      "requirementIds": [
+        "REP-NAV-1",
+        "REP-NAV-2",
+        "REP-NAV-3",
+        "REP-NAV-6",
+        "REP-NAV-7",
+        "REP-ACT-01",
+        "REP-ACT-10",
+        "REP-ACT-11",
+        "REP-ACT-18",
+        "REP-ACT-20",
+        "REP-ACT-22",
+        "REP-ACT-23",
+        "REP-ACT-25",
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R10",
+        "R11",
+        "R12",
+        "R14",
+        "R15",
+        "R16",
+        "R17",
+        "R19",
+        "R20",
+        "R21",
+        "R22",
+        "R23",
+        "R24",
+        "REP-JRN-A",
+        "REP-JRN-B",
+        "REP-JRN-C",
+        "REP-JRN-D",
+        "REP-JRN-E",
+        "REP-JRN-F",
+        "REP-JRN-G",
+        "REP-SCN-CAPE",
+        "REP-SCN-CUPE",
+        "REP-SCN-LIUNA",
+        "REP-SCN-SMALL-LOCAL"
+      ],
+      "implementationStatusCounts": {
+        "NOT_IMPLEMENTED": 14,
+        "PARTIAL_SOURCE": 23,
+        "SOURCE_PRESENT": 9
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    },
+    {
+      "gate": 11,
+      "name": "Member/staff messaging",
+      "requirementIds": [
+        "REP-NAV-4",
+        "REP-ACT-12",
+        "REP-ACT-13",
+        "REP-ACT-14"
+      ],
+      "implementationStatusCounts": {
+        "PARTIAL_SOURCE": 3,
+        "SOURCE_PRESENT": 1
+      },
+      "note": "Obligation to build and prove. Nothing is claimed delivered."
+    }
+  ],
+  "stewardStructure": {
+    "register": "docs/union-eyes/convergence/register/ue-persona-steward-structure-0c2.json",
+    "recommendation": "OPT-C-SCOPED-PROFILE",
+    "recommendationOnly": true,
+    "selected": null
+  },
+  "decisionOwnerRole": "AUTHORIZED_PRODUCT_OWNER",
+  "consultedRolesAdvisoryOnly": [
+    "Union Eyes representation product lead",
+    "Institution representative with grievance-handling responsibility, where one exists"
+  ],
+  "approvalOptions": [
+    {
+      "id": "APPROVE",
+      "resultingState": "ACCEPTED_BY_AUTHORIZED_PRODUCT_OWNER",
+      "effect": "Establishes the named artifact version as the engineering canonical for this persona. Settles or explicitly defers each listed product decision. Issues no institutional authority and activates nothing."
+    },
+    {
+      "id": "REJECT",
+      "resultingState": "REJECTED_BY_AUTHORIZED_PRODUCT_OWNER",
+      "effect": "The artifact version is not the engineering canonical. The persona stays unresolved and its Gate 0 blocker stays."
+    },
+    {
+      "id": "RETURN_FOR_REWORK",
+      "resultingState": "RETURNED_FOR_REWORK",
+      "effect": "The named reasons are recorded and a new artifact version is prepared. The returned version stays preserved."
+    }
+  ],
+  "productApprovalDoesNot": [
+    "Issue, approve or activate any of the 79 outstanding institutional decisions or the 32 baseline institutional authority decisions.",
+    "Issue a financial mandate, a triage designation, a supervisory mandate, a delegation, an appointment or any other instrument.",
+    "Create, name or fill an institutional office, including a steward office.",
+    "Change an implementation status, a security status, a release disposition or a runtime qualification status.",
+    "Resolve any ratchet, test or route defect."
+  ],
+  "claims": {
+    "implementationComplete": false,
+    "runtimeQualification": "NOT_QUALIFIED",
+    "securityStatusChanged": false,
+    "institutionalAuthorityGranted": false,
+    "productSpecificationRatified": false
+  }
+}

@@ -12,11 +12,11 @@ import { createLogger } from '@nzila/os-core'
 const logger = createLogger('stripe:customers')
 
 const CreateCustomerSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   ventureId: z.string().optional(),
   email: z.string().email(),
   name: z.string().min(1),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.string()).optional(),
 })
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

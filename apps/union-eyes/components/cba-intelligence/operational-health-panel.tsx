@@ -1,33 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle2, Siren, ShieldCheck } from "lucide-react";
-
-type HealthLevel = "healthy" | "warning" | "critical";
-
-interface OperationalHealthResponse {
-  success: boolean;
-  data: {
-    level: HealthLevel;
-    generatedAt: string;
-    throughput: {
-      ingestionSuccessRate: number | null;
-      extractionSuccessRate: number | null;
-    };
-    quality: {
-      reviewBacklog: number;
-      staleSources: number;
-      expiredSources: number;
-    };
-    checks: Array<{
-      name: string;
-      level: HealthLevel;
-      detail: string;
-    }>;
-  };
-}
+import type { HealthLevel } from "@/lib/services/cba-intelligence/health-service";
+import { failureText } from "@/lib/client/api-envelope";
+import { useOperationalHealth } from "./use-operational-health";
 
 function toPct(value: number | null): string {
   if (value == null) return "n/a";
@@ -47,13 +25,7 @@ function levelIcon(level: HealthLevel) {
 }
 
 export function OperationalHealthPanel() {
-  const { data, isLoading, error } = useQuery<OperationalHealthResponse>({
-    queryKey: ["cba-intel-operational-health"],
-    queryFn: () => fetch("/api/cba-intelligence/health").then((r) => r.json()),
-    refetchInterval: 60_000,
-  });
-
-  const health = data?.data;
+  const { data: health, isLoading, error } = useOperationalHealth();
 
   return (
     <Card>
@@ -68,7 +40,7 @@ export function OperationalHealthPanel() {
         {isLoading ? (
           <div className="text-sm text-muted-foreground">Loading health snapshot...</div>
         ) : error ? (
-          <div className="text-sm text-red-600">Failed to load health snapshot.</div>
+          <div role="alert" className="text-sm text-red-600">{failureText(error, "Failed to load health snapshot.")}</div>
         ) : !health ? (
           <div className="text-sm text-muted-foreground">No health snapshot available.</div>
         ) : (

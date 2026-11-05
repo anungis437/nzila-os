@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getBuildMetadata, isReadyFromChecks, normalizeHealthChecks } from '@nzila/os-core/health'
 import { evaluateCatalogAdmission } from '@/lib/operations/catalog-admission'
+import { probeQueue, probeStorage } from '@/lib/operations/service-probes'
 import { evaluateTestBypassGuard, readTestBypassGuardEnv } from '@/lib/reality/test-bypass-guard'
 
 const APP = 'union-eyes'
@@ -30,35 +31,11 @@ async function checkCatalogReady(): Promise<boolean> {
 }
 
 async function checkQueueReady(): Promise<boolean> {
-  const djangoUrl = process.env.DJANGO_API_URL || process.env.NEXT_PUBLIC_DJANGO_API_URL || ''
-  if (!djangoUrl) {
-    return false
-  }
-
-  try {
-    const base = djangoUrl.replace(/\/$/, '')
-    const response = await fetch(`${base}/api/auth_core/ready/`, {
-      cache: 'no-store',
-      signal: AbortSignal.timeout(3000),
-    })
-    return response.ok
-  } catch {
-    return false
-  }
+  return (await probeQueue()).state === 'ok'
 }
 
 async function checkStorageReady(): Promise<boolean> {
-  const containerName = process.env.AZURE_BLOB_CONTAINER
-  if (!containerName) {
-    return false
-  }
-
-  try {
-    const { container } = await import('@nzila/blob')
-    return await container(containerName).exists()
-  } catch {
-    return false
-  }
+  return (await probeStorage()).state === 'ok'
 }
 
 function hasAll(values: Array<string | undefined>): boolean {
@@ -105,14 +82,6 @@ function checkCalendarTokenEncryptionReady(): boolean {
   return typeof key === 'string' && key.trim().length > 0
 }
 
-function checkCalendarSchedulerReady(): boolean {
-  const enabled = parseBoolEnv(process.env.CALENDAR_SYNC_CRON_ENABLED, false)
-  if (!enabled) return false
-
-  const cronSecret = process.env.CRON_SECRET_KEY || process.env.CRON_SECRET
-  return typeof cronSecret === 'string' && cronSecret.trim().length > 0
-}
-
 export async function GET() {
   const requireQueue = parseBoolEnv(process.env.READY_REQUIRE_QUEUE, false)
   const requireStorage = parseBoolEnv(process.env.READY_REQUIRE_STORAGE, false)
@@ -128,7 +97,6 @@ export async function GET() {
     process.env.READY_REQUIRE_CALENDAR_TOKEN_ENCRYPTION,
     false,
   )
-  const requireCalendarScheduler = parseBoolEnv(process.env.READY_REQUIRE_CALENDAR_SCHEDULER, false)
 
   // Directive 2026-11-04 item 4: a test-auth / risk-bypass switch in a
   // deployed environment makes the revision not-ready, with a reason code.
@@ -159,10 +127,6 @@ export async function GET() {
     checksInput.calendarTokenEncryption = checkCalendarTokenEncryptionReady()
   }
 
-  if (requireCalendarScheduler) {
-    checksInput.calendarScheduler = checkCalendarSchedulerReady()
-  }
-
   const checks = normalizeHealthChecks(checksInput)
 
   const requiredChecks = [
@@ -175,7 +139,6 @@ export async function GET() {
     ...(requireCalendarIntegrations ? ['calendarIntegrations'] : []),
     ...(requireEmailDelivery ? ['emailDelivery'] : []),
     ...(requireCalendarTokenEncryption ? ['calendarTokenEncryption'] : []),
-    ...(requireCalendarScheduler ? ['calendarScheduler'] : []),
   ]
   const ready = isReadyFromChecks(checks, requiredChecks)
 

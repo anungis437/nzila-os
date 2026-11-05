@@ -15,9 +15,12 @@
  *   • Token never stored plaintext. Replay impossible after acceptedAt is set.
  *   • The invite carries the org+role assignment, so the user cannot escalate
  *     by tampering with form data — the role comes from the row, not the body.
+ *   • Acceptance locks the inviter and re-reads the invite before any
+ *     membership or session write. A denial that commits first confers nothing.
  */
 import { randomBytes, createHash } from 'crypto'
 import { authDb as db, withAuthContext, withAuthSavepoint, withTenantAuthContext, insertAuthRow } from '../auth-db'
+import { lockInviterAuthority } from '@nzila/db/auth-client'
 import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority'
 import {
   authInvites,
@@ -103,15 +106,22 @@ async function logEvent(
     userAgent?: string | null
     metadata?: Record<string, unknown>
   },
+  /** A required record is part of the operation: if it cannot be written the operation fails and rolls back. */
+  required = false,
 ): Promise<void> {
+  const write = () => withAuthSavepoint(async () => db.insert(authAuditLog).values({
+    userId: opts.userId ?? null,
+    eventType,
+    ipAddress: opts.ipAddress ?? null,
+    userAgent: opts.userAgent ?? null,
+    metadata: opts.metadata ?? {},
+  }))
+  if (required) {
+    await write()
+    return
+  }
   try {
-    await withAuthSavepoint(async () => db.insert(authAuditLog).values({
-      userId: opts.userId ?? null,
-      eventType,
-      ipAddress: opts.ipAddress ?? null,
-      userAgent: opts.userAgent ?? null,
-      metadata: opts.metadata ?? {},
-    }))
+    await write()
   } catch {
     // best-effort
   }
@@ -155,7 +165,7 @@ async function createInviteWithContext(input: CreateInviteInput, email: string, 
       organizationId: input.organizationId,
       role,
     },
-  })
+  }, true)
 
   return { success: true, inviteId: row.id, token, expiresAt }
 }
@@ -184,7 +194,6 @@ async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: stri
       ),
     )
     .limit(1)
-    .for('update')
 
   if (!invite) {
     await logEvent('invite_accept_failed', {
@@ -196,11 +205,37 @@ async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: stri
   }
   if (!ALLOWED_ROLES.has(invite.role)) return { success: false, error: 'Invalid invite role' }
 
+  // Hold the inviter's lifecycle and membership writers until this transaction
+  // commits, then re-read. A denial that committed while this transaction
+  // waited is visible here, before any membership or session write.
+  await lockInviterAuthority(db, invite.invitedBy)
+  const [confirmed] = await db
+    .select()
+    .from(authInvites)
+    .where(
+      and(
+        eq(authInvites.tokenHash, tokenHash),
+        isNull(authInvites.acceptedAt),
+        isNull(authInvites.revokedAt),
+        gt(authInvites.expiresAt, new Date()),
+      ),
+    )
+    .limit(1)
+    .for('update')
+  if (!confirmed) {
+    await logEvent('invite_accept_failed', {
+      ipAddress: input.ipAddress,
+      userAgent: input.userAgent,
+      metadata: { reason: 'inviter_authority_lost' },
+    })
+    return { success: false, error: 'Invalid or expired invite' }
+  }
+
   // Find or create the underlying user.
   const [existing] = await db
     .select({ userId: authUsers.userId })
     .from(authUsers)
-    .where(sql`lower(${authUsers.email}) = ${invite.email}`)
+    .where(sql`lower(${authUsers.email}) = ${confirmed.email}`)
     .limit(1)
 
   let userId: string
@@ -210,7 +245,7 @@ async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: stri
     userId = crypto.randomUUID()
     await insertAuthRow(authUsers, {
       userId,
-      email: invite.email,
+      email: confirmed.email,
       passwordHash: null,
       firstName: input.firstName ?? null,
       lastName: input.lastName ?? null,
@@ -227,7 +262,7 @@ async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: stri
     .from(authOrganizationUsers)
     .where(
       and(
-        eq(authOrganizationUsers.organizationId, invite.organizationId),
+        eq(authOrganizationUsers.organizationId, confirmed.organizationId),
         eq(authOrganizationUsers.userId, userId),
       ),
     )
@@ -237,20 +272,20 @@ async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: stri
     await db
       .update(authOrganizationUsers)
       .set({
-        role: invite.role,
-        invitedBy: invite.invitedBy,
-        invitedAt: invite.createdAt ?? new Date(),
+        role: confirmed.role,
+        invitedBy: confirmed.invitedBy,
+        invitedAt: confirmed.createdAt ?? new Date(),
         joinedAt: new Date(),
         updatedAt: new Date(),
       })
       .where(eq(authOrganizationUsers.organizationUserId, existingMembership.id))
   } else {
     await insertAuthRow(authOrganizationUsers, {
-      organizationId: invite.organizationId,
+      organizationId: confirmed.organizationId,
       userId,
-      role: invite.role,
-      invitedBy: invite.invitedBy,
-      invitedAt: invite.createdAt ?? new Date(),
+      role: confirmed.role,
+      invitedBy: confirmed.invitedBy,
+      invitedAt: confirmed.createdAt ?? new Date(),
       joinedAt: new Date(),
     })
   }
@@ -258,7 +293,7 @@ async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: stri
   // Mint session
   const completion = await completeAuthFirstFactor({
     userId,
-    organizationId: invite.organizationId,
+    organizationId: confirmed.organizationId,
     ipAddress: input.ipAddress,
     userAgent: input.userAgent,
   })
@@ -268,22 +303,22 @@ async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: stri
     ipAddress: input.ipAddress,
     userAgent: input.userAgent,
     metadata: {
-      inviteId: invite.id,
-      organizationId: invite.organizationId,
-      role: invite.role,
+      inviteId: confirmed.id,
+      organizationId: confirmed.organizationId,
+      role: confirmed.role,
     },
   })
   await db.update(authInvites).set({ acceptedAt: new Date(), acceptedUserId: userId })
-    .where(eq(authInvites.id, invite.id))
+    .where(eq(authInvites.id, confirmed.id))
 
   return {
     success: true,
     ...completion,
     user: {
       id: userId,
-      email: invite.email,
-      organizationId: invite.organizationId,
-      role: invite.role,
+      email: confirmed.email,
+      organizationId: confirmed.organizationId,
+      role: confirmed.role,
     },
   }
 }

@@ -32,7 +32,7 @@ describe('UE-FSM-001: Union Eyes route-level FSM enforcement', () => {
     expect(src).toContain('updateClaimStatusById')
 
     const claimsUpdateStart = src.indexOf('.update(claims)')
-    const claimsUpdateEnd = src.indexOf('.where(eq(claims.claimId, caseId));', claimsUpdateStart)
+    const claimsUpdateEnd = src.indexOf('.where(and(eq(claims.claimId, caseId), eq(claims.organizationId, orgId)));', claimsUpdateStart)
     expect(claimsUpdateStart).toBeGreaterThanOrEqual(0)
     expect(claimsUpdateEnd).toBeGreaterThan(claimsUpdateStart)
 

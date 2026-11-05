@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { apiErrorMessage } from '@/lib/client/api-envelope';
 import { Badge } from '@/components/ui/badge';
 import {
   Send, CheckCircle, Archive, RotateCcw, Loader2,
@@ -60,10 +61,10 @@ export function ContentWorkflowActions({ itemId, currentStatus, title }: Content
         body: JSON.stringify({ status: target }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setError(data.error?.message ?? data.message ?? 'Failed to update status');
+        setError(apiErrorMessage(data, 'Failed to update status'));
         return;
       }
 

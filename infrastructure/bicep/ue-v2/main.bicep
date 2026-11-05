@@ -84,8 +84,6 @@ param appMaxReplicas int = env == 'prod' ? 6 : 2
 @description('Malware scanner replica bounds. Uploads fail closed while no scanner replica is running (cold start included).')
 param clamavMinReplicas int = env == 'prod' ? 1 : 0
 param clamavMaxReplicas int = 2
-@description('Deadline-reminder job schedule (Container Apps Job, billed per execution). Each run wakes the app, so a scale-to-zero staging app uses an hourly schedule.')
-param cronSchedule string = env == 'prod' ? '*/5 * * * *' : '0 * * * *'
 @description('Internal Container Apps environment (reachable only through Private Link, e.g. Front Door). Staging has no Front Door, so its environment is external.')
 param acaInternal bool = env == 'prod'
 @description('Optional ingress IP allow-list for the app (CIDR strings). Empty = no restriction.')
@@ -434,6 +432,7 @@ module apps 'modules/apps.bicep' = {
   name: 'apps'
   params: {
     location: location
+    deploymentEnvironment: env
     environmentId: acaEnv.id
     environmentDefaultDomain: acaEnv.properties.defaultDomain
     identityId: appIdentity.id
@@ -453,10 +452,7 @@ module apps 'modules/apps.bicep' = {
     maxReplicas: appMaxReplicas
     clamavMinReplicas: clamavMinReplicas
     clamavMaxReplicas: clamavMaxReplicas
-    cronSchedule: cronSchedule
     ingressAllowedIpRanges: ingressAllowedIpRanges
-    runtimeEnvironment: env == 'prod' ? 'production' : 'staging'
-    deploymentType: env
     prefix: prefix
     enableStripe: enableStripe
     tags: tags

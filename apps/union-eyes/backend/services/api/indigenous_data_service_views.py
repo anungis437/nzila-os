@@ -7,7 +7,7 @@ Auto-generated: 2026-02-18 09:08
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from core.isolation import DenyAllPermission
 from rest_framework.pagination import CursorPagination
 from django.db import transaction
 from django.utils import timezone
@@ -17,6 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 from compliance.models import BandCouncils, BandCouncilConsent, IndigenousMemberData, IndigenousDataAccessLog, IndigenousDataSharingAgreements, TraditionalKnowledgeRegistry
 from core.models import AuditLogs
+from core.api_projection import api_columns
 
 class IndigenousDataServicePagination(CursorPagination):
     page_size = 50
@@ -43,7 +44,10 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
 - POST /api/services/indigenous-data-service/approve_access/ — Approve indigenous data access request
     """
 
-    permission_classes = [IsAuthenticated]
+    # CONTAINED (convergence tranche 9): nothing calls this ViewSet (the application calls one Django service endpoint,
+    # governance-service/check_status), and its write paths take unscoped input. Reopen only with a reviewed, tenant-scoped,
+    # role-gated design.
+    permission_classes = [DenyAllPermission]
     pagination_class = IndigenousDataServicePagination
 
     def paginate_queryset(self, queryset):
@@ -81,12 +85,12 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by('-created_at'))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response({
                 'count': queryset.count(),
-                'results': list(queryset.order_by('-created_at').values()[:100]),
+                'results': list(queryset.order_by('-created_at').values(*api_columns(queryset))[:100]),
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -149,12 +153,12 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by('-created_at'))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response({
                 'count': queryset.count(),
-                'results': list(queryset.order_by('-created_at').values()[:100]),
+                'results': list(queryset.order_by('-created_at').values(*api_columns(queryset))[:100]),
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -217,12 +221,12 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by('-created_at'))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response({
                 'count': queryset.count(),
-                'results': list(queryset.order_by('-created_at').values()[:100]),
+                'results': list(queryset.order_by('-created_at').values(*api_columns(queryset))[:100]),
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -253,12 +257,12 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by('-created_at'))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response({
                 'count': queryset.count(),
-                'results': list(queryset.order_by('-created_at').values()[:100]),
+                'results': list(queryset.order_by('-created_at').values(*api_columns(queryset))[:100]),
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -289,12 +293,12 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by('-created_at'))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response({
                 'count': queryset.count(),
-                'results': list(queryset.order_by('-created_at').values()[:100]),
+                'results': list(queryset.order_by('-created_at').values(*api_columns(queryset))[:100]),
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
@@ -357,12 +361,12 @@ class IndigenousDataServiceViewSet(viewsets.ViewSet):
 
             page = self.paginate_queryset(queryset.order_by('-created_at'))
             if page is not None:
-                data = list(page.values())
+                data = list(page.values(*api_columns(queryset)))
                 return self.get_paginated_response(data)
 
             return Response({
                 'count': queryset.count(),
-                'results': list(queryset.order_by('-created_at').values()[:100]),
+                'results': list(queryset.order_by('-created_at').values(*api_columns(queryset))[:100]),
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({

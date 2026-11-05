@@ -49,6 +49,7 @@ export default async function LocaleStatusPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'marketing.statusBody' });
+  const hero = await getTranslations({ locale, namespace: 'marketing.status' });
 
   const labels: StatusLabels = {
     systemStatus: t('systemStatus'),
@@ -73,8 +74,8 @@ export default async function LocaleStatusPage({
       {/* Hero Section with Imagery */}
       <MarketingHeroSection
         imageUrl={heroImagery.status}
-        heading={t('pageTitle')}
-        description={t('pageDescription')}
+        heading={hero('heroHeading')}
+        description={hero('heroDescription')}
       />
 
       <StatusPage labels={labels} />

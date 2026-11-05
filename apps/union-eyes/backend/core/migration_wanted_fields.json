@@ -157,7 +157,7 @@
       "db_type": "boolean",
       "has_remote": false,
       "migration": "content.0004",
-      "null": false,
+      "null": true,
       "python_default": {
         "kind": "literal",
         "value": false
@@ -255,7 +255,7 @@
       "db_type": "boolean",
       "has_remote": false,
       "migration": "content.0004",
-      "null": false,
+      "null": true,
       "python_default": {
         "kind": "literal",
         "value": false
@@ -272,7 +272,7 @@
       "db_type": "boolean",
       "has_remote": false,
       "migration": "content.0004",
-      "null": false,
+      "null": true,
       "python_default": {
         "kind": "literal",
         "value": false

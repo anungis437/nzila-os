@@ -3,11 +3,11 @@ export const dynamic = 'force-dynamic';
 import { Metadata } from "next";
 import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { FileText, Download, Calendar, CheckCircle, AlertCircle } from "lucide-react";
+import { FileText, Calendar, CheckCircle } from "lucide-react";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -35,23 +35,31 @@ export default async function AuditsPage({ params }: PageProps) {
   }
 
   // Fetch audit data from API
-  let audits: { id: string; title: string; type: string; status: string; dateCompleted?: string; dateScheduled?: string; auditor: string; findings: number; hasReport: boolean; }[] = [];
+  // What /api/audits sends: recorded audit-log entries. There are no audit engagements, so no scheduled or in-progress audit, no findings count and no report.
+  let audits: { id: string; title: string; type: string; status: string; dateCompleted?: string; auditor: string; }[] = [];
+  // A retrieval failure must never be rendered as an empty (clean) audit posture.
+  let retrieval: "ok" | "unavailable" | "forbidden" = "unavailable";
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
-    const res = await fetch(`${baseUrl}/api/v2/audits`, { cache: 'no-store' });
+    const cookie = (await headers()).get("cookie") ?? "";
+    const res = await fetch(`${baseUrl}/api/audits`, { cache: 'no-store', headers: { cookie } });
     if (res.ok) {
-      const json = await res.json();
-      audits = Array.isArray(json) ? json : json?.audits ?? json?.data ?? [];
+      const json = (await res.json()) as { data?: { audits?: typeof audits } };
+      const list = json.data?.audits;
+      if (Array.isArray(list)) {
+        audits = list;
+        retrieval = "ok";
+      }
+    } else if (res.status === 401 || res.status === 403) {
+      retrieval = "forbidden";
     }
   } catch {
-    // API not available — empty state
+    retrieval = "unavailable";
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed": return "bg-green-500/10 text-green-700 border-green-500/20";
-      case "in-progress": return "bg-blue-500/10 text-blue-700 border-blue-500/20";
-      case "scheduled": return "bg-amber-500/10 text-amber-700 border-amber-500/20";
       default: return "bg-gray-500/10 text-gray-700 border-gray-500/20";
     }
   };
@@ -70,10 +78,6 @@ export default async function AuditsPage({ params }: PageProps) {
     switch (status) {
       case "completed":
         return t("statuses.completed");
-      case "in-progress":
-        return t("statuses.inProgress");
-      case "scheduled":
-        return t("statuses.scheduled");
       default:
         return t("statuses.unknown");
     }
@@ -97,21 +101,34 @@ export default async function AuditsPage({ params }: PageProps) {
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-muted-foreground mt-2">
-            {t("subtitle")}
-          </p>
-        </div>
-        <Button>
-          <Calendar className="mr-2 h-4 w-4" />
-          {t("scheduleAudit")}
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground mt-2">
+          {t("subtitle")}
+        </p>
       </div>
 
+      {retrieval !== "ok" && (
+        <div role="alert" className="rounded-md border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-800">
+          <p className="font-medium">
+            {retrieval === "forbidden" ? t("forbiddenTitle") : t("unavailableTitle")}
+          </p>
+          <p className="mt-1">
+            {retrieval === "forbidden" ? t("forbiddenBody") : t("unavailableBody")}
+          </p>
+        </div>
+      )}
+
+      {retrieval === "ok" && audits.length === 0 && (
+        <div role="status" className="rounded-md border p-4 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">{t("emptyTitle")}</p>
+          <p className="mt-1">{t("emptyBody")}</p>
+        </div>
+      )}
+
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {retrieval === "ok" && (
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t("summary.totalAudits")}</CardTitle>
@@ -132,36 +149,11 @@ export default async function AuditsPage({ params }: PageProps) {
             <div className="text-2xl font-bold">
               {audits.filter(a => a.status === "completed").length}
             </div>
-            <p className="text-xs text-green-500">{t("summary.allClear")}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("summary.inProgress")}</CardTitle>
-            <AlertCircle className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {audits.filter(a => a.status === "in-progress").length}
-            </div>
-            <p className="text-xs text-muted-foreground">{t("summary.activeReviews")}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("summary.scheduled")}</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {audits.filter(a => a.status === "scheduled").length}
-            </div>
-            <p className="text-xs text-muted-foreground">{t("summary.upcoming")}</p>
+            <p className="text-xs text-muted-foreground">{t("summary.recordedOutcomes")}</p>
           </CardContent>
         </Card>
       </div>
+      )}
 
       {/* Audits List */}
       <div className="grid gap-4">
@@ -186,26 +178,9 @@ export default async function AuditsPage({ params }: PageProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    {audit.dateCompleted && t("completedDate", { value: new Date(audit.dateCompleted).toLocaleDateString() })}
-                    {audit.dateScheduled && t("scheduledDate", { value: new Date(audit.dateScheduled).toLocaleDateString() })}
-                  </div>
-                  {audit.findings > 0 && (
-                    <div className="flex items-center gap-2 text-amber-600">
-                      <AlertCircle className="h-4 w-4" />
-                      {t("findings", { count: audit.findings })}
-                    </div>
-                  )}
-                </div>
-                {audit.hasReport && (
-                  <Button variant="outline" size="sm">
-                    <Download className="mr-2 h-4 w-4" />
-                    {t("downloadReport")}
-                  </Button>
-                )}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                {audit.dateCompleted && t("completedDate", { value: new Date(audit.dateCompleted).toLocaleDateString() })}
               </div>
             </CardContent>
           </Card>

@@ -71,13 +71,13 @@ def make_bearer_request(token: str = "signed-jwt-value") -> MagicMock:
     return request
 
 
-def authenticate_as_org(org_external_id: str, org_internal_id):
+def authenticate_as_org(org_external_id: str, org_internal_id, is_member: bool = True):
     """Runs the REAL OIDCAuthentication.authenticate() end-to-end, mocking
     only JWT signature verification (no reachable JWKS server in this
-    sandbox), user sync, the cache backend, and the Organizations DB
-    lookup (no reachable Postgres in this sandbox) — every other line,
-    including the resolve_organization_context() call this correction
-    added, runs for real. Returns the populated request object.
+    sandbox), user sync, the cache backend, and the Organizations and
+    OrganizationMembers DB lookups (no reachable Postgres in this sandbox) —
+    every other line, including the resolve_organization_context() call this
+    correction added, runs for real. Returns the populated request object.
     """
     request = make_bearer_request()
     auth = OIDCAuthentication()
@@ -90,11 +90,14 @@ def authenticate_as_org(org_external_id: str, org_internal_id):
     with patch.object(auth, "_verify_token", return_value=fake_payload), \
          patch.object(auth, "_get_or_create_user", return_value=fake_user), \
          patch("auth_core.authentication.cache") as mock_cache, \
-         patch("auth_core.models.Organizations") as mock_organizations:
+         patch("auth_core.models.Organizations") as mock_organizations, \
+         patch("auth_core.models.OrganizationMembers") as mock_members:
         mock_cache.get.return_value = None
         mock_organizations.objects.filter.return_value.first.return_value = (
             fake_org if org_internal_id is not None else None
         )
+        # resolve_organization_context() requires an ACTIVE membership of the principal in the claimed organization.
+        mock_members.objects.filter.return_value.exists.return_value = is_member
         auth.authenticate(request)
 
     return request
@@ -122,6 +125,10 @@ class RequestLifecyclePropagationTest(unittest.TestCase):
         request = authenticate_as_org(ORG_A_EXTERNAL, ORG_A_INTERNAL)
         self.assertEqual(request.organization_id, ORG_A_INTERNAL)
         self.assertEqual(request.org_id, ORG_A_EXTERNAL)
+
+    def test_a_principal_without_an_active_membership_is_not_authenticated(self):
+        with self.assertRaises(exceptions.AuthenticationFailed):
+            authenticate_as_org(ORG_A_EXTERNAL, ORG_A_INTERNAL, is_member=False)
 
     def test_viewset_queryset_uses_the_propagated_organization_id_end_to_end(self):
         """The mixin reads request.organization_id set by the REAL

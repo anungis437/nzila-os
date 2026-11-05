@@ -7,7 +7,7 @@
  */
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Plus, Upload, Shield } from "lucide-react";
@@ -17,14 +17,8 @@ import {
 } from "@/components/documents/document-library-browser";
 import {
   DocumentVersionControl,
-  type DocumentInfo,
   type DocumentVersion,
 } from "@/components/documents/document-version-control";
-import {
-  DocumentApprovalWorkflow,
-  type ApprovalRecord,
-  type WorkflowStatus,
-} from "@/components/documents/document-approval-workflow";
 import {
   DocumentTemplateManager,
   type DocumentTemplate,
@@ -38,6 +32,22 @@ import { DocumentBulkOperations } from "@/components/documents/document-bulk-ope
 import { DocumentRetentionPolicy } from "@/components/documents/document-retention-policy";
 import { OCRUpload } from "@/components/documents/ocr-upload";
 import { useOrganizationId } from "@/lib/hooks/use-organization";
+import {
+  canonicalShareUnavailable,
+  denialForBulkOutcome,
+  formatBulkSummary,
+  journeyCopy,
+  type BulkDownloadReport,
+  type JourneyDenial,
+} from "@/lib/documents/canonical-journey";
+import {
+  listDenied,
+  repositoryRows,
+  requestAuthorizedDownload,
+  requestBulkDownload,
+  submitDocumentVersion,
+  submitRepositoryDocument,
+} from "@/lib/documents/document-repository-client";
 
 type RepositoryDocumentRow = {
   id: string;
@@ -47,6 +57,7 @@ type RepositoryDocumentRow = {
   documentType?: string | null;
   privacyLabel?: string | null;
   uploadedBy?: string | null;
+  uploadedByName?: string | null;
   createdAt?: string | Date | null;
   updatedAt?: string | Date | null;
   fileUrl?: string | null;
@@ -68,14 +79,12 @@ type RepositoryDetailResponse = RepositoryDocumentRow & {
     id: string;
     versionNo: number;
     uploadedAt: string | Date;
-    uploadedBy: string;
-    storageKey: string;
+    uploadedBy?: string | null;
+    uploadedByName?: string | null;
     contentHash: string;
   }>;
 };
 
-type RetentionPolicyConfig = NonNullable<React.ComponentProps<typeof DocumentRetentionPolicy>["existingPolicy"]>;
-type LegalHoldEntry = React.ComponentProps<typeof DocumentRetentionPolicy>["legalHolds"][number];
 
 function toDate(value: string | Date | null | undefined): Date {
   if (value instanceof Date) return value;
@@ -85,8 +94,6 @@ function toDate(value: string | Date | null | undefined): Date {
 function toRepositoryDocumentItem(row: RepositoryDocumentRow): DocumentItem {
   const name = row.title ?? row.name ?? row.filename ?? row.id;
   const labels = [row.documentType, row.privacyLabel].filter(Boolean) as string[];
-  const canShare = row.privacyLabel === 'public_internal' || row.privacyLabel === 'team_confidential';
-  const canEdit = row.privacyLabel !== 'highly_sensitive';
 
   return {
     id: row.id,
@@ -96,19 +103,16 @@ function toRepositoryDocumentItem(row: RepositoryDocumentRow): DocumentItem {
     size: row.fileSize ?? undefined,
     createdAt: toDate(row.createdAt),
     updatedAt: toDate(row.updatedAt),
-    createdBy: {
-      id: row.uploadedBy ?? 'unknown',
-      name: row.uploadedBy ?? 'Unknown user',
-    },
+    ...(row.uploadedByName ? { createdBy: { id: row.uploadedBy ?? row.uploadedByName, name: row.uploadedByName } } : {}),
     parentId: null,
     path: [],
     starred: false,
     tags: labels,
     permissions: {
       canView: true,
-      canEdit,
-      canDelete: canEdit,
-      canShare,
+      canEdit: false,
+      canDelete: false,
+      canShare: false,
     },
   };
 }
@@ -118,59 +122,30 @@ function toVersionView(version: NonNullable<RepositoryDetailResponse['versions']
     id: version.id,
     versionNumber: version.versionNo,
     createdAt: toDate(version.uploadedAt),
-    createdBy: {
-      id: version.uploadedBy,
-      name: version.uploadedBy,
-    },
-    size: 0,
-    comment: version.contentHash,
-    changes: {
-      type: 'updated',
-      summary: version.storageKey,
-    },
+    ...(version.uploadedByName ? { createdBy: { id: version.uploadedBy ?? version.uploadedByName, name: version.uploadedByName } } : {}),
+    contentHash: version.contentHash,
     isCurrent,
-    downloadUrl: version.storageKey,
+    downloadUrl: '',
   };
 }
 
 export function DocumentsConsole() {
   const t = useTranslations("documentsPage");
+  const locale = useLocale();
+  const copy = journeyCopy(locale);
   const organizationId = useOrganizationId();
+  const [notice, setNotice] = React.useState<JourneyDenial | 'saved' | null>(null);
   const [activeTab, setActiveTab] = React.useState("library");
   const [selectedDocumentId, setSelectedDocumentId] = React.useState<string | null>(null);
   const [selectedDocument, setSelectedDocument] = React.useState<RepositoryDetailResponse | null>(null);
   const [selectedDocumentVersions, setSelectedDocumentVersions] = React.useState<DocumentVersion[]>([]);
-  const [approvalConfigsByDocument, setApprovalConfigsByDocument] = React.useState<
-    Record<string, NonNullable<React.ComponentProps<typeof DocumentApprovalWorkflow>['existingConfig']>>
-  >({});
-  const [approvalStatusByDocument, setApprovalStatusByDocument] = React.useState<Record<string, WorkflowStatus>>({});
   const [selectedLibraryItems, setSelectedLibraryItems] = React.useState<DocumentItem[]>([]);
   const [selectionResetSignal, setSelectionResetSignal] = React.useState(0);
-  const [releasedHoldIds, setReleasedHoldIds] = React.useState<Set<string>>(new Set());
-  const [retentionPolicy, setRetentionPolicy] = React.useState<RetentionPolicyConfig>({
-    rules: [
-      {
-        name: 'General Documents',
-        category: 'general',
-        retentionPeriod: 7,
-        retentionUnit: 'years',
-        action: 'archive',
-        enabled: true,
-        description: 'Standard retention for union document lifecycle governance',
-      },
-    ],
-    autoEnforce: true,
-    notifyBeforeAction: true,
-    notificationDays: 7,
-  });
   const [repoDocs, setRepoDocs] = React.useState<RepositoryDocumentRow[]>([]);
   const [query, setQuery] = React.useState('');
   const [label, setLabel] = React.useState('');
   const [savedSearches, setSavedSearches] = React.useState<SavedSearch[]>([]);
-  const [importUrlsText, setImportUrlsText] = React.useState('');
-  const [importDocumentType, setImportDocumentType] = React.useState('evidence');
-  const [importPrivacyLabel, setImportPrivacyLabel] = React.useState<PrivacyLabel>('team_confidential');
-  const [importing, setImporting] = React.useState(false);
+  const [bulkReport, setBulkReport] = React.useState<BulkDownloadReport | null>(null);
   const [filters, setFilters] = React.useState<SearchFilters>({ query: '' });
   const [loading, setLoading] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
@@ -198,8 +173,14 @@ export function DocumentsConsole() {
       if (nextFilters.dateTo) params.set('to', nextFilters.dateTo.toISOString());
       if (nextFilters.tags?.length) params.set('label', nextFilters.tags[0] ?? '');
       const res = await fetch(`/api/documents/repository?${params.toString()}`);
-      const json = await res.json();
-      setRepoDocs(Array.isArray(json?.data) ? json.data : []);
+      const json = await res.json().catch(() => null);
+      const denial = listDenied(res.status, json);
+      if (denial) {
+        setRepoDocs([]);
+        setNotice(denial);
+        return;
+      }
+      setRepoDocs(repositoryRows(json) as RepositoryDocumentRow[]);
     } finally {
       setLoading(false);
     }
@@ -209,13 +190,20 @@ export function DocumentsConsole() {
     setSelectedDocumentId(documentId);
     try {
       const res = await fetch(`/api/documents/repository/${documentId}`);
-      const json = await res.json();
-      const detail = (json?.data ?? json) as RepositoryDetailResponse;
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        setSelectedDocument(null);
+        setSelectedDocumentVersions([]);
+        setNotice(res.status === 401 || res.status === 403 || res.status === 404 ? 'unauthorized' : 'list_unavailable');
+        return;
+      }
+      const detail = (json && typeof json === 'object' && 'data' in json ? (json as { data: RepositoryDetailResponse }).data : json) as RepositoryDetailResponse;
       setSelectedDocument(detail);
       const versions = Array.isArray(detail?.versions) ? detail.versions : [];
       setSelectedDocumentVersions(
         versions.map((version, index) => toVersionView(version, index === 0)),
       );
+      setNotice(null);
       setActiveTab('library');
     } catch {
       setSelectedDocument(null);
@@ -236,40 +224,10 @@ export function DocumentsConsole() {
   const availableUsers = React.useMemo(() => {
     const users = new Map<string, string>();
     for (const row of repoDocs) {
-      if (row.uploadedBy) users.set(row.uploadedBy, row.uploadedBy);
+      if (row.uploadedBy && row.uploadedByName) users.set(row.uploadedBy, row.uploadedByName);
     }
     return Array.from(users, ([id, name]) => ({ id, name }));
   }, [repoDocs]);
-
-  const selectedRepoDocs = React.useMemo(() => {
-    const selectedIds = new Set(selectedLibraryItems.map((item) => item.id));
-    return repoDocs.filter((document) => selectedIds.has(document.id));
-  }, [repoDocs, selectedLibraryItems]);
-
-  const activeApprovalDocument = React.useMemo(() => {
-    if (selectedDocumentId) {
-      return repoDocs.find((document) => document.id === selectedDocumentId) ?? null;
-    }
-    return repoDocs[0] ?? null;
-  }, [repoDocs, selectedDocumentId]);
-
-  const activeApprovalConfig = React.useMemo(() => {
-    if (!activeApprovalDocument) {
-      return undefined;
-    }
-    return approvalConfigsByDocument[activeApprovalDocument.id];
-  }, [activeApprovalDocument, approvalConfigsByDocument]);
-
-  const activeApprovalStatus = React.useMemo(() => {
-    if (!activeApprovalDocument) {
-      return undefined;
-    }
-    return approvalStatusByDocument[activeApprovalDocument.id];
-  }, [activeApprovalDocument, approvalStatusByDocument]);
-
-  const activePendingReview = React.useMemo<ApprovalRecord | undefined>(() => {
-    return activeApprovalStatus?.approvals.find((approval) => approval.status === 'pending');
-  }, [activeApprovalStatus]);
 
   const templateItems = React.useMemo<DocumentTemplate[]>(() => {
     return repoDocs
@@ -282,31 +240,10 @@ export function DocumentsConsole() {
         name: document.title ?? document.name ?? document.filename ?? document.id,
         category: document.documentType ?? 'template',
         description: document.filename ?? undefined,
-        content: document.fileUrl ?? '',
-        variables: [],
         createdAt: toDate(document.createdAt),
         updatedAt: toDate(document.updatedAt),
-        createdBy: {
-          id: document.uploadedBy ?? 'unknown',
-          name: document.uploadedBy ?? 'Unknown user',
-        },
-        usageCount: 0,
       }));
   }, [repoDocs]);
-
-  const retentionLegalHolds = React.useMemo<LegalHoldEntry[]>(() => {
-    return repoDocs
-      .filter((document) => document.privacyLabel === 'highly_sensitive' && !releasedHoldIds.has(document.id))
-      .map((document) => ({
-        id: document.id,
-        documentId: document.id,
-        documentName: document.title ?? document.name ?? document.filename ?? document.id,
-        reason: 'Sensitive document requires review',
-        createdBy: { id: document.uploadedBy ?? 'unknown', name: document.uploadedBy ?? 'Unknown user' },
-        createdAt: new Date(document.createdAt ?? new Date()),
-        status: 'active' as const,
-      }));
-  }, [releasedHoldIds, repoDocs]);
 
   React.useEffect(() => {
     void loadRepository(filters);
@@ -334,16 +271,17 @@ export function DocumentsConsole() {
     try {
       const payload = {
         ...uploadPayload,
-        contentHash: uploadPayload.contentHash || `manual:${Date.now()}`,
+        // The server computes the content hash from storage. A value typed here is only a claim to be checked.
+        contentHash: uploadPayload.contentHash.trim() || undefined,
         linkedEntityType: uploadPayload.linkedEntityId ? uploadPayload.linkedEntityType : undefined,
         linkedEntityId: uploadPayload.linkedEntityId || undefined,
       };
 
-      await fetch('/api/documents/repository', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const result = await submitRepositoryDocument(payload);
+      if (!result.accepted) {
+        setNotice(result.denial ?? 'upload_rejected');
+        return;
+      }
 
       setUploadPayload({
         title: '',
@@ -356,6 +294,7 @@ export function DocumentsConsole() {
         linkedEntityType: 'grievance',
         linkedEntityId: '',
       });
+      setNotice('saved');
       await loadRepository();
     } finally {
       setUploading(false);
@@ -394,11 +333,18 @@ export function DocumentsConsole() {
     void loadDocumentDetails(documentId);
   };
 
-  const handleDownloadDocument = (item: DocumentItem) => {
-    const row = repoDocs.find((document) => document.id === item.id);
-    if (row?.fileUrl) {
-      window.open(row.fileUrl, '_blank', 'noopener,noreferrer');
+  const openAuthorizedDownload = async (documentId: string) => {
+    const result = await requestAuthorizedDownload(documentId);
+    if (!result.downloadUrl) {
+      setNotice(result.denial ?? 'unauthorized');
+      return;
     }
+    setNotice(null);
+    window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleDownloadDocument = (item: DocumentItem) => {
+    void openAuthorizedDownload(item.id);
   };
 
   const handlePreviewDocument = (item: DocumentItem) => {
@@ -420,220 +366,30 @@ export function DocumentsConsole() {
     await loadRepository(nextFilters);
   };
 
-  const handleImportFromUrls = async () => {
-    const urls = importUrlsText
-      .split(/\r?\n/)
-      .map((value) => value.trim())
-      .filter(Boolean);
-
-    if (urls.length === 0) {
-      window.alert('Provide at least one URL to import.');
-      return;
-    }
-
-    setImporting(true);
-    try {
-      const failed: string[] = [];
-
-      for (const rawUrl of urls) {
-        try {
-          const parsed = new URL(rawUrl);
-          const fileName = decodeURIComponent(parsed.pathname.split('/').pop() || `import-${Date.now()}.bin`);
-          const title = fileName.replace(/\.[^.]+$/, '') || fileName;
-          const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
-          const mimeType = ext === 'pdf'
-            ? 'application/pdf'
-            : ext === 'png'
-              ? 'image/png'
-              : ext === 'jpg' || ext === 'jpeg'
-                ? 'image/jpeg'
-                : ext === 'txt'
-                  ? 'text/plain'
-                  : 'application/octet-stream';
-
-          const response = await fetch('/api/documents/repository', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              title,
-              filename: fileName,
-              fileUrl: rawUrl,
-              documentType: importDocumentType,
-              mimeType,
-              privacyLabel: importPrivacyLabel,
-            }),
-          });
-
-          if (!response.ok) {
-            failed.push(rawUrl);
-          }
-        } catch {
-          failed.push(rawUrl);
-        }
-      }
-
-      await loadRepository();
-
-      if (failed.length > 0) {
-        window.alert(`Imported ${urls.length - failed.length} of ${urls.length} URLs. ${failed.length} failed.`);
-      } else {
-        window.alert(`Imported ${urls.length} documents successfully.`);
-      }
-
-      setImportUrlsText('');
-    } finally {
-      setImporting(false);
-    }
-  };
-
   const handleBulkDownload = async () => {
-    const downloadable = selectedRepoDocs.filter((document) => Boolean(document.fileUrl));
-    if (downloadable.length === 0) {
-      window.alert(t('bulk.noDownloadable'));
+    if (selectedLibraryItems.length === 0) {
+      setNotice('none_selected');
       return;
     }
 
-    for (const document of downloadable) {
-      window.open(document.fileUrl as string, '_blank', 'noopener,noreferrer');
-    }
-  };
-
-  const handleBulkShare = async (permission: string) => {
-    if (selectedRepoDocs.length === 0) {
+    setBulkReport(null);
+    const result = await requestBulkDownload(selectedLibraryItems.map((item) => item.id));
+    if (!result.report) {
+      setNotice(result.denial ?? 'bulk_unavailable');
       return;
     }
-
-    const permissionToLabel: Record<string, PrivacyLabel> = {
-      view: 'public_internal',
-      comment: 'team_confidential',
-      edit: 'lro_confidential',
-      admin: 'highly_sensitive',
-    };
-    const privacyLabel = permissionToLabel[permission] ?? 'team_confidential';
-
-    await Promise.all(
-      selectedRepoDocs.map((document) =>
-        fetch(`/api/documents/repository/${document.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ privacyLabel }),
-        }),
-      ),
-    );
-
-    await loadRepository();
-  };
-
-  const handleSaveApprovalConfig: NonNullable<React.ComponentProps<typeof DocumentApprovalWorkflow>['onSaveConfig']> = async (config) => {
-    setApprovalConfigsByDocument((previous) => ({
-      ...previous,
-      [config.documentId]: config,
-    }));
-
-    const firstStage = config.stages[0];
-    const approvalSeed: WorkflowStatus = {
-      currentStage: 0,
-      overallStatus: 'pending',
-      approvals: (firstStage?.reviewerIds ?? []).map((reviewerId) => ({
-        id: `${config.documentId}:${firstStage?.name}:${reviewerId}`,
-        stageId: String(firstStage?.order ?? 1),
-        stageName: firstStage?.name ?? 'Initial Review',
-        reviewerId,
-        reviewerName: reviewerId,
-        status: 'pending',
-      })),
-    };
-
-    setApprovalStatusByDocument((previous) => ({
-      ...previous,
-      [config.documentId]: approvalSeed,
-    }));
-  };
-
-  const handleSubmitApprovalReview: NonNullable<React.ComponentProps<typeof DocumentApprovalWorkflow>['onSubmitReview']> = async (
-    approvalId,
-    nextStatus,
-    comment,
-  ) => {
-    if (!activeApprovalDocument) {
-      return;
-    }
-
-    setApprovalStatusByDocument((previous) => {
-      const current = previous[activeApprovalDocument.id];
-      if (!current) {
-        return previous;
+    setNotice(null);
+    setBulkReport(result.report);
+    for (const item of result.report.items) {
+      if (item.outcome === 'issued' && item.downloadUrl) {
+        window.open(item.downloadUrl, '_blank', 'noopener,noreferrer');
       }
-
-      const approvals = current.approvals.map((approval) => {
-        if (approval.id !== approvalId) {
-          return approval;
-        }
-        return {
-          ...approval,
-          status: nextStatus,
-          comment,
-          timestamp: new Date(),
-        };
-      });
-
-      const hasRejected = approvals.some((approval) => approval.status === 'rejected');
-      const hasPending = approvals.some((approval) => approval.status === 'pending');
-      const overallStatus: WorkflowStatus['overallStatus'] = hasRejected
-        ? 'rejected'
-        : hasPending
-          ? 'in_progress'
-          : 'approved';
-
-      return {
-        ...previous,
-        [activeApprovalDocument.id]: {
-          ...current,
-          approvals,
-          overallStatus,
-          currentStage: overallStatus === 'approved' ? 1 : 0,
-        },
-      };
-    });
-  };
-
-  const handleSaveRetentionPolicy: NonNullable<React.ComponentProps<typeof DocumentRetentionPolicy>["onSavePolicy"]> = async (policy) => {
-    setRetentionPolicy(policy);
-  };
-
-  const handleReleaseHold: NonNullable<React.ComponentProps<typeof DocumentRetentionPolicy>["onReleaseHold"]> = async (holdId) => {
-    setReleasedHoldIds((previous) => new Set(previous).add(holdId));
-    await fetch(`/api/documents/repository/${holdId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ privacyLabel: 'case_restricted' satisfies PrivacyLabel }),
-    });
-    await loadRepository();
-  };
-
-  const handleExecuteRetention: NonNullable<React.ComponentProps<typeof DocumentRetentionPolicy>["onExecuteRetention"]> = async () => {
-    const heldIds = new Set(retentionLegalHolds.map((hold) => hold.documentId));
-    const candidates = repoDocs.filter((document) => !heldIds.has(document.id));
-    if (candidates.length === 0) {
-      return;
     }
+  };
 
-    await Promise.all(
-      candidates.map((document) => {
-        const nextLabel: PrivacyLabel =
-          document.privacyLabel === 'public_internal' || document.privacyLabel === 'team_confidential'
-            ? 'case_restricted'
-            : (document.privacyLabel as PrivacyLabel | undefined) ?? 'case_restricted';
-
-        return fetch(`/api/documents/repository/${document.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ privacyLabel: nextLabel }),
-        });
-      }),
-    );
-
-    await loadRepository();
+  const handleBulkShare = async (_permission: string) => {
+    canonicalShareUnavailable();
+    setNotice('share_blocked');
   };
 
   const appendVersion = async (documentId: string) => {
@@ -645,11 +401,16 @@ export function DocumentsConsole() {
 
     setVersioning(true);
     try {
-      await fetch(`/api/documents/repository/${documentId}/versions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileUrl, contentHash }),
+      const result = await submitDocumentVersion(documentId, {
+        fileUrl,
+        contentHash,
+        expectedVersionNo: selectedDocumentId === documentId ? selectedDocumentVersions[0]?.versionNumber : undefined,
       });
+      if (!result.accepted) {
+        setNotice(result.denial ?? 'upload_rejected');
+        return;
+      }
+      setNotice('saved');
       await loadRepository();
     } finally {
       setVersioning(false);
@@ -657,9 +418,36 @@ export function DocumentsConsole() {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto max-w-full py-4 sm:py-8 space-y-6">
+      {notice && (
+        <p
+          role="alert"
+          data-testid="document-journey-notice"
+          className="rounded-md border px-3 py-2 text-sm"
+        >
+          {notice === 'saved' ? copy.saved : copy[notice]}
+        </p>
+      )}
+      {bulkReport && (
+        <div role="status" data-testid="document-bulk-report" className="rounded-md border px-3 py-2 text-sm">
+          <p>{formatBulkSummary(copy, bulkReport)}</p>
+          {bulkReport.items.some((item) => item.outcome !== 'issued') && (
+            <ul className="mt-2 list-disc pl-5">
+              {bulkReport.items
+                .filter((item) => item.outcome !== 'issued')
+                .map((item) => (
+                  <li key={item.documentId}>
+                    {selectedLibraryItems.find((candidate) => candidate.id === item.documentId)?.name ?? item.documentId}
+                    {': '}
+                    {copy[denialForBulkOutcome(item.outcome)]}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
+      )}
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t('header.title')}</h1>
           <p className="text-gray-600 mt-2">
@@ -684,7 +472,6 @@ export function DocumentsConsole() {
           <TabsTrigger value="library">{t('tabs.library')}</TabsTrigger>
           <TabsTrigger value="search">{t('tabs.search')}</TabsTrigger>
           <TabsTrigger value="templates">{t('tabs.templates')}</TabsTrigger>
-          <TabsTrigger value="approvals">{t('tabs.approvals')}</TabsTrigger>
           <TabsTrigger value="retention">{t('tabs.retention')}</TabsTrigger>
           <TabsTrigger value="bulk">{t('tabs.bulk')}</TabsTrigger>
         </TabsList>
@@ -738,43 +525,6 @@ export function DocumentsConsole() {
           </div>
 
           <div className="rounded-lg border p-3">
-            <div className="mb-2 text-sm font-medium">Migration Import (URL list)</div>
-            <p className="mb-3 text-xs text-gray-600">
-              Paste one URL per line to import external documents into the governed repository.
-            </p>
-            <textarea
-              value={importUrlsText}
-              onChange={(e) => setImportUrlsText(e.target.value)}
-              placeholder="https://example.org/documents/collective-agreement.pdf"
-              rows={5}
-              className="mb-3 w-full rounded border px-3 py-2 text-sm"
-            />
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-              <input
-                value={importDocumentType}
-                onChange={(e) => setImportDocumentType(e.target.value)}
-                placeholder="Imported document type"
-                className="rounded border px-3 py-2 text-sm"
-              />
-              <select
-                value={importPrivacyLabel}
-                onChange={(e) => setImportPrivacyLabel(e.target.value as PrivacyLabel)}
-                className="rounded border px-3 py-2 text-sm"
-              >
-                <option value="public_internal">public_internal</option>
-                <option value="team_confidential">team_confidential</option>
-                <option value="lro_confidential">lro_confidential</option>
-                <option value="privileged">privileged</option>
-                <option value="case_restricted">case_restricted</option>
-                <option value="highly_sensitive">highly_sensitive</option>
-              </select>
-              <Button onClick={() => void handleImportFromUrls()} disabled={importing || !importUrlsText.trim()}>
-                {importing ? 'Importing...' : 'Import URLs'}
-              </Button>
-            </div>
-          </div>
-
-          <div className="rounded-lg border p-3">
             <div className="mb-3 text-sm font-medium">OCR Ingestion</div>
             {organizationId ? (
               <OCRUpload
@@ -798,7 +548,10 @@ export function DocumentsConsole() {
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">{String(doc.documentType ?? t('repository.defaults.documentType'))}</span>
                 <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">{String(doc.privacyLabel ?? t('repository.defaults.privacyLabel'))}</span>
                 <span className="text-xs text-gray-500">{String(doc.linkedEntityType ?? t('repository.defaults.unlinked'))}:{String(doc.linkedEntityId ?? '-')}</span>
-                <Button variant="outline" size="sm" disabled={versioning} onClick={() => void appendVersion(String(doc.id))} className="ml-auto">
+                <Button variant="outline" size="sm" onClick={() => void openAuthorizedDownload(String(doc.id))} className="ml-auto">
+                  {copy.download}
+                </Button>
+                <Button variant="outline" size="sm" disabled={versioning} onClick={() => void appendVersion(String(doc.id))}>
                   {t('repository.addVersion')}
                 </Button>
               </div>
@@ -812,7 +565,6 @@ export function DocumentsConsole() {
         <TabsContent value="library">
           <DocumentLibraryBrowser
             items={repositoryItems}
-            onNavigate={(_folderId) => undefined}
             onUpload={() => setActiveTab('repository')}
             onDownload={handleDownloadDocument}
             onPreview={handlePreviewDocument}
@@ -853,41 +605,18 @@ export function DocumentsConsole() {
           />
         </TabsContent>
 
-        <TabsContent value="approvals">
-          {activeApprovalDocument ? (
-            <DocumentApprovalWorkflow
-              documentId={activeApprovalDocument.id}
-              documentName={activeApprovalDocument.title ?? activeApprovalDocument.name ?? activeApprovalDocument.filename ?? t('approvals.documentName')}
-              existingConfig={activeApprovalConfig}
-              status={activeApprovalStatus}
-              reviewers={availableUsers.map((user) => ({ id: user.id, name: user.name, email: `${user.id}@example.com`, role: 'reviewer' }))}
-              isReviewer={Boolean(activePendingReview)}
-              pendingReview={activePendingReview}
-              onSaveConfig={handleSaveApprovalConfig}
-              onSubmitReview={handleSubmitApprovalReview}
-            />
-          ) : (
-            <div className="rounded-lg border px-4 py-3 text-sm text-gray-600">
-              {t('approvals.empty')}
-            </div>
-          )}
-        </TabsContent>
-
         <TabsContent value="retention">
           <DocumentRetentionPolicy
-            existingPolicy={retentionPolicy}
-            legalHolds={retentionLegalHolds}
+            legalHolds={null}
+            unavailableNotice={copy.retention_unavailable}
             stats={{
               totalDocuments: repoDocs.length,
-              documentsUnderRetention: repoDocs.length,
-              documentsOnHold: retentionLegalHolds.length,
-              scheduledForArchival: repoDocs.filter((document) => document.privacyLabel === 'case_restricted').length,
-              scheduledForDeletion: 0,
+              documentsUnderRetention: null,
+              documentsOnHold: null,
+              scheduledForArchival: null,
+              scheduledForDeletion: null,
             }}
             categories={availableTags}
-            onSavePolicy={handleSaveRetentionPolicy}
-            onReleaseHold={handleReleaseHold}
-            onExecuteRetention={handleExecuteRetention}
           />
         </TabsContent>
 
@@ -913,6 +642,10 @@ export function DocumentsConsole() {
             totalVersions: selectedDocumentVersions.length || 1,
           }}
           versions={selectedDocumentVersions}
+          canDownload={(version) => version.isCurrent}
+          onDownload={() => {
+            void openAuthorizedDownload(selectedDocumentId);
+          }}
         />
       )}
     </div>

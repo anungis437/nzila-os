@@ -36,7 +36,7 @@ export const smsTemplates = pgTable(
     variables: text('variables').array().default([]),
     category: text('category'),
     isActive: boolean('is_active').default(true),
-    createdBy: text('created_by').references(() => profiles.userId, { onDelete: 'set null' }),
+    createdBy: text('created_by'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -73,7 +73,7 @@ export const smsCampaigns = pgTable('sms_campaigns', {
   startedAt: timestamp('started_at', { withTimezone: true }),
   completedAt: timestamp('completed_at', { withTimezone: true }),
   cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
-  createdBy: text('created_by').references(() => profiles.userId, { onDelete: 'set null' }),
+  createdBy: text('created_by'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -90,7 +90,7 @@ export const smsMessages = pgTable('sms_messages', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  userId: text('user_id').references(() => profiles.userId, { onDelete: 'set null' }),
+  userId: text('user_id'),
   phoneNumber: text('phone_number').notNull(),
   message: text('message').notNull(),
   templateId: uuid('template_id').references(() => smsTemplates.id, { onDelete: 'set null' }),
@@ -121,7 +121,7 @@ export const smsConversations = pgTable('sms_conversations', {
   organizationId: uuid('organization_id')
     .notNull()
     .references(() => organizations.id, { onDelete: 'cascade' }),
-  userId: text('user_id').references(() => profiles.userId, { onDelete: 'set null' }),
+  userId: text('user_id'),
   phoneNumber: text('phone_number').notNull(),
   direction: text('direction').notNull(),
   message: text('message').notNull(),
@@ -146,7 +146,7 @@ export const smsCampaignRecipients = pgTable(
     campaignId: uuid('campaign_id')
       .notNull()
       .references(() => smsCampaigns.id, { onDelete: 'cascade' }),
-    userId: text('user_id').references(() => profiles.userId, { onDelete: 'set null' }),
+    userId: text('user_id'),
     phoneNumber: text('phone_number').notNull(),
     messageId: uuid('message_id').references(() => smsMessages.id, { onDelete: 'set null' }),
     status: text('status').notNull().default('pending'),
@@ -174,7 +174,7 @@ export const smsOptOuts = pgTable(
     organizationId: uuid('organization_id')
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
-    userId: text('user_id').references(() => profiles.userId, { onDelete: 'set null' }),
+    userId: text('user_id'),
     phoneNumber: text('phone_number').notNull(),
     optedOutAt: timestamp('opted_out_at', { withTimezone: true }).notNull().defaultNow(),
     optedOutVia: text('opted_out_via'),
@@ -188,30 +188,6 @@ export const smsOptOuts = pgTable(
 
 export type SmsOptOut = typeof smsOptOuts.$inferSelect;
 export type NewSmsOptOut = typeof smsOptOuts.$inferInsert;
-
-// ============================================================================
-// SMS RATE LIMITS
-// ============================================================================
-
-export const smsRateLimits = pgTable(
-  'sms_rate_limits',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    organizationId: uuid('organization_id')
-      .notNull()
-      .references(() => organizations.id, { onDelete: 'cascade' }),
-    messagesSent: integer('messages_sent').default(0),
-    windowStart: timestamp('window_start', { withTimezone: true }).notNull().defaultNow(),
-    windowEnd: timestamp('window_end', { withTimezone: true }).notNull().defaultNow(),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => ({
-    organizationWindowUnique: unique().on(table.organizationId, table.windowStart),
-  })
-);
-
-export type SmsRateLimit = typeof smsRateLimits.$inferSelect;
-export type NewSmsRateLimit = typeof smsRateLimits.$inferInsert;
 
 // ============================================================================
 // RELATIONS
@@ -300,13 +276,6 @@ export const smsOptOutsRelations = relations(smsOptOuts, ({ one }) => ({
   user: one(profiles, {
     fields: [smsOptOuts.userId],
     references: [profiles.userId],
-  }),
-}));
-
-export const smsRateLimitsRelations = relations(smsRateLimits, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [smsRateLimits.organizationId],
-    references: [organizations.id],
   }),
 }));
 

@@ -22,7 +22,7 @@
  * when a new governed route starts writing a new `responses` key.
  *
  * Inventory (every route that writes `pilot_applications.responses`,
- * verified via a full-repo scan for `.update(pilotApplications)` under
+ * verified via a full-repo scan for writes to the pilot_applications table under
  * round 24): commercial-transition (`commercialState`,
  * `commercialStateUpdatedAt`, `commercialTransitionHistory`,
  * `pilotIntelligence`, all 7 qualification/opportunity score fields,

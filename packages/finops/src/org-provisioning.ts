@@ -24,7 +24,7 @@ export const OrgProvisionRequestSchema = z.object({
   region: z.string().default('canadacentral'),
   adminEmail: z.string().email(),
   features: z.array(z.string()).default([]),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.string()).optional(),
 });
 
 export type OrgProvisionRequest = z.infer<typeof OrgProvisionRequestSchema>;

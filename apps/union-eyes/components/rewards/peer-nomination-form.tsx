@@ -1,125 +1,89 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AwardTypeSelector } from './award-type-selector';
-import { Award, Search, Users } from 'lucide-react';
-import { createAward } from '@/actions/rewards-actions';
-import type { RecognitionAwardType } from '@/db/schema/recognition-rewards-schema';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { nominatePeer } from '@/actions/rewards-actions';
+import { nominatePeerSchema } from '@/lib/validation/rewards-schemas';
+
+export interface PeerAwardTypeOption {
+  id: string;
+  name: string;
+  defaultCreditAmount: number;
+}
+
+/** A colleague a nomination can name: a name and the id the server resolves, nothing else about them. */
+export interface PeerCandidate {
+  userId: string;
+  name: string;
+}
 
 interface PeerNominationFormProps {
-  awardTypes: RecognitionAwardType[];
-  organizationMembers: {
-    userId: string;
-    name: string;
-    email: string;
-    avatar?: string;
-    role: string;
-  }[];
+  /** The peer award types of the active program. The server accepts nothing else, whatever the form sends. */
+  awardTypes: PeerAwardTypeOption[];
+  candidates: PeerCandidate[];
   currentUserId: string;
   onSuccess?: () => void;
 }
 
-export function PeerNominationForm({
-  awardTypes,
-  organizationMembers,
-  currentUserId,
-  onSuccess,
-}: PeerNominationFormProps) {
+const MAX_REASON_LENGTH = 500;
+const SELECT_CLASS = 'w-full rounded-md border bg-background p-2 text-sm';
+
+export function PeerNominationForm({ awardTypes, candidates, currentUserId, onSuccess }: PeerNominationFormProps) {
   const t = useTranslations('rewards.peer');
-  const locale = useLocale();
   const router = useRouter();
   const [awardTypeId, setAwardTypeId] = useState('');
-  const [recipientId, setRecipientId] = useState('');
-  const [message, setMessage] = useState('');
+  const [recipientUserId, setRecipientUserId] = useState('');
+  const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  // Filter out current user and only show peer-recognition enabled award types
-  const eligibleMembers = organizationMembers.filter((m) => m.userId !== currentUserId);
-  const peerAwardTypes = awardTypes.filter((t) => t.kind === 'peer');
+  const colleagues = candidates.filter((candidate) => candidate.userId !== currentUserId);
 
-  const selectedRecipient = eligibleMembers.find((m) => m.userId === recipientId);
-  const selectedAwardType = peerAwardTypes.find((t) => t.id === awardTypeId);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError('');
+    setSubmitted(false);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!awardTypeId || !recipientId || !message.trim()) {
+    // The same schema the action validates with: what is sent is exactly what the action accepts.
+    const parsed = nominatePeerSchema.safeParse({ awardTypeId, recipientUserId, reason });
+    if (!parsed.success) {
       setError(t('validation.allFieldsRequired'));
       return;
     }
 
     setIsSubmitting(true);
-    setError('');
-
     try {
-      const result = await createAward({
-        award_type_id: awardTypeId,
-        recipient_user_id: recipientId,
-        message: message.trim(),
-        credits_to_award: selectedAwardType?.defaultCreditAmount,
-      });
+      const result = await nominatePeer(parsed.data);
 
-      if (result.success) {
-        setSuccess(true);
-        setMessage('');
-        setRecipientId('');
+      // A success is a row written: the action returns the nomination it stored, and without one nothing is reported as submitted.
+      if (result.success && 'data' in result && result.data?.id) {
+        setSubmitted(true);
         setAwardTypeId('');
-        
-        setTimeout(() => {
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            router.push(`/${locale}/dashboard/rewards`);
-          }
-        }, 2000);
+        setRecipientUserId('');
+        setReason('');
+        onSuccess?.();
       } else {
-        setError(result.error || t('error.submit'));
+        setError(('error' in result && result.error) || t('error.submit'));
       }
-    } catch (err) {
-      setError(err.message || t('error.submit'));
+    } catch {
+      setError(t('error.submit'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (peerAwardTypes.length === 0) {
+  if (awardTypes.length === 0) {
     return (
       <Alert>
-        <AlertDescription>
-          {t('noPeerAwards')}
-        </AlertDescription>
+        <AlertDescription>{t('noPeerAwards')}</AlertDescription>
       </Alert>
     );
   }
@@ -128,137 +92,82 @@ export function PeerNominationForm({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Award className="h-5 w-5 text-primary" />
+          <Award className="h-5 w-5 text-primary" aria-hidden="true" />
           {t('title')}
         </CardTitle>
         <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Recipient Selection */}
           <div className="space-y-2">
-            <Label htmlFor="recipient">
-              {t('recipient')}
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
-            <Popover open={searchOpen} onOpenChange={setSearchOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="w-full justify-between"
-                >
-                  {selectedRecipient ? (
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={selectedRecipient.avatar} />
-                        <AvatarFallback className="text-xs">
-                          {getInitials(selectedRecipient.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{selectedRecipient.name}</span>
-                    </div>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      {t('selectRecipient')}
-                    </span>
-                  )}
-                  <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0">
-                <Command>
-                  <CommandInput placeholder={t('searchMembers')} />
-                  <CommandEmpty>{t('noMembers')}</CommandEmpty>
-                  <CommandGroup className="max-h-64 overflow-auto">
-                    {eligibleMembers.map((member) => (
-                      <CommandItem
-                        key={member.userId}
-                        value={member.name}
-                        onSelect={() => {
-                          setRecipientId(member.userId);
-                          setSearchOpen(false);
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={member.avatar} />
-                            <AvatarFallback className="text-xs">
-                              {getInitials(member.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">{member.email}</p>
-                          </div>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <Label htmlFor="nomination-recipient">{t('recipient')}</Label>
+            <select
+              id="nomination-recipient"
+              className={SELECT_CLASS}
+              value={recipientUserId}
+              onChange={(event) => setRecipientUserId(event.target.value)}
+              disabled={isSubmitting || colleagues.length === 0}
+            >
+              <option value="">{colleagues.length === 0 ? t('noMembers') : t('selectRecipient')}</option>
+              {colleagues.map((colleague) => (
+                <option key={colleague.userId} value={colleague.userId}>
+                  {colleague.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Award Type Selection */}
-          <AwardTypeSelector
-            awardTypes={peerAwardTypes}
-            value={awardTypeId}
-            onChange={setAwardTypeId}
-            required
-            label={t('awardType')}
-          />
-
-          {/* Message */}
           <div className="space-y-2">
-            <Label htmlFor="message">
-              {t('message')}
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
+            <Label htmlFor="nomination-award-type">{t('awardType')}</Label>
+            <select
+              id="nomination-award-type"
+              className={SELECT_CLASS}
+              value={awardTypeId}
+              onChange={(event) => setAwardTypeId(event.target.value)}
+              disabled={isSubmitting}
+            >
+              <option value="">{t('selectAwardType')}</option>
+              {awardTypes.map((awardType) => (
+                <option key={awardType.id} value={awardType.id}>
+                  {awardType.name} ({awardType.defaultCreditAmount})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="nomination-reason">{t('message')}</Label>
             <Textarea
-              id="message"
+              id="nomination-reason"
               placeholder={t('messagePlaceholder')}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
               rows={6}
-              maxLength={500}
-              required
+              maxLength={MAX_REASON_LENGTH}
+              disabled={isSubmitting}
             />
             <p className="text-xs text-muted-foreground text-right">
-              {message.length}/500
+              {reason.length}/{MAX_REASON_LENGTH}
             </p>
           </div>
 
-          {/* Error Alert */}
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
-          {/* Success Alert */}
-          {success && (
-            <Alert>
-              <AlertDescription className="text-green-600">
-                {t('success')}
-              </AlertDescription>
+          {submitted && (
+            <Alert role="status">
+              <AlertDescription className="text-green-700">{t('success')}</AlertDescription>
             </Alert>
           )}
 
-          {/* Submit Button */}
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-            >
+            <Button type="button" variant="outline" onClick={() => router.back()}>
               {t('cancel')}
             </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || !awardTypeId || !recipientId || !message.trim()}
-            >
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? t('submitting') : t('submit')}
             </Button>
           </div>
@@ -267,4 +176,3 @@ export function PeerNominationForm({
     </Card>
   );
 }
-

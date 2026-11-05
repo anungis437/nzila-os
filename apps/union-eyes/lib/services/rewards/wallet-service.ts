@@ -10,7 +10,9 @@ import {
   rewardWalletLedger,
   type RewardWalletLedgerEntry,
 } from '@/db/schema/domains/infrastructure/rewards';
-import { eq, and, desc, sql, type SQL } from 'drizzle-orm';
+import { eq, and, desc, sql, getTableColumns, type SQL } from 'drizzle-orm';
+import { sqlIn } from '@/lib/db/sql-in';
+import { UserFacingError } from '@/lib/errors/user-facing-error';
 
 type DbTransaction = PgTransaction<
   PostgresJsQueryResultHKT,
@@ -102,6 +104,46 @@ export async function listLedger(
 }
 
 /**
+ * The balance and one page of the ledger as they stand at one instant. Read as two statements, a movement between them made the
+ * balance disagree with the entries beside it; here the page, the total and the newest balance come out of ONE statement (window
+ * functions over the same rows), which is one snapshot whatever the isolation level of the transaction it runs in. That matters: the
+ * route runs in the member's tenant transaction, and a nested transaction cannot raise the isolation level of the one it is in.
+ */
+export async function getWalletSnapshot(
+  orgId: string,
+  userId: string,
+  limit = 20,
+  offset = 0,
+): Promise<{ balance: number; entries: RewardWalletLedgerEntry[]; total: number }> {
+  const owned = and(eq(rewardWalletLedger.orgId, orgId), eq(rewardWalletLedger.userId, userId));
+  const rows = await db
+    .select({
+      ...getTableColumns(rewardWalletLedger),
+      snapshotTotal: sql<number>`(count(*) over ())::int`,
+      snapshotBalance: sql<number>`first_value(${rewardWalletLedger.balanceAfter}) over (order by ${rewardWalletLedger.createdAt} desc)`,
+    })
+    .from(rewardWalletLedger)
+    .where(owned)
+    .orderBy(desc(rewardWalletLedger.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  if (rows.length > 0) {
+    const { snapshotTotal, snapshotBalance } = rows[0];
+    return {
+      balance: snapshotBalance ?? 0,
+      total: snapshotTotal,
+      entries: rows.map(({ snapshotTotal: _total, snapshotBalance: _balance, ...entry }) => entry),
+    };
+  }
+
+  // A page past the end holds no row to read the figures from: they are read by themselves (an empty ledger is balance 0, total 0).
+  const [latest] = await db.select().from(rewardWalletLedger).where(owned).orderBy(desc(rewardWalletLedger.createdAt)).limit(1);
+  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(rewardWalletLedger).where(owned);
+  return { balance: latest?.balanceAfter ?? 0, entries: [], total: count };
+}
+
+/**
  * Apply a ledger entry (transactional)
  * Calculates new balance and enforces the canonical non-negative constraint.
  * 
@@ -137,7 +179,7 @@ export async function applyLedgerEntry(
     if (allowNegativeBalance) {
       throw new Error('Negative balances are prohibited by the canonical ledger contract');
     }
-    throw new Error(
+    throw new UserFacingError(
       `Insufficient balance. Current: ${currentBalance}, Requested: ${Math.abs(amountCredits)}`
     );
   }
@@ -263,7 +305,7 @@ export async function getBulkBalances(
         balance_after
       FROM ${rewardWalletLedger}
       WHERE org_id = ${orgId}
-        AND user_id = ANY(${userIds})
+        AND ${sqlIn(sql`user_id`, userIds)}
       ORDER BY user_id, created_at DESC
     )
     SELECT user_id, balance_after

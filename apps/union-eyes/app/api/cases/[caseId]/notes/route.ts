@@ -12,12 +12,12 @@ import { and, eq, desc } from 'drizzle-orm'
 import { withRLSContext } from '@/lib/db/with-rls-context'
 import { claimUpdates } from '@/db/schema/claims-schema'
 import { claimHistoryReference, publicClaimHistory } from '@/lib/cases/claim-history-reference'
-import { auditDataMutation } from '@/lib/audit-logger'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { logger } from '@/lib/logger'
 import { buildUnionEvidencePack } from '@/lib/evidence'
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard'
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial'
-import { getCaseActor, findReadableCase, caseHistoryVisibility, requireCaseAction, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
+import { getCaseActor, findReadableCase, caseHistoryVisibility, caseAuthorizationResponse } from '@/lib/cases/case-authorization'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +26,7 @@ const AddNoteSchema = z.object({
     .string()
     .min(1, 'Note text is required')
     .max(10000, 'Note must be at most 10,000 characters'),
-  isInternal: z.boolean().optional().default(false),
+  isInternal: z.boolean().optional(),
 })
 
 /**
@@ -48,7 +48,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cas
       const rows = await tx
         .select()
         .from(claimUpdates)
-        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(actor)))
+        .where(and(eq(claimUpdates.claimId, claimHistoryReference(claim.claimId)), caseHistoryVisibility(claim.visibility)))
         .orderBy(desc(claimUpdates.createdAt))
       return { claimId: claim.claimId, rows }
     })
@@ -109,13 +109,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
       )
     }
 
-    const { text, isInternal } = parsed.data
-    await requireCaseAction(actor, isInternal ? 'note_add_internal' : 'note_add', caseId)
+    const { text } = parsed.data
+    const wanted = parsed.data.isInternal
 
-    const note = await withRLSContext(async (tx) => {
-      const claim = await findReadableCase(tx, actor, caseId, true)
+    const written = await withRLSContext(async (tx) => {
+      // Anyone the kernel lets comment may add a member-visible note; an internal note is a separate decision.
+      const claim = await findReadableCase(tx, actor, caseId, true, 'case:comment')
 
       if (!claim) return null
+      const isInternal = wanted ?? claim.visibility === 'internal'
+      if (isInternal && !(await findReadableCase(tx, actor, caseId, true, 'case:write_notes'))) return null
 
       const [newNote] = await tx
         .insert(claimUpdates)
@@ -129,30 +132,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ cas
         })
         .returning()
 
-      return publicClaimHistory(newNote, claim.claimId)
+      // The note and its audit record commit together; the audit carries the length, never the text.
+      await persistAtomicAudit(tx, {
+        organizationId: orgId,
+        userId,
+        action: 'case.note.add',
+        resourceType: 'claim_updates',
+        resourceId: newNote.updateId ?? null,
+        details: { event: 'CASE_NOTE_ADDED', caseId, isInternal, contentLength: text.length },
+      })
+
+      return { note: publicClaimHistory(newNote, claim.claimId), isInternal }
     })
 
-    if (!note) {
+    if (!written) {
       return NextResponse.json(
         { error: 'NOT_FOUND', message: `Case '${caseId}' not found.` },
         { status: 404 },
       )
     }
 
-    // Audit trail — log note ID + content hash (not full text for privacy)
-    await auditDataMutation({
-      userId,
-      organizationId: orgId,
-      resource: 'claim_updates',
-      resourceId: note.updateId ?? undefined,
-      action: 'create',
-      details: {
-        event: 'CASE_NOTE_ADDED',
-        caseId,
-        isInternal,
-        contentLength: text.length,
-      },
-    })
+    const { note, isInternal } = written
 
     logger.info('Case note added', {
       caseId,

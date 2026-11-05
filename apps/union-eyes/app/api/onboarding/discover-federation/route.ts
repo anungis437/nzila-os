@@ -15,7 +15,7 @@ import { NextResponse } from 'next/server';
 import { withRoleAuth, type MemberRole } from '@/lib/role-middleware';
 import { autoDetectParentFederation } from '@/lib/utils/smart-onboarding';
 import { logger } from '@/lib/logger';
-import { eventBus, AppEvents } from '@/lib/events';
+import { recordOnboardingRead } from '@/lib/utils/onboarding-read-audit';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 
  
@@ -31,7 +31,7 @@ const onboardingDiscoverFederationSchema = z.object({
 });
 
 export const POST = withRoleAuth('officer' as MemberRole, async (request, context) => {
-  const { userId, organizationId: _organizationId } = context;
+  const { userId, organizationId } = context;
 
   try {
     const rateLimit = await checkRateLimit(userId, RATE_LIMITS.ONBOARDING);
@@ -54,7 +54,7 @@ export const POST = withRoleAuth('officer' as MemberRole, async (request, contex
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
         'Invalid request data',
-        validation.error.errors
+        validation.error.issues
       );
     }
     
@@ -65,6 +65,10 @@ export const POST = withRoleAuth('officer' as MemberRole, async (request, contex
       ErrorCode.MISSING_REQUIRED_FIELD,
       'province is required'
     );
+    }
+
+    if (!organizationId) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Organization context required');
     }
 
     const suggestions = await autoDetectParentFederation(
@@ -80,13 +84,7 @@ export const POST = withRoleAuth('officer' as MemberRole, async (request, contex
       suggestionCount: suggestions.length,
     });
 
-    // Emit audit event
-    eventBus.emit(AppEvents.AUDIT_LOG, {
-      userId,
-      action: 'federation_discovery',
-      resource: 'onboarding',
-      details: { province, sector, suggestionCount: suggestions.length },
-    });
+    await recordOnboardingRead({ organizationId, userId }, 'onboarding.federation_discovery', { province, sector: sector ?? null, suggestionCount: suggestions.length });
 
     return NextResponse.json({
       success: true,

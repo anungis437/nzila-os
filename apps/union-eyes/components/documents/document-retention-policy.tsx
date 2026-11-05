@@ -90,18 +90,22 @@ export interface LegalHold {
   status: "active" | "released";
 }
 
+/** A null figure is unavailable, not zero: it has no canonical source and must not be shown as a count. */
 export interface RetentionStats {
-  totalDocuments: number;
-  documentsUnderRetention: number;
-  documentsOnHold: number;
-  scheduledForArchival: number;
-  scheduledForDeletion: number;
+  totalDocuments: number | null;
+  documentsUnderRetention: number | null;
+  documentsOnHold: number | null;
+  scheduledForArchival: number | null;
+  scheduledForDeletion: number | null;
 }
 
 export interface DocumentRetentionPolicyProps {
   existingPolicy?: PolicyConfig;
-  legalHolds: LegalHold[];
+  /** null means hold status is unavailable (no canonical hold record), which is different from no holds. */
+  legalHolds: LegalHold[] | null;
   stats: RetentionStats;
+  /** Shown in place of the rules and holds when they are unavailable. */
+  unavailableNotice?: string;
   categories: string[];
   onSavePolicy?: (policy: PolicyConfig) => Promise<void>;
   onCreateHold?: (documentId: string, reason: string) => Promise<void>;
@@ -113,6 +117,7 @@ export function DocumentRetentionPolicy({
   existingPolicy,
   legalHolds,
   stats,
+  unavailableNotice,
   categories,
   onSavePolicy,
   onCreateHold: _onCreateHold,
@@ -155,7 +160,8 @@ export function DocumentRetentionPolicy({
     }
   };
 
-  const activeHolds = legalHolds.filter((h) => h.status === "active");
+  const activeHolds = (legalHolds ?? []).filter((h) => h.status === "active");
+  const figure = (value: number | null) => (value === null ? "Unavailable" : value);
 
   return (
     <div className="space-y-6">
@@ -171,14 +177,14 @@ export function DocumentRetentionPolicy({
       <div className="grid grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-6">
-            <div className="text-2xl font-bold">{stats.totalDocuments}</div>
+            <div className="text-2xl font-bold">{figure(stats.totalDocuments)}</div>
             <div className="text-sm text-gray-600">Total Documents</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-blue-600">
-              {stats.documentsUnderRetention}
+              {figure(stats.documentsUnderRetention)}
             </div>
             <div className="text-sm text-gray-600">Under Retention</div>
           </CardContent>
@@ -186,7 +192,7 @@ export function DocumentRetentionPolicy({
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-orange-600">
-              {stats.documentsOnHold}
+              {figure(stats.documentsOnHold)}
             </div>
             <div className="text-sm text-gray-600">Legal Holds</div>
           </CardContent>
@@ -194,7 +200,7 @@ export function DocumentRetentionPolicy({
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-purple-600">
-              {stats.scheduledForArchival}
+              {figure(stats.scheduledForArchival)}
             </div>
             <div className="text-sm text-gray-600">To Archive</div>
           </CardContent>
@@ -202,13 +208,18 @@ export function DocumentRetentionPolicy({
         <Card>
           <CardContent className="p-6">
             <div className="text-2xl font-bold text-red-600">
-              {stats.scheduledForDeletion}
+              {figure(stats.scheduledForDeletion)}
             </div>
             <div className="text-sm text-gray-600">To Delete</div>
           </CardContent>
         </Card>
       </div>
 
+      {legalHolds === null ? (
+        <div role="status" data-testid="retention-unavailable" className="rounded-lg border px-4 py-3 text-sm text-gray-700">
+          {unavailableNotice ?? "Retention rules and legal holds are not available."}
+        </div>
+      ) : (
       <Tabs defaultValue="rules" className="w-full">
         <TabsList>
           <TabsTrigger value="rules">Retention Rules</TabsTrigger>
@@ -564,6 +575,7 @@ export function DocumentRetentionPolicy({
           </Card>
         </TabsContent>
       </Tabs>
+      )}
     </div>
   );
 }

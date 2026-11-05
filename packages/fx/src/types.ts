@@ -248,7 +248,7 @@ export const ConversionRequestSchema = z.object({
 })
 
 export const EntityCurrencyConfigSchema = z.object({
-  orgId: z.string().uuid(),
+  orgId: z.guid(),
   functionalCurrency: CurrencyCodeSchema.default('CAD'),
   transactionCurrencies: z.array(CurrencyCodeSchema).default(['CAD']),
   rateSource: z.enum(['bank_of_canada', 'manual', 'ecb', 'fallback']).default('bank_of_canada'),
