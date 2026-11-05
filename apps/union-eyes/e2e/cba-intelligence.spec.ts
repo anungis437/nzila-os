@@ -138,7 +138,9 @@ test.describe("Labor continuity intelligence page", () => {
     await selectTab(primaryTabList, "Benchmark");
     await expect(page.getByPlaceholder("Paste agreement UUID...")).toBeVisible();
     await expect(page.getByRole("button", { name: "Run Benchmark" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Save Snapshot" })).toBeVisible();
+    // Executive readers may run benchmarks, but snapshot writes require curator authority.
+    // Assert the write control is absent rather than granting an unauthorized capability.
+    await expect(page.getByRole("button", { name: "Save Snapshot" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Show History" })).toBeVisible();
 
     await selectTab(primaryTabList, "Freshness");
