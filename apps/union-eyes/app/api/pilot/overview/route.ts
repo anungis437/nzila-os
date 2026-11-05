@@ -1,14 +1,16 @@
 /**
  * GET /api/pilot/overview
  *
- * Returns pilot metrics for the enrolled organizations, one bounded page at a time.
- * Reachable only by a platform administrator: the platform-staff authority (isPlatformAdminUser) is the mandate for a read across
- * organizations. Holding an officer role title in the platform organization is not, and neither is any organization-level role.
- * Each read is audited, with the page it returned.
+ * Returns pilot metrics for the enrolled organizations the caller directly administers, one bounded page at a time.
+ * The figures are tenant content (member counts, grievance volumes and resolution times), so a platform title is no mandate to read them
+ * (#1116): there is no cross-tenant read here. Both the count and the page are scoped to the organizations where the caller holds a live,
+ * direct administrative membership; a caller who administers none is refused, and one whose organizations are not enrolled gets an empty
+ * page. Hierarchy (a parent's or federation's administrator) confers nothing. Each read is audited, with the page it returned.
  */
 
 import { NextResponse } from "next/server";
-import { requireUser, hasMinRole, isPlatformAdminUser } from "@/lib/api-auth-guard";
+import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
+import { isAdministrativeRole, resolveOrganizationAccess } from "@/lib/organizations/read-authority";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -16,7 +18,7 @@ import {
 import { pilotEnrollments } from "@/db/schema/domains/pilot/pilot-enrollments";
 import { pilotMilestones } from "@/db/schema/domains/pilot/pilot-milestones";
 import { organizations } from "@/db/schema-organizations";
-import { asc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { operationAuditResponse, performAtomicSystemAuditedOperation } from "@/lib/audit/operation-audit";
 import { DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
 import type { PilotMilestone } from "@/types/marketing";
@@ -46,12 +48,18 @@ export async function GET(request?: Request) {
       );
     }
 
-    if (!(await isPlatformAdminUser(user.userId))) {
+    // Only the organizations the caller directly administers: a platform title or an ancestor's administration grants nothing here.
+    const access = await resolveOrganizationAccess(user.userId);
+    const permittedOrgIds = [...access.direct]
+      .filter(([, role]) => isAdministrativeRole(role))
+      .map(([organizationId]) => organizationId);
+    if (permittedOrgIds.length === 0) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
-        "Only platform administrators can view the pilot overview"
+        "The pilot overview is available only to an administrator of an organization"
       );
     }
+    const scope = and(eq(pilotEnrollments.status, "active"), inArray(pilotEnrollments.organizationId, permittedOrgIds));
 
     const params = request ? new URL(request.url).searchParams : new URLSearchParams();
     const limit = boundedInteger(params.get("limit"), DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE);
@@ -63,13 +71,13 @@ export async function GET(request?: Request) {
         userId: user.userId,
         action: "pilot.overview.read",
         resourceType: "pilot_enrollments",
-        details: { limit, offset },
+        details: { limit, offset, organizationCount: permittedOrgIds.length },
       },
       async (tx) => {
       const [{ total }] = (await tx
         .select({ total: sql<number>`count(*)` })
         .from(pilotEnrollments)
-        .where(eq(pilotEnrollments.status, "active"))) as Array<{ total: number | string }>;
+        .where(scope)) as Array<{ total: number | string }>;
 
       const enrollments = await tx
         .select({
@@ -79,7 +87,7 @@ export async function GET(request?: Request) {
         })
         .from(pilotEnrollments)
         .innerJoin(organizations, eq(pilotEnrollments.organizationId, organizations.id))
-        .where(eq(pilotEnrollments.status, "active"))
+        .where(scope)
         .orderBy(asc(pilotEnrollments.enrolledAt), asc(pilotEnrollments.id))
         .limit(limit)
         .offset(offset);

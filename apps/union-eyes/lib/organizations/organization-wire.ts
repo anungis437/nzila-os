@@ -27,3 +27,25 @@ export function organizationWire(row: OrganizationWireRow) {
 }
 
 export type OrganizationWire = ReturnType<typeof organizationWire>;
+
+export type OrganizationDirectoryWireRow = Pick<
+  InferSelectModel<typeof organizations>,
+  'id' | 'name' | 'slug' | 'organizationType' | 'parentId' | 'hierarchyLevel' | 'hierarchyPath' | 'status'
+>;
+
+/**
+ * The directory entry of an organization in the same key style as {@link organizationWire}: what a caller who is only affiliated with it (an
+ * administrator above it, not a member of it) receives. Identity and placement only; the snake_case form is read-authority's directoryProjection.
+ */
+export function organizationDirectoryWire(row: OrganizationDirectoryWireRow) {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    type: row.organizationType,
+    parentId: row.parentId ?? null,
+    hierarchyLevel: row.hierarchyLevel ?? 0,
+    hierarchyPath: row.hierarchyPath,
+    status: row.status ?? 'active',
+  };
+}

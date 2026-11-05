@@ -1,19 +1,20 @@
 /**
- * Hierarchy-Based Access Control
- * 
- * Implements organizational hierarchy validation for federation/congress sharing.
- * Ensures users can only access resources within their authorized hierarchy.
- * 
+ * Organization access decisions: DIRECT ONLY.
+ *
  * Security Context: This module operates at SYSTEM level (allowlisted in RLS scanner)
- * as it needs to validate access across organizational boundaries. All queries here
- * are for hierarchy validation only and do not access org-scoped data.
- * 
- * Security Model:
- * - Federation admins can access child union resources
- * - Union admins can access child local resources
- * - Local admins can only access their own resources
- * - Congress sharing requires explicit congress membership
- * 
+ * because it reads memberships across organizations to reach its decisions. It reads
+ * membership and organization rows only, never org-scoped content.
+ *
+ * Security Model (#1116, owner ruling: explicit, scoped grants only):
+ * - The organization hierarchy is an affiliation graph, not an access-control list.
+ *   A parent, federation or congress administrator gains nothing in a child, and a
+ *   child's administrator gains nothing in an ancestor or a sibling.
+ * - Access to an organization requires the caller's own LIVE membership of exactly that
+ *   organization (status 'active', not soft-deleted) with a role that permits the action,
+ *   and the organization itself must be active.
+ * - Federation and congress sharing are cross-organization grants. No ratified,
+ *   grant-backed sharing instrument exists, so they are denied by default.
+ *
  * Usage:
  * ```typescript
  * const access = await validateHierarchyAccess(userId, targetOrgId, 'read');
@@ -25,13 +26,14 @@
 
 import { db } from '@/db';
 import { organizations, organizationMembers, congressMemberships } from '@/db/schema';
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import type { InferSelectModel } from 'drizzle-orm';
 
 export interface HierarchyAccessResult {
   allowed: boolean;
   reason?: string;
+  /** Only 'direct' is ever granted. The other values are retained for type compatibility and are never produced. */
   accessType?: 'direct' | 'hierarchical' | 'congress' | 'public';
   userRole?: string;
   organizationLevel?: string;
@@ -45,9 +47,36 @@ type OrganizationMember = InferSelectModel<typeof organizationMembers>;
 /** Membership with eager-loaded organization relation */
 type MembershipWithOrg = OrganizationMember & { organization?: Organization };
 
+const CROSS_ORGANIZATION_DENIAL =
+  'Cross-organization access requires a ratified, explicitly granted sharing instrument; none exists, so it is denied';
+
+/** The organization is live: an archived, suspended or otherwise inactive organization confers nothing. */
+const isActiveOrganization = (org: Pick<Organization, 'status'> | null | undefined) =>
+  !!org && (org.status ?? 'active') === 'active';
+
 /**
- * Validates if a user has access to a target organization based on hierarchy
- * Note: This function operates at SYSTEM context as it validates access across organizations
+ * The caller's LIVE memberships (status 'active', not soft-deleted), optionally of one organization only.
+ * A suspended, inactive, removed or soft-deleted membership is not a membership here.
+ */
+async function liveMemberships(userId: string, organizationId?: string): Promise<MembershipWithOrg[]> {
+  const conditions = [
+    eq(organizationMembers.userId, userId),
+    eq(organizationMembers.status, 'active'),
+    isNull(organizationMembers.deletedAt),
+  ];
+  if (organizationId) conditions.push(eq(organizationMembers.organizationId, organizationId));
+  return (await db.query.organizationMembers.findMany({
+    where: and(...conditions),
+    with: {
+      organization: true,
+    },
+  })) as MembershipWithOrg[];
+}
+
+/**
+ * Validates if a user has access to a target organization.
+ * Only the caller's own live membership of exactly that organization counts; hierarchy grants nothing.
+ * Note: This function operates at SYSTEM context as it reads memberships across organizations.
  */
 export async function validateHierarchyAccess(
   userId: string,
@@ -55,83 +84,40 @@ export async function validateHierarchyAccess(
   action: ActionType = 'read'
 ): Promise<HierarchyAccessResult> {
   try {
-    // Get target organization details
     const targetOrg = await db.query.organizations.findFirst({
       where: eq(organizations.id, targetOrgId),
     });
 
-    if (!targetOrg) {
+    // An organization that is not active reads as not found, so the answer does not disclose its lifecycle.
+    if (!targetOrg || !isActiveOrganization(targetOrg)) {
       return {
         allowed: false,
         reason: 'Organization not found',
       };
     }
 
-    // Get user's organization memberships with organization details
-    const userMemberships = await db.query.organizationMembers.findMany({
-      where: eq(organizationMembers.userId, userId),
-      with: {
-        organization: true,
-      },
-    }) as MembershipWithOrg[];
+    const [directMembership] = await liveMemberships(userId, targetOrgId);
 
-    if (userMemberships.length === 0) {
+    if (!directMembership || directMembership.organizationId !== targetOrgId) {
       return {
         allowed: false,
-        reason: 'User has no organization memberships',
+        reason: 'User has no live membership of this organization',
       };
     }
 
-    // Check for direct membership
-    const directMembership = userMemberships.find(
-      m => m.organizationId === targetOrgId
-    );
-
-    if (directMembership) {
-      const hasPermission = checkActionPermission(directMembership.role, action);
-      if (hasPermission) {
-        return {
-          allowed: true,
-          accessType: 'direct',
-          userRole: directMembership.role,
-          organizationLevel: targetOrg.organizationType,
-        };
-      }
-    }
-
-    // Check hierarchical access (parent org admins can access child orgs)
-    for (const membership of userMemberships) {
-      if (['admin', 'super_admin', 'owner'].includes(membership.role)) {
-        // Check if user's org is in target org's hierarchy path
-        if (targetOrg.hierarchyPath?.includes(membership.organizationId)) {
-          // Validate action is allowed for hierarchical access
-          if (action === 'read' || action === 'share') {
-            return {
-              allowed: true,
-              accessType: 'hierarchical',
-              userRole: membership.role,
-              organizationLevel: membership.organization?.organizationType,
-            };
-          }
-        }
-
-        // Check if target org is in user's org hierarchy path (parent access)
-        if (membership.organization?.hierarchyPath?.includes(targetOrgId)) {
-          if (action === 'read') {
-            return {
-              allowed: true,
-              accessType: 'hierarchical',
-              userRole: membership.role,
-              organizationLevel: membership.organization?.organizationType,
-            };
-          }
-        }
-      }
+    if (!checkActionPermission(directMembership.role, action)) {
+      return {
+        allowed: false,
+        reason: 'User role does not permit this action',
+        userRole: directMembership.role,
+      };
     }
 
     return {
-      allowed: false,
-      reason: 'User does not have hierarchical access to this organization',
+      allowed: true,
+      accessType: 'direct',
+      userRole: directMembership.role,
+      organizationLevel: targetOrg.organizationType,
     };
   } catch (error) {
     logger.error('Hierarchy access validation error', error as Error, { userId, targetOrgId });
@@ -143,8 +129,9 @@ export async function validateHierarchyAccess(
 }
 
 /**
- * Validates if content can be shared at the specified level
- * Note: This function operates at SYSTEM context for hierarchy validation
+ * Validates if content can be shared at the specified level.
+ * Federation and congress sharing are cross-organization grants and are denied by default (#1116).
+ * Note: This function operates at SYSTEM context.
  */
 export async function validateSharingLevel(
   userId: string,
@@ -163,82 +150,9 @@ export async function validateSharingLevel(
     };
   }
 
-  // Get user's organization hierarchy
-  const userMemberships = await db.query.organizationMembers.findMany({
-    where: eq(organizationMembers.userId, userId),
-    with: {
-      organization: true,
-    },
-  }) as MembershipWithOrg[];
-
-  const userOrg = userMemberships.find((m) => m.organizationId === sourceOrgId)?.organization;
-  if (!userOrg) {
-    return {
-      allowed: false,
-      reason: 'User is not a member of the source organization',
-    };
-  }
-
-  if (sharingLevel === 'federation') {
-    // Requires parent organization to be a federation
-    if (userOrg.organizationType === 'federation') {
-      return { allowed: true };
-    }
-
-    // Or user's organization must be within a federation hierarchy
-    const hasValidHierarchy = userOrg.hierarchyPath && userOrg.hierarchyPath.length > 0;
-    if (!hasValidHierarchy) {
-      return {
-        allowed: false,
-        reason: 'Federation sharing requires organization to be part of a federation hierarchy',
-      };
-    }
-
-    return { allowed: true };
-  }
-
-  if (sharingLevel === 'congress') {
-    // Congress sharing requires CLC affiliation
-    const sourceOrg = await db.query.organizations.findFirst({
-      where: eq(organizations.id, sourceOrgId),
-      columns: { clcAffiliated: true, id: true },
-    });
-
-    if (!sourceOrg?.clcAffiliated) {
-      return {
-        allowed: false,
-        reason: 'Congress sharing requires source organization to be CLC affiliated',
-      };
-    }
-
-    // User's organization must also be CLC affiliated
-    if (!userOrg.clcAffiliated) {
-      return {
-        allowed: false,
-        reason: 'Congress sharing requires your organization to be CLC affiliated',
-      };
-    }
-
-    const [userOrgMembershipValid, sourceOrgMembershipValid] = await Promise.all([
-      validateCongressMembership(userId, userOrg.id),
-      validateCongressMembership(userId, sourceOrgId),
-    ]);
-
-    if (!userOrgMembershipValid || !sourceOrgMembershipValid) {
-      return {
-        allowed: false,
-        reason: 'Congress sharing requires active congress memberships for both organizations',
-      };
-    }
-
-    logger.info('Congress sharing validated', {
-      userId,
-      sourceOrgId,
-      userOrgId: userOrg.id,
-      sharingLevel: 'congress',
-    });
-
-    return { allowed: true };
+  if (sharingLevel === 'federation' || sharingLevel === 'congress') {
+    logger.info('Cross-organization sharing denied by default', { userId, sourceOrgId, sharingLevel });
+    return { allowed: false, reason: CROSS_ORGANIZATION_DENIAL };
   }
 
   return {
@@ -248,52 +162,22 @@ export async function validateSharingLevel(
 }
 
 /**
- * Gets all organizations accessible to a user based on hierarchy
- * Note: This function operates at SYSTEM context for hierarchy traversal
+ * Gets the organizations a user may act on: exactly the active organizations of their own live memberships whose role
+ * permits the action. Child, parent and sibling organizations are never added.
+ * Note: This function operates at SYSTEM context.
  */
 export async function getAccessibleOrganizations(
   userId: string,
   action: ActionType = 'read'
 ): Promise<string[]> {
   try {
-    // Get user's direct memberships
-    const userMemberships = await db.query.organizationMembers.findMany({
-      where: eq(organizationMembers.userId, userId),
-      with: {
-        organization: true,
-      },
-    }) as MembershipWithOrg[];
-
     const accessibleOrgIds = new Set<string>();
-
-    // Add direct memberships
-    for (const membership of userMemberships) {
-      if (checkActionPermission(membership.role, action)) {
-        accessibleOrgIds.add(membership.organizationId);
-      }
-
-      // If user is admin in this org, add child organizations
-      if (['admin', 'super_admin', 'owner'].includes(membership.role)) {
-        const org = membership.organization;
-        if (org && org.hierarchyPath) {
-          // Get all child organizations
-          const childOrgs = await db.query.organizations.findMany({
-            where: or(
-              ...org.hierarchyPath.map((parentId: string) =>
-                eq(organizations.parentId, parentId)
-              )
-            ),
-          });
-
-          for (const childOrg of childOrgs) {
-            if (action === 'read' || action === 'share') {
-              accessibleOrgIds.add(childOrg.id);
-            }
-          }
-        }
-      }
+    for (const membership of await liveMemberships(userId)) {
+      if (!checkActionPermission(membership.role, action)) continue;
+      // The membership's organization must itself be live; an absent relation fails closed.
+      if (!isActiveOrganization(membership.organization)) continue;
+      accessibleOrgIds.add(membership.organizationId);
     }
-
     return Array.from(accessibleOrgIds);
   } catch (error) {
     logger.error('Get accessible organizations error', error as Error, { userId });

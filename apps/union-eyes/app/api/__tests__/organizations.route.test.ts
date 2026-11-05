@@ -29,16 +29,19 @@ const mockDb: any = {
   })),
 };
 
-vi.mock('@/lib/api-auth-guard', () => ({ auth: m.auth, requireSystemAdmin: m.requireSystemAdmin }));
+vi.mock('@/lib/api-auth-guard', () => ({ auth: m.auth, requireSystemAdmin: m.requireSystemAdmin, ROLE_HIERARCHY: { member: 1, admin: 3 } }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 // The list is scoped by the shared read authority, whose SQL behaviour is proven in organizations-read-authority.pglite.test.ts;
-// here the caller is a platform administrator so this suite keeps testing the route's mapping and creation rules.
-vi.mock('@/lib/organizations/read-authority', () => ({
-  resolveOrganizationAccess: async () => ({ platform: true, direct: new Map(), descendants: new Set() }),
-  readableOrganizationIds: () => null,
-  canAdministerOrganization: () => true,
-  UUID_PATTERN: /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+// here the caller is a direct administrator of org_1 so this suite keeps testing the route's mapping and creation rules.
+const authority = vi.hoisted(() => ({ reads: true, administers: true }));
+vi.mock('@/lib/organizations/read-authority', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/organizations/read-authority')>()),
+  resolveOrganizationAccess: async () => ({ direct: new Map([['org_1', 'admin']]), affiliated: new Set() }),
+  affiliationOrganizationIds: () => ['org_1'],
+  canReadOrganization: () => authority.reads,
+  canAdministerOrganization: () => authority.administers,
 }));
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => false }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/db/schema', () => ({ organizations: { id: 'id', parentId: 'parentId', status: 'status', hierarchyPath: 'hierarchyPath', hierarchyLevel: 'hierarchyLevel' } }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.withRLSContext, withSystemContext: m.withSystemContext }));
@@ -67,6 +70,8 @@ describe('organizations route', () => {
     m.rowsQueue = [];
     m.executeQueue = [];
     m.inserted = { ...orgRow };
+    authority.reads = true;
+    authority.administers = true;
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.audit.mockResolvedValue(undefined);
     m.requireSystemAdmin.mockResolvedValue(undefined);
@@ -82,16 +87,38 @@ describe('organizations route', () => {
     expect(response.status).toBe(401);
   });
 
-  it('GET returns organizations with include_stats enrichment', async () => {
+  it('GET returns organizations with include_stats enrichment, counting grievances under the caller\'s own membership', async () => {
     const { GET } = await loadRoute();
+    const contexts: unknown[] = [];
+    m.withRLSContext.mockImplementation(async (...args: unknown[]) => {
+      contexts.push(args[0]);
+      return (args[args.length - 1] as (tx: unknown) => unknown)(mockDb);
+    });
     m.rowsQueue.push([orgRow]);
-    m.executeQueue.push([{ org_id: 'org_1', cnt: 3 }], [{ parent: 'org_1', cnt: 1 }]);
+    // The child counts are read first (system role), then each administered organization's grievances (tenant context).
+    m.executeQueue.push([{ parent: 'org_1', cnt: 1 }], [{ cnt: 3 }]);
 
     const response = await GET(new NextRequest('http://localhost/api/organizations?include_stats=true'));
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.data[0].activeClaims).toBe(3);
     expect(json.data[0].childCount).toBe(1);
+    expect(contexts).toEqual([{ organizationId: 'org_1' }]);
+  });
+
+  it('GET gives an organization the caller is only affiliated with as its directory entry, and counts no grievances for it', async () => {
+    const { GET } = await loadRoute();
+    authority.reads = false;
+    authority.administers = false;
+    m.rowsQueue.push([{ ...orgRow, email: 'office@org.example' }]);
+    m.executeQueue.push([{ parent: 'org_1', cnt: 1 }]);
+
+    const json = await (await GET(new NextRequest('http://localhost/api/organizations?include_stats=true'))).json();
+    expect(Object.keys(json.data[0]).sort()).toEqual(
+      ['id', 'name', 'slug', 'organization_type', 'parent_id', 'hierarchy_level', 'hierarchy_path', 'status', 'parentName', 'childCount'].sort(),
+    );
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(mockDb.execute).toHaveBeenCalledTimes(1);
   });
 
   it('POST returns 401 when unauthenticated', async () => {

@@ -1,17 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// The organization read authority is proven in organizations-read-authority.route.test.ts; these tests exercise the
-// route's own behaviour as a caller who may read and administer the organization.
-vi.mock('@/lib/organizations/read-authority', () => ({
-  resolveOrganizationAccess: async () => ({ platform: true, direct: new Map(), descendants: new Set() }),
-  canReadOrganization: () => true,
-  canAdministerOrganization: () => true,
-  readableOrganizationIds: () => null,
-  directRoleIn: () => 'admin',
-  UUID_PATTERN: /^[0-9a-fA-F-]{36}$/,
-}));
+// The organization read authority is exercised in organizations-read-authority.pglite.test.ts; these tests exercise the
+// route's own behaviour as a caller who administers the organization through a direct membership (or does not).
 const m = vi.hoisted(() => ({
-  requireUserForOrganization: vi.fn(),
+  administers: true,
   appendMandatoryAudit: vi.fn(),
   insertValues: vi.fn(),
 }))
@@ -21,9 +13,10 @@ vi.mock('@nzila/platform-auth/entra/server', () => ({
 }))
 vi.mock('@/db/db', () => ({ db: {} }))
 vi.mock('@/db/schema', () => ({ organizationMembers: {} }))
-vi.mock('@/lib/api-auth-guard', () => ({
-  requireUserForOrganization: m.requireUserForOrganization,
-  ROLE_HIERARCHY: { member: 1, steward: 2, admin: 3 },
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ direct: new Map(), affiliated: new Set() }),
+  canAdministerOrganization: () => m.administers,
+  UUID_PATTERN: /^[0-9a-fA-F-]{36}$/,
 }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.appendMandatoryAudit }))
 vi.mock('@/lib/db/with-rls-context', () => ({
@@ -56,7 +49,7 @@ const post = (payload: unknown) =>
 describe('organizations/[id]/members POST', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    m.requireUserForOrganization.mockResolvedValue({ userId: 'admin_1', roles: ['admin'] })
+    m.administers = true
     m.insertValues.mockImplementation((v: Record<string, unknown>) => ({ id: 'row_1', ...v }))
     m.appendMandatoryAudit.mockResolvedValue(undefined)
   })
@@ -84,11 +77,20 @@ describe('organizations/[id]/members POST', () => {
     ).rejects.toThrow('audit unavailable')
   })
 
-  it('rejects callers below steward', async () => {
+  it('rejects a caller without a direct administrative role in the organization (steward, ancestor administrator, platform title)', async () => {
     const { POST } = await loadRoute()
-    m.requireUserForOrganization.mockResolvedValue({ userId: 'u1', roles: ['member'] })
+    m.administers = false
     const response = await POST(post(body) as never, { params: Promise.resolve({ id: ORG_ID }) })
     expect(response.status).toBe(403)
+    expect(m.insertValues).not.toHaveBeenCalled()
+  })
+
+  it('refuses to grant a privileged role (admin, executive) even to the organization\'s administrator', async () => {
+    const { POST } = await loadRoute()
+    for (const role of ['admin', 'executive']) {
+      const response = await POST(post({ ...body, role }) as never, { params: Promise.resolve({ id: ORG_ID }) })
+      expect(response.status, role).toBe(403)
+    }
     expect(m.insertValues).not.toHaveBeenCalled()
   })
 })

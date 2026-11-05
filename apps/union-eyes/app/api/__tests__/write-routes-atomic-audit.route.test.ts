@@ -49,6 +49,12 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: vi.fn(async (_ctx: unknown, fn: (t: unknown) => Promise<unknown>) => fn(tx)),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
+// The compliance audit-log GET checks direct administration (#1116); these tests exercise only the writers.
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: vi.fn(),
+  directRoleIn: vi.fn(),
+  isAdministrativeRole: vi.fn(() => false),
+}));
 
 const caller = { organizationId: 'org_1', userId: 'u1' };
 

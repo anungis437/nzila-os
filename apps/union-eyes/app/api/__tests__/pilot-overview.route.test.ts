@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { PgDialect } from 'drizzle-orm/pg-core';
+import type { SQL } from 'drizzle-orm';
 
 const m = vi.hoisted(() => ({
   requireUser: vi.fn(),
   hasMinRole: vi.fn(),
   isPlatformAdminUser: vi.fn(),
+  resolveOrganizationAccess: vi.fn(),
   performAtomicSystemAuditedOperation: vi.fn(),
   operationAuditResponse: vi.fn(),
   logger: { error: vi.fn() },
@@ -41,6 +44,10 @@ vi.mock('@/lib/api-auth-guard', () => ({
   requireUser: m.requireUser,
   hasMinRole: m.hasMinRole,
   isPlatformAdminUser: m.isPlatformAdminUser,
+}));
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: m.resolveOrganizationAccess,
+  isAdministrativeRole: (role: string | undefined) => role === 'admin' || role === 'president',
 }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/audit/operation-audit', () => ({
@@ -83,7 +90,13 @@ describe('pilot/overview route', () => {
     m.chainCalls = [];
     m.requireUser.mockResolvedValue({ userId: 'u1', organizationId: 'platform_org' });
     m.hasMinRole.mockResolvedValue(true);
-    m.isPlatformAdminUser.mockResolvedValue(true);
+    m.isPlatformAdminUser.mockResolvedValue(false);
+    // The caller directly administers org_1 and org_2 and is a plain member of org_3.
+    m.resolveOrganizationAccess.mockResolvedValue({
+      platform: false,
+      direct: new Map([['org_1', 'admin'], ['org_2', 'president'], ['org_3', 'member']]),
+      descendants: new Set(),
+    });
     m.operationAuditResponse.mockReturnValue(null);
     m.performAtomicSystemAuditedOperation.mockImplementation(async (_op: unknown, work: (tx: unknown) => Promise<unknown>) => work(mockDb));
   });
@@ -96,16 +109,52 @@ describe('pilot/overview route', () => {
     expect(m.performAtomicSystemAuditedOperation).not.toHaveBeenCalled();
   });
 
-  it('F06 A4: an officer of the platform organization without platform-administrator authority is denied, and nothing is read', async () => {
-    m.isPlatformAdminUser.mockResolvedValueOnce(false);
+  // #1116: a platform title is no mandate for a cross-tenant read.
+  it('a platform administrator who directly administers no organization is denied, and nothing is read', async () => {
+    m.isPlatformAdminUser.mockResolvedValue(true);
+    m.resolveOrganizationAccess.mockResolvedValueOnce({ platform: true, direct: new Map(), descendants: new Set(['org_9']) });
     const { GET } = await loadRoute();
 
     const response = await GET();
 
     expect(response.status).toBe(403);
-    expect(m.isPlatformAdminUser).toHaveBeenCalledWith('u1');
+    expect(m.resolveOrganizationAccess).toHaveBeenCalledWith('u1');
     expect(m.performAtomicSystemAuditedOperation).not.toHaveBeenCalled();
     expect(mockDb.select).not.toHaveBeenCalled();
+  });
+
+  it('a plain member, or a parent administrator through hierarchy only, is denied', async () => {
+    m.resolveOrganizationAccess.mockResolvedValueOnce({ platform: false, direct: new Map([['org_3', 'member']]), descendants: new Set(['org_1']) });
+    const { GET } = await loadRoute();
+
+    expect((await GET()).status).toBe(403);
+    expect(m.performAtomicSystemAuditedOperation).not.toHaveBeenCalled();
+  });
+
+  it('scopes both the count and the page to the organizations the caller directly administers', async () => {
+    m.selectQueue.push([{ total: 0 }], []);
+    const { GET } = await loadRoute();
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    const wheres = m.chainCalls.filter(([prop]) => prop === 'where').map(([, args]) => new PgDialect().sqlToQuery(args[0] as SQL));
+    expect(wheres).toHaveLength(2);
+    for (const where of wheres) {
+      expect(where.sql).toContain('"pilot_enrollments"."organization_id" in ($');
+      expect(where.params).toEqual(['active', 'org_1', 'org_2']);
+    }
+  });
+
+  it('answers an empty page, not someone else\'s, when none of the administered organizations is enrolled', async () => {
+    m.selectQueue.push([{ total: 0 }], []);
+    const { GET } = await loadRoute();
+
+    const json = await (await GET()).json();
+
+    expect(json.organizations).toEqual([]);
+    expect(json.pagination).toMatchObject({ total: 0, returned: 0 });
+    expect(mockDb.execute).not.toHaveBeenCalled();
   });
 
   it('GET returns organization metrics for the page of active enrollments, with one query per figure', async () => {
@@ -174,7 +223,7 @@ describe('pilot/overview route', () => {
         organizationId: 'platform_org',
         userId: 'u1',
         action: 'pilot.overview.read',
-        details: { limit: 100, offset: 0 },
+        details: { limit: 100, offset: 0, organizationCount: 2 },
       }),
       expect.any(Function),
     );

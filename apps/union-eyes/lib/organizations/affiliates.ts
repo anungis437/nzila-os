@@ -3,9 +3,13 @@
  *
  * Under row-level security a tenant session reads only its own row of `organizations`, so a parent can never list its affiliates in its own
  * context: the read is a system read. That is only sound with a decision made before it, and the decision is the one the organization routes
- * already use (lib/organizations/read-authority.ts): the caller must be a platform administrator or an administrator of the organization
- * (a CLC, federation, national or organization administrator holds the administrative rank), and each affiliate returned must be one
- * the caller may read. The page's own role check is not what authorizes the system read.
+ * already use (lib/organizations/read-authority.ts): the caller must be an administrator of the organization through their own live
+ * membership there (a CLC, federation, national or organization administrator holds the administrative rank; a platform title confers
+ * nothing). The page's own role check is not what authorizes the system read.
+ *
+ * The hierarchy is an affiliation graph, not an access grant: administering the parent shows that an affiliate exists and its directory
+ * entry (name, type, status). Its province, affiliate code, contact details, description and member count are given only for an
+ * affiliate the caller is a direct member of; elsewhere they are null, which the pages show as not available.
  */
 import { and, asc, count, eq, inArray, isNull } from 'drizzle-orm';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
@@ -23,16 +27,21 @@ export interface AffiliateRow {
   id: string;
   name: string;
   organizationType: string;
+  /** Null unless the caller is a direct member of the affiliate. */
   provinceTerritory: string | null;
+  /** Null unless the caller is a direct member of the affiliate. */
   clcAffiliateCode: string | null;
+  /** Null unless the caller is a direct member of the affiliate. */
   email: string | null;
+  /** Null unless the caller is a direct member of the affiliate. */
   phone: string | null;
-  /** The postal address as one line; the column holds a JSON object. */
+  /** The postal address as one line; the column holds a JSON object. Null unless the caller is a direct member of the affiliate. */
   address: string | null;
+  /** Null unless the caller is a direct member of the affiliate. */
   description: string | null;
   status: string | null;
-  /** Active members on file for the affiliate. */
-  memberCount: number;
+  /** Active members on file for the affiliate; null unless the caller is a direct member of it. */
+  memberCount: number | null;
 }
 
 /** The keys the address column is declared with, in the order a postal address is written. */
@@ -77,6 +86,7 @@ export async function listAffiliates(input: { userId: string; organizationId: st
       .orderBy(asc(organizations.name));
     const readable = children.filter((child) => canReadOrganization(access, child.id));
     const counts =
+      // Counted as the system role over the affiliates the caller is a direct member of only.
       readable.length === 0
         ? []
         : await tx
@@ -90,13 +100,16 @@ export async function listAffiliates(input: { userId: string; organizationId: st
               ),
             )
             .groupBy(organizationMembers.organizationId);
-    return { children: readable, counts };
+    return { children, counts };
   });
 
   const memberCounts = new Map(counts.map((row) => [row.organizationId, row.memberCount]));
-  return children.map((child) => ({
-    ...child,
-    address: addressLine(child.address),
-    memberCount: memberCounts.get(child.id) ?? 0,
-  }));
+  return children.map((child) => {
+    if (!canReadOrganization(access, child.id)) {
+      // Affiliation metadata (where the affiliate sits and its affiliate code) stays visible; contacts, address, description and membership
+      // figures are the affiliate's own and need a direct membership (#1116).
+      return { ...child, email: null, phone: null, address: null, description: null, memberCount: null };
+    }
+    return { ...child, address: addressLine(child.address), memberCount: memberCounts.get(child.id) ?? 0 };
+  });
 }

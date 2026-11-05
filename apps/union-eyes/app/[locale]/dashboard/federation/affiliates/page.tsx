@@ -198,7 +198,9 @@ export default async function FederationAffiliatesPage({
                     )}
                   </div>
 
-                  <p className="text-sm text-muted-foreground mt-2">{t('list.members', { count: affiliate.memberCount })}</p>
+                  {affiliate.memberCount !== null && (
+                    <p className="text-sm text-muted-foreground mt-2">{t('list.members', { count: affiliate.memberCount })}</p>
+                  )}
                   {affiliate.description && <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{affiliate.description}</p>}
                 </div>
               ))}

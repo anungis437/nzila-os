@@ -7,8 +7,10 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import type { RLSTx } from '@/lib/db/with-rls-context';
 import { MAX_HIERARCHY_DEPTH } from '@/lib/utils/hierarchy-validation';
 import {
+  affiliationOrganizationIds,
   canAdministerOrganization,
-  readableOrganizationIds,
+  canReadOrganization,
+  directoryProjection,
   resolveOrganizationAccess,
   UUID_PATTERN,
 } from '@/lib/organizations/read-authority';
@@ -31,13 +33,14 @@ const MAX_LISTED_ORGANIZATIONS = 1000;
 const STATUS_FILTER_PATTERN = /^[a-z_]{1,32}$/;
 
 /**
- * GET /api/organizations — the organizations the caller may read.
+ * GET /api/organizations — the organizations the caller is affiliated with.
  *
- * Being signed in is not enough. The list is the caller's own active memberships, the organizations below one they
- * administer, or (for a platform administrator) every organization, read as the system role after that is decided here
- * rather than left to the connection's database role. Contact details, billing contact, subscription tier, settings and
- * provenance are returned only for organizations the caller administers; elsewhere the entry is the public profile.
- * Grievance counts (include_stats) are likewise administrative.
+ * Being signed in is not enough, and neither is a platform title. The list is the caller's own active memberships and the organizations
+ * below one they administer, read as the system role after that is decided here rather than left to the connection's database role.
+ * The hierarchy is an affiliation graph, not an access grant: an organization the caller is not a direct member of is listed as its
+ * directory entry only. Contact details, member counts, billing contact, subscription tier, settings and provenance are returned only for
+ * organizations the caller administers through their own membership; for other memberships the entry is the profile. Grievance counts
+ * (include_stats) are likewise for the organization's own administrators and are read under that membership (tenant row-level security).
  */
 export async function GET(req: NextRequest) {
   const { userId } = await auth();
@@ -53,64 +56,63 @@ export async function GET(req: NextRequest) {
   if (statusFilter && !STATUS_FILTER_PATTERN.test(statusFilter)) return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
   if (purpose !== null && purpose !== 'parent') return NextResponse.json({ error: 'Invalid purpose' }, { status: 400 });
 
-  const access = await resolveOrganizationAccess(userId);
-  // The organizations a caller may read are not the organizations they may choose as a parent. A parent is attached or changed only
-  // with platform governance (creating an organization and changing its parent both require it), so the candidates are every
-  // organization for a platform administrator and none for anyone else; an empty picker says that instead of offering rows the
-  // server would refuse.
-  if (purpose === 'parent' && !access.platform) return NextResponse.json({ data: [], purpose, assignable: false });
-  const readable = readableOrganizationIds(access);
-  if (readable && readable.length === 0) return NextResponse.json({ data: [] });
+  // The organizations a caller may see are not the organizations they may choose as a parent. Attaching or changing a parent needs an
+  // approved institutional workflow that is not built here, so no caller is offered candidates; an empty picker says that instead of
+  // offering rows the server would refuse. A platform title does not open the whole directory.
+  if (purpose === 'parent') return NextResponse.json({ data: [], purpose, assignable: false });
 
-  const conditions: SQL[] = [];
-  if (readable) conditions.push(inArray(organizations.id, readable));
+  const access = await resolveOrganizationAccess(userId);
+  const visible = affiliationOrganizationIds(access);
+  if (visible.length === 0) return NextResponse.json({ data: [] });
+
+  const conditions: SQL[] = [inArray(organizations.id, visible)];
   if (parentId) conditions.push(eq(organizations.parentId, parentId));
   if (statusFilter) conditions.push(eq(organizations.status, statusFilter));
 
-  const where = conditions.length > 0
-    ? and(...conditions)
-    : undefined;
+  const { rows, childrenByOrg } = await withSystemContext(async (tx) => {
+    const rows = await tx.select().from(organizations).where(and(...conditions)).orderBy(asc(organizations.hierarchyLevel), asc(organizations.name)).limit(MAX_LISTED_ORGANIZATIONS);
 
-  const mapped = await withSystemContext(async (tx) => {
-    const rows = await tx.select().from(organizations).where(where).orderBy(asc(organizations.hierarchyLevel), asc(organizations.name)).limit(MAX_LISTED_ORGANIZATIONS);
-
-    // When include_stats is requested, count active claims and children per org
-    const claimsByOrg: Record<string, number> = {};
+    // How many organizations sit directly below each listed one: placement in the hierarchy, part of the directory.
     const childrenByOrg: Record<string, number> = {};
     if (includeStats && rows.length > 0) {
-      const orgIds = rows.map(r => r.id);
-      const administered = orgIds.filter((id) => canAdministerOrganization(access, id));
-      if (administered.length > 0) {
-        const claimCounts = await tx.execute(
-          sql`SELECT organization_id::text as org_id, count(*)::int as cnt
-              FROM grievances
-              WHERE organization_id::text IN (${sql.join(administered.map(id => sql`${id}`), sql`,`)})
-                AND status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration')
-              GROUP BY organization_id`
-        );
-        for (const row of rowsOf<{ org_id: string; cnt: number }>(claimCounts)) {
-          claimsByOrg[row.org_id] = Number(row.cnt);
-        }
-      }
-
       const childCounts = await tx.execute(
         sql`SELECT parent_id::text as parent, count(*)::int as cnt
             FROM organizations
-            WHERE parent_id::text IN (${sql.join(orgIds.map(id => sql`${id}`), sql`,`)})
+            WHERE parent_id::text IN (${sql.join(rows.map(r => sql`${r.id}`), sql`,`)})
             GROUP BY parent_id`
       );
       for (const row of rowsOf<{ parent: string; cnt: number }>(childCounts)) {
         childrenByOrg[row.parent] = Number(row.cnt);
       }
     }
+    return { rows, childrenByOrg };
+  });
 
-    // Build parent name lookup from fetched rows
-    const nameById = new Map(rows.map(r => [r.id, r.name]));
+  // Active grievances, only for the organizations the caller administers directly, each read under the caller's own membership there.
+  const claimsByOrg: Record<string, number> = {};
+  if (includeStats) {
+    const administered = rows.map((r) => r.id).filter((id) => canAdministerOrganization(access, id));
+    await Promise.all(administered.map(async (organizationId) => {
+      const counted = await withRLSContext({ organizationId }, async (tx) => rowsOf<{ cnt: number }>(await tx.execute(
+        sql`SELECT count(*)::int as cnt
+            FROM grievances
+            WHERE organization_id = ${organizationId}
+              AND status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration')`
+      )));
+      claimsByOrg[organizationId] = Number(counted[0]?.cnt ?? 0);
+    }));
+  }
 
-    // Map camelCase DB fields to snake_case expected by frontend
-    return rows.map(row => {
-      const administrative = canAdministerOrganization(access, row.id);
-      return {
+  // Build parent name lookup from fetched rows
+  const nameById = new Map(rows.map(r => [r.id, r.name]));
+
+  // Map camelCase DB fields to snake_case expected by frontend
+  const mapped = rows.map(row => {
+    const parentName = row.parentId ? nameById.get(row.parentId) ?? null : null;
+    const stats = includeStats ? { childCount: childrenByOrg[row.id] ?? 0 } : {};
+    if (!canReadOrganization(access, row.id)) return { ...directoryProjection(row), parentName, ...stats };
+    const administrative = canAdministerOrganization(access, row.id);
+    return {
       id: row.id,
       name: row.name,
       slug: row.slug,
@@ -118,7 +120,7 @@ export async function GET(req: NextRequest) {
       short_name: row.shortName,
       organization_type: row.organizationType,
       parent_id: row.parentId,
-      parentName: row.parentId ? nameById.get(row.parentId) ?? null : null,
+      parentName,
       hierarchy_path: row.hierarchyPath,
       hierarchy_level: row.hierarchyLevel,
       province_territory: row.provinceTerritory,
@@ -145,15 +147,12 @@ export async function GET(req: NextRequest) {
         created_by: row.createdBy,
         legacy_org_id: row.legacyOrgId,
       } : {}),
-      ...(includeStats ? {
-        childCount: childrenByOrg[row.id] ?? 0,
-        ...(administrative ? { activeClaims: claimsByOrg[row.id] ?? 0 } : {}),
-      } : {}),
-      };
-    });
+      ...stats,
+      ...(includeStats && administrative ? { activeClaims: claimsByOrg[row.id] ?? 0 } : {}),
+    };
   });
 
-  return NextResponse.json({ data: mapped, ...(purpose ? { purpose, assignable: true } : {}) });
+  return NextResponse.json({ data: mapped });
 }
 
 /** POST /api/organizations — create organization in DB */

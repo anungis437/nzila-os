@@ -1,16 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
-// The organization read authority is proven in organizations-read-authority.route.test.ts; these tests exercise the
-// route's own behaviour as a caller who may read and administer the organization.
-const authority = vi.hoisted(() => ({ administers: true }));
-vi.mock('@/lib/organizations/read-authority', () => ({
-  resolveOrganizationAccess: async () => ({ platform: false, direct: new Map([['11111111-1111-4111-8111-111111111111', 'member']]), descendants: new Set() }),
-  canReadOrganization: () => true,
+// The organization read authority is exercised in organizations-read-authority.pglite.test.ts; these tests exercise the
+// route's own behaviour for a caller who is a direct member (reads), a direct administrator (administers), or only affiliated (sees).
+const authority = vi.hoisted(() => ({ sees: true, reads: true, administers: true }));
+vi.mock('@/lib/organizations/read-authority', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/organizations/read-authority')>()),
+  resolveOrganizationAccess: async () => ({ direct: new Map([['11111111-1111-4111-8111-111111111111', 'member']]), affiliated: new Set() }),
+  canSeeAffiliation: () => authority.sees,
+  canReadOrganization: () => authority.reads,
   canAdministerOrganization: () => authority.administers,
-  readableOrganizationIds: () => null,
-  directRoleIn: () => 'admin',
-  UUID_PATTERN: /^[0-9a-fA-F-]{36}$/,
 }));
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
@@ -56,6 +55,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   },
   withSystemContext: async (fn: () => Promise<unknown>) => fn(),
 }));
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => false }));
 vi.mock('@/lib/api-auth-guard', () => ({
   requireUserForOrganization: m.requireUserForOrganization,
   requireSystemAdmin: m.requireSystemAdmin,
@@ -87,6 +87,8 @@ describe('organizations/[id] route', () => {
     m.executeQueue = [];
     m.rlsContexts = [];
     m.updateQueue = [];
+    authority.sees = true;
+    authority.reads = true;
     authority.administers = true;
     m.auth.mockResolvedValue({ userId: 'u1' });
     m.requireUserForOrganization.mockResolvedValue({ roles: ['admin'], userId: 'u1' });
@@ -141,6 +143,37 @@ describe('organizations/[id] route', () => {
     expect(m.rlsContexts).toEqual([]);
   });
 
+  it('GET gives a caller affiliated only through an organization above the directory entry: no profile, counts or grievance query', async () => {
+    const { GET } = await loadRoute();
+    authority.reads = false;
+    authority.administers = false;
+    m.selectQueue.push([{ ...orgRow, email: 'office@org.example', description: 'private', website: 'https://org.example' }]);
+    m.executeQueue.push([{ cnt: 1 }]);
+
+    const response = await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111'), { params: Promise.resolve({ id: orgRow.id }) });
+    expect(response.status).toBe(200);
+    const { data } = await response.json();
+    expect(Object.keys(data).sort()).toEqual(
+      ['id', 'name', 'slug', 'organization_type', 'parent_id', 'hierarchy_level', 'hierarchy_path', 'status', 'childCount'].sort(),
+    );
+    expect(data).toMatchObject({ id: orgRow.id, childCount: 1 });
+    // Only the child count ran, as the system role; no grievance count under any context.
+    expect(mockDb.execute).toHaveBeenCalledTimes(1);
+    expect(m.rlsContexts).toEqual([]);
+  });
+
+  it('GET answers 404 without reading the organization to a caller who is not affiliated with it', async () => {
+    const { GET } = await loadRoute();
+    authority.sees = false;
+    authority.reads = false;
+    authority.administers = false;
+
+    const response = await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111'), { params: Promise.resolve({ id: orgRow.id }) });
+    expect(response.status).toBe(404);
+    expect(mockDb.select).not.toHaveBeenCalled();
+    expect(mockDb.execute).not.toHaveBeenCalled();
+  });
+
   it('GET gives an administrator contact details, membership figures and grievance counts', async () => {
     const { GET } = await loadRoute();
     m.selectQueue.push([{ ...orgRow, email: 'office@org.example', phone: '555-0100' }]);
@@ -149,6 +182,8 @@ describe('organizations/[id] route', () => {
     const { data } = await (await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111'), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) })).json();
     expect(data).toMatchObject({ email: 'office@org.example', phone: '555-0100', member_count: 3, active_member_count: 2, memberCount: 3, activeClaims: 2, totalClaims: 5, childCount: 1 });
     expect(mockDb.execute).toHaveBeenCalledTimes(2);
+    // The grievance count ran under the caller's own membership of the organization (tenant row-level security).
+    expect(m.rlsContexts).toEqual([{ organizationId: orgRow.id }]);
   });
 
   it('PATCH returns 403 when org auth check fails', async () => {
@@ -188,7 +223,7 @@ describe('organizations/[id] route', () => {
     expect(m.audit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'organization.update', userId: 'u1', organizationId: orgRow.id }));
   });
 
-  it('PATCH refuses parent or status changes from an organization administrator and writes nothing', async () => {
+  it('PATCH refuses parent or status changes (409) from an organization administrator and writes nothing', async () => {
     const { PATCH } = await loadRoute();
     m.requireSystemAdmin.mockRejectedValue(new Error('forbidden'));
 
@@ -197,7 +232,7 @@ describe('organizations/[id] route', () => {
       const response = await PATCH(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', {
         method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
       }), { params: Promise.resolve({ id: orgRow.id }) });
-      expect(response.status).toBe(403);
+      expect(response.status).toBe(409);
     }
     expect(mockDb.update).not.toHaveBeenCalled();
     expect(m.audit).not.toHaveBeenCalled();
@@ -217,17 +252,19 @@ describe('organizations/[id] route', () => {
     expect(response.status).toBe(200);
   });
 
-  it('PATCH lets platform governance change the parent affiliation', async () => {
+  it('PATCH refuses a parent or status change (409) even when the caller also holds a platform title: no escape hatch', async () => {
     const { PATCH } = await loadRoute();
-    // The route's own read, then the reparent helper's three reads: this organization's current parent, the new parent, the descendants.
-    m.selectQueue.push([orgRow], [{ parentId: null }], [{ id: '22222222-2222-4222-8222-222222222222', hierarchyPath: [], hierarchyLevel: 0 }], []);
-    m.updateQueue.push([{ ...orgRow, parentId: '22222222-2222-4222-8222-222222222222' }]);
-
-    const response = await PATCH(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', {
-      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ parent_id: '22222222-2222-4222-8222-222222222222' }),
-    }), { params: Promise.resolve({ id: orgRow.id }) });
-
-    expect(response.status).toBe(200);
+    // requireSystemAdmin resolves (a platform title) and is not consulted.
+    for (const body of [{ parent_id: '22222222-2222-4222-8222-222222222222' }, { status: 'suspended' }]) {
+      m.selectQueue.push([orgRow]);
+      const response = await PATCH(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111', {
+        method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+      }), { params: Promise.resolve({ id: orgRow.id }) });
+      expect(response.status).toBe(409);
+    }
+    expect(m.requireSystemAdmin).not.toHaveBeenCalled();
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
   });
 
   it('PATCH does not audit when the organization does not exist', async () => {

@@ -35,7 +35,8 @@ interface AffiliateData {
   name: string;
   organizationType: string;
   province?: string | null;
-  memberCount: number;
+  /** Null where the caller is not a member of the affiliate: administering the congress does not show its membership. */
+  memberCount: number | null;
   remittanceStatus: string;
   lastRemittanceDate: string | null;
   complianceStatus: string;
@@ -161,7 +162,7 @@ function AffiliatesTable({ affiliates, t }: { affiliates: AffiliateData[]; t: Tr
                     {affiliate.province || 'N/A'}
                   </div>
                 </TableCell>
-                <TableCell className="text-right">{affiliate.memberCount.toLocaleString()}</TableCell>
+                <TableCell className="text-right">{affiliate.memberCount === null ? 'N/A' : affiliate.memberCount.toLocaleString()}</TableCell>
                 <TableCell>{getStatusBadge(affiliate.remittanceStatus)}</TableCell>
                 <TableCell>{getComplianceBadge(affiliate.complianceStatus)}</TableCell>
                 <TableCell className="text-right">
@@ -339,8 +340,12 @@ export default async function CLCAffiliatesPage() {
                             <span className="mx-2">•</span>
                           </>
                         )}
-                        <Users className="h-3 w-3" />
-                        {federation.memberCount.toLocaleString()} members
+                        {federation.memberCount !== null && (
+                          <>
+                            <Users className="h-3 w-3" />
+                            {federation.memberCount.toLocaleString()} members
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { PgDialect } from 'drizzle-orm/pg-core';
+import type { SQL } from 'drizzle-orm';
 
 const ORG = '11111111-1111-4111-8111-111111111111';
 const ORG_404 = '22222222-2222-4222-8222-222222222222';
@@ -129,33 +131,59 @@ describe('organizations/switch route', () => {
     expect(response.status).toBe(403);
   });
 
-  it('POST allows platform admin to switch without membership', async () => {
+  // #1116: a platform title confers no tenant selection.
+  it('POST denies a platform administrator who holds no membership of the organization', async () => {
     const { POST } = await loadRoute();
     process.env.PLATFORM_ADMIN_USER_IDS = 'user_1,other_user';
-    m.selectQueue.push([
-      {
-        id: ORG,
-        name: 'Org 1',
-        slug: 'org-1',
-        organizationType: 'union',
-        parentId: null,
-        sectors: ['healthcare'],
-        provinceTerritory: 'ON',
-        description: 'Union org',
-        createdAt: new Date('2024-01-01T00:00:00.000Z'),
-        updatedAt: new Date('2024-02-01T00:00:00.000Z'),
-      },
-    ]);
+    m.selectQueue.push([{ id: ORG, name: 'Org 1', slug: 'org-1', status: 'active' }], []);
+
+    const response = await POST(request(JSON.stringify({ organizationId: ORG })));
+
+    expect(response.status).toBe(403);
+    expect((await response.json()).organization).toBeUndefined();
+    expect(recordSelection).not.toHaveBeenCalled();
+    // The membership lookup is made for the platform administrator exactly as for anyone else.
+    expect(mockTx.select).toHaveBeenCalledTimes(2);
+  });
+
+  it('POST lets a platform administrator switch only on their own membership, and records membership authority', async () => {
+    const { POST } = await loadRoute();
+    process.env.PLATFORM_ADMIN_USER_IDS = 'user_1';
+    m.selectQueue.push([{ id: ORG, name: 'Org 1', slug: 'org-1', status: 'active' }], [{ id: 'membership_1', userId: 'user_1', organizationId: ORG }]);
 
     const response = await POST(request(JSON.stringify({ organizationId: ORG })));
 
     expect(response.status).toBe(200);
-    const json = await response.json();
-    expect(json.success).toBe(true);
-    expect(json.organization).toMatchObject({ id: ORG, name: 'Org 1', slug: 'org-1' });
-    expect(recordSelection).toHaveBeenCalledWith(expect.objectContaining({ organizationId: ORG, userId: 'user_1', authority: 'platform_administrator' }));
-    // The administrator path reads the organization only; no membership lookup is made.
+    expect(recordSelection).toHaveBeenCalledWith(expect.objectContaining({ organizationId: ORG, userId: 'user_1', authority: 'membership' }));
+    expect(recordSelection).not.toHaveBeenCalledWith(expect.objectContaining({ authority: 'platform_administrator' }));
+  });
+
+  it('POST answers 404 to a platform administrator for an archived organization, before any membership lookup', async () => {
+    const { POST } = await loadRoute();
+    process.env.PLATFORM_ADMIN_USER_IDS = 'user_1';
+    m.selectQueue.push([{ id: ORG, name: 'Org 1', slug: 'org-1', status: 'archived' }], [{ id: 'membership_1' }]);
+
+    const response = await POST(request(JSON.stringify({ organizationId: ORG })));
+
+    expect(response.status).toBe(404);
+    expect(recordSelection).not.toHaveBeenCalled();
     expect(mockTx.select).toHaveBeenCalledTimes(1);
+  });
+
+  it('POST counts only an active, non-deleted membership: a suspended membership is denied', async () => {
+    const { POST } = await loadRoute();
+    // The suspended row is filtered out by the lookup's predicate, so the database returns nothing.
+    m.selectQueue.push([{ id: ORG, name: 'Org 1', slug: 'org-1', status: 'active' }], []);
+
+    const response = await POST(request(JSON.stringify({ organizationId: ORG })));
+
+    expect(response.status).toBe(403);
+    expect(recordSelection).not.toHaveBeenCalled();
+    const membershipWhere = mockTx.select.mock.results[1].value.where.mock.calls[0][0] as SQL;
+    const query = new PgDialect().sqlToQuery(membershipWhere);
+    expect(query.sql).toContain('"organization_members"."status" = $');
+    expect(query.sql).toContain('"organization_members"."deleted_at" is null');
+    expect(query.params).toEqual(expect.arrayContaining(['user_1', ORG, 'active']));
   });
 
   // DEF-0B10-OPL-10

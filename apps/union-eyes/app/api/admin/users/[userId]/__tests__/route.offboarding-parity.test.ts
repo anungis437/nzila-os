@@ -19,6 +19,11 @@
  *   4. reactivation (inactive -> active) does not invoke revocation;
  *   5. a missing membership row 404s before any revocation is attempted.
  *
+ * #1116: the platform caller here is also a live, direct administrator of
+ * org-a (the platform title alone is not enough; see
+ * app/api/__tests__/admin-users-id.route.test.ts for the denials), and the
+ * members are plain members (reactivating an officer or above is refused).
+ *
  * PR #752 round 13: reactivation now calls reactivateMemberAccess()
  * (round-12's reactivation branch only restored organization_members
  * .status, leaving the durable authOrganizationUsers membership disabled
@@ -58,6 +63,11 @@ vi.mock('@/lib/db/with-rls-context', () => ({
     };
     return operation(tx);
   },
+}));
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ platform: true, direct: new Map([['org-a', 'admin']]), descendants: new Set() }),
+  directRoleIn: (access: { direct: Map<string, string> }, organizationId: string) => access.direct.get(organizationId),
+  isAdministrativeRole: (role: string | undefined) => role === 'admin',
 }));
 vi.mock('@/lib/services/member-access-revocation-service', () => ({
   revokeMemberAccess: m.revokeMemberAccess,
@@ -110,7 +120,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
     // UUIDs here — proves the fix for the round-11/12 identity bug where
     // the membership row id was passed to session/case-access revocation.
     m.selectWhere.mockResolvedValue([
-      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'active', role: 'member', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
     ]);
     const { PUT } = await loadRoute();
 
@@ -130,7 +140,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('DELETE (soft-delete) also resolves the real authUserId and calls revokeMemberAccess with newLocalStatus "deleted"', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'active', role: 'member', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
     ]);
     const { DELETE } = await loadRoute();
 
@@ -150,7 +160,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('PUT (inactive -> active reactivation) calls reactivateMemberAccess with the real authUserId, not revokeMemberAccess', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'inactive', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'inactive', role: 'member', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
     ]);
     const { PUT } = await loadRoute();
 
@@ -170,7 +180,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('PUT reactivation returns 502 (not 200) when reactivateMemberAccess reports failure', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'inactive', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'inactive', role: 'member', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
     ]);
     m.reactivateMemberAccess.mockResolvedValue({
       success: false,
@@ -189,7 +199,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('PUT returns 502 (not 200) when revokeMemberAccess reports failure — offboarding is never certified from a partial revocation', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'active', role: 'member', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
     ]);
     m.revokeMemberAccess.mockResolvedValue({
       success: false,
@@ -211,7 +221,7 @@ describe('admin users route — synchronous fail-closed offboarding', () => {
 
   it('DELETE returns 502 (not 200) when revokeMemberAccess reports failure', async () => {
     m.selectWhere.mockResolvedValue([
-      { status: 'active', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
+      { status: 'active', role: 'member', organizationId: 'org-a', authUserId: 'real-auth-user-999' },
     ]);
     m.revokeMemberAccess.mockResolvedValue({
       success: false,
