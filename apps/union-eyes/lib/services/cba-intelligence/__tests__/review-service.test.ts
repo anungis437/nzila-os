@@ -106,8 +106,8 @@ describe("review-service", () => {
     [
       "wage_adjustment",
       "cbaIntelWageAdjustments",
-      { id: "w1", adjustmentType: "general_increase", adjustmentPercent: "2.500", adjustmentFlat: null, year: 2026, classification: "Clerks", confidence: "0.600", citationText: "2.5% in 2026", isInferred: false, reviewStatus: "needs_followup", createdAt },
-      { title: "general increase · 2.5% · 2026 · Clerks", employer: null, jurisdiction: null, clauseFamily: null, confidence: 0.6, citationText: "2.5% in 2026", isInferred: false, reviewStatus: "needs_followup" },
+      { id: "w1", adjustmentType: "general_increase", adjustmentPercent: "2.500", adjustmentFlat: null, year: 2026, classification: "Cashiers", confidence: "0.600", citationText: "2.5% in 2026", isInferred: false, reviewStatus: "needs_followup", createdAt },
+      { title: "general increase · 2.5% · 2026 · Cashiers", employer: null, jurisdiction: null, clauseFamily: null, confidence: 0.6, citationText: "2.5% in 2026", isInferred: false, reviewStatus: "needs_followup" },
     ],
     [
       "clause",
