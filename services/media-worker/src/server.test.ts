@@ -95,6 +95,27 @@ describe('validateEnv', () => {
     expect(env.S3_REGION).toBe('auto')
   })
 
+  it('accepts bounded worker concurrency at 64 and rejects 65', () => {
+    const baseEnv = {
+      S3_ENDPOINT: 'https://s3.example.com',
+      S3_ACCESS_KEY_ID: 'access',
+      S3_SECRET_ACCESS_KEY: 'secret',
+      S3_BUCKET: 'bucket',
+      REDIS_URL: 'redis://localhost:6379',
+      DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
+      NODE_ENV: 'test',
+    }
+
+    process.env = { ...baseEnv, WORKER_CONCURRENCY: '64' }
+    expect(validateEnv().WORKER_CONCURRENCY).toBe(64)
+
+    process.env = { ...baseEnv, WORKER_CONCURRENCY: '65' }
+    expect(() => validateEnv()).toThrow('WORKER_CONCURRENCY')
+
+    process.env = { ...baseEnv, WORKER_CONCURRENCY: '0' }
+    expect(() => validateEnv()).toThrow('WORKER_CONCURRENCY')
+  })
+
   it('throws with readable validation errors', () => {
     process.env = {
       S3_ENDPOINT: 'notaurl',
