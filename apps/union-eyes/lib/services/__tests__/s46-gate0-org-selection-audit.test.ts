@@ -11,9 +11,12 @@ describe('Gate 0 batch B103: organization selection is audited before it takes e
     expect(canonical.indexOf('await recordOrganizationSelection(')).toBeLessThan(canonical.indexOf('await rebindSessionOrganization('))
   })
 
-  it('records the legacy selection, names a platform administrator, and refuses when the record cannot be written', () => {
+  it('records the legacy selection on membership authority only, and refuses when the record cannot be written', () => {
     const route = src('app/api/organizations/switch/route.ts')
-    expect(route).toContain("isAdmin ? 'platform_administrator' : 'membership'")
+    // #1116: a platform title confers no tenant selection, so the legacy path names no platform authority.
+    expect(route).toContain("authority: 'membership', mode: 'legacy'")
+    expect(route).not.toContain('platform_administrator')
+    expect(route).not.toContain('isPlatformAdminUser')
     expect(route.indexOf('recordOrganizationSelection({')).toBeLessThan(route.indexOf('success: true'))
     expect(route).toContain('status: 503')
   })

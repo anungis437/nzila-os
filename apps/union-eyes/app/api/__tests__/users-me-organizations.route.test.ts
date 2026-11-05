@@ -113,14 +113,14 @@ describe('users/me/organizations route', () => {
     expect(mockDb.update).not.toHaveBeenCalled();
   });
 
-  it('returns all organizations for platform admins', async () => {
+  // #1116: a platform title confers no tenant enumeration.
+  it('offers a platform administrator only the active organizations of their own active memberships', async () => {
     const { GET } = await loadRoute();
     process.env.PLATFORM_ADMIN_USER_IDS = 'user_1';
     m.selectQueue.push(
       [{ id: 'm1', organizationId: 'org_1', userId: 'user_1', role: 'admin', isPrimary: true, joinedAt: new Date(), createdAt: new Date() }],
       [
-        { id: 'org_1', name: 'Org One', slug: 'org-one', organizationType: 'union', sectors: [], provinceTerritory: 'ON', createdAt: new Date(), updatedAt: new Date() },
-        { id: 'org_2', name: 'Org Two', slug: 'org-two', organizationType: 'union', sectors: [], provinceTerritory: 'AB', createdAt: new Date(), updatedAt: new Date() },
+        { id: 'org_1', name: 'Org One', slug: 'org-one', organizationType: 'union', sectors: [], provinceTerritory: 'ON', status: 'active', createdAt: new Date(), updatedAt: new Date() },
       ],
     );
 
@@ -128,7 +128,26 @@ describe('users/me/organizations route', () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.organizations).toHaveLength(2);
+    expect(payload.organizations.map((o: { id: string }) => o.id)).toEqual(['org_1']);
+    expect(payload.memberships.map((x: { organizationId: string }) => x.organizationId)).toEqual(['org_1']);
+    // The organization read is bounded to the caller's membership ids, never an unfiltered list.
+    const orgChain = mockDb.select.mock.results[1].value;
+    expect(orgChain.where).toHaveBeenCalledTimes(1);
+    expect(orgChain.limit).not.toHaveBeenCalled();
+  });
+
+  it('offers a platform administrator with no membership no organization at all', async () => {
+    const { GET } = await loadRoute();
+    process.env.PLATFORM_ADMIN_USER_IDS = 'user_1';
+    m.selectQueue.push([], [{ id: 'org_2', name: 'Org Two', slug: 'org-two', status: 'active' }]);
+
+    const response = await GET(new NextRequest('http://localhost/api/users/me/organizations'));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.organizations).toEqual([]);
+    expect(payload.memberships).toEqual([]);
+    expect(mockDb.select).toHaveBeenCalledTimes(1);
   });
 
   it('offers a member only the active organizations they belong to, with the memberships of those organizations', async () => {

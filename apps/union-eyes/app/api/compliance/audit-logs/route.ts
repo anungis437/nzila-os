@@ -1,12 +1,15 @@
 /**
  * GET POST /api/compliance/audit-logs
  * Compliance audit logs backed by PostgreSQL.
+ * The list is readable only by a live, direct administrator of the organization in context (#1116): a platform title, a role carried
+ * in provider metadata, or an administrator's role in a parent organization is not enough.
  */
 import { withApi, ApiError, z } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { auditLogs } from '@/db/schema/audit-security-schema';
 import { eq, desc } from 'drizzle-orm';
+import { directRoleIn, isAdministrativeRole, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +17,9 @@ export const GET = withApi(
   { auth: { required: true, minRole: 'admin' } },
   async ({ organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.forbidden('Organization audit context required');
+    if (!isAdministrativeRole(directRoleIn(await resolveOrganizationAccess(userId), organizationId))) {
+      throw ApiError.forbidden('Reading the audit log requires direct administration of this organization');
+    }
     return withRLSContext({ organizationId, userId }, async (tx) => {
       // The record of who did what and when. The captured values, network address, user agent, session and correlation ids,
       // free-form metadata and error text stay in the store and are not served by this list.

@@ -7,6 +7,8 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   rows: [] as Record<string, unknown>[],
   persistAtomicAudit: vi.fn(),
+  direct: new Map<string, string>(),
+  resolveOrganizationAccess: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError }));
@@ -14,6 +16,11 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomic
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) =>
     fn({ select: () => ({ from: () => ({ where: () => ({ limit: async () => m.rows }) }) }) }),
+}));
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: m.resolveOrganizationAccess,
+  directRoleIn: (access: { direct: Map<string, string> }, organizationId: string) => access.direct.get(organizationId),
+  isAdministrativeRole: (role: string | undefined) => role === 'admin',
 }));
 vi.mock('@/db/schema/audit-security-schema', () => ({ auditLogs: { auditId: 'auditId', organizationId: 'organizationId' } }));
 vi.mock('drizzle-orm', async (importOriginal) => {
@@ -32,6 +39,8 @@ const ctx = (over: Record<string, unknown> = {}) => ({
 describe('audits/[id] route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    m.direct = new Map([['org_1', 'admin']]);
+    m.resolveOrganizationAccess.mockImplementation(async () => ({ platform: false, direct: m.direct, descendants: new Set() }));
     m.withApi.mockImplementation((_cfg: unknown, handler: (c: any) => Promise<unknown>) => (c: any) => handler(c));
     m.rows = [{
       auditId: AUDIT_ID, action: 'viewed', resourceType: 'claim', resourceId: 'c1', severity: 'info', outcome: 'success',
@@ -64,6 +73,21 @@ describe('audits/[id] route', () => {
     const { GET } = await loadRoute();
     m.rows = [];
     await expect(GET(ctx())).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  // #1116: the audit history is tenant content; only a live, direct administrator of the organization in context reads it.
+  it('refuses, before any read or access audit, a platform administrator, an ancestor administrator or an officer of the organization', async () => {
+    const { GET } = await loadRoute();
+    for (const access of [
+      { platform: true, direct: new Map<string, string>(), descendants: new Set<string>() },
+      { platform: false, direct: new Map([['parent_org', 'admin']]), descendants: new Set(['org_1']) },
+      { platform: false, direct: new Map([['org_1', 'officer']]), descendants: new Set<string>() },
+    ]) {
+      m.resolveOrganizationAccess.mockResolvedValueOnce(access);
+      await expect(GET(ctx())).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    }
+    expect(m.resolveOrganizationAccess).toHaveBeenCalledWith('user_1');
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 });

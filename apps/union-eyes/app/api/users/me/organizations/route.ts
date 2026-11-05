@@ -5,14 +5,14 @@
  * Queries Drizzle/PostgreSQL directly (replaces Django proxy).
  *
  * V2 uses active private memberships, including for platform administrators.
- * Legacy PLATFORM_ADMIN_USER_IDS can still enumerate all organizations when V2 is off.
+ * Legacy mode does the same: everyone, a platform administrator included, is offered only the active organizations of their own
+ * active, non-removed memberships. A platform title confers no tenant enumeration (#1116).
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { createLogger } from '@nzila/os-core'
-import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { organizationWire } from '@/lib/organizations/organization-wire';
@@ -39,8 +39,6 @@ export async function GET(_req: NextRequest) {
 
     logger.info('[/api/users/me/organizations] Request started', { userId });
 
-    const isAdmin = await isPlatformAdminUser(userId);
-
     // A person's memberships span organizations, which no single-organization transaction can show, so they are read by the system role,
     // as the organization read authority does (lib/organizations/read-authority.ts). Only an active, non-removed membership is the caller's:
     // a suspended or removed member is not offered an organization they can no longer switch into.
@@ -64,17 +62,7 @@ export async function GET(_req: NextRequest) {
         membershipCount: ownMemberships.length,
       });
 
-      if (isAdmin) {
-        // Platform admins can see ALL organizations
-        const allOrgs = await tx.select().from(organizations).limit(500);
-        logger.info('[/api/users/me/organizations] Platform admin — returning all orgs', {
-          userId,
-          count: allOrgs.length,
-        });
-        return { memberships: ownMemberships, orgs: allOrgs };
-      }
-
-      // Regular users only see the active organizations they are members of
+      // Everyone, a platform administrator included, sees only the active organizations they are members of.
       const orgIds = [...new Set(ownMemberships.map(m => m.organizationId))];
       const memberOrgs = orgIds.length > 0
         ? await tx.select().from(organizations).where(inArray(organizations.id, orgIds))
@@ -82,7 +70,7 @@ export async function GET(_req: NextRequest) {
       const activeOrgs = memberOrgs.filter(o => (o.status ?? 'active') === 'active');
       const activeIds = new Set(activeOrgs.map(o => o.id));
 
-      logger.info('[/api/users/me/organizations] Non-admin org resolution complete', {
+      logger.info('[/api/users/me/organizations] Org resolution complete', {
         userId,
         membershipCount: ownMemberships.length,
         orgCount: activeOrgs.length,
