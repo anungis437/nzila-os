@@ -89,8 +89,10 @@ describe.skipIf(!URL)('the exit interview page read on the combined schema, as t
     expect(await read('member', reader, ORG_A, ids.legal)).toBeNull()
   })
 
-  it('lets a steward read what was not shared and a draft, but not what needs an administrator, which an administrator reads', async () => {
-    expect(await read('steward', reader, ORG_A, ids.notShared)).toMatchObject({ id: ids.notShared })
+  it('lets a steward read a draft but not a finished interview without the retiree\'s consent, nor what needs an administrator, which an administrator reads', async () => {
+    // A finished interview is shared only while the retiring employee's consent stands; office does not override it.
+    expect(await read('steward', reader, ORG_A, ids.notShared)).toBeNull()
+    expect(await read('admin', reader, ORG_A, ids.notShared)).toBeNull()
     expect(await read('steward', reader, ORG_A, ids.draft)).toMatchObject({ id: ids.draft })
     expect(await read('steward', reader, ORG_A, ids.legal)).toBeNull()
     expect(await read('admin', reader, ORG_A, ids.legal)).toMatchObject({ id: ids.legal })

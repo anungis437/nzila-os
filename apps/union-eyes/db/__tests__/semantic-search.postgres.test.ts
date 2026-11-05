@@ -256,8 +256,9 @@ describe.skipIf(!URL)('semantic search on the combined schema, as the real runti
 
       // Below steward a published interview is shared only with the retiree's consent, and only at the levels the role may read.
       expect((await hybrid(ORG_A, { levels: ['public_internal'], stewardPlus: false })).map((result) => result.id)).toEqual([open])
-      // A steward or above reads a published interview whose retiree has not consented, within the levels of the role.
-      expect((await hybrid(ORG_A, { levels: ['public_internal', 'restricted'], stewardPlus: true })).map((result) => result.id).sort()).toEqual([open, unconsented, restricted].sort())
+      // A steward or above reads more levels, but never a published interview whose retiree has not consented.
+      expect((await hybrid(ORG_A, { levels: ['public_internal', 'restricted'], stewardPlus: true })).map((result) => result.id).sort()).toEqual([open, restricted].sort())
+      expect((await hybrid(ORG_A, { levels: ['public_internal', 'restricted'], stewardPlus: true })).map((result) => result.id)).not.toContain(unconsented)
       expect(await hybrid(ORG_A, { levels: [], stewardPlus: true })).toEqual([])
       // One organization never reads another's interviews: the other local's interview is not among them, and row-level security says so before the predicate.
       expect(await hybrid(ORG_B, { levels: ['public_internal'], stewardPlus: false })).toHaveLength(1)
