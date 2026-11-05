@@ -2967,6 +2967,9 @@ importers:
       '@union-claims/financial':
         specifier: workspace:*
         version: link:../../../../packages/union-claims-financial
+      '@nzila/payments-stripe':
+        specifier: workspace:*
+        version: link:../../../../packages/payments-stripe
       cors:
         specifier: ^2.8.5
         version: 2.8.6
