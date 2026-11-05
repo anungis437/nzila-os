@@ -55,6 +55,17 @@ describe('lib/dashboard/role-experience', () => {
       expect(canAccessDashboardPath('/dashboard/workspace', 'member', false)).toBe(false);
       expect(canAccessDashboardPath('/dashboard/security', 'member', false)).toBe(false);
     });
+    it('keeps the existing CBA Intelligence page reachable by eligible roles without advertising it as a new primary destination', () => {
+      const route = '/dashboard/cba-intelligence';
+      expect(canAccessDashboardPath(route, 'member', false)).toBe(false);
+      for (const experience of ['staff', 'executive', 'governance', 'admin'] as const) {
+        expect(canAccessDashboardPath(route, experience, false), experience).toBe(true);
+        expect(getNavigationForExperience(experience).some((item) => item.href === route), experience).toBe(false);
+      }
+      // Navigating to the page never grants dataset access: the server role guard
+      // and commercial_reporting entitlement on its APIs remain in force.
+    });
+
     it('blocks excluded surfaces in pilot mode', () => {
       expect(canAccessDashboardPath('/dashboard/executive-operating-intelligence', 'executive', false)).toBe(true);
       expect(canAccessDashboardPath('/dashboard/executive-operating-intelligence', 'executive', true)).toBe(false);
