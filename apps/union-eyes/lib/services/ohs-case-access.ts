@@ -206,6 +206,12 @@ export async function assertOhsCaseAccessForCreate(input: {
   linkedCneesstFilingId?: unknown;
 }): Promise<void> {
   if (!input.organizationId || !input.actorUserId) throw ApiError.forbidden();
+  // A malformed id is the caller's request being invalid, not a question of authority: the schema layer the
+  // generic route already runs (zod) catches most of this, but this is also the only one of the three crud-factory
+  // hooks this module wires up that ever sees a value from the request body rather than an already-stored row, so
+  // it is the one place the field's own shape still needs checking directly.
+  if (typeof input.memberId === 'string' && !isUuid(input.memberId)) throw ApiError.badRequest('memberId must be a valid uuid');
+  if (typeof input.linkedCneesstFilingId === 'string' && !isUuid(input.linkedCneesstFilingId)) throw ApiError.badRequest('cneesstFilingId must be a valid uuid');
   const decision = await evaluateOhsCaseAccess({
     organizationId: input.organizationId,
     actorUserId: input.actorUserId,
