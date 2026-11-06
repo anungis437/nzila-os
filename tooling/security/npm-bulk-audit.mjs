@@ -174,12 +174,15 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
   return flat
 }
 
-async function fetchAdvisories(pkgMap) {
+export async function fetchAdvisories(pkgMap) {
   const requestBody = {}
   for (const [name, versions] of pkgMap) requestBody[name] = [...versions]
 
   const response = await fetch(BULK_ENDPOINT, {
     method: 'POST',
+    // Never forward the installed dependency inventory to a redirected origin.
+    // Registry redirects are not audit completion evidence.
+    redirect: 'manual',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody),
     signal: AbortSignal.timeout(30000),
