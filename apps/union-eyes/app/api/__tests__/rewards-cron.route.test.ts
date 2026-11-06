@@ -90,6 +90,18 @@ describe('rewards/cron route', () => {
     expect(response.status).toBe(200);
     expect(payload.data.executed).toEqual([{ task: 'expirations', result: expect.objectContaining({ sent: 10 }) }]);
     expect(m.sendBatchExpirationWarnings).toHaveBeenCalledTimes(1);
+    // DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES: the scan is routed per active organization, not one cross-organization read.
+    expect(m.sendBatchExpirationWarnings).toHaveBeenCalledWith(['org_1', 'org_2']);
+  });
+
+  it('scans no organization for expiring credits when no organization is active', async () => {
+    m.db.query.organizations.findMany.mockResolvedValue([]);
+    const { POST } = await loadRoute();
+    await POST(new NextRequest('http://localhost/api/rewards/cron?task=expirations', {
+      method: 'POST', headers: { authorization: 'Bearer test-secret' },
+    }));
+    // An empty list is a scan of nothing; it is never the unscoped cross-organization scan (called with no list).
+    expect(m.sendBatchExpirationWarnings).toHaveBeenCalledWith([]);
   });
 
   it('runs all tasks when task=all', async () => {
