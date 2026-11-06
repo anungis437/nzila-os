@@ -63,14 +63,18 @@ const PATCH = withApi(
   async ({ body, params, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.forbidden();
     const { id } = params as { id: string };
-    const fields = Object.keys(body);
+    // Re-asserted here, not just declared on the route: a client-supplied organizationId, createdBy or any other field the schema
+    // does not name must never reach the SET clause below, even if the framework's own parse of `body` were ever bypassed.
+    const parsed = patchSchema.safeParse(body);
+    if (!parsed.success) throw ApiError.badRequest('Invalid anti-scab violation update', { issues: parsed.error.issues });
+    const fields = Object.keys(parsed.data);
     if (fields.length === 0) throw ApiError.badRequest('No field to update');
 
     // The change and its audit record commit together; the author condition is part of the update itself.
     return withRLSContext({ organizationId }, async (tx) => {
       const [row] = await tx
         .update(antiScabViolations)
-        .set({ ...body, updatedAt: sql`now()` } as never)
+        .set({ ...parsed.data, updatedAt: sql`now()` } as never)
         .where(and(eq(antiScabViolations.id, id), eq(antiScabViolations.organizationId, organizationId), antiScabAuthorCondition(userId)))
         .returning();
       if (!row) throw ApiError.notFound('Anti scab violation');
