@@ -1,42 +1,47 @@
 /**
  * GET /api/metrics/operational
  *
- * Platform-wide operational counters for observability dashboards. The caller is the platform operator: a caller presenting the
- * service key (compared in constant time) or a platform administrator. An ordinary signed-in user of any organization is refused.
- *
- * Only infrastructure state is read here: the job queue's depth. Issue #1116: a platform title confers no tenant content, and an
- * aggregate computed over every organization's claims or claim-update text is tenant content. So workflow transitions, claims past
- * their SLA and failure-like updates are not computed from the tenants' tables; they are returned as null ("not measured here"),
- * like the request and error rates that come from the observability system, rather than as proxies. A failed read is an error, not
- * zero.
+ * Dedicated, read-only infrastructure measurement. An operator title or a
+ * generic AI service secret never gives access. The caller must hold the
+ * distinct capability credential metrics:platform_operational:read.
+ * No union claim, member, grievance, case or tenant tables may be queried.
  */
 import { NextResponse } from 'next/server'
 import { getAllQueueStats } from '@/lib/job-queue'
-import { requireApiAuth, isPlatformAdminUser } from '@/lib/api-auth-guard'
 import { constantTimeEquals } from '@/lib/security/constant-time'
 import { logger } from '@/lib/logger'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
-async function isPlatformOperator(req: Request): Promise<{ ok: true } | { ok: false; status: 401 | 403 }> {
-  if (constantTimeEquals(req.headers.get('x-service-key'), process.env.AI_SERVICE_KEY)) return { ok: true }
-  let userId: string | undefined
-  try {
-    userId = (await requireApiAuth()).userId ?? undefined
-  } catch {
-    return { ok: false, status: 401 }
+const CAPABILITY = 'metrics:platform_operational:read'
+
+function authenticateMetricsService(req: Request): 'allowed' | 'unconfigured' | 'denied' {
+  const expected = process.env.UE_METRICS_SERVICE_KEY
+  // Absence, underlength and secret re-use are configuration errors, never
+  // invitations to fall back to interactive/platform or shared AI authority.
+  if (!expected || expected.length < 32 ||
+      expected === process.env.AI_SERVICE_KEY ||
+      expected === process.env.QUEUE_STATUS_SERVICE_KEY) {
+    return 'unconfigured'
   }
-  if (!userId) return { ok: false, status: 401 }
-  return (await isPlatformAdminUser(userId)) ? { ok: true } : { ok: false, status: 403 }
+  return constantTimeEquals(req.headers.get('x-service-key'), expected) ? 'allowed' : 'denied'
 }
 
 export async function GET(req: Request) {
-  const denial = await isPlatformOperator(req)
-  if (!denial.ok) {
-    return NextResponse.json({ error: denial.status === 401 ? 'Unauthorized' : 'Forbidden' }, { status: denial.status })
+  const access = authenticateMetricsService(req)
+  if (access !== 'allowed') {
+    // A caller without the matching credential is unauthorized whatever the server's configuration: answering 503 to an
+    // anonymous request would tell it whether the key is configured. The unconfigured or unsafe state is the operator's to
+    // see, so it is logged here (and the Control Plane consumer shows no data), never returned to the caller.
+    if (access === 'unconfigured') logger.error('operational_metrics_service_key_unconfigured', { capability: CAPABILITY })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: { 'Cache-Control': 'no-store' } })
   }
 
-  const now = new Date()
+  logger.info('operational_metrics_service_authorized', {
+    principal: 'control-plane-operational-metrics',
+    capability: CAPABILITY,
+  })
 
   try {
     const queueStats = await getAllQueueStats()
@@ -44,19 +49,17 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       scope: 'platform',
-      // Aggregates over the tenants' claims are tenant content (#1116): the platform operator does not read them.
       workflow_transition_rate: null,
       sla_violations: null,
       failure_like_updates: null,
       queue_depth: queueDepth,
-      // Request and error rates come from the observability system; this route does not measure them.
       request_count: null,
       error_rate: null,
       window: '24h',
-      generated_at: now.toISOString(),
-    })
+      generated_at: new Date().toISOString(),
+    }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     logger.error('operational_metrics_failed', { error })
-    return NextResponse.json({ error: 'Failed to compute metrics' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to compute metrics' }, { status: 500, headers: { 'Cache-Control': 'no-store' } })
   }
 }
