@@ -75,7 +75,7 @@ describe('GET /api/tenant/current', () => {
 describe('GET /api/union-eyes/queue-status', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.AI_SERVICE_KEY = 'svc-key';
+    process.env.QUEUE_STATUS_SERVICE_KEY = 'svc-key-dedicated-to-queue-status-route';
     process.env.DJANGO_API_URL = 'http://django.internal';
     m.requireApiAuth.mockResolvedValue({});
     m.requireSystemAdmin.mockResolvedValue(undefined);
@@ -101,7 +101,7 @@ describe('GET /api/union-eyes/queue-status', () => {
 
   it('serves the control plane (service key) and a platform administrator', async () => {
     m.requireApiAuth.mockRejectedValue(new Error('no session'));
-    expect((await call({ 'x-service-key': 'svc-key' })).status).toBe(200);
+    expect((await call({ 'x-service-key': 'svc-key-dedicated-to-queue-status-route' })).status).toBe(200);
     m.requireApiAuth.mockResolvedValue({});
     const admin = await call();
     expect(admin.status).toBe(200);
@@ -110,7 +110,7 @@ describe('GET /api/union-eyes/queue-status', () => {
 
   it('does not return the cause of a backend failure', async () => {
     m.getAllQueueStats.mockRejectedValue(new Error('connect ECONNREFUSED redis://user:secret@10.0.0.5:6379'));
-    const response = await call({ 'x-service-key': 'svc-key' });
+    const response = await call({ 'x-service-key': 'svc-key-dedicated-to-queue-status-route' });
     expect(response.status).toBe(503);
     expect(JSON.stringify(await response.json())).not.toMatch(/secret|10\.0\.0\.5|ECONNREFUSED/);
   });

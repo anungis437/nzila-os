@@ -10,26 +10,39 @@ import { NextResponse } from 'next/server'
 import { getAllQueueStats, getFailedJobs } from '@/lib/job-queue'
 import { requireApiAuth, requireSystemAdmin } from '@/lib/api-auth-guard'
 import { logger } from '@/lib/logger'
-import { timingSafeEqual } from 'node:crypto'
-
-// A shared secret is compared in constant time, so response timing does not reveal how much of a guess was right.
-function sameSecret(presented: string | null, expected: string): boolean {
-  if (!presented) return false
-  const a = Buffer.from(presented)
-  const b = Buffer.from(expected)
-  return a.length === b.length && timingSafeEqual(a, b)
-}
+import { constantTimeEquals } from '@/lib/security/constant-time'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * The machine path authenticates with QUEUE_STATUS_SERVICE_KEY alone: a key dedicated to this route, at least 32 characters, and distinct
+ * from AI_SERVICE_KEY and UE_METRICS_SERVICE_KEY, so a leak of either of those does not open queue data (issue #1118). There is no fallback
+ * to the shared AI key in any environment. Absence, underlength or re-use is a configuration error the operator sees in the log; the caller
+ * sees 401 either way, so the answer does not tell it whether the key is configured.
+ */
+function authenticateQueueService(presented: string): 'allowed' | 'unconfigured' | 'denied' {
+  const expected = process.env.QUEUE_STATUS_SERVICE_KEY
+  if (!expected || expected.length < 32 ||
+      expected === process.env.AI_SERVICE_KEY ||
+      expected === process.env.UE_METRICS_SERVICE_KEY) {
+    return 'unconfigured'
+  }
+  return constantTimeEquals(presented, expected) ? 'allowed' : 'denied'
+}
+
 export async function GET(req: Request) {
   try {
-    // Queue counts and failed task names are platform-wide operational data, not an organization's: the control plane (service key)
-    // or a platform administrator may read them, and a signed-in member may not.
-    // A key dedicated to this route; the shared AI service key is accepted only outside production, so a leak of the AI key does not open platform queue data.
-    const svcKey = process.env.QUEUE_STATUS_SERVICE_KEY || (process.env.NODE_ENV === 'production' ? undefined : process.env.AI_SERVICE_KEY)
-    const isServiceRequest = !!svcKey && sameSecret(req.headers.get('x-service-key'), svcKey)
-    if (!isServiceRequest) {
+    // Queue counts and failed task identifiers/names are platform infrastructure data, not an organization's: no claim, member, case or
+    // other tenant content is read or returned. The monitoring caller (service key) or a platform administrator may read them; a signed-in
+    // member may not. A request that presents a service key is judged on that key only and never falls through to the session path.
+    const presentedKey = req.headers.get('x-service-key')
+    if (presentedKey !== null) {
+      const access = authenticateQueueService(presentedKey)
+      if (access === 'unconfigured') logger.error('queue_status_service_key_unconfigured', { route: '/api/union-eyes/queue-status' })
+      if (access !== 'allowed') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: { 'Cache-Control': 'no-store' } })
+      }
+    } else {
       try {
         await requireApiAuth()
       } catch {
