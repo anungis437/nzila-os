@@ -84,16 +84,18 @@ test.describe("Labor continuity intelligence page", () => {
     const entitled = await hasCommercialReportingAccess(page);
 
     await page.goto(PAGE_URL, { waitUntil: "domcontentloaded" });
-    const onContinuityRoute = page.url().includes("/dashboard/cba-intelligence");
-
-    if (!entitled || !onContinuityRoute) {
-      // Module-gated (no commercial_reporting entitlement) or role gate redirected
-      // away — verify we remain stable on a safe dashboard surface. Use a generous
-      // timeout so a late client-side gating redirect has time to settle.
+    if (!entitled) {
+      // A denied entitlement must fail closed. Wait for the client guard
+      // rather than treating transient server-rendered tabs as authorization.
       await expect(page).toHaveURL(/\/dashboard(\/|$)/, { timeout: 15_000 });
       await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator('main [role="tablist"]')).toHaveCount(0);
       return;
     }
+
+    // A successful entitlement must not be silently reclassified as a
+    // legitimate denial if hydration redirects the executive away.
+    await expect(page).toHaveURL(/\/dashboard\/cba-intelligence(?:[/?#]|$)/, { timeout: 15_000 });
 
     const primaryTabList = page.locator('main [role="tablist"]').first();
     await expect(primaryTabList).toBeVisible({ timeout: 10_000 });
