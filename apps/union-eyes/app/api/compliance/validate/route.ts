@@ -24,7 +24,7 @@ const dateText = z.string().max(40).refine((value) => !Number.isNaN(new Date(val
 // Counts are integers from an untrusted caller, never legal or membership attestations.
 const countLike = z.union([
   z.number().int().nonnegative().finite(),
-  z.string().regex(/^(0|[1-9]\\d{0,14})$/, 'must be a nonnegative integer'),
+  z.string().regex(/^(0|[1-9]\d{0,14})$/, 'must be a nonnegative integer'),
 ]).refine((value) => Number.isSafeInteger(Number(value)), 'must be a safe integer');
 
 const validateCountPair = (
