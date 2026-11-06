@@ -59,7 +59,40 @@ const callers = {
   icra_organizations: 'app/api/icra/start/route.ts',
   workbook_purchases: 'app/api/payments/webhooks/stripe/route.ts',
   workbooks: 'app/api/payments/webhooks/stripe/route.ts',
+  // Relations whose SYSTEM mutation authority entered the plan with the 2026-10-29 (R-46) and 2026-11-04
+  // regenerations. Each caller is the source file, listed in the relation's supportingCapability, that
+  // performs the mutation under the system role or opens the system context in which it runs.
+  contact_submissions: 'app/api/contact/route.ts',
+  cookie_consents: 'app/api/gdpr/cookie-consent/route.ts',
+  document_intakes: 'lib/documents/intake-lifecycle.ts',
+  email_address_suppressions: 'lib/communications/address-suppression.ts',
+  geofence_events: 'app/api/cron/location-retention/route.ts',
+  in_app_notifications: 'app/api/rewards/cron/route.ts',
+  location_deletion_log: 'app/api/cron/location-retention/route.ts',
+  location_tracking: 'app/api/cron/location-retention/route.ts',
+  member_location_consent: 'app/api/cron/location-retention/route.ts',
+  member_roles: 'db/queries/enhanced-rbac-queries.ts',
+  newsletter_list_subscribers: 'app/api/communications/webhooks/resend/route.ts',
+  org_subscriptions: 'app/api/pilot/apply/[id]/commercial-transition/route.ts',
+  payment_allocations: 'services/platform-economics/billing-service.ts',
+  permission_exceptions: 'db/queries/enhanced-rbac-queries.ts',
+  pilot_fixture_rows: 'app/api/pilot/bootstrap/cupe/route.ts',
+  platform_invoice_line_items: 'app/api/pilot/apply/[id]/commercial-transition/route.ts',
+  platform_invoices: 'services/platform-economics/billing-service.ts',
+  public_intake_audit_events: 'lib/public-intake/intake-audit.ts',
+  rbac_audit_log: 'db/queries/enhanced-rbac-queries.ts',
+  reward_budget_envelopes: 'lib/services/rewards/budget-service.ts',
+  reward_wallet_ledger: 'lib/services/rewards/wallet-service.ts',
+  role_definitions: 'db/queries/enhanced-rbac-queries.ts',
+  scim_configurations: 'lib/scim/scim-token.ts',
+  scim_events_log: 'lib/scim/events-log.ts',
+  scim_provisioned_users: 'lib/scim/provisioned-members.ts',
+  workbook_memory_holders: 'lib/workbook/access-control.ts',
+  workbook_modules: 'app/api/workbook/start/route.ts',
 } as const
+
+/** The exact number of relations the plan grants a SYSTEM INSERT, UPDATE or DELETE; one source caller each. */
+export const SYSTEM_MUTATION_DENOMINATOR = 80
 
 export interface SystemMutationContract {
   table: string
@@ -81,7 +114,11 @@ export const systemMutationRules = (plan: V2Plan): SecurityRule[] =>
 
 export function systemMutationContracts(plan: V2Plan): SystemMutationContract[] {
   const rules = systemMutationRules(plan)
-  assert.equal(rules.length, 53, 'UE_V2_SYSTEM_MUTATION_EXACT_DENOMINATOR_REQUIRED')
+  assert.equal(
+    rules.length,
+    SYSTEM_MUTATION_DENOMINATOR,
+    'UE_V2_SYSTEM_MUTATION_EXACT_DENOMINATOR_REQUIRED',
+  )
   assert.deepEqual(
     rules.map((rule) => rule.table).sort(),
     Object.keys(callers).sort(),
@@ -127,19 +164,27 @@ export function systemMutationContracts(plan: V2Plan): SystemMutationContract[] 
       icra_assessments: 'report_tier_id',
       icra_maturity_profiles: 'maturity_band_id',
     }
+    // Relations without updated_at: the column and value the source caller's own system UPDATE sets.
+    const callerUpdates: Record<string, [column: string, value: string]> = {
+      contact_submissions: ['crm_status', 'recorded'],
+      document_intakes: ['status', 'expired'],
+      rbac_audit_log: ['reviewed_at', '2026-10-13T12:00:00.000Z'],
+    }
     const updateColumn =
       updateColumns[rule.table] ??
+      callerUpdates[rule.table]?.[0] ??
       (rule.table === 'transaction_fee_events' || rule.table === 'external_data_sync_log'
         ? 'status'
         : 'updated_at')
     const updateValue =
       rule.table in updateColumns
         ? 'synthetic-system-update'
-        : rule.table === 'transaction_fee_events'
-          ? 'reversed'
-          : rule.table === 'external_data_sync_log'
-            ? 'completed'
-            : '2026-10-13T12:00:00.000Z'
+        : (callerUpdates[rule.table]?.[1] ??
+          (rule.table === 'transaction_fee_events'
+            ? 'reversed'
+            : rule.table === 'external_data_sync_log'
+              ? 'completed'
+              : '2026-10-13T12:00:00.000Z'))
     if (rule.systemPrivileges.includes('UPDATE'))
       assert(
         table.columns.some((column) => column.name === updateColumn),
