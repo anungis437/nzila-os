@@ -11,8 +11,8 @@ import {
   platformInvoices,
   subscriptionPlans,
 } from '@/db/schema';
-import { withApiAuth, hasMinRole, getCurrentUser } from '@/lib/api-auth-guard';
-import { authorizePilotAccess, getPilotEffectiveOrganizationId, getPilotVerifiedOrganizationId } from '@/lib/pilot/pilot-ownership';
+import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { authorizePilotAccess, getPilotEffectiveOrganizationId, getPilotVerifiedOrganizationId, hasPilotPlatformAuthority } from '@/lib/pilot/pilot-ownership';
 import {
   buildPilotArtifactVersionRecord,
   buildPilotContractNumber,
@@ -126,7 +126,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
     // authorizePilotAccess check below) — check the same tier here, before
     // touching the database at all, so an under-authorized caller gets a
     // uniform 403 regardless of whether the pilot id exists.
-    const canAccess = await hasMinRole('system_admin');
+    const canAccess = await hasPilotPlatformAuthority();
     if (!canAccess) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -191,7 +191,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
     // (commercialContracts / billingAccounts / orgSubscriptions /
     // platformInvoices), so ordinary same-org self-service is not
     // sufficient authority here: only an independent platform-tier decision
-    // (system_admin+, per authorizePilotAccess's 'platform' branch) counts.
+    // (platform-staff authority, per authorizePilotAccess's 'platform' branch) counts.
     // The org VALUE used here doesn't affect the outcome for platform
     // actors (who pass regardless) or non-platform actors (who are
     // rejected regardless of same-org/cross-org) — only the actor's ROLE

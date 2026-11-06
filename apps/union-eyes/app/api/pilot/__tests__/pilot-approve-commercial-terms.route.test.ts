@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  hasMinRole: vi.fn(),
+  hasPilotPlatformAuthority: vi.fn(),
   getCurrentUser: vi.fn(),
   approveCommercialTerms: vi.fn(),
 }));
@@ -11,7 +11,6 @@ vi.mock('@/lib/api-auth-guard', async (orig) => {
   const actual = await orig<typeof import('@/lib/api-auth-guard')>();
   return {
     ...actual,
-    hasMinRole: m.hasMinRole,
     getCurrentUser: m.getCurrentUser,
     withApiAuth: vi.fn(
       (handler: (req: NextRequest, ctx?: { params?: { id: string } }) => Promise<Response>) =>
@@ -19,6 +18,8 @@ vi.mock('@/lib/api-auth-guard', async (orig) => {
     ),
   };
 });
+// The platform tier is the explicit platform-staff authority, never a role title (DEF-0B10-PIL-PLATFORM-TIER-…).
+vi.mock('@/lib/pilot/pilot-ownership', () => ({ hasPilotPlatformAuthority: m.hasPilotPlatformAuthority }));
 vi.mock('@/lib/pilot/commercial-terms-authority', () => ({
   approveCommercialTerms: m.approveCommercialTerms,
 }));
@@ -30,13 +31,13 @@ async function loadRoute() {
 describe('pilot/apply/[id]/approve-commercial-terms route (PR #752 round 25)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.hasMinRole.mockResolvedValue(true);
+    m.hasPilotPlatformAuthority.mockResolvedValue(true);
     m.getCurrentUser.mockResolvedValue({ id: 'admin-1' });
   });
 
-  it('returns 403 without touching approveCommercialTerms when caller lacks system_admin role', async () => {
+  it('returns 403 without touching approveCommercialTerms when caller lacks platform-staff authority', async () => {
     const { POST } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+    m.hasPilotPlatformAuthority.mockResolvedValueOnce(false);
 
     const response = await POST(
       new NextRequest('http://localhost/api/pilot/apply/p1/approve-commercial-terms', {

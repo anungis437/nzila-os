@@ -19,19 +19,25 @@ describe('pilot/apply collection route requires platform-tier read authority', (
     expect(src).not.toMatch(/readRole:\s*['"](member|steward|officer|chief_steward|admin|president)['"]/);
     expect(src).toMatch(/readRole:\s*['"]system_admin['"]/);
   });
+
+  it('decides the list on the explicit platform-staff authority, never a role title (DEF-0B10-PIL-PLATFORM-TIER-…)', () => {
+    const src = readFileSync(resolve(APP_ROOT, 'app/api/pilot/apply/route.ts'), 'utf8');
+    expect(src).toMatch(/await hasPilotPlatformAuthority\(\)/);
+    expect(src).not.toMatch(/hasMinRole\(\s*['"]system_admin['"]\s*\)/);
+  });
 });
 
 /* ── round 19: runtime proof of authorize-before-elevate + public POST governance ── */
 
 const m = vi.hoisted(() => ({
-  hasMinRole: vi.fn(),
+  hasPilotPlatformAuthority: vi.fn(),
   withSystemContext: vi.fn(),
   listHandler: vi.fn(),
   checkRateLimit: vi.fn(),
   dbInsert: vi.fn(),
 }));
 
-vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@/lib/pilot/pilot-ownership', () => ({ hasPilotPlatformAuthority: m.hasPilotPlatformAuthority }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: () => ({ GET: m.listHandler }) }));
 vi.mock('@/lib/rate-limiter', async (importOriginal) => {
@@ -57,7 +63,7 @@ describe('pilot/apply collection route — runtime authorize-before-elevate (PR 
   });
 
   it('GET rejects an under-authorized caller WITHOUT ever elevating to the system connection', async () => {
-    m.hasMinRole.mockResolvedValue(false);
+    m.hasPilotPlatformAuthority.mockResolvedValue(false);
     const { GET } = await loadRoute();
 
     const response = await GET(new NextRequest('http://localhost/api/pilot/apply'));
@@ -68,7 +74,7 @@ describe('pilot/apply collection route — runtime authorize-before-elevate (PR 
   });
 
   it('GET elevates to the system connection only after authorization succeeds', async () => {
-    m.hasMinRole.mockResolvedValue(true);
+    m.hasPilotPlatformAuthority.mockResolvedValue(true);
     const { GET } = await loadRoute();
 
     const response = await GET(new NextRequest('http://localhost/api/pilot/apply'));

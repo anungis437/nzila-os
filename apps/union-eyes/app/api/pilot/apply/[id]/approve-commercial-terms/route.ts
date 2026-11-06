@@ -13,8 +13,9 @@
  */
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withApiAuth, hasMinRole, getCurrentUser } from '@/lib/api-auth-guard';
+import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
 import { approveCommercialTerms } from '@/lib/pilot/commercial-terms-authority';
+import { hasPilotPlatformAuthority } from '@/lib/pilot/pilot-ownership';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
   // place these commercial-terms fields may be set; no same-org
   // self-service path exists (an applicant's own member count cannot
   // approve itself).
-  if (!(await hasMinRole('system_admin'))) {
+  if (!(await hasPilotPlatformAuthority())) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

@@ -17,7 +17,7 @@
  * `approveCommercialTerms()` is the ONLY function that may write
  * `verifiedMemberCount`/`verifiedPilotAmount`/`verifiedSubscriptionPlanId`/
  * `commercialTermsApprovedBy`/`commercialTermsApprovedAt` — callers must
- * already have confirmed platform-tier authority (`hasMinRole('system_admin')`)
+ * already have confirmed platform-tier authority (`hasPilotPlatformAuthority()`)
  * before calling this; it does not itself perform that check (matching the
  * established convention of `bindPilotOrganization`/`rebindPilotOrganization`).
  * `commercial-transition/route.ts` must consume these verified columns

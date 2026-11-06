@@ -9,8 +9,8 @@
  */
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withApiAuth, hasMinRole, getCurrentUser } from '@/lib/api-auth-guard';
-import { bindPilotOrganization } from '@/lib/pilot/pilot-ownership';
+import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { bindPilotOrganization, hasPilotPlatformAuthority } from '@/lib/pilot/pilot-ownership';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +26,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
   // Platform-only, before any database access — this endpoint is the ONE
   // place `verifiedOrganizationId` may be set; no same-org self-service path
   // exists (a submitter's own claim cannot verify itself).
-  if (!(await hasMinRole('system_admin'))) {
+  if (!(await hasPilotPlatformAuthority())) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
