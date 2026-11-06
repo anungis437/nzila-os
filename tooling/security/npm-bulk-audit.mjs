@@ -105,7 +105,7 @@ export function parseLockfilePackages(lockfilePath) {
     // Invalid indentation must never silently remove an installed package from
     // the audit inventory. Nested mapping content is indented four or more
     // spaces; resolved snapshot keys are indented exactly two spaces.
-    if (/^\\t/.test(line) || /^ {1}(?:[^ ]|$)/.test(line) || /^ {3}[^ ]/.test(line)) {
+    if (/^\t/.test(line) || /^ {1}(?:[^ ]|$)/.test(line) || /^ {3}[^ ]/.test(line)) {
       throw new Error('Malformed snapshot indentation in pnpm-lock.yaml')
     }
     if (!line.startsWith('  ') || line.startsWith('    ')) continue
