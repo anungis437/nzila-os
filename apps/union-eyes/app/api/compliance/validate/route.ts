@@ -69,24 +69,30 @@ export const complianceValidateSchema = z.object({
   }).optional(),
 }).strict();
 
+// Error responses can contain caller-supplied validation details; never allow shared caches to retain them.
+const privateError = (response: NextResponse): NextResponse => {
+  response.headers.set('Cache-Control', 'private, no-store');
+  return response;
+};
+
 async function handler(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user || !user.organizationId) {
-      return standardErrorResponse(
+      return privateError(standardErrorResponse(
       ErrorCode.AUTH_REQUIRED,
       'Authentication and organization context required'
-    );
+    ));
     }
 
     // A malformed JSON document is not an empty compliance request. Fail closed before validation.
     const rawBody = await request.json().catch(() => null);
     if (rawBody === null) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON request body');
+      return privateError(standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON request body'));
     }
     const parsed = complianceValidateSchema.safeParse(rawBody);
     if (!parsed.success) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid compliance validation request', parsed.error.issues.slice(0, 5));
+      return privateError(standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid compliance validation request', parsed.error.issues.slice(0, 5)));
     }
     const body = parsed.data;
     const jurisdiction = body.jurisdiction || 'CA-FED';
@@ -162,11 +168,11 @@ async function handler(request: NextRequest) {
       ...(checks.length === 0 ? { notice: 'No check applied to the data supplied; this is not a finding of compliance.' } : {}),
     }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
-return standardErrorResponse(
+return privateError(standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       'Compliance validation failed',
       error
-    );
+    ));
   }
 }
 
