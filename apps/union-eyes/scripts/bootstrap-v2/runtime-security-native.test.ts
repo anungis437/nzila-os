@@ -131,22 +131,25 @@ native('current tenant positive writes with genuine restricted execution', () =>
     await createCurrentState(seed, plan)
     await seed.query('COMMIT')
     expect((await qualifyNativePrivileges(seed, plan)).mismatches).toEqual([])
+    // The catalog qualifier must see a removed authorized SYSTEM read and an added unauthorized one. Both relations
+    // below carry table-level SYSTEM SELECT in current storage authority (86aa8adb2, a0404b79b), so the removal is of
+    // that grant; fee_adjustments and consent_records are SYSTEM INSERT-only, so any column read granted there is extra.
     for (const [sql, mismatch] of [
       [
-        'REVOKE SELECT (sync_id) ON public.external_data_sync_log FROM union_eyes_system',
+        'REVOKE SELECT ON public.external_data_sync_log FROM union_eyes_system',
         'COLUMN_SELECT_GRANT_MISMATCH:external_data_sync_log.sync_id:union_eyes_system',
       ],
       [
-        'GRANT SELECT (error_details) ON public.external_data_sync_log TO union_eyes_system',
-        'COLUMN_SELECT_GRANT_MISMATCH:external_data_sync_log.error_details:union_eyes_system',
+        'GRANT SELECT (amount_cad) ON public.fee_adjustments TO union_eyes_system',
+        'COLUMN_SELECT_GRANT_MISMATCH:fee_adjustments.amount_cad:union_eyes_system',
       ],
       [
-        'REVOKE SELECT (contract_number) ON public.commercial_contracts FROM union_eyes_system',
+        'REVOKE SELECT ON public.commercial_contracts FROM union_eyes_system',
         'COLUMN_SELECT_GRANT_MISMATCH:commercial_contracts.contract_number:union_eyes_system',
       ],
       [
-        'GRANT SELECT (metadata) ON public.commercial_contracts TO union_eyes_system',
-        'COLUMN_SELECT_GRANT_MISMATCH:commercial_contracts.metadata:union_eyes_system',
+        'GRANT SELECT (channel) ON public.consent_records TO union_eyes_system',
+        'COLUMN_SELECT_GRANT_MISMATCH:consent_records.channel:union_eyes_system',
       ],
     ]) {
       await seed.query('BEGIN')

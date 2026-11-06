@@ -1,10 +1,10 @@
 {
   "contract": "APPLICATION_USER_ID=TEXT",
-  "candidateColumns": 78,
+  "candidateColumns": 85,
   "classificationCounts": {
-    "APPLICATION_USER_ID": 45,
-    "DOMAIN_ENTITY_UUID": 19,
-    "DEAD_OR_UNREACHABLE": 14
+    "APPLICATION_USER_ID": 44,
+    "DEAD_OR_UNREACHABLE": 19,
+    "DOMAIN_ENTITY_UUID": 22
   },
   "unclassifiedCurrentIdentityColumns": 0,
   "unclassifiedColumns": [],
@@ -32,7 +32,6 @@
     "grievance_deadlines.override_by",
     "grievance_deadlines.superseded_by",
     "grievance_events.actor_user_id",
-    "grievance_timeline.created_by",
     "grievances.created_by",
     "grievances.last_updated_by",
     "hazard_reports.created_by",
@@ -87,6 +86,26 @@
       "targetType": "text",
       "evidence": [],
       "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "alert_recipients",
+      "column": "recipient_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "bargaining_team_members",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
       "previousType": "uuid"
     },
     {
@@ -399,16 +418,6 @@
       "previousType": "uuid"
     },
     {
-      "table": "grievance_timeline",
-      "column": "created_by",
-      "currentType": "text",
-      "classification": "APPLICATION_USER_ID",
-      "targetType": "text",
-      "evidence": [],
-      "rationale": "Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity.",
-      "previousType": "uuid"
-    },
-    {
       "table": "grievances",
       "column": "created_by",
       "currentType": "text",
@@ -549,8 +558,38 @@
       "previousType": "uuid"
     },
     {
+      "table": "member_roles",
+      "column": "acting_for_member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "member_roles",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier.",
+      "previousType": "uuid"
+    },
+    {
       "table": "mfa_configurations",
       "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "newsletter_engagement",
+      "column": "recipient_id",
       "currentType": "uuid",
       "classification": "DEAD_OR_UNREACHABLE",
       "targetType": "uuid",
@@ -686,6 +725,16 @@
       "targetType": "uuid",
       "evidence": [],
       "rationale": "Pension trustee rows reference pension entities by uuid; no application user id is written.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "permission_exceptions",
+      "column": "member_id",
+      "currentType": "uuid",
+      "classification": "DOMAIN_ENTITY_UUID",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier.",
       "previousType": "uuid"
     },
     {
@@ -828,6 +877,16 @@
       "previousType": "uuid"
     },
     {
+      "table": "sso_sessions",
+      "column": "user_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
+      "previousType": "uuid"
+    },
+    {
       "table": "stewards",
       "column": "user_id",
       "currentType": "uuid",
@@ -860,6 +919,16 @@
       "targetType": "uuid",
       "evidence": [],
       "rationale": "Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier.",
+      "previousType": "uuid"
+    },
+    {
+      "table": "voting_notifications",
+      "column": "recipient_id",
+      "currentType": "uuid",
+      "classification": "DEAD_OR_UNREACHABLE",
+      "targetType": "uuid",
+      "evidence": [],
+      "rationale": "No live (non-test) application source references this column; no launch mutation required.",
       "previousType": "uuid"
     },
     {
@@ -925,5 +994,5 @@
       "previousType": "uuid"
     }
   ],
-  "sourcePlanDigest": "462d4194fec0d534949c282a91563f728c03add32a9422295d9d7b4db332a73f"
+  "sourcePlanDigest": "209b78b44526d998802f0acbeb85b94c5f71f761c7ea5775f858112ab99496ec"
 }
