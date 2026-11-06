@@ -133,13 +133,18 @@ export function latestEngagementByMember(memberId: string): MemberEngagementSnap
   return all.sort((a, b) => b.snapshotAt.localeCompare(a.snapshotAt))[0]
 }
 
-export function disengagedMembersCount(orgId: string): number {
+/**
+ * Members whose latest snapshot is disengaged or lost, or null when the organization has no engagement snapshot at all. No scheduled
+ * scorer writes snapshots, so an empty store is the absence of a measurement; a count of 0 would read as "no member is disengaged".
+ */
+export function disengagedMembersCount(orgId: string): number | null {
   const byMember = new Map<string, MemberEngagementSnapshot>()
   for (const s of listEngagementSnapshots()) {
     if (s.subject.orgId !== orgId) continue
     const cur = byMember.get(s.memberId)
     if (!cur || s.snapshotAt > cur.snapshotAt) byMember.set(s.memberId, s)
   }
+  if (byMember.size === 0) return null
   let n = 0
   for (const s of byMember.values()) {
     if (s.tier === 'disengaged' || s.tier === 'lost') n += 1
