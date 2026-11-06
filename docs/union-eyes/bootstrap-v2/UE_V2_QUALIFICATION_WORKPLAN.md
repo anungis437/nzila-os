@@ -176,19 +176,58 @@ grants table-level SYSTEM SELECT on `commercial_contracts` (`86aa8adb2`) and `ex
 (`a0404b79b`), so the column-read contracts no longer apply to them. The column-read assertions now run
 against an explicit INSERT/UPDATE-only authority, and the current table-level grant is pinned.
 
-**Still failing or not run:**
-
-- *Native proofs* (`system-mutation-native`, `runtime-security-native`, …): the plan does not install on
-  PostgreSQL. `data_aggregation_consent.categories` and `notification_templates.channels` are declared
-  by Django `EnumArrayField` as `movement_trend_category[]` / `notification_channel[]`, but the plan only
-  creates the renamed `ue_v2_*` enums. Fix belongs to Q5.
-- *`reward-source.test.ts`*: Django `RewardWalletLedger` declares `points_change`, `transaction_type`,
-  `award_id`, `description`, `reference_id`, `reference_type` (`15153ab8c`), which the contract forbids
-  and which the plan now carries. Model-vs-contract decision still open.
-- *`local-vault-fixture.test.ts`* (needs `python` on PATH) and *`production-key-authority.test.ts`*
-  (child process timeout on this host): environmental.
-
-CI: `.github/workflows/ue-bootstrap-v2-provenance.yml` regenerates the plan with `--self-test --check`
-and runs the census, integration and compiler-boundary tests on every Union Eyes PR.
+**Still failing or not run:** see section 7.
 
 `UE_V2_CANONICAL_FRESH_BOOTSTRAP` stays UNQUALIFIED.
+
+## 7. Progress, 2026-11-06 (Q5 install defect; native runs)
+
+**The plan installs on PostgreSQL 16.** Before this, a fresh install failed with
+`type "movement_trend_category[]" does not exist`. Two Django `EnumArrayField` columns
+(`data_aggregation_consent.categories`, `notification_templates.channels`) name a database enum in their
+own SQL, but the plan created only the renamed `ue_v2_*` enums. The field casts every write to
+`%s::<enum_type>[]`, so the type must exist under the declared name; renaming the column type would
+install and then break every Django write. `current_models.py` now records the field's enum type and
+choices; `source.ts` (`currentModelEnumTypes`) creates each declared type under its name, refuses two
+declarations with different labels, and refuses a Drizzle enum of the same name with different labels.
+`enum-types.test.ts` pins this and checks that every non-builtin column type in the plan is created
+before its table. Those two are the only enum-backed arrays.
+
+**Native runs** (disposable `pgvector/pgvector:0.8.1-pg16`, `UE_V2_NATIVE_MANIFEST=1`):
+
+| Suite | Result |
+| --- | --- |
+| `system-mutation-native` | 81/81, after one contract fix: `rbac_audit_log` now proves `review_notes`; `reviewed_at` alone violates `rbac_audit_log_review_consistent` |
+| `audit-chain-native` | 4/4 (needs `python` on PATH) |
+| `launch-defects-native` | 6/6, after regenerating `UE_APPLICATION_IDENTITY_CONTRACT` (it still listed `grievance_timeline.created_by`, removed in `15153ab8c`; 8 identity-looking columns new to the plan are now classified; 0 unclassified, 0 violations) |
+| `organization-selection-native` | 36/36 |
+| `manifest-native` | 1/1 |
+| `runtime-security-native` | 371/378 (17.6 min) |
+
+**Open, each needs an owner decision:**
+
+- *SYSTEM table-level SELECT on `external_data_sync_log` and `commercial_contracts`* (`a0404b79b`,
+  `86aa8adb2`). Three `runtime-security-native` cases still assert that a system `SELECT *` on these
+  relations is denied. The recorded reasons (data-source overview; commercial transition reading the
+  contract it accepts) are specific, and the first cites its own native proof. Confirm the broadening,
+  then turn the three denials into a pinned allowance, or narrow the authority back to the column
+  contracts.
+- *`arbitration_decisions`* compiles to DENY_UNRESOLVED (no grants). B101 made it TENANT_RLS_REQUIRED
+  with `source_organization_id` and a public-or-owned read rule (cache 0041); the V2 compiler has no
+  geometry for that rule. One `arbitration_precedents` case fails downstream.
+- *`signature_audit_trail`* compiles to DENY_UNRESOLVED: current Django declares `document_id` as a
+  plain UUID, so the tenant path through `signature_documents` is gone (evidence integrity; see 5).
+- *`reward-source.test.ts`*: the six `RewardWalletLedger` fields (`award_id`, `description`,
+  `points_change`, `reference_id`, `reference_type`, `transaction_type`) are the legacy points-based
+  ledger columns. No Django or TypeScript path reads or writes them (the ViewSet is `DenyAllPermission`;
+  the TS hits are `member_dues_ledger`). Django declares them because `15153ab8c` made Django equal the
+  converged database (`ue_physical_parity`, 0 findings). Removing them from Django alone would
+  reintroduce parity findings; dropping the physical columns discards historical ledger data. The choice:
+  retire the columns (archive, platform migration, state-only Django removal) or keep them and change
+  the contract.
+- *Environmental*: `local-vault-fixture` needs the `cryptography` package beside `python`;
+  `production-key-authority` timed out on this host.
+
+CI: `.github/workflows/ue-bootstrap-v2-provenance.yml` builds the wheelhouse, regenerates the plan with
+`--self-test --check`, and runs the census, compiler, enum and native suites above except
+`runtime-security-native` (too slow for every PR) and the environmental two.

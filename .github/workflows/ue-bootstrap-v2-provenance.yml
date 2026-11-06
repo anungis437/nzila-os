@@ -4,7 +4,8 @@ name: Union Eyes Bootstrap V2 Provenance
 # was generated from. This job regenerates the plan from the pull request's source with the pinned interpreter
 # and the hash-locked wheelhouse, and fails when the committed plan no longer matches (source drift), when two
 # generations differ (non-determinism), or when the source-bound SYSTEM mutation census and its hash bindings
-# no longer hold. It needs Docker but no database.
+# no longer hold. It then installs the plan into a disposable pinned PostgreSQL container and runs the native
+# component proofs that finish in minutes. No external database or credential is used.
 
 on:
   pull_request:
@@ -30,7 +31,7 @@ jobs:
   provenance:
     name: V2 source plan and SYSTEM mutation provenance
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
@@ -71,6 +72,29 @@ jobs:
           apps/union-eyes/scripts/bootstrap-v2/system-mutation-contracts.test.ts
           apps/union-eyes/scripts/bootstrap-v2/system-component-integration.test.ts
           apps/union-eyes/scripts/bootstrap-v2/bootstrap-v2.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/enum-types.test.ts
+
+      # audit-chain-native verifies the chain with the backend's own rule (stdlib only) through `python`.
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.11'
+
+      - name: Pull the pinned PostgreSQL image the native fixture runs with --pull never
+        run: docker pull pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
+
+      # The plan installs into a fresh container per suite. runtime-security-native (378 cases, over ten minutes
+      # locally) is not run here; local-vault-fixture needs the cryptography package outside the wheelhouse image.
+      - name: Native SYSTEM mutation, audit chain, launch-defect, organization-selection and manifest proofs
+        env:
+          UE_V2_NATIVE_MANIFEST: '1'
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: >-
+          pnpm exec vitest run --project union-eyes-heavy
+          apps/union-eyes/scripts/bootstrap-v2/system-mutation-native.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/audit-chain-native.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/launch-defects-native.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/organization-selection-native.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/manifest-native.test.ts
 
       - name: The checks left the tracked tree unchanged
         run: git diff --exit-code
