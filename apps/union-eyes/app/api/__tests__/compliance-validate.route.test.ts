@@ -159,6 +159,17 @@ describe('compliance/validate route', () => {
     expect(response.status).toBe(400);
   });
 
+  it.each(['null', '', '{invalid json'])('rejects malformed or null JSON without a false empty-check success: %j', async (raw) => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/compliance/validate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: raw,
+    }));
+    expect(response.status).toBe(400);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
   it('returns 401 when user context missing', async () => {
     m.getCurrentUser.mockResolvedValueOnce({ id: 'u1', organizationId: null });
     const { POST } = await loadRoute();
