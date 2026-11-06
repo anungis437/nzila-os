@@ -100,14 +100,34 @@ describe('PlatformSettingsContent: what it offers', () => {
     expect(screen.queryByText(/Critical only|All alerts/)).toBeNull();
   });
 
-  it('says a webhook is saved only, since nothing sends it', async () => {
+  it('says a stored webhook is saved only, since nothing sends it, and offers no way to change it', async () => {
     const user = userEvent.setup();
-    render(<PlatformSettingsContent initialData={data()} />);
+    render(<PlatformSettingsContent initialData={data({ webhookNotifications: true, webhookUrl: 'https://hooks.example/x' })} />);
     await section(user, 'Notifications');
 
-    expect(screen.queryByText(/no webhook is sent/)).toBeNull();
-    await user.click(screen.getByRole('checkbox', { name: 'Webhook notifications' }));
     expect(screen.getByText('Saved only: no webhook is sent from this setting yet.')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Webhook notifications' })).toBeDisabled();
+    expect(screen.getByLabelText('Webhook URL')).toBeDisabled();
+  });
+
+  // DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE: the route refuses these keys, so the
+  // screen shows the stored value and offers no control that would only ever be refused.
+  it('shows every security setting no code enforces as unchangeable, and sends none of them', async () => {
+    const user = userEvent.setup();
+    render(<PlatformSettingsContent initialData={data()} />);
+
+    expect(screen.getByText('They cannot be changed here: the platform refuses to save a control it does not enforce.')).toBeInTheDocument();
+    for (const name of ['Require multi-factor authentication', 'Require mixed case', 'Require symbols']) {
+      expect(screen.getByRole('checkbox', { name })).toBeDisabled();
+    }
+    expect(screen.getByLabelText('Session timeout')).toBeDisabled();
+    expect(screen.getByLabelText('Min password length')).toBeDisabled();
+    expect(screen.getByLabelText('API rate limit')).toBeDisabled();
+
+    await user.click(screen.getByRole('checkbox', { name: 'Require multi-factor authentication' }));
+    expect(screen.getByRole('checkbox', { name: 'Require multi-factor authentication' })).toBeChecked();
+    expect(screen.queryByText('You have unsaved changes')).toBeNull();
+    expect(calls).toEqual([]);
   });
 });
 
@@ -116,12 +136,13 @@ describe('PlatformSettingsContent: saving', () => {
     const user = userEvent.setup();
     render(<PlatformSettingsContent initialData={data()} />);
 
-    await user.click(screen.getByRole('checkbox', { name: 'Require multi-factor authentication' }));
+    await section(user, 'Notifications');
+    await user.click(screen.getByRole('checkbox', { name: 'Push notifications' }));
     await user.click(saveButton());
 
     await waitFor(() => expect(puts()).toHaveLength(1));
     expect(calls[0].url).toBe('/api/settings/organization');
-    expect(puts()[0].body).toEqual({ settings: { mfaEnforcement: false } });
+    expect(puts()[0].body).toEqual({ settings: { pushNotifications: false } });
     await waitFor(() => expect(screen.queryByText('You have unsaved changes')).toBeNull());
   });
 
@@ -129,44 +150,47 @@ describe('PlatformSettingsContent: saving', () => {
     const user = userEvent.setup();
     render(<PlatformSettingsContent initialData={data()} />);
 
-    await user.selectOptions(screen.getAllByRole('combobox')[0], '60');
+    await section(user, 'Notifications');
+    await user.selectOptions(screen.getAllByRole('combobox')[0], 'weekly');
     await section(user, 'Localization');
     await user.selectOptions(screen.getAllByRole('combobox')[2], 'USD');
     await user.click(saveButton());
 
     await waitFor(() => expect(puts()).toHaveLength(1));
-    expect(puts()[0].body).toEqual({ settings: { sessionTimeout: 60, currency: 'USD' } });
+    expect(puts()[0].body).toEqual({ settings: { digestFrequency: 'weekly', currency: 'USD' } });
   });
 
-  it('shows what the route says about a saved setting that nothing enforces', async () => {
-    save = saved({ message: 'Saved. These settings are stored but not yet enforced by the platform: mfaEnforcement' });
+  it('shows a note the route returns with a save', async () => {
+    save = saved({ message: 'Saved. These settings are stored but not yet enforced by the platform: smsAlerts' });
     const user = userEvent.setup();
     render(<PlatformSettingsContent initialData={data()} />);
 
-    await user.click(screen.getByRole('checkbox', { name: 'Require multi-factor authentication' }));
+    await section(user, 'Notifications');
+    await user.click(screen.getByRole('checkbox', { name: 'SMS alerts' }));
     await user.click(saveButton());
 
-    await waitFor(() => expect(screen.getAllByRole('status').some((status) => status.textContent?.includes('stored but not yet enforced by the platform: mfaEnforcement'))).toBe(true));
+    await waitFor(() => expect(screen.getAllByRole('status').some((status) => status.textContent?.includes('stored but not yet enforced by the platform: smsAlerts'))).toBe(true));
   });
 
   it('shows the route\'s reason when it refused the settings, and keeps the change and the save bar', async () => {
-    save = refused(400, 'Settings were not saved (invalid value: passwordMinLength)');
+    save = refused(400, 'Settings were not saved (invalid value: smsAlerts)');
     const user = userEvent.setup();
     render(<PlatformSettingsContent initialData={data()} />);
 
-    await user.click(screen.getByRole('checkbox', { name: 'Require mixed case' }));
+    await section(user, 'Notifications');
+    await user.click(screen.getByRole('checkbox', { name: 'Push notifications' }));
     await user.click(saveButton());
 
     const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent('Settings were not saved (invalid value: passwordMinLength)');
-    expect(screen.getByRole('checkbox', { name: 'Require mixed case' })).not.toBeChecked();
+    expect(alert).toHaveTextContent('Settings were not saved (invalid value: smsAlerts)');
+    expect(screen.getByRole('checkbox', { name: 'Push notifications' })).not.toBeChecked();
     expect(screen.getByText('You have unsaved changes')).toBeInTheDocument();
 
     // The change is still unsaved, so it is sent again.
     save = saved();
     await user.click(saveButton());
     await waitFor(() => expect(puts()).toHaveLength(2));
-    expect(puts()[1].body).toEqual({ settings: { requireMixedCase: false } });
+    expect(puts()[1].body).toEqual({ settings: { pushNotifications: false } });
     await waitFor(() => expect(screen.queryByText('You have unsaved changes')).toBeNull());
     expect(screen.queryByRole('alert')).toBeNull();
   });
@@ -176,7 +200,8 @@ describe('PlatformSettingsContent: saving', () => {
     const user = userEvent.setup();
     render(<PlatformSettingsContent initialData={data()} />);
 
-    await user.click(screen.getByRole('checkbox', { name: 'Require symbols' }));
+    await section(user, 'Notifications');
+    await user.click(screen.getByRole('checkbox', { name: 'SMS alerts' }));
     await user.click(saveButton());
 
     expect(await screen.findByRole('alert')).toHaveTextContent('The server did not confirm that the settings were saved.');
@@ -188,7 +213,8 @@ describe('PlatformSettingsContent: saving', () => {
     render(<PlatformSettingsContent initialData={data()} />);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch'); }));
 
-    await user.click(screen.getByRole('checkbox', { name: 'Require symbols' }));
+    await section(user, 'Notifications');
+    await user.click(screen.getByRole('checkbox', { name: 'SMS alerts' }));
     await user.click(saveButton());
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Failed to fetch');
@@ -198,26 +224,27 @@ describe('PlatformSettingsContent: saving', () => {
   it('sends a value that was changed back to what it was before the last save, since that save changed it', async () => {
     const user = userEvent.setup();
     render(<PlatformSettingsContent initialData={data()} />);
-    const mixedCase = screen.getByRole('checkbox', { name: 'Require mixed case' });
+    await section(user, 'Notifications');
 
-    await user.click(mixedCase);
+    await user.click(screen.getByRole('checkbox', { name: 'Push notifications' }));
     await user.click(saveButton());
     await waitFor(() => expect(puts()).toHaveLength(1));
     await waitFor(() => expect(screen.queryByText('You have unsaved changes')).toBeNull());
 
-    await user.click(screen.getByRole('checkbox', { name: 'Require mixed case' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Push notifications' }));
     await user.click(saveButton());
     await waitFor(() => expect(puts()).toHaveLength(2));
-    expect(puts()[0].body).toEqual({ settings: { requireMixedCase: false } });
-    expect(puts()[1].body).toEqual({ settings: { requireMixedCase: true } });
+    expect(puts()[0].body).toEqual({ settings: { pushNotifications: false } });
+    expect(puts()[1].body).toEqual({ settings: { pushNotifications: true } });
   });
 
   it('asks nothing when a change was undone before saving', async () => {
     const user = userEvent.setup();
     render(<PlatformSettingsContent initialData={data()} />);
+    await section(user, 'Notifications');
 
-    await user.click(screen.getByRole('checkbox', { name: 'Require symbols' }));
-    await user.click(screen.getByRole('checkbox', { name: 'Require symbols' }));
+    await user.click(screen.getByRole('checkbox', { name: 'SMS alerts' }));
+    await user.click(screen.getByRole('checkbox', { name: 'SMS alerts' }));
     await user.click(saveButton());
 
     await waitFor(() => expect(screen.queryByText('You have unsaved changes')).toBeNull());
