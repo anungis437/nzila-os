@@ -17,7 +17,11 @@ function isoDate(value: unknown, field: string, optional = false): string | null
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     throw ApiError.badRequest(`${field} must be a YYYY-MM-DD calendar date`);
   }
-  const parsed = new Date(`${value}T00:00:00.000Z`);
+  // Date parsing must not normalize invalid dates or silently reinterpret years 0000–0099.
+  const [year, month, day] = value.split('-').map(Number);
+  const parsed = new Date(0);
+  parsed.setUTCHours(0, 0, 0, 0);
+  parsed.setUTCFullYear(year, month - 1, day);
   if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) {
     throw ApiError.badRequest(`${field} is not a valid calendar date`);
   }
