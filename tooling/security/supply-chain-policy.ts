@@ -502,7 +502,7 @@ export function checkVulnerabilityPolicy(
         throw new Error(`Advisory identity mismatch: ${key}`)
       }
       const severity = advisory.severity
-      if (!['info', 'low', 'moderate', 'high', 'critical'].includes(String(severity))) {
+      if (typeof severity !== 'string' || !['info', 'low', 'moderate', 'high', 'critical'].includes(severity)) {
         throw new Error(`Unknown severity for advisory: ${key}`)
       }
       // Validate secondary identifiers at EVERY severity, including low/info.

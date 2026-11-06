@@ -64,6 +64,12 @@ describe('security audit policy: fail closed', () => {
     expect(result.errors.some((message) => message.includes('Invalid or unreadable audit report'))).toBe(true)
   })
 
+  it('rejects non-string advisory severity instead of coercing it into a clean low-risk result', () => {
+    const result = checkVulnerabilityPolicy(fixture('audit-nonstring-severity.json'), atApproval)
+    expect(result.passed).toBe(false)
+    expect(result.errors.some((message) => message.includes('Unknown severity for advisory'))).toBe(true)
+  })
+
   it('rejects a forged zero-vulnerability report without collector provenance', () => {
     const result = checkVulnerabilityPolicy(fixture('audit-forged-empty.json'), atApproval)
     expect(result.passed).toBe(false)
