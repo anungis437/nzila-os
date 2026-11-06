@@ -237,3 +237,12 @@ test('advisory ids are recorded as the canonical string the policy binds to the 
   assert.equal(flat['1120680'].id, '1120680')
   assert.equal(flat['1120680'].package, 'esbuild')
 })
+
+test('malformed peer suffix nesting cannot be certified as a resolved package', () => {
+  for (const suffix of ['(react@18.3.1))', '(react@18.3.1)(extra@1.0.0))', '(react@18.3.1))(']) {
+    withLockfile('lockfileVersion: 9.0\nsnapshots:\n  pkg@1.2.3' + suffix + ':\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Malformed (peer dependency suffix|resolved snapshot key)/))
+  }
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  pkg@1.2.3(react@18.3.1(@types+react@18.3.1)):\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).get('pkg')], ['1.2.3']))
+})
