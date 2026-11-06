@@ -66,6 +66,9 @@ vi.mock('@/lib/db/with-rls-context', async () => {
     withSystemContext: (work: never) => counted(() => rlsContextModule.withSystemContext(work)),
     withExplicitUserContext: (userId: string, work: () => Promise<unknown>, organizationId?: string) =>
       counted(() => harness.tenant(RUNTIME_ROLE, organizationId ?? null, userId, () => work())),
+    // As in production (lib/db/with-rls-context.ts): no organization, the authenticated session's own principal only.
+    withPrincipalOnlyContext: (work: (tx: unknown) => Promise<unknown>) =>
+      counted(() => harness.tenant(RUNTIME_ROLE, null, sessionUser(), work)),
   }
 })
 vi.mock('@/lib/audit/atomic-audit', async () => ({ persistAtomicAudit: (await import('./native-route-harness')).recordAudit }))

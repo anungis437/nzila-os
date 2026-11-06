@@ -82,7 +82,7 @@ const PATCH = withApi(
         resourceId: row.id,
         details: { fields, route: 'anti-scab-author' },
       });
-      return row;
+      return { data: row };
     });
   },
 );

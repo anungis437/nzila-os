@@ -44,7 +44,9 @@ export async function deliverIcraClaimCredential(input: {
 }): Promise<ClaimDeliveryResult> {
   if (!isAssessmentId(input.assessmentId)) return { delivered: false, reason: 'INVALID_ASSESSMENT' }
   const email = (input.buyerEmail ?? '').trim()
-  if (!email || !EMAIL_SHAPE.test(email)) return { delivered: false, reason: 'NO_BUYER_EMAIL' }
+  // Bounded before the shape regex runs: RFC 5321's 254-char ceiling keeps the match cheap regardless of input and closes the
+  // polynomial-backtracking path a much longer crafted string could otherwise force.
+  if (!email || email.length > 254 || !EMAIL_SHAPE.test(email)) return { delivered: false, reason: 'NO_BUYER_EMAIL' }
   const base = claimLinkBase()
   if (!base) return { delivered: false, reason: 'APP_URL_NOT_CONFIGURED' }
 
