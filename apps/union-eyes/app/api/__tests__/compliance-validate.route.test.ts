@@ -236,6 +236,28 @@ describe('compliance/validate route', () => {
     }
   });
 
+  it('does not cache authorization or invalid-payload errors', async () => {
+    const { POST } = await loadRoute();
+    const cases = [
+      { body: '{}', anonymous: true, expected: 401 },
+      { body: '{invalid json', anonymous: false, expected: 400 },
+      { body: JSON.stringify({ data: { totalMembers: 0, votesCase: 1 } }), anonymous: false, expected: 400 },
+    ];
+    for (const testCase of cases) {
+      m.getCurrentUser.mockResolvedValueOnce(
+        testCase.anonymous ? null : { id: 'u1', organizationId: 'org_1' },
+      );
+      const response = await POST(new Request('http://localhost/api/compliance/validate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: testCase.body,
+      }));
+      expect(response.status).toBe(testCase.expected);
+      expect(response.headers.get('cache-control')).toContain('private');
+      expect(response.headers.get('cache-control')).toContain('no-store');
+    }
+  });
+
   it('returns 401 when user context missing', async () => {
     m.getCurrentUser.mockResolvedValueOnce({ id: 'u1', organizationId: null });
     const { POST } = await loadRoute();
