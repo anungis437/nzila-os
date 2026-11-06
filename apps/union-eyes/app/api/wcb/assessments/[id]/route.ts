@@ -19,5 +19,11 @@ const { GET, PATCH, DELETE } = crudRoutes({
   // Premium rate, assessable payroll and premium due are the organization's financial position: an officer reads them.
   readRole: 'officer',
   writeRole: 'officer',
+  // Corrections to the assessment's figures. The jurisdiction and year identify it and do not change; status and payment date
+  // are not set through the generic PATCH.
+  writableFields: [
+    'rateGroup', 'premiumRate', 'assessablePayroll', 'premiumDue', 'experienceRating', 'ratingProgramName', 'surchargeOrRefund',
+    'dueDate',
+  ],
 });
 export { GET, PATCH, DELETE };

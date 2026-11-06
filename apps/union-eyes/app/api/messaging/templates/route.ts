@@ -14,6 +14,9 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   // An archived row is not listed.
   readCondition: sql`${messageTemplates.isActive} IS NOT FALSE`,
+  // The fields the new-template form posts (dashboard/communications/templates/new). isDefault is not a form field, and the organization,
+  // creator and dates are the server's.
+  writableFields: ['name', 'description', 'type', 'category', 'subject', 'body', 'preheader', 'htmlContent', 'plainTextContent', 'variables', 'tags', 'isActive'],
   readRole: 'member',
   writeRole: 'steward',
 });

@@ -18,5 +18,12 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // The refusal as reported. The inspector's decision, outcome, corrective actions, reprisal complaint, documents and the uuid
+  // links (workplace, incident, filing) are not create fields. memberId is required by the table.
+  writableFields: [
+    'memberId', 'memberName', 'jobTitle', 'refusalDate', 'workplaceName', 'locationDescription', 'taskRefused',
+    'dangerDescription', 'supervisorNotifiedAt', 'supervisorName', 'hsRepNotifiedAt', 'hsRepName', 'cneesstInspectorCalledAt',
+    'cneesstInspectorName',
+  ],
 });
 export { GET, POST };

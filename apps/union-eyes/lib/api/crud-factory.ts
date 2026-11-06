@@ -78,8 +78,10 @@ export interface CrudOptions {
    * The body fields a client may set on create and update. Any other field is refused with 400 rather than copied into the
    * row, so status, counters, approval flags and similar server-owned columns cannot be written by mass assignment.
    * The primary key, organization and creator are always server-owned and ignored if sent.
+   * Fail closed: a route that omits this list accepts no body field on create or update (403), so every route that exports a
+   * POST or PATCH from this factory must declare the minimal list its screens and API callers actually send.
    */
-  writableFields?: string[];
+  writableFields?: readonly string[];
   /** Columns removed from every row the route returns (credentials, internal security flags). */
   omitFromResponse?: string[];
   /** Response fields visible only to authenticated steward-or-higher members of this organization. Fail closed if the role lookup fails. */
@@ -108,6 +110,17 @@ export interface CrudOptions {
   readCondition?: SQL;
   /** Like readCondition, but decided per caller (for example: public, or written by the caller). Applies to every GET. */
   readConditionFor?: (caller: { userId: string | null | undefined; organizationId: string | null | undefined }) => SQL | undefined;
+  /**
+   * Per-row read authority decided after the tenant, role and owner scope (for example, the case authority kernel's verdict on the
+   * grievance a row belongs to). A row the hook refuses is never returned: the item GET answers 404, as for a row that does not exist,
+   * and the list leaves it out. With this hook the list authorises every scoped row before paging (at most ROW_AUTHORITY_SCAN_LIMIT; a
+   * larger set is refused with a 400 asking for narrower filters), so its page and total describe only rows the caller may read.
+   * A hook that throws fails the request; it never discloses.
+   */
+  rowReadAuthority?: (
+    row: Record<string, unknown>,
+    caller: { userId: string; organizationId: string | null | undefined },
+  ) => Promise<boolean>;
   /** A condition added to GET only for a caller below the steward floor (for example, hiding unpublished rows from members). */
   belowStaffReadCondition?: SQL;
   /** With an ownerColumn: the owner may delete their own row at the write floor (the row scope already limits it to theirs). */
@@ -366,6 +379,22 @@ const FACTORY_MANAGED_FIELDS = new Set([
   'approvedByName', 'approvedDate', 'closedBy', 'closedById', 'resolvedBy', 'resolvedById', 'signedBy', 'signedById', 'enteredBy',
 ]);
 
+/** The most scoped rows a list with a per-row read authority will authorise in one request. */
+export const ROW_AUTHORITY_SCAN_LIMIT = 2000;
+
+/** Keeps the rows the per-row read authority admits, in order; any refusal or a hook that throws keeps nothing it did not admit. */
+export async function authorisedRows(
+  rows: Array<Record<string, unknown>>,
+  authority: NonNullable<CrudOptions['rowReadAuthority']>,
+  caller: { userId: string; organizationId: string | null | undefined },
+): Promise<Array<Record<string, unknown>>> {
+  const kept: Array<Record<string, unknown>> = [];
+  for (const row of rows) {
+    if ((await authority(row, caller)) === true) kept.push(row);
+  }
+  return kept;
+}
+
 /** Strict, bounded pagination for every collection backed by the CRUD factory. */
 export { parseCrudPagination };
 
@@ -390,6 +419,19 @@ export function assertGenericWritePayload(
     }
   }
   return { ...payload };
+}
+
+/**
+ * The route's explicit allow-list, failing closed. With no list declared nothing is writable (403): the generic route was
+ * never told which fields its screens may set, so it sets none. With a list, any other field is a 400 naming it.
+ * Exported for direct unit testing.
+ */
+export function assertClientWritableFields(fields: Record<string, unknown>, writableFields: readonly string[] | undefined): void {
+  if (!writableFields) {
+    throw ApiError.forbidden('This resource declares no client-writable fields; it cannot be written through the generic interface.');
+  }
+  const unexpected = Object.keys(fields).filter((key) => !writableFields.includes(key));
+  if (unexpected.length > 0) throw ApiError.badRequest(`Fields not allowed on this resource: ${unexpected.join(', ')}`);
 }
 
 export function stripBlockedPatchFields(
@@ -556,11 +598,13 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     return shapeCrudResponseRow(row, drizzleTableName(table), opts.omitFromResponse, opts.staffOnlyResponseFields, belowStaff);
   }
 
-  /** Refuses any body field outside the route's allow-list. Factory-managed fields are already refused by assertGenericWritePayload. */
+  /**
+   * Refuses any body field outside the route's allow-list. Factory-managed fields are already refused by assertGenericWritePayload.
+   * Fails closed: a route that declares no writableFields accepts no body field at all, so a write route cannot fall back to
+   * "any real column" and let a caller set status, cost, outcome or certification columns by mass assignment.
+   */
   function assertWritable(fields: Record<string, unknown>): void {
-    if (!opts.writableFields) return;
-    const unexpected = Object.keys(fields).filter((key) => !opts.writableFields!.includes(key));
-    if (unexpected.length > 0) throw ApiError.badRequest(`Fields not allowed on this resource: ${unexpected.join(', ')}`);
+    assertClientWritableFields(fields, opts.writableFields);
   }
 
   /** Limits a query to rows whose parent belongs to the caller's organization. */
@@ -686,12 +730,25 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
           ? withWhere[0].orderBy(opts.orderDirection === 'asc' ? asc(orderCol) : desc(orderCol))
           : withWhere[0];
 
-        const [rows, totalResult] = await Promise.all([
-          ordered.limit(limit).offset(offset),
-          withWhere[1],
-        ]);
-
-        const total = totalResult[0]?.total ?? 0;
+        let rows: unknown[];
+        let total: number;
+        if (opts.rowReadAuthority) {
+          if (!userId) throw ApiError.forbidden();
+          const scoped = (await ordered.limit(ROW_AUTHORITY_SCAN_LIMIT + 1)) as Array<Record<string, unknown>>;
+          if (scoped.length > ROW_AUTHORITY_SCAN_LIMIT) {
+            throw ApiError.badRequest(`Too many ${resourceName} rows to authorise in one request; narrow the list with its filters`);
+          }
+          const readable = await authorisedRows(scoped, opts.rowReadAuthority, { userId, organizationId });
+          rows = readable.slice(offset, offset + limit);
+          total = readable.length;
+        } else {
+          const [pageRows, totalResult] = await Promise.all([
+            ordered.limit(limit).offset(offset),
+            withWhere[1],
+          ]);
+          rows = pageRows;
+          total = totalResult[0]?.total ?? 0;
+        }
 
         // Resolve the tenant role once per page, not once per row. A failed role lookup redacts rather than discloses.
         const belowStaff = !opts.staffOnlyResponseFields?.length || await isBelowStaff(userId, organizationId);
@@ -838,6 +895,10 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
 
         const [row] = await db.select().from(table).where(and(...conditions));
         if (!row) throw ApiError.notFound(`${resourceName} not found`);
+        // A row the per-row authority refuses is answered exactly like a row that does not exist.
+        if (opts.rowReadAuthority && !(userId && (await opts.rowReadAuthority(row as Record<string, unknown>, { userId, organizationId })) === true)) {
+          throw ApiError.notFound(`${resourceName} not found`);
+        }
         return { data: await shapeForCaller(row, userId, organizationId) };
       },
     );

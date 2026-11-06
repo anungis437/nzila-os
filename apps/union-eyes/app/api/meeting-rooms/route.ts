@@ -12,6 +12,8 @@ const { GET, POST } = crudRoutes({
   tags: ["Scheduling"],
   orgScoped: true,
   readRole: 'member',
+  // No screen creates a room. A room's description; its status, active flag, booking rules, allowed roles and contact person are not set here.
+  writableFields: ['name', 'displayName', 'description', 'buildingName', 'floor', 'roomNumber', 'address', 'capacity', 'features', 'equipment'],
   writeRole: 'steward',
 });
 export { GET, POST };

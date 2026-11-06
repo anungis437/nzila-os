@@ -18,5 +18,11 @@ const { GET, PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // The narrative and reference numbers a steward corrects. The member, type, status, lifecycle dates, outcome and compensation
+  // are not changed through the generic PATCH.
+  writableFields: [
+    'title', 'description', 'descriptionFr', 'relief', 'reliefFr', 'legalBasis', 'filingDeadline', 'internalCaseNumber',
+    'cneesstFileNumber', 'tatAppealNumber',
+  ],
 });
 export { GET, PATCH, DELETE };

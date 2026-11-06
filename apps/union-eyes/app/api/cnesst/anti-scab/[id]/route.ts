@@ -21,5 +21,12 @@ const { GET, PATCH, DELETE } = crudRoutes({
   writeRole: 'steward',
   // Authorship and the reporter are fixed when the violation is filed.
   blockedPatchFields: ['createdBy', 'reportedById', 'reportedByName'],
+  // Facts a steward records as the violation is pursued. Tribunal outcomes (injunction granted, penalty, resolution), the derived
+  // day count, documents and metadata are not set through the generic PATCH.
+  writableFields: [
+    'strikeOrLockoutStartDate', 'isStrike', 'bargainingUnitDescription', 'violationType', 'violationDate', 'description',
+    'descriptionFr', 'evidenceSummary', 'replacementWorkerCount', 'tatComplaintFiled', 'tatComplaintDate', 'tatFileNumber',
+    'injunctionRequested',
+  ],
 });
 export { GET, PATCH, DELETE };

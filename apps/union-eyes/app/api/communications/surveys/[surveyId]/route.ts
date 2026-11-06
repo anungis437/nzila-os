@@ -21,6 +21,9 @@ const { GET, PATCH, DELETE } = crudRoutes({
   belowStaffReadCondition: ne(surveys.status, 'draft'),
   writeRole: 'steward',
   blockedPatchFields: ['publishedAt', 'responseCount', 'viewCount', 'completionRate'],
+  // The collection's author fields less allowAnonymous, which respondents relied on when they answered. status is writable only because
+  // this route is the survey's open/close workflow: lifecycleBeforeUpdate allows forward moves only and stamps the publication time.
+  writableFields: ['title', 'description', 'surveyType', 'closesAt', 'allowMultipleResponses', 'requireAuthentication', 'shuffleQuestions', 'showResults', 'welcomeMessage', 'thankYouMessage', 'status'],
   beforeUpdate: lifecycleBeforeUpdate('survey'),
 });
 export { GET, PATCH, DELETE };

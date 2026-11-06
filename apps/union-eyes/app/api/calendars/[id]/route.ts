@@ -40,6 +40,9 @@ const { PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
+  // No screen edits a calendar. Its presentation only: whether it is personal or shared is fixed at create, so a personal calendar's
+  // events cannot be exposed by a later edit, and sync state and tokens are the server's.
+  writableFields: ['name', 'description', 'color', 'timezone'],
   lockedAuthCheck: async (existing, ctx) => {
     if (existing.isPersonal && existing.ownerId !== ctx.userId) {
       return { ok: false, status: 403 };

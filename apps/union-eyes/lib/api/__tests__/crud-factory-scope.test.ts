@@ -105,7 +105,7 @@ describe('crud-factory parent scope (rows owned through a parent)', () => {
     captured.inserts.length = 0;
     captured.parentRows = [];
   });
-  const options = { table: proposals, tags: ['t'], orgScoped: true, parentScope: { column: 'negotiationId', parent: negotiations } } as const;
+  const options = { table: proposals, tags: ['t'], orgScoped: true, parentScope: { column: 'negotiationId', parent: negotiations }, writableFields: ['negotiationId', 'title'] } as const;
 
   it('limits a list to rows whose parent belongs to the caller organization', async () => {
     const crudRoutes = await factory();

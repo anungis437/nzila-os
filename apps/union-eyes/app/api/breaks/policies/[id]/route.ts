@@ -18,5 +18,10 @@ const { GET, PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
+  // The policy's terms (no screen posts here). The active flag and metadata are not set through the generic route.
+  writableFields: [
+    'name', 'breakType', 'compensation', 'durationMinutes', 'frequencyPerShift', 'minHoursForEligibility', 'maxHoursBetween',
+    'applicableShiftType', 'cbaClauseRef', 'notes',
+  ],
 });
 export { GET, PATCH, DELETE };

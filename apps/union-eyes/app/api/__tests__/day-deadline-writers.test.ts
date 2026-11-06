@@ -37,7 +37,7 @@ vi.mock('@/db', () => ({
 }));
 vi.mock('@/db/schema', () => ({ deadlines: {}, arbitrations: {}, grievances: {} }));
 vi.mock('@/lib/api/org-references', () => ({ assertOrganizationOwns: mocks.assertOrganizationOwns }));
-vi.mock('@/lib/arbitration/arbitration-case-authority', () => ({ mayWriteArbitrationFor: mocks.mayWriteArbitrationFor }));
+vi.mock('@/lib/arbitration/arbitration-case-authority', () => ({ mayWriteArbitrationFor: mocks.mayWriteArbitrationFor, arbitrationRowReadable: vi.fn() }));
 
 async function load(route: string): Promise<Record<string, any>> {
   mocks.current = route;
