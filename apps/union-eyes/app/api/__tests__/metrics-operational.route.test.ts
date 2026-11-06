@@ -66,17 +66,22 @@ describe('operational metrics: dedicated scoped identity, no tenant content', ()
     expect(m.queueStats).not.toHaveBeenCalled()
   })
 
-  it('fails closed on missing, weak or reused service configuration', async () => {
+  it('fails closed on missing, weak or reused service configuration, answering 401 so the configuration is not disclosed', async () => {
     const { GET } = await import('../metrics/operational/route')
     delete process.env.UE_METRICS_SERVICE_KEY
-    expect((await GET(request(METRICS_KEY))).status).toBe(503)
+    // An anonymous caller cannot tell an unconfigured server from a wrong key: both are 401.
+    expect((await GET(request())).status).toBe(401)
+    expect((await GET(request(METRICS_KEY))).status).toBe(401)
     process.env.UE_METRICS_SERVICE_KEY = 'too-short'
-    expect((await GET(request('too-short'))).status).toBe(503)
+    expect((await GET(request('too-short'))).status).toBe(401)
     process.env.UE_METRICS_SERVICE_KEY = AI_KEY
-    expect((await GET(request(AI_KEY))).status).toBe(503)
+    expect((await GET(request(AI_KEY))).status).toBe(401)
     process.env.UE_METRICS_SERVICE_KEY = QUEUE_KEY
-    expect((await GET(request(QUEUE_KEY))).status).toBe(503)
+    expect((await GET(request(QUEUE_KEY))).status).toBe(401)
     expect(m.queueStats).not.toHaveBeenCalled()
+    // The unsafe configuration is reported to operators server-side, once per refused request.
+    expect(m.logError).toHaveBeenCalledWith('operational_metrics_service_key_unconfigured', expect.objectContaining({ capability: 'metrics:platform_operational:read' }))
+    expect(m.logError).toHaveBeenCalledTimes(5)
   })
 
   it('authenticates a distinct metrics key and returns only queue infrastructure, without tenant reads', async () => {

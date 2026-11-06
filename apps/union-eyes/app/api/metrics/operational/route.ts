@@ -30,10 +30,11 @@ function authenticateMetricsService(req: Request): 'allowed' | 'unconfigured' | 
 
 export async function GET(req: Request) {
   const access = authenticateMetricsService(req)
-  if (access === 'unconfigured') {
-    return NextResponse.json({ error: 'Operational metrics service unavailable' }, { status: 503, headers: { 'Cache-Control': 'no-store' } })
-  }
-  if (access === 'denied') {
+  if (access !== 'allowed') {
+    // A caller without the matching credential is unauthorized whatever the server's configuration: answering 503 to an
+    // anonymous request would tell it whether the key is configured. The unconfigured or unsafe state is the operator's to
+    // see, so it is logged here (and the Control Plane consumer shows no data), never returned to the caller.
+    if (access === 'unconfigured') logger.error('operational_metrics_service_key_unconfigured', { capability: CAPABILITY })
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: { 'Cache-Control': 'no-store' } })
   }
 
