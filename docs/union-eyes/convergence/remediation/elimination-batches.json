@@ -10040,7 +10040,7 @@
     {
       "id": "B129-PRECEDENT-LIBRARY-NATIVE-PROOF-AND-ORDERING-DEFECTS",
       "family": "Django and Drizzle convergence: the precedent library proven on the converged arbitration_decisions under the real roles",
-      "evidenceCommit": null,
+      "evidenceCommit": "bc4cca2c7",
       "items": [],
       "touches": [
         {
@@ -10070,7 +10070,18 @@
           "explanation": "B131: reading the current routes shows both gaps B98 recorded as remaining were already closed in source -- app/api/arbitrations/route.ts and [id]/route.ts both declare rowReadAuthority: arbitrationRowReadable (the collection list filters through authorisedRows before pagination, counting only readable rows; the item route answers 404 for an unreadable row, the same as one that does not exist), and the item route declares retainOnDelete: true, which the generic factory enforces before any row is read, refusing DELETE unconditionally for every caller. What had no end-to-end proof was the wiring, not the logic: the case-access predicates are already unit-tested against a mocked case-access service, and the generic read-filter and retainOnDelete behaviours are generic crud-factory concerns. db/__tests__/arbitration-case-authority-routes.postgres.test.ts proves the wiring itself on the combined schema, as the real union_eyes_runtime role, against the unmodified route handlers: the collection lists only arbitrations whose case the caller may read; an unreadable case and a cross-tenant arbitration both answer 404 on the item route; a read-only collaborator reads but cannot PATCH; the case owner can PATCH; DELETE refuses every caller unconditionally, including the owner, before any row is read; creating an arbitration requires edit authority on the named grievance, not only organization membership, and is refused for another organization's grievance."
         }
       ],
-      "touches": []
+      "touches": [
+        {
+          "defectId": "DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/arbitration/arbitration-case-authority.ts",
+            "apps/union-eyes/app/api/arbitrations/route.ts",
+            "apps/union-eyes/app/api/arbitrations/[id]/route.ts",
+            "apps/union-eyes/db/__tests__/arbitration-case-authority-routes.postgres.test.ts"
+          ]
+        }
+      ]
     }
   ],
   "uncreditedSourceEvidence": {
