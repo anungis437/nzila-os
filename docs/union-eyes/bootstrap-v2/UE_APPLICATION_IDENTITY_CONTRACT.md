@@ -5,11 +5,11 @@ application user identifier (the `user_management.users.user_id` value carried b
 Genuine entity UUID references stay UUID. Classification uses foreign keys, the current declarations
 and how live application code reads and writes each column; it is never decided by column name alone.
 
-- Source plan: `462d4194fec0d534949c282a91563f728c03add32a9422295d9d7b4db332a73f`
-- Identity-looking UUID candidates classified: **78**
+- Source plan: `209b78b44526d998802f0acbeb85b94c5f71f761c7ea5775f858112ab99496ec`
+- Identity-looking UUID candidates classified: **85**
 - Unclassified current identity columns: **0**
 - Contract violations: **0**
-- Classification counts: {"APPLICATION_USER_ID":45,"DOMAIN_ENTITY_UUID":19,"DEAD_OR_UNREACHABLE":14}
+- Classification counts: {"APPLICATION_USER_ID":44,"DEAD_OR_UNREACHABLE":19,"DOMAIN_ENTITY_UUID":22}
 
 ## APPLICATION_USER_ID (converted to TEXT)
 
@@ -37,7 +37,6 @@ and how live application code reads and writes each column; it is never decided 
 | `grievance_deadlines.override_by` | uuid -> text | Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity. |
 | `grievance_deadlines.superseded_by` | uuid -> text | Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity. |
 | `grievance_events.actor_user_id` | uuid -> text | Live application code reads or writes the authenticated application user id into this column. |
-| `grievance_timeline.created_by` | uuid -> text | Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity. |
 | `grievances.created_by` | uuid -> text | Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity. |
 | `grievances.last_updated_by` | uuid -> text | Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity. |
 | `hazard_reports.created_by` | uuid -> text | Actor attribution (*_by) stores the acting authenticated application user; there is no foreign key to a uuid entity. |
@@ -76,11 +75,14 @@ and how live application code reads and writes each column; it is never decided 
 | `member_breaks.member_id` | uuid -> uuid | Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier. |
 | `member_employment.member_id` | uuid -> uuid | Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier. |
 | `member_leaves.member_id` | uuid -> uuid | Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier. |
+| `member_roles.acting_for_member_id` | uuid -> uuid | Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier. |
+| `member_roles.member_id` | uuid -> uuid | Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier. |
 | `pension_benefit_claims.member_id` | uuid -> uuid | Live code references the column without the authenticated user id; treated as an entity reference. |
 | `pension_contributions.member_id` | uuid -> uuid | Live code references the column without the authenticated user id; treated as an entity reference. |
 | `pension_members.user_id` | uuid -> uuid | app/api/pension/members documents that it stores the organization_members.id uuid primary key. |
 | `pension_t4a_records.member_id` | uuid -> uuid | Live code references the column without the authenticated user id; treated as an entity reference. |
 | `pension_trustees.user_id` | uuid -> uuid | Pension trustee rows reference pension entities by uuid; no application user id is written. |
+| `permission_exceptions.member_id` | uuid -> uuid | Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier. |
 | `representation_authorities.represented_person_id` | uuid -> uuid | Live code references the column without the authenticated user id; treated as an entity reference. |
 | `stewards.user_id` | uuid -> uuid | The steward dashboard documents this uuid as matching organization_members.id (member entity key), not the text application user id. |
 | `voter_eligibility.member_id` | uuid -> uuid | Foreign key to organization_members.id, a uuid entity key; not the authenticated user identifier. |
@@ -95,17 +97,22 @@ and how live application code reads and writes each column; it is never decided 
 
 | Column | Type | Basis |
 | --- | --- | --- |
+| `alert_recipients.recipient_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
+| `bargaining_team_members.member_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `cnesst_filings.member_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `member_consents.user_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `member_contact_preferences.user_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `member_employment_details.user_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `member_history_events.user_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `mfa_configurations.user_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
+| `newsletter_engagement.recipient_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `notification_tracking.recipient_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `organization_users.organization_user_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `organizer_impacts.user_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `preventive_withdrawals.member_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `right_of_refusal_events.member_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
+| `sso_sessions.user_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `user_management.organization_users.organization_user_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
+| `voting_notifications.recipient_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `wcb_claims.worker_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |
 | `workplace_incidents.injured_person_id` | uuid -> uuid | No live (non-test) application source references this column; no launch mutation required. |

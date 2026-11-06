@@ -53,6 +53,8 @@ export interface CurrentColumn {
   clientDefault: unknown
   defaultKind?: 'UUID4' | 'AUDIT_NOW' | 'CALLABLE' | 'SCALAR' | 'NONE'
   choices: unknown[]
+  enumType?: string | null
+  enumValues?: string[] | null
   foreignKey: { table: string; column: string; onDelete: string; databaseSemantics: string } | null
 }
 export interface CurrentModel {
@@ -95,6 +97,38 @@ export function retainCurrentModelBaseline(
     if (!modelColumns.some((column) => column.name === name)) delete columns[name]
     else delete columns[name].default
   }
+}
+
+/**
+ * Database enum types that current Django fields name in their own SQL. An EnumArrayField column is declared as
+ * "<enum_type>[]" and every write casts to that name ("%s::<enum_type>[]"), so the type must exist under the declared
+ * name with the field's choices as its labels. Drizzle-declared enums are renamed (ue_v2_<name>_<digest>) because only
+ * their values are load-bearing; a Django-declared enum is not renamed, because the application refers to it by name.
+ * A Drizzle enum of the same name must carry the same labels, or the two declarations disagree about one type.
+ */
+export function currentModelEnumTypes(
+  models: readonly CurrentModel[],
+  drizzleEnums: Readonly<Record<string, readonly string[]>> = {},
+): Map<string, string> {
+  const types = new Map<string, string>()
+  for (const model of models)
+    for (const column of model.columns) {
+      if (!column.enumType) continue
+      const name = column.enumType
+      const values = column.enumValues ?? []
+      if (!/^[a-z_][a-z0-9_]*$/.test(name) || !values.length)
+        throw new Error(`UE_V2_CURRENT_ENUM_DECLARATION_REQUIRED:${model.table}.${column.name}`)
+      if (column.type !== `${name}[]` && column.type !== name)
+        throw new Error(`UE_V2_CURRENT_ENUM_COLUMN_TYPE_MISMATCH:${model.table}.${column.name}`)
+      const drizzle = drizzleEnums[name]
+      if (drizzle && JSON.stringify(drizzle) !== JSON.stringify(values))
+        throw new Error(`UE_V2_CURRENT_ENUM_SOURCE_CONFLICT:${name}`)
+      const sql = `CREATE TYPE "public".${quote(name)} AS ENUM (${values.map((label) => `'${label.replaceAll("'", "''")}'`).join(', ')});`
+      if (types.has(`public.${name}`) && types.get(`public.${name}`) !== sql)
+        throw new Error(`UE_V2_CURRENT_ENUM_CONFLICT:${name}`)
+      types.set(`public.${name}`, sql)
+    }
+  return types
 }
 
 export function currentModelServerDefaults(model: CurrentModel): string[] {
@@ -805,7 +839,15 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     }
   }
   const seen = new Map<string, string>()
-  const enums = new Map<string, string>()
+  const enums = currentModelEnumTypes(
+    currentModels.models,
+    Object.fromEntries(
+      Object.values(enumExports).map((value) => {
+        const declared = value as { enumName: string; enumValues: string[] }
+        return [declared.enumName, declared.enumValues]
+      }),
+    ),
+  )
   for (const [symbol, table] of exported.sort(([a], [b]) => a.localeCompare(b))) {
     const config = getTableConfig(table)
     const key = `${config.schema ?? 'public'}.${config.name}`

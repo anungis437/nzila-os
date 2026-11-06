@@ -147,6 +147,10 @@ def main():
                         "databaseSemantics": "NO ACTION DEFERRABLE INITIALLY DEFERRED",
                     } if field.is_relation and (field.many_to_one or field.one_to_one) and field.db_constraint else None,
                 })
+                # A database enum the field's own SQL names (EnumArrayField casts to "<enum_type>[]" at runtime).
+                if getattr(field, "enum_type", None):
+                    columns[-1]["enumType"] = field.enum_type
+                    columns[-1]["enumValues"] = [value for value, _ in field.base_field.flatchoices]
             models.append({
                 "table": table,
                 "app": model._meta.app_label,

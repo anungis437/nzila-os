@@ -22,9 +22,14 @@ import {
 import { syntheticParameter } from './runtime-security'
 import { qualificationExitCode } from './clean-room'
 
-function table(name: string, columns = ['id', 'organization_id']): SourceTable {
-  const authority = storageAuthorityManifest.find((entry) => entry.table === name)
-  if (!authority) throw new Error(`Test requires current storage authority:${name}`)
+function table(
+  name: string,
+  columns = ['id', 'organization_id'],
+  requiredSystemPrivileges?: ('SELECT' | 'INSERT' | 'UPDATE' | 'DELETE')[],
+): SourceTable {
+  const current = storageAuthorityManifest.find((entry) => entry.table === name)
+  if (!current) throw new Error(`Test requires current storage authority:${name}`)
+  const authority = requiredSystemPrivileges ? { ...current, requiredSystemPrivileges } : current
   return {
     name,
     columns: columns.map((column) => ({ name: column, type: 'uuid', notNull: false })),
@@ -61,9 +66,20 @@ function plan(tables: SourceTable[]): V2Plan {
 }
 
 describe('prospective bootstrap local authority boundaries', () => {
-  it('permits only the current commercial transition lookup and returned identifier', () => {
+  // The column-read contracts (service-column-contracts.ts) confine a SYSTEM writer that has no table SELECT to the
+  // columns its own WHERE needs. Current authority grants both relations table-level SYSTEM SELECT, for reasons recorded
+  // in their storage-authority entries (commercial transition reads the contract it accepts, 86aa8adb2; the data-source
+  // overview lists sync runs as a system read, a0404b79b). The mechanism is proved on the narrower authority it applies
+  // to; the current authority is pinned separately so a later change to it is a reviewed decision, not a silent one.
+  it('confines a SYSTEM writer without table SELECT to the commercial transition lookup and returned identifier', () => {
     const compiled = compileSecurity(
-      plan([table('commercial_contracts', ['id', 'organization_id', 'contract_number', 'status'])]),
+      plan([
+        table(
+          'commercial_contracts',
+          ['id', 'organization_id', 'contract_number', 'status'],
+          ['INSERT', 'UPDATE'],
+        ),
+      ]),
     )
     expect(compiled.rules[0].systemSelectColumns).toEqual(['id', 'contract_number'])
     expect(compiled.rules[0].systemPrivileges).toEqual(['INSERT', 'UPDATE'])
@@ -73,12 +89,16 @@ describe('prospective bootstrap local authority boundaries', () => {
     expect(compiled.statements.join('\n')).not.toContain(
       'GRANT SELECT ON TABLE public."commercial_contracts" TO union_eyes_system;',
     )
-    expect(() => compileSecurity(plan([table('commercial_contracts')]))).toThrow(
-      'UE_V2_SYSTEM_PREDICATE_COLUMN_REQUIRED:commercial_contracts',
-    )
+    expect(() =>
+      compileSecurity(plan([table('commercial_contracts', undefined, ['INSERT', 'UPDATE'])])),
+    ).toThrow('UE_V2_SYSTEM_PREDICATE_COLUMN_REQUIRED:commercial_contracts')
   })
-  it('permits only the source-owned service UPDATE predicate, not broad sync-log reads', () => {
-    const source = table('external_data_sync_log', ['id', 'sync_id', 'status'])
+  it('confines a SYSTEM writer without table SELECT to the source-owned sync-log UPDATE predicate', () => {
+    const source = table(
+      'external_data_sync_log',
+      ['id', 'sync_id', 'status'],
+      ['INSERT', 'UPDATE'],
+    )
     const compiled = compileSecurity(plan([source]))
     expect(compiled.rules[0].systemSelectColumns).toEqual(['sync_id'])
     expect(compiled.rules[0].systemPrivileges).toEqual(['INSERT', 'UPDATE'])
@@ -88,8 +108,22 @@ describe('prospective bootstrap local authority boundaries', () => {
     expect(compiled.statements.join('\n')).not.toContain(
       'GRANT SELECT ON TABLE public."external_data_sync_log" TO union_eyes_system;',
     )
-    expect(() => compileSecurity(plan([table('external_data_sync_log', ['id'])]))).toThrow(
-      'UE_V2_SYSTEM_PREDICATE_COLUMN_REQUIRED:external_data_sync_log',
+    expect(() =>
+      compileSecurity(plan([table('external_data_sync_log', ['id'], ['INSERT', 'UPDATE'])])),
+    ).toThrow('UE_V2_SYSTEM_PREDICATE_COLUMN_REQUIRED:external_data_sync_log')
+  })
+  it.each([
+    ['commercial_contracts', ['id', 'organization_id', 'contract_number', 'status']],
+    ['external_data_sync_log', ['id', 'sync_id', 'status']],
+  ])('pins the current table-level SYSTEM SELECT authority of %s', (name, columns) => {
+    const compiled = compileSecurity(plan([table(name, columns)]))
+    expect(compiled.rules[0].systemPrivileges).toEqual(['SELECT', 'INSERT', 'UPDATE'])
+    expect(compiled.rules[0].systemSelectColumns).toBeUndefined()
+    expect(compiled.statements.join('\n')).toContain(
+      `GRANT SELECT, INSERT, UPDATE ON TABLE public."${name}" TO union_eyes_system;`,
+    )
+    expect(compiled.statements.join('\n')).not.toMatch(
+      new RegExp(`GRANT SELECT \\([^)]*\\) ON TABLE public\\."${name}"`),
     )
   })
   it('honors a recorded user-parent override when a child also references a sibling table', () => {
