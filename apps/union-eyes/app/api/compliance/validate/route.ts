@@ -69,7 +69,12 @@ async function handler(request: NextRequest) {
     );
     }
 
-    const parsed = complianceValidateSchema.safeParse(await request.json().catch(() => ({})));
+    // A malformed JSON document is not an empty compliance request. Fail closed before validation.
+    const rawBody = await request.json().catch(() => null);
+    if (rawBody === null) {
+      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid JSON request body');
+    }
+    const parsed = complianceValidateSchema.safeParse(rawBody);
     if (!parsed.success) {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid compliance validation request', parsed.error.issues.slice(0, 5));
     }
