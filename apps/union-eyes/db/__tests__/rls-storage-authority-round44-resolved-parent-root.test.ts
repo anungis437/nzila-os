@@ -312,10 +312,16 @@ describe('round 44 defect fix: governance telemetry cross-org aggregate requires
     const src = source('app/api/governance/telemetry/route.ts');
     expect(src).toMatch(/if \(await isSystemAdmin\(\)\)/);
     // The safe in-process-only fallback values must be assigned before the gate.
-    const fallbackIndex = src.indexOf('let dbAuditEventVolume = 0');
+    const fallbackIndex = src.indexOf('let dbAuditEventVolume: number | null = null');
     const gateIndex = src.indexOf('if (await isSystemAdmin())');
     expect(fallbackIndex).toBeGreaterThan(-1);
     expect(gateIndex).toBeGreaterThan(-1);
     expect(fallbackIndex).toBeLessThan(gateIndex);
+  });
+
+  it('issue #1118: counts no organization\'s policy evaluations across tenants, even for a platform administrator', () => {
+    const src = source('app/api/governance/telemetry/route.ts');
+    expect(src).not.toContain('policyEvaluations');
+    expect(src).toContain('policy_denied_count: null');
   });
 });

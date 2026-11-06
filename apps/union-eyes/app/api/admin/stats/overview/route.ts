@@ -1,25 +1,24 @@
 /**
  * GET /api/admin/stats/overview
- * Returns system-wide stats: total members, active orgs, total orgs, storage, active today.
+ * Returns platform-wide figures a platform administrator may see: active and total organizations, and database size.
+ *
+ * Total members and members active today are null ("not measured here"): they are counts of every organization's roster, and a platform
+ * title is no standing entitlement to read or derive a union's content, even as an aggregate (issues #1116, #1118). Cross-organization
+ * grants are not built, so those figures are not read at all.
  */
 import { db } from '@/db/db';
 import { organizations } from '@/db/schema';
-import { organizationMembers } from '@/db/schema';
 import { count, sql, ne } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 
 export const dynamic = 'force-dynamic';
 
-// A platform operation: system-wide counts, gated by platform authority (platform_lead); its statements run as the system role, which holds
-// SELECT on both tables.
+// A platform operation over the platform's own record (the organizations it serves) and the database's size, gated by platform authority
+// (platform_lead); its statements run as the system role. organization_members is not read.
 export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
   async () => withSystemContext(async () => {
-    const [memberStats] = await db
-      .select({ totalMembers: count() })
-      .from(organizationMembers);
-
     const [orgStats] = await db
       .select({
         totalOrganizations: count(),
@@ -28,7 +27,7 @@ export const GET = withApi(
       .from(organizations)
       .where(ne(organizations.organizationType, 'platform'));
 
-    // Estimate storage from table sizes
+    // Estimate storage from the database size (infrastructure).
     const storageResult = await db.execute(
       sql`SELECT pg_database_size(current_database()) as db_size`
     );
@@ -36,20 +35,12 @@ export const GET = withApi(
     const dbSizeBytes = Number((rows[0] as Record<string, unknown>)?.db_size ?? 0);
     const totalStorageGb = dbSizeBytes / (1024 * 1024 * 1024);
 
-    // Active today: members with recent activity (created/updated in last 24h)
-    const [activeResult] = await db
-      .select({ activeToday: sql<number>`count(distinct user_id)` })
-      .from(organizationMembers)
-      .where(sql`${organizationMembers.updatedAt} >= now() - interval '24 hours'
-        OR ${organizationMembers.createdAt} >= now() - interval '24 hours'`);
-
     return {
-      totalMembers: memberStats.totalMembers,
+      totalMembers: null,
       activeOrganizations: orgStats.activeOrganizations,
       totalOrganizations: orgStats.totalOrganizations,
       totalStorage: Number(totalStorageGb.toFixed(2)),
-      activeToday: activeResult.activeToday ?? 0,
+      activeToday: null,
     };
   }),
 );
-

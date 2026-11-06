@@ -14,7 +14,7 @@
    "ORG_AUTH": 8,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 239,
-   "ROLE_AUTH": 105,
+   "ROLE_AUTH": 104,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 381,
@@ -10922,7 +10922,7 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "ROLE_AUTH",
+   "guard": "ORG_AUTH",
    "kernel": false,
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",

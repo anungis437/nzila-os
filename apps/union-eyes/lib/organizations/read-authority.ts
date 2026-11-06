@@ -29,6 +29,9 @@ export interface OrganizationAccess {
 const ADMIN_RANK = ROLE_HIERARCHY.admin;
 const roleRank = (role: string) => ROLE_HIERARCHY[role as keyof typeof ROLE_HIERARCHY] ?? 0;
 export const isAdministrativeRole = (role: string | undefined) => roleRank(role ?? '') >= ADMIN_RANK;
+const OFFICER_RANK = ROLE_HIERARCHY.officer;
+/** An officer of the organization or above in the role hierarchy (officer, chief steward, the executive and its administrators). */
+export const isOfficerOrAboveRole = (role: string | undefined) => roleRank(role ?? '') >= OFFICER_RANK;
 
 const MAX_AFFILIATED = 5000;
 
@@ -78,6 +81,16 @@ export function canReadOrganization(access: OrganizationAccess, organizationId: 
 /** Administrative authority over an organization: the caller's own live membership there carries an administrative role. */
 export function canAdministerOrganization(access: OrganizationAccess, organizationId: string): boolean {
   return isAdministrativeRole(access.direct.get(organizationId));
+}
+
+/**
+ * The organization's own aggregate analytics (membership and caseload figures, small-cell suppressed): the caller's own live membership
+ * there carries an officer-or-above role, whose function covers the organization's reporting (owner decision on issue #1118: direct
+ * officers may have org-scoped analytics). Like every other grant here it is direct and specific: an officer or administrator of an
+ * organization above it, and a platform title, have none.
+ */
+export function canReadOrganizationAnalytics(access: OrganizationAccess, organizationId: string): boolean {
+  return isOfficerOrAboveRole(access.direct.get(organizationId));
 }
 
 /** The caller may know the organization exists and see its directory entry (and nothing more unless {@link canReadOrganization}). */
