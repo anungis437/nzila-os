@@ -22,7 +22,7 @@ export const COMPLIANCE_JURISDICTIONS = ['CA-FED', 'CA-AB', 'CA-BC', 'CA-MB', 'C
 
 // Dates are calendar dates, not JavaScript's permissive Date.parse inputs (which normalize impossible days).
 // Do not infer jurisdictional deadlines from these caller-supplied dates.
-const dateText = z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/, 'must be an ISO calendar date')
+const dateText = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be an ISO calendar date')
   .refine((value) => {
     const [year, month, day] = value.split('-').map(Number);
     const parsed = new Date(Date.UTC(year, month - 1, day));
