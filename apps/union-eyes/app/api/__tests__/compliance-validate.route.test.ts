@@ -37,7 +37,7 @@ describe('compliance/validate route', () => {
       body: JSON.stringify({}),
     }));
 
-    expect([200, 400, 401, 403, 500]).toContain(response.status);
+    expect(response.status).toBe(401);
   });
 
   it('evaluates compliance checks for provided data', async () => {
@@ -76,11 +76,45 @@ describe('compliance/validate route', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ jurisdiction: 'CA-ON', data: { totalMembers: 100, votesCase: 10, signedCards: 90, bargainingUnit: 100 } }),
     }));
+    expect(response.status).toBe(200);
     const { checks } = await response.json();
     expect(checks.map((c: { status: string }) => c.status)).toEqual(['info', 'info']);
     expect(JSON.stringify(checks)).not.toMatch(/compliant|violation|Quorum met|Automatic certification/i);
     expect(checks[0].message).toContain('10.0%');
     expect(checks[1].message).toContain('90.0%');
+  });
+
+  it.each([
+    { totalMembers: 100, votesCase: 101 },
+    { totalMembers: 0, votesCase: 0 },
+    { bargainingUnit: 10, signedCards: 11 },
+    { bargainingUnit: 0, signedCards: 0 },
+    { totalMembers: -1, votesCase: 0 },
+    { totalMembers: 1.5, votesCase: 1 },
+    { totalMembers: 'Infinity', votesCase: 1 },
+    { totalMembers: '9007199254740993', votesCase: 1 },
+  ])('rejects impossible or unsafe counts: %j', async (data) => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/compliance/validate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ jurisdiction: 'CA-ON', data }),
+    }));
+    expect(response.status).toBe(400);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('accepts zero numerator with positive population without asserting compliance', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/compliance/validate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ data: { totalMembers: 10, votesCase: 0, bargainingUnit: 10, signedCards: 0 } }),
+    }));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.checks).toEqual([]);
+    expect(body.notice).toContain('not a finding of compliance');
   });
 
   it('returns 400 for invalid JSON body', async () => {
@@ -91,7 +125,7 @@ describe('compliance/validate route', () => {
       body: '{invalid json',
     }));
 
-    expect([200, 400, 500]).toContain(response.status);
+    expect(response.status).toBe(400);
   });
 
   it('returns 401 when user context missing', async () => {
@@ -104,6 +138,6 @@ describe('compliance/validate route', () => {
       body: JSON.stringify({}),
     }));
 
-    expect([200, 401, 400]).toContain(response.status);
+    expect(response.status).toBe(401);
   });
 });
