@@ -190,6 +190,13 @@ export async function fetchAdvisories(pkgMap) {
     throw new Error(`Audit registry unreachable: ${err.message}`)
   })
 
+  // A successful status is insufficient if a transport shim or future fetch
+  // implementation followed a redirect despite the manual policy. Reject
+  // redirected responses before parsing or certifying their advisory payload.
+  if (response.redirected === true ||
+      (typeof response.url === 'string' && response.url !== '' && response.url !== BULK_ENDPOINT)) {
+    throw new Error('Audit registry response was redirected or came from an unexpected endpoint')
+  }
   if (!response.ok) {
     throw new Error(`Audit registry returned HTTP ${response.status}; a failed request is never an empty audit`)
   }
