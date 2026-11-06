@@ -95,13 +95,18 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
     )
   const newGrievance = async (organizationId: string, createdBy: string) => {
     const id = randomUUID()
-    await admin.query(`INSERT INTO grievances (id, organization_id, created_by) VALUES ($1,$2,$3)`, [id, organizationId, createdBy])
+    // The physical table is Django-managed and carries no database-level defaults (see grievances.ts's own
+    // comment), so a raw-SQL insert must supply every NOT NULL column explicitly, not only the ones this test cares about.
+    await admin.query(
+      `INSERT INTO grievances (id, organization_id, grievance_number, type, title, description, created_by) VALUES ($1,$2,$3,'individual',$4,$5,$6)`,
+      [id, organizationId, `GR-${tag}-${id.slice(0, 8)}`, `Grievance ${tag}`, 'd', createdBy],
+    )
     return id
   }
   const newArbitration = async (grievanceId: string, number: string) => {
     const id = randomUUID()
     await admin.query(
-      `INSERT INTO arbitrations (id, grievance_id, arbitration_number, board_name, board_type) VALUES ($1,$2,$3,'Board','grievance')`,
+      `INSERT INTO arbitrations (id, grievance_id, arbitration_number, board_name, board_type, status) VALUES ($1,$2,$3,'Board','grievance','pending')`,
       [id, grievanceId, number],
     )
     return id
