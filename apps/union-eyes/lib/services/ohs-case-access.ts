@@ -17,15 +17,20 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
  *     a case assigned outside the steward's ordinary coverage;
  *   - an active steward_assignments row whose bargaining unit, worksite or department covers the member's current
  *     employment record.
- * Nobody else reads, lists or changes the record. A member with no current employment row, or a steward with no
+  * Nobody else reads, lists or changes the record. A member with no current employment row, or a steward with no
  * covering assignment and no designation, is refused — the same answer as a record that does not exist.
+ *
+ * cnesst_filings.member_id is nullable (a filing can report a workplace-level hazard with no member named); a
+ * right-of-refusal or preventive withdrawal's member_id is not. A record that names no member claims no member's
+ * case to protect, so it stays at the steward role floor the route already enforces, the same as the committee,
+ * pay-equity and assessment routes in this family that have no case-authority layer at all.
  *
  * Each check opens its own tenant transaction (as lib/services/case-access-service.ts's getEffectiveCaseAccess
  * does), so it is safe to call from rowReadAuthority, lockedAuthCheck or beforeCreate alike, whichever already-
  * scoped handler it runs inside of.
  */
 
-export type OhsCaseAccessReason = 'officer_or_above' | 'designated_representative' | 'coverage_match' | 'no_authority';
+export type OhsCaseAccessReason = 'officer_or_above' | 'designated_representative' | 'coverage_match' | 'no_member_named' | 'no_authority';
 
 export interface OhsCaseAccessDecision {
   allowed: boolean;
@@ -58,7 +63,7 @@ export async function evaluateOhsCaseAccess(input: {
       return { allowed: true, reason: 'designated_representative' };
     }
   }
-  if (!input.memberId) return { allowed: false, reason: 'no_authority' };
+  if (!input.memberId) return { allowed: true, reason: 'no_member_named' };
   const covers = await stewardCoversMember({
     organizationId: input.organizationId,
     stewardUserId: input.actorUserId,
