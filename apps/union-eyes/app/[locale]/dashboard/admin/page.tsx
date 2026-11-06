@@ -57,12 +57,6 @@ interface PlatformStats {
   activeToday: number | null;
 }
 
-interface ActivityItem {
-  id: string;
-  description: string;
-  timestamp: string | null;
-}
-
 /** An organization's tenancy record: no member counts, officer names or contacts, which are its content (#1116). */
 interface LocalSection {
   id: string;
@@ -102,7 +96,7 @@ const HUB_LINKS = [
   { key: "taxonomy", href: "/dashboard/admin/members" },
 ] as const;
 
-type LoadSubject = "stats" | "activity" | "users" | "locals" | "health";
+type LoadSubject = "stats" | "users" | "locals" | "health";
 
 /** The page's own words, from the message catalogs (adminConsolePage), in the language of the page. */
 function useCopy() {
@@ -116,7 +110,7 @@ function useCopy() {
     orgsTotal: (count: number) => t("orgsTotal", { count }),
     databaseSize: t("databaseSize"),
     databaseSizeNote: t("databaseSizeNote"),
-    noActivity: t("noActivity"),
+    activityUnavailable: t("activityUnavailable"),
     searchTooShort: t("searchTooShort", { min: MIN_USER_SEARCH }),
     noUsers: t("noUsers"),
     usersScopeNote: t("usersScopeNote"),
@@ -186,15 +180,6 @@ function readStats(body: unknown): PlatformStats {
     throw new ApiShapeError("incomplete statistics");
   }
   return { totalMembers, activeOrganizations, totalOrganizations, totalStorage, activeToday };
-}
-
-function readActivity(body: unknown): ActivityItem[] {
-  return rowsOf(body).map((row) => {
-    const id = text(row.id);
-    const description = text(row.description);
-    if (!id || !description) throw new ApiShapeError("an activity entry without an id or description");
-    return { id, description, timestamp: text(row.timestamp) };
-  });
 }
 
 function readUsers(body: unknown): SystemUser[] {
@@ -499,7 +484,6 @@ export default function AdminPage() {
   const localsUrl = `/api/admin/organizations${search ? `?search=${encodeURIComponent(search)}` : ""}`;
 
   const stats = useRemote(activeSection === "overview" ? "/api/admin/stats/overview" : null, readStats, overviewReload);
-  const activity = useRemote(activeSection === "overview" ? "/api/admin/stats/activity?limit=10" : null, readActivity, overviewReload);
   const users = useRemote(activeSection === "users" ? usersUrl : null, readUsers, usersReload);
   const locals = useRemote(activeSection === "locals" ? localsUrl : null, readLocals, localsReload);
   const health = useRemote(activeSection === "database" ? "/api/admin/database/health" : null, readHealth, healthReload);
@@ -690,25 +674,11 @@ export default function AdminPage() {
             {/* Recent Activity */}
             <Card className={panel}>
               <h2 className="text-xl font-bold text-gray-900 mb-4">{t('admin.overview.recentActivity')}</h2>
-              {activity.error !== null ? (
-                <LoadFailure title={copy.couldNotLoad("activity")} detail={activity.error} retryLabel={copy.retry} onRetry={() => setOverviewReload((n) => n + 1)} />
-              ) : activity.loading ? (
-                <div className="text-center py-8 text-gray-500">{copy.loading}</div>
-              ) : !activity.data || activity.data.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>{copy.noActivity}</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {activity.data.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                      <p className="text-sm font-medium text-gray-900">{item.description}</p>
-                      <p className="text-xs text-gray-500">{item.timestamp ? new Date(item.timestamp).toLocaleString(numberLocale) : copy.notRecorded}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {/* No request: GET /api/admin/stats/activity refuses every caller (#1116, #1118), so the feed is explained, not loaded. */}
+              <div className="text-center py-8 text-gray-500">
+                <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>{copy.activityUnavailable}</p>
+              </div>
             </Card>
           </motion.div>
         )}

@@ -12,14 +12,25 @@ vi.mock('@/db/db', async () => {
   const { lateBoundDb } = await import('./support/pglite-tables');
   return { db: lateBoundDb(state) };
 });
-vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(state.db),
-  withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(state.db),
-}));
+// As the real withRLSContext does, the work runs inside the tenant context storage, so code that needs the creating transaction
+// (the organization's record-number series) finds it.
+vi.mock('@/lib/db/with-rls-context', async () => {
+  const { tenantContextStorage } = await import('@/db/tenant-context-storage');
+  return {
+      withRLSContext: async (...args: unknown[]) =>
+      tenantContextStorage.run(state.db as never, () => (args[args.length - 1] as (tx: unknown) => Promise<unknown>)(state.db)),
+    withSystemContext: async (fn: (tx: unknown) => Promise<unknown>) => fn(state.db),
+  };
+});
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit }));
-vi.mock('@/lib/api/with-api', () => ({
-  withApi: (_cfg: unknown, handler: (c: unknown) => Promise<unknown>) => (c: unknown) => handler(c),
-}));
+// As the real withApi does for rlsOrgContext routes, the handler runs inside the organization's transaction (tenant context storage).
+vi.mock('@/lib/api/with-api', async () => {
+  const { tenantContextStorage } = await import('@/db/tenant-context-storage');
+  return {
+    withApi: (cfg: { rlsOrgContext?: boolean }, handler: (c: unknown) => Promise<unknown>) => (c: unknown) =>
+      cfg?.rlsOrgContext ? tenantContextStorage.run(state.db as never, () => handler(c)) : handler(c),
+  };
+});
 
 const ORG = '11111111-1111-4111-8111-111111111111';
 let pg: PGlite;

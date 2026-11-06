@@ -17,13 +17,14 @@ describe('Gate 0 batch B69: satisfaction figures, platform statistics and the in
     expect(item).toContain('Satisfaction ratings for this representative')
   })
 
-  it('counts people once and reads under the system role on purpose, with no settlement figure (DEF-0B10-OPL-14 replaces the settlements assertions)', () => {
+  it('reads only organization tenancy metadata under the system role: no member, grievance, agreement or settlement figure (#1116/#1118; DEF-0B10-OPL-14)', () => {
     const stats = src('lib/queries/platform-stats.ts')
-    expect(stats).toContain('count(distinct ${organizationMembers.userId})')
-    expect(stats).toContain('isNull(organizationMembers.deletedAt)')
-    expect(stats).toContain("status IN ('settled', 'closed')")
+    // Platform staff read tenancy metadata from the organizations table only; figures derived from tenant content are null, not counted.
     expect(stats).toContain('withSystemContext')
-    expect(stats).toContain('WHERE deleted_at IS NULL')
+    expect(stats).toContain('FROM organizations')
+    expect(stats).not.toMatch(/organizationMembers|FROM organization_members|FROM grievances|FROM collective_agreements|FROM claims\b/)
+    expect(stats).toContain('grievances: null')
+    expect(stats).toContain('registeredUsers: null')
     expect(stats).not.toMatch(/FROM settlements|settlements\b.*\bamount|perCapitaRate/)
   })
 

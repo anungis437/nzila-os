@@ -40,6 +40,17 @@ export default function ClaimIcraClient({ assessmentId, token, locale }: Props) 
         }
         return;
       }
+      // The claim route answers { ok: true, assessmentId, organizationId }. Only an answer that confirms this assessment was
+      // claimed opens its results; anything else is shown as a failed claim rather than assumed to have worked.
+      const claimed: unknown = await res.json().catch(() => null);
+      const confirmed = claimed !== null && typeof claimed === 'object'
+        && (claimed as { ok?: unknown }).ok === true
+        && (claimed as { assessmentId?: unknown }).assessmentId === assessmentId;
+      if (!confirmed) {
+        setStatus('error');
+        setErrorMessage(fr ? 'La récupération n’a pas été confirmée.' : 'The claim was not confirmed.');
+        return;
+      }
       setStatus('success');
       router.push(`/${locale}/continuity-assessment/results/${assessmentId}`);
     } catch {

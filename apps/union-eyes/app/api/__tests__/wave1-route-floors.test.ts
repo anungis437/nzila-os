@@ -68,24 +68,26 @@ describe('health and safety incident routes', () => {
   it('marks only a report filed as anonymous for anonymous attribution', async () => {
     captured.calls.length = 0;
     const mod = await import('../health-safety/incidents/route');
-    const opts = captured.calls.at(-1) as { anonymousCreate: (v: Record<string, unknown>) => boolean; beforeCreate: (v: Record<string, unknown>) => Record<string, unknown> };
+    const opts = captured.calls.at(-1) as { anonymousCreate: (v: Record<string, unknown>) => boolean };
+    // beforeCreate also issues the organization's record number inside the creating transaction; the anonymity rules it
+    // applies are buildIncidentCreateValues, which is what these assertions exercise.
+    const build = mod.buildIncidentCreateValues;
     const base = { description: 'd', locationDescription: 'l', organizationId: 'o', createdBy: 'user-1', incidentType: 'near_miss', severity: 'minor', incidentDate: '2026-03-01T10:00:00Z' };
-    expect(opts.anonymousCreate(opts.beforeCreate({ ...base, isAnonymous: true }))).toBe(true);
-    expect(opts.anonymousCreate(opts.beforeCreate({ ...base, isAnonymous: false }))).toBe(false);
-    expect(opts.anonymousCreate(opts.beforeCreate({ ...base, isAnonymous: 'true' }))).toBe(false);
-    expect(opts.anonymousCreate(opts.beforeCreate(base))).toBe(false);
+    expect(opts.anonymousCreate(build({ ...base, isAnonymous: true }))).toBe(true);
+    expect(opts.anonymousCreate(build({ ...base, isAnonymous: false }))).toBe(false);
+    expect(opts.anonymousCreate(build({ ...base, isAnonymous: 'true' }))).toBe(false);
+    expect(opts.anonymousCreate(build(base))).toBe(false);
     expect(mod.POST).toBeDefined();
   });
 
   it('drops the reporter identity from an anonymous report', async () => {
     captured.calls.length = 0;
     vi.resetModules();
-    await import('../health-safety/incidents/route');
-    const opts = captured.calls.at(-1) as { beforeCreate: (v: Record<string, unknown>) => Record<string, unknown> };
+    const { buildIncidentCreateValues: build } = await import('../health-safety/incidents/route');
     const valid = { description: 'd', locationDescription: 'l', incidentType: 'near_miss', severity: 'minor', incidentDate: '2026-03-01T10:00:00Z', reportedByName: 'Jo' };
-    const anonymous = opts.beforeCreate({ ...valid, isAnonymous: true });
+    const anonymous = build({ ...valid, isAnonymous: true });
     expect(anonymous.isAnonymous).toBe(true);
     expect(anonymous.reportedByName).toBeUndefined();
-    expect(opts.beforeCreate({ ...valid, isAnonymous: false }).reportedByName).toBe('Jo');
+    expect(build({ ...valid, isAnonymous: false }).reportedByName).toBe('Jo');
   });
 });
