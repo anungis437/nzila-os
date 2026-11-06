@@ -10,6 +10,7 @@ const h = vi.hoisted(() => ({
   operation: vi.fn(),
   ready: vi.fn(),
   writeEmbedding: vi.fn(),
+  eraseEmbeddings: vi.fn(async () => [] as string[]),
   where: [] as unknown[],
   set: [] as unknown[],
 }));
@@ -55,7 +56,7 @@ vi.mock('@/lib/ai/vector-readiness', () => ({
   },
   vectorColumnReady: h.ready,
 }));
-vi.mock('@/lib/ai/knowledge-base-embeddings', () => ({ writeKnowledgeBaseEmbedding: h.writeEmbedding }));
+vi.mock('@/lib/ai/knowledge-base-embeddings', () => ({ writeKnowledgeBaseEmbedding: h.writeEmbedding, eraseKnowledgeBaseEmbeddings: h.eraseEmbeddings }));
 
 import { buildIndexableContent, indexExitInterview } from '../semantic-indexer';
 
@@ -248,6 +249,19 @@ describe('lib/knowledge-transfer/indexing/semantic-indexer', () => {
     expect(result).toEqual({ indexed: false, reason: 'Retiree consent not granted' });
     expect(h.where).toContainEqual(kbCopyPredicate);
     expect(h.set).toContainEqual(expect.objectContaining({ isActive: false }));
+  });
+
+  // DEF-0B7-EXC-CONSENT-WITHDRAWAL-AND-RECLASSIFICATION-WITHDRAW-NOTHING-DERIVED
+  it('erases the embedding of the copy when the interview may no longer be indexed, and records which', async () => {
+    h.queue.push([interview({ consentGranted: false, knowledgeBaseId: 'kb1' })], undefined, [{ id: 'kb1' }]);
+    h.eraseEmbeddings.mockResolvedValueOnce(['kb1']);
+    await indexExitInterview('i1', 'org-1', 'user-1');
+    expect(h.eraseEmbeddings).toHaveBeenCalledWith(tx, { organizationId: 'org-1', sourceType: 'exit_interview', sourceId: 'i1' });
+    expect(h.audit).toHaveBeenCalledWith(
+      tx,
+      expect.objectContaining({ action: 'exit_interview.index.skipped', details: expect.objectContaining({ erasedEmbeddingIds: ['kb1'] }) }),
+      'success',
+    );
   });
 
   it('requires consent and an indexable level where the index is written, and records no success when a withdrawal won', async () => {
