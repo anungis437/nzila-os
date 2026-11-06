@@ -257,3 +257,22 @@ test('audit registry redirects are rejected without forwarding the dependency in
     globalThis.fetch = previousFetch
   }
 })
+
+test('a successful but redirected or off-origin audit response cannot certify a clean scan', async () => {
+  const previousFetch = globalThis.fetch
+  const pkgMap = new Map([['node-forge', new Set(['1.4.0'])]])
+  try {
+    for (const response of [
+      { ok: true, status: 200, redirected: true, url: 'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk', json: async () => ({}) },
+      { ok: true, status: 200, redirected: false, url: 'https://untrusted.example/collect', json: async () => ({}) },
+    ]) {
+      globalThis.fetch = async (_url, options) => {
+        assert.equal(options.redirect, 'manual')
+        return response
+      }
+      await assert.rejects(fetchAdvisories(pkgMap), /redirected or came from an unexpected endpoint/)
+    }
+  } finally {
+    globalThis.fetch = previousFetch
+  }
+})
