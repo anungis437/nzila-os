@@ -8,7 +8,7 @@ const m = vi.hoisted(() => ({
   enforceAISafety: vi.fn(),
   dataIngestion: { ingest: vi.fn() },
   entityExtraction: { extract: vi.fn() },
-  ragPipeline: { addDocuments: vi.fn() },
+  index: vi.fn(),
   operation: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
@@ -32,7 +32,10 @@ vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntit
 vi.mock('@nzila/policies', () => ({ enforceAISafety: m.enforceAISafety }));
 vi.mock('@/lib/ai/data-ingestion', () => ({ dataIngestion: m.dataIngestion }));
 vi.mock('@/lib/ai/entity-extraction', () => ({ entityExtraction: m.entityExtraction }));
-vi.mock('@/lib/ai/rag-pipeline', () => ({ ragPipeline: m.ragPipeline }));
+vi.mock('@/lib/ai/durable-ingest-index', () => ({
+  indexIngestedDocument: m.index,
+  IngestTooLargeToIndexError: class IngestTooLargeToIndexError extends Error {},
+}));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
 async function loadRoute() {
@@ -62,11 +65,12 @@ describe('ai/ingest route', () => {
       documentType: 'contract',
       orgs: [{ name: 'ACME Union' }],
     });
-    m.ragPipeline.addDocuments.mockResolvedValue(undefined);
+    m.index.mockResolvedValue({ status: 'indexed', durable: true, documentId: 'doc_1', knowledgeBaseIds: ['kb_1'], chunkCount: 1, embedded: true });
     m.operation.mockImplementation(async (_op: unknown, fn: () => Promise<unknown>) => fn());
   });
 
-  it('indexes the document under the caller organization after recording the intent', async () => {
+  // DEF-0B2-AI-RAG-INDEX-PROCESS-LOCAL: the index is the organization's durable knowledge_base rows, not process memory.
+  it('indexes the document durably under the caller organization and reports what was stored', async () => {
     const { POST } = await loadRoute();
     const form = new FormData();
     form.set('file', new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' }));
@@ -75,18 +79,28 @@ describe('ai/ingest route', () => {
     const response = await POST(new Request('http://localhost/api/ai/ingest', { method: 'POST', body: form }));
 
     expect(response.status).toBe(201);
-    expect(m.operation).toHaveBeenCalledWith(
-      expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'ai.ingest.rag_index', resourceId: 'doc_1' }),
-      expect.any(Function),
-    );
-    expect(m.ragPipeline.addDocuments).toHaveBeenCalledWith([
-      expect.objectContaining({ metadata: expect.objectContaining({ organizationId: 'org_1' }) }),
-    ]);
+    expect(m.index).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: 'org_1', userId: 'u1', documentId: 'doc_1', content: 'Extracted text from document', source: 'manual-upload',
+    }));
+    const body = await response.json();
+    expect(body.rag).toMatchObject({ status: 'indexed', durable: true, chunkCount: 1, knowledgeBaseIds: ['kb_1'] });
+    expect(JSON.stringify(body)).not.toContain('process_memory');
   });
 
-  it('indexes nothing when the intent cannot be recorded', async () => {
+  it('says so when the rows were stored without an embedding', async () => {
     const { POST } = await loadRoute();
-    m.operation.mockRejectedValueOnce(Object.assign(new Error('x'), { code: 'OPERATION_AUDIT_UNAVAILABLE' }));
+    m.index.mockResolvedValueOnce({ status: 'stored_without_embedding', durable: true, documentId: 'doc_1', knowledgeBaseIds: ['kb_1'], chunkCount: 1, embedded: false });
+    const form = new FormData();
+    form.set('file', new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' }));
+    form.set('data', JSON.stringify({ source: 'manual-upload', addToRAG: true }));
+
+    const body = await (await POST(new Request('http://localhost/api/ai/ingest', { method: 'POST', body: form }))).json();
+    expect(body.rag).toMatchObject({ status: 'stored_without_embedding', embedded: false });
+  });
+
+  it('indexes nothing and answers 409 when an audit record cannot be written', async () => {
+    const { POST } = await loadRoute();
+    m.index.mockRejectedValueOnce(Object.assign(new Error('x'), { code: 'OPERATION_AUDIT_UNAVAILABLE' }));
     const form = new FormData();
     form.set('file', new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' }));
     form.set('data', JSON.stringify({ source: 'manual-upload', addToRAG: true }));
@@ -94,7 +108,17 @@ describe('ai/ingest route', () => {
     const response = await POST(new Request('http://localhost/api/ai/ingest', { method: 'POST', body: form }));
 
     expect(response.status).toBe(409);
-    expect(m.ragPipeline.addDocuments).not.toHaveBeenCalled();
+  });
+
+  it('does not index when addToRAG is false', async () => {
+    const { POST } = await loadRoute();
+    const form = new FormData();
+    form.set('file', new File([new Uint8Array([1, 2, 3])], 'doc.txt', { type: 'text/plain' }));
+    form.set('data', JSON.stringify({ source: 'manual-upload', addToRAG: false }));
+
+    const response = await POST(new Request('http://localhost/api/ai/ingest', { method: 'POST', body: form }));
+    expect(response.status).toBe(201);
+    expect(m.index).not.toHaveBeenCalled();
   });
 
   it('returns 400 when file is missing', async () => {

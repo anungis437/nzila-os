@@ -4,7 +4,7 @@
  */
 
 import { z } from "zod";
-import { requireCommitteeReader } from "@/lib/services/committee-read-access";
+import { canReadCommitteeMinutes, requireCommitteeReader, withholdMinutes } from "@/lib/services/committee-read-access";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
 import {
@@ -77,7 +77,8 @@ export const GET = withApi(
     if (!meeting) throw ApiError.notFound("Meeting");
 
     const attendees = await getMeetingAttendees(meetingId);
-    return { ...meeting, attendees };
+    const readable = await canReadCommitteeMinutes(organizationId, committeeId, userId);
+    return { ...(readable ? meeting : withholdMinutes(meeting)), attendees };
   }
 );
 
@@ -103,6 +104,7 @@ export const PATCH = withApi(
     });
     if (!updated) throw ApiError.notFound("Meeting");
 
-    return updated;
+    // Editing the meeting's arrangements is a steward's work; reading its minutes still needs a seat on the committee.
+    return (await canReadCommitteeMinutes(organizationId, committeeId, userId)) ? updated : withholdMinutes(updated);
   }
 );

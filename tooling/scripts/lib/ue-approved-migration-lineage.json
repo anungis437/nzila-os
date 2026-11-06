@@ -382,6 +382,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "Row security for job_classifications, committee_memberships, integration_sync_logs and shopify_config, the relations tenant-context census CTX-3 reclassified after finding live code for them"
+      },
+      {
+        "tag": "0056_external_authority_principal_precheck",
+        "sha256": "de1377ff71eff5dea032c0ed3495691d0e95884573dd4464a3e06211dd7355ae",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-g0-wave1-c",
+        "note": "DEF-0B8 external org-from-query: one SELECT policy on representation_authorities that, with no organization context, shows the authenticated principal only their own authority rows, so the external middleware checks the authority before opening the named organization's tenant transaction"
       }
     ],
     "platform": [
@@ -839,6 +846,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "agents/ue-cursor-final-closure",
         "note": "The deadline reminders pending-uniqueness index is unique over pending reminders only, as the scheduler's ON CONFLICT clause and its design require; the canonical lineage created it over every status, so a reschedule inserted no reminder"
+      },
+      {
+        "tag": "0080_document_intake_matter_binding",
+        "sha256": "2361841f9c55fc9a2881b8e2e06bfea7d55c8397c98f0b54b875fd31e9ed4f48",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-g0-wave1-c",
+        "note": "DEF-0B8 external upload: nullable matter_type and matter_id on document_intakes (both or neither, immutable once opened) so the external grievance upload accepts only an intake the representative opened for that grievance; rollback refuses while a bound intake exists"
       }
     ]
   }

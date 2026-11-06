@@ -16,6 +16,15 @@ describe('F07 object-level reads', () => {
     },
   )
 
+  // DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP: a steward role is not a seat on the committee; the minutes are withheld from a reader who
+  // is neither an active member nor an administrator of the organization.
+  it.each(['meetings', 'meetings/[meetingId]'])('committees/[id]/%s withholds the minutes unless the reader may read them', (route) => {
+    const source = read(`app/api/committees/[id]/${route}/route.ts`)
+    const get = source.slice(source.indexOf('export const GET ='), source.indexOf('export const POST =') > 0 ? source.indexOf('export const POST =') : source.indexOf('export const PATCH ='))
+    expect(get).toContain('canReadCommitteeMinutes(organizationId, committeeId, userId)')
+    expect(get).toContain('withholdMinutes')
+  })
+
   // DEF-0B7-PLT-EVENT-ITEM-IGNORES-PRIVATE-VISIBILITY-AND-RETURNS-MEETING-PASSWORD
   it('the legacy event item delegates to the canonical route, which applies privacy and selects no meeting password', () => {
     expect(read('app/api/events/[id]/route.ts')).toContain("from '@/app/api/calendar/events/[id]/route'")

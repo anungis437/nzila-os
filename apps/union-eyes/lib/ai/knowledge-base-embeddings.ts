@@ -1,7 +1,7 @@
 import { and, eq, inArray, sql, type SQL } from 'drizzle-orm';
 import type { db } from '@/db/db';
 import { knowledgeBase } from '@/db/schema';
-import { KNOWLEDGE_BASE_EMBEDDING, requireVectorColumn } from '@/lib/ai/vector-readiness';
+import { KNOWLEDGE_BASE_EMBEDDING, requireVectorColumn, vectorColumnReady } from '@/lib/ai/vector-readiness';
 
 /**
  * Reading and writing knowledge_base.embedding (capability UE-AI-SEMANTIC-SEARCH, lib/reality/capability-registry.ts).
@@ -52,6 +52,31 @@ export async function writeKnowledgeBaseEmbedding(
     RETURNING id
   `);
   if (Array.from(written).length !== 1) throw new Error('Knowledge base record not found');
+}
+
+/**
+ * Erases the stored embedding of an organization's knowledge rows made from one source record (and of any further row named by id), active or
+ * not, and returns the ids whose vector was erased. The vector is a derivative of the source text: when the source may no longer be indexed
+ * (consent withdrawn, or reclassified to a level that is never indexed) it is erased, not only hidden behind is_active. The row itself and its
+ * text stay: whether they are kept is a retention and legal-hold decision made elsewhere. Where the column does not exist, no vector was ever
+ * stored, and nothing is erased.
+ */
+export async function eraseKnowledgeBaseEmbeddings(
+  executor: WriteExecutor,
+  target: { organizationId: string; sourceType: string; sourceId: string; ids?: readonly string[] },
+): Promise<string[]> {
+  if (!(await vectorColumnReady(KNOWLEDGE_BASE_EMBEDDING, executor))) return [];
+  const named = (target.ids ?? []).filter((id) => typeof id === 'string' && id.length > 0);
+  const byId = named.length > 0 ? sql` OR id::text IN (${sql.join(named.map((id) => sql`${id}`), sql`, `)})` : sql``;
+  const erased = await executor.execute(sql`
+    UPDATE knowledge_base
+       SET embedding = NULL, updated_at = now()
+     WHERE organization_id = ${target.organizationId}::uuid
+       AND ${EMBEDDING_COLUMN} IS NOT NULL
+       AND ((source_type = ${target.sourceType} AND source_id = ${target.sourceId})${byId})
+    RETURNING id
+  `);
+  return (Array.from(erased) as Array<{ id: unknown }>).map((row) => String(row.id));
 }
 
 export interface KnowledgeBaseMatch {

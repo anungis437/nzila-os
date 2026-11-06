@@ -216,6 +216,35 @@ export function evaluateExternalDocumentAccess(input: {
   };
 }
 
+/**
+ * Whether the caller holds a live representation authority for this matter in the organization they named, asked with no organization context
+ * (withPrincipalOnlyContext): the rows visible are the caller's own authorities only. This is the gate in front of the organization's tenant
+ * transaction, not the authorization decision itself (authorizeExternalMatterAccess still decides, on the tenant transaction, with the grant).
+ */
+export async function holdsExternalAuthority(tx: RLSTx, input: {
+  actorUserId: string;
+  organizationId: string;
+  matterType: RepresentationAuthority['matterType'];
+  matterId: string;
+}): Promise<boolean> {
+  const [authority] = await tx
+    .select({ id: representationAuthorities.id })
+    .from(representationAuthorities)
+    .where(
+      and(
+        eq(representationAuthorities.organizationId, input.organizationId),
+        eq(representationAuthorities.matterType, input.matterType),
+        eq(representationAuthorities.matterId, input.matterId),
+        eq(representationAuthorities.representativeUserId, input.actorUserId),
+        eq(representationAuthorities.status, 'active'),
+        isNull(representationAuthorities.revokedAt),
+        or(isNull(representationAuthorities.expiresAt), sql`${representationAuthorities.expiresAt} > NOW()`),
+      ),
+    )
+    .limit(1);
+  return Boolean(authority);
+}
+
 export async function authorizeExternalMatterAccess(tx: RLSTx, input: {
   actor: ExternalActor;
   organizationId: string;

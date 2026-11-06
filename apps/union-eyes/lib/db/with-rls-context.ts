@@ -218,6 +218,30 @@ export async function withRLSContext<T>(
 }
 
 /**
+ * The authenticated principal alone, with NO organization context: app.current_user_id is the signed-in user and app.current_org_id is empty.
+ *
+ * Exists for one question that must be answered before any organization's tenant transaction is opened: whether an external representative
+ * holds a representation authority in the organization their request names (DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-
+ * AND-AUDIT-BEFORE-GRANT). With an empty organization context the tenant policies show nothing; the only rows visible are the caller's own
+ * representation authorities (cache 0056). Compatibility (legacy) mode only: the canonical V2 binder already refuses an organization the
+ * caller holds no live membership in before any transaction opens, so V2 callers must not use this and it refuses.
+ */
+export async function withPrincipalOnlyContext<T>(operation: (tx: RLSTx) => Promise<T>): Promise<T> {
+  if (currentStateContextEnabled()) {
+    throw new Error('withPrincipalOnlyContext is a compatibility-mode pre-check; the canonical binder decides organization access in V2')
+  }
+  const { userId } = await auth()
+  if (!userId) {
+    throw new Error('Unauthorized: No authenticated user found. User must be logged in via platform auth.')
+  }
+  return await db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`)
+    await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
+    return tenantContextStorage.run(tx, () => operation(tx))
+  })
+}
+
+/**
  * Execute database operation with explicit user ID
  *
  * Use this when you need to set context for a different user than the authenticated one.

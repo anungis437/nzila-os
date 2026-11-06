@@ -5,7 +5,7 @@
 
 import { listPage } from "@/lib/api/list-page";
 import { z } from "zod";
-import { requireCommitteeReader } from "@/lib/services/committee-read-access";
+import { canReadCommitteeMinutes, requireCommitteeReader, withholdMinutes } from "@/lib/services/committee-read-access";
 import { withApi } from "@/lib/api/with-api";
 import { ApiError } from "@/lib/api/errors";
 import {
@@ -60,7 +60,9 @@ export const GET = withApi(
     // A page is bounded: a non-numeric or negative value is the default and no page exceeds 200 rows.
     const { limit, offset } = listPage(request, 200, 50);
 
-    return listMeetings(committeeId, { status, limit, offset });
+    const meetings = await listMeetings(committeeId, { status, limit, offset });
+    if (await canReadCommitteeMinutes(organizationId, committeeId, userId)) return meetings;
+    return meetings.map(withholdMinutes);
   }
 );
 

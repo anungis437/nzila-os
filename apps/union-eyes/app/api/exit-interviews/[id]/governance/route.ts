@@ -4,7 +4,8 @@
  *
  * Updates the sensitivity classification of an exit interview, or records the withdrawal of the retiree's consent.
  * Consent is the retiring employee's to give: this route refuses to record a grant (409) and only records a withdrawal,
- * which also deactivates the interview's knowledge-base copy in the same transaction. All changes are audit-logged.
+ * which also takes the interview's knowledge-base copy out of service in the same transaction. A reclassification to a level that is
+ * never indexed does the same. Taking the copy out of service deactivates it and erases its embedding. All changes are audit-logged.
  *
  * Access: admin+
  */
@@ -17,6 +18,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { exitInterviews, exitInterviewEvents, knowledgeBase } from '@/db/schema';
 import { SENSITIVITY_LEVELS } from '@/lib/knowledge-transfer/governance/consent-controls';
+import { eraseKnowledgeBaseEmbeddings } from '@/lib/ai/knowledge-base-embeddings';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,10 +85,13 @@ export const PATCH = withApi(
         .returning();
       if (!row) throw ApiError.notFound('Exit interview');
 
-      // A withdrawn consent takes the interview's knowledge-base copy out of service in the same transaction. The copy is
-      // deactivated, not deleted: retention and legal hold are decided elsewhere.
+      // An interview that may no longer be indexed (consent withdrawn or never recorded, or a level that is never indexed) takes its
+      // knowledge-base copy out of service in the same transaction: the copy is deactivated and its embedding, a derivative of the
+      // interview text, is erased. The row and its text are not deleted: retention and legal hold are decided elsewhere.
       let deactivatedKnowledgeBaseIds: string[] = [];
-      if (row.consentGranted === false) {
+      let erasedEmbeddingIds: string[] = [];
+      const stillIndexable = Boolean(SENSITIVITY_LEVELS[row.sensitivityLevel]?.indexingAllowed) && row.consentGranted === true;
+      if (!stillIndexable) {
         const linked = [and(eq(knowledgeBase.sourceType, 'exit_interview'), eq(knowledgeBase.sourceId, row.id))];
         if (row.knowledgeBaseId) linked.push(eq(knowledgeBase.id, row.knowledgeBaseId));
         const hidden = await tx
@@ -95,6 +100,12 @@ export const PATCH = withApi(
           .where(and(eq(knowledgeBase.organizationId, organizationId!), eq(knowledgeBase.isActive, true), or(...linked)))
           .returning({ id: knowledgeBase.id });
         deactivatedKnowledgeBaseIds = hidden.map((h) => h.id);
+        erasedEmbeddingIds = await eraseKnowledgeBaseEmbeddings(tx, {
+          organizationId: organizationId!,
+          sourceType: 'exit_interview',
+          sourceId: row.id,
+          ids: row.knowledgeBaseId ? [row.knowledgeBaseId] : [],
+        });
       }
 
       const change = {
@@ -103,6 +114,7 @@ export const PATCH = withApi(
         previousConsent: existing.consentGranted,
         newConsent: row.consentGranted,
         deactivatedKnowledgeBaseIds,
+        erasedEmbeddingIds,
       };
       await tx.insert(exitInterviewEvents).values({
         interviewId: params.id,

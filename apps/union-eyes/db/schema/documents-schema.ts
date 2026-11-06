@@ -238,6 +238,9 @@ export const documentIntakes = pgTable('document_intakes', {
   deletionAttempts: integer('deletion_attempts').notNull().default(0),
   deletionAttemptedAt: timestamp('deletion_attempted_at', { withTimezone: true }),
   deletionError: text('deletion_error'),
+  // The one matter an intake was opened for (platform 0080): both or neither. An intake naming a matter is accepted only for that matter.
+  matterType: text('matter_type'),
+  matterId: uuid('matter_id'),
 }, (table) => [
   uniqueIndex('document_intakes_storage_key_uidx').on(table.storageKey),
   index('document_intakes_principal_idx').on(table.organizationId, table.principalUserId, table.status),
