@@ -160,7 +160,7 @@ async function handler(request: NextRequest) {
       checks,
       evaluated: checks.length,
       ...(checks.length === 0 ? { notice: 'No check applied to the data supplied; this is not a finding of compliance.' } : {}),
-    });
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
 return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
