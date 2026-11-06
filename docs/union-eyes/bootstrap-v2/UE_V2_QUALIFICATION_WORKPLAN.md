@@ -154,3 +154,41 @@ Compatibility against the new plan: **549 OK, 1 table missing 6 columns, 22 abse
 `bootstrap-v2.test.ts` failures concern the authority manifest, which must also be regenerated (Q4).
 
 **Not done:** Q1 (committed reachability script), Q3–Q6.
+
+## 6. Progress, 2026-11-05 (Q4, partial; issue #1118)
+
+**Plan rebaselined.** Regenerated with the pinned `python:3.11-slim` image (`linux/amd64`) and a
+wheelhouse whose 87 wheel digests equal the 87 locked digests. Two generations are identical. Hash
+changes, each traced to a merged commit: `users/me/organizations`, `pilot/overview`,
+`admin/users/[userId]` (#1116, `810c6e2fe`); `organizations`, `organizations/tree`,
+`organizations/[id]/path` (#1116, `17b1d3459`); `backend/grievances/tests.py` (`a6eff5ecd`, which
+also moves the aggregate backend digest of 250 statements); `pnpm-lock.yaml` (dependency PRs); and
+`scripts/bootstrap-v2/system-mutation-contracts.ts` (this change).
+
+**SYSTEM mutation census.** The recorded denominator was 53; the plan grants SYSTEM
+INSERT/UPDATE/DELETE on 80 relations (+4 with the R-46 regeneration `e25b62f75`, +23 with
+`96ab046c8`). Each of the 27 was bound to a source caller from its `supportingCapability` that performs
+the mutation under the system role; the denominator is now 80. The census and hash bindings pass; the
+native component proof for the 27 has not run (see below).
+
+**`bootstrap-v2.test.ts`.** The two failures were not plan staleness: storage authority deliberately
+grants table-level SYSTEM SELECT on `commercial_contracts` (`86aa8adb2`) and `external_data_sync_log`
+(`a0404b79b`), so the column-read contracts no longer apply to them. The column-read assertions now run
+against an explicit INSERT/UPDATE-only authority, and the current table-level grant is pinned.
+
+**Still failing or not run:**
+
+- *Native proofs* (`system-mutation-native`, `runtime-security-native`, …): the plan does not install on
+  PostgreSQL. `data_aggregation_consent.categories` and `notification_templates.channels` are declared
+  by Django `EnumArrayField` as `movement_trend_category[]` / `notification_channel[]`, but the plan only
+  creates the renamed `ue_v2_*` enums. Fix belongs to Q5.
+- *`reward-source.test.ts`*: Django `RewardWalletLedger` declares `points_change`, `transaction_type`,
+  `award_id`, `description`, `reference_id`, `reference_type` (`15153ab8c`), which the contract forbids
+  and which the plan now carries. Model-vs-contract decision still open.
+- *`local-vault-fixture.test.ts`* (needs `python` on PATH) and *`production-key-authority.test.ts`*
+  (child process timeout on this host): environmental.
+
+CI: `.github/workflows/ue-bootstrap-v2-provenance.yml` regenerates the plan with `--self-test --check`
+and runs the census, integration and compiler-boundary tests on every Union Eyes PR.
+
+`UE_V2_CANONICAL_FRESH_BOOTSTRAP` stays UNQUALIFIED.

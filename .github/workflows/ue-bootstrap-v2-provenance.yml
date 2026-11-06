@@ -1,0 +1,76 @@
+name: Union Eyes Bootstrap V2 Provenance
+
+# Gate 0 acceptance track (issue #1118): the V2 canonical source plan records a SHA-256 of every source file it
+# was generated from. This job regenerates the plan from the pull request's source with the pinned interpreter
+# and the hash-locked wheelhouse, and fails when the committed plan no longer matches (source drift), when two
+# generations differ (non-determinism), or when the source-bound SYSTEM mutation census and its hash bindings
+# no longer hold. It needs Docker but no database.
+
+on:
+  pull_request:
+    paths:
+      - 'apps/union-eyes/**'
+      - 'docs/union-eyes/bootstrap-v2/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/ue-bootstrap-v2-provenance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ue-bootstrap-v2-provenance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The interpreter image source.ts runs the collectors in; the wheelhouse is built in the same image.
+  UE_V2_PYTHON_IMAGE: python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce
+
+jobs:
+  provenance:
+    name: V2 source plan and SYSTEM mutation provenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Build the hash-locked Linux x86_64 cp311 wheelhouse in the pinned interpreter image
+        shell: bash
+        run: |
+          set -euo pipefail
+          wheelhouse="$RUNNER_TEMP/ue-v2-wheelhouse"
+          mkdir -p "$wheelhouse"
+          docker run --rm --platform linux/amd64 \
+            -v "$GITHUB_WORKSPACE/apps/union-eyes/backend/requirements.lock:/req/requirements.lock:ro" \
+            -v "$wheelhouse:/wheels" \
+            "$UE_V2_PYTHON_IMAGE" \
+            python -m pip download --quiet --disable-pip-version-check --no-cache-dir \
+              --require-hashes --no-deps --only-binary=:all: \
+              -r /req/requirements.lock -d /wheels
+          # Exactly one wheel per locked artifact, and the wheel digests are the locked digests.
+          diff <(grep -o 'sha256:[0-9a-f]*' apps/union-eyes/backend/requirements.lock | cut -d: -f2 | sort) \
+               <(sha256sum "$wheelhouse"/*.whl | awk '{print $1}' | sort)
+          echo "UE_V2_WHEELHOUSE=$wheelhouse" >> "$GITHUB_ENV"
+
+      - name: Regenerate the V2 source plan twice and compare with the committed plan
+        working-directory: apps/union-eyes
+        env:
+          DOCKER_DEFAULT_PLATFORM: linux/amd64
+        run: pnpm exec tsx scripts/bootstrap-v2/plan.ts --self-test --check
+
+      - name: Source-bound SYSTEM mutation contracts and plan compiler boundaries
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: >-
+          pnpm exec vitest run --project union-eyes-heavy
+          apps/union-eyes/scripts/bootstrap-v2/system-mutation-contracts.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/system-component-integration.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/bootstrap-v2.test.ts
+
+      - name: The checks left the tracked tree unchanged
+        run: git diff --exit-code
