@@ -126,7 +126,7 @@ describe.skipIf(!URL)('OHS/CNESST case authority on the combined schema, as the 
 
   describe('CNESST filings', () => {
     it('a covering steward opens, reads and updates a filing for the member their assignment covers', async () => {
-      const created = await call(filings().POST, A.steward, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Covered ${tag}`, description: 'd', memberId: memberCovered } })
+      const created = await call(filings().POST, A.steward, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Covered ${tag}`, description: 'd', memberId: memberCovered } })
       const id = created.data.id as string
       expect((await rowOf('cnesst_filings', id))!.member_id).toBe(memberCovered)
       const read = await call(filingItem().GET, A.steward, { id })
@@ -136,11 +136,11 @@ describe.skipIf(!URL)('OHS/CNESST case authority on the combined schema, as the 
     })
 
     it('refuses a same-tenant steward with no covering assignment: create, read and update all fail closed', async () => {
-      const createDenied = await rejection(call(filings().POST, A.outsider, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Uncovered ${tag}`, description: 'd', memberId: memberUncovered } }))
+      const createDenied = await rejection(call(filings().POST, A.outsider, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Uncovered ${tag}`, description: 'd', memberId: memberUncovered } }))
       expect((createDenied as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.FORBIDDEN)
 
       // An officer opens the record the outsider has no case authority over, so the refusal is proven against a real row.
-      const officerOpened = await call(filings().POST, A.officer, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Uncovered ${tag}`, description: 'd', memberId: memberUncovered } })
+      const officerOpened = await call(filings().POST, A.officer, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Uncovered ${tag}`, description: 'd', memberId: memberUncovered } })
       const id = officerOpened.data.id as string
 
       const readDenied = await rejection(call(filingItem().GET, A.outsider, { id }))
@@ -151,12 +151,12 @@ describe.skipIf(!URL)('OHS/CNESST case authority on the combined schema, as the 
     })
 
     it('an officer reaches every member\'s filing regardless of coverage', async () => {
-      const read = await call(filingItem().GET, A.officer, { id: (await call(filings().POST, A.officer, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Officer-opened ${tag}`, description: 'd', memberId: memberUncovered } })).data.id as string })
+      const read = await call(filingItem().GET, A.officer, { id: (await call(filings().POST, A.officer, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Officer-opened ${tag}`, description: 'd', memberId: memberUncovered } })).data.id as string })
       expect(read.data.memberId).toBe(memberUncovered)
     })
 
     it('a designated representative reaches the filing even with no covering assignment', async () => {
-      const opened = await call(filings().POST, A.officer, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Designated ${tag}`, description: 'd', memberId: memberUncovered } })
+      const opened = await call(filings().POST, A.officer, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Designated ${tag}`, description: 'd', memberId: memberUncovered } })
       const id = opened.data.id as string
       await admin.query(`UPDATE cnesst_filings SET union_rep_id = $1 WHERE id = $2`, [A.outsider.id, id])
       const read = await call(filingItem().GET, A.outsider, { id })
@@ -166,7 +166,7 @@ describe.skipIf(!URL)('OHS/CNESST case authority on the combined schema, as the 
     })
 
     it('revoking the covering assignment removes access; reassigning it to another steward moves access with it', async () => {
-      const opened = await call(filings().POST, A.steward, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Revocation ${tag}`, description: 'd', memberId: memberCovered } })
+      const opened = await call(filings().POST, A.steward, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Revocation ${tag}`, description: 'd', memberId: memberCovered } })
       const id = opened.data.id as string
       expect((await call(filingItem().GET, A.steward, { id })).data.id).toBe(id)
 
@@ -180,20 +180,20 @@ describe.skipIf(!URL)('OHS/CNESST case authority on the combined schema, as the 
     })
 
     it('refuses cross-tenant access outright: another organization\'s steward and officer both get not-found', async () => {
-      const opened = await call(filings().POST, A.officer, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Tenant A only ${tag}`, description: 'd', memberId: memberCovered } })
+      const opened = await call(filings().POST, A.officer, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Tenant A only ${tag}`, description: 'd', memberId: memberCovered } })
       const id = opened.data.id as string
       for (const who of [B.steward, B.officer]) {
         const denied = await rejection(call(filingItem().GET, who, { id }))
         expect((denied as InstanceType<typeof ApiError>)?.code, who.role).toBe(ErrorCode.NOT_FOUND)
       }
       // The reverse direction: org B's own member and officer-opened filing is unreachable from org A.
-      const orgBFiling = await call(filings().POST, B.officer, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Tenant B only ${tag}`, description: 'd', memberId: memberOrgB } })
+      const orgBFiling = await call(filings().POST, B.officer, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Tenant B only ${tag}`, description: 'd', memberId: memberOrgB } })
       const deniedFromA = await rejection(call(filingItem().GET, A.officer, { id: orgBFiling.data.id as string }))
       expect((deniedFromA as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.NOT_FOUND)
     })
 
     it('concurrent reads of the same filing by an authorized and an unauthorized steward resolve independently, with no cross-contamination', async () => {
-      const opened = await call(filings().POST, A.officer, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Concurrency ${tag}`, description: 'd', memberId: memberUncovered } })
+      const opened = await call(filings().POST, A.officer, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Concurrency ${tag}`, description: 'd', memberId: memberUncovered } })
       const id = opened.data.id as string
       const [authorized, denied] = await Promise.all([
         call(filingItem().GET, A.officer, { id }),
@@ -219,7 +219,7 @@ describe.skipIf(!URL)('OHS/CNESST case authority on the combined schema, as the 
     })
 
     it('a steward with no covering assignment reaches a refusal through the filing it is linked to', async () => {
-      const filing = await call(filings().POST, A.officer, { body: { filingType: 'latmp_accident', legalBasis: 'LATMP art. 271', title: `Linked ${tag}`, description: 'd', memberId: memberUncovered } })
+      const filing = await call(filings().POST, A.officer, { body: { filingType: 'workplace_accident', legalBasis: 'LATMP art. 271', title: `Linked ${tag}`, description: 'd', memberId: memberUncovered } })
       await admin.query(`UPDATE cnesst_filings SET union_rep_id = $1 WHERE id = $2`, [A.outsider.id, filing.data.id])
       const refusal = await call(refusals().POST, A.officer, { body: { memberId: memberUncovered, memberName: 'Worker', refusalDate: new Date().toISOString(), taskRefused: 'Operate the press', dangerDescription: 'Guard removed', cneesstFilingId: filing.data.id } })
       const read = await call(refusalItem().GET, A.outsider, { id: refusal.data.id as string })

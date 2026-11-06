@@ -3,6 +3,7 @@ import { cneesstFilings, memberEmployment, stewardAssignments, stewards } from '
 import { hasRoleInOrganization } from '@/lib/api-auth-guard';
 import { ApiError } from '@/lib/api/errors';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { isUuid } from '@/lib/page-data/uuid';
 
 /**
  * Case authority for CNESST/OHS records (DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY,
@@ -54,7 +55,7 @@ export async function evaluateOhsCaseAccess(input: {
   if (input.designatedRepId && input.designatedRepId === input.actorUserId) {
     return { allowed: true, reason: 'designated_representative' };
   }
-  if (input.linkedCneesstFilingId) {
+  if (input.linkedCneesstFilingId && isUuid(input.linkedCneesstFilingId)) {
     const transitiveRepId = await filingDesignatedRep({
       organizationId: input.organizationId,
       cneesstFilingId: input.linkedCneesstFilingId,
@@ -64,6 +65,9 @@ export async function evaluateOhsCaseAccess(input: {
     }
   }
   if (!input.memberId) return { allowed: true, reason: 'no_member_named' };
+  // A caller-supplied id that is not a well-formed uuid names no row PostgreSQL will ever match (lib/page-data/uuid.ts);
+  // this keeps that the same clean, fail-closed answer, rather than a raw invalid-uuid-literal database fault.
+  if (!isUuid(input.memberId)) return { allowed: false, reason: 'no_authority' };
   const covers = await stewardCoversMember({
     organizationId: input.organizationId,
     stewardUserId: input.actorUserId,
