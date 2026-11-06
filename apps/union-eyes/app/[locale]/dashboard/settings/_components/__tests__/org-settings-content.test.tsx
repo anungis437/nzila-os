@@ -205,33 +205,38 @@ describe('OrgSettingsContent: saving', () => {
     expect(puts()[0].body).toEqual({ shortName: 'L1000X', settings: { emailProvider: 'mailgun' } });
   });
 
-  it('sends the logo address and the domains that were added', async () => {
+  it('sends the logo address', async () => {
     const user = userEvent.setup();
     await renderLoaded();
     await section(user, 'branding');
     await user.type(screen.getByLabelText('Logo URL (https)'), 'https://cdn.example/logo.png');
-    await section(user, 'security');
-    await user.type(screen.getByLabelText('Add an allowed email domain'), 'Example.org{enter}');
-    await user.type(screen.getByLabelText('Add an allowed email domain'), 'example.org');
-    await user.click(screen.getByRole('button', { name: 'Add' }));
     await user.click(screen.getByRole('button', { name: msg('settings.saveChanges') }));
 
     await waitFor(() => expect(puts()).toHaveLength(1));
-    // The second entry of the same domain was not added again.
-    expect(puts()[0].body).toEqual({ settings: { logoUrl: 'https://cdn.example/logo.png', allowedDomains: ['example.org'] } });
+    expect(puts()[0].body).toEqual({ settings: { logoUrl: 'https://cdn.example/logo.png' } });
   });
 
-  it('removes a domain', async () => {
+  // DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE: the route refuses a save of any
+  // security setting no code enforces, so the screen shows what is stored and offers no control (domains, IP list, MFA, passwords,
+  // session) that could only be refused. These replace the tests that added and removed allowed domains.
+  it('offers no way to change a security setting that no code enforces, and sends none of them', async () => {
     const user = userEvent.setup();
-    load = loadBody(organization({}, { allowedDomains: ['a.example', 'b.example'] }));
+    load = loadBody(organization({}, { allowedDomains: ['a.example', 'b.example'], ipWhitelist: '10.0.0.1', requireMFA: true }), ['requireMFA', 'ipWhitelist', 'allowedDomains']);
     await renderLoaded();
     await section(user, 'security');
 
-    await user.click(screen.getByRole('button', { name: 'Remove a.example' }));
-    await user.click(screen.getByRole('button', { name: msg('settings.saveChanges') }));
+    expect(screen.getByText(/the platform refuses to save a control it does not enforce/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove a.example' })).toBeDisabled();
+    expect(screen.getByLabelText('Add an allowed email domain')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
+    expect(screen.getByLabelText('IP allowlist')).toBeDisabled();
+    expect(screen.getByLabelText('Session timeout duration')).toBeDisabled();
+    expect(screen.getByLabelText('Require multi-factor authentication')).toBeDisabled();
+    expect(screen.getByLabelText('Enforce strong passwords')).toBeDisabled();
 
-    await waitFor(() => expect(puts()).toHaveLength(1));
-    expect(puts()[0].body).toEqual({ settings: { allowedDomains: ['b.example'] } });
+    await user.click(screen.getByRole('button', { name: 'Remove a.example' }));
+    expect(screen.getByRole('button', { name: 'Remove a.example' })).toBeInTheDocument();
+    expect(puts()).toHaveLength(0);
   });
 
   it('shows the route\'s reason when it refused the settings, and keeps the changes and the save bar', async () => {

@@ -263,7 +263,7 @@ export async function getExpiringCreditsUsers(
     .limit(batchSize);
 
   // The earnings are dated lots, not allocated against spending, so what can still expire is at most what the member holds now.
-  const balances = await currentBalances(rows.map((row) => ({ orgId: row.orgId, userId: row.userId })), executor);
+  const balances = await currentBalances(rows.map((row) => ({ orgId: row.orgId, userId: row.userId })), executor, organizationId);
 
   return rows
     .filter((row) => row.userEmail && row.expirationDate)
@@ -287,7 +287,11 @@ export async function getExpiringCreditsUsers(
 }
 
 /** The latest ledger balance of each organization and member in the list. */
-async function currentBalances(members: Array<{ orgId: string; userId: string }>, executor: RLSTx = db): Promise<Map<string, number>> {
+async function currentBalances(
+  members: Array<{ orgId: string; userId: string }>,
+  executor: RLSTx = db,
+  organizationId?: string,
+): Promise<Map<string, number>> {
   const balances = new Map<string, number>();
   const userIds = [...new Set(members.map((member) => member.userId))];
   const wanted = new Set(members.map((member) => `${member.orgId}:${member.userId}`));
@@ -296,7 +300,8 @@ async function currentBalances(members: Array<{ orgId: string; userId: string }>
     const ledger = await executor
       .select({ orgId: rewardWalletLedger.orgId, userId: rewardWalletLedger.userId, balanceAfter: rewardWalletLedger.balanceAfter })
       .from(rewardWalletLedger)
-      .where(inArray(rewardWalletLedger.userId, chunk))
+      // An organization's scan reads only that organization's ledger, never another organization's balance for the same user id.
+      .where(organizationId ? and(eq(rewardWalletLedger.orgId, organizationId), inArray(rewardWalletLedger.userId, chunk)) : inArray(rewardWalletLedger.userId, chunk))
       .orderBy(desc(rewardWalletLedger.createdAt));
     for (const entry of ledger) {
       const key = `${entry.orgId}:${entry.userId}`;
@@ -357,7 +362,11 @@ async function sendExpirationNotificationToUser(
  * Trigger notification for expiring credits
  * Processes in batches with rate limiting
  */
-export async function notifyExpiringCredits(daysBeforeExpiration = 7, options: { exactDay?: boolean } = {}) {
+export async function notifyExpiringCredits(
+  daysBeforeExpiration = 7,
+  options: { exactDay?: boolean } = {},
+  organizationIds?: readonly string[],
+) {
   try {
     const now = Date.now();
     const expirationDate = new Date();
@@ -368,8 +377,22 @@ export async function notifyExpiringCredits(daysBeforeExpiration = 7, options: {
       expiresBefore: expirationDate.toISOString(),
     });
 
-    // Get all users with expiring credits (paginated). The scan crosses organizations, which only the system role may do.
-    const usersWithExpiringCredits = await withSystemContext((tx) => getExpiringCreditsUsers(daysBeforeExpiration, 10000, undefined, options, tx));
+    // With the list of organizations to warn, each organization is scanned on its own: a system transaction of its own whose every read
+    // carries that organization's predicate, so no read spans organizations and an organization left off the list (not active) is not
+    // scanned at all. Without a list the scan crosses organizations, which only the system role may do.
+    const usersWithExpiringCredits: ExpiringCreditsNotification[] = [];
+    if (organizationIds) {
+      for (const organizationId of organizationIds) {
+        if (!organizationId) continue;
+        usersWithExpiringCredits.push(
+          ...(await withSystemContext((tx) => getExpiringCreditsUsers(daysBeforeExpiration, 10000, organizationId, options, tx))),
+        );
+      }
+    } else {
+      usersWithExpiringCredits.push(
+        ...(await withSystemContext((tx) => getExpiringCreditsUsers(daysBeforeExpiration, 10000, undefined, options, tx))),
+      );
+    }
     
     logger.info('[Notifications] Found users with expiring credits', {
       count: usersWithExpiringCredits.length,
@@ -485,7 +508,7 @@ export async function notifyRedemptionConfirmed(redemptionId: string) {
  * Batch notification for credit expiration warnings
  * Should be run as a scheduled job (daily)
  */
-export async function sendBatchExpirationWarnings() {
+export async function sendBatchExpirationWarnings(organizationIds?: readonly string[]) {
   try {
     const now = Date.now();
     const results = {
@@ -505,7 +528,7 @@ export async function sendBatchExpirationWarnings() {
 
     for (const interval of intervals) {
       // Each tier warns the earnings that expire exactly that many days from today, so a member is warned once per tier.
-      const result = await notifyExpiringCredits(interval.days, { exactDay: true });
+      const result = await notifyExpiringCredits(interval.days, { exactDay: true }, organizationIds);
 
       if ('sent' in result) {
         results[interval.counter] = result.sent ?? 0;

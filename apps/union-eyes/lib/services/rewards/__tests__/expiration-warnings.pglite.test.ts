@@ -150,4 +150,37 @@ describe('credit expiration warnings', () => {
     await sendBatchExpirationWarnings();
     expect(state.sent.map((s) => s.recipientEmail)).toEqual(['u7@x.ca']);
   });
+
+  // DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES: the cron passes its active organizations and each is scanned on its own.
+  it('scans only the organizations it is given, each under its own predicate', async () => {
+    await earn(ORG_A, 'u7', 100, 7);
+    await earn(ORG_B, 'u-b', 40, 7);
+
+    const onlyB = await sendBatchExpirationWarnings([ORG_B]) as { success: boolean; byOrganization: Record<string, { sent: number; failed: number }> };
+    expect(onlyB.success).toBe(true);
+    expect(state.sent).toEqual([{ recipientEmail: 'u-b@x.ca', expiringAmount: 40 }]);
+    expect(Object.keys(onlyB.byOrganization)).toEqual([ORG_B]);
+
+    state.sent.length = 0;
+    const both = await sendBatchExpirationWarnings([ORG_A, ORG_B]) as { byOrganization: Record<string, { sent: number; failed: number }> };
+    // ORG_B was already warned for this tier; ORG_A is warned now.
+    expect(state.sent).toEqual([{ recipientEmail: 'u7@x.ca', expiringAmount: 100 }]);
+    expect(both.byOrganization).toEqual({ [ORG_A]: { sent: 1, failed: 0 } });
+  });
+
+  it('warns no one when no organization is listed', async () => {
+    await earn(ORG_A, 'u7', 100, 7);
+    const result = await sendBatchExpirationWarnings([]);
+    expect(result).toMatchObject({ success: true, usersNotified7Days: 0 });
+    expect(state.sent).toHaveLength(0);
+  });
+
+  it('caps an organization\'s warning at that organization\'s balance, not the same user\'s balance elsewhere', async () => {
+    await pg.query(`INSERT INTO organization_members (organization_id, user_id, email) VALUES ($1::uuid, 'u-partial', 'u-partial-b@x.ca')`, [ORG_B]);
+    await earn(ORG_A, 'u-partial', 100, 7);
+    await spend(ORG_A, 'u-partial', 70, 30);
+    await earn(ORG_B, 'u-partial', 500, 90);
+    await sendBatchExpirationWarnings([ORG_A, ORG_B]);
+    expect(state.sent).toEqual([{ recipientEmail: 'u-partial@x.ca', expiringAmount: 30 }]);
+  });
 });
