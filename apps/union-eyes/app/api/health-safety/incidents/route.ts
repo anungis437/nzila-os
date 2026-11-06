@@ -5,6 +5,7 @@ import { crudRoutes } from '@/lib/api/crud-factory';
 import { ne } from 'drizzle-orm';
 import { workplaceIncidents } from '@/db/schema';
 import { ApiError } from '@/lib/api/errors';
+import { issueOrganizationRecordNumber } from '@/lib/records/organization-record-number';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,11 +35,6 @@ export const SEVERITY_MAP: Record<string, string> = {
   critical: 'critical',
   fatal: 'fatal',
 };
-
-export function generateIncidentNumber(): string {
-  const year = new Date().getFullYear();
-  return `INC-${year}-${crypto.randomUUID()}`;
-}
 
 export function resolveIncidentDate(raw: Record<string, unknown>): string {
   const incidentDate = raw.incidentDate;
@@ -110,8 +106,8 @@ export function buildIncidentCreateValues(values: Record<string, unknown>): Reco
     );
   }
 
+  // The incident number is not set here: the server issues it from the organization's own sequence (see beforeCreate).
   return {
-    incidentNumber: generateIncidentNumber(),
     incidentType: resolvedType,
     severity: resolvedSeverity,
     incidentDate,
@@ -162,7 +158,11 @@ const { GET, POST } = crudRoutes({
     'injuredPersonName', 'bodyPartAffected', 'injuryNature', 'treatmentProvided',
     'immediateActionsToken', 'incidentDate',
   ],
-  beforeCreate: (values) => buildIncidentCreateValues(values),
+  // The number is the next in this organization's INC-<year>- sequence, issued in the transaction that inserts the row; the body cannot supply it.
+  beforeCreate: async (values, ctx) => ({
+    ...buildIncidentCreateValues(values),
+    incidentNumber: await issueOrganizationRecordNumber('incident', ctx.organizationId),
+  }),
   // A report filed as anonymous is not attributed to the session user in the row or the audit entry.
   anonymousCreate: (values) => values.isAnonymous === true,
 });
