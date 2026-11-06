@@ -137,7 +137,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'withApiAuth(',             // withApiAuth() wrapper — enforces auth
     'getCurrentUser(',          // getCurrentUser() — Clerk auth check
     'timingSafeEqual(',         // Cron secret verification via timing-safe compare
-    'constantTimeEquals(',      // Dedicated scoped service-key comparison (covered by route-level deny tests)
+    'authenticateMetricsService(', // Dedicated read-only metrics machine capability guard (#1118); route-level denial tests
     'CRON_SECRET',              // Cron route secret verification
     'verifyShopifySignature(',  // Shopify webhook signature verification
     'withRoleAuth(',             // Role-based auth guard wrapper
@@ -242,6 +242,13 @@ describe('INV-11 — Every API route has authorization', () => {
       expect(hasAuth('const actor = await getCaseActor()')).toBe(true)
       expect(hasAuth("import { getCaseActor } from '@/lib/cases/case-authorization'")).toBe(false)
       expect(hasAuth('const actor = request.body.actor')).toBe(false)
+    })
+
+    it('does not mistake arbitrary constant-time equality for an authorization decision', () => {
+      // A constant-time comparison is a primitive; authorization requires the
+      // route-specific capability guard (whose deny paths are tested in UE).
+      expect(hasAuth('const equal = constantTimeEquals(userValue, candidate)')).toBe(false)
+      expect(hasAuth('const result = authenticateMetricsService(req)')).toBe(true)
     })
 
     it('recognizes a Stripe webhook that verifies its signature (verifyStripeSignature)', () => {
