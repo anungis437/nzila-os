@@ -103,11 +103,13 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
     )
     return id
   }
-  const newArbitration = async (grievanceId: string, number: string) => {
+  const newArbitration = async (organizationId: string, grievanceId: string, number: string) => {
     const id = randomUUID()
+    // The real arbitrations table carries a NOT NULL organization_id (Django-managed, like grievances; see
+    // grievances.ts's own comment on raw-SQL inserts needing every NOT NULL column supplied explicitly).
     await admin.query(
-      `INSERT INTO arbitrations (id, grievance_id, arbitration_number, board_name, board_type, status) VALUES ($1,$2,$3,'Board','grievance','pending')`,
-      [id, grievanceId, number],
+      `INSERT INTO arbitrations (id, organization_id, grievance_id, arbitration_number, board_name, board_type, status) VALUES ($1,$2,$3,$4,'Board','grievance','pending')`,
+      [id, organizationId, grievanceId, number],
     )
     return id
   }
@@ -127,10 +129,10 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
     caseNoStanding = await newGrievance(ORG_A, steward.id)
     caseOrgB = await newGrievance(ORG_B, stewardOrgB.id)
 
-    arbitrationOwned = await newArbitration(caseOwned, `OWN-${tag}`)
-    arbitrationReadOnly = await newArbitration(caseReadOnly, `RO-${tag}`)
-    arbitrationNoStanding = await newArbitration(caseNoStanding, `NONE-${tag}`)
-    arbitrationOrgB = await newArbitration(caseOrgB, `ORGB-${tag}`)
+    arbitrationOwned = await newArbitration(ORG_A, caseOwned, `OWN-${tag}`)
+    arbitrationReadOnly = await newArbitration(ORG_A, caseReadOnly, `RO-${tag}`)
+    arbitrationNoStanding = await newArbitration(ORG_A, caseNoStanding, `NONE-${tag}`)
+    arbitrationOrgB = await newArbitration(ORG_B, caseOrgB, `ORGB-${tag}`)
 
     // steward: primary owner of caseOwned, read-only collaborator of caseReadOnly, no standing at all on caseNoStanding.
     state.caseAccess.set(`${steward.id}|${caseOwned}`, { canViewCase: true, isPrimaryOwner: true, canEditCaseNotes: true })
