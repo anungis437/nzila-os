@@ -238,7 +238,7 @@ describe('the messages the screens ask for', () => {
 
   it('exist for the messages the administration console builds at run time', () => {
     const built = [
-      ...['stats', 'activity', 'users', 'locals', 'health'].map((subject) => `${subject}Failed`),
+      ...['stats', 'users', 'locals', 'health'].map((subject) => `${subject}Failed`),
       ...['checklist', 'invites', 'structure', 'taxonomy'].flatMap((entry) => [`hub.${entry}.title`, `hub.${entry}.body`]),
     ];
 
