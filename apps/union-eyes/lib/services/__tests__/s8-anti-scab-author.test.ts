@@ -28,6 +28,23 @@ describe('S8 anti-scab violation author (platform 0044)', () => {
     const collection = read('app/api/cnesst/anti-scab/route.ts')
     expect(collection).toContain('writableFields: [')
     for (const field of ['reportedById', 'reportedByName', 'resolved', 'penaltyAmount', 'tatComplaintFiled']) expect(collection).not.toContain(`'${field}'`)
-    expect(read('app/api/cnesst/anti-scab/[id]/route.ts')).toContain("blockedPatchFields: ['createdBy', 'reportedById', 'reportedByName']")
+    // The item PATCH is a dedicated, strict schema: authorship, the reporter and the organization are not fields it accepts.
+    const item = read('app/api/cnesst/anti-scab/[id]/route.ts')
+    const schema = item.slice(item.indexOf('const patchSchema'), item.indexOf('}).strict();'))
+    expect(schema.length).toBeGreaterThan(0)
+    for (const field of ['createdBy', 'reportedById', 'reportedByName', 'organizationId']) expect(schema).not.toContain(`${field}:`)
+  })
+
+  // DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY: a steward role is not authority over every violation file. Until the institutional
+  // authority over these records is decided, list, item read and change are limited to the record's author.
+  it('limits the list, the item read and the change to the principal who filed the violation', () => {
+    const access = read('lib/services/anti-scab-access.ts')
+    expect(access).toContain('eq(antiScabViolations.createdBy, userId)')
+    expect(access).toContain('sql`false`')
+    expect(read('app/api/cnesst/anti-scab/route.ts')).toContain('readConditionFor: ({ userId }) => antiScabAuthorCondition(userId)')
+    const item = read('app/api/cnesst/anti-scab/[id]/route.ts')
+    expect(item).toContain('readConditionFor: ({ userId }) => antiScabAuthorCondition(userId)')
+    expect(item).toMatch(/\.update\(antiScabViolations\)[\s\S]*antiScabAuthorCondition\(userId\)[\s\S]*persistAtomicAudit\(tx,/)
+    expect(item).toContain('retainOnDelete: true')
   })
 })
