@@ -37,7 +37,15 @@ describe('lib/knowledge-transfer/resilience-strategies/strategy-modeler', () => 
     const roadmap = await buildResilienceRoadmap('org-1');
     expect(roadmap.strategies.length).toBeGreaterThan(0);
     expect(roadmap.strategies.length).toBeLessThanOrEqual(5);
-    expect(roadmap.projectedScore).toBeGreaterThanOrEqual(roadmap.currentScore);
+    // DEF-0B7-COGB-ROADMAP-DOCUMENTATION-RULE-PRECEDENCE-AND-CONSTANT-PROJECTED-GAINS: no validated model projects a score or a gain,
+    // so neither is stated (they were literals from a per-strategy table), and the roadmap says why.
+    expect(roadmap.projectedScore).toBeNull();
+    expect(roadmap.projectionNotMeasuredReason).toMatch(/^Not measured/);
+    for (const strategy of roadmap.strategies) {
+      expect(strategy.projectedResilienceGain).toBeNull();
+      expect(strategy.governanceStabilityGain).toBeNull();
+      expect(strategy.dependencyReductionImpact).toBeNull();
+    }
     expect(roadmap.maturityNarrative).toContain('early');
     expect(roadmap.phase1QuickWins.length + roadmap.phase2Foundation.length + roadmap.phase3Sustained.length).toBeGreaterThan(0);
   });

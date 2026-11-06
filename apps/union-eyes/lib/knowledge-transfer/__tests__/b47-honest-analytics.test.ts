@@ -34,6 +34,14 @@ describe('B47 cognition results state what they rest on', () => {
     expect(source).toContain('!Number.isFinite(documentationScore)')
   })
 
+  it('states no projected gain from a per-strategy table (DEF-0B7-COGB-ROADMAP-DOCUMENTATION-RULE-PRECEDENCE-AND-CONSTANT-PROJECTED-GAINS)', () => {
+    const source = read('lib/knowledge-transfer/resilience-strategies/strategy-modeler.ts')
+    expect(source).not.toContain('computeStrategyGain')
+    expect(source).not.toMatch(/documentation_foundation:\s*\[\d+/)
+    expect(source).toContain('projectedResilienceGain: null')
+    expect(read('lib/knowledge-transfer/adaptive-resilience/adaptive-engine.ts')).not.toMatch(/projectedResilienceGain [+-] \d/)
+  })
+
   it('makes no personality claim from the absence of recorded activity (DEF-0B7-COGB-PERSONALITY-LABEL-ASSIGNED-FROM-ABSENCE-OF-DATA)', () => {
     const source = read('lib/knowledge-transfer/maturity-personalities/personality-profiler.ts')
     expect(source).toContain("if (totalInteractions < 2) return 'insufficient_data'")
