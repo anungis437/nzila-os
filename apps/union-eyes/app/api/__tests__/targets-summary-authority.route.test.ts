@@ -21,6 +21,7 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn(() => ({})),
   and: vi.fn(() => ({})),
   desc: vi.fn(() => ({})),
+  gte: vi.fn(() => ({})),
 }));
 vi.mock('@/db/schema', () => ({
   kpiConfigurations: { kind: 'configs', organizationId: 'org', displayOrder: 'order' },
@@ -88,6 +89,25 @@ describe('KPI target summary — disclosure and read audit', () => {
       organizationId: org, userId: officer, action: 'target.summary.read',
       resourceType: 'kpi_configurations', details: { targetCount: 1 },
     });
+  });
+
+  it('does not present a metric row as the value when the declared calculation cannot be applied (DEF-0B12-PLT-KPI-CURRENT-VALUE-IS-THE-LATEST-ROW-OF-THE-METRIC-TYPE-TEXT-NOT-THE-DECLARED-SOURCE-OR-CALCULATION)', async () => {
+    // The configured calculation is not a supported aggregation; the stored row of the same metric type is not the value.
+    const { GET } = await import('../targets/summary/route');
+    const result = await (GET as unknown as (ctx: unknown) => Promise<{ targets: Array<Record<string, unknown>> }>)({ organizationId: org, userId: officer });
+    expect(result.targets[0]).toMatchObject({ currentValue: null, valueBasis: 'not_measured', health: 'no_data', progress: null });
+    expect(String(result.targets[0].notMeasuredReason)).toMatch(/no supported aggregation/);
+  });
+
+  it('applies the declared aggregation to the recent periods of the declared source', async () => {
+    m.configRows = [{ ...m.configRows[0], calculation: { aggregation: 'avg' } }];
+    m.metricRows = [
+      { metricValue: '4', periodType: 'monthly', periodStart: new Date(Date.now() - 40 * 86_400_000), periodEnd: new Date(Date.now() - 10 * 86_400_000), trend: 'up' },
+      { metricValue: '6', periodType: 'monthly', periodStart: new Date(Date.now() - 70 * 86_400_000), periodEnd: new Date(Date.now() - 40 * 86_400_000), trend: 'down' },
+    ];
+    const { GET } = await import('../targets/summary/route');
+    const result = await (GET as unknown as (ctx: unknown) => Promise<{ targets: Array<Record<string, unknown>> }>)({ organizationId: org, userId: officer });
+    expect(result.targets[0]).toMatchObject({ currentValue: 5, valueBasis: 'declared_aggregation_of_metric_periods', periodsUsed: 2, aggregation: 'avg', stale: false });
   });
 
   it('does not return a successful summary if its audit write fails', async () => {

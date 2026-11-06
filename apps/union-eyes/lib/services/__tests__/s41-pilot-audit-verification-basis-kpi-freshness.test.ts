@@ -26,7 +26,10 @@ describe('Gate 0 batch B97: pilot write audit, verification basis and KPI freshn
   it('does not judge a KPI target against a metric row from a long-past period', () => {
     const route = src('app/api/targets/summary/route.ts')
     expect(route).toContain('const MAX_METRIC_AGE_DAYS = 120')
-    expect(route).toContain("valueBasis: 'latest_metric_row_of_the_metric_type'")
-    expect(route).toContain('stale: Boolean(latestMetric) && !fresh')
+    // The value is no longer the latest row of the metric type (DEF-0B12-PLT-KPI-CURRENT-VALUE-IS-THE-LATEST-ROW...): only periods within the
+    // window are read, and a target whose source has only older periods is stale, not valued.
+    expect(route).toContain('gte(analyticsMetrics.periodEnd, cutoff)')
+    expect(route).toContain('stale = Boolean(older)')
+    expect(route).not.toContain('latest_metric_row_of_the_metric_type')
   })
 })

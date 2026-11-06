@@ -1,8 +1,8 @@
 /**
  * Reads GET /api/targets/summary, which answers { success, data: { summary, targets }, timestamp } (withApi around { summary, targets }).
  *
- * Each target is the kpi_configurations row's own fields plus what the route works out from the latest stored metric row of the target's metric
- * type: `currentValue` (null when there is no such row or it is too old), `asOf` (the period end of the row used), `stale` (a row exists but is too
+ * Each target is the kpi_configurations row's own fields plus what the route works out by applying the target's declared source and aggregation to
+ * the recent stored periods of its metric type: `currentValue` (null, with `notMeasuredReason`, when that cannot be done), `asOf` (the latest period end used), `stale` (a row exists but is too
  * old to judge against), `progress` (a percentage, null without a value or a non-zero target) and `health`. A figure the route could not compute is
  * null and stays null here: it is never shown as zero.
  */
@@ -26,6 +26,8 @@ export interface KPITarget {
   asOf: string | null;
   stale: boolean;
   trend: string | null;
+  /** Why currentValue is null (declared source or calculation not applicable, or no recent period); null when measured. */
+  notMeasuredReason: string | null;
 }
 
 export interface TargetSummary {
@@ -59,6 +61,7 @@ function readTarget(value: unknown): KPITarget {
     asOf: optionalString(row, 'asOf'),
     stale: row.stale,
     trend: optionalString(row, 'trend'),
+    notMeasuredReason: optionalString(row, 'notMeasuredReason'),
   };
 }
 
