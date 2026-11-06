@@ -113,8 +113,9 @@ describe('compliance/validate route', () => {
     }));
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body.checks).toEqual([]);
-    expect(body.notice).toContain('not a finding of compliance');
+    expect(body.checks).toHaveLength(2);
+    expect(body.checks.map((check: { status: string }) => check.status)).toEqual(['info', 'info']);
+    expect(body.checks.every((check: { message: string }) => check.message.includes('0.0%'))).toBe(true);
   });
 
   it('returns 400 for invalid JSON body', async () => {
