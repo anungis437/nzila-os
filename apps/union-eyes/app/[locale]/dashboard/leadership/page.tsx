@@ -38,6 +38,7 @@ import {
   ComplianceSummaryCard,
   ComplianceMetrics,
   ComplianceAlert,
+  ComplianceMeasurement,
 } from '@/components/leadership/compliance-summary-card';
 import {
   LeadershipExport,
@@ -55,6 +56,7 @@ interface DashboardData {
   categories: CategoryBreakdown[];
   stewards: StewardCapacity[];
   compliance: {
+    measurement?: ComplianceMeasurement;
     metrics: ComplianceMetrics;
     alerts: ComplianceAlert[];
   };
@@ -243,6 +245,7 @@ export default function LeadershipPage() {
       <ComplianceSummaryCard
         metrics={data.compliance.metrics}
         alerts={data.compliance.alerts}
+        measurement={data.compliance.measurement}
       />
     </div>
   );

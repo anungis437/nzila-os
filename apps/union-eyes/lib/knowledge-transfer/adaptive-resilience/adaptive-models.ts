@@ -25,10 +25,10 @@ export interface AdaptedRecommendation {
   adaptationReason: AdaptationReason;
   /** What historical evidence drove this adaptation */
   historicalEvidence: string;
-  /** Estimated resilience gain adjusted by history */
-  adjustedResilienceGain: number;
-  /** Original estimated gain */
-  originalResilienceGain: number;
+  /** Estimated resilience gain adjusted by history. Null: no validated model estimates a strategy's gain. */
+  adjustedResilienceGain: number | null;
+  /** Original estimated gain. Null: not measured. */
+  originalResilienceGain: number | null;
   confidence: 'high' | 'medium' | 'low';
 }
 

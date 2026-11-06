@@ -1,9 +1,9 @@
 /**
  * Dispatch Engine Service
  *
- * Implements the dispatch-hall model: employers request workers,
- * the engine ranks eligible members by org-scoped rules
- * (seniority, availability, skills match) and produces assignments.
+ * Implements the dispatch-hall model: employers request workers and an officer offers the request to named members. The rule
+ * ranking (rankCandidates) applies a configured rule only where the member data it needs is recorded, and otherwise says the
+ * candidates are unranked; it is not called by the assignment, which remains the officer's explicit selection.
  */
 
 import { db } from "@/db/db";
@@ -20,73 +20,122 @@ import { eq, and, asc, desc, inArray } from "drizzle-orm";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+/**
+ * A member a request could be offered to, with only what is recorded about them. Null means nothing records it: there is no source
+ * of member skills or availability in Union Eyes, and seniority is organization_members.seniority, which may be unset.
+ */
 export interface MemberCandidate {
   memberId: string;
   name?: string;
-  skills: string[];
-  seniorityYears: number;
-  available: boolean;
+  seniority: number | null;
+  skills: string[] | null;
+  available: boolean | null;
 }
 
-export interface ScoredCandidate extends MemberCandidate {
-  score: number;
+type RuleInput = { ruleType: DispatchRuleType; ruleDefinition: Record<string, unknown>; priority: number };
+
+/** Whether a configured rule could be applied to these candidates, and if not, why. */
+export interface DispatchRuleOutcome {
+  ruleType: DispatchRuleType;
+  priority: number;
+  applied: boolean;
+  reason: string | null;
 }
 
-// ─── Scoring ─────────────────────────────────────────────────────────────────
+export interface DispatchRanking {
+  /** 'unranked' when no configured rule has the data it needs: the candidates are then listed in their stored order, not ranked. */
+  status: "ranked" | "unranked";
+  reason: string | null;
+  rules: DispatchRuleOutcome[];
+  /** In rank order when ranked; rank is null when unranked. */
+  candidates: Array<MemberCandidate & { rank: number | null }>;
+}
+
+// ─── Rule application ────────────────────────────────────────────────────────
+
+const NO_SOURCE: Partial<Record<DispatchRuleType, string>> = {
+  rotation: "Not applied: no rotation order is recorded for the organization's members.",
+  geographic_proximity: "Not applied: no member location or distance to the job site is recorded.",
+};
 
 /**
- * Calculate dispatch priority score for a single candidate.
- *
- * The score is a weighted sum driven by dispatch rules.
- * Higher = more suitable.
+ * Decide which configured rules can be applied. A rule is applied only when every candidate has the recorded value it orders by;
+ * otherwise it is reported as not applied with the reason, rather than scored from a placeholder (the previous engine added flat
+ * bonuses for rotation and proximity, treated "no required skills" as a full match, and weighted seniority by an arbitrary factor).
  */
-export function calculateDispatchPriority(
-  candidate: MemberCandidate,
+export function evaluateDispatchRules(
+  candidates: MemberCandidate[],
   requiredSkills: string[],
-  rules: { ruleType: DispatchRuleType; ruleDefinition: Record<string, unknown>; priority: number }[],
-): number {
-  let score = 0;
-
-  for (const rule of rules) {
-    const weight = rule.priority || 1;
-
-    switch (rule.ruleType) {
-      case "seniority": {
-        // More seniority → higher score
-        score += candidate.seniorityYears * 5 * weight;
-        break;
-      }
-      case "availability": {
-        score += candidate.available ? 30 * weight : 0;
-        break;
-      }
-      case "skills_match": {
-        const matched = requiredSkills.filter((sk) =>
-          candidate.skills.some(
-            (cs) => cs.toLowerCase() === sk.toLowerCase(),
-          ),
-        );
-        const ratio =
-          requiredSkills.length > 0
-            ? matched.length / requiredSkills.length
-            : 1;
-        score += Math.round(ratio * 40 * weight);
-        break;
-      }
-      case "rotation": {
-        // Rotation ordering handled externally; flat bonus
-        score += 10 * weight;
-        break;
-      }
-      case "geographic_proximity": {
-        // Placeholder — requires geo data
-        score += 5 * weight;
-        break;
-      }
+  rules: RuleInput[],
+): DispatchRuleOutcome[] {
+  return rules.map((rule) => {
+    const base = { ruleType: rule.ruleType, priority: rule.priority };
+    if (NO_SOURCE[rule.ruleType]) return { ...base, applied: false, reason: NO_SOURCE[rule.ruleType]! };
+    if (candidates.length === 0) return { ...base, applied: false, reason: "Not applied: there are no candidates." };
+    if (rule.ruleType === "seniority") {
+      const missing = candidates.filter((c) => c.seniority === null || !Number.isFinite(c.seniority)).length;
+      return missing === 0
+        ? { ...base, applied: true, reason: null }
+        : { ...base, applied: false, reason: `Not applied: ${missing} of ${candidates.length} candidates have no recorded seniority.` };
     }
-  }
+    if (rule.ruleType === "availability") {
+      const missing = candidates.filter((c) => c.available === null).length;
+      return missing === 0
+        ? { ...base, applied: true, reason: null }
+        : { ...base, applied: false, reason: "Not applied: no record of member availability exists." };
+    }
+    // skills_match
+    if (requiredSkills.length === 0) return { ...base, applied: false, reason: "Not applied: the request names no required skills." };
+    const missing = candidates.filter((c) => c.skills === null).length;
+    return missing === 0
+      ? { ...base, applied: true, reason: null }
+      : { ...base, applied: false, reason: "Not applied: no record of member skills exists." };
+  });
+}
 
-  return Math.max(0, score);
+function matchedSkills(candidate: MemberCandidate, requiredSkills: string[]): number {
+  const held = new Set((candidate.skills ?? []).map((skill) => skill.toLowerCase()));
+  return requiredSkills.filter((skill) => held.has(skill.toLowerCase())).length;
+}
+
+/**
+ * Rank candidates by the applicable rules in precedence order (highest rule priority first), comparing on each rule's recorded value
+ * and falling through to the next rule on a tie. No weights are invented: a rule orders candidates, it does not add points.
+ */
+export function rankByDispatchRules(
+  candidates: MemberCandidate[],
+  requiredSkills: string[],
+  rules: RuleInput[],
+): DispatchRanking {
+  const outcomes = evaluateDispatchRules(candidates, requiredSkills, rules);
+  const applied = outcomes.filter((o) => o.applied).sort((a, b) => b.priority - a.priority);
+  if (applied.length === 0) {
+    return {
+      status: "unranked",
+      reason: rules.length === 0
+        ? "Unranked: the organization has no dispatch rules configured."
+        : "Unranked: no configured dispatch rule has the member data it needs.",
+      rules: outcomes,
+      candidates: candidates.map((c) => ({ ...c, rank: null })),
+    };
+  }
+  const compare = (a: MemberCandidate, b: MemberCandidate): number => {
+    for (const rule of applied) {
+      let diff = 0;
+      if (rule.ruleType === "seniority") diff = (b.seniority as number) - (a.seniority as number);
+      else if (rule.ruleType === "availability") diff = Number(b.available) - Number(a.available);
+      else if (rule.ruleType === "skills_match") diff = matchedSkills(b, requiredSkills) - matchedSkills(a, requiredSkills);
+      if (diff !== 0) return diff;
+    }
+    return 0;
+  };
+  const ordered = [...candidates].sort(compare);
+  return {
+    status: "ranked",
+    reason: null,
+    rules: outcomes,
+    candidates: ordered.map((c, index) => ({ ...c, rank: index + 1 })),
+  };
 }
 
 // ─── Service ─────────────────────────────────────────────────────────────────
@@ -132,17 +181,20 @@ export async function loadDispatchRules(orgId: string) {
     .orderBy(desc(dispatchRules.priority));
 }
 
+/** Active members ranked at most: the ranking reads them in memory and refuses rather than ranking a partial list. */
+export const DISPATCH_CANDIDATE_BOUND = 5_000;
+
 /**
- * Rank a set of member candidates against a dispatch request
- * using the org's configured dispatch rules.
+ * Rank the organization's active members for a dispatch request using its configured rules and only recorded member data
+ * (organization_members.seniority; nothing records skills or availability, so those rules report themselves not applied).
+ * No route calls this yet: an assignment is the officer's explicit selection (assignWorkersToDispatch), not an engine ranking.
  */
 export async function rankCandidates(
   orgId: string,
   requestId: string,
-  candidates: MemberCandidate[],
-): Promise<ScoredCandidate[]> {
-  // Fetch request
-  const [request] = await db
+  exec: RLSTx = db,
+): Promise<DispatchRanking> {
+  const [request] = await exec
     .select()
     .from(dispatchRequests)
     .where(
@@ -154,16 +206,30 @@ export async function rankCandidates(
 
   if (!request) throw new Error("Dispatch request not found.");
 
-  const rules = await loadDispatchRules(orgId);
-  const requiredSkills = (request.requiredSkills as string[]) ?? [];
+  const rules = await exec
+    .select()
+    .from(dispatchRules)
+    .where(eq(dispatchRules.orgId, orgId))
+    .orderBy(desc(dispatchRules.priority));
+  const requiredSkills = (request.requiredSkills as string[] | null) ?? [];
 
-  const scored: ScoredCandidate[] = candidates.map((c) => ({
-    ...c,
-    score: calculateDispatchPriority(c, requiredSkills, rules),
+  const members = await exec
+    .select({ id: organizationMembers.id, name: organizationMembers.name, seniority: organizationMembers.seniority })
+    .from(organizationMembers)
+    .where(and(eq(organizationMembers.organizationId, orgId), eq(organizationMembers.status, "active")))
+    .limit(DISPATCH_CANDIDATE_BOUND + 1);
+  if (members.length > DISPATCH_CANDIDATE_BOUND) {
+    throw new Error(`Ranking more than ${DISPATCH_CANDIDATE_BOUND} active members is not implemented.`);
+  }
+
+  const candidates: MemberCandidate[] = members.map((m) => ({
+    memberId: m.id,
+    name: m.name,
+    seniority: m.seniority ?? null,
+    skills: null,
+    available: null,
   }));
-
-  scored.sort((a, b) => b.score - a.score);
-  return scored;
+  return rankByDispatchRules(candidates, requiredSkills, rules);
 }
 
 /** The refusals of an assignment, so a route can answer each with its own status. */
@@ -178,8 +244,8 @@ const LIVE_ASSIGNMENT_STATUSES = ["offered", "accepted", "confirmed", "completed
 /**
  * Offer a dispatch request to named members.
  *
- * The officer chooses the members; the dispatch rules are not applied here (rankCandidates scores a candidate list, and no source of
- * candidate skills or availability feeds it). What this guarantees is that the choice is a valid one: the request is the caller's and
+ * The officer chooses the members; the dispatch rules are not applied here (rankCandidates can order active members by a rule only
+ * where the data is recorded, which today is seniority alone: nothing records member skills or availability). What this guarantees is that the choice is a valid one: the request is the caller's and
  * still open, every member is an active member of the organization, none is already offered or placed on it, and the offers do not
  * exceed the workers requested. The request row is locked so two officers cannot both fill the last place.
  *

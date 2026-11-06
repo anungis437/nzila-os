@@ -21,10 +21,17 @@ export interface InstitutionalNarrative {
   engine: string;
   /** Canonical institutional domain (e.g. "governance"). */
   domain: string;
-  /** Short, plain-language headline (1 sentence, ≤ 160 chars). */
+  /**
+   * Short, plain-language headline (1 sentence, ≤ 160 chars). It states what the result rests on (the records it cites, or that it
+   * cites none); it is never the engine's fixed interpretation guidance presented as a finding.
+   */
   headline: string;
   /** A 2–4 sentence calm summary of the envelope. */
   summary: string;
+  /** The engine's fixed interpretation guidance: the same text for every organization, so it is labelled guidance, not a finding. */
+  guidance: string;
+  /** Number of stored records the envelope cites as evidence. */
+  evidenceCount: number;
   /** The most material reasoning steps, in order. */
   keyReasoning: string[];
   /** Governance implications surfaced for human review. */
@@ -42,14 +49,21 @@ const CONFIDENCE_PHRASE: Record<string, string> = {
   high: 'with high confidence',
   moderate: 'with moderate confidence',
   low: 'with limited confidence',
-  insufficient_data: 'with insufficient supporting evidence',
+  // No engine computes a confidence; the kernel's lowest band then means "not assessed", not a measured shortfall.
+  insufficient_data: 'with no assessed confidence',
 };
 
+const DOMAIN_LABEL_PATTERN = /_/g;
+
 function pickHeadline(env: InstitutionalExplainabilityEnvelope<unknown>): string {
-  const guidance = env.interpretationGuidance.trim();
-  // Headline = first sentence of interpretation guidance, capped at 160 chars.
-  const firstSentence = guidance.split(/(?<=[.!?])\s/)[0] ?? guidance;
-  return firstSentence.length > 160 ? `${firstSentence.slice(0, 157)}...` : firstSentence;
+  // The headline states what the result rests on. The interpretation guidance is fixed text, identical for every organization, so it is
+  // never used as a headline: that would present guidance as a finding about this organization.
+  const domain = env.domain.replace(DOMAIN_LABEL_PATTERN, ' ');
+  const evidenceCount = env.evidence.length;
+  const headline = evidenceCount === 0
+    ? `No evidence-backed finding for ${domain}: the result cites no institutional record.`
+    : `${domain}: result cites ${evidenceCount} institutional record${evidenceCount === 1 ? '' : 's'}.`;
+  return headline.length > 160 ? `${headline.slice(0, 157)}...` : headline;
 }
 
 function pickSummary(env: InstitutionalExplainabilityEnvelope<unknown>): string {
@@ -57,10 +71,10 @@ function pickSummary(env: InstitutionalExplainabilityEnvelope<unknown>): string 
   const evidenceCount = env.evidence.length;
   const reviewCount = env.governanceImplications.filter((g) => g.requiresHumanReview).length;
   const parts = [
-    env.interpretationGuidance.trim(),
     evidenceCount === 0
       ? 'No institutional evidence is attached to this result, so it is guidance, not a finding.'
       : `Derived from ${evidenceCount} institutional evidence item${evidenceCount === 1 ? '' : 's'} ${conf}.`,
+    `Guidance: ${env.interpretationGuidance.trim()}`,
   ];
   if (reviewCount > 0) {
     parts.push(
@@ -98,6 +112,8 @@ export function narrateEnvelope(
     domain: env.domain,
     headline: pickHeadline(env),
     summary: pickSummary(env),
+    guidance: env.interpretationGuidance.trim(),
+    evidenceCount: env.evidence.length,
     keyReasoning: pickKeyReasoning(env),
     reviewSignals: pickReviewSignals(env),
     confidence: env.confidence,
@@ -164,11 +180,13 @@ export function composeExecutiveBriefing(
   narratives: ReadonlyArray<InstitutionalNarrative>,
 ): ExecutiveBriefing {
   const sorted = narratives.slice().sort((a, b) => {
-    // Surface higher-confidence + review-flagged narratives first.
-    const score = (n: InstitutionalNarrative) =>
-      (n.reviewSignals.length > 0 ? 10 : 0) +
-      (n.confidence === 'very_high' ? 4 : n.confidence === 'high' ? 3 : n.confidence === 'moderate' ? 2 : 1);
-    return score(b) - score(a);
+    // Surface review-flagged narratives first, then those that cite evidence (most first), then an assessed confidence. A narrative
+    // that cites nothing and has no assessed confidence never outranks one that rests on records.
+    const confidenceRank = (n: InstitutionalNarrative) =>
+      n.confidence === 'very_high' ? 4 : n.confidence === 'high' ? 3 : n.confidence === 'moderate' ? 2 : n.confidence === 'low' ? 1 : 0;
+    const review = (n: InstitutionalNarrative) => (n.reviewSignals.length > 0 ? 1 : 0);
+    const evidence = (n: InstitutionalNarrative) => n.evidenceCount ?? 0;
+    return review(b) - review(a) || evidence(b) - evidence(a) || confidenceRank(b) - confidenceRank(a);
   });
   const reviewSignals: string[] = [];
   for (const n of sorted) {

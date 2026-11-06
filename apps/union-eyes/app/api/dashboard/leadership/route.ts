@@ -13,6 +13,7 @@ import {
   DashboardTimeframe,
   getLeadershipDashboardMetrics,
 } from "@/lib/services/dashboard-kpi-service";
+import { ApiError } from "@/lib/api/errors";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -56,7 +57,11 @@ export const GET = withOrganizationAuth(async (request, context) => {
     });
 
     return standardSuccessResponse(metrics);
-  } catch (_error) {
+  } catch (error) {
+    // A read over its bound is answered 501 with the reason, never as figures computed from a partial read.
+    if (error instanceof ApiError && error.code === ErrorCode.NOT_IMPLEMENTED) {
+      return standardErrorResponse(ErrorCode.NOT_IMPLEMENTED, error.message);
+    }
     return standardErrorResponse(
       ErrorCode.INTERNAL_ERROR,
       "Failed to load leadership dashboard"

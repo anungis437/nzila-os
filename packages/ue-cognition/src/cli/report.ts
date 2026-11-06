@@ -34,7 +34,7 @@ if (fairness) {
     `min=${fairness.minUtilization.toFixed(2)} max=${fairness.maxUtilization.toFixed(2)}`,
   )
 }
-console.log(`Disengaged/lost members: ${disengagedMembersCount(orgId)}`)
+console.log(`Disengaged/lost members: ${disengagedMembersCount(orgId) ?? 'not measured (no engagement snapshot)'}`)
 console.log(`Audit entries: ${audits.length}`)
 if (kpi) {
   console.log('Latest KPI snapshot:')

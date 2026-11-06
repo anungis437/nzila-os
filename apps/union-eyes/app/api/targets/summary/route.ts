@@ -1,18 +1,20 @@
 import { kpiConfigurations, analyticsMetrics } from '@/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, gte } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { computeKpiHealth } from '@/lib/kpi/health';
+import { evaluateTargetValue, sourceMismatchReason } from '@/lib/kpi/target-value';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * The current value of a target is the latest stored metric row of its metric type, which is all the stored data can say: neither the declared
- * data source nor a calculation is applied to it. So the answer states which row it used (asOf) and does not judge a target against a row
- * from a period long past: a row whose period ended more than this many days ago is no current value.
+ * The current value of a target applies its declared data source and calculation (lib/kpi/target-value.ts) to the stored metric periods of
+ * its type that ended within this many days; a period long past is no current value, and when only such periods exist the answer is stale.
  */
 const MAX_METRIC_AGE_DAYS = 120;
+/** Periods read per target. A target with more recent rows than this is not measured, rather than aggregated over the first of them. */
+const MAX_METRIC_ROWS = 1_000;
 
 
 export const GET = withApi(
@@ -28,26 +30,45 @@ export const GET = withApi(
       .where(eq(kpiConfigurations.organizationId, organizationId!))
       .orderBy(kpiConfigurations.displayOrder);
 
-    // For each KPI, grab the latest matching analytic metric to derive current value
+    const cutoff = new Date(Date.now() - MAX_METRIC_AGE_DAYS * 86_400_000);
+
     const enriched = await Promise.all(
       configs.map(async (cfg) => {
-        const [latestMetric] = await tx
-          .select()
-          .from(analyticsMetrics)
-          .where(
-            and(
-              eq(analyticsMetrics.organizationId, organizationId!),
-              eq(analyticsMetrics.metricType, cfg.metricType),
-            ),
-          )
-          .orderBy(desc(analyticsMetrics.periodEnd))
-          .limit(1);
+        // Rows are read only for a metric type that is computed from the declared source; otherwise the value is not measured.
+        const readable = sourceMismatchReason(cfg.metricType, cfg.dataSource) === null;
+        const windowRows = readable
+          ? await tx
+            .select()
+            .from(analyticsMetrics)
+            .where(
+              and(
+                eq(analyticsMetrics.organizationId, organizationId!),
+                eq(analyticsMetrics.metricType, cfg.metricType),
+                gte(analyticsMetrics.periodEnd, cutoff),
+              ),
+            )
+            .orderBy(desc(analyticsMetrics.periodEnd))
+            .limit(MAX_METRIC_ROWS + 1)
+          : [];
+        const overBound = windowRows.length > MAX_METRIC_ROWS;
+        const value = overBound
+          ? { ...evaluateTargetValue({ metricType: cfg.metricType, dataSource: cfg.dataSource, calculation: cfg.calculation, windowRows: [] }),
+              notMeasuredReason: `Not measured: more than ${MAX_METRIC_ROWS} stored rows of this metric type in the window; aggregating beyond that bound is not implemented.` }
+          : evaluateTargetValue({ metricType: cfg.metricType, dataSource: cfg.dataSource, calculation: cfg.calculation, windowRows });
 
-        const periodEnd = latestMetric?.periodEnd ? new Date(latestMetric.periodEnd) : null;
-        const fresh = periodEnd != null && Date.now() - periodEnd.getTime() <= MAX_METRIC_AGE_DAYS * 86_400_000;
-        const currentValue = latestMetric && fresh
-          ? parseFloat(String(latestMetric.metricValue))
-          : null;
+        // Stale: the declared source does have stored values, but none for a recent period.
+        let stale = false;
+        if (readable && !overBound && windowRows.length === 0) {
+          const [older] = await tx
+            .select()
+            .from(analyticsMetrics)
+            .where(and(eq(analyticsMetrics.organizationId, organizationId!), eq(analyticsMetrics.metricType, cfg.metricType)))
+            .orderBy(desc(analyticsMetrics.periodEnd))
+            .limit(1);
+          stale = Boolean(older);
+        }
+
+        const currentValue = value.currentValue;
         const targetNum = cfg.targetValue ? parseFloat(String(cfg.targetValue)) : null;
         const warningNum = cfg.warningThreshold ? parseFloat(String(cfg.warningThreshold)) : null;
         const criticalNum = cfg.criticalThreshold ? parseFloat(String(cfg.criticalThreshold)) : null;
@@ -71,10 +92,13 @@ export const GET = withApi(
           health,
           currentValue,
           progress,
-          valueBasis: 'latest_metric_row_of_the_metric_type',
-          asOf: latestMetric && fresh ? periodEnd!.toISOString() : null,
-          stale: Boolean(latestMetric) && !fresh,
-          trend: latestMetric && fresh ? latestMetric.trend ?? null : null,
+          valueBasis: value.valueBasis,
+          notMeasuredReason: value.notMeasuredReason,
+          aggregation: value.aggregation,
+          periodsUsed: value.periodsUsed,
+          asOf: value.asOf,
+          stale,
+          trend: value.trend,
         };
       }),
     );
