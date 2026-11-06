@@ -28,6 +28,8 @@ export interface LocationConsentRequest {
   purposeDescription: string;
   consentText: string;
   noticeVersion: string;
+  /** The digest of the exact notice the member acknowledged (lib/location/consent-notice.ts). */
+  noticeDigest: string;
   allowedDuringStrike?: boolean;
   allowedDuringEvents?: boolean;
   ipAddress?: string;
@@ -132,6 +134,7 @@ export class GeofencePrivacyService {
     const notice = getLocationConsentNotice();
     if (!notice ||
         request.noticeVersion !== notice.version ||
+        request.noticeDigest !== notice.digest ||
         request.purpose !== notice.purpose ||
         request.purposeDescription !== notice.purposeDescription ||
         request.consentText !== notice.consentText) {
