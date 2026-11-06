@@ -1,7 +1,7 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1007,
+  "routes": 1008,
   "mutating": 676,
   "kernel": 60,
   "byGuard": {
@@ -17,7 +17,7 @@
    "ROLE_AUTH": 105,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 381,
+   "WITH_API": 382,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -9603,6 +9603,18 @@
    "audit": "CRUD_ATOMIC"
   },
   {
+   "route": "mobile/devices/[id]/test-push/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
+  },
+  {
    "route": "mobile/devices/route.ts",
    "methods": [
     "GET",
@@ -9672,12 +9684,15 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "retiredMethods": [
+    "POST"
+   ],
+   "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "movement-insights/trends/route.ts",
