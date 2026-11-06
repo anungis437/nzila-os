@@ -1,7 +1,7 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1007,
+  "routes": 1008,
   "mutating": 676,
   "kernel": 60,
   "byGuard": {
@@ -13,11 +13,11 @@
    "NONE": 21,
    "ORG_AUTH": 7,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 239,
+   "RETIRED": 238,
    "ROLE_AUTH": 105,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 380,
+   "WITH_API": 382,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -29,29 +29,29 @@
    "NONE": 8,
    "ORG_AUTH": 3,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 224,
+   "RETIRED": 223,
    "ROLE_AUTH": 55,
    "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 227
+   "WITH_API": 228
   },
   "mutatingByAudit": {
    "ATOMIC": 156,
-   "ATOMIC_SERVICE": 116,
+   "ATOMIC_SERVICE": 117,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 83,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 27,
    "INTENT_OUTCOME": 28,
    "NO_WRITES_FOUND": 9,
-   "NONE": 223
+   "NONE": 222
   },
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 83,
-   "NONE": 310,
+   "NONE": 309,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 229
+   "TENANT_TX": 230
   }
  },
  "routes": [
@@ -4144,11 +4144,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "RETIRED",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "communications/polls/route.ts",
@@ -9603,6 +9603,18 @@
    "audit": "CRUD_ATOMIC"
   },
   {
+   "route": "mobile/devices/[id]/test-push/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
+  },
+  {
    "route": "mobile/devices/route.ts",
    "methods": [
     "GET",
@@ -9672,12 +9684,15 @@
     "GET",
     "POST"
    ],
-   "mutating": true,
+   "retiredMethods": [
+    "POST"
+   ],
+   "mutating": false,
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "TENANT_TX",
-   "audit": "ATOMIC"
+   "audit": "READ_ONLY"
   },
   {
    "route": "movement-insights/trends/route.ts",

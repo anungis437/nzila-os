@@ -113,11 +113,19 @@ describe('S6 verified and small fixes', () => {
     expect(source).not.toMatch(/recipientEmail|\.email\b/)
   })
 
-  it('answers 501, not generic CRUD, on the campaign analytics path and the poll vote path', () => {
-    for (const route of ['app/api/communications/campaigns/[id]/analytics/route.ts', 'app/api/communications/campaigns/[id]/schedule/route.ts', 'app/api/communications/campaigns/[id]/send-test/route.ts', 'app/api/communications/polls/[pollId]/vote/route.ts']) {
+  it('answers 501, not generic CRUD, on the campaign analytics path', () => {
+    for (const route of ['app/api/communications/campaigns/[id]/analytics/route.ts', 'app/api/communications/campaigns/[id]/schedule/route.ts', 'app/api/communications/campaigns/[id]/send-test/route.ts']) {
       const source = read(route)
       expect(source, route).toContain('ApiError.notImplemented')
       expect(source, route).not.toContain('crudRoutes')
     }
+  })
+
+  // DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH: the poll vote path is now a real, dedicated vote (lib/communications/polls.ts, proven in
+  // lib/communications/__tests__/polls.pglite.test.ts). It is still never generic CRUD.
+  it('serves the poll vote path through the dedicated one-vote-per-member path, never generic CRUD', () => {
+    const source = read('app/api/communications/polls/[pollId]/vote/route.ts')
+    expect(source).toContain('castPollVote')
+    expect(source).not.toContain('crudRoutes')
   })
 })

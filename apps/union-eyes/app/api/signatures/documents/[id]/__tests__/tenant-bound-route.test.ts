@@ -82,6 +82,8 @@ describe('signature document tenant boundary', () => {
   it.each([
     [{ synced: false, reason: 'provider_unavailable' }, 503],
     [{ synced: false, reason: 'no_envelope' }, 409],
+    // A legacy document stored with provider "internal" has no provider to refresh from: a conflict, not a retryable outage.
+    [{ synced: false, reason: 'not_external_provider' }, 409],
     [{ synced: false, reason: 'already_applied' }, 200],
   ] as const)('POST never invents a successful sync for %j', async (result, status) => {
     const { POST } = await import('../route');

@@ -170,41 +170,8 @@ describe('satisfaction POST (a steward creating a survey by hand)', () => {
   });
 });
 
-describe('mobile/sync POST (device registration)', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    m.selected = [];
-    m.returned = [{ id: 'dev1' }];
-    m.persistAtomicAudit.mockResolvedValue(undefined);
-  });
-
-  // The route takes the parsed body from the framework context.
-  const request = { body: { deviceToken: 'tok-12345678', deviceId: 'device-1', platform: 'ios' } };
-
-  it('registers the caller\u2019s device and audits it without the device token', async () => {
-    const { POST } = await import('../mobile/sync/route');
-    const result = await POST({ ...caller, ...request });
-
-    expect(result).toEqual({ device: { id: 'dev1' }, sync: { performed: false, reason: 'registration_only' } });
-    expect(m.persistAtomicAudit).toHaveBeenCalledWith(
-      tx,
-      expect.objectContaining({ userId: 'u1', action: 'mobile.device.register', resourceId: 'dev1', details: { platform: 'ios', deviceId: 'device-1', pushCapable: true } }),
-    );
-    expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('tok-12345678');
-  });
-
-  it('refuses a device already registered to another account, and a hijack that raced past the check, writing no audit', async () => {
-    const { POST } = await import('../mobile/sync/route');
-
-    m.selected = [{ userId: 'victim' }];
-    await expect(POST({ ...caller, ...request })).rejects.toMatchObject({ status: 409 });
-
-    m.selected = [];
-    m.returned = []; // the ownership predicate on the upsert matched nothing
-    await expect(POST({ ...caller, ...request })).rejects.toMatchObject({ status: 409 });
-    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
-  });
-});
+// mobile/sync POST no longer registers a device (it answers 501 and writes nothing): see app/api/mobile/sync/__tests__/route.test.ts.
+// Device registration is the push_devices CRUD at /api/mobile/devices, whose audit is the factory's.
 
 describe('governance/policies/evaluate POST', () => {
   it('passes the evaluating administrator to the engine so the evaluation is attributed', async () => {
