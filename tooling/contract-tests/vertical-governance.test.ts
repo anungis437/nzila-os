@@ -137,6 +137,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'withApiAuth(',             // withApiAuth() wrapper — enforces auth
     'getCurrentUser(',          // getCurrentUser() — Clerk auth check
     'timingSafeEqual(',         // Cron secret verification via timing-safe compare
+    'constantTimeEquals(',      // Dedicated scoped service-key comparison (covered by route-level deny tests)
     'CRON_SECRET',              // Cron route secret verification
     'verifyShopifySignature(',  // Shopify webhook signature verification
     'withRoleAuth(',             // Role-based auth guard wrapper

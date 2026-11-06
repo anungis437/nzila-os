@@ -1,6 +1,6 @@
 # Nzila OS — Canonical Repo Inventory
 
-> Auto-generated on 2026-11-05 by `tooling/repo-inventory`. Do not edit manually.
+> Auto-generated on 2026-11-06 by `tooling/repo-inventory`. Do not edit manually.
 
 ## Summary
 
@@ -11,7 +11,7 @@
 | Workspace Packages (apps|packages|services|tooling) | 260 |
 | GitHub Workflows | 68 |
 | Contract Test Files | 306 |
-| TS/JS Test Files | 3612 |
+| TS/JS Test Files | 3613 |
 | Python Test Files | 52 |
 
 ## Apps
@@ -23,7 +23,7 @@
 | cfo | Next.js | 3005 | ✅ | ✅ | ✅ | ✅ | 238 | CFO finance dashboard — ledger management, tax tools, AI advisory, document inte |
 | civic | Next.js | — | ✅ | ✅ | ❌ | ❌ | 24 |  |
 | console | Next.js | 3001 | ✅ | ✅ | ✅ | ✅ | 449 | Internal operations console — platform governance, compliance, analytics, integr |
-| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 334 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
+| control-plane | Next.js | 3010 | ✅ | ✅ | ✅ | ✅ | 335 | Platform control plane — multi-tenant governance, workflow orchestration, anomal |
 | cora | Next.js | 3009 | ✅ | ✅ | ✅ | ✅ | 127 | Cora is Agricultural Institutional Infrastructure. |
 | flow | Next.js | 3003 | ✅ | ✅ | ✅ | ✅ | 438 | Commerce vertical — end-to-end order management, quoting, invoicing, inventory,  |
 | maestria | Next.js | 3021 | ✅ | ✅ | ❌ | ✅ | 73 |  |
