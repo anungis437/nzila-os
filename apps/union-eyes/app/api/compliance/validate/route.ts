@@ -21,7 +21,25 @@ export const COMPLIANCE_CHECKS = ['arbitration_deadline', 'strike_vote', 'certif
 export const COMPLIANCE_JURISDICTIONS = ['CA-FED', 'CA-AB', 'CA-BC', 'CA-MB', 'CA-NB', 'CA-NL', 'CA-NS', 'CA-NT', 'CA-NU', 'CA-ON', 'CA-PE', 'CA-QC', 'CA-SK', 'CA-YT'] as const;
 
 const dateText = z.string().max(40).refine((value) => !Number.isNaN(new Date(value).getTime()), 'must be a valid date');
-const countLike = z.union([z.number(), z.string().max(20)]);
+// Counts are integers from an untrusted caller, never legal or membership attestations.
+const countLike = z.union([
+  z.number().int().nonnegative().finite(),
+  z.string().regex(/^(0|[1-9]\\d{0,14})$/, 'must be a nonnegative integer'),
+]).refine((value) => Number.isSafeInteger(Number(value)), 'must be a safe integer');
+
+const validateCountPair = (
+  data: { totalMembers?: number | string; votesCase?: number | string; signedCards?: number | string; bargainingUnit?: number | string },
+  part: 'votesCase' | 'signedCards',
+  whole: 'totalMembers' | 'bargainingUnit',
+  ctx: z.RefinementCtx,
+) => {
+  if (data[part] === undefined || data[whole] === undefined) return;
+  const numerator = Number(data[part]);
+  const denominator = Number(data[whole]);
+  if (denominator === 0 || numerator > denominator) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: [part], message: 'count cannot exceed a positive population' });
+  }
+};
 
 // The body is parsed, not cast: an unknown jurisdiction or check name is a 400 instead of silently producing no check, and a date that
 // is not a date is refused instead of being passed to Date.
@@ -35,7 +53,10 @@ export const complianceValidateSchema = z.object({
     votesCase: countLike.optional(),
     signedCards: countLike.optional(),
     bargainingUnit: countLike.optional(),
-  }).strict().optional(),
+  }).strict().superRefine((data, ctx) => {
+    validateCountPair(data, 'votesCase', 'totalMembers', ctx);
+    validateCountPair(data, 'signedCards', 'bargainingUnit', ctx);
+  }).optional(),
 }).strict();
 
 async function handler(request: NextRequest) {
