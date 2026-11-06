@@ -110,7 +110,7 @@ async function handler(request: NextRequest) {
       return (numerator / denominator) * 100;
     };
 
-    if (shouldRun('strike_vote') && data.totalMembers && data.votesCase) {
+    if (shouldRun('strike_vote') && data.totalMembers !== undefined && data.votesCase !== undefined) {
       const turnout = percentage(data.votesCase, data.totalMembers);
       if (turnout !== null) {
         checks.push({
@@ -125,7 +125,7 @@ async function handler(request: NextRequest) {
       }
     }
 
-    if (shouldRun('certification') && data.signedCards && data.bargainingUnit) {
+    if (shouldRun('certification') && data.signedCards !== undefined && data.bargainingUnit !== undefined) {
       const cardPercentage = percentage(data.signedCards, data.bargainingUnit);
       if (cardPercentage !== null) {
         checks.push({
