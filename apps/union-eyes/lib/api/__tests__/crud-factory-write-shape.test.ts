@@ -69,7 +69,7 @@ const databaseError = (code: string, extra: Record<string, unknown> = {}) =>
 async function routes(options: Record<string, unknown> = {}, item = false) {
   state.handlers.clear();
   const { crudRoutes } = await import('../crud-factory');
-  crudRoutes({ table: filings, tags: ['t'], orgScoped: true, writeRole: 'steward', ...(item ? { itemRoute: true } : {}), ...options } as never);
+  crudRoutes({ table: filings, tags: ['t'], orgScoped: true, writeRole: 'steward', writableFields: ['memberId', 'title', 'filedAt'], ...(item ? { itemRoute: true } : {}), ...options } as never);
   return { create: state.handlers.get('Create')!, update: state.handlers.get('Update')! };
 }
 

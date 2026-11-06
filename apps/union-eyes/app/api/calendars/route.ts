@@ -43,6 +43,8 @@ const { POST } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',
+  // The new-calendar form (app/[locale]/calendar/page.tsx). The owner is the caller; sync state and tokens are the server's.
+  writableFields: ['name', 'description', 'color', 'timezone', 'isPersonal'],
   beforeCreate: (values, ctx) => ({ ...values, ownerId: ctx.userId }),
 });
 export { POST };

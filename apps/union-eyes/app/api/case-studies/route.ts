@@ -20,6 +20,8 @@ const handlers = crudRoutes({
   readRole: 'member',
   // Organization administrators do not have platform-wide publishing authority.
   writeRole: 'content_manager',
+  // Editorial content set by the content-management role. publishedAt and organizationId are server-owned and refused by the factory.
+  writableFields: ['slug', 'title', 'organizationType', 'category', 'summary', 'challenge', 'solution', 'outcome', 'metrics', 'testimonial', 'visibility', 'featured'],
 });
 
 /** Public GET — no auth required (used on marketing pages) */

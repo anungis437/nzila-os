@@ -99,7 +99,11 @@ vi.mock('@/db/db', () => {
     execute: async () => [],
     select: () => ({
       from: () => ({
-        where: (predicate: Predicate) => consents.filter((c) => matches(c as unknown as Record<string, unknown>, predicate)),
+        where: (predicate: Predicate) => {
+          const rows = consents.filter((c) => matches(c as unknown as Record<string, unknown>, predicate));
+          // The withdrawal reads the row under SELECT ... FOR UPDATE before writing it.
+          return Object.assign(rows, { limit: (n: number) => ({ for: async () => rows.slice(0, n) }) });
+        },
       }),
     }),
     update: () => ({
@@ -192,6 +196,20 @@ describe('members/[id]/consents subject-authority', () => {
     });
     expect(res.status).toBe(200);
     expect(consents[0].status).toBe('withdrawn');
+    // The withdrawal time is the server's, stamped with the withdrawal.
+    expect((consents[0] as unknown as { withdrawnAt?: unknown }).withdrawnAt).toBeInstanceOf(Date);
+  });
+
+  // DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT: the subject's own PATCH only withdraws. A grant is a new consent under the current text, not a status
+  // edit that revives an old record; and no other column is writable from the body.
+  it('A1 cannot re-grant or otherwise re-status a consent, nor set the withdrawal time', async () => {
+    asUser(USER_A1, ORG_A);
+    for (const body of [{ status: 'granted' }, { status: 'expired' }, { withdrawnAt: '2020-01-01T00:00:00Z' }]) {
+      const res = await PATCH(makeRequest(body), { params: Promise.resolve({ id: CONSENT_A1_ID }) });
+      expect(res.status, JSON.stringify(body)).toBeGreaterThanOrEqual(400);
+      expect(res.status, JSON.stringify(body)).toBeLessThan(500);
+    }
+    expect(consents[0].status).toBe('granted');
   });
 
   it('A2 (same org, different user) cannot mutate A1s consent record', async () => {

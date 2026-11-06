@@ -19,5 +19,12 @@ const { GET, PATCH, DELETE } = crudRoutes({
   retainOnDelete: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // Notification facts and the narrative a steward completes. The member, refusal date, inspector decision, outcome and corrective
+  // actions are not changed through the generic PATCH.
+  writableFields: [
+    'jobTitle', 'workplaceName', 'locationDescription', 'taskRefused', 'dangerDescription', 'supervisorNotifiedAt',
+    'supervisorName', 'hsRepNotifiedAt', 'hsRepName', 'cneesstInspectorCalledAt', 'cneesstInspectorName', 'reprisalComplaint',
+    'reprisalDetails',
+  ],
 });
 export { GET, PATCH, DELETE };

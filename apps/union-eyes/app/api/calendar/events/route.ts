@@ -63,6 +63,8 @@ const { POST } = crudRoutes({
   pk: 'id',
   tags: ['Scheduling'],
   orgScoped: true,
+  // createEventBody (lib/calendar/event-form.ts) is the only caller. The organizer, creator and organization are the server's.
+  writableFields: ['calendarId', 'title', 'description', 'location', 'startTime', 'endTime', 'timezone', 'isAllDay', 'eventType', 'meetingUrl'],
   writeRole: 'steward',
   beforeCreate: async (values, { organizationId, userId }) => {
     if (!organizationId || !userId || typeof values.calendarId !== 'string') {

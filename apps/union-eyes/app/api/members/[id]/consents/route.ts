@@ -13,6 +13,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { userConsents } from '@/db/schema';
+import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,13 @@ const { GET, PATCH } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'member',
+  // The subject withdraws their own consent: only the status, and only to 'withdrawn'. A fresh grant is a new consent under the
+  // current text (the consent capture flow), never a status edit of an old record; the withdrawal time is stamped by the server.
+  writableFields: ['status'],
+  beforeUpdate: (updates) => {
+    if (updates.status !== 'withdrawn') throw ApiError.badRequest("A consent can only be withdrawn here: status must be 'withdrawn'");
+    return { status: 'withdrawn', withdrawnAt: new Date() };
+  },
   blockedPatchFields: [
     'userId',
     'organizationId',

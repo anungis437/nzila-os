@@ -21,5 +21,11 @@ const { GET, POST } = crudRoutes({
   staffMayNameOwner: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // What a steward states when opening a filing for a member. Status, CNESST/TAT numbers, filed/acknowledged/decision dates, outcome,
+  // compensation, the union representative and links to other records are not a create field.
+  writableFields: [
+    'memberId', 'filingType', 'title', 'description', 'descriptionFr', 'relief', 'reliefFr', 'legalBasis', 'filingDeadline',
+    'internalCaseNumber',
+  ],
 });
 export { GET, POST };
