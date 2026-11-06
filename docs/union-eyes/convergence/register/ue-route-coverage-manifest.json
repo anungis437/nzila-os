@@ -1,9 +1,9 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1007,
-  "mutating": 676,
-  "kernel": 60,
+  "routes": 1009,
+  "mutating": 678,
+  "kernel": 62,
   "byGuard": {
    "ADMIN_AUTH": 18,
    "CAPABILITY_TOKEN": 13,
@@ -11,13 +11,13 @@
    "CRUD_FACTORY": 139,
    "DELEGATED": 17,
    "NONE": 21,
-   "ORG_AUTH": 7,
+   "ORG_AUTH": 8,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 239,
    "ROLE_AUTH": 105,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 380,
+   "WITH_API": 381,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -27,17 +27,17 @@
    "CRUD_FACTORY": 83,
    "DELEGATED": 10,
    "NONE": 8,
-   "ORG_AUTH": 3,
+   "ORG_AUTH": 4,
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 224,
    "ROLE_AUTH": 55,
    "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 227
+   "WITH_API": 228
   },
   "mutatingByAudit": {
    "ATOMIC": 156,
-   "ATOMIC_SERVICE": 116,
+   "ATOMIC_SERVICE": 118,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 83,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -49,7 +49,7 @@
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 83,
-   "NONE": 310,
+   "NONE": 312,
    "SYSTEM_CONTEXT": 53,
    "TENANT_TX": 229
   }
@@ -7148,6 +7148,18 @@
    "audit": "READ_ONLY"
   },
   {
+   "route": "external/grievances/[id]/documents/intakes/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "ORG_AUTH",
+   "kernel": true,
+   "subordinate": "EXTERNAL_AUTHORITY",
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
    "route": "external/grievances/[id]/documents/route.ts",
    "methods": [
     "GET"
@@ -7166,7 +7178,7 @@
    ],
    "mutating": true,
    "guard": "ORG_AUTH",
-   "kernel": false,
+   "kernel": true,
    "subordinate": "EXTERNAL_AUTHORITY",
    "data": "TENANT_TX",
    "audit": "ATOMIC"
@@ -11127,6 +11139,18 @@
    "subordinate": null,
    "data": "SYSTEM_CONTEXT",
    "audit": "ATOMIC"
+  },
+  {
+   "route": "precedents/drafts/[id]/review/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "precedents/jurisdiction-preferences/route.ts",

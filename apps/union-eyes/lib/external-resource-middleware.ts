@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/api-auth-guard';
-import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { withPrincipalOnlyContext, withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { logger } from '@/lib/logger';
 import {
   authorizeExternalMatterAccess,
+  holdsExternalAuthority,
   type ExternalMatterPermission,
 } from '@/lib/services/external-resource-authorization-service';
 import { representationAuthorityScopeEnum, type RepresentationAuthority } from '@/db/schema/representation-authority-schema';
@@ -123,6 +125,23 @@ export function withExternalMatterResourceAuth<TParams extends object = External
         userId: user.userId,
         representativeOrganizationId: (user as { organizationId?: string }).organizationId,
       };
+
+      // The organization in the request is the caller's word. Before that organization's tenant transaction is opened (and before anything is
+      // written to its audit trail), the caller must hold a live representation authority there for this matter, asked with no organization
+      // context, where the only rows visible are the caller's own. Someone who holds none is refused here and no tenant transaction is opened.
+      // In canonical V2 the organization binder refuses an organization without a live membership before any transaction opens.
+      if (!currentStateContextEnabled()) {
+        const held = await withPrincipalOnlyContext((tx) => holdsExternalAuthority(tx, {
+          actorUserId: actor.userId,
+          organizationId: resource.organizationId,
+          matterType: resource.matterType,
+          matterId: resource.matterId,
+        }));
+        if (!held) {
+          logger.warn('External request refused before any organization context: no authority held', { permission: options.requiredPermission });
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+      }
 
       const method = request.method.toUpperCase();
       const isRead = method === 'GET' || method === 'HEAD';

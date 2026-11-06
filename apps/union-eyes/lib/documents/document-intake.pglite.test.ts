@@ -225,6 +225,28 @@ describe('acceptance check', () => {
     expect(await check(view.intakeId, { operation: 'append_version', targetDocumentId: id(1) })).toEqual({ ok: false, kind: 'operation_mismatch' });
   });
 
+  // DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE: an intake opened for one matter is accepted for that matter only.
+  it('accepts an intake opened for a matter only for that matter, and never where no matter is named', async () => {
+    const matter = { type: 'grievance', id: id(77) };
+    const { view } = await openOk('hello', { matter });
+    expect(await intakeRow(view.intakeId)).toMatchObject({ matter_type: 'grievance', matter_id: id(77) });
+    expect(await check(view.intakeId, { matter })).toMatchObject({ ok: true, replay: false });
+    expect(await check(view.intakeId, { matter: { type: 'grievance', id: id(78) } })).toEqual({ ok: false, kind: 'operation_mismatch' });
+    expect(await check(view.intakeId)).toEqual({ ok: false, kind: 'operation_mismatch' });
+    const plain = await openOk('plain');
+    expect(await check(plain.view.intakeId, { matter })).toEqual({ ok: false, kind: 'operation_mismatch' });
+  });
+
+  it('the database refuses moving an intake to another matter, and a matter type without an id', async () => {
+    const { view } = await openOk('hello', { matter: { type: 'grievance', id: id(77) } });
+    await expect(q(`UPDATE document_intakes SET matter_id = $2 WHERE id = $1`, [view.intakeId, id(78)])).rejects.toThrow();
+    await expect(q(
+      `INSERT INTO document_intakes (id, organization_id, principal_user_id, operation, storage_key, original_filename, mime_type, size_bytes, content_hash, expires_at, matter_type)
+       VALUES ($1, $2, 'u', 'create_document', $3, 'a.pdf', 'application/pdf', 1, $4, now() + interval '10 minutes', 'grievance')`,
+      [id(90), ORG_A, `documents/${ORG_A}/intake/${id(90)}/x`, 'a'.repeat(64)],
+    )).rejects.toThrow();
+  });
+
   it('refuses an expired intake and one whose object was replaced or removed', async () => {
     const old = await openOk('old', { now: new Date(Date.now() - minutes(120)) });
     expect(await check(old.view.intakeId)).toMatchObject({ ok: false, kind: 'expired' });

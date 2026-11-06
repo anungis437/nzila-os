@@ -7,24 +7,22 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { withExternalMatterResourceAuth } from '@/lib/external-resource-middleware';
 import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-utils';
-import { resolveStoredBlob } from '@/lib/services/document-blob-integrity-service';
+import { generateSasUrl } from '@/lib/blob-client';
+import { bindIntakeInTx, checkIntakeForAcceptance, IntakeConflictError } from '@/lib/documents/intake-lifecycle';
+import { blobIntakeStorage } from '@/lib/documents/intake-storage';
 import { deriveExternalUploadGrant, EXTERNAL_UPLOAD_LABELS } from '@/lib/services/external-upload-authority';
 
 const documentBlobContainer = process.env.AZURE_BLOB_CONTAINER ?? 'union-eyes';
 
+// The file is named only by the intake the representative opened for this grievance (POST ../intakes). A storage path or URL is not accepted:
+// nothing would show the object was uploaded by this representative for this matter. The file's name, type, size and checksum are the ones the
+// server recorded when it received it, not the caller's.
 const externalUploadSchema = z.object({
+  intakeId: z.guid(),
   title: z.string().min(1).max(300),
-  filename: z.string().min(1).max(500),
-  fileUrl: z.string().url().optional(),
-  blobPath: z.string().min(1).optional(),
   documentType: z.string().min(1).max(120),
-  mimeType: z.string().min(1).max(120),
   privacyLabel: z.enum(EXTERNAL_UPLOAD_LABELS).default('case_restricted'),
-  fileSize: z.number().int().nonnegative().optional(),
-}).refine((value) => Boolean(value.blobPath || value.fileUrl), {
-  message: 'blobPath or fileUrl is required',
-  path: ['blobPath'],
-});
+}).strict();
 
 export const POST = withExternalMatterResourceAuth(
   {
@@ -48,11 +46,26 @@ export const POST = withExternalMatterResourceAuth(
       return NextResponse.json({ error: 'Invalid document payload', details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const resolvedBlob = await resolveStoredBlob({
-      organizationId: context.organizationId,
-      blobPath: parsed.data.blobPath,
-      fileUrl: parsed.data.fileUrl,
-    });
+    // The intake must be this representative's, in this organization, opened for this grievance, still open, and its object still exactly the
+    // one the server recorded. Anything else is refused before a transaction opens.
+    const check = await checkIntakeForAcceptance(
+      {
+        organizationId: context.organizationId,
+        userId: context.actor.userId,
+        intakeId: parsed.data.intakeId,
+        operation: 'create_document',
+        matter: { type: matterType, id: context.matterId },
+      },
+      blobIntakeStorage,
+    );
+    if (!check.ok) {
+      return check.kind === 'not_found'
+        ? NextResponse.json({ error: 'Intake not found' }, { status: 404 })
+        : NextResponse.json({ error: 'The intake cannot be used for this upload', reason: check.kind }, { status: 409 });
+    }
+    if (check.replay) return NextResponse.json({ error: 'The intake was already used' }, { status: 409 });
+    const intake = check.intake;
+    const fileUrl = await generateSasUrl(documentBlobContainer, intake.storageKey);
 
     const created = await withRLSContext({ organizationId: context.organizationId }, async (tx) => {
       const [matterGrant] = await tx
@@ -80,22 +93,6 @@ export const POST = withExternalMatterResourceAuth(
       });
       if (!derived.ok) return { forbidden: true as const };
 
-      // The representative names a stored object; nothing shows it is theirs. An object another record already holds (a document
-      // or a version of one) is some other matter's file, so it is never attached here through an upload.
-      const [heldByDocument] = await tx
-        .select({ id: documents.id })
-        .from(documents)
-        .where(and(eq(documents.organizationId, context.organizationId), eq(documents.blobPath, resolvedBlob.blobPath)))
-        .limit(1);
-      const [heldByVersion] = heldByDocument
-        ? []
-        : await tx
-            .select({ id: documentVersions.id })
-            .from(documentVersions)
-            .where(and(eq(documentVersions.organizationId, context.organizationId), eq(documentVersions.storageKey, resolvedBlob.blobPath)))
-            .limit(1);
-      if (heldByDocument || heldByVersion) return { conflict: true as const };
-
       const [insertedDocument] = await tx
         .insert(documents)
         .values({
@@ -104,17 +101,17 @@ export const POST = withExternalMatterResourceAuth(
           title: parsed.data.title,
           category: 'other',
           blobContainer: documentBlobContainer,
-          blobPath: resolvedBlob.blobPath,
-          contentType: parsed.data.mimeType,
-          sizeBytes: parsed.data.fileSize,
-          sha256: resolvedBlob.contentHash,
-          filename: parsed.data.filename,
+          blobPath: intake.storageKey,
+          contentType: intake.mimeType,
+          sizeBytes: Number(intake.sizeBytes),
+          sha256: intake.contentHash,
+          filename: intake.originalFilename,
           name: parsed.data.title,
-          fileUrl: resolvedBlob.fileUrl,
+          fileUrl,
           fileType: parsed.data.documentType,
           documentType: parsed.data.documentType,
-          mimeType: parsed.data.mimeType,
-          fileSize: parsed.data.fileSize,
+          mimeType: intake.mimeType,
+          fileSize: Number(intake.sizeBytes),
           uploadedBy: context.actor.userId,
           privacyLabel: parsed.data.privacyLabel,
         })
@@ -124,13 +121,22 @@ export const POST = withExternalMatterResourceAuth(
           name: documents.name,
         });
 
-      await tx.insert(documentVersions).values({
+      const [version] = await tx.insert(documentVersions).values({
         organizationId: context.organizationId,
         documentId: insertedDocument.id,
         versionNo: 1,
-        storageKey: resolvedBlob.blobPath,
-        contentHash: resolvedBlob.contentHash,
+        storageKey: intake.storageKey,
+        contentHash: intake.contentHash,
         uploadedBy: context.actor.userId,
+      }).returning({ id: documentVersions.id });
+
+      // Taking the intake and creating the document are one transaction: a lost race (another acceptance, a cancellation, expiry) undoes both.
+      await bindIntakeInTx(tx, {
+        organizationId: context.organizationId,
+        userId: context.actor.userId,
+        intakeId: intake.id,
+        documentId: insertedDocument.id,
+        versionId: version.id,
       });
 
       await tx.insert(documentLinks).values({
@@ -167,14 +173,17 @@ export const POST = withExternalMatterResourceAuth(
         action: 'document.external_upload',
         resourceType: 'documents',
         resourceId: insertedDocument.id,
-        details: { matterType, matterId: context.matterId, authorityId: context.authorityId, privacyLabel: parsed.data.privacyLabel },
+        details: { matterType, matterId: context.matterId, authorityId: context.authorityId, privacyLabel: parsed.data.privacyLabel, intakeId: intake.id },
       });
 
-      return { forbidden: false as const, conflict: false as const, document: insertedDocument };
+      return { forbidden: false as const, document: insertedDocument };
+    }).catch((error: unknown) => {
+      if (error instanceof IntakeConflictError) return { intakeConflict: true as const };
+      throw error;
     });
 
-    if ('conflict' in created && created.conflict) {
-      return NextResponse.json({ error: 'The file is already attached to another record' }, { status: 409 });
+    if ('intakeConflict' in created) {
+      return NextResponse.json({ error: 'The intake is no longer open' }, { status: 409 });
     }
     if (created.forbidden) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
