@@ -2,13 +2,13 @@
  * POST /api/organizations/switch
  *
  * V2 rotates a password session or validates a provider selection hint using private memberships.
- * Legacy mode validates public membership/admin authority and returns organization metadata.
+ * Legacy mode validates the caller's own active membership of an active organization and returns organization metadata.
+ * A platform title confers no tenant selection: platform staff switch only into organizations they are live members of (#1116).
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { organizations, organizationMembers } from '@/db/schema-organizations';
 import { and, eq, isNull } from 'drizzle-orm';
-import { isPlatformAdminUser } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { recordOrganizationSelection } from '@/lib/auth/organization-selection-audit';
 import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
@@ -54,8 +54,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'organizationId must be a valid organization id' }, { status: 400 });
   }
 
-  const isAdmin = await isPlatformAdminUser(userId);
-
   // The caller's memberships span organizations, which no single-organization transaction can show, so the lookup is the system role's,
   // exactly as the organization read authority does it (lib/organizations/read-authority.ts).
   const selection = await withSystemContext(async (tx): Promise<Selection> => {
@@ -66,9 +64,6 @@ export async function POST(req: NextRequest) {
       .limit(1);
 
     if (!org) return { kind: 'not-found' };
-
-    // Platform admins can switch to any org without membership check
-    if (isAdmin) return { kind: 'allowed', org };
 
     // An archived or inactive organization cannot be switched to: the resolver that reads the selection requires it to be active.
     if ((org.status ?? 'active') !== 'active') return { kind: 'not-found' };
@@ -100,10 +95,9 @@ export async function POST(req: NextRequest) {
   }
   const org = selection.org;
 
-  // A selection that leaves no trail is refused: a platform administrator choosing an organization they hold no membership of is the case
-  // that matters most.
+  // A selection that leaves no trail is refused. The only authority the legacy path recognises is the caller's own live membership.
   try {
-    await recordOrganizationSelection({ organizationId: org.id, userId, authority: isAdmin ? 'platform_administrator' : 'membership', mode: 'legacy' });
+    await recordOrganizationSelection({ organizationId: org.id, userId, authority: 'membership', mode: 'legacy' });
   } catch {
     return NextResponse.json({ error: 'The organization selection could not be recorded' }, { status: 503 });
   }

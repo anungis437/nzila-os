@@ -1,27 +1,21 @@
 /**
- * GET /api/control-plane/modules/union-eyes/telemetry
+ * Control Plane → Union Eyes telemetry fan-in.
  *
- * Aggregates union-eyes telemetry for the control-plane dashboard:
- * - EU health status
- * - SLA breach summary
- * - Queue backlog
- *
- * Fetches live data from the union-eyes service endpoints.
+ * The credentials are intentionally non-interchangeable:
+ * - UE_METRICS_SERVICE_KEY: metrics:platform_operational:read
+ * - QUEUE_STATUS_SERVICE_KEY: existing queue status capability
+ * - AI_SERVICE_KEY: not accepted by either Control Plane telemetry consumer.
+ * Missing credentials result in unavailable data, not a privileged fallback.
  */
 import { NextResponse } from 'next/server'
 import { requireApiAuth, handleAuthError } from '@/lib/api-auth'
 
 export const dynamic = 'force-dynamic'
 
-const EU_BASE_URL = process.env.UNION_EYES_URL
-
-// Shared when calling union-eyes internal endpoints (s2s auth)
-const EU_SERVICE_KEY = process.env.AI_SERVICE_KEY ?? ''
-
-async function fetchJson<T>(url: string): Promise<T | null> {
+async function fetchJson<T>(url: string, key?: string): Promise<T | null> {
   try {
     const headers: Record<string, string> = {}
-    if (EU_SERVICE_KEY) headers['x-service-key'] = EU_SERVICE_KEY
+    if (key) headers['x-service-key'] = key
     const res = await fetch(url, { cache: 'no-store', headers })
     if (!res.ok) return null
     return (await res.json()) as T
@@ -35,17 +29,14 @@ interface HealthPayload {
   status: string
   version: string
   uptime: number
-  checks: {
-    db: string       // 'ok' | 'fail'
-    queue: string    // 'ok' | 'degraded' | 'unreachable'
-  }
+  checks: { db: string; queue: string }
 }
 
 interface MetricsPayload {
-  sla_violations: number
-  workflow_transition_rate: number
+  sla_violations: number | null
+  workflow_transition_rate: number | null
   queue_depth: number
-  error_rate: number
+  error_rate: number | null
 }
 
 interface QueuePayload {
@@ -61,23 +52,28 @@ export async function GET(request: Request) {
   try {
     await requireApiAuth(request)
 
-    if (!EU_BASE_URL) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: {
-            code: 'UNION_EYES_URL_NOT_CONFIGURED',
-            message: 'UNION_EYES_URL is required to collect union-eyes telemetry',
-          },
-        },
-        { status: 500 },
-      )
+    const baseUrl = process.env.UNION_EYES_URL
+    if (!baseUrl) {
+      return NextResponse.json({
+        ok: false,
+        error: { code: 'UNION_EYES_URL_NOT_CONFIGURED', message: 'UNION_EYES_URL is required to collect union-eyes telemetry' },
+      }, { status: 500 })
     }
 
+    const metricsKey = process.env.UE_METRICS_SERVICE_KEY
+    const queueKey = process.env.QUEUE_STATUS_SERVICE_KEY
+    const aiKey = process.env.AI_SERVICE_KEY
+    const distinct = (key: string | undefined, other: string | undefined) =>
+      !!key && key.length >= 32 && key !== other
+
+    // Neither endpoint may receive a reused AI key or the other's credential.
+    const validMetricsKey = distinct(metricsKey, queueKey) && distinct(metricsKey, aiKey)
+    const validQueueKey = distinct(queueKey, metricsKey) && distinct(queueKey, aiKey)
+
     const [health, metrics, queue] = await Promise.all([
-      fetchJson<HealthPayload>(`${EU_BASE_URL}/api/health`),
-      fetchJson<MetricsPayload>(`${EU_BASE_URL}/api/metrics/operational`),
-      fetchJson<QueuePayload>(`${EU_BASE_URL}/api/union-eyes/queue-status`),
+      fetchJson<HealthPayload>(`${baseUrl}/api/health`),
+      validMetricsKey ? fetchJson<MetricsPayload>(`${baseUrl}/api/metrics/operational`, metricsKey) : Promise.resolve(null),
+      validQueueKey ? fetchJson<QueuePayload>(`${baseUrl}/api/union-eyes/queue-status`, queueKey) : Promise.resolve(null),
     ])
 
     return NextResponse.json({
@@ -104,7 +100,7 @@ export async function GET(request: Request) {
         },
         fetched_at: new Date().toISOString(),
       },
-    })
+    }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     return handleAuthError(error)
   }

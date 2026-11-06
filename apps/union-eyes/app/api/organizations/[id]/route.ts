@@ -6,9 +6,14 @@ import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
 import { requireUserForOrganization, requireSystemAdmin, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
-import { canAdministerOrganization, canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority'
+import {
+  canAdministerOrganization,
+  canReadOrganization,
+  canSeeAffiliation,
+  directoryProjection,
+  resolveOrganizationAccess,
+} from '@/lib/organizations/read-authority'
 import { mergeSettings, organizationPatchSchema } from '@/lib/organizations/profile-input'
-import { repointHierarchy, ReparentRefusal, type ReparentPlan } from '@/lib/organizations/reparent'
 import { isUniqueViolation } from '@/lib/db/unique-violation'
 
 export const dynamic = 'force-dynamic'
@@ -69,42 +74,41 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params
   const invalid = assertOrgIdParam(id)
   if (invalid) return invalid
-  // The organizations table is read as the system role, which is not tenant-scoped: the caller must hold an active
-  // membership here, administer an organization above it, or be a platform administrator. Otherwise it does not exist.
+  // The organizations table is read as the system role, which is not tenant-scoped, so the decision is made here. The private profile
+  // belongs to the organization's own live members; an administrator of an organization above it sees its directory entry only (the
+  // hierarchy is an affiliation graph, not an access grant); a platform title confers nothing. Anyone else: it does not exist.
   const access = await resolveOrganizationAccess(userId)
-  if (!canReadOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!canSeeAffiliation(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   const [row] = await withSystemContext(() =>
     db.select().from(organizations).where(eq(organizations.id, id)),
   )
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  const childCountOf = async () => {
+    const childRows = await withSystemContext(async () => rowsOf<{ cnt: number }>(
+      await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
+    ))
+    return childRows[0]?.cnt ?? 0
+  }
+
+  // Affiliated only: the directory entry and how many organizations sit below it. No counts of members or grievances are computed.
+  if (!canReadOrganization(access, id)) {
+    return NextResponse.json({ data: { ...directoryProjection(row), childCount: await childCountOf() } })
+  }
+
   // Settings, the billing contact, provenance, contact details, membership figures and grievance counts belong to the
-  // organization's administrators (as on the organization list); any other reader gets the public profile, and the
+  // organization's own administrators (as on the organization list); any other member gets the profile, and the
   // grievance count is not even computed for them.
   const administrative = canAdministerOrganization(access, id)
 
-  // Counts are computed under explicit authority. A bare pooled connection has no
-  // tenant identity and can silently return zero or leak cross-tenant aggregates.
-  const claimCounts = (tx: typeof db) => tx.execute(sql`SELECT
-        count(*)::int AS total,
-        count(*) FILTER (WHERE status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration'))::int AS active
-        FROM grievances WHERE organization_id = ${id}`)
-  // Direct members are bound through tenant RLS. A platform or parent administrator
-  // may be authorized for a descendant without direct membership; canonical binding
-  // correctly rejects impersonating that descendant, so use the system role only
-  // after the explicit canReadOrganization check and the exact organization predicate.
+  // Grievance counts are read under the caller's own membership of this organization (tenant row-level security), never as the system role.
   const readClaims = !administrative
     ? Promise.resolve(null)
-    : access.platform || !access.direct.has(id)
-      ? withSystemContext(async () => rowsOf<{ total: number; active: number }>(await claimCounts(db)))
-      : withRLSContext({ organizationId: id }, async (tx) => rowsOf<{ total: number; active: number }>(await claimCounts(tx)))
-  const [claimRows, childRows] = await Promise.all([
-    readClaims,
-    withSystemContext(async () => rowsOf<{ cnt: number }>(
-      await db.execute(sql`SELECT count(*)::int AS cnt FROM organizations WHERE parent_id = ${id}`),
-    )),
-  ])
-  const childCount = childRows[0]?.cnt ?? 0
+    : withRLSContext({ organizationId: id }, async (tx) => rowsOf<{ total: number; active: number }>(await tx.execute(sql`SELECT
+        count(*)::int AS total,
+        count(*) FILTER (WHERE status::text IN ('draft','filed','acknowledged','investigating','response_due','response_received','escalated','mediation','arbitration'))::int AS active
+        FROM grievances WHERE organization_id = ${id}`)))
+  const [claimRows, childCount] = await Promise.all([readClaims, childCountOf()])
 
   if (administrative) {
     const claims = claimRows?.[0] ?? { total: 0, active: 0 }
@@ -179,33 +183,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const [current] = await tx.select().from(organizations).where(eq(organizations.id, id))
     if (!current) return null
 
-    // Parent affiliation and lifecycle status define the federation boundary and the institution's standing: an
-    // organization's own administrator may resubmit the current values but may not change them.
+    // Parent affiliation and lifecycle status define the federation boundary and the institution's standing. Changing either needs an
+    // independently approved institutional workflow that is not built, so no caller (an organization administrator or a platform title)
+    // changes them here; resubmitting the current values is accepted.
     const parentChanged = body.parent_id !== undefined && (body.parent_id ?? null) !== (current.parentId ?? null)
     const statusChanged = body.status !== undefined && body.status !== current.status
-    if (parentChanged || statusChanged) {
-      try {
-        await requireSystemAdmin()
-      } catch {
-        return 'forbidden' as const
-      }
-    } else {
-      delete updates.parentId
-      delete updates.status
-    }
-
-    // A parent change recomputes this organization's path and level and every descendant's, or is refused (unknown parent, a cycle, too deep).
-    let reparent: ReparentPlan | null = null
-    if (parentChanged) {
-      try {
-        reparent = await repointHierarchy(tx, id, body.parent_id ?? null)
-      } catch (error) {
-        if (error instanceof ReparentRefusal) return { refused: error.message } as const
-        throw error
-      }
-      updates.hierarchyPath = reparent.hierarchyPath
-      updates.hierarchyLevel = reparent.hierarchyLevel
-    }
+    if (parentChanged || statusChanged) return 'governed' as const
+    delete updates.parentId
+    delete updates.status
 
     // A new slug must be free: paths resolve organizations by slug. Settings are merged into the stored ones, not substituted.
     if (typeof updates.slug === 'string' && updates.slug !== current.slug) {
@@ -224,7 +209,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       resourceId: id,
       details: {
         fields: Object.keys(updates).filter((k) => k !== 'updatedAt'),
-        ...(reparent ? { previousParentId: reparent.previousParentId, newParentId: body.parent_id ?? null, descendantsRepointed: reparent.descendantsRepointed } : {}),
       },
     })
     return row
@@ -237,12 +221,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (isUniqueViolation(error)) return NextResponse.json({ error: 'That slug is already in use' }, { status: 409 })
     throw error
   }
-  if (updated && typeof updated === 'object' && 'refused' in updated) return NextResponse.json({ error: updated.refused }, { status: 400 })
   if (updated === 'slug-taken') return NextResponse.json({ error: 'That slug is already in use' }, { status: 409 })
-  if (updated === 'forbidden') {
+  if (updated === 'governed') {
     return NextResponse.json(
-      { error: 'Forbidden: changing parent affiliation or status requires platform governance' },
-      { status: 403 },
+      { error: 'Changing parent affiliation or status requires an approved institutional workflow; this endpoint does not change them' },
+      { status: 409 },
     )
   }
   if (!updated) return NextResponse.json({ error: 'Not found' }, { status: 404 })

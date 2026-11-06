@@ -1,88 +1,65 @@
 /**
  * GET /api/metrics/operational
  *
- * Platform-wide operational counters for observability dashboards: workflow transitions in the last 24 hours, claims past
- * their SLA, queue depth and failure-like claim updates.
- *
- * These count every organization's claims, so they are for the platform operator only: a caller presenting the service
- * key (compared in constant time) or a platform administrator. An ordinary signed-in user of any organization is refused.
- * The route used to count claims across all organizations for any signed-in user and for anyone holding the AI service key,
- * and it reported a lifetime claim count as `request_count` and a ratio of claim-update text matches as `error_rate`.
- * Neither is measured here: they are not returned, rather than returned as proxies. A failed read is an error, not zero.
+ * Dedicated, read-only infrastructure measurement. An operator title or a
+ * generic AI service secret never gives access. The caller must hold the
+ * distinct capability credential metrics:platform_operational:read.
+ * No union claim, member, grievance, case or tenant tables may be queried.
  */
 import { NextResponse } from 'next/server'
-import { claims, claimUpdates } from '@/db/schema'
-import { sql, count, gte, and } from 'drizzle-orm'
 import { getAllQueueStats } from '@/lib/job-queue'
-import { requireApiAuth, isPlatformAdminUser } from '@/lib/api-auth-guard'
 import { constantTimeEquals } from '@/lib/security/constant-time'
-import { withSystemContext } from '@/lib/db/with-rls-context'
 import { logger } from '@/lib/logger'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
-async function isPlatformOperator(req: Request): Promise<{ ok: true } | { ok: false; status: 401 | 403 }> {
-  if (constantTimeEquals(req.headers.get('x-service-key'), process.env.AI_SERVICE_KEY)) return { ok: true }
-  let userId: string | undefined
-  try {
-    userId = (await requireApiAuth()).userId ?? undefined
-  } catch {
-    return { ok: false, status: 401 }
+const CAPABILITY = 'metrics:platform_operational:read'
+
+function authenticateMetricsService(req: Request): 'allowed' | 'unconfigured' | 'denied' {
+  const expected = process.env.UE_METRICS_SERVICE_KEY
+  // Absence, underlength and secret re-use are configuration errors, never
+  // invitations to fall back to interactive/platform or shared AI authority.
+  if (!expected || expected.length < 32 ||
+      expected === process.env.AI_SERVICE_KEY ||
+      expected === process.env.QUEUE_STATUS_SERVICE_KEY) {
+    return 'unconfigured'
   }
-  if (!userId) return { ok: false, status: 401 }
-  return (await isPlatformAdminUser(userId)) ? { ok: true } : { ok: false, status: 403 }
+  return constantTimeEquals(req.headers.get('x-service-key'), expected) ? 'allowed' : 'denied'
 }
 
 export async function GET(req: Request) {
-  const denial = await isPlatformOperator(req)
-  if (!denial.ok) {
-    return NextResponse.json({ error: denial.status === 401 ? 'Unauthorized' : 'Forbidden' }, { status: denial.status })
+  const access = authenticateMetricsService(req)
+  if (access !== 'allowed') {
+    // A caller without the matching credential is unauthorized whatever the server's configuration: answering 503 to an
+    // anonymous request would tell it whether the key is configured. The unconfigured or unsafe state is the operator's to
+    // see, so it is logged here (and the Control Plane consumer shows no data), never returned to the caller.
+    if (access === 'unconfigured') logger.error('operational_metrics_service_key_unconfigured', { capability: CAPABILITY })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: { 'Cache-Control': 'no-store' } })
   }
 
-  const now = new Date()
-  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  logger.info('operational_metrics_service_authorized', {
+    principal: 'control-plane-operational-metrics',
+    capability: CAPABILITY,
+  })
 
   try {
-    // The counters span every organization, so they are read as the system role (the platform operator's own principal), after the
-    // operator check above and in one read-only transaction. No organization's transaction can show another organization's rows.
-    // The two claim_updates figures come from one scan of the last day's rows rather than two.
-    const { updateCounts, slaViolations } = await withSystemContext(async (tx) => {
-      const updateRows = await tx
-        .select({
-          transitions: sql<number>`count(*) filter (where ${claimUpdates.updateType} = 'status_change')`.mapWith(Number),
-          failureLike: sql<number>`count(*) filter (where ${claimUpdates.message} ILIKE '%error%' OR ${claimUpdates.message} ILIKE '%failed%')`.mapWith(Number),
-        })
-        .from(claimUpdates)
-        .where(gte(claimUpdates.createdAt, oneDayAgo))
-      const slaRows = await tx
-        .select({ count: count() })
-        .from(claims)
-        .where(
-          and(
-            sql`${claims.status} NOT IN ('closed', 'resolved', 'rejected')`,
-            sql`${claims.updatedAt} < NOW() - INTERVAL '5 days'`,
-          ),
-        )
-      return { updateCounts: updateRows, slaViolations: slaRows }
-    })
     const queueStats = await getAllQueueStats()
-
     const queueDepth = queueStats.reduce((sum, q) => sum + (q.active ?? 0) + (q.reserved ?? 0) + (q.scheduled ?? 0), 0)
 
     return NextResponse.json({
       scope: 'platform',
-      workflow_transition_rate: updateCounts[0]?.transitions ?? 0,
-      sla_violations: slaViolations[0]?.count ?? 0,
-      failure_like_updates: updateCounts[0]?.failureLike ?? 0,
+      workflow_transition_rate: null,
+      sla_violations: null,
+      failure_like_updates: null,
       queue_depth: queueDepth,
-      // Request and error rates come from the observability system; this route does not measure them.
       request_count: null,
       error_rate: null,
       window: '24h',
-      generated_at: now.toISOString(),
-    })
+      generated_at: new Date().toISOString(),
+    }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     logger.error('operational_metrics_failed', { error })
-    return NextResponse.json({ error: 'Failed to compute metrics' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to compute metrics' }, { status: 500, headers: { 'Cache-Control': 'no-store' } })
   }
 }

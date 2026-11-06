@@ -59,11 +59,13 @@ test.describe('promotions: rewards export, profile roles, operational metrics, p
     expect(JSON.stringify(body)).not.toContain(U.memberPrimary.userId)
   })
 
-  test('DEF-0B9-ML operational metrics: no organization role reaches platform counters', async ({}, testInfo) => {
+  test('DEF-0B9-ML operational metrics: no human org or platform session is a metrics service principal', async ({}, testInfo) => {
     test.skip(apiOnly(testInfo), 'API journey: runs once, at desktop')
     expect(await status(await anonymous(), 'get', '/api/metrics/operational')).toBe(401)
     for (const who of [U.memberPrimary, U.stewardPrimary, U.adminPrimary, U.executivePrimary]) {
-      expect(await status(await as(who), 'get', '/api/metrics/operational'), who.userId).toBe(403)
+      // This endpoint authenticates a dedicated machine capability, not a web session;
+      // 401 for a session-only request is intentional, not a tenant role floor.
+      expect(await status(await as(who), 'get', '/api/metrics/operational'), who.userId).toBe(401)
     }
   })
 

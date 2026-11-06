@@ -4,7 +4,7 @@ import { db } from '@/db/db'
 import { organizations } from '@/db/schema-organizations'
 import { sql } from 'drizzle-orm'
 import { withSystemContext } from '@/lib/db/with-rls-context'
-import { canReadOrganization, resolveOrganizationAccess, UUID_PATTERN } from '@/lib/organizations/read-authority'
+import { canReadOrganization, canSeeAffiliation, directoryProjection, resolveOrganizationAccess, UUID_PATTERN } from '@/lib/organizations/read-authority'
 
 const MAX_DESCENDANTS = 2000
 
@@ -20,8 +20,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params
   if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 })
 
+  // Only organizations the caller is affiliated with; the member count only where the caller is a direct member, a directory entry elsewhere.
   const access = await resolveOrganizationAccess(userId)
-  if (!canReadOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!canSeeAffiliation(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const rows = (
     await withSystemContext(() =>
@@ -31,18 +32,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
         .where(sql`${id} = ANY(${organizations.hierarchyPath}) AND ${organizations.id} != ${id}`)
         .limit(MAX_DESCENDANTS),
     )
-  ).filter((row) => canReadOrganization(access, row.id))
+  ).filter((row) => canSeeAffiliation(access, row.id))
 
   const mapped = rows.map((row) => ({
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    organization_type: row.organizationType,
-    parent_id: row.parentId,
-    hierarchy_path: row.hierarchyPath,
-    hierarchy_level: row.hierarchyLevel,
-    member_count: row.memberCount,
-    status: row.status,
+    ...directoryProjection(row),
+    ...(canReadOrganization(access, row.id) ? { member_count: row.memberCount } : {}),
   }))
 
   return NextResponse.json({ data: mapped })

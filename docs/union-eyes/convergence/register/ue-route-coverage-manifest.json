@@ -6,7 +6,7 @@
   "kernel": 60,
   "byGuard": {
    "ADMIN_AUTH": 18,
-   "CAPABILITY_TOKEN": 12,
+   "CAPABILITY_TOKEN": 13,
    "CRON_SECRET": 1,
    "CRUD_FACTORY": 139,
    "DELEGATED": 17,
@@ -15,7 +15,7 @@
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 239,
    "ROLE_AUTH": 105,
-   "SESSION_AUTH": 53,
+   "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 380,
    "WITH_API_PUBLIC": 2
@@ -9415,10 +9415,10 @@
     "GET"
    ],
    "mutating": false,
-   "guard": "SESSION_AUTH",
+   "guard": "CAPABILITY_TOKEN",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {

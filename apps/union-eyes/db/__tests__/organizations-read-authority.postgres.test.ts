@@ -6,7 +6,8 @@
  * handlers against a database built by Django `migrate` plus the approved Drizzle bootstrap, with each statement executed as
  * `union_eyes_system` or `union_eyes_runtime` through the same ambient-transaction mechanism production uses. It proves the
  * system role holds the privileges those reads need on the real schema, and that a stranger, a sibling and a suspended member
- * read nothing.
+ * read nothing. Issue #1116: authority is direct and specific. The administrator of the federation sees the locals below it as
+ * directory entries only (no roster, contacts, member counts, grievance counts or analytics), and a platform title confers nothing.
  *
  * Needs UE_AUTHORITY_COMBINED_URL (see apps/union-eyes/db/__tests__/README.md); skipped when it is not set.
  */
@@ -102,6 +103,15 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
   const as = (user: string) => {
     state.userId = user
   }
+  /** What a caller affiliated only through an organization above must never receive. */
+  const PRIVATE_KEYS = [
+    'settings', 'billing_contact_id', 'subscription_tier', 'created_by', 'legacy_org_id', 'email', 'phone', 'address', 'charter_number',
+    'member_count', 'active_member_count', 'memberCount', 'activeClaims', 'totalClaims', 'description', 'sectors', 'website',
+  ]
+  const expectDirectoryOnly = (row: Record<string, unknown> | undefined, label: string) => {
+    expect(row, label).toBeDefined()
+    for (const key of PRIVATE_KEYS) expect(row, `${label}: ${key}`).not.toHaveProperty(key)
+  }
 
   async function org(id: string, name: string, type: string, parent: string | null, path: string[]) {
     await admin.query(
@@ -167,24 +177,29 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect((await item.GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status).toBe(404)
   })
 
-  it('gives a member the public profile and the administrator of the federation everything below it', async () => {
+  it('gives a member the public profile, the local administrator everything for their own local, and the administrator of the federation directory entries below it', async () => {
     const { GET } = await import('../../app/api/organizations/route')
     as('member-a')
     const [asMember] = (await (await GET(get('/api/organizations'))).json()).data as Array<Record<string, unknown>>
     for (const key of ['settings', 'billing_contact_id', 'subscription_tier', 'created_by', 'email', 'phone', 'address', 'charter_number']) {
       expect(asMember, key).not.toHaveProperty(key)
     }
+    as('admin-a')
+    const [asAdmin] = (await (await GET(get('/api/organizations?include_stats=true'))).json()).data as Array<Record<string, unknown>>
+    expect(asAdmin).toMatchObject({ id: LOCAL_A, subscription_tier: 'pro', activeClaims: 0 })
     as('admin-fed')
-    const rows = (await (await GET(get('/api/organizations'))).json()).data as Array<Record<string, unknown>>
+    const rows = (await (await GET(get('/api/organizations?include_stats=true'))).json()).data as Array<Record<string, unknown>>
     expect(rows.filter((r) => [FED, LOCAL_A, LOCAL_B].includes(r.id as string)).map((r) => r.id).sort()).toEqual([FED, LOCAL_A, LOCAL_B].sort())
-    expect(rows.find((r) => r.id === LOCAL_A)).toMatchObject({ subscription_tier: 'pro' })
+    expectDirectoryOnly(rows.find((r) => r.id === LOCAL_A), 'LOCAL_A')
+    expectDirectoryOnly(rows.find((r) => r.id === LOCAL_B), 'LOCAL_B')
+    expect(rows.find((r) => r.id === FED)).toMatchObject({ subscription_tier: 'pro' })
   })
 
-  it('a platform administrator lists every organization', async () => {
+  it('a platform title lists no organization', async () => {
     const { GET } = await import('../../app/api/organizations/route')
     state.platformAdmins.add('platform-1')
     as('platform-1')
-    expect(await ids(await GET(get('/api/organizations')))).toEqual([FED, LOCAL_A, LOCAL_B].sort())
+    expect(await ids(await GET(get('/api/organizations')))).toEqual([])
   })
 
   it('the tree, hierarchy and search confine a member to their own organization and show the federation administrator the subtree', async () => {
@@ -197,6 +212,12 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect(await ids(await tree.GET(get('/api/organizations/tree')))).toEqual([])
     as('admin-fed')
     expect(await ids(await tree.GET(get('/api/organizations/tree')))).toEqual([FED, LOCAL_A, LOCAL_B].sort())
+    const hierarchyRows = (await (await hierarchy.GET(get('/api/organizations/hierarchy'))).json()).data as Array<Record<string, unknown>>
+    expectDirectoryOnly(hierarchyRows.find((r) => r.id === LOCAL_A), 'hierarchy LOCAL_A')
+    state.platformAdmins.add('platform-1')
+    as('platform-1')
+    expect(await ids(await tree.GET(get('/api/organizations/tree')))).toEqual([])
+    expect(await ids(await hierarchy.GET(get('/api/organizations/hierarchy')))).toEqual([])
   })
 
   it('the item route answers 404 to a stranger, a sibling and a suspended member, and the profile to a member', async () => {
@@ -212,7 +233,19 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     as('admin-a')
     expect((await (await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).json()).data).toMatchObject({ subscription_tier: 'pro' })
     as('admin-fed')
-    expect((await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status).toBe(200)
+    const asAncestor = await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))
+    expect(asAncestor.status).toBe(200)
+    const directory = (await asAncestor.json()).data
+    expect(Object.keys(directory).sort()).toEqual(
+      ['id', 'name', 'slug', 'organization_type', 'parent_id', 'hierarchy_level', 'hierarchy_path', 'status', 'childCount'].sort(),
+    )
+    state.platformAdmins.add('platform-1')
+    as('platform-1')
+    expect((await GET(get(`/api/organizations/${LOCAL_A}`), params(LOCAL_A))).status).toBe(404)
+    as('admin-a')
+    expect((await GET(get(`/api/organizations/${LOCAL_B}`), params(LOCAL_B))).status, 'sibling').toBe(404)
+    const unknown = randomUUID()
+    expect((await GET(get(`/api/organizations/${unknown}`), params(unknown))).status, 'unknown id').toBe(404)
   })
 
   it('children and descendants list nothing to a stranger or a sibling, and the subtree to the federation administrator', async () => {
@@ -222,7 +255,10 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect((await children.GET(get(`/api/organizations/${FED}/children`), params(FED))).status).toBe(404)
     expect((await descendants.GET(get(`/api/organizations/${FED}/descendants`), params(FED))).status).toBe(404)
     as('admin-fed')
-    expect(await ids(await children.GET(get(`/api/organizations/${FED}/children`), params(FED)))).toEqual([LOCAL_A, LOCAL_B].sort())
+    const childRes = await children.GET(get(`/api/organizations/${FED}/children`), params(FED))
+    const childRows = (await childRes.json()).data as Array<Record<string, unknown>>
+    expect(childRows.map((r) => r.id).sort()).toEqual([LOCAL_A, LOCAL_B].sort())
+    for (const row of childRows) expectDirectoryOnly(row, `child ${row.id}`)
     expect(await ids(await descendants.GET(get(`/api/organizations/${FED}/descendants`), params(FED)))).toEqual([LOCAL_A, LOCAL_B].sort())
   })
 
@@ -244,14 +280,20 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect((await GET(get(`/api/organizations/${LOCAL_A}/ancestors`), params(LOCAL_A))).status).toBe(404)
     as('member-a')
     expect(await ids(await GET(get(`/api/organizations/${LOCAL_A}/ancestors`), params(LOCAL_A)))).toEqual([])
+    state.platformAdmins.add('platform-1')
     as('platform-1')
+    expect((await GET(get(`/api/organizations/${LOCAL_A}/ancestors`), params(LOCAL_A))).status).toBe(404)
+    as('admin-fed')
     expect(await ids(await GET(get(`/api/organizations/${LOCAL_A}/ancestors`), params(LOCAL_A)))).toEqual([FED])
     expect((await GET(get('/api/organizations/not-a-uuid/ancestors'), params('not-a-uuid'))).status).toBe(400)
   })
 
-  it('analytics is refused to a stranger (404) and a plain member (403), and given to an officer and to the administrator above', async () => {
+  it('analytics is given only to the organization\'s own administrator, read under its row-level policy; everyone else reads 404', async () => {
     const { GET } = await import('../../app/api/organizations/[id]/analytics/route')
-    for (const [user, status] of [['member-b', 404], ['member-a', 403], ['officer-a', 200], ['admin-fed', 200]] as const) {
+    state.platformAdmins.add('platform-1')
+    for (const [user, status] of [
+      ['member-b', 404], ['member-a', 404], ['steward-a', 404], ['officer-a', 404], ['admin-fed', 404], ['platform-1', 404], ['removed-a', 404], ['admin-a', 200],
+    ] as const) {
       as(user)
       expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status, user).toBe(status)
     }
@@ -270,24 +312,28 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     }
     const candidate = { user_id: `new-${tag}`, name: 'New Person', email: 'new@example.test' }
 
-    it('a plain member, a suspended member and a stranger cannot read the roster; a steward and the administrator above can', async () => {
-      for (const user of ['member-a', 'suspended-a', 'member-b']) expect((await rosterGet(user)).status, user).toBe(403)
-      const steward = await rosterGet('steward-a')
-      expect(steward.status).toBe(200)
-      expect(((await steward.json()).data as Array<{ organization_id: string }>).every((r) => r.organization_id === LOCAL_A)).toBe(true)
-      expect((await rosterGet('admin-fed')).status).toBe(200)
+    it('only the organization\'s own administrator reads the roster: not a member, steward, officer, administrator above, platform title or removed administrator', async () => {
+      state.platformAdmins.add('platform-1')
+      for (const user of ['member-a', 'suspended-a', 'member-b', 'steward-a', 'officer-a', 'admin-fed', 'platform-1', 'removed-a']) {
+        expect((await rosterGet(user)).status, user).toBe(403)
+      }
+      const localAdmin = await rosterGet('admin-a')
+      expect(localAdmin.status).toBe(200)
+      expect(((await localAdmin.json()).data as Array<{ organization_id: string }>).every((r) => r.organization_id === LOCAL_A)).toBe(true)
     })
 
-    it('no caller grants a role at or above their own, nobody grants admin, and a plain member or stranger adds no one', async () => {
-      for (const [user, role] of [['steward-a', 'steward'], ['steward-a', 'admin'], ['officer-a', 'admin'], ['admin-a', 'admin']] as const) {
-        expect((await rosterPost(user, { ...candidate, role })).status, `${user} -> ${role}`).toBe(403)
+    it('nobody grants a privileged role, and no one but the organization\'s own administrator adds anyone', async () => {
+      for (const role of ['admin', 'executive']) {
+        expect((await rosterPost('admin-a', { ...candidate, role })).status, `admin-a -> ${role}`).toBe(403)
       }
-      for (const user of ['member-a', 'member-b']) expect((await rosterPost(user, { ...candidate, role: 'member' })).status, user).toBe(403)
+      for (const user of ['member-a', 'member-b', 'steward-a', 'officer-a', 'admin-fed', 'platform-1']) {
+        expect((await rosterPost(user, { ...candidate, role: 'member' })).status, user).toBe(403)
+      }
       expect((await admin.query('SELECT 1 FROM organization_members WHERE user_id = $1', [candidate.user_id])).rows).toHaveLength(0)
     })
 
-    it('a steward adds a member only as a pending membership, written as the runtime role under the real row-level policy', async () => {
-      const response = await rosterPost('steward-a', { ...candidate, role: 'member', status: 'active' })
+    it('the administrator adds a member only as a pending membership, written as the runtime role under the real row-level policy', async () => {
+      const response = await rosterPost('admin-a', { ...candidate, role: 'member', status: 'active' })
       expect(response.status).toBe(201)
       const { rows } = await admin.query('SELECT role, status, organization_id FROM organization_members WHERE user_id = $1', [candidate.user_id])
       expect(rows).toEqual([{ role: 'member', status: 'pending', organization_id: LOCAL_A }])

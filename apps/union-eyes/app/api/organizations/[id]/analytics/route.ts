@@ -4,15 +4,8 @@ import { db } from '@/db/db'
 import { organizations } from '@/db/schema-organizations'
 import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
-import { ROLE_HIERARCHY } from '@/lib/api-auth-guard'
 import { shouldSuppressClaimMetrics, shouldSuppressMemberMetrics, MIN_PUBLISHABLE_GROUP_SIZE } from '@/lib/organizations/analytics-privacy'
-import {
-  canAdministerOrganization,
-  canReadOrganization,
-  directRoleIn,
-  resolveOrganizationAccess,
-  UUID_PATTERN,
-} from '@/lib/organizations/read-authority'
+import { canAdministerOrganization, resolveOrganizationAccess, UUID_PATTERN } from '@/lib/organizations/read-authority'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,15 +22,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params
   if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 })
 
-  // Analytics aggregate an organization's membership and caseload: they belong to its officers, the administrators above
-  // it and the platform, and a signed-in stranger must not learn that the organization exists.
+  // Analytics aggregate an organization's membership and caseload: they belong to its own administrators, through their live membership
+  // there. An administrator of an organization above it, a platform title, an officer and a signed-in stranger all read not found, so the
+  // answer does not tell them the organization exists or how it is governed.
   const access = await resolveOrganizationAccess(userId)
-  if (!canReadOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  const directRole = directRoleIn(access, id)
-  const officer = (ROLE_HIERARCHY[(directRole ?? '') as keyof typeof ROLE_HIERARCHY] ?? 0) >= ROLE_HIERARCHY.officer
-  if (!canAdministerOrganization(access, id) && !officer) {
-    return NextResponse.json({ error: 'Forbidden: requires officer role' }, { status: 403 })
-  }
+  if (!canAdministerOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const [org] = await withSystemContext(() =>
     db.select().from(organizations).where(eq(organizations.id, id)),
@@ -49,10 +38,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   )
   const childOrganizations = childRows[0]?.cnt ?? 0
 
-  // Every figure belongs to the organization named in the path, so the queries run with that organization's identity,
-  // never the caller's own. Under the caller's organization a parent administrator read zeros for a child. A caller with
-  // no direct membership here (a platform or parent administrator, authorized above) reads under the system role with the
-  // exact organization predicate.
+  // Every figure belongs to the organization named in the path and is read under the caller's own membership of it (tenant row-level
+  // security), never as the system role.
   const aggregate = async (q: typeof db) => {
     const memberRows = rowsOf<{ total: number; active: number; new_this_month: number; prev: number }>(
       await q.execute(
@@ -128,10 +115,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }
   }
 
-  const analytics =
-    access.platform || !access.direct.has(id)
-      ? await withSystemContext(() => aggregate(db))
-      : await withRLSContext({ organizationId: id }, (tx) => aggregate(tx as unknown as typeof db))
+  const analytics = await withRLSContext({ organizationId: id }, (tx) => aggregate(tx as unknown as typeof db))
 
   return NextResponse.json({ data: analytics })
 }

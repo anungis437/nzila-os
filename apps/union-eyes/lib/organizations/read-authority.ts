@@ -1,30 +1,36 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { organizationMembers, organizations } from '@/db/schema-organizations';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { isPlatformAdminUser, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
+import { ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 
 /**
- * Which organizations a signed-in caller may read.
+ * Which organizations a signed-in caller may read, and how much of each.
  *
- * Organization routes read the `organizations` table as the system role, which is not tenant-scoped, so the route has to
- * decide. Being signed in is not enough: a caller may read an organization they hold an ACTIVE membership in, the
- * descendants of an organization where they are an administrator, and (for a platform administrator) every organization.
- * Anything else reads as not found.
+ * Authority over an organization's content is direct and specific: it comes from the caller's own live membership there (issue #1116).
+ * The organization hierarchy is an affiliation graph, not an access-control list: administering an organization above another one does not
+ * confer the other organization's roster, contacts, member counts, grievance figures, analytics, settings, billing, legal or financial data.
+ * A platform title confers nothing here either; platform operations need their own separately authorized capabilities. Cross-organization
+ * grants and break-glass access are not built, so they stay denied.
+ *
+ * What an administrator above an organization may see is that it is affiliated: its directory entry (see {@link directoryProjection}) and no
+ * more. Anything else reads as not found.
  */
 export interface OrganizationAccess {
-  platform: boolean;
-  /** organizationId -> the caller's role there. Active memberships only. */
+  /** organizationId -> the caller's role there. Active, non-removed memberships only. */
   direct: ReadonlyMap<string, string>;
-  /** Organizations below one where the caller is an administrator. */
-  descendants: ReadonlySet<string>;
+  /**
+   * Organizations strictly below one where the caller is a direct administrator, excluding those where the caller is a direct member.
+   * Visible as a directory entry only.
+   */
+  affiliated: ReadonlySet<string>;
 }
 
 const ADMIN_RANK = ROLE_HIERARCHY.admin;
 const roleRank = (role: string) => ROLE_HIERARCHY[role as keyof typeof ROLE_HIERARCHY] ?? 0;
 export const isAdministrativeRole = (role: string | undefined) => roleRank(role ?? '') >= ADMIN_RANK;
 
-const MAX_DESCENDANTS = 5000;
+const MAX_AFFILIATED = 5000;
 
 async function directMemberships(userId: string): Promise<Array<{ organizationId: string; role: string }>> {
   if (currentStateContextEnabled()) {
@@ -46,42 +52,72 @@ async function directMemberships(userId: string): Promise<Array<{ organizationId
 }
 
 export async function resolveOrganizationAccess(userId: string): Promise<OrganizationAccess> {
-  if (await isPlatformAdminUser(userId)) return { platform: true, direct: new Map(), descendants: new Set() };
-
   const memberships = await directMemberships(userId);
   const direct = new Map(memberships.map((m) => [m.organizationId, m.role] as const));
   const administered = memberships.filter((m) => isAdministrativeRole(m.role)).map((m) => m.organizationId);
 
-  let descendants = new Set<string>();
+  const affiliated = new Set<string>();
   if (administered.length > 0) {
     const rows = await withSystemContext((tx) =>
       tx
         .select({ id: organizations.id })
         .from(organizations)
         .where(sql`${organizations.hierarchyPath}::text[] && ARRAY[${sql.join(administered.map((id) => sql`${id}::text`), sql`, `)}]::text[]`)
-        .limit(MAX_DESCENDANTS),
+        .limit(MAX_AFFILIATED),
     );
-    descendants = new Set(rows.map((row) => row.id));
+    for (const row of rows) if (!direct.has(row.id)) affiliated.add(row.id);
   }
-  return { platform: false, direct, descendants };
+  return { direct, affiliated };
 }
 
+/** The organization's private profile and content: the caller holds a live membership there. */
 export function canReadOrganization(access: OrganizationAccess, organizationId: string): boolean {
-  return access.platform || access.direct.has(organizationId) || access.descendants.has(organizationId);
+  return access.direct.has(organizationId);
 }
 
-/** Administrative authority over an organization: its own administrator, an administrator above it, or the platform. */
+/** Administrative authority over an organization: the caller's own live membership there carries an administrative role. */
 export function canAdministerOrganization(access: OrganizationAccess, organizationId: string): boolean {
-  return access.platform || access.descendants.has(organizationId) || isAdministrativeRole(access.direct.get(organizationId));
+  return isAdministrativeRole(access.direct.get(organizationId));
+}
+
+/** The caller may know the organization exists and see its directory entry (and nothing more unless {@link canReadOrganization}). */
+export function canSeeAffiliation(access: OrganizationAccess, organizationId: string): boolean {
+  return access.direct.has(organizationId) || access.affiliated.has(organizationId);
 }
 
 /** The caller's role in the organization (undefined when they are not a direct member). */
 export const directRoleIn = (access: OrganizationAccess, organizationId: string) => access.direct.get(organizationId);
 
-/** Every organization id the caller may read, or null for a platform administrator (no restriction). */
-export function readableOrganizationIds(access: OrganizationAccess): string[] | null {
-  if (access.platform) return null;
-  return [...new Set([...access.direct.keys(), ...access.descendants])];
+/** Every organization whose private profile the caller may read: their direct memberships. */
+export function readableOrganizationIds(access: OrganizationAccess): string[] {
+  return [...access.direct.keys()];
+}
+
+/** Every organization the caller may see a directory entry for: direct memberships and the organizations affiliated below one they administer. */
+export function affiliationOrganizationIds(access: OrganizationAccess): string[] {
+  return [...new Set([...access.direct.keys(), ...access.affiliated])];
+}
+
+type DirectoryRow = Pick<
+  typeof organizations.$inferSelect,
+  'id' | 'name' | 'slug' | 'organizationType' | 'parentId' | 'hierarchyLevel' | 'hierarchyPath' | 'status'
+>;
+
+/**
+ * The directory entry of an organization: what an affiliated (not directly authorized) caller may see. Identity and placement in the
+ * hierarchy only: no contacts, counts, settings, billing, provenance or activity.
+ */
+export function directoryProjection(row: DirectoryRow) {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    organization_type: row.organizationType,
+    parent_id: row.parentId ?? null,
+    hierarchy_level: row.hierarchyLevel,
+    hierarchy_path: row.hierarchyPath,
+    status: row.status,
+  };
 }
 
 export const UUID_PATTERN = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;

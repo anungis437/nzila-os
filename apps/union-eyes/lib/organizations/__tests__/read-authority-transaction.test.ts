@@ -41,15 +41,57 @@ describe('organization read authority uses the explicit system transaction', () 
   it('uses transaction-bound membership and hierarchy queries, never a bare database handle', async () => {
     const tx = systemTransaction([{ organizationId: orgA, role: 'admin' }], [{ id: orgChild }]);
     m.withSystemContext.mockImplementation(async (callback: (systemTx: typeof tx) => unknown) => callback(tx));
-    const { resolveOrganizationAccess, canReadOrganization, canAdministerOrganization } = await import('../read-authority');
+    const { resolveOrganizationAccess, canReadOrganization, canAdministerOrganization, canSeeAffiliation, readableOrganizationIds, affiliationOrganizationIds } =
+      await import('../read-authority');
     const access = await resolveOrganizationAccess('user-a');
     expect(m.withSystemContext).toHaveBeenCalledTimes(2);
     expect(tx.select).toHaveBeenCalledTimes(2);
     expect(canReadOrganization(access, orgA)).toBe(true);
-    expect(canReadOrganization(access, orgChild)).toBe(true);
-    expect(canAdministerOrganization(access, orgChild)).toBe(true);
+    expect(canAdministerOrganization(access, orgA)).toBe(true);
+    // Issue #1116: the organization below is affiliated, not readable or administrable.
+    expect(canSeeAffiliation(access, orgChild)).toBe(true);
+    expect(canReadOrganization(access, orgChild)).toBe(false);
+    expect(canAdministerOrganization(access, orgChild)).toBe(false);
+    expect(canSeeAffiliation(access, foreignOrg)).toBe(false);
     expect(canReadOrganization(access, foreignOrg)).toBe(false);
     expect(canAdministerOrganization(access, foreignOrg)).toBe(false);
+    expect(readableOrganizationIds(access)).toEqual([orgA]);
+    expect(affiliationOrganizationIds(access).sort()).toEqual([orgA, orgChild].sort());
+  });
+
+  it('never consults a platform title: a platform administrator with no membership has no organization', async () => {
+    m.isPlatformAdminUser.mockResolvedValue(true);
+    const tx = systemTransaction([], [{ id: orgChild }]);
+    m.withSystemContext.mockImplementation(async (callback: (systemTx: typeof tx) => unknown) => callback(tx));
+    const { resolveOrganizationAccess, canSeeAffiliation, readableOrganizationIds, affiliationOrganizationIds } = await import('../read-authority');
+    const access = await resolveOrganizationAccess('platform-user');
+    expect(m.isPlatformAdminUser).not.toHaveBeenCalled();
+    expect(access).toEqual({ direct: new Map(), affiliated: new Set() });
+    expect(canSeeAffiliation(access, orgChild)).toBe(false);
+    expect(readableOrganizationIds(access)).toEqual([]);
+    expect(affiliationOrganizationIds(access)).toEqual([]);
+  });
+
+  it('keeps a directly held organization out of the affiliated set even when it is also below one the caller administers', async () => {
+    const tx = systemTransaction([{ organizationId: orgA, role: 'admin' }, { organizationId: orgChild, role: 'member' }], [{ id: orgChild }]);
+    m.withSystemContext.mockImplementation(async (callback: (systemTx: typeof tx) => unknown) => callback(tx));
+    const { resolveOrganizationAccess, canAdministerOrganization, canReadOrganization } = await import('../read-authority');
+    const access = await resolveOrganizationAccess('user-a');
+    expect(access.affiliated.has(orgChild)).toBe(false);
+    expect(canReadOrganization(access, orgChild)).toBe(true);
+    // A member there, not an administrator: administering the parent adds nothing.
+    expect(canAdministerOrganization(access, orgChild)).toBe(false);
+  });
+
+  it('projects a directory entry with identity and placement only', async () => {
+    const { directoryProjection } = await import('../read-authority');
+    const row = {
+      id: orgA, name: 'A', slug: 'a', organizationType: 'local', parentId: null, hierarchyLevel: 0, hierarchyPath: [], status: 'active',
+      email: 'x@a.example', memberCount: 9, settings: { secret: true },
+    };
+    expect(directoryProjection(row)).toEqual({
+      id: orgA, name: 'A', slug: 'a', organization_type: 'local', parent_id: null, hierarchy_level: 0, hierarchy_path: [], status: 'active',
+    });
   });
 
   it('does not query descendant organizations for a non-administrator', async () => {

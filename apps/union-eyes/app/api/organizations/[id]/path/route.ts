@@ -12,8 +12,8 @@ import { organizations } from '@/db/schema-organizations';
 import { eq, inArray } from 'drizzle-orm';
 import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { canReadOrganization, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
-import { organizationWire } from '@/lib/organizations/organization-wire';
+import { canReadOrganization, canSeeAffiliation, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
+import { organizationDirectoryWire, organizationWire } from '@/lib/organizations/organization-wire';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +33,10 @@ function formatOrg(o: OrgRow) {
     hierarchyLevel: o.hierarchyLevel ?? 0,
   };
 }
+
+/** The profile where the caller is a direct member; the directory entry where they are only affiliated (an administrator above it). */
+type Access = Awaited<ReturnType<typeof resolveOrganizationAccess>>;
+const entryFor = (access: Access, o: OrgRow) => (canReadOrganization(access, o.id) ? formatOrg(o) : organizationDirectoryWire(o));
 
 export async function GET(_req: NextRequest, { params }: Params) {
   if (currentStateContextEnabled()) {
@@ -64,11 +68,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
     .limit(1));
 
   const org = rows[0];
-  if (!org || !canReadOrganization(access, org.id)) {
+  if (!org || !canSeeAffiliation(access, org.id)) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  const path: ReturnType<typeof formatOrg>[] = [];
+  const path: Array<ReturnType<typeof entryFor>> = [];
 
   const hierarchyTokens = (org.hierarchyPath ?? []).filter(
     (token) => token && token !== org.id && token !== org.slug,
@@ -97,7 +101,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     const ancestorByToken = new Map<string, OrgRow>();
     for (const ancestor of [...uuidAncestors, ...slugAncestors]) {
-      if (!canReadOrganization(access, ancestor.id)) continue;
+      if (!canSeeAffiliation(access, ancestor.id)) continue;
       ancestorByToken.set(ancestor.id, ancestor);
       if (ancestor.slug) {
         ancestorByToken.set(ancestor.slug, ancestor);
@@ -108,11 +112,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
       const ancestor = ancestorByToken.get(token);
       if (!ancestor) continue;
       if (path.some((entry) => entry.id === ancestor.id)) continue;
-      path.push(formatOrg(ancestor));
+      path.push(entryFor(access, ancestor));
     }
   }
 
-  path.push(formatOrg(org));
+  path.push(entryFor(access, org));
 
   return NextResponse.json({ data: path });
 }
