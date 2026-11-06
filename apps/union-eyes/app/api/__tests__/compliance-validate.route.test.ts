@@ -162,6 +162,22 @@ describe('compliance/validate route', () => {
     },
   );
 
+  it.each(['0001-01-01', '0099-12-31', '0100-01-01'])(
+    'accepts canonical early ISO year %s without Date.UTC century remapping',
+    async (grievanceDate) => {
+      const { POST } = await loadRoute();
+      const response = await POST(new Request('http://localhost/api/compliance/validate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ data: { grievanceDate, arbitrationDate: '2026-01-01' } }),
+      }));
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.checks).toHaveLength(1);
+      expect(body.checks[0]).toMatchObject({ ruleCategory: 'arbitration_deadline', status: 'info' });
+    },
+  );
+
   it('accepts a real leap-day date without inventing a legal deadline', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/compliance/validate', {
