@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { parseLockfilePackages, normalizeAdvisoryResponse } from './npm-bulk-audit.mjs'
+import { parseLockfilePackages, normalizeAdvisoryResponse, fetchAdvisories } from './npm-bulk-audit.mjs'
 
 function withLockfile(contents, run) {
   const folder = mkdtempSync(join(tmpdir(), 'nzila-audit-'))
@@ -236,4 +236,24 @@ test('advisory ids are recorded as the canonical string the policy binds to the 
   assert.deepEqual(Object.keys(flat), ['1120680'])
   assert.equal(flat['1120680'].id, '1120680')
   assert.equal(flat['1120680'].package, 'esbuild')
+})
+
+
+test('audit registry redirects are rejected without forwarding the dependency inventory', async () => {
+  const previousFetch = globalThis.fetch
+  const pkgMap = new Map([['node-forge', new Set(['1.4.0'])]])
+  let requests = 0
+  try {
+    globalThis.fetch = async (_url, options) => {
+      requests++
+      assert.equal(options.method, 'POST')
+      assert.equal(options.redirect, 'manual')
+      assert.deepEqual(JSON.parse(options.body), { 'node-forge': ['1.4.0'] })
+      return { ok: false, status: 302, headers: new Headers({ location: 'https://untrusted.example/collect' }) }
+    }
+    await assert.rejects(fetchAdvisories(pkgMap), /Audit registry returned HTTP 302/)
+    assert.equal(requests, 1)
+  } finally {
+    globalThis.fetch = previousFetch
+  }
 })
