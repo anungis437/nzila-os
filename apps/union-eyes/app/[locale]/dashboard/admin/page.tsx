@@ -63,15 +63,12 @@ interface ActivityItem {
   timestamp: string | null;
 }
 
+/** An organization's tenancy record: no member counts, officer names or contacts, which are its content (#1116). */
 interface LocalSection {
   id: string;
   number: string | null;
   name: string;
   region: string | null;
-  memberCount: number;
-  activeCount: number;
-  president: string | null;
-  contact: string | null;
   status: string;
 }
 
@@ -122,7 +119,9 @@ function useCopy() {
     noActivity: t("noActivity"),
     searchTooShort: t("searchTooShort", { min: MIN_USER_SEARCH }),
     noUsers: t("noUsers"),
+    usersScopeNote: t("usersScopeNote"),
     noOrganizations: t("noOrganizations"),
+    directoryOnlyNote: t("directoryOnlyNote"),
     organization: t("organization"),
     removeUser: t("removeUser"),
     toggleStatus: t("toggleStatus"),
@@ -221,18 +220,12 @@ function readLocals(body: unknown): LocalSection[] {
   return rowsOf(body).map((row) => {
     const id = text(row.id);
     const name = text(row.name);
-    const memberCount = count(row.memberCount);
-    const activeCount = count(row.activeCount);
-    if (!id || !name || memberCount === null || activeCount === null) throw new ApiShapeError("an organization without the expected fields");
+    if (!id || !name) throw new ApiShapeError("an organization without the expected fields");
     return {
       id,
       number: text(row.number),
       name,
       region: text(row.region),
-      memberCount,
-      activeCount,
-      president: text(row.president),
-      contact: text(row.contact),
       status: text(row.status) ?? "",
     };
   });
@@ -724,7 +717,8 @@ export default function AdminPage() {
         {activeSection === "users" && (
           <motion.div {...section}>
             <Card className={panel}>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('admin.users.title')}</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin.users.title')}</h2>
+              <p className="text-xs text-gray-600 mb-4">{copy.usersScopeNote}</p>
               {searchBox(t('admin.users.searchPlaceholder'), "focus:ring-blue-500")}
               {searchTooShort && <p className="mb-4 text-sm text-gray-600">{copy.searchTooShort}</p>}
 
@@ -802,6 +796,7 @@ export default function AdminPage() {
             <Card className={panel}>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('admin.locals.title')}</h2>
               {searchBox(t('admin.locals.searchPlaceholder'), "focus:ring-green-500")}
+              <p className="text-xs text-gray-600 mb-4">{copy.directoryOnlyNote}</p>
 
               {locals.error !== null ? (
                 <LoadFailure title={copy.couldNotLoad("locals")} detail={locals.error} retryLabel={copy.retry} onRetry={() => setLocalsReload((n) => n + 1)} />
@@ -819,7 +814,7 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {locals.data.map((local) => (
                     <Card key={local.id} className="p-5 bg-linear-to-br from-white to-gray-50 border-gray-200 hover:shadow-lg transition-all">
-                      <div className="mb-4">
+                      <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-lg font-bold text-gray-900">
                             {local.number ? `${t('admin.locals.localPrefix')} ${local.number}` : local.name}
@@ -836,35 +831,6 @@ export default function AdminPage() {
                         <p className="text-xs text-gray-600">{local.region ?? copy.notRecorded}</p>
                       </div>
 
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">{t('admin.locals.totalMembers')}:</span>
-                          <span className="font-semibold text-gray-900">{local.memberCount.toLocaleString(numberLocale)}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">{t('admin.locals.activeMembers')}:</span>
-                          <span className="font-semibold text-green-600">{local.activeCount.toLocaleString(numberLocale)}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div
-                            className="bg-green-600 h-2 rounded-full transition-all"
-                            style={{ width: `${local.memberCount > 0 ? Math.min(100, (local.activeCount / local.memberCount) * 100) : 0}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-gray-200">
-                        <div className="flex items-center justify-between text-xs">
-                          <div>
-                            <p className="text-gray-600 mb-1">{t('admin.locals.president')}:</p>
-                            <p className="font-medium text-gray-900">{local.president ?? copy.notRecorded}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-gray-600 mb-1">{t('admin.locals.contact')}:</p>
-                            <p className="font-medium text-blue-600">{local.contact ?? copy.notRecorded}</p>
-                          </div>
-                        </div>
-                      </div>
                     </Card>
                   ))}
                 </div>

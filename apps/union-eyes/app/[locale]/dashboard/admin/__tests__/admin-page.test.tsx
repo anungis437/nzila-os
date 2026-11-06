@@ -52,10 +52,8 @@ const localRow = (overrides: Record<string, unknown> = {}) => ({
   number: 'toronto-central',
   name: 'Toronto Central',
   region: 'ON',
-  memberCount: 40,
-  activeCount: 30,
-  president: 'Pat President',
-  contact: 'pat@example.com',
+  organizationType: 'local',
+  parentId: null,
   status: 'active',
   ...overrides,
 });
@@ -219,6 +217,12 @@ describe('AdminPage: overview', () => {
 });
 
 describe('AdminPage: users', () => {
+  it('says the directory covers only organizations the caller administers directly (#1116)', async () => {
+    renderPage();
+    open(enCA.admin.sections.userManagement);
+    expect(await screen.findByText(enCA.adminConsolePage.usersScopeNote)).toBeInTheDocument();
+  });
+
   it('lists the users the route answers with, and offers no add, edit or last login it cannot back', async () => {
     renderPage();
     open(enCA.admin.sections.userManagement);
@@ -328,22 +332,30 @@ describe('AdminPage: organizations', () => {
     open(enCA.admin.sections.localSections);
 
     expect(await screen.findByText('Toronto Central')).toBeInTheDocument();
-    expect(screen.getByText('Pat President')).toBeInTheDocument();
-    expect(screen.getByText('pat@example.com')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: new RegExp(enCA.admin.locals.addLocal, 'i') })).toBeNull();
     expect(screen.queryByRole('button', { name: /edit local|local settings/i })).toBeNull();
   });
 
-  it('shows a dash for a president or contact that is not recorded, and a 0% bar, not NaN, for an organization with no members', async () => {
+  // Issue #1116: the directory is the tenancy record; member counts and officer contacts are the organization's content.
+  it('shows no member counts, president or contact, and says why', async () => {
     server.locals = () =>
-      standardSuccessResponse([localRow({ president: '', contact: '', region: '', memberCount: 0, activeCount: 0, number: '' })]);
+      standardSuccessResponse([localRow({ memberCount: 40, activeCount: 30, president: 'Pat President', contact: 'pat@example.com' })]);
     renderPage();
     open(enCA.admin.sections.localSections);
 
     expect(await screen.findByText('Toronto Central')).toBeInTheDocument();
-    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(3);
-    expect(document.querySelector('[style*="NaN"]')).toBeNull();
-    expect(document.querySelector('[style*="width: 0%"]')).not.toBeNull();
+    expect(screen.getByText(enCA.adminConsolePage.directoryOnlyNote)).toBeInTheDocument();
+    for (const absent of ['Pat President', 'pat@example.com', '40', '30']) expect(screen.queryByText(absent)).toBeNull();
+    expect(screen.queryByText(new RegExp(`${enCA.admin.locals.totalMembers}|${enCA.admin.locals.president}`))).toBeNull();
+  });
+
+  it('shows a dash for a region that is not recorded', async () => {
+    server.locals = () => standardSuccessResponse([localRow({ region: '', number: '' })]);
+    renderPage();
+    open(enCA.admin.sections.localSections);
+
+    expect(await screen.findByText('Toronto Central')).toBeInTheDocument();
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows the route’s refusal instead of “No organizations found”', async () => {

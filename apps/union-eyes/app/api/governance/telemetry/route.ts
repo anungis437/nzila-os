@@ -2,8 +2,7 @@
  * UnionEyes — /api/governance/telemetry
  *
  * Governance-level observability metrics for procurement / security review
- * and ops dashboards. Backed by real domain tables where possible, with
- * in-process counters as augmentation.
+ * and ops dashboards. A figure without a real, governed source is null.
  *
  * Shape mirrors apps/flow's governance telemetry endpoint so platform
  * adapters in Control Plane can consume both consistently.
@@ -19,16 +18,9 @@ import { withSystemContext } from '@/lib/db/with-rls-context'
 
 const SERVICE = 'union-eyes'
 
-// In-process governance counters (augment DB-backed metrics)
-let workflowTransitionErrorCount = 0
-let evidenceExportCount = 0
-let authAnomalyCount = 0
-
-/** Retained for callers; policy denials are not reported by this endpoint (see GET). */
-export function recordPolicyDenied() { /* not measured here */ }
-export function recordWorkflowTransitionError() { workflowTransitionErrorCount++ }
-export function recordEvidenceExport() { evidenceExportCount++ }
-export function recordAuthAnomaly() { authAnomalyCount++ }
+// Workflow-transition errors, evidence exports and authentication anomalies have no recording source in this application: nothing ever
+// counted them, so a counter here would always read 0. They are reported as null ("not measured here", issue #1118), never as a
+// measurement of zero; a figure appears only once a real, governed source exists.
 
 export const dynamic = 'force-dynamic'
 
@@ -65,10 +57,10 @@ export async function GET(request: Request) {
       return NextResponse.json({
         service: SERVICE,
         policy_denied_count: null,
-        workflow_transition_error_count: workflowTransitionErrorCount,
+        workflow_transition_error_count: null,
         audit_event_volume: dbAuditEventVolume,
-        evidence_export_count: evidenceExportCount,
-        auth_anomaly_count: authAnomalyCount,
+        evidence_export_count: null,
+        auth_anomaly_count: null,
         generated_at: new Date().toISOString(),
       })
     }),

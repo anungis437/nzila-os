@@ -52,6 +52,10 @@ describe('GET /api/governance/telemetry', () => {
     expect(m.tablesRead).toEqual([])
     expect(body.policy_denied_count).toBeNull()
     expect(body.audit_event_volume).toBeNull()
+    // Nothing records these: they are not measured here, never a constant zero (#1118).
+    expect(body.workflow_transition_error_count).toBeNull()
+    expect(body.evidence_export_count).toBeNull()
+    expect(body.auth_anomaly_count).toBeNull()
   })
 
   it('counts only the platform governance log for a platform administrator, never organizations\' policy evaluations', async () => {

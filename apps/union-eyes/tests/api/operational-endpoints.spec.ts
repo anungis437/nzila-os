@@ -76,10 +76,10 @@ const HEALTH_RESPONSE_FAILING: Record<string, unknown> = {
 // caller who is not a platform administrator, or when the database is unavailable.
 const GOVERNANCE_TELEMETRY_RESPONSE: Record<string, number | string | null> = {
   policy_denied_count: null,
-  workflow_transition_error_count: 1,
+  workflow_transition_error_count: null,
   audit_event_volume: 142,
-  evidence_export_count: 7,
-  auth_anomaly_count: 0,
+  evidence_export_count: null,
+  auth_anomaly_count: null,
   generated_at: '2025-01-01T00:00:00.000Z',
 }
 
@@ -236,16 +236,11 @@ describe('UE Ops - /api/governance/telemetry response contract', () => {
 describe('UE Ops - /api/governance/telemetry source implementation contract', () => {
   const telemetrySrc = readRoute('app/api/governance/telemetry/route.ts')
 
-  it('exports recordPolicyDenied counter helper (GOV-TELEMETRY-EXPORTS-HELPERS)', () => {
-    expect(telemetrySrc).toContain('recordPolicyDenied')
-  })
-
-  it('exports recordWorkflowTransitionError counter helper (GOV-TELEMETRY-EXPORTS-TRANSITION-ERROR)', () => {
-    expect(telemetrySrc).toContain('recordWorkflowTransitionError')
-  })
-
-  it('exports recordEvidenceExport counter helper (GOV-TELEMETRY-EXPORTS-EVIDENCE-EXPORT)', () => {
-    expect(telemetrySrc).toContain('recordEvidenceExport')
+  it('reports no never-incremented in-process counter as a measured zero (GOV-TELEMETRY-NO-CONSTANT-ZERO, #1118)', () => {
+    for (const counter of ['workflow_transition_error_count', 'evidence_export_count', 'auth_anomaly_count']) {
+      expect(telemetrySrc).toContain(`${counter}: null`)
+    }
+    expect(telemetrySrc).not.toMatch(/export function record[A-Z]/)
   })
 
   it('response includes generated_at timestamp (GOV-TELEMETRY-GENERATED-AT)', () => {
