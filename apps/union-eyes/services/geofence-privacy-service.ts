@@ -36,6 +36,8 @@ export interface LocationConsentRequest {
 
 export interface LocationTrackingRequest {
   userId: string;
+  /** The caller's organization, resolved by the server; recorded on the point so its deletion is logged against it. */
+  organizationId: string;
   latitude: number;
   longitude: number;
   accuracy?: number;
@@ -67,6 +69,53 @@ export class LocationConsentNotFoundError extends Error {
   constructor(message = "No active location consent") {
     super(message);
     this.name = "LocationConsentNotFoundError";
+  }
+}
+
+type DeletedLocationRow = { at?: Date | string | null; organizationId?: string | null };
+
+/**
+ * What one deletion removed, per organization of the removed rows. A row that carries no organization (written before
+ * platform 0080) is counted under null, an unattributed entry, never under an organization it cannot be shown to belong to.
+ */
+export class DeletionLedger {
+  private readonly buckets = new Map<string | null, { count: number; oldest: Date | null; newest: Date | null }>();
+
+  addAll(rows: DeletedLocationRow[]) {
+    for (const row of rows) this.add(row);
+  }
+
+  add(row: DeletedLocationRow) {
+    const key = row.organizationId ?? null;
+    const bucket = this.buckets.get(key) ?? { count: 0, oldest: null, newest: null };
+    bucket.count += 1;
+    const when = row.at instanceof Date ? row.at : row.at ? new Date(row.at) : null;
+    if (when && !Number.isNaN(when.getTime())) {
+      if (!bucket.oldest || when < bucket.oldest) bucket.oldest = when;
+      if (!bucket.newest || when > bucket.newest) bucket.newest = when;
+    }
+    this.buckets.set(key, bucket);
+  }
+
+  /** The entries to write, organizations in a stable order and the unattributed entry last. A date that was not recorded stays null. */
+  entries() {
+    return [...this.buckets.entries()]
+      .sort(([a], [b]) => (a === null ? 1 : b === null ? -1 : a.localeCompare(b)))
+      .map(([organizationId, bucket]) => ({
+        organizationId,
+        recordCount: bucket.count.toString(),
+        oldestRecordDate: bucket.oldest,
+        newestRecordDate: bucket.newest,
+      }));
+  }
+
+  async write(
+    tx: RLSTx,
+    fields: { deletionType: string; deletionReason: string; initiatedBy?: string; initiatorRole?: string },
+  ) {
+    const entries = this.entries();
+    if (entries.length === 0) return;
+    await tx.insert(locationDeletionLog).values(entries.map((entry) => ({ ...fields, ...entry })));
   }
 }
 
@@ -275,6 +324,7 @@ export class GeofencePrivacyService {
       .insert(locationTracking)
       .values({
         userId: tracking.userId,
+        organizationId: tracking.organizationId,
         latitude: tracking.latitude.toFixed(8),
         longitude: tracking.longitude.toFixed(8),
         accuracy: tracking.accuracy?.toFixed(2),
@@ -375,7 +425,7 @@ export class GeofencePrivacyService {
             config.backgroundTrackingAllowed === false &&
             config.explicitOptInRequired === true &&
             config.autoDeletionEnabled === true) {
-          await this.logGeofenceEvent(userId, geofenceId, "entry", latitude, longitude, tx);
+          await this.logGeofenceEvent(userId, geofenceId, fence.unionLocalId, "entry", latitude, longitude, tx);
           recorded = true;
         }
       }
@@ -418,6 +468,7 @@ export class GeofencePrivacyService {
   private static async logGeofenceEvent(
     userId: string,
     geofenceId: string,
+    organizationId: string | null,
     eventType: "entry" | "exit",
     latitude: number,
     longitude: number,
@@ -429,6 +480,7 @@ export class GeofencePrivacyService {
     await tx.insert(geofenceEvents).values({
       userId,
       geofenceId,
+      organizationId,
       eventType,
       latitude: latitude.toFixed(8),
       longitude: longitude.toFixed(8),
@@ -490,41 +542,28 @@ export class GeofencePrivacyService {
 
     let trackingRecordsDeleted = 0;
     let eventRecordsDeleted = 0;
-    // The log records the real span of what was deleted, not the time of the run.
-    let oldest: Date | null = null;
-    let newest: Date | null = null;
-    const widen = (at: Date | string | null | undefined) => {
-      if (!at) return;
-      const when = at instanceof Date ? at : new Date(at);
-      if (Number.isNaN(when.getTime())) return;
-      if (!oldest || when < oldest) oldest = when;
-      if (!newest || when > newest) newest = when;
-    };
+    // One log entry per organization whose rows were removed, each with the real span of what was deleted, not the time of the run.
+    const ledger = new DeletionLedger();
     for (const userId of userIds) {
       const deletedTracking = await tx
         .delete(locationTracking)
         .where(and(eq(locationTracking.userId, userId), lte(locationTracking.expiresAt, now)))
-        .returning({ id: locationTracking.id, at: locationTracking.recordedAt });
+        .returning({ id: locationTracking.id, at: locationTracking.recordedAt, organizationId: locationTracking.organizationId });
       const deletedEvents = await tx
         .delete(geofenceEvents)
         .where(and(eq(geofenceEvents.userId, userId), lte(geofenceEvents.expiresAt, now)))
-        .returning({ id: geofenceEvents.id, at: geofenceEvents.eventTime });
+        .returning({ id: geofenceEvents.id, at: geofenceEvents.eventTime, organizationId: geofenceEvents.organizationId });
       trackingRecordsDeleted += deletedTracking.length;
       eventRecordsDeleted += deletedEvents.length;
-      for (const row of deletedTracking) widen((row as { at?: Date | string | null }).at);
-      for (const row of deletedEvents) widen((row as { at?: Date | string | null }).at);
+      ledger.addAll(deletedTracking);
+      ledger.addAll(deletedEvents);
     }
 
-    // The caller passes the system transaction. Every per-user delete and this log commit or roll back together.
-    if (trackingRecordsDeleted > 0 || eventRecordsDeleted > 0) {
-      await tx.insert(locationDeletionLog).values({
-        deletionType: "auto_24hr",
-        deletionReason: "24-hour retention policy (automatic cleanup)",
-        recordCount: (trackingRecordsDeleted + eventRecordsDeleted).toString(),
-        oldestRecordDate: oldest ?? now,
-        newestRecordDate: newest ?? now,
-      });
-    }
+    // The caller passes the system transaction. Every per-user delete and these log entries commit or roll back together.
+    await ledger.write(tx, {
+      deletionType: "auto_24hr",
+      deletionReason: "24-hour retention policy (automatic cleanup)",
+    });
 
     return { trackingRecordsDeleted, eventRecordsDeleted, truncated };
   }
@@ -537,19 +576,23 @@ export class GeofencePrivacyService {
     const deletedTracking = await tx
       .delete(locationTracking)
       .where(eq(locationTracking.userId, userId))
-      .returning({ id: locationTracking.id });
+      .returning({ id: locationTracking.id, at: locationTracking.recordedAt, organizationId: locationTracking.organizationId });
 
     // Delete geofence events
     const deletedEvents = await tx
       .delete(geofenceEvents)
       .where(eq(geofenceEvents.userId, userId))
-      .returning({ id: geofenceEvents.id });
+      .returning({ id: geofenceEvents.id, at: geofenceEvents.eventTime, organizationId: geofenceEvents.organizationId });
 
-    // Log deletion
-    await tx.insert(locationDeletionLog).values({
+    // Log the deletion: one entry per organization the member's rows belonged to, with their real span, initiated by the member.
+    const ledger = new DeletionLedger();
+    ledger.addAll(deletedTracking);
+    ledger.addAll(deletedEvents);
+    await ledger.write(tx, {
       deletionType: "user_request",
       deletionReason: reason,
-      recordCount: (deletedTracking.length + deletedEvents.length).toString(),
+      initiatedBy: userId,
+      initiatorRole: "member",
     });
 
     return {

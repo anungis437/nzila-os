@@ -68,6 +68,8 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     const location = await withRLSContext({ organizationId }, async (tx) => {
       const recorded = await GeofencePrivacyService.trackLocation({
         userId: user.id,
+        // The point belongs to the caller's server-resolved organization, so its retention deletion is logged against it.
+        organizationId,
         latitude,
         longitude,
         accuracy,

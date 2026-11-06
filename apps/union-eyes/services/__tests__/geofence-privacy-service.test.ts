@@ -290,6 +290,9 @@ describe('geofence-privacy-service', () => {
       expect(r.recorded).toBe(true);
       expect(r.distance).toBeLessThan(1);
       expect(h.db.insert).toHaveBeenCalledTimes(1);
+      // DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION: the event carries the fence's organization.
+      const chain = h.db.insert.mock.results[0].value as { values: { mock: { calls: unknown[][] } } };
+      expect(chain.values.mock.calls[0][0]).toMatchObject({ userId: 'u1', geofenceId: 'g1', organizationId: fence.unionLocalId });
     });
 
     // DEF-0B8-JUR-GEOFENCE-GET-STORES-MEMBER-COORDINATES-WITHOUT-A-CONSENT-CHECK
