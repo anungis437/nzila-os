@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 652,
- "partial": 72,
- "outstanding": 125,
- "accountedFor": 125,
+ "corrected": 653,
+ "partial": 71,
+ "outstanding": 124,
+ "accountedFor": 124,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -124,9 +124,9 @@
   {
    "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
    "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
-   "defects": 13,
+   "defects": 12,
    "severity": {
-    "HIGH": 4,
+    "HIGH": 3,
     "MEDIUM": 8,
     "LOW": 1
    },
@@ -134,7 +134,6 @@
    "namedFiles": 2,
    "tranches": {
     "0B.1": 1,
-    "0B.3": 1,
     "0B.4": 2,
     "0B.5": 2,
     "0B.7": 2,
@@ -528,11 +527,6 @@
    {
     "id": "DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY",
-    "severity": "HIGH",
-    "partial": true
    },
    {
     "id": "DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY",
