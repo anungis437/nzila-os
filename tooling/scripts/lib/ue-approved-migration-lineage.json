@@ -853,6 +853,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-g0-wave1-c",
         "note": "DEF-0B8 external upload: nullable matter_type and matter_id on document_intakes (both or neither, immutable once opened) so the external grievance upload accepts only an intake the representative opened for that grievance; rollback refuses while a bound intake exists"
+      },
+      {
+        "tag": "0081_location_data_organization",
+        "sha256": "3109c661f269cc610a00b50ce6ef2e3c5fce844c6b3f014e41724a3c5f508f20",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-g0-wave1-d1",
+        "note": "Nullable organization_id on location_tracking, geofence_events and location_deletion_log, so the retention sweep and a member's erasure log one entry per organization of the rows removed (DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION). No backfill; rollback refuses while a value exists."
       }
     ]
   }

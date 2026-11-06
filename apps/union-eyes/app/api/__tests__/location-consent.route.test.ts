@@ -43,6 +43,8 @@ vi.mock('@/lib/api/standardized-responses', () => ({
   standardSuccessResponse: m.standardSuccessResponse,
 }));
 
+const DIGEST = 'a'.repeat(64);
+
 async function loadRoute() {
   return import('../location/consent/route');
 }
@@ -53,7 +55,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     m.withApiAuth.mockImplementation((handler: any) => handler);
     m.getCurrentUser.mockResolvedValue({ id: 'caller-own-id' });
     m.getOrganizationIdForUser.mockResolvedValue('org-1');
-    m.getLocationConsentNotice.mockReturnValue({ version: 'v1', purpose: 'foreground_location_tracking', purposeDescription: 'Server description', consentText: 'Approved exact notice' });
+    m.getLocationConsentNotice.mockReturnValue({ version: 'v1', purpose: 'foreground_location_tracking', purposeDescription: 'Server description', consentText: 'Approved exact notice', digest: DIGEST });
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.requestLocationConsent.mockResolvedValue({ id: 'consent_1' });
     m.hasValidConsent.mockResolvedValue(true);
@@ -67,12 +69,14 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
   // DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED
   it('POST refuses client-authored text, absent acknowledgment, forged version and invalid permissions', async () => {
     const { POST } = await loadRoute();
-    const base = { noticeVersion: 'v1', acknowledged: true, allowedDuringStrike: true };
+    const base = { noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringStrike: true };
     for (const extra of [
       { allowedDuringStrike: 'false' },
       { allowedDuringEvents: 1 },
       { acknowledged: false },
       { noticeVersion: 'forged' },
+      { noticeDigest: 'b'.repeat(64) },
+      { noticeDigest: undefined },
       { consentText: 'attacker-provided wording' },
       { purpose: 'other purpose' },
       { userId: 'victim' },
@@ -91,14 +95,14 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
       method: 'POST',
-      body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true, allowedDuringStrike: true }),
+      body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringStrike: true }),
     }));
     expect(response.status).toBe(200);
     expect(m.requestLocationConsent).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: 'caller-own-id', purpose: 'foreground_location_tracking',
         purposeDescription: 'Server description', consentText: 'Approved exact notice',
-        noticeVersion: 'v1', allowedDuringStrike: true,
+        noticeVersion: 'v1', noticeDigest: DIGEST, allowedDuringStrike: true,
       }),
       m.tx,
     );
@@ -107,7 +111,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
       expect.objectContaining({
         organizationId: 'org-1', userId: 'caller-own-id',
         action: 'location.consent.grant', resourceId: 'consent_1',
-        details: expect.objectContaining({ noticeVersion: 'v1' }),
+        details: expect.objectContaining({ noticeVersion: 'v1', noticeDigest: DIGEST }),
       }),
     );
   });
@@ -116,7 +120,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     const { POST } = await loadRoute();
     m.getLocationConsentNotice.mockReturnValueOnce(null);
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
-      method: 'POST', body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true, allowedDuringStrike: true }),
+      method: 'POST', body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringStrike: true }),
     }));
     expect(response.status).toBe(503);
     expect(m.requestLocationConsent).not.toHaveBeenCalled();
@@ -125,7 +129,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
   it('POST rejects acknowledgment with no selected tracking purpose', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
-      method: 'POST', body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true }),
+      method: 'POST', body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true }),
     }));
     expect(response.status).toBe(400);
     expect(m.requestLocationConsent).not.toHaveBeenCalled();
@@ -137,7 +141,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
       method: 'POST',
-      body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true, allowedDuringEvents: true }),
+      body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringEvents: true }),
     }));
 
     expect(response.status).toBe(500);
@@ -150,7 +154,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
       method: 'POST',
-      body: JSON.stringify({ noticeVersion: 'v1', acknowledged: true, allowedDuringEvents: true }),
+      body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringEvents: true }),
     }));
 
     expect(response.status).toBe(409);
@@ -183,7 +187,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     expect(payload.consentGrantAvailable).toBe(true);
     expect(payload.notice).toEqual({
       version: 'v1', purpose: 'foreground_location_tracking',
-      purposeDescription: 'Server description', consentText: 'Approved exact notice',
+      purposeDescription: 'Server description', consentText: 'Approved exact notice', digest: DIGEST,
     });
     expect(m.requestLocationConsent).not.toHaveBeenCalled();
   });

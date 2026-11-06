@@ -35,7 +35,7 @@ Complete backend API implementation for the Health & Safety module with 8+ produ
 **Auth:** Minimum role level 30 (health_safety_rep)  
 **Rate Limit:** 20 incidents per hour per user  
 **Features:**
-- Auto-generates unique incident number (INC-YYYY-NNNNN)
+- Issues the incident number from the organization's own sequence (INC-YYYY-NNNN); a body that names one is refused
 - Validates all required fields with Zod schema
 - Supports injured person details, witnesses, investigation tracking
 - Documents and photos support
@@ -121,7 +121,7 @@ Complete backend API implementation for the Health & Safety module with 8+ produ
 **Auth:** Minimum role level 30  
 **Rate Limit:** 30 inspections per hour  
 **Features:**
-- Auto-generates inspection number (INS-YYYY-NNNNN)
+- Issues the inspection number from the organization's own sequence (INS-YYYY-NNNN); a body that names one is refused
 - Supports checklist items with pass/fail/requires_attention status
 - Inspection team tracking
 - Regulatory compliance tracking
@@ -212,7 +212,7 @@ Complete backend API implementation for the Health & Safety module with 8+ produ
 **Auth:** Minimum role level 30  
 **Rate Limit:** 15 reports per hour  
 **Features:**
-- Auto-generates report number (HAZ-YYYY-NNNNN)
+- Issues the report number from the organization's own sequence (HAZ-YYYY-NNNN); a body that names one is refused
 - Supports anonymous reporting
 - Risk score calculation (likelihood × severity)
 - Triggers notifications for critical/extreme hazards
@@ -302,7 +302,7 @@ Complete backend API implementation for the Health & Safety module with 8+ produ
 **Auth:** Minimum role level 30  
 **Rate Limit:** 50 distributions per hour  
 **Features:**
-- Auto-generates item number (PPE-YYYY-NNNNN)
+- Issues the item number from the organization's own sequence (PPE-NNNN); a body that names one is refused
 - Tracks issuance to workers
 - Expiry date tracking
 - Certification and compliance tracking (CSA, ANSI)
@@ -377,7 +377,7 @@ Complete backend API implementation for the Health & Safety module with 8+ produ
         "recentCritical": [
           {
             "id": "...",
-            "incidentNumber": "INC-2026-00042",
+            "incidentNumber": "INC-2026-0042",
             "incidentType": "fall",
             "severity": "critical",
             "incidentDate": "2026-02-09T14:30:00Z",

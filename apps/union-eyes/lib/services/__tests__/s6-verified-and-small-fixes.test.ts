@@ -60,8 +60,11 @@ describe('S6 verified and small fixes', () => {
 
   it('records the real span of what a retention run deleted, not the run time', () => {
     const service = read('services/geofence-privacy-service.ts')
-    expect(service).toContain('oldestRecordDate: oldest ?? now')
-    expect(service).toContain('newestRecordDate: newest ?? now')
+    // The span is now kept per organization (DeletionLedger, DEF-0B6-...-HAS-NO-ORGANIZATION): still the deleted rows' own dates,
+    // and a date that was not recorded stays null instead of becoming the run time. Behaviour: db/__tests__/location-retention-owner.pglite.test.ts.
+    expect(service).toContain('oldestRecordDate: bucket.oldest')
+    expect(service).toContain('newestRecordDate: bucket.newest')
+    expect(service).not.toMatch(/RecordDate: (oldest|newest) \?\? now/)
     expect(service).toContain('at: locationTracking.recordedAt')
     expect(service).toContain('at: geofenceEvents.eventTime')
   })
