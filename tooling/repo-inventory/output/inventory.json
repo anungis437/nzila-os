@@ -3,9 +3,9 @@
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
-  "workflowCount": 68,
+  "workflowCount": 69,
   "contractTestCount": 306,
-  "tsTestFileCount": 3633,
+  "tsTestFileCount": 3634,
   "pythonTestFileCount": 52,
   "apps": [
     {
@@ -689,7 +689,7 @@
         "workload-intelligence"
       ],
       "purpose": "Full-stack union case management platform — grievance lifecycle, collective bargaining, evidence-sealed audit trails, and leadership analytics. Built for Canadian labour unions operating under federal and provincial employment law.",
-      "codeFileCount": 6326
+      "codeFileCount": 6327
     },
     {
       "name": "union-eyes-demo",
@@ -910,6 +910,7 @@
     "security-bulk-audit-contract.yml",
     "security-design-review.yml",
     "trivy.yml",
+    "ue-bootstrap-v2-provenance.yml",
     "ue-build-push-proof.yml",
     "ue-full-regression.yml",
     "ue-http-runtime.yml",
