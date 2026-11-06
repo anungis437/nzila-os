@@ -214,6 +214,28 @@ describe('compliance/validate route', () => {
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
+  it('prevents caching caller-supplied compliance figures and empty-check notices', async () => {
+    const { POST } = await loadRoute();
+    for (const data of [{ totalMembers: 100, votesCase: 25 }, {}]) {
+      const response = await POST(new Request('http://localhost/api/compliance/validate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ data }),
+      }));
+      expect(response.status).toBe(200);
+      expect(response.headers.get('cache-control')).toContain('no-store');
+      expect(response.headers.get('cache-control')).toContain('private');
+      const body = await response.json();
+      if (Object.keys(data).length === 0) {
+        expect(body.evaluated).toBe(0);
+        expect(body.notice).toContain('not a finding of compliance');
+      } else {
+        expect(body.evaluated).toBe(1);
+        expect(body.checks[0].status).toBe('info');
+      }
+    }
+  });
+
   it('returns 401 when user context missing', async () => {
     m.getCurrentUser.mockResolvedValueOnce({ id: 'u1', organizationId: null });
     const { POST } = await loadRoute();
