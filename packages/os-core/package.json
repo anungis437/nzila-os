@@ -66,7 +66,7 @@
   },
   "optionalDependencies": {
     "@nzila/platform-auth": "workspace:*",
-    "@azure/identity": "^4.5.0",
+    "@azure/identity": "^4.14.0",
     "@azure/keyvault-secrets": "^4.9.0",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.75.0",
