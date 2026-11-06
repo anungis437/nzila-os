@@ -9418,7 +9418,7 @@
    "guard": "SESSION_AUTH",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
