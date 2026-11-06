@@ -48,11 +48,13 @@ type AdminSection =
   | "ai-testing";
 
 interface PlatformStats {
-  totalMembers: number;
+  /** null: not measured here. A count of every organization's roster is tenant content, not a platform entitlement (#1118). */
+  totalMembers: number | null;
   activeOrganizations: number;
   totalOrganizations: number;
   totalStorage: number;
-  activeToday: number;
+  /** null: not measured here, as totalMembers. */
+  activeToday: number | null;
 }
 
 interface ActivityItem {
@@ -179,7 +181,9 @@ function readStats(body: unknown): PlatformStats {
   const totalOrganizations = count(data.totalOrganizations);
   const totalStorage = count(data.totalStorage);
   const activeToday = count(data.activeToday);
-  if (totalMembers === null || activeOrganizations === null || totalOrganizations === null || totalStorage === null || activeToday === null) {
+  // Member figures may be null (not measured here); the organization and storage figures must be present.
+  if ((data.totalMembers !== null && totalMembers === null) || (data.activeToday !== null && activeToday === null) ||
+      activeOrganizations === null || totalOrganizations === null || totalStorage === null) {
     throw new ApiShapeError("incomplete statistics");
   }
   return { totalMembers, activeOrganizations, totalOrganizations, totalStorage, activeToday };
@@ -634,13 +638,13 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">{t('admin.overview.totalMembers')}</p>
-                      <p className="text-3xl font-bold text-gray-900">{stats.data ? stats.data.totalMembers.toLocaleString(numberLocale) : copy.loading}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.data ? (stats.data.totalMembers === null ? copy.notRecorded : stats.data.totalMembers.toLocaleString(numberLocale)) : copy.loading}</p>
                     </div>
                     <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
                       <Users className="w-7 h-7 text-blue-600" />
                     </div>
                   </div>
-                  {stats.data && <p className="text-xs text-gray-600 font-medium">{copy.membersChanged(stats.data.activeToday)}</p>}
+                  {stats.data && stats.data.activeToday !== null && <p className="text-xs text-gray-600 font-medium">{copy.membersChanged(stats.data.activeToday)}</p>}
                 </Card>
 
                 <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">

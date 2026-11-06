@@ -14,19 +14,18 @@ import { isSystemAdmin } from '@/lib/api-auth-guard'
 import { withSpan } from '@nzila/os-core/telemetry'
 import { db } from '@/db/db'
 import { governanceEvents } from '@/db/schema'
-import { policyEvaluations } from '@/db/schema/policy-engine-schema'
 import { sql } from 'drizzle-orm'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 
 const SERVICE = 'union-eyes'
 
 // In-process governance counters (augment DB-backed metrics)
-let policyDeniedCount = 0
 let workflowTransitionErrorCount = 0
 let evidenceExportCount = 0
 let authAnomalyCount = 0
 
-export function recordPolicyDenied() { policyDeniedCount++ }
+/** Retained for callers; policy denials are not reported by this endpoint (see GET). */
+export function recordPolicyDenied() { /* not measured here */ }
 export function recordWorkflowTransitionError() { workflowTransitionErrorCount++ }
 export function recordEvidenceExport() { evidenceExportCount++ }
 export function recordAuthAnomaly() { authAnomalyCount++ }
@@ -39,36 +38,33 @@ export async function GET(request: Request) {
       const auth = await authenticateUser()
       if (!auth.ok) return auth.response
 
-      let dbAuditEventVolume = 0
-      let dbPolicyDenied = policyDeniedCount
+      // null when not measured for this caller (not a platform administrator) or when the database is unavailable: never a fabricated zero.
+      let dbAuditEventVolume: number | null = null
 
-      // Cross-organization aggregates require genuine platform-staff
-      // authority, not merely being signed in — round 44 defect fix.
+      // governance_events is the platform's own corporate-governance log (golden share, reserved-matter votes, mission audits): it has no
+      // organization column and holds no union's content, so a platform administrator may see its row count — round 44 defect fix.
+      //
+      // Policy denials are NOT counted from policy_evaluations here (issue #1118): those rows are organizations' evaluations of their
+      // members and actions, and a count across every organization derives tenant activity. A platform title, the system database role
+      // or a service key is no standing entitlement to that; cross-organization reporting needs its own separately approved mandate.
+      // Until a governed source exists the figure is null ("not measured here"), never a fabricated zero.
       if (await isSystemAdmin()) {
         try {
-          const [ae, pd] = await withSystemContext(async (_tx) =>
-            Promise.all([
-              db
-                .select({ count: sql<number>`count(*)` })
-                .from(governanceEvents)
-                .then((rows) => rows[0]),
-              db
-                .select({ count: sql<number>`count(*)` })
-                .from(policyEvaluations)
-                .where(sql`${policyEvaluations.actionTaken} = 'denied' OR ${policyEvaluations.passed} = false`)
-                .then((rows) => rows[0]),
-            ])
+          const ae = await withSystemContext(async (_tx) =>
+            db
+              .select({ count: sql<number>`count(*)` })
+              .from(governanceEvents)
+              .then((rows) => rows[0]),
           )
           dbAuditEventVolume = Number(ae?.count ?? 0)
-          dbPolicyDenied = Number(pd?.count ?? 0) + policyDeniedCount
         } catch {
-          // Fall back to in-process counters when DB unavailable.
+          // Database unavailable: the volume stays null (not measured).
         }
       }
 
       return NextResponse.json({
         service: SERVICE,
-        policy_denied_count: dbPolicyDenied,
+        policy_denied_count: null,
         workflow_transition_error_count: workflowTransitionErrorCount,
         audit_event_volume: dbAuditEventVolume,
         evidence_export_count: evidenceExportCount,

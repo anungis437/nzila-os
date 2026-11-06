@@ -206,6 +206,16 @@ describe('AdminPage: overview', () => {
     expect(await screen.findByText('The platform statistics could not be loaded')).toBeInTheDocument();
     expect(screen.getByText('Unexpected API response: incomplete statistics')).toBeInTheDocument();
   });
+
+  it('shows member figures the route does not measure (null, #1118) as not recorded, not as zero or a failure', async () => {
+    server.stats = () => standardSuccessResponse({ ...stats, totalMembers: null, activeToday: null });
+    renderPage();
+
+    expect(await screen.findByText('4')).toBeInTheDocument();
+    expect(screen.queryByText('The platform statistics could not be loaded')).not.toBeInTheDocument();
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
+    expect(screen.queryByText(/memberships? added or updated in the last 24 hours/)).not.toBeInTheDocument();
+  });
 });
 
 describe('AdminPage: users', () => {
