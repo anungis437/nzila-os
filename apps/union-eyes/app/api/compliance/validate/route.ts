@@ -25,7 +25,10 @@ export const COMPLIANCE_JURISDICTIONS = ['CA-FED', 'CA-AB', 'CA-BC', 'CA-MB', 'C
 const dateText = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be an ISO calendar date')
   .refine((value) => {
     const [year, month, day] = value.split('-').map(Number);
-    const parsed = new Date(Date.UTC(year, month - 1, day));
+    // Date.UTC remaps years 00–99 to 1900–1999; setUTCFullYear preserves the supplied year.
+    const parsed = new Date(0);
+    parsed.setUTCHours(0, 0, 0, 0);
+    parsed.setUTCFullYear(year, month - 1, day);
     return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
   }, 'must be a real calendar date');
 // Counts are integers from an untrusted caller, never legal or membership attestations.
