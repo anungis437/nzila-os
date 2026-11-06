@@ -90,8 +90,8 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
     )
   const newOrgMember = (who: { id: string; organizationId: string; role: string }) =>
     admin.query(
-      `INSERT INTO organization_members (id, user_id, organization_id, name, email, role, status) VALUES ($1,$1,$2,$3,$4,$5,'active')`,
-      [who.id, who.organizationId, `Actor ${tag}`, `actor-${who.id}@${tag}.test`, who.role],
+      `INSERT INTO organization_members (id, user_id, organization_id, name, email, role, status) VALUES ($1,$2,$3,$4,$5,$6,'active')`,
+      [who.id, who.id, who.organizationId, `Actor ${tag}`, `actor-${who.id}@${tag}.test`, who.role],
     )
   const newGrievance = async (organizationId: string, createdBy: string) => {
     const id = randomUUID()
