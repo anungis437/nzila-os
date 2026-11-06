@@ -148,6 +148,34 @@ describe('compliance/validate route', () => {
     expect(body.checks.every((check: { message: string }) => check.message.includes('0.0%'))).toBe(true);
   });
 
+  it.each(['2026-02-30', '2025-02-29', '2026-13-01', '2026-00-10', '2026-01-00', '2026-1-1', 'tomorrow', '2026-01-01T12:00:00Z'])(
+    'rejects impossible or noncanonical arbitration calendar date %s',
+    async (arbitrationDate) => {
+      const { POST } = await loadRoute();
+      const response = await POST(new Request('http://localhost/api/compliance/validate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ data: { grievanceDate: '2026-01-01', arbitrationDate } }),
+      }));
+      expect(response.status).toBe(400);
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    },
+  );
+
+  it('accepts a real leap-day date without inventing a legal deadline', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/compliance/validate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ data: { grievanceDate: '2024-02-29', arbitrationDate: '2024-03-01' } }),
+    }));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.checks).toHaveLength(1);
+    expect(body.checks[0]).toMatchObject({ ruleCategory: 'arbitration_deadline', status: 'info' });
+    expect(body.checks[0].message).toContain('No validated arbitration deadline');
+  });
+
   it('returns 400 for invalid JSON body', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/compliance/validate', {
