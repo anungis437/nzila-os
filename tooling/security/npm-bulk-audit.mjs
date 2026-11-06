@@ -114,6 +114,20 @@ export function parseLockfilePackages(lockfilePath) {
     if (!match) {
       throw new Error('Malformed resolved snapshot key in pnpm-lock.yaml')
     }
+    // A malformed peer suffix can otherwise be accepted as an installed
+    // snapshot even though pnpm could not have resolved that peer graph.
+    // Nested peer groups are legitimate, but parentheses must be balanced.
+    const peerSuffix = snapshotKey.slice(match[1].length + 1 + match[2].length)
+    let peerDepth = 0
+    for (const char of peerSuffix) {
+      if (char === '(') peerDepth++
+      if (char === ')' && --peerDepth < 0) {
+        throw new Error('Malformed peer dependency suffix in pnpm-lock.yaml')
+      }
+    }
+    if (peerDepth !== 0) {
+      throw new Error('Malformed peer dependency suffix in pnpm-lock.yaml')
+    }
     const [, name, version] = match
     // YAML duplicate mapping keys can silently replace an earlier resolution.
     // Reject them rather than certifying an incomplete or ambiguous inventory;
