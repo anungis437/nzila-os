@@ -164,11 +164,13 @@ export function systemMutationContracts(plan: V2Plan): SystemMutationContract[] 
       icra_assessments: 'report_tier_id',
       icra_maturity_profiles: 'maturity_band_id',
     }
-    // Relations without updated_at: the column and value the source caller's own system UPDATE sets.
+    // Relations without updated_at: a column and value the source caller's own system UPDATE sets. The component
+    // proof sets one column, so it is one no check constraint ties to another (rbac_audit_log_review_consistent
+    // pairs reviewed_at with reviewed_by; markAuditEntryReviewed sets both, and review_notes with them).
     const callerUpdates: Record<string, [column: string, value: string]> = {
       contact_submissions: ['crm_status', 'recorded'],
       document_intakes: ['status', 'expired'],
-      rbac_audit_log: ['reviewed_at', '2026-10-13T12:00:00.000Z'],
+      rbac_audit_log: ['review_notes', 'synthetic-system-update'],
     }
     const updateColumn =
       updateColumns[rule.table] ??
