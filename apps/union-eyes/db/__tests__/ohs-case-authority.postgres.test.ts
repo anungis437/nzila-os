@@ -181,7 +181,7 @@ describe.skipIf(!URL)('OHS/CNESST case authority on the combined schema, as the 
       // Restore A.steward's own Shop Floor coverage (this test revoked the one created in beforeAll): later tests in
       // this file still rely on A.steward covering memberCovered, and a test proving revocation must not leak a
       // permanently uncovered steward into the rest of the suite.
-      await admin.query(`UPDATE steward_assignments SET status = 'active' WHERE organization_id = $1 AND department = 'Shop Floor' AND steward_id IN (SELECT id FROM stewards WHERE user_id = $2)`, [ORG_A, A.steward.id])
+      await admin.query(`UPDATE steward_assignments SET status = 'active' WHERE organization_id = $1 AND department = 'Shop Floor' AND steward_id::text IN (SELECT id::text FROM stewards WHERE user_id = $2)`, [ORG_A, A.steward.id])
     })
 
     it('refuses cross-tenant access outright: another organization\'s steward and officer both get not-found', async () => {

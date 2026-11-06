@@ -1239,7 +1239,7 @@
       "newlyImplemented": 0,
       "outstandingAfter": 177,
       "partial": 0,
-      "evidenceCommit": null
+      "evidenceCommit": "bc4cca2c7"
     },
     {
       "id": "B130-F03-OHS-CNESST-CASE-AUTHORITY",
@@ -9614,7 +9614,7 @@
         {
           "batch": "B129-PRECEDENT-LIBRARY-NATIVE-PROOF-AND-ORDERING-DEFECTS",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "bc4cca2c7",
           "files": [
             "apps/union-eyes/db/__tests__/precedent-library.postgres.test.ts",
             "apps/union-eyes/lib/services/precedent-service.ts"

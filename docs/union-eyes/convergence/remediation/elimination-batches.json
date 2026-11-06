@@ -10040,7 +10040,7 @@
     {
       "id": "B129-PRECEDENT-LIBRARY-NATIVE-PROOF-AND-ORDERING-DEFECTS",
       "family": "Django and Drizzle convergence: the precedent library proven on the converged arbitration_decisions under the real roles",
-      "evidenceCommit": null,
+      "evidenceCommit": "bc4cca2c7",
       "items": [],
       "touches": [
         {
@@ -10083,7 +10083,30 @@
           "explanation": "B130: the right-of-refusal and preventive-withdrawal collection and item routes gained the same case-authority mechanism (lib/services/ohs-case-access.ts), reached transitively through cnesst_filing_id when the row is linked to a filing that names its own designated representative, since neither table has a representative column of its own. cnesst_filing_id was added to both tables' create fields so the link can be set at all. Proven on the combined schema in db/__tests__/ohs-case-authority.postgres.test.ts: covering-steward access, same-tenant denial with no coverage and no linked designation, and access reached through a linked filing's representative with no covering assignment."
         }
       ],
-      "touches": []
+      "touches": [
+        {
+          "defectId": "DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/ohs-case-access.ts",
+            "apps/union-eyes/app/api/cnesst/filings/route.ts",
+            "apps/union-eyes/app/api/cnesst/filings/[id]/route.ts",
+            "apps/union-eyes/db/__tests__/ohs-case-authority.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/ohs-case-access.ts",
+            "apps/union-eyes/app/api/cnesst/right-of-refusal/route.ts",
+            "apps/union-eyes/app/api/cnesst/right-of-refusal/[id]/route.ts",
+            "apps/union-eyes/app/api/cnesst/preventive-withdrawals/route.ts",
+            "apps/union-eyes/app/api/cnesst/preventive-withdrawals/[id]/route.ts",
+            "apps/union-eyes/db/__tests__/ohs-case-authority.postgres.test.ts"
+          ]
+        }
+      ]
     }
   ],
   "uncreditedSourceEvidence": {
