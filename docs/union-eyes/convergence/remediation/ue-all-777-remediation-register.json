@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 652,
-    "engineeringRemaining": 125,
+    "engineeringCorrected": 654,
+    "engineeringRemaining": 123,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 72
   },
@@ -3449,9 +3449,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B130-F03-OHS-CNESST-CASE-AUTHORITY",
+        "path": "apps/union-eyes/lib/services/ohs-case-access.ts; apps/union-eyes/app/api/cnesst/filings/route.ts; apps/union-eyes/app/api/cnesst/filings/[id]/route.ts; apps/union-eyes/db/__tests__/ohs-case-authority.postgres.test.ts",
+        "explanation": "B130: the CNESST filing collection and item routes gained evaluateOhsCaseAccess (lib/services/ohs-case-access.ts) as rowReadAuthority / lockedAuthCheck / beforeCreate. A steward now reaches a filing only with an officer-or-above role, as the record's own union_rep_id, or through an active steward_assignments row whose unit, worksite or department covers the member's current member_employment row; anyone else is answered exactly like a filing that does not exist on read, and 403 on create or update. Proven on the combined schema as the real union_eyes_runtime role in db/__tests__/ohs-case-authority.postgres.test.ts: covering-steward access, same-tenant denial on create/read/write with the row left unchanged, officer organization-wide access, designated-representative access, coverage lost on revocation and regained on reassignment, mutual cross-tenant unreachability, and independent concurrent authorized/unauthorized reads.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
@@ -3985,9 +3992,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B130-F03-OHS-CNESST-CASE-AUTHORITY",
+        "path": "apps/union-eyes/lib/services/ohs-case-access.ts; apps/union-eyes/app/api/cnesst/right-of-refusal/route.ts; apps/union-eyes/app/api/cnesst/right-of-refusal/[id]/route.ts; apps/union-eyes/app/api/cnesst/preventive-withdrawals/route.ts; apps/union-eyes/app/api/cnesst/preventive-withdrawals/[id]/route.ts; apps/union-eyes/db/__tests__/ohs-case-authority.postgres.test.ts",
+        "explanation": "B130: the right-of-refusal and preventive-withdrawal collection and item routes gained the same case-authority mechanism (lib/services/ohs-case-access.ts), reached transitively through cnesst_filing_id when the row is linked to a filing that names its own designated representative, since neither table has a representative column of its own. cnesst_filing_id was added to both tables' create fields so the link can be set at all. Proven on the combined schema in db/__tests__/ohs-case-authority.postgres.test.ts: covering-steward access, same-tenant denial with no coverage and no linked designation, and access reached through a linked filing's representative with no covering assignment.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
+      }
     },
     {
       "defectId": "DEF-0B5-OHS-REFUSAL-EVENT-HARD-DELETE",
@@ -4694,8 +4708,8 @@
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B55-F12-WORKFLOW-INTEGRITY-APPROVAL-LOCKS-AND-ATOMIC-UNSUBSCRIBE",
-        "path": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts; apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts; apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts; apps/union-eyes/lib/services/messaging/campaign-service.ts; apps/union-eyes/lib/services/messaging/email-service.ts; apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts; apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts; docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md; docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md; docs/union-eyes/convergence/remediation/evidence/ue-unsubscribe-capability-target-20261031.md",
-        "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation; outbound campaign emails now carry a campaign/recipient-bound RFC 8058 one-click POST capability, with SendGrid header forwarding. Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
+        "path": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts; apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts; apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts; apps/union-eyes/lib/services/messaging/email-service.ts; apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts; docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md; docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md; docs/union-eyes/convergence/remediation/evidence/ue-unsubscribe-capability-target-20261031.md",
+        "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation. (An outbound campaign sender that attached a campaign/recipient-bound RFC 8058 one-click capability to campaign emails had no caller and was deleted on 2026-11-03: no campaign email is sent in this release.) Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
         "remaining": "Exact-HEAD focused/full unit and contract, native PostgreSQL 15/16, HTTP/browser and staging proof; live provider one-click interoperability; independent institutional ratification. No CLOSED credit.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
@@ -4719,8 +4733,8 @@
       "engineeringCorrection": {
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B87-PLATFORM-READS-COMMUNICATIONS-SIGNATURES",
-        "path": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts; apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts; apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts; apps/union-eyes/lib/services/messaging/campaign-service.ts; apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts; docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
-        "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed). An outbound campaign sender now issues a signed campaign-scoped unsubscribe capability, while explicit all-organization tokens remain separately signed. Missing signing keys refuse sends. Real mail-provider issuance and independent policy approval remain unproven.",
+        "path": "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts; apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts; apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts; apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts; docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
+        "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed). Nothing in the application issues a campaign-scoped unsubscribe capability today: the outbound campaign sender that did had no caller and was deleted on 2026-11-03, and sending is NOT_IMPLEMENTED (UE-ACTION-CAMPAIGN-SEND). Explicit all-organization tokens remain separately signed. Independent policy approval remains unproven.",
         "remaining": "Exact-HEAD executable, native and HTTP/browser qualification; provider delivery headers and one-click interoperability; global opt-out institutional semantics.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
