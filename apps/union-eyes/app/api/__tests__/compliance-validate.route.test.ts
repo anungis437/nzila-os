@@ -104,6 +104,36 @@ describe('compliance/validate route', () => {
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
+  it('accepts canonical decimal count strings and reports only unverified arithmetic', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/compliance/validate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        data: { totalMembers: '100', votesCase: '25', bargainingUnit: '200', signedCards: '50' },
+      }),
+    }));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.checks).toHaveLength(2);
+    expect(body.checks.map((check: { status: string }) => check.status)).toEqual(['info', 'info']);
+    expect(body.checks[0].message).toContain('25.0%');
+    expect(body.checks[1].message).toContain('25.0%');
+  });
+
+  it.each(['01', '+1', '1.0', '1e2', ' 1', '1 ', '1x', '-1'])(
+    'rejects noncanonical numeric string %s',
+    async (votesCase) => {
+      const { POST } = await loadRoute();
+      const response = await POST(new Request('http://localhost/api/compliance/validate', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ data: { totalMembers: '100', votesCase } }),
+      }));
+      expect(response.status).toBe(400);
+    },
+  );
+
   it('accepts zero numerator with positive population without asserting compliance', async () => {
     const { POST } = await loadRoute();
     const response = await POST(new Request('http://localhost/api/compliance/validate', {
