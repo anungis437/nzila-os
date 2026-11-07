@@ -7,6 +7,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { rightOfRefusalEvents } from '@/db/schema';
+import { linkedOhsRecordLockedAuthCheck, linkedOhsRecordRowReadable } from '@/lib/services/ohs-case-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,9 @@ const { GET, PATCH, DELETE } = crudRoutes({
   retainOnDelete: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // A steward reads or changes a refusal only when case authority reaches its member, directly or through its linked filing (DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY); otherwise it answers 404.
+  rowReadAuthority: linkedOhsRecordRowReadable,
+  lockedAuthCheck: linkedOhsRecordLockedAuthCheck,
   // Notification facts and the narrative a steward completes, including the outcome notes once the matter is resolved. The member,
   // refusal date, the outcome enum itself and corrective actions are not changed through the generic PATCH.
   writableFields: [

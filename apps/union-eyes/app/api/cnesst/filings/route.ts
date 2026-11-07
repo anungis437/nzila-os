@@ -6,6 +6,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { cneesstFilings } from '@/db/schema';
+import { assertOhsCaseAccessForCreate, filingRowReadable } from '@/lib/services/ohs-case-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +22,13 @@ const { GET, POST } = crudRoutes({
   staffMayNameOwner: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // A steward reads a filing only when case authority reaches its member (officer, coverage or the filing's designated representative); otherwise it is left out of the list (DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY).
+  rowReadAuthority: filingRowReadable,
+  // Opening a filing for a member a steward holds no case authority over is refused before any row is inserted.
+  beforeCreate: async (values, { organizationId, userId }) => {
+    await assertOhsCaseAccessForCreate({ organizationId, actorUserId: userId, memberId: values.memberId });
+    return values;
+  },
   // What a steward states when opening a filing for a member: filedDate is the submission fact the steward is recording, not an
   // external body's decision. CNESST/TAT numbers, acknowledged/decision dates, outcome, compensation, the union representative and
   // links to other records are not a create field.

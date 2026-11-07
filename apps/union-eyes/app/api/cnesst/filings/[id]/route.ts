@@ -7,6 +7,7 @@
  */
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { cneesstFilings } from '@/db/schema';
+import { filingLockedAuthCheck, filingRowReadable } from '@/lib/services/ohs-case-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,9 @@ const { GET, PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // A steward reads or changes a filing only when case authority reaches its member (DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY); otherwise it answers 404.
+  rowReadAuthority: filingRowReadable,
+  lockedAuthCheck: filingLockedAuthCheck,
   // The narrative and reference numbers a steward corrects. The member, type, status, lifecycle dates, outcome and compensation
   // are not changed through the generic PATCH.
   writableFields: [
