@@ -194,7 +194,10 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
 }
 
 export async function fetchAdvisories(pkgMap) {
-  const requestBody = {}
+  // Null-prototype map prevents package names such as __proto__ from being
+  // silently dropped by the Object.prototype setter during JSON serialization.
+  // An omitted installed package would make a clean audit untrustworthy.
+  const requestBody = Object.create(null)
   for (const [name, versions] of pkgMap) requestBody[name] = [...versions]
 
   const response = await fetch(BULK_ENDPOINT, {
