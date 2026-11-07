@@ -145,7 +145,10 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
     state.caseAccess.set(`${stewardOrgB.id}|${caseOrgB}`, { canViewCase: true, isPrimaryOwner: true, canEditCaseNotes: true })
   }, 60_000)
 
-  afterAll(() => harness.stop())
+  afterAll(async () => {
+    await admin?.end()
+    await harness.stop()
+  })
 
   it('the collection lists only arbitrations whose case the caller may read, counting only those', async () => {
     const result = await call(collection().GET, steward)
