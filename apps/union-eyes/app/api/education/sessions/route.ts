@@ -19,6 +19,8 @@ function isoDate(value: unknown, field: string, optional = false): string | null
   }
   // Date parsing must not normalize invalid dates or silently reinterpret years 0000–0099.
   const [year, month, day] = value.split('-').map(Number);
+  // PostgreSQL has no year zero; refuse it before reaching the database.
+  if (year === 0) throw ApiError.badRequest(`${field} is not a valid calendar date`);
   const parsed = new Date(0);
   parsed.setUTCHours(0, 0, 0, 0);
   parsed.setUTCFullYear(year, month - 1, day);
