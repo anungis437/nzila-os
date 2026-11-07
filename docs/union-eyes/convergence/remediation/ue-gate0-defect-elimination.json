@@ -1356,7 +1356,7 @@
       "newlyImplemented": 1,
       "outstandingAfter": 124,
       "partial": 0,
-      "evidenceCommit": null
+      "evidenceCommit": "1ee68b585"
     }
   ],
   "entries": {
@@ -19177,7 +19177,7 @@
         {
           "batch": "B142-F12-ORG-CAMPAIGN-CLIENT-ROUTES-VERIFIED",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "1ee68b585",
           "files": [
             "apps/union-eyes/components/organizing/organizing-console.tsx",
             "apps/union-eyes/components/organizing/campaign-detail-console.tsx",

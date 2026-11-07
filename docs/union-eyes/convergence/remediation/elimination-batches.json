@@ -11231,7 +11231,7 @@
     {
       "id": "B142-F12-ORG-CAMPAIGN-CLIENT-ROUTES-VERIFIED",
       "family": "Verification credit: organizing campaign clients already call the real v1 endpoint, and the only item-path caller is deleted dead code",
-      "evidenceCommit": null,
+      "evidenceCommit": "1ee68b585",
       "items": [
         {
           "prefix": "DEF-0B10-ORG-CLIENTS-CALL-CAMPAIGN-ITEM-AND-V2-ROUTES-THAT-ANSWER-NO-CAMPAIGN-DATA",
