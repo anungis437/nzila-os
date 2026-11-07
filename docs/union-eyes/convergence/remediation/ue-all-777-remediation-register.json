@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 653,
-    "engineeringRemaining": 124,
+    "engineeringCorrected": 654,
+    "engineeringRemaining": 123,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 71
+    "engineeringPartial": 70
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -7358,11 +7358,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
-        "path": "apps/union-eyes/app/api/exit-interviews/[id]/governance/route.ts; apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts",
-        "explanation": "Reads of the interview and of its knowledge-base copy apply the interview's current consent and sensitivity, so a withdrawal or reclassification takes effect on the next read (existing read-gate tests).",
-        "remaining": "The knowledge-base row, its content and its embedding are not erased or deactivated when consent is withdrawn; they are only filtered at read time.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B132-F06-DERIVED-ANALYTICS-CONSENT-PROOF",
+        "path": "apps/union-eyes/lib/knowledge-transfer/governance/interview-access.ts; apps/union-eyes/lib/knowledge-transfer/governance/__tests__/derived-analytics-condition.pglite.test.ts",
+        "explanation": "B132: reading the current routes shows the consent gap B32 recorded as remaining was already closed in source -- hybrid-search.ts's keywordSearch and semanticSearch both require consentGranted = true (proven on real SQL in db/__tests__/semantic-search.postgres.test.ts and lib/knowledge-transfer/search/__tests__/hybrid-search.test.ts), and the governance route already deactivates the interview's knowledge-base copy in the same transaction a withdrawal commits in. What had no proof at all was derivedAnalyticsCondition, the shared consent-and-level predicate all seven derived-analytics engines (topic graph, propagation, resilience, forecast, simulation, continuity risk, succession) import unchanged from interview-access.ts: every one of those seven engines' own unit tests mocks the condition away rather than exercising it, unlike interviewListCondition which already has a real-SQL proof. lib/knowledge-transfer/governance/__tests__/derived-analytics-condition.pglite.test.ts proves derivedAnalyticsCondition directly against the real Drizzle table on PGlite: it admits only published, consented interviews at a derived-analytics level of the caller's own organization, excluding a withdrawn-consent interview that would otherwise qualify, a privileged-or-above interview, a draft and another organization's row. Since all seven engines share the one unchanged function, proving it once covers all seven by construction. Erasing a withdrawn-consent interview's knowledge-base content and embedding (rather than the deactivation and consent-gated filtering already in place) remains the governance route's own documented, deliberate deferral to a future retention/legal-hold decision -- an institutional decision, not an engineering gap this batch closes or should.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
