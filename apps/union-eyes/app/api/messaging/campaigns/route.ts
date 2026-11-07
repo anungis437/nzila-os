@@ -12,6 +12,9 @@ const { GET, POST } = crudRoutes({
   tags: ['Communications'],
   orgScoped: true,
   readRole: 'member',
+  // Deprecated alias of /api/communications/campaigns over the same table: the same author fields; status, send times, delivery
+  // statistics and the audience count are never the author's.
+  writableFields: ['name', 'description', 'type', 'channel', 'templateId', 'segmentId', 'segmentQuery', 'subject', 'body', 'variables', 'timezone', 'settings', 'metadata', 'tags'],
   writeRole: 'steward',
 });
 export { GET, POST };

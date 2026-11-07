@@ -17,6 +17,13 @@ const { GET, PATCH, DELETE } = crudRoutes({
   readCondition: ne(hazardReports.status, 'archived'),
   writeRole: 'admin',
   // A status or outcome is the result of the workflow that investigates, verifies or closes the record, so a generic PATCH may not set it.
-  blockedPatchFields: ['status', 'closedDate', 'verifiedById', 'verifiedByName', 'verifiedDate', 'riskAssessmentCompleted', 'likelihoodScore', 'severityScore', 'riskScore'],
+  // The report number is server-issued at creation and never changed afterwards.
+  blockedPatchFields: ['reportNumber', 'status', 'closedDate', 'verifiedById', 'verifiedByName', 'verifiedDate', 'riskAssessmentCompleted', 'likelihoodScore', 'severityScore', 'riskScore'],
+  // The report's descriptive fields an administrator may correct. Reporter identity and anonymity, assignment, risk scores,
+  // resolution, verification, cost and closure are set by the reporting and investigation workflow, not the generic PATCH.
+  writableFields: [
+    'hazardCategory', 'hazardLevel', 'specificLocation', 'hazardDescription', 'potentialConsequences', 'suggestedCorrections',
+    'workplaceName', 'department', 'whoIsAtRisk', 'existingControls', 'photoUrls', 'notes',
+  ],
 });
 export { GET, PATCH, DELETE };

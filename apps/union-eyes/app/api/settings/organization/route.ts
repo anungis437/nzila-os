@@ -105,6 +105,13 @@ export const PUT = withApi(
         ].filter(Boolean).join('; ');
         throw ApiError.badRequest(`Settings were not saved (${detail})`);
       }
+      // DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE: no sign-in, session, password,
+      // rate-limit or notification code reads these keys, so saving one would answer updated:true for a control that does not exist.
+      // They are refused, before anything is read or written; a value stored earlier is still reported as notEnforced on every read.
+      const refusedUnenforced = notEnforcedKeysIn(checked.settings);
+      if (refusedUnenforced.length > 0) {
+        throw ApiError.badRequest(`Settings were not saved (not enforced by the platform, so not accepted as a control: ${refusedUnenforced.join(', ')})`);
+      }
       checkedSettings = checked.settings;
     }
 
@@ -153,10 +160,7 @@ export const PUT = withApi(
       });
     });
 
-    // Saved is not in force: a setting that no code reads is reported as such, not as applied.
-    const notEnforced = checkedSettings === null ? [] : notEnforcedKeysIn(checkedSettings);
-    return notEnforced.length > 0
-      ? { updated: true, notEnforced, message: 'Saved. These settings are stored but not yet enforced by the platform: ' + notEnforced.join(', ') }
-      : { updated: true };
+    // Only settings the platform reads were accepted, so nothing saved here is a stored-but-unenforced control.
+    return { updated: true };
   },
 );

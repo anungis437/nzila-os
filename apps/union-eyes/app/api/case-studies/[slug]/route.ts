@@ -16,5 +16,7 @@ const { GET, PATCH, DELETE } = crudRoutes({
   // Drafts and organization-linked editorial content must not be enumerable by any union member.
   readRole: 'content_manager',
   writeRole: 'content_manager',
+  // As on create, less the slug, which is this route's key. publishedAt and organizationId are server-owned.
+  writableFields: ['title', 'organizationType', 'category', 'summary', 'challenge', 'solution', 'outcome', 'metrics', 'testimonial', 'visibility', 'featured'],
 });
 export { GET, PATCH, DELETE };

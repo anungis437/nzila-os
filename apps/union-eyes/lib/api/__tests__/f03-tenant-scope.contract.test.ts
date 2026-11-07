@@ -45,7 +45,7 @@ describe('F03 tenant scope of shared and child records', () => {
   // DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ. Replaces the earlier pin that the read was audited before it ran (two-phase). The behaviour is
   // proven in app/api/__tests__/admin-users.route.test.ts, admin-stats-activity.route.test.ts and db/__tests__/platform-directory.postgres.test.ts;
   // this pin only keeps the routes from drifting back to a bare database handle or a role-title check.
-  it.each(['app/api/admin/users/route.ts', 'app/api/admin/stats/activity/route.ts'])(
+  it.each(['app/api/admin/users/route.ts'])(
     '%s asks for platform-staff authority, then reads and records in one system transaction',
     (route) => {
       const source = read(route)
@@ -56,6 +56,15 @@ describe('F03 tenant scope of shared and child records', () => {
       expect(source).not.toContain("from '@/db/db'")
     },
   )
+
+  // Issue #1118: the cross-organization member activity feed is refused outright and reads nothing.
+  it('app/api/admin/stats/activity/route.ts refuses every caller without reading a member row', () => {
+    const source = read('app/api/admin/stats/activity/route.ts')
+    expect(source).toContain('ApiError.forbidden(')
+    expect(source).not.toContain('recentMemberActivity')
+    expect(source).not.toContain('withSystemContext')
+    expect(source).not.toContain("from '@/db/db'")
+  })
 
   // DEF-0B6-EMP-REPLAY-NO-FINANCIAL-MANDATE
   it('a payroll replay needs a live financial view mandate before it reads any item', () => {

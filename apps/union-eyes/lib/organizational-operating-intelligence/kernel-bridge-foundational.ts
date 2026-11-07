@@ -46,6 +46,30 @@ interface FoundationalEngineSpec<TPayload> {
   interpretationGuidance: string;
 }
 
+/**
+ * The cognition-memory entries an engine's result itself cites: every `memoryEntryId` string found in the payload. These are the
+ * stored records the result names, so they are the only evidence the envelope can honestly carry; a result that cites none carries
+ * an empty evidence list (and the narrative layer then says the result is guidance, not a finding).
+ */
+export function collectCitedMemoryEntryIds(payload: unknown): string[] {
+  const ids = new Set<string>();
+  const seen = new Set<unknown>();
+  const visit = (value: unknown): void => {
+    if (value === null || typeof value !== 'object' || seen.has(value)) return;
+    seen.add(value);
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item);
+      return;
+    }
+    for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+      if (key === 'memoryEntryId' && typeof child === 'string' && child.length > 0) ids.add(child);
+      else visit(child);
+    }
+  };
+  visit(payload);
+  return [...ids];
+}
+
 function defineFoundationalEngine<TPayload>(spec: FoundationalEngineSpec<TPayload>) {
   return defineCognitionEngine<TPayload>({
     engineId: spec.engineId,
@@ -53,12 +77,21 @@ function defineFoundationalEngine<TPayload>(spec: FoundationalEngineSpec<TPayloa
     domain: spec.domain,
     compute: async (organizationId: string) => {
       const payload = await spec.invoke(organizationId);
-      // No constant: confidence is the amount of evidence the engine reports having read, capped at 100, and 0 when it reports none.
-      const reported = payload as { interviewsAnalyzed?: number; entriesAnalyzed?: number; interviewCount?: number } | null;
-      const evidence = Number(reported?.interviewsAnalyzed ?? reported?.entriesAnalyzed ?? reported?.interviewCount ?? 0);
+      // Evidence is the stored records the result cites, never a description of how many entries were read.
+      const evidence = collectCitedMemoryEntryIds(payload).map((id) => ({
+        id: `${spec.engineId}:${id}`,
+        sourceDomain: spec.domain,
+        description: `Cognition memory entry cited by the ${spec.engineId} result.`,
+        reference: { kind: 'cognition_memory' as const, id },
+      }));
+      // No engine computes a validated confidence: a count of entries read is not one, and a constant is not one. The score is
+      // therefore 0, which the kernel resolves to the 'insufficient_data' band ("confidence not assessed"), whatever the data.
+      // The engines emit no reasoning chain, assumptions or governance implications, so those lists stay empty rather than being
+      // filled with text that the computation did not produce.
       return {
         payload,
-        confidenceScore: Number.isFinite(evidence) ? Math.max(0, Math.min(100, Math.round(evidence))) : 0,
+        confidenceScore: 0,
+        evidence,
         interpretationGuidance: spec.interpretationGuidance,
       };
     },

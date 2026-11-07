@@ -20,5 +20,12 @@ const { GET, PATCH, DELETE } = crudRoutes({
   // The roster names the worker and employer members of the committee.
   readRole: 'steward',
   writeRole: 'officer',
+  // The committee's composition and schedule. Program approvals, the meeting counter, the active flag, documents and the
+  // uuid links (workplace, worker co-chair) are not set through the generic route.
+  writableFields: [
+    'workplaceName', 'committeeName', 'establishedDate', 'mandateExpiryDate', 'workerRepresentatives', 'employerRepresentatives',
+    'workerCoChairName', 'employerCoChairName', 'meetingFrequency', 'lastMeetingDate', 'nextMeetingDate', 'workplaceWorkerCount',
+    'isMandatory', 'notes',
+  ],
 });
 export { GET, PATCH, DELETE };

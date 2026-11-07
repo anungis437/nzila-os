@@ -13,5 +13,7 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'officer',
+  // The program's content. CLC approval is an accreditation fact and is not set through this generic route.
+  writableFields: ['programName', 'programDescription', 'programDuration', 'requiredCourses', 'electiveCourses', 'minimumRequiredCourses', 'minimumElectiveCourses', 'providesCertification', 'certificationName', 'isActive', 'notes'],
 });
 export { GET, POST };

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
+import { UNIT_WRITABLE_FIELDS } from '@/lib/union-structure/unit-writable-fields';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -306,10 +307,12 @@ describe('toUnitPayload', () => {
   const collectionRoute = readFileSync('app/api/units/route.ts', 'utf8');
   const itemRoute = readFileSync('app/api/units/[id]/route.ts', 'utf8');
 
-  it('sends only fields the collection route accepts on create', () => {
-    const writable = listOf(collectionRoute, 'writableFields');
-    expect(writable.length).toBeGreaterThan(0);
-    for (const key of Object.keys(toUnitPayload(values))) expect(writable).toContain(key);
+  it('sends only fields the collection and item routes accept', () => {
+    // Both routes take their allow-list from UNIT_WRITABLE_FIELDS (lib/union-structure/unit-writable-fields.ts).
+    expect(collectionRoute).toContain('writableFields: UNIT_WRITABLE_FIELDS');
+    expect(itemRoute).toContain('writableFields: UNIT_WRITABLE_FIELDS');
+    expect(UNIT_WRITABLE_FIELDS.length).toBeGreaterThan(0);
+    for (const key of Object.keys(toUnitPayload(values))) expect(UNIT_WRITABLE_FIELDS).toContain(key);
   });
 
   it('sends nothing the item route refuses on update', () => {

@@ -1,34 +1,19 @@
 /**
  * GET /api/admin/stats/activity
- * Returns recent activity across organizations (latest member additions) for platform administrators.
  *
- * Authorized by platform-staff authority, not a role title; runs under the system role with its audit record in the same transaction; gives an
- * abbreviated name and no e-mail address (lib/platform/user-directory.ts).
+ * Refused for every caller. The feed listed the latest member additions across every organization (a name, a role and the organization),
+ * which is tenant content: platform-staff authority and a platform title are no standing entitlement to it (issues #1116, #1118), and
+ * cross-organization grants are not built, so it is denied. No table is read.
  */
-import { withApi } from '@/lib/api/framework';
-import { performAtomicPlatformRead } from '@/lib/audit/audited-platform-read';
-import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
-import { recentMemberActivity } from '@/lib/platform/user-directory';
+import { withApi, ApiError } from '@/lib/api/framework';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
-  async (ctx) => {
-    const actor = await requirePlatformStaffAuthority(ctx, 'platform.member_activity.read');
-    const url = new URL(ctx.request.url);
-    const requested = Number(url.searchParams.get('limit') ?? '10');
-    const limit = Number.isFinite(requested) ? Math.min(Math.max(Math.trunc(requested), 1), 50) : 10;
-
-    return performAtomicPlatformRead(
-      actor,
-      {
-        action: 'platform.member_activity.read',
-        resourceType: 'organization_members',
-        details: { limit },
-        resultDetails: (rows: unknown[]) => ({ returned: rows.length }),
-      },
-      (tx) => recentMemberActivity(tx, limit),
+  async () => {
+    throw ApiError.forbidden(
+      'Recent member activity across organizations is not available: it is tenant content, and no cross-organization grant exists.',
     );
   },
 );

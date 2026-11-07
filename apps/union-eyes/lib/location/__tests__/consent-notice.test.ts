@@ -3,6 +3,7 @@ import {
   getLocationConsentNotice,
   LOCATION_CONSENT_DESCRIPTION,
   LOCATION_CONSENT_PURPOSE,
+  locationConsentNoticeDigest,
 } from '../consent-notice';
 
 const previousVersion = process.env.UE_LOCATION_CONSENT_NOTICE_VERSION;
@@ -43,6 +44,21 @@ describe('institution-owned location consent notice', () => {
       purpose: LOCATION_CONSENT_PURPOSE,
       purposeDescription: LOCATION_CONSENT_DESCRIPTION,
       consentText: 'Exact adopted notice',
+      digest: expect.stringMatching(/^[a-f0-9]{64}$/),
     });
+  });
+
+  // DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED
+  it('binds the digest to the exact wording: changed text under an unchanged version is a different notice', () => {
+    process.env.UE_LOCATION_CONSENT_NOTICE_VERSION = 'v1';
+    process.env.UE_LOCATION_CONSENT_NOTICE_TEXT = 'Exact adopted notice';
+    const first = getLocationConsentNotice()!;
+    expect(first.digest).toBe(locationConsentNoticeDigest(first));
+    expect(getLocationConsentNotice()!.digest).toBe(first.digest);
+    process.env.UE_LOCATION_CONSENT_NOTICE_TEXT = 'Exact adopted notice, amended';
+    expect(getLocationConsentNotice()!.digest).not.toBe(first.digest);
+    process.env.UE_LOCATION_CONSENT_NOTICE_TEXT = 'Exact adopted notice';
+    process.env.UE_LOCATION_CONSENT_NOTICE_VERSION = 'v2';
+    expect(getLocationConsentNotice()!.digest).not.toBe(first.digest);
   });
 });

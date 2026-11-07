@@ -5,6 +5,8 @@
  * version and its exact member-facing text before consent may be granted.
  * This contract is intentionally fail-closed when that decision is outstanding.
  */
+import { createHash } from 'node:crypto';
+
 export const LOCATION_CONSENT_PURPOSE = 'foreground_location_tracking';
 export const LOCATION_CONSENT_DESCRIPTION =
   'Foreground-only location tracking for strike or event coordination when separately selected. Location records are retained for no more than 24 hours, and consent can be revoked.';
@@ -14,6 +16,18 @@ export interface LocationConsentNotice {
   purpose: string;
   purposeDescription: string;
   consentText: string;
+  /**
+   * SHA-256 of the exact notice (version, purpose, description and text). GET serves it with the notice and a grant must
+   * present it, so the acknowledgement names the very text that was served: wording changed under an unchanged version no
+   * longer matches, and the consent stored is the text the member was shown, not merely a version label.
+   */
+  digest: string;
+}
+
+export function locationConsentNoticeDigest(notice: Omit<LocationConsentNotice, 'digest'>): string {
+  return createHash('sha256')
+    .update(JSON.stringify([notice.version, notice.purpose, notice.purposeDescription, notice.consentText]))
+    .digest('hex');
 }
 
 export function getLocationConsentNotice(): LocationConsentNotice | null {
@@ -24,10 +38,11 @@ export function getLocationConsentNotice(): LocationConsentNotice | null {
   if (!version || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,9}$/.test(version)) return null;
   if (!consentText || consentText.length > 4000) return null;
 
-  return {
+  const notice = {
     version,
     purpose: LOCATION_CONSENT_PURPOSE,
     purposeDescription: LOCATION_CONSENT_DESCRIPTION,
     consentText,
   };
+  return { ...notice, digest: locationConsentNoticeDigest(notice) };
 }

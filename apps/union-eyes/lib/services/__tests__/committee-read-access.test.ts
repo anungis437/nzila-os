@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const h = vi.hoisted(() => ({ rows: [] as unknown[][], scope: vi.fn(), below: vi.fn() }))
+const h = vi.hoisted(() => ({ rows: [] as unknown[][], scope: vi.fn(), below: vi.fn(), direct: new Map<string, string>() }))
 
 vi.mock('@/db', () => {
   const chain: Record<string, unknown> = {}
@@ -14,7 +14,13 @@ vi.mock('@/lib/api/errors', () => ({ ApiError: { notFound: (what: string) => Obj
 vi.mock('@/lib/api/crud-low-role-guard', () => ({ isBelowStaff: h.below }))
 vi.mock('@/lib/services/committee-workspace-service', () => ({ requireCommitteeScope: h.scope }))
 
-import { requireCommitteeReader } from '../committee-read-access'
+vi.mock('@/lib/organizations/read-authority', () => ({
+  resolveOrganizationAccess: async () => ({ direct: h.direct, affiliated: new Set() }),
+  directRoleIn: (access: { direct: Map<string, string> }, organizationId: string) => access.direct.get(organizationId),
+  isAdministrativeRole: (role: string | undefined) => role === 'admin' || role === 'super_admin',
+}))
+
+import { canReadCommitteeMinutes, requireCommitteeReader, withholdMinutes } from '../committee-read-access'
 
 // DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP
 describe('requireCommitteeReader', () => {
@@ -55,5 +61,51 @@ describe('requireCommitteeReader', () => {
     h.scope.mockRejectedValueOnce(Object.assign(new Error('Committee'), { code: 'NOT_FOUND' }))
     await expect(requireCommitteeReader('o2', 'c1', 'u1')).rejects.toMatchObject({ code: 'NOT_FOUND' })
     expect(h.below).not.toHaveBeenCalled()
+  })
+})
+
+// DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP: the minutes read is checked against the committee, not only against a steward role.
+describe('canReadCommitteeMinutes', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    h.rows = []
+    h.direct = new Map()
+  })
+
+  it('lets an active member of the committee read the minutes', async () => {
+    h.rows = [[{ id: 'mem1' }]]
+    await expect(canReadCommitteeMinutes('o1', 'c1', 'member')).resolves.toBe(true)
+  })
+
+  it('withholds the minutes from a steward of the organization who is not on the committee', async () => {
+    h.rows = [[]]
+    h.direct = new Map([['o1', 'steward']])
+    await expect(canReadCommitteeMinutes('o1', 'c1', 'steward')).resolves.toBe(false)
+  })
+
+  it('withholds the minutes from an officer who is not on the committee', async () => {
+    h.rows = [[]]
+    h.direct = new Map([['o1', 'officer']])
+    await expect(canReadCommitteeMinutes('o1', 'c1', 'officer')).resolves.toBe(false)
+  })
+
+  it('lets an administrator of the organization itself read the minutes', async () => {
+    h.rows = [[]]
+    h.direct = new Map([['o1', 'admin']])
+    await expect(canReadCommitteeMinutes('o1', 'c1', 'admin')).resolves.toBe(true)
+  })
+
+  it('does not let an administrator of another organization read the minutes', async () => {
+    h.rows = [[]]
+    h.direct = new Map([['o2', 'admin'], ['o1', 'member']])
+    await expect(canReadCommitteeMinutes('o1', 'c1', 'admin-elsewhere')).resolves.toBe(false)
+  })
+
+  it('refuses a caller with no identity', async () => {
+    await expect(canReadCommitteeMinutes('o1', 'c1', null)).resolves.toBe(false)
+  })
+
+  it('withholds the minutes text and says so', () => {
+    expect(withholdMinutes({ id: 'm1', minutes: 'secret deliberation' })).toEqual({ id: 'm1', minutes: null, minutesWithheld: true })
   })
 })

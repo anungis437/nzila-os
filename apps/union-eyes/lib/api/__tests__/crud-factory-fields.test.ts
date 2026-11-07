@@ -136,6 +136,56 @@ describe('crud-factory writableFields, omitFromResponse and ownerMayDelete', () 
     crudRoutes({ table: devices, tags: ['t'], orgScoped: true, writeRole: 'member', itemRoute: true, ownerMayDelete: true });
     expect(captured.floors.get('Delete')).toBe('admin');
   });
+
+  // DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT: a route that names no allow-list writes nothing, rather than any real column.
+  it('fails closed: with no writableFields a create or update is refused (403) and nothing is written, even a real, non-reserved column', async () => {
+    let crudRoutes = await factory();
+    crudRoutes({ table: devices, tags: ['t'], orgScoped: true, writeRole: 'member', ownerColumn: 'profileId' });
+    await expect(captured.handlers.get('Create')!(ctx({ body: { platform: 'ios', enabled: 'yes' } }))).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    crudRoutes = await factory();
+    crudRoutes({ table: devices, tags: ['t'], orgScoped: true, writeRole: 'member', ownerColumn: 'profileId', itemRoute: true });
+    await expect(captured.handlers.get('Update')!(ctx({ body: { enabled: 'no' } }))).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    await expect(captured.handlers.get('Update')!(ctx({ body: {} }))).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(captured.inserts).toEqual([]);
+    expect(captured.sets).toEqual([]);
+    // An explicit empty list is honoured the same way: nothing is client-writable.
+    crudRoutes = await factory();
+    crudRoutes({ ...base, writeRole: 'member', writableFields: [] });
+    await expect(captured.handlers.get('Create')!(ctx({ body: { platform: 'ios' } }))).rejects.toMatchObject({ message: expect.stringContaining('platform') });
+    expect(captured.inserts).toEqual([]);
+  });
+
+  // DEF-0B3-ARBITRATION-RECORD-NO-CASE-AUTHORITY: the per-row read hook the arbitration routes use for the case authority's verdict.
+  it('rowReadAuthority: the list keeps only admitted rows and counts only them; the item answers 404 for a refused row', async () => {
+    const decide = vi.fn(async (row: Record<string, unknown>) => row.id !== 'hidden');
+    let crudRoutes = await factory();
+    crudRoutes({ ...base, writeRole: 'member', rowReadAuthority: decide });
+    captured.rows = [{ id: 'a', platform: 'ios' }, { id: 'hidden', platform: 'ios' }, { id: 'b', platform: 'android' }];
+    const listed = await captured.handlers.get('List')!(ctx({ request: new Request('http://localhost/api/x?limit=1&page=2') })) as { data: Array<Record<string, unknown>>; pagination: { total: number } };
+    expect(listed.data.map((r) => r.id)).toEqual(['b']);
+    expect(listed.pagination.total).toBe(2);
+    expect(decide).toHaveBeenCalledWith(expect.objectContaining({ id: 'hidden' }), { userId: 'user-1', organizationId: '11111111-1111-4111-8111-111111111111' });
+
+    crudRoutes = await factory();
+    crudRoutes({ ...base, writeRole: 'member', itemRoute: true, rowReadAuthority: decide });
+    captured.rows = [{ id: 'hidden', platform: 'ios' }];
+    await expect(captured.handlers.get('Get')!(ctx())).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    captured.rows = [{ id: 'a', platform: 'ios' }];
+    await expect(captured.handlers.get('Get')!(ctx())).resolves.toMatchObject({ data: { id: 'a' } });
+  });
+
+  it('rowReadAuthority: a hook that throws fails the request instead of disclosing, and an over-large scope is refused', async () => {
+    let crudRoutes = await factory();
+    crudRoutes({ ...base, writeRole: 'member', rowReadAuthority: async () => { throw new Error('kernel unavailable'); } });
+    captured.rows = [{ id: 'a', platform: 'ios' }];
+    await expect(captured.handlers.get('List')!(ctx())).rejects.toThrow('kernel unavailable');
+
+    const { ROW_AUTHORITY_SCAN_LIMIT } = await import('../crud-factory');
+    crudRoutes = await factory();
+    crudRoutes({ ...base, writeRole: 'member', rowReadAuthority: async () => true });
+    captured.rows = Array.from({ length: ROW_AUTHORITY_SCAN_LIMIT + 1 }, (_, i) => ({ id: String(i) }));
+    await expect(captured.handlers.get('List')!(ctx())).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+  });
 });
 
 const render = (clause: unknown) => new PgDialect().sqlToQuery(clause as SQL);

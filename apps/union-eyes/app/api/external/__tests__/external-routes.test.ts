@@ -19,11 +19,17 @@ const mocks = vi.hoisted(() => {
     requireUser: vi.fn(),
     withRLSContext: vi.fn(),
     withExplicitUserContext: vi.fn(),
+    withPrincipalOnlyContext: vi.fn(),
+    holdsExternalAuthority: vi.fn(),
     authorizeExternalMatterAccess: vi.fn(),
     authorizeExternalDocumentAccess: vi.fn(),
     generateSasUrl: vi.fn(),
     resolveStoredBlob: vi.fn(),
     audit: vi.fn(),
+    checkIntake: vi.fn(),
+    bindIntake: vi.fn(),
+    openIntake: vi.fn(),
+    IntakeConflictError: class IntakeConflictError extends Error {},
   };
 });
 
@@ -33,13 +39,25 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mocks.audit }))
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: mocks.withRLSContext,
   withExplicitUserContext: mocks.withExplicitUserContext,
+  withPrincipalOnlyContext: mocks.withPrincipalOnlyContext,
 }));
+vi.mock('@/lib/auth/canonical-bootstrap', () => ({ currentStateContextEnabled: () => false }));
 vi.mock('@/lib/services/external-resource-authorization-service', () => ({
   authorizeExternalMatterAccess: mocks.authorizeExternalMatterAccess,
   authorizeExternalDocumentAccess: mocks.authorizeExternalDocumentAccess,
+  holdsExternalAuthority: mocks.holdsExternalAuthority,
 }));
 vi.mock('@/lib/blob-client', () => ({ generateSasUrl: mocks.generateSasUrl, readBlobBounded: vi.fn(), BlobTooLargeError: class extends Error {} }));
 vi.mock('@/lib/services/document-blob-integrity-service', () => ({ resolveStoredBlob: mocks.resolveStoredBlob }));
+vi.mock('@/lib/documents/intake-lifecycle', () => ({
+  checkIntakeForAcceptance: mocks.checkIntake,
+  openIntake: mocks.openIntake,
+  bindIntakeInTx: mocks.bindIntake,
+  IntakeConflictError: mocks.IntakeConflictError,
+}));
+vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: async () => ({ allowed: true }), RATE_LIMITS: { DOCUMENT_UPLOAD: {} }, createRateLimitHeaders: () => ({}) }));
+vi.mock('@/lib/security/clamav', () => ({ isMalwareScanError: () => false }));
+vi.mock('@/lib/documents/intake-storage', () => ({ blobIntakeStorage: { name: 'intake-storage' } }));
 
 describe('external resource routes', () => {
   beforeEach(() => {
@@ -48,6 +66,8 @@ describe('external resource routes', () => {
     mocks.audit.mockReset().mockResolvedValue(undefined);
     mocks.withRLSContext.mockImplementation(async (_context: unknown, operation: (tx: unknown) => Promise<unknown>) => operation(mocks.db));
     mocks.withExplicitUserContext.mockImplementation(async (_userId: string, operation: () => Promise<unknown>) => operation());
+    mocks.withPrincipalOnlyContext.mockImplementation(async (operation: (tx: unknown) => Promise<unknown>) => operation('principal-tx'));
+    mocks.holdsExternalAuthority.mockResolvedValue(true);
     mocks.requireUser.mockResolvedValue({ userId: '11111111-1111-1111-1111-111111111111', organizationId: '22222222-2222-2222-2222-222222222222' });
     mocks.authorizeExternalMatterAccess.mockResolvedValue({
       allowed: true,
@@ -68,6 +88,45 @@ describe('external resource routes', () => {
       fileUrl: 'https://storage.example/doc.pdf?sig=1',
       contentHash: '0'.repeat(64),
     });
+  });
+
+  // DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT
+  it('refuses a caller who holds no authority in the named organization without opening its tenant transaction or writing its audit', async () => {
+    const { GET } = await import('@/app/api/external/grievances/[id]/route');
+    mocks.holdsExternalAuthority.mockResolvedValueOnce(false);
+
+    const response = await GET(
+      new Request('https://example.test/api/external/grievances/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa?organizationId=99999999-9999-9999-9999-999999999999'),
+      { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' },
+    );
+
+    expect(response.status).toBe(403);
+    expect(mocks.withPrincipalOnlyContext).toHaveBeenCalledTimes(1);
+    expect(mocks.holdsExternalAuthority).toHaveBeenCalledWith('principal-tx', {
+      actorUserId: '11111111-1111-1111-1111-111111111111',
+      organizationId: '99999999-9999-9999-9999-999999999999',
+      matterType: 'grievance',
+      matterId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    });
+    expect(mocks.withRLSContext).not.toHaveBeenCalled();
+    expect(mocks.authorizeExternalMatterAccess).not.toHaveBeenCalled();
+    expect(mocks.audit).not.toHaveBeenCalled();
+  });
+
+  it('asks the authority question before the organization transaction is opened', async () => {
+    const { GET } = await import('@/app/api/external/grievances/[id]/route');
+    const order: string[] = [];
+    mocks.holdsExternalAuthority.mockImplementationOnce(async () => (order.push('precheck'), true));
+    mocks.withRLSContext.mockImplementation(async (_c: unknown, op: (tx: unknown) => Promise<unknown>) => (order.push('tenant'), op(mocks.db)));
+    mocks.selectQueue.push([]);
+
+    await GET(
+      new Request('https://example.test/api/external/grievances/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa?organizationId=99999999-9999-9999-9999-999999999999'),
+      { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' },
+    );
+
+    expect(order[0]).toBe('precheck');
+    expect(order).toContain('tenant');
   });
 
   it('returns an external-safe grievance detail projection for an exact grant', async () => {
@@ -295,36 +354,47 @@ describe('external resource routes', () => {
     );
   }
 
+  const INTAKE = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
+  const intakeKey = `documents/${uploadOrg}/intake/${INTAKE}/0011223344556677`;
   const uploadBody = {
+    intakeId: INTAKE,
     title: 'Specialist upload',
-    filename: 'specialist-upload.pdf',
-    blobPath: 'documents/99999999-9999-9999-9999-999999999999/external-upload.pdf',
     documentType: 'evidence',
-    mimeType: 'application/pdf',
-    fileSize: 1234,
+  };
+  const openIntake = (over: Record<string, unknown> = {}) => mocks.checkIntake.mockResolvedValue({
+    ok: true,
+    replay: false,
+    intake: {
+      id: INTAKE, storageKey: intakeKey, contentHash: 'a'.repeat(64), mimeType: 'application/pdf', sizeBytes: 1234,
+      originalFilename: 'specialist-upload.pdf', principalUserId: uploadActor, matterType: 'grievance', matterId: uploadMatter, ...over,
+    },
+  });
+  const captureInserts = () => {
+    const valuesByTable: unknown[] = [];
+    mocks.db.insert.mockImplementation(vi.fn(() => ({
+      values: vi.fn((values: unknown) => {
+        valuesByTable.push(values);
+        const result: any = Promise.resolve(undefined);
+        result.returning = vi.fn(async () => [{ id: valuesByTable.length === 2 ? 'version-1' : 'dddddddd-dddd-dddd-dddd-dddddddddddd', title: 'Specialist upload', name: 'Specialist upload' }]);
+        return result;
+      }),
+    })));
+    return valuesByTable;
   };
 
-  it('populates the live document org id compatibility column for external uploads', async () => {
-    const insertedDocument = {
-      id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
-      title: 'Specialist upload',
-      name: 'Specialist upload',
-    };
-    const valuesByTable: unknown[] = [];
-    const tx = {
-      insert: vi.fn(() => ({
-        values: vi.fn((values: unknown) => {
-          valuesByTable.push(values);
-          return { returning: vi.fn(async () => [insertedDocument]) };
-        }),
-      })),
-    };
-    mocks.db.insert.mockImplementation(tx.insert);
+  it('creates the document from the intake the representative opened for this grievance, with the server\'s record of the file', async () => {
+    const valuesByTable = captureInserts();
     seedMatterGrant();
+    openIntake();
+    mocks.bindIntake.mockResolvedValue(undefined);
 
     const response = await postUpload(uploadBody);
 
     expect(response.status).toBe(201);
+    expect(mocks.checkIntake).toHaveBeenCalledWith(
+      { organizationId: uploadOrg, userId: uploadActor, intakeId: INTAKE, operation: 'create_document', matter: { type: 'grievance', id: uploadMatter } },
+      { name: 'intake-storage' },
+    );
     // The write runs in the organization's own transaction, opened after the authorization decision's transaction closed.
     expect(mocks.withRLSContext).toHaveBeenCalledWith({ organizationId: uploadOrg }, expect.any(Function));
     expect(mocks.withExplicitUserContext).not.toHaveBeenCalled();
@@ -333,12 +403,17 @@ describe('external resource routes', () => {
       orgId: uploadOrg,
       category: 'other',
       blobContainer: 'union-eyes',
-      blobPath: 'documents/99999999-9999-9999-9999-999999999999/external-upload.pdf',
+      blobPath: intakeKey,
       contentType: 'application/pdf',
       sizeBytes: 1234,
-      sha256: '0'.repeat(64),
+      sha256: 'a'.repeat(64),
+      filename: 'specialist-upload.pdf',
       uploadedBy: uploadActor,
       privacyLabel: 'case_restricted',
+    });
+    expect(valuesByTable[1]).toMatchObject({ storageKey: intakeKey, contentHash: 'a'.repeat(64), versionNo: 1 });
+    expect(mocks.bindIntake).toHaveBeenCalledWith(mocks.db, {
+      organizationId: uploadOrg, userId: uploadActor, intakeId: INTAKE, documentId: 'dddddddd-dddd-dddd-dddd-dddddddddddd', versionId: 'version-1',
     });
     expect(valuesByTable[3]).toMatchObject({
       grantedBy: 'union-issuer',
@@ -351,24 +426,49 @@ describe('external resource routes', () => {
   });
 
   // DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE
-  it('refuses a stored object another document already holds, and inserts nothing', async () => {
+  it('no longer accepts a storage path or URL: an object the representative did not upload through an intake cannot be named', async () => {
+    const response = await postUpload({ ...uploadBody, blobPath: `documents/${uploadOrg}/someone-elses-file.pdf` });
+    expect(response.status).toBe(400);
+    const withoutIntake = await postUpload({ title: 'x', documentType: 'evidence', fileUrl: 'https://storage.example/doc.pdf' });
+    expect(withoutIntake.status).toBe(400);
+    expect(mocks.checkIntake).not.toHaveBeenCalled();
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+  });
+
+  it('answers another principal\'s intake (or one that does not exist) as not found, and inserts nothing', async () => {
     seedMatterGrant();
-    mocks.selectQueue.push([{ id: 'existing-document' }]);
-
+    mocks.checkIntake.mockResolvedValue({ ok: false, kind: 'not_found' });
     const response = await postUpload(uploadBody);
+    expect(response.status).toBe(404);
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+  });
 
+  it('refuses an intake opened for a different matter, an expired one or one whose object changed, and inserts nothing', async () => {
+    seedMatterGrant();
+    for (const kind of ['operation_mismatch', 'expired', 'object_changed', 'not_open']) {
+      mocks.checkIntake.mockResolvedValueOnce({ ok: false, kind });
+      const response = await postUpload(uploadBody);
+      expect(response.status, kind).toBe(409);
+    }
+    expect(mocks.db.insert).not.toHaveBeenCalled();
+  });
+
+  it('refuses an intake that was already used', async () => {
+    seedMatterGrant();
+    mocks.checkIntake.mockResolvedValue({ ok: true, replay: true, intake: { id: INTAKE } });
+    const response = await postUpload(uploadBody);
     expect(response.status).toBe(409);
     expect(mocks.db.insert).not.toHaveBeenCalled();
   });
 
-  it('refuses a stored object that is already a version of another document', async () => {
+  it('answers 409 when the intake is taken in the meantime (the document write is undone with it)', async () => {
+    captureInserts();
     seedMatterGrant();
-    mocks.selectQueue.push([], [{ id: 'existing-version' }]);
-
+    openIntake();
+    mocks.bindIntake.mockRejectedValue(new mocks.IntakeConflictError('taken'));
     const response = await postUpload(uploadBody);
-
     expect(response.status).toBe(409);
-    expect(mocks.db.insert).not.toHaveBeenCalled();
+    expect(mocks.audit).not.toHaveBeenCalledWith(mocks.db, expect.objectContaining({ action: 'document.external_upload' }));
   });
 
   it('rejects a privilege label before any external upload insert', async () => {
@@ -380,6 +480,7 @@ describe('external resource routes', () => {
 
   it('refuses an external upload when the representative issued the matter grant', async () => {
     seedMatterGrant({ grantedBy: uploadActor });
+    openIntake();
     const response = await postUpload(uploadBody);
     expect(response.status).toBe(403);
     const body = await response.json();
@@ -491,5 +592,55 @@ describe('external resource middleware: a read and its record are one transactio
 
     expect(response.status).toBe(400);
     expect(mocks.withRLSContext).not.toHaveBeenCalled();
+  });
+});
+
+// DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE
+describe('external grievance intake', () => {
+  const GRIEVANCE = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const ORGANIZATION = '99999999-9999-9999-9999-999999999999';
+  const ACTOR = '11111111-1111-1111-1111-111111111111';
+  const postFile = async (file?: File) => {
+    const { POST } = await import('@/app/api/external/grievances/[id]/documents/intakes/route');
+    const form = new FormData();
+    if (file) form.set('file', file);
+    return POST(
+      new Request(`https://example.test/api/external/grievances/${GRIEVANCE}/documents/intakes?organizationId=${ORGANIZATION}`, { method: 'POST', body: form }),
+      { params: { id: GRIEVANCE } },
+    );
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.withRLSContext.mockImplementation(async (_c: unknown, op: (tx: unknown) => Promise<unknown>) => op(mocks.db));
+    mocks.withPrincipalOnlyContext.mockImplementation(async (op: (tx: unknown) => Promise<unknown>) => op('principal-tx'));
+    mocks.holdsExternalAuthority.mockResolvedValue(true);
+    mocks.requireUser.mockResolvedValue({ userId: ACTOR, organizationId: '22222222-2222-2222-2222-222222222222' });
+    mocks.authorizeExternalMatterAccess.mockResolvedValue({ allowed: true, reason: 'allowed', authorityId: 'auth-1', matterGrantId: 'grant-1' });
+    mocks.openIntake.mockResolvedValue({ ok: true, intake: { intakeId: 'intake-1', checksum: 'a'.repeat(64) } });
+  });
+
+  it('opens an intake bound to the representative, the organization and this grievance', async () => {
+    const response = await postFile(new File([new Uint8Array([1, 2, 3])], 'a.pdf', { type: 'application/pdf' }));
+    expect(response.status).toBe(201);
+    expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(mocks.db, expect.objectContaining({ requiredPermission: 'upload_documents' }), expect.anything());
+    expect(mocks.openIntake).toHaveBeenCalledWith(
+      expect.objectContaining({ organizationId: ORGANIZATION, userId: ACTOR, operation: 'create_document', matter: { type: 'grievance', id: GRIEVANCE } }),
+      { name: 'intake-storage' },
+    );
+    expect(JSON.stringify(await response.json())).not.toContain('documents/');
+  });
+
+  it('opens nothing without upload permission on the matter', async () => {
+    mocks.authorizeExternalMatterAccess.mockResolvedValue({ allowed: false, reason: 'permission_missing', authorityId: 'auth-1', matterGrantId: 'grant-1' });
+    const response = await postFile(new File([new Uint8Array([1])], 'a.pdf', { type: 'application/pdf' }));
+    expect(response.status).toBe(403);
+    expect(mocks.openIntake).not.toHaveBeenCalled();
+  });
+
+  it('refuses a missing file and a file type that is not allowed', async () => {
+    expect((await postFile()).status).toBe(400);
+    expect((await postFile(new File([new Uint8Array([1])], 'a.exe', { type: 'application/x-msdownload' }))).status).toBe(400);
+    expect(mocks.openIntake).not.toHaveBeenCalled();
   });
 });

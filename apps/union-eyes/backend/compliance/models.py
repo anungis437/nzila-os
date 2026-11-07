@@ -783,6 +783,8 @@ class LocationTracking(BaseModel):
     aggregated_only = models.BooleanField(default=True)
     device_type = models.CharField(max_length=50, null=True, blank=True)
     app_version = models.CharField(max_length=20, null=True, blank=True)
+    # The organization the point was recorded in, resolved by the server (platform 0080). NULL only on rows written before it.
+    organization_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = 'location_tracking'
@@ -822,6 +824,8 @@ class GeofenceEvents(BaseModel):
     longitude = models.DecimalField(max_digits=11, decimal_places=8, null=True, blank=True)
     expires_at = models.DateTimeField()
     purpose = models.TextField(null=True, blank=True)
+    # The organization that owns the geofence (platform 0080). NULL only on rows written before it.
+    organization_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = 'geofence_events'
@@ -852,6 +856,8 @@ class LocationDeletionLog(BaseModel):
     initiated_by = models.CharField(max_length=255, null=True, blank=True)
     initiator_role = models.CharField(max_length=50, null=True, blank=True)
     deleted_at = models.DateTimeField(default=timezone.now)
+    # One entry per organization whose rows a deletion removed (platform 0080); NULL marks rows that carried no organization.
+    organization_id = models.UUIDField(null=True, blank=True)
 
     class Meta:
         db_table = 'location_deletion_log'

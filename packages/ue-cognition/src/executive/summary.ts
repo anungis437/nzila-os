@@ -58,8 +58,9 @@ export interface ExecutiveSummary {
     readonly idle: ReadonlyArray<{ readonly stewardId: string; readonly utilizationRatio: number }>
   }
   readonly engagement: {
-    readonly disengagedMemberCount: number
-    readonly atRiskMemberCount: number
+    /** Null when no engagement snapshot exists for the organization: nothing computed, so nothing measured. */
+    readonly disengagedMemberCount: number | null
+    readonly atRiskMemberCount: number | null
   }
   readonly recommendedInterventions: ReadonlyArray<{
     readonly priority: 'critical' | 'high' | 'medium'
@@ -85,13 +86,14 @@ function latestRiskPerCase(orgId: string): CaseRiskSnapshot[] {
   return [...byCase.values()]
 }
 
-function atRiskMemberCount(orgId: string): number {
+function atRiskMemberCount(orgId: string): number | null {
   const byMember = new Map<string, ReturnType<typeof listEngagementSnapshots>[number]>()
   for (const s of listEngagementSnapshots()) {
     if (s.subject.orgId !== orgId) continue
     const cur = byMember.get(s.memberId)
     if (!cur || s.snapshotAt > cur.snapshotAt) byMember.set(s.memberId, s)
   }
+  if (byMember.size === 0) return null
   let n = 0
   for (const s of byMember.values()) {
     if (s.tier === 'at_risk') n += 1
@@ -102,7 +104,7 @@ function atRiskMemberCount(orgId: string): number {
 function buildInterventions(
   cases: readonly CaseRiskSnapshot[],
   stewards: readonly StewardWorkloadSnapshot[],
-  disengaged: number,
+  disengaged: number | null,
 ): ExecutiveSummary['recommendedInterventions'] {
   const out: Array<{
     priority: 'critical' | 'high' | 'medium'
@@ -131,7 +133,7 @@ function buildInterventions(
       })
     }
   }
-  if (disengaged > 0) {
+  if (disengaged !== null && disengaged > 0) {
     out.push({
       priority: 'medium',
       target: 'member',

@@ -15,10 +15,12 @@ describe('Gate 0 batch B93: dashboard measures, queue key and archived employer 
     expect(route).not.toContain('openHazards > 3')
   })
 
-  it('reads the queue status key from a dedicated variable and not the shared AI key in production', () => {
+  it('reads the queue status key from a dedicated variable and never falls back to the shared AI key (#1118)', () => {
     const route = src('app/api/union-eyes/queue-status/route.ts')
-    expect(route).toContain("process.env.QUEUE_STATUS_SERVICE_KEY || (process.env.NODE_ENV === 'production' ? undefined : process.env.AI_SERVICE_KEY)")
-    expect(route).toContain('timingSafeEqual')
+    expect(route).toContain('const expected = process.env.QUEUE_STATUS_SERVICE_KEY')
+    expect(route).toContain('expected === process.env.AI_SERVICE_KEY')
+    expect(route).not.toMatch(/QUEUE_STATUS_SERVICE_KEY \|\|/)
+    expect(route).toContain('constantTimeEquals(')
   })
 
   it('refuses timesheet input for an archived employer', () => {

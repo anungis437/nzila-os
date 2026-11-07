@@ -9,7 +9,7 @@ vi.mock('@/lib/knowledge-transfer/resilience-strategies/strategy-modeler', () =>
 
 import { computeAdaptiveResilience } from '../adaptive-engine';
 
-function strategy(strategyType: string, name: string, gain = 18) {
+function strategy(strategyType: string, name: string, gain: number | null = null) {
   return { strategyType, name, projectedResilienceGain: gain };
 }
 
@@ -48,6 +48,8 @@ describe('lib/knowledge-transfer/adaptive-resilience/adaptive-engine', () => {
     expect(result.adaptationSummary.overallConfidence).toBe('high');
     expect(result.adaptationSummary.elevatedCount).toBeGreaterThanOrEqual(1);
     expect(result.adaptationNarrative).toContain('cognition entries');
+    // History changes priority only: there is no measured gain to adjust, so no adjusted gain is invented (+5/+2/-3 on literals before).
+    for (const rec of result.adaptedRecommendations) expect(rec.adjustedResilienceGain).toBeNull();
   });
 
   it('leaves recommendations unadjusted with insufficient history', async () => {

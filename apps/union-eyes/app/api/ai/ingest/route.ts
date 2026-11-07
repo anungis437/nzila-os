@@ -18,8 +18,8 @@ import { requireEntitlement } from '@/services/platform-economics/entitlement-gu
 import { enforceAISafety } from '@nzila/policies';
 import { dataIngestion } from '@/lib/ai/data-ingestion';
 import { entityExtraction, ExtractionResult } from '@/lib/ai/entity-extraction';
-import { ragPipeline } from '@/lib/ai/rag-pipeline';
-import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
+import { indexIngestedDocument, IngestTooLargeToIndexError, type DurableIndexResult } from '@/lib/ai/durable-ingest-index';
+import { operationAuditResponse } from '@/lib/audit/operation-audit';
 import {
   IngestionCapacityError,
   IngestionTooLargeError,
@@ -147,7 +147,7 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
     const userId = context.userId;
     const orgId = context.organizationId;
 
-    if (!orgId) {
+    if (!orgId || !userId) {
       return NextResponse.json(
         { error: 'Organization context required for document ingestion' },
         { status: 403 }
@@ -185,50 +185,24 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
       });
     }
 
-    // Add to RAG if requested
-    let ragResult: { status: string; durable: boolean; documentId: string; chunkCount: number | null } | null = null;
+    // Add to the retrieval index if requested. The index is durable and tenant-scoped: the organization's own knowledge_base rows (with
+    // their embeddings where pgvector is installed), recorded atomically. Nothing is kept in process memory.
+    let ragResult: DurableIndexResult | null = null;
     if (metadata.addToRAG) {
-      // The index lives in process memory and the embedding call leaves the database, so the intent is recorded first
-      // and nothing is indexed if that record cannot be written. Chunks carry the organization so another
-      // organization's queries never retrieve them.
-      await performAuditedOperation(
-        {
-          organizationId: orgId,
-          userId,
-          action: 'ai.ingest.rag_index',
-          resourceType: 'rag_documents',
-          resourceId: document.id,
-          details: { source: metadata.source, filename },
-        },
-        () =>
-          ragPipeline.addDocuments([{
-            id: document.id,
-            content: document.content,
-            metadata: {
-              organizationId: orgId,
-              source: metadata.source,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              type: extraction?.documentType as any || 'document',
-              jurisdiction: metadata.jurisdiction,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              tags: metadata.tags,
-            },
-          }]),
-      );
-
-      // The index is process memory: it is lost on restart and is not shared across instances. The answer says so and does not claim a
-      // durable index or a chunk count nothing computed.
-      ragResult = {
-        status: 'indexed_in_process_memory',
-        durable: false,
+      ragResult = await indexIngestedDocument({
+        organizationId: orgId,
+        userId,
         documentId: document.id,
-        chunkCount: null,
-      };
+        title: filename,
+        content: document.content,
+        source: metadata.source,
+        tags: metadata.tags,
+      });
 
-      logger.info('Document added to RAG', {
+      logger.info('Document added to the knowledge index', {
         documentId: document.id,
         userId,
+        status: ragResult.status,
       });
     }
 
@@ -252,6 +226,9 @@ export const POST = withRoleAuth('officer', async (request: NextRequest, context
   } catch (error) {
     const limited = limitResponse(error);
     if (limited) return limited;
+    if (error instanceof IngestTooLargeToIndexError) {
+      return NextResponse.json({ error: error.message }, { status: 413 });
+    }
     const refused = operationAuditResponse(error);
     if (refused) return NextResponse.json(refused.body, { status: refused.status });
     logger.error('AI ingestion error', { error });

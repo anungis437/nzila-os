@@ -63,6 +63,9 @@ describe('location/track route (PR #752 round 49 — self-service location-track
     );
     const callArg = m.trackLocation.mock.calls[0][0];
     expect(callArg.userId).not.toBe('attacker-supplied-victim-id');
+    // DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION: the point carries the caller's server-resolved
+    // organization, so its retention deletion is logged against that organization.
+    expect(callArg.organizationId).toBe('org-1');
   });
 
   // DEF-0B8-JUR-LOCATION-TRACK-WRITES-ARE-UNAUDITED-AND-REFUSALS-ANSWER-500

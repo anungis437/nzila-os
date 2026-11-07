@@ -19,6 +19,15 @@ const { GET, PATCH, DELETE } = crudRoutes({
   readCondition: ne(workplaceIncidents.status, 'archived'),
   writeRole: 'admin',
   // A status or outcome is the result of the workflow that investigates, verifies or closes the record, so a generic PATCH may not set it.
-  blockedPatchFields: ['status', 'closedDate', 'investigationStartDate', 'investigationCompletedDate', 'investigationReport', 'wsibClaimStatus'],
+  // The incident number is server-issued at creation and never changed afterwards.
+  blockedPatchFields: ['incidentNumber', 'status', 'closedDate', 'investigationStartDate', 'investigationCompletedDate', 'investigationReport', 'wsibClaimStatus'],
+  // The narrative an administrator may correct. Reporter identity and anonymity, investigation, authority/WSIB claim, closure,
+  // lost-time counts and the claim link are set by their workflows, not the generic PATCH.
+  writableFields: [
+    'incidentType', 'severity', 'incidentDate', 'locationDescription', 'description', 'departmentName', 'whatHappened',
+    'taskBeingPerformed', 'equipmentInvolved', 'materialsInvolved', 'witnessesPresent', 'witnessNames', 'witnessStatements',
+    'injuredPersonName', 'bodyPartAffected', 'injuryNature', 'treatmentProvided', 'rootCauseAnalysis',
+    'correctiveActionsSummary', 'immediateActionsToken',
+  ],
 });
 export { GET, PATCH, DELETE };

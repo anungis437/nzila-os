@@ -8,6 +8,7 @@ import {
 } from "@/db/schema";
 import { and, eq, gte, lt } from "drizzle-orm";
 import { cacheGet, cacheSet } from "@/lib/services/cache-service";
+import { ApiError } from "@/lib/api/errors";
 
 export type DashboardTimeframe = "weekly" | "monthly" | "quarterly";
 
@@ -31,7 +32,34 @@ const ACTIVE_MEMBER_EXCLUDE = new Set(["inactive", "archived", "deleted", "disab
 const LEADERSHIP_CACHE_TTL_SECONDS = 600;
 const EXECUTIVE_CACHE_TTL_SECONDS = 600;
 const CACHE_NAMESPACE = "dashboard-kpis";
-const CACHE_VERSION = "v3";
+const CACHE_VERSION = "v4";
+
+/**
+ * The dashboards aggregate in memory, so each read is bounded. A bound that is reached is never a silent truncation: the read asks
+ * for one row more than the bound, and an organization with more rows than the bound gets a 501 naming the table, not figures computed
+ * from the first rows of it.
+ */
+export const DASHBOARD_READ_BOUNDS = {
+  grievances: 50_000,
+  compliance_alerts: 10_000,
+  organization_members: 100_000,
+  strategic_goals: 5_000,
+} as const;
+
+/** Throws when a bounded read returned more rows than its bound (it asks for bound + 1), so no figure is computed from a partial read. */
+export function assertWithinReadBound<T>(table: keyof typeof DASHBOARD_READ_BOUNDS, rows: T[]): T[] {
+  const bound = DASHBOARD_READ_BOUNDS[table];
+  if (rows.length > bound) {
+    throw ApiError.notImplemented(
+      `Dashboard figures are not measured for this organization: it has more than ${bound} ${table} rows, and aggregating beyond that bound is not implemented. No figure is computed from a partial read.`,
+    );
+  }
+  return rows;
+}
+
+/** Nothing in Union Eyes writes compliance alerts, so an empty table is the absence of a measurement, not a clean record. */
+export const COMPLIANCE_NOT_MEASURED_REASON =
+  "Not measured: no process in Union Eyes records compliance alerts for this organization, so there is nothing to measure adherence, response time or documentation against.";
 
 type DateInput = Date | string | null | undefined;
 
@@ -103,13 +131,17 @@ export interface LeadershipDashboardPayload {
     capacityLimit: number;
   }>;
   compliance: {
+    /** 'not_measured' when the organization has no compliance alert rows (nothing writes them); every metric is then null. */
+    measurement: { status: "measured" | "not_measured"; reason: string | null };
     metrics: {
       /** Null when no alert has been resolved: there is nothing to measure. */
       deadlineAdherence: number | null;
-      avgResponseTime: number;
+      /** Days; null when no alert has been resolved. */
+      avgResponseTime: number | null;
       /** Null when no alert exists. */
       documentationRate: number | null;
-      openAlerts: number;
+      /** Null when no alert rows exist: zero open alerts would read as a measured clean record. */
+      openAlerts: number | null;
     };
     alerts: Array<{
       id: string;
@@ -165,8 +197,10 @@ export async function getLeadershipDashboardMetrics(args: {
 
   // Read inside the organization's own transaction: the module-level handle has no organization set, and row-level security then shows no rows.
   const { grievanceRows, alertRows } = await withRLSContext({ organizationId }, async (tx) => ({
-    grievanceRows: await tx.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(5000),
-    alertRows: await tx.select().from(complianceAlerts).where(eq(complianceAlerts.orgId, organizationId)).limit(1000),
+    grievanceRows: assertWithinReadBound("grievances",
+      await tx.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(DASHBOARD_READ_BOUNDS.grievances + 1)),
+    alertRows: assertWithinReadBound("compliance_alerts",
+      await tx.select().from(complianceAlerts).where(eq(complianceAlerts.orgId, organizationId)).limit(DASHBOARD_READ_BOUNDS.compliance_alerts + 1)),
   }));
 
   const payload = buildLeadershipDashboard(grievanceRows, alertRows, timeframe, now);
@@ -212,9 +246,12 @@ export async function getExecutiveMetrics(args: {
   const nextMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
 
   const { grievanceRows, memberRows, goalRows, remittanceRows } = await withRLSContext({ organizationId }, async (tx) => ({
-    grievanceRows: await tx.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(5000),
-    memberRows: await tx.select().from(organizationMembers).where(eq(organizationMembers.organizationId, organizationId)).limit(10000),
-    goalRows: await tx.select().from(strategicGoals).where(eq(strategicGoals.organizationId, organizationId)).limit(500),
+    grievanceRows: assertWithinReadBound("grievances",
+      await tx.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(DASHBOARD_READ_BOUNDS.grievances + 1)),
+    memberRows: assertWithinReadBound("organization_members",
+      await tx.select().from(organizationMembers).where(eq(organizationMembers.organizationId, organizationId)).limit(DASHBOARD_READ_BOUNDS.organization_members + 1)),
+    goalRows: assertWithinReadBound("strategic_goals",
+      await tx.select().from(strategicGoals).where(eq(strategicGoals.organizationId, organizationId)).limit(DASHBOARD_READ_BOUNDS.strategic_goals + 1)),
     remittanceRows: await tx
       .select()
       .from(employerRemittances)
@@ -346,11 +383,14 @@ export function buildLeadershipDashboard(
     categories,
     stewards,
     compliance: {
+      measurement: alertRows.length > 0
+        ? { status: "measured", reason: null }
+        : { status: "not_measured", reason: COMPLIANCE_NOT_MEASURED_REASON },
       metrics: {
         deadlineAdherence: resolvedAlerts.length > 0 ? Math.round((resolvedWithinThreshold / resolvedAlerts.length) * 100) : null,
-        avgResponseTime: averageRounded(responseTimes),
+        avgResponseTime: responseTimes.length > 0 ? averageRounded(responseTimes) : null,
         documentationRate: alertRows.length > 0 ? Math.round((documentedAlertCount / alertRows.length) * 100) : null,
-        openAlerts: openAlerts.length,
+        openAlerts: alertRows.length > 0 ? openAlerts.length : null,
       },
       alerts: openAlerts
         .sort((a, b) => {

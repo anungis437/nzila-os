@@ -48,6 +48,8 @@ export const memberLocationConsent = pgTable("member_location_consent", {
 export const locationTracking = pgTable("location_tracking", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: varchar("user_id", { length: 255 }).notNull(),
+  // The organization the caller recorded this point in, resolved by the server (platform 0080). NULL only on rows written before it.
+  organizationId: uuid("organization_id"),
   
   // Location data
   latitude: decimal("latitude", { precision: 10, scale: 8 }).notNull(),
@@ -117,6 +119,8 @@ export const geofenceEvents = pgTable("geofence_events", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: varchar("user_id", { length: 255 }).notNull(),
   geofenceId: uuid("geofence_id").notNull(),
+  // The organization that owns the geofence (its union_local_id), recorded with the event (platform 0080). NULL only on rows written before it.
+  organizationId: uuid("organization_id"),
   
   // Event details
   eventType: varchar("event_type", { length: 20 }).notNull(), // "entry", "exit"
@@ -161,6 +165,9 @@ export const locationTrackingAudit = pgTable("location_tracking_audit", {
 // Location data deletion log (compliance tracking)
 export const locationDeletionLog = pgTable("location_deletion_log", {
   id: uuid("id").primaryKey().defaultRandom(),
+  // One entry per organization whose rows a deletion removed (platform 0080). NULL marks rows that carried no organization
+  // (written before the column existed): unattributed, never assigned to an organization they cannot be shown to belong to.
+  organizationId: uuid("organization_id"),
   
   // Deletion details
   deletionType: varchar("deletion_type", { length: 50 }).notNull(), // "auto_24hr", "user_request", "consent_revoked", "retention_policy"

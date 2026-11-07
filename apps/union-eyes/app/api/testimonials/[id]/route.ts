@@ -20,6 +20,9 @@ const { GET, PATCH, DELETE } = crudRoutes({
   // administrator could change any organization's row by id. Writes need a genuine platform-elevated role, as for the
   // other shared reference tables.
   writeRole: 'content_manager',
+  // Editorial fields the content-management role sets (featuring and visibility are editorial decisions at that elevated floor).
+  // approvedAt is a factory-managed stamp, refused in the body before this list or the hook below is consulted.
+  writableFields: ['type', 'quote', 'author', 'role', 'organization', 'organizationType', 'photo', 'featured', 'visibility'],
   // Approval is stamped here, with the server's clock, and only once: the client's timestamp is not the approval time, and approving an
   // approved testimonial must not move it. Only the approval fields a client may send are interpreted.
   beforeUpdate: (updates, { existing }) => {

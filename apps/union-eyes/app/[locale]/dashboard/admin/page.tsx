@@ -48,28 +48,21 @@ type AdminSection =
   | "ai-testing";
 
 interface PlatformStats {
-  totalMembers: number;
+  /** null: not measured here. A count of every organization's roster is tenant content, not a platform entitlement (#1118). */
+  totalMembers: number | null;
   activeOrganizations: number;
   totalOrganizations: number;
   totalStorage: number;
-  activeToday: number;
+  /** null: not measured here, as totalMembers. */
+  activeToday: number | null;
 }
 
-interface ActivityItem {
-  id: string;
-  description: string;
-  timestamp: string | null;
-}
-
+/** An organization's tenancy record: no member counts, officer names or contacts, which are its content (#1116). */
 interface LocalSection {
   id: string;
   number: string | null;
   name: string;
   region: string | null;
-  memberCount: number;
-  activeCount: number;
-  president: string | null;
-  contact: string | null;
   status: string;
 }
 
@@ -103,7 +96,7 @@ const HUB_LINKS = [
   { key: "taxonomy", href: "/dashboard/admin/members" },
 ] as const;
 
-type LoadSubject = "stats" | "activity" | "users" | "locals" | "health";
+type LoadSubject = "stats" | "users" | "locals" | "health";
 
 /** The page's own words, from the message catalogs (adminConsolePage), in the language of the page. */
 function useCopy() {
@@ -117,10 +110,12 @@ function useCopy() {
     orgsTotal: (count: number) => t("orgsTotal", { count }),
     databaseSize: t("databaseSize"),
     databaseSizeNote: t("databaseSizeNote"),
-    noActivity: t("noActivity"),
+    activityUnavailable: t("activityUnavailable"),
     searchTooShort: t("searchTooShort", { min: MIN_USER_SEARCH }),
     noUsers: t("noUsers"),
+    usersScopeNote: t("usersScopeNote"),
     noOrganizations: t("noOrganizations"),
+    directoryOnlyNote: t("directoryOnlyNote"),
     organization: t("organization"),
     removeUser: t("removeUser"),
     toggleStatus: t("toggleStatus"),
@@ -179,19 +174,12 @@ function readStats(body: unknown): PlatformStats {
   const totalOrganizations = count(data.totalOrganizations);
   const totalStorage = count(data.totalStorage);
   const activeToday = count(data.activeToday);
-  if (totalMembers === null || activeOrganizations === null || totalOrganizations === null || totalStorage === null || activeToday === null) {
+  // Member figures may be null (not measured here); the organization and storage figures must be present.
+  if ((data.totalMembers !== null && totalMembers === null) || (data.activeToday !== null && activeToday === null) ||
+      activeOrganizations === null || totalOrganizations === null || totalStorage === null) {
     throw new ApiShapeError("incomplete statistics");
   }
   return { totalMembers, activeOrganizations, totalOrganizations, totalStorage, activeToday };
-}
-
-function readActivity(body: unknown): ActivityItem[] {
-  return rowsOf(body).map((row) => {
-    const id = text(row.id);
-    const description = text(row.description);
-    if (!id || !description) throw new ApiShapeError("an activity entry without an id or description");
-    return { id, description, timestamp: text(row.timestamp) };
-  });
 }
 
 function readUsers(body: unknown): SystemUser[] {
@@ -217,18 +205,12 @@ function readLocals(body: unknown): LocalSection[] {
   return rowsOf(body).map((row) => {
     const id = text(row.id);
     const name = text(row.name);
-    const memberCount = count(row.memberCount);
-    const activeCount = count(row.activeCount);
-    if (!id || !name || memberCount === null || activeCount === null) throw new ApiShapeError("an organization without the expected fields");
+    if (!id || !name) throw new ApiShapeError("an organization without the expected fields");
     return {
       id,
       number: text(row.number),
       name,
       region: text(row.region),
-      memberCount,
-      activeCount,
-      president: text(row.president),
-      contact: text(row.contact),
       status: text(row.status) ?? "",
     };
   });
@@ -502,7 +484,6 @@ export default function AdminPage() {
   const localsUrl = `/api/admin/organizations${search ? `?search=${encodeURIComponent(search)}` : ""}`;
 
   const stats = useRemote(activeSection === "overview" ? "/api/admin/stats/overview" : null, readStats, overviewReload);
-  const activity = useRemote(activeSection === "overview" ? "/api/admin/stats/activity?limit=10" : null, readActivity, overviewReload);
   const users = useRemote(activeSection === "users" ? usersUrl : null, readUsers, usersReload);
   const locals = useRemote(activeSection === "locals" ? localsUrl : null, readLocals, localsReload);
   const health = useRemote(activeSection === "database" ? "/api/admin/database/health" : null, readHealth, healthReload);
@@ -634,13 +615,13 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">{t('admin.overview.totalMembers')}</p>
-                      <p className="text-3xl font-bold text-gray-900">{stats.data ? stats.data.totalMembers.toLocaleString(numberLocale) : copy.loading}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.data ? (stats.data.totalMembers === null ? copy.notRecorded : stats.data.totalMembers.toLocaleString(numberLocale)) : copy.loading}</p>
                     </div>
                     <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
                       <Users className="w-7 h-7 text-blue-600" />
                     </div>
                   </div>
-                  {stats.data && <p className="text-xs text-gray-600 font-medium">{copy.membersChanged(stats.data.activeToday)}</p>}
+                  {stats.data && stats.data.activeToday !== null && <p className="text-xs text-gray-600 font-medium">{copy.membersChanged(stats.data.activeToday)}</p>}
                 </Card>
 
                 <Card className="p-6 bg-white/80 backdrop-blur-sm border-gray-200">
@@ -693,25 +674,11 @@ export default function AdminPage() {
             {/* Recent Activity */}
             <Card className={panel}>
               <h2 className="text-xl font-bold text-gray-900 mb-4">{t('admin.overview.recentActivity')}</h2>
-              {activity.error !== null ? (
-                <LoadFailure title={copy.couldNotLoad("activity")} detail={activity.error} retryLabel={copy.retry} onRetry={() => setOverviewReload((n) => n + 1)} />
-              ) : activity.loading ? (
-                <div className="text-center py-8 text-gray-500">{copy.loading}</div>
-              ) : !activity.data || activity.data.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>{copy.noActivity}</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {activity.data.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                      <p className="text-sm font-medium text-gray-900">{item.description}</p>
-                      <p className="text-xs text-gray-500">{item.timestamp ? new Date(item.timestamp).toLocaleString(numberLocale) : copy.notRecorded}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {/* No request: GET /api/admin/stats/activity refuses every caller (#1116, #1118), so the feed is explained, not loaded. */}
+              <div className="text-center py-8 text-gray-500">
+                <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>{copy.activityUnavailable}</p>
+              </div>
             </Card>
           </motion.div>
         )}
@@ -720,7 +687,8 @@ export default function AdminPage() {
         {activeSection === "users" && (
           <motion.div {...section}>
             <Card className={panel}>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('admin.users.title')}</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('admin.users.title')}</h2>
+              <p className="text-xs text-gray-600 mb-4">{copy.usersScopeNote}</p>
               {searchBox(t('admin.users.searchPlaceholder'), "focus:ring-blue-500")}
               {searchTooShort && <p className="mb-4 text-sm text-gray-600">{copy.searchTooShort}</p>}
 
@@ -798,6 +766,7 @@ export default function AdminPage() {
             <Card className={panel}>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('admin.locals.title')}</h2>
               {searchBox(t('admin.locals.searchPlaceholder'), "focus:ring-green-500")}
+              <p className="text-xs text-gray-600 mb-4">{copy.directoryOnlyNote}</p>
 
               {locals.error !== null ? (
                 <LoadFailure title={copy.couldNotLoad("locals")} detail={locals.error} retryLabel={copy.retry} onRetry={() => setLocalsReload((n) => n + 1)} />
@@ -815,7 +784,7 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {locals.data.map((local) => (
                     <Card key={local.id} className="p-5 bg-linear-to-br from-white to-gray-50 border-gray-200 hover:shadow-lg transition-all">
-                      <div className="mb-4">
+                      <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-lg font-bold text-gray-900">
                             {local.number ? `${t('admin.locals.localPrefix')} ${local.number}` : local.name}
@@ -832,35 +801,6 @@ export default function AdminPage() {
                         <p className="text-xs text-gray-600">{local.region ?? copy.notRecorded}</p>
                       </div>
 
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">{t('admin.locals.totalMembers')}:</span>
-                          <span className="font-semibold text-gray-900">{local.memberCount.toLocaleString(numberLocale)}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">{t('admin.locals.activeMembers')}:</span>
-                          <span className="font-semibold text-green-600">{local.activeCount.toLocaleString(numberLocale)}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div
-                            className="bg-green-600 h-2 rounded-full transition-all"
-                            style={{ width: `${local.memberCount > 0 ? Math.min(100, (local.activeCount / local.memberCount) * 100) : 0}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-gray-200">
-                        <div className="flex items-center justify-between text-xs">
-                          <div>
-                            <p className="text-gray-600 mb-1">{t('admin.locals.president')}:</p>
-                            <p className="font-medium text-gray-900">{local.president ?? copy.notRecorded}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-gray-600 mb-1">{t('admin.locals.contact')}:</p>
-                            <p className="font-medium text-blue-600">{local.contact ?? copy.notRecorded}</p>
-                          </div>
-                        </div>
-                      </div>
                     </Card>
                   ))}
                 </div>

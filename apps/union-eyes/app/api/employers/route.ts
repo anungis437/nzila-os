@@ -6,6 +6,7 @@ import { assertOrganizationOwns } from '@/lib/api/org-references';
 import { ApiError } from '@/lib/api/errors';
 import { isCheckViolation } from '@/lib/db/unique-violation';
 import { employers } from '@/db/schema';
+import { EMPLOYER_WRITABLE_FIELDS, assertEmployerStatusWritable } from '@/lib/union-structure/employer-writable-fields';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,10 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',
+  // What the employer form sends (toEmployerPayload), plus the parent company checked below.
+  writableFields: EMPLOYER_WRITABLE_FIELDS,
   beforeCreate: async (values, ctx) => {
+    assertEmployerStatusWritable(values, undefined);
     await checkParent(values, ctx.organizationId);
     return values;
   },

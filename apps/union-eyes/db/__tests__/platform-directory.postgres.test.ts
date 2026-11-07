@@ -162,24 +162,28 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
     expect(await can('settlements')).toBe(false)
   })
 
-  it('platform statistics count every organization, match the superuser, carry no settlement or per-capita figure, and are recorded', async () => {
+  it('platform statistics count every organization, match the superuser, derive nothing from tenant content (#1118), and are recorded', async () => {
     const truth = {
       organizations: Number((await scalar(`SELECT count(*) AS n FROM organizations WHERE organization_type <> 'platform'`)).n),
-      people: Number((await scalar(`SELECT count(DISTINCT user_id) AS n FROM organization_members WHERE deleted_at IS NULL`)).n),
-      grievances: Number((await scalar(`SELECT count(*) AS n FROM grievances`)).n),
-      agreements: Number((await scalar(`SELECT count(*) AS n FROM collective_agreements`)).n),
     }
     const stats = await modules!.stats.getPlatformStatsFromDb({ userId: STAFF, organizationId: ORG_A })
 
     expect(stats.totalOrganizations).toBe(truth.organizations)
-    expect(stats.registeredUsers).toBe(truth.people)
-    expect(stats.grievances.total).toBe(truth.grievances)
-    expect(stats.collectiveAgreements.total).toBe(truth.agreements)
     expect(stats.totalOrganizations).toBeGreaterThanOrEqual(2)
-    expect(stats.grievances.total).toBeGreaterThanOrEqual(2)
-    expect(stats.collectiveAgreements.total).toBeGreaterThanOrEqual(1)
+    // Roster, grievance, agreement and role figures are not measured here: null, never zero, whatever the tables hold.
+    expect(stats.registeredUsers).toBeNull()
+    expect(stats.activeUsers).toBeNull()
+    expect(stats.totalMemberCount).toBeNull()
+    expect(stats.grievances).toBeNull()
+    expect(stats.collectiveAgreements).toBeNull()
+    expect(stats.roleDistribution).toBeNull()
     expect(stats).not.toHaveProperty('settlements')
-    for (const row of stats.organizations) expect(row).not.toHaveProperty('perCapitaRate')
+    for (const row of stats.organizations) {
+      expect(row).not.toHaveProperty('perCapitaRate')
+      expect(row.memberCount).toBeNull()
+      expect(row.activeMemberCount).toBeNull()
+    }
+    for (const sector of stats.sectors) expect(sector.total_members).toBeNull()
 
     const recorded = await audits('platform_stats.read', STAFF)
     expect(recorded).toHaveLength(1)

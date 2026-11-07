@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import { PgDialect } from 'drizzle-orm/pg-core';
 import { hazardReports, workplaceIncidents } from '@/db/schema';
 
 /**
@@ -264,39 +265,69 @@ describe('health-safety hazards/incidents submission — role gating', () => {
     expect(capture()?.organizationId).toBe(ORG_A);
   });
 
-  it('5 & 6. a generated reportNumber is populated and satisfies the collision-resistant UUID format', async () => {
-    const { POST } = await import('../hazards/route');
+  // DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS
+  /** The statements run on the tenant transaction, compiled, so the per-organization lock and sequence read can be checked. */
+  function executedSql() {
+    const dialect = new PgDialect();
+    return m.dbExecute.mock.calls
+      .map(([query]) => { try { return dialect.sqlToQuery(query as never); } catch { return null; } })
+      .filter((q): q is { sql: string; params: unknown[] } => q !== null);
+  }
+
+  it.each([
+    ['hazards', 'reportNumber', 'HAZ', { hazardType: 'fire', priority: 'high', location: 'Warehouse B', description: 'Sparks near flammable storage' }],
+    ['incidents', 'incidentNumber', 'INC', { incidentType: 'injury', incidentDate: '2026-10-29T13:00:00.000Z', severity: 'minor', location: 'Loading dock', description: 'Worker slipped on wet floor' }],
+  ] as const)('5 & 6. %s: the number is the next in the caller organization\'s own sequence, read under a per-organization lock', async (path, field, prefix, body) => {
+    const { POST } = await import(`../${path}/route`);
     m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+    m.dbExecute.mockImplementation(async (query: unknown) => {
+      const compiled = new PgDialect().sqlToQuery(query as never);
+      return /last_sequence/.test(compiled.sql) ? [{ last_sequence: 41 }] : [];
+    });
     const capture = mockInsertCapture();
 
-    await POST(postRequest('http://localhost/api/health-safety/hazards', {
-      hazardType: 'fire',
-      priority: 'high',
-      location: 'Warehouse B',
-      description: 'Sparks near flammable storage',
-    }));
-
-    const reportNumber = capture()?.reportNumber as string;
-    expect(typeof reportNumber).toBe('string');
-    expect(reportNumber).toMatch(/^HAZ-\d{4}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    const response = await POST(postRequest(`http://localhost/api/health-safety/${path}`, body));
+    expect(response.status).toBe(200);
+    const year = new Date().getUTCFullYear();
+    expect(capture()?.[field]).toBe(`${prefix}-${year}-0042`);
+    const statements = executedSql();
+    const lock = statements.find((q) => q.sql.includes('pg_advisory_xact_lock'));
+    expect(lock?.params[0]).toContain(`:${ORG_A}:${prefix}-${year}-`);
+    const read = statements.find((q) => q.sql.includes('last_sequence'));
+    expect(read?.sql).toContain('organization_id =');
+    expect(read?.params).toContain(ORG_A);
+    expect(read?.params).not.toContain(ORG_B);
   });
 
-  it('5 & 6. a generated incidentNumber is populated and satisfies the collision-resistant UUID format', async () => {
-    const { POST } = await import('../incidents/route');
-    m.getCurrentUser.mockResolvedValue(authUser('health_safety_rep'));
+  it.each([
+    ['inspections', 'inspectionNumber', 'INS', { inspectionType: 'routine', scheduledDate: '2026-11-10T09:00:00.000Z' }],
+    ['ppe', 'itemNumber', 'PPE', { ppeType: 'hard_hat', itemName: 'Hard hat' }],
+  ] as const)('5c. %s: a body that names the number is refused, and a create gets a server-issued number', async (path, field, prefix, body) => {
+    const { POST } = await import(`../${path}/route`);
+    m.getCurrentUser.mockResolvedValue(authUser('admin'));
     const capture = mockInsertCapture();
 
-    await POST(postRequest('http://localhost/api/health-safety/incidents', {
-      incidentType: 'injury',
-      incidentDate: '2026-10-29T13:00:00.000Z',
-      severity: 'minor',
-      location: 'Loading dock',
-      description: 'Worker slipped on wet floor',
-    }));
+    const refused = await POST(postRequest(`http://localhost/api/health-safety/${path}`, { ...body, [field]: `${prefix}-CHOSEN` }));
+    expect(refused.status).toBe(400);
+    expect(capture()).toBeUndefined();
 
-    const incidentNumber = capture()?.incidentNumber as string;
-    expect(typeof incidentNumber).toBe('string');
-    expect(incidentNumber).toMatch(/^INC-\d{4}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    const created = await POST(postRequest(`http://localhost/api/health-safety/${path}`, body));
+    expect(created.status).toBe(200);
+    expect(String(capture()?.[field])).toMatch(prefix === 'PPE' ? /^PPE-0001$/ : new RegExp(`^${prefix}-\\d{4}-0001$`));
+  });
+
+  it.each([
+    ['incidents', 'incidentNumber'],
+    ['hazards', 'reportNumber'],
+    ['inspections', 'inspectionNumber'],
+  ] as const)('5d. %s: a PATCH cannot change the server-issued number', async (path, field) => {
+    const { PATCH } = await import(`../${path}/[id]/route`);
+    m.getCurrentUser.mockResolvedValue(authUser('admin'));
+    const response = await PATCH(new NextRequest(`http://localhost/api/health-safety/${path}/abc`, {
+      method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ [field]: 'X-CHOSEN' }),
+    }), { params: Promise.resolve({ id: 'abc' }) });
+    expect(response.status).toBe(400);
+    expect(m.dbInsert).not.toHaveBeenCalled();
   });
 
   it('6a. refuses caller-supplied report identifiers, statuses and unsupported form fields', async () => {

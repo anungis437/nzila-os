@@ -14,7 +14,8 @@ describe('Gate 0 batch B90: lifecycle routes and the minimum cohort for satisfac
     expect(hazard).toContain('resolutionDate: sql`coalesce(')
     expect(hazard).toContain("action: `hazard.${body.action}`")
     // The generic PATCH still cannot set a status or a date.
-    expect(src('app/api/health-safety/incidents/[id]/route.ts')).toContain("blockedPatchFields: ['status', 'closedDate'")
+    // (The list also blocks the server-issued incident number, which precedes them.)
+    expect(src('app/api/health-safety/incidents/[id]/route.ts')).toMatch(/blockedPatchFields: \[[^\]]*'status', 'closedDate'/)
   })
 
   it('returns no satisfaction figure below the minimum number of completed responses', () => {

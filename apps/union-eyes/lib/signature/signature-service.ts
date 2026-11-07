@@ -11,7 +11,7 @@ import {
   signatureAuditTrail,
 } from "@/db/schema";
 import SignatureProviderFactory from "./providers";
-import { decideProviderSync, mayAdvanceSigner } from "./provider-sync";
+import { decideProviderSync, isExternalSignatureProvider, mayAdvanceSigner } from "./provider-sync";
 import { eq, and, or, desc, asc, gt, inArray, notInArray, isNull, lt } from "drizzle-orm";
 import { organizationMembers } from "@/db/schema-organizations";
 import { signerListSchema, verifySignerList, SignerVerificationError } from "./signer-verification";
@@ -320,6 +320,11 @@ export class SignatureService {
 
     if (!document || !document.providerEnvelopeId) {
       return { synced: false, reason: "no_envelope" };
+    }
+    // A document stored with provider "internal" (the removed built-in stub) has no provider to ask. Reporting that as a provider
+    // outage would tell the sender to retry something that can never succeed.
+    if (!isExternalSignatureProvider(document.provider)) {
+      return { synced: false, reason: "not_external_provider" };
     }
 
     let status;
@@ -758,8 +763,9 @@ export class SignatureService {
       throw new SignatureAuthorityError("CONFLICT", `A ${document.status} document cannot be voided`);
     }
 
-    // Void with provider
-    if (document.providerEnvelopeId) {
+    // Void with provider. A document stored with provider "internal" (the removed built-in stub) carries a locally minted envelope id that no
+    // provider holds: nothing can be signed elsewhere, so it is voided here alone instead of being refused for want of a provider.
+    if (document.providerEnvelopeId && isExternalSignatureProvider(document.provider)) {
       try {
         const provider = SignatureProviderFactory.getProvider(
           document.provider as "docusign" | "hellosign"
@@ -799,7 +805,7 @@ export class SignatureService {
         action: "signature.document.void",
         resourceType: "signature_documents",
         resourceId: documentId,
-        details: { reason, from: document.status },
+        details: { reason, from: document.status, voidedAtProvider: Boolean(document.providerEnvelopeId && isExternalSignatureProvider(document.provider)) },
       });
     });
   }

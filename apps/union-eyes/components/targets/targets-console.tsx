@@ -302,6 +302,9 @@ function buildColumns(onToggle: (id: string, active: boolean) => void, busyId: s
             </div>
             {row.original.asOf && <div className="text-[11px] text-muted-foreground">as of {formatAsOf(row.original.asOf, locale)}</div>}
             {row.original.stale && <div className="text-[11px] text-muted-foreground">Latest stored value is too old to judge</div>}
+            {val === null && !row.original.stale && row.original.notMeasuredReason && (
+              <div className="text-[11px] text-muted-foreground">{row.original.notMeasuredReason}</div>
+            )}
           </div>
         );
       },
@@ -594,6 +597,9 @@ export function TargetsConsole() {
                                 <span className="text-muted-foreground"> / {t.targetValue ? parseFloat(t.targetValue).toLocaleString() : DASH}</span>
                               </div>
                               <div className="text-xs text-muted-foreground">{t.progress === null ? DASH : `${t.progress}% complete`}</div>
+                              {t.currentValue === null && t.notMeasuredReason && (
+                                <div className="max-w-xs text-[11px] text-muted-foreground">{t.notMeasuredReason}</div>
+                              )}
                             </div>
                             <TrendIcon trend={t.trend} />
                           </div>

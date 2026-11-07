@@ -8,7 +8,7 @@
 
 import { NextResponse } from "next/server";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { directRoleIn, isOfficerOrAboveRole, resolveOrganizationAccess } from "@/lib/organizations/read-authority";
 import {
   ErrorCode,
   standardErrorResponse,
@@ -24,11 +24,13 @@ import type { PilotMetrics, PilotMilestone } from "@/types/marketing";
 export const dynamic = "force-dynamic";
 
 export const GET = withOrganizationAuth(async (_request, context) => {
-  const { organizationId } = context;
+  const { organizationId, userId } = context;
 
   try {
-    const canAccess = await hasMinRole("officer");
-    if (!canAccess) {
+    // The officer role is checked in the exact organization whose figures are read, through the caller's own live membership there
+    // (issue #1116), not in whichever organization a role resolver picks for the user. Hierarchy and platform titles confer nothing.
+    const access = userId ? await resolveOrganizationAccess(userId) : null;
+    if (!access || !isOfficerOrAboveRole(directRoleIn(access, organizationId))) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
         "Requires officer role or above"
