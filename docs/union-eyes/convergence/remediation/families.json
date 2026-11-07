@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 677,
- "partial": 47,
- "outstanding": 100,
- "accountedFor": 100,
+ "corrected": 678,
+ "partial": 46,
+ "outstanding": 99,
+ "accountedFor": 99,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -80,9 +80,9 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 16,
+   "defects": 15,
    "severity": {
-    "HIGH": 4,
+    "HIGH": 3,
     "MEDIUM": 12,
     "LOW": 0
    },
@@ -93,7 +93,7 @@
     "0B.3": 1,
     "0B.5": 1,
     "0B.6": 2,
-    "0B.7": 4,
+    "0B.7": 3,
     "0B.8": 1,
     "0B.10": 1,
     "0B.11": 4
@@ -362,11 +362,6 @@
    {
     "id": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-CONTRIBUTIONS-WRITE-OUTSIDE-SYSTEM-CONTEXT",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-CONSENT-WITHDRAWAL-AND-RECLASSIFICATION-WITHDRAW-NOTHING-DERIVED",
-    "severity": "HIGH",
-    "partial": true
    },
    {
     "id": "DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW",
