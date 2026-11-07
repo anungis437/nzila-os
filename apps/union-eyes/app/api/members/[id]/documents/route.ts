@@ -14,5 +14,6 @@ const { GET, PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
+  writableFields: ['title', 'category', 'description', 'tags', 'documentType', 'privacyLabel'],
 });
 export { GET, PATCH, DELETE };

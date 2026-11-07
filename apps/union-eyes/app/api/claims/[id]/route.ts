@@ -51,6 +51,7 @@ const { PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
+  writableFields: ['claimType', 'description', 'incidentDate', 'location', 'desiredOutcome', 'witnessesPresent', 'witnessDetails', 'previouslyReported', 'previousReportDetails', 'priority', 'isAnonymous', 'claimAmount'],
   blockedPatchFields: ['status'],
 }) as any as { PATCH: typeof GET; DELETE: typeof GET };
 

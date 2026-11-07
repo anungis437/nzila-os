@@ -10980,6 +10980,59 @@
       ]
     },
     {
+      "id": "B133-F02-CRUD-WRITABLE-FIELDS-REMAINING-ROUTES",
+      "family": "Generic CRUD mass assignment: the remaining routes Wave 1's fail-closed default left without a writableFields list",
+      "evidenceCommit": "9132a0826",
+      "items": [
+        {
+          "prefix": "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/app/api/metrics/route.ts",
+            "apps/union-eyes/app/api/gdpr/consents/route.ts",
+            "apps/union-eyes/app/api/gdpr/requests/route.ts",
+            "apps/union-eyes/app/api/gdpr/data-erasure/route.ts",
+            "apps/union-eyes/app/api/consent/route.ts",
+            "apps/union-eyes/app/api/deadlines/route.ts",
+            "apps/union-eyes/app/api/deadlines/compliance/route.ts",
+            "apps/union-eyes/app/api/members/[id]/route.ts",
+            "apps/union-eyes/app/api/members/[id]/employment/route.ts",
+            "apps/union-eyes/app/api/members/[id]/documents/route.ts",
+            "apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+            "apps/union-eyes/app/api/claims/[id]/route.ts",
+            "apps/union-eyes/app/api/currency/convert/route.ts",
+            "apps/union-eyes/app/api/admin/clc/analytics/organizations/route.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-writable-fields-census.test.ts"
+          ],
+          "explanation": "Of the 21 routes this branch's own crud-writable-fields-census.test.ts still flagged after Wave 1 (B105+ fail-closed writableFields default), 12 routes (metrics, gdpr/consents, gdpr/requests, gdpr/data-erasure, consent, deadlines, deadlines/compliance, members/[id], members/[id]/employment, members/[id]/documents, communications/polls/[pollId], claims/[id]) now declare a real, narrow writableFields list decided from each table's own schema, excluding computed, approval and financial-adjustment columns. 2 routes (currency/convert, admin/clc/analytics/organizations) were facades bound to the unrelated analyticsMetrics table with zero real callers, the same bug class as the already-fixed organization_members facades (DEF-0B1-CRUD-FACADE-ORG-MEMBERS, B09-F02); converted to 501 rather than inventing an allow-list for an operation that never existed. census: 138/138 passing.",
+          "remaining": "7 of the 21 routes are deliberately not fixed here: arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId] and arrears/escalate are bound to the unrelated perCapitaRemittances table instead of the real, unused memberArrears/paymentPlans tables (a genuine feature gap, not just a missing allow-list; per-capita/remittance work is explicitly future, non-blocking per product direction) and members/dues has no real POST caller in this repo and its fields feed dues calculation, needing its own product decision. None of the 7 are newly insecure: Wave 1's fail-closed default already refuses every write on a route with no writableFields (403), so leaving them unlisted is safe, just incomplete."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/app/api/metrics/route.ts",
+            "apps/union-eyes/app/api/gdpr/consents/route.ts",
+            "apps/union-eyes/app/api/gdpr/requests/route.ts",
+            "apps/union-eyes/app/api/gdpr/data-erasure/route.ts",
+            "apps/union-eyes/app/api/consent/route.ts",
+            "apps/union-eyes/app/api/deadlines/route.ts",
+            "apps/union-eyes/app/api/deadlines/compliance/route.ts",
+            "apps/union-eyes/app/api/members/[id]/route.ts",
+            "apps/union-eyes/app/api/members/[id]/employment/route.ts",
+            "apps/union-eyes/app/api/members/[id]/documents/route.ts",
+            "apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+            "apps/union-eyes/app/api/claims/[id]/route.ts",
+            "apps/union-eyes/app/api/currency/convert/route.ts",
+            "apps/union-eyes/app/api/admin/clc/analytics/organizations/route.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-writable-fields-census.test.ts"
+          ]
+        }
+      ]
+    },
+    {
       "id": "B131-F07-ARBITRATION-CASE-AUTHORITY-WIRING-PROOF",
       "family": "Authorization and object-level authority: closing the read-filter and delete-block gap B98 left open for arbitration records by proving the existing crud-factory wiring end to end",
       "evidenceCommit": "9b08adc4d",
