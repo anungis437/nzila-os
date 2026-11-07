@@ -112,6 +112,13 @@ test('one-space snapshot entries cannot disappear from the audited graph', () =>
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
 })
 
+test('three-space snapshot keys cannot disappear from the audited dependency graph', () => {
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n   node-forge@1.4.0:\n', (file) =>
+    assert.throws(() => parseLockfilePackages(file), /Malformed snapshot indentation/))
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n    dependencies:\n      node-forge: 1.4.0\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
+})
+
 test('duplicate snapshots sections cannot hide dependencies from the audit inventory', () => {
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\npackages:\n  undici@7.29.1:\nsnapshots:\n  node-forge@1.4.0:\n', (file) =>
     assert.throws(() => parseLockfilePackages(file), /Ambiguous pnpm lockfile/))
