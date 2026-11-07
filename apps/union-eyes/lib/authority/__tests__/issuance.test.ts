@@ -228,6 +228,18 @@ describe('issuance policy: conflicts and domain protections', () => {
     expect(codes(run(r, issuerFacts(['steward']), null, lift))).toContain('CAPACITY_NOT_ELIGIBLE')
     expect(codes(run({ ...r, holderUserId: U.president }, issuerFacts(), null, lift))).toContain('SELF_APPROVAL')
   })
+
+  it('platform_staff has no eligible holder capacity: it denies even with a fully-formed, otherwise-valid active rule', () => {
+    // No capacity in ./capacity.ts's ROLE_CAPACITIES is eligible to hold this domain (structural support only,
+    // per DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ / DEF-0B10-OPL-14's decision record); exercise every real
+    // capacity as both issuer and holder to prove none can make this domain grant anything.
+    const platformRule = rule({ domain: 'platform_staff', issuerCapacities: ['executive'], allowedPowers: ['read'], maxTermDays: 365, requiresAcceptance: false, requiredIndependentApprovals: 0 })
+    const ALL_CAPACITIES: Capacity[] = ['member', 'steward', 'chief_steward', 'officer', 'executive', 'financial_officer', 'trustee', 'auditor', 'governance_reviewer', 'privacy_officer']
+    for (const cap of ALL_CAPACITIES) {
+      const d = run(req({ domain: 'platform_staff', powers: ['read'] }), issuerFacts(['executive']), holder([cap]), platformRule)
+      expect(codes(d), cap).toContain('CAPACITY_NOT_ELIGIBLE')
+    }
+  })
 })
 
 describe('default issuance templates', () => {

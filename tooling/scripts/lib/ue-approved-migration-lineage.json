@@ -860,6 +860,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-g0-wave1-d1",
         "note": "Nullable organization_id on location_tracking, geofence_events and location_deletion_log, so the retention sweep and a member's erasure log one entry per organization of the rows removed (DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION). No backfill; rollback refuses while a value exists."
+      },
+      {
+        "tag": "0082_platform_staff_mandate_kind",
+        "sha256": "f0ff8784157a9247676b52958b6acb413fd61d5dd32890626abbb1a1ba6aaaef",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Widens ue_authority_mandates_kind_chk and ue_authority_rule_domain_chk to accept 'platform_staff', so the kernel can represent (never issues) a platform-wide mandate for DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ / DEF-0B10-OPL-14. No row created, no behavior change; see docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md for the remaining institutional step."
       }
     ]
   }

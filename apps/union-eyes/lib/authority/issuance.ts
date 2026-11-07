@@ -35,6 +35,7 @@ export const ISSUANCE_DOMAINS: readonly IssuanceDomain[] = [
   'governance_review',
   'executive_office',
   'emergency_access',
+  'platform_staff',
   'delegation',
   'case_assignment',
   'recusal',
@@ -143,6 +144,10 @@ const HOLDER_CAPACITIES: Readonly<Record<IssuanceDomain, readonly Capacity[]>> =
   governance_review: ['member'],
   executive_office: ['executive'],
   emergency_access: ['steward', 'chief_steward', 'officer', 'executive', 'financial_officer'],
+  // Empty on purpose: no customer-organization capacity is eligible to hold a platform-wide mandate (./capacity.ts).
+  // hasCapacity() on an empty wanted list is always false, so this domain always denies until a platform-officer
+  // capacity is institutionally defined - see platform-staff-mandate-decision-record.md.
+  platform_staff: [],
   delegation: ['officer', 'executive'],
   case_assignment: ['steward', 'chief_steward', 'officer'],
   recusal: ['member'],

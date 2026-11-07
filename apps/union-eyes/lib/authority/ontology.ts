@@ -84,6 +84,15 @@ export type MandateKind =
   | 'governance_review'
   | 'executive_office'
   | 'emergency_access'
+  /**
+   * Scoped to UE_SYSTEM_ORG_ID (the same platform pseudo-organization sentinel used elsewhere for system-context
+   * operations), never to a customer organization: authority that reaches across every tenant cannot be issued
+   * by any one customer's executives (./capacity.ts: platform, federation and national roles confer no
+   * customer-organization capacity). No issuance rule exists for this domain and none can be drafted until an
+   * institutional decision names who may hold 'executive' capacity for the platform pseudo-organization itself;
+   * see docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md. Structural support only.
+   */
+  | 'platform_staff'
 
 export interface MandateScope {
   unitIds?: readonly Uuid[]
