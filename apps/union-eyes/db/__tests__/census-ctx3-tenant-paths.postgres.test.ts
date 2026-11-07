@@ -63,7 +63,7 @@ const { employerContacts } = await import('@/db/schema/domains/communications/em
 type Row = Record<string, any>
 type Handler = (ctx: unknown) => Promise<unknown>
 
-describe('the promoted and corrected tenant paths, as the real runtime role', () => {
+describe.skipIf(!URL)('the promoted and corrected tenant paths, as the real runtime role', () => {
   const tag = `tp${randomUUID().slice(0, 8)}`
   const ORG_A = randomUUID()
   const ORG_B = randomUUID()

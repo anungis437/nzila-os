@@ -78,7 +78,7 @@ const { signTrackingPayload } = await import('@/lib/communications/tracking-toke
 type Row = Record<string, any>
 type Handler = (ctx: unknown) => Promise<Response>
 
-describe('the cross-organization system jobs and webhooks, as the real roles', () => {
+describe.skipIf(!URL)('the cross-organization system jobs and webhooks, as the real roles', () => {
   const tag = `cj${randomUUID().slice(0, 8)}`
   const ORG_A = randomUUID()
   const ORG_B = randomUUID()
