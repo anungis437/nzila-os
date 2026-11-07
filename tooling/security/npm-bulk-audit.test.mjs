@@ -158,7 +158,7 @@ test('audit report paths containing equals signs are preserved without truncatio
   try {
     writeFileSync(join(folder, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n')
     const mock = join(folder, 'mock-registry.mjs')
-    writeFileSync(mock, "globalThis.fetch = async () => ({ ok: true, json: async () => ({}) })\n")
+    writeFileSync(mock, "globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({}) })\n")
     const reportName = 'audit=security=report.json'
     const script = fileURLToPath(new URL('./npm-bulk-audit.mjs', import.meta.url))
     const result = spawnSync(process.execPath, ['--import', mock, script, '--audit-level=high', '--output=' + reportName], {
@@ -299,5 +299,21 @@ test('partial HTTP success must not certify a complete security audit', async ()
     assert.deepEqual(await fetchAdvisories(packages), {})
   } finally {
     globalThis.fetch = previousFetch
+  }
+})
+
+
+test('missing or malformed HTTP status cannot certify a clean audit', async () => {
+  const originalFetch = globalThis.fetch
+  const packages = new Map([['node-forge', new Set(['1.4.0'])]])
+  try {
+    for (const status of [undefined, null, '200', NaN]) {
+      let parsed = false
+      globalThis.fetch = async () => ({ ok: true, status, json: async () => { parsed = true; return {} } })
+      await assert.rejects(fetchAdvisories(packages), /Audit registry returned HTTP/)
+      assert.equal(parsed, false)
+    }
+  } finally {
+    globalThis.fetch = originalFetch
   }
 })
