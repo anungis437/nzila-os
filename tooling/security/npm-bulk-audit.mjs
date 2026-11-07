@@ -121,7 +121,7 @@ export function parseLockfilePackages(lockfilePath) {
     // A snapshot-shaped key nested at an even indentation depth is not a
     // legitimate pnpm dependency mapping. Refuse it instead of silently
     // omitting an installed package from the security inventory.
-    if (leadingSpaces >= 4 && /^ {4,}(?:'[^']+'|[^\\s'\"]+@[^\\s:]+):(?: \\{\\})?\\s*$/.test(line)) {
+    if (leadingSpaces >= 4 && /^ {4,}(?:'[^']+@[^']+'|[^\s'\"]+@[^\s:]+):(?: \{\})?\s*$/.test(line)) {
       throw new Error('Nested resolved snapshot key in pnpm-lock.yaml')
     }
     if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
