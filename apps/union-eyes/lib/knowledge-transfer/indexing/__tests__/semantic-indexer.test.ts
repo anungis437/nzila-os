@@ -41,6 +41,7 @@ vi.mock('@/db/schema', () => ({
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, inArray: (...a: unknown[]) => a }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ embed: h.embed }),
+  toGatewayDataClass: (c: string) => c,
   UE_APP_KEY: 'ue', UE_SYSTEM_ORG_ID: 'sys', UE_PROFILES: { EMBEDDINGS: 'emb' },
 }));
 vi.mock('@/lib/services/ai/embedding-cache', () => ({

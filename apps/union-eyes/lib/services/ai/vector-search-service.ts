@@ -13,6 +13,7 @@
 
 import {
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -84,7 +85,8 @@ export async function generateEmbedding(
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.EMBEDDINGS,
       input: text,
-      dataClass: 'internal',
+      // Embeds clause and precedent text, the organization's own negotiated agreement and case content.
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     const embedding = response.embeddings[0];

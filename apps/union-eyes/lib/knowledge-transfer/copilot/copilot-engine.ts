@@ -24,6 +24,7 @@ import { inOrganization, isUuid } from '../org-scope';
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
@@ -237,7 +238,8 @@ export async function processCopilotQuery(
         appKey: UE_APP_KEY,
         profileKey: COPILOT_PROFILE,
         input: messages,
-        dataClass: 'internal',
+        // Exit-interview content names a departing individual and their account of the organization.
+        dataClass: toGatewayDataClass('confidential'),
       }),
   );
 

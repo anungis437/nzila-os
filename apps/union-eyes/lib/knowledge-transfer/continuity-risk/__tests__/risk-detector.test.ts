@@ -21,6 +21,7 @@ vi.mock('@/db/schema', () => ({
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ generate: generateMock }),
+  toGatewayDataClass: (c: string) => c,
   buildOrgAiTrace: (o: string) => ({ orgId: o }),
   UE_APP_KEY: 'ue',
   UE_PROFILES: { CONTINUITY_RISK: 'continuity_risk' },

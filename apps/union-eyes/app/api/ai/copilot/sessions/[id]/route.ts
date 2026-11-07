@@ -43,7 +43,7 @@ export const PATCH = withApi(
     });
     if (blocked) return blocked;
 
-    enforceAISafety({ origin: 'copilot-session', action: 'PATCH', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'steward', dataClass: 'internal' });
+    enforceAISafety({ origin: 'copilot-session', action: 'PATCH', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'steward', dataClass: 'grievance_legal' });
 
     const id = z.guid().safeParse(params.id);
     if (!id.success) return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing session id');

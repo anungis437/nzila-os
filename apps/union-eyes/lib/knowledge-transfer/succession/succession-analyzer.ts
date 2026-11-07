@@ -25,6 +25,7 @@ import { exitInterviews } from '@/db/schema';
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -212,7 +213,7 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
             persistAtomicAudit(tx, { organizationId: orgId, userId: actorUserId, action, resourceType: 'exit_interviews', resourceId: orgId, details }),
           )
         : Promise.resolve();
-    await audit('exit_interview.succession_analysis.requested', { interviews: published.length, dataClass: 'internal' });
+    await audit('exit_interview.succession_analysis.requested', { interviews: published.length, dataClass: toGatewayDataClass('confidential') });
 
     let result;
     try {
@@ -225,7 +226,7 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
           { role: 'system', content: SUCCESSION_PROMPT },
           { role: 'user', content: inputText },
         ],
-        dataClass: 'internal',
+        dataClass: toGatewayDataClass('confidential'),
       });
     } catch (error) {
       await audit('exit_interview.succession_analysis.failed', { reason: error instanceof Error ? error.name : 'unknown' }).catch(() => undefined);

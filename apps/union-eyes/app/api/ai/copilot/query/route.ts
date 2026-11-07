@@ -49,7 +49,7 @@ export const POST = withApi(
     });
     if (blocked) return blocked;
 
-    enforceAISafety({ origin: 'copilot-query', action: 'POST', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'steward', dataClass: 'internal' });
+    enforceAISafety({ origin: 'copilot-query', action: 'POST', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'steward', dataClass: 'grievance_legal' });
 
     try {
       const result = await executeCopilotAction({
@@ -98,7 +98,7 @@ export const GET = withApi(
     });
     if (blocked) return blocked;
 
-    enforceAISafety({ origin: 'copilot-query', action: 'GET', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'steward', dataClass: 'internal' });
+    enforceAISafety({ origin: 'copilot-query', action: 'GET', organizationId: organizationId!, userId: userId!, userRole: user?.role ?? 'steward', dataClass: 'grievance_legal' });
 
     const history = await getCopilotHistory(userId!, organizationId!);
     return standardSuccessResponse(history);

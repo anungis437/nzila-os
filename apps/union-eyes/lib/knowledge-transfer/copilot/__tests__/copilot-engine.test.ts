@@ -16,6 +16,7 @@ vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: h.opera
 vi.mock('drizzle-orm', () => ({ sql: Object.assign((..._a: unknown[]) => ({}), { raw: (s: string) => s }) }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ generate: h.generate }),
+  toGatewayDataClass: (c: string) => c,
   buildOrgAiTrace: (o: string) => ({ orgId: o }),
   UE_APP_KEY: 'ue',
   UE_SYSTEM_ORG_ID: 'sys',

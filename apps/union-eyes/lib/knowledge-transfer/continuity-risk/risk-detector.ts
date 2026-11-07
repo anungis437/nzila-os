@@ -20,6 +20,7 @@ import { exitInterviews } from '@/db/schema';
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -202,7 +203,7 @@ export async function detectContinuityRisks(orgId: string): Promise<OrgContinuit
         { role: 'system', content: RISK_ANALYSIS_PROMPT },
         { role: 'user', content: buildRiskInput(publishedInterviews) },
       ],
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     try {

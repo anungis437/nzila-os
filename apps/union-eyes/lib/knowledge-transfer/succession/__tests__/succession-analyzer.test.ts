@@ -18,6 +18,7 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () 
 vi.mock('@/lib/api/errors', () => ({ ApiError: { internal: (m: string) => Object.assign(new Error(m), { status: 500 }) } }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ generate: generateMock }),
+  toGatewayDataClass: (c: string) => c,
   buildOrgAiTrace: () => ({}),
   UE_APP_KEY: 'ue',
   UE_SYSTEM_ORG_ID: 'sys',

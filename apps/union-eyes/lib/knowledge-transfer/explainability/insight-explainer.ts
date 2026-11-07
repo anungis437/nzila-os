@@ -20,6 +20,7 @@
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -157,7 +158,7 @@ export async function explainInsights(params: {
         content: `INSIGHTS TO EXPLAIN:\n${insightInput}\n\nSUPPORTING INTERVIEW DATA:\n${interviewContext}`,
       },
     ],
-    dataClass: 'internal',
+    dataClass: toGatewayDataClass('confidential'),
   });
 
   let parsedExplanations: Array<{

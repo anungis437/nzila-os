@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: mocks.mockGetAiClient,
+  toGatewayDataClass: (c: string) => c,
   buildOrgAiTrace: vi.fn(() => ({
     component: 'test',
     action: 'mock',

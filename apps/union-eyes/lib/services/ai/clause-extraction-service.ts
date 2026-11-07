@@ -9,6 +9,7 @@ import { createHash } from 'crypto';
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -162,7 +163,8 @@ async function extractTextFromPDF(
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
       input: `Extract all text from this collective bargaining agreement document at URL: ${pdfUrl}. Maintain the structure including article numbers, section numbers, and clause text. Format as plain text with clear section breaks.`,
-      dataClass: 'internal',
+      // The source document is the organization's own negotiated agreement text.
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     return response.content || '';
@@ -236,7 +238,7 @@ Return a JSON array of extracted clauses.`;
       profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
       promptKey: UE_PROFILES.CLAUSE_EXTRACTION,
       input: `${systemPrompt}\n\nExtract and classify all clauses from this ${context.jurisdiction} ${context.sector} collective bargaining agreement:\n\n${text}`,
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     const result = response.data as Record<string, unknown>;
@@ -365,7 +367,7 @@ export async function reExtractClause(
       profileKey: UE_PROFILES.CLAUSE_EXTRACTION,
       promptKey: UE_PROFILES.CLAUSE_EXTRACTION,
       input: `Re-analyze this clause with additional context and provide an improved classification and extraction.\n\nContext: ${context.surroundingClauses.join('\n\n')}\n\nFull Agreement Available: ${context.fullAgreementText.substring(0, 2000)}...\n\nProvide the best possible extraction for this clause.`,
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     const result = response.data as Record<string, unknown>;
@@ -391,7 +393,7 @@ export async function generateClauseSummary(
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.CLAUSE_SUMMARY,
       input: `Provide a concise 1-2 sentence summary of this collective bargaining agreement clause:\n\n${clauseContent}`,
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     return response.content || '';
@@ -425,7 +427,7 @@ export async function analyzeClauseQuality(
       profileKey: UE_PROFILES.CLAUSE_QUALITY,
       promptKey: UE_PROFILES.CLAUSE_QUALITY,
       input: `You are a labour law expert analyzing collective bargaining agreement clauses for clarity, enforceability, and best practices in ${context.jurisdiction}.\n\nAnalyze this ${context.clauseType} clause and provide:\n1. Overall quality rating (excellent/good/fair/poor)\n2. List of potential issues or ambiguities\n3. Suggestions for improvement\n\nClause: ${clause}`,
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     const result = response.data as Record<string, unknown>;

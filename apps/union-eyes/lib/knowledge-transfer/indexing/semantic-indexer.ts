@@ -22,6 +22,7 @@ import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import {
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -47,7 +48,7 @@ async function generateEmbedding(text: string, _orgId?: string): Promise<number[
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.EMBEDDINGS,
     input: text,
-    dataClass: 'internal',
+    dataClass: toGatewayDataClass('confidential'),
   });
   const embedding = result.embeddings[0];
   embeddingCache.setCachedEmbedding(text, 'ai-sdk', embedding).catch(() => {});
