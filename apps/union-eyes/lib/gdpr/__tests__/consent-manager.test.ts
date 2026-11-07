@@ -258,7 +258,7 @@ describe('DataExportService', () => {
     h.q.messagesFindMany.mockResolvedValue([{ id: 'm1', threadId: 't1', messageType: 'text', content: 'hi', fileName: null, status: 'sent', createdAt: new Date(), readAt: null }]);
     h.q.receiptsFindMany.mockResolvedValue([{ messageId: 'm1', readAt: new Date() }]);
     h.q.claimsFindMany.mockResolvedValue([{ claimId: 'cl1', claimNumber: 'CN', claimType: 'grievance', status: 'open', priority: 'high', incidentDate: new Date(), location: 'L', description: 'd', desiredOutcome: 'o', isAnonymous: false, progress: 50, createdAt: new Date(), resolvedAt: null }]);
-    h.q.claimUpdatesFindMany.mockResolvedValue([{ updateId: 'up1', claimId: 'cl1', updateType: 'note', content: 'c', createdAt: new Date() }]);
+    h.q.claimUpdatesFindMany.mockResolvedValue([{ updateId: 'up1', claimId: 'cl1', updateType: 'note', message: 'c', createdAt: new Date() }]);
     h.q.sessionsFindMany.mockResolvedValue([{ id: 'sess1', title: 'V', type: 'motion', meetingType: 'agm', startTime: new Date(), endTime: new Date() }]);
     h.q.votesFindMany.mockResolvedValue([{ sessionId: 'sess1', castAt: new Date(), receiptId: 'r', verificationCode: 'v', isAnonymous: false, voterType: 'member' }]);
     h.chainQueue = [[{ id: 'consent1' }]]; // getConsentData select
@@ -267,6 +267,9 @@ describe('DataExportService', () => {
     expect(result.data.profile).toEqual({ userId: 'u' });
     expect(result.data.communications[0].count).toBe(1);
     expect(result.data.claims[0].count).toBe(1);
+    // claimUpdates rows carry their note text on `message`, not `content`: a GDPR export that reads the wrong
+    // field silently omits the note from every data-access response.
+    expect(result.data.claims[1].data[0].content).toBe('c');
     expect(result.data.votes[0].count).toBe(1);
   });
 });

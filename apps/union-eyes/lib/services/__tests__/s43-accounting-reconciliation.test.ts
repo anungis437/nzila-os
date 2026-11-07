@@ -2,13 +2,46 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
+interface ReconciliationDoc {
+  problems: string[]
+  consistent: boolean
+  totals: {
+    overlayImplemented: number
+    overlayPartial: number
+    ledgerImplemented: number
+    creditedByEarlierRuns: number
+    unresolvedByOverlay: number
+    untouchedByOverlay: number
+    qualificationVerified: number
+    closed: number
+  }
+  mutuallyExclusiveAccounting: {
+    population: number
+    implemented: number
+    partial: number
+    untouched: number
+    partialIds: string[]
+    untouchedIds: string[]
+  }
+}
+
+interface OverlayDoc {
+  records: Array<{ engineeringCorrection?: { state?: string } | null }>
+}
+
+interface LedgerDoc {
+  entries: Record<string, { status?: string }>
+}
+
 const dir = join(process.cwd(), '../../docs/union-eyes/convergence/remediation')
-const read = (name: string) => JSON.parse(readFileSync(join(dir, name), 'utf8'))
+function read<T>(name: string): T {
+  return JSON.parse(readFileSync(join(dir, name), 'utf8')) as T
+}
 
 describe('Gate 0 accounting reconciliation', () => {
-  const rec = read('ue-gate0-accounting-reconciliation.json')
-  const overlay = read('ue-all-777-remediation-register.json')
-  const ledger = read('ue-gate0-defect-elimination.json')
+  const rec = read<ReconciliationDoc>('ue-gate0-accounting-reconciliation.json')
+  const overlay = read<OverlayDoc>('ue-all-777-remediation-register.json')
+  const ledger = read<LedgerDoc>('ue-gate0-defect-elimination.json')
 
   it('records no inconsistency between the overlay and the elimination ledger', () => {
     expect(rec.problems).toEqual([])
@@ -16,8 +49,8 @@ describe('Gate 0 accounting reconciliation', () => {
   })
 
   it('accounts for every corrected defect exactly once: ledger credits plus earlier-run credits equal the overlay total', () => {
-    const implemented = overlay.records.filter((r: any) => r.engineeringCorrection?.state === 'IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION').length
-    const ledgerImplemented = Object.values(ledger.entries).filter((e: any) => e.status === 'IMPLEMENTED_PENDING_QUALIFICATION').length
+    const implemented = overlay.records.filter((r) => r.engineeringCorrection?.state === 'IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION').length
+    const ledgerImplemented = Object.values(ledger.entries).filter((e) => e.status === 'IMPLEMENTED_PENDING_QUALIFICATION').length
     expect(rec.totals.overlayImplemented).toBe(implemented)
     expect(rec.totals.ledgerImplemented).toBe(ledgerImplemented)
     expect(rec.totals.creditedByEarlierRuns).toBe(implemented - ledgerImplemented)
