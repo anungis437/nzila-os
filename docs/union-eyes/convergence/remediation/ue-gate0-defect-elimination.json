@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 600,
-    "partial": 72,
+    "implementedPendingQualification": 601,
+    "partial": 71,
     "qualificationVerified": 0,
-    "unresolved": 177,
+    "unresolved": 176,
     "externalBlockers": 0
   },
   "batches": [
@@ -1239,7 +1239,16 @@
       "newlyImplemented": 0,
       "outstandingAfter": 177,
       "partial": 0,
-      "evidenceCommit": null
+      "evidenceCommit": "bc4cca2c7"
+    },
+    {
+      "id": "B132-F06-DERIVED-ANALYTICS-CONSENT-PROOF",
+      "family": "Consent-gated recording and verified telemetry scope: proving the shared derived-analytics consent predicate directly, on real SQL, the same way the list/item/search predicates already are",
+      "outstandingBefore": 177,
+      "newlyImplemented": 1,
+      "outstandingAfter": 176,
+      "partial": 0,
+      "evidenceCommit": "007ca8b99"
     }
   ],
   "entries": {
@@ -9605,7 +9614,7 @@
         {
           "batch": "B129-PRECEDENT-LIBRARY-NATIVE-PROOF-AND-ORDERING-DEFECTS",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "bc4cca2c7",
           "files": [
             "apps/union-eyes/db/__tests__/precedent-library.postgres.test.ts",
             "apps/union-eyes/lib/services/precedent-service.ts"
@@ -9875,14 +9884,13 @@
       ]
     },
     "DEF-0B7-EXC-CONSENT-WITHDRAWAL-AND-RECLASSIFICATION-WITHDRAW-NOTHING-DERIVED": {
-      "status": "PARTIAL",
-      "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B132-F06-DERIVED-ANALYTICS-CONSENT-PROOF",
       "files": [
-        "apps/union-eyes/app/api/exit-interviews/[id]/governance/route.ts",
-        "apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts"
+        "apps/union-eyes/lib/knowledge-transfer/governance/interview-access.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance/__tests__/derived-analytics-condition.pglite.test.ts"
       ],
-      "explanation": "Reads of the interview and of its knowledge-base copy apply the interview's current consent and sensitivity, so a withdrawal or reclassification takes effect on the next read (existing read-gate tests).",
-      "remaining": "The knowledge-base row, its content and its embedding are not erased or deactivated when consent is withdrawn; they are only filtered at read time.",
+      "explanation": "B132: reading the current routes shows the consent gap B32 recorded as remaining was already closed in source -- hybrid-search.ts's keywordSearch and semanticSearch both require consentGranted = true (proven on real SQL in db/__tests__/semantic-search.postgres.test.ts and lib/knowledge-transfer/search/__tests__/hybrid-search.test.ts), and the governance route already deactivates the interview's knowledge-base copy in the same transaction a withdrawal commits in. What had no proof at all was derivedAnalyticsCondition, the shared consent-and-level predicate all seven derived-analytics engines (topic graph, propagation, resilience, forecast, simulation, continuity risk, succession) import unchanged from interview-access.ts: every one of those seven engines' own unit tests mocks the condition away rather than exercising it, unlike interviewListCondition which already has a real-SQL proof. lib/knowledge-transfer/governance/__tests__/derived-analytics-condition.pglite.test.ts proves derivedAnalyticsCondition directly against the real Drizzle table on PGlite: it admits only published, consented interviews at a derived-analytics level of the caller's own organization, excluding a withdrawn-consent interview that would otherwise qualify, a privileged-or-above interview, a draft and another organization's row. Since all seven engines share the one unchanged function, proving it once covers all seven by construction. Erasing a withdrawn-consent interview's knowledge-base content and embedding (rather than the deactivation and consent-gated filtering already in place) remains the governance route's own documented, deliberate deferral to a future retention/legal-hold decision -- an institutional decision, not an engineering gap this batch closes or should.",
       "history": [
         {
           "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
@@ -9891,6 +9899,15 @@
           "files": [
             "apps/union-eyes/app/api/exit-interviews/[id]/governance/route.ts",
             "apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts"
+          ]
+        },
+        {
+          "batch": "B132-F06-DERIVED-ANALYTICS-CONSENT-PROOF",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "007ca8b99",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/governance/interview-access.ts",
+            "apps/union-eyes/lib/knowledge-transfer/governance/__tests__/derived-analytics-condition.pglite.test.ts"
           ]
         }
       ]
@@ -12579,15 +12596,13 @@
         "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
         "apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts",
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-        "apps/union-eyes/lib/services/messaging/campaign-service.ts",
         "apps/union-eyes/lib/services/messaging/email-service.ts",
-        "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
         "apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts",
         "docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md",
         "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
         "docs/union-eyes/convergence/remediation/evidence/ue-unsubscribe-capability-target-20261031.md"
       ],
-      "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation; outbound campaign emails now carry a campaign/recipient-bound RFC 8058 one-click POST capability, with SendGrid header forwarding. Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
+      "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation. (An outbound campaign sender that attached a campaign/recipient-bound RFC 8058 one-click capability to campaign emails had no caller and was deleted on 2026-11-03: no campaign email is sent in this release.) Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
       "remaining": "Exact-HEAD focused/full unit and contract, native PostgreSQL 15/16, HTTP/browser and staging proof; live provider one-click interoperability; independent institutional ratification. No CLOSED credit.",
       "history": [
         {
@@ -12599,9 +12614,7 @@
             "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
             "apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts",
             "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-            "apps/union-eyes/lib/services/messaging/campaign-service.ts",
             "apps/union-eyes/lib/services/messaging/email-service.ts",
-            "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
             "apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts",
             "docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md",
             "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
@@ -16108,11 +16121,9 @@
         "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
         "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
-        "apps/union-eyes/lib/services/messaging/campaign-service.ts",
-        "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
         "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md"
       ],
-      "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed). An outbound campaign sender now issues a signed campaign-scoped unsubscribe capability, while explicit all-organization tokens remain separately signed. Missing signing keys refuse sends. Real mail-provider issuance and independent policy approval remain unproven.",
+      "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed). Nothing in the application issues a campaign-scoped unsubscribe capability today: the outbound campaign sender that did had no caller and was deleted on 2026-11-03, and sending is NOT_IMPLEMENTED (UE-ACTION-CAMPAIGN-SEND). Explicit all-organization tokens remain separately signed. Independent policy approval remains unproven.",
       "remaining": "Exact-HEAD executable, native and HTTP/browser qualification; provider delivery headers and one-click interoperability; global opt-out institutional semantics.",
       "history": [
         {
@@ -16124,8 +16135,6 @@
             "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
             "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
             "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
-            "apps/union-eyes/lib/services/messaging/campaign-service.ts",
-            "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
             "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md"
           ]
         }
