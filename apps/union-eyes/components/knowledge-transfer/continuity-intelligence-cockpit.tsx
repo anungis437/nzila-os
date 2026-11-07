@@ -32,7 +32,8 @@ interface SuccessionFragilityReport {
     role: string;
     interviewCount: number;
     successorReadiness: 'none' | 'minimal' | 'partial' | 'adequate';
-    averageContinuityRiskScore: number;
+    averageContinuityRiskScore: number | null;
+    smallCellSuppressed?: boolean;
   }>;
   criticalOperationalGaps: string[];
   documentationPriorities: string[];
@@ -184,8 +185,9 @@ function SuccessionPanel() {
               </div>
               <p className="text-xs text-muted-foreground">
                 {role.interviewCount} interview{role.interviewCount !== 1 ? 's' : ''}
-                {role.averageContinuityRiskScore > 0 &&
+                {role.averageContinuityRiskScore != null && role.averageContinuityRiskScore > 0 &&
                   ` · avg risk ${role.averageContinuityRiskScore}/100`}
+                {role.smallCellSuppressed && ' · figures withheld (small sample)'}
               </p>
             </div>
           );

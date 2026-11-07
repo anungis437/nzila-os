@@ -87,6 +87,44 @@ describe('lib/knowledge-transfer/succession/succession-analyzer', () => {
     expect(member?.successorReadiness).toBe('none');
   });
 
+  // DEF-0B7-COGB-INTERVIEW-DERIVED-ROLE-OUTPUT-IDENTIFIES-SINGLE-DEPARTING-PERSON: a role with fewer than
+  // MIN_COHORT_SIZE (5) interviews must not carry that departing person's own years of service and risk score.
+  it('withholds years-of-service and risk score for a role below the minimum cohort size', async () => {
+    whereMock.mockResolvedValue([interview('steward', 80)]);
+    generateMock.mockResolvedValue({
+      content: JSON.stringify({
+        criticalOperationalGaps: [], documentationPriorities: [], continuityRecommendations: [], governanceMitigations: [],
+        executiveSummary: 'summary',
+      }),
+    });
+    const report = await analyzeSuccessionFragility('org-1');
+    const steward = report.roleSuccessionStatus.find((r) => r.role === 'steward');
+    expect(steward?.interviewCount).toBe(1);
+    expect(steward?.smallCellSuppressed).toBe(true);
+    expect(steward?.totalYearsOfServiceCaptured).toBeNull();
+    expect(steward?.averageContinuityRiskScore).toBeNull();
+    // successorReadiness is a coarse 4-value label, computed from the withheld figures but not itself withheld.
+    expect(steward?.successorReadiness).toBe('minimal');
+  });
+
+  it('reports years-of-service and risk score once a role reaches the minimum cohort size', async () => {
+    whereMock.mockResolvedValue([
+      interview('officer', 20), interview('officer', 30), interview('officer', 40), interview('officer', 50), interview('officer', 60),
+    ]);
+    generateMock.mockResolvedValue({
+      content: JSON.stringify({
+        criticalOperationalGaps: [], documentationPriorities: [], continuityRecommendations: [], governanceMitigations: [],
+        executiveSummary: 'summary',
+      }),
+    });
+    const report = await analyzeSuccessionFragility('org-1');
+    const officer = report.roleSuccessionStatus.find((r) => r.role === 'officer');
+    expect(officer?.interviewCount).toBe(5);
+    expect(officer?.smallCellSuppressed).toBe(false);
+    expect(officer?.totalYearsOfServiceCaptured).toBe(25);
+    expect(officer?.averageContinuityRiskScore).toBe(40);
+  });
+
   it('fails instead of returning a canned summary when the model reply is not usable', async () => {
     whereMock.mockResolvedValue([interview('steward', 50)]);
     generateMock.mockResolvedValue({ content: 'not json' });

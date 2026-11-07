@@ -11126,6 +11126,81 @@
           ]
         }
       ]
+    },
+    {
+      "id": "B140-F07-F11-VERIFIED-CLOSURES-AND-COHORT-SUPPRESSION",
+      "family": "Verification credits for already-merged authorization/consent fixes, plus new small-cell suppression for succession reporting",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B7-COGB-INTERVIEW-DERIVED-ROLE-OUTPUT-IDENTIFIES-SINGLE-DEPARTING-PERSON",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+            "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts",
+            "apps/union-eyes/components/knowledge-transfer/continuity-intelligence-cockpit.tsx"
+          ],
+          "explanation": "analyzeSuccessionFragility's per-role totalYearsOfServiceCaptured and averageContinuityRiskScore are now null (smallCellSuppressed: true) whenever a role's interviewCount is below MIN_COHORT_SIZE (5, matching the repo's existing small-cell convention in app/api/breaks/compliance/route.ts): a role built from 1-4 published exit interviews no longer discloses the precise summed years of service and averaged risk score that at n=1 is exactly that one departing person's own figures. successorReadiness (a coarse 4-value label) is still returned, computed from the withheld figures, since a label is far less identifying than the exact numbers. The consuming frontend component (continuity-intelligence-cockpit.tsx) was updated to treat the field as nullable and show a 'figures withheld' note instead of a stale truthy-check that happened to degrade gracefully. 2 new regression tests (below and at the threshold); topic-graph and propagation-map's isSingleSource flag was left unchanged on inspection: it signals knowledge-redundancy risk (a boolean, not a specific person's numeric figures) and is itself the organizational-resilience signal the feature exists to show, not a privacy violation on its own."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-LOCATION-CONSENT-IS-NOT-BOUND-TO-PURPOSE-ORGANIZATION-OR-STRIKE",
+          "status": "PARTIAL",
+          "files": [
+            "apps/union-eyes/services/geofence-privacy-service.ts",
+            "apps/union-eyes/services/__tests__/geofence-privacy-service.test.ts"
+          ],
+          "explanation": "VERIFIED (not new code): commit 8a5f606cd ('refuse unverified location strike and event associations') already closes the two concrete exploitation paths the register names. trackLocation throws 'Location tracking cannot link an unverified strike or event' for ANY caller-supplied strikeId/eventId (there is no organization-bound strike/event register to check them against, so neither is ever accepted, not merely 'accepted as any uuid and not verified' as the register describes) and throws 'Location tracking purpose is not covered by the current consent' for any purpose other than strike/picket/event (so meeting/organizing tracking - the register's 'need nothing beyond an opt-in' claim - is unreachable, not merely under-protected). hasValidConsent's context check (allowedDuringStrike/allowedDuringEvents) is purpose-category-scoped, closing the free-text purpose-mismatch concern now that only two fixed categories exist. services/__tests__/geofence-privacy-service.test.ts lines 230-231 assert both refusals directly (67/67 passing).",
+          "remaining": "member_location_consent.user_id is still unique by user alone with no organization column, so one consent grant authorizes strike/event tracking context for every organization the member belongs to, not just the organization where it was given. Closing this needs a schema change (composite unique on user_id+organization_id) touching every hasValidConsent/grant/revoke caller; deferred as its own, narrower item rather than attempted as a same-pass schema migration."
+        },
+        {
+          "prefix": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cnesst/anti-scab/route.ts",
+            "apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts",
+            "apps/union-eyes/lib/services/anti-scab-access.ts",
+            "apps/union-eyes/lib/services/__tests__/anti-scab-access.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s8-anti-scab-author.test.ts"
+          ],
+          "explanation": "VERIFIED (not new code), upgraded from B135's PARTIAL credit: commit a077c8ec4 added a createdBy column to anti_scab_violations (db/schema/domains/health-safety/cnesst-schema.ts:431, contradicting the register's 'has no createdBy column'), and reportedById/reportedByName are absent from the POST route's writableFields list (no longer client-settable, closing the identity-spoofing path; they are simply unpopulated rather than session-stamped, a completeness gap, not a security one). The item route's PATCH is a hand-written .strict() zod schema that does not declare resolved/penaltyAmount/injunctionGranted/tatFileNumber ('Tribunal outcomes ... are not the filer's to set'), and both routes scope reads/writes to antiScabAuthorCondition (the record's own author), not 'any steward of the organization'. 5/5 existing tests passing; no new test needed, the existing suite already proves author-scoping and outcome-field exclusion."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/location/consent/route.ts",
+            "apps/union-eyes/lib/location/consent-notice.ts",
+            "apps/union-eyes/app/api/__tests__/location-consent.route.test.ts"
+          ],
+          "explanation": "VERIFIED (not new code): commit ea8d4e2ac ('require an institution-supplied versioned location consent notice before grant') closes this. The route's locationConsentSchema IS applied (.safeParse, .strict()) and declares only noticeVersion/noticeDigest/acknowledged/allowedDuringStrike/allowedDuringEvents - consentText, purpose and purposeDescription are rejected if present in the body (unknown keys under .strict()) and are instead read from getLocationConsentNotice(), a server-owned notice object, and compared against the submitted noticeVersion/noticeDigest (409 on mismatch) before any grant. The stored consentVersion is notice.version (dynamic), not a fixed '1.0'. 14/14 existing route tests passing."
+        },
+        {
+          "prefix": "DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/committee-read-access.ts",
+            "apps/union-eyes/app/api/committees/[id]/meetings/route.ts",
+            "apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/route.ts",
+            "apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/attendance/route.ts",
+            "apps/union-eyes/app/api/committees/[id]/action-items/route.ts",
+            "apps/union-eyes/app/api/committees/[id]/documents/route.ts",
+            "apps/union-eyes/lib/services/__tests__/committee-read-access.test.ts",
+            "apps/union-eyes/app/api/__tests__/committees-minutes-scope.route.test.ts"
+          ],
+          "explanation": "VERIFIED (not new code): commit 343348f8f ('committee working record is read by staff and committee members only') added requireCommitteeReader (staff, or an active committee_memberships row, else the same 404 as a nonexistent committee) and canReadCommitteeMinutes/withholdMinutes (minutes are further restricted to an active member or an organization administrator, redacted for anyone else who can otherwise read the meeting). All 5 route groups the register names - meetings, minutes (via the meeting GET), attendance, action items (the list), documents - call requireCommitteeReader before returning committee working-record content. 13+4=17 existing tests passing.",
+          "remaining": "committees/[id]/intelligence (steward+, requireCommitteeScope only, no membership check) and a single action item's PATCH (requireCommitteeScope, steward-level write not gated to committee members) are narrower, not explicitly named by the register's title (which lists meetings/minutes/attendance/action items/documents, not intelligence snapshots), and were not changed here; flagged for a dedicated follow-up decision on whether steward-wide committee-intelligence read access is intentional."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B7-COGB-INTERVIEW-DERIVED-ROLE-OUTPUT-IDENTIFIES-SINGLE-DEPARTING-PERSON",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+            "apps/union-eyes/components/knowledge-transfer/continuity-intelligence-cockpit.tsx"
+          ]
+        }
+      ]
     }
   ],
   "uncreditedSourceEvidence": {

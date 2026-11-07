@@ -37,10 +37,12 @@ export interface RoleSuccessionStatus {
   role: string;
   /** Number of published exit interviews from this role */
   interviewCount: number;
-  /** Total years of captured organizational service */
-  totalYearsOfServiceCaptured: number;
-  /** Average continuity risk score across interviews from this role */
-  averageContinuityRiskScore: number;
+  /** Total years of captured organizational service. Null below MIN_COHORT_SIZE: a 1-4 interview count would carry exactly those departing people's own years of service. */
+  totalYearsOfServiceCaptured: number | null;
+  /** Average continuity risk score across interviews from this role. Null below MIN_COHORT_SIZE for the same reason. */
+  averageContinuityRiskScore: number | null;
+  /** True when interviewCount is below MIN_COHORT_SIZE and the two fields above are withheld rather than naming a specific departing person's figures. */
+  smallCellSuppressed: boolean;
   /** Operational areas with no documented procedure handoff */
   undocumentedAreas: string[];
   /** Key topics captured from this role */
@@ -72,6 +74,9 @@ export interface SuccessionFragilityReport {
 }
 
 const UNION_ROLES = ['member', 'steward', 'chief_steward', 'officer', 'admin'] as const;
+
+/** Below this many interviews, a role's aggregate years-of-service and risk score are exactly one or a few departing people's own figures (matches the repo's small-cell convention, e.g. app/api/breaks/compliance). */
+const MIN_COHORT_SIZE = 5;
 
 const SUCCESSION_PROMPT = `You are an organizational succession analyst for a union organization.
 
@@ -165,11 +170,13 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
         data.riskScores.length > 0
           ? Math.round(data.riskScores.reduce((a, b) => a + b, 0) / data.riskScores.length)
           : 0;
+      const smallCellSuppressed = data.interviewCount > 0 && data.interviewCount < MIN_COHORT_SIZE;
       return {
         role,
         interviewCount: data.interviewCount,
-        totalYearsOfServiceCaptured: data.totalYears,
-        averageContinuityRiskScore: avgRisk,
+        totalYearsOfServiceCaptured: smallCellSuppressed ? null : data.totalYears,
+        averageContinuityRiskScore: smallCellSuppressed ? null : avgRisk,
+        smallCellSuppressed,
         undocumentedAreas: [...data.undocumented].slice(0, 6),
         keyTopicsCaptured: [...data.topics].slice(0, 8),
         successorReadiness: scoreReadiness(data.interviewCount, avgRisk),
