@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 708,
-    "engineeringRemaining": 69,
+    "engineeringCorrected": 709,
+    "engineeringRemaining": 68,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 27
   },
@@ -5614,10 +5614,28 @@
       "title": "Timesheet ingest never writes member_employment_id or job_classification_id on an entry, payroll preparation therefore opens a blocking critical missing_employment_mapping event for every official run, approveRun refuses approval while a critical blocking event is open, and no route of the employer execution API sets the mapping or resolves a critical event, so an official payroll run cannot reach approval through this API.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/lib/employer-execution/resolve-employment-mapping.ts",
+          "apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts"
+        ],
+        "repair": "Added the external-payroll-identity resolution mechanism (deterministic, auditable, explicit-pair mapping; unresolved externalIds safely left for review) that was the one piece missing between ingest, the existing compliance gate, and approveRun.",
+        "regressionPaths": [
+          "apps/union-eyes/lib/employer-execution/__tests__/resolve-employment-mapping.pglite.test.ts"
+        ],
+        "limits": "Resolves member_employment_id/job_classification_id mapping only; does not address the other 2 UNTOUCHED defects in this tranche (DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH, DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY) or DEF-0B10-PEN-... (pension), which remain separate, unaddressed gaps.",
+        "state": "PARTIAL_SOURCE_HARDENING_CI_PENDING"
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "batch": "GATE0-PHASE2-PAYROLL-IDENTITY-RESOLUTION",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/lib/employer-execution/resolve-employment-mapping.ts; apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts; apps/union-eyes/lib/employer-execution/__tests__/resolve-employment-mapping.pglite.test.ts",
+        "sourceBranch": "fix/ue-gate0-final-convergence",
+        "explanation": "Built the resolution action the register said no route provided. A timesheet entry's employeeExternalId names an external payroll/HR system's own identifier, never a Union Eyes identity, so timesheet ingest correctly leaves member_employment_id/job_classification_id null and the existing engine correctly opens a critical, blocking missing_employment_mapping event; this pass adds the missing mechanism to resolve it, not a new detection or gate (both were already real and correct). POST /api/employer-execution/timesheets/:batchId/mapping accepts explicit, deterministic (employeeExternalId -> memberEmploymentId[, jobClassificationId]) pairs - no fuzzy or name-based auto-matching is attempted anywhere, and an externalId with no submitted mapping is left exactly as it was, so an unresolved match is safely held for review rather than silently defaulted. Every mapping is validated to reference a real member_employment (and job_classification, if given) row of the organization, and the member_employment's own employerId (when set) must match the batch's employer, before anything is written; an invalid reference refuses the whole request. After writing, the function re-derives the truth from current data (not the stale snapshot count the event opened with) and resolves the missing_employment_mapping event only for a run whose batch now has zero unmapped entries - at which point approveRun (lib/employer-execution/payroll-run-transitions.ts, unmodified) naturally stops finding an open blocking critical event and an official run can reach approval."
+      }
     },
     {
       "defectId": "DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH",

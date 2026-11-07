@@ -3,23 +3,23 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 708,
+    "overlayImplemented": 709,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 55,
+    "creditedByEarlierRuns": 56,
     "earlierRunCreditsWithIndependentRegressionEvidence": 32,
     "overlayPartial": 27,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 69,
-    "untouchedByOverlay": 42,
+    "unresolvedByOverlay": 68,
+    "untouchedByOverlay": 41,
     "qualificationVerified": 0,
     "closed": 0
   },
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 708,
+    "implemented": 709,
     "partial": 27,
-    "untouched": 42,
+    "untouched": 41,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
       "DEF-0B1-BILLING-SCHEDULER-LATENT",
@@ -56,7 +56,6 @@
       "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
       "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
       "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
-      "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
       "DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH",
       "DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY",
       "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
@@ -560,6 +559,18 @@
         "apps/union-eyes/lib/ai/chatbot-service.ts"
       ],
       "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
+      "batch": "GATE0-PHASE2-PAYROLL-IDENTITY-RESOLUTION",
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/lib/employer-execution/resolve-employment-mapping.ts",
+        "apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
+        "apps/union-eyes/lib/employer-execution/__tests__/resolve-employment-mapping.pglite.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
     },
     {
       "defectId": "DEF-0B6-CMP-CRUD-ORG-SCOPE-NO-OP-ON-TABLE-WITHOUT-ORG-COLUMN",
