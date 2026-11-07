@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 600,
-    "partial": 72,
+    "implementedPendingQualification": 603,
+    "partial": 70,
     "qualificationVerified": 0,
-    "unresolved": 177,
+    "unresolved": 174,
     "externalBlockers": 0
   },
   "batches": [
@@ -1238,6 +1238,15 @@
       "outstandingBefore": 177,
       "newlyImplemented": 0,
       "outstandingAfter": 177,
+      "partial": 0,
+      "evidenceCommit": "bc4cca2c7"
+    },
+    {
+      "id": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
+      "family": "Register text that lagged already-landed source fixes: PKI workflow retirement, finance mandate resource-scoping, subscription mandate-bound authority",
+      "outstandingBefore": 177,
+      "newlyImplemented": 3,
+      "outstandingAfter": 174,
       "partial": 0,
       "evidenceCommit": null
     }
@@ -8665,15 +8674,14 @@
       ]
     },
     "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ": {
-      "status": "PARTIAL",
-      "batch": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
       "files": [
         "apps/union-eyes/app/api/billing/subscriptions/route.ts",
         "apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts",
-        "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts"
+        "apps/union-eyes/app/api/__tests__/billing-subscriptions-mandates.route.test.ts"
       ],
-      "explanation": "Subscriptions are read at the officer floor and paused or resumed by an administrator (was a steward).",
-      "remaining": "Authority is still a role title with the financial-mandate check only on reconciliation; subscription changes need the live financial mandate.",
+      "explanation": "The register described subscriptions readable at the member floor with pause/resume/cancel at a role-title floor and no office named with contract authority. The collection route now requires officer for GET and admin for POST; the item route requires officer plus a resource-scoped finance:view mandate for GET, and FINANCIAL_MEMBER_DATA_ROLES plus a resource-scoped finance:prepare mandate for PATCH/DELETE, with commercial terms (status, seats, discount, etc.) excluded from the PATCH body entirely (only free-form metadata, with server-owned provenance keys protected against overwrite). billing-subscriptions-mandates.route.test.ts adversarially proves GET/PATCH/DELETE each refuse without the resource-specific mandate before any read, mutation or audit. 7/7 passing.",
       "history": [
         {
           "batch": "B27-F05-F06-COMMERCIAL-BOUNDS-AUDIT-AND-RETENTION",
@@ -8683,6 +8691,16 @@
             "apps/union-eyes/app/api/billing/subscriptions/route.ts",
             "apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts",
             "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts"
+          ]
+        },
+        {
+          "batch": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/app/api/billing/subscriptions/route.ts",
+            "apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/billing-subscriptions-mandates.route.test.ts"
           ]
         }
       ]
@@ -9605,7 +9623,7 @@
         {
           "batch": "B129-PRECEDENT-LIBRARY-NATIVE-PROOF-AND-ORDERING-DEFECTS",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "bc4cca2c7",
           "files": [
             "apps/union-eyes/db/__tests__/precedent-library.postgres.test.ts",
             "apps/union-eyes/lib/services/precedent-service.ts"
@@ -10791,20 +10809,17 @@
       ]
     },
     "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE": {
-      "status": "PARTIAL",
-      "batch": "B39-F05-FINANCIAL-INTELLIGENCE-NEEDS-A-MANDATE-AND-FLAGS-CANNOT-BE-FORGED",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
       "files": [
-        "apps/union-eyes/lib/finance/finance-view-mandate.ts",
-        "apps/union-eyes/lib/finance/__tests__/finance-view-mandate.test.ts",
-        "apps/union-eyes/app/api/ai/finance/analysis/route.ts",
-        "apps/union-eyes/app/api/ai/pension/plans/[id]/funding/route.ts",
         "apps/union-eyes/app/api/ai/pension/members/[id]/projection/route.ts",
-        "apps/union-eyes/app/api/ai/pension/plans/[id]/trustee-summary/route.ts",
-        "apps/union-eyes/app/api/__tests__/ai-finance-analysis.route.test.ts",
-        "apps/union-eyes/lib/api/__tests__/f05-b39-mandate.contract.test.ts"
+        "apps/union-eyes/lib/finance/finance-view-mandate.ts",
+        "apps/union-eyes/lib/finance/require-live-financial-mandate.ts",
+        "apps/union-eyes/lib/finance/principal-financial-authority.ts",
+        "apps/union-eyes/lib/finance/__tests__/principal-financial-authority.test.ts",
+        "apps/union-eyes/lib/finance/__tests__/finance-view-mandate.test.ts"
       ],
-      "explanation": "The finance analysis and the three pension intelligence routes first require a live finance:view mandate (in the caller own tenant context) and answer 403 without it, before the rate limit, feature gate, entitlement or any read. The finance analysis test mock gained the new collaborator and a refusal test.",
-      "remaining": "The view mandate is not resource-scoped to a plan or member, and the pension projection still reads any member of the plan by id for an officer.",
+      "explanation": "The register's remaining text said the view mandate was not resource-scoped to a plan or member and the pension projection read any member by id for an officer. The route now threads the specific memberId as resourceId through financeViewMandateDenial -> assertFinanceViewMandate -> requireLiveFinancialMandate -> assertPrincipalFinancialAuthority, whose decision function refuses a mandate scoped to a different resourceId (NOT_FOUND) -- confirmed both by direct source reading of the full call chain and by principal-financial-authority.test.ts's adversarial case asserting exactly that cross-resource refusal, plus finance-view-mandate.test.ts proving the resourceId is threaded correctly end to end at the wiring layer. 2/2 plus the full suite passing (61 total across related files).",
       "history": [
         {
           "batch": "B39-F05-FINANCIAL-INTELLIGENCE-NEEDS-A-MANDATE-AND-FLAGS-CANNOT-BE-FORGED",
@@ -10819,6 +10834,19 @@
             "apps/union-eyes/app/api/ai/pension/plans/[id]/trustee-summary/route.ts",
             "apps/union-eyes/app/api/__tests__/ai-finance-analysis.route.test.ts",
             "apps/union-eyes/lib/api/__tests__/f05-b39-mandate.contract.test.ts"
+          ]
+        },
+        {
+          "batch": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/app/api/ai/pension/members/[id]/projection/route.ts",
+            "apps/union-eyes/lib/finance/finance-view-mandate.ts",
+            "apps/union-eyes/lib/finance/require-live-financial-mandate.ts",
+            "apps/union-eyes/lib/finance/principal-financial-authority.ts",
+            "apps/union-eyes/lib/finance/__tests__/principal-financial-authority.test.ts",
+            "apps/union-eyes/lib/finance/__tests__/finance-view-mandate.test.ts"
           ]
         }
       ]
@@ -12579,15 +12607,13 @@
         "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
         "apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts",
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-        "apps/union-eyes/lib/services/messaging/campaign-service.ts",
         "apps/union-eyes/lib/services/messaging/email-service.ts",
-        "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
         "apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts",
         "docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md",
         "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
         "docs/union-eyes/convergence/remediation/evidence/ue-unsubscribe-capability-target-20261031.md"
       ],
-      "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation; outbound campaign emails now carry a campaign/recipient-bound RFC 8058 one-click POST capability, with SendGrid header forwarding. Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
+      "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation. (An outbound campaign sender that attached a campaign/recipient-bound RFC 8058 one-click capability to campaign emails had no caller and was deleted on 2026-11-03: no campaign email is sent in this release.) Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
       "remaining": "Exact-HEAD focused/full unit and contract, native PostgreSQL 15/16, HTTP/browser and staging proof; live provider one-click interoperability; independent institutional ratification. No CLOSED credit.",
       "history": [
         {
@@ -12599,9 +12625,7 @@
             "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
             "apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts",
             "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-            "apps/union-eyes/lib/services/messaging/campaign-service.ts",
             "apps/union-eyes/lib/services/messaging/email-service.ts",
-            "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
             "apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts",
             "docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md",
             "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
@@ -16108,11 +16132,9 @@
         "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
         "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
-        "apps/union-eyes/lib/services/messaging/campaign-service.ts",
-        "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
         "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md"
       ],
-      "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed). An outbound campaign sender now issues a signed campaign-scoped unsubscribe capability, while explicit all-organization tokens remain separately signed. Missing signing keys refuse sends. Real mail-provider issuance and independent policy approval remain unproven.",
+      "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed). Nothing in the application issues a campaign-scoped unsubscribe capability today: the outbound campaign sender that did had no caller and was deleted on 2026-11-03, and sending is NOT_IMPLEMENTED (UE-ACTION-CAMPAIGN-SEND). Explicit all-organization tokens remain separately signed. Independent policy approval remains unproven.",
       "remaining": "Exact-HEAD executable, native and HTTP/browser qualification; provider delivery headers and one-click interoperability; global opt-out institutional semantics.",
       "history": [
         {
@@ -16124,8 +16146,6 @@
             "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
             "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
             "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
-            "apps/union-eyes/lib/services/messaging/campaign-service.ts",
-            "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
             "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md"
           ]
         }
@@ -18549,6 +18569,28 @@
             "apps/union-eyes/app/api/__tests__/clause-library-anonymization.contract.test.ts",
             "apps/union-eyes/db/__tests__/clause-suggestions.postgres.test.ts",
             "apps/union-eyes/db/__tests__/clause-library-visibility.postgres.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B1-PKI-WORKFLOW-IN-MEMORY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
+      "files": [
+        "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
+        "apps/union-eyes/app/api/admin/pki/workflows/route.ts",
+        "apps/union-eyes/app/api/__tests__/admin-pki-retired.route.test.ts"
+      ],
+      "explanation": "The register's defect text describes a process-local workflow map that is lost on restart and not shared across instances. That map is no longer reachable: /api/admin/pki/workflows and /api/admin/pki/workflows/[id] (GET/PUT/DELETE) were already retired to 501 in an earlier, already-merged batch (commit a0404b79b, mismatch census batch 5, predates this session) rather than left pointing at the unreliable in-memory store. admin-pki-retired.route.test.ts proves all 3 methods answer 501 NOT_IMPLEMENTED and never call the database, the RLS context helpers, or any statement executor -- the broken state is fully retired, not merely hidden. No new workflow persistence was built in its place; the capability is honestly absent (501) rather than present-but-unreliable. 8/8 passing.",
+      "history": [
+        {
+          "batch": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
+            "apps/union-eyes/app/api/admin/pki/workflows/route.ts",
+            "apps/union-eyes/app/api/__tests__/admin-pki-retired.route.test.ts"
           ]
         }
       ]

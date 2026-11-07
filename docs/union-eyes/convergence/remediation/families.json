@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 652,
- "partial": 72,
- "outstanding": 125,
- "accountedFor": 125,
+ "corrected": 655,
+ "partial": 70,
+ "outstanding": 122,
+ "accountedFor": 122,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -84,17 +84,16 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 23,
+   "defects": 21,
    "severity": {
-    "HIGH": 4,
+    "HIGH": 2,
     "MEDIUM": 19,
     "LOW": 0
    },
    "namedRoutes": 1,
    "namedFiles": 0,
    "tranches": {
-    "0B.2": 2,
-    "0B.3": 1,
+    "0B.2": 1,
     "0B.5": 2,
     "0B.6": 2,
     "0B.7": 9,
@@ -219,16 +218,16 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 30,
+   "defects": 29,
    "severity": {
-    "HIGH": 2,
+    "HIGH": 1,
     "MEDIUM": 22,
     "LOW": 6
    },
    "namedRoutes": 5,
    "namedFiles": 0,
    "tranches": {
-    "0B.1": 4,
+    "0B.1": 3,
     "0B.2": 1,
     "0B.5": 4,
     "0B.6": 5,
@@ -394,16 +393,6 @@
   "F05-INPUT-VALIDATION-AND-BOUNDS": [
    {
     "id": "DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
     "severity": "HIGH",
     "partial": true
    },
@@ -709,10 +698,6 @@
    }
   ],
   "F12-OTHER-ROUTE-SPECIFIC": [
-   {
-    "id": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
-    "severity": "HIGH"
-   },
    {
     "id": "DEF-0B1-ALLOWLIST-DRIFT",
     "severity": "MEDIUM"
