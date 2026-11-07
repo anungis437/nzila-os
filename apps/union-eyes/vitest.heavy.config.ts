@@ -16,5 +16,11 @@ export default defineProject({
     hookTimeout: 180_000,
     fileParallelism: false,
     sequence: { groupOrder: 2 },
+    // The repository-scan census tests (response-shape-census, untyped-read-census)
+    // walk the whole app with the TypeScript compiler API and can exceed the default
+    // per-worker heap even running alone (observed SIGABRT with the default limit).
+    // A single heavy file already runs in its own forked process, so raising its
+    // ceiling costs nothing for the other, smaller heavy tests.
+    execArgv: ["--max-old-space-size=8192"],
   },
 } as unknown as Parameters<typeof defineProject>[0]);

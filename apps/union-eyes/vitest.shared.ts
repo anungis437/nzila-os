@@ -16,6 +16,8 @@ export const heavyTests = [
   "scripts/__tests__/runtime-schema-authority-oracle.test.ts",
   "scripts/__tests__/rls-storage-reachability-audit.test.ts",
   "scripts/__tests__/rls-verify-deadline-engine-policies.pglite.test.ts",
+  "scripts/__tests__/response-shape-census.test.ts",
+  "scripts/__tests__/untyped-read-census.test.ts",
   "db/__tests__/scoped-migrations-existing-env.test.ts",
   "db/__tests__/convergence-p0-contracts.test.ts",
   "lib/member-integrity/__tests__/member-query-importers.test.ts",

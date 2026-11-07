@@ -24,6 +24,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
   UE_APP_KEY: 'ue',
   UE_PROFILES: { CONTINUITY_RISK: 'p' },
   UE_SYSTEM_ORG_ID: 'sys',
+  toGatewayDataClass: (c: string) => c,
   getAiClient: () => ({ generate: (input: unknown) => (state.generate as (i: unknown) => unknown)(input) }),
 }));
 

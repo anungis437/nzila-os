@@ -29,7 +29,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }))
 vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: h.operation }))
-vi.mock('@/lib/ai/ai-client', () => ({ getAiClient: () => ({ embed: h.embed }), UE_APP_KEY: 'k', UE_PROFILES: { EMBEDDINGS: 'e' }, UE_SYSTEM_ORG_ID: 's' }))
+vi.mock('@/lib/ai/ai-client', () => ({ getAiClient: () => ({ embed: h.embed }), toGatewayDataClass: (c: string) => c, UE_APP_KEY: 'k', UE_PROFILES: { EMBEDDINGS: 'e' }, UE_SYSTEM_ORG_ID: 's' }))
 vi.mock('@/lib/ai/knowledge-base-embeddings', () => ({ writeKnowledgeBaseEmbedding: h.write }))
 vi.mock('@/lib/ai/vector-readiness', () => ({ KNOWLEDGE_BASE_EMBEDDING: {}, vectorColumnReady: h.ready }))
 vi.mock('@/lib/logger', () => ({ logger: { error: h.error } }))
