@@ -26,15 +26,6 @@ type UserRow = Awaited<ReturnType<typeof listPlatformUsers>>[number];
 type ActivityRow = Awaited<ReturnType<typeof recentMemberActivity>>[number];
 
 const stats = { totalMembers: 120, activeOrganizations: '4', totalOrganizations: 5, totalStorage: 1.5, activeToday: '7' };
-const activityRow = (overrides: Partial<ActivityRow> = {}): ActivityRow => ({
-  id: 'member-1',
-  type: 'member_added',
-  description: 'A. Worker joined Local 100 as steward',
-  user: 'A. Worker',
-  organizationName: 'Local 100',
-  timestamp: new Date('2026-03-16T12:00:00Z'),
-  ...overrides,
-});
 const userRow = (overrides: Partial<UserRow> = {}): UserRow => ({
   id: 'user-1',
   name: 'Alex Worker',
@@ -52,10 +43,8 @@ const localRow = (overrides: Record<string, unknown> = {}) => ({
   number: 'toronto-central',
   name: 'Toronto Central',
   region: 'ON',
-  memberCount: 40,
-  activeCount: 30,
-  president: 'Pat President',
-  contact: 'pat@example.com',
+  organizationType: 'local',
+  parentId: null,
   status: 'active',
   ...overrides,
 });
@@ -73,7 +62,6 @@ const health = {
 
 interface Server {
   stats: () => Response;
-  activity: () => Response;
   users: () => Response;
   locals: () => Response;
   health: () => Response;
@@ -86,7 +74,6 @@ let server: Server;
 const fetchMock = vi.fn(async (url: string, init?: RequestInit): Promise<Response> => {
   const method = init?.method ?? 'GET';
   if (url === '/api/admin/stats/overview') return server.stats();
-  if (url.startsWith('/api/admin/stats/activity')) return server.activity();
   if (url.startsWith('/api/admin/users/') && method === 'PUT') return server.userPut();
   if (url.startsWith('/api/admin/users/') && method === 'DELETE') return server.userDelete();
   if (url.startsWith('/api/admin/users')) return server.users();
@@ -100,7 +87,6 @@ const fetchMock = vi.fn(async (url: string, init?: RequestInit): Promise<Respons
 beforeEach(() => {
   server = {
     stats: () => standardSuccessResponse(stats),
-    activity: () => standardSuccessResponse([activityRow()]),
     users: () => standardSuccessResponse([userRow()]),
     locals: () => standardSuccessResponse([localRow()]),
     health: () => standardSuccessResponse(health),
@@ -166,28 +152,13 @@ describe('AdminPage: overview', () => {
     expect(await screen.findByText('120')).toBeInTheDocument();
   });
 
-  it('shows what each recent activity entry says, with its time', async () => {
+  it('explains that recent member activity across organizations is not shown, and never requests it (#1116, #1118)', async () => {
     renderPage();
+    await screen.findByText('120');
 
-    expect(await screen.findByText('A. Worker joined Local 100 as steward')).toBeInTheDocument();
-    expect(screen.getByText(new Date('2026-03-16T12:00:00Z').toLocaleString('en-CA'))).toBeInTheDocument();
-  });
-
-  it('says there is no activity when there is none, instead of “Loading activity...” for ever', async () => {
-    server.activity = () => standardSuccessResponse([]);
-    renderPage();
-
-    expect(await screen.findByText('No recent activity.')).toBeInTheDocument();
-    expect(screen.queryByText(/Loading activity/)).toBeNull();
-  });
-
-  it('says the activity could not be loaded when it cannot', async () => {
-    server.activity = () => standardErrorResponse(ErrorCode.FORBIDDEN, 'Platform staff authority is required');
-    renderPage();
-
-    expect(await screen.findByText('The recent activity could not be loaded')).toBeInTheDocument();
-    expect(screen.getByText('Platform staff authority is required')).toBeInTheDocument();
-    expect(screen.queryByText('No recent activity.')).toBeNull();
+    expect(screen.getByText(/Recent member activity across organizations is not shown here/)).toBeInTheDocument();
+    expect(fetchMock.mock.calls.some(([url]) => String(url).startsWith('/api/admin/stats/activity'))).toBe(false);
+    expect(screen.queryByText('The recent activity could not be loaded')).toBeNull();
   });
 
   it('links to the setup pages that exist', async () => {
@@ -206,9 +177,25 @@ describe('AdminPage: overview', () => {
     expect(await screen.findByText('The platform statistics could not be loaded')).toBeInTheDocument();
     expect(screen.getByText('Unexpected API response: incomplete statistics')).toBeInTheDocument();
   });
+
+  it('shows member figures the route does not measure (null, #1118) as not recorded, not as zero or a failure', async () => {
+    server.stats = () => standardSuccessResponse({ ...stats, totalMembers: null, activeToday: null });
+    renderPage();
+
+    expect(await screen.findByText('4')).toBeInTheDocument();
+    expect(screen.queryByText('The platform statistics could not be loaded')).not.toBeInTheDocument();
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
+    expect(screen.queryByText(/memberships? added or updated in the last 24 hours/)).not.toBeInTheDocument();
+  });
 });
 
 describe('AdminPage: users', () => {
+  it('says the directory covers only organizations the caller administers directly (#1116)', async () => {
+    renderPage();
+    open(enCA.admin.sections.userManagement);
+    expect(await screen.findByText(enCA.adminConsolePage.usersScopeNote)).toBeInTheDocument();
+  });
+
   it('lists the users the route answers with, and offers no add, edit or last login it cannot back', async () => {
     renderPage();
     open(enCA.admin.sections.userManagement);
@@ -318,22 +305,30 @@ describe('AdminPage: organizations', () => {
     open(enCA.admin.sections.localSections);
 
     expect(await screen.findByText('Toronto Central')).toBeInTheDocument();
-    expect(screen.getByText('Pat President')).toBeInTheDocument();
-    expect(screen.getByText('pat@example.com')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: new RegExp(enCA.admin.locals.addLocal, 'i') })).toBeNull();
     expect(screen.queryByRole('button', { name: /edit local|local settings/i })).toBeNull();
   });
 
-  it('shows a dash for a president or contact that is not recorded, and a 0% bar, not NaN, for an organization with no members', async () => {
+  // Issue #1116: the directory is the tenancy record; member counts and officer contacts are the organization's content.
+  it('shows no member counts, president or contact, and says why', async () => {
     server.locals = () =>
-      standardSuccessResponse([localRow({ president: '', contact: '', region: '', memberCount: 0, activeCount: 0, number: '' })]);
+      standardSuccessResponse([localRow({ memberCount: 40, activeCount: 30, president: 'Pat President', contact: 'pat@example.com' })]);
     renderPage();
     open(enCA.admin.sections.localSections);
 
     expect(await screen.findByText('Toronto Central')).toBeInTheDocument();
-    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(3);
-    expect(document.querySelector('[style*="NaN"]')).toBeNull();
-    expect(document.querySelector('[style*="width: 0%"]')).not.toBeNull();
+    expect(screen.getByText(enCA.adminConsolePage.directoryOnlyNote)).toBeInTheDocument();
+    for (const absent of ['Pat President', 'pat@example.com', '40', '30']) expect(screen.queryByText(absent)).toBeNull();
+    expect(screen.queryByText(new RegExp(`${enCA.admin.locals.totalMembers}|${enCA.admin.locals.president}`))).toBeNull();
+  });
+
+  it('shows a dash for a region that is not recorded', async () => {
+    server.locals = () => standardSuccessResponse([localRow({ region: '', number: '' })]);
+    renderPage();
+    open(enCA.admin.sections.localSections);
+
+    expect(await screen.findByText('Toronto Central')).toBeInTheDocument();
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows the route’s refusal instead of “No organizations found”', async () => {

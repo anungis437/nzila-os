@@ -461,6 +461,66 @@ describe("remittance-runs POST (execute)", () => {
     expect(h.state.committed).toBe(true);
   });
 
+  // DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE: each group reports its own total and the members who actually contribute to it. A group
+  // nobody contributes to is still reported, honestly, as zero with zero members, never as the run's item count.
+  it("reports a zero-amount group as zero with zero members, and counts only contributing members per group", async () => {
+    const POST = await load();
+    const rows = [
+      { ...item("5.00", "0.00", "0.00"), employeeExternalId: "E1" },
+      { ...item("0.00", "2.50", "0.00"), employeeExternalId: "E2" },
+      { ...item("5.00", "0", "0.00"), employeeExternalId: "E3" },
+    ];
+    h.state.selects = [[approvedRun()], [], [], rows];
+    h.state.inserts = [[{ id: "rr-1", runCode: "rr-9", status: "generated", generatedAt: new Date() }]];
+
+    await POST(ctx(EXECUTOR));
+
+    const groups = h.state.calls.find((c) => c.op === "insert" && Array.isArray(c.values) && c.values[0]?.groupKey !== undefined)!;
+    const byGroup = Object.fromEntries(
+      (groups.values as Array<Record<string, unknown>>).map((g) => [g.groupKey, { amount: g.amount, memberCount: g.memberCount, type: g.contributionType }]),
+    );
+    expect(byGroup).toEqual({
+      dues: { amount: "10", memberCount: "2", type: "dues" },
+      benefits: { amount: "2.5", memberCount: "1", type: "benefits" },
+      pension: { amount: "0", memberCount: "0", type: "pension" },
+    });
+    for (const g of groups.values as Array<Record<string, unknown>>) {
+      expect(g.organizationId).toBe(ORG);
+      expect(g.remittanceRunId).toBe("rr-1");
+    }
+
+    const run = h.state.calls.find((c) => c.op === "insert" && c.values?.totalDue !== undefined)!;
+    expect(run.values.totalDue).toBe("12.5");
+    expect(run.values.packageSummary).toMatchObject({ dues: 10, benefits: 2.5, pension: 0, itemCount: 3 });
+
+    // The CSV carries every member row, the zero columns written as 0.00, never dropped or left blank.
+    const csv = h.state.calls.find((c) => c.op === "insert" && Array.isArray(c.values) && c.values[0]?.artifactType === "remittance_csv")!;
+    const lines = String(csv.values[0].manifestJson.content).split("\n");
+    expect(lines).toEqual([
+      "employee_external_id,gross_pay,dues_amount,benefit_amount,pension_amount,net_pay",
+      "E1,100.00,5.00,0.00,0.00,80.00",
+      "E2,100.00,0.00,2.50,0.00,80.00",
+      "E3,100.00,5.00,0.00,0.00,80.00",
+    ]);
+  });
+
+  it("counts the due date in calendar days whatever the server's time zone and a daylight saving change", async () => {
+    const POST = await load();
+    const previous = process.env.TZ;
+    process.env.TZ = "America/Toronto";
+    try {
+      // 2026-03-01 + 15 days crosses the 2026-03-08 change to daylight time in Toronto.
+      h.state.selects = [[{ ...approvedRun(), periodEnd: "2026-03-01" }], [], [], [item("1.00", "0.00", "0.00")]];
+      h.state.inserts = [[{ id: "rr-1", runCode: "rr-9", status: "generated", generatedAt: new Date() }]];
+      await POST(ctx(EXECUTOR));
+    } finally {
+      if (previous === undefined) delete process.env.TZ;
+      else process.env.TZ = previous;
+    }
+    const run = h.state.calls.find((c) => c.op === "insert" && c.values?.totalDue !== undefined)!;
+    expect(run.values.dueDate).toBe("2026-03-16");
+  });
+
   it("chains the remittance from the run's own seal, not from a replay manifest", async () => {
     const POST = await load();
     const replay = { manifestJson: { chainLink: { entityType: "replay", linkId: "replay-link", sealHash: "rs", chainDepth: 2 } } };

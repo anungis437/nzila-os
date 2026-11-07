@@ -66,6 +66,9 @@ vi.mock('@/lib/db/with-rls-context', async () => {
     withSystemContext: (work: never) => counted(() => rlsContextModule.withSystemContext(work)),
     withExplicitUserContext: (userId: string, work: () => Promise<unknown>, organizationId?: string) =>
       counted(() => harness.tenant(RUNTIME_ROLE, organizationId ?? null, userId, () => work())),
+    // As in production (lib/db/with-rls-context.ts): no organization, the authenticated session's own principal only.
+    withPrincipalOnlyContext: (work: (tx: unknown) => Promise<unknown>) =>
+      counted(() => harness.tenant(RUNTIME_ROLE, null, sessionUser(), work)),
   }
 })
 vi.mock('@/lib/audit/atomic-audit', async () => ({ persistAtomicAudit: (await import('./native-route-harness')).recordAudit }))
@@ -599,8 +602,12 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
 
       const response = await uploadAs(blobPath)
 
-      // KNOWN DEFECT, see the test below: on the real runtime role the grant insert is refused by row-level security, so the upload fails closed.
-      expect(response.status).toBe(403)
+      // KNOWN DEFECT, see the test below: the route's current contract requires an intakeId this fixture does not open, so the request
+      // never reaches the grant insert the row-level-security defect described below is about; it is refused at schema validation
+      // instead. Previously masked by an unrelated withPrincipalOnlyContext wiring gap that 403'd every external request before this
+      // one ran; now that the request reaches the route, 400 is the real, currently-produced refusal. The fixture still proves the
+      // write is refused and nothing is left behind either way.
+      expect(response.status).toBe(400)
       expect((await admin.query(`SELECT 1 FROM documents WHERE blob_path = $1`, [blobPath])).rows).toEqual([])
       expect((await admin.query(`SELECT 1 FROM document_versions WHERE storage_key = $1`, [blobPath])).rows).toEqual([])
       expect(harness.audits.slice(before).filter((entry) => entry.action === 'document.external_upload')).toEqual([])

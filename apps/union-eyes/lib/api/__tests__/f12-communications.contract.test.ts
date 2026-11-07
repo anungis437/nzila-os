@@ -36,7 +36,9 @@ describe('F12 communications records', () => {
   it('a new survey or poll is created with only author fields', () => {
     const survey = /writableFields: \[([^\]]*)\]/.exec(read('communications/surveys'))?.[1] ?? '';
     for (const field of ['status', 'publishedAt', 'responseCount', 'completionRate']) expect(survey, field).not.toContain(`'${field}'`);
-    const poll = /writableFields: \[([^\]]*)\]/.exec(read('communications/polls'))?.[1] ?? '';
-    for (const field of ['status', 'publishedAt', 'totalVotes', 'uniqueVoters']) expect(poll, field).not.toContain(`'${field}'`);
+    // A poll is created through the dedicated path (DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH): its strict schema names no lifecycle or counter field.
+    expect(read('communications/polls')).toContain('body: createPollSchema');
+    const pollSchema = readFileSync(join(API, '..', '..', 'lib', 'communications', 'polls.ts'), 'utf8').split('export const createPollSchema')[1].split('.strict()')[0];
+    for (const field of ['status', 'publishedAt', 'totalVotes', 'uniqueVoters']) expect(pollSchema, field).not.toContain(`${field}:`);
   });
 });

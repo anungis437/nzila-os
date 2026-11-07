@@ -15,6 +15,8 @@ const { GET, POST } = crudRoutes({
   // An archived row is not listed.
   readCondition: sql`${newsletterDistributionLists.isActive} IS NOT FALSE`,
   // A distribution list names its audience and carries its filter criteria: staff read it.
+  // The fields the new-list form posts (dashboard/communications/distribution-lists/new). The subscriber count is the server's.
+  writableFields: ['name', 'description', 'listType', 'isActive'],
   readRole: 'steward',
   writeRole: 'steward',
 });

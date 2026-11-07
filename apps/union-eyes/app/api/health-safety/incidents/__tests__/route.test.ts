@@ -1,21 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import {
   buildIncidentCreateValues,
-  generateIncidentNumber,
   resolveIncidentDate,
   INCIDENT_TYPE_MAP,
   SEVERITY_MAP,
 } from '../route';
 
 describe('health-safety/incidents route helpers', () => {
-  describe('generateIncidentNumber', () => {
-    it('produces an INC-<year>-<uuid> formatted number with full UUID entropy', () => {
-      const num = generateIncidentNumber();
-      expect(num).toMatch(/^INC-\d{4}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
-      expect(num.length).toBeLessThanOrEqual(50);
-    });
-  });
-
   describe('resolveIncidentDate', () => {
     it('combines a date and time-of-day into a single ISO timestamp', () => {
       const iso = resolveIncidentDate({ incidentDate: '2026-03-15T00:00:00.000Z', incidentTime: '14:30' });
@@ -64,15 +55,13 @@ describe('health-safety/incidents route helpers', () => {
       expect(result.description).toBe('Worker slipped on wet floor');
     });
 
-    it('generates an incidentNumber when the client does not supply one', () => {
-      const result = buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'injury', severity: 'minor', location: 'Site A', description: 'desc' });
-      expect(result.incidentNumber).toMatch(/^INC-\d{4}-[0-9a-f-]{36}$/);
-    });
-
-    it('generates an authoritative incident number even if the caller supplies one', () => {
+    // DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS: the number is issued by the route from the
+    // organization's own sequence (lib/records/organization-record-number.ts), never by the builder and never from the body.
+    it('never carries an incident number, whether or not the caller sent one', () => {
+      expect(buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'injury', severity: 'minor', location: 'Site A', description: 'desc' })).not.toHaveProperty('incidentNumber');
       const result = buildIncidentCreateValues({ incidentDate: '2026-03-15T10:00:00.000Z', incidentType: 'injury', severity: 'minor', location: 'Site A', description: 'desc', incidentNumber: 'INC-2020-000001' });
-      expect(result.incidentNumber).not.toBe('INC-2020-000001');
-      expect(result.incidentNumber).toMatch(/^INC-\d{4}-[0-9a-f-]{36}$/);
+      expect(result).not.toHaveProperty('incidentNumber');
+      expect(JSON.stringify(result)).not.toContain('INC-2020-000001');
     });
 
     it('suppresses reporter identity fields in metadata when isAnonymous is true', () => {

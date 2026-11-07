@@ -1,8 +1,9 @@
 /**
- * Unit Tests — Dispatch Engine
+ * Unit Tests — Dispatch rule application
  *
- * Tests the dispatch priority scoring, candidate ranking,
- * and rule-based worker assignment logic.
+ * DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED: the previous scorer invented points (flat rotation and proximity bonuses, a full
+ * skills match when none was required, seniority times an arbitrary weight). A rule now orders candidates only when every candidate
+ * has the recorded value it needs, and otherwise is reported as not applied, leaving the candidates unranked.
  */
 import { describe, it, expect, vi } from "vitest";
 
@@ -14,100 +15,87 @@ vi.mock("@/db/db", () => ({
 }));
 
 import {
-  calculateDispatchPriority,
+  evaluateDispatchRules,
+  rankByDispatchRules,
   type MemberCandidate,
 } from "@/lib/services/dispatch-engine";
 
-// ─── Test Data ───────────────────────────────────────────────────────────────
+type RuleInput = Parameters<typeof rankByDispatchRules>[2][number];
 
-type RuleInput = Parameters<typeof calculateDispatchPriority>[2][number];
+const rule = (ruleType: RuleInput["ruleType"], priority = 1): RuleInput => ({ ruleType, ruleDefinition: {}, priority });
+const member = (memberId: string, overrides: Partial<MemberCandidate> = {}): MemberCandidate => ({
+  memberId,
+  seniority: null,
+  skills: null,
+  available: null,
+  ...overrides,
+});
 
-const baseCandidate: MemberCandidate = {
-  memberId: "m-001",
-  seniorityYears: 10,
-  available: true,
-  skills: ["welding", "plumbing"],
-};
+describe("evaluateDispatchRules", () => {
+  it("never applies rotation or proximity: nothing records a rotation order or a location", () => {
+    const outcomes = evaluateDispatchRules([member("m1", { seniority: 3 })], [], [rule("rotation"), rule("geographic_proximity")]);
+    expect(outcomes.map((o) => o.applied)).toEqual([false, false]);
+    expect(outcomes[0].reason).toMatch(/no rotation order/);
+    expect(outcomes[1].reason).toMatch(/no member location/);
+  });
 
-const seniorityRule: RuleInput = {
-  ruleType: "seniority",
-  ruleDefinition: {},
-  priority: 2,
-};
+  it("does not apply skills or availability when no member record holds them", () => {
+    const outcomes = evaluateDispatchRules([member("m1")], ["welding"], [rule("skills_match"), rule("availability")]);
+    expect(outcomes).toEqual([
+      { ruleType: "skills_match", priority: 1, applied: false, reason: "Not applied: no record of member skills exists." },
+      { ruleType: "availability", priority: 1, applied: false, reason: "Not applied: no record of member availability exists." },
+    ]);
+  });
 
-const skillsRule: RuleInput = {
-  ruleType: "skills_match",
-  ruleDefinition: {},
-  priority: 3,
-};
+  it("does not treat a request with no required skills as a full match", () => {
+    const [outcome] = evaluateDispatchRules([member("m1", { skills: ["welding"] })], [], [rule("skills_match")]);
+    expect(outcome.applied).toBe(false);
+    expect(outcome.reason).toMatch(/names no required skills/);
+  });
 
-const availabilityRule: RuleInput = {
-  ruleType: "availability",
-  ruleDefinition: {},
-  priority: 2,
-};
+  it("does not apply seniority when any candidate has none recorded", () => {
+    const [outcome] = evaluateDispatchRules([member("m1", { seniority: 4 }), member("m2")], [], [rule("seniority")]);
+    expect(outcome.applied).toBe(false);
+    expect(outcome.reason).toBe("Not applied: 1 of 2 candidates have no recorded seniority.");
+  });
+});
 
-const proximityRule: RuleInput = {
-  ruleType: "geographic_proximity",
-  ruleDefinition: {},
-  priority: 1,
-};
+describe("rankByDispatchRules", () => {
+  it("leaves candidates unranked, in their given order, when no rule has data", () => {
+    const ranking = rankByDispatchRules([member("a"), member("b")], ["welding"], [rule("skills_match"), rule("rotation")]);
+    expect(ranking.status).toBe("unranked");
+    expect(ranking.reason).toMatch(/no configured dispatch rule has the member data/);
+    expect(ranking.candidates.map((c) => [c.memberId, c.rank])).toEqual([["a", null], ["b", null]]);
+  });
 
-// ─── calculateDispatchPriority ───────────────────────────────────────────────
+  it("is unranked when the organization has no rules", () => {
+    const ranking = rankByDispatchRules([member("a", { seniority: 1 })], [], []);
+    expect(ranking.status).toBe("unranked");
+    expect(ranking.reason).toMatch(/no dispatch rules configured/);
+  });
 
-describe("calculateDispatchPriority", () => {
-  it("returns a numeric score", () => {
-    const score = calculateDispatchPriority(
-      baseCandidate,
+  it("orders by recorded seniority when every candidate has one, and reports the other rules as not applied", () => {
+    const ranking = rankByDispatchRules(
+      [member("junior", { seniority: 2 }), member("senior", { seniority: 20 })],
       ["welding"],
-      [seniorityRule],
+      [rule("seniority", 2), rule("skills_match", 3)],
     );
-    expect(typeof score).toBe("number");
-    expect(score).toBeGreaterThanOrEqual(0);
+    expect(ranking.status).toBe("ranked");
+    expect(ranking.candidates.map((c) => [c.memberId, c.rank])).toEqual([["senior", 1], ["junior", 2]]);
+    expect(ranking.rules.find((r) => r.ruleType === "skills_match")?.applied).toBe(false);
   });
 
-  it("higher seniority yields higher score", () => {
-    const senior: MemberCandidate = { ...baseCandidate, seniorityYears: 20 };
-    const junior: MemberCandidate = { ...baseCandidate, seniorityYears: 2 };
-
-    const seniorScore = calculateDispatchPriority(senior, ["welding"], [seniorityRule]);
-    const juniorScore = calculateDispatchPriority(junior, ["welding"], [seniorityRule]);
-
-    expect(seniorScore).toBeGreaterThan(juniorScore);
-  });
-
-  it("full skill match scores higher than partial", () => {
-    const perfect: MemberCandidate = { ...baseCandidate, skills: ["welding", "plumbing"] };
-    const partial: MemberCandidate = { ...baseCandidate, skills: ["welding"] };
-    const none: MemberCandidate = { ...baseCandidate, skills: ["painting"] };
-
-    const required = ["welding", "plumbing"];
-    const perfectScore = calculateDispatchPriority(perfect, required, [skillsRule]);
-    const partialScore = calculateDispatchPriority(partial, required, [skillsRule]);
-    const noneScore = calculateDispatchPriority(none, required, [skillsRule]);
-
-    expect(perfectScore).toBeGreaterThan(partialScore);
-    expect(partialScore).toBeGreaterThan(noneScore);
-  });
-
-  it("unavailable candidate gets zero for availability rule", () => {
-    const unavailable: MemberCandidate = { ...baseCandidate, available: false };
-    const score = calculateDispatchPriority(unavailable, ["welding"], [availabilityRule]);
-    expect(score).toBe(0);
-  });
-
-  it("combined rules produce higher max score", () => {
-    const all = [seniorityRule, skillsRule, availabilityRule, proximityRule];
-    const single = [seniorityRule];
-
-    const allScore = calculateDispatchPriority(baseCandidate, ["welding"], all);
-    const singleScore = calculateDispatchPriority(baseCandidate, ["welding"], single);
-
-    expect(allScore).toBeGreaterThanOrEqual(singleScore);
-  });
-
-  it("returns 0 for empty rules", () => {
-    const score = calculateDispatchPriority(baseCandidate, ["welding"], []);
-    expect(score).toBe(0);
+  it("applies rules in precedence order and falls through on a tie, without adding points", () => {
+    const ranking = rankByDispatchRules(
+      [
+        member("partial", { seniority: 10, skills: ["welding"] }),
+        member("full-junior", { seniority: 1, skills: ["welding", "plumbing"] }),
+        member("full-senior", { seniority: 9, skills: ["Welding", "plumbing"] }),
+      ],
+      ["welding", "plumbing"],
+      [rule("seniority", 1), rule("skills_match", 5)],
+    );
+    expect(ranking.candidates.map((c) => c.memberId)).toEqual(["full-senior", "full-junior", "partial"]);
+    expect(ranking.candidates[0]).not.toHaveProperty("score");
   });
 });

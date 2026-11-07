@@ -20,6 +20,13 @@ const CLOCK_SKEW_MS = 5 * 60_000;
 
 export const isTerminalSignatureState = (status: string): boolean => (TERMINAL as readonly string[]).includes(status);
 
+/**
+ * Whether a stored document is held by an external signature provider. A document stored with provider "internal" was
+ * created by the removed built-in stub: its envelope id was minted locally and no provider holds it, so there is nothing
+ * to ask for a status and nothing to void at a provider.
+ */
+export const isExternalSignatureProvider = (provider: string | null | undefined): boolean => !!provider && EXTERNAL_PROVIDERS.has(provider);
+
 export interface StoredSignatureState {
   status: string;
   provider: string;

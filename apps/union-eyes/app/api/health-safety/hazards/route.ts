@@ -5,6 +5,7 @@ import { crudRoutes } from '@/lib/api/crud-factory';
 import { ne } from 'drizzle-orm';
 import { hazardReports } from '@/db/schema';
 import { ApiError } from '@/lib/api/errors';
+import { issueOrganizationRecordNumber } from '@/lib/records/organization-record-number';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,11 +34,6 @@ const VALID_HAZARD_CATEGORIES = new Set([
   'working_at_heights', 'machinery', 'other',
 ]);
 const VALID_HAZARD_LEVELS = new Set(['low', 'moderate', 'high', 'critical', 'extreme']);
-
-export function generateReportNumber(): string {
-  const year = new Date().getFullYear();
-  return `HAZ-${year}-${crypto.randomUUID()}`;
-}
 
 /**
  * Normalize the documented mobile/legacy hazard form aliases before the
@@ -108,8 +104,8 @@ export function buildHazardCreateValues(values: Record<string, unknown>): Record
     );
   }
 
+  // The report number is not set here: the server issues it from the organization's own sequence (see beforeCreate).
   return {
-    reportNumber: generateReportNumber(),
     hazardCategory: category,
     hazardLevel: level,
     specificLocation,
@@ -148,7 +144,11 @@ const { GET, POST } = crudRoutes({
     'reportedByName', 'reporterContactInfo', 'workplaceName',
     'department', 'whoIsAtRisk', 'existingControls', 'photoUrls',
   ],
-  beforeCreate: (values) => buildHazardCreateValues(values),
+  // The number is the next in this organization's HAZ-<year>- sequence, issued in the transaction that inserts the row; the body cannot supply it.
+  beforeCreate: async (values, ctx) => ({
+    ...buildHazardCreateValues(values),
+    reportNumber: await issueOrganizationRecordNumber('hazard', ctx.organizationId),
+  }),
   // Preserve reporter anonymity in both the row and its mandatory audit entry.
   anonymousCreate: (values) => values.isAnonymous === true,
 });

@@ -135,6 +135,23 @@ describe('SignatureService authority and atomic audit', () => {
       expect(m.audit).not.toHaveBeenCalled();
     });
 
+    // DEF-0B11-SOC-INTERNAL-SIGNATURE-PROVIDER-IS-A-STUB...: a document stored with provider "internal" carries a locally minted envelope id
+    // that no provider holds. Its void used to be attempted against a provider that does not exist, so it was refused for ever.
+    it('voids a legacy internal document locally without asking any provider, and audits that no provider was involved', async () => {
+      m.documentFind.mockResolvedValue({ ...DOC, provider: 'internal', providerEnvelopeId: 'internal_env_123' });
+      await SignatureService.voidDocument('d1', 'sender', 'never sent', 'o1');
+      expect(m.voidEnvelope).not.toHaveBeenCalled();
+      expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'signature.document.void', details: expect.objectContaining({ voidedAtProvider: false }) }));
+    });
+
+    it('still voids an external document at its provider first', async () => {
+      m.documentFind.mockResolvedValue({ ...DOC, provider: 'docusign', providerEnvelopeId: 'env-1' });
+      m.voidEnvelope.mockResolvedValue(undefined);
+      await SignatureService.voidDocument('d1', 'sender', 'why', 'o1');
+      expect(m.voidEnvelope).toHaveBeenCalledWith('env-1', 'why');
+      expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ details: expect.objectContaining({ voidedAtProvider: true }) }));
+    });
+
     it('is a conflict with no audit when the document completed in the meantime', async () => {
       m.voidUpdate = [];
       await expect(SignatureService.voidDocument('d1', 'sender', 'why', 'o1')).rejects.toBeInstanceOf(SignatureAuthorityError);

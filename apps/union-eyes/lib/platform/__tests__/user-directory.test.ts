@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { abbreviateName, escapeLike, maskEmail, MIN_SEARCH_LENGTH, normalizeSearch } from '../user-directory'
+import { abbreviateName, escapeLike, listPlatformUsers, maskEmail, MIN_SEARCH_LENGTH, normalizeSearch } from '../user-directory'
 
 // DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ: the projections that keep a cross-organization read to the minimum necessary.
 describe('maskEmail', () => {
@@ -61,5 +61,13 @@ describe('search term handling', () => {
     expect(normalizeSearch('ab')).toEqual({ term: 'ab', tooShort: true })
     expect(normalizeSearch('abc')).toEqual({ term: 'abc', tooShort: false })
     expect(MIN_SEARCH_LENGTH).toBe(3)
+  })
+})
+
+// Issue #1116: a caller who administers no organization directly reads no membership at all.
+describe('listPlatformUsers', () => {
+  it('reads nothing when it is bounded to no organization', async () => {
+    const tx = { select: () => { throw new Error('the membership table was read') } }
+    await expect(listPlatformUsers(tx as never, { organizationIds: [] })).resolves.toEqual([])
   })
 })

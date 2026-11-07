@@ -88,7 +88,8 @@ export async function computeAdaptiveResilience(
     );
 
     let priorityDelta = 0;
-    let adjustedGain = strategy.projectedResilienceGain;
+    // The roadmap's projected gain is not measured (null), so there is no gain to adjust: the previous +5/+2/-3 adjustments were applied
+    // to literal per-strategy gains. Only the priority change, which rests on the organization's own history, is stated.
     let confidence: AdaptedRecommendation['confidence'] = 'low';
 
     if (historyStrength < 3) {
@@ -96,17 +97,14 @@ export async function computeAdaptiveResilience(
       confidence = 'low';
     } else if (reason === 'historically_effective') {
       priorityDelta = 2;
-      adjustedGain = Math.min(strategy.projectedResilienceGain + 5, 30);
       elevated++;
       confidence = 'high';
     } else if (reason === 'score_correlation') {
       priorityDelta = 1;
-      adjustedGain = Math.min(strategy.projectedResilienceGain + 2, 30);
       elevated++;
       confidence = 'medium';
     } else if (reason === 'unproven_approach' && decliningPeriods.length > improvingPeriods.length) {
       priorityDelta = -1;
-      adjustedGain = Math.max(strategy.projectedResilienceGain - 3, 0);
       deprioritized++;
       confidence = 'low';
     } else {
@@ -122,8 +120,8 @@ export async function computeAdaptiveResilience(
       priorityDelta,
       adaptationReason: reason,
       historicalEvidence: evidence,
-      adjustedResilienceGain: adjustedGain,
-      originalResilienceGain: strategy.projectedResilienceGain,
+      adjustedResilienceGain: null,
+      originalResilienceGain: strategy.projectedResilienceGain ?? null,
       confidence,
     };
   });

@@ -7,7 +7,7 @@ const m = vi.hoisted(() => ({
   enforceAISafety: vi.fn(),
   dataIngestion: { ingest: vi.fn() },
   entityExtraction: { extract: vi.fn() },
-  ragPipeline: { addDocuments: vi.fn() },
+  index: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
@@ -23,7 +23,7 @@ vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntit
 vi.mock('@nzila/policies', () => ({ enforceAISafety: m.enforceAISafety }));
 vi.mock('@/lib/ai/data-ingestion', () => ({ dataIngestion: m.dataIngestion }));
 vi.mock('@/lib/ai/entity-extraction', () => ({ entityExtraction: m.entityExtraction }));
-vi.mock('@/lib/ai/rag-pipeline', () => ({ ragPipeline: m.ragPipeline }));
+vi.mock('@/lib/ai/durable-ingest-index', () => ({ indexIngestedDocument: m.index, IngestTooLargeToIndexError: class extends Error {} }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 
 import { POST } from '../ai/ingest/route';

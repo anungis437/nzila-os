@@ -125,7 +125,7 @@ export function computeKpiSnapshot(input: KpiComputeInput): UECognitionKpiSnapsh
   const engagementSnaps = listEngagementSnapshots().filter((s) => s.subject.orgId === orgId)
   void engagementSnaps
   const disengagedStart = input.baseline.disengagedMemberCount
-  const recoveryPct = disengagedStart !== null && disengagedStart > 0
+  const recoveryPct = disengagedStart !== null && disengagedStart > 0 && disengagedEnd !== null
     ? ((disengagedStart - disengagedEnd) / disengagedStart) * 100
     : null
 

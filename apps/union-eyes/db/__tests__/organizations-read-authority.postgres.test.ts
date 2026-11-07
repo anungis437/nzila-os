@@ -288,11 +288,11 @@ describe.skipIf(!URL)('organization read routes on the combined schema, as the s
     expect((await GET(get('/api/organizations/not-a-uuid/ancestors'), params('not-a-uuid'))).status).toBe(400)
   })
 
-  it('analytics is given only to the organization\'s own administrator, read under its row-level policy; everyone else reads 404', async () => {
+  it('analytics is given only to the organization\'s own officers and administrators (#1118), read under its row-level policy; everyone else reads 404', async () => {
     const { GET } = await import('../../app/api/organizations/[id]/analytics/route')
     state.platformAdmins.add('platform-1')
     for (const [user, status] of [
-      ['member-b', 404], ['member-a', 404], ['steward-a', 404], ['officer-a', 404], ['admin-fed', 404], ['platform-1', 404], ['removed-a', 404], ['admin-a', 200],
+      ['member-b', 404], ['member-a', 404], ['steward-a', 404], ['officer-a', 200], ['admin-fed', 404], ['platform-1', 404], ['removed-a', 404], ['admin-a', 200],
     ] as const) {
       as(user)
       expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status, user).toBe(status)

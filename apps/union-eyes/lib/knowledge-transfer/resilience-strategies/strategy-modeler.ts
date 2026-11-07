@@ -150,31 +150,13 @@ function inferCurrentMaturity(
   return 'initial';
 }
 
-function computeStrategyGain(
-  strategyType: StrategyType,
-  singleSourceCount: number,
-  govConcentration: number,
-  vendorConcentration: number,
-): { resilience: number; governance: number; dependency: number } {
-  const base: Record<StrategyType, [number, number, number]> = {
-    documentation_foundation:         [18, 10, 15],
-    knowledge_decentralization:        [22, 12, 25],
-    governance_distribution:           [12, 30, 10],
-    operational_redundancy:            [20, 8, 20],
-    vendor_diversification:            [10, 5, 30],
-    continuity_mentorship_program:     [15, 15, 18],
-    institutional_transfer_initiative: [25, 18, 20],
-  };
-  const [r, g, d] = base[strategyType];
-  const singleSourceBonus = Math.min(10, singleSourceCount);
-  const govBonus = Math.min(8, govConcentration / 10);
-  const vendorBonus = Math.min(8, vendorConcentration / 10);
-  return {
-    resilience: Math.min(35, r + (strategyType.includes('knowledge') ? singleSourceBonus : 0)),
-    governance: Math.min(40, g + (strategyType.includes('governance') ? govBonus : 0)),
-    dependency: Math.min(40, d + (strategyType.includes('vendor') ? vendorBonus : 0)),
-  };
-}
+/**
+ * No validated model estimates what a strategy will gain. The previous per-strategy table of resilience, governance and dependency
+ * "gains" (plus bonuses scaled from node counts) was a set of literals presented as projections for this organization, so every
+ * projected gain is null and the roadmap says why.
+ */
+export const PROJECTED_GAIN_NOT_MEASURED_REASON =
+  'Not measured: no validated model estimates the resilience, governance or dependency gain of a strategy for this organization.';
 
 /**
  * Build an organizational resilience roadmap.
@@ -217,19 +199,15 @@ export async function buildResilienceRoadmap(orgId: string): Promise<ResilienceR
 
   const strategies: ResilienceStrategyModel[] = selectedTypes.map((type) => {
     const template = STRATEGY_CATALOG[type];
-    const gains = computeStrategyGain(type, singleSourceCount, govConcentration, vendorConcentration);
     const currentMaturity = inferCurrentMaturity(currentScore, type);
     return {
       ...template,
       currentMaturity,
-      projectedResilienceGain: gains.resilience,
-      governanceStabilityGain: gains.governance,
-      dependencyReductionImpact: gains.dependency,
+      projectedResilienceGain: null,
+      governanceStabilityGain: null,
+      dependencyReductionImpact: null,
     };
   });
-
-  const totalGain = strategies.reduce((s, st) => s + st.projectedResilienceGain, 0);
-  const projectedScore = Math.min(100, currentScore + Math.round(totalGain * 0.7));
 
   // Phase buckets
   const phase1QuickWins: string[] = [];
@@ -261,7 +239,9 @@ export async function buildResilienceRoadmap(orgId: string): Promise<ResilienceR
     organizationId: orgId,
     generatedAt: new Date().toISOString(),
     currentScore,
-    projectedScore,
+    // No projected score: it was the current score plus 70% of the literal gains above.
+    projectedScore: null,
+    projectionNotMeasuredReason: PROJECTED_GAIN_NOT_MEASURED_REASON,
     strategies,
     phase1QuickWins,
     phase2Foundation,

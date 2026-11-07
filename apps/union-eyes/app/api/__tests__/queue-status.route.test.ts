@@ -66,37 +66,80 @@ describe('queue status route', () => {
     expect(body.queue).toBeNull()
   })
 
-  // DEF-0B12-PLT-QUEUE-STATUS-SERVICE-KEY-IS-THE-SHARED-AI-KEY-COMPARED-WITH-A-PLAIN-EQUALITY
-  it('accepts the control-plane service key, and refuses a wrong or different-length key without the admin path', async () => {
-    process.env.AI_SERVICE_KEY = 'service-key-value'
-    process.env.DJANGO_API_URL = 'https://django.local'
-    mocks.getAllQueueStats.mockResolvedValue([])
-    mocks.getFailedJobs.mockResolvedValue([])
-    mocks.requireApiAuth.mockRejectedValue(new Error('no session'))
-
-    const ok = await GET(new Request('http://localhost/api/union-eyes/queue-status', { headers: { 'x-service-key': 'service-key-value' } }))
-    expect(ok.status).toBe(200)
-    for (const wrong of ['service-key-valuX', 'short', '']) {
-      const refused = await GET(new Request('http://localhost/api/union-eyes/queue-status', { headers: { 'x-service-key': wrong } }))
-      expect(refused.status).toBe(401)
-    }
-    delete process.env.AI_SERVICE_KEY
-  })
-
-  it('prefers a dedicated queue-status key, and in production does not accept the shared AI key (B93)', async () => {
-    process.env.QUEUE_STATUS_SERVICE_KEY = 'queue-key-value'
-    process.env.AI_SERVICE_KEY = 'service-key-value'
-    process.env.DJANGO_API_URL = 'https://django.local'
-    mocks.getAllQueueStats.mockResolvedValue([])
-    mocks.getFailedJobs.mockResolvedValue([])
-    mocks.requireApiAuth.mockRejectedValue(new Error('no session'))
+  // DEF-0B12-PLT-QUEUE-STATUS-SERVICE-KEY-IS-THE-SHARED-AI-KEY-COMPARED-WITH-A-PLAIN-EQUALITY, issue #1118
+  describe('machine path: QUEUE_STATUS_SERVICE_KEY only', () => {
+    const QUEUE_KEY = 'queue-status-service-key-of-32-chars!!'
+    const AI_KEY = 'ai-service-key-that-is-at-least-32-chars'
+    const METRICS_KEY = 'ue-metrics-service-key-of-32-chars-long!'
     const withKey = (key: string) => GET(new Request('http://localhost/api/union-eyes/queue-status', { headers: { 'x-service-key': key } }))
-    expect((await withKey('queue-key-value')).status).toBe(200)
-    expect((await withKey('service-key-value')).status).toBe(401)
-    delete process.env.QUEUE_STATUS_SERVICE_KEY
-    vi.stubEnv('NODE_ENV', 'production')
-    expect((await withKey('service-key-value')).status).toBe(401)
-    vi.unstubAllEnvs()
-    delete process.env.AI_SERVICE_KEY
+
+    beforeEach(() => {
+      process.env.DJANGO_API_URL = 'https://django.local'
+      process.env.AI_SERVICE_KEY = AI_KEY
+      process.env.UE_METRICS_SERVICE_KEY = METRICS_KEY
+      mocks.getAllQueueStats.mockResolvedValue([])
+      mocks.getFailedJobs.mockResolvedValue([])
+      mocks.requireApiAuth.mockRejectedValue(new Error('no session'))
+    })
+    afterEach(() => {
+      delete process.env.QUEUE_STATUS_SERVICE_KEY
+      delete process.env.AI_SERVICE_KEY
+      delete process.env.UE_METRICS_SERVICE_KEY
+      vi.unstubAllEnvs()
+    })
+
+    it('accepts the dedicated key and refuses a wrong, different-length or empty key', async () => {
+      process.env.QUEUE_STATUS_SERVICE_KEY = QUEUE_KEY
+      expect((await withKey(QUEUE_KEY)).status).toBe(200)
+      for (const wrong of [QUEUE_KEY.slice(0, -1) + 'X', 'short', '']) {
+        expect((await withKey(wrong)).status).toBe(401)
+      }
+    })
+
+    it('never accepts the AI or metrics key, in any environment, whether or not the dedicated key is set', async () => {
+      for (const env of ['development', 'test', 'production']) {
+        vi.stubEnv('NODE_ENV', env)
+        delete process.env.QUEUE_STATUS_SERVICE_KEY
+        expect((await withKey(AI_KEY)).status).toBe(401)
+        expect((await withKey(METRICS_KEY)).status).toBe(401)
+        process.env.QUEUE_STATUS_SERVICE_KEY = QUEUE_KEY
+        expect((await withKey(AI_KEY)).status).toBe(401)
+        expect((await withKey(METRICS_KEY)).status).toBe(401)
+      }
+      expect(mocks.getAllQueueStats).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      ['unset', undefined],
+      ['shorter than 32 characters', 'short-queue-key'],
+      ['the AI service key', AI_KEY],
+      ['the metrics service key', METRICS_KEY],
+    ])('answers 401 (not 503) and reads nothing when the configured key is %s, even to a caller presenting it', async (_label, value) => {
+      if (value === undefined) delete process.env.QUEUE_STATUS_SERVICE_KEY
+      else process.env.QUEUE_STATUS_SERVICE_KEY = value
+      const response = await withKey(value ?? QUEUE_KEY)
+      expect(response.status).toBe(401)
+      expect(await response.json()).toEqual({ error: 'Unauthorized' })
+      expect(mocks.getAllQueueStats).not.toHaveBeenCalled()
+      expect(mocks.requireApiAuth).not.toHaveBeenCalled()
+    })
+
+    it('does not fall back to a platform administrator session when a key is presented and wrong', async () => {
+      process.env.QUEUE_STATUS_SERVICE_KEY = QUEUE_KEY
+      mocks.requireApiAuth.mockResolvedValue({ userId: 'admin' })
+      expect((await withKey('not-the-key')).status).toBe(401)
+      expect(mocks.requireSystemAdmin).not.toHaveBeenCalled()
+    })
+
+    it('returns infrastructure fields only: no job arguments, results or tracebacks reach the caller', async () => {
+      process.env.QUEUE_STATUS_SERVICE_KEY = QUEUE_KEY
+      mocks.getFailedJobs.mockResolvedValue([{
+        task_id: 't1', task_name: 'notifications.send', status: 'FAILURE', date_done: '2026-11-05T00:00:00Z',
+        args: ['member@example.org'], kwargs: { claimId: 'CANARY-CLAIM' }, result: 'CANARY-RESULT', traceback: 'CANARY-TRACE',
+      }])
+      const body = await (await withKey(QUEUE_KEY)).json()
+      expect(body.queue.recent_failures).toEqual([{ task_id: 't1', task_name: 'notifications.send', status: 'FAILURE', date_done: '2026-11-05T00:00:00Z' }])
+      expect(JSON.stringify(body)).not.toMatch(/CANARY|member@example\.org/)
+    })
   })
 })

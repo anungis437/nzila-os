@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 // The organization read authority is exercised in organizations-read-authority.pglite.test.ts; these tests exercise the
-// route's own behaviour as the organization's own administrator (a direct membership), or as anyone else.
+// route's own behaviour as the organization's own officer or administrator (a direct membership), or as anyone else.
 vi.mock('@/lib/organizations/read-authority', () => ({
   resolveOrganizationAccess: async () => ({ direct: new Map([['11111111-1111-4111-8111-111111111111', 'admin']]), affiliated: new Set() }),
-  canAdministerOrganization: () => m.administers,
+  canReadOrganizationAnalytics: () => m.administers,
   UUID_PATTERN: /^[0-9a-fA-F-]{36}$/,
 }));
 const m = vi.hoisted(() => ({
@@ -68,7 +68,7 @@ describe('organizations/[id]/analytics route', () => {
     expect(m.withRLSContext.mock.calls[0][0]).toEqual({ organizationId: '11111111-1111-4111-8111-111111111111' });
   });
 
-  it('answers 404, reading nothing, to anyone who does not administer the organization directly (officer, ancestor administrator, platform title)', async () => {
+  it('answers 404, reading nothing, to anyone without a direct officer-or-above role in the organization (steward, member, ancestor administrator, platform title)', async () => {
     m.administers = false;
     const { GET } = await loadRoute();
     const response = await GET(new NextRequest('http://localhost/api/organizations/11111111-1111-4111-8111-111111111111/analytics'), { params: Promise.resolve({ id: '11111111-1111-4111-8111-111111111111' }) });

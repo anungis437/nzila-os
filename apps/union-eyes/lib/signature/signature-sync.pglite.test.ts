@@ -159,6 +159,8 @@ describe('SignatureService.syncDocumentStatus', () => {
     observe('completed', { completedAt: new Date('2026-02-20T14:15:16.000Z') });
     expect(await SignatureService.syncDocumentStatus(DOC, ORG)).toEqual({ synced: false, reason: 'not_external_provider' });
     expect((await doc()).status).toBe('sent');
+    // A legacy internal document is answered before any provider is looked up: it is not a provider outage (which would read as retryable).
+    expect(state.calls).toBe(0);
     await resetDocumentDatabase(pg);
     await pg.exec('TRUNCATE signature_audit_trail, document_signers, signature_documents');
     await seed({ envelope: null });

@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { UNIT_WRITABLE_FIELDS } from '@/lib/union-structure/unit-writable-fields';
 
 const API = join(fileURLToPath(new URL('../../../', import.meta.url)), 'app', 'api');
 const read = (route: string) => readFileSync(join(API, ...route.split('/'), 'route.ts'), 'utf8');
@@ -10,9 +11,11 @@ describe('F04 generic CRUD routes name what a body may write and what a response
   // DEF-0B12-CRUD-BARGAINING-UNIT-CERTIFICATION-AND-REPRESENTATION-FIELDS-WRITABLE-BY-ANY-STEWARD / DEF-0B12-CRUD-BARGAINING-UNIT-ROWS-READABLE-BY-ANY-MEMBER-WITH-CERTIFICATION-NOTES-AND-CUSTOM-FIELDS
   it('bargaining units accept no certification or representation field and return no notes', () => {
     const collection = read('units');
-    const writable = /writableFields: \[([^\]]*)\]/.exec(collection)?.[1] ?? '';
-    for (const field of ['certificationNumber', 'certificationDate', 'certificationBody', 'chiefStewardId', 'bargainingChairId', 'currentCollectiveAgreementId', 'status', 'memberCount']) {
-      expect(writable, field).not.toContain(`'${field}'`);
+    // Both unit routes take their allow-list from one constant, so the list itself is checked (a regex over the route text would match nothing).
+    expect(collection).toContain('writableFields: UNIT_WRITABLE_FIELDS');
+    expect(read('units/[id]')).toContain('writableFields: UNIT_WRITABLE_FIELDS');
+    for (const field of ['certificationNumber', 'certificationDate', 'certificationBody', 'certificationExpiryDate', 'chiefStewardId', 'bargainingChairId', 'currentCollectiveAgreementId', 'status', 'memberCount', 'archivedAt']) {
+      expect(UNIT_WRITABLE_FIELDS, field).not.toContain(field);
     }
     expect(collection).toContain("omitFromResponse: ['notes', 'customFields']");
     const item = read('units/[id]');

@@ -10,7 +10,8 @@ describe('Gate 0 batch B102: truthful audit, settings and not-implemented answer
     expect(notEnforcedKeysIn({ mfaEnforcement: true, timezone: 'UTC', passwordMinLength: 12 })).toEqual(['mfaEnforcement', 'passwordMinLength'])
     expect(notEnforcedKeysIn({ timezone: 'UTC' })).toEqual([])
     expect(NOT_ENFORCED_SETTING_KEYS).toContain('sessionTimeout')
-    expect(src('app/api/settings/organization/route.ts')).toContain('notEnforcedKeysIn(checkedSettings)')
+    // A save of an unenforced key is refused (it used to be saved and reported back as notEnforced).
+    expect(src('app/api/settings/organization/route.ts')).toContain('const refusedUnenforced = notEnforcedKeysIn(checked.settings);')
   })
 
   it('makes the external authorization record mandatory: it is written through the atomic audit and a failure throws', () => {

@@ -56,6 +56,11 @@ function LoadingState({ message }: { message: string }) {
   );
 }
 
+/** A projected gain is null when no validated model estimates it; it is shown as not measured, never as +0. */
+function formatGain(value: number | null | undefined, sign: string, unit = ''): string {
+  return typeof value === 'number' && Number.isFinite(value) ? `${sign}${value}${unit}` : 'Not measured';
+}
+
 function ScoreRing({ score }: { score: number }) {
   const color = score >= 75 ? '#10b981' : score >= 60 ? '#f59e0b' : score >= 40 ? '#f97316' : '#ef4444';
   const r = 36;
@@ -343,11 +348,19 @@ export function ContinuityPlanningWorkspace() {
                 </div>
                 <div className="text-2xl text-slate-300">→</div>
                 <div className="text-center">
-                  <ScoreRing score={roadmapData.projectedScore} />
+                  {/* No validated model projects a score; the roadmap says so instead of drawing one. */}
+                  {roadmapData.projectedScore === null ? (
+                    <div className="w-[90px] text-xs text-slate-500">Not measured</div>
+                  ) : (
+                    <ScoreRing score={roadmapData.projectedScore} />
+                  )}
                   <div className="text-xs text-slate-500 mt-1">Projected</div>
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-slate-700">{roadmapData.maturityNarrative}</p>
+                  {roadmapData.projectedScore === null && roadmapData.projectionNotMeasuredReason && (
+                    <p className="mt-1 text-xs text-slate-500">{roadmapData.projectionNotMeasuredReason}</p>
+                  )}
                 </div>
               </div>
 
@@ -385,7 +398,7 @@ export function ContinuityPlanningWorkspace() {
                       >
                         <span className="flex-1 text-sm font-medium text-slate-800">{s.name}</span>
                         <span className="text-xs text-slate-500">{s.estimatedDurationWeeks} wks</span>
-                        <span className="text-xs text-indigo-600 font-medium">+{s.projectedResilienceGain} pts</span>
+                        <span className="text-xs text-indigo-600 font-medium">{formatGain(s.projectedResilienceGain, '+', ' pts')}</span>
                         <span className="text-slate-300 ml-2">{expandedStrategyIdx === idx ? '▲' : '▼'}</span>
                       </button>
 
@@ -395,15 +408,15 @@ export function ContinuityPlanningWorkspace() {
 
                           <div className="grid grid-cols-3 gap-3 text-xs">
                             <div className="bg-slate-50 rounded p-2 text-center">
-                              <div className="font-medium text-indigo-600">+{s.projectedResilienceGain}</div>
+                              <div className="font-medium text-indigo-600">{formatGain(s.projectedResilienceGain, '+')}</div>
                               <div className="text-slate-500">Resilience pts</div>
                             </div>
                             <div className="bg-slate-50 rounded p-2 text-center">
-                              <div className="font-medium text-blue-600">+{s.governanceStabilityGain}</div>
+                              <div className="font-medium text-blue-600">{formatGain(s.governanceStabilityGain, '+')}</div>
                               <div className="text-slate-500">Gov. stability</div>
                             </div>
                             <div className="bg-slate-50 rounded p-2 text-center">
-                              <div className="font-medium text-emerald-600">-{s.dependencyReductionImpact}%</div>
+                              <div className="font-medium text-emerald-600">{formatGain(s.dependencyReductionImpact, '-', '%')}</div>
                               <div className="text-slate-500">Dependency</div>
                             </div>
                           </div>

@@ -17,21 +17,28 @@ describe('Gate 0 batch B69: satisfaction figures, platform statistics and the in
     expect(item).toContain('Satisfaction ratings for this representative')
   })
 
-  it('counts people once and reads under the system role on purpose, with no settlement figure (DEF-0B10-OPL-14 replaces the settlements assertions)', () => {
+  it('reads only organization tenancy metadata under the system role: no member, grievance, agreement or settlement figure (#1116/#1118; DEF-0B10-OPL-14)', () => {
     const stats = src('lib/queries/platform-stats.ts')
-    expect(stats).toContain('count(distinct ${organizationMembers.userId})')
-    expect(stats).toContain('isNull(organizationMembers.deletedAt)')
-    expect(stats).toContain("status IN ('settled', 'closed')")
+    // Platform staff read tenancy metadata from the organizations table only; figures derived from tenant content are null, not counted.
     expect(stats).toContain('withSystemContext')
-    expect(stats).toContain('WHERE deleted_at IS NULL')
+    expect(stats).toContain('FROM organizations')
+    expect(stats).not.toMatch(/organizationMembers|FROM organization_members|FROM grievances|FROM collective_agreements|FROM claims\b/)
+    expect(stats).toContain('grievances: null')
+    expect(stats).toContain('registeredUsers: null')
     expect(stats).not.toMatch(/FROM settlements|settlements\b.*\bamount|perCapitaRate/)
   })
 
-  it('does not claim the process-local document index is durable or counted', () => {
+  // DEF-0B2-AI-RAG-INDEX-PROCESS-LOCAL: the process-local index is gone; the ingest writes the organization's durable knowledge rows.
+  it('indexes an ingested document durably, tenant-scoped, and claims no embedding it did not store', () => {
     const ingest = src('app/api/ai/ingest/route.ts')
-    expect(ingest).toContain("status: 'indexed_in_process_memory'")
-    expect(ingest).toContain('durable: false')
+    expect(ingest).not.toContain('ragPipeline')
+    expect(ingest).not.toContain('indexed_in_process_memory')
+    expect(ingest).toContain('indexIngestedDocument(')
     expect(ingest).not.toContain('Simplified - actual implementation')
+    const index = src('lib/ai/durable-ingest-index.ts')
+    expect(index).toMatch(/withRLSContext\(\{ organizationId \}[\s\S]*insert\(knowledgeBase\)[\s\S]*persistAtomicAudit\(tx,/)
+    expect(index).toContain("isPublic: false")
+    expect(index).toContain("status: 'stored_without_embedding'")
   })
 
   it('never writes a bare parent id: the item route refuses any parent change (409) until a governed reparent workflow exists (#1116)', () => {

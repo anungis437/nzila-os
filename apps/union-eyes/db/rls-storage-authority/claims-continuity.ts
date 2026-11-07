@@ -38,8 +38,8 @@ export const claimsContinuityEntries: StorageAuthorityEntry[] = [
   {
     table: "representation_authorities",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "Added 2026-09-15 external representation foundation: direct NOT NULL organization_id plus exact representative_user_id and matter scope. Read by external auth middleware/services before any external matter/document row is returned; created/activated/revoked by lib/services/representation-authority-service.ts. No representative organization inheritance is allowed without a matching authority row.",
-    supportingCapability: ["lib/services/representation-authority-service.ts","lib/services/external-resource-authorization-service.ts","lib/external-resource-middleware.ts","app/api/external/grievances/[id]/route.ts","app/api/external/documents/[id]/route.ts","app/api/external/documents/[id]/download/route.ts"],
+    reason: "Added 2026-09-15 external representation foundation: direct NOT NULL organization_id plus exact representative_user_id and matter scope. Read by external auth middleware/services before any external matter/document row is returned; created/activated/revoked by lib/services/representation-authority-service.ts. No representative organization inheritance is allowed without a matching authority row. Cache 0056 adds one SELECT policy for the case with no organization context: the authenticated principal sees only their own authority rows, so the external middleware checks the authority (lib/db/with-rls-context.ts withPrincipalOnlyContext) before it opens the named organization's tenant transaction.",
+    supportingCapability: ["lib/services/representation-authority-service.ts","lib/services/external-resource-authorization-service.ts","lib/external-resource-middleware.ts","db/migrations-cache/0056_external_authority_principal_precheck.sql","app/api/external/grievances/[id]/route.ts","app/api/external/documents/[id]/route.ts","app/api/external/documents/[id]/download/route.ts"],
     requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
     requiredSystemPrivileges: [],
     invocationAuthority: "TENANT_USER",

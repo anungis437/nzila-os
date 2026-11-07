@@ -2,26 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import {
   buildHazardCreateValues,
-  generateReportNumber,
   HAZARD_TYPE_TO_CATEGORY,
   PRIORITY_TO_HAZARD_LEVEL,
 } from '../route';
 
 describe('health-safety/hazards route helpers', () => {
-  describe('generateReportNumber', () => {
-    it('produces a HAZ-<year>-<uuid> formatted number with full UUID entropy', () => {
-      const num = generateReportNumber();
-      expect(num).toMatch(/^HAZ-\d{4}-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
-      expect(num.length).toBeLessThanOrEqual(50);
-    });
-
-    it('produces distinct values across calls', () => {
-      const a = generateReportNumber();
-      const b = generateReportNumber();
-      expect(a).not.toEqual(b);
-    });
-  });
-
   describe('buildHazardCreateValues', () => {
     it('maps every known client hazardType to a valid hazardCategory enum value', () => {
       for (const [hazardType, expectedCategory] of Object.entries(HAZARD_TYPE_TO_CATEGORY)) {
@@ -57,16 +42,13 @@ describe('health-safety/hazards route helpers', () => {
       expect(result.suggestedCorrections).toBe('Remove flammable materials');
     });
 
-    it('generates a reportNumber when the client does not supply one', () => {
-      const result = buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: 'Site A', description: 'desc' });
-      expect(typeof result.reportNumber).toBe('string');
-      expect(result.reportNumber).toMatch(/^HAZ-\d{4}-[0-9a-f-]{36}$/);
-    });
-
-    it('does not trust a client-supplied report number', () => {
+    // DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS: the number is issued by the route from the
+    // organization's own sequence (lib/records/organization-record-number.ts), never by the builder and never from the body.
+    it('never carries a report number, whether or not the client sent one', () => {
+      expect(buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: 'Site A', description: 'desc' })).not.toHaveProperty('reportNumber');
       const result = buildHazardCreateValues({ hazardType: 'other', priority: 'low', location: 'Site A', description: 'desc', reportNumber: 'HAZ-2020-000001' });
-      expect(result.reportNumber).not.toBe('HAZ-2020-000001');
-      expect(result.reportNumber).toMatch(/^HAZ-\d{4}-[0-9a-f-]{36}$/);
+      expect(result).not.toHaveProperty('reportNumber');
+      expect(JSON.stringify(result)).not.toContain('HAZ-2020-000001');
     });
 
     it('suppresses reporter identity fields when isAnonymous is true', () => {

@@ -4,6 +4,7 @@
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { arbitrationDecisions } from '@/db/schema';
 import { PUBLIC_DETAIL_COLUMNS, WITHHELD_DECISION_COLUMNS } from '@/lib/precedents/public-decision-view';
+import { PRECEDENT_WRITABLE_FIELDS } from '@/lib/precedents/precedent-writable-fields';
 import { eq, isNull, or, and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -27,5 +28,7 @@ const { GET, POST } = crudRoutes({
   // a genuine platform-elevated role, never an ordinary per-tenant role
   // (round 58D fix; same defect class round 52 fixed for dataClassificationPolicy).
   writeRole: 'content_manager',
+  // The decision's own content; counters, embedding, import provenance and the supplying organization are server-owned.
+  writableFields: PRECEDENT_WRITABLE_FIELDS,
 });
 export { GET, POST };

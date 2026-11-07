@@ -9,7 +9,11 @@ const m = vi.hoisted(() => ({
   auth: vi.fn(),
   dbExecute: vi.fn(),
   tenantContexts: [] as Array<{ organizationId: string }>,
+  direct: new Map<string, string>(),
+  resolveAccess: vi.fn(),
 }));
+
+vi.mock('@/lib/organizations/read-authority', () => ({ resolveOrganizationAccess: m.resolveAccess }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth, hasMinRole: m.hasMinRole }));
 vi.mock('@nzila/os-core', () => ({ createLogger: vi.fn(() => m.logger) }));
@@ -60,7 +64,9 @@ describe('admin/pilot-status route', () => {
 
     m.withApiAuth.mockImplementation((handler: any) => (request: NextRequest) => handler(request));
     m.hasMinRole.mockResolvedValue(true);
-    m.auth.mockResolvedValue({ orgId: 'org-abc' });
+    m.auth.mockResolvedValue({ userId: 'user-1', orgId: 'org-abc' });
+    m.direct = new Map([['org-abc', 'platform_lead']]);
+    m.resolveAccess.mockImplementation(async () => ({ direct: m.direct, affiliated: new Set() }));
     // Return SELECT 1's shape for the postgres-ping probe and COUNT's
     // shape for the users/worksites queries. The mock sql template is
     // stringified via its `strings` array; inspect it to decide.
@@ -135,6 +141,25 @@ describe('admin/pilot-status route', () => {
         usersInvited: null,
         worksitesConfigured: null,
       }),
+      expect.anything(),
+    );
+  });
+
+  // Issue #1118: the organization figures are content of that organization; a platform title gives none of them.
+  it.each([
+    ['the caller is not a direct member of the session organization', () => { m.direct = new Map([['org-other', 'admin']]); }],
+    ['the session names no user', () => { m.auth.mockResolvedValue({ orgId: 'org-abc' }); }],
+    ['the session names no organization', () => { m.auth.mockResolvedValue({ userId: 'user-1' }); }],
+  ])('measures no organization figure (null, not zero) when %s', async (_label, arrange) => {
+    arrange();
+    const { GET } = await loadRoute();
+
+    const response = await GET(new NextRequest('http://localhost/api/admin/pilot-status'));
+
+    expect(response.status).toBe(200);
+    expect(m.tenantContexts).toEqual([]);
+    expect(m.buildPilotStatus).toHaveBeenCalledWith(
+      expect.objectContaining({ usersInvited: null, worksitesConfigured: null }),
       expect.anything(),
     );
   });

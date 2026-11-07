@@ -102,17 +102,56 @@ describe('settings/organization route', () => {
 
   it('records the before and after of every written setting in the audit row', async () => {
     m.db.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => rows([{ settings: { timezone: 'UTC', credits: 5 } }])) })) }));
-    const result = await put({ timezone: 'America/Toronto', sessionTimeout: 60 });
+    // sessionTimeout was the second key here; it is no longer writable (see below), so an enforced-by-no-code key is not the example.
+    const result = await put({ timezone: 'America/Toronto', currency: 'CAD' });
     expect(result.updated).toBe(true);
     expect(m.audit).toHaveBeenCalledWith(
       m.db,
       expect.objectContaining({
         details: expect.objectContaining({
-          settingsBefore: { timezone: 'UTC', sessionTimeout: null },
-          settingsAfter: { timezone: 'America/Toronto', sessionTimeout: 60 },
+          settingsBefore: { timezone: 'UTC', currency: null },
+          settingsAfter: { timezone: 'America/Toronto', currency: 'CAD' },
         }),
       }),
     );
+  });
+
+  // DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE
+  describe('security settings that no code enforces', () => {
+    it.each([
+      ['sessionTimeout', 60],
+      ['mfaEnforcement', true],
+      ['requireMFA', true],
+      ['enforceStrongPasswords', true],
+      ['passwordMinLength', 12],
+      ['requireMixedCase', true],
+      ['requireSymbol', true],
+      ['rateLimitPerMin', 100],
+      ['webhookUrl', 'https://hooks.example/x'],
+      ['webhookNotifications', true],
+      ['ipWhitelist', '10.0.0.0/8'],
+      ['allowedDomains', ['example.org']],
+    ])('refuses a valid %s with 400, naming it, and saves and audits nothing (not even the other keys)', async (key, value) => {
+      await expect(put({ timezone: 'America/Toronto', [key]: value })).rejects.toMatchObject({
+        status: 400,
+        message: expect.stringContaining(`not enforced by the platform, so not accepted as a control: ${key}`),
+      });
+      expect(m.db.select).not.toHaveBeenCalled();
+      expect(m.db.update).not.toHaveBeenCalled();
+      expect(m.audit).not.toHaveBeenCalled();
+    });
+
+    it('never answers updated:true with a notEnforced list for a save', async () => {
+      const result = await put({ timezone: 'America/Toronto' });
+      expect(result).toEqual({ updated: true });
+    });
+
+    it('still reports a value stored before the refusal as notEnforced on every read', async () => {
+      m.db.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(() => rows([{ id: 'org_1', name: 'Test Org', settings: { requireMFA: true, timezone: 'UTC' } }])) })) }));
+      const { GET } = await loadRoute();
+      const result = await GET({ organizationId: 'org_1' });
+      expect(result.notEnforced).toEqual(['requireMFA']);
+    });
   });
 
   // DEF-0B11-IDS-SETTINGS-PUT-IS-UNVALIDATED-AND-MERGES-OUTSIDE-THE-TRANSACTION

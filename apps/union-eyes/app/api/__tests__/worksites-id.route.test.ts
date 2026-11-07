@@ -40,6 +40,8 @@ describe('worksites item route', () => {
       writeRole: 'steward',
       // The employer must be the caller organization's (batch B25).
       beforeUpdate: expect.any(Function),
+      // DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT: what the worksite form sends; manager contact, notes, custom fields and counts are not writable.
+      writableFields: ['employerId', 'name', 'code', 'status', 'employeeCount', 'address'],
     });
   });
 

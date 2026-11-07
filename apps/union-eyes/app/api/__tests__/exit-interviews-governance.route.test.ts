@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
   updateReturningQueue: [] as unknown[][],
   audit: vi.fn(),
   updates: [] as Array<{ table: unknown; set: Record<string, unknown> }>,
+  erase: vi.fn(),
 }));
 
 const mockDb = {
@@ -42,6 +43,7 @@ vi.mock('@/lib/api/framework', () => ({
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_o: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb) }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+vi.mock('@/lib/ai/knowledge-base-embeddings', () => ({ eraseKnowledgeBaseEmbeddings: m.erase }));
 vi.mock('@/lib/knowledge-transfer/governance/consent-controls', () => ({
   SENSITIVITY_LEVELS: {
     public_internal: { indexingAllowed: true, description: 'Internal' },
@@ -69,6 +71,7 @@ describe('exit-interviews/[id]/governance route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.audit.mockResolvedValue(undefined);
+    m.erase.mockResolvedValue([]);
     m.selectQueue = [];
     m.updateReturningQueue = [];
     m.updates = [];
@@ -196,5 +199,78 @@ describe('exit-interviews/[id]/governance route', () => {
     const json = await response.json();
     expect(json.data.consentGranted).toBe(false);
     expect(json.indexingEligible).toBe(false);
+  });
+
+  // DEF-0B7-EXC-CONSENT-WITHDRAWAL-AND-RECLASSIFICATION-WITHDRAW-NOTHING-DERIVED: the embedding is a derivative and is erased, not only hidden.
+  it('PATCH withdrawal erases the embedding of the knowledge-base copy in the same transaction, and audits it', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: true, knowledgeBaseId: 'kb_1' }]);
+    m.updateReturningQueue.push(
+      [{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: false, knowledgeBaseId: 'kb_1' }],
+      [{ id: 'kb_1' }],
+    );
+    m.erase.mockResolvedValue(['kb_1']);
+
+    const response = await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+      params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'admin-1', body: { consentGranted: false },
+    });
+
+    expect(response.status).toBe(200);
+    expect(m.erase).toHaveBeenCalledWith(mockDb, { organizationId: 'org_1', sourceType: 'exit_interview', sourceId: 'iv_1', ids: ['kb_1'] });
+    expect(m.audit).toHaveBeenCalledWith(mockDb, expect.objectContaining({
+      details: expect.objectContaining({ erasedEmbeddingIds: ['kb_1'], deactivatedKnowledgeBaseIds: ['kb_1'] }),
+    }));
+  });
+
+  it('PATCH reclassification to a level that is never indexed takes the copy out of service even while consent stands', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: true, knowledgeBaseId: 'kb_1' }]);
+    m.updateReturningQueue.push(
+      [{ id: 'iv_1', sensitivityLevel: 'legal_sensitive', consentGranted: true, knowledgeBaseId: 'kb_1' }],
+      [{ id: 'kb_1' }],
+    );
+    m.erase.mockResolvedValue(['kb_1']);
+
+    const response = await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+      params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'admin-1', body: { sensitivityLevel: 'legal_sensitive' },
+    });
+
+    expect(response.status).toBe(200);
+    const { knowledgeBase } = await import('@/db/schema');
+    expect(m.updates).toHaveLength(2);
+    expect(m.updates[0].set).not.toHaveProperty('consentGranted');
+    expect(m.updates[1].table).toBe(knowledgeBase);
+    expect(m.updates[1].set).toMatchObject({ isActive: false });
+    expect(m.erase).toHaveBeenCalledTimes(1);
+    expect(m.audit).toHaveBeenCalledWith(mockDb, expect.objectContaining({
+      details: expect.objectContaining({ newSensitivity: 'legal_sensitive', deactivatedKnowledgeBaseIds: ['kb_1'], erasedEmbeddingIds: ['kb_1'] }),
+    }));
+    expect((await response.json()).indexingEligible).toBe(false);
+  });
+
+  it('PATCH leaves the copy and its embedding alone when the interview stays indexable', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'restricted', consentGranted: true }]);
+    m.updateReturningQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: true }]);
+
+    await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+      params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'u1', body: { sensitivityLevel: 'public_internal' },
+    });
+
+    expect(m.erase).not.toHaveBeenCalled();
+  });
+
+  it('a failure to erase the embedding fails the whole change (nothing is reported as withdrawn)', async () => {
+    const { PATCH } = await loadRoute();
+    m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: true }]);
+    m.updateReturningQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: false }], []);
+    m.erase.mockRejectedValue(new Error('erase failed'));
+
+    const response = await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+      params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'u1', body: { consentGranted: false },
+    });
+
+    expect(response.status).toBe(500);
+    expect(m.audit).not.toHaveBeenCalled();
   });
 });

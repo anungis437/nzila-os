@@ -2258,6 +2258,7 @@
   "geofence_events": [
    "latitude",
    "longitude",
+   "organization_id",
    "purpose"
   ],
   "geofences": [
@@ -2878,7 +2879,8 @@
    "initiated_by",
    "initiator_role",
    "newest_record_date",
-   "oldest_record_date"
+   "oldest_record_date",
+   "organization_id"
   ],
   "location_tracking": [
    "accuracy",
@@ -2887,6 +2889,7 @@
    "app_version",
    "device_type",
    "event_id",
+   "organization_id",
    "strike_id"
   ],
   "location_tracking_audit": [

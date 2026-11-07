@@ -336,15 +336,30 @@ describe('GET /api/organizations (list) and /api/organizations/tree', () => {
 });
 
 describe('analytics', () => {
-  it('is given only to the organization\'s own administrator; everyone else (officer, ancestor administrator, platform title, stranger) reads not found', async () => {
+  // Owner decision on issue #1118: direct officers may have org-scoped analytics. Still direct only: no ancestor, no platform title.
+  it('is given to the organization\'s own officers and administrators; everyone else (steward, member, ancestor administrator, platform title, stranger) reads not found', async () => {
     const { GET } = await import('../organizations/[id]/analytics/route');
     state.platformAdmins.add('platform-1');
-    for (const user of ['u-member-b', 'u-member-a', 'u-steward-a', 'u-officer-a', 'u-admin-fed', 'u-suspended-a', 'platform-1', 'nobody']) {
+    for (const user of ['u-member-b', 'u-member-a', 'u-steward-a', 'u-admin-fed', 'u-suspended-a', 'platform-1', 'nobody']) {
       state.userId = user;
       expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status, user).toBe(404);
     }
-    state.userId = 'u-admin-a';
-    expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status).toBe(200);
+    for (const user of ['u-officer-a', 'u-admin-a']) {
+      state.userId = user;
+      expect((await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).status, user).toBe(200);
+    }
+    // The officer of LOCAL_A has nothing in the sibling LOCAL_B or the parent federation.
+    state.userId = 'u-officer-a';
+    for (const other of [LOCAL_B, FED]) {
+      expect((await GET(get(`/api/organizations/${other}/analytics`), params(other))).status, other).toBe(404);
+    }
+  });
+
+  it('gives a direct officer the same suppressed, path-organization figures as an administrator', async () => {
+    const { GET } = await import('../organizations/[id]/analytics/route');
+    state.userId = 'u-officer-a';
+    const { data } = await (await GET(get(`/api/organizations/${LOCAL_A}/analytics`), params(LOCAL_A))).json();
+    expect(data).toMatchObject({ organizationId: LOCAL_A, totalMembers: null, totalClaims: null, suppression: { members: true, claims: true } });
   });
 
   // DEF-0B9-ORG-ANALYTICS-METRIC-QUERIES-RUN-IN-SESSION-ORGANIZATION-CONTEXT-FILTERED-BY-PATH-ID-RETURNING-ZEROS: the figures are those of the

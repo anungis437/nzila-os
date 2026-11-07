@@ -91,6 +91,7 @@ const m = vi.hoisted(() => {
     syncWorkbookPurchase: vi.fn(),
     generateClaimToken: vi.fn(),
     computeClaimExpiry: vi.fn(),
+    deliverIcraClaimCredential: vi.fn(),
   };
 });
 
@@ -118,6 +119,7 @@ vi.mock('@/lib/audit-logger', () => ({
 }));
 vi.mock('@/lib/hubspot/syncIcraPurchase', () => ({ syncIcraPurchase: m.syncIcraPurchase }));
 vi.mock('@/lib/hubspot/syncWorkbookPurchase', () => ({ syncWorkbookPurchase: m.syncWorkbookPurchase }));
+vi.mock('@/lib/icra/claim-delivery', () => ({ deliverIcraClaimCredential: m.deliverIcraClaimCredential }));
 vi.mock('@/lib/icra/claim-tokens', () => ({
   generateClaimToken: m.generateClaimToken,
   computeClaimExpiry: m.computeClaimExpiry,
@@ -680,6 +682,62 @@ describe('payments/webhooks/stripe route', () => {
       claimTokenExpiresAt: new Date('2026-06-30T00:00:00.000Z'),
       claimEmail: 'buyer@example.org',
     });
+  });
+
+  // DEF-0B8-ICRA-CLAIM-TOKEN-HAS-NO-ICRA-ISSUER-SO-CLAIM-CANNOT-SUCCEED: the issued credential reaches the buyer.
+  const icraPaid = (id: string) => JSON.stringify({
+    id,
+    type: 'checkout.session.completed',
+    data: { object: {
+      id: `cs_${id}`,
+      customer_details: { email: 'buyer@example.org' },
+      metadata: { product: 'icra_report', icra_assessment_id: '00000000-0000-0000-0000-000000000099', icra_tier_id: 'executive_continuity_brief', locale: 'fr-CA' },
+    } },
+  });
+
+  it('delivers the credential it issued to the buyer, after the fulfilment commits', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    m.syncIcraPurchase.mockResolvedValue(undefined);
+    m.deliverIcraClaimCredential.mockResolvedValue({ delivered: true });
+    m.queueSelect([{ reportTierId: 'continuity_reflection' }], []);
+    // tier upgrade, then the guarded credential write that issued it
+    m.queueUpdate([], [{ id: '00000000-0000-0000-0000-000000000099' }]);
+
+    const response = await POST(makeStripeRequest(icraPaid('evt_icra_deliver_1'), 'whsec_test'));
+    expect(response.status).toBe(200);
+    expect(m.deliverIcraClaimCredential).toHaveBeenCalledTimes(1);
+    expect(m.deliverIcraClaimCredential).toHaveBeenCalledWith({
+      assessmentId: '00000000-0000-0000-0000-000000000099',
+      claimToken: 'claim-token-123',
+      buyerEmail: 'buyer@example.org',
+      locale: 'fr-CA',
+    });
+  });
+
+  it('sends nothing when the guard kept an already-issued or claimed credential', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    m.syncIcraPurchase.mockResolvedValue(undefined);
+    m.queueSelect([{ reportTierId: 'continuity_reflection' }], []);
+    m.queueUpdate([], []);
+    const response = await POST(makeStripeRequest(icraPaid('evt_icra_deliver_2'), 'whsec_test'));
+    expect(response.status).toBe(200);
+    expect(m.deliverIcraClaimCredential).not.toHaveBeenCalled();
+  });
+
+  it('keeps the paid fulfilment when delivery fails, and logs the failure without the token', async () => {
+    const { POST } = await loadRoute('whsec_test');
+    m.syncIcraPurchase.mockResolvedValue(undefined);
+    m.deliverIcraClaimCredential.mockResolvedValue({ delivered: false, reason: 'APP_URL_NOT_CONFIGURED' });
+    m.queueSelect([{ reportTierId: 'continuity_reflection' }], []);
+    m.queueUpdate([], [{ id: '00000000-0000-0000-0000-000000000099' }]);
+    const response = await POST(makeStripeRequest(icraPaid('evt_icra_deliver_3'), 'whsec_test'));
+    expect(response.status).toBe(200);
+    expect(m.logger.error).toHaveBeenCalledWith('[stripe-webhook] ICRA claim credential not delivered', {
+      icraAssessmentId: '00000000-0000-0000-0000-000000000099',
+      reason: 'APP_URL_NOT_CONFIGURED',
+    });
+    expect(JSON.stringify(m.logger.error.mock.calls)).not.toContain('claim-token-123');
+    expect(JSON.stringify(m.logger.info.mock.calls)).not.toContain('claim-token-123');
   });
 
   it('does not issue a credential when the paid tier was already fulfilled (a replayed delivery)', async () => {

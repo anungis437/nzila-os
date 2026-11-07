@@ -39,13 +39,24 @@ export function normalizeSearch(raw: string | null | undefined): { term: string;
   return { term, tooShort: term.length > 0 && term.length < MIN_SEARCH_LENGTH }
 }
 
-export async function listPlatformUsers(tx: RLSTx, input: { search?: string | null; organizationId?: string | null }) {
+/**
+ * `organizationIds`, when given, bounds the directory to those organizations (the route passes the organizations the caller directly
+ * administers, issue #1116); an empty list reads nothing.
+ */
+export async function listPlatformUsers(
+  tx: RLSTx,
+  input: { search?: string | null; organizationId?: string | null; organizationIds?: readonly string[] },
+) {
+  if (input.organizationIds && input.organizationIds.length === 0) return []
   const { term } = normalizeSearch(input.search)
   // A removed member's tombstone is not part of a cross-organization directory.
   const conditions: SQL[] = [isNull(organizationMembers.deletedAt)]
   const matching = term ? or(ilike(organizationMembers.name, `%${escapeLike(term)}%`), ilike(organizationMembers.email, `%${escapeLike(term)}%`)) : undefined
   if (matching) conditions.push(matching)
   if (input.organizationId) conditions.push(sql`${organizationMembers.organizationId}::text = ${input.organizationId}`)
+  if (input.organizationIds) {
+    conditions.push(sql`${organizationMembers.organizationId}::text IN (${sql.join(input.organizationIds.map((id) => sql`${id}`), sql`, `)})`)
+  }
 
   const rows = await tx
     .select({

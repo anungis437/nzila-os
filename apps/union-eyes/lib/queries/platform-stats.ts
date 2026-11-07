@@ -5,64 +5,56 @@
  * Used by both the API route and server components.
  */
 
-import { organizations, organizationMembers } from '@/db/schema';
+import { organizations } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { sql, ne, count, sum, isNull } from 'drizzle-orm';
+import { sql, ne, count } from 'drizzle-orm';
+
+/**
+ * A figure derived from organizations' own content (rosters, grievances, collective agreements, role assignments). Issue #1118 / #1116: a
+ * platform title or the platform-staff fact is no standing entitlement to read or derive any union's content, even as an aggregate without
+ * organization ids. Cross-organization grants are not built, so these figures are not measured here and read null, never zero.
+ */
+type NotMeasuredHere = null;
 
 export interface PlatformStats {
   totalOrganizations: number;
   activeOrganizations: number;
-  totalMemberCount: number;
-  totalActiveMemberCount: number;
-  registeredUsers: number;
-  activeUsers: number;
+  totalMemberCount: NotMeasuredHere;
+  totalActiveMemberCount: NotMeasuredHere;
+  registeredUsers: NotMeasuredHere;
+  activeUsers: NotMeasuredHere;
   organizationTypes: {
     unions: number;
     congresses: number;
     federations: number;
   };
   clcAffiliatedCount: number;
-  grievances: {
-    total: number;
-    open: number;
-    highPriority: number;
-    resolved: number;
-    inArbitration: number;
-  };
-  collectiveAgreements: {
-    total: number;
-    active: number;
-    negotiating: number;
-    expired: number;
-  };
-  sectors: Array<{ sector: string; org_count: number; total_members: number }>;
+  grievances: NotMeasuredHere;
+  collectiveAgreements: NotMeasuredHere;
+  sectors: Array<{ sector: string; org_count: number; total_members: NotMeasuredHere }>;
   organizations: Array<{
     id: string;
     name: string;
     organizationType: string;
     status: string;
-    memberCount: number | null;
-    activeMemberCount: number | null;
+    memberCount: NotMeasuredHere;
+    activeMemberCount: NotMeasuredHere;
     sectors: string[];
     clcAffiliated: boolean | null;
     subscriptionTier: string | null;
     createdAt: Date;
   }>;
-  roleDistribution: Array<{ role: string; cnt: number }>;
+  roleDistribution: NotMeasuredHere;
 }
 
 /**
- * Platform-wide counts across every organization, read under the system role on purpose (a platform operator's cross-tenant read), not
- * through whatever the connection role happens to see.
+ * Platform-wide statistics, read under the system role on purpose: the platform's own record of the organizations it serves (how many, of
+ * which type, status, sector and affiliation, and each one's commercial tier) and nothing derived from an organization's content.
  *
- * `registeredUsers` and `activeUsers` count distinct people with an undeleted membership (one person in several organizations is one);
- * `resolved` grievances are settled or closed ones.
- *
- * Minimum necessary. The figures are counts and distributions. The organization list gives each organization's name, type, status, size and
- * commercial tier; it does not give a per-capita rate, and there is no settlement count or monetary total: a sum of every tenant's settlement
- * amounts is not something a platform operator needs, and the system role holds no privilege on settlements, so the earlier query could not
- * have run under it at all.
+ * Member, user, role, grievance and collective-agreement figures are not read: they are null (see {@link NotMeasuredHere}). No query touches
+ * organization_members, grievances or collective_agreements; per-organization member counts stored on the organization row are not
+ * returned either, since they are a projection of the roster.
  */
 export function getPlatformStatsFromDb(reader: { userId: string; organizationId: string }): Promise<PlatformStats> {
   return withSystemContext(async (tx) => {
@@ -80,12 +72,10 @@ export function getPlatformStatsFromDb(reader: { userId: string; organizationId:
 }
 
 async function computePlatformStats(db: typeof import('@/db/db').db): Promise<PlatformStats> {
-  // ── Organization stats ──
+  // ── Organization directory counts (the platform's own record) ──
   const orgStats = await db
     .select({
       totalOrganizations: count(),
-      totalMemberCount: sum(organizations.memberCount),
-      totalActiveMemberCount: sum(organizations.activeMemberCount),
       activeOrganizations: sql<number>`count(*) filter (where ${organizations.status} = 'active')`,
       unionCount: sql<number>`count(*) filter (where ${organizations.organizationType} = 'union')`,
       congressCount: sql<number>`count(*) filter (where ${organizations.organizationType} = 'congress')`,
@@ -95,58 +85,24 @@ async function computePlatformStats(db: typeof import('@/db/db').db): Promise<Pl
     .from(organizations)
     .where(ne(organizations.organizationType, 'platform'));
 
-  // ── Registered users (organization_members) ──
-  const memberStats = await db
-    .select({
-      totalRegisteredUsers: sql<number>`count(distinct ${organizationMembers.userId})`,
-      activeUsers: sql<number>`count(distinct ${organizationMembers.userId}) filter (where ${organizationMembers.status} = 'active')`,
-      distinctOrgs: sql<number>`count(distinct ${organizationMembers.organizationId})`,
-    })
-    .from(organizationMembers)
-    .where(isNull(organizationMembers.deletedAt));
-
-  // ── Grievance stats ──
-  const grievanceStats = await db.execute(sql`
-    SELECT 
-      count(*) as total_grievances,
-      count(*) filter (where status NOT IN ('settled', 'withdrawn', 'denied', 'closed')) as open_grievances,
-      count(*) filter (where priority IN ('high', 'urgent')) as high_priority,
-      count(*) filter (where status IN ('settled', 'closed')) as resolved_grievances,
-      count(*) filter (where status = 'arbitration') as in_arbitration
-    FROM grievances
-  `);
-
-  // ── Collective agreement stats ──
-  const cbaStats = await db.execute(sql`
-    SELECT 
-      count(*) as total_cbas,
-      count(*) filter (where status = 'active') as active_cbas,
-      count(*) filter (where status = 'under_negotiation') as negotiating_cbas,
-      count(*) filter (where status = 'expired') as expired_cbas
-    FROM collective_agreements
-  `);
-
-  // ── Sector breakdown ──
+  // ── Sector breakdown: organizations per declared sector, without their member totals ──
   const sectorBreakdown = await db.execute(sql`
     SELECT 
       unnest(sectors) as sector,
-      count(*) as org_count,
-      sum(member_count) as total_members
+      count(*) as org_count
     FROM organizations 
     WHERE organization_type != 'platform' AND array_length(sectors, 1) > 0
     GROUP BY unnest(sectors)
-    ORDER BY total_members DESC
+    ORDER BY org_count DESC
   `);
 
-  // ── Organization list with health data ──
+  // ── Organization list: directory and commercial metadata only ──
   const orgRows = await db
     .select({
       id: organizations.id,
       name: organizations.name,
       organizationType: organizations.organizationType,
       status: organizations.status,
-      memberCount: organizations.memberCount,
-      activeMemberCount: organizations.activeMemberCount,
       sectors: organizations.sectors,
       clcAffiliated: organizations.clcAffiliated,
       subscriptionTier: organizations.subscriptionTier,
@@ -158,54 +114,36 @@ async function computePlatformStats(db: typeof import('@/db/db').db): Promise<Pl
   const orgList = orgRows.map(o => ({
     ...o,
     status: o.status ?? 'active',
+    memberCount: null,
+    activeMemberCount: null,
     sectors: (o.sectors ?? []) as string[],
     createdAt: o.createdAt ?? new Date(),
   }));
 
-  // ── Member role distribution ──
-  const roleDistribution = await db.execute(sql`
-    SELECT role, count(*) as cnt 
-    FROM organization_members 
-    WHERE deleted_at IS NULL
-    GROUP BY role 
-    ORDER BY cnt DESC
-  `);
-
   const org = orgStats[0];
-  const members = memberStats[0];
-  const grievanceRow = grievanceStats[0] ?? {};
-  const cbaRow = cbaStats[0] ?? {};
-  const sectors = Array.from(sectorBreakdown) as Array<{ sector: string; org_count: number; total_members: number }>;
-  const roles = Array.from(roleDistribution) as Array<{ role: string; cnt: number }>;
+  const sectors = (Array.from(sectorBreakdown) as Array<{ sector: string; org_count: number | string }>).map((row) => ({
+    sector: row.sector,
+    org_count: Number(row.org_count),
+    total_members: null,
+  }));
 
   return {
     totalOrganizations: Number(org?.totalOrganizations ?? 0),
     activeOrganizations: Number(org?.activeOrganizations ?? 0),
-    totalMemberCount: Number(org?.totalMemberCount ?? 0),
-    totalActiveMemberCount: Number(org?.totalActiveMemberCount ?? 0),
-    registeredUsers: Number(members?.totalRegisteredUsers ?? 0),
-    activeUsers: Number(members?.activeUsers ?? 0),
+    totalMemberCount: null,
+    totalActiveMemberCount: null,
+    registeredUsers: null,
+    activeUsers: null,
     organizationTypes: {
       unions: Number(org?.unionCount ?? 0),
       congresses: Number(org?.congressCount ?? 0),
       federations: Number(org?.federationCount ?? 0),
     },
     clcAffiliatedCount: Number(org?.clcAffiliatedCount ?? 0),
-    grievances: {
-      total: Number(grievanceRow.total_grievances ?? 0),
-      open: Number(grievanceRow.open_grievances ?? 0),
-      highPriority: Number(grievanceRow.high_priority ?? 0),
-      resolved: Number(grievanceRow.resolved_grievances ?? 0),
-      inArbitration: Number(grievanceRow.in_arbitration ?? 0),
-    },
-    collectiveAgreements: {
-      total: Number(cbaRow.total_cbas ?? 0),
-      active: Number(cbaRow.active_cbas ?? 0),
-      negotiating: Number(cbaRow.negotiating_cbas ?? 0),
-      expired: Number(cbaRow.expired_cbas ?? 0),
-    },
+    grievances: null,
+    collectiveAgreements: null,
     sectors,
     organizations: orgList,
-    roleDistribution: roles,
+    roleDistribution: null,
   };
 }

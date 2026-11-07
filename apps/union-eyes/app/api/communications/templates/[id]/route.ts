@@ -14,6 +14,9 @@ const { GET, PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   // A removed template or list is archived, not deleted: a list's subscribed and unsubscribed trail cascades from it, so it is kept.
   archiveColumn: 'isActive',
+  // The template editor's EDITABLE_FIELDS (dashboard/communications/templates/[id]). The channel type is fixed at create; isDefault is not editable.
+  // isActive is the editor's own toggle (a reversible archive), so it stays writable here.
+  writableFields: ['name', 'description', 'category', 'subject', 'preheader', 'body', 'htmlContent', 'plainTextContent', 'variables', 'tags', 'isActive'],
   readRole: 'member',
   writeRole: 'steward',
 });

@@ -207,7 +207,7 @@ describe('FF_EVAL_004 — Role-based flags cannot grant higher permissions', () 
       if (!/requiredEntitlements|entitlement/i.test(content)) continue
       entitlementRouteCount += 1
 
-      const hasRoleOrAuthConstraint = /requiredRole|allowedRoles|hasMinRole|readRole|writeRole|orgScoped\s*:\s*true|withOrganizationAuth|withRoleAuth|withMinRole|withApiAuth|withApi\s*\(|requireEntitlement|auth\s*:\s*\{[^}]*required\s*:\s*true|auth\s*:\s*\{[^}]*minRole/s.test(content)
+      const hasRoleOrAuthConstraint = /requiredRole|allowedRoles|hasMinRole|readRole|writeRole|orgScoped\s*:\s*true|withOrganizationAuth|withRoleAuth|withMinRole|withApiAuth|withApi\s*\(|requireEntitlement|authenticateUser\s*\(|isSystemAdmin\s*\(|auth\s*:\s*\{[^}]*required\s*:\s*true|auth\s*:\s*\{[^}]*minRole/s.test(content)
       expect(hasRoleOrAuthConstraint, `${relPath(file)} should pair entitlements with auth/role constraints`).toBe(true)
 
       const allowsAnonymous = /withApiAuthOptional|auth\s*:\s*\{[^}]*required\s*:\s*false/s.test(content)

@@ -488,6 +488,81 @@ describe("dashboard-kpi-service", () => {
     expect(result.compliance.alerts).toEqual([]);
   });
 
+  // DEF-0B6-CMP-LEADERSHIP-COMPLIANCE-DEFAULTS-TO-100-AND-TRUNCATES: nothing writes compliance alerts, so an empty table is no measurement.
+  it("buildLeadershipDashboard states compliance is not measured when no alert rows exist, with no zero open alerts or 0-day response", () => {
+    const result = buildLeadershipDashboard([], [], "monthly", iso("2026-01-12T00:00:00.000Z"));
+
+    expect(result.compliance.measurement.status).toBe("not_measured");
+    expect(result.compliance.measurement.reason).toMatch(/no process in Union Eyes records compliance alerts/);
+    expect(result.compliance.metrics).toEqual({
+      deadlineAdherence: null,
+      avgResponseTime: null,
+      documentationRate: null,
+      openAlerts: null,
+    });
+  });
+
+  it("buildLeadershipDashboard measures compliance from alert rows that exist, and leaves response time null when none is resolved", () => {
+    const alerts = [
+      {
+        id: "a-open",
+        orgId: "org-1",
+        employerId: "emp-1",
+        alertType: "reporting_overdue",
+        severity: "high",
+        message: "Report overdue",
+        createdAt: iso("2026-01-02T00:00:00.000Z"),
+        resolvedAt: null,
+      },
+    ] as unknown as LeadershipDashboardAlerts;
+    const result = buildLeadershipDashboard([], alerts, "monthly", iso("2026-01-12T00:00:00.000Z"));
+
+    expect(result.compliance.measurement).toEqual({ status: "measured", reason: null });
+    expect(result.compliance.metrics.openAlerts).toBe(1);
+    expect(result.compliance.metrics.documentationRate).toBe(100);
+    expect(result.compliance.metrics.avgResponseTime).toBeNull();
+    expect(result.compliance.metrics.deadlineAdherence).toBeNull();
+  });
+
+  it("refuses with 501, rather than aggregating the first rows, when an organization has more grievances than the read bound", async () => {
+    vi.resetModules();
+    const GRIEVANCE_BOUND = 50_000;
+    const limits: number[] = [];
+    const overBound = { length: GRIEVANCE_BOUND + 1 } as unknown as unknown[];
+    const dbMock = {
+      select: vi.fn(() => ({
+        from: (table: { __table: string }) => ({
+          where: () => ({
+            limit: (n: number) => {
+              limits.push(n);
+              return Promise.resolve(table.__table === "grievances" ? overBound : []);
+            },
+          }),
+        }),
+      })),
+    };
+    vi.doMock("@/db/schema", () => ({
+      grievances: { __table: "grievances" },
+      complianceAlerts: { __table: "alerts" },
+      organizationMembers: { __table: "members" },
+      strategicGoals: { __table: "goals" },
+      employerRemittances: { __table: "remittances" },
+    }));
+    vi.doMock("drizzle-orm", () => ({ and: vi.fn(() => ({})), eq: vi.fn(() => ({})), gte: vi.fn(() => ({})), lt: vi.fn(() => ({})) }));
+    const cacheSet = vi.fn();
+    vi.doMock("@/lib/services/cache-service", () => ({ cacheGet: vi.fn().mockResolvedValue(null), cacheSet }));
+    vi.doMock("@/lib/db/with-rls-context", () => inContext(dbMock));
+
+    const mod = await import("@/lib/services/dashboard-kpi-service");
+    await expect(
+      mod.getLeadershipDashboardMetrics({ organizationId: "org-1", timeframe: "monthly", now: iso("2026-06-10T00:00:00.000Z") }),
+    ).rejects.toMatchObject({ code: "NOT_IMPLEMENTED", message: expect.stringMatching(/more than 50000 grievances rows/) });
+    // The read asks for one row past the bound so that reaching it is detected, and nothing partial is cached.
+    expect(mod.DASHBOARD_READ_BOUNDS.grievances).toBe(GRIEVANCE_BOUND);
+    expect(limits[0]).toBe(GRIEVANCE_BOUND + 1);
+    expect(cacheSet).not.toHaveBeenCalled();
+  });
+
   it("getExecutiveMetrics cache miss loads db rows and caches payload", async () => {
     vi.resetModules();
 

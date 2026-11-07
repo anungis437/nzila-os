@@ -72,12 +72,14 @@ const HEALTH_RESPONSE_FAILING: Record<string, unknown> = {
 
 // ─── Fixture: governance telemetry contract shape ────────────────────────────
 
-const GOVERNANCE_TELEMETRY_RESPONSE = {
-  policy_denied_count: 3,
-  workflow_transition_error_count: 1,
+// policy_denied_count is null: it is not derived from organizations' policy evaluations (issue #1118). audit_event_volume is null for a
+// caller who is not a platform administrator, or when the database is unavailable.
+const GOVERNANCE_TELEMETRY_RESPONSE: Record<string, number | string | null> = {
+  policy_denied_count: null,
+  workflow_transition_error_count: null,
   audit_event_volume: 142,
-  evidence_export_count: 7,
-  auth_anomaly_count: 0,
+  evidence_export_count: null,
+  auth_anomaly_count: null,
   generated_at: '2025-01-01T00:00:00.000Z',
 }
 
@@ -208,7 +210,7 @@ describe('UE Ops - /api/governance/telemetry response contract', () => {
     }
   })
 
-  it('all counters are non-negative numbers (GOV-TELEMETRY-COUNTER-TYPE)', () => {
+  it('every counter is a non-negative number or null when not measured (GOV-TELEMETRY-COUNTER-TYPE)', () => {
     const counters = [
       'policy_denied_count',
       'workflow_transition_error_count',
@@ -217,8 +219,10 @@ describe('UE Ops - /api/governance/telemetry response contract', () => {
       'auth_anomaly_count',
     ] as const
     for (const counter of counters) {
-      expect(typeof GOVERNANCE_TELEMETRY_RESPONSE[counter]).toBe('number')
-      expect(GOVERNANCE_TELEMETRY_RESPONSE[counter]).toBeGreaterThanOrEqual(0)
+      const value = GOVERNANCE_TELEMETRY_RESPONSE[counter]
+      if (value === null) continue
+      expect(typeof value).toBe('number')
+      expect(value).toBeGreaterThanOrEqual(0)
     }
   })
 
@@ -232,24 +236,20 @@ describe('UE Ops - /api/governance/telemetry response contract', () => {
 describe('UE Ops - /api/governance/telemetry source implementation contract', () => {
   const telemetrySrc = readRoute('app/api/governance/telemetry/route.ts')
 
-  it('exports recordPolicyDenied counter helper (GOV-TELEMETRY-EXPORTS-HELPERS)', () => {
-    expect(telemetrySrc).toContain('recordPolicyDenied')
-  })
-
-  it('exports recordWorkflowTransitionError counter helper (GOV-TELEMETRY-EXPORTS-TRANSITION-ERROR)', () => {
-    expect(telemetrySrc).toContain('recordWorkflowTransitionError')
-  })
-
-  it('exports recordEvidenceExport counter helper (GOV-TELEMETRY-EXPORTS-EVIDENCE-EXPORT)', () => {
-    expect(telemetrySrc).toContain('recordEvidenceExport')
+  it('reports no never-incremented in-process counter as a measured zero (GOV-TELEMETRY-NO-CONSTANT-ZERO, #1118)', () => {
+    for (const counter of ['workflow_transition_error_count', 'evidence_export_count', 'auth_anomaly_count']) {
+      expect(telemetrySrc).toContain(`${counter}: null`)
+    }
+    expect(telemetrySrc).not.toMatch(/export function record[A-Z]/)
   })
 
   it('response includes generated_at timestamp (GOV-TELEMETRY-GENERATED-AT)', () => {
     expect(telemetrySrc).toContain('generated_at')
   })
 
-  it('policy_denied_count derives from real DB query or in-process counter (GOV-TELEMETRY-REAL-POLICY-COUNT)', () => {
-    expect(telemetrySrc).toMatch(/policyEvaluations|policyDeniedCounter/)
+  it('policy_denied_count is not derived from organizations\' policy evaluations across tenants (GOV-TELEMETRY-NO-CROSS-TENANT, #1118)', () => {
+    expect(telemetrySrc).not.toContain('policyEvaluations')
+    expect(telemetrySrc).toContain('policy_denied_count: null')
   })
 })
 
