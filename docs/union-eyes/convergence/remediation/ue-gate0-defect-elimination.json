@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 620,
-    "partial": 47,
+    "implementedPendingQualification": 625,
+    "partial": 42,
     "qualificationVerified": 0,
-    "unresolved": 157,
+    "unresolved": 152,
     "externalBlockers": 0
   },
   "batches": [
@@ -1248,6 +1248,15 @@
       "newlyImplemented": 20,
       "outstandingAfter": 157,
       "partial": 0,
+      "evidenceCommit": "0f50fd5e4"
+    },
+    {
+      "id": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+      "family": "Corrects a misattribution (2 defects wrongly credited as main-based in B137, actually Wave1-only, caught by the ledger-provenance test's file-existence check) and credits 2 more genuine Wave1 fixes (the organizational-dynamics engine family) found via the same citation sweep",
+      "outstandingBefore": 157,
+      "newlyImplemented": 5,
+      "outstandingAfter": 152,
+      "partial": 0,
       "evidenceCommit": null
     }
   ],
@@ -1464,14 +1473,14 @@
       ]
     },
     "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER": {
-      "status": "PARTIAL",
-      "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
       "files": [
-        "apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
-        "apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts"
+        "apps/union-eyes/lib/push/push-sender.ts",
+        "apps/union-eyes/lib/push/__tests__/push-sender.test.ts",
+        "apps/union-eyes/app/api/mobile/devices/[id]/test-push/__tests__/route.test.ts"
       ],
-      "explanation": "Both device tables now have an owner removal route (PATCH preferences and DELETE for push devices, DELETE for mobile devices), audited.",
-      "remaining": "The two tables are not consolidated, and no sender reads either table (services/fcm-service.ts and lib/mobile/mobile-engine.ts remain unimported by any route or worker).",
+      "explanation": "New lib/push/push-sender.ts (73 new lines, a real FCM sender) makes push_devices the single written table, matching Wave 1's own claim 'MOB-TWO-DEVICE-TABLES: FIXED, partially. push_devices is the single written table, with a real FCM sender. Test push returns 501 without FIREBASE_SERVICE_ACCOUNT. Old mobile_devices rows are not migrated.' Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error; corrected after a ledger-provenance test caught the missing-file reference).",
       "history": [
         {
           "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
@@ -1480,6 +1489,16 @@
           "files": [
             "apps/union-eyes/app/api/mobile/devices/[id]/route.ts",
             "apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts"
+          ]
+        },
+        {
+          "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/lib/push/push-sender.ts",
+            "apps/union-eyes/lib/push/__tests__/push-sender.test.ts",
+            "apps/union-eyes/app/api/mobile/devices/[id]/test-push/__tests__/route.test.ts"
           ]
         }
       ]
@@ -1526,7 +1545,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/mobile/sync/route.ts"
           ]
@@ -2596,7 +2615,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/services/rewards/notification-service.ts",
             "apps/union-eyes/lib/services/rewards/__tests__/expiration-warnings.pglite.test.ts"
@@ -2623,7 +2642,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/rewards/cron/route.ts"
           ]
@@ -2693,7 +2712,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts",
             "apps/union-eyes/lib/icra/claim-delivery.ts"
@@ -3703,7 +3722,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/signature/signature-service.ts",
             "apps/union-eyes/lib/signature/provider-sync.ts"
@@ -3984,7 +4003,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/services/dispatch-engine.ts",
             "apps/union-eyes/lib/services/__tests__/dispatch-engine.test.ts"
@@ -5450,7 +5469,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
             "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
@@ -5479,13 +5498,15 @@
       ]
     },
     "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS": {
-      "status": "PARTIAL",
-      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
       "files": [
-        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
+        "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+        "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+        "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+        "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
       ],
-      "explanation": "The governance-coherence engine, which embedded literal scores, answers 501 (batch B10).",
-      "remaining": "The governance-momentum engine still derives scores from ratios of cognition-memory entry counts with arbitrary scaling.",
+      "explanation": "A 572-line diff (mostly deletions) across 4 organizational-dynamics engines removes the fabricated literal-weight/entry-count-ratio scoring; coherence-engine.ts's own top-of-file comment explicitly cites this defect ID and its DEF-0B7-COGB-ENTRY-COUNT-PROXIES sibling by name: 'The engine previously derived scores and labels from those counts with arbitrary scaling... Preserve this callable interface, but refuse invented scores until a governed model exists.' Each engine now throws ApiError.notImplemented rather than returning an invented score. Confirmed via direct diff and source read.",
       "history": [
         {
           "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
@@ -5494,17 +5515,30 @@
           "files": [
             "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
           ]
+        },
+        {
+          "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
+          ]
         }
       ]
     },
     "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST": {
-      "status": "PARTIAL",
-      "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
       "files": [
-        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
+        "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+        "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+        "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+        "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
       ],
-      "explanation": "The coordination, rhythm and trust engines answer 501 (batch B10).",
-      "remaining": "The response-elasticity engine still derives its indicators from entry counts and labels them elasticity.",
+      "explanation": "Same fix and the same direct citation as DEF-0B7-COGA-COHERENCE-AND-MOMENTUM above (both defect IDs are named together in coherence-engine.ts's own comment). Confirmed via direct diff and source read.",
       "history": [
         {
           "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
@@ -5512,6 +5546,17 @@
           "evidenceCommit": null,
           "files": [
             "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts"
+          ]
+        },
+        {
+          "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
           ]
         }
       ]
@@ -6326,7 +6371,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "PARTIAL_SOURCE_REMAINING_WORK",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/services/committee-read-access.ts"
           ]
@@ -7916,7 +7961,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "PARTIAL_SOURCE_REMAINING_WORK",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/location/consent/route.ts"
           ]
@@ -8026,7 +8071,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/units/route.ts",
             "apps/union-eyes/app/api/units/[id]/route.ts",
@@ -10420,7 +10465,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts",
             "apps/union-eyes/lib/documents/intake-lifecycle.ts",
@@ -11577,7 +11622,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-modeler.ts",
             "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-models.ts"
@@ -11664,7 +11709,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/organizational-narratives/index.ts",
             "apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts"
@@ -12398,7 +12443,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/services/dashboard-kpi-service.ts",
             "apps/union-eyes/lib/services/__tests__/dashboard-kpi-service.test.ts"
@@ -13239,17 +13284,13 @@
       ]
     },
     "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS": {
-      "status": "PARTIAL",
-      "batch": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
       "files": [
-        "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts",
-        "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql",
-        "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql",
-        "apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts"
+        "apps/union-eyes/lib/records/organization-record-number.ts",
+        "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts"
       ],
-      "explanation": "Migration 0042 makes incident_number, inspection_number, report_number and item_number unique within an organization.",
-      "remaining": "The numbers are still supplied by the caller; a server-issued per-organization sequence is not built.",
+      "explanation": "New lib/records/organization-record-number.ts (76 new lines) implements allocateOrganizationRecordNumber/issueOrganizationRecordNumber with RECORD_NUMBER_SERIES: a server-issued per-organization series under an advisory lock in the creating transaction, matching Wave 1's own claim 'HS-RECORD-NUMBERS and ORG-CAMPAIGN-CODE: FIXED. Server-issued per-organization series under an advisory lock... A missing field answers 400, not 500.' Proven by a dedicated new PGlite test (72 new lines) that cites this defect ID and its DEF-0B10-ORG-CAMPAIGN-CODE sibling directly. Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error -- the file does not exist on origin/main at all; corrected after a ledger-provenance test caught the missing-file reference).",
       "history": [
         {
           "batch": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
@@ -13262,22 +13303,27 @@
             "apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts",
             "apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts"
           ]
+        },
+        {
+          "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts"
+          ]
         }
       ]
     },
     "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500": {
-      "status": "PARTIAL",
-      "batch": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
       "files": [
-        "apps/union-eyes/db/schema/domains/infrastructure/organizing.ts",
-        "apps/union-eyes/db/schema/organizing-tools-schema.ts",
-        "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql",
-        "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql",
-        "apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts",
-        "apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts"
+        "apps/union-eyes/lib/records/organization-record-number.ts",
+        "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts",
+        "apps/union-eyes/app/api/organizing/campaigns/__tests__/route.test.ts"
       ],
-      "explanation": "Migration 0042 makes organizing_campaigns.campaign_code unique within an organization.",
-      "remaining": "campaign_code and the other columns are still required in the body; a server-issued code and defaults are not built.",
+      "explanation": "Same server-issued record-numbering mechanism as DEF-0B8-HS-RECORD-NUMBERS above; the campaign route's own test also cites this defect ID directly. Confirmed via direct diff read against origin/main.",
       "history": [
         {
           "batch": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
@@ -13290,6 +13336,16 @@
             "apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql",
             "apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts",
             "apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts"
+          ]
+        },
+        {
+          "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts",
+            "apps/union-eyes/app/api/organizing/campaigns/__tests__/route.test.ts"
           ]
         }
       ]
@@ -13316,7 +13372,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/services/geofence-privacy-service.ts",
             "apps/union-eyes/db/__tests__/location-retention-owner.pglite.test.ts"
@@ -13566,7 +13622,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "PARTIAL_SOURCE_REMAINING_WORK",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/cnesst/anti-scab/route.ts",
             "apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts",
@@ -13683,7 +13739,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/pension/members/route.ts"
           ]
@@ -13777,7 +13833,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/communications/polls/[pollId]/vote/route.ts",
             "apps/union-eyes/lib/communications/polls.ts"
@@ -14792,7 +14848,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/ai/ingest/route.ts",
             "apps/union-eyes/lib/ai/durable-ingest-index.ts"
@@ -16202,7 +16258,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "PARTIAL_SOURCE_REMAINING_WORK",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/services/precedent-audited-service.ts"
           ]
@@ -16860,7 +16916,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/union-structure/employer-archive.ts",
             "apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts"
@@ -16911,7 +16967,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "PARTIAL_SOURCE_REMAINING_WORK",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/lib/external-resource-middleware.ts",
             "apps/union-eyes/lib/services/external-resource-authorization-service.ts"
@@ -17095,7 +17151,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/cognition/engagement/route.ts"
           ]
@@ -17254,7 +17310,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/targets/summary/route.ts",
             "apps/union-eyes/lib/kpi/target-value.ts"
@@ -17782,7 +17838,7 @@
         {
           "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "0f50fd5e4",
           "files": [
             "apps/union-eyes/app/api/settings/organization/route.ts",
             "apps/union-eyes/lib/settings/unenforced-settings.ts"

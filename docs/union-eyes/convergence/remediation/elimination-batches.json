@@ -10056,7 +10056,7 @@
     {
       "id": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
       "family": "Wave 1 (PR #1128) fixes real defects across its own commits but never updates the ledger; this batch credits the ones independently verified via direct diff content against origin/main, excluding dues/per-capita/remittance-adjacent and institutionally-blocked items",
-      "evidenceCommit": null,
+      "evidenceCommit": "0f50fd5e4",
       "items": [
         {
           "prefix": "DEF-0B2-AI-RAG-INDEX-PROCESS-LOCAL",
@@ -10475,6 +10475,112 @@
             "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts",
             "apps/union-eyes/lib/documents/intake-lifecycle.ts",
             "apps/union-eyes/lib/documents/intake-storage.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+      "family": "Corrects a misattribution (2 defects wrongly credited as main-based in B137, actually Wave1-only, caught by the ledger-provenance test's file-existence check) and credits 2 more genuine Wave1 fixes (the organizational-dynamics engine family) found via the same citation sweep",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts"
+          ],
+          "explanation": "New lib/records/organization-record-number.ts (76 new lines) implements allocateOrganizationRecordNumber/issueOrganizationRecordNumber with RECORD_NUMBER_SERIES: a server-issued per-organization series under an advisory lock in the creating transaction, matching Wave 1's own claim 'HS-RECORD-NUMBERS and ORG-CAMPAIGN-CODE: FIXED. Server-issued per-organization series under an advisory lock... A missing field answers 400, not 500.' Proven by a dedicated new PGlite test (72 new lines) that cites this defect ID and its DEF-0B10-ORG-CAMPAIGN-CODE sibling directly. Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error -- the file does not exist on origin/main at all; corrected after a ledger-provenance test caught the missing-file reference)."
+        },
+        {
+          "prefix": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts",
+            "apps/union-eyes/app/api/organizing/campaigns/__tests__/route.test.ts"
+          ],
+          "explanation": "Same server-issued record-numbering mechanism as DEF-0B8-HS-RECORD-NUMBERS above; the campaign route's own test also cites this defect ID directly. Confirmed via direct diff read against origin/main."
+        },
+        {
+          "prefix": "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/push/push-sender.ts",
+            "apps/union-eyes/lib/push/__tests__/push-sender.test.ts",
+            "apps/union-eyes/app/api/mobile/devices/[id]/test-push/__tests__/route.test.ts"
+          ],
+          "explanation": "New lib/push/push-sender.ts (73 new lines, a real FCM sender) makes push_devices the single written table, matching Wave 1's own claim 'MOB-TWO-DEVICE-TABLES: FIXED, partially. push_devices is the single written table, with a real FCM sender. Test push returns 501 without FIREBASE_SERVICE_ACCOUNT. Old mobile_devices rows are not migrated.' Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error; corrected after a ledger-provenance test caught the missing-file reference)."
+        },
+        {
+          "prefix": "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
+          ],
+          "explanation": "A 572-line diff (mostly deletions) across 4 organizational-dynamics engines removes the fabricated literal-weight/entry-count-ratio scoring; coherence-engine.ts's own top-of-file comment explicitly cites this defect ID and its DEF-0B7-COGB-ENTRY-COUNT-PROXIES sibling by name: 'The engine previously derived scores and labels from those counts with arbitrary scaling... Preserve this callable interface, but refuse invented scores until a governed model exists.' Each engine now throws ApiError.notImplemented rather than returning an invented score. Confirmed via direct diff and source read."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
+          ],
+          "explanation": "Same fix and the same direct citation as DEF-0B7-COGA-COHERENCE-AND-MOMENTUM above (both defect IDs are named together in coherence-engine.ts's own comment). Confirmed via direct diff and source read."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts",
+            "apps/union-eyes/app/api/organizing/campaigns/__tests__/route.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/push/push-sender.ts",
+            "apps/union-eyes/lib/push/__tests__/push-sender.test.ts",
+            "apps/union-eyes/app/api/mobile/devices/[id]/test-push/__tests__/route.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
           ]
         }
       ]

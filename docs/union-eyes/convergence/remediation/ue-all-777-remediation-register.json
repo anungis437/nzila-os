@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 672,
-    "engineeringRemaining": 105,
+    "engineeringCorrected": 677,
+    "engineeringRemaining": 100,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 52
+    "engineeringPartial": 47
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -8193,11 +8193,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
-        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "explanation": "The governance-coherence engine, which embedded literal scores, answers 501 (batch B10).",
-        "remaining": "The governance-momentum engine still derives scores from ratios of cognition-memory entry counts with arbitrary scaling.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts; apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts; apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts; apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts",
+        "explanation": "A 572-line diff (mostly deletions) across 4 organizational-dynamics engines removes the fabricated literal-weight/entry-count-ratio scoring; coherence-engine.ts's own top-of-file comment explicitly cites this defect ID and its DEF-0B7-COGB-ENTRY-COUNT-PROXIES sibling by name: 'The engine previously derived scores and labels from those counts with arbitrary scaling... Preserve this callable interface, but refuse invented scores until a governed model exists.' Each engine now throws ApiError.notImplemented rather than returning an invented score. Confirmed via direct diff and source read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -8646,11 +8645,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
-        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "explanation": "The coordination, rhythm and trust engines answer 501 (batch B10).",
-        "remaining": "The response-elasticity engine still derives its indicators from entry counts and labels them elasticity.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts; apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts; apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts; apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts",
+        "explanation": "Same fix and the same direct citation as DEF-0B7-COGA-COHERENCE-AND-MOMENTUM above (both defect IDs are named together in coherence-engine.ts's own comment). Confirmed via direct diff and source read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -9738,11 +9736,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
-        "path": "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts; apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql; apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql; apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts",
-        "explanation": "Migration 0042 makes incident_number, inspection_number, report_number and item_number unique within an organization.",
-        "remaining": "The numbers are still supplied by the caller; a server-issued per-organization sequence is not built.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/records/organization-record-number.ts; apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts",
+        "explanation": "New lib/records/organization-record-number.ts (76 new lines) implements allocateOrganizationRecordNumber/issueOrganizationRecordNumber with RECORD_NUMBER_SERIES: a server-issued per-organization series under an advisory lock in the creating transaction, matching Wave 1's own claim 'HS-RECORD-NUMBERS and ORG-CAMPAIGN-CODE: FIXED. Server-issued per-organization series under an advisory lock... A missing field answers 400, not 500.' Proven by a dedicated new PGlite test (72 new lines) that cites this defect ID and its DEF-0B10-ORG-CAMPAIGN-CODE sibling directly. Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error -- the file does not exist on origin/main at all; corrected after a ledger-provenance test caught the missing-file reference).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -12413,11 +12410,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
-        "path": "apps/union-eyes/app/api/mobile/devices/[id]/route.ts; apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts",
-        "explanation": "Both device tables now have an owner removal route (PATCH preferences and DELETE for push devices, DELETE for mobile devices), audited.",
-        "remaining": "The two tables are not consolidated, and no sender reads either table (services/fcm-service.ts and lib/mobile/mobile-engine.ts remain unimported by any route or worker).",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/push/push-sender.ts; apps/union-eyes/lib/push/__tests__/push-sender.test.ts; apps/union-eyes/app/api/mobile/devices/[id]/test-push/__tests__/route.test.ts",
+        "explanation": "New lib/push/push-sender.ts (73 new lines, a real FCM sender) makes push_devices the single written table, matching Wave 1's own claim 'MOB-TWO-DEVICE-TABLES: FIXED, partially. push_devices is the single written table, with a real FCM sender. Test push returns 501 without FIREBASE_SERVICE_ACCOUNT. Old mobile_devices rows are not migrated.' Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error; corrected after a ledger-provenance test caught the missing-file reference).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -14201,11 +14197,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
-        "path": "apps/union-eyes/db/schema/domains/infrastructure/organizing.ts; apps/union-eyes/db/schema/organizing-tools-schema.ts; apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql; apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql; apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts",
-        "explanation": "Migration 0042 makes organizing_campaigns.campaign_code unique within an organization.",
-        "remaining": "campaign_code and the other columns are still required in the body; a server-issued code and defaults are not built.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/records/organization-record-number.ts; apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts; apps/union-eyes/app/api/organizing/campaigns/__tests__/route.test.ts",
+        "explanation": "Same server-issued record-numbering mechanism as DEF-0B8-HS-RECORD-NUMBERS above; the campaign route's own test also cites this defect ID directly. Confirmed via direct diff read against origin/main.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },

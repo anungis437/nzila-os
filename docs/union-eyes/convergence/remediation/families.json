@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 672,
- "partial": 52,
- "outstanding": 105,
- "accountedFor": 105,
+ "corrected": 677,
+ "partial": 47,
+ "outstanding": 100,
+ "accountedFor": 100,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -45,11 +45,11 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 9,
+   "defects": 7,
    "severity": {
     "HIGH": 2,
     "MEDIUM": 4,
-    "LOW": 3
+    "LOW": 1
    },
    "namedRoutes": 3,
    "namedFiles": 0,
@@ -57,8 +57,7 @@
     "0B.2": 1,
     "0B.4": 1,
     "0B.6": 2,
-    "0B.8": 1,
-    "0B.10": 2,
+    "0B.10": 1,
     "0B.11": 2
    }
   },
@@ -81,10 +80,10 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 18,
+   "defects": 16,
    "severity": {
     "HIGH": 4,
-    "MEDIUM": 14,
+    "MEDIUM": 12,
     "LOW": 0
    },
    "namedRoutes": 1,
@@ -94,7 +93,7 @@
     "0B.3": 1,
     "0B.5": 1,
     "0B.6": 2,
-    "0B.7": 6,
+    "0B.7": 4,
     "0B.8": 1,
     "0B.10": 1,
     "0B.11": 4
@@ -120,14 +119,14 @@
   {
    "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
    "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
-   "defects": 12,
+   "defects": 11,
    "severity": {
     "HIGH": 3,
-    "MEDIUM": 8,
+    "MEDIUM": 7,
     "LOW": 1
    },
    "namedRoutes": 2,
-   "namedFiles": 2,
+   "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
     "0B.3": 1,
@@ -135,7 +134,6 @@
     "0B.5": 2,
     "0B.7": 2,
     "0B.8": 1,
-    "0B.9": 1,
     "0B.10": 2
    }
   },
@@ -310,16 +308,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
     "id": "DEF-0B10-OPL-14",
     "severity": "HIGH",
     "partial": true
@@ -392,16 +380,6 @@
    {
     "id": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
@@ -493,11 +471,6 @@
    {
     "id": "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B10-PEN-BENEFIT-CLAIMS-CAN-BE-FILED-BUT-NO-ROUTE-CAN-DECIDE-OR-PAY-THEM",
