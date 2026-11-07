@@ -6,7 +6,7 @@
     "overlayImplemented": 706,
     "ledgerImplemented": 652,
     "creditedByEarlierRuns": 54,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 23,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 32,
     "overlayPartial": 26,
     "ledgerPartial": 24,
     "unresolvedByOverlay": 71,
@@ -397,36 +397,36 @@
       "defectId": "DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
       "batch": "B10-CALENDAR-OAUTH-AUDIT",
       "sourceCommit": null,
-      "regressionTest": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/calendar-sync-google-callback.route.test.ts; apps/union-eyes/app/api/__tests__/calendar-sync-microsoft-callback.route.test.ts; apps/union-eyes/app/api/__tests__/calendar-sync-callbacks-mutation-isolation.pglite.test.ts",
       "files": [
         "apps/union-eyes/app/api/calendar-sync/google/callback/route.ts",
         "apps/union-eyes/app/api/calendar-sync/microsoft/callback/route.ts"
       ],
-      "hasIndependentRegressionEvidence": false
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B4-CALENDAR-CONNECTION-ROW-RETURNS-TOKENS",
       "batch": "B10-CALENDAR-CONNECTION-BOUNDARY-RECONCILIATION",
       "sourceCommit": null,
-      "regressionTest": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts",
       "files": [
         "apps/union-eyes/app/api/calendar-sync/connections/route.ts",
         "apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts",
         "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts"
       ],
-      "hasIndependentRegressionEvidence": false
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B4-CALENDAR-CONNECTION-CRUD-WRITES-AROUND-OAUTH",
       "batch": "B10-CALENDAR-CONNECTION-BOUNDARY-RECONCILIATION",
       "sourceCommit": null,
-      "regressionTest": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts",
       "files": [
         "apps/union-eyes/app/api/calendar-sync/connections/route.ts",
         "apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts",
         "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts"
       ],
-      "hasIndependentRegressionEvidence": false
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B4-CALENDAR-SYNC-ANY-MEMBER-CONNECTION",
@@ -635,61 +635,61 @@
       "defectId": "DEF-0B9-ORG-ITEM-GET-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-RECORD-AS-SYSTEM",
       "batch": null,
       "sourceCommit": null,
-      "regressionTest": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-id.route.test.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
       "files": [
         "apps/union-eyes/app/api/organizations/[id]/route.ts"
       ],
-      "hasIndependentRegressionEvidence": false
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B9-ORG-ITEM-GET-STATISTICS-RUN-ON-BARE-DB-AFTER-SYSTEM-READ-WITHOUT-ORGANIZATION-CONTEXT",
       "batch": null,
       "sourceCommit": null,
-      "regressionTest": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-id.route.test.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
       "files": [
         "apps/union-eyes/app/api/organizations/[id]/route.ts"
       ],
-      "hasIndependentRegressionEvidence": false
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B9-ORG-MEMBERSHIP-GUARD-IGNORES-MEMBER-STATUS-AND-REMOVAL-FLAG",
       "batch": null,
       "sourceCommit": null,
-      "regressionTest": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
       "files": [
         "apps/union-eyes/lib/api-auth-guard.ts"
       ],
-      "hasIndependentRegressionEvidence": false
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B9-ORG-HIERARCHY-LIST-ANY-SIGNED-IN-USER-ENUMERATES-EVERY-ORGANIZATION-AS-SYSTEM",
       "batch": null,
       "sourceCommit": null,
-      "regressionTest": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-hierarchy.route.test.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
       "files": [
         "apps/union-eyes/app/api/organizations/hierarchy/route.ts"
       ],
-      "hasIndependentRegressionEvidence": false
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B9-ORG-CHILDREN-ANY-SIGNED-IN-USER-LISTS-CHILDREN-OF-ANY-ORGANIZATION-AS-SYSTEM",
       "batch": null,
       "sourceCommit": null,
-      "regressionTest": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
       "files": [
         "apps/union-eyes/app/api/organizations/[id]/children/route.ts"
       ],
-      "hasIndependentRegressionEvidence": false
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B9-ORG-DESCENDANTS-ANY-SIGNED-IN-USER-LISTS-WHOLE-SUBTREE-OF-ANY-ORGANIZATION-UNBOUNDED-AS-SYSTEM",
       "batch": null,
       "sourceCommit": null,
-      "regressionTest": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts",
       "files": [
         "apps/union-eyes/app/api/organizations/[id]/descendants/route.ts"
       ],
-      "hasIndependentRegressionEvidence": false
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B9-ORG-ANCESTORS-ANY-SIGNED-IN-USER-READS-ANCESTRY-OF-ANY-ORGANIZATION-AS-SYSTEM",

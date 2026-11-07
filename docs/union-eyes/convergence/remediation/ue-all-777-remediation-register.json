@@ -1478,7 +1478,7 @@
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B133-F02-CRUD-WRITABLE-FIELDS-REMAINING-ROUTES",
         "path": "apps/union-eyes/app/api/metrics/route.ts; apps/union-eyes/app/api/gdpr/consents/route.ts; apps/union-eyes/app/api/gdpr/requests/route.ts; apps/union-eyes/app/api/gdpr/data-erasure/route.ts; apps/union-eyes/app/api/consent/route.ts; apps/union-eyes/app/api/deadlines/route.ts; apps/union-eyes/app/api/deadlines/compliance/route.ts; apps/union-eyes/app/api/members/[id]/route.ts; apps/union-eyes/app/api/members/[id]/employment/route.ts; apps/union-eyes/app/api/members/[id]/documents/route.ts; apps/union-eyes/app/api/communications/polls/[pollId]/route.ts; apps/union-eyes/app/api/claims/[id]/route.ts; apps/union-eyes/app/api/currency/convert/route.ts; apps/union-eyes/app/api/admin/clc/analytics/organizations/route.ts; apps/union-eyes/lib/api/__tests__/crud-writable-fields-census.test.ts; apps/union-eyes/lib/api/crud-governance.ts; apps/union-eyes/lib/api/__tests__/crud-governance.test.ts",
-        "explanation": "Of the 21 routes this branch's own crud-writable-fields-census.test.ts still flagged after Wave 1 (B105+ fail-closed writableFields default), 12 routes (metrics, gdpr/consents, gdpr/requests, gdpr/data-erasure, consent, deadlines, deadlines/compliance, members/[id], members/[id]/employment, members/[id]/documents, communications/polls/[pollId], claims/[id]) now declare a real, narrow writableFields list decided from each table's own schema, excluding computed, approval and financial-adjustment columns. 2 routes (currency/convert, admin/clc/analytics/organizations) were facades bound to the unrelated analyticsMetrics table with zero real callers, the same bug class as the already-fixed organization_members facades (DEF-0B1-CRUD-FACADE-ORG-MEMBERS, B09-F02); converted to 501 rather than inventing an allow-list for an operation that never existed. census: 138/138 passing. VERIFIED (follow-up): the remaining 7 routes (arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId], arrears/escalate bound to per_capita_remittances; members/dues bound to dues_transactions) write over tables lib/api/crud-governance.ts classifies DENIED and READ_ONLY respectively — assertCrudWrite refuses every write on either table unconditionally, before any writableFields list is consulted, so no mass-assignment surface exists on any of the 21 originally-flagged routes. crud-governance.test.ts (22/22) pins both classifications explicitly; crud-writable-fields-census.test.ts's own governanceAllowsWrite() gate is why these 7 do not need a list. The stated exploit mechanism (a caller setting status/author/approval/cost/provenance columns via generic CRUD write) is removed for every one of the 21 routes.",
+        "explanation": "Of the 21 routes this branch's own crud-writable-fields-census.test.ts still flagged after Wave 1 (B105+ fail-closed writableFields default), 12 routes (metrics, gdpr/consents, gdpr/requests, gdpr/data-erasure, consent, deadlines, deadlines/compliance, members/[id], members/[id]/employment, members/[id]/documents, communications/polls/[pollId], claims/[id]) now declare a real, narrow writableFields list decided from each table's own schema, excluding computed, approval and financial-adjustment columns. 2 routes (currency/convert, admin/clc/analytics/organizations) were facades bound to the unrelated analyticsMetrics table with zero real callers, the same bug class as the already-fixed organization_members facades (DEF-0B1-CRUD-FACADE-ORG-MEMBERS, B09-F02); converted to 501 rather than inventing an allow-list for an operation that never existed. census: 138/138 passing. VERIFIED (follow-up): the remaining 7 routes (arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId], arrears/escalate bound to per_capita_remittances; members/dues bound to dues_transactions) write over tables lib/api/crud-governance.ts classifies DENIED and READ_ONLY respectively \u2014 assertCrudWrite refuses every write on either table unconditionally, before any writableFields list is consulted, so no mass-assignment surface exists on any of the 21 originally-flagged routes. crud-governance.test.ts (22/22) pins both classifications explicitly; crud-writable-fields-census.test.ts's own governanceAllowsWrite() gate is why these 7 do not need a list. The stated exploit mechanism (a caller setting status/author/approval/cost/provenance columns via generic CRUD write) is removed for every one of the 21 routes.",
         "remaining": "The arrears/dues FEATURE gap is unrelated to this security defect and stays open as its own item: arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId] and arrears/escalate are bound to the unrelated perCapitaRemittances table instead of the real, unused memberArrears/paymentPlans tables (per-capita/remittance work is explicitly future, non-blocking per product direction), and members/dues has no real POST caller in this repo and its fields feed dues calculation, needing its own product decision. Neither gap is a mass-assignment exposure: both tables' generic writes are unconditionally refused by governance classification, independent of any field list.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
@@ -2407,7 +2407,7 @@
         "tests": [
           "apps/union-eyes/app/api/__tests__/breaks-compliance-privacy.route.test.ts"
         ],
-        "repair": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
+        "repair": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1\u20134, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
         "sourceState": "PATCHED_NOT_ACCEPTED",
         "unitState": "PENDING_AT_EXACT_HEAD",
         "nativeState": "PENDING_AT_EXACT_HEAD",
@@ -2420,7 +2420,7 @@
       "engineeringCorrection": {
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/app/api/breaks/compliance/route.ts",
-        "explanation": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
+        "explanation": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1\u20134, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -2522,7 +2522,8 @@
         "batch": "B10-CALENDAR-OAUTH-AUDIT",
         "path": "apps/union-eyes/app/api/calendar-sync/google/callback/route.ts; apps/union-eyes/app/api/calendar-sync/microsoft/callback/route.ts",
         "explanation": "Both provider callbacks now perform the credential mutation and mandatory audit within the same organization-bound RLS transaction, with the connection id and actor. An audit failure prevents the transaction from committing. Callback unit regressions cover both providers and audit failure; exact-SHA CI and real provider acceptance remain pending.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/calendar-sync-google-callback.route.test.ts; apps/union-eyes/app/api/__tests__/calendar-sync-microsoft-callback.route.test.ts; apps/union-eyes/app/api/__tests__/calendar-sync-callbacks-mutation-isolation.pglite.test.ts"
       }
     },
     {
@@ -2585,7 +2586,8 @@
         "batch": "B10-CALENDAR-CONNECTION-BOUNDARY-RECONCILIATION",
         "path": "apps/union-eyes/app/api/calendar-sync/connections/route.ts; apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts; apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts",
         "explanation": "Both connection GET routes select explicit safe projections excluding accessToken, refreshToken and tokenExpiresAt, and bind both organizationId and userId; regression checks projections and owner predicates.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts"
       }
     },
     {
@@ -2623,7 +2625,8 @@
         "batch": "B10-CALENDAR-CONNECTION-BOUNDARY-RECONCILIATION",
         "path": "apps/union-eyes/app/api/calendar-sync/connections/route.ts; apps/union-eyes/app/api/calendar-sync/connections/[id]/route.ts; apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts",
         "explanation": "Direct POST accepts only provider and returns OAuth initiation URL without writing; item PATCH strictly accepts non-secret sync settings, enforces caller ownership, and audits changes transactionally. Regression rejects token and identity mass assignment.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/calendar-sync-connections-owner-scoping.route.test.ts"
       }
     },
     {
@@ -13186,7 +13189,8 @@
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/app/api/organizations/[id]/route.ts",
         "explanation": "Item read checks active organization read authority before system-role query and withholds administrator-only fields from members.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-id.route.test.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts"
       }
     },
     {
@@ -13224,7 +13228,8 @@
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/app/api/organizations/[id]/route.ts",
         "explanation": "Claims aggregates execute in explicit tenant RLS context for direct members or in a system transaction after verified platform/parent-admin authority; both paths predicate the target organization. Child counts execute in explicit system context. No bare pooled query or silent tenant mismatch.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-id.route.test.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts"
       }
     },
     {
@@ -13353,7 +13358,8 @@
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/lib/api-auth-guard.ts",
         "explanation": "Legacy organization guards and role lookup require active membership and deleted_at IS NULL; shared organization read-authority also excludes soft-deleted membership. Adversarial unit and native PG regression added; CI not yet verified at current HEAD.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts"
       }
     },
     {
@@ -13621,7 +13627,8 @@
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/app/api/organizations/hierarchy/route.ts",
         "explanation": "System-role hierarchy read is constrained to verified active membership and administered descendants, including rootOrgId filter.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-hierarchy.route.test.ts; apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts"
       }
     },
     {
@@ -13691,7 +13698,8 @@
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/app/api/organizations/[id]/children/route.ts",
         "explanation": "Parent read authority is checked before system query; child projection is filtered to caller-readable organizations.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts"
       }
     },
     {
@@ -13737,7 +13745,8 @@
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/app/api/organizations/[id]/descendants/route.ts",
         "explanation": "Parent read authority is checked before system query, descendants are filtered to readable organizations and the query is bounded to 2000 rows.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/organizations-read-authority.pglite.test.ts"
       }
     },
     {
