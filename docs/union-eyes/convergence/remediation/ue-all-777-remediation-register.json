@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 655,
-    "engineeringRemaining": 122,
+    "engineeringCorrected": 656,
+    "engineeringRemaining": 121,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 70
+    "engineeringPartial": 69
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -11824,11 +11824,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B08-ICRA-JUR-ML-ORG",
-        "path": "apps/union-eyes/lib/ml/sla-breach-score.ts; apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts; apps/union-eyes/app/api/__tests__/ml-sla-breach-risk.route.test.ts; apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts",
-        "explanation": "The score is presented as a rule-based heuristic: no confidence, no interval and no training date are returned or stored. Its priority and time remaining are read from the case in the caller's organization (404 for a case that is not), so a caller can no longer choose the inputs that decide an imminent-breach alert; values sent for them are ignored.",
-        "remaining": "The transition count and previous-breach flag are still caller-supplied (they add at most 0.34, so with a case that has time left they cannot reach the 0.80 alert threshold); deriving them needs the claim history.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B136-ML-SLA-SCORE-STALE-REGISTER-CREDIT",
+        "path": "apps/union-eyes/lib/ml/sla-breach-score.ts; apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts; apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts",
+        "explanation": "Already fixed on main by commit 220dc70c9 ('eliminate caller-controlled SLA risk inputs and quarantine legacy predictions'), predating this session, never ledger-credited. The route's body schema now comments 'Legacy fields are accepted for compatibility, but are NOT authoritative scoring inputs' for transitionCount/hasPreviousBreaches, and computeVerifiedCaseSlaRisk always passes transitionCount:0, hasPreviousBreaches:false regardless of the caller's body, scoring only from priority and hoursRemaining derived server-side from the claim's own stored status/timestamps (caseFacts). A dedicated test ('verified case-facts-only SLA scoring' > 'uses only priority and deadline, not caller-provided history') proves this adversarially. 6/6 passing.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },

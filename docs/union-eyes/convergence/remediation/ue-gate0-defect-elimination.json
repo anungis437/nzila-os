@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 603,
-    "partial": 70,
+    "implementedPendingQualification": 604,
+    "partial": 69,
     "qualificationVerified": 0,
-    "unresolved": 174,
+    "unresolved": 173,
     "externalBlockers": 0
   },
   "batches": [
@@ -1247,6 +1247,15 @@
       "outstandingBefore": 177,
       "newlyImplemented": 3,
       "outstandingAfter": 174,
+      "partial": 0,
+      "evidenceCommit": "150e8b5eb"
+    },
+    {
+      "id": "B136-ML-SLA-SCORE-STALE-REGISTER-CREDIT",
+      "family": "A second register text lagging an already-landed fix, found while surveying the DEF-0B9-ML family for similar staleness",
+      "outstandingBefore": 174,
+      "newlyImplemented": 1,
+      "outstandingAfter": 173,
       "partial": 0,
       "evidenceCommit": null
     }
@@ -2760,16 +2769,14 @@
       ]
     },
     "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE": {
-      "status": "PARTIAL",
-      "batch": "B08-ICRA-JUR-ML-ORG",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B136-ML-SLA-SCORE-STALE-REGISTER-CREDIT",
       "files": [
         "apps/union-eyes/lib/ml/sla-breach-score.ts",
         "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
-        "apps/union-eyes/app/api/__tests__/ml-sla-breach-risk.route.test.ts",
         "apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts"
       ],
-      "explanation": "The score is presented as a rule-based heuristic: no confidence, no interval and no training date are returned or stored. Its priority and time remaining are read from the case in the caller's organization (404 for a case that is not), so a caller can no longer choose the inputs that decide an imminent-breach alert; values sent for them are ignored.",
-      "remaining": "The transition count and previous-breach flag are still caller-supplied (they add at most 0.34, so with a case that has time left they cannot reach the 0.80 alert threshold); deriving them needs the claim history.",
+      "explanation": "Already fixed on main by commit 220dc70c9 ('eliminate caller-controlled SLA risk inputs and quarantine legacy predictions'), predating this session, never ledger-credited. The route's body schema now comments 'Legacy fields are accepted for compatibility, but are NOT authoritative scoring inputs' for transitionCount/hasPreviousBreaches, and computeVerifiedCaseSlaRisk always passes transitionCount:0, hasPreviousBreaches:false regardless of the caller's body, scoring only from priority and hoursRemaining derived server-side from the claim's own stored status/timestamps (caseFacts). A dedicated test ('verified case-facts-only SLA scoring' > 'uses only priority and deadline, not caller-provided history') proves this adversarially. 6/6 passing.",
       "history": [
         {
           "batch": "B08-ICRA-JUR-ML-ORG",
@@ -2779,6 +2786,16 @@
             "apps/union-eyes/lib/ml/sla-breach-score.ts",
             "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
             "apps/union-eyes/app/api/__tests__/ml-sla-breach-risk.route.test.ts",
+            "apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts"
+          ]
+        },
+        {
+          "batch": "B136-ML-SLA-SCORE-STALE-REGISTER-CREDIT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/lib/ml/sla-breach-score.ts",
+            "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
             "apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts"
           ]
         }
@@ -8696,7 +8713,7 @@
         {
           "batch": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "150e8b5eb",
           "files": [
             "apps/union-eyes/app/api/billing/subscriptions/route.ts",
             "apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts",
@@ -10839,7 +10856,7 @@
         {
           "batch": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "150e8b5eb",
           "files": [
             "apps/union-eyes/app/api/ai/pension/members/[id]/projection/route.ts",
             "apps/union-eyes/lib/finance/finance-view-mandate.ts",
@@ -18586,7 +18603,7 @@
         {
           "batch": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "150e8b5eb",
           "files": [
             "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
             "apps/union-eyes/app/api/admin/pki/workflows/route.ts",

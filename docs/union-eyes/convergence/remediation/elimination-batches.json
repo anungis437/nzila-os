@@ -10056,7 +10056,7 @@
     {
       "id": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
       "family": "Register text that lagged already-landed source fixes: PKI workflow retirement, finance mandate resource-scoping, subscription mandate-bound authority",
-      "evidenceCommit": null,
+      "evidenceCommit": "150e8b5eb",
       "items": [
         {
           "prefix": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
@@ -10121,6 +10121,34 @@
             "apps/union-eyes/app/api/billing/subscriptions/route.ts",
             "apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts",
             "apps/union-eyes/app/api/__tests__/billing-subscriptions-mandates.route.test.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B136-ML-SLA-SCORE-STALE-REGISTER-CREDIT",
+      "family": "A second register text lagging an already-landed fix, found while surveying the DEF-0B9-ML family for similar staleness",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/ml/sla-breach-score.ts",
+            "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+            "apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts"
+          ],
+          "explanation": "Already fixed on main by commit 220dc70c9 ('eliminate caller-controlled SLA risk inputs and quarantine legacy predictions'), predating this session, never ledger-credited. The route's body schema now comments 'Legacy fields are accepted for compatibility, but are NOT authoritative scoring inputs' for transitionCount/hasPreviousBreaches, and computeVerifiedCaseSlaRisk always passes transitionCount:0, hasPreviousBreaches:false regardless of the caller's body, scoring only from priority and hoursRemaining derived server-side from the claim's own stored status/timestamps (caseFacts). A dedicated test ('verified case-facts-only SLA scoring' > 'uses only priority and deadline, not caller-provided history') proves this adversarially. 6/6 passing."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/ml/sla-breach-score.ts",
+            "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+            "apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts"
           ]
         }
       ]

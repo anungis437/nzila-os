@@ -1,18 +1,18 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 655,
- "partial": 70,
- "outstanding": 122,
- "accountedFor": 122,
+ "corrected": 656,
+ "partial": 69,
+ "outstanding": 121,
+ "accountedFor": 121,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 9,
+   "defects": 8,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 6,
+    "MEDIUM": 5,
     "LOW": 3
    },
    "namedRoutes": 1,
@@ -22,7 +22,6 @@
     "0B.5": 1,
     "0B.7": 1,
     "0B.8": 2,
-    "0B.9": 1,
     "0B.11": 3
    }
   },
@@ -262,11 +261,6 @@
    {
     "id": "DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED-ONE-GLOBAL-SECRET-AND-HEADER-KEYED-LIMIT",
     "severity": "LOW",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE",
-    "severity": "MEDIUM",
     "partial": true
    },
    {
