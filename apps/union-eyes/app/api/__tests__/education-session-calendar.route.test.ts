@@ -27,12 +27,16 @@ describe('education session calendar validation', () => {
     }
   });
 
-  it.each(['2027-02-29', '2028-02-30', '2028-04-31', '2028-13-01', '2028-00-01', '2028-01-00', '2028-1-01', '2028-01-01T00:00:00Z'])(
+  it.each(['2027-02-29', '2028-02-30', '2028-04-31', '2028-13-01', '2028-00-01', '2028-01-00', '2028-1-01', '2028-01-01T00:00:00Z', '0000-01-01'])(
     'rejects noncanonical or impossible calendar date %s',
     date => {
       expect(() => validateEducationSessionCreate({ ...valid, startDate: date })).toThrow();
     },
   );
+
+  it('rejects year zero in optional registration windows as well', () => {
+    expect(() => validateEducationSessionCreate({ ...valid, registrationOpenDate: '0000-01-01' })).toThrow();
+  });
 
   it('rejects impossible registration window dates rather than normalizing them', () => {
     expect(() => validateEducationSessionCreate({
