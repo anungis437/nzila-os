@@ -11201,6 +11201,32 @@
           ]
         }
       ]
+    },
+    {
+      "id": "B141-F05-EXTERNAL-SYNC-SYSTEM-CONTEXT-VERIFIED",
+      "family": "Verification credit: scheduled external-data sync already runs fully inside system context",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-CONTRIBUTIONS-WRITE-OUTSIDE-SYSTEM-CONTEXT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/external-data/wage-enrichment-service.ts",
+            "apps/union-eyes/lib/services/external-data/__tests__/wage-enrichment-service.test.ts"
+          ],
+          "explanation": "VERIFIED (not new code): commits 50b84ebde (RLS tenant-isolation foundation, #752) and c37232b53 (round 52 non-finance scope exception remediation) already moved syncContributionRates onto withSystemContext throughout: the sync-log create/update (lines 499, 660) and both the EI and CPP rate select/update/insert blocks (line 527, each wrapped in its own tx.transaction savepoint) run inside the system-context transaction, the same pattern syncWageData (line 150), the union-density method (line 292) and the COLA method (line 401) already use - line 400's own comment ('same principal-mismatch class as syncWageData above') documents this as a unified fix across all four sync methods. 18/18 existing tests passing; no production write in this function runs through the plain tenant db handle any more."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-CONTRIBUTIONS-WRITE-OUTSIDE-SYSTEM-CONTEXT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/external-data/wage-enrichment-service.ts",
+            "apps/union-eyes/lib/services/external-data/__tests__/wage-enrichment-service.test.ts"
+          ]
+        }
+      ]
     }
   ],
   "uncreditedSourceEvidence": {

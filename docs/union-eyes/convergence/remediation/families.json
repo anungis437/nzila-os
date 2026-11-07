@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 705,
+ "corrected": 706,
  "partial": 26,
- "outstanding": 72,
- "accountedFor": 72,
+ "outstanding": 71,
+ "accountedFor": 71,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -76,17 +76,16 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 9,
+   "defects": 8,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 9,
+    "MEDIUM": 8,
     "LOW": 0
    },
    "namedRoutes": 1,
    "namedFiles": 0,
    "tranches": {
     "0B.5": 1,
-    "0B.6": 1,
     "0B.7": 3,
     "0B.8": 1,
     "0B.10": 1,
@@ -294,10 +293,6 @@
   "F05-INPUT-VALIDATION-AND-BOUNDS": [
    {
     "id": "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-CONTRIBUTIONS-WRITE-OUTSIDE-SYSTEM-CONTEXT",
     "severity": "MEDIUM"
    },
    {
