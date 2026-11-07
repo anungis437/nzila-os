@@ -126,6 +126,16 @@ test('five-space malformed snapshot keys cannot disappear from the audited graph
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
 })
 
+test('all odd-depth snapshot indentation is rejected, including seven and nine spaces', () => {
+  for (const depth of [1, 3, 5, 7, 9]) {
+    withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n' +
+      ' '.repeat(depth) + 'node-forge@1.4.0:\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Malformed snapshot indentation/, String(depth)))
+  }
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n    dependencies:\n      node-forge: 1.4.0\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
+})
+
 test('duplicate snapshots sections cannot hide dependencies from the audit inventory', () => {
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\npackages:\n  undici@7.29.1:\nsnapshots:\n  node-forge@1.4.0:\n', (file) =>
     assert.throws(() => parseLockfilePackages(file), /Ambiguous pnpm lockfile/))
