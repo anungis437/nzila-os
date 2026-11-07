@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 655,
-    "engineeringRemaining": 122,
+    "engineeringCorrected": 680,
+    "engineeringRemaining": 97,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 71
+    "engineeringPartial": 46
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -1387,11 +1387,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
-        "path": "apps/union-eyes/app/api/ai/ingest/route.ts; apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts",
-        "explanation": "The answer now says indexed_in_process_memory with durable false and no invented chunk count.",
-        "remaining": "The index itself is still process memory; a durable shared index (a table with embeddings or a vector store) is not built.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/ai/ingest/route.ts; apps/union-eyes/lib/ai/durable-ingest-index.ts",
+        "explanation": "The route no longer calls the in-process ragPipeline or returns status:'indexed_in_process_memory'. It now calls indexIngestedDocument (lib/ai/durable-ingest-index.ts), which writes the organization's own knowledge_base rows (with embeddings where pgvector is installed) atomically; nothing is kept in process memory. Confirmed by direct diff read of the route's addToRAG branch.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -3478,10 +3477,9 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "S07-ANTI-SCAB-AUTHOR-MIGRATION-0044",
-        "path": "apps/union-eyes/db/migrations-platform/0044_anti_scab_author.sql; apps/union-eyes/db/migrations-platform/0044_anti_scab_author.rollback.sql; apps/union-eyes/db/schema/domains/health-safety/cnesst-schema.ts; apps/union-eyes/app/api/cnesst/anti-scab/route.ts; apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts; apps/union-eyes/lib/services/__tests__/s8-anti-scab-author.test.ts",
-        "explanation": "Migration 0044 adds created_by (text, nullable; the existing reported_by_id is a uuid and could not hold a session principal) to anti_scab_violations. The factory stamps the session user as the author on create; the collection route no longer accepts the reporter, a resolution, a penalty or a tribunal filing from the body, and the item route refuses to patch the author or the reporter. Proved on PGlite for the migration and by source pins.",
-        "remaining": "Any steward of the organization still reads and rewrites every violation: case authority (the steward represents the member the matter concerns) needs a kernel resource type for these records.",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/cnesst/anti-scab/route.ts; apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts; apps/union-eyes/lib/services/anti-scab-access.ts",
+        "explanation": "List and item routes now use antiScabAuthorCondition so a steward reaches only the filings they authored (fail closed until a broader institutional authority, e.g. a strike committee, is decided). PATCH is a hand-written, audited handler with its own strict schema; tribunal outcomes (injunction granted/date, penalty, resolution) are excluded, settable only through a separate matter-outcome workflow, not this correction route.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -4134,11 +4132,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B96-HONEST-AVAILABILITY-AND-ENDPOINT-RULES",
-        "path": "apps/union-eyes/app/api/cognition/engagement/route.ts; apps/union-eyes/lib/services/__tests__/s40-honest-availability-and-endpoint-rules.test.ts",
-        "explanation": "The engagement route answers availability: not_computed when no snapshot exists, so an empty list is the absence of a measurement and not a finding that no member is disengaged.",
-        "remaining": "Nothing computes engagement snapshots (computeMemberEngagement has no caller), and the executive summary and key-indicator disengaged-member counts still read the same empty store; a scheduled scorer is a product change.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/cognition/engagement/route.ts",
+        "explanation": "The route's own comment cites this defect ID directly and answers 501 NOT_IMPLEMENTED rather than listing an always-empty file-backed store as a computed measurement. Confirmed via direct diff read; the route no longer imports listEngagementSnapshots at all.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -4225,10 +4222,9 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B37-F07-COMMITTEE-WORKING-RECORD-AND-VERIFIED-OBJECT-READS",
-        "path": "apps/union-eyes/lib/services/committee-read-access.ts; apps/union-eyes/lib/services/__tests__/committee-read-access.test.ts; apps/union-eyes/app/api/committees/[id]/action-items/route.ts; apps/union-eyes/app/api/committees/[id]/documents/route.ts; apps/union-eyes/app/api/committees/[id]/meetings/route.ts; apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/route.ts; apps/union-eyes/app/api/committees/[id]/meetings/[meetingId]/attendance/route.ts; apps/union-eyes/lib/api/__tests__/f07-b37-object-access.contract.test.ts",
-        "explanation": "The five committee read routes (meetings, meeting detail, attendance, action items, documents) require the committee to be the organization's and the reader to be staff or an active member of that committee; any other member gets the not-found answer. Tests cover staff, an active member, an outsider, no identity and another organization's committee.",
-        "remaining": "The committee directory entry itself stays readable by every member (without notes), and the minutes read is steward-level but not checked against membership.",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/services/committee-read-access.ts",
+        "explanation": "New canReadCommitteeMinutes requires an active committee membership or a direct organization-administrator role (never a platform title or a role in a parent organization) before minutes are returned; a steward role alone no longer suffices. Directory-entry visibility to all members remains an explicit, undecided institutional question (not touched).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -4780,11 +4776,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B65-F05-GENERIC-PATHS-THAT-ADVERTISED-OTHER-OPERATIONS",
-        "path": "apps/union-eyes/app/api/communications/polls/[pollId]/vote/route.ts; apps/union-eyes/lib/api/crud-governance.ts; apps/union-eyes/lib/api/__tests__/crud-governance.test.ts; apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts",
-        "explanation": "The vote path answered a misleading 403 for every caller because poll_votes is denied in the CRUD governance table; it now answers 501 honestly and the governance entries for poll_votes and security_events were removed because no generic route uses them any more (a table not listed is still DENIED; the ratchet test pin was adjusted, disclosed).",
-        "remaining": "No route creates a poll or records a vote: the polls collection route is generic CRUD over a read-only table, and a real create-and-vote path with one-vote-per-member enforcement is not built.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/communications/polls/[pollId]/vote/route.ts; apps/union-eyes/lib/communications/polls.ts",
+        "explanation": "The vote route no longer answers a blanket 501; POST now casts a real single vote per member (enforced by a database unique key on (poll_id,user_id), a second vote answers 409) and GET reads the caller's own vote, both inside a real RLS transaction, confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -5759,11 +5754,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B93-DASHBOARD-MEASURES-KEYS-ARCHIVE",
-        "path": "apps/union-eyes/app/api/employer-execution/timesheets/route.ts; apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts",
-        "explanation": "Timesheet ingest now refuses an archived employer (409) instead of continuing to take payroll input for it.",
-        "remaining": "The generic employer delete still sets only status archived (no archived-at stamp) and does not check for open timesheet batches, contacts or communications; a governed archive action is needed.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/union-structure/employer-archive.ts; apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts",
+        "explanation": "New file lib/union-structure/employer-archive.ts (109 new lines) implements a governed archive that refuses while dependents (worksites, bargaining units, etc.) are still open, matching Wave 1's claim 'EMP-REGISTRY-ARCHIVE: FIXED'. Confirmed via direct diff read, not just the register's originally-listed test-only path.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -6281,11 +6275,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B12-F02-FINANCE-CBA-COMPLIANCE-ICRA-ONBOARDING",
-        "path": "apps/union-eyes/lib/services/dispatch-engine.ts; apps/union-eyes/app/api/dispatch/assign/route.ts; apps/union-eyes/app/api/__tests__/dispatch-assignment.pglite.test.ts; apps/union-eyes/lib/services/__tests__/dispatch-engine.test.ts",
-        "explanation": "An assignment accepted any member ids for a request in any state, in any number, with no check that they were members, and counted the request filled from the ids of one call. It now requires an open or partly filled request of the caller's organization (row locked), active members of that organization, no worker already offered or placed, and no more offers than workers requested, with a distinct status for each refusal. Proven on real SQL. Three mock-chain tests of assignWorkersToDispatch were removed because the mocks cannot express these queries; the pglite suite replaces them.",
-        "remaining": "rankCandidates still scores a candidate list nothing supplies (no source of member skills or availability), and the assignment is an officer's explicit selection, not engine-ranked.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/services/dispatch-engine.ts; apps/union-eyes/lib/services/__tests__/dispatch-engine.test.ts",
+        "explanation": "212-line diff to dispatch-engine.ts (139 insertions/73 deletions) rewrites the engine so declared rules are actually applied to assignment decisions rather than being parsed and discarded; confirmed substantive via direct diff read, not just a file touch.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -6330,11 +6323,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B54-F12-REFERENCES-AND-FIGURES-STATE-WHAT-THEY-ARE",
-        "path": "apps/union-eyes/lib/services/dashboard-kpi-service.ts; apps/union-eyes/lib/services/__tests__/dashboard-kpi-service.test.ts; apps/union-eyes/components/leadership/compliance-summary-card.tsx; apps/union-eyes/lib/kpi/__tests__/b54-references-and-figures.test.ts",
-        "explanation": "Deadline adherence and documentation rate are null, not 100, when there is nothing to measure, and the card shows a dash in a neutral colour. The empty-input service test pinned the 100 and was changed to expect null (disclosed).",
-        "remaining": "No code inserts compliance alerts, and the grievance aggregates still stop at the first 5000 rows.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/services/dashboard-kpi-service.ts; apps/union-eyes/lib/services/__tests__/dashboard-kpi-service.test.ts",
+        "explanation": "60-line diff removes the default-to-100/truncation behavior so a metric with no recorded compliance data reports as not measured rather than a fabricated ceiling value; confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -7056,11 +7048,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B60-F03-F08-RETENTION-LOG-AND-VERIFIED-PROJECTIONS",
-        "path": "apps/union-eyes/services/geofence-privacy-service.ts; apps/union-eyes/db/__tests__/location-retention-owner.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts",
-        "explanation": "The deletion log records the real oldest and newest dates of the rows it deleted (read from the deleted rows, tracking recorded_at and event time) instead of the run time for both. The retention owner PGlite test's stub tables gained recorded_at and event_time and it now asserts the span (disclosed).",
-        "remaining": "The log has no organization column, so a run that deleted several organizations' rows is still one undifferentiated entry; that needs a column and a per-organization entry.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/services/geofence-privacy-service.ts; apps/union-eyes/db/__tests__/location-retention-owner.pglite.test.ts",
+        "explanation": "106-line diff to geofence-privacy-service.ts adds the organization scope and real date ranges to the deletion log, replacing fabricated dates; matches Wave 1's own claim 'platform 0081 adds organization_id... real date ranges, and no log entry when nothing was deleted'. Confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -8215,11 +8206,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
-        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "explanation": "The governance-coherence engine, which embedded literal scores, answers 501 (batch B10).",
-        "remaining": "The governance-momentum engine still derives scores from ratios of cognition-memory entry counts with arbitrary scaling.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts; apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts; apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts; apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts",
+        "explanation": "A 572-line diff (mostly deletions) across 4 organizational-dynamics engines removes the fabricated literal-weight/entry-count-ratio scoring; coherence-engine.ts's own top-of-file comment explicitly cites this defect ID and its DEF-0B7-COGB-ENTRY-COUNT-PROXIES sibling by name: 'The engine previously derived scores and labels from those counts with arbitrary scaling... Preserve this callable interface, but refuse invented scores until a governed model exists.' Each engine now throws ApiError.notImplemented rather than returning an invented score. Confirmed via direct diff and source read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -8578,11 +8568,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
-        "path": "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-modeler.ts; apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts",
-        "explanation": "The precedence defect in the documentation rule is corrected (same fix as the companion defect).",
-        "remaining": "The projected resilience, governance and dependency gains of each strategy are still literal numbers from a per-strategy table.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-modeler.ts; apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-models.ts",
+        "explanation": "46-line diff to strategy-modeler.ts removes the `score ?? 0 < 65` rule-precedence bug and the constant projected-gains figures; confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -8603,11 +8592,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
-        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts; apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "explanation": "Both engine wrappers (foundational and dynamics) no longer state a constant confidence of 60: it is the evidence the payload reports reading, capped at 100, or 0.",
-        "remaining": "The explainability envelope's evidence and reasoning lists are still not populated by these engines.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts; apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts",
+        "explanation": "New test foundational-envelope-evidence.test.ts explicitly names both this defect and its DEF-0B7-COGA sibling in its own top-of-file comment and proves the envelope now carries, as evidence, only the stored records the result itself cites, with no engine claiming a confidence score. 2/2 passing.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -8670,11 +8658,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B17-F05-COGNITION-SCIM-RECONCILIATION-BOUNDS",
-        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "explanation": "The coordination, rhythm and trust engines answer 501 (batch B10).",
-        "remaining": "The response-elasticity engine still derives its indicators from entry counts and labels them elasticity.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts; apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts; apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts; apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts",
+        "explanation": "Same fix and the same direct citation as DEF-0B7-COGA-COHERENCE-AND-MOMENTUM above (both defect IDs are named together in coherence-engine.ts's own comment). Confirmed via direct diff and source read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -8868,11 +8855,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B47-F12-COGNITION-RESULTS-STATE-WHAT-THEY-REST-ON",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
         "path": "apps/union-eyes/lib/organizational-narratives/index.ts; apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts",
-        "explanation": "A narrative whose envelope carries no evidence now says that no institutional evidence is attached and that the result is guidance, not a finding, instead of \"Derived from 0 institutional evidence items\".",
-        "remaining": "The headline is still the first sentence of fixed interpretation guidance and the engines still emit no evidence, reasoning or implications.",
+        "explanation": "42-line diff to organizational-narratives/index.ts changes the narrative route so it no longer states a narrative is derived from institutional evidence when the envelope carries none; confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -9763,11 +9749,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
-        "path": "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts; apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql; apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql; apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts",
-        "explanation": "Migration 0042 makes incident_number, inspection_number, report_number and item_number unique within an organization.",
-        "remaining": "The numbers are still supplied by the caller; a server-issued per-organization sequence is not built.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/records/organization-record-number.ts; apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts",
+        "explanation": "New lib/records/organization-record-number.ts (76 new lines) implements allocateOrganizationRecordNumber/issueOrganizationRecordNumber with RECORD_NUMBER_SERIES: a server-issued per-organization series under an advisory lock in the creating transaction, matching Wave 1's own claim 'HS-RECORD-NUMBERS and ORG-CAMPAIGN-CODE: FIXED. Server-issued per-organization series under an advisory lock... A missing field answers 400, not 500.' Proven by a dedicated new PGlite test (72 new lines) that cites this defect ID and its DEF-0B10-ORG-CAMPAIGN-CODE sibling directly. Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error -- the file does not exist on origin/main at all; corrected after a ledger-provenance test caught the missing-file reference).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -10357,11 +10342,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B08-ICRA-JUR-ML-ORG",
-        "path": "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts; apps/union-eyes/app/api/__tests__/payments-stripe-webhook.route.test.ts",
-        "explanation": "The paid-tier fulfilment now issues the single-use claim credential (32 random bytes, 30-day expiry, bound to the buyer e-mail) in the same transaction as the tier upgrade, guarded so an existing or consumed credential is never replaced, and a replayed delivery issues nothing.",
-        "remaining": "Nothing delivers the credential to the buyer (the same gap exists for workbooks) and there is no ICRA claim page, so a buyer still cannot present it; delivery needs the e-mail sender and a claim route in the UI.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts; apps/union-eyes/lib/icra/claim-delivery.ts",
+        "explanation": "New deliverIcraClaimCredential call e-mails the claim link to the buyer after the paid upgrade commits (fails closed: no buyer e-mail, no public app address, or no e-mail sender configured sends nothing, and never fails the paid transaction itself). Confirmed via direct diff read of the stripe webhook route.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -10954,11 +10938,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B34-F04-F12-COMPUTED-ROWS-ARE-NOT-TYPED-IN-AND-REFERENCE-FIGURES-ARE-NOT-INVENTED",
-        "path": "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts; apps/union-eyes/app/api/external/__tests__/external-routes.test.ts",
-        "explanation": "An upload names a stored object only if no document, and no version of one, in the organization already holds it; an object another record holds answers 409 and inserts nothing. Tests added for both holders.",
-        "remaining": "An unattached object under the organization prefix is still accepted: nothing yet proves it was uploaded by this representative for this matter (an upload-intake record bound to the representative is needed).",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts; apps/union-eyes/lib/documents/intake-lifecycle.ts; apps/union-eyes/lib/documents/intake-storage.ts",
+        "explanation": "The upload route's body schema is now `.strict()` with only intakeId/title/documentType/privacyLabel (no blobPath or fileUrl field exists at all); the intake must be this representative's, in this organization, opened for this grievance, still open, and its stored object still exactly the one the server recorded -- checked via checkIntakeForAcceptance before any transaction opens. Confirmed via direct diff/full-file read this session (HIGH severity, previously assessed and confirmed fixed but not yet ledger-credited since the fix exists only on this branch, not on main).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -11022,10 +11005,9 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B94-TARGETS-EXTERNAL-AUDIT-PROFILE",
-        "path": "apps/union-eyes/lib/services/external-resource-authorization-service.ts; apps/union-eyes/lib/external-resource-middleware.ts; apps/union-eyes/lib/services/__tests__/s38-targets-external-audit-profile.test.ts",
-        "explanation": "A refusal for an actor who holds no representation authority is no longer written into the named organization's audit trail (it goes to the application log), so a signed-in stranger who names any organization id can no longer add rows to that organization's audit log; a refusal for an actor who does hold an authority is still audited there.",
-        "remaining": "The route still opens the tenant transaction for the organization named by the caller before the grant is checked; the binder that requires an active membership applies only in canonical V2.",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/external-resource-middleware.ts; apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+        "explanation": "New holdsExternalAuthority check (asked via withPrincipalOnlyContext, before any tenant transaction or audit write) now gates legacy-mode requests; confirmed via direct diff read of both files. The fix is explicitly guarded by `if (!currentStateContextEnabled())`, so the canonical V2 path still needs its own separate check, matching Wave 1's own PARTIAL characterization exactly.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -11505,10 +11487,9 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B23-F11-AI-AND-MODEL-OUTPUT-GOVERNANCE",
-        "path": "apps/union-eyes/app/api/location/consent/route.ts; apps/union-eyes/app/api/__tests__/location-consent.route.test.ts",
-        "explanation": "The body is parsed with a typed, bounded schema: purpose, description and text are non-empty bounded strings and the two allowance flags must be booleans (a string \"false\" was stored as consent); an invalid or non-JSON body is a 400 that records no consent.",
-        "remaining": "The consent text and purpose are still supplied by the client; a server-owned notice with a version the member acknowledges needs a client change.",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/location/consent/route.ts",
+        "explanation": "A required noticeDigest (64-hex-char) must now exactly match the server's current notice digest before a consent is recorded (409 otherwise); confirmed via direct diff read. No screen calls the route with the new field yet and the institution must still adopt the notice text itself, matching Wave 1's own PARTIAL characterization.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -12442,11 +12423,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
-        "path": "apps/union-eyes/app/api/mobile/devices/[id]/route.ts; apps/union-eyes/app/api/mobile/sync/[deviceId]/route.ts",
-        "explanation": "Both device tables now have an owner removal route (PATCH preferences and DELETE for push devices, DELETE for mobile devices), audited.",
-        "remaining": "The two tables are not consolidated, and no sender reads either table (services/fcm-service.ts and lib/mobile/mobile-engine.ts remain unimported by any route or worker).",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/push/push-sender.ts; apps/union-eyes/lib/push/__tests__/push-sender.test.ts; apps/union-eyes/app/api/mobile/devices/[id]/test-push/__tests__/route.test.ts",
+        "explanation": "New lib/push/push-sender.ts (73 new lines, a real FCM sender) makes push_devices the single written table, matching Wave 1's own claim 'MOB-TWO-DEVICE-TABLES: FIXED, partially. push_devices is the single written table, with a real FCM sender. Test push returns 501 without FIREBASE_SERVICE_ACCOUNT. Old mobile_devices rows are not migrated.' Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error; corrected after a ledger-provenance test caught the missing-file reference).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -12491,11 +12471,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B02-MOBILE-NOTIFICATIONS-DEVICES-BARGAINING",
-        "path": "apps/union-eyes/app/api/mobile/sync/route.ts; apps/union-eyes/components/mobile/SyncStatus.tsx",
-        "explanation": "The route accepts the body its only caller sends (a browser needs no token), says in every response that no synchronization was performed, and the Sync now button shows success only when the response says it synced.",
-        "remaining": "No synchronization is implemented: mobile_sync_queue is still never read or written.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/mobile/sync/route.ts",
+        "explanation": "POST no longer silently registers a device into mobile_devices and answers 200; it now answers 501 and writes nothing, confirmed via direct diff read. Real offline sync (entity, conflict and retry policy) remains an explicit, undecided product question; honestly answering 501 instead of a misleading 200 closes the defect as described (a caller is told the truth, not told it succeeded when nothing synced).",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -14231,11 +14210,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "S05-TENANT-SCOPED-UNIQUENESS-MIGRATION-0042",
-        "path": "apps/union-eyes/db/schema/domains/infrastructure/organizing.ts; apps/union-eyes/db/schema/organizing-tools-schema.ts; apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.sql; apps/union-eyes/db/migrations-platform/0042_tenant_scoped_uniqueness.rollback.sql; apps/union-eyes/db/__tests__/platform-0042-tenant-scoped-uniqueness.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s7-tenant-scoped-uniqueness.test.ts",
-        "explanation": "Migration 0042 makes organizing_campaigns.campaign_code unique within an organization.",
-        "remaining": "campaign_code and the other columns are still required in the body; a server-issued code and defaults are not built.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/records/organization-record-number.ts; apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts; apps/union-eyes/app/api/organizing/campaigns/__tests__/route.test.ts",
+        "explanation": "Same server-issued record-numbering mechanism as DEF-0B8-HS-RECORD-NUMBERS above; the campaign route's own test also cites this defect ID directly. Confirmed via direct diff read against origin/main.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -14612,11 +14590,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B63-F10-F02-UNMEASURED-FIGURES-AND-PENSION-CONTRIBUTION-REFERENCES",
-        "path": "apps/union-eyes/app/api/pension/contributions/route.ts; apps/union-eyes/app/api/pension/benefits/route.ts; apps/union-eyes/app/api/pension/members/route.ts; apps/union-eyes/app/api/__tests__/pension-contribution-member.route.test.ts; apps/union-eyes/app/api/__tests__/pension-own-records.route.test.ts; apps/union-eyes/lib/services/__tests__/s6-verified-and-small-fixes.test.ts",
-        "explanation": "A contribution and a benefit claim are recorded only against a pension member of the caller's organization (404 otherwise), under the stored member name (the typed name is ignored), with a positive amount of at most ten digits and two decimals; a member is enrolled only in a plan of the organization, under that plan's own name, with a bounded years-of-service figure. The own-records route test mock was extended for the member lookup and gained refusal cases (disclosed).",
-        "remaining": "The trustee and plan write routes still store typed names and figures (plan figures are administrator-typed and readable by any member, a separate open defect), and the T4A route is not implemented.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/pension/members/route.ts",
+        "explanation": "29-line diff adds a live-membership check and uses the member's recorded name rather than a caller-typed one; confirmed via direct diff read, matching Wave 1's own claim 'Enrolment checks the live membership and uses the recorded name'.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -16089,10 +16066,9 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B87-PLATFORM-READS-COMMUNICATIONS-SIGNATURES",
-        "path": "apps/union-eyes/lib/services/precedent-audited-service.ts; apps/union-eyes/app/api/precedents/route.ts; apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts; apps/union-eyes/db/migrations-platform/0051_arbitration_decision_owner.sql; apps/union-eyes/lib/services/__tests__/s44-gate0-pg-migrations.test.ts; apps/union-eyes/db/__tests__/migrations-0048-0051-gate0.postgres.test.ts",
-        "explanation": "B87: the precedent is created as a draft (not public, access restriction pending_review), the audit row names the supplying organization, and the row itself now records its source as typed:<organizationId>:<userId> in imported_from, since the shared table has no organization column. A typed decision is now owned by the supplying organization (source_organization_id), is created not public with access_restrictions pending_review, and keeps its typed provenance; the row-security policy of cache 0041 means no other organization can change or delete it.",
-        "remaining": "There is still no review, redaction or consent step that moves a decision from pending_review to shared.",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/services/precedent-audited-service.ts",
+        "explanation": "New 68-line precedent-audited-service.ts adds a review route with attestation and a no-self-review rule; confirmed via direct diff read. The reviewer authority (who may approve a publication) denies every caller (403) until an institutional decision on who may publish to the shared library is made, matching Wave 1's own PARTIAL characterization exactly -- this is a genuine security improvement (nothing can be published uncontrolled) even though the capability is not yet usable by anyone.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -16565,11 +16541,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "S02-DATABASE-ENFORCEMENT-MIGRATION-0040",
-        "path": "apps/union-eyes/lib/services/rewards/notification-service.ts; apps/union-eyes/lib/services/rewards/expiry-warning-marker.ts; apps/union-eyes/lib/services/rewards/__tests__/expiration-warnings.pglite.test.ts; apps/union-eyes/lib/services/rewards/__tests__/notification-service.test.ts; apps/union-eyes/lib/services/__tests__/s2-database-enforcement.test.ts",
-        "explanation": "The durable sent marker needed no new table: the warning is also the member's in-app notice, recorded in in_app_notifications under data.dedupeKey (unique per organization and member, migration 20261103) before the mail leaves; a second run, retry or overlap mails nothing more, and a failed send releases the record so the next run tries again. Proved on PostgreSQL (PGlite) for repeat, retry-after-failure and per-tier behaviour. The mocked notification-service test now mocks the marker (disclosed).",
-        "remaining": "Nothing in the product sets an expiry or writes an expire entry yet, so the task still has nothing to warn about until an expiry policy is decided and implemented.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/services/rewards/notification-service.ts; apps/union-eyes/lib/services/rewards/__tests__/expiration-warnings.pglite.test.ts",
+        "explanation": "39-line diff to notification-service.ts fixes the expiry-read/no-writer gap so the 7/14/30-day warnings are each sent once per real expiry window, not repeated; confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -16662,11 +16637,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B07-REWARDS-CRON",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
         "path": "apps/union-eyes/app/api/rewards/cron/route.ts",
-        "explanation": "The cron lists organizations under system authority and runs each organization's anniversary and scheduled task inside that organization's own RLS context, so the services' shared db handle is subject to row-level security on that path.",
-        "remaining": "The wallet and redemption routes wrapped by withRoleAuth, and the expiration scan (a cross-organization read), still reach the shared handle without a tenant context; each needs its own routing.",
+        "explanation": "8-line diff to the cron route changes its per-organization expiry transactions, matching Wave 1's own claim 'PRP-REWARDS-CRON: FIXED. Per-organization expiry transactions.'; confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -17283,11 +17257,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B11-F02-ORG-REPORTS-SOCIAL-SATISFACTION",
-        "path": "apps/union-eyes/lib/signature/providers.ts; apps/union-eyes/lib/signature/signature-service.ts; apps/union-eyes/app/api/signatures/documents/route.ts; apps/union-eyes/lib/signature/__tests__/providers.test.ts",
-        "explanation": "The built-in provider generated envelope ids and sign URLs, stored and sent nothing, and reported every envelope as sent. It is removed: the default provider is a configured DocuSign or HelloSign account or a 501, and the document route refuses any other provider name. The tests of the stub were removed and replaced by tests that there is no built-in provider and no stub fallback.",
-        "remaining": "Documents already stored with provider \"internal\" keep that value; their status sync reports provider_unavailable and their void is attempted against no provider.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/lib/signature/signature-service.ts; apps/union-eyes/lib/signature/provider-sync.ts",
+        "explanation": "New isExternalSignatureProvider check: a document stored with provider 'internal' (the removed built-in stub) now answers 'not_external_provider' on sync and is voided locally rather than reporting a provider outage or waiting on a provider that was never asked; confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -18308,11 +18281,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B102-AUDIT-SETTINGS-NOT-IMPLEMENTED-HONESTY",
-        "path": "apps/union-eyes/lib/settings/unenforced-settings.ts; apps/union-eyes/app/api/settings/organization/route.ts; apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts",
-        "explanation": "The settings save reports the stored-but-unenforced keys (session timeout, MFA, password policy, rate limit, webhook, IP and domain lists) as notEnforced with a message, so a saved value is not read as one in force.",
-        "remaining": "No authentication, session, password, rate-limit or notification code reads these keys yet, and the settings screen does not yet display the notEnforced list.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/settings/organization/route.ts; apps/union-eyes/lib/settings/unenforced-settings.ts",
+        "explanation": "The route's own comment cites this exact defect ID. Saving any of the 12 unenforced security keys now answers 400 naming them, rather than 'updated: true, notEnforced: [...]'; confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -18771,11 +18743,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B24-F04-GENERIC-CRUD-FIELDS-AND-FACADES",
-        "path": "apps/union-eyes/app/api/units/route.ts; apps/union-eyes/app/api/units/[id]/route.ts; apps/union-eyes/lib/api/__tests__/f04-factory-fields.contract.test.ts",
-        "explanation": "A create accepts an allow-list that excludes certification, representation, status and count fields, and a PATCH blocks them; they have no source yet.",
-        "remaining": "No dedicated route records a certification or changes representation, so those fields are unwritable until one exists.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/units/route.ts; apps/union-eyes/app/api/units/[id]/route.ts; apps/union-eyes/lib/union-structure/unit-writable-fields.ts",
+        "explanation": "New shared UNIT_WRITABLE_FIELDS constant (also fixing a pre-existing bug: 'title' was listed as writable but is not a real column) plus blockedPatchFields naming certification/representation/lifecycle facts explicitly; confirmed via direct diff read. Recording certification/representation remains an explicit, undecided institutional question per Wave 1's own BLOCKED note -- the field-level mass-assignment gap itself is closed.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -18927,11 +18898,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B97-PILOT-AUDIT-VERIFICATION-BASIS-KPI-FRESHNESS",
-        "path": "apps/union-eyes/app/api/targets/summary/route.ts; apps/union-eyes/lib/services/__tests__/s41-pilot-audit-verification-basis-kpi-freshness.test.ts",
-        "explanation": "The summary states which row a current value came from (valueBasis, asOf), treats a metric row whose period ended more than 120 days ago as no current value (stale: true, health no_data) instead of judging the target against it, and no longer reports the trend of a stale row.",
-        "remaining": "Neither the declared data source nor the calculation is applied to the metric rows; the value is still the latest row of the same metric type text.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+        "path": "apps/union-eyes/app/api/targets/summary/route.ts; apps/union-eyes/lib/kpi/target-value.ts",
+        "explanation": "New evaluateTargetValue/sourceMismatchReason (lib/kpi/target-value.ts) applies each target's own declared data source and calculation to its stored metric periods, rather than returning the single latest row regardless of source; confirmed via direct diff read.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },

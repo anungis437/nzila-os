@@ -10080,6 +10080,538 @@
       ]
     },
     {
+      "id": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+      "family": "Wave 1 (PR #1128) fixes real defects across its own commits but never updates the ledger; this batch credits the ones independently verified via direct diff content against origin/main, excluding dues/per-capita/remittance-adjacent and institutionally-blocked items",
+      "evidenceCommit": "0f50fd5e4",
+      "items": [
+        {
+          "prefix": "DEF-0B2-AI-RAG-INDEX-PROCESS-LOCAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/ai/ingest/route.ts",
+            "apps/union-eyes/lib/ai/durable-ingest-index.ts"
+          ],
+          "explanation": "The route no longer calls the in-process ragPipeline or returns status:'indexed_in_process_memory'. It now calls indexIngestedDocument (lib/ai/durable-ingest-index.ts), which writes the organization's own knowledge_base rows (with embeddings where pgvector is installed) atomically; nothing is kept in process memory. Confirmed by direct diff read of the route's addToRAG branch."
+        },
+        {
+          "prefix": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/app/api/cnesst/anti-scab/route.ts",
+            "apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts",
+            "apps/union-eyes/lib/services/anti-scab-access.ts"
+          ],
+          "explanation": "List and item routes now use antiScabAuthorCondition so a steward reaches only the filings they authored (fail closed until a broader institutional authority, e.g. a strike committee, is decided). PATCH is a hand-written, audited handler with its own strict schema; tribunal outcomes (injunction granted/date, penalty, resolution) are excluded, settable only through a separate matter-outcome workflow, not this correction route."
+        },
+        {
+          "prefix": "DEF-0B5-COGNITION-ENGAGEMENT-NEVER-COMPUTED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cognition/engagement/route.ts"
+          ],
+          "explanation": "The route's own comment cites this defect ID directly and answers 501 NOT_IMPLEMENTED rather than listing an always-empty file-backed store as a computed measurement. Confirmed via direct diff read; the route no longer imports listEngagementSnapshots at all."
+        },
+        {
+          "prefix": "DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/lib/services/committee-read-access.ts"
+          ],
+          "explanation": "New canReadCommitteeMinutes requires an active committee membership or a direct organization-administrator role (never a platform title or a role in a parent organization) before minutes are returned; a steward role alone no longer suffices. Directory-entry visibility to all members remains an explicit, undecided institutional question (not touched)."
+        },
+        {
+          "prefix": "DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/polls/[pollId]/vote/route.ts",
+            "apps/union-eyes/lib/communications/polls.ts"
+          ],
+          "explanation": "The vote route no longer answers a blanket 501; POST now casts a real single vote per member (enforced by a database unique key on (poll_id,user_id), a second vote answers 409) and GET reads the caller's own vote, both inside a real RLS transaction, confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/dispatch-engine.ts",
+            "apps/union-eyes/lib/services/__tests__/dispatch-engine.test.ts"
+          ],
+          "explanation": "212-line diff to dispatch-engine.ts (139 insertions/73 deletions) rewrites the engine so declared rules are actually applied to assignment decisions rather than being parsed and discarded; confirmed substantive via direct diff read, not just a file touch."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-LEADERSHIP-COMPLIANCE-DEFAULTS-TO-100-AND-TRUNCATES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/dashboard-kpi-service.ts",
+            "apps/union-eyes/lib/services/__tests__/dashboard-kpi-service.test.ts"
+          ],
+          "explanation": "60-line diff removes the default-to-100/truncation behavior so a metric with no recorded compliance data reports as not measured rather than a fabricated ceiling value; confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/services/geofence-privacy-service.ts",
+            "apps/union-eyes/db/__tests__/location-retention-owner.pglite.test.ts"
+          ],
+          "explanation": "106-line diff to geofence-privacy-service.ts adds the organization scope and real date ranges to the deletion log, replacing fabricated dates; matches Wave 1's own claim 'platform 0081 adds organization_id... real date ranges, and no log entry when nothing was deleted'. Confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-REGISTRY-ARCHIVE-IGNORES-DEPENDENTS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/union-structure/employer-archive.ts",
+            "apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts"
+          ],
+          "explanation": "New file lib/union-structure/employer-archive.ts (109 new lines) implements a governed archive that refuses while dependents (worksites, bargaining units, etc.) are still open, matching Wave 1's claim 'EMP-REGISTRY-ARCHIVE: FIXED'. Confirmed via direct diff read, not just the register's originally-listed test-only path."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-ROADMAP-DOCUMENTATION-RULE-PRECEDENCE-AND-CONSTANT-PROJECTED-GAINS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-modeler.ts",
+            "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-models.ts"
+          ],
+          "explanation": "46-line diff to strategy-modeler.ts removes the `score ?? 0 < 65` rule-precedence bug and the constant projected-gains figures; confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-ENVELOPE-CONFIDENCE-FIXED-AT-60-AND-EXPLAINABILITY-EMPTY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+            "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
+          ],
+          "explanation": "New test foundational-envelope-evidence.test.ts explicitly names both this defect and its DEF-0B7-COGA sibling in its own top-of-file comment and proves the envelope now carries, as evidence, only the stored records the result itself cites, with no engine claiming a confidence score. 2/2 passing."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-NARRATIVES-CITE-ZERO-EVIDENCE-AS-DERIVED-FROM-EVIDENCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-narratives/index.ts",
+            "apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts"
+          ],
+          "explanation": "42-line diff to organizational-narratives/index.ts changes the narrative route so it no longer states a narrative is derived from institutional evidence when the envelope carries none; confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/lib/external-resource-middleware.ts",
+            "apps/union-eyes/lib/services/external-resource-authorization-service.ts"
+          ],
+          "explanation": "New holdsExternalAuthority check (asked via withPrincipalOnlyContext, before any tenant transaction or audit write) now gates legacy-mode requests; confirmed via direct diff read of both files. The fix is explicitly guarded by `if (!currentStateContextEnabled())`, so the canonical V2 path still needs its own separate check, matching Wave 1's own PARTIAL characterization exactly."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-CLAIM-TOKEN-HAS-NO-ICRA-ISSUER-SO-CLAIM-CANNOT-SUCCEED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts",
+            "apps/union-eyes/lib/icra/claim-delivery.ts"
+          ],
+          "explanation": "New deliverIcraClaimCredential call e-mails the claim link to the buyer after the paid upgrade commits (fails closed: no buyer e-mail, no public app address, or no e-mail sender configured sends nothing, and never fails the paid transaction itself). Confirmed via direct diff read of the stripe webhook route."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/app/api/location/consent/route.ts"
+          ],
+          "explanation": "A required noticeDigest (64-hex-char) must now exactly match the server's current notice digest before a consent is recorded (409 otherwise); confirmed via direct diff read. No screen calls the route with the new field yet and the institution must still adopt the notice text itself, matching Wave 1's own PARTIAL characterization."
+        },
+        {
+          "prefix": "DEF-0B9-MOB-SYNC-PATH-REGISTERS-A-DEVICE-AND-SYNCS-NOTHING-AND-ITS-ONLY-CALLER-ALWAYS-FAILS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/mobile/sync/route.ts"
+          ],
+          "explanation": "POST no longer silently registers a device into mobile_devices and answers 200; it now answers 501 and writes nothing, confirmed via direct diff read. Real offline sync (entity, conflict and retry policy) remains an explicit, undecided product question; honestly answering 501 instead of a misleading 200 closes the defect as described (a caller is told the truth, not told it succeeded when nothing synced)."
+        },
+        {
+          "prefix": "DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AMOUNTS-UNVERIFIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/pension/members/route.ts"
+          ],
+          "explanation": "29-line diff adds a live-membership check and uses the member's recorded name rather than a caller-typed one; confirmed via direct diff read, matching Wave 1's own claim 'Enrolment checks the live membership and uses the recorded name'."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/lib/services/precedent-audited-service.ts"
+          ],
+          "explanation": "New 68-line precedent-audited-service.ts adds a review route with attestation and a no-self-review rule; confirmed via direct diff read. The reviewer authority (who may approve a publication) denies every caller (403) until an institutional decision on who may publish to the shared library is made, matching Wave 1's own PARTIAL characterization exactly -- this is a genuine security improvement (nothing can be published uncontrolled) even though the capability is not yet usable by anyone."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-CRON-EXPIRATION-TASK-READS-AN-EXPIRY-NO-WRITER-SETS-AND-WOULD-REPEAT-ACROSS-THE-7-14-AND-30-DAY-WINDOWS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/rewards/notification-service.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/expiration-warnings.pglite.test.ts"
+          ],
+          "explanation": "39-line diff to notification-service.ts fixes the expiry-read/no-writer gap so the 7/14/30-day warnings are each sent once per real expiry window, not repeated; confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES-USE-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/rewards/cron/route.ts"
+          ],
+          "explanation": "8-line diff to the cron route changes its per-organization expiry transactions, matching Wave 1's own claim 'PRP-REWARDS-CRON: FIXED. Per-organization expiry transactions.'; confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-INTERNAL-SIGNATURE-PROVIDER-IS-A-STUB-THAT-SENDS-NOTHING-AND-THE-REQUEST-IS-RECORDED-AS-SENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/signature/signature-service.ts",
+            "apps/union-eyes/lib/signature/provider-sync.ts"
+          ],
+          "explanation": "New isExternalSignatureProvider check: a document stored with provider 'internal' (the removed built-in stub) now answers 'not_external_provider' on sync and is voided locally rather than reporting a provider outage or waiting on a provider that was never asked; confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/settings/organization/route.ts",
+            "apps/union-eyes/lib/settings/unenforced-settings.ts"
+          ],
+          "explanation": "The route's own comment cites this exact defect ID. Saving any of the 12 unenforced security keys now answers 400 naming them, rather than 'updated: true, notEnforced: [...]'; confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B12-CRUD-BARGAINING-UNIT-CERTIFICATION-AND-REPRESENTATION-FIELDS-WRITABLE-BY-ANY-STEWARD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/units/route.ts",
+            "apps/union-eyes/app/api/units/[id]/route.ts",
+            "apps/union-eyes/lib/union-structure/unit-writable-fields.ts"
+          ],
+          "explanation": "New shared UNIT_WRITABLE_FIELDS constant (also fixing a pre-existing bug: 'title' was listed as writable but is not a real column) plus blockedPatchFields naming certification/representation/lifecycle facts explicitly; confirmed via direct diff read. Recording certification/representation remains an explicit, undecided institutional question per Wave 1's own BLOCKED note -- the field-level mass-assignment gap itself is closed."
+        },
+        {
+          "prefix": "DEF-0B12-PLT-KPI-CURRENT-VALUE-IS-THE-LATEST-ROW-OF-THE-METRIC-TYPE-TEXT-NOT-THE-DECLARED-SOURCE-OR-CALCULATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/targets/summary/route.ts",
+            "apps/union-eyes/lib/kpi/target-value.ts"
+          ],
+          "explanation": "New evaluateTargetValue/sourceMismatchReason (lib/kpi/target-value.ts) applies each target's own declared data source and calculation to its stored metric periods, rather than returning the single latest row regardless of source; confirmed via direct diff read."
+        },
+        {
+          "prefix": "DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts",
+            "apps/union-eyes/lib/documents/intake-lifecycle.ts",
+            "apps/union-eyes/lib/documents/intake-storage.ts"
+          ],
+          "explanation": "The upload route's body schema is now `.strict()` with only intakeId/title/documentType/privacyLabel (no blobPath or fileUrl field exists at all); the intake must be this representative's, in this organization, opened for this grievance, still open, and its stored object still exactly the one the server recorded -- checked via checkIntakeForAcceptance before any transaction opens. Confirmed via direct diff/full-file read this session (HIGH severity, previously assessed and confirmed fixed but not yet ledger-credited since the fix exists only on this branch, not on main)."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B2-AI-RAG-INDEX-PROCESS-LOCAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/ai/ingest/route.ts",
+            "apps/union-eyes/lib/ai/durable-ingest-index.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/app/api/cnesst/anti-scab/route.ts",
+            "apps/union-eyes/app/api/cnesst/anti-scab/[id]/route.ts",
+            "apps/union-eyes/lib/services/anti-scab-access.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B5-COGNITION-ENGAGEMENT-NEVER-COMPUTED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/cognition/engagement/route.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/lib/services/committee-read-access.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/communications/polls/[pollId]/vote/route.ts",
+            "apps/union-eyes/lib/communications/polls.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/dispatch-engine.ts",
+            "apps/union-eyes/lib/services/__tests__/dispatch-engine.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B6-CMP-LEADERSHIP-COMPLIANCE-DEFAULTS-TO-100-AND-TRUNCATES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/dashboard-kpi-service.ts",
+            "apps/union-eyes/lib/services/__tests__/dashboard-kpi-service.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/services/geofence-privacy-service.ts",
+            "apps/union-eyes/db/__tests__/location-retention-owner.pglite.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B6-EMP-REGISTRY-ARCHIVE-IGNORES-DEPENDENTS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/union-structure/employer-archive.ts",
+            "apps/union-eyes/lib/services/__tests__/s37-dashboard-measures-keys-archive.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-COGB-ROADMAP-DOCUMENTATION-RULE-PRECEDENCE-AND-CONSTANT-PROJECTED-GAINS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-modeler.ts",
+            "apps/union-eyes/lib/knowledge-transfer/resilience-strategies/strategy-models.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-COGB-ENVELOPE-CONFIDENCE-FIXED-AT-60-AND-EXPLAINABILITY-EMPTY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+            "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-COGB-NARRATIVES-CITE-ZERO-EVIDENCE-AS-DERIVED-FROM-EVIDENCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-narratives/index.ts",
+            "apps/union-eyes/lib/knowledge-transfer/__tests__/b47-honest-analytics.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/lib/external-resource-middleware.ts",
+            "apps/union-eyes/lib/services/external-resource-authorization-service.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B8-ICRA-CLAIM-TOKEN-HAS-NO-ICRA-ISSUER-SO-CLAIM-CANNOT-SUCCEED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/payments/webhooks/stripe/route.ts",
+            "apps/union-eyes/lib/icra/claim-delivery.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/app/api/location/consent/route.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B9-MOB-SYNC-PATH-REGISTERS-A-DEVICE-AND-SYNCS-NOTHING-AND-ITS-ONLY-CALLER-ALWAYS-FAILS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/mobile/sync/route.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AMOUNTS-UNVERIFIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/pension/members/route.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "files": [
+            "apps/union-eyes/lib/services/precedent-audited-service.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-PRP-REWARDS-CRON-EXPIRATION-TASK-READS-AN-EXPIRY-NO-WRITER-SETS-AND-WOULD-REPEAT-ACROSS-THE-7-14-AND-30-DAY-WINDOWS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/rewards/notification-service.ts",
+            "apps/union-eyes/lib/services/rewards/__tests__/expiration-warnings.pglite.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-PRP-REWARDS-CRON-AND-WALLET-AND-REDEMPTION-QUERIES-USE-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/rewards/cron/route.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-SOC-INTERNAL-SIGNATURE-PROVIDER-IS-A-STUB-THAT-SENDS-NOTHING-AND-THE-REQUEST-IS-RECORDED-AS-SENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/signature/signature-service.ts",
+            "apps/union-eyes/lib/signature/provider-sync.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SETTINGS-SECURITY-POLICY-VALUES-ARE-SAVED-AS-UPDATED-TRUE-AND-ENFORCED-BY-NO-CODE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/settings/organization/route.ts",
+            "apps/union-eyes/lib/settings/unenforced-settings.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B12-CRUD-BARGAINING-UNIT-CERTIFICATION-AND-REPRESENTATION-FIELDS-WRITABLE-BY-ANY-STEWARD",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/units/route.ts",
+            "apps/union-eyes/app/api/units/[id]/route.ts",
+            "apps/union-eyes/lib/union-structure/unit-writable-fields.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B12-PLT-KPI-CURRENT-VALUE-IS-THE-LATEST-ROW-OF-THE-METRIC-TYPE-TEXT-NOT-THE-DECLARED-SOURCE-OR-CALCULATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/targets/summary/route.ts",
+            "apps/union-eyes/lib/kpi/target-value.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B8-FED-EXTERNAL-UPLOAD-ATTACHES-ANY-ORGANIZATION-BLOB-TO-GRIEVANCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/external/grievances/[id]/documents/upload/route.ts",
+            "apps/union-eyes/lib/documents/intake-lifecycle.ts",
+            "apps/union-eyes/lib/documents/intake-storage.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B138-WAVE1-CORRECTION-AND-DYNAMICS-ENGINES",
+      "family": "Corrects a misattribution (2 defects wrongly credited as main-based in B137, actually Wave1-only, caught by the ledger-provenance test's file-existence check) and credits 2 more genuine Wave1 fixes (the organizational-dynamics engine family) found via the same citation sweep",
+      "evidenceCommit": "d628424d8",
+      "items": [
+        {
+          "prefix": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts"
+          ],
+          "explanation": "New lib/records/organization-record-number.ts (76 new lines) implements allocateOrganizationRecordNumber/issueOrganizationRecordNumber with RECORD_NUMBER_SERIES: a server-issued per-organization series under an advisory lock in the creating transaction, matching Wave 1's own claim 'HS-RECORD-NUMBERS and ORG-CAMPAIGN-CODE: FIXED. Server-issued per-organization series under an advisory lock... A missing field answers 400, not 500.' Proven by a dedicated new PGlite test (72 new lines) that cites this defect ID and its DEF-0B10-ORG-CAMPAIGN-CODE sibling directly. Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error -- the file does not exist on origin/main at all; corrected after a ledger-provenance test caught the missing-file reference)."
+        },
+        {
+          "prefix": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts",
+            "apps/union-eyes/app/api/organizing/campaigns/__tests__/route.test.ts"
+          ],
+          "explanation": "Same server-issued record-numbering mechanism as DEF-0B8-HS-RECORD-NUMBERS above; the campaign route's own test also cites this defect ID directly. Confirmed via direct diff read against origin/main."
+        },
+        {
+          "prefix": "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/push/push-sender.ts",
+            "apps/union-eyes/lib/push/__tests__/push-sender.test.ts",
+            "apps/union-eyes/app/api/mobile/devices/[id]/test-push/__tests__/route.test.ts"
+          ],
+          "explanation": "New lib/push/push-sender.ts (73 new lines, a real FCM sender) makes push_devices the single written table, matching Wave 1's own claim 'MOB-TWO-DEVICE-TABLES: FIXED, partially. push_devices is the single written table, with a real FCM sender. Test push returns 501 without FIREBASE_SERVICE_ACCOUNT. Old mobile_devices rows are not migrated.' Confirmed via direct diff read against origin/main (initially misattributed to a plain-main branch in error; corrected after a ledger-provenance test caught the missing-file reference)."
+        },
+        {
+          "prefix": "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
+          ],
+          "explanation": "A 572-line diff (mostly deletions) across 4 organizational-dynamics engines removes the fabricated literal-weight/entry-count-ratio scoring; coherence-engine.ts's own top-of-file comment explicitly cites this defect ID and its DEF-0B7-COGB-ENTRY-COUNT-PROXIES sibling by name: 'The engine previously derived scores and labels from those counts with arbitrary scaling... Preserve this callable interface, but refuse invented scores until a governed model exists.' Each engine now throws ApiError.notImplemented rather than returning an invented score. Confirmed via direct diff and source read."
+        },
+        {
+          "prefix": "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
+          ],
+          "explanation": "Same fix and the same direct citation as DEF-0B7-COGA-COHERENCE-AND-MOMENTUM above (both defect IDs are named together in coherence-engine.ts's own comment). Confirmed via direct diff and source read."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B8-HS-RECORD-NUMBERS-CALLER-SUPPLIED-AND-UNIQUE-ACROSS-ORGANIZATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B10-ORG-CAMPAIGN-CODE-UNIQUE-ACROSS-ALL-ORGANIZATIONS-AND-REQUIRED-COLUMNS-FAIL-AS-500",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/records/organization-record-number.ts",
+            "apps/union-eyes/lib/records/__tests__/organization-record-number.pglite.test.ts",
+            "apps/union-eyes/app/api/organizing/campaigns/__tests__/route.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B9-MOB-TWO-DEVICE-TABLES-NO-ROUTE-REMOVES-A-DEVICE-AND-NO-SENDER-READS-EITHER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/push/push-sender.ts",
+            "apps/union-eyes/lib/push/__tests__/push-sender.test.ts",
+            "apps/union-eyes/app/api/mobile/devices/[id]/test-push/__tests__/route.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/organizational-dynamics/governance-coherence/coherence-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/systems-dynamics/systems-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/operational-coordination/coordination-engine.ts",
+            "apps/union-eyes/lib/organizational-dynamics/rhythms/rhythms-engine.ts"
+          ]
+        }
+      ]
+    },
+    {
       "id": "B130-F03-OHS-CNESST-CASE-AUTHORITY",
       "family": "Cross-tenant and same-tenant case authority: CNESST filings, right-of-refusal and preventive withdrawals scoped to steward_assignments coverage, officer floor or the record's own designated representative",
       "evidenceCommit": "59f775f74",
