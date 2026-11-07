@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 616,
-    "partial": 57,
+    "implementedPendingQualification": 617,
+    "partial": 56,
     "qualificationVerified": 0,
-    "unresolved": 161,
+    "unresolved": 160,
     "externalBlockers": 0
   },
   "batches": [
@@ -1242,29 +1242,38 @@
       "evidenceCommit": "bc4cca2c7"
     },
     {
+      "id": "B132-F06-DERIVED-ANALYTICS-CONSENT-PROOF",
+      "family": "Consent-gated recording and verified telemetry scope: proving the shared derived-analytics consent predicate directly, on real SQL, the same way the list/item/search predicates already are",
+      "outstandingBefore": 177,
+      "newlyImplemented": 1,
+      "outstandingAfter": 176,
+      "partial": 0,
+      "evidenceCommit": "007ca8b99"
+    },
+    {
       "id": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
       "family": "Register text that lagged already-landed source fixes: PKI workflow retirement, finance mandate resource-scoping, subscription mandate-bound authority",
-      "outstandingBefore": 177,
+      "outstandingBefore": 176,
       "newlyImplemented": 3,
-      "outstandingAfter": 174,
+      "outstandingAfter": 173,
       "partial": 0,
       "evidenceCommit": "150e8b5eb"
     },
     {
       "id": "B136-ML-SLA-SCORE-STALE-REGISTER-CREDIT",
       "family": "A second register text lagging an already-landed fix, found while surveying the DEF-0B9-ML family for similar staleness",
-      "outstandingBefore": 174,
+      "outstandingBefore": 173,
       "newlyImplemented": 1,
-      "outstandingAfter": 173,
+      "outstandingAfter": 172,
       "partial": 0,
       "evidenceCommit": "10be7585c"
     },
     {
       "id": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
       "family": "A systematic sweep: grep every DEF-0B defect ID literally cited in any .ts/.tsx file, cross-referenced against the still-actionable list -- 15 more defects whose fix already exists on plain main (not Wave 1), predating this whole session, never ledger-credited",
-      "outstandingBefore": 173,
+      "outstandingBefore": 172,
       "newlyImplemented": 12,
-      "outstandingAfter": 161,
+      "outstandingAfter": 160,
       "partial": 0,
       "evidenceCommit": null
     }
@@ -9919,14 +9928,13 @@
       ]
     },
     "DEF-0B7-EXC-CONSENT-WITHDRAWAL-AND-RECLASSIFICATION-WITHDRAW-NOTHING-DERIVED": {
-      "status": "PARTIAL",
-      "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B132-F06-DERIVED-ANALYTICS-CONSENT-PROOF",
       "files": [
-        "apps/union-eyes/app/api/exit-interviews/[id]/governance/route.ts",
-        "apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts"
+        "apps/union-eyes/lib/knowledge-transfer/governance/interview-access.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance/__tests__/derived-analytics-condition.pglite.test.ts"
       ],
-      "explanation": "Reads of the interview and of its knowledge-base copy apply the interview's current consent and sensitivity, so a withdrawal or reclassification takes effect on the next read (existing read-gate tests).",
-      "remaining": "The knowledge-base row, its content and its embedding are not erased or deactivated when consent is withdrawn; they are only filtered at read time.",
+      "explanation": "B132: reading the current routes shows the consent gap B32 recorded as remaining was already closed in source -- hybrid-search.ts's keywordSearch and semanticSearch both require consentGranted = true (proven on real SQL in db/__tests__/semantic-search.postgres.test.ts and lib/knowledge-transfer/search/__tests__/hybrid-search.test.ts), and the governance route already deactivates the interview's knowledge-base copy in the same transaction a withdrawal commits in. What had no proof at all was derivedAnalyticsCondition, the shared consent-and-level predicate all seven derived-analytics engines (topic graph, propagation, resilience, forecast, simulation, continuity risk, succession) import unchanged from interview-access.ts: every one of those seven engines' own unit tests mocks the condition away rather than exercising it, unlike interviewListCondition which already has a real-SQL proof. lib/knowledge-transfer/governance/__tests__/derived-analytics-condition.pglite.test.ts proves derivedAnalyticsCondition directly against the real Drizzle table on PGlite: it admits only published, consented interviews at a derived-analytics level of the caller's own organization, excluding a withdrawn-consent interview that would otherwise qualify, a privileged-or-above interview, a draft and another organization's row. Since all seven engines share the one unchanged function, proving it once covers all seven by construction. Erasing a withdrawn-consent interview's knowledge-base content and embedding (rather than the deactivation and consent-gated filtering already in place) remains the governance route's own documented, deliberate deferral to a future retention/legal-hold decision -- an institutional decision, not an engineering gap this batch closes or should.",
       "history": [
         {
           "batch": "B32-F06-CONSENT-GATED-RECORDING-AND-VERIFIED-TELEMETRY-SCOPE",
@@ -9935,6 +9943,15 @@
           "files": [
             "apps/union-eyes/app/api/exit-interviews/[id]/governance/route.ts",
             "apps/union-eyes/app/api/__tests__/exit-interviews-read-gates.pglite.test.ts"
+          ]
+        },
+        {
+          "batch": "B132-F06-DERIVED-ANALYTICS-CONSENT-PROOF",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "007ca8b99",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/governance/interview-access.ts",
+            "apps/union-eyes/lib/knowledge-transfer/governance/__tests__/derived-analytics-condition.pglite.test.ts"
           ]
         }
       ]
