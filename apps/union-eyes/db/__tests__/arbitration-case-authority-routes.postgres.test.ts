@@ -63,6 +63,9 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
   const steward = { id: randomUUID(), organizationId: ORG_A, role: 'steward' }
   const otherSteward = { id: randomUUID(), organizationId: ORG_A, role: 'steward' }
   const stewardOrgB = { id: randomUUID(), organizationId: ORG_B, role: 'steward' }
+  // DELETE's own role floor is admin (crud-factory defaults deleteRole to 'admin' when writeRole is below it), so
+  // only an admin caller actually reaches retainOnDelete; a steward is refused by the role floor first.
+  const orgAdmin = { id: randomUUID(), organizationId: ORG_A, role: 'admin' }
 
   let caseOwned = ''
   let caseReadOnly = ''
@@ -120,10 +123,10 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
 
   beforeAll(async () => {
     admin = await harness.start(URL!)
-    for (const who of [steward, otherSteward, stewardOrgB]) harness.setRole(who.id, who.organizationId, who.role)
+    for (const who of [steward, otherSteward, stewardOrgB, orgAdmin]) harness.setRole(who.id, who.organizationId, who.role)
     await newOrganization(ORG_A, `Org A ${tag}`)
     await newOrganization(ORG_B, `Org B ${tag}`)
-    for (const who of [steward, otherSteward, stewardOrgB]) await newOrgMember(who)
+    for (const who of [steward, otherSteward, stewardOrgB, orgAdmin]) await newOrgMember(who)
 
     caseOwned = await newGrievance(ORG_A, steward.id)
     caseReadOnly = await newGrievance(ORG_A, steward.id)
@@ -176,10 +179,15 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
   })
 
   it('DELETE refuses every caller unconditionally, including the case owner, before any row is read', async () => {
-    const error = await rejection(call(item().DELETE, steward, { id: arbitrationOwned }))
+    const error = await rejection(call(item().DELETE, orgAdmin, { id: arbitrationOwned }))
     expect((error as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.CONFLICT)
-    const error2 = await rejection(call(item().DELETE, otherSteward, { id: 'does-not-exist' }))
+    const error2 = await rejection(call(item().DELETE, orgAdmin, { id: 'does-not-exist' }))
     expect((error2 as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.CONFLICT)
+  })
+
+  it('DELETE refuses a caller below its own role floor before retainOnDelete is ever reached', async () => {
+    const error = await rejection(call(item().DELETE, steward, { id: arbitrationOwned }))
+    expect((error as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.FORBIDDEN)
   })
 
   it('creating an arbitration requires edit authority on the named grievance, not only membership in its organization', async () => {
