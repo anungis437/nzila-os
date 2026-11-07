@@ -105,7 +105,7 @@ export function parseLockfilePackages(lockfilePath) {
     if (/^[ \t]*\t/.test(line)) {
       throw new Error('Tab indentation in pnpm-lock.yaml snapshots is not permitted')
     }
-    if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
+    // pnpm v9 writes snapshots as its final top-level section. Never stop\n    // inventorying at an unexpected top-level mapping: doing so could hide\n    // vulnerable resolved packages after an injected section header.\n    if (/^[^\s#][^:]*:/.test(line)) {\n      throw new Error('Unexpected top-level section after pnpm snapshots; dependency inventory incomplete')\n    }
     // pnpm v9 emits two-space YAML indentation levels. Reject every odd
     // indentation depth, including deeper malformed keys that would otherwise
     // be silently omitted from the audited dependency graph.
