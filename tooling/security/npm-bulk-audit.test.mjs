@@ -153,10 +153,10 @@ test('even-indented nested snapshot keys cannot evade dependency inventory', () 
     '      node-forge@1.4.0: {}',
     "    'node-forge@1.4.0': {}",
   ]) {
-    withLockfile('lockfileVersion: 9.0\\nsnapshots:\\n  undici@7.29.1:\\n' + nested + '\\n', (file) =>
+    withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n' + nested + '\n', (file) =>
       assert.throws(() => parseLockfilePackages(file), /Nested resolved snapshot key/, nested))
   }
-  withLockfile('lockfileVersion: 9.0\\nsnapshots:\\n  undici@7.29.1:\\n    dependencies:\\n      node-forge: 1.4.0\\n', (file) =>
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n    dependencies:\n      node-forge: 1.4.0\n', (file) =>
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
 })
 
