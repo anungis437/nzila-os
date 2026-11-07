@@ -28,4 +28,18 @@ describe('Gate 0 accounting reconciliation', () => {
     expect(rec.totals.qualificationVerified).toBe(0)
     expect(rec.totals.closed).toBe(0)
   })
+
+  it('partitions every one of the 777 defects into exactly one of implemented, partial or untouched, with no overlap', () => {
+    const m = rec.mutuallyExclusiveAccounting
+    expect(m.population).toBe(777)
+    expect(m.implemented + m.partial + m.untouched).toBe(777)
+    expect(m.implemented).toBe(rec.totals.overlayImplemented)
+    expect(m.partial).toBe(rec.totals.overlayPartial)
+    expect(m.untouched).toBe(rec.totals.untouchedByOverlay)
+    expect(new Set(m.partialIds).size).toBe(m.partialIds.length)
+    expect(new Set(m.untouchedIds).size).toBe(m.untouchedIds.length)
+    expect(m.partialIds.some((id: string) => m.untouchedIds.includes(id))).toBe(false)
+    // "unresolvedByOverlay" (the historical name) is partial + untouched together, never additional to partial.
+    expect(rec.totals.unresolvedByOverlay).toBe(m.partial + m.untouched)
+  })
 })
