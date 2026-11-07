@@ -402,3 +402,16 @@ test('prototype-colliding installed package names remain in the registry request
     globalThis.fetch = originalFetch
   }
 })
+
+
+test('unexpected top-level sections cannot truncate the resolved dependency inventory', () => {
+  for (const injected of [
+    'other:\\n  node-forge@1.4.0:',
+    'packages:\\n  node-forge@1.4.0:',
+  ]) {
+    withLockfile('lockfileVersion: 9.0\\nsnapshots:\\n  undici@7.29.1:\\n' + injected.replaceAll('\\n', '\n') + '\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Unexpected top-level section after pnpm snapshots/))
+  }
+  withLockfile('lockfileVersion: 9.0\\nsnapshots:\\n  undici@7.29.1:\\n  node-forge@1.4.0:\\n'.replaceAll('\\n', '\n'), (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici', 'node-forge']))
+})
