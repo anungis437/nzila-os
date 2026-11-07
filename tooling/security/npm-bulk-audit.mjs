@@ -197,7 +197,9 @@ export async function fetchAdvisories(pkgMap) {
       (typeof response.url === 'string' && response.url !== '' && response.url !== BULK_ENDPOINT)) {
     throw new Error('Audit registry response was redirected or came from an unexpected endpoint')
   }
-  if (!response.ok) {
+  // Partial-content and other non-200 2xx responses cannot certify a complete audit.
+  // Check the actual HTTP status, not only the transport's `ok` flag.
+  if (!response.ok || (Number.isInteger(response.status) && response.status !== 200)) {
     throw new Error(`Audit registry returned HTTP ${response.status}; a failed request is never an empty audit`)
   }
   let raw
