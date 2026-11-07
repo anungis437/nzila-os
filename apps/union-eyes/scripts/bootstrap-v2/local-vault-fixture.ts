@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import {
   constants,
   generateKeyPairSync,
@@ -55,10 +55,25 @@ async function close(server: http.Server | https.Server) {
   assert.equal(server.listening, false)
 }
 
+let resolvedPythonBinary: string | undefined
+
+/** 'python3' is the portable name across macOS, Linux and CI containers; 'python' is kept as a fallback for
+ * environments where only that name resolves to a Python 3 interpreter. Resolved once per process. */
+function pythonBinary(): string {
+  if (resolvedPythonBinary) return resolvedPythonBinary
+  for (const candidate of ['python3', 'python']) {
+    if (spawnSync(candidate, ['--version'], { stdio: 'ignore' }).error === undefined) {
+      resolvedPythonBinary = candidate
+      return candidate
+    }
+  }
+  throw new Error("openLocalVaultFixture: neither 'python3' nor 'python' is on PATH")
+}
+
 /** Owned wire-protocol fixture, not an SDK/encryption replacement or production custody proof. */
 export async function openLocalVaultFixture(statePath: string) {
   const certificate = JSON.parse(
-    execFileSync('python', ['-I', '-c', certificateProgram], {
+    execFileSync(pythonBinary(), ['-I', '-c', certificateProgram], {
       encoding: 'utf8',
       timeout: 30000,
       maxBuffer: 16384,
