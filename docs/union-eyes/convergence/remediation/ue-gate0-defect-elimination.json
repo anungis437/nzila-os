@@ -11,7 +11,7 @@
   "totals": {
     "original": 777,
     "implementedPendingQualification": 600,
-    "partial": 72,
+    "partial": 71,
     "qualificationVerified": 0,
     "unresolved": 177,
     "externalBlockers": 0
@@ -1235,6 +1235,15 @@
     {
       "id": "B129-PRECEDENT-LIBRARY-NATIVE-PROOF-AND-ORDERING-DEFECTS",
       "family": "Django and Drizzle convergence: the precedent library proven on the converged arbitration_decisions under the real roles",
+      "outstandingBefore": 177,
+      "newlyImplemented": 0,
+      "outstandingAfter": 177,
+      "partial": 0,
+      "evidenceCommit": "bc4cca2c7"
+    },
+    {
+      "id": "B133-F02-CRUD-WRITABLE-FIELDS-REMAINING-ROUTES",
+      "family": "Generic CRUD mass assignment: the remaining routes Wave 1's fail-closed default left without a writableFields list",
       "outstandingBefore": 177,
       "newlyImplemented": 0,
       "outstandingAfter": 177,
@@ -9605,7 +9614,7 @@
         {
           "batch": "B129-PRECEDENT-LIBRARY-NATIVE-PROOF-AND-ORDERING-DEFECTS",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "bc4cca2c7",
           "files": [
             "apps/union-eyes/db/__tests__/precedent-library.postgres.test.ts",
             "apps/union-eyes/lib/services/precedent-service.ts"
@@ -12579,15 +12588,13 @@
         "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
         "apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts",
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-        "apps/union-eyes/lib/services/messaging/campaign-service.ts",
         "apps/union-eyes/lib/services/messaging/email-service.ts",
-        "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
         "apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts",
         "docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md",
         "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
         "docs/union-eyes/convergence/remediation/evidence/ue-unsubscribe-capability-target-20261031.md"
       ],
-      "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation; outbound campaign emails now carry a campaign/recipient-bound RFC 8058 one-click POST capability, with SendGrid header forwarding. Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
+      "explanation": "The message log, campaign stats, preference, list subscriptions and consent record are written on the one transaction handed to the callback (they used the shared connection, so there was no transaction at all). The unit-test mocks were adapted to pass the mock db as the transaction and to include the newsletter tables, and the real-SQL pglite test now creates those tables and still passes (disclosed). Subsequent source corrections made GET a signed read-only confirmation and POST the sole mutation. (An outbound campaign sender that attached a campaign/recipient-bound RFC 8058 one-click capability to campaign emails had no caller and was deleted on 2026-11-03: no campaign email is sent in this release.) Added unit and PGlite regression sources. These additions are not yet executable-qualified.",
       "remaining": "Exact-HEAD focused/full unit and contract, native PostgreSQL 15/16, HTTP/browser and staging proof; live provider one-click interoperability; independent institutional ratification. No CLOSED credit.",
       "history": [
         {
@@ -12599,9 +12606,7 @@
             "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
             "apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts",
             "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
-            "apps/union-eyes/lib/services/messaging/campaign-service.ts",
             "apps/union-eyes/lib/services/messaging/email-service.ts",
-            "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
             "apps/union-eyes/lib/services/messaging/__tests__/email-service.test.ts",
             "docs/union-eyes/convergence/remediation/ue-unsubscribe-scanner-safe-20261031.md",
             "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md",
@@ -16108,11 +16113,9 @@
         "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
         "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
         "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
-        "apps/union-eyes/lib/services/messaging/campaign-service.ts",
-        "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
         "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md"
       ],
-      "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed). An outbound campaign sender now issues a signed campaign-scoped unsubscribe capability, while explicit all-organization tokens remain separately signed. Missing signing keys refuse sends. Real mail-provider issuance and independent policy approval remain unproven.",
+      "explanation": "A link without a campaign now revokes in every organization that holds a preference row or a list subscription for the recipient, in the same transaction and through the same helper as a campaign link: preference, list subscriptions and one revoked consent record per organization, each attributed to its organization. The reason text is bounded at 200 characters. The route tests were extended and the b55 pin was adapted to the helper (disclosed). Nothing in the application issues a campaign-scoped unsubscribe capability today: the outbound campaign sender that did had no caller and was deleted on 2026-11-03, and sending is NOT_IMPLEMENTED (UE-ACTION-CAMPAIGN-SEND). Explicit all-organization tokens remain separately signed. Independent policy approval remains unproven.",
       "remaining": "Exact-HEAD executable, native and HTTP/browser qualification; provider delivery headers and one-click interoperability; global opt-out institutional semantics.",
       "history": [
         {
@@ -16124,8 +16127,6 @@
             "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
             "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts",
             "apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts",
-            "apps/union-eyes/lib/services/messaging/campaign-service.ts",
-            "apps/union-eyes/lib/services/messaging/__tests__/campaign-service.test.ts",
             "docs/union-eyes/convergence/remediation/ue-campaign-unsubscribe-headers-20261031.md"
           ]
         }
@@ -16632,14 +16633,27 @@
       ]
     },
     "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT": {
-      "status": "PARTIAL",
-      "batch": "B92-FACTORY-ATTRIBUTION-AND-VERIFIED-CREDITS",
+      "status": "PARTIAL_SOURCE_REMAINING_WORK",
+      "batch": "B133-F02-CRUD-WRITABLE-FIELDS-REMAINING-ROUTES",
       "files": [
-        "apps/union-eyes/lib/api/crud-factory.ts",
-        "apps/union-eyes/lib/services/__tests__/s36-factory-attribution-and-verified-credits.test.ts"
+        "apps/union-eyes/app/api/metrics/route.ts",
+        "apps/union-eyes/app/api/gdpr/consents/route.ts",
+        "apps/union-eyes/app/api/gdpr/requests/route.ts",
+        "apps/union-eyes/app/api/gdpr/data-erasure/route.ts",
+        "apps/union-eyes/app/api/consent/route.ts",
+        "apps/union-eyes/app/api/deadlines/route.ts",
+        "apps/union-eyes/app/api/deadlines/compliance/route.ts",
+        "apps/union-eyes/app/api/members/[id]/route.ts",
+        "apps/union-eyes/app/api/members/[id]/employment/route.ts",
+        "apps/union-eyes/app/api/members/[id]/documents/route.ts",
+        "apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+        "apps/union-eyes/app/api/claims/[id]/route.ts",
+        "apps/union-eyes/app/api/currency/convert/route.ts",
+        "apps/union-eyes/app/api/admin/clc/analytics/organizations/route.ts",
+        "apps/union-eyes/lib/api/__tests__/crud-writable-fields-census.test.ts"
       ],
-      "explanation": "The factory already refuses any key that is not a real column and any identity, tenancy, owner and lifecycle-time field. B92 widens the refused set to attribution and approval written under other spellings (createdById, approvedById, reviewedById, publishedById, verifiedById/Name/Date, approvedByName/Date, closedBy/ById, resolvedBy/ById, signedBy/ById, enteredBy), so the person and time of an act are always the server's record on all 98 factory routes; the factory and route suites pass.",
-      "remaining": "A route that lists no writableFields (84 of the 98) still accepts any real, non-reserved column, including status, cost and outcome columns; each needs its own allow-list decided from what its screens send.",
+      "explanation": "Of the 21 routes this branch's own crud-writable-fields-census.test.ts still flagged after Wave 1 (B105+ fail-closed writableFields default), 12 routes (metrics, gdpr/consents, gdpr/requests, gdpr/data-erasure, consent, deadlines, deadlines/compliance, members/[id], members/[id]/employment, members/[id]/documents, communications/polls/[pollId], claims/[id]) now declare a real, narrow writableFields list decided from each table's own schema, excluding computed, approval and financial-adjustment columns. 2 routes (currency/convert, admin/clc/analytics/organizations) were facades bound to the unrelated analyticsMetrics table with zero real callers, the same bug class as the already-fixed organization_members facades (DEF-0B1-CRUD-FACADE-ORG-MEMBERS, B09-F02); converted to 501 rather than inventing an allow-list for an operation that never existed. census: 138/138 passing.",
+      "remaining": "7 of the 21 routes are deliberately not fixed here: arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId] and arrears/escalate are bound to the unrelated perCapitaRemittances table instead of the real, unused memberArrears/paymentPlans tables (a genuine feature gap, not just a missing allow-list; per-capita/remittance work is explicitly future, non-blocking per product direction) and members/dues has no real POST caller in this repo and its fields feed dues calculation, needing its own product decision. None of the 7 are newly insecure: Wave 1's fail-closed default already refuses every write on a route with no writableFields (403), so leaving them unlisted is safe, just incomplete.",
       "history": [
         {
           "batch": "B92-FACTORY-ATTRIBUTION-AND-VERIFIED-CREDITS",
@@ -16648,6 +16662,28 @@
           "files": [
             "apps/union-eyes/lib/api/crud-factory.ts",
             "apps/union-eyes/lib/services/__tests__/s36-factory-attribution-and-verified-credits.test.ts"
+          ]
+        },
+        {
+          "batch": "B133-F02-CRUD-WRITABLE-FIELDS-REMAINING-ROUTES",
+          "status": "PARTIAL_SOURCE_REMAINING_WORK",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/app/api/metrics/route.ts",
+            "apps/union-eyes/app/api/gdpr/consents/route.ts",
+            "apps/union-eyes/app/api/gdpr/requests/route.ts",
+            "apps/union-eyes/app/api/gdpr/data-erasure/route.ts",
+            "apps/union-eyes/app/api/consent/route.ts",
+            "apps/union-eyes/app/api/deadlines/route.ts",
+            "apps/union-eyes/app/api/deadlines/compliance/route.ts",
+            "apps/union-eyes/app/api/members/[id]/route.ts",
+            "apps/union-eyes/app/api/members/[id]/employment/route.ts",
+            "apps/union-eyes/app/api/members/[id]/documents/route.ts",
+            "apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+            "apps/union-eyes/app/api/claims/[id]/route.ts",
+            "apps/union-eyes/app/api/currency/convert/route.ts",
+            "apps/union-eyes/app/api/admin/clc/analytics/organizations/route.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-writable-fields-census.test.ts"
           ]
         }
       ]
