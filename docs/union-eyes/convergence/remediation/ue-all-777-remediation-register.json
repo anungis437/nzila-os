@@ -4456,17 +4456,31 @@
       "title": "A campaign row stores a segment id, a free-form segment query and an audience count, and no route in the campaign group evaluates the audience, checks the communication preferences or consent of a recipient, or sends; authoring is detached from the consent and delivery rules the platform keeps elsewhere.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/lib/communications/campaign-audience.ts",
+          "apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts",
+          "apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts"
+        ],
+        "repair": "Added a real consent/preference audience evaluator and wired it into a read-only schedule preview; wired send-test to really send to one explicit test address via the real email provider.",
+        "regressionPaths": [
+          "apps/union-eyes/lib/communications/__tests__/campaign-audience.test.ts",
+          "apps/union-eyes/lib/api/__tests__/f12-communications.contract.test.ts",
+          "apps/union-eyes/app/api/__tests__/crud-routes-coverage.test.ts"
+        ],
+        "limits": "No bulk sender, no status/stats transition, no dispatcher/queue, no segment resolution, no SMS send-test, no template variable substitution. See engineeringCorrection.remaining.",
+        "state": "PARTIAL_SOURCE_HARDENING_CI_PENDING"
+      },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B29-F12-COMMUNICATIONS-LIFECYCLE-AND-VERIFIED-CREDITS",
-        "path": "apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts; apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts; apps/union-eyes/lib/api/__tests__/f12-communications.contract.test.ts",
+        "batch": "GATE0-PHASE2-CAMPAIGN-SENDER-MECHANISM",
+        "path": "apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts; apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts; apps/union-eyes/lib/api/__tests__/f12-communications.contract.test.ts; apps/union-eyes/lib/communications/campaign-audience.ts; apps/union-eyes/lib/communications/__tests__/campaign-audience.test.ts; apps/union-eyes/lib/api/__tests__/f12-communications.contract.test.ts",
         "explanation": "The schedule and send-test paths answer 501: they were the campaign row under another name and no sender reads them, so nothing was scheduled or tested.",
-        "remaining": "No sender exists: schedule and send-test answer 501 and nothing reads a campaign to deliver it, so the audience, communication preferences and consent are not evaluated by any send path; the consent check belongs to the sender when one is built. A campaign row remains a draft record whose scheduledAt and sendImmediately fields are intentions only.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "remaining": "Built the real, bounded part of the writer mechanism this pass covers: lib/communications/campaign-audience.ts resolves every active organization member (segment-based narrowing via segmentId/segmentQuery remains unbuilt - no member_segments table or query interpreter exists, and inventing one would be fabricated targeting logic) and evaluates each one for real against communication_preferences and consent_records. schedule's GET is now a real, read-only preview using that evaluator (never mutates, never sends, never creates an actual schedule - no dispatcher exists to act on one, so claiming to schedule would itself be fabrication). send-test's POST now really sends the campaign's own content to one explicit caller-supplied test address via the real email provider (lib/email-service.ts), with no template {{variable}} substitution (also unbuilt) and no SMS support yet. Still not built, and not fabricated here: a real bulk sender that walks the evaluated audience and actually delivers to every eligible member, the status/stats transition that would accompany it (draft -> sending -> sent), and the background dispatcher/queue a safe, batched, retryable version of that requires. schedule and send-test still refuse every other HTTP method they do not implement.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
     {
