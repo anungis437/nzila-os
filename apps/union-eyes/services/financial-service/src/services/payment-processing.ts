@@ -32,7 +32,7 @@ export type PaymentStatus =
   | 'refunded';
 
 // Stripe payment method types
-export type StripePaymentMethod = 'card' | 'bank_account' | 'us_bank_account';
+export type StripePaymentMethod = 'card' | 'us_bank_account';
 
 type StripeEventObjectLike = {
   id?: string;
@@ -96,7 +96,7 @@ export async function createDuesPaymentIntent(
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency,
-      payment_method_types: [paymentMethod],
+      allowed_payment_method_types: [paymentMethod],
       description: description || `Union dues payment for member ${memberId}`,
       metadata: {
         organizationId,
@@ -463,7 +463,7 @@ export async function createDonationPaymentIntent(
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency,
-      payment_method_types: [paymentMethod],
+      allowed_payment_method_types: [paymentMethod],
       description: `Donation to strike fund`,
       metadata: {
         organizationId: resolvedOrganizationId,

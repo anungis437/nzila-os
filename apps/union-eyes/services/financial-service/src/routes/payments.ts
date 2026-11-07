@@ -31,7 +31,7 @@ const CreateDuesPaymentSchema = z.object({
   memberId: z.guid(),
   amount: z.number().min(0.50).max(100000),
   currency: z.string().length(3).default('usd'),
-  paymentMethod: z.enum(['card', 'bank_account', 'us_bank_account']),
+  paymentMethod: z.enum(['card', 'us_bank_account']),
   description: z.string().optional(),
   metadata: z.record(z.string(), z.string()).optional(),
 });
@@ -66,7 +66,7 @@ const CreateDonationSchema = z.object({
   donorName: z.string().optional(),
   isAnonymous: z.boolean().default(false),
   message: z.string().max(500).optional(),
-  paymentMethod: z.enum(['card', 'bank_account', 'us_bank_account']).default('card'),
+  paymentMethod: z.enum(['card', 'us_bank_account']).default('card'),
 });
 
 const ConfirmDonationSchema = z.object({

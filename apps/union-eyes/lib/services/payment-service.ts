@@ -193,7 +193,7 @@ export class PaymentService {
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'acss_debit'],
+      allowed_payment_method_types: ['card', 'acss_debit'],
       line_items: [
         {
           price_data: {
