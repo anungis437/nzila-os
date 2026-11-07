@@ -317,3 +317,12 @@ test('missing or malformed HTTP status cannot certify a clean audit', async () =
     globalThis.fetch = originalFetch
   }
 })
+
+test('tab-indented snapshot records fail closed instead of disappearing from audit inventory', () => {
+  for (const record of ['\tundici@7.29.1:', ' \tundici@7.29.1:', '  \tundici@7.29.1:']) {
+    withLockfile('lockfileVersion: 9.0\nsnapshots:\n  node-forge@1.4.0:\n' + record + '\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Tab indentation/))
+  }
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  node-forge@1.4.0:\n    dependencies:\n      undici: 7.29.1\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['node-forge']))
+})
