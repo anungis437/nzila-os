@@ -100,6 +100,11 @@ export function parseLockfilePackages(lockfilePath) {
   }
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i]
+    // YAML forbids tab indentation. A tab-prefixed snapshot can otherwise be
+    // silently skipped, allowing a resolved dependency to evade the audit.
+    if (/^[ \t]*\t/.test(line)) {
+      throw new Error('Tab indentation in pnpm-lock.yaml snapshots is not permitted')
+    }
     if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
     if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
     // pnpm writes a snapshot key either bare or single-quoted (it quotes every key
