@@ -1,18 +1,18 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 678,
- "partial": 46,
- "outstanding": 99,
- "accountedFor": 99,
+ "corrected": 694,
+ "partial": 31,
+ "outstanding": 83,
+ "accountedFor": 83,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 5,
+   "defects": 4,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 2,
+    "MEDIUM": 1,
     "LOW": 3
    },
    "namedRoutes": 0,
@@ -21,44 +21,41 @@
     "0B.1": 1,
     "0B.5": 1,
     "0B.7": 1,
-    "0B.8": 1,
-    "0B.9": 1
+    "0B.8": 1
    }
   },
   {
    "family": "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED",
    "purpose": "Stubs, fabricated figures and false-success answers: return 501 or implement for real",
-   "defects": 5,
+   "defects": 3,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 5,
+    "MEDIUM": 3,
     "LOW": 0
    },
-   "namedRoutes": 1,
+   "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
     "0B.7": 2,
-    "0B.8": 1,
-    "0B.11": 2
+    "0B.8": 1
    }
   },
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 7,
+   "defects": 5,
    "severity": {
     "HIGH": 2,
-    "MEDIUM": 4,
+    "MEDIUM": 2,
     "LOW": 1
    },
-   "namedRoutes": 3,
+   "namedRoutes": 2,
    "namedFiles": 0,
    "tranches": {
     "0B.2": 1,
-    "0B.4": 1,
     "0B.6": 2,
     "0B.10": 1,
-    "0B.11": 2
+    "0B.11": 1
    }
   },
   {
@@ -80,23 +77,22 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 15,
+   "defects": 10,
    "severity": {
-    "HIGH": 3,
-    "MEDIUM": 12,
+    "HIGH": 1,
+    "MEDIUM": 9,
     "LOW": 0
    },
    "namedRoutes": 1,
    "namedFiles": 0,
    "tranches": {
-    "0B.2": 2,
-    "0B.3": 1,
+    "0B.2": 1,
     "0B.5": 1,
-    "0B.6": 2,
+    "0B.6": 1,
     "0B.7": 3,
     "0B.8": 1,
     "0B.10": 1,
-    "0B.11": 4
+    "0B.11": 2
    }
   },
   {
@@ -140,20 +136,19 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 11,
+   "defects": 8,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 11,
+    "MEDIUM": 8,
     "LOW": 0
    },
    "namedRoutes": 3,
-   "namedFiles": 1,
+   "namedFiles": 0,
    "tranches": {
-    "0B.7": 3,
-    "0B.8": 1,
+    "0B.7": 2,
     "0B.9": 1,
     "0B.10": 2,
-    "0B.11": 2,
+    "0B.11": 1,
     "0B.12": 2
    }
   },
@@ -176,17 +171,16 @@
   {
    "family": "F10-FINANCIAL-AND-PAYMENT",
    "purpose": "Financial and payment integrity",
-   "defects": 3,
+   "defects": 2,
    "severity": {
     "HIGH": 0,
     "MEDIUM": 2,
-    "LOW": 1
+    "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
     "0B.6": 1,
-    "0B.8": 1,
     "0B.10": 1
    }
   },
@@ -212,18 +206,18 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 27,
+   "defects": 25,
    "severity": {
-    "HIGH": 2,
-    "MEDIUM": 20,
+    "HIGH": 1,
+    "MEDIUM": 19,
     "LOW": 5
    },
    "namedRoutes": 5,
    "namedFiles": 0,
    "tranches": {
-    "0B.1": 4,
+    "0B.1": 3,
     "0B.2": 1,
-    "0B.5": 3,
+    "0B.5": 2,
     "0B.6": 3,
     "0B.7": 6,
     "0B.8": 3,
@@ -252,11 +246,6 @@
     "id": "DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED-ONE-GLOBAL-SECRET-AND-HEADER-KEYED-LIMIT",
     "severity": "LOW",
     "partial": true
-   },
-   {
-    "id": "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE",
-    "severity": "MEDIUM",
-    "partial": true
    }
   ],
   "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED": [
@@ -274,27 +263,12 @@
     "id": "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
     "severity": "MEDIUM",
     "partial": true
-   },
-   {
-    "id": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY",
-    "severity": "MEDIUM",
-    "partial": true
    }
   ],
   "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE": [
    {
     "id": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
     "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE",
-    "severity": "MEDIUM",
     "partial": true
    },
    {
@@ -314,11 +288,6 @@
    },
    {
     "id": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
     "severity": "MEDIUM",
     "partial": true
    }
@@ -341,23 +310,8 @@
     "partial": true
    },
    {
-    "id": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
     "id": "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-CONTRIBUTIONS-WRITE-OUTSIDE-SYSTEM-CONTEXT",
@@ -391,16 +345,6 @@
    },
    {
     "id": "DEF-0B11-PRP-RECONCILIATION-RESOLVE-IS-A-STATUS-AND-NOTE-ONLY-WITH-NO-SECOND-APPROVER-OR-LEDGER-EFFECT",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS",
     "severity": "MEDIUM",
     "partial": true
    }
@@ -488,16 +432,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B9-ML-QUERY-SENDS-FREE-TEXT-AND-ARBITRARY-CONTEXT-TO-AN-EXTERNAL-SERVICE-WITH-NO-DISCLOSURE-DECISION",
     "severity": "MEDIUM",
     "partial": true
@@ -513,11 +447,6 @@
    {
     "id": "DEF-0B11-PRP-DUES-PAY-POST-SENDS-THE-ORGANIZATION-AND-MEMBER-USER-ID-TO-THE-PROCESSOR-FOR-A-MERCHANT-ACCOUNT-NO-SOURCE-NAMES",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD",
@@ -547,11 +476,6 @@
    {
     "id": "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
     "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
-    "severity": "LOW",
     "partial": true
    },
    {
@@ -588,10 +512,6 @@
   ],
   "F12-OTHER-ROUTE-SPECIFIC": [
    {
-    "id": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
-    "severity": "HIGH"
-   },
-   {
     "id": "DEF-0B1-ALLOWLIST-DRIFT",
     "severity": "MEDIUM"
    },
@@ -609,11 +529,6 @@
    },
    {
     "id": "DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B5-UNSUBSCRIBE-WRITES-NOT-ATOMIC",
     "severity": "MEDIUM",
     "partial": true
    },
