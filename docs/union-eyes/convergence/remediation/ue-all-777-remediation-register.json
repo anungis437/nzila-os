@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 707,
-    "engineeringRemaining": 70,
+    "engineeringCorrected": 708,
+    "engineeringRemaining": 69,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 26
+    "engineeringPartial": 27
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -12223,10 +12223,28 @@
       "title": "The declared ml_predictions shape (prediction_type, prediction_date, predicted_value, bounds, confidence, horizon, granularity) conflicts with the SQL files that create the table: db/migrations/20260324_add_remaining_missing_tables.sql, db/migrations/20260507_fixup_create_break_glass_activations.sql and db/migrations/manual/067_advanced_analytics_q1_2025.sql each create it with model_name, model_version and target_date NOT NULL and no default, and migrations-platform/0019 only adds the declared columns (and sets NOT NULL on them only when the table is empty), so on a table created from those files the inserts of the SLA breach risk route and of the generic prediction routes, which supply none of the legacy columns, are refused by the database.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.sql",
+          "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.rollback.sql"
+        ],
+        "repair": "Added a governed, additive migration relaxing NOT NULL on the three legacy ml_predictions columns that conflict with the canonical Drizzle shape and block every current insert path on a legacy-created table.",
+        "regressionPaths": [
+          "apps/union-eyes/db/migrations-platform/__tests__/0084-ml-predictions-relax-legacy-not-null.pglite.test.ts"
+        ],
+        "limits": "Only relaxes the conflicting NOT NULL constraints; does not drop the legacy columns (dead but potentially still populated on some environment) and does not address the other 7 ml_predictions defects in this tranche (already credited separately).",
+        "state": "PARTIAL_SOURCE_HARDENING_CI_PENDING"
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "batch": "GATE0-PHASE2-ML-PREDICTIONS-SCHEMA-CONVERGENCE",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "path": "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.sql; apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.rollback.sql; apps/union-eyes/db/migrations-platform/__tests__/0084-ml-predictions-relax-legacy-not-null.pglite.test.ts",
+        "sourceBranch": "fix/ue-gate0-final-convergence",
+        "explanation": "Verified the exact conflict: db/schema/domains/analytics/analytics.ts declares a second, now-shadowed mlPredictions with model_name/model_version/target_date all NOT NULL with no default (db/schema/index.ts explicitly resolves the name collision in favour of the canonical db/schema/domains/ml/predictions.ts). Confirmed zero production code reads or writes model_name under any name, and confirmed two real write paths - app/api/ml/predictions/sla-breach-risk/route.ts and actions/analytics-actions.ts generatePredictions - between them never supply all three legacy columns on every insert. Migration 0084 relaxes NOT NULL on all three (guarded per-column: no-op if the column does not exist, as on a table built fresh from the canonical Drizzle shape, or if already nullable); the rollback restores NOT NULL per-column only where no row already holds a null there. Proven against both table shapes with a real PGlite instance: the legacy shape's insert is refused before the migration and succeeds after it; the canonical shape is an unaffected no-op either way."
+      }
     },
     {
       "defectId": "DEF-0B9-ML-ALERTS-SQL-NAMES-ABSENT-COLUMNS-AND-AN-ABSENT-TABLE-AND-IS-NOT-VALID-SQL",

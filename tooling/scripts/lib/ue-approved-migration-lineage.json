@@ -872,7 +872,14 @@
         "sha256": "37fe1c742215eb473827b5015b182610474bf0a9afc5b7d6fc46328afbc6c1de",
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-gate0-final-convergence",
-        "note": "Drops six nullable columns (award_id, description, points_change, reference_id, reference_type, transaction_type) left over from a superseded points-based reward_wallet_ledger shape that bootstrap V2's current Drizzle declaration never carried. Zero production TypeScript references any of the six; fails closed and refuses to run if any row still has non-null data in them. Restores agreement between the Django model and the Drizzle-canonical, bootstrap-v2 declaration (scripts/bootstrap-v2/reward-source.test.ts)."      }
+        "note": "Drops six nullable columns (award_id, description, points_change, reference_id, reference_type, transaction_type) left over from a superseded points-based reward_wallet_ledger shape that bootstrap V2's current Drizzle declaration never carried. Zero production TypeScript references any of the six; fails closed and refuses to run if any row still has non-null data in them. Restores agreement between the Django model and the Drizzle-canonical, bootstrap-v2 declaration (scripts/bootstrap-v2/reward-source.test.ts)."      },
+      {
+        "tag": "0084_ml_predictions_relax_legacy_not_null",
+        "sha256": "9da49e2e746631e4305887ec5c8571c5046161d53b5767afff3ce716b8006102",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Relaxes NOT NULL on three legacy ml_predictions columns (model_name, model_version, target_date) that three historical migrations create but platform migration 0019 never touches, matching a since-shadowed Drizzle declaration (db/schema/domains/analytics/analytics.ts) superseded by the canonical one (db/schema/domains/ml/predictions.ts). Zero production code supplies all three on every insert path (the SLA breach risk route and actions/analytics-actions.ts's generatePredictions both omit at least one), so a table built from the legacy SQL refuses every current write. Guarded per-column to no-op where the column does not exist or is already nullable; rollback refuses per-column if any row already holds a null there."
+      }
     ]
   }
 }

@@ -3,23 +3,23 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 707,
+    "overlayImplemented": 708,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 54,
+    "creditedByEarlierRuns": 55,
     "earlierRunCreditsWithIndependentRegressionEvidence": 32,
     "overlayPartial": 27,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 70,
-    "untouchedByOverlay": 43,
+    "unresolvedByOverlay": 69,
+    "untouchedByOverlay": 42,
     "qualificationVerified": 0,
     "closed": 0
   },
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 707,
+    "implemented": 708,
     "partial": 27,
-    "untouched": 43,
+    "untouched": 42,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
       "DEF-0B1-BILLING-SCHEDULER-LATENT",
@@ -75,7 +75,6 @@
       "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
       "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
       "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",
-      "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
       "DEF-0B9-ML-METRICS-ROUTE-SERVES-STORED-ANALYTICS-ROWS-WHERE-THE-PROMETHEUS-ENDPOINT-IS-DOCUMENTED",
       "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
       "DEF-0B10-PIL-PLATFORM-TIER-OF-THE-PILOT-ROUTES-IS-ANY-ROLE-TITLE-AT-OR-ABOVE-SYSTEM-ADMIN-LEVEL-AND-NOT-A-PLATFORM-MANDATE",
@@ -710,6 +709,18 @@
       "regressionTest": null,
       "files": [
         "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
+      "batch": "GATE0-PHASE2-ML-PREDICTIONS-SCHEMA-CONVERGENCE",
+      "sourceCommit": null,
+      "regressionTest": null,
+      "files": [
+        "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.sql",
+        "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.rollback.sql",
+        "apps/union-eyes/db/migrations-platform/__tests__/0084-ml-predictions-relax-legacy-not-null.pglite.test.ts"
       ],
       "hasIndependentRegressionEvidence": false
     },

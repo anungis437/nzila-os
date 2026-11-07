@@ -596,6 +596,13 @@
       "when": 1759370030000,
       "tag": "0083_reward_wallet_ledger_drop_legacy_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "7",
+      "when": 1759370040000,
+      "tag": "0084_ml_predictions_relax_legacy_not_null",
+      "breakpoints": true
     }
   ]
 }
