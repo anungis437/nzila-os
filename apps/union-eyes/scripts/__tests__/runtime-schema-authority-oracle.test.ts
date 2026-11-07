@@ -12,17 +12,22 @@ describe('runtime schema authority oracle', () => {
     oracle = buildRuntimeSchemaOracle()
   }, 180_000)
 
-  it('records the f60040 baseline as partial instead of complete runtime-schema proof', () => {
+  it('records the f60040 baseline as partial runtime-schema proof, with full creation-lineage closure but bootstrap-execution gaps remaining', () => {
     expect(oracle.status).toMatchObject({
       f60040Schema: 'PARTIAL_RUNTIME_SCHEMA',
       previousRuntimeContractCompleteness: 'INSUFFICIENT',
-      canonicalSchemaAuthorityClosure: 'BLOCKED',
+      // The platform-0059 through 0071 convergence batches (and the Drizzle/Django
+      // reconciliation tranches alongside them) created governed migrations for every
+      // table that previously had no creation lineage at all, closing the no-owner set
+      // from 23 (2026-09-23) to 10 (2026-10-17) to 0. This closure is about LINEAGE
+      // ONLY ("some governed migration creates this table somewhere in history") - it
+      // is not a claim that the fresh-bootstrap script actually runs all of them; that
+      // separate, still-open gap is what bootstrapMissingCreationTables tracks below.
+      canonicalSchemaAuthorityClosure: 'READY_FOR_BOOTSTRAP_PROOF',
       preCompleteRuntimeSchemaDigest: FROZEN_DJANGO_DIGEST,
     })
     expect(oracle.counts.runtimeUniverseTables).toBeGreaterThan(300)
-    // Disposition-adjusted remaining no-owner set after lineage restoration inventory.
-    // Current dedicated financial/runtime lineage reductions leave 10 unresolved owners.
-    expect(oracle.counts.runtimeTablesWithoutSchemaOwner).toBe(10)
+    expect(oracle.counts.runtimeTablesWithoutSchemaOwner).toBe(0)
     expect(oracle.counts.bootstrapMissingCreationTables).toBeGreaterThan(0)
   }, 60_000)
 
