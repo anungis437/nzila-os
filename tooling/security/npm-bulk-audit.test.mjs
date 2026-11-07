@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { parseLockfilePackages, normalizeAdvisoryResponse } from './npm-bulk-audit.mjs'
+import { parseLockfilePackages, normalizeAdvisoryResponse, fetchAdvisories } from './npm-bulk-audit.mjs'
 
 function withLockfile(contents, run) {
   const folder = mkdtempSync(join(tmpdir(), 'nzila-audit-'))
@@ -105,6 +105,20 @@ test('inventory rejects fabricated keys, unsupported lockfiles, and out-of-secti
 })
 
 
+test('one-space snapshot entries cannot disappear from the audited graph', () => {
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n node-forge@1.4.0:\n', (file) =>
+    assert.throws(() => parseLockfilePackages(file), /Malformed snapshot indentation/))
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n    dependencies:\n      node-forge: 1.4.0\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
+})
+
+test('three-space snapshot keys cannot disappear from the audited dependency graph', () => {
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n   node-forge@1.4.0:\n', (file) =>
+    assert.throws(() => parseLockfilePackages(file), /Malformed snapshot indentation/))
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n    dependencies:\n      node-forge: 1.4.0\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
+})
+
 test('duplicate snapshots sections cannot hide dependencies from the audit inventory', () => {
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\npackages:\n  undici@7.29.1:\nsnapshots:\n  node-forge@1.4.0:\n', (file) =>
     assert.throws(() => parseLockfilePackages(file), /Ambiguous pnpm lockfile/))
@@ -158,7 +172,7 @@ test('audit report paths containing equals signs are preserved without truncatio
   try {
     writeFileSync(join(folder, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n')
     const mock = join(folder, 'mock-registry.mjs')
-    writeFileSync(mock, "globalThis.fetch = async () => ({ ok: true, json: async () => ({}) })\n")
+    writeFileSync(mock, "globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({}) })\n")
     const reportName = 'audit=security=report.json'
     const script = fileURLToPath(new URL('./npm-bulk-audit.mjs', import.meta.url))
     const result = spawnSync(process.execPath, ['--import', mock, script, '--audit-level=high', '--output=' + reportName], {
@@ -236,4 +250,93 @@ test('advisory ids are recorded as the canonical string the policy binds to the 
   assert.deepEqual(Object.keys(flat), ['1120680'])
   assert.equal(flat['1120680'].id, '1120680')
   assert.equal(flat['1120680'].package, 'esbuild')
+})
+
+
+test('audit registry redirects are rejected without forwarding the dependency inventory', async () => {
+  const previousFetch = globalThis.fetch
+  const pkgMap = new Map([['node-forge', new Set(['1.4.0'])]])
+  let requests = 0
+  try {
+    globalThis.fetch = async (_url, options) => {
+      requests++
+      assert.equal(options.method, 'POST')
+      assert.equal(options.redirect, 'manual')
+      assert.deepEqual(JSON.parse(options.body), { 'node-forge': ['1.4.0'] })
+      return { ok: false, status: 302, headers: new Headers({ location: 'https://untrusted.example/collect' }) }
+    }
+    await assert.rejects(fetchAdvisories(pkgMap), /Audit registry returned HTTP 302/)
+    assert.equal(requests, 1)
+  } finally {
+    globalThis.fetch = previousFetch
+  }
+})
+
+test('a successful but redirected or off-origin audit response cannot certify a clean scan', async () => {
+  const previousFetch = globalThis.fetch
+  const pkgMap = new Map([['node-forge', new Set(['1.4.0'])]])
+  try {
+    for (const response of [
+      { ok: true, status: 200, redirected: true, url: 'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk', json: async () => ({}) },
+      { ok: true, status: 200, redirected: false, url: 'https://untrusted.example/collect', json: async () => ({}) },
+    ]) {
+      globalThis.fetch = async (_url, options) => {
+        assert.equal(options.redirect, 'manual')
+        return response
+      }
+      await assert.rejects(fetchAdvisories(pkgMap), /redirected or came from an unexpected endpoint/)
+    }
+  } finally {
+    globalThis.fetch = previousFetch
+  }
+})
+
+test('partial HTTP success must not certify a complete security audit', async () => {
+  const previousFetch = globalThis.fetch
+  const packages = new Map([['node-forge', new Set(['1.4.0'])]])
+  try {
+    for (const status of [206, 202, 204]) {
+      let parsed = false
+      globalThis.fetch = async (_url, options) => {
+        assert.equal(options.redirect, 'manual')
+        return { ok: true, status, redirected: false, json: async () => {
+          parsed = true
+          return {}
+        } }
+      }
+      await assert.rejects(fetchAdvisories(packages), new RegExp('HTTP ' + status))
+      assert.equal(parsed, false, 'unexpected audit body parse for HTTP ' + status)
+    }
+    globalThis.fetch = async () => ({
+      ok: true, status: 200, redirected: false, json: async () => ({}),
+    })
+    assert.deepEqual(await fetchAdvisories(packages), {})
+  } finally {
+    globalThis.fetch = previousFetch
+  }
+})
+
+
+test('missing or malformed HTTP status cannot certify a clean audit', async () => {
+  const originalFetch = globalThis.fetch
+  const packages = new Map([['node-forge', new Set(['1.4.0'])]])
+  try {
+    for (const status of [undefined, null, '200', NaN]) {
+      let parsed = false
+      globalThis.fetch = async () => ({ ok: true, status, json: async () => { parsed = true; return {} } })
+      await assert.rejects(fetchAdvisories(packages), /Audit registry returned HTTP/)
+      assert.equal(parsed, false)
+    }
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('tab-indented snapshot records fail closed instead of disappearing from audit inventory', () => {
+  for (const record of ['\tundici@7.29.1:', ' \tundici@7.29.1:', '  \tundici@7.29.1:']) {
+    withLockfile('lockfileVersion: 9.0\nsnapshots:\n  node-forge@1.4.0:\n' + record + '\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Tab indentation/))
+  }
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  node-forge@1.4.0:\n    dependencies:\n      undici: 7.29.1\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['node-forge']))
 })

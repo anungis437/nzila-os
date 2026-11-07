@@ -100,7 +100,17 @@ export function parseLockfilePackages(lockfilePath) {
   }
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i]
+    // YAML forbids tab indentation. A tab-prefixed snapshot can otherwise be
+    // silently skipped, allowing a resolved dependency to evade the audit.
+    if (/^[ \t]*\t/.test(line)) {
+      throw new Error('Tab indentation in pnpm-lock.yaml snapshots is not permitted')
+    }
     if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
+    // One- and three-space snapshot keys are invalid for pnpm v9 and
+    // must not be silently excluded from the audited installed graph.
+    if (/^(?: [^ \t#\r\n]| {3}[^ \t#\r\n])/.test(line)) {
+      throw new Error('Malformed snapshot indentation in pnpm-lock.yaml')
+    }
     if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
     // pnpm writes a snapshot key either bare or single-quoted (it quotes every key
     // that starts with `@`), followed by `:` and either nothing (a nested mapping
@@ -174,12 +184,15 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
   return flat
 }
 
-async function fetchAdvisories(pkgMap) {
+export async function fetchAdvisories(pkgMap) {
   const requestBody = {}
   for (const [name, versions] of pkgMap) requestBody[name] = [...versions]
 
   const response = await fetch(BULK_ENDPOINT, {
     method: 'POST',
+    // Never forward the installed dependency inventory to a redirected origin.
+    // Registry redirects are not audit completion evidence.
+    redirect: 'manual',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody),
     signal: AbortSignal.timeout(30000),
@@ -187,7 +200,16 @@ async function fetchAdvisories(pkgMap) {
     throw new Error(`Audit registry unreachable: ${err.message}`)
   })
 
-  if (!response.ok) {
+  // A successful status is insufficient if a transport shim or future fetch
+  // implementation followed a redirect despite the manual policy. Reject
+  // redirected responses before parsing or certifying their advisory payload.
+  if (response.redirected === true ||
+      (typeof response.url === 'string' && response.url !== '' && response.url !== BULK_ENDPOINT)) {
+    throw new Error('Audit registry response was redirected or came from an unexpected endpoint')
+  }
+  // Partial-content and other non-200 2xx responses cannot certify a complete audit.
+  // Check the actual HTTP status, not only the transport's `ok` flag.
+  if (response.status !== 200 || response.ok !== true) {
     throw new Error(`Audit registry returned HTTP ${response.status}; a failed request is never an empty audit`)
   }
   let raw
