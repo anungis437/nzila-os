@@ -3,14 +3,14 @@
  * registration. A generic free-form insert could forge verification.
  */
 import { and, eq, isNull } from 'drizzle-orm';
-import { crudRoutes } from '@/lib/api/crud-factory';
+import { crudRoutes, queryIdMutations, type CrudOptions } from '@/lib/api/crud-factory';
 import { ApiError } from '@/lib/api/errors';
 import { db } from '@/db/db';
 import { memberCertifications, courseRegistrations, trainingCourses } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
+const certificationCrudOptions: CrudOptions & { itemRoute?: false } = {
   table: memberCertifications,
   pk: 'id',
   tags: ['Scheduling'],
@@ -77,5 +77,11 @@ const { GET, POST } = crudRoutes({
       verificationDate: null,
     };
   },
-});
-export { GET, POST };
+};
+
+const { GET, POST } = crudRoutes(certificationCrudOptions);
+// No [id]/route.ts exists for certifications; the admin screens submit edits and deletes with
+// `?id=` on this collection URL instead, so the item-mode handlers (same options, same
+// authorization) are exposed here rather than under a path segment.
+const { PATCH, DELETE } = queryIdMutations(crudRoutes({ ...certificationCrudOptions, itemRoute: true }));
+export { GET, POST, PATCH, DELETE };

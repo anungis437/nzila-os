@@ -2,10 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
   crudRoutes: vi.fn(),
+  queryIdMutations: vi.fn(),
   assertOrganizationOwns: vi.fn(),
 }));
 
-vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: m.crudRoutes }));
+vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: m.crudRoutes, queryIdMutations: m.queryIdMutations }));
 vi.mock('@/lib/api/org-references', () => ({ assertOrganizationOwns: m.assertOrganizationOwns }));
 vi.mock('@/lib/api/errors', () => ({
   ApiError: {
@@ -39,10 +40,13 @@ describe('education session creation integrity', () => {
     vi.clearAllMocks();
     m.assertOrganizationOwns.mockResolvedValue(undefined);
     m.crudRoutes.mockImplementation((opts: Record<string, any>) => {
-      options = opts;
-      beforeCreate = opts.beforeCreate;
-      return { GET: vi.fn(), POST: vi.fn() };
+      if (!opts.itemRoute) {
+        options = opts;
+        beforeCreate = opts.beforeCreate;
+      }
+      return { GET: vi.fn(), POST: vi.fn(), PATCH: vi.fn(), DELETE: vi.fn() };
     });
+    m.queryIdMutations.mockReturnValue({ PATCH: vi.fn(), DELETE: vi.fn() });
     await import('../route');
   });
 

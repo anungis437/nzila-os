@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const m = vi.hoisted(() => ({
-  crudRoutes: vi.fn(), select: vi.fn(), from: vi.fn(), where: vi.fn(), limit: vi.fn(),
+  crudRoutes: vi.fn(), queryIdMutations: vi.fn(), select: vi.fn(), from: vi.fn(), where: vi.fn(), limit: vi.fn(),
   eq: vi.fn((column: unknown, value: unknown) => ({ op: 'eq', column, value })),
   isNull: vi.fn((column: unknown) => ({ op: 'isNull', column })),
   and: vi.fn((...conditions: unknown[]) => ({ conditions })),
 }));
-vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: m.crudRoutes }));
+vi.mock('@/lib/api/crud-factory', () => ({ crudRoutes: m.crudRoutes, queryIdMutations: m.queryIdMutations }));
 vi.mock('@/lib/api/errors', () => {
   const error = (status: number, message: string) => Object.assign(new Error(message), { status });
   return { ApiError: {
@@ -40,10 +40,13 @@ describe('education certification candidate: evidence and mass-assignment bounda
     vi.clearAllMocks();
     vi.resetModules();
     m.crudRoutes.mockImplementation((opts: Record<string, any>) => {
-      options = opts;
-      beforeCreate = opts.beforeCreate;
-      return { GET: vi.fn(), POST: vi.fn() };
+      if (!opts.itemRoute) {
+        options = opts;
+        beforeCreate = opts.beforeCreate;
+      }
+      return { GET: vi.fn(), POST: vi.fn(), PATCH: vi.fn(), DELETE: vi.fn() };
     });
+    m.queryIdMutations.mockReturnValue({ PATCH: vi.fn(), DELETE: vi.fn() });
     m.from.mockReturnValue({ where: m.where });
     m.where.mockReturnValue({ limit: m.limit });
     await import('../route');

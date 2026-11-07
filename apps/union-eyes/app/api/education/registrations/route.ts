@@ -34,6 +34,10 @@ const { GET, POST } = crudRoutes({
   staffReadsAll: true,
   readRole: 'member',
   writeRole: 'member',
+  // A member's own rows are already scoped by ownerColumn; these only matter for a staff caller
+  // (staffReadsAll) narrowing the organization-wide list down to one member or one registration
+  // status, rather than always reading every registration of every member.
+  listFilters: { equals: { memberId: 'memberId', registrationStatus: 'registrationStatus' } },
   // Enrollment accepts intent and logistical preferences only. Payment,
   // waiver, approval, attendance and completion fields are server-owned.
   // Refuse unsupported client fields instead of reporting a successful

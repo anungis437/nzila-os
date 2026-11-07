@@ -1,7 +1,7 @@
 /**
  * CRUD collection route for courseSessions
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
+import { crudRoutes, queryIdMutations, type CrudOptions } from '@/lib/api/crud-factory';
 import { courseSessions, trainingCourses } from '@/db/schema';
 import { assertOrganizationOwns } from '@/lib/api/org-references';
 import { ApiError } from '@/lib/api/errors';
@@ -68,7 +68,7 @@ export function validateEducationSessionCreate(values: Record<string, unknown>):
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
+const sessionCrudOptions: CrudOptions & { itemRoute?: false } = {
   table: courseSessions,
   pk: 'id',
   tags: ["Scheduling"],
@@ -93,5 +93,11 @@ const { GET, POST } = crudRoutes({
     await assertOrganizationOwns([{ field: 'courseId', value: values.courseId, table: trainingCourses }], organizationId);
     return values;
   },
-});
-export { GET, POST };
+};
+
+const { GET, POST } = crudRoutes(sessionCrudOptions);
+// No [id]/route.ts exists for sessions; the admin screens submit edits and deletes with `?id=` on
+// this collection URL instead, so the item-mode handlers (same options, same authorization) are
+// exposed here rather than under a path segment.
+const { PATCH, DELETE } = queryIdMutations(crudRoutes({ ...sessionCrudOptions, itemRoute: true }));
+export { GET, POST, PATCH, DELETE };

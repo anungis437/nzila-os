@@ -1478,7 +1478,7 @@
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B133-F02-CRUD-WRITABLE-FIELDS-REMAINING-ROUTES",
         "path": "apps/union-eyes/app/api/metrics/route.ts; apps/union-eyes/app/api/gdpr/consents/route.ts; apps/union-eyes/app/api/gdpr/requests/route.ts; apps/union-eyes/app/api/gdpr/data-erasure/route.ts; apps/union-eyes/app/api/consent/route.ts; apps/union-eyes/app/api/deadlines/route.ts; apps/union-eyes/app/api/deadlines/compliance/route.ts; apps/union-eyes/app/api/members/[id]/route.ts; apps/union-eyes/app/api/members/[id]/employment/route.ts; apps/union-eyes/app/api/members/[id]/documents/route.ts; apps/union-eyes/app/api/communications/polls/[pollId]/route.ts; apps/union-eyes/app/api/claims/[id]/route.ts; apps/union-eyes/app/api/currency/convert/route.ts; apps/union-eyes/app/api/admin/clc/analytics/organizations/route.ts; apps/union-eyes/lib/api/__tests__/crud-writable-fields-census.test.ts; apps/union-eyes/lib/api/crud-governance.ts; apps/union-eyes/lib/api/__tests__/crud-governance.test.ts",
-        "explanation": "Of the 21 routes this branch's own crud-writable-fields-census.test.ts still flagged after Wave 1 (B105+ fail-closed writableFields default), 12 routes (metrics, gdpr/consents, gdpr/requests, gdpr/data-erasure, consent, deadlines, deadlines/compliance, members/[id], members/[id]/employment, members/[id]/documents, communications/polls/[pollId], claims/[id]) now declare a real, narrow writableFields list decided from each table's own schema, excluding computed, approval and financial-adjustment columns. 2 routes (currency/convert, admin/clc/analytics/organizations) were facades bound to the unrelated analyticsMetrics table with zero real callers, the same bug class as the already-fixed organization_members facades (DEF-0B1-CRUD-FACADE-ORG-MEMBERS, B09-F02); converted to 501 rather than inventing an allow-list for an operation that never existed. census: 138/138 passing. VERIFIED (follow-up): the remaining 7 routes (arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId], arrears/escalate bound to per_capita_remittances; members/dues bound to dues_transactions) write over tables lib/api/crud-governance.ts classifies DENIED and READ_ONLY respectively \u2014 assertCrudWrite refuses every write on either table unconditionally, before any writableFields list is consulted, so no mass-assignment surface exists on any of the 21 originally-flagged routes. crud-governance.test.ts (22/22) pins both classifications explicitly; crud-writable-fields-census.test.ts's own governanceAllowsWrite() gate is why these 7 do not need a list. The stated exploit mechanism (a caller setting status/author/approval/cost/provenance columns via generic CRUD write) is removed for every one of the 21 routes.",
+        "explanation": "Of the 21 routes this branch's own crud-writable-fields-census.test.ts still flagged after Wave 1 (B105+ fail-closed writableFields default), 12 routes (metrics, gdpr/consents, gdpr/requests, gdpr/data-erasure, consent, deadlines, deadlines/compliance, members/[id], members/[id]/employment, members/[id]/documents, communications/polls/[pollId], claims/[id]) now declare a real, narrow writableFields list decided from each table's own schema, excluding computed, approval and financial-adjustment columns. 2 routes (currency/convert, admin/clc/analytics/organizations) were facades bound to the unrelated analyticsMetrics table with zero real callers, the same bug class as the already-fixed organization_members facades (DEF-0B1-CRUD-FACADE-ORG-MEMBERS, B09-F02); converted to 501 rather than inventing an allow-list for an operation that never existed. census: 138/138 passing. VERIFIED (follow-up): the remaining 7 routes (arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId], arrears/escalate bound to per_capita_remittances; members/dues bound to dues_transactions) write over tables lib/api/crud-governance.ts classifies DENIED and READ_ONLY respectively — assertCrudWrite refuses every write on either table unconditionally, before any writableFields list is consulted, so no mass-assignment surface exists on any of the 21 originally-flagged routes. crud-governance.test.ts (22/22) pins both classifications explicitly; crud-writable-fields-census.test.ts's own governanceAllowsWrite() gate is why these 7 do not need a list. The stated exploit mechanism (a caller setting status/author/approval/cost/provenance columns via generic CRUD write) is removed for every one of the 21 routes.",
         "remaining": "The arrears/dues FEATURE gap is unrelated to this security defect and stays open as its own item: arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId] and arrears/escalate are bound to the unrelated perCapitaRemittances table instead of the real, unused memberArrears/paymentPlans tables (per-capita/remittance work is explicitly future, non-blocking per product direction), and members/dues has no real POST caller in this repo and its fields feed dues calculation, needing its own product decision. Neither gap is a mass-assignment exposure: both tables' generic writes are unconditionally refused by governance classification, independent of any field list.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
@@ -2407,7 +2407,7 @@
         "tests": [
           "apps/union-eyes/app/api/__tests__/breaks-compliance-privacy.route.test.ts"
         ],
-        "repair": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1\u20134, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
+        "repair": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
         "sourceState": "PATCHED_NOT_ACCEPTED",
         "unitState": "PENDING_AT_EXACT_HEAD",
         "nativeState": "PENDING_AT_EXACT_HEAD",
@@ -2420,7 +2420,7 @@
       "engineeringCorrection": {
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/app/api/breaks/compliance/route.ts",
-        "explanation": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1\u20134, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
+        "explanation": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -5243,10 +5243,35 @@
       "title": "The education admin screens call operations the route files do not export or do not perform: POST on the attendance and enrollments item routes that export only GET, PATCH and DELETE, PATCH and DELETE with an id query on the session, program and certification collection routes that export only GET and POST, and renewal reminders on a route that runs the course create, so the screens cannot mark attendance, enroll, edit or delete sessions, programs and certifications, or send reminders, and ignored filters (memberId, sessionStatus, includeProgress) return unfiltered rows.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/lib/api/crud-factory.ts",
+          "apps/union-eyes/app/api/education/sessions/route.ts",
+          "apps/union-eyes/app/api/education/programs/route.ts",
+          "apps/union-eyes/app/api/education/certifications/route.ts",
+          "apps/union-eyes/app/api/education/registrations/route.ts"
+        ],
+        "repair": "Added crud-factory.queryIdMutations() and wired it into sessions/programs/certifications for PATCH/DELETE via ?id=; added memberId/registrationStatus list filters to registrations.",
+        "regressionPaths": [
+          "apps/union-eyes/lib/api/__tests__/crud-factory-query-id-mutations.test.ts",
+          "apps/union-eyes/app/api/education/sessions/__tests__/session-create-integrity.test.ts",
+          "apps/union-eyes/app/api/education/certifications/__tests__/candidate-integrity.test.ts",
+          "apps/union-eyes/app/api/education/registrations/__tests__/route.test.ts",
+          "apps/union-eyes/app/api/__tests__/crud-routes-coverage.test.ts"
+        ],
+        "limits": "includeProgress and a session-status filter on registrations remain unresolved (see engineeringCorrection.explanation); program enrolment and attendance deletion remain deliberate, documented institutional/product-design refusals from an earlier round, not newly built here.",
+        "state": "PARTIAL_SOURCE_HARDENING_CI_PENDING"
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "batch": "GATE0-PHASE2-EDUCATION-ROUTE-PARITY",
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "path": "apps/union-eyes/lib/api/crud-factory.ts; apps/union-eyes/app/api/education/sessions/route.ts; apps/union-eyes/app/api/education/programs/route.ts; apps/union-eyes/app/api/education/certifications/route.ts; apps/union-eyes/app/api/education/registrations/route.ts; apps/union-eyes/lib/api/__tests__/crud-factory-query-id-mutations.test.ts",
+        "sourceBranch": "fix/ue-gate0-final-convergence",
+        "explanation": "Three parts of this defect were already fixed by earlier rounds, before this correction: the renewal-reminders route now answers 501 instead of silently running course-create (app/api/education/certifications/renewal-reminders/route.ts); program enrolment (app/api/education/programs/[id]/enrollments/route.ts) and attendance deletion (app/api/education/sessions/[id]/attendance/route.ts DELETE) both now refuse with a clear 501/'governed workflow required' reason instead of exposing an undesigned mutation - no durable program_enrollments model or attendance-correction workflow exists yet to build a real implementation on, so a fabricated one was correctly avoided; those two remain genuine, isolated institutional/product-design gaps, not something this pass invents an answer for. This pass closes the remaining, genuinely simple CRUD-completion part: sessions, programs and certifications have no [id]/route.ts, and their admin screens submit PATCH/DELETE with ?id= on the collection URL instead, so crud-factory.ts gained an exported queryIdMutations helper (delegates to the existing itemRoute:true handlers - same authorization, validation and audit trail as a conventional item route; adds no new authorization logic of its own) and all three routes now export real PATCH/DELETE. Also added the memberId and registrationStatus list filters to education/registrations, so a staff caller (staffReadsAll) reading every member's registrations can narrow by either instead of always reading the organization's whole list. Not resolved: 'includeProgress' has no verified specification for what computed/joined progress data it should return, and a session-status filter on registrations would require a join crud-factory's listFilters does not support (courseRegistrations has no sessionStatus column of its own) - registrationStatus (a real column on the table) is offered instead, but the original audit's exact 'sessionStatus' framing is not implemented as literally named."
+      }
     },
     {
       "defectId": "DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA",

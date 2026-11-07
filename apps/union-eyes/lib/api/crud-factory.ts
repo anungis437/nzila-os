@@ -1131,3 +1131,20 @@ export function crudRoutes(opts: CrudOptions): CollectionHandlers | ItemHandlers
     return { GET, PATCH, DELETE };
   }
 }
+
+/**
+ * Exposes an item route's PATCH/DELETE on a collection route, reading the target id from an `?id=`
+ * query parameter instead of a `[id]` path segment — for a screen that already submits PATCH/DELETE
+ * that way against the collection URL, with no separate `[id]/route.ts` for the resource. Delegates
+ * to handlers built with `itemRoute: true` (same options, so the same authorization, validation, and
+ * audit trail as a conventional item route), so this adds no new authorization logic of its own: a
+ * missing or unmatched id reaches the same `eq(pkCol, id)` lookup an absent row already 404s from.
+ */
+export function queryIdMutations(
+  itemHandlers: Pick<ItemHandlers, 'PATCH' | 'DELETE'>,
+  paramName = 'id',
+): Pick<ItemHandlers, 'PATCH' | 'DELETE'> {
+  const withQueryId = (handler: RouteHandler): RouteHandler => (request) =>
+    handler(request, { params: { [paramName]: request.nextUrl.searchParams.get(paramName) ?? '' } });
+  return { PATCH: withQueryId(itemHandlers.PATCH), DELETE: withQueryId(itemHandlers.DELETE) };
+}
