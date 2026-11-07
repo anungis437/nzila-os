@@ -113,6 +113,12 @@ export function parseLockfilePackages(lockfilePath) {
     if (leadingSpaces % 2 !== 0 && line.trim() && !line.trimStart().startsWith('#')) {
       throw new Error('Malformed snapshot indentation in pnpm-lock.yaml')
     }
+    // A snapshot-shaped key nested at an even indentation depth is not a
+    // legitimate pnpm dependency mapping. Refuse it instead of silently
+    // omitting an installed package from the security inventory.
+    if (leadingSpaces >= 4 && /^ {4,}(?:'[^']+'|[^\\s'\"]+@[^\\s:]+):(?: \\{\\})?\\s*$/.test(line)) {
+      throw new Error('Nested resolved snapshot key in pnpm-lock.yaml')
+    }
     if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
     // pnpm writes a snapshot key either bare or single-quoted (it quotes every key
     // that starts with `@`), followed by `:` and either nothing (a nested mapping
