@@ -276,3 +276,28 @@ test('a successful but redirected or off-origin audit response cannot certify a 
     globalThis.fetch = previousFetch
   }
 })
+
+test('partial HTTP success must not certify a complete security audit', async () => {
+  const previousFetch = globalThis.fetch
+  const packages = new Map([['node-forge', new Set(['1.4.0'])]])
+  try {
+    for (const status of [206, 202, 204]) {
+      let parsed = false
+      globalThis.fetch = async (_url, options) => {
+        assert.equal(options.redirect, 'manual')
+        return { ok: true, status, redirected: false, json: async () => {
+          parsed = true
+          return {}
+        } }
+      }
+      await assert.rejects(fetchAdvisories(packages), new RegExp('HTTP ' + status))
+      assert.equal(parsed, false, 'unexpected audit body parse for HTTP ' + status)
+    }
+    globalThis.fetch = async () => ({
+      ok: true, status: 200, redirected: false, json: async () => ({}),
+    })
+    assert.deepEqual(await fetchAdvisories(packages), {})
+  } finally {
+    globalThis.fetch = previousFetch
+  }
+})
