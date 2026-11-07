@@ -64,7 +64,7 @@ interface Family {
   retained: boolean
   /** The role that writes (a create or an update); a delete needs an administrator. */
   writer: 'steward' | 'officer'
-  create: () => Record<string, unknown>
+  create: (org?: 'A' | 'B') => Record<string, unknown>
   patch: { field: string; column: string; value: string }
   required: string
   enumField?: { field: string; value: string }
@@ -98,6 +98,44 @@ describe.skipIf(!URL)('the CNESST and WCB routes on the combined schema, as the 
   const idsOf = (rows: Row[]) => rows.map((row) => row.id as string)
   const rejection = async (promise: Promise<unknown>) => promise.then(() => null, (error: unknown) => error)
 
+  const newOrganization = (id: string, name: string) =>
+    admin.query(
+      `INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
+       VALUES ($1,$2,$3,'local','{}',0,'{}',false,0,0,'{}','{}','active',now(),now(),1)`,
+      [id, name, `${name.toLowerCase().replace(/\W+/g, '-')}-${tag}-${id.slice(0, 6)}`],
+    )
+  const newOrgMember = (who: { id: string; organizationId: string; role: string }) =>
+    admin.query(
+      `INSERT INTO organization_members (id, user_id, organization_id, name, email, role, status) VALUES ($1,$2,$3,$4,$5,$6,'active')`,
+      [who.id, who.id, who.organizationId, `Actor ${tag}`, `actor-${who.id}@${tag}.test`, who.role],
+    )
+  // A steward's case authority over a member depends on a real, covered employment record (DEF-0B4/0B5): one such
+  // member per organization, covered by that organization's steward actor, so the generic CRUD assertions below
+  // (org-scoping, audit, validation) exercise an authorized write rather than being refused by the case-authority
+  // layer before they reach it.
+  const newCoveredMember = async (organizationId: string, steward: { id: string }) => {
+    const memberId = randomUUID()
+    const department = 'Shop Floor'
+    await admin.query(
+      `INSERT INTO organization_members (id, user_id, organization_id, name, email, role, status) VALUES ($1,$2,$3,$4,$5,'member','active')`,
+      [memberId, memberId, organizationId, `Member ${tag}`, `member-${memberId}@${tag}.test`],
+    )
+    await admin.query(
+      `INSERT INTO member_employment (id, organization_id, member_id, employment_status, employment_type, hire_date, seniority_date, job_title, department, pay_frequency)
+       VALUES ($1,$2,$3,'active','full_time',current_date,current_date,'Operator',$4,'hourly')`,
+      [randomUUID(), organizationId, memberId, department],
+    )
+    const stewardProfileId = randomUUID()
+    await admin.query(`INSERT INTO stewards (id, org_id, user_id, active) VALUES ($1,$2,$3,true)`, [stewardProfileId, organizationId, steward.id])
+    await admin.query(
+      `INSERT INTO steward_assignments (id, organization_id, steward_id, steward_type, status, department, start_date) VALUES ($1,$2,$3,'steward','active',$4,current_date)`,
+      [randomUUID(), organizationId, stewardProfileId, department],
+    )
+    return memberId
+  }
+  let coveredMemberA = ''
+  let coveredMemberB = ''
+
   const families: Family[] = URL
     ? [
         {
@@ -108,13 +146,13 @@ describe.skipIf(!URL)('the CNESST and WCB routes on the combined schema, as the 
         },
         {
           key: 'refusals', label: 'right-of-refusal events', table: 'right_of_refusal_events', tableRef: () => schema!.rightOfRefusalEvents as never, retained: true, writer: 'steward',
-          create: () => ({ memberId: randomUUID(), memberName: `Worker ${tag}`, refusalDate: '2026-01-15T10:30:00.000Z', taskRefused: 'Operate the press', dangerDescription: 'The guard is removed.' }),
+          create: (org = 'A') => ({ memberId: org === 'B' ? coveredMemberB : coveredMemberA, memberName: `Worker ${tag}`, refusalDate: '2026-01-15T10:30:00.000Z', taskRefused: 'Operate the press', dangerDescription: 'The guard is removed.' }),
           patch: { field: 'outcomeNotes', column: 'outcome_notes', value: `Supervisor notified ${tag}` },
           required: 'taskRefused', enumField: { field: 'outcome', value: 'not_an_outcome' }, uuidField: 'memberId', dateField: 'inspectorDecisionDate', timestampField: 'refusalDate', hasCreatedBy: false,
         },
         {
           key: 'withdrawals', label: 'preventive withdrawals', table: 'preventive_withdrawals', tableRef: () => schema!.preventiveWithdrawals as never, retained: false, writer: 'steward',
-          create: () => ({ memberId: randomUUID(), memberName: `Worker ${tag}`, reason: first(schema!.preventiveWithdrawals.reason), requestDate: '2026-02-01' }),
+          create: (org = 'A') => ({ memberId: org === 'B' ? coveredMemberB : coveredMemberA, memberName: `Worker ${tag}`, reason: first(schema!.preventiveWithdrawals.reason), requestDate: '2026-02-01' }),
           patch: { field: 'notes', column: 'notes', value: `Certificate received ${tag}` },
           required: 'memberName', enumField: { field: 'reason', value: 'not_a_reason' }, uuidField: 'memberId', dateField: 'requestDate', hasCreatedBy: false,
         },
@@ -153,6 +191,11 @@ describe.skipIf(!URL)('the CNESST and WCB routes on the combined schema, as the 
   beforeAll(async () => {
     admin = await harness.start(URL!)
     for (const who of [...Object.values(A), ...Object.values(B)]) harness.setRole(who.id, who.organizationId, who.role)
+    await newOrganization(ORG_A, `Org A ${tag}`)
+    await newOrganization(ORG_B, `Org B ${tag}`)
+    for (const who of [...Object.values(A), ...Object.values(B)]) await newOrgMember(who)
+    coveredMemberA = await newCoveredMember(ORG_A, A.steward)
+    coveredMemberB = await newCoveredMember(ORG_B, B.steward)
   }, 60_000)
 
   afterAll(async () => {
@@ -164,12 +207,12 @@ describe.skipIf(!URL)('the CNESST and WCB routes on the combined schema, as the 
     const created = { a: '', b: '' }
 
     it('creates a row owned by the caller\'s organization and attributed to the caller', async () => {
-      const result = await call(collectionOf(family).POST, writerOf(family, 'A'), { body: family.create() })
+      const result = await call(collectionOf(family).POST, writerOf(family, 'A'), { body: family.create('A') })
       created.a = result.data.id as string
       const stored = (await rowOf(family.table, created.a))!
       expect(stored.organization_id).toBe(ORG_A)
       if (family.hasCreatedBy) expect(stored.created_by).toBe(writerOf(family, 'A').id)
-      const other = await call(collectionOf(family).POST, writerOf(family, 'B'), { body: family.create() })
+      const other = await call(collectionOf(family).POST, writerOf(family, 'B'), { body: family.create('B') })
       created.b = other.data.id as string
       expect((await rowOf(family.table, created.b))!.organization_id).toBe(ORG_B)
     })
@@ -287,11 +330,10 @@ describe.skipIf(!URL)('the CNESST and WCB routes on the combined schema, as the 
     expect((await admin.query(`SELECT count(*)::int AS n FROM public.cnesst_filings WHERE title = $1`, [title])).rows[0].n).toBe(0)
   })
 
-  it('lets a steward file on behalf of a member, and shows the organization\'s filings to its staff', async () => {
+  it('lets a steward file on behalf of a member they hold case authority over, and shows the organization\'s filings to its staff', async () => {
     const family = families[0]
-    const member = randomUUID()
-    const result = await call(collectionOf(family).POST, A.steward, { body: { ...family.create(), memberId: member, title: `On behalf of a member ${tag}` } })
-    expect((await rowOf('cnesst_filings', result.data.id as string))!.member_id).toBe(member)
+    const result = await call(collectionOf(family).POST, A.steward, { body: { ...family.create(), memberId: coveredMemberA, title: `On behalf of a member ${tag}` } })
+    expect((await rowOf('cnesst_filings', result.data.id as string))!.member_id).toBe(coveredMemberA)
     const listed = await call(collectionOf(family).GET, A.officer, { query: '?limit=100' })
     expect(idsOf(listed.data)).toContain(result.data.id)
   })
