@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 642,
+    "implementedPendingQualification": 644,
     "partial": 26,
     "qualificationVerified": 0,
-    "unresolved": 135,
+    "unresolved": 133,
     "externalBlockers": 0
   },
   "batches": [
@@ -1293,7 +1293,16 @@
       "newlyImplemented": 12,
       "outstandingAfter": 135,
       "partial": 0,
-      "evidenceCommit": null
+      "evidenceCommit": "54e91e3ae"
+    },
+    {
+      "id": "B130-F03-OHS-CNESST-CASE-AUTHORITY",
+      "family": "Cross-tenant and same-tenant case authority: CNESST filings, right-of-refusal and preventive withdrawals scoped to steward_assignments coverage, officer floor or the record's own designated representative",
+      "outstandingBefore": 135,
+      "newlyImplemented": 2,
+      "outstandingAfter": 133,
+      "partial": 0,
+      "evidenceCommit": "59f775f74"
     }
   ],
   "entries": {
@@ -3800,7 +3809,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/lib/social-media/social-media-service.ts",
             "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
@@ -4227,7 +4236,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
             "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts"
@@ -4409,7 +4418,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/app/api/__tests__/cba-benchmark-snapshot.route.test.ts",
             "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
@@ -4778,7 +4787,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
             "apps/union-eyes/lib/scim/provisioned-members.ts",
@@ -5456,7 +5465,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/app/api/icra/checkout/route.ts",
             "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts"
@@ -7535,7 +7544,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/lib/public-intake/guard.ts",
             "apps/union-eyes/lib/api/__tests__/f08-public-limiters.contract.test.ts"
@@ -8871,7 +8880,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts"
           ]
@@ -11968,7 +11977,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/lib/social-media/export-audit.ts",
             "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts"
@@ -12035,7 +12044,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts"
           ]
@@ -12823,7 +12832,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts"
           ]
@@ -15749,7 +15758,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/lib/social-media/social-media-service.ts",
             "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts"
@@ -17775,7 +17784,7 @@
         {
           "batch": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "54e91e3ae",
           "files": [
             "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
             "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
@@ -18844,6 +18853,58 @@
             "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
             "apps/union-eyes/app/api/admin/pki/workflows/route.ts",
             "apps/union-eyes/app/api/__tests__/admin-pki-retired.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B4-OHS-FILINGS-NO-CASE-AUTHORITY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B130-F03-OHS-CNESST-CASE-AUTHORITY",
+      "files": [
+        "apps/union-eyes/lib/services/ohs-case-access.ts",
+        "apps/union-eyes/app/api/cnesst/filings/route.ts",
+        "apps/union-eyes/app/api/cnesst/filings/[id]/route.ts",
+        "apps/union-eyes/db/__tests__/ohs-case-authority.postgres.test.ts"
+      ],
+      "explanation": "B130: the CNESST filing collection and item routes gained evaluateOhsCaseAccess (lib/services/ohs-case-access.ts) as rowReadAuthority / lockedAuthCheck / beforeCreate. A steward now reaches a filing only with an officer-or-above role, as the record's own union_rep_id, or through an active steward_assignments row whose unit, worksite or department covers the member's current member_employment row; anyone else is answered exactly like a filing that does not exist on read, and 403 on create or update. Proven on the combined schema as the real union_eyes_runtime role in db/__tests__/ohs-case-authority.postgres.test.ts: covering-steward access, same-tenant denial on create/read/write with the row left unchanged, officer organization-wide access, designated-representative access, coverage lost on revocation and regained on reassignment, mutual cross-tenant unreachability, and independent concurrent authorized/unauthorized reads.",
+      "history": [
+        {
+          "batch": "B130-F03-OHS-CNESST-CASE-AUTHORITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "59f775f74",
+          "files": [
+            "apps/union-eyes/lib/services/ohs-case-access.ts",
+            "apps/union-eyes/app/api/cnesst/filings/route.ts",
+            "apps/union-eyes/app/api/cnesst/filings/[id]/route.ts",
+            "apps/union-eyes/db/__tests__/ohs-case-authority.postgres.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B5-OHS-WITHDRAWAL-REFUSAL-NO-CASE-AUTHORITY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B130-F03-OHS-CNESST-CASE-AUTHORITY",
+      "files": [
+        "apps/union-eyes/lib/services/ohs-case-access.ts",
+        "apps/union-eyes/app/api/cnesst/right-of-refusal/route.ts",
+        "apps/union-eyes/app/api/cnesst/right-of-refusal/[id]/route.ts",
+        "apps/union-eyes/app/api/cnesst/preventive-withdrawals/route.ts",
+        "apps/union-eyes/app/api/cnesst/preventive-withdrawals/[id]/route.ts",
+        "apps/union-eyes/db/__tests__/ohs-case-authority.postgres.test.ts"
+      ],
+      "explanation": "B130: the right-of-refusal and preventive-withdrawal collection and item routes gained the same case-authority mechanism (lib/services/ohs-case-access.ts), reached transitively through cnesst_filing_id when the row is linked to a filing that names its own designated representative, since neither table has a representative column of its own. cnesst_filing_id was added to both tables' create fields so the link can be set at all. Proven on the combined schema in db/__tests__/ohs-case-authority.postgres.test.ts: covering-steward access, same-tenant denial with no coverage and no linked designation, and access reached through a linked filing's representative with no covering assignment.",
+      "history": [
+        {
+          "batch": "B130-F03-OHS-CNESST-CASE-AUTHORITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "59f775f74",
+          "files": [
+            "apps/union-eyes/lib/services/ohs-case-access.ts",
+            "apps/union-eyes/app/api/cnesst/right-of-refusal/route.ts",
+            "apps/union-eyes/app/api/cnesst/right-of-refusal/[id]/route.ts",
+            "apps/union-eyes/app/api/cnesst/preventive-withdrawals/route.ts",
+            "apps/union-eyes/app/api/cnesst/preventive-withdrawals/[id]/route.ts",
+            "apps/union-eyes/db/__tests__/ohs-case-authority.postgres.test.ts"
           ]
         }
       ]
