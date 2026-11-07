@@ -11205,7 +11205,7 @@
     {
       "id": "B141-F05-EXTERNAL-SYNC-SYSTEM-CONTEXT-VERIFIED",
       "family": "Verification credit: scheduled external-data sync already runs fully inside system context",
-      "evidenceCommit": null,
+      "evidenceCommit": "a127d9d3a",
       "items": [
         {
           "prefix": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-CONTRIBUTIONS-WRITE-OUTSIDE-SYSTEM-CONTEXT",
