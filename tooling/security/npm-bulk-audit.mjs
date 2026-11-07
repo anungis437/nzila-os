@@ -106,9 +106,11 @@ export function parseLockfilePackages(lockfilePath) {
       throw new Error('Tab indentation in pnpm-lock.yaml snapshots is not permitted')
     }
     if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
-    // One-, three-, and five-space snapshot keys are invalid for pnpm v9 and
-    // must not be silently excluded from the audited installed graph.
-    if (/^(?: [^ \t#\r\n]| {3}[^ \t#\r\n]| {5}[^ \t#\r\n])/.test(line)) {
+    // pnpm v9 emits two-space YAML indentation levels. Reject every odd
+    // indentation depth, including deeper malformed keys that would otherwise
+    // be silently omitted from the audited dependency graph.
+    const leadingSpaces = /^ */.exec(line)[0].length
+    if (leadingSpaces % 2 !== 0 && line.trim() && !line.trimStart().startsWith('#')) {
       throw new Error('Malformed snapshot indentation in pnpm-lock.yaml')
     }
     if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
