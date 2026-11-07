@@ -14,6 +14,7 @@ import { icraAssessments } from '@/db/schema/icra-schema'
 import { icraMaturityProfiles } from '@/db/schema/icra-schema'
 import { workbooks, workbookPurchases } from '@/db/schema/workbook-schema'
 import { generateClaimToken, computeClaimExpiry } from '@/lib/icra/claim-tokens'
+import { deliverIcraClaimCredential } from '@/lib/icra/claim-delivery'
 import { eq, and, isNull } from 'drizzle-orm'
 import type { InstitutionalContinuityProfile } from '@/lib/icra/types'
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
@@ -496,7 +497,10 @@ export async function POST(request: NextRequest) {
             // Upgrade the assessment tier and patch the stored profile payload
             // (SYSTEM_ONLY table — bounded system execution, not ordinary db) so
             // the results page reflects the new tier.
-            await withSystemContext(async (tx) => {
+            // The credential this delivery issues, known here so it can be delivered after the transaction commits; null when the guard
+            // found one already issued or claimed (a replay or a later upgrade), so a held token is neither replaced nor re-sent.
+            const icraClaimToken = generateClaimToken()
+            const issuedClaimToken = await withSystemContext(async (tx) => {
               await tx
                 .update(icraAssessments)
                 .set({ reportTierId: icraTierId })
@@ -505,10 +509,10 @@ export async function POST(request: NextRequest) {
               // A paid assessment is issued the single-use credential the claim route redeems, in the same transaction as the tier
               // upgrade so a paid tier is never left without it. The guard keeps an already-issued or already-claimed assessment
               // untouched, so a later upgrade or a replayed delivery cannot replace a token the buyer already holds.
-              await tx
+              const issued = await tx
                 .update(icraAssessments)
                 .set({
-                  claimToken: generateClaimToken(),
+                  claimToken: icraClaimToken,
                   claimTokenExpiresAt: computeClaimExpiry(),
                   claimEmail: icraBuyerEmail ?? null,
                 })
@@ -520,6 +524,7 @@ export async function POST(request: NextRequest) {
                     isNull(icraAssessments.claimedByUserId),
                   ),
                 )
+                .returning({ id: icraAssessments.id })
 
               const [profileRow] = await tx
                 .select({ profilePayload: icraMaturityProfiles.profilePayload })
@@ -537,6 +542,7 @@ export async function POST(request: NextRequest) {
                   .set({ profilePayload: updated })
                   .where(eq(icraMaturityProfiles.assessmentId, icraAssessmentId))
               }
+              return issued.length > 0 ? icraClaimToken : null
             })
 
             logger.info('[stripe-webhook] ICRA tier upgraded', {
@@ -544,6 +550,24 @@ export async function POST(request: NextRequest) {
               tierId: icraTierId,
               sessionId: session.id,
             })
+
+            // ── Claim credential delivery ──
+            // After the commit, the buyer is e-mailed the link to the claim page that redeems the credential. Delivery fails closed (no
+            // buyer e-mail, no public application address, or no e-mail sender configured sends nothing) and never fails the paid
+            // fulfilment: the tier is upgraded either way. A failed delivery is logged without the token for an operator to act on.
+            if (issuedClaimToken) {
+              const delivery = await deliverIcraClaimCredential({
+                assessmentId: icraAssessmentId,
+                claimToken: issuedClaimToken,
+                buyerEmail: icraBuyerEmail,
+                locale: (session?.metadata?.locale as string | undefined) ?? (session?.locale as string | undefined),
+              }).catch(() => ({ delivered: false as const, reason: 'SEND_FAILED' as const }))
+              if (delivery.delivered) {
+                logger.info('[stripe-webhook] ICRA claim credential delivered', { icraAssessmentId })
+              } else {
+                logger.error('[stripe-webhook] ICRA claim credential not delivered', { icraAssessmentId, reason: delivery.reason })
+              }
+            }
 
             // ── Institutional continuity stewardship: HubSpot CRM sync ──
             // Fire-and-forget. CRM unavailability MUST NOT block Stripe

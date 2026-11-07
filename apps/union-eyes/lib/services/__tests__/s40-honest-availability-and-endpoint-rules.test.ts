@@ -6,7 +6,11 @@ const src = (path: string) => readFileSync(join(process.cwd(), path), 'utf8').re
 
 describe('Gate 0 batch B96: honest availability and endpoint rules', () => {
   it('says when engagement snapshots were never computed', () => {
-    expect(src('app/api/cognition/engagement/route.ts')).toContain("availability: latest.length === 0 ? 'not_computed' : 'computed'")
+    // Superseded by a stricter rule (DEF-0B5-COGNITION-ENGAGEMENT-NEVER-COMPUTED): nothing computes snapshots, so the route answers 501
+    // instead of listing an empty store as 200 with availability 'not_computed'.
+    const route = src('app/api/cognition/engagement/route.ts')
+    expect(route).toContain('{ status: 501 }')
+    expect(route).not.toContain('listEngagementSnapshots')
   })
 
   it('accepts only a public http(s) address as an integration endpoint', () => {

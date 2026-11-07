@@ -3,14 +3,17 @@ import { listPage } from '@/lib/api/list-page';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { PENSION_ADMIN_ROLES, isPensionAdministrator } from '@/lib/pension/pension-authority';
-import { pensionMembers, pensionPlans } from '@/db/schema';
+import { organizationMembers, pensionMembers, pensionPlans } from '@/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
+// DEF-0B10-PEN-PENSION-WRITES-STORE-TYPED-MEMBER-REFERENCES-NAMES-AND-AMOUNTS-UNVERIFIED: an enrolment names a real membership of this
+// organization (userId is the organization_members row id, the identity the member's own pension reads resolve to), and the enrolled
+// name is that membership's recorded name. A typed name is accepted and ignored for compatibility; it is never stored.
 const createMemberSchema = z.object({
   planId: z.guid(),
-  userId: z.guid().optional(),
-  name: z.string().max(255),
+  userId: z.guid(),
+  name: z.string().max(255).optional(),
   // The plan's name is read from the plan; accepted and ignored for compatibility.
   planName: z.string().max(255).optional(),
   enrollmentDate: z.coerce.date().optional(),
@@ -90,9 +93,25 @@ export const POST = withApi(
         .where(and(eq(pensionPlans.id, parsed.planId), eq(pensionPlans.organizationId, organizationId)))
         .limit(1);
       if (!plan) throw ApiError.notFound('Pension plan');
+      // The person must be an active member of this organization; an id that names no membership here, a membership of another
+      // organization, or a removed membership is refused and nothing is written.
+      const [membership] = await tx
+        .select({ id: organizationMembers.id, name: organizationMembers.name, status: organizationMembers.status, deletedAt: organizationMembers.deletedAt })
+        .from(organizationMembers)
+        .where(and(eq(organizationMembers.id, parsed.userId), eq(organizationMembers.organizationId, organizationId)))
+        .limit(1);
+      if (!membership || membership.deletedAt || membership.status !== 'active') throw ApiError.notFound('Organization member');
+      // One enrolment per member and plan: a second enrolment would split the member's contributions and claims across two records.
+      const [already] = await tx
+        .select({ id: pensionMembers.id })
+        .from(pensionMembers)
+        .where(and(eq(pensionMembers.organizationId, organizationId), eq(pensionMembers.planId, plan.id), eq(pensionMembers.userId, membership.id)))
+        .limit(1);
+      if (already) throw ApiError.conflict('This member is already enrolled in this plan');
+      const { name: _typedName, ...enrolment } = parsed;
       const [member] = await tx
         .insert(pensionMembers)
-        .values({ ...parsed, planName: plan.planName, organizationId })
+        .values({ ...enrolment, userId: membership.id, name: membership.name, planName: plan.planName, organizationId })
         .returning();
       await persistAtomicAudit(tx, {
         organizationId,
@@ -100,7 +119,7 @@ export const POST = withApi(
         action: 'pension.member.enroll',
         resourceType: 'pension_members',
         resourceId: member.id,
-        details: { planId: parsed.planId },
+        details: { planId: parsed.planId, organizationMemberId: membership.id },
       });
       return member;
     });

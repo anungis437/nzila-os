@@ -42,14 +42,14 @@ export interface ResilienceStrategyModel {
   targetMaturity: MaturityStage;
   /** Total estimated duration to achieve target maturity */
   estimatedDurationWeeks: number;
-  /** Projected resilience score improvement (0-40 points) */
-  projectedResilienceGain: number;
+  /** Projected resilience score improvement. Null: no validated model estimates it (see ResilienceRoadmap.projectionNotMeasuredReason). */
+  projectedResilienceGain: number | null;
   /** Continuity maturity progression description */
   maturityProgression: string;
-  /** Governance stability improvement (0-100) */
-  governanceStabilityGain: number;
-  /** Dependency reduction impact (0-100) */
-  dependencyReductionImpact: number;
+  /** Governance stability improvement. Null: not measured. */
+  governanceStabilityGain: number | null;
+  /** Dependency reduction impact. Null: not measured. */
+  dependencyReductionImpact: number | null;
   /** Key milestones */
   milestones: StrategyMilestone[];
   /** Enablers: what makes this strategy more effective */
@@ -65,8 +65,10 @@ export interface ResilienceRoadmap {
   generatedAt: string;
   /** Current overall resilience score */
   currentScore: number;
-  /** Projected score if all strategies are executed */
-  projectedScore: number;
+  /** Projected score if all strategies are executed. Null: no validated model projects it. */
+  projectedScore: number | null;
+  /** Why the projected score and the per-strategy gains are null. */
+  projectionNotMeasuredReason: string;
   /** Recommended strategies in priority order */
   strategies: ResilienceStrategyModel[];
   /** Phase 1: quick wins (0-8 weeks) */

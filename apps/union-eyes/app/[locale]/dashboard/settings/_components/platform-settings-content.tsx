@@ -85,10 +85,10 @@ export interface PlatformSettingsData {
 }
 
 /* ── Toggle switch helper ─────────────────────────────────────────────────── */
-function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+function Toggle({ checked, onChange, label, disabled = false }: { checked: boolean; onChange: (v: boolean) => void; label: string; disabled?: boolean }) {
   return (
-    <label className="relative inline-flex items-center cursor-pointer">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} aria-label={label} className="sr-only peer" />
+    <label className={`relative inline-flex items-center ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} aria-label={label} className="sr-only peer" />
       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
     </label>
   );
@@ -279,6 +279,9 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                   <p className="mt-1">{isFrench
                     ? 'Les options de sécurité ci-dessous sont enregistrées avec l’organisation, mais les mécanismes de connexion, de session, de mot de passe et de limitation de débit ne les lisent pas. Ne les considérez pas comme des protections actives.'
                     : 'The security options below are saved with the organization, but sign-in, session, password and rate-limit mechanisms do not read them. Do not rely on them as active protections.'}</p>
+                  <p className="mt-1">{isFrench
+                    ? 'Elles ne peuvent pas être modifiées ici : la plateforme refuse d’enregistrer un contrôle qu’elle n’applique pas.'
+                    : 'They cannot be changed here: the platform refuses to save a control it does not enforce.'}</p>
                 </div>
               )}
 
@@ -287,7 +290,7 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Session timeout</label>
-                    <select value={sessionTimeout} onChange={(e) => { setSessionTimeout(Number(e.target.value)); markChanged(); }}
+                    <select value={sessionTimeout} disabled aria-label="Session timeout" onChange={(e) => { setSessionTimeout(Number(e.target.value)); markChanged(); }}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                       <option value={15}>15 minutes</option>
                       <option value={30}>30 minutes</option>
@@ -301,19 +304,19 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                       <p className="font-medium text-gray-900">Require multi-factor authentication</p>
                       <p className="text-sm text-gray-600">A stored preference: sign-in does not read it</p>
                     </div>
-                    <Toggle checked={mfaEnforcement} onChange={(v) => { setMfaEnforcement(v); markChanged(); }} label="Require multi-factor authentication" />
+                    <Toggle checked={mfaEnforcement} onChange={(v) => { setMfaEnforcement(v); markChanged(); }} label="Require multi-factor authentication" disabled />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Min password length</label>
-                      <input type="number" min={8} max={64} value={passwordMinLength}
+                      <input type="number" min={8} max={64} value={passwordMinLength} disabled aria-label="Min password length"
                         onChange={(e) => { setPasswordMinLength(Number(e.target.value)); markChanged(); }}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">API rate limit (req/min)</label>
-                      <input type="number" min={10} max={1000} value={rateLimitPerMin}
+                      <input type="number" min={10} max={1000} value={rateLimitPerMin} disabled aria-label="API rate limit"
                         onChange={(e) => { setRateLimitPerMin(Number(e.target.value)); markChanged(); }}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                     </div>
@@ -324,7 +327,7 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                       <p className="font-medium text-gray-900">Require mixed case</p>
                       <p className="text-sm text-gray-600">Passwords must include uppercase and lowercase letters</p>
                     </div>
-                    <Toggle checked={requireMixedCase} onChange={(v) => { setRequireMixedCase(v); markChanged(); }} label="Require mixed case" />
+                    <Toggle checked={requireMixedCase} onChange={(v) => { setRequireMixedCase(v); markChanged(); }} label="Require mixed case" disabled />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -332,7 +335,7 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                       <p className="font-medium text-gray-900">Require symbols</p>
                       <p className="text-sm text-gray-600">Passwords must include at least one special character</p>
                     </div>
-                    <Toggle checked={requireSymbol} onChange={(v) => { setRequireSymbol(v); markChanged(); }} label="Require symbols" />
+                    <Toggle checked={requireSymbol} onChange={(v) => { setRequireSymbol(v); markChanged(); }} label="Require symbols" disabled />
                   </div>
                 </div>
               )}
@@ -381,7 +384,7 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                       <p className="font-medium text-gray-900">Webhook notifications</p>
                       <p className="text-sm text-gray-600">Forward events to an external webhook endpoint</p>
                     </div>
-                    <Toggle checked={webhookNotifications} onChange={(v) => { setWebhookNotifications(v); markChanged(); }} label="Webhook notifications" />
+                    <Toggle checked={webhookNotifications} onChange={(v) => { setWebhookNotifications(v); markChanged(); }} label="Webhook notifications" disabled />
                   </div>
                   {webhookNotifications && (
                     <p className="text-xs text-amber-800">Saved only: no webhook is sent from this setting yet.</p>
@@ -390,7 +393,7 @@ export default function PlatformSettingsContent({ initialData }: { initialData: 
                   {webhookNotifications && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Webhook URL</label>
-                      <input type="url" value={webhookUrl} placeholder="https://example.com/webhook"
+                      <input type="url" value={webhookUrl} disabled aria-label="Webhook URL" placeholder="https://example.com/webhook"
                         onChange={(e) => { setWebhookUrl(e.target.value); markChanged(); }}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                     </div>

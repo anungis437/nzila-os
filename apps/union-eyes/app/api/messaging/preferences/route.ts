@@ -12,6 +12,9 @@ const { GET, POST } = crudRoutes({
   tags: ['Communications'],
   orgScoped: true,
   readRole: 'member',
+  // Deprecated (canonical: /api/notifications/preferences). The route has no owner column, so a body could name any user's preferences:
+  // it accepts no field and the canonical route is the writer.
+  writableFields: [],
   writeRole: 'member',
 });
 export { GET, POST };

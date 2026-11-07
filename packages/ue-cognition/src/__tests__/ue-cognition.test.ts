@@ -19,6 +19,7 @@ import {
   computeCaseRisk,
   computeKpiSnapshot,
   computeMemberEngagement,
+  disengagedMembersCount,
   computeStewardWorkload,
   computeWorkloadFairness,
   findPrecedents,
@@ -268,6 +269,25 @@ describe('workload engine', () => {
 })
 
 describe('engagement engine', () => {
+  // DEF-0B5-COGNITION-ENGAGEMENT-NEVER-COMPUTED: no scheduled scorer writes snapshots, so an empty store is not "no member disengaged".
+  it('reports the disengaged count and the executive engagement counts as not measured when no snapshot exists', () => {
+    expect(disengagedMembersCount(ORG)).toBeNull()
+    const summary = buildExecutiveSummary(subject)
+    expect(summary.engagement).toEqual({ disengagedMemberCount: null, atRiskMemberCount: null })
+    expect(summary.recommendedInterventions.some((i) => i.target === 'member')).toBe(false)
+    const kpi = computeKpiSnapshot({
+      subject,
+      windowDays: 30,
+      baseline: { avgCycleTimeDays: null, utilizationFairness: null, disengagedMemberCount: 10 },
+      observedCycleTimeDays: null,
+      observedCasesSavedFromSlaBreach: null,
+      observedAcceptedReassignments: null,
+      stewardCount: 1,
+    })
+    expect(kpi.disengagedMembersEnd).toBeNull()
+    expect(kpi.engagementRecoveryPct).toBeNull()
+  })
+
   it('classifies disengaged member with phone outreach when ignored > read', () => {
     const events: MemoryEvent[] = [
       event('member_login', '2025-01-01T00:00:00Z', 0.1),
@@ -290,6 +310,8 @@ describe('engagement engine', () => {
     expect(['at_risk', 'disengaged', 'lost']).toContain(snap.tier)
     expect(snap.engagementScore).toBeLessThanOrEqual(100)
     expect(snap.recommendedTimingHours).toBeGreaterThan(0)
+    // Once a snapshot exists the count is measured.
+    expect(disengagedMembersCount(ORG)).toBe(snap.tier === 'at_risk' ? 0 : 1)
   })
 
   it('honours preferred channel from member profile', () => {

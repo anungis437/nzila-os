@@ -49,7 +49,10 @@ function ConfidenceBadge({ confidence }: { confidence: string }) {
         ? 'bg-amber-50 text-amber-700 border-amber-200'
         : 'bg-slate-50 text-slate-600 border-slate-200';
   return (
-    <span className={`rounded-full border px-2.5 py-0.5 text-xs ${tone}`}>{confidence}</span>
+    // No engine computes a confidence; the lowest band means it was not assessed, which the badge says rather than printing a band name.
+    <span className={`rounded-full border px-2.5 py-0.5 text-xs ${tone}`}>
+      {confidence === 'insufficient_data' ? 'confidence not assessed' : confidence}
+    </span>
   );
 }
 

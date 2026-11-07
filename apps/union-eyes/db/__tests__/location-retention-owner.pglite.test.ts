@@ -25,6 +25,7 @@ beforeAll(async () => {
     CREATE TABLE location_tracking (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id varchar(255) NOT NULL,
+      organization_id uuid,
       recorded_at timestamp NOT NULL DEFAULT now(),
       expires_at timestamp NOT NULL
     );
@@ -32,11 +33,13 @@ beforeAll(async () => {
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id varchar(255) NOT NULL,
       geofence_id uuid NOT NULL,
+      organization_id uuid,
       event_time timestamp NOT NULL DEFAULT now(),
       expires_at timestamp NOT NULL
     );
     CREATE TABLE location_deletion_log (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      organization_id uuid,
       deletion_type varchar(50) NOT NULL,
       deletion_reason text,
       record_count varchar(20) NOT NULL,
@@ -143,6 +146,57 @@ describe('location retention owner sweep', () => {
     expect(await count(`SELECT count(*) AS n FROM location_tracking WHERE expires_at <= now()`)).toBe(2)
     expect(await count(`SELECT count(*) AS n FROM geofence_events WHERE expires_at <= now()`)).toBe(1)
     expect(await count(`SELECT count(*) AS n FROM location_deletion_log`)).toBe(0)
+  })
+
+  // DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION: one entry per organization whose rows were removed.
+  const ORG_A = '11111111-1111-4111-8111-111111111111'
+  const ORG_B = '22222222-2222-4222-8222-222222222222'
+  async function seedTwoOrganizations() {
+    await pg.exec('RESET ROLE')
+    await pg.exec(`DELETE FROM location_tracking; DELETE FROM geofence_events; DELETE FROM location_deletion_log; DELETE FROM location_log_faults;`)
+    await pg.exec(`
+      INSERT INTO location_tracking (user_id, organization_id, recorded_at, expires_at) VALUES
+        ('user-a', '${ORG_A}', now() - interval '30 hours', now() - interval '6 hours'),
+        ('user-a', '${ORG_A}', now() - interval '25 hours', now() - interval '1 hour'),
+        ('user-b', '${ORG_B}', now() - interval '27 hours', now() - interval '3 hours'),
+        ('user-c', NULL, now() - interval '40 hours', now() - interval '16 hours'),
+        ('user-a', '${ORG_A}', now(), now() + interval '20 hours');
+      INSERT INTO geofence_events (user_id, geofence_id, organization_id, event_time, expires_at) VALUES
+        ('user-b', gen_random_uuid(), '${ORG_B}', now() - interval '29 hours', now() - interval '5 hours');
+    `)
+  }
+  type Entry = { organization_id: string | null; record_count: string; hours: string | null; initiated_by: string | null; deletion_type: string }
+  const entries = async () => (await pg.query<Entry>(`SELECT organization_id, record_count, deletion_type, initiated_by,
+      round(extract(epoch FROM (newest_record_date - oldest_record_date)) / 3600)::text AS hours
+      FROM location_deletion_log ORDER BY organization_id NULLS LAST`)).rows
+
+  it('the retention sweep writes one entry per organization, with that organization\'s count and real span, and one unattributed entry for rows that carry none', async () => {
+    await seedTwoOrganizations()
+    const result = await db.transaction(async (tx) => {
+      await tx.execute(sql.raw(`SET LOCAL ROLE union_eyes_system`))
+      return GeofencePrivacyService.deleteExpiredLocationData(tx as never)
+    })
+    expect(result).toEqual({ trackingRecordsDeleted: 4, eventRecordsDeleted: 1, truncated: false })
+    await pg.exec('RESET ROLE')
+    expect(await entries()).toEqual([
+      { organization_id: ORG_A, record_count: '2', deletion_type: 'auto_24hr', initiated_by: null, hours: '5' },
+      { organization_id: ORG_B, record_count: '2', deletion_type: 'auto_24hr', initiated_by: null, hours: '2' },
+      { organization_id: null, record_count: '1', deletion_type: 'auto_24hr', initiated_by: null, hours: '0' },
+    ])
+  })
+
+  it('a member\'s erasure logs each organization of the removed rows separately, initiated by the member, and logs nothing when nothing was removed', async () => {
+    await seedTwoOrganizations()
+    await pg.exec(`INSERT INTO geofence_events (user_id, geofence_id, organization_id, event_time, expires_at) VALUES ('user-a', gen_random_uuid(), '${ORG_B}', now() - interval '2 hours', now() + interval '22 hours')`)
+    const erased = await db.transaction(async (tx) => GeofencePrivacyService.eraseLocationData('user-a', tx as never))
+    expect(erased).toEqual({ trackingRecordsDeleted: 3, eventRecordsDeleted: 1, total: 4 })
+    const rows = await entries()
+    expect(rows.map(({ organization_id, record_count, deletion_type, initiated_by }) => ({ organization_id, record_count, deletion_type, initiated_by }))).toEqual([
+      { organization_id: ORG_A, record_count: '3', deletion_type: 'user_request', initiated_by: 'user-a' },
+      { organization_id: ORG_B, record_count: '1', deletion_type: 'user_request', initiated_by: 'user-a' },
+    ])
+    await db.transaction(async (tx) => GeofencePrivacyService.eraseLocationData('user-a', tx as never))
+    expect(await entries()).toHaveLength(2)
   })
 
   it('names userId and expiresAt on each retention delete', () => {

@@ -15,7 +15,6 @@ import {
   buildExecutiveSummary,
   computeKpiSnapshot,
   computeWorkloadFairness,
-  listEngagementSnapshots,
   type RiskTier,
 } from '@nzila/ue-cognition';
 import { getTranslations } from 'next-intl/server';
@@ -81,20 +80,6 @@ export default async function CognitionPage({ params }: PageProps) {
         return t('status.unknown');
     }
   };
-  const getEngagementTierLabel = (tier: string) => {
-    switch (tier) {
-      case 'engaged':
-        return t('engagementTier.engaged');
-      case 'at_risk':
-        return t('engagementTier.atRisk');
-      case 'disengaged':
-        return t('engagementTier.disengaged');
-      case 'lost':
-        return t('engagementTier.lost');
-      default:
-        return tier;
-    }
-  };
   const session = await auth();
   if (!session?.userId) {
     return <div className="p-8 text-sm">{t('states.signInRequired')}</div>;
@@ -116,10 +101,8 @@ export default async function CognitionPage({ params }: PageProps) {
     ? computeWorkloadFairness(stewardSubject(orgId, 'org'), stewards)
     : null;
   const summary = buildExecutiveSummary(subject);
-  const engagement = listEngagementSnapshots()
-    .filter((s) => s.subject.orgId === orgId)
-    .sort((a, b) => b.disengagementProbability - a.disengagementProbability)
-    .slice(0, 25);
+  // No member-engagement table: nothing computes engagement snapshots (no scheduled, organization-scoped scorer exists), so the
+  // disengaged-member tile below reads null ("no source data") rather than a list or a count from an empty store.
 
   const kpis = computeKpiSnapshot({
     subject,
@@ -221,35 +204,6 @@ export default async function CognitionPage({ params }: PageProps) {
                   <td>{(s.utilizationRatio * 100).toFixed(0)}%</td>
                   <td>{s.atRiskCaseCount}</td>
                   <td>{(s.slaRiskScore * 100).toFixed(0)}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
-
-      {/* Disengaged members queue */}
-      {engagement.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-lg font-semibold">{t('memberEngagement.title')}</h2>
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-muted-foreground">
-              <tr>
-                <th>{t('memberEngagement.columns.member')}</th>
-                <th>{t('memberEngagement.columns.tier')}</th>
-                <th>{t('memberEngagement.columns.disengagementRisk')}</th>
-                <th>{t('memberEngagement.columns.recommendedChannel')}</th>
-                <th>{t('memberEngagement.columns.withinHours')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {engagement.map((m) => (
-                <tr key={m.id} className="border-t">
-                  <td className="py-2">{m.memberId.slice(0, 8)}</td>
-                  <td>{getEngagementTierLabel(m.tier)}</td>
-                  <td>{(m.disengagementProbability * 100).toFixed(0)}%</td>
-                  <td>{m.recommendedChannel}</td>
-                  <td>{m.recommendedTimingHours}</td>
                 </tr>
               ))}
             </tbody>

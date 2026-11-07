@@ -21,9 +21,14 @@ import { cn } from "@/lib/utils";
 
 export interface ComplianceMetrics {
   deadlineAdherence: number | null; // percentage 0-100; null when nothing was measured
-  avgResponseTime: number;   // days
+  avgResponseTime: number | null;   // days; null when no alert was resolved
   documentationRate: number | null; // percentage 0-100; null when nothing was measured
-  openAlerts: number;
+  openAlerts: number | null; // null when no alert rows exist: nothing writes them, so zero would read as a clean record
+}
+
+export interface ComplianceMeasurement {
+  status: "measured" | "not_measured";
+  reason: string | null;
 }
 
 export interface ComplianceAlert {
@@ -36,6 +41,8 @@ export interface ComplianceAlert {
 export interface ComplianceSummaryCardProps {
   metrics: ComplianceMetrics;
   alerts: ComplianceAlert[];
+  /** When absent (an older payload) the metrics are shown as they are; nulls still render as a dash, never as 0 or 100%. */
+  measurement?: ComplianceMeasurement;
   className?: string;
 }
 
@@ -60,6 +67,7 @@ const SEVERITY_VARIANT: Record<string, "destructive" | "secondary" | "outline"> 
 export function ComplianceSummaryCard({
   metrics,
   alerts,
+  measurement,
   className,
 }: ComplianceSummaryCardProps) {
   const t = useTranslations("leadershipDashboard.compliance");
@@ -78,8 +86,8 @@ export function ComplianceSummaryCard({
     {
       icon: ShieldCheck,
       label: t("avgResponseTime"),
-      value: `${metrics.avgResponseTime}d`,
-      color: metrics.avgResponseTime <= 5 ? "text-green-600" : "text-amber-600",
+      value: metrics.avgResponseTime === null ? "—" : `${metrics.avgResponseTime}d`,
+      color: metrics.avgResponseTime === null ? "text-muted-foreground" : metrics.avgResponseTime <= 5 ? "text-green-600" : "text-amber-600",
     },
     {
       icon: FileText,
@@ -90,8 +98,8 @@ export function ComplianceSummaryCard({
     {
       icon: AlertTriangle,
       label: t("openAlerts"),
-      value: String(metrics.openAlerts),
-      color: metrics.openAlerts === 0 ? "text-green-600" : "text-red-600",
+      value: metrics.openAlerts === null ? "—" : String(metrics.openAlerts),
+      color: metrics.openAlerts === null ? "text-muted-foreground" : metrics.openAlerts === 0 ? "text-green-600" : "text-red-600",
     },
   ];
 
@@ -101,6 +109,12 @@ export function ComplianceSummaryCard({
         <ShieldCheck className="h-4 w-4 text-muted-foreground" />
         <h3 className="text-sm font-semibold">{t("title")}</h3>
       </div>
+
+      {measurement?.status === "not_measured" && (
+        <p className="text-xs text-muted-foreground" data-testid="compliance-not-measured">
+          {measurement.reason}
+        </p>
+      )}
 
       {/* Metric gauges */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

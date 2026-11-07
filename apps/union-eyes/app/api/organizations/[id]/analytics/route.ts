@@ -5,7 +5,7 @@ import { organizations } from '@/db/schema-organizations'
 import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
 import { shouldSuppressClaimMetrics, shouldSuppressMemberMetrics, MIN_PUBLISHABLE_GROUP_SIZE } from '@/lib/organizations/analytics-privacy'
-import { canAdministerOrganization, resolveOrganizationAccess, UUID_PATTERN } from '@/lib/organizations/read-authority'
+import { canReadOrganizationAnalytics, resolveOrganizationAccess, UUID_PATTERN } from '@/lib/organizations/read-authority'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,11 +22,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params
   if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid organization id' }, { status: 400 })
 
-  // Analytics aggregate an organization's membership and caseload: they belong to its own administrators, through their live membership
-  // there. An administrator of an organization above it, a platform title, an officer and a signed-in stranger all read not found, so the
-  // answer does not tell them the organization exists or how it is governed.
+  // Analytics aggregate an organization's membership and caseload: they belong to its own officers and administrators, through their live
+  // membership there with an officer-or-above role (owner decision on issue #1118). A steward, a member, an officer or administrator of an
+  // organization above it, a platform title and a signed-in stranger all read not found, so the answer does not tell them the
+  // organization exists or how it is governed.
   const access = await resolveOrganizationAccess(userId)
-  if (!canAdministerOrganization(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!canReadOrganizationAnalytics(access, id)) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const [org] = await withSystemContext(() =>
     db.select().from(organizations).where(eq(organizations.id, id)),

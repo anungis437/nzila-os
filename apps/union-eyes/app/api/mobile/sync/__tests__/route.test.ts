@@ -1,54 +1,29 @@
-import { describe, it, expect } from 'vitest';
-import { assertDeviceNotOwnedByAnotherUser, parseDeviceRegistration } from '../route';
+import { describe, it, expect, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-// Gate 0 DEF-0B9-MOB-SYNC-PATH / DEVICE-REREGISTRATION: registration is validated against the column limits, a browser needs
-// no push token, and a native device must supply one.
-describe('parseDeviceRegistration', () => {
-  it('accepts the body the Sync now button sends (a browser with no token) and keys it by device id', () => {
-    const result = parseDeviceRegistration({ deviceId: 'dev-1', platform: 'pwa' });
-    expect(result).toMatchObject({ ok: true, value: { deviceToken: 'pwa:dev-1', pushCapable: false } });
+const written = vi.hoisted(() => ({ calls: 0 }));
+vi.mock('@/lib/api/framework', () => ({
+  withApi: (_cfg: unknown, handler: (ctx: unknown) => Promise<unknown>) => (ctx: unknown) => handler(ctx),
+  ApiError: {
+    notImplemented: (msg: string) => Object.assign(new Error(msg), { status: 501 }),
+    badRequest: (msg: string) => Object.assign(new Error(msg), { status: 400 }),
+  },
+}));
+vi.mock('@/db/db', () => ({ db: new Proxy({}, { get: () => () => { written.calls += 1; throw new Error('no database access expected'); } }) }));
+
+// Gate 0 DEF-0B9-MOB-SYNC-PATH-REGISTERS-A-DEVICE-AND-SYNCS-NOTHING / DEF-0B9-MOB-TWO-DEVICE-TABLES: the sync path registered a device into a
+// second table no sender reads and answered 200 although it synchronized nothing. It now answers 501 and writes nothing.
+describe('mobile/sync POST', () => {
+  it('answers 501 for synchronization and touches no table', async () => {
+    const { POST } = await import('../route');
+    await expect((POST as unknown as (ctx: unknown) => Promise<unknown>)({ userId: 'u1', organizationId: 'o1', body: { deviceId: 'd', platform: 'ios', deviceToken: 'tok-12345678' } }))
+      .rejects.toMatchObject({ status: 501, message: expect.stringContaining('/api/mobile/devices') });
+    expect(written.calls).toBe(0);
   });
 
-  it('requires a push token from a native device', () => {
-    expect(parseDeviceRegistration({ deviceId: 'dev-1', platform: 'ios' })).toMatchObject({ ok: false });
-    expect(parseDeviceRegistration({ deviceId: 'dev-1', platform: 'android', deviceToken: 'tok-12345678' })).toMatchObject({ ok: true, value: { pushCapable: true } });
-  });
-
-  it('refuses values the columns cannot hold and fields it does not know', () => {
-    for (const bad of [
-      { deviceId: 'd', platform: 'symbian' },
-      { deviceId: 'd', platform: 'pwa', appVersion: 'x'.repeat(21) },
-      { deviceId: 'd', platform: 'pwa', osVersion: 'x'.repeat(51) },
-      { deviceId: 'd', platform: 'pwa', deviceName: 'x'.repeat(256) },
-      { deviceId: 'x'.repeat(256), platform: 'pwa' },
-      { deviceId: 'd', platform: 'pwa', isJailbroken: false },
-      { deviceId: 'd', platform: 'pwa', userId: 'someone-else' },
-      {},
-      null,
-    ]) {
-      expect(parseDeviceRegistration(bad), JSON.stringify(bad)).toMatchObject({ ok: false });
-    }
-  });
-});
-
-// ROUND 50 REGRESSION: the POST handler previously upserted on deviceId
-// alone with no ownership check, letting any authenticated user hijack
-// another user's mobile_devices row (and their push notification channel)
-// by supplying that row's deviceId.
-describe('mobile/sync route helpers', () => {
-  describe('assertDeviceNotOwnedByAnotherUser', () => {
-    it('does not throw when no existing row is found for the deviceId', () => {
-      expect(() => assertDeviceNotOwnedByAnotherUser(undefined, 'caller-user')).not.toThrow();
-    });
-
-    it('does not throw when the existing row belongs to the caller', () => {
-      expect(() => assertDeviceNotOwnedByAnotherUser('caller-user', 'caller-user')).not.toThrow();
-    });
-
-    it('throws a conflict when the existing row belongs to another user', () => {
-      expect(() => assertDeviceNotOwnedByAnotherUser('victim-user', 'attacker-user')).toThrow(
-        'This device is already registered to another account',
-      );
-    });
+  it('no longer inserts into mobile_devices or reads mobile_sync_queue anywhere in the route', () => {
+    const source = readFileSync(join(__dirname, '..', 'route.ts'), 'utf8');
+    expect(source).not.toMatch(/\.insert\(|onConflictDoUpdate|mobileSyncQueue/);
   });
 });

@@ -75,6 +75,14 @@ export const intakeStorageKey = (organizationId: string, intakeId: string): stri
 
 const clean = (error: unknown): string => (error instanceof Error ? error.message : 'unknown').slice(0, 200).replace(/documents\/[^\s"']*/g, '[object]');
 
+export interface IntakeMatter {
+  type: string;
+  id: string;
+}
+
+const sameMatter = (row: Pick<DocumentIntake, 'matterType' | 'matterId'>, matter: IntakeMatter | null | undefined): boolean =>
+  (row.matterType ?? null) === (matter?.type ?? null) && (row.matterId?.toLowerCase() ?? null) === (matter?.id.toLowerCase() ?? null);
+
 export type OpenIntakeResult =
   | { ok: true; intake: IntakeView }
   | { ok: false; kind: 'invalid' | 'upload_failed'; error?: unknown };
@@ -89,6 +97,8 @@ export async function openIntake(
     mimeType: string;
     bytes: Buffer;
     now?: Date;
+    /** The one matter the intake is for (an external representative's upload). It is then accepted only for that matter. */
+    matter?: IntakeMatter | null;
   },
   storage: IntakeStorage,
 ): Promise<OpenIntakeResult> {
@@ -120,6 +130,7 @@ export async function openIntake(
         objectState: 'present',
         createdAt: now,
         expiresAt: new Date(now.getTime() + INTAKE_TTL_MINUTES * 60_000),
+        ...(input.matter ? { matterType: input.matter.type, matterId: input.matter.id.toLowerCase() } : {}),
       })
       .returning();
     await persistAtomicAudit(tx, {
@@ -128,7 +139,14 @@ export async function openIntake(
       action: 'document.intake.open',
       resourceType: 'document_intakes',
       resourceId: id,
-      details: { operation: input.operation, size: bytes.length, mimeType: input.mimeType, checksum: hash, targetDocumentId: input.targetDocumentId ?? null },
+      details: {
+        operation: input.operation,
+        size: bytes.length,
+        mimeType: input.mimeType,
+        checksum: hash,
+        targetDocumentId: input.targetDocumentId ?? null,
+        ...(input.matter ? { matterType: input.matter.type, matterId: input.matter.id } : {}),
+      },
     });
     return created;
   });
@@ -173,7 +191,16 @@ export type AcceptanceCheck =
  * state under a row lock, so a race between two acceptances (or an acceptance and a cancellation) has one winner.
  */
 export async function checkIntakeForAcceptance(
-  input: { organizationId: string; userId: string; intakeId: string; operation: DocumentIntake['operation']; targetDocumentId?: string | null; now?: Date },
+  input: {
+    organizationId: string;
+    userId: string;
+    intakeId: string;
+    operation: DocumentIntake['operation'];
+    targetDocumentId?: string | null;
+    now?: Date;
+    /** The matter the acceptance is for. An intake opened for a matter is accepted only for it; one opened for none only without one. */
+    matter?: IntakeMatter | null;
+  },
   storage: IntakeStorage,
 ): Promise<AcceptanceCheck> {
   const row = await withRLSContext({ organizationId: input.organizationId }, async (tx) =>
@@ -187,7 +214,7 @@ export async function checkIntakeForAcceptance(
   );
   // Another principal's intake is indistinguishable from one that does not exist.
   if (!row || row.principalUserId !== input.userId) return { ok: false, kind: 'not_found' };
-  if (row.operation !== input.operation || (row.targetDocumentId ?? null) !== (input.targetDocumentId ?? null)) {
+  if (row.operation !== input.operation || (row.targetDocumentId ?? null) !== (input.targetDocumentId ?? null) || !sameMatter(row, input.matter)) {
     return { ok: false, kind: 'operation_mismatch' };
   }
   if (row.status === 'accepted') return { ok: true, replay: true, intake: row };

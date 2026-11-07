@@ -116,7 +116,7 @@ describe('the real tree', () => {
   })
 
   // lib modules nothing reaches. The ceiling can only fall; the end is zero.
-  const CEILING_DEAD_LIB = 375
+  const CEILING_DEAD_LIB = 374
 
   it('holds the lib modules nothing reaches at or below the ceiling', () => {
     expect(report.deadLib.length).toBeLessThanOrEqual(CEILING_DEAD_LIB)

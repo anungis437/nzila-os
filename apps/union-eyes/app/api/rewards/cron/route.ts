@@ -29,8 +29,8 @@ import {
  * 
  * Security: the cron secret (CRON_SECRET_KEY or CRON_SECRET), presented as x-cron-secret or a bearer token, is checked before any statement.
  * The job has no tenant session, so every database step runs as the system role: the organization list and each organization's task in
- * a system transaction of their own (with the task's audit entry on the same transaction), the expiry scan and each warning marker in short
- * ones. No transaction is open while a warning e-mail is sent.
+ * a system transaction of their own (with the task's audit entry on the same transaction), the expiry scan (one organization at a time,
+ * each with that organization's predicate) and each warning marker in short ones. No transaction is open while a warning e-mail is sent.
  */
 const TASKS = ['anniversaries', 'expirations', 'scheduled', 'all'] as const;
 
@@ -127,7 +127,9 @@ const anniversaryResults = await Promise.allSettled(
     }
 
     if (task === 'expirations' || task === 'all') {
-const expirationResult = await sendBatchExpirationWarnings();
+      // The scan runs organization by organization over the active organizations listed above, each in its own system transaction
+      // with that organization's predicate, rather than as one read across every organization's ledger.
+      const expirationResult = await sendBatchExpirationWarnings(organizations.map((org) => org.id));
       // The batch carries its own success flag; wrapping it in a successful run would hide a failed one.
       if ((expirationResult as { success?: boolean } | undefined)?.success === false) failures.push({ scope: 'expirations', reason: 'expiration warnings reported failure' });
       else succeeded += 1;

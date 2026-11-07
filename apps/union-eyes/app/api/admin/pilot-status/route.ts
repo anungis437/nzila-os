@@ -30,6 +30,7 @@ import {
 } from '@/lib/pilot-admin-operational';
 import type { CaseRow } from '@/lib/dashboard-metrics';
 import { auth } from '@nzila/platform-auth/entra/server';
+import { resolveOrganizationAccess } from '@/lib/organizations/read-authority';
 
 const logger = createLogger('admin:pilot-status');
 
@@ -79,13 +80,17 @@ export const GET = withApiAuth(async (_request: NextRequest) => {
     }
 
     const session = await auth();
-    // Resolve org id defensively — see user memory: session.orgId is Entra
-    // group GUID, NOT the app-org UUID. Prefer explicit context if callers
-    // start providing one; for now, use whatever the session surfaces and
-    // let the measurement queries return null on mismatch (which surfaces
-    // as `unknown` rather than a fake zero).
+    // The organization figures (members invited, worksites configured) are that organization's content: they are measured only for an
+    // organization where the caller holds a live direct membership (issues #1116, #1118). The platform_lead title above is not authority
+    // over any organization's content, and the session's orgId is not proof of membership (it can be an Entra group GUID, not the
+    // app-org UUID): anything else is null, rendered `unknown`, never a count of zero for an organization that is not the caller's.
     const rawOrgId = (session as { orgId?: unknown } | null)?.orgId;
-    const orgId = typeof rawOrgId === 'string' && rawOrgId.length > 0 ? rawOrgId : null;
+    const userId = (session as { userId?: unknown } | null)?.userId;
+    let orgId: string | null = null;
+    if (typeof rawOrgId === 'string' && rawOrgId.length > 0 && typeof userId === 'string' && userId.length > 0) {
+      const access = await resolveOrganizationAccess(userId);
+      orgId = access.direct.has(rawOrgId) ? rawOrgId : null;
+    }
 
     // Run real measurements. Any measurement that can't be performed
     // honestly returns null, which the health engine renders as `unknown`.

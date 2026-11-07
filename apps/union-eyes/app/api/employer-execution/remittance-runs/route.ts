@@ -183,8 +183,10 @@ export const POST = withApi(
       const dueDaysValue = Number(profileConfig.remittance_due_days ?? 15);
       const dueDays = Number.isFinite(dueDaysValue) && dueDaysValue > 0 ? dueDaysValue : 15;
 
+      // periodEnd is a calendar date (parsed as UTC midnight); the due date is counted in UTC days so the server's zone and a daylight
+      // saving change inside the window cannot move it to the day before.
       const dueDate = new Date(String(payrollRun.periodEnd));
-      dueDate.setDate(dueDate.getDate() + dueDays);
+      dueDate.setUTCDate(dueDate.getUTCDate() + dueDays);
       const dueDateIso = dueDate.toISOString().slice(0, 10);
 
       // Amounts are summed in integer cents from the items on record.

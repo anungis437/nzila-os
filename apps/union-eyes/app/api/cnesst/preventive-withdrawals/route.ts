@@ -18,5 +18,10 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // The member's request as a steward records it. Status, employer-paid days, CNESST IRR amounts and the link to a filing are
+  // not create fields. memberId is required by the table (not checked against the organization's roster here).
+  writableFields: [
+    'memberId', 'memberName', 'reason', 'requestDate', 'medicalCertificateDate', 'physicianName', 'notes',
+  ],
 });
 export { GET, POST };

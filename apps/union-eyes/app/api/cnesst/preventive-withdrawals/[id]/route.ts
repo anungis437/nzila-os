@@ -18,5 +18,11 @@ const { GET, PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // The reassignment and withdrawal facts a steward follows up. The member, status, employer-paid days and CNESST IRR amounts are
+  // not changed through the generic PATCH.
+  writableFields: [
+    'reason', 'medicalCertificateDate', 'physicianName', 'reassignmentOffered', 'reassignmentAccepted',
+    'reassignmentDescription', 'withdrawalStartDate', 'withdrawalEndDate', 'notes',
+  ],
 });
 export { GET, PATCH, DELETE };

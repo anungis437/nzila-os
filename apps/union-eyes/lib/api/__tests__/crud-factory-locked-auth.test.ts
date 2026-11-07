@@ -101,7 +101,7 @@ const auth = async (row: Record<string, unknown>, ctx: { userId?: string | null 
 async function mount(table: PgTable = personal) {
   const { crudRoutes } = await import('../crud-factory')
   crudRoutes({ table, tags: ['Scheduling'], orgScoped: true, itemRoute: true,
-    writeRole: 'steward', lockedAuthCheck: auth })
+    writeRole: 'steward', writableFields: ['title'], lockedAuthCheck: auth })
 }
 const handler = (name: 'Update' | 'Delete') => {
   const fn = m.handlers.get(name)
@@ -187,7 +187,7 @@ describe('R-52: lockedAuthCheck is mandatory for all generic writes', () => {
     const { crudRoutes } = await import('../crud-factory')
     crudRoutes({
       table: alternate, pk: 'id', tags: ['Scheduling'], orgScoped: true,
-      itemRoute: true, writeRole: 'steward', ownerColumn: 'ownerId',
+      itemRoute: true, writeRole: 'steward', ownerColumn: 'ownerId', writableFields: ['title'],
     })
     await expect(handler('Update')(context({
       recordId: 'malicious-pk', createdBy: 'malicious-creator',
@@ -208,7 +208,7 @@ describe('R-52: lockedAuthCheck is mandatory for all generic writes', () => {
     crudRoutes({
       table: personal, pk: 'id', tags: ['Scheduling'], orgScoped: true,
       itemRoute: true, writeRole: 'steward', lockedAuthCheck: auth,
-      ownerColumn: 'ownerId',
+      ownerColumn: 'ownerId', writableFields: ['title'],
       beforeUpdate: async (updates) => ({
         ...updates,
         id: 'malicious-pk',

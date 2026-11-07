@@ -23,7 +23,9 @@ describe('Gate 0: stored organization security settings must not masquerade as e
     const get = route.slice(route.indexOf('export const GET'), route.indexOf('/* ── PUT'));
     const put = route.slice(route.indexOf('export const PUT'));
     expect(get).toContain('notEnforced: notEnforcedKeysIn(settings)');
-    expect(put).toContain('notEnforcedKeysIn(checkedSettings)');
+    // The PUT refuses an unenforced key before it reads or writes anything, rather than saving it and reporting it back.
+    expect(put).toContain('const refusedUnenforced = notEnforcedKeysIn(checked.settings);');
+    expect(put.indexOf('refusedUnenforced.length > 0')).toBeLessThan(put.indexOf('withRLSContext('));
     expect(put).toContain('await persistAtomicAudit(tx,');
   });
 

@@ -4,6 +4,7 @@
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { bargainingUnits, employers, worksites } from '@/db/schema';
 import { assertOrganizationOwns } from '@/lib/api/org-references';
+import { UNIT_WRITABLE_FIELDS } from '@/lib/union-structure/unit-writable-fields';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,7 @@ const { GET, POST } = crudRoutes({
     ], organizationId);
     return values;
   },
-  writableFields: ['employerId', 'worksiteId', 'name', 'unitNumber', 'unitType', 'classifications', 'title', 'description', 'contractExpiryDate', 'nextBargainingDate'],
+  // Exactly what the unit form sends (toUnitPayload) plus the unit's classifications. 'title' was listed here but is not a column.
+  writableFields: UNIT_WRITABLE_FIELDS,
 });
 export { GET, POST };

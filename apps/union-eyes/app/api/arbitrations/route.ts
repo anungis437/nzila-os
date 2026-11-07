@@ -7,8 +7,9 @@
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { assertOrganizationOwns } from '@/lib/api/org-references';
 import { ApiError } from '@/lib/api/errors';
-import { mayWriteArbitrationFor } from '@/lib/arbitration/arbitration-case-authority';
+import { arbitrationRowReadable, mayWriteArbitrationFor } from '@/lib/arbitration/arbitration-case-authority';
 import { arbitrations, grievances } from '@/db/schema';
+import { ARBITRATION_CREATE_FIELDS } from '@/lib/arbitration/arbitration-fields';
 import { ARBITRATION_DEADLINE_DAY_FIELDS } from '@/lib/deadline-engine/deadline-day';
 import { dayDeadlineFieldsAtEndOfDay } from '@/lib/deadline-engine/organization-time-zone';
 
@@ -21,6 +22,11 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'steward',
   writeRole: 'steward',
+  // Only arbitrations of cases the caller may read by the case authority are listed; a steward role alone reads none.
+  rowReadAuthority: arbitrationRowReadable,
+  // What the person handling the case records when the arbitration is referred. The grievance is checked against the case authority below.
+  // Status, the award and actual cost are recorded later on the item route by the case holder; organization, ids and timestamps are server-owned.
+  writableFields: ARBITRATION_CREATE_FIELDS,
   beforeCreate: async (values, { organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');
     await assertOrganizationOwns([{ field: 'grievanceId', value: values.grievanceId, table: grievances }], organizationId);

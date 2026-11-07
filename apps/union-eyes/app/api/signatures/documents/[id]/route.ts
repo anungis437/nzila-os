@@ -142,10 +142,10 @@ export const POST = withApiAuth(async (
       return standardErrorResponse(ErrorCode.FORBIDDEN, 'Access denied');
     }
     const result = await SignatureService.syncDocumentStatus(params.id, organizationId);
-    // A provider outage or an unlinked envelope is not a successful refresh.
+    // A provider outage, an unlinked envelope, or a document no external provider holds is not a successful refresh.
     // Idempotent/no-op observations remain HTTP 200 but disclose synced=false.
     const status = result.reason === 'provider_unavailable' ? 503
-      : result.reason === 'no_envelope' ? 409
+      : result.reason === 'no_envelope' || result.reason === 'not_external_provider' ? 409
       : 200;
     return NextResponse.json({ success: result.synced, ...result }, { status });
   } catch (error) {

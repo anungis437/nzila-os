@@ -180,7 +180,6 @@ const eslintConfig = defineConfig([
       'lib/middleware/api-security.ts',
       'lib/email-service.ts',
       'lib/clc/nil-prompts.ts',
-      'lib/ai/pipeline.ts',
       'app/api/icra/submit/route.ts',
     ],
     rules: {

@@ -1,6 +1,5 @@
 /**
  * Dispatch Engine — Unit Tests
- * calculateDispatchPriority is a PURE function (no DB) — tested directly.
  * DB-backed functions mock @/db/db.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -49,7 +48,7 @@ vi.mock("@/db/schema/domains/dispatch/dispatch", () => ({
     priority: "priority",
   },
 }));
-vi.mock("@/db/schema-organizations", () => ({ organizationMembers: { id: "id", organizationId: "organizationId", status: "status" } }));
+vi.mock("@/db/schema-organizations", () => ({ organizationMembers: { id: "id", organizationId: "organizationId", status: "status", name: "name", seniority: "seniority" } }));
 vi.mock("drizzle-orm", () => ({
   inArray: vi.fn((c, v) => ({ _type: "inArray", c, v })),
   eq: vi.fn((_c, v) => ({ _type: "eq", v })),
@@ -59,129 +58,18 @@ vi.mock("drizzle-orm", () => ({
 }));
 
 import {
-  calculateDispatchPriority,
   createDispatchRequest,
   listDispatchQueue,
   loadDispatchRules,
   rankCandidates,
-  type MemberCandidate,
 } from "../dispatch-engine";
 
 describe("dispatch-engine", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  // ── PURE FUNCTION: calculateDispatchPriority ─────────────────────────────
-  describe("calculateDispatchPriority", () => {
-    const baseCandidate: MemberCandidate = {
-      memberId: "m1",
-      skills: ["welding", "electrical"],
-      seniorityYears: 5,
-      available: true,
-    };
-
-    it("scores seniority rule correctly", () => {
-      const rules = [{ ruleType: "seniority" as const, ruleDefinition: {}, priority: 1 }];
-      const score = calculateDispatchPriority(baseCandidate, [], rules);
-      // 5 years * 5 * 1 = 25
-      expect(score).toBe(25);
-    });
-
-    it("scores seniority with weight", () => {
-      const rules = [{ ruleType: "seniority" as const, ruleDefinition: {}, priority: 3 }];
-      const score = calculateDispatchPriority(baseCandidate, [], rules);
-      // 5 * 5 * 3 = 75
-      expect(score).toBe(75);
-    });
-
-    it("scores availability rule – available", () => {
-      const rules = [{ ruleType: "availability" as const, ruleDefinition: {}, priority: 1 }];
-      const score = calculateDispatchPriority(baseCandidate, [], rules);
-      // 30 * 1 = 30
-      expect(score).toBe(30);
-    });
-
-    it("scores availability rule – not available", () => {
-      const rules = [{ ruleType: "availability" as const, ruleDefinition: {}, priority: 1 }];
-      const score = calculateDispatchPriority(
-        { ...baseCandidate, available: false },
-        [],
-        rules
-      );
-      expect(score).toBe(0);
-    });
-
-    it("scores skills_match with full match", () => {
-      const rules = [{ ruleType: "skills_match" as const, ruleDefinition: {}, priority: 1 }];
-      const score = calculateDispatchPriority(
-        baseCandidate,
-        ["welding", "electrical"],
-        rules
-      );
-      // ratio 1.0 * 40 * 1 = 40
-      expect(score).toBe(40);
-    });
-
-    it("scores skills_match with partial match", () => {
-      const rules = [{ ruleType: "skills_match" as const, ruleDefinition: {}, priority: 1 }];
-      const score = calculateDispatchPriority(baseCandidate, ["welding", "plumbing"], rules);
-      // 1/2 * 40 = 20
-      expect(score).toBe(20);
-    });
-
-    it("scores skills_match with no required skills → ratio 1", () => {
-      const rules = [{ ruleType: "skills_match" as const, ruleDefinition: {}, priority: 1 }];
-      const score = calculateDispatchPriority(baseCandidate, [], rules);
-      // ratio=1 → 40
-      expect(score).toBe(40);
-    });
-
-    it("scores skills_match case-insensitively", () => {
-      const rules = [{ ruleType: "skills_match" as const, ruleDefinition: {}, priority: 1 }];
-      const score = calculateDispatchPriority(baseCandidate, ["WELDING"], rules);
-      // 1/1 * 40 = 40
-      expect(score).toBe(40);
-    });
-
-    it("scores rotation rule – flat 10 * weight", () => {
-      const rules = [{ ruleType: "rotation" as const, ruleDefinition: {}, priority: 2 }];
-      const score = calculateDispatchPriority(baseCandidate, [], rules);
-      expect(score).toBe(20);
-    });
-
-    it("scores geographic_proximity rule – flat 5 * weight", () => {
-      const rules = [{ ruleType: "geographic_proximity" as const, ruleDefinition: {}, priority: 1 }];
-      const score = calculateDispatchPriority(baseCandidate, [], rules);
-      expect(score).toBe(5);
-    });
-
-    it("combines multiple rules", () => {
-      const rules = [
-        { ruleType: "seniority" as const, ruleDefinition: {}, priority: 1 },
-        { ruleType: "availability" as const, ruleDefinition: {}, priority: 1 },
-        { ruleType: "skills_match" as const, ruleDefinition: {}, priority: 1 },
-      ];
-      const score = calculateDispatchPriority(
-        baseCandidate,
-        ["welding"],
-        rules
-      );
-      // seniority: 25, availability: 30, skills: 1/1*40=40 → 95
-      expect(score).toBe(95);
-    });
-
-    it("returns 0 when score would be negative (clamp)", () => {
-      // With no rules, score stays 0
-      const score = calculateDispatchPriority(baseCandidate, [], []);
-      expect(score).toBe(0);
-    });
-
-    it("uses priority 1 when priority is 0 (falsy)", () => {
-      const rules = [{ ruleType: "seniority" as const, ruleDefinition: {}, priority: 0 }];
-      const score = calculateDispatchPriority(baseCandidate, [], rules);
-      // priority defaults to 1 when 0 (falsy): 5*5*1 = 25
-      expect(score).toBe(25);
-    });
-  });
+  // The point-scoring tests that stood here asserted the invented scores themselves (rotation flat 10, proximity flat 5, a full skills
+  // match when none was required). Rule application is now tested in lib/__tests__/dispatch-engine.test.ts
+  // (DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED).
 
   // ── createDispatchRequest ────────────────────────────────────────────────
   describe("createDispatchRequest", () => {
@@ -223,73 +111,43 @@ describe("dispatch-engine", () => {
 
   // ── rankCandidates ───────────────────────────────────────────────────────
   describe("rankCandidates", () => {
-    it("scores and sorts candidates by score desc", async () => {
-      // First select → dispatch request
-      const requestWhere = vi.fn().mockResolvedValue([
-        { id: "req-1", orgId: "org-1", requiredSkills: ["welding"], requestedWorkers: 1 },
-      ]);
-      const requestFrom = vi.fn().mockReturnValue({ where: requestWhere });
-
-      // Second select → dispatch rules
-      const rulesOrderBy = vi.fn().mockResolvedValue([
-        { ruleType: "seniority", ruleDefinition: {}, priority: 1 },
-      ]);
-      const rulesWhere = vi.fn().mockReturnValue({ orderBy: rulesOrderBy });
-      const rulesFrom = vi.fn().mockReturnValue({ where: rulesWhere });
-
-      let callCount = 0;
+    function chainSelects(requestRows: unknown[], ruleRows: unknown[], memberRows: unknown[]) {
+      let call = 0;
       mocks.mockDb.select.mockImplementation(() => {
-        callCount++;
-        if (callCount === 1) return { from: requestFrom };
-        return { from: rulesFrom };
+        call++;
+        if (call === 1) return { from: () => ({ where: vi.fn().mockResolvedValue(requestRows) }) };
+        if (call === 2) return { from: () => ({ where: () => ({ orderBy: vi.fn().mockResolvedValue(ruleRows) }) }) };
+        return { from: () => ({ where: () => ({ limit: vi.fn().mockResolvedValue(memberRows) }) }) };
       });
+    }
 
-      const candidates: MemberCandidate[] = [
-        { memberId: "m1", skills: ["welding"], seniorityYears: 2, available: true },
-        { memberId: "m2", skills: ["welding"], seniorityYears: 10, available: true },
-      ];
+    it("ranks the organization's active members by recorded seniority (DEF-0B6-CMP-DISPATCH-RULES-ENGINE-NEVER-APPLIED)", async () => {
+      chainSelects(
+        [{ id: "req-1", orgId: "org-1", requiredSkills: ["welding"], requestedWorkers: 1 }],
+        [{ ruleType: "seniority", ruleDefinition: {}, priority: 1 }],
+        [{ id: "m1", name: "A", seniority: 2 }, { id: "m2", name: "B", seniority: 10 }],
+      );
+      const ranking = await rankCandidates("org-1", "req-1");
+      expect(ranking.status).toBe("ranked");
+      expect(ranking.candidates.map((c) => c.memberId)).toEqual(["m2", "m1"]);
+      // Nothing records skills or availability: candidates carry null, never an assumed value.
+      expect(ranking.candidates[0]).toMatchObject({ skills: null, available: null });
+    });
 
-      const ranked = await rankCandidates("org-1", "req-1", candidates);
-      expect(ranked[0].memberId).toBe("m2"); // higher seniority
-      expect(ranked[0].score).toBeGreaterThan(ranked[1].score);
+    it("is unranked when the configured rules need data nothing records", async () => {
+      chainSelects(
+        [{ id: "req-1", orgId: "org-1", requiredSkills: null, requestedWorkers: 1 }],
+        [{ ruleType: "availability", ruleDefinition: {}, priority: 1 }],
+        [{ id: "m1", name: "A", seniority: 5 }],
+      );
+      const ranking = await rankCandidates("org-1", "req-1");
+      expect(ranking.status).toBe("unranked");
+      expect(ranking.candidates[0].rank).toBeNull();
     });
 
     it("throws when request not found", async () => {
-      const requestWhere = vi.fn().mockResolvedValue([]);
-      const requestFrom = vi.fn().mockReturnValue({ where: requestWhere });
-      mocks.mockDb.select.mockReturnValue({ from: requestFrom });
-
-      await expect(
-        rankCandidates("org-1", "nonexistent", [])
-      ).rejects.toThrow("Dispatch request not found.");
-    });
-
-    it("handles null requiredSkills via fallback (Batch 35)", async () => {
-      const requestWhere = vi.fn().mockResolvedValue([
-        { id: "req-1", orgId: "org-1", requiredSkills: null, requestedWorkers: 1 },
-      ]);
-      const requestFrom = vi.fn().mockReturnValue({ where: requestWhere });
-
-      const rulesOrderBy = vi.fn().mockResolvedValue([
-        { ruleType: "seniority", ruleDefinition: {}, priority: 1 },
-      ]);
-      const rulesWhere = vi.fn().mockReturnValue({ orderBy: rulesOrderBy });
-      const rulesFrom = vi.fn().mockReturnValue({ where: rulesWhere });
-
-      let callCount = 0;
-      mocks.mockDb.select.mockImplementation(() => {
-        callCount++;
-        if (callCount === 1) return { from: requestFrom };
-        return { from: rulesFrom };
-      });
-
-      const candidates: MemberCandidate[] = [
-        { memberId: "m1", skills: ["welding"], seniorityYears: 5, available: true },
-      ];
-
-      const ranked = await rankCandidates("org-1", "req-1", candidates);
-      expect(ranked).toHaveLength(1);
-      expect(ranked[0].score).toBeGreaterThanOrEqual(0);
+      chainSelects([], [], []);
+      await expect(rankCandidates("org-1", "nonexistent")).rejects.toThrow("Dispatch request not found.");
     });
   });
 

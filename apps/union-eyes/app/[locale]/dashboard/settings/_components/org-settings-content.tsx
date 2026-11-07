@@ -852,6 +852,9 @@ export default function OrgSettingsContent() {
                   <p className="mt-1">{isFrench
                     ? 'Les options de sécurité ci-dessous ne sont pas appliquées par les mécanismes de connexion, de session ou de mot de passe. Ne les considérez pas comme des protections actives.'
                     : 'The security options below are not enforced by sign-in, session or password mechanisms. Do not rely on them as active protections.'}</p>
+                  <p className="mt-1">{isFrench
+                    ? 'Elles ne peuvent pas être modifiées ici : la plateforme refuse d’enregistrer un contrôle qu’elle n’applique pas. Les valeurs affichées sont celles enregistrées auparavant.'
+                    : 'They cannot be changed here: the platform refuses to save a control it does not enforce. The values shown are what was stored before.'}</p>
                   {notEnforced.length > 0 && (
                     <p className="mt-2 break-words">{isFrench ? 'Champs enregistrés sans application : ' : 'Saved but unenforced fields: '}{notEnforced.join(', ')}</p>
                   )}
@@ -868,6 +871,7 @@ export default function OrgSettingsContent() {
                         type="checkbox"
                         checked={orgSettings.security.enforceStrongPasswords}
                         onChange={(e) => handleInputChange("security", "enforceStrongPasswords", e.target.checked)}
+                        disabled
                         aria-label="Enforce strong passwords"
                         className="sr-only peer"
                       />
@@ -885,6 +889,7 @@ export default function OrgSettingsContent() {
                         type="checkbox"
                         checked={orgSettings.security.requireMFA}
                         onChange={(e) => handleInputChange("security", "requireMFA", e.target.checked)}
+                        disabled
                         aria-label="Require multi-factor authentication"
                         className="sr-only peer"
                       />
@@ -899,6 +904,7 @@ export default function OrgSettingsContent() {
                     <select
                       value={orgSettings.security.sessionTimeout}
                       onChange={(e) => handleInputChange("security", "sessionTimeout", parseInt(e.target.value))}
+                      disabled
                       aria-label="Session timeout duration"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
@@ -919,6 +925,7 @@ export default function OrgSettingsContent() {
                           {domain}
                           <button
                             type="button"
+                            disabled
                             aria-label={`Remove ${domain}`}
                             onClick={() => {
                               const newDomains = orgSettings.security.allowedDomains.filter((_, i) => i !== index);
@@ -943,13 +950,14 @@ export default function OrgSettingsContent() {
                           }
                         }}
                         placeholder="example.org"
+                        disabled
                         aria-label="Add an allowed email domain"
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       <button
                         type="button"
                         onClick={addDomain}
-                        disabled={domainDraft.trim() === ""}
+                        disabled
                         className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
                       >
                         {isFrench ? 'Ajouter' : 'Add'}
@@ -965,6 +973,8 @@ export default function OrgSettingsContent() {
                     <textarea
                       value={orgSettings.security.ipWhitelist}
                       onChange={(e) => handleInputChange("security", "ipWhitelist", e.target.value)}
+                      disabled
+                      aria-label="IP allowlist"
                       placeholder={t('settings.ipWhitelistPlaceholder')}
                       rows={4}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"

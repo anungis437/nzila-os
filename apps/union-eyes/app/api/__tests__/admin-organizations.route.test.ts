@@ -97,106 +97,76 @@ describe('admin/organizations route', () => {
     expect(mockDb.select).not.toHaveBeenCalled();
   });
 
-  it('runs all three reads as the system role, in one system transaction', async () => {
+  it('runs one read, of the organizations table only, as the system role in one system transaction', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push([], [], []);
+    m.selectQueue.push([]);
     await GET(new NextRequest('http://localhost/api/admin/organizations'));
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
-    expect(m.openAtSelect).toEqual([1, 1, 1]);
+    expect(m.openAtSelect).toEqual([1]);
+    expect(mockDb.select).toHaveBeenCalledTimes(1);
   });
 
-  it('GET returns mapped organizations with live counts and contacts', async () => {
+  // Issue #1116: platform staff manage tenancy and operational metadata, never tenant content.
+  it('GET returns tenancy metadata only: no member counts, no president or administrator names or e-mail addresses', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push(
-      [
-        {
-          id: 'org_1',
-          name: 'Local 100',
-          slug: 'local-100',
-          organizationType: 'local',
-          provinceTerritory: 'ON',
-          memberCount: 80,
-          activeMemberCount: 70,
-          status: 'active',
-        },
-      ],
-      [{ organizationId: 'org_1', total: 120, active: 110 }],
-      [{ organizationId: 'org_1', name: 'Alex President', email: 'alex@example.com', role: 'president' }],
-    );
+    m.selectQueue.push([
+      {
+        id: 'org_1',
+        name: 'Local 100',
+        slug: 'local-100',
+        organizationType: 'local',
+        provinceTerritory: 'ON',
+        parentId: 'fed_1',
+        status: 'active',
+        createdAt: new Date('2026-01-02T00:00:00Z'),
+        updatedAt: new Date('2026-02-03T00:00:00Z'),
+        // Fields a mis-built query might carry: they must not reach the caller.
+        memberCount: 80,
+        activeMemberCount: 70,
+      },
+    ]);
 
     const json = (await GET(new NextRequest('http://localhost/api/admin/organizations'))) as any[];
-    expect(json).toHaveLength(1);
-    expect(json[0]).toMatchObject({
-      id: 'org_1',
-      name: 'Local 100',
-      memberCount: 120,
-      activeCount: 110,
-      president: 'Alex President',
-      contact: 'alex@example.com',
-    });
+    expect(json).toEqual([
+      {
+        id: 'org_1',
+        number: 'local-100',
+        name: 'Local 100',
+        organizationType: 'local',
+        region: 'ON',
+        parentId: 'fed_1',
+        status: 'active',
+        createdAt: '2026-01-02T00:00:00.000Z',
+        updatedAt: '2026-02-03T00:00:00.000Z',
+      },
+    ]);
+    for (const key of ['memberCount', 'activeCount', 'president', 'contact', 'email']) expect(json[0]).not.toHaveProperty(key);
+  });
+
+  it('does not import or query the membership table', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const source = readFileSync(resolve(__dirname, '../admin/organizations/route.ts'), 'utf8');
+    expect(source).not.toContain('organizationMembers');
+    expect(source).not.toMatch(/memberCount|activeMemberCount|email/);
   });
 
   it('GET supports search parameter and still returns response', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push([], [], []);
+    m.selectQueue.push([]);
     const json = await GET(
       new NextRequest('http://localhost/api/admin/organizations?search=local'),
     );
     expect(Array.isArray(json)).toBe(true);
   });
 
-  it('GET falls back to table counts when live counts missing', async () => {
+  it('GET reports a missing region, parent and dates as empty or null, and keeps an inactive status', async () => {
     const { GET } = await loadRoute();
-    m.selectQueue.push(
-      [
-        {
-          id: 'org_2',
-          name: 'Local 200',
-          slug: 'local-200',
-          organizationType: 'local',
-          provinceTerritory: null,
-          memberCount: 45,
-          activeMemberCount: 40,
-          status: 'inactive',
-        },
-      ],
-      [],
-      [],
-    );
+    m.selectQueue.push([
+      { id: 'org_2', name: 'Local 200', slug: 'local-200', organizationType: 'local', provinceTerritory: null, parentId: null, status: 'inactive', createdAt: null, updatedAt: null },
+    ]);
 
     const json = (await GET(new NextRequest('http://localhost/api/admin/organizations'))) as any[];
-    expect(json[0]).toMatchObject({
-      memberCount: 45,
-      activeCount: 40,
-      region: '',
-      status: 'inactive',
-    });
-  });
-
-  it('GET keeps first contact when multiple contacts exist', async () => {
-    const { GET } = await loadRoute();
-    m.selectQueue.push(
-      [
-        {
-          id: 'org_1',
-          name: 'Local 100',
-          slug: 'local-100',
-          organizationType: 'local',
-          provinceTerritory: 'ON',
-          memberCount: 80,
-          activeMemberCount: 70,
-          status: 'active',
-        },
-      ],
-      [{ organizationId: 'org_1', total: 80, active: 70 }],
-      [
-        { organizationId: 'org_1', name: 'First Contact', email: 'first@example.com', role: 'president' },
-        { organizationId: 'org_1', name: 'Second Contact', email: 'second@example.com', role: 'admin' },
-      ],
-    );
-
-    const json = (await GET(new NextRequest('http://localhost/api/admin/organizations'))) as any[];
-    expect(json[0].president).toBe('First Contact');
-    expect(json[0].contact).toBe('first@example.com');
+    expect(json[0]).toMatchObject({ region: '', parentId: null, createdAt: null, updatedAt: null, status: 'inactive' });
   });
 });

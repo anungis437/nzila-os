@@ -27,6 +27,8 @@ import {
 // affirm the exact currently configured notice before a consent record is written.
 const locationConsentSchema = z.object({
   noticeVersion: z.string().min(1).max(10),
+  // The digest GET served with the notice: the acknowledgement names the exact text, not only its version label.
+  noticeDigest: z.string().regex(/^[a-f0-9]{64}$/),
   acknowledged: z.literal(true),
   allowedDuringStrike: z.boolean().default(false),
   allowedDuringEvents: z.boolean().default(false),
@@ -54,10 +56,10 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     if (!parsed.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
-        'The current noticeVersion, acknowledged: true and boolean context permissions are required; client-authored notice text is not accepted',
+        'The current noticeVersion and noticeDigest, acknowledged: true and boolean context permissions are required; client-authored notice text is not accepted',
       );
     }
-    if (parsed.data.noticeVersion !== notice.version) {
+    if (parsed.data.noticeVersion !== notice.version || parsed.data.noticeDigest !== notice.digest) {
       return NextResponse.json(
         { error: 'Consent notice has changed; review and acknowledge the current version' },
         { status: 409, headers: { 'Cache-Control': 'no-store' } },
@@ -81,6 +83,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
           purposeDescription,
           consentText,
           noticeVersion: notice.version,
+          noticeDigest: notice.digest,
           allowedDuringStrike,
           allowedDuringEvents,
           ipAddress,
@@ -94,7 +97,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
         action: 'location.consent.grant',
         resourceType: 'member_location_consent',
         resourceId: granted.id,
-        details: { purpose, noticeVersion: notice.version, allowedDuringStrike, allowedDuringEvents },
+        details: { purpose, noticeVersion: notice.version, noticeDigest: notice.digest, allowedDuringStrike, allowedDuringEvents },
       });
       return granted;
     });
@@ -154,6 +157,7 @@ export const GET = withApiAuth(async (req: NextRequest) => {
         purpose: notice.purpose,
         purposeDescription: notice.purposeDescription,
         consentText: notice.consentText,
+        digest: notice.digest,
       } : null,
       consentGrantAvailable: notice !== null,
     }, { headers: { 'Cache-Control': 'no-store' } });

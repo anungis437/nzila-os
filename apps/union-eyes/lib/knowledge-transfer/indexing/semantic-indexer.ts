@@ -26,7 +26,7 @@ import {
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
-import { writeKnowledgeBaseEmbedding } from '@/lib/ai/knowledge-base-embeddings';
+import { eraseKnowledgeBaseEmbeddings, writeKnowledgeBaseEmbedding } from '@/lib/ai/knowledge-base-embeddings';
 import { KNOWLEDGE_BASE_EMBEDDING, VectorSearchUnavailableError, vectorColumnReady } from '@/lib/ai/vector-readiness';
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import { logger } from '@/lib/logger';
@@ -129,7 +129,9 @@ export async function indexExitInterview(
           ),
         )
         .returning({ id: knowledgeBase.id });
-      await audit(tx, 'exit_interview.index.skipped', { reason, deactivatedKnowledgeBaseIds: deactivated.map((d) => d.id) });
+      // Its embedding, a derivative of the interview text, is erased with it.
+      const erasedEmbeddingIds = await eraseKnowledgeBaseEmbeddings(tx, { organizationId: orgId, sourceType: 'exit_interview', sourceId: interviewId });
+      await audit(tx, 'exit_interview.index.skipped', { reason, deactivatedKnowledgeBaseIds: deactivated.map((d) => d.id), erasedEmbeddingIds });
       return { indexed: false, reason };
     });
 

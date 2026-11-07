@@ -46,6 +46,9 @@ export async function createDocumentDatabase(): Promise<PGlite> {
   await pg.exec('CREATE UNIQUE INDEX idx_document_versions_unique ON document_versions (document_id, version_no)');
   const migration = readFileSync(join(__dirname, '..', '..', '..', 'db', 'migrations-platform', '0022_document_intake_and_transcription.sql'), 'utf8');
   for (const statement of migration.split('--> statement-breakpoint')) if (statement.trim()) await pg.exec(statement);
+  // Platform 0080: the matter an intake was opened for.
+  const matterBinding = readFileSync(join(__dirname, '..', '..', '..', 'db', 'migrations-platform', '0080_document_intake_matter_binding.sql'), 'utf8');
+  for (const statement of matterBinding.split('--> statement-breakpoint')) if (statement.trim()) await pg.exec(statement);
   return pg;
 }
 
