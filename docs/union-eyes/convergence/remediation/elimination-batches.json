@@ -10612,6 +10612,319 @@
       ]
     },
     {
+      "id": "B134-F02-STALE-REGISTER-CREDITS-PKI-FINANCE-SUBSCRIPTION",
+      "family": "Register text that lagged already-landed source fixes: PKI workflow retirement, finance mandate resource-scoping, subscription mandate-bound authority",
+      "evidenceCommit": "150e8b5eb",
+      "items": [
+        {
+          "prefix": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
+            "apps/union-eyes/app/api/admin/pki/workflows/route.ts",
+            "apps/union-eyes/app/api/__tests__/admin-pki-retired.route.test.ts"
+          ],
+          "explanation": "The register's defect text describes a process-local workflow map that is lost on restart and not shared across instances. That map is no longer reachable: /api/admin/pki/workflows and /api/admin/pki/workflows/[id] (GET/PUT/DELETE) were already retired to 501 in an earlier, already-merged batch (commit a0404b79b, mismatch census batch 5, predates this session) rather than left pointing at the unreliable in-memory store. admin-pki-retired.route.test.ts proves all 3 methods answer 501 NOT_IMPLEMENTED and never call the database, the RLS context helpers, or any statement executor -- the broken state is fully retired, not merely hidden. No new workflow persistence was built in its place; the capability is honestly absent (501) rather than present-but-unreliable. 8/8 passing."
+        },
+        {
+          "prefix": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/ai/pension/members/[id]/projection/route.ts",
+            "apps/union-eyes/lib/finance/finance-view-mandate.ts",
+            "apps/union-eyes/lib/finance/require-live-financial-mandate.ts",
+            "apps/union-eyes/lib/finance/principal-financial-authority.ts",
+            "apps/union-eyes/lib/finance/__tests__/principal-financial-authority.test.ts",
+            "apps/union-eyes/lib/finance/__tests__/finance-view-mandate.test.ts"
+          ],
+          "explanation": "The register's remaining text said the view mandate was not resource-scoped to a plan or member and the pension projection read any member by id for an officer. The route now threads the specific memberId as resourceId through financeViewMandateDenial -> assertFinanceViewMandate -> requireLiveFinancialMandate -> assertPrincipalFinancialAuthority, whose decision function refuses a mandate scoped to a different resourceId (NOT_FOUND) -- confirmed both by direct source reading of the full call chain and by principal-financial-authority.test.ts's adversarial case asserting exactly that cross-resource refusal, plus finance-view-mandate.test.ts proving the resourceId is threaded correctly end to end at the wiring layer. 2/2 plus the full suite passing (61 total across related files)."
+        },
+        {
+          "prefix": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/billing/subscriptions/route.ts",
+            "apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/billing-subscriptions-mandates.route.test.ts"
+          ],
+          "explanation": "The register described subscriptions readable at the member floor with pause/resume/cancel at a role-title floor and no office named with contract authority. The collection route now requires officer for GET and admin for POST; the item route requires officer plus a resource-scoped finance:view mandate for GET, and FINANCIAL_MEMBER_DATA_ROLES plus a resource-scoped finance:prepare mandate for PATCH/DELETE, with commercial terms (status, seats, discount, etc.) excluded from the PATCH body entirely (only free-form metadata, with server-owned provenance keys protected against overwrite). billing-subscriptions-mandates.route.test.ts adversarially proves GET/PATCH/DELETE each refuse without the resource-specific mandate before any read, mutation or audit. 7/7 passing."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B1-PKI-WORKFLOW-IN-MEMORY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/admin/pki/workflows/[id]/route.ts",
+            "apps/union-eyes/app/api/admin/pki/workflows/route.ts",
+            "apps/union-eyes/app/api/__tests__/admin-pki-retired.route.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B2-AI-FINANCE-ROLE-TITLE-GATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/ai/pension/members/[id]/projection/route.ts",
+            "apps/union-eyes/lib/finance/finance-view-mandate.ts",
+            "apps/union-eyes/lib/finance/require-live-financial-mandate.ts",
+            "apps/union-eyes/lib/finance/principal-financial-authority.ts",
+            "apps/union-eyes/lib/finance/__tests__/principal-financial-authority.test.ts",
+            "apps/union-eyes/lib/finance/__tests__/finance-view-mandate.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B3-SUBSCRIPTION-ROLE-TITLE-AND-MEMBER-READ",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/billing/subscriptions/route.ts",
+            "apps/union-eyes/app/api/billing/subscriptions/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/billing-subscriptions-mandates.route.test.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B136-ML-SLA-SCORE-STALE-REGISTER-CREDIT",
+      "family": "A second register text lagging an already-landed fix, found while surveying the DEF-0B9-ML family for similar staleness",
+      "evidenceCommit": "10be7585c",
+      "items": [
+        {
+          "prefix": "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/ml/sla-breach-score.ts",
+            "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+            "apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts"
+          ],
+          "explanation": "Already fixed on main by commit 220dc70c9 ('eliminate caller-controlled SLA risk inputs and quarantine legacy predictions'), predating this session, never ledger-credited. The route's body schema now comments 'Legacy fields are accepted for compatibility, but are NOT authoritative scoring inputs' for transitionCount/hasPreviousBreaches, and computeVerifiedCaseSlaRisk always passes transitionCount:0, hasPreviousBreaches:false regardless of the caller's body, scoring only from priority and hoursRemaining derived server-side from the claim's own stored status/timestamps (caseFacts). A dedicated test ('verified case-facts-only SLA scoring' > 'uses only priority and deadline, not caller-provided history') proves this adversarially. 6/6 passing."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B9-ML-SLA-SCORE-IS-LITERAL-WEIGHTS-OVER-CALLER-VALUES-PRESENTED-AS-A-MODEL-WITH-CONSTANT-CONFIDENCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/ml/sla-breach-score.ts",
+            "apps/union-eyes/app/api/ml/predictions/sla-breach-risk/route.ts",
+            "apps/union-eyes/lib/ml/__tests__/sla-breach-score.test.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "B137-MAIN-STALE-REGISTER-CREDITS-WIDE-SWEEP",
+      "family": "A systematic sweep: grep every DEF-0B defect ID literally cited in any .ts/.tsx file, cross-referenced against the still-actionable list -- 15 more defects whose fix already exists on plain main (not Wave 1), predating this whole session, never ledger-credited",
+      "evidenceCommit": "54e91e3ae",
+      "items": [
+        {
+          "prefix": "DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/__tests__/cba-benchmark-snapshot.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+          ],
+          "explanation": "Already fixed on main, predating this session, never ledger-credited. Both test files cite this defect ID directly and are unchanged relative to origin/main (not a Wave 1 fix). 2 test files, confirmed passing this session."
+        },
+        {
+          "prefix": "DEF-0B5-UNSUBSCRIBE-WRITES-NOT-ATOMIC",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts"
+          ],
+          "explanation": "Already fixed on main, predating this session, never ledger-credited. b55-workflow-integrity.test.ts cites this defect ID directly, unchanged relative to origin/main. Confirmed passing this session."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts"
+          ],
+          "explanation": "Already fixed on main, predating this session, never ledger-credited. f05-commercial-bounds.contract.test.ts cites this defect ID directly, unchanged relative to origin/main. Confirmed passing this session."
+        },
+        {
+          "prefix": "DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts"
+          ],
+          "explanation": "Already fixed on main, predating this session, never ledger-credited. b51-sso-entitlements.test.ts cites this defect ID directly, unchanged relative to origin/main. Confirmed passing this session."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/public-intake/guard.ts",
+            "apps/union-eyes/lib/api/__tests__/f08-public-limiters.contract.test.ts"
+          ],
+          "explanation": "Already fixed on main, predating this session, never ledger-credited. lib/public-intake/guard.ts and its contract test are unchanged relative to origin/main; multiple ICRA route tests cite this defect ID directly. Confirmed passing this session (21 total files in this verification pass)."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/icra/checkout/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts"
+          ],
+          "explanation": "Already fixed on main via commit 3d8add96a ('bind ICRA published copy and checkout to one CAD price authority'), predating this session, never ledger-credited. The route's own comment explains the localhost-fallback refusal; confirmed present via direct source read (grep for 'localhost:3000' on origin/main). Confirmed passing this session."
+        },
+        {
+          "prefix": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ],
+          "explanation": "Already fixed on main, predating this session, never ledger-credited. The SCIM Users route now declares auth:{machine:scimCaller} (a real bearer-token machine credential, lib/scim/route-support.ts), verified via direct source read. Unchanged relative to origin/main. 35/35 passing this session (scim-users.route.test.ts)."
+        },
+        {
+          "prefix": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ],
+          "explanation": "Same route as the bearer-authentication fix above: provisioning now writes a separate public.scim_provisioned_users directory (platform 0059) that is pending, never active, and not linked to any member account, per the route's own documented comment and lib/scim/provisioned-members.ts. Confirmed via direct source read. Unchanged relative to origin/main."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
+            "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts"
+          ],
+          "explanation": "Already fixed on main, predating this session, never ledger-credited. reconciliation-service.test.ts cites this defect ID directly, unchanged relative to origin/main. Confirmed passing this session."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts"
+          ],
+          "explanation": "Already fixed on main, predating this session, never ledger-credited. social-media-service.test.ts cites this defect ID directly, unchanged relative to origin/main. Confirmed passing this session."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
+            "apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts"
+          ],
+          "explanation": "Same social-media-service.ts fix as above; both test files cite this defect ID directly, unchanged relative to origin/main. Confirmed passing this session."
+        },
+        {
+          "prefix": "DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/export-audit.ts",
+            "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts"
+          ],
+          "explanation": "Already fixed on main, predating this session, never ledger-credited. lib/social-media/export-audit.ts exists as a dedicated export-audit module; f05-commercial-bounds.contract.test.ts cites this defect ID directly, unchanged relative to origin/main. Confirmed passing this session."
+        }
+      ],
+      "touches": [
+        {
+          "defectId": "DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/__tests__/cba-benchmark-snapshot.route.test.ts",
+            "apps/union-eyes/lib/services/__tests__/s24-cba-visibility-and-analytics.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B5-UNSUBSCRIBE-WRITES-NOT-ATOMIC",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/services/__tests__/b55-workflow-integrity.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B6-EMP-TIMESHEET-INGEST-STEWARD-FLOOR-UNBOUNDED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONFIGURATION-ENABLED-BY-DEFAULT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/sso/__tests__/b51-sso-entitlements.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B8-ICRA-RATE-LIMITS-PER-PROCESS-AND-KEYED-ON-REQUEST-HEADER-ADDRESS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/public-intake/guard.ts",
+            "apps/union-eyes/lib/api/__tests__/f08-public-limiters.contract.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B8-ICRA-CHECKOUT-REDIRECT-DEFAULTS-TO-LOCALHOST-AND-PRICE-MAY-DIFFER-FROM-DISPLAYED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/icra/checkout/route.ts",
+            "apps/union-eyes/app/api/__tests__/icra-checkout.route.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-ROUTE-HAS-NO-BEARER-AUTHENTICATION-AND-READS-NO-SCIM-CONFIGURATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/app/api/__tests__/scim-users.route.test.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-IDS-SCIM-PROVISION-STORES-THE-USERNAME-STRING-AS-THE-USER-ID-AND-ACTIVATES-WITHOUT-ACCEPTANCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/scim/v2/[organizationId]/Users/route.ts",
+            "apps/union-eyes/lib/scim/provisioned-members.ts",
+            "apps/union-eyes/db/__tests__/scim-provisioning.postgres.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-PRP-RECONCILIATION-RUNS-ARE-NOT-REPEATABLE-AND-THE-BILLING-PERIOD-IS-NOT-BOUND-TO-THE-ORGANIZATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/services/platform-economics/reconciliation-service.ts",
+            "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-SOC-PUBLISH-RECORDS-THE-ROW-AFTER-THE-EXTERNAL-POST-AUDITS-COMPLETED-WHEN-EVERY-PLATFORM-FAILED-AND-RETURNS-PLATFORM-ERROR-TEXT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-SOC-ANALYTICS-AND-ENGAGEMENT-FIGURES-HAVE-NO-WRITER-SO-EVERY-METRIC-IS-ZERO-OR-EMPTY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/social-media-service.ts",
+            "apps/union-eyes/lib/social-media/__tests__/social-media-service.test.ts",
+            "apps/union-eyes/app/api/__tests__/social-media-analytics.route.test.ts"
+          ]
+        },
+        {
+          "defectId": "DEF-0B11-SOC-ANALYTICS-EXPORT-IS-A-DELETE-VERB-READ-AT-MEMBER-FLOOR-WITH-UNBOUNDED-ROWS-UNNEUTRALISED-CSV-AND-MISMATCHED-COLUMNS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/social-media/export-audit.ts",
+            "apps/union-eyes/lib/api/__tests__/f05-commercial-bounds.contract.test.ts"
+          ]
+        }
+      ]
+    },
+    {
       "id": "B131-F07-ARBITRATION-CASE-AUTHORITY-WIRING-PROOF",
       "family": "Authorization and object-level authority: closing the read-filter and delete-block gap B98 left open for arbitration records by proving the existing crud-factory wiring end to end",
       "evidenceCommit": "9b08adc4d",
