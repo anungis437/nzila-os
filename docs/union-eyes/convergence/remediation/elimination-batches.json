@@ -11130,7 +11130,7 @@
     {
       "id": "B140-F07-F11-VERIFIED-CLOSURES-AND-COHORT-SUPPRESSION",
       "family": "Verification credits for already-merged authorization/consent fixes, plus new small-cell suppression for succession reporting",
-      "evidenceCommit": null,
+      "evidenceCommit": "e0baf8ee1",
       "items": [
         {
           "prefix": "DEF-0B7-COGB-INTERVIEW-DERIVED-ROLE-OUTPUT-IDENTIFIES-SINGLE-DEPARTING-PERSON",
