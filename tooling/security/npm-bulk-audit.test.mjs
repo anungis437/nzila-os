@@ -120,9 +120,9 @@ test('three-space snapshot keys cannot disappear from the audited dependency gra
 })
 
 test('five-space malformed snapshot keys cannot disappear from the audited graph', () => {
-  withLockfile('lockfileVersion: 9.0\\nsnapshots:\\n  undici@7.29.1:\\n     node-forge@1.4.0:\\n', (file) =>
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n     node-forge@1.4.0:\n', (file) =>
     assert.throws(() => parseLockfilePackages(file), /Malformed snapshot indentation/))
-  withLockfile('lockfileVersion: 9.0\\nsnapshots:\\n  undici@7.29.1:\\n    dependencies:\\n      node-forge: 1.4.0\\n', (file) =>
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n    dependencies:\n      node-forge: 1.4.0\n', (file) =>
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici']))
 })
 
