@@ -589,6 +589,13 @@
       "when": 1759370020000,
       "tag": "0082_platform_staff_mandate_kind",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1759370030000,
+      "tag": "0083_reward_wallet_ledger_drop_legacy_columns",
+      "breakpoints": true
     }
   ]
 }

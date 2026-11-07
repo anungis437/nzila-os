@@ -137,12 +137,6 @@ class RewardWalletLedger(BaseModel):
     source_id = models.UUIDField(null=True, blank=True)
     memo = models.TextField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
-    award_id = models.UUIDField(null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    points_change = models.IntegerField(null=True, blank=True)
-    reference_id = models.CharField(max_length=255, null=True, blank=True)
-    reference_type = models.CharField(max_length=50, null=True, blank=True)
-    transaction_type = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         db_table = "reward_wallet_ledger"

@@ -866,8 +866,13 @@
         "sha256": "f0ff8784157a9247676b52958b6acb413fd61d5dd32890626abbb1a1ba6aaaef",
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-gate0-final-convergence",
-        "note": "Widens ue_authority_mandates_kind_chk and ue_authority_rule_domain_chk to accept 'platform_staff', so the kernel can represent (never issues) a platform-wide mandate for DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ / DEF-0B10-OPL-14. No row created, no behavior change; see docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md for the remaining institutional step."
-      }
+        "note": "Widens ue_authority_mandates_kind_chk and ue_authority_rule_domain_chk to accept 'platform_staff', so the kernel can represent (never issues) a platform-wide mandate for DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ / DEF-0B10-OPL-14. No row created, no behavior change; see docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md for the remaining institutional step."      },
+      {
+        "tag": "0083_reward_wallet_ledger_drop_legacy_columns",
+        "sha256": "37fe1c742215eb473827b5015b182610474bf0a9afc5b7d6fc46328afbc6c1de",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Drops six nullable columns (award_id, description, points_change, reference_id, reference_type, transaction_type) left over from a superseded points-based reward_wallet_ledger shape that bootstrap V2's current Drizzle declaration never carried. Zero production TypeScript references any of the six; fails closed and refuses to run if any row still has non-null data in them. Restores agreement between the Django model and the Drizzle-canonical, bootstrap-v2 declaration (scripts/bootstrap-v2/reward-source.test.ts)."      }
     ]
   }
 }
