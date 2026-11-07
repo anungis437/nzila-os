@@ -14,5 +14,6 @@ const { GET, PATCH, DELETE } = crudRoutes({
   itemRoute: true,
   readRole: 'member',
   writeRole: 'steward',
+  writableFields: ['employerId', 'worksiteId', 'bargainingUnitId', 'employmentStatus', 'employmentType', 'hireDate', 'seniorityDate', 'terminationDate', 'expectedReturnDate', 'jobTitle', 'jobCode', 'jobClassification', 'jobLevel', 'department', 'division', 'shiftType', 'shiftStartTime', 'shiftEndTime', 'operatesWeekends', 'operates24Hours', 'supervisorName', 'supervisorId', 'isProbationary', 'probationEndDate', 'customFields', 'notes'],
 });
 export { GET, PATCH, DELETE };

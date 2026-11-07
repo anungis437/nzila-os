@@ -14,5 +14,6 @@ const { GET, POST } = crudRoutes({
   unscopedByDesign: 'data subject requests are subject-owned and refused without an owner column by CRUD governance; no organization discriminator',
   readRole: 'member',
   writeRole: 'steward',
+  writableFields: ['userId', 'requestType', 'province', 'requestDescription', 'requestedDataTypes'],
 });
 export { GET, POST };

@@ -13,5 +13,6 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',
+  writableFields: ['metricType', 'metricName', 'metricValue', 'metricUnit', 'periodType', 'periodStart', 'periodEnd', 'metadata', 'comparisonValue', 'trend'],
 });
 export { GET, POST };
