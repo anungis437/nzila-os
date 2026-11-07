@@ -381,3 +381,24 @@ test('tab-indented snapshot records fail closed instead of disappearing from aud
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  node-forge@1.4.0:\n    dependencies:\n      undici: 7.29.1\n', (file) =>
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['node-forge']))
 })
+
+test('prototype-colliding installed package names remain in the registry request', async () => {
+  const originalFetch = globalThis.fetch
+  const packages = new Map([
+    ['__proto__', new Set(['1.0.0'])],
+    ['constructor', new Set(['2.0.0'])],
+    ['node-forge', new Set(['1.4.0'])],
+  ])
+  try {
+    globalThis.fetch = async (_url, options) => {
+      const body = JSON.parse(options.body)
+      assert.deepEqual(Object.keys(body).sort(), ['__proto__', 'constructor', 'node-forge'].sort())
+      assert.deepEqual(Object.getOwnPropertyDescriptor(body, '__proto__').value, ['1.0.0'])
+      assert.deepEqual(body.constructor, ['2.0.0'])
+      return { ok: true, status: 200, redirected: false, json: async () => ({}) }
+    }
+    assert.deepEqual(await fetchAdvisories(packages), {})
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
