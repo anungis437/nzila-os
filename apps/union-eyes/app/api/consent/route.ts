@@ -13,5 +13,6 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',
+  writableFields: ['subjectType', 'subjectId', 'purposeType', 'purposeDescription', 'legalBasis', 'consentGiven', 'consentMethod', 'consentText', 'consentVersion', 'consentDate', 'expiryDate'],
 });
 export { GET, POST };

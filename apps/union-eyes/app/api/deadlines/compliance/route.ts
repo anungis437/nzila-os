@@ -15,6 +15,7 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'member',
   writeRole: 'steward',
+  writableFields: ['claimId', 'deadlineRuleId', 'deadlineName', 'deadlineType', 'eventDate', 'originalDeadline', 'dueDate', 'priority'],
   // A due date sent as a calendar day ("2026-03-04") falls due at 23:59 that day in the organization's zone; a datetime is kept as sent.
   beforeCreate: (values, { organizationId }) => dayDeadlineFieldsAtEndOfDay(values, CLAIM_DEADLINE_DAY_FIELDS, organizationId),
 });

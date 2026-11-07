@@ -16,6 +16,7 @@ const { GET, PATCH, DELETE } = crudRoutes({
   paramName: 'pollId',
   readRole: 'member',
   writeRole: 'steward',
+  writableFields: ['question', 'description', 'options', 'status', 'allowMultipleVotes', 'requireAuthentication', 'showResultsBeforeVote', 'closesAt'],
   blockedPatchFields: ['publishedAt', 'totalVotes', 'uniqueVoters'],
   beforeUpdate: lifecycleBeforeUpdate('poll'),
 });
