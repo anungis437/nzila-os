@@ -39,6 +39,7 @@ vi.mock('@/lib/services/case-access-service', () => {
 })
 
 const { harness } = await import('./native-route-harness')
+const { ApiError, ErrorCode } = await import('@/lib/api/errors')
 
 type Row = Record<string, unknown>
 type One = (ctx: unknown) => Promise<{ data: Row }>
@@ -154,19 +155,19 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
 
   it('the item route answers not-found for a case the caller may not read, not forbidden', async () => {
     const error = await rejection(call(item().GET, steward, { id: arbitrationNoStanding }))
-    expect((error as { status?: number }).status).toBe(404)
+    expect((error as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.NOT_FOUND)
   })
 
   it('an organization never sees another organization\'s arbitration even with a matching case-access stub', async () => {
     const error = await rejection(call(item().GET, steward, { id: arbitrationOrgB }))
-    expect((error as { status?: number }).status).toBe(404)
+    expect((error as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.NOT_FOUND)
   })
 
   it('a read-only collaborator reads the arbitration but may not update it', async () => {
     const read = await call(item().GET, steward, { id: arbitrationReadOnly })
     expect(read.data.id).toBe(arbitrationReadOnly)
     const error = await rejection(call(item().PATCH, steward, { id: arbitrationReadOnly, body: { boardName: 'Renamed' } }))
-    expect((error as { status?: number }).status).toBe(403)
+    expect((error as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.FORBIDDEN)
   })
 
   it('the case owner may update their own arbitration', async () => {
@@ -176,15 +177,15 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
 
   it('DELETE refuses every caller unconditionally, including the case owner, before any row is read', async () => {
     const error = await rejection(call(item().DELETE, steward, { id: arbitrationOwned }))
-    expect((error as { status?: number }).status).toBe(409)
+    expect((error as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.CONFLICT)
     const error2 = await rejection(call(item().DELETE, otherSteward, { id: 'does-not-exist' }))
-    expect((error2 as { status?: number }).status).toBe(409)
+    expect((error2 as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.CONFLICT)
   })
 
   it('creating an arbitration requires edit authority on the named grievance, not only membership in its organization', async () => {
     const body = { grievanceId: caseReadOnly, arbitrationNumber: `NEW-${tag}`, boardName: 'Board', boardType: 'grievance' }
     const error = await rejection(call(collection().POST, steward, { body }))
-    expect((error as { status?: number }).status).toBe(403)
+    expect((error as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.FORBIDDEN)
     const created = await call(collection().POST, steward, { body: { ...body, grievanceId: caseOwned, arbitrationNumber: `NEW2-${tag}` } })
     expect(created.data.grievanceId).toBe(caseOwned)
   })
@@ -192,7 +193,6 @@ describe.skipIf(!URL)('arbitration case authority on the combined schema, as the
   it('creating an arbitration against another organization\'s grievance is refused before any case-access check', async () => {
     const body = { grievanceId: caseOrgB, arbitrationNumber: `CROSS-${tag}`, boardName: 'Board', boardType: 'grievance' }
     const error = await rejection(call(collection().POST, steward, { body }))
-    expect((error as { status?: number }).status).toBeGreaterThanOrEqual(400)
-    expect((error as { status?: number }).status).toBeLessThan(500)
+    expect((error as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.NOT_FOUND)
   })
 })
