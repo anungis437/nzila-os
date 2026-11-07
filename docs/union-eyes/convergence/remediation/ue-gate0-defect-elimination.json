@@ -1329,7 +1329,7 @@
       "newlyImplemented": 1,
       "outstandingAfter": 130,
       "partial": 0,
-      "evidenceCommit": null
+      "evidenceCommit": "da2a6f8e2b"
     }
   ],
   "entries": {
@@ -16788,7 +16788,7 @@
         {
           "batch": "B139-F05-AI-DATA-CLASS-REMAINING-SERVICES",
           "status": "IMPLEMENTED_PENDING_QUALIFICATION",
-          "evidenceCommit": null,
+          "evidenceCommit": "da2a6f8e2b",
           "files": [
             "apps/union-eyes/lib/services/ai/auto-classification-service.ts",
             "apps/union-eyes/lib/services/ai/clause-extraction-service.ts",

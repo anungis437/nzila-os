@@ -11069,7 +11069,7 @@
     {
       "id": "B139-F05-AI-DATA-CLASS-REMAINING-SERVICES",
       "family": "AI governed-data classification: the remaining services the B87/B89 mapping fix had not yet reached",
-      "evidenceCommit": null,
+      "evidenceCommit": "da2a6f8e2b",
       "items": [
         {
           "prefix": "DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
