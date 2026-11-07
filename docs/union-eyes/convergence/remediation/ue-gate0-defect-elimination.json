@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 652,
+    "implementedPendingQualification": 653,
     "partial": 24,
     "qualificationVerified": 0,
-    "unresolved": 125,
+    "unresolved": 124,
     "externalBlockers": 0
   },
   "batches": [
@@ -1348,6 +1348,15 @@
       "outstandingAfter": 125,
       "partial": 0,
       "evidenceCommit": "a127d9d3a"
+    },
+    {
+      "id": "B142-F12-ORG-CAMPAIGN-CLIENT-ROUTES-VERIFIED",
+      "family": "Verification credit: organizing campaign clients already call the real v1 endpoint, and the only item-path caller is deleted dead code",
+      "outstandingBefore": 125,
+      "newlyImplemented": 1,
+      "outstandingAfter": 124,
+      "partial": 0,
+      "evidenceCommit": null
     }
   ],
   "entries": {
@@ -19151,6 +19160,28 @@
           "files": [
             "apps/union-eyes/lib/services/external-data/wage-enrichment-service.ts",
             "apps/union-eyes/lib/services/external-data/__tests__/wage-enrichment-service.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B10-ORG-CLIENTS-CALL-CAMPAIGN-ITEM-AND-V2-ROUTES-THAT-ANSWER-NO-CAMPAIGN-DATA": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B142-F12-ORG-CAMPAIGN-CLIENT-ROUTES-VERIFIED",
+      "files": [
+        "apps/union-eyes/components/organizing/organizing-console.tsx",
+        "apps/union-eyes/components/organizing/campaign-detail-console.tsx",
+        "apps/union-eyes/components/organizing/organizing-consoles.test.tsx"
+      ],
+      "explanation": "VERIFIED (not new code), two independent historical fixes together close this: (1) commit 1df40bbe1 (\"visible retired capabilities\", Oct 28) repointed both OrganizingConsole and CampaignDetailConsole from the /api/v2/organizing/campaigns catch-all (which only ever answered a 410/deprecation notice) to the real /api/organizing/campaigns v1 collection route under the explicit banner \"Retired /api/v2 callers: twelve capabilities with a root route were repointed\"; organizing-consoles.test.tsx renders both components live and asserts via fetchMock.mock.calls that they call exactly '/api/organizing/campaigns?limit=100&page=1' / '&page=2', not any v2 path (19/19 passing). (2) commit 4bc1602e9 (\"mismatch census batch 4: dead code\") deleted components/organizing/LabourBoardFormGenerator.tsx -- the only caller of the missing /api/organizing/campaigns/<campaignId> item path -- as part of a declaration-level, zero-importer dead-code purge (134 files, ~49,800 lines, proven by a TypeScript import resolver over every entry point before deletion). No current file calls an organizing-campaigns item path (grepped the full source tree): the exploit/empty-state mechanism this defect named has no surviving code path.",
+      "history": [
+        {
+          "batch": "B142-F12-ORG-CAMPAIGN-CLIENT-ROUTES-VERIFIED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": null,
+          "files": [
+            "apps/union-eyes/components/organizing/organizing-console.tsx",
+            "apps/union-eyes/components/organizing/campaign-detail-console.tsx",
+            "apps/union-eyes/components/organizing/organizing-consoles.test.tsx"
           ]
         }
       ]

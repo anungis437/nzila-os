@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 706,
-    "engineeringRemaining": 71,
+    "engineeringCorrected": 707,
+    "engineeringRemaining": 70,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 26
   },
@@ -14300,9 +14300,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B142-F12-ORG-CAMPAIGN-CLIENT-ROUTES-VERIFIED",
+        "path": "apps/union-eyes/components/organizing/organizing-console.tsx; apps/union-eyes/components/organizing/campaign-detail-console.tsx; apps/union-eyes/components/organizing/organizing-consoles.test.tsx",
+        "explanation": "VERIFIED (not new code), two independent historical fixes together close this: (1) commit 1df40bbe1 (\"visible retired capabilities\", Oct 28) repointed both OrganizingConsole and CampaignDetailConsole from the /api/v2/organizing/campaigns catch-all (which only ever answered a 410/deprecation notice) to the real /api/organizing/campaigns v1 collection route under the explicit banner \"Retired /api/v2 callers: twelve capabilities with a root route were repointed\"; organizing-consoles.test.tsx renders both components live and asserts via fetchMock.mock.calls that they call exactly '/api/organizing/campaigns?limit=100&page=1' / '&page=2', not any v2 path (19/19 passing). (2) commit 4bc1602e9 (\"mismatch census batch 4: dead code\") deleted components/organizing/LabourBoardFormGenerator.tsx -- the only caller of the missing /api/organizing/campaigns/<campaignId> item path -- as part of a declaration-level, zero-importer dead-code purge (134 files, ~49,800 lines, proven by a TypeScript import resolver over every entry point before deletion). No current file calls an organizing-campaigns item path (grepped the full source tree): the exploit/empty-state mechanism this defect named has no surviving code path.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/components/organizing/organizing-consoles.test.tsx"
+      }
     },
     {
       "defectId": "DEF-0B10-ORG-ORGANIZER-IMPACT-ROUTE-IS-ORGANIZER-TASK-CRUD-NOT-IMPACT-METRICS",
