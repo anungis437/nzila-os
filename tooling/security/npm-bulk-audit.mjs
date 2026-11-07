@@ -199,7 +199,7 @@ export async function fetchAdvisories(pkgMap) {
   }
   // Partial-content and other non-200 2xx responses cannot certify a complete audit.
   // Check the actual HTTP status, not only the transport's `ok` flag.
-  if (!response.ok || (Number.isInteger(response.status) && response.status !== 200)) {
+  if (response.status !== 200 || response.ok !== true) {
     throw new Error(`Audit registry returned HTTP ${response.status}; a failed request is never an empty audit`)
   }
   let raw
