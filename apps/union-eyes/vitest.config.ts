@@ -1,6 +1,6 @@
 import { defineProject } from "vitest/config";
 import react from "@vitejs/plugin-react";
-import { heavyTests, sharedExclude, sharedResolve, sharedSetupFiles } from "./vitest.shared";
+import { censusTests, heavyTests, sharedExclude, sharedResolve, sharedSetupFiles } from "./vitest.shared";
 
 export default defineProject({
   plugins: [react()],
@@ -30,6 +30,6 @@ export default defineProject({
         statements: 99,
       },
     },
-    exclude: [...sharedExclude, ...heavyTests],
+    exclude: [...sharedExclude, ...heavyTests, ...censusTests],
   },
 } as unknown as Parameters<typeof defineProject>[0]);

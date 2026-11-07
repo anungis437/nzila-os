@@ -16,6 +16,7 @@ export default defineConfig({
       'apps/partners',
       'apps/union-eyes',
       'apps/union-eyes/vitest.heavy.config.ts',
+      'apps/union-eyes/vitest.census.config.ts',
       'apps/web',
       'apps/nacp-exams',
       'apps/zonga',
