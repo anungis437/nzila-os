@@ -3,19 +3,19 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 653,
-    "ledgerImplemented": 601,
+    "overlayImplemented": 678,
+    "ledgerImplemented": 626,
     "creditedByEarlierRuns": 52,
     "earlierRunCreditsWithIndependentRegressionEvidence": 21,
-    "overlayPartial": 71,
-    "ledgerPartial": 70,
-    "unresolvedByOverlay": 124,
+    "overlayPartial": 46,
+    "ledgerPartial": 40,
+    "unresolvedByOverlay": 99,
     "qualificationVerified": 0,
     "closed": 0
   },
   "agreement": {
-    "creditedByBoth": 601,
-    "sameBatchLabel": 573,
+    "creditedByBoth": 626,
+    "sameBatchLabel": 598,
     "differentBatchLabel": 28
   },
   "batchLabelDifferences": [
