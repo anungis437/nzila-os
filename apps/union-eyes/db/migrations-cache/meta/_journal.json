@@ -379,6 +379,13 @@
       "when": 1790500000000,
       "tag": "0056_external_authority_principal_precheck",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1790510000000,
+      "tag": "0057_pilot_demo_seeds_row_ids",
+      "breakpoints": true
     }
   ]
 }

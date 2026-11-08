@@ -8,9 +8,9 @@
 - **Branch:** main
 - **Commit:** local
 - **Short Commit:** local
-- **Generated:** 2026-11-08T05:55:07.152Z
+- **Generated:** 2026-09-09T15:52:22.410Z
 - **Migrations Directory:** `db/migrations`
-- **Total Migrations:** 120
+- **Total Migrations:** 97
 
 ## Migration Files
 
@@ -89,7 +89,7 @@
 | 0105 | 0105_correspondence_pipeline.sql | `7855d408...10ef63cf` | 6.68 KB | =========================================================================== |
 | 0106 | 0106_integration_fabric.sql | `8d983c5e...2edf8f42` | 10.40 KB | =========================================================================== |
 | 0107 | 0107_ue_policy_bindings.sql | `647a14f0...fc78c704` | 1.42 KB | ============================================================================= |
-| 0108 | 0108_rls_tenant_isolation_foundation.sql | `11ae2973...1fd28290` | 27.79 KB | ============================================================================= |
+| 0108 | 0108_rls_tenant_isolation_foundation.sql | `aba7074a...3328d766` | 21.62 KB | ============================================================================= |
 | 1770880372830 | 1770880372830_consolidate_chart_of_accounts_fixed.sql | `1f4b3853...106ce17e` | 10.59 KB | ============================================================================ |
 | 20260212 | 20260212_add_hris_tables_fixed.sql | `fba48701...41ece925` | 8.66 KB | Migration: HRIS Integration Tables (FIXED) |
 | 20260212 | 20260212_add_integration_framework_fixed.sql | `7235867e...fe0c086e` | 7.28 KB | Integration Framework Database Schema |
@@ -112,30 +112,7 @@
 | 20260508 | 20260508_fixup_post_0019_align_modern_schema.sql | `163e9a5f...88048bcf` | 5.59 KB | Fixup: align modern schema after 0019 drops + missing newer migrations. |
 | 20260509 | 20260509_fixup_auth_mfa_magic_invites.sql | `aac9d2ab...ef5411fe` | 3.01 KB | 20260509_fixup_auth_mfa_magic_invites.sql |
 | 20260521 | 20260521_fixup_icra_assessments_claim_columns.sql | `56960b63...e8457fba` | 0.85 KB | Fixup: add icra_assessments claim/payment columns that exist in Drizzle schema |
-| 20260909 | 20260909_strike_fund_disbursements_organization_id.sql | `6d3cc3b4...4a97b56a` | 5.48 KB | Round 58 Phase 0 (corrected): close the final storage-authority blocker |
-| 20260910 | 20260910_rls_enforcement_expansion_round58.sql | `d57d158a...54004cb5` | 479.10 KB | ============================================================================= |
-| 20260913 | 20260913_round58_production_geometry_prerequisites.sql | `0061c3f8...15ca2156` | 11.42 KB | ============================================================================= |
-| 20260914 | 20260914_round58_complete_production_geometry_prerequisites.sql | `edd831b0...824561af` | 19.17 KB | ============================================================================= |
-| 20260915 | 20260915_external_representation_authority.sql | `2837f0ef...084ea7ba` | 7.11 KB | UnionEyes external representation authority foundation. |
-| 20260915 | 20260915_external_representation_authority_rollback.sql | `a6b6edab...8eaf91d3` | 1.10 KB | Rollback for 20260915_external_representation_authority.sql. |
-| 20260921 | 20260921_platform_payment_external_reference_uniqueness.sql | `3115e357...b2dd92af` | 2.72 KB | ───────────────────────────────────────────────────────────────────────────── |
-| 20260921 | 20260921_platform_payment_external_reference_uniqueness_rollback.sql | `85761225...6b340091` | 0.88 KB | ───────────────────────────────────────────────────────────────────────────── |
-| 20260921 | 20260921_workbook_child_system_read_authority.sql | `e05f2a59...a2390089` | 2.73 KB | ───────────────────────────────────────────────────────────────────────────── |
-| 20260921 | 20260921_workbook_child_system_read_authority_rollback.sql | `812c30d0...6bc20ea7` | 1.25 KB | ───────────────────────────────────────────────────────────────────────────── |
-| 20260921 | 20260921_workbook_credential_and_payment_authority.sql | `27efea45...8f33a98c` | 8.04 KB | ============================================================================= |
-| 20260921 | 20260921_workbook_credential_and_payment_authority_rollback.sql | `6f322d23...96f75858` | 1.69 KB | ============================================================================= |
-| 20261005 | 20261005_prod_rls_closure_twelve_tables.sql | `717800a3...0fb5c882` | 5.10 KB | ============================================================================= |
-| 20261005 | 20261005_prod_rls_closure_twelve_tables_rollback.sql | `eb5c7a58...cb69ccb0` | 1.70 KB | ============================================================================= |
-| 20261030 | 20261030_redact_analytics_claim_ids.sql | `ed5be130...30cd4f4c` | 0.48 KB | UE Gate 0: permanently remove historical claim identifiers from member-readable |
-| 20261031 | 20261031_message_log_provider_message_id_index.sql | `a92ad784...77251908` | 1.48 KB | UE Gate 0 (DEF-0B6-SYS-RESEND-MESSAGE-ID-LOOKUP-UNINDEXED-AND-NOT-UNIQUE): the R |
-| 20261031 | 20261031_message_log_provider_message_id_index_rollback.sql | `3c42eaa6...65825966` | 0.24 KB | Rollback for 20261031_message_log_provider_message_id_index.sql. Drops whichever |
-| 20261101 | 20261101_shopify_shop_domain_routing.sql | `abae6e04...ad5ec24d` | 1.70 KB | UE Gate 0 (DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED..., DEF-0B8-ICRA-SHOPI |
-| 20261101 | 20261101_shopify_shop_domain_routing_rollback.sql | `f85174c7...86c2454a` | 0.47 KB | Rollback for 20261101_shopify_shop_domain_routing.sql. No data changes. |
-| 20261102 | 20261102_redact_shopify_purchaser_data.sql | `f5a84c17...4650eccc` | 2.14 KB | UE Gate 0 (DEF-0B8-ICRA-SHOPIFY-WEBHOOK-STORES-FULL-PAYLOAD-AND-CUSTOMER-DATA-IN |
-| 20261103 | 20261103_in_app_notifications_dedupe_key.sql | `42c31fa6...4b47ba15` | 0.72 KB | UE Gate 0 (DEF-0B6-SYS-SLA-WATCHDOG-EVENTS-HAVE-NO-SUBSCRIBER): the SLA watchdog |
-| 20261103 | 20261103_in_app_notifications_dedupe_key_rollback.sql | `d388b1db...93e0cf85` | 0.13 KB | Rollback for 20261103_in_app_notifications_dedupe_key.sql. No data changes. |
-| 20261108 | 20261108_pilot_demo_seeds_row_ids.sql | `dff51f49...6ffe5e91` | 0.88 KB | UE Gate 0 (DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL |
-| 20261108 | 20261108_pilot_demo_seeds_row_ids_rollback.sql | `6d493367...a6ba3a16` | 0.25 KB | Rollback for 20261108_pilot_demo_seeds_row_ids.sql |
+| 20260909 | 20260909_strike_fund_disbursements_organization_id.sql | `1036e698...fe483606` | 3.44 KB | Round 58 Phase 0: close the final storage-authority blocker for |
 
 ## Verification
 
