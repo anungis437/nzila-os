@@ -41,6 +41,12 @@ describe('lib/knowledge-transfer/learning-trajectories/trajectory-analyzer', () 
     expect(report.milestones.some((m) => m.achieved)).toBe(true);
     expect(report.trajectorySpanDays).toBeGreaterThan(0);
     expect(report.interactionsPerMonth).not.toBeNull();
+    // DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST: the band is a fixed formula, not a statistical confidence
+    // interval - renamed off 'confidenceRange' and disclosed as such.
+    expect(report.forecast[0]).toHaveProperty('projectionBand');
+    expect(report.forecast[0]).not.toHaveProperty('confidenceRange');
+    expect(report.methodologyNote).toMatch(/linear extrapolation|fixed formula|not .*(probabilistic|statistical)/i);
+    expect(report.interpretationGuidance).not.toMatch(/probabilistic/i);
   });
 
   it('returns insufficient_data momentum and empty forecast with no timeline', async () => {

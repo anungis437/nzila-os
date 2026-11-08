@@ -88,13 +88,13 @@ function buildForecast(
   return horizons.map((months) => {
     const projected = latest + adjustedRate * months;
     const clamped = Math.min(Math.max(Math.round(projected), 0), 100);
-    const uncertainty = Math.min(months * 3, 20);
+    const bandWidth = Math.min(months * 3, 20);
     return {
       monthsAhead: months,
       forecastedScore: clamped,
-      confidenceRange: {
-        low: Math.max(0, clamped - uncertainty),
-        high: Math.min(100, clamped + uncertainty),
+      projectionBand: {
+        low: Math.max(0, clamped - bandWidth),
+        high: Math.min(100, clamped + bandWidth),
       },
     };
   });
@@ -206,6 +206,12 @@ export async function analyzeLearningTrajectory(orgId: string): Promise<Learning
     estimatedMonthsToNextMilestone: estimatedMonths,
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
-      'Learning trajectories are organizational — not individual. Forecasts are probabilistic projections based on organizational history and are intended for governance planning purposes.',
+      'Learning trajectories are organizational — not individual. Forecasts project a linear extrapolation of ' +
+      'organizational history forward and are intended for governance planning purposes, not as a statistical prediction.',
+    methodologyNote:
+      'forecast is a linear extrapolation from the first and last typed resilience scores (as few as 2 points), ' +
+      "adjusted by a momentum multiplier; each point's projectionBand is a fixed formula (min(monthsAhead * 3, 20)), " +
+      "not an interval derived from the data's own variance - it is not a probabilistic or statistical forecast, " +
+      'and estimatedMonthsToNextMilestone compounds the same linear assumption.',
   };
 }

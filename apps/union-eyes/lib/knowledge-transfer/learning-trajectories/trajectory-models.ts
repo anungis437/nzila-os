@@ -31,10 +31,17 @@ export type LearningMomentum =
 export interface TrajectoryForecastPoint {
   /** Month offset from now. */
   monthsAhead: number;
-  /** Forecasted resilience score. */
+  /**
+   * A linear extrapolation from the first and last typed resilience scores (as few as 2 points), adjusted by a
+   * momentum multiplier. Not a statistical forecast.
+   */
   forecastedScore: number;
-  /** Confidence range. */
-  confidenceRange: { low: number; high: number };
+  /**
+   * A fixed formula (min(monthsAhead * 3, 20) points either side), not an interval computed from the data's own
+   * variance or spread - widens with time horizon alone, never with how few or scattered the underlying typed
+   * scores actually are. Do not read this as a statistical confidence interval.
+   */
+  projectionBand: { low: number; high: number };
 }
 
 /** A maturity milestone. */
@@ -72,4 +79,10 @@ export interface LearningTrajectoryReport {
   entriesAnalyzed: number;
   /** Governance-safe disclaimer. */
   interpretationGuidance: string;
+  /**
+   * forecast/estimatedMonthsToNextMilestone are a linear extrapolation from the first and last typed resilience
+   * scores (as few as 2 points), momentum-adjusted; each forecast point's projectionBand is a fixed formula
+   * (min(monthsAhead * 3, 20)), not a statistically derived interval. Not a probabilistic model.
+   */
+  methodologyNote: string;
 }
