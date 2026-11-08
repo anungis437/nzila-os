@@ -20,7 +20,7 @@
  */
 import { assessMandate } from '../common'
 import { decide } from '../kernel'
-import type { AuthorityRequest, GovernanceReviewFacts } from '../ontology'
+import type { AuthorityRequest, AuthoritySource, GovernanceReviewFacts } from '../ontology'
 import { AuthorityStoreError, bindSessionActor, isPrincipalId, isUuid, parsePgTextArray, type SqlExecutor } from './executor'
 import type { EnforcementDeps } from './enforce'
 import { loadAuthorityFacts } from './facts'
@@ -149,7 +149,7 @@ export async function openMemberReview(
 export async function listMemberReviewIntake(
   exec: SqlExecutor,
   deps: EnforcementDeps,
-  input: { organizationId: string; actorUserId: string },
+  input: { organizationId: string; actorUserId: string; onOversightAuthorization?: (reviewId: string, authority: readonly AuthoritySource[]) => void },
 ): Promise<ReviewIntakeList> {
   requireUuids(input.organizationId)
   requirePrincipals(input.actorUserId)
@@ -222,7 +222,11 @@ export async function listMemberReviewIntake(
         action: 'review:monitor',
         resource: { type: 'governance_review', id: resource.id, organizationId: input.organizationId },
       }
-      if (decide(request, facts, resource, now).effect !== 'allow') continue
+      const decision = decide(request, facts, resource, now)
+      if (decision.effect !== 'allow') continue
+      // Internal-only provenance; never included in the member-facing review list.
+      // A failed audit collector aborts the enclosing read transaction (fail closed).
+      input.onOversightAuthorization?.(resource.id, decision.authority)
       oversight.push({
         id: resource.id,
         reviewType: String(row.review_type),
