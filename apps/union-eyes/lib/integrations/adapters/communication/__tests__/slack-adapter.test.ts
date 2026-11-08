@@ -170,4 +170,47 @@ describe('SlackAdapter', () => {
     const r = await adapter.sync({ type: 'full', orgs: ['mystery'] } as never);
     expect(r.success).toBe(true);
   });
+
+  describe('cooperative cancellation (DEF-0B8-ICRA-SYNC-LEASE-LOSS-FENCING)', () => {
+    it('stops before the first entity type when the abort signal is already aborted', async () => {
+      const adapter = await makeConnected();
+      const controller = new AbortController();
+      controller.abort();
+      const r = await adapter.sync({ type: 'full', orgs: ['channels', 'messages'], abortSignal: controller.signal } as never);
+      expect(r.success).toBe(false);
+      expect(h.client.getChannels).not.toHaveBeenCalled();
+      expect(h.client.getChannelMessages).not.toHaveBeenCalled();
+    });
+
+    it('stops fetching further pages of channels once aborted mid-sync', async () => {
+      const adapter = await makeConnected();
+      const controller = new AbortController();
+      let call = 0;
+      h.client.getChannels = vi.fn(async () => {
+        call += 1;
+        if (call === 1) {
+          // Abort takes effect after the first page lands, simulating a lease loss mid-run.
+          controller.abort();
+          return { channels: [{ id: 'c1', name: 'general', is_private: false, is_archived: false, created: 1700000000, creator: 'u1' }], nextCursor: 'page-2' };
+        }
+        return { channels: [{ id: 'c2', name: 'second-page', is_private: false, is_archived: false, created: 1700000000, creator: 'u1' }], nextCursor: undefined };
+      });
+      const r = await adapter.sync({ type: 'full', orgs: ['channels'], abortSignal: controller.signal } as never);
+      // The first page was processed before the abort was observed; the second page was never fetched.
+      expect(r.recordsProcessed).toBe(1);
+      expect(h.client.getChannels).toHaveBeenCalledTimes(1);
+      expect(r.success).toBe(false);
+    });
+
+    it('does not abort or stop early when no abort signal is given', async () => {
+      const adapter = await makeConnected();
+      h.client.getChannels = vi.fn(async () => ({
+        channels: [{ id: 'c1', name: 'general', is_private: false, is_archived: false, created: 1700000000, creator: 'u1' }],
+        nextCursor: undefined,
+      }));
+      const r = await adapter.sync({ type: 'full', orgs: ['channels'] } as never);
+      expect(r.success).toBe(true);
+      expect(r.recordsProcessed).toBe(1);
+    });
+  });
 });

@@ -110,6 +110,7 @@ export class SlackAdapter extends BaseIntegration {
 
     try {
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         switch (entity) {
           case 'channels':
             await this.syncChannels(options, results);
@@ -151,6 +152,7 @@ export class SlackAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted(options);
       const response = await this.client.getChannels({
         cursor,
         limit: PAGE_SIZE,
@@ -228,6 +230,7 @@ export class SlackAdapter extends BaseIntegration {
       let hasMore = true;
 
       while (hasMore) {
+        this.throwIfAborted(options);
         const response = await this.client.getChannelMessages(channel.externalId, {
           cursor,
           limit: PAGE_SIZE,
@@ -287,6 +290,7 @@ export class SlackAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted(options);
       const response = await this.client.getUsers({
         cursor,
         limit: PAGE_SIZE,
@@ -349,6 +353,7 @@ export class SlackAdapter extends BaseIntegration {
    * Sync files shared in workspace
    */
   private async syncFiles(options: SyncOptions, results: SyncResult): Promise<void> {
+    this.throwIfAborted(options);
     const tsFrom = options.cursor;
 
     const response = await this.client.getFiles({

@@ -201,7 +201,7 @@ describe('SyncEngine', () => {
     }
   });
 
-  it('stops renewing and downgrades a successful result to PARTIAL when a renewal tick fails (lease lost)', async () => {
+  it('stops renewing, aborts the signal, and reports the run cancelled (not waited on) when a renewal tick fails (lease lost)', async () => {
     push([{ id: 'log-lost' }]); // createSyncLog
     let resolveSync: (v: unknown) => void = () => {};
     const inFlight = new Promise((resolve) => { resolveSync = resolve; });
@@ -214,29 +214,31 @@ describe('SyncEngine', () => {
       const run = engine.executeSync('org1', IntegrationProvider.WORKDAY, { type: SyncType.FULL });
       await vi.advanceTimersByTimeAsync(0);
 
-      await vi.advanceTimersByTimeAsync(300_000); // first renewal tick fails -> lease marked lost
+      push({}); // updateSyncLog for the cancelled run - written as soon as the lease is lost, without waiting on inFlight
+      await vi.advanceTimersByTimeAsync(300_000); // first renewal tick fails -> lease marked lost, signal aborted
       expect(h.extendLock).toHaveBeenCalledTimes(1);
 
       // A second full interval period must not retry: once the lease is lost, no further renewal is attempted.
       await vi.advanceTimersByTimeAsync(300_000);
       expect(h.extendLock).toHaveBeenCalledTimes(1);
 
-      push({}); // updateSyncLog
-      resolveSync({ success: true, recordsProcessed: 1, recordsCreated: 1, recordsUpdated: 0, recordsFailed: 0, cursor: 'c', errors: [] });
+      // The run resolves WITHOUT ever calling resolveSync(...): the engine does not wait on the abandoned call.
       const result = await run;
-
-      // The sync itself still reports success (we cannot interrupt an in-flight third-party call), but a result whose
-      // exclusivity could not be guaranteed for the full duration is never reported as a clean success.
-      expect(result.success).toBe(true);
-      expect(result.metadata).toMatchObject({ leaseRenewalLost: true });
-      expect(h.setCalls.at(-1)).toMatchObject({ status: SyncStatus.PARTIAL });
+      expect(result.success).toBe(false);
+      expect(result.metadata).toMatchObject({ leaseRenewalLost: true, abortedEarly: true });
+      expect(h.setCalls.at(-1)).toMatchObject({ status: SyncStatus.CANCELLED });
       expect(String(h.setCalls.at(-1)?.error)).toMatch(/lease/i);
+
+      // The abandoned call can still settle later without crashing the process (no unhandled rejection) and without
+      // changing a result already returned.
+      resolveSync({ success: true, recordsProcessed: 99, recordsCreated: 0, recordsUpdated: 0, recordsFailed: 0, cursor: 'c', errors: [] });
+      await vi.advanceTimersByTimeAsync(0);
     } finally {
       vi.useRealTimers();
     }
   });
 
-  it('a sync that already failed stays FAILED (not masked as PARTIAL) even if the lease was also lost', async () => {
+  it('a late adapter rejection after the lease was already lost does not crash the process or change the already-returned cancelled result', async () => {
     push([{ id: 'log-failed-and-lost' }]); // createSyncLog
     let rejectSync: (e: unknown) => void = () => {};
     const inFlight = new Promise((_resolve, reject) => { rejectSync = reject; });
@@ -247,15 +249,56 @@ describe('SyncEngine', () => {
     try {
       const run = engine.executeSync('org1', IntegrationProvider.WORKDAY, { type: SyncType.FULL });
       await vi.advanceTimersByTimeAsync(0);
+
+      push({}); // updateSyncLog for the cancelled run
       await vi.advanceTimersByTimeAsync(300_000);
       expect(h.extendLock).toHaveBeenCalledTimes(1);
 
-      rejectSync(new Error('adapter boom'));
-      await expect(run).rejects.toThrow('adapter boom');
-      // executeSync rethrows before writing a sync-log update in this path (matches the pre-existing throw/catch
-      // behaviour); the lease-lost renewal loop still must not keep running once the call has settled.
+      const result = await run;
+      expect(result.success).toBe(false);
+      expect(h.setCalls.at(-1)).toMatchObject({ status: SyncStatus.CANCELLED });
+
+      // The lease-lost renewal loop must not keep running once the lease is already lost.
       await vi.advanceTimersByTimeAsync(300_000);
       expect(h.extendLock).toHaveBeenCalledTimes(1);
+
+      // The abandoned call eventually rejects: this must not surface as an unhandled rejection or throw here.
+      rejectSync(new Error('adapter boom'));
+      await vi.advanceTimersByTimeAsync(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('passes an abort signal through to the integration, aborted once the lease is lost', async () => {
+    push([{ id: 'log-signal' }]); // createSyncLog
+    let receivedOptions: { abortSignal?: AbortSignal } | undefined;
+    let resolveSync: (v: unknown) => void = () => {};
+    const inFlight = new Promise((resolve) => { resolveSync = resolve; });
+    h.factory.getIntegration.mockResolvedValue({
+      sync: (options: { abortSignal?: AbortSignal }) => {
+        receivedOptions = options;
+        return inFlight;
+      },
+    });
+    h.extendLock.mockResolvedValue(false);
+
+    vi.useFakeTimers();
+    try {
+      const run = engine.executeSync('org1', IntegrationProvider.WORKDAY, { type: SyncType.FULL });
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(receivedOptions?.abortSignal).toBeInstanceOf(AbortSignal);
+      expect(receivedOptions?.abortSignal?.aborted).toBe(false);
+
+      push({}); // updateSyncLog for the cancelled run
+      await vi.advanceTimersByTimeAsync(300_000); // renewal tick fails -> lease lost
+
+      expect(receivedOptions?.abortSignal?.aborted).toBe(true);
+
+      await run;
+      resolveSync({ success: true, recordsProcessed: 1, recordsCreated: 0, recordsUpdated: 0, recordsFailed: 0, cursor: 'c', errors: [] });
+      await vi.advanceTimersByTimeAsync(0);
     } finally {
       vi.useRealTimers();
     }
