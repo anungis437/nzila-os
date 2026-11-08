@@ -757,6 +757,10 @@ class SurveyResponses(BaseModel):
     time_spent_seconds = models.IntegerField(null=True, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(null=True, blank=True)
+    # DEF-0B5-SURVEY-RESPONSES-IDENTIFIED-OR-ANONYMOUS-RESPONSE-MUTATION-AUTHORITY: SHA-256 hash of a one-time
+    # capability token issued at creation for an anonymous response (user_id NULL); never set for an identified
+    # response. See lib/communications/survey-response-capability.ts.
+    response_token_hash = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "survey_responses"
