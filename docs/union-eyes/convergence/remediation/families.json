@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 717,
- "partial": 28,
+ "partial": 29,
  "outstanding": 60,
  "accountedFor": 60,
  "families": [
@@ -442,7 +442,8 @@
    },
    {
     "id": "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY",

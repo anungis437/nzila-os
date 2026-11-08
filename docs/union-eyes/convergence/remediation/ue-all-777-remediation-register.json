@@ -92,7 +92,7 @@
     "engineeringCorrected": 717,
     "engineeringRemaining": 60,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 28
+    "engineeringPartial": 29
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -5010,10 +5010,34 @@
       "title": "No route under app/api writes survey_answers, and the results route is the only one that reads the table, so a response can be created and no answer can be recorded; the survey capability cannot be completed through these routes.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts",
+          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/__tests__/route.test.ts",
+          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/__tests__/route.test.ts"
+        ],
+        "commits": [
+          "7129d521531621b8cf7fb58d54f12c5650457bed"
+        ],
+        "repair": "Added the two missing routes. POST .../responses/[responseId]/answers writes one answer per call (text, number or choices - exactly one shape), upserted by the existing (responseId, questionId) unique constraint so a respondent can change an answer before submitting; refuses once the response is completed, and an identified response may only be answered by its own respondent (an anonymous response has no owning user by design, matching the existing response-creation route's trust model). PATCH .../responses/[responseId] marks a response completed once every required question (survey_questions.required) has a matching answer, refusing with the missing question ids otherwise, with a status predicate guarding against two concurrent completions. Both are audited (persistAtomicAudit, same withRLSContext transaction as the mutation) - route-coverage-manifest's audit-gap ratchet test correctly flagged the first draft of these routes for lacking this, which is how the gap was caught before commit.",
+        "limits": "Answer-shape validation against the question's declared type (text length bounds, numeric rating range, valid choice ids) is not implemented - only the polymorphic 'exactly one field' shape is enforced. Full per-question-type validation remains a separate, tracked gap.",
+        "verificationNote": "Workstream D (fix/ue-gate0-final-convergence): local vitest run confirms both new test files (8 + 7 = 15 passing) and the route-coverage-manifest/edge-route-config suites (25/25) after regenerating the manifest (1011 -> 1013 routes). Typecheck and eslint clean. Not a CI run at a recorded SHA."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B147-GATE0-RESIDUAL-WORKSTREAM-D-SURVEY-ANSWER-CAPABILITY",
+        "path": "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts; apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/__tests__/route.test.ts; apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/__tests__/route.test.ts",
+        "explanation": "The survey capability can now be completed through these routes: answers can be written and a response can be marked completed once its required questions are answered. Marked PARTIAL, not IMPLEMENTED, because per-question-type answer validation (text bounds, rating range, valid choice ids) is not yet implemented.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B5-SURVEY-RESULTS-NO-ORG-PREDICATE-LOADS-ALL-ANSWERS",
