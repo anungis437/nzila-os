@@ -92,7 +92,7 @@
     "engineeringCorrected": 719,
     "engineeringRemaining": 58,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 29
+    "engineeringPartial": 30
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -8388,10 +8388,33 @@
       "title": "The expertise map rates a domain critical when one interview mentions its tag, reports averageRiskScore 0 when no interview carries a score, and returns the roles of the one interview behind a single-source tag; the continuity risk report returns overallRiskScore 0 for an organization with no interview, scores coverage gaps against the literal role list steward, chief_steward, officer and admin, and caps each term of the score with fixed weights; the decision brief marks its evidence confidence high as a literal, so the ratings are fixed rules over tag counts presented as measured risk.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "PARTIAL_FIX_APPLIED",
+        "paths": [
+          "apps/union-eyes/app/api/exit-interviews/expertise-map/route.ts",
+          "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts"
+        ],
+        "commits": [
+          "6aabcdcd6"
+        ],
+        "repair": "expertise-map now reports hasRiskData per domain so averageRiskScore 0 (no interview for this domain carried a score) is distinguishable from a domain genuinely scored 0. The continuity risk report (lib/knowledge-transfer/continuity-risk/risk-detector.ts) already exposes totalPublishedInterviews alongside overallRiskScore, so a reader can already tell its 0-for-no-interviews case apart from a genuinely low score without further change.",
+        "limits": "NOT addressed: a domain mentioned in exactly one interview is still rated riskLevel \"critical\" outright (riskLevel() function), regardless of what the domain actually is or whether any risk score backs it; the continuity risk report's fixed per-signal weights (singleSourceCount*8 capped 40, coverageGapCount*15 capped 30, etc.) are unchanged; the decision brief's evidence confidence literal is unchanged. Only the single most literal \"0 could mean no data\" ambiguity, for the expertise map specifically, is closed this run.",
+        "verificationNote": "npx vitest run app/api/__tests__/exit-interviews-expertise-map.route.test.ts -> 2/2 passing (new hasRiskData true/false case). typecheck clean. 40/40 in app/api/__tests__/static-priority-smoke.test.ts + app/api/exit-interviews/analytics."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B153-GATE3-COGNITION-ANALYTICS-EXPERTISE-MAP-RISK-DATA",
+        "path": "apps/union-eyes/app/api/exit-interviews/expertise-map/route.ts;apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts",
+        "explanation": "New record (was untouched): added hasRiskData to the expertise map so a 0 average risk score backed by no actual interview score is distinguishable from a genuinely-scored 0, closing one of this title's several named failure modes. The single-mention-equals-critical labeling, the risk report's fixed per-signal weights, and the decision brief's literal confidence remain unaddressed - honestly kept PARTIAL.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-CASCADE-REGULATORY-RISK-IS-A-LABEL-TEMPLATE",
