@@ -92,7 +92,7 @@
     "engineeringCorrected": 720,
     "engineeringRemaining": 57,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 30
+    "engineeringPartial": 31
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -12680,10 +12680,32 @@
       "title": "The /api/metrics route is a generic crudRoutes configuration over analytics_metrics that lists the organization stored metric rows at the member floor and accepts a steward-supplied row, while lib/observability/metrics.ts documents the Prometheus (prom-client) metrics as available at GET /api/metrics and lib/public-routes.ts names /api/metrics as a role-scoped infrastructure route, so a scraper pointed at the documented path receives JSON rows of business metric records (including their metadata column) rather than metrics in the exposition format.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "PARTIAL_FIX_APPLIED",
+        "paths": [
+          "apps/union-eyes/lib/observability/metrics.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/observability/__tests__/metrics.test.ts"
+        ],
+        "commits": [
+          "06ef754e8"
+        ],
+        "repair": "Corrected the module header comment, which falsely claimed Prometheus exposition metrics were available at GET /api/metrics (that path is the unrelated analyticsMetrics CRUD route), to plainly state no route exposes this registry and nothing increments its custom HTTP counters - confirmed via repo-wide grep that httpRequestsTotal/httpRequestDuration/httpRequestSize/httpResponseSize have zero callers outside this file and its own test.",
+        "limits": "The routing conflict itself is unchanged: GET /api/metrics still answers with analyticsMetrics CRUD rows, and no real Prometheus-exposition route exists anywhere. Building one would also require wiring request-rate/latency instrumentation across the app (the custom counters are currently dead weight, never incremented) - substantially larger scope than a documentation correction, not attempted this run.",
+        "verificationNote": "npx vitest run lib/observability/__tests__/metrics.test.ts -> 26/26 passing (comment-only change). typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B155-GATE3-METRICS-ROUTE-DOC-CORRECTION",
+        "path": "apps/union-eyes/lib/observability/metrics.ts",
+        "regressionTest": "apps/union-eyes/lib/observability/__tests__/metrics.test.ts",
+        "explanation": "New record (was untouched): removed the false documentation claim that Prometheus metrics are served at /api/metrics. The underlying routing conflict and the unwired custom HTTP counters remain - a real fix would need either relocating the business CRUD route or building a genuine Prometheus-exposition route plus app-wide instrumentation, both larger than this run's scope. Honestly kept PARTIAL.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B9-ML-MOVEMENT-TRENDS-ROUTE-IS-NOT-THE-CONSENT-GATED-AGGREGATE-THE-DASHBOARD-SERVES",

@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 720,
- "partial": 30,
+ "partial": 31,
  "outstanding": 57,
  "accountedFor": 57,
  "families": [
@@ -262,7 +262,8 @@
   "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD": [
    {
     "id": "DEF-0B9-ML-METRICS-ROUTE-SERVES-STORED-ANALYTICS-ROWS-WHERE-THE-PROMETHEUS-ENDPOINT-IS-DOCUMENTED",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    }
   ],
   "F05-INPUT-VALIDATION-AND-BOUNDS": [
