@@ -3,23 +3,23 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 719,
+    "overlayImplemented": 720,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 66,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 42,
+    "creditedByEarlierRuns": 67,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 43,
     "overlayPartial": 30,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 58,
-    "untouchedByOverlay": 28,
+    "unresolvedByOverlay": 57,
+    "untouchedByOverlay": 27,
     "qualificationVerified": 0,
     "closed": 0
   },
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 719,
+    "implemented": 720,
     "partial": 30,
-    "untouched": 28,
+    "untouched": 27,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
       "DEF-0B1-BILLING-SCHEDULER-LATENT",
@@ -55,7 +55,6 @@
     "untouchedIds": [
       "DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY",
       "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
-      "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
       "DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY",
       "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
       "DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW",
@@ -576,6 +575,18 @@
       "regressionTest": "apps/union-eyes/lib/ai/__tests__/chatbot-moderation-fail-closed.contract.test.ts",
       "files": [
         "apps/union-eyes/lib/ai/chatbot-service.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
+      "batch": "B154-GATE3-COGNITION-KPI-ASSUMPTION-DISCLOSURE",
+      "sourceCommit": null,
+      "regressionTest": "packages/ue-cognition/src/__tests__/ue-cognition.test.ts;apps/union-eyes/app/api/__tests__/cognition-kpis.route.test.ts",
+      "files": [
+        "packages/ue-cognition/src/kpis/engine.ts",
+        "apps/union-eyes/app/api/cognition/kpis/route.ts",
+        "apps/union-eyes/app/api/__tests__/cognition-kpis.route.test.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },

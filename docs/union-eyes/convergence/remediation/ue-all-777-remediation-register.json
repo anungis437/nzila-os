@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 719,
-    "engineeringRemaining": 58,
+    "engineeringCorrected": 720,
+    "engineeringRemaining": 57,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 30
   },
@@ -4256,10 +4256,35 @@
       "title": "The key-indicator snapshot computes estimated admin hours saved and a dollar return from constants (hours saved per precedent retrieval, per early warning and per reassignment, and a loaded hourly rate), not from measured time; the route comment calls the artefact the one handed to buyers, so an assumption is presented as a result.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "VERIFIED_AT_CURRENT_HEAD",
+        "paths": [
+          "packages/ue-cognition/src/kpis/engine.ts",
+          "apps/union-eyes/app/api/cognition/kpis/route.ts",
+          "apps/union-eyes/app/api/__tests__/cognition-kpis.route.test.ts"
+        ],
+        "regressionPaths": [
+          "packages/ue-cognition/src/__tests__/ue-cognition.test.ts",
+          "apps/union-eyes/app/api/__tests__/cognition-kpis.route.test.ts"
+        ],
+        "commits": [
+          "166b098b5"
+        ],
+        "repair": "Every assumption-derived figure is named estimatedX (estimatedAdminHoursSaved, estimatedRoiCad), every constant it rests on (hoursSavedPerPrecedentRetrieval, hoursSavedPerEarlyWarning, hoursSavedPerReassignmentRecommendation, loadedHourlyRateCad, stewardCount) is listed in a returned assumptions[] array with a human-readable note on each, and the route adds its own governance.note stating fields are null (not inferred) when source data is insufficient. The engine's own package test suite already asserted assumption surfacing (2 dedicated tests); added a route-level test this run proving the route itself (not just the underlying function) returns the same disclosure end to end.",
+        "limits": "None against this title - the complaint (\"an assumption is presented as a result\") is fully addressed: nothing claims to be measured that is not.",
+        "verificationNote": "npx vitest run packages/ue-cognition/src/__tests__/ue-cognition.test.ts -> 15/15 passing. npx vitest run apps/union-eyes/app/api/__tests__/cognition-kpis.route.test.ts -> 3/3 passing (new this run). typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B154-GATE3-COGNITION-KPI-ASSUMPTION-DISCLOSURE",
+        "path": "packages/ue-cognition/src/kpis/engine.ts;apps/union-eyes/app/api/cognition/kpis/route.ts;apps/union-eyes/app/api/__tests__/cognition-kpis.route.test.ts",
+        "regressionTest": "packages/ue-cognition/src/__tests__/ue-cognition.test.ts;apps/union-eyes/app/api/__tests__/cognition-kpis.route.test.ts",
+        "explanation": "Was untouched - found already resolved at current HEAD (prior commit 166b098b5 and the engine's own design: see its header comment \"Honest formulae... Assumptions are NOT hidden\"). Every figure the title names as fabricated is explicitly estimated-prefixed and fully disclosed via assumptions[] plus a governance note. Added only the missing route-level regression test this run - no code change needed.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B5-COGNITION-HEALTH-PLATFORM-POSTURE-TO-ORG-OFFICER",
