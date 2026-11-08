@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 713,
-    "engineeringRemaining": 64,
+    "engineeringCorrected": 714,
+    "engineeringRemaining": 63,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 24
   },
@@ -990,9 +990,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
+        "path": "apps/union-eyes/app/api/icra/telemetry/route.ts; apps/union-eyes/lib/rate-limiter.ts; apps/union-eyes/app/api/__tests__/icra-telemetry.route.test.ts",
+        "explanation": "P2 Gate 0 corrective convergence: cross-verified against the current HEAD of this branch and found this defect was already closed by an earlier, independent commit never recorded in this register (fdd6b11a2 \"UE Gate 0 elimination B22: F08 public-route controls (shared limiter, trusted client address, link acknowledgement, opaque log refs, projections)\"). app/api/icra/telemetry/route.ts imports and calls the shared checkRateLimit from lib/rate-limiter.ts, which is Upstash/ioredis-backed (a real distributed store, not a process-local Map or Set) with a circuit breaker around the Redis calls. No process-local in-memory limiter remains in this route; grepped the file for `new Map(`/`new Set(` and found none. Redis-unavailable behaviour is an explicit, documented fail-open (allow the request) rather than falling back to a per-instance counter, which is a reasonable, intentional tradeoff for a LOW-severity anti-abuse control on an anonymous telemetry sink, not the silent, uncoordinated-state problem the defect named. No code change was needed; only this register entry was missing.",
+        "regressionTest": "app/api/__tests__/icra-telemetry.route.test.ts — mocks @/lib/rate-limiter and asserts 'returns 204 when rate-limited', directly exercising the shared-limiter integration point. 4/4 tests passed.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B2-CRUD-FACADE-SEGMENTS-SETTINGS",

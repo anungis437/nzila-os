@@ -3,23 +3,23 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 713,
+    "overlayImplemented": 714,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 60,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 36,
+    "creditedByEarlierRuns": 61,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 37,
     "overlayPartial": 24,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 64,
-    "untouchedByOverlay": 40,
+    "unresolvedByOverlay": 63,
+    "untouchedByOverlay": 39,
     "qualificationVerified": 0,
     "closed": 0
   },
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 713,
+    "implemented": 714,
     "partial": 24,
-    "untouched": 40,
+    "untouched": 39,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
       "DEF-0B1-BILLING-SCHEDULER-LATENT",
@@ -48,7 +48,6 @@
     ],
     "untouchedIds": [
       "DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY",
-      "DEF-0B1-ICRA-TELEMETRY-PROCESS-LOCAL-LIMIT",
       "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
       "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
       "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
@@ -340,6 +339,18 @@
         "apps/union-eyes/app/api/communications/unsubscribe/[recipientId]/route.ts",
         "apps/union-eyes/app/api/__tests__/communications-unsubscribe.route.test.ts",
         "apps/union-eyes/app/api/__tests__/communications-public-mutation-isolation.pglite.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B1-ICRA-TELEMETRY-PROCESS-LOCAL-LIMIT",
+      "batch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
+      "sourceCommit": null,
+      "regressionTest": "app/api/__tests__/icra-telemetry.route.test.ts — mocks @/lib/rate-limiter and asserts 'returns 204 when rate-limited', directly exercising the shared-limiter integration point. 4/4 tests passed.",
+      "files": [
+        "apps/union-eyes/app/api/icra/telemetry/route.ts",
+        "apps/union-eyes/lib/rate-limiter.ts",
+        "apps/union-eyes/app/api/__tests__/icra-telemetry.route.test.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },
