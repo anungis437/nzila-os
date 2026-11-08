@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 717,
-    "engineeringRemaining": 60,
+    "engineeringCorrected": 718,
+    "engineeringRemaining": 59,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 30
+    "engineeringPartial": 29
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -8847,17 +8847,35 @@
       "title": "The systems-dynamics, operational-coordination, operating-rhythms, multi-domain-cognition and operational-trust engines write literal values into their profiles that depend on no stored record (consistency 50 and 60, stabilization signal confidence 75 and 70, coordination frequency 70 and 50, response times of 5, 7 and 3 days, adherence 75, variance 30, stabilization 14 days, integration scores 50 to 70, reasoning-chain confidence 70 and 65, fixed trust indicators such as Reliable mitigation execution), so a reader cannot tell a measured field from a constant.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
+      "currentRun": {
+        "state": "VERIFIED_AT_CURRENT_HEAD",
+        "paths": [
+          "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+          "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts",
+          "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts"
+        ],
+        "commits": [
+          "7175028b5",
+          "fd2f83f0f",
+          "42a19625d"
+        ],
+        "repair": "All 5 title-named engines (systems-dynamics, operational-coordination, operating-rhythms, multi-domain-cognition, operational-trust) plus governance-coherence and the 2 engines this record's own prior \"remaining\" text named (response-elasticity, governance-momentum) now throw NOT_IMPLEMENTED via kernel-bridge.ts's notImplementedCompute helper instead of returning literal/fabricated profiles. Commits 7175028b5 (B10 batch) and fd2f83f0f (later, uncredited in this record) did the engineering; this run added the missing test coverage (constant-engines-not-implemented.test.ts) proving multi-domain-cognition, operational-trust, systems-dynamics, governance-coherence, operational-coordination and operating-rhythms specifically refuse and never leak a fixed frequency/response-time/integration-score/trust-indicator literal - response-elasticity and governance-momentum were already covered by unmeasured-engines.test.ts.",
+        "limits": "The underlying legacy raw functions (analyzeOperationalTrust, modelCoordinationBehavior, analyzeInstitutionalRhythms, analyzeSystemsDynamics, evaluateGovernanceCoherence in lib/organizational-dynamics/** and lib/multi-domain-cognition/trust-dynamics) still contain their original fabricated-scaling implementations and are still exercised by a now-stale lib/multi-domain-cognition/__tests__/cognitionEngines.test.ts - confirmed via repo-wide grep to have ZERO callers outside their own definition files and that one stale test, so they are unreachable from any live route; left as an explicitly-noted residual (dead code, not a production risk) rather than deleted this run.",
+        "verificationNote": "npx vitest run lib/organizational-operating-intelligence/ lib/multi-domain-cognition/ lib/organizational-dynamics/ -> 4 files, 34 tests passed. constant-engines-not-implemented.test.ts alone: 18/18 passed (9 engines x 2 assertions)."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
-        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts; apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs",
-        "explanation": "The systems-dynamics, governance-coherence, operational-coordination, operating-rhythm, multi-domain and operational-trust engines embedded fixed frequencies, response times, integration scores and narrative claims (for example \"Consistent governance behavior\") and presented them as measurements. They now fail with 501 through the same refusal as the correlation engine.",
-        "remaining": "The response-elasticity and governance-momentum engines remain: they derive scores from counts of cognition-memory entries with arbitrary scaling. They hold no fixed claim, but the scaling is not a validated measure.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B150-GATE3-COGNITION-ANALYTICS-DYNAMICS-ENGINES",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts;apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts",
+        "regressionTest": "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts;apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts",
+        "explanation": "Upgraded from PARTIAL: this record's own prior \"remaining\" text (response-elasticity, governance-momentum arbitrary-scaling) was independently closed by a later, previously-uncredited commit fd2f83f0f, and the 5 title-named engines were already fixed by the original B10 batch (7175028b5) but lacked direct test coverage for multi-domain-cognition and operational-trust specifically - added this run. All 7 engines now verified to refuse with NOT_IMPLEMENTED and never leak a fabricated literal.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
     {
