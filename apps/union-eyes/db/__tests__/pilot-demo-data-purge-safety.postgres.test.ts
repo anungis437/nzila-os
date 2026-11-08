@@ -6,19 +6,19 @@
  * DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN.
  *
  * Runs the real, unmodified POST/DELETE route handlers - and the real generateDemoEmployers/generateDemoGrievances
- * fixtures they seed from - against a real Postgres connection, through the real drizzle-orm query builder and the
- * real pilotDemoSeeds/employers/grievances schema objects (db and withRLSContext are mocked only to route every
- * query through that real connection; auth/runtime-mode/audit are stubbed). Tables here declare every column the
- * real schema objects do (so Drizzle's generated INSERT, which references every declared column and sends `default`
- * for the rest, succeeds), but as plain nullable types with no FK/enum/uniqueness constraints - this proves the
- * purge's row-ownership logic against real SQL semantics (inArray, IS NULL, empty-array no-op), not the full
- * production constraint/privilege surface, which is out of scope for this specific safety property.
+ * fixtures they seed from - against the combined Django + Drizzle schema, through the real drizzle-orm query
+ * builder and the real pilotDemoSeeds/employers/grievances schema objects (db and withRLSContext are mocked only
+ * to route every query through that real connection; auth/runtime-mode/audit are stubbed). Operates on the REAL,
+ * already-migrated tables (no synthetic CREATE TABLE of its own - this is the shared combined database every other
+ * *.postgres.test.ts file in the same run also uses), so every raw fixture insert below supplies every real NOT
+ * NULL column with a real, constraint-satisfying value and every mutation is scoped to this test's own
+ * organization_id - never an unscoped DELETE/DROP against the shared tables.
  *
- * Opt-in: skipped unless UE_TEST_PG_URL is set to a reachable, disposable Postgres connection string. Run locally
- * against a throwaway container, e.g.:
- *   docker run --rm -d --name ue-test-pg -e POSTGRES_PASSWORD=postgres -p 15435:5432 \
- *     pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
- *   UE_TEST_PG_URL=postgres://postgres:postgres@127.0.0.1:15435/postgres \
+ * Opt-in: skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully
+ * bootstrapped database (same convention as every other file in this directory). Run locally via
+ * tooling/scripts/ue-runtime-up.mjs (db --fresh --postgres-version 15, then env) to get a real connection string,
+ * e.g.:
+ *   UE_AUTHORITY_COMBINED_URL=postgres://... UE_AUTHORITY_DJANGO=1 \
  *     npx vitest run --config vitest.native.config.ts db/__tests__/pilot-demo-data-purge-safety.postgres.test.ts
  */
 import { randomUUID } from 'node:crypto';
@@ -29,7 +29,7 @@ import { pilotDemoSeeds } from '@/db/schema/domains/pilot/pilot-demo-seeds';
 import { employers } from '@/db/schema/union-structure-schema';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 
-const URL_ = process.env.UE_TEST_PG_URL;
+const URL_ = process.env.UE_AUTHORITY_COMBINED_URL;
 type Tx = ReturnType<typeof drizzle>;
 const state = vi.hoisted(() => ({ db: null as unknown }));
 
@@ -66,118 +66,31 @@ describe.skipIf(!URL_)('pilot demo-data purge never deletes a real row matching 
   beforeAll(async () => {
     admin = new pg.Client({ connectionString: URL_ });
     await admin.connect();
-    await admin.query(`
-      CREATE TABLE IF NOT EXISTS pilot_demo_seeds (
-        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-        organization_id uuid NOT NULL,
-        seeded_by varchar(255),
-        seeded_at timestamptz NOT NULL DEFAULT now(),
-        purged_at timestamptz,
-        member_count integer NOT NULL DEFAULT 0,
-        employer_count integer NOT NULL DEFAULT 0,
-        grievance_count integer NOT NULL DEFAULT 0,
-        employer_ids text[],
-        grievance_ids text[],
-        created_at timestamptz NOT NULL DEFAULT now(),
-        updated_at timestamptz NOT NULL DEFAULT now()
-      );
-      CREATE TABLE IF NOT EXISTS employers (
-        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-        organization_id uuid,
-        name varchar(255),
-        legal_name varchar(255),
-        dba_name varchar(255),
-        employer_type varchar(50),
-        status varchar(50),
-        business_number varchar(50),
-        federal_corporation_number varchar(50),
-        provincial_corporation_number varchar(50),
-        industry_code varchar(20),
-        email varchar(255),
-        phone varchar(50),
-        website varchar(500),
-        main_address jsonb,
-        total_employees integer,
-        unionized_employees integer,
-        established_date date,
-        primary_contact_name varchar(255),
-        primary_contact_title varchar(255),
-        primary_contact_email varchar(255),
-        primary_contact_phone varchar(50),
-        labour_relations_contact_name varchar(255),
-        labour_relations_contact_email varchar(255),
-        labour_relations_contact_phone varchar(50),
-        parent_company_id uuid,
-        notes text,
-        custom_fields jsonb,
-        created_at timestamptz,
-        updated_at timestamptz,
-        created_by text,
-        updated_by text,
-        archived_at timestamptz
-      );
-      CREATE TABLE IF NOT EXISTS grievances (
-        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-        grievance_number varchar(50),
-        type varchar(50),
-        status varchar(50),
-        priority varchar(50),
-        step varchar(50),
-        grievant_id uuid,
-        grievant_name varchar(255),
-        grievant_email varchar(255),
-        union_rep_id uuid,
-        employer_rep_id varchar(255),
-        employer_id uuid,
-        employer_name varchar(255),
-        workplace_id uuid,
-        workplace_name varchar(255),
-        cba_id uuid,
-        cba_article varchar(100),
-        cba_section varchar(100),
-        title varchar(500),
-        description text,
-        background text,
-        desired_outcome text,
-        incident_date timestamptz,
-        filed_date timestamptz,
-        response_deadline timestamptz,
-        meeting_date timestamptz,
-        escalated_at timestamptz,
-        resolved_at timestamptz,
-        closed_at timestamptz,
-        timeline jsonb,
-        group_grievance_id uuid,
-        related_grievance_ids jsonb,
-        attachments jsonb,
-        is_group_grievance boolean,
-        is_arbitration_eligible boolean,
-        has_legal_implications boolean,
-        is_confidential boolean,
-        organization_id uuid,
-        created_at timestamptz,
-        updated_at timestamptz,
-        created_by text,
-        last_updated_by text,
-        external_case_id varchar(255),
-        import_fingerprint varchar(64),
-        source_system varchar(100),
-        imported_at timestamptz,
-        import_batch_id uuid
-      );
-    `);
+    // A real organization row: employers.organization_id carries a real FK to organizations.id, so both the
+    // seed route's own inserts and this test's "colliding real employer" fixture need one to exist first.
+    await admin.query(
+      `INSERT INTO organizations (id, name, slug, organization_type, hierarchy_path, hierarchy_level, sectors, clc_affiliated, member_count, active_member_count, settings, features_enabled, status, created_at, updated_at, remittance_day)
+       VALUES ($1, $2, $3, 'local', ARRAY[$1]::uuid[], 0, '{}', false, 0, 0, '{}', '{}', 'active', now(), now(), 1)`,
+      [ORG_ID, `Demo Purge Safety Org ${ORG_ID.slice(0, 8)}`, `demo-purge-safety-${ORG_ID.slice(0, 8)}`],
+    );
     state.db = drizzle(admin, { schema: { pilotDemoSeeds, employers, grievances } });
   });
 
   afterAll(async () => {
-    await admin.query('DROP TABLE IF EXISTS pilot_demo_seeds, employers, grievances');
+    // Scoped cleanup only - this runs against the SAME shared, fully-bootstrapped combined database every other
+    // *.postgres.test.ts file in this run also uses, so nothing here may touch another test's rows.
+    await admin.query('DELETE FROM grievances WHERE organization_id = $1', [ORG_ID]);
+    await admin.query('DELETE FROM employers WHERE organization_id = $1', [ORG_ID]);
+    await admin.query('DELETE FROM pilot_demo_seeds WHERE organization_id = $1', [ORG_ID]);
+    await admin.query('DELETE FROM organizations WHERE id = $1', [ORG_ID]);
     await admin.end();
   });
 
   beforeEach(async () => {
-    await admin.query('DELETE FROM pilot_demo_seeds');
-    await admin.query('DELETE FROM employers');
-    await admin.query('DELETE FROM grievances');
+    // Reset this test's own org-scoped rows between the 2 it() blocks below - still scoped, never a bare DELETE.
+    await admin.query('DELETE FROM pilot_demo_seeds WHERE organization_id = $1', [ORG_ID]);
+    await admin.query('DELETE FROM employers WHERE organization_id = $1', [ORG_ID]);
+    await admin.query('DELETE FROM grievances WHERE organization_id = $1', [ORG_ID]);
   });
 
   async function post() {
@@ -196,11 +109,13 @@ describe.skipIf(!URL_)('pilot demo-data purge never deletes a real row matching 
     // A REAL grievance and employer that happen to match the historical demo naming convention, created outside
     // this seed (no id in its tracked arrays).
     await admin.query(
-      "INSERT INTO grievances (organization_id, grievance_number, title, description) VALUES ($1, 'GRV-DEMO-999', 'A real grievance that collides with the pattern', 'real description')",
+      `INSERT INTO grievances (id, organization_id, grievance_number, type, status, title, description, created_at, updated_at)
+       VALUES (gen_random_uuid(), $1, 'GRV-DEMO-999', 'individual', 'new', 'A real grievance that collides with the pattern', 'real description', now(), now())`,
       [ORG_ID],
     );
     await admin.query(
-      "INSERT INTO employers (organization_id, name, email) VALUES ($1, 'A Real Employer', 'lr-demo@a-real-employer.ca')",
+      `INSERT INTO employers (id, organization_id, name, employer_type, status, email, created_at, updated_at)
+       VALUES (gen_random_uuid(), $1, 'A Real Employer', 'federal', 'active', 'lr-demo@a-real-employer.ca', now(), now())`,
       [ORG_ID],
     );
 
@@ -221,15 +136,18 @@ describe.skipIf(!URL_)('pilot demo-data purge never deletes a real row matching 
       [ORG_ID],
     );
     await admin.query(
-      "INSERT INTO grievances (organization_id, grievance_number, title, description) VALUES ($1, 'GRV-DEMO-LEGACY-1', 'Legacy-seeded grievance (untracked)', 'd')",
+      `INSERT INTO grievances (id, organization_id, grievance_number, type, status, title, description, created_at, updated_at)
+       VALUES (gen_random_uuid(), $1, 'GRV-DEMO-LEGACY-1', 'individual', 'new', 'Legacy-seeded grievance (untracked)', 'd', now(), now())`,
       [ORG_ID],
     );
     await admin.query(
-      "INSERT INTO grievances (organization_id, grievance_number, title, description) VALUES ($1, 'GRV-DEMO-999', 'A real grievance that collides with the pattern', 'd')",
+      `INSERT INTO grievances (id, organization_id, grievance_number, type, status, title, description, created_at, updated_at)
+       VALUES (gen_random_uuid(), $1, 'GRV-DEMO-999', 'individual', 'new', 'A real grievance that collides with the pattern', 'd', now(), now())`,
       [ORG_ID],
     );
     await admin.query(
-      "INSERT INTO employers (organization_id, name, email) VALUES ($1, 'A Real Employer', 'lr-demo@a-real-employer.ca')",
+      `INSERT INTO employers (id, organization_id, name, employer_type, status, email, created_at, updated_at)
+       VALUES (gen_random_uuid(), $1, 'A Real Employer', 'federal', 'active', 'lr-demo@a-real-employer.ca', now(), now())`,
       [ORG_ID],
     );
 
