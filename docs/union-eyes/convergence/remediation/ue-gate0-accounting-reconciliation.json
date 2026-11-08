@@ -3,23 +3,23 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 721,
+    "overlayImplemented": 728,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 68,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 44,
-    "overlayPartial": 36,
+    "creditedByEarlierRuns": 75,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 51,
+    "overlayPartial": 30,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 56,
-    "untouchedByOverlay": 20,
+    "unresolvedByOverlay": 49,
+    "untouchedByOverlay": 19,
     "qualificationVerified": 0,
     "closed": 0
   },
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 721,
-    "partial": 36,
-    "untouched": 20,
+    "implemented": 728,
+    "partial": 30,
+    "untouched": 19,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
       "DEF-0B1-BILLING-SCHEDULER-LATENT",
@@ -29,14 +29,8 @@
       "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
       "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
       "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
-      "DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED",
       "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
-      "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
-      "DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS",
-      "DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS",
       "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
-      "DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS",
-      "DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST-EXTRAPOLATES-TWO-TYPED-SCORES",
       "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-RELEASES-LATEST-VERSION-NOT-GRANTED-VERSION",
       "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
       "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
@@ -63,7 +57,6 @@
       "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
       "DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY",
       "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
-      "DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW",
       "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",
       "DEF-0B7-PLT-EQUITY-SNAPSHOT-SCHEMA-HAS-NO-SMALL-CELL-RULE",
       "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
@@ -652,6 +645,49 @@
       "hasIndependentRegressionEvidence": false
     },
     {
+      "defectId": "DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW",
+      "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/exit-interviews-governance.route.test.ts;apps/union-eyes/lib/knowledge-transfer/governance/__tests__/consent-controls.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/exit-interviews/[id]/governance/route.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance/consent-controls.ts",
+        "apps/union-eyes/app/api/__tests__/exit-interviews-governance.route.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance/__tests__/consent-controls.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED",
+      "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/__tests__/response-builder.test.ts",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/response-builder.ts",
+        "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/explainability-models.ts",
+        "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
+        "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/__tests__/response-builder.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
+      "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/behavior-patterns/__tests__/behavior-engine.test.ts;apps/union-eyes/lib/knowledge-transfer/governance-culture/__tests__/culture-engine.test.ts;apps/union-eyes/lib/knowledge-transfer/learning-archetypes/__tests__/archetype-classifier.test.ts",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
+        "apps/union-eyes/lib/knowledge-transfer/behavior-patterns/behavior-engine.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance-culture/culture-engine.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance-culture/culture-models.ts",
+        "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-classifier.ts",
+        "apps/union-eyes/lib/knowledge-transfer/behavior-patterns/__tests__/behavior-engine.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance-culture/__tests__/culture-engine.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
       "defectId": "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",
       "batch": "B151-GATE3-COGNITION-ANALYTICS-ENVELOPE-CONFIDENCE",
       "sourceCommit": null,
@@ -659,6 +695,46 @@
       "files": [
         "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
         "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS",
+      "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts;apps/union-eyes/lib/knowledge-transfer/continuity-risk/__tests__/risk-detector.test.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
+      "files": [
+        "apps/union-eyes/app/api/exit-interviews/expertise-map/route.ts",
+        "apps/union-eyes/components/knowledge-transfer/expertise-map/expertise-map.tsx",
+        "apps/union-eyes/lib/knowledge-transfer/continuity-risk/risk-detector.ts",
+        "apps/union-eyes/components/knowledge-transfer/continuity-health-panel.tsx",
+        "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-engine.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
+        "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts",
+        "apps/union-eyes/lib/knowledge-transfer/continuity-risk/__tests__/risk-detector.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS",
+      "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
+        "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS",
+      "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts",
+        "apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },
@@ -681,6 +757,19 @@
       "files": [
         "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
         "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST-EXTRAPOLATES-TWO-TYPED-SCORES",
+      "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-analyzer.ts",
+        "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-models.ts",
+        "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
+        "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },

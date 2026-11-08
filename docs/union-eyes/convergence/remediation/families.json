@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 721,
- "partial": 36,
- "outstanding": 56,
- "accountedFor": 56,
+ "corrected": 728,
+ "partial": 30,
+ "outstanding": 49,
+ "accountedFor": 49,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -74,17 +74,17 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 7,
+   "defects": 5,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 7,
+    "MEDIUM": 5,
     "LOW": 0
    },
    "namedRoutes": 1,
    "namedFiles": 0,
    "tranches": {
     "0B.5": 1,
-    "0B.7": 3,
+    "0B.7": 1,
     "0B.10": 1,
     "0B.11": 2
    }
@@ -177,27 +177,26 @@
   {
    "family": "F11-AI-GOVERNANCE",
    "purpose": "AI governance: consent, sensitivity, explainability and human accountability",
-   "defects": 4,
+   "defects": 3,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 3,
+    "MEDIUM": 2,
     "LOW": 1
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
     "0B.6": 1,
-    "0B.7": 1,
     "0B.10": 2
    }
   },
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 18,
+   "defects": 14,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 15,
+    "MEDIUM": 11,
     "LOW": 3
    },
    "namedRoutes": 3,
@@ -205,7 +204,7 @@
    "tranches": {
     "0B.5": 2,
     "0B.6": 2,
-    "0B.7": 5,
+    "0B.7": 1,
     "0B.8": 3,
     "0B.10": 3,
     "0B.11": 1,
@@ -272,16 +271,7 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW",
-    "severity": "MEDIUM"
-   },
-   {
     "id": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
     "severity": "MEDIUM",
     "partial": true
    },
@@ -401,11 +391,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B10-PIL-PILOT-ADOPTION-ENGAGEMENT-AND-RESOLUTION-FIGURES-ARE-ROW-UPDATE-PROXIES-AND-OPEN-CASE-AGE-WITH-STORED-FIGURES-AS-FALLBACK",
     "severity": "MEDIUM"
    },
@@ -432,26 +417,6 @@
    {
     "id": "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST-EXTRAPOLATES-TWO-TYPED-SCORES",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",

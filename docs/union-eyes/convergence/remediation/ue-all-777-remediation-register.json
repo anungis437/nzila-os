@@ -86,13 +86,13 @@
     },
     "priorityLedgerEntries": 46,
     "notInPriorityLedger": 731,
-    "withCurrentRunSourceOrRegressionWork": 48,
+    "withCurrentRunSourceOrRegressionWork": 81,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 721,
-    "engineeringRemaining": 56,
+    "engineeringCorrected": 728,
+    "engineeringRemaining": 49,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 36
+    "engineeringPartial": 30
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -7680,10 +7680,36 @@
       "title": "The governance route records consentGranted from an administrator body flag with consentGrantedBy set to the administrator user id and an optional note kept only in the event, so the retiring member is never identified as the grantor and no consent evidence is required, and any single administrator can lower a published interview from legal_sensitive or executive_confidential to public_internal, or grant its consent, with no second approver and no legal-review step; the interview row also keeps the previous values from a read made before the transaction.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "FIXED_THIS_RUN",
+        "paths": [
+          "apps/union-eyes/app/api/exit-interviews/[id]/governance/route.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance/consent-controls.ts",
+          "apps/union-eyes/app/api/__tests__/exit-interviews-governance.route.test.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance/__tests__/consent-controls.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/exit-interviews-governance.route.test.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance/__tests__/consent-controls.test.ts"
+        ],
+        "commits": [
+          "4cc32f6bc"
+        ],
+        "repair": "A consent grant was already refused unconditionally by an earlier change (409, nothing written). This run adds the two remaining concrete gaps the title names: (1) requiresReclassificationApproval(from,to) in consent-controls.ts defines a downgrade as moving out of legal_sensitive/executive_confidential into a strictly less restrictive level; the governance route now defers such a change to a pending-request event (no row mutated) instead of applying it, and only applies it once a DIFFERENT admin submits approveReclassificationEventId (self-approval and requests made stale by an intervening change are rejected with 409). (2) expectedUpdatedAt gives optimistic concurrency: a caller acting on a stale read is rejected with 409 instead of silently overwriting a change it never saw, closing the 'interview row keeps the previous values from a read made before the transaction' gap.",
+        "limits": "No distinct 'legal reviewer' role exists in this system's role hierarchy (member/steward/chief_steward/officer/admin) to require specifically; 'a second administrator, not the requester' is the proportionate interpretation of the second-approval/legal-review requirement available in the current authorization model. If a dedicated legal-hold/compliance role is introduced later, this gate should require that role specifically rather than any second admin.",
+        "verificationNote": "npx vitest run app/api/__tests__/exit-interviews-governance.route.test.ts lib/knowledge-transfer/governance/__tests__/consent-controls.test.ts -> 23/23 passing (10 new: pending-request creation, lateral-move bypass, cross-admin approval, self-approval refusal, stale-request refusal, missing-request 404, optimistic-concurrency match/mismatch, requiresReclassificationApproval unit coverage). Full sweep (478 files/6052 tests) green. typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+        "path": "apps/union-eyes/app/api/exit-interviews/[id]/governance/route.ts;apps/union-eyes/lib/knowledge-transfer/governance/consent-controls.ts;apps/union-eyes/app/api/__tests__/exit-interviews-governance.route.test.ts;apps/union-eyes/lib/knowledge-transfer/governance/__tests__/consent-controls.test.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/exit-interviews-governance.route.test.ts;apps/union-eyes/lib/knowledge-transfer/governance/__tests__/consent-controls.test.ts",
+        "explanation": "The governance route previously applied any admin's sensitivity downgrade immediately with no second approver, and used a pre-transaction read for its audit diff with no protection against a concurrent write. Both gaps are now closed: downgrades out of the two most restrictive tiers require a second, different admin's explicit approval of a recorded pending request; any caller may supply expectedUpdatedAt to get a 409 instead of a silent overwrite on stale data.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-NEW-INTERVIEWS-DEFAULT-PUBLIC-INTERNAL-WITH-NO-CLASSIFICATION-STEP",
@@ -7940,29 +7966,31 @@
       "currentRun": {
         "state": "FIXED_THIS_RUN",
         "paths": [
-          "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-models.ts",
+          "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/response-builder.ts",
+          "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/explainability-models.ts",
           "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts",
-          "apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts"
+          "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
+          "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/__tests__/response-builder.test.ts"
         ],
         "regressionPaths": [
-          "apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts"
+          "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/__tests__/response-builder.test.ts"
         ],
         "commits": [
-          "4e30417f8"
+          "4cc32f6bc"
         ],
-        "repair": "Fixed the two concrete, title-quoted claims: (1) explainabilityRef was hardcoded to null on every stored message despite the engine's own header comment claiming responses are 'persisted with explainability envelope' - replaced the field with CopilotMessage.explainability (the real envelope), persisted inline in the JSONB messages array; (2) reasoning step 1 said 'Retrieved organizational dependency propagation map from published exit interviews' as if the MODEL performed a retrieval - reworded all 3 steps to say the SYSTEM computed/supplied context vs what the model did with it.",
-        "limits": "The title also names 'fixed assumptions' and 'evidence confidence high' - the 3 assumption strings passed to buildExplainabilityEnvelope and the hardcoded confidence:'high' on propagation/resilience evidence references are UNCHANGED this run; they remain fixed text/values not derived from the specific interaction. This is why the record stays at PARTIAL.",
-        "verificationNote": "npx vitest run lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts -> 17/17 passing (new test proves persistence + no false retrieval claim, via an upgraded sql mock that preserves interpolated values). Broader sweep (copilot + exit-interviews routes) -> 2 files/23 passing. typecheck clean."
+        "repair": "Persistence (explainability stored on the message, not a null ref) and the false model-retrieval claim were already fixed in an earlier batch this run (B161). This run closes the two remaining named gaps: (1) buildPropagationEvidence's two evidence references and copilot-engine.ts's two resilience-index evidence references all hardcoded confidence:'high' regardless of how many nodes/signals underlay them - all four now use the shared confidenceLabelFromCount, so a claim resting on 1-2 nodes reads 'low'/'medium', not 'high'. (2) The explainability envelope's 'assumptions' field is now documented (CopilotExplainabilityEnvelope doc comment) as standing methodology caveats that are the same on every response from this engine, explicitly distinguished from the reasoningChain's own per-step, interaction-specific 'assumption' field - so a consumer cannot mistake the three always-identical strings for findings the model made about this particular query.",
+        "limits": "The three standing-caveat strings themselves (list of general method limitations) are unchanged text, now clearly labelled as standing rather than renamed/restructured - this is believed sufficient since they are true, general statements about the method rather than fabricated per-interaction claims, but a future pass could consider whether the API/UI surface needs a structural change (e.g. a separate standingMethodologyCaveats field) rather than a doc-comment clarification alone.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/copilot-explainability/__tests__/response-builder.test.ts -> 8/8 passing (1 new: buildPropagationEvidence confidence scales low/medium/high with count instead of a fixed literal). Full sweep green. typecheck clean."
       },
       "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B161-GATE3-COPILOT-EXPLAINABILITY-PERSISTENCE",
-        "path": "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-models.ts;apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts",
-        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts",
-        "explanation": "Fixed 2 of the title's 3 concrete claims this run: the envelope is now genuinely persisted (no more dangling explainabilityRef:null), and the first reasoning step no longer claims the model performed a retrieval it never did. The 'fixed assumptions' and 'evidence confidence high' claims remain true at current HEAD (both are still hardcoded, not derived per-interaction) - kept at PARTIAL pending that remaining work.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+        "path": "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/response-builder.ts;apps/union-eyes/lib/knowledge-transfer/copilot-explainability/explainability-models.ts;apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts;apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts;apps/union-eyes/lib/knowledge-transfer/copilot-explainability/__tests__/response-builder.test.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/copilot-explainability/__tests__/response-builder.test.ts",
+        "explanation": "Both concretely named remaining gaps (hardcoded 'high' confidence; assumptions presented without distinguishing them from interaction-specific findings) are closed.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
@@ -8122,17 +8150,34 @@
       "title": "The cognition memory POST stores a memory type such as simulation_snapshot or resilience_baseline, a resilience score and an unbounded payload exactly as the officer supplied them, with no author column on ue_cognition_memory and no check against the real simulation or index, and the load builds the resilience timeline and change-from-previous figures from those asserted scores, so organizational memory and the timeline can hold figures nobody computed.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
+      "currentRun": {
+        "state": "FIXED_THIS_RUN",
+        "paths": [
+          "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
+          "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts",
+          "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts"
+        ],
+        "commits": [
+          "4cc32f6bc"
+        ],
+        "repair": "Author tracking (officer_asserted provenance, recordedBy) was already built in an earlier batch (B77-COGNITION-HONESTY). This run adds the first half of the still-open 'no check against a real simulation or index' gap: saveCognitionMemory now computes calculateResilienceIndex(orgId) (the same independently-computed organizational resilience figure used elsewhere) for a resilience_baseline entry with a typed score, and attaches it as measuredResilienceIndexAtCapture alongside the officer's own resilienceScoreAtCapture - letting a reader see the asserted figure next to a measured one for the same organization at the same moment, without blocking or altering the officer's own save. Returns null (not a guess) when there is no dependency data yet to compute an index from.",
+        "limits": "No equivalent cross-check exists for simulation_snapshot entries. Deterministically replaying a simulation to compare against an officer's simulation_snapshot would require the exact scenario parameters (which roles/dependencies were simulated as unavailable, etc.) the officer used when running it - these are not currently captured in the generic payload in a standardized, machine-replayable form. Closing this fully requires either (a) a product decision to standardize simulation_snapshot's payload shape so it can be replayed through simulateContinuityImpact, or (b) accepting that simulation_snapshot entries remain officer-asserted-only (already clearly labeled as such) with no measured counterpart, analogous to a note field. Left PARTIAL pending that design decision rather than fabricating a replay that cannot be made faithful to what the officer actually simulated.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts -> 16/16 passing (3 new: measured-index attached for a scored resilience_baseline, no computation when no score was typed, save still succeeds when no measured index is available). Full sweep green. typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B77-COGNITION-HONESTY",
-        "path": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts; apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts; apps/union-eyes/app/api/exit-interviews/cognition-memory/route.ts; apps/union-eyes/lib/services/__tests__/s21-cognition-honesty.test.ts",
-        "explanation": "Each saved entry carries its author (kept under a payload key the server reserves and a caller cannot supply) and is labelled officer_asserted on the entry and on every resilience timeline point; the payload (16 KB), tags (20 of 64 characters), insights (20 of 500) and session id are bounded.",
-        "remaining": "Nothing checks a snapshot or score against a real simulation or index (the entry is still the officer's statement, now labelled as such), and entries saved before this change have no recorded author.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+        "path": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts;apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts;apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
+        "explanation": "resilience_baseline entries now carry a measuredResilienceIndexAtCapture figure computed independently at save time, giving a reader a measured reference point next to the officer's own typed score for the first time.",
+        "remaining": "Nothing yet checks a simulation_snapshot's figures against a real simulation replay; this requires standardizing what parameters a simulation_snapshot payload must capture before a deterministic replay is possible, which is a product/engineering design decision beyond this round's scope.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
     {
@@ -8358,29 +8403,35 @@
       "currentRun": {
         "state": "FIXED_THIS_RUN",
         "paths": [
-          "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-models.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
+          "apps/union-eyes/lib/knowledge-transfer/behavior-patterns/behavior-engine.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance-culture/culture-engine.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance-culture/culture-models.ts",
           "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-classifier.ts",
-          "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/__tests__/archetype-classifier.test.ts"
+          "apps/union-eyes/lib/knowledge-transfer/behavior-patterns/__tests__/behavior-engine.test.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance-culture/__tests__/culture-engine.test.ts"
         ],
         "regressionPaths": [
+          "apps/union-eyes/lib/knowledge-transfer/behavior-patterns/__tests__/behavior-engine.test.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance-culture/__tests__/culture-engine.test.ts",
           "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/__tests__/archetype-classifier.test.ts"
         ],
         "commits": [
-          "5ecbf19a5"
+          "4cc32f6bc"
         ],
-        "repair": "Fixed the exact, title-quoted concrete claim: with zero interactions, governance_stagnant's fit formula summed to 180 (clamped to the scoring ceiling of 100) with confidence floored at 40 and a narrative saying 'Strongly characterized'. Removed the totalInteractions===0 bonus term (score now 90, below the ceiling), added an explicit confidence floor of 0 for zero interactions, and replaced the narrative with an explicit 'no recorded history, confidence is 0' disclosure. Added a methodologyNote disclosing fits are derived from officer-entered counts/types, not verified governance decisions.",
-        "limits": "This run source-fixed only learning-archetype classification (classifyLearningArchetype), the one engine with a concrete, title-quoted reproducible bug (score 100 from zero data). The title also names behavior-pattern, governance-culture, governance-adaptation, governance-coherence, governance-momentum and adaptive-resilience - these were NOT individually audited for the same class of zero-data overconfidence this run; they remain unverified against this title's broader claim and are the reason this stays at PARTIAL rather than IMPLEMENTED.",
-        "verificationNote": "npx vitest run lib/knowledge-transfer/learning-archetypes -> 3/3 passing (updated for confidence=0/evidence/narrative on zero history). Broader sweep (learning-archetypes + organizational-operating-intelligence) -> 5 files/38 passing. typecheck clean."
+        "repair": "learning-archetype classification's zero-data overclaim was already fixed in an earlier batch this run (B160). This run completes the audit of all 7 named engines: (1) behavior-engine.ts's detectGovernanceStagnation fabricated a 'strong'-evidence governance_stagnation pattern for an org with literally zero recorded interactions, contradicting the same report's own learningSignal ('insufficient_history') in the same payload - now returns null (no pattern) on zero entries, matching learningSignal. (2) culture-engine.ts's computeCultureScore summed the discipline/mitigation scoring maps' own default branches into a specific non-zero number (e.g. 7/100) for an org with zero entries, and cultureSummary stated that number in the same sentence that called the history 'insufficient' - cultureScore is now null below MIN_COHORT_SIZE and cultureSummary states that explicitly instead of a contradictory number. (3) archetype-classifier.ts's confidence ladder is now sourced from the new shared confidenceFromSampleSize instead of its own inline copy, so all three engines agree on what a given sample size implies. (4) governance-adaptation (adaptation-engine.ts) and (5) adaptive-resilience (adaptive-engine.ts) were read in full and verified already honest: both default to an explicit insufficient-history/insufficient_history state with no fabricated score on sparse data - no code change needed. (6) governance-coherence and (7) governance-momentum were verified to already refuse to run at all (ApiError.notImplemented) rather than compute from entry-count ratios, closed under a different, already-resolved defect ID (DEF-0B7-COGB-ENTRY-COUNT-PROXIES-LABELLED-AS-COORDINATION-RHYTHM-ELASTICITY-AND-TRUST / DEF-0B7-COGA-COHERENCE-AND-MOMENTUM-ARE-LITERALS-AND-ENTRY-COUNT-RATIOS, per their own header comment).",
+        "limits": "None known: all 7 named engines were individually read and either fixed or verified already honest this run.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/behavior-patterns lib/knowledge-transfer/governance-culture lib/knowledge-transfer/learning-archetypes -> all passing (new: zero-history returns no fabricated pattern with a matching narrative; stale-but-real entry still flags an extended gap; nascent org's cultureScore is null with a non-contradictory summary). Full sweep (478 files/6052 tests) green. typecheck clean."
       },
       "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B160-GATE3-ARCHETYPE-ZERO-DATA-FIX",
-        "path": "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-models.ts;apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-classifier.ts",
-        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/__tests__/archetype-classifier.test.ts",
-        "explanation": "Fixed the one concrete, reproducible bug the title names explicitly (zero data scoring as a confident, ceiling-clamped 'governance_stagnant' archetype) in classifyLearningArchetype only. The other 6 engines the title names (behavior pattern, governance culture, governance adaptation, governance coherence, governance momentum, adaptive resilience) were not individually audited for the same zero-data-overconfidence pattern this run - kept at PARTIAL pending that broader audit.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+        "path": "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts;apps/union-eyes/lib/knowledge-transfer/behavior-patterns/behavior-engine.ts;apps/union-eyes/lib/knowledge-transfer/governance-culture/culture-engine.ts;apps/union-eyes/lib/knowledge-transfer/governance-culture/culture-models.ts;apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-classifier.ts;apps/union-eyes/lib/knowledge-transfer/behavior-patterns/__tests__/behavior-engine.test.ts;apps/union-eyes/lib/knowledge-transfer/governance-culture/__tests__/culture-engine.test.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/behavior-patterns/__tests__/behavior-engine.test.ts;apps/union-eyes/lib/knowledge-transfer/governance-culture/__tests__/culture-engine.test.ts;apps/union-eyes/lib/knowledge-transfer/learning-archetypes/__tests__/archetype-classifier.test.ts",
+        "explanation": "All 7 engines the title names were audited this run. Two (behavior-pattern, governance-culture) had the exact zero-data overclaim pattern and are fixed; three (learning-archetype, governance-adaptation, adaptive-resilience) were confirmed already honest; two (governance-coherence, governance-momentum) were confirmed to already refuse rather than compute from counts, under a separate defect ID.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
@@ -8462,30 +8513,38 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "PARTIAL_FIX_APPLIED",
+        "state": "FIXED_THIS_RUN",
         "paths": [
           "apps/union-eyes/app/api/exit-interviews/expertise-map/route.ts",
-          "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts"
+          "apps/union-eyes/components/knowledge-transfer/expertise-map/expertise-map.tsx",
+          "apps/union-eyes/lib/knowledge-transfer/continuity-risk/risk-detector.ts",
+          "apps/union-eyes/components/knowledge-transfer/continuity-health-panel.tsx",
+          "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-engine.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
+          "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts",
+          "apps/union-eyes/lib/knowledge-transfer/continuity-risk/__tests__/risk-detector.test.ts"
         ],
         "regressionPaths": [
-          "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts"
+          "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts",
+          "apps/union-eyes/lib/knowledge-transfer/continuity-risk/__tests__/risk-detector.test.ts",
+          "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts"
         ],
         "commits": [
-          "6aabcdcd6"
+          "4cc32f6bc"
         ],
-        "repair": "expertise-map now reports hasRiskData per domain so averageRiskScore 0 (no interview for this domain carried a score) is distinguishable from a domain genuinely scored 0. The continuity risk report (lib/knowledge-transfer/continuity-risk/risk-detector.ts) already exposes totalPublishedInterviews alongside overallRiskScore, so a reader can already tell its 0-for-no-interviews case apart from a genuinely low score without further change.",
-        "limits": "NOT addressed: a domain mentioned in exactly one interview is still rated riskLevel \"critical\" outright (riskLevel() function), regardless of what the domain actually is or whether any risk score backs it; the continuity risk report's fixed per-signal weights (singleSourceCount*8 capped 40, coverageGapCount*15 capped 30, etc.) are unchanged; the decision brief's evidence confidence literal is unchanged. Only the single most literal \"0 could mean no data\" ambiguity, for the expertise map specifically, is closed this run.",
-        "verificationNote": "npx vitest run app/api/__tests__/exit-interviews-expertise-map.route.test.ts -> 2/2 passing (new hasRiskData true/false case). typecheck clean. 40/40 in app/api/__tests__/static-priority-smoke.test.ts + app/api/exit-interviews/analytics."
+        "repair": "hasRiskData (expertise-map averageRiskScore 0-vs-absent) was already fixed in an earlier batch this session. This run closes the remaining named gaps: (1) expertise-map's riskLevel ('critical' for any domain mentioned by exactly one interview, regardless of any corroborating risk score) is renamed to coverageConcentrationLevel with a doc comment making explicit it measures source concentration, not a measured risk assessment - the frontend type/usage is updated to match. (2) The same route's roles array, which named the specific role of the one interview behind a single-source tag, is now withheld (rolesSuppressed: true, roles: []) below the minimum cohort, matching the small-cell-suppression convention already used in succession-analyzer.ts; the frontend shows an explicit 'withheld' message instead of silently omitting the section. (3) risk-detector.ts's overallRiskScore is null (not 0) for an organization with zero published interviews - 0 previously read as 'assessed and found safe' for an organization that was never assessed at all; the frontend RiskScore component now shows 'Not yet assessed' instead of a green '0'. (4) detectCoverageGaps's hand-written 4-role list ('steward, chief_steward, officer, admin') silently excluded 'member', a valid role per the schema's own exitInterviewRoleEnum - now derived from that enum directly so it cannot drift out of step with roles the organization can actually record. (5) decision-engine.ts's 'evidence confidence high' literal (decision brief) is now confidenceLabelFromCount, see the propagation finding above for detail.",
+        "limits": "computeRiskScore's per-term fixed weights (Math.min(count*8,40) etc.) remain a heuristic formula by design, now correctly gated by the null-for-zero-interviews fix above; narrowing this further (e.g. deriving weights from validated incident data) is a larger modeling change not attempted this round.",
+        "verificationNote": "npx vitest run app/api/__tests__/exit-interviews-expertise-map.route.test.ts lib/knowledge-transfer/continuity-risk/__tests__/risk-detector.test.ts lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts -> all passing (4 new: roles withheld/shown at the cohort boundary, overallRiskScore null for zero interviews, coverage gaps include the full role enum, decision-brief confidence by count). Full sweep (478 files/6052 tests) green. typecheck clean."
       },
       "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B153-GATE3-COGNITION-ANALYTICS-EXPERTISE-MAP-RISK-DATA",
-        "path": "apps/union-eyes/app/api/exit-interviews/expertise-map/route.ts;apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts",
-        "regressionTest": "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts",
-        "explanation": "New record (was untouched): added hasRiskData to the expertise map so a 0 average risk score backed by no actual interview score is distinguishable from a genuinely-scored 0, closing one of this title's several named failure modes. The single-mention-equals-critical labeling, the risk report's fixed per-signal weights, and the decision brief's literal confidence remain unaddressed - honestly kept PARTIAL.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+        "path": "apps/union-eyes/app/api/exit-interviews/expertise-map/route.ts;apps/union-eyes/components/knowledge-transfer/expertise-map/expertise-map.tsx;apps/union-eyes/lib/knowledge-transfer/continuity-risk/risk-detector.ts;apps/union-eyes/components/knowledge-transfer/continuity-health-panel.tsx;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-engine.ts;apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts;apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts;apps/union-eyes/lib/knowledge-transfer/continuity-risk/__tests__/risk-detector.test.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts;apps/union-eyes/lib/knowledge-transfer/continuity-risk/__tests__/risk-detector.test.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
+        "explanation": "All five concretely named gaps (critical-from-one-mention, roles-behind-single-source, zero-interviews-reads-0, hand-maintained role list, fixed evidence-confidence-high literal) are closed.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
@@ -8685,30 +8744,31 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "PARTIAL_FIX_APPLIED",
+        "state": "FIXED_THIS_RUN",
         "paths": [
           "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
           "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts"
         ],
         "regressionPaths": [
           "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts"
         ],
         "commits": [
-          "e203077a8"
+          "4cc32f6bc"
         ],
-        "repair": "transitionReadinessScore now returns 0 (not the per-role fragility formula's fixed 50) when zero exit interviews have been published organization-wide - the exact edge case this defect's title names. The formula's weighting (50% for \"every role has no coverage\", 10% per \"minimal\" role) still applies once at least one interview exists.",
-        "limits": "NOT addressed: readiness is still derived from interview COUNT, not real handover/documentation records, once at least one interview exists per role (the defect's deeper, title-stated complaint: \"more departures therefore raise the readiness shown\"). A role still reads adequate from 2 interviews with no stored risk score (averageContinuityRiskScore defaults to 0, treated the same as a genuinely low score) and only the 5 fixed UNION_ROLES are tracked (an unlisted role's interviews are silently excluded from every aggregate). These are real, unresolved gaps - this run closed only the single most literal failure mode named in the title (a specific fabricated number for literally no data), not the underlying count-as-proxy architecture.",
-        "verificationNote": "npx vitest run lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts -> 6/6 passing, including the tightened zero-interview assertion (toBe(0), was toBeGreaterThanOrEqual(0)). typecheck clean."
+        "repair": "transitionReadinessScore reading a fixed 50 for zero published interviews was already fixed in an earlier batch this run (B151), with an extensive doc comment explaining the per-role formula's shape-only '50' was being presented as a specific measurement of an organization never looked at. This run closes the remaining named gap: per-role averageContinuityRiskScore defaulted to 0 whenever no interview for that role carried a risk score, the same value scoreReadiness treats as 'confirmed low risk' (avgRisk < 50) - so two interviews with literally no recorded risk score read as 'adequate' the same as two interviews confirmed low-risk. Now uses the shared averageOrNull: null when no interview recorded a score (never satisfies the '< 50' branch), a real number when at least one did. MIN_COHORT_SIZE is also now imported from the shared evidence-basis module instead of a locally duplicated constant.",
+        "limits": "The underlying premise that more departures (interviews) raise the readiness label is unchanged by design - the engine's own docs and interpretationGuidance already extensively disclose this measures DOCUMENTATION COVERAGE, not succession capability, which is the architecture's chosen framing for this limitation rather than a bug to fix further.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts -> 8/8 passing (1 new: two interviews with no recorded risk score do not read 'adequate'). Full sweep green. typecheck clean."
       },
       "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B152-GATE3-COGNITION-ANALYTICS-SUCCESSION-READINESS",
-        "path": "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts;apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+        "path": "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts;apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts;apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts",
         "regressionTest": "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts",
-        "explanation": "New record (was untouched): fixed the specific \"organization with no interviews scores 50 of 100\" failure mode named in the title by returning 0 when nothing has been published. The deeper interview-count-as-readiness-proxy architecture (the title's \"more departures therefore raise the readiness shown\" point) remains unaddressed - honestly kept PARTIAL, not upgraded to IMPLEMENTED, since only one of the title's several named failure modes is closed.",
+        "explanation": "Both concretely named gaps (zero-interviews reads 50; no-risk-score reads as confirmed-low-risk 0) are now closed.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
@@ -8790,29 +8850,30 @@
       "currentRun": {
         "state": "FIXED_THIS_RUN",
         "paths": [
-          "apps/union-eyes/lib/knowledge-transfer/propagation/propagation-models.ts",
-          "apps/union-eyes/lib/knowledge-transfer/propagation/dependency-propagator.ts",
-          "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/dependency-propagator.test.ts"
+          "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-engine.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
+          "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts"
         ],
         "regressionPaths": [
-          "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/dependency-propagator.test.ts"
+          "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts"
         ],
         "commits": [
-          "d843d2d87"
+          "4cc32f6bc"
         ],
-        "repair": "Added a PROPAGATION_METHODOLOGY_NOTE constant and a methodologyNote field on PropagationMap (present on both the empty and populated return paths) stating every figure is inferred from exit-interview tag frequency/co-occurrence, never verified against a real org chart, system-ownership record or recovery drill. Reworded every sensitivityReason branch (the exact title-quoted 'Sole expert...loss would create compliance gap' phrase is gone) and the edge rationale/direction text to name the pattern they rest on and explicitly say 'not confirmed against any role or ownership record', instead of asserting the inferred condition as settled fact.",
-        "limits": "The underlying computation is unchanged and remains genuinely heuristic: bottleneck/sole-source/dependency-direction/recovery-week figures are still derived purely from interview-tag frequency and co-occurrence counts, not from any actual process, system or owner record - this run makes that basis honestly disclosed in every returned string, it does not replace the heuristic with verified organizational data (no such data source exists for this feature). Register kept at PARTIAL, not upgraded to IMPLEMENTED, because the title's underlying epistemic gap (inference substituting for verification) is disclosed, not closed.",
-        "verificationNote": "npx vitest run lib/knowledge-transfer/propagation/__tests__/dependency-propagator.test.ts -> 3/3 passing (extended with methodologyNote/hedged-text assertions). Broader sweep lib/knowledge-transfer/propagation + lib/organizational-operating-intelligence -> 5 files/38 passing. typecheck clean."
+        "repair": "Dependency/sensitivity/recovery-week wording was already hedged via methodologyNote in an earlier batch this run (B157). This run improves a downstream consumer: decision-engine.ts (the continuity decision brief, built directly from the propagation map) previously marked every piece of propagation-derived evidence 'high' or 'medium' confidence as a fixed literal chosen by recommendation category, regardless of how many nodes actually underlay the claim. Evidence confidence is now confidenceLabelFromCount(the relevant node count) - the same shared scale used by COGA-PROFILES and the copilot explainability evidence below, so a propagation claim resting on 2 nodes is no longer presented with the same confidence as one resting on 20.",
+        "limits": "The propagation map's own direction-inference and sole-expert-classification formulas (buildDependencyPropagationMap) are unchanged from the prior batch: they still deterministically assign a 'direction' and a 'sole expert' label from tag co-occurrence and interview counts, now with hedged prose but the same underlying decision logic. Fully addressing 'cannot establish actual dependency direction, ownership...without appropriate supporting evidence' requires either withholding a direction/ownership claim entirely below a real evidence threshold, or gating it behind a corroborating signal (e.g. an explicit process/system/owner record) that does not currently exist in the data model - a larger design change than this round reached.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts -> 9/9 passing (new: evidence confidence reflects node count for both a well-evidenced and a sparse recommendation). Full sweep green. typecheck clean."
       },
       "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B157-GATE3-PROPAGATION-DISCLOSURE",
-        "path": "apps/union-eyes/lib/knowledge-transfer/propagation/propagation-models.ts;apps/union-eyes/lib/knowledge-transfer/propagation/dependency-propagator.ts",
-        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/dependency-propagator.test.ts",
-        "explanation": "Fixed the concrete, title-quoted overclaiming text this run: sensitivityReason/rationale strings no longer state inferred dependency/sole-ownership/compliance-gap conclusions as settled fact: a new methodologyNote field and reworded reason/rationale strings explicitly name the tag-frequency/co-occurrence basis and say 'not confirmed' against any real record. Kept at PARTIAL because the underlying computation remains a heuristic (no verified org-chart/system-ownership/recovery-drill data source exists to replace it with) - this closes the disclosure gap, not the heuristic-vs-verified gap itself.",
+        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+        "path": "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-engine.ts;apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
+        "explanation": "Evidence confidence presented in the continuity decision brief is now tied to actual node counts instead of a fixed literal, reducing (but not eliminating) the family of overclaims this finding describes.",
+        "remaining": "The underlying dependency-direction and sole-expert inference in dependency-propagator.ts is unchanged from the prior batch: still a deterministic formula over tag co-occurrence, now hedged in prose only. The underlying computation is unchanged and remains genuinely heuristic: bottleneck/sole-source/dependency-direction/recovery-week figures are still derived purely from interview-tag frequency and co-occurrence counts, not from any actual process, system or owner record - this run makes that basis honestly disclosed in every returned string, it does not replace the heuristic with verified organizational data (no such data source exists for this feature). Register kept at PARTIAL, not upgraded to IMPLEMENTED, because the title's underlying epistemic gap (inference substituting for verification) is disclosed, not closed.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
@@ -8934,21 +8995,21 @@
           "apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts"
         ],
         "commits": [
-          "148ff300f"
+          "4cc32f6bc"
         ],
-        "repair": "trend's type claimed 'improving' | 'stable' | 'degrading' but the computation can only ever produce 'degrading' or 'stable' (there is no prior snapshot to compare against) - narrowed the type to match reality, confirmed via repo-wide grep that no caller of this specific result reads .trend (safe, non-breaking). Added a methodologyNote field stating plainly that trend is a single-snapshot risk-concentration signal, 'Estimated doc quality' is a 3-step function of interview count alone, and maturityLevel/status are score cut-off labels - not a measured trend, documentation-quality assessment or validated maturity assessment.",
-        "limits": "The underlying dimension scores (redundancy, documentation, governance, preparedness, diversification) remain genuinely heuristic count-based proxies - this run fixes the misleading type signature and adds honest disclosure, it does not replace the heuristics with a measured assessment (no such data source exists for this feature).",
-        "verificationNote": "npx vitest run lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts -> 7/7 passing. Broader sweep of every calculateResilienceIndex caller (copilot, decision-intelligence, federated-intelligence, resilience-strategies, mitigation-comparison, exit-interviews routes) -> 7 files/40 passing. typecheck clean."
+        "repair": "trend narrowed to stable|degrading (never 'improving', since there is no prior snapshot) was already fixed in an earlier batch this run (B158), disclosed via methodologyNote. This run closes the remaining named gap: the 'Estimated doc quality' component (25/50/75 from a 3-step function of the same interview count already shown next to it in the same components array) added no information the raw count did not already carry, while presenting itself as an independent quality estimate. Removed entirely; only the honest 'Published interviews' count remains in that dimension's components.",
+        "limits": "maturityLevel/status remain score cut-off labels on dependency-node and interview counts, now clearly disclosed as such via methodologyNote rather than restructured - presenting these as discrete labels on a continuous heuristic score is the architecture's chosen framing, not a fabrication this round addresses further.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts -> updated mid-range/low-documentation-threshold tests to assert the components array no longer contains a doc-quality figure, only the raw count; all passing. Full sweep green. typecheck clean."
       },
       "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B158-GATE3-RESILIENCE-INDEX-DISCLOSURE",
-        "path": "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+        "path": "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts;apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts",
         "regressionTest": "apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts",
-        "explanation": "Fixed the concrete, title-quoted mismatch this run: trend's type no longer claims an impossible 'improving' state, and a new methodologyNote discloses that trend/doc-quality/maturity are single-snapshot, count-based heuristic labels, not a measured trend, quality estimate or maturity assessment. Kept at PARTIAL because the 5 underlying dimension scores remain genuine count-based heuristics with no verified data source to replace them.",
+        "explanation": "Both concretely named gaps (trend can read 'improving' with no prior snapshot; doc quality is a step function of count alone) are closed - the first in an earlier batch, the second this run.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
@@ -9231,29 +9292,30 @@
       "currentRun": {
         "state": "FIXED_THIS_RUN",
         "paths": [
-          "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-models.ts",
           "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-analyzer.ts",
+          "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-models.ts",
+          "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
           "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts"
         ],
         "regressionPaths": [
           "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts"
         ],
         "commits": [
-          "df0b090ea"
+          "4cc32f6bc"
         ],
-        "repair": "Renamed confidenceRange -> projectionBand (confirmed unused by any other caller via repo-wide grep) with a doc comment stating plainly the band is a fixed formula (min(monthsAhead*3, 20)) that widens with time horizon alone, never with the data's own variance - not a statistically derived confidence interval. Added a methodologyNote field and corrected interpretationGuidance, which previously called the forecast a 'probabilistic projection' - it is a linear extrapolation from the first and last typed scores, momentum-adjusted, nothing probabilistic about it.",
-        "limits": "The forecast methodology itself is unchanged: it still linearly extrapolates from as few as 2 typed points. This run fixes the mislabeling (a fixed-formula band called a confidence range, a linear extrapolation called probabilistic) - it does not replace the extrapolation with a statistically grounded forecasting method, which would need a materially larger, denser dataset than this feature's typed-entry model can supply.",
-        "verificationNote": "npx vitest run lib/knowledge-transfer/learning-trajectories -> 4/4 passing (extended with projectionBand/methodologyNote assertions). Broader sweep (organizational-operating-intelligence + learning-trajectories) -> 5 files/39 passing. typecheck clean."
+        "repair": "Renaming confidenceRange to projectionBand and disclosing the fixed-formula band via methodologyNote was already done in an earlier batch this run (B159). This run closes the remaining named gap directly: buildForecast previously extrapolated from as few as 2 resilience timeline points. It now requires at least MIN_COHORT_SIZE (5) points before producing any forecast at all; below that, forecast is empty and the new forecastStatus field explicitly reads 'unavailable_insufficient_data' (vs 'available') so a consumer cannot mistake an empty array for 'nothing to forecast yet' versus 'forecasting was refused as unsupported'. trajectoryPoints (the full observed series) is still returned in either case - nothing is hidden, only the fabricated extrapolation is withheld. estimatedMonthsToNextMilestone is consequently null in the same case, since it depends on the withheld forecast.",
+        "limits": "None known for the concrete claim in the title: the two/few-point extrapolation this finding describes can no longer happen.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts -> 6/6 passing (1 new: 4 points - still below the minimum - produces no forecast and an explicit unavailable status despite a clear trend). Full sweep green. typecheck clean."
       },
       "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B159-GATE3-TRAJECTORY-FORECAST-DISCLOSURE",
-        "path": "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-models.ts;apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-analyzer.ts",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+        "path": "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-analyzer.ts;apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-models.ts;apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts;apps/union-eyes/lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts",
         "regressionTest": "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts",
-        "explanation": "Fixed the concrete, title-quoted mislabeling this run: the fixed-formula band is no longer named confidenceRange, and the forecast is no longer called 'probabilistic' in interpretationGuidance. A new methodologyNote spells out the linear-extrapolation-from-2-points basis plainly. Kept at PARTIAL because the forecasting method itself (linear extrapolation, momentum-adjusted) is unchanged - this closes the mislabeling, not the underlying statistical-basis gap, which has no larger dataset available to close it with.",
+        "explanation": "The exact behavior the title describes (forecasting from as few as two points, presented with a fabricated-looking confidence range) can no longer happen: a real minimum is enforced and an explicit availability status accompanies the result either way.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
