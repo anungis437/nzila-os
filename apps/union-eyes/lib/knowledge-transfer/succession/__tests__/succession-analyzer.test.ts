@@ -51,7 +51,9 @@ describe('lib/knowledge-transfer/succession/succession-analyzer', () => {
     whereMock.mockResolvedValue([]);
     const report = await analyzeSuccessionFragility('org-1');
     expect(generateMock).not.toHaveBeenCalled();
-    expect(report.transitionReadinessScore).toBeGreaterThanOrEqual(0);
+    // DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS: an organization with
+    // zero published interviews must read 0, never the per-role formula's fixed 50 for "every role has no coverage".
+    expect(report.transitionReadinessScore).toBe(0);
     expect(report.executiveSummary).toContain('No published exit interviews');
     expect(report.roleSuccessionStatus.length).toBe(5);
   });

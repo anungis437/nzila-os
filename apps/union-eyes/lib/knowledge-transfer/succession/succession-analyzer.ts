@@ -184,16 +184,25 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
     },
   );
 
-  // Readiness score = inverse of fragility (percentage of roles with at least partial coverage)
+  // Readiness score = inverse of fragility (percentage of roles with at least partial coverage).
+  // With zero published interviews organization-wide there is no documentation coverage to measure at all: every role
+  // reads 'none' by construction, and the per-role formula below would otherwise compute a fixed 50 from that shape
+  // alone (the weight it gives to "every role has no coverage"), presenting a specific number for an organization
+  // this analysis has not actually looked at yet.
   const rolesWithNone = roleSuccessionStatus.filter((r) => r.successorReadiness === 'none').length;
   const rolesWithMinimal = roleSuccessionStatus.filter(
     (r) => r.successorReadiness === 'minimal',
   ).length;
-  const fragility = Math.min(
-    (rolesWithNone / UNION_ROLES.length) * 50 + rolesWithMinimal * 10,
-    100,
-  );
-  const transitionReadinessScore = Math.max(0, 100 - Math.round(fragility));
+  const transitionReadinessScore =
+    published.length === 0
+      ? 0
+      : Math.max(
+          0,
+          100 -
+            Math.round(
+              Math.min((rolesWithNone / UNION_ROLES.length) * 50 + rolesWithMinimal * 10, 100),
+            ),
+        );
 
   let criticalOperationalGaps: string[] = [];
   let documentationPriorities: string[] = [];
