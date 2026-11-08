@@ -6,6 +6,11 @@
 // Every defect the overlay marks implemented must be accounted for exactly once: either by an elimination batch, or by an earlier run
 // whose record cites existing source. The script writes ue-gate0-accounting-reconciliation.json and exits non-zero on any inconsistency.
 // It never edits the frozen register, the overlay or the ledger.
+//
+// Gate 0 corrective convergence: also independently validates all three mutually-exclusive buckets (not just the
+// implemented count), including overlay.summary.engineeringPartial / engineeringRemaining against the per-record data,
+// and cross-checks the separately-generated families.json against these same canonical numbers — a generated artifact
+// going stale after a real register change (as families.json had) is now a reconciliation failure, not a silent drift.
 const fs = require('fs')
 const path = require('path')
 const root = path.resolve(__dirname, '../../../..')
@@ -78,6 +83,11 @@ if (overlayImplemented !== ledgerImplemented + earlierRunCredits.length) {
   problems.push(`credit does not reconcile: overlay ${overlayImplemented} != ledger ${ledgerImplemented} + earlier runs ${earlierRunCredits.length}`)
 }
 if (overlay.summary.engineeringCorrected !== overlayImplemented) problems.push('overlay summary.engineeringCorrected does not match its records')
+// Gate 0 corrective convergence: these two were previously unchecked, so a real state transition (a defect moving
+// untouched -> partial, or partial -> implemented) could advance the per-record data while summary.engineeringPartial /
+// summary.engineeringRemaining silently went stale — exactly what happened to families.json below before this fix.
+if (overlay.summary.engineeringPartial !== overlayPartial) problems.push(`overlay summary.engineeringPartial (${overlay.summary.engineeringPartial}) does not match its records (${overlayPartial})`)
+if (overlay.summary.engineeringRemaining !== partialIds.length + untouchedIds.length) problems.push(`overlay summary.engineeringRemaining (${overlay.summary.engineeringRemaining}) does not match partial + untouched (${partialIds.length + untouchedIds.length})`)
 if (implementedIds.length !== overlayImplemented) problems.push(`ID-level implemented count ${implementedIds.length} != aggregate overlayImplemented ${overlayImplemented}`)
 if (partialIds.length !== overlayPartial) problems.push(`ID-level partial count ${partialIds.length} != aggregate overlayPartial ${overlayPartial}`)
 if (implementedIds.length + partialIds.length + untouchedIds.length !== register.length) {
@@ -85,6 +95,21 @@ if (implementedIds.length + partialIds.length + untouchedIds.length !== register
 }
 const dup = (ids) => ids.length !== new Set(ids).size
 if (dup(implementedIds) || dup(partialIds) || dup(untouchedIds)) problems.push('duplicate defect ID found within a single accounting bucket')
+
+// Family classifications: classify-families.cjs is a separate, deterministic, rerunnable generator over the same
+// frozen register and overlay. Its own output must agree with this script's canonical numbers, or it is stale.
+const familiesPath = path.join(__dirname, 'families.json')
+let families = null
+if (fs.existsSync(familiesPath)) {
+  families = JSON.parse(fs.readFileSync(familiesPath, 'utf8'))
+  if (families.population !== register.length) problems.push(`families.json population (${families.population}) != register length (${register.length})`)
+  if (families.corrected !== overlayImplemented) problems.push(`families.json corrected (${families.corrected}) != overlay implemented (${overlayImplemented}); run classify-families.cjs`)
+  if (families.partial !== overlayPartial) problems.push(`families.json partial (${families.partial}) != overlay partial (${overlayPartial}); run classify-families.cjs`)
+  if (families.outstanding !== register.length - overlayImplemented) problems.push(`families.json outstanding (${families.outstanding}) != population - implemented (${register.length - overlayImplemented}); run classify-families.cjs`)
+  if (families.accountedFor !== families.outstanding) problems.push(`families.json accountedFor (${families.accountedFor}) != its own outstanding (${families.outstanding})`)
+} else {
+  problems.push('families.json not found; run classify-families.cjs')
+}
 
 const doc = {
   record: 'UE-GATE0-ACCOUNTING-RECONCILIATION',
@@ -114,6 +139,7 @@ const doc = {
     untouchedIds,
   },
   agreement: { creditedByBoth: batchCredits, sameBatchLabel: sameBatchAgreement, differentBatchLabel: batchDisagreements.length },
+  familyClassifications: families ? { populationAgrees: families.population === register.length, correctedAgrees: families.corrected === overlayImplemented, partialAgrees: families.partial === overlayPartial, outstandingAgrees: families.outstanding === register.length - overlayImplemented } : { checked: false },
   batchLabelDifferences: batchDisagreements,
   earlierRunCredits,
   consistent: problems.length === 0,

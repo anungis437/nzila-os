@@ -98,6 +98,12 @@
     "sameBatchLabel": 625,
     "differentBatchLabel": 28
   },
+  "familyClassifications": {
+    "populationAgrees": true,
+    "correctedAgrees": true,
+    "partialAgrees": true,
+    "outstandingAgrees": true
+  },
   "batchLabelDifferences": [
     {
       "defectId": "DEF-0B3-KPI-ALERT-RECIPIENTS-MEMBER-READ",

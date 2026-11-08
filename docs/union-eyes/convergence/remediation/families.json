@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 707,
- "partial": 26,
- "outstanding": 70,
- "accountedFor": 70,
+ "corrected": 709,
+ "partial": 27,
+ "outstanding": 68,
+ "accountedFor": 68,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -181,10 +181,10 @@
   {
    "family": "F11-AI-GOVERNANCE",
    "purpose": "AI governance: consent, sensitivity, explainability and human accountability",
-   "defects": 5,
+   "defects": 4,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 4,
+    "MEDIUM": 3,
     "LOW": 1
    },
    "namedRoutes": 0,
@@ -192,17 +192,16 @@
    "tranches": {
     "0B.6": 1,
     "0B.7": 1,
-    "0B.9": 1,
     "0B.10": 2
    }
   },
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 21,
+   "defects": 20,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 17,
+    "MEDIUM": 16,
     "LOW": 4
    },
    "namedRoutes": 3,
@@ -210,7 +209,7 @@
    "tranches": {
     "0B.1": 2,
     "0B.5": 2,
-    "0B.6": 3,
+    "0B.6": 2,
     "0B.7": 5,
     "0B.8": 3,
     "0B.10": 3,
@@ -441,14 +440,11 @@
   "F11-AI-GOVERNANCE": [
    {
     "id": "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
     "severity": "MEDIUM"
    },
    {
@@ -476,10 +472,6 @@
    },
    {
     "id": "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
     "severity": "MEDIUM"
    },
    {
