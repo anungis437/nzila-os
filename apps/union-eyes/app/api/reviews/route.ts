@@ -117,6 +117,15 @@ export async function GET() {
         },
       })
       if (result.oversight.length > 0) {
+        // The store's authorization callback is an internal security boundary.
+        // Never disclose a review if the audit cannot attribute its authorization
+        // to a specific mandate, even if the store is later refactored.
+        for (const review of result.oversight) {
+          const sources = authorizationByReview.get(review.id)
+          if (!sources?.some((source) => source.kind === 'mandate' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(source.id) && source.instrument.trim().length > 0)) {
+            throw new AuthorityStoreError('DENIED', 'OVERSIGHT_AUTHORITY_PROVENANCE_MISSING: refuse unauditable disclosure')
+          }
+        }
         // An oversight read discloses complainant identity and privilege classification, so it leaves a record in the same transaction.
         await persistAtomicAudit(tx, {
           organizationId: who.organizationId,
@@ -124,7 +133,7 @@ export async function GET() {
           action: 'review.oversight.read',
           resourceType: 'governance_review',
           resourceId: result.oversight[0].id,
-          details: { reviewIds: result.oversight.map((review) => review.id), privilegedCount: result.oversight.filter((review) => review.classification === 'privileged').length, decision: 'review:monitor', authorityByReview: result.oversight.map((review) => ({ reviewId: review.id, sources: authorizationByReview.get(review.id) ?? [] })) },
+          details: { reviewIds: result.oversight.map((review) => review.id), privilegedCount: result.oversight.filter((review) => review.classification === 'privileged').length, decision: 'review:monitor', authorityByReview: result.oversight.map((review) => ({ reviewId: review.id, sources: authorizationByReview.get(review.id)! })) },
         })
       }
       return result
