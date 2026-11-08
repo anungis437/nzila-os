@@ -3,23 +3,23 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 709,
+    "overlayImplemented": 710,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 56,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 32,
+    "creditedByEarlierRuns": 57,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 33,
     "overlayPartial": 27,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 68,
-    "untouchedByOverlay": 41,
+    "unresolvedByOverlay": 67,
+    "untouchedByOverlay": 40,
     "qualificationVerified": 0,
     "closed": 0
   },
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 709,
+    "implemented": 710,
     "partial": 27,
-    "untouched": 41,
+    "untouched": 40,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
       "DEF-0B1-BILLING-SCHEDULER-LATENT",
@@ -51,7 +51,6 @@
     ],
     "untouchedIds": [
       "DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY",
-      "DEF-0B1-ALLOWLIST-DRIFT",
       "DEF-0B1-ICRA-TELEMETRY-PROCESS-LOCAL-LIMIT",
       "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
       "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
@@ -321,6 +320,17 @@
         "apps/union-eyes/app/api/organizations/route.ts",
         "apps/union-eyes/app/api/organizations/search/route.ts",
         "apps/union-eyes/lib/organizations/read-authority.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B1-ALLOWLIST-DRIFT",
+      "batch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/__tests__/public-routes.test.ts; apps/union-eyes/lib/__tests__/edge-route-config.test.ts; apps/union-eyes/lib/__tests__/api-auth-guard.test.ts (116 passed); apps/union-eyes/scripts/validate-api-governance.ts (45 pre-existing ungoverned routes, unchanged set, 0 new/regressed)",
+      "files": [
+        "apps/union-eyes/lib/public-routes.ts",
+        "apps/union-eyes/scripts/validate-api-governance.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },

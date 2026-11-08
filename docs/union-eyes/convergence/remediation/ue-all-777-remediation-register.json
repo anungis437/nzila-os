@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 709,
-    "engineeringRemaining": 68,
+    "engineeringCorrected": 710,
+    "engineeringRemaining": 67,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 27
   },
@@ -835,9 +835,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
+        "path": "apps/union-eyes/lib/public-routes.ts; apps/union-eyes/scripts/validate-api-governance.ts",
+        "explanation": "The three mechanisms were: lib/public-routes.ts (canonical, edge-enforced), proxy.ts (already imported the canonical isPublicRoute for API enforcement; its own createRouteMatcher list is a distinct, correctly-separate concern for page-level routing, not API auth), and scripts/validate-api-governance.ts, which hand-copied a stale PUBLIC_ROUTE_PREFIXES/CRON_ROUTE_PREFIXES snapshot instead of importing the canonical constants, per its own \"Keep this in sync\" comment. Refactored the governance script to import isPublicRoute/isCronRoute directly from lib/public-routes.ts, making drift structurally impossible going forward. Running the corrected script against the real route tree surfaced exactly two routes that accept anonymous calls but were absent from the canonical allowlist: GET /api/auth/me (same PLATFORM_AUTH_HANDLER guard class as the already-public /api/auth/methods; returns { user: null } and never throws 401) and GET+POST /api/gdpr/cookie-consent (the visitor consentId is the sole credential; getCurrentUser() is consulted only to optionally attribute an authenticated visitor, never to gate the request). Both added to PUBLIC_API_ROUTES with justification comments. Verified the governed/public/cron/ungoverned route counts are byte-identical to the pre-existing baseline (45 unrelated pre-existing ungoverned routes, unchanged) except for these two routes moving from an inconsistent ad hoc public classification to the single canonical list.",
+        "regressionTest": "apps/union-eyes/lib/__tests__/public-routes.test.ts; apps/union-eyes/lib/__tests__/edge-route-config.test.ts; apps/union-eyes/lib/__tests__/api-auth-guard.test.ts (116 passed); apps/union-eyes/scripts/validate-api-governance.ts (45 pre-existing ungoverned routes, unchanged set, 0 new/regressed)",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B1-DOCS-UNAUTH-API-SURFACE",

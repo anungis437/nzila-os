@@ -24,6 +24,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import { isPublicRoute, isCronRoute } from "../lib/public-routes";
 
 // ── Configuration ─────────────────────────────────────────────────────────
 
@@ -54,34 +55,6 @@ const DEPRECATED_WRAPPER_PATTERNS = [
 /** HTTP method names that are legal Next.js route exports. */
 const HTTP_METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"] as const;
 
-/**
- * Route path prefixes that are explicitly declared public in public-routes.ts.
- * These routes are auth-exempt by design (webhooks use signature verification,
- * health checks have no sensitive data, auth routes are onboarding flows).
- *
- * Keep this in sync with apps/union-eyes/lib/public-routes.ts.
- */
-const PUBLIC_ROUTE_PREFIXES: string[] = [
-  "/api/health",
-  "/api/status",
-  "/api/docs",
-  "/api/webhooks",
-  "/api/signatures/webhooks",
-  "/api/integrations/shopify/webhooks",
-  "/api/payments/webhooks",
-  "/api/auth",
-  "/api/communications/track",
-  "/api/communications/unsubscribe",
-  // Cookie consent must work without authentication (GDPR compliance requirement)
-  "/api/gdpr/cookie-consent",
-];
-
-/** Cron route prefixes — authenticated via CRON_SECRET header, not bearer tokens. */
-const CRON_ROUTE_PREFIXES: string[] = [
-  "/api/cron",
-  "/api/rewards/cron",
-];
-
 // ── Utilities ─────────────────────────────────────────────────────────────
 
 function walkDir(dir: string): string[] {
@@ -108,14 +81,6 @@ function routePathFromFile(filePath: string): string {
   // Remove Next.js dynamic segment brackets for path matching purposes
   const routeSegment = match[1].replace(/\[.*?\]/g, "*");
   return `/api/${routeSegment}`;
-}
-
-function isPublicRoute(routePath: string): boolean {
-  return PUBLIC_ROUTE_PREFIXES.some((prefix) => routePath.startsWith(prefix));
-}
-
-function isCronRoute(routePath: string): boolean {
-  return CRON_ROUTE_PREFIXES.some((prefix) => routePath.startsWith(prefix));
 }
 
 /** Check if the file exports any HTTP method handler. */
