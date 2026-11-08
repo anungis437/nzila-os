@@ -8,6 +8,7 @@ const m = vi.hoisted(() => {
     updateRows: null as Array<Record<string, unknown>> | null,
     persistAtomicAudit: vi.fn(),
     executeSync: vi.fn(),
+    clearCache: vi.fn(),
     order: [] as string[],
   };
   const chain = (rows: () => unknown[], op: string) => {
@@ -58,6 +59,9 @@ vi.mock('@/lib/integrations/registry', () => ({
 }));
 vi.mock('@/lib/integrations/sync-engine', () => ({
   SyncEngine: { getInstance: () => ({ executeSync: m.executeSync }) },
+}));
+vi.mock('@/lib/integrations/factory', () => ({
+  IntegrationFactory: { getInstance: () => ({ clearCache: m.clearCache }) },
 }));
 vi.mock('@/lib/integrations/provider-policy', () => ({
   isProviderApprovedForControlPlane: () => true,
@@ -139,6 +143,18 @@ describe('integration control plane — audit', () => {
       configureIntegrationForOrg('org_1', { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, enabled: true }, 'steward_1'),
     ).rejects.toMatchObject({ code: 'CONFLICT' });
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.clearCache).not.toHaveBeenCalled();
+  });
+
+  // DEF: integration-factory cache-staleness - a saved config change must not keep serving a cached adapter built from
+  // the prior credentials/settings.
+  it('configure clears the cached adapter instance for this organization and provider after a successful save', async () => {
+    await configureIntegrationForOrg(
+      'org_1',
+      { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, settings: { region: 'ca' }, credentialRef: 'vault/secret-1' },
+      'steward_1',
+    );
+    expect(m.clearCache).toHaveBeenCalledWith('org_1', IntegrationProvider.BAMBOOHR);
   });
 
   it('configure fails, leaving no integration, when the audit cannot be written', async () => {
@@ -156,11 +172,14 @@ describe('integration control plane — audit', () => {
       tx,
       expect.objectContaining({ action: 'integration.activate', resourceId: 'cfg_1', details: expect.objectContaining({ previouslyEnabled: false }) }),
     );
+    expect(m.clearCache).toHaveBeenCalledWith('org_1', 'bamboohr');
 
     m.persistAtomicAudit.mockClear();
+    m.clearCache.mockClear();
     m.updateRows = [];
     await expect(setIntegrationActivationForOrg('org_1', 'cfg_1', true, 'steward_1')).rejects.toMatchObject({ code: 'CONFLICT' });
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.clearCache).not.toHaveBeenCalled();
   });
 
   it('activation treats another organization\u2019s integration as not found, with no audit', async () => {

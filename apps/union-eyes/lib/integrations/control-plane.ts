@@ -15,6 +15,7 @@ import { integrationConfigs, integrationProviderEnum, integrationTypeEnum } from
 import { and, eq, sql } from 'drizzle-orm';
 import { IntegrationRegistry } from './registry';
 import { SyncEngine } from './sync-engine';
+import { IntegrationFactory } from './factory';
 import {
   findDisallowedSettingsKeys,
   findUnapprovedEntities,
@@ -181,7 +182,7 @@ export async function configureIntegrationForOrg(
   assertProviderType(input.provider, input.type);
   assertApprovedSettingsKeys(input.provider, input.settings);
 
-  return withRLSContext({ organizationId }, async (tx) => {
+  const publicConfig = await withRLSContext({ organizationId }, async (tx) => {
     const [existing] = await tx
       .select()
       .from(integrationConfigs)
@@ -254,6 +255,12 @@ export async function configureIntegrationForOrg(
     });
     return toPublicConfig(config);
   });
+
+  // The cached adapter instance (credentials, settings) was built from whatever was saved before this write; serving it
+  // again after a credential/settings/webhook change would silently keep using stale configuration until the process
+  // restarts. Only this organization/provider pair is invalidated; every other cached integration is untouched.
+  IntegrationFactory.getInstance().clearCache(organizationId, input.provider);
+  return publicConfig;
 }
 
 export async function setIntegrationActivationForOrg(
@@ -262,7 +269,7 @@ export async function setIntegrationActivationForOrg(
   enabled: boolean,
   userId: string,
 ) {
-  return withRLSContext({ organizationId }, async (tx) => {
+  const publicConfig = await withRLSContext({ organizationId }, async (tx) => {
     const config = await loadIntegrationById(organizationId, integrationId, tx);
     assertKnownProvider(config.provider as IntegrationProvider);
 
@@ -290,6 +297,11 @@ export async function setIntegrationActivationForOrg(
     });
     return toPublicConfig(updated);
   });
+
+  // Disabling then re-enabling (or any activation change) must not keep serving a cached instance built under the prior
+  // enabled state.
+  IntegrationFactory.getInstance().clearCache(organizationId, publicConfig.provider as IntegrationProvider);
+  return publicConfig;
 }
 
 export async function initiateTenantIntegrationSync(
