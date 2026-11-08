@@ -246,7 +246,9 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
     expect(strictOf(integrityOpen.findings)).toEqual([])
     const integrityCounts = summarize(integrityOpen.findings)
     expect(integrityCounts.FK_ABSENT).toBe(293)
-    expect(integrityCounts.INDEX_ABSENT).toBe(797)
+    // Gate 0 corrective convergence: db/schema/award-templates-schema.ts (a dead duplicate reward_wallet_ledger
+    // declaration) was deleted, taking its 3 declared indexes with it — 797 - 3 = 794.
+    expect(integrityCounts.INDEX_ABSENT).toBe(794)
     expect(integrityCounts.CHECK_ABSENT).toBe(36)
     expect(integrityCounts.NOT_NULL_ABSENT).toBe(294)
 

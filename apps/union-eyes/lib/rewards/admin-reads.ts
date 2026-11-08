@@ -87,7 +87,7 @@ export function loadRewardsReport(organizationId: string): Promise<RewardsReport
         (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${organizationId}::uuid AND status = 'issued') AS issued_awards,
         (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${organizationId}::uuid AND status = 'pending') AS pending_awards,
         (SELECT COUNT(*) FROM recognition_awards WHERE org_id = ${organizationId}::uuid AND created_at > NOW() - INTERVAL '30 days') AS awards_last_30_days,
-        (SELECT COALESCE(SUM(amount_credits), 0) FROM reward_wallet_ledger WHERE org_id = ${organizationId}::uuid AND award_id IS NOT NULL AND amount_credits > 0) AS credits_issued,
+        (SELECT COALESCE(SUM(amount_credits), 0) FROM reward_wallet_ledger WHERE org_id = ${organizationId}::uuid AND source_type = 'award' AND amount_credits > 0) AS credits_issued,
         (SELECT COUNT(DISTINCT recipient_user_id) FROM recognition_awards WHERE org_id = ${organizationId}::uuid AND status = 'issued') AS unique_recipients,
         (SELECT COUNT(DISTINCT issuer_user_id) FROM recognition_awards WHERE org_id = ${organizationId}::uuid AND status = 'issued') AS unique_givers
     `);
@@ -97,7 +97,7 @@ export function loadRewardsReport(organizationId: string): Promise<RewardsReport
       SELECT
         ra.id,
         ra.status,
-        COALESCE((SELECT SUM(wl.amount_credits) FROM reward_wallet_ledger wl WHERE wl.award_id = ra.id AND wl.amount_credits > 0), 0) AS points_value,
+        COALESCE((SELECT SUM(wl.amount_credits) FROM reward_wallet_ledger wl WHERE wl.source_type = 'award' AND wl.source_id = ra.id AND wl.amount_credits > 0), 0) AS points_value,
         ra.created_at,
         ra.reason AS message,
         om_r.name AS recipient_name,
@@ -123,7 +123,7 @@ export function loadRewardsReport(organizationId: string): Promise<RewardsReport
       FROM recognition_awards ra
       JOIN organization_members om ON om.user_id = ra.recipient_user_id AND om.organization_id = ra.org_id
       LEFT JOIN LATERAL (
-        SELECT SUM(wl.amount_credits) AS amount FROM reward_wallet_ledger wl WHERE wl.award_id = ra.id AND wl.amount_credits > 0
+        SELECT SUM(wl.amount_credits) AS amount FROM reward_wallet_ledger wl WHERE wl.source_type = 'award' AND wl.source_id = ra.id AND wl.amount_credits > 0
       ) credits ON TRUE
       WHERE ra.org_id = ${organizationId}::uuid
         AND ra.status = 'issued'

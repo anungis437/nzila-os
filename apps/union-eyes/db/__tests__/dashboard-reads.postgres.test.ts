@@ -102,7 +102,7 @@ describe.skipIf(!URL)('the organization dashboards read on the combined schema, 
     await award(ORG_A, programA, typeA, U.memberA2, 'pending')
     const awardB = await award(ORG_B, programB, typeB, U.memberB1, 'issued')
     const ledger = (org: string, userId: string, eventType: string, amount: number, balance: number, awardId: string | null, ago: string) =>
-      admin.query(`INSERT INTO reward_wallet_ledger (org_id, user_id, event_type, amount_credits, balance_after, source_type, award_id, created_at) VALUES ($1, $2, $3, $4, $5, 'system', $6, now() - $7::interval)`, [org, userId, eventType, amount, balance, awardId, ago])
+      admin.query(`INSERT INTO reward_wallet_ledger (org_id, user_id, event_type, amount_credits, balance_after, source_type, source_id, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, now() - $8::interval)`, [org, userId, eventType, amount, balance, awardId ? 'award' : 'system', awardId, ago])
     await ledger(ORG_A, U.memberA1, 'earn', 100, 100, awardA, '3 hours')
     await ledger(ORG_A, U.memberA1, 'spend', -30, 70, null, '2 hours')
     await ledger(ORG_A, U.memberA1, 'expire', -10, 60, null, '1 hour')

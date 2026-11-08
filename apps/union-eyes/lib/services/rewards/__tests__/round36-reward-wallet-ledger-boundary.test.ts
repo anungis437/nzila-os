@@ -121,17 +121,7 @@ describe('round 36: full reachability census for reward_budget_envelopes / rewar
       'db/schema/domains/infrastructure/awards.ts',
       'db/schema/domains/infrastructure/index.ts',
       'db/schema/recognition-rewards-schema.ts',
-      'db/schema/award-templates-schema.ts',
       'lib/services/rewards/wallet-service.ts',
-      // PRE-EXISTING, already tracked by
-      // scripts/__tests__/schema-duplicate-table-ratchet.test.ts:
-      // these two import a DIFFERENT (incompatible) rewardWalletLedger
-      // schema definition (pointsChange/transactionType/expiresAt) from
-      // db/schema/award-templates-schema.ts, not the canonical shape in
-      // domains/infrastructure/rewards.ts — a genuine duplicate-schema
-      // defect, but out of round-36's authority-convergence scope (not a
-      // new caller introduced by this round; consolidating the duplicate
-      // schema is a separate future tranche).
       'lib/services/rewards/notification-service.ts',
       'lib/utils/rewards-stats-utils.ts',
       // The dashboard page readers: every read is inside withRLSContext({ organizationId }) (lib/rewards/page-reads.ts).

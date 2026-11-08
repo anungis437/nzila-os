@@ -41,7 +41,7 @@ type Row = Record<string, unknown>;
 const AWARD_CREDITS = sql`
   LEFT JOIN LATERAL (
     SELECT SUM(wl.amount_credits) AS amount FROM reward_wallet_ledger wl
-    WHERE wl.award_id = ra.id AND wl.org_id = ra.org_id AND wl.amount_credits > 0
+    WHERE wl.source_type = 'award' AND wl.source_id = ra.id AND wl.org_id = ra.org_id AND wl.amount_credits > 0
   ) credits ON TRUE
 `;
 
@@ -69,7 +69,7 @@ export function loadRewardsAnalytics(organizationId: string, period: AnalyticsPe
       SELECT COALESCE(SUM(amount_credits), 0)::int AS credits_awarded
       FROM reward_wallet_ledger
       WHERE org_id = ${organizationId}::uuid
-        AND award_id IS NOT NULL AND amount_credits > 0
+        AND source_type = 'award' AND amount_credits > 0
         AND created_at >= ${from}::timestamptz AND created_at <= ${to}::timestamptz
     `);
 
