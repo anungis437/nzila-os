@@ -92,7 +92,7 @@
     "engineeringCorrected": 721,
     "engineeringRemaining": 56,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 33
+    "engineeringPartial": 34
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -9180,10 +9180,34 @@
       "title": "The learning trajectory forecast extrapolates linearly from the first and last typed scores with a momentum multiplier, from as few as two points, and attaches a confidence range of plus or minus min(3 per month, 20) that is a literal formula rather than an interval from the data, then estimates months to the next maturity milestone from it, so a forecast with no statistical basis is presented with a confidence range.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "FIXED_THIS_RUN",
+        "paths": [
+          "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-models.ts",
+          "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-analyzer.ts",
+          "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts"
+        ],
+        "commits": [
+          "df0b090ea"
+        ],
+        "repair": "Renamed confidenceRange -> projectionBand (confirmed unused by any other caller via repo-wide grep) with a doc comment stating plainly the band is a fixed formula (min(monthsAhead*3, 20)) that widens with time horizon alone, never with the data's own variance - not a statistically derived confidence interval. Added a methodologyNote field and corrected interpretationGuidance, which previously called the forecast a 'probabilistic projection' - it is a linear extrapolation from the first and last typed scores, momentum-adjusted, nothing probabilistic about it.",
+        "limits": "The forecast methodology itself is unchanged: it still linearly extrapolates from as few as 2 typed points. This run fixes the mislabeling (a fixed-formula band called a confidence range, a linear extrapolation called probabilistic) - it does not replace the extrapolation with a statistically grounded forecasting method, which would need a materially larger, denser dataset than this feature's typed-entry model can supply.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/learning-trajectories -> 4/4 passing (extended with projectionBand/methodologyNote assertions). Broader sweep (organizational-operating-intelligence + learning-trajectories) -> 5 files/39 passing. typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B159-GATE3-TRAJECTORY-FORECAST-DISCLOSURE",
+        "path": "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-models.ts;apps/union-eyes/lib/knowledge-transfer/learning-trajectories/trajectory-analyzer.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/learning-trajectories/__tests__/trajectory-analyzer.test.ts",
+        "explanation": "Fixed the concrete, title-quoted mislabeling this run: the fixed-formula band is no longer named confidenceRange, and the forecast is no longer called 'probabilistic' in interpretationGuidance. A new methodologyNote spells out the linear-extrapolation-from-2-points basis plainly. Kept at PARTIAL because the forecasting method itself (linear extrapolation, momentum-adjusted) is unchanged - this closes the mislabeling, not the underlying statistical-basis gap, which has no larger dataset available to close it with.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-AGGREGATE-ERRORS-RETURNED-VERBATIM-IN-HTTP-200",
