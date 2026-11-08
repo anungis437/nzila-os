@@ -1,8 +1,8 @@
 Total distinct physical (schema, table) keys: 626
-Keys with >1 declaration: 249
+Keys with >1 declaration: 243
   - CONFLICTING_SCHEMA (proven incompatible): 13
   - SAME_COLUMN_SET_UNVERIFIED (names match, full compatibility not proven): 1
-  - IDENTICAL_OR_PROVEN_COMPATIBLE: 235
+  - IDENTICAL_OR_PROVEN_COMPATIBLE: 229
 
 === CONFLICTING_SCHEMA ===
 ml_predictions: db/schema/analytics.ts(mlPredictions)[15cols] | db/schema/domains/analytics/analytics.ts(mlPredictions)[15cols] | db/schema/domains/ml/predictions.ts(mlPredictions)[13cols] | db/schema/ml-predictions-schema.ts(mlPredictions)[11cols]
@@ -144,12 +144,6 @@ sms_messages: db/schema/domains/communications/sms.ts(smsMessages) | db/schema/s
 sms_conversations: db/schema/domains/communications/sms.ts(smsConversations) | db/schema/sms-communications-schema.ts(smsConversations)
 sms_campaign_recipients: db/schema/domains/communications/sms.ts(smsCampaignRecipients) | db/schema/sms-communications-schema.ts(smsCampaignRecipients)
 sms_opt_outs: db/schema/domains/communications/sms.ts(smsOptOuts) | db/schema/sms-communications-schema.ts(smsOptOuts)
-surveys: db/schema/domains/communications/surveys.ts(surveys) | db/schema/survey-polling-schema.ts(surveys)
-survey_questions: db/schema/domains/communications/surveys.ts(surveyQuestions) | db/schema/survey-polling-schema.ts(surveyQuestions)
-survey_responses: db/schema/domains/communications/surveys.ts(surveyResponses) | db/schema/survey-polling-schema.ts(surveyResponses)
-survey_answers: db/schema/domains/communications/surveys.ts(surveyAnswers) | db/schema/survey-polling-schema.ts(surveyAnswers)
-polls: db/schema/domains/communications/surveys.ts(polls) | db/schema/survey-polling-schema.ts(polls)
-poll_votes: db/schema/domains/communications/surveys.ts(pollVotes) | db/schema/survey-polling-schema.ts(pollVotes)
 data_classification_policy: db/schema/domains/compliance/employer-interference.ts(dataClassificationPolicy) | db/schema/employer-non-interference-schema.ts(dataClassificationPolicy)
 data_classification_registry: db/schema/domains/compliance/employer-interference.ts(dataClassificationRegistry) | db/schema/employer-non-interference-schema.ts(dataClassificationRegistry)
 firewall_access_rules: db/schema/domains/compliance/employer-interference.ts(firewallAccessRules) | db/schema/employer-non-interference-schema.ts(firewallAccessRules)

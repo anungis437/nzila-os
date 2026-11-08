@@ -51,7 +51,10 @@ const OPERATIONAL = [
   'member_certifications', 'member_segments', 'message_templates', 'negotiations', 'newsletter_distribution_lists',
   'organizing_campaigns', 'pay_equity_exercises', 'pilot_applications', 'ppe_equipment',
   'preventive_withdrawals', 'push_devices', 'reports', 'right_of_refusal_events', 'safety_inspections',
-  'sms_campaigns', 'sms_conversations', 'sms_messages', 'survey_responses', 'surveys', 'testimonials', 'training_courses',
+  // survey_responses left the list when its generic route (POST .../responses) became a custom handler (the anonymous-
+  // response capability-token mechanism needs to return a value absent from the inserted row, which crudRoutes has no
+  // hook for); unlisted means DENIED.
+  'sms_campaigns', 'sms_conversations', 'sms_messages', 'surveys', 'testimonials', 'training_courses',
   'training_programs', 'trend_analyses', 'user_notification_preferences', 'wcb_employer_assessments', 'workplace_incidents', 'worksites',
 ] as const
 
