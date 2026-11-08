@@ -265,19 +265,21 @@ export async function processCopilotQuery(
   const reasoning: ReasoningLink[] = [
     {
       stepNumber: 1,
-      reasoning: 'Retrieved organizational dependency propagation map from published exit interviews',
+      // Describes what the SYSTEM computed and supplied as context to the model - never a claim that the model
+      // itself performed a retrieval step (DEF-0B7-EXC-COPILOT-EXPLAINABILITY).
+      reasoning: 'System computed an organizational dependency propagation map from published exit interviews and supplied it as context',
       conclusion: `${totalNodes} knowledge nodes analyzed, ${singleSourceCount} single-source`,
       assumption: 'Published exit interviews reflect current organizational knowledge distribution',
     },
     {
       stepNumber: 2,
-      reasoning: 'Assessed multi-dimensional organizational resilience index',
+      reasoning: 'System computed a multi-dimensional organizational resilience index and supplied it as context',
       conclusion: `Overall resilience: ${resilienceIndex.overallScore}/100`,
       assumption: 'Resilience dimensions are weighted equally unless otherwise specified',
     },
     {
       stepNumber: 3,
-      reasoning: 'Formulated governance-safe response with organizational framing',
+      reasoning: 'Model formulated a governance-safe response with organizational framing from the supplied context',
       conclusion: answer.slice(0, 120) + (answer.length > 120 ? '…' : ''),
       assumption: 'Response addresses organizational continuity, not individual assessment',
     },
@@ -321,7 +323,7 @@ export async function processCopilotQuery(
       role: 'assistant',
       content: answer,
       createdAt: now,
-      explainabilityRef: null,
+      explainability,
     }, userId);
     await persistAtomicAudit(tx, {
       organizationId: orgId,

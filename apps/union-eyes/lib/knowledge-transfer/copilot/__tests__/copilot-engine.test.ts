@@ -13,7 +13,7 @@ const h = vi.hoisted(() => ({
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: h.withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
 vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: h.operation }));
-vi.mock('drizzle-orm', () => ({ sql: Object.assign((..._a: unknown[]) => ({}), { raw: (s: string) => s }) }));
+vi.mock('drizzle-orm', () => ({ sql: Object.assign((...a: unknown[]) => ({ strings: a[0], values: a.slice(1) }), { raw: (s: string) => s }) }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ generate: h.generate }),
   toGatewayDataClass: (c: string) => c,
@@ -82,6 +82,26 @@ describe('lib/knowledge-transfer/copilot/copilot-engine', () => {
     expect(result.followUpSuggestions[0]).toContain('fragile');
     expect(result.evidenceReferences).toBeTruthy();
     expect(result.overallConfidence).toBe('medium');
+  });
+
+  it('persists the explainability envelope inline with the assistant message, and never claims the model itself retrieved data (DEF-0B7-EXC-COPILOT-EXPLAINABILITY)', async () => {
+    await processCopilotQuery(ORG, { query: 'What is most fragile and at risk?' }, USER);
+    // Find the UPDATE ue_copilot_conversations call that appends the assistant message (its JSON-stringified
+    // message is one of the raw interpolated `values`, not nested inside another JSON.stringify of the whole array).
+    const messageJson = h.execute.mock.calls
+      .map((call) => (call[0] as { values?: unknown[] } | undefined)?.values ?? [])
+      .flat()
+      .find((v): v is string => typeof v === 'string' && v.includes('"role":"assistant"'));
+    expect(messageJson).toBeDefined();
+    const [assistantMessage] = JSON.parse(messageJson!);
+    // The envelope is genuinely persisted, not a dangling null ref.
+    expect(assistantMessage.explainability).toBeTruthy();
+    expect(assistantMessage.explainability.reasoningChain.length).toBeGreaterThan(0);
+    expect(assistantMessage).not.toHaveProperty('explainabilityRef');
+    // No reasoning step claims the MODEL performed a retrieval it never received.
+    const reasoningText = JSON.stringify(assistantMessage.explainability.reasoningChain);
+    expect(reasoningText).not.toContain('"reasoning":"Retrieved');
+    expect(reasoningText).toContain('System computed');
   });
 
   it('returns governance follow-ups and reuses an existing conversation', async () => {

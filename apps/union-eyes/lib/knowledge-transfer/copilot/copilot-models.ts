@@ -13,13 +13,15 @@
  * - Produces disciplinary recommendations
  */
 
+import type { CopilotExplainabilityEnvelope } from '../copilot-explainability/explainability-models';
+
 export interface CopilotMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   createdAt: string;
-  /** Linked explainability data for assistant messages */
-  explainabilityRef?: string | null;
+  /** The explainability envelope for this assistant message, persisted inline (JSONB) with the conversation. */
+  explainability?: CopilotExplainabilityEnvelope | null;
 }
 
 export interface CopilotConversation {
