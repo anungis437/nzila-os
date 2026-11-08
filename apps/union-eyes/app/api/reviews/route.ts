@@ -91,7 +91,10 @@ function reviewErrorResponse(error: unknown): NextResponse {
     return privateJson({ success: false, error: error.code, code }, { status: status[error.code] })
   }
   const denied = caseAuthorizationResponse(error)
-  if (denied) return denied
+  if (denied) {
+    denied.headers.set('Cache-Control', PRIVATE_RESPONSE_HEADERS['Cache-Control'])
+    return denied
+  }
   if (error instanceof ApiError) {
     return privateJson({ success: false, error: error.code }, { status: error.code === ErrorCode.FORBIDDEN ? 403 : 401 })
   }
