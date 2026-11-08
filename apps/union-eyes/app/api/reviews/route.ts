@@ -108,7 +108,14 @@ export async function GET() {
     const who = await actor()
     // An explicit organization makes the database context exactly the organization this route resolved, never a second resolution.
     const list = await withRLSContext({ organizationId: who.organizationId }, async (tx) => {
-      const result = await listMemberReviewIntake(drizzleExecutor(tx), kernelDeps, { organizationId: who.organizationId, actorUserId: who.userId })
+      const authorizationByReview = new Map<string, { kind: string; id: string; instrument: string }[]>()
+      const result = await listMemberReviewIntake(drizzleExecutor(tx), kernelDeps, {
+        organizationId: who.organizationId,
+        actorUserId: who.userId,
+        onOversightAuthorization: (reviewId, authority) => {
+          authorizationByReview.set(reviewId, authority.map(({ kind, id, instrument }) => ({ kind, id, instrument })))
+        },
+      })
       if (result.oversight.length > 0) {
         // An oversight read discloses complainant identity and privilege classification, so it leaves a record in the same transaction.
         await persistAtomicAudit(tx, {
@@ -117,7 +124,7 @@ export async function GET() {
           action: 'review.oversight.read',
           resourceType: 'governance_review',
           resourceId: result.oversight[0].id,
-          details: { reviewIds: result.oversight.map((review) => review.id), privilegedCount: result.oversight.filter((review) => review.classification === 'privileged').length, decision: 'review:monitor' },
+          details: { reviewIds: result.oversight.map((review) => review.id), privilegedCount: result.oversight.filter((review) => review.classification === 'privileged').length, decision: 'review:monitor', authorityByReview: result.oversight.map((review) => ({ reviewId: review.id, sources: authorizationByReview.get(review.id) ?? [] })) },
         })
       }
       return result
