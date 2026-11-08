@@ -24,7 +24,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { pilotDemoSeeds } from "@/db/schema/domains/pilot/pilot-demo-seeds";
 import { employers } from "@/db/schema/union-structure-schema";
 import { grievances } from "@/db/schema/domains/claims/grievances";
-import { eq, and, like, isNull, isNotNull } from "drizzle-orm";
+import { eq, and, like, isNull, isNotNull, inArray } from "drizzle-orm";
 
 // Thrown inside the seed transaction so a lost race rolls back the rows it had already inserted.
 class DemoSeedConflict extends Error {}
@@ -93,6 +93,11 @@ export const POST = withOrganizationAuth(async (_request, context) => {
         await tx.insert(grievances).values(demoGrievances);
       }
 
+      // The exact ids this seed is about to insert (generateDemoEmployers/generateDemoGrievances assign id
+      // client-side), so the purge can later delete precisely these rows instead of matching on name/email pattern.
+      const employerIds = demoEmployers.map((e) => e.id);
+      const grievanceIds = demoGrievances.map((g) => g.id);
+
       if (existing.length > 0) {
         // Re-seed after a purge: only a purged marker may be reopened.
         const reopened = await tx
@@ -103,6 +108,8 @@ export const POST = withOrganizationAuth(async (_request, context) => {
             purgedAt: null,
             employerCount: summary.employers,
             grievanceCount: summary.grievances,
+            employerIds,
+            grievanceIds,
             updatedAt: new Date(),
           })
           .where(and(eq(pilotDemoSeeds.organizationId, organizationId), isNotNull(pilotDemoSeeds.purgedAt)))
@@ -114,6 +121,8 @@ export const POST = withOrganizationAuth(async (_request, context) => {
           seededBy: userId,
           employerCount: summary.employers,
           grievanceCount: summary.grievances,
+          employerIds,
+          grievanceIds,
         });
       }
 
@@ -178,27 +187,28 @@ export const DELETE = withOrganizationAuth(async (_request, context) => {
           .update(pilotDemoSeeds)
           .set({ purgedAt: new Date(), updatedAt: new Date() })
           .where(and(eq(pilotDemoSeeds.organizationId, organizationId), isNull(pilotDemoSeeds.purgedAt)))
-          .returning({ id: pilotDemoSeeds.id });
+          .returning({ id: pilotDemoSeeds.id, employerIds: pilotDemoSeeds.employerIds, grievanceIds: pilotDemoSeeds.grievanceIds });
         if (closed.length === 0) throw new DemoSeedConflict();
 
-        // Delete demo grievances (identified by GRV-DEMO-* number)
+        // Delete exactly the rows this seed created. Rows seeded before employer_ids/grievance_ids existed have
+        // those columns null; only for those legacy markers does the purge fall back to the prior name/email
+        // pattern match, so already-seeded pilot orgs are not stranded with undeletable demo data.
+        const { employerIds, grievanceIds } = closed[0];
+
         await tx
           .delete(grievances)
           .where(
-            and(
-              eq(grievances.organizationId, organizationId),
-              like(grievances.grievanceNumber, "GRV-DEMO-%"),
-            ),
+            grievanceIds && grievanceIds.length > 0
+              ? and(eq(grievances.organizationId, organizationId), inArray(grievances.id, grievanceIds))
+              : and(eq(grievances.organizationId, organizationId), like(grievances.grievanceNumber, "GRV-DEMO-%")),
           );
 
-        // Delete demo employers (identified by demo contact emails)
         await tx
           .delete(employers)
           .where(
-            and(
-              eq(employers.organizationId, organizationId),
-              like(employers.email, "lr-demo@%"),
-            ),
+            employerIds && employerIds.length > 0
+              ? and(eq(employers.organizationId, organizationId), inArray(employers.id, employerIds))
+              : and(eq(employers.organizationId, organizationId), like(employers.email, "lr-demo@%")),
           );
 
         await persistAtomicAudit(tx, {

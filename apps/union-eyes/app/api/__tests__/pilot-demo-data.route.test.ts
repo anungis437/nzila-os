@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { PgDialect } from 'drizzle-orm/pg-core';
+
+const dialect = new PgDialect();
 
 const m = vi.hoisted(() => ({
   withOrganizationAuth: vi.fn(),
@@ -10,6 +13,7 @@ const m = vi.hoisted(() => ({
   assertPilotDemoMutationRuntime: vi.fn(),
   selectQueue: [] as unknown[][],
   updateQueue: [] as unknown[][],
+  deleteWhereClauses: [] as string[],
 }));
 
 function makeSelectChain(rows: unknown[]) {
@@ -31,7 +35,11 @@ const mockDb: any = {
     };
     return chain;
   }),
-  delete: vi.fn(() => ({ where: vi.fn(async () => undefined) })),
+  delete: vi.fn(() => ({
+    where: vi.fn(async (condition: unknown) => {
+      m.deleteWhereClauses.push(dialect.sqlToQuery(condition as Parameters<PgDialect['sqlToQuery']>[0]).sql);
+    }),
+  })),
 };
 
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: m.withOrganizationAuth }));
@@ -67,6 +75,7 @@ describe('pilot/demo-data route', () => {
     vi.clearAllMocks();
     m.selectQueue = [];
     m.updateQueue = [];
+    m.deleteWhereClauses = [];
     m.withOrganizationAuth.mockImplementation((h: (r: Request, c: any) => Promise<Response>) => (r: Request, c: any = { organizationId: 'org_1', userId: 'u1' }) => h(r, c));
     m.hasMinRole.mockResolvedValue(true);
     m.assertPilotDemoMutationRuntime.mockReturnValue('pilot');
@@ -148,6 +157,44 @@ describe('pilot/demo-data route', () => {
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       mockDb,
       expect.objectContaining({ organizationId: 'org_1', userId: 'u1', action: 'purged', resourceId: 'seed-1' }),
+    );
+  });
+
+  // DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN
+  it('DELETE purges by exact seeded row id when the marker carries one, not by name/email pattern', async () => {
+    const { DELETE } = await loadRoute();
+    m.updateQueue.push([{ id: 'seed-1', employerIds: ['e-1', 'e-2'], grievanceIds: ['g-1'] }]);
+
+    const response = await DELETE(new Request('http://localhost/api/pilot/demo-data', { method: 'DELETE' }), { organizationId: 'org_1', userId: 'u1' });
+
+    expect(response.status).toBe(200);
+    expect(m.deleteWhereClauses.some((sql) => /in \(/i.test(sql))).toBe(true);
+    expect(m.deleteWhereClauses.every((sql) => !/like/i.test(sql))).toBe(true);
+  });
+
+  it('DELETE falls back to the legacy name/email pattern only for a marker seeded before row ids existed', async () => {
+    const { DELETE } = await loadRoute();
+    m.updateQueue.push([{ id: 'seed-1', employerIds: null, grievanceIds: null }]);
+
+    const response = await DELETE(new Request('http://localhost/api/pilot/demo-data', { method: 'DELETE' }), { organizationId: 'org_1', userId: 'u1' });
+
+    expect(response.status).toBe(200);
+    expect(m.deleteWhereClauses.some((sql) => /like/i.test(sql))).toBe(true);
+  });
+
+  it('POST captures the exact generated employer and grievance ids on the seed marker', async () => {
+    const { POST } = await loadRoute();
+    m.selectQueue.push([]);
+    m.generateDemoEmployers.mockReturnValue([{ id: 'e-1' }, { id: 'e-2' }]);
+    m.generateDemoGrievances.mockReturnValue([{ id: 'g-1' }]);
+
+    const response = await POST(new Request('http://localhost/api/pilot/demo-data', { method: 'POST' }), { organizationId: 'org_1', userId: 'u1' });
+
+    expect(response.status).toBe(200);
+    // insert() is called for employers, then grievances, then the pilot_demo_seeds marker, in that order.
+    const markerInsertCall = mockDb.insert.mock.results[2].value.values;
+    expect(markerInsertCall).toHaveBeenCalledWith(
+      expect.objectContaining({ employerIds: ['e-1', 'e-2'], grievanceIds: ['g-1'] }),
     );
   });
 

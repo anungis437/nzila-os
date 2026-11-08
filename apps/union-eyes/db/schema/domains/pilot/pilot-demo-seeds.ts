@@ -10,6 +10,7 @@ import {
   uuid,
   varchar,
   integer,
+  text,
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
@@ -27,6 +28,11 @@ export const pilotDemoSeeds = pgTable(
     memberCount: integer("member_count").notNull().default(0),
     employerCount: integer("employer_count").notNull().default(0),
     grievanceCount: integer("grievance_count").notNull().default(0),
+    // The exact row ids this seed inserted, captured at seed time (generateDemoEmployers/generateDemoGrievances
+    // already assign the id client-side before insert). Purge deletes by this list, not by name/email pattern,
+    // so it removes only what this seed created. Null on rows seeded before this column existed.
+    employerIds: text("employer_ids").array(),
+    grievanceIds: text("grievance_ids").array(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
