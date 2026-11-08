@@ -415,20 +415,16 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_CI_PENDING",
         "paths": [
           "apps/union-eyes/lib/api/crud-governance.ts"
         ],
+        "repair": "Classified analytics_metrics as READ_ONLY, denying all generic metric writes while retaining tenant-scoped reads. Added regression ratchet for metric and refresh CRUD aliases.",
         "regressionPaths": [
           "apps/union-eyes/lib/api/__tests__/crud-governance.test.ts"
         ],
-        "commits": [
-          "e2db2ee8910804327bc8c7e648a09957273c1ee4",
-          "3bb0ac9b5d97c6ab73e5438746c0c9590c0035ac",
-          "bbbde40d6586405ae12da89c4764a04dfde80877"
-        ],
-        "repair": "Classified analytics_metrics as READ_ONLY, denying all generic metric writes while retaining tenant-scoped reads. Added regression ratchet for metric and refresh CRUD aliases.",
-        "limits": "Source-only; CI, PG15/16 and HTTP/browser not verified at this SHA. Governed metric ingestion and CLC reporting journeys remain unqualified."
+        "limits": "Source-only; CI, PG15/16 and HTTP/browser not verified at this SHA. Governed metric ingestion and CLC reporting journeys remain unqualified.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -540,31 +536,22 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_CI_PENDING",
         "paths": [
           "apps/union-eyes/lib/finance/billing-cycle-authority.ts",
           "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
           "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
           "apps/union-eyes/lib/services/billing-cycle-service.ts"
         ],
+        "repair": "Both caller-selected billing-cycle execution and preview now demand a live, tenant-bound, ledger-wide finance:execute mandate for the exact target organization and actor before calculating or charging; role title alone cannot authorize. BillingCycleService now executes its member read/write transaction under the explicit target organization and actor RLS context.",
         "regressionPaths": [
           "apps/union-eyes/lib/finance/__tests__/billing-cycle-authority.test.ts",
           "apps/union-eyes/app/api/__tests__/admin-billing-cycles.route.test.ts",
           "apps/union-eyes/app/api/__tests__/admin-billing-cycles-preview.route.test.ts",
           "apps/union-eyes/lib/services/__tests__/billing-cycle-service.test.ts"
         ],
-        "commits": [
-          "215c41e36e8ef222f91e23e33108b039e74b5610",
-          "b6d7858ef1f4d56b7de0ddc267f700fc7cc3e797",
-          "8d3ae8b453b08043ac6e630ed889188b4a0fbedd",
-          "484a7fb389b7434691604ac74f43e714a18184c8",
-          "50b64afb4d6539167bba41ef6ce94a91f0acb08a",
-          "a3ddf8d68cde0aef2065f0ef2aa637a38cec7f92",
-          "65acbecdc8a6d09ad330f2eaa5ef2db75e6ca1df",
-          "20979bdf7d242049382b12b82bf6588078564e0a"
-        ],
-        "repair": "Both caller-selected billing-cycle execution and preview now demand a live, tenant-bound, ledger-wide finance:execute mandate for the exact target organization and actor before calculating or charging; role title alone cannot authorize. BillingCycleService now executes its member read/write transaction under the explicit target organization and actor RLS context.",
-        "limits": "Source-level only, unit/PG15/16/HTTP validation pending. Scheduled cross-org trigger and non-atomic billing-cycle processing are separate open obligations."
+        "limits": "Source-level only, unit/PG15/16/HTTP validation pending. Scheduled cross-org trigger and non-atomic billing-cycle processing are separate open obligations.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -738,23 +725,19 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_CI_PENDING",
         "paths": [
           "apps/union-eyes/app/api/admin/ai-usage/route.ts"
         ],
+        "repair": "Both canonical and legacy AI audit listing and count SQL now enforce organization_id = authenticated organization, and missing organization context is refused. Unit regression checks both schema paths and absent context.",
         "regressionPaths": [
           "apps/union-eyes/app/api/__tests__/admin-ai-usage.route.test.ts",
           "apps/union-eyes/app/api/__tests__/admin-ai-usage-list.route.test.ts"
         ],
-        "commits": [
-          "0cf46e8315120cccca359624b7acfd0e36bef949",
-          "4cdc1e4a8d91b24eaa1621a6e59586fa2e92d8f0",
-          "6b7bc91c7fb3558a89be82792089ef1a7785b226"
-        ],
-        "repair": "Both canonical and legacy AI audit listing and count SQL now enforce organization_id = authenticated organization, and missing organization context is refused. Unit regression checks both schema paths and absent context.",
-        "limits": "Source patch and regression authored; no exact-HEAD unit, native PG15/16, real HTTP, browser or institutional acceptance evidence yet."
+        "limits": "Source patch and regression authored; no exact-HEAD unit, native PG15/16, real HTTP, browser or institutional acceptance evidence yet.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -1185,8 +1168,22 @@
       "title": "AI grievance triage, clause reasoning and the copilot read any grievance in the organization for a steward role title. They do not check that the steward holds the case, so grievance content for cases the steward does not represent is sent to a model.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/lib/ai/grievance-triage.ts; apps/union-eyes/lib/ai/clause-reasoning.ts; apps/union-eyes/lib/ai/steward-copilot.ts"
+        ],
+        "repair": "All three grievance-context AI services now require live kernel-backed effective case access for the caller before fetching case content or invoking a model, including direct service calls.",
+        "regressionPaths": [
+          "apps/union-eyes/lib/ai/__tests__/grievance-triage.test.ts",
+          "apps/union-eyes/lib/ai/__tests__/clause-reasoning.test.ts",
+          "apps/union-eyes/lib/ai/__tests__/steward-copilot.test.ts",
+          "apps/union-eyes/lib/ai/__tests__/steward-copilot-outcome.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -1304,8 +1301,19 @@
       "title": "The classify route applies no AI feature gate and no AI safety check, although every sibling AI route applies both.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/app/api/ai/classify/route.ts"
+        ],
+        "repair": "Classification now checks AI feature gate and enforceAISafety before invoking classification services.",
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/ai-classify.route.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -1327,8 +1335,19 @@
       "title": "AI search and summarize return another organization's knowledge row when is_public is true, and no source says who may set the flag. Public cross-tenant data is not authorized by being public.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/app/api/ai/search/route.ts"
+        ],
+        "repair": "Search restricts knowledge retrieval to caller organization regardless of is_public; summarization document lookup also requires same organization.",
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/ai-search.route.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -1350,8 +1369,19 @@
       "title": "The semantic-search status GET counts every cba_clause and arbitration_precedents row across organizations through the global db handle with no organization predicate, at the member role floor.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/app/api/ai/semantic-search/route.ts"
+        ],
+        "repair": "Semantic index status counts only caller organization clauses and source-organization precedents, requires org context and AI feature gate.",
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/ai-semantic-search.route.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -1373,8 +1403,19 @@
       "title": "The AI feedback GET returns every user's rating, comment and user id for a query id in the organization at the member role floor.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/app/api/ai/feedback/route.ts"
+        ],
+        "repair": "GET now filters feedback by authenticated userId in addition to query, operation and organization.",
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/ai-feedback.route.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -1535,13 +1576,18 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "additionalHardening": "Break item PATCH now repeats tenant and member predicates on UPDATE; regression added for membership and mutation ownership.",
-        "additionalRegression": "apps/union-eyes/app/api/__tests__/break-self-report-tenant-scope.route.test.ts",
-        "unitState": "PENDING_AT_EXACT_HEAD",
-        "nativeState": "PENDING_AT_EXACT_HEAD",
-        "runtimeState": "PENDING_AT_EXACT_HEAD"
+        "paths": [
+          "apps/union-eyes/app/api/breaks/route.ts"
+        ],
+        "repair": "Dedicated break collection and item handlers resolve active organization_members.id from authenticated userId and scope reads/amendments to that member.",
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/breaks.route.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone). This session ALSO added regression coverage that did not exist before: apps/union-eyes/app/api/__tests__/breaks.route.test.ts (no regression test covered this route/file at all before this pass)."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -1564,13 +1610,18 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "additionalHardening": "Break item PATCH now repeats tenant and member predicates on UPDATE; regression added for membership and mutation ownership.",
-        "additionalRegression": "apps/union-eyes/app/api/__tests__/break-self-report-tenant-scope.route.test.ts",
-        "unitState": "PENDING_AT_EXACT_HEAD",
-        "nativeState": "PENDING_AT_EXACT_HEAD",
-        "runtimeState": "PENDING_AT_EXACT_HEAD"
+        "paths": [
+          "apps/union-eyes/app/api/breaks/route.ts"
+        ],
+        "repair": "Strict create schema rejects caller-supplied memberId and binds insert memberId to authenticated active organization member; transaction includes atomic audit.",
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/breaks.route.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone). This session ALSO added regression coverage that did not exist before: apps/union-eyes/app/api/__tests__/breaks.route.test.ts (no regression test covered this route/file at all before this pass)."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -1910,23 +1961,18 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_CI_PENDING",
-        "source": [
-          "apps/union-eyes/app/api/billing/send-batch/route.ts",
-          "apps/union-eyes/services/platform-economics/billing-service.ts"
-        ],
-        "tests": [
-          "apps/union-eyes/app/api/__tests__/billing-send-batch.route.test.ts",
-          "apps/union-eyes/services/platform-economics/billing-service.test.ts"
+        "paths": [
+          "apps/union-eyes/app/api/billing/send-batch/route.ts"
         ],
         "repair": "Bind batch billing period and active subscriptions to authenticated organization, validate returned tenant identity and reject foreign billing periods in shared invoice generator.",
-        "sourceState": "PATCHED_NOT_ACCEPTED",
-        "unitState": "PENDING_AT_EXACT_HEAD",
-        "nativeState": "PENDING_AT_EXACT_HEAD",
-        "runtimeState": "PENDING_AT_EXACT_HEAD",
-        "limits": "No independent acceptance or deployed authorization proof at new HEAD."
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/billing-send-batch.route.test.ts"
+        ],
+        "limits": "No independent acceptance or deployed authorization proof at new HEAD.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -1949,26 +1995,18 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_CI_PENDING",
-        "source": [
-          "apps/union-eyes/app/api/billing/replay-invoice/route.ts",
-          "apps/union-eyes/services/platform-economics/billing-service.ts",
-          "apps/union-eyes/app/api/finance/invoices/[id]/route.ts"
-        ],
-        "tests": [
-          "apps/union-eyes/app/api/__tests__/billing-replay-invoice.route.test.ts",
-          "apps/union-eyes/services/platform-economics/billing-service.test.ts",
-          "apps/union-eyes/services/platform-economics/__tests__/billing-service.test.ts",
-          "apps/union-eyes/app/api/__tests__/finance-invoices-id.route.test.ts"
+        "paths": [
+          "apps/union-eyes/app/api/billing/replay-invoice/route.ts"
         ],
         "repair": "Require organization-scoped invoice and line-item lookup for replay and finance detail; reject mismatched rows; require secretary_treasurer for replay.",
-        "sourceState": "PATCHED_NOT_ACCEPTED",
-        "unitState": "PENDING_AT_EXACT_HEAD",
-        "nativeState": "PENDING_AT_EXACT_HEAD",
-        "runtimeState": "PENDING_AT_EXACT_HEAD",
-        "limits": "No independent acceptance or deployed authorization proof at new HEAD."
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/billing-replay-invoice.route.test.ts"
+        ],
+        "limits": "No independent acceptance or deployed authorization proof at new HEAD.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -2087,18 +2125,18 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "source": [
+        "paths": [
           "apps/union-eyes/app/api/audits/[id]/route.ts"
         ],
-        "tests": [
-          "apps/union-eyes/app/api/__tests__/audit-item-redaction.route.test.ts"
+        "repair": "Officer-gated item read now uses tenant-bound transaction, explicit non-sensitive field projection and mandatory audit-read evidence; rejects invalid identifiers and missing organization.",
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/audits-id.route.test.ts"
         ],
-        "sourceState": "PATCHED_NOT_ACCEPTED",
-        "unitState": "PENDING_AT_EXACT_HEAD",
-        "nativeState": "PENDING_AT_EXACT_HEAD",
-        "runtimeState": "PENDING_AT_EXACT_HEAD"
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -2314,22 +2352,18 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_MIGRATION_PENDING_NATIVE_ACCEPTANCE",
-        "source": [
-          "apps/union-eyes/actions/analytics-actions.ts",
-          "apps/union-eyes/db/migrations/20261030_redact_analytics_claim_ids.sql"
-        ],
-        "tests": [
-          "apps/union-eyes/actions/__tests__/analytics-actions.test.ts"
+        "paths": [
+          "apps/union-eyes/actions/analytics-actions.ts"
         ],
         "repair": "New calculations persist only aggregate counts; member metrics reads now allowlist aggregate-only metadata for all historical and new records; idempotent PostgreSQL migration removes stored claimIds from historical claims-volume rows.",
-        "sourceState": "PATCHED_NOT_ACCEPTED",
-        "unitState": "PENDING_AT_EXACT_HEAD",
-        "nativeState": "MIGRATION_NOT_APPLIED_OR_PROVEN_AT_EXACT_HEAD",
-        "runtimeState": "PENDING_AT_EXACT_HEAD",
-        "limits": "Historical rows remain until migration executes; no runtime/independent acceptance."
+        "regressionPaths": [
+          "apps/union-eyes/actions/__tests__/analytics-actions.test.ts"
+        ],
+        "limits": "Historical rows remain until migration executes; no runtime/independent acceptance.",
+        "state": "SOURCE_PATCHED_MIGRATION_PENDING_NATIVE_ACCEPTANCE",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -2400,21 +2434,18 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_CI_PENDING",
-        "source": [
+        "paths": [
           "apps/union-eyes/app/api/breaks/compliance/route.ts"
         ],
-        "tests": [
+        "repair": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
+        "regressionPaths": [
           "apps/union-eyes/app/api/__tests__/breaks-compliance-privacy.route.test.ts"
         ],
-        "repair": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
-        "sourceState": "PATCHED_NOT_ACCEPTED",
-        "unitState": "PENDING_AT_EXACT_HEAD",
-        "nativeState": "PENDING_AT_EXACT_HEAD",
-        "runtimeState": "PENDING_AT_EXACT_HEAD",
-        "limits": "No source-backed case-representation authority for steward-level individual break reporting; such detail remains unavailable. No independent approval."
+        "limits": "No source-backed case-representation authority for steward-level individual break reporting; such detail remains unavailable. No independent approval.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -2716,8 +2747,19 @@
       "title": "The calendar item route supplies lockedAuthCheck to reject another member personal calendar, but the factory invokes it only when beforeUpdate or mergeJsonColumns is configured and never on delete, and the route configures neither, so a steward can still update or delete another member personal calendar.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/lib/api/crud-factory.ts"
+        ],
+        "repair": "Generic item PATCH enters locked transaction whenever lockedAuthCheck exists; DELETE independently acquires FOR UPDATE and invokes lockedAuthCheck before mutation.",
+        "regressionPaths": [
+          "apps/union-eyes/lib/api/__tests__/crud-factory-locked-auth.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -6505,8 +6547,19 @@
       "title": "The generic CRUD route declares orgScoped true over a table that has no organization column, so the factory adds no tenant predicate and every row of the table is visible to every organization once the read is allowed; the declared scope is a no-op.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/lib/api/crud-factory.ts"
+        ],
+        "repair": "Org-scoped generic routes without organizationId or a declared parentScope now fail during route construction instead of silently omitting tenant filtering.",
+        "regressionPaths": [
+          "apps/union-eyes/lib/api/__tests__/crud-factory-scope.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -12147,8 +12200,19 @@
       "title": "The ml/monitoring/metrics GET queries ml_predictions for predicted_at, prediction_correct and assignment_accepted and model_metadata for model_name, precision, recall, f1_score, last_evaluated_at, baseline_accuracy and baseline_confidence, none of which the declared tables have, and joins model_metadata to the per-model figures on model_name with no organization predicate (the table is organization-scoped, and the query runs through the shared database client rather than a tenant transaction), so on a database built from the repository the route fails with a column error, and were the columns present the join would mix the model rows of every organization into one organization figures.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts"
+        ],
+        "repair": "Query uses actual schema columns and organization predicates for model metadata and prediction subqueries.",
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/ml-monitoring-metrics.route.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone). This session ALSO added regression coverage that did not exist before: apps/union-eyes/app/api/__tests__/ml-monitoring-metrics.route.test.ts (no regression test covered this route/file at all before this pass)."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -12170,8 +12234,19 @@
       "title": "The ml/monitoring/metrics GET substitutes literal figures for what was not measured and reports them as model health: precision, recall and f1 are COALESCEd to 0.80, the status CASE returns critical whenever accuracy is NULL and healthy only at 0.85 and above, and the mapping code turns a missing value into 0, a missing status into healthy, a missing trend into stable and a missing last_evaluated_at into the current time, so a model with no measurements is reported with 0.80 quality figures and a fresh timestamp.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "paths": [
+          "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts"
+        ],
+        "repair": "No invented precision, recall, F1, health or trend; unevaluated values explicitly null/unknown.",
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/ml-monitoring-metrics.route.test.ts"
+        ],
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone). This session ALSO added regression coverage that did not exist before: apps/union-eyes/app/api/__tests__/ml-monitoring-metrics.route.test.ts (no regression test covered this route/file at all before this pass)."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
@@ -13837,16 +13912,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_CI_PENDING",
         "paths": [
           "apps/union-eyes/app/api/organizations/[id]/ancestors/route.ts",
           "apps/union-eyes/lib/organizations/read-authority.ts"
         ],
+        "repair": "Malformed and inaccessible organization IDs are rejected; only authorized ancestors are queried and projected.",
         "regressionPaths": [
           "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
         ],
-        "repair": "Malformed and inaccessible organization IDs are rejected; only authorized ancestors are queried and projected.",
-        "limits": "Native PG15/16 and HTTP/browser acceptance at exact current HEAD still pending; this is source-level only."
+        "limits": "Native PG15/16 and HTTP/browser acceptance at exact current HEAD still pending; this is source-level only.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -13895,20 +13971,17 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "state": "SOURCE_PATCHED_CI_PENDING",
         "paths": [
           "apps/union-eyes/app/api/organizations/[id]/path/route.ts"
         ],
+        "repair": "Legacy breadcrumb lookup now uses explicit system transaction with verified organization read authority before returning any record; ancestor projection is filtered to readable organizations, not bare-db behavior.",
         "regressionPaths": [
           "apps/union-eyes/app/api/__tests__/organizations-path.route.test.ts",
           "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
         ],
-        "commits": [
-          "854902c5f652e63229f4273cf393e5c7738ed5a4",
-          "b72648889ee1d8f4df240ae95100c976d67652bf",
-          "41bd1423dfb691925a47aa20091e3c7b9b1fa3a1"
-        ],
-        "limits": "Exact-HEAD unit, native PG15/16 and browser acceptance pending; source correction is not CLOSED."
+        "limits": "Exact-HEAD unit, native PG15/16 and browser acceptance pending; source correction is not CLOSED.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
@@ -18981,19 +19054,18 @@
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
       "currentRun": {
-        "source": [
+        "paths": [
           "apps/union-eyes/app/api/targets/summary/route.ts"
         ],
-        "tests": [
+        "repair": "Officer-only authorization, explicit non-sensitive projection, tenant-bound database context and mandatory read audit remove member exposure of calculation, alert recipients, creator and dashboard layout.",
+        "regressionPaths": [
           "apps/union-eyes/app/api/__tests__/targets-summary-authority.route.test.ts"
         ],
-        "note": "Source correction and adversarial route tests committed; exact-HEAD CI and VS/runtime acceptance pending.",
-        "sourceState": "PATCHED_NOT_ACCEPTED",
-        "unitState": "PENDING_AT_EXACT_HEAD",
-        "nativeState": "PENDING_AT_EXACT_HEAD",
-        "runtimeState": "PENDING_AT_EXACT_HEAD"
+        "limits": "Verified by local vitest run only; not an exact-SHA CI run.",
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "verificationNote": "Phase 5 reconciliation (fix/ue-gate0-final-convergence): independently re-verified this session - confirmed every file in engineeringCorrection.path still exists and still contains the claimed fix, and confirmed the regression test(s) below actually pass at this exact working-tree state (local vitest run, not a CI run at a recorded SHA - the verificationPolicy's CI/exact-SHA bar is not met by this alone)."
       },
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {

@@ -47,7 +47,7 @@ describe('roster facade routes', () => {
       'federations/[id]/remittances', 'federations/benchmark/grievances', 'jurisdiction/clc-compliance', 'jurisdiction/validate-deadline', 'locals',
       'locals/[id]', 'organizer/impact', 'portal/documents', 'portal/documents/upload', 'storage/cleanup', 'storage/usage', 'clauses/search',
       'movement-insights/trends', 'arbitration/precedents/[id]/citations', 'arbitration/precedents/[id]/documents', 'arbitration/precedents/search',
-      'reports/[id]/execute', 'reports/[id]/run', 'communications/templates/[id]/duplicate', 'investigations', 'investigations/audit', 'communications/campaigns/[id]/schedule', 'communications/campaigns/[id]/send-test', 'onboarding', 'wcb/claims', 'wcb/claims/[id]', 'social-media/feed', 'external-data', 'external-data/lrb', 'integrations/api-keys', 'reports/builder', 'reports/scheduled', 'reports/scheduled/[id]', 'reports/datasources/sample', 'healthwelfare/plans', 'reconciliation/bank', 'reconciliation/upload',
+      'reports/[id]/execute', 'reports/[id]/run', 'communications/templates/[id]/duplicate', 'investigations', 'investigations/audit', 'onboarding', 'wcb/claims', 'wcb/claims/[id]', 'social-media/feed', 'external-data', 'external-data/lrb', 'integrations/api-keys', 'reports/builder', 'reports/scheduled', 'reports/scheduled/[id]', 'reports/datasources/sample', 'healthwelfare/plans', 'reconciliation/bank', 'reconciliation/upload',
       'ml/recommendations', 'ml/predictions/churn-risk', 'ml/monitoring/alerts', 'billing/send-invoice', 'compliance/data-classification-policy', 'onboarding/smart-defaults', 'continuity/archives', 'continuity/docs',
     ];
     for (const route of converted) {
@@ -68,5 +68,26 @@ describe('roster facade routes', () => {
     expect(file!.text).toContain('requireLiveFinancialMandate');
     expect(file!.text).toMatch(/export const POST = withApi/);
     expect(file!.text).toMatch(/export const GET = withApi/);
+  });
+
+  // DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY: these two were pure 501 facades (both still
+  // in the `converted` list above as of an earlier round); schedule's GET and send-test's POST are now real
+  // operations (a consent/preference-evaluated audience preview, and a real test send), covered in detail
+  // by lib/api/__tests__/f12-communications.contract.test.ts. Every OTHER method on both routes still
+  // correctly refuses with 501, which this asserts here so they are not silently dropped from this file's
+  // "every former facade accounted for" tracking.
+  it('the campaign schedule and send-test routes still refuse every method they do not implement', () => {
+    const schedule = files.find((f) => f.route === 'communications/campaigns/[id]/schedule');
+    expect(schedule, 'communications/campaigns/[id]/schedule exists').toBeTruthy();
+    expect(schedule!.text).toContain('ApiError.notImplemented');
+    expect(schedule!.text).toMatch(/export const PATCH = notImplemented;/);
+    expect(schedule!.text).toMatch(/export const DELETE = notImplemented;/);
+
+    const sendTest = files.find((f) => f.route === 'communications/campaigns/[id]/send-test');
+    expect(sendTest, 'communications/campaigns/[id]/send-test exists').toBeTruthy();
+    expect(sendTest!.text).toContain('ApiError.notImplemented');
+    expect(sendTest!.text).toMatch(/export const GET = notImplemented;/);
+    expect(sendTest!.text).toMatch(/export const PATCH = notImplemented;/);
+    expect(sendTest!.text).toMatch(/export const DELETE = notImplemented;/);
   });
 });

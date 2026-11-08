@@ -20,20 +20,24 @@ import { enforceAISafety } from '@nzila/policies';
  * - Churn Risk Prediction
  * - Smart Assignment
  * - Legal Precedent Search
+ *
+ * The schema stores forecast values and model accuracy, not an evaluated precision/recall/F1 or a
+ * computed health/trend verdict - those fields answer null/'not_evaluated'/'unknown' rather than a
+ * fabricated figure, until a real evaluation pipeline exists to measure them.
  * 
  * Response:
  * {
  *   models: [{
  *     modelName: string,
- *     accuracy: number,      // 0-1 scale
- *     precision: number,     // 0-1 scale
- *     recall: number,        // 0-1 scale
- *     f1Score: number,       // 0-1 scale
+ *     accuracy: number | null,      // 0-1 scale
+ *     precision: null,              // not yet evaluated
+ *     recall: null,                 // not yet evaluated
+ *     f1Score: null,                // not yet evaluated
  *     predictions24h: number,
- *     avgConfidence: number, // 0-1 scale
- *     lastUpdated: string,
- *     status: 'healthy' | 'warning' | 'critical',
- *     trend: 'up' | 'down' | 'stable'
+ *     avgConfidence: number | null, // 0-1 scale
+ *     lastUpdated: string | null,
+ *     status: 'not_evaluated',
+ *     trend: 'unknown'
  *   }],
  *   timestamp: string
  * }
