@@ -92,7 +92,7 @@
     "engineeringCorrected": 721,
     "engineeringRemaining": 56,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 32
+    "engineeringPartial": 33
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -8876,10 +8876,33 @@
       "title": "The index trend is stable or degrading from one snapshot (single-source nodes over 40 percent of nodes) and can never be improving, the \"Estimated doc quality\" component is 25, 50 or 75 from the interview count alone, and the maturity level and status are label cut-offs on a score built from node counts, yet the response presents them as a trend, a quality estimate and a maturity assessment.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "FIXED_THIS_RUN",
+        "paths": [
+          "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts",
+          "apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts"
+        ],
+        "commits": [
+          "148ff300f"
+        ],
+        "repair": "trend's type claimed 'improving' | 'stable' | 'degrading' but the computation can only ever produce 'degrading' or 'stable' (there is no prior snapshot to compare against) - narrowed the type to match reality, confirmed via repo-wide grep that no caller of this specific result reads .trend (safe, non-breaking). Added a methodologyNote field stating plainly that trend is a single-snapshot risk-concentration signal, 'Estimated doc quality' is a 3-step function of interview count alone, and maturityLevel/status are score cut-off labels - not a measured trend, documentation-quality assessment or validated maturity assessment.",
+        "limits": "The underlying dimension scores (redundancy, documentation, governance, preparedness, diversification) remain genuinely heuristic count-based proxies - this run fixes the misleading type signature and adds honest disclosure, it does not replace the heuristics with a measured assessment (no such data source exists for this feature).",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts -> 7/7 passing. Broader sweep of every calculateResilienceIndex caller (copilot, decision-intelligence, federated-intelligence, resilience-strategies, mitigation-comparison, exit-interviews routes) -> 7 files/40 passing. typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B158-GATE3-RESILIENCE-INDEX-DISCLOSURE",
+        "path": "apps/union-eyes/lib/knowledge-transfer/resilience-index/resilience-calculator.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts",
+        "explanation": "Fixed the concrete, title-quoted mismatch this run: trend's type no longer claims an impossible 'improving' state, and a new methodologyNote discloses that trend/doc-quality/maturity are single-snapshot, count-based heuristic labels, not a measured trend, quality estimate or maturity assessment. Kept at PARTIAL because the 5 underlying dimension scores remain genuine count-based heuristics with no verified data source to replace them.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-ROADMAP-DOCUMENTATION-RULE-PRECEDENCE-AND-CONSTANT-PROJECTED-GAINS",
