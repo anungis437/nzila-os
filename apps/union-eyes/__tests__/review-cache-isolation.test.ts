@@ -13,7 +13,7 @@ describe('review response cache isolation', () => {
   })
 
   it('routes GET, POST and error responses through privateJson', () => {
-    const directCalls = route.match(/NextResponse\\.json\\(/g) ?? []
+    const directCalls = route.match(/NextResponse\.json\(/g) ?? []
     expect(directCalls).toHaveLength(1) // the single privateJson implementation
     expect(route).toContain('return privateJson({ success: true, ...list })')
     expect(route).toContain('return privateJson({ success: true, ...opened, alreadyOpen: !created }')
