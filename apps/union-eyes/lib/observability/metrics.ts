@@ -11,7 +11,11 @@
  * - Database: Query times, connection pool stats
  * - Cache: Hit rates, Redis operations
  * 
- * Access metrics at: GET /api/metrics
+ * Not currently exposed at any route: GET /api/metrics is a generic CRUD route over the analyticsMetrics table
+ * (app/api/metrics/route.ts), an unrelated business feature, so a reader must not confuse the two. No route calls
+ * this module's register.metrics() to serve its Prometheus exposition text, and nothing in the app yet increments
+ * httpRequestsTotal/httpRequestDuration/httpRequestSize/httpResponseSize - only prom-client's own collectDefaultMetrics
+ * (process CPU/memory/event-loop) would have real data if this were wired up.
  */
 
 import { Registry, Counter, Histogram, Gauge, collectDefaultMetrics } from 'prom-client';
