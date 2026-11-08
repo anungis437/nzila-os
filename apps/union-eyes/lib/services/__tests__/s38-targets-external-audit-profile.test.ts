@@ -33,4 +33,15 @@ describe('Gate 0 batch B94: KPI target bounds and external refusal audit scope',
     const helper = context.slice(context.indexOf('export async function withPrincipalOnlyContext'))
     expect(helper.slice(0, helper.indexOf('\n}\n'))).toContain("set_config('app.current_org_id', '', true)")
   })
+
+  // DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT (canonical V2 gap)
+  it('runs the external-authority precheck in every bootstrap mode: an external representative is never an organization member, so the canonical V2 membership binder cannot replace it', () => {
+    const middleware = src('lib/external-resource-middleware.ts')
+    expect(middleware).not.toContain('currentStateContextEnabled')
+    expect(middleware).not.toContain("from '@/lib/auth/canonical-bootstrap'")
+    const precheck = middleware.indexOf('withPrincipalOnlyContext((tx) => holdsExternalAuthority(')
+    const guardedBlock = middleware.slice(0, precheck)
+    // No unclosed `if (` between the actor declaration and the precheck would gate it behind a flag again.
+    expect(guardedBlock.lastIndexOf('if (!')).toBeLessThan(guardedBlock.lastIndexOf('const actor ='))
+  })
 })

@@ -3,13 +3,13 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 711,
+    "overlayImplemented": 712,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 58,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 34,
-    "overlayPartial": 26,
+    "creditedByEarlierRuns": 59,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 35,
+    "overlayPartial": 25,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 66,
+    "unresolvedByOverlay": 65,
     "untouchedByOverlay": 40,
     "qualificationVerified": 0,
     "closed": 0
@@ -17,8 +17,8 @@
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 711,
-    "partial": 26,
+    "implemented": 712,
+    "partial": 25,
     "untouched": 40,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
@@ -37,7 +37,6 @@
       "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
       "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
       "DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED-ONE-GLOBAL-SECRET-AND-HEADER-KEYED-LIMIT",
-      "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
       "DEF-0B8-JUR-LOCATION-CONSENT-IS-NOT-BOUND-TO-PURPOSE-ORGANIZATION-OR-STRIKE",
       "DEF-0B9-ML-QUERY-SENDS-FREE-TEXT-AND-ARBITRARY-CONTEXT-TO-AN-EXTERNAL-SERVICE-WITH-NO-DISCLOSURE-DECISION",
       "DEF-0B10-ORG-FORM-GENERATION-ROUTE-RETURNS-JSON-AND-THE-CLIENT-SAVES-IT-AS-THE-PDF",
@@ -728,6 +727,18 @@
       "regressionTest": "apps/union-eyes/app/api/__tests__/health-safety-dashboard.route.test.ts",
       "files": [
         "apps/union-eyes/app/api/health-safety/dashboard/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
+      "batch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
+      "sourceCommit": null,
+      "regressionTest": "lib/services/__tests__/s38-targets-external-audit-profile.test.ts (4/4 passed, including a new test asserting the precheck is unconditional (no currentStateContextEnabled reference remains); app/api/external/__tests__/external-routes.test.ts, app/api/external/documents/[id]/download/projection.test.ts, app/api/external/documents/[id]/download/route.pglite.test.ts (37/37 passed). Verified as a genuine regression test by temporarily reintroducing the conditional, confirming the new test fails, then restoring the clean source with zero diff from HEAD.",
+      "files": [
+        "apps/union-eyes/lib/external-resource-middleware.ts",
+        "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+        "apps/union-eyes/lib/services/__tests__/s38-targets-external-audit-profile.test.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },

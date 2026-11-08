@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 711,
-    "engineeringRemaining": 66,
+    "engineeringCorrected": 712,
+    "engineeringRemaining": 65,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 26
+    "engineeringPartial": 25
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -11155,11 +11155,12 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
-        "path": "apps/union-eyes/lib/external-resource-middleware.ts; apps/union-eyes/lib/services/external-resource-authorization-service.ts",
-        "explanation": "New holdsExternalAuthority check (asked via withPrincipalOnlyContext, before any tenant transaction or audit write) now gates legacy-mode requests; confirmed via direct diff read of both files. The fix is explicitly guarded by `if (!currentStateContextEnabled())`, so the canonical V2 path still needs its own separate check, matching Wave 1's own PARTIAL characterization exactly.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
+        "path": "apps/union-eyes/lib/external-resource-middleware.ts; apps/union-eyes/lib/services/external-resource-authorization-service.ts; apps/union-eyes/lib/services/__tests__/s38-targets-external-audit-profile.test.ts",
+        "explanation": "New holdsExternalAuthority check (asked via withPrincipalOnlyContext, before any tenant transaction or audit write) now gates legacy-mode requests; confirmed via direct diff read of both files. The fix is explicitly guarded by `if (!currentStateContextEnabled())`, so the canonical V2 path still needs its own separate check, matching Wave 1's own PARTIAL characterization exactly. Closed the canonical V2 gap (P2 Gate 0 corrective convergence): removed the `if (!currentStateContextEnabled())` conditional entirely, so the holdsExternalAuthority precheck now runs unconditionally in both legacy and V2 bootstrap mode. An external representative is never an organization member by definition (that is the entire point of the representation-authority grant model), so canonical V2's organization-membership binder addresses a separate, non-overlapping concern and cannot stand in for this matter-specific check; no actual V2 equivalent protection for this external-representative scenario was found anywhere in the codebase (grepped for \"organization binder\"/\"organizationBinder\"/\"bindOrganization\" with no implementation matching the removed comment's claim). The now-unused currentStateContextEnabled import was removed.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "lib/services/__tests__/s38-targets-external-audit-profile.test.ts (4/4 passed, including a new test asserting the precheck is unconditional (no currentStateContextEnabled reference remains); app/api/external/__tests__/external-routes.test.ts, app/api/external/documents/[id]/download/projection.test.ts, app/api/external/documents/[id]/download/route.pglite.test.ts (37/37 passed). Verified as a genuine regression test by temporarily reintroducing the conditional, confirming the new test fails, then restoring the clean source with zero diff from HEAD."
       }
     },
     {
