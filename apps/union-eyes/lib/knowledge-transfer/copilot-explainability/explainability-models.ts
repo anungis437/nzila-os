@@ -45,9 +45,14 @@ export interface GovernanceFlag {
 export interface CopilotExplainabilityEnvelope {
   /** What data was used to form this response */
   evidenceReferences: EvidenceReference[];
-  /** Step-by-step reasoning chain */
+  /** Step-by-step reasoning chain. Each link's own `assumption` is specific to that computation. */
   reasoningChain: ReasoningLink[];
-  /** Key assumptions made */
+  /**
+   * Standing methodology caveats that apply to every response from this engine (e.g. "based on published exit
+   * interviews", "single-source counts may undercount"). These are NOT derived from, or specific to, this
+   * particular query - they are the same limitations of the underlying analysis method every time. Do not present
+   * these as findings the model made about this interaction (DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED).
+   */
   assumptions: string[];
   /** Governance considerations surfaced */
   governanceFlags: GovernanceFlag[];

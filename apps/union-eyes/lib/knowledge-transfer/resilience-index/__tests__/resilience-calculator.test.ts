@@ -122,8 +122,9 @@ describe('calculateResilienceIndex', () => {
     );
     const idx = await calculateResilienceIndex('org');
     const doc = idx.dimensions.find((d) => d.name === 'Documentation Maturity');
-    // 4-7 interviews -> estimated doc quality component value 50
-    expect(doc!.components.some((c) => c.value === 50)).toBe(true);
+    // DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS: there is no separate
+    // "Estimated doc quality" figure anymore - only the raw, honest interview count.
+    expect(doc!.components).toEqual([{ name: 'Published interviews', value: 5 }]);
     // preparedness gets +15 for identified bottlenecks (no critical)
     const prep = idx.dimensions.find((d) => d.name === 'Continuity Preparedness');
     expect(prep!.score).toBeGreaterThan(0);
@@ -134,7 +135,7 @@ describe('calculateResilienceIndex', () => {
     mocks.buildMap.mockResolvedValue(mapWith([n('a', 2, 'general', false, 'low')]));
     const idx = await calculateResilienceIndex('org');
     const doc = idx.dimensions.find((d) => d.name === 'Documentation Maturity');
-    expect(doc!.components.some((c) => c.value === 25)).toBe(true);
+    expect(doc!.components).toEqual([{ name: 'Published interviews', value: 2 }]);
   });
 
   // DEF-0B7-COGB-EMPTY-ORGANIZATION-RESILIENCE-INDEX-DIVIDES-BY-ZERO-AND-REPORTS-STRONG: an organization with no dependency map used to read as a

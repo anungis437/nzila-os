@@ -16,7 +16,7 @@
 import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
-import { exitInterviews } from '@/db/schema';
+import { exitInterviews, exitInterviewRoleEnum } from '@/db/schema';
 import {
   buildOrgAiTrace,
   getAiClient,
@@ -25,6 +25,11 @@ import {
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
+
+/** The full set of roles the schema allows for an exit interview (member, steward, chief_steward, officer, admin) -
+ *  not a hand-maintained subset, so coverage-gap detection cannot silently drift out of step with roles the
+ *  organization can actually record. */
+const UNION_ROLE_VALUES = exitInterviewRoleEnum.enumValues;
 
 export interface ContinuityRiskFlag {
   flag: string;
@@ -38,8 +43,9 @@ export interface OrgContinuityRiskReport {
   organizationId: string;
   generatedAt: string;
   totalPublishedInterviews: number;
-  /** 0–100. Higher = more fragile. */
-  overallRiskScore: number;
+  /** 0–100. Higher = more fragile. Null when there are no published interviews: there is nothing to assess, and a
+   *  risk score of 0 would read as "assessed and found safe" rather than "not yet assessed". */
+  overallRiskScore: number | null;
   riskFlags: ContinuityRiskFlag[];
   /** Topics covered by only ONE exit interview — single-source knowledge */
   singleSourceTopics: string[];
@@ -130,16 +136,18 @@ function detectIsolatedExpertise(
 
 /**
  * Detect roles with no published interview (coverage gaps).
- * Compares roles present in published interviews vs the expected union role set.
+ * Compares roles present in published interviews vs the full set of roles the schema allows
+ * (exitInterviewRoleEnum) - not a hand-maintained subset, so this cannot silently drift out of
+ * step with roles the organization can actually record.
  */
 function detectCoverageGaps(interviews: Array<{ roleInUnion: string }>): string[] {
   const coveredRoles = new Set(interviews.map((i) => i.roleInUnion));
-  const allRoles = ['steward', 'chief_steward', 'officer', 'admin'];
-  return allRoles.filter((r) => !coveredRoles.has(r));
+  return UNION_ROLE_VALUES.filter((r) => !coveredRoles.has(r));
 }
 
 /**
- * Compute an overall org risk score (0–100) from detected signals.
+ * Compute an overall org risk score (0–100) from detected signals. Null with zero published interviews: there is
+ * no signal at all to score, and 0 would be indistinguishable from "assessed and found safe".
  */
 function computeRiskScore(params: {
   singleSourceCount: number;
@@ -147,8 +155,8 @@ function computeRiskScore(params: {
   isolatedExpertiseCount: number;
   highRiskInterviewCount: number;
   totalInterviews: number;
-}): number {
-  if (params.totalInterviews === 0) return 0;
+}): number | null {
+  if (params.totalInterviews === 0) return null;
   const base =
     Math.min(params.singleSourceCount * 8, 40) +
     Math.min(params.coverageGapCount * 15, 30) +

@@ -12,6 +12,7 @@ import { buildDependencyPropagationMap } from '../propagation/dependency-propaga
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import { forecastContinuityTrends } from '../forecasting/continuity-forecaster';
 import type { DependencyNode } from '../propagation/propagation-models';
+import { confidenceLabelFromCount } from '../governance/evidence-basis';
 import {
   type ContinuityRecommendation,
   type DecisionBrief,
@@ -41,12 +42,12 @@ function buildSingleSourceRecommendation(
       {
         observation: `${singleSourceCount} of ${totalNodes} knowledge nodes have single-source coverage`,
         dataPoint: `${pct}% single-source concentration`,
-        confidence: 'high',
+        confidence: confidenceLabelFromCount(singleSourceCount),
       },
       {
         observation: `Critical areas include: ${topNodes.join(', ')}`,
         dataPoint: `Top ${topNodes.length} single-source critical nodes identified`,
-        confidence: 'high',
+        confidence: confidenceLabelFromCount(criticalSingleSource.length),
       },
     ],
     reasoningChain: [
@@ -102,7 +103,7 @@ function buildGovernanceRecommendation(
       {
         observation: `${govSingleSource} of ${totalGovNodes} governance nodes are single-source`,
         dataPoint: `${Math.round((govSingleSource / Math.max(totalGovNodes, 1)) * 100)}% governance concentration`,
-        confidence: 'high',
+        confidence: confidenceLabelFromCount(govSingleSource),
       },
     ],
     reasoningChain: [
@@ -152,7 +153,7 @@ function buildDocumentationRecommendation(
       {
         observation: `${undocumentedChainCount} single-source chains with no documentation signals`,
         dataPoint: `${Math.round((undocumentedChainCount / Math.max(totalNodes, 1)) * 100)}% of nodes are undocumented chains`,
-        confidence: 'medium',
+        confidence: confidenceLabelFromCount(undocumentedChainCount),
       },
     ],
     reasoningChain: [
@@ -201,7 +202,7 @@ function buildVendorRecommendation(
       {
         observation: `${vendorSingleSource} vendor nodes identified as single-source dependencies`,
         dataPoint: `${vendorSingleSource} vendors with no identified alternatives`,
-        confidence: 'medium',
+        confidence: confidenceLabelFromCount(vendorSingleSource),
       },
     ],
     reasoningChain: [

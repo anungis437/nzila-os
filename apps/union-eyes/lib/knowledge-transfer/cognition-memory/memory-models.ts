@@ -53,6 +53,15 @@ export interface CognitionMemoryEntry {
   /** Key insights distilled from the payload */
   keyInsights: string[];
   provenance?: MemoryProvenance;
+  /**
+   * For a resilience_baseline entry only: the independently computed organizational resilience index at the
+   * moment this entry was saved (lib/knowledge-transfer/resilience-index/resilience-calculator.ts), alongside the
+   * officer's own resilienceScoreAtCapture - letting a reader see the asserted figure next to a measured one,
+   * rather than only the officer's own statement (DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR).
+   * Null when the entry is not a resilience_baseline, no score was given, or there was no dependency data to
+   * compute a measured index from at save time (not every organization has enough data for one to exist yet).
+   */
+  measuredResilienceIndexAtCapture?: number | null;
 }
 
 export interface ResilienceSnapshotPoint {

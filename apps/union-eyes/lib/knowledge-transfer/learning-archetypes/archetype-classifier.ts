@@ -10,6 +10,7 @@
 
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory/memory-store';
 import { listReasoningSessions } from '@/lib/knowledge-transfer/reasoning-sessions/session-manager';
+import { confidenceFromSampleSize } from '@/lib/knowledge-transfer/governance/evidence-basis';
 import type {
   ArchetypeClassificationResult,
   LearningArchetype,
@@ -102,8 +103,9 @@ function scoreFits(
     // Zero recorded interactions means nothing was observed to classify, not a confidently-measured archetype -
     // the fitting formulas below would otherwise still clamp a 'governance_stagnant' fit to its ceiling from
     // nothing but an empty history (see classifyLearningArchetype's own zero-interaction guard, which this
-    // floor backs up rather than relies on alone).
-    confidence: totalInteractions === 0 ? 0 : totalInteractions >= 10 ? 80 : totalInteractions >= 5 ? 60 : 40,
+    // floor backs up rather than relies on alone). Shared with every other DEF-0B7-COGA-PROFILES sibling engine
+    // via confidenceFromSampleSize so the same sample size always implies the same confidence.
+    confidence: confidenceFromSampleSize(totalInteractions),
   });
 
   fits.push(score('proactive_stabilizer',
@@ -245,10 +247,13 @@ export async function classifyLearningArchetype(orgId: string): Promise<Archetyp
     interpretationGuidance:
       'These archetypes characterize organizational governance style — not individual employees. Classifications are derived from organizational continuity records and are intended for governance strategy planning.',
     methodologyNote:
-      'Archetype fit scores, governance culture/momentum/coherence postures and adaptive-resilience narratives are ' +
-      'all derived from counts, types and dates of cognition memory entries an officer chooses to type in through ' +
-      'the memory route and reasoning-session activity - they measure use of these analytics tools and officer-' +
-      'entered scores, not verified governance decisions. classificationConfidence is 0 when there are no recorded ' +
-      'interactions at all.',
+      'Archetype fit scores are derived from counts, types and dates of cognition memory entries an officer ' +
+      'chooses to type in through the memory route and reasoning-session activity - they measure use of these ' +
+      'analytics tools and officer-entered scores, not verified governance decisions. classificationConfidence is ' +
+      '0 when there are no recorded interactions at all, and uses the same confidenceFromSampleSize scale as the ' +
+      'sibling behaviour-pattern and governance-culture engines. Governance momentum and governance coherence are ' +
+      'not computed from these counts at all (they refuse to run rather than return an entry-count ratio dressed ' +
+      'as a measured outcome); governance adaptation and adaptive resilience report their own insufficient-history ' +
+      'states directly.',
   };
 }

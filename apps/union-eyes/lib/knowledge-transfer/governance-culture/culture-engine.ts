@@ -11,6 +11,7 @@
 import { randomUUID } from 'crypto';
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory/memory-store';
 import { listReasoningSessions } from '@/lib/knowledge-transfer/reasoning-sessions/session-manager';
+import { meetsMinimumCohort } from '@/lib/knowledge-transfer/governance/evidence-basis';
 import type {
   GovernanceCultureProfile,
   ContinuityCulturePosture,
@@ -71,13 +72,20 @@ function cultureHealthSignal(trend: string, entries: number): CultureHealthSigna
   return 'insufficient_history';
 }
 
+/**
+ * Returns null below the minimum cohort: with too few recorded interactions, the discipline/mitigation maps' own
+ * default branches (e.g. "irregular", "unverified") would otherwise sum to a specific, non-zero number (an
+ * organization with literally nothing recorded previously scored a nonzero figure from those defaults alone),
+ * which reads as a measured composite when nothing has actually been assessed.
+ */
 function computeCultureScore(
   trend: string,
   disciplineConsistency: string,
   mitFollowThrough: string,
   totalEntries: number,
   sessionCount: number,
-): number {
+): number | null {
+  if (!meetsMinimumCohort(totalEntries + sessionCount)) return null;
   let score = 0;
   // Engagement density (max 25)
   score += Math.min((totalEntries + sessionCount) * 3, 25);
@@ -229,7 +237,7 @@ function buildEvolutionPhases(
   return phases;
 }
 
-function cultureSummary(posture: ContinuityCulturePosture, health: CultureHealthSignal, score: number): string {
+function cultureSummary(posture: ContinuityCulturePosture, health: CultureHealthSignal, score: number | null): string {
   const postureDesc: Record<ContinuityCulturePosture, string> = {
     proactive_governance: 'proactively governs organizational continuity',
     responsive_governance: 'responds to continuity challenges with governance action',
@@ -245,7 +253,12 @@ function cultureSummary(posture: ContinuityCulturePosture, health: CultureHealth
     recovering: 'Culture is recovering with volatile but engagement-positive signals.',
     insufficient_history: 'Insufficient history to characterize culture evolution — continue building organizational memory.',
   };
-  return `This organization ${postureDesc[posture]}. ${healthDesc[health]} Governance culture score: ${score}/100.`;
+  // A score is only stated when one was computed: below the minimum cohort, stating a number here would contradict
+  // the "insufficient history" health description in the same sentence.
+  const scoreClause = score === null
+    ? 'Too few recorded interactions to compute a governance culture score.'
+    : `Governance culture score: ${score}/100.`;
+  return `This organization ${postureDesc[posture]}. ${healthDesc[health]} ${scoreClause}`;
 }
 
 /** Analyze organizational governance culture from organizational cognition history. */

@@ -57,6 +57,20 @@ describe('lib/knowledge-transfer/copilot-explainability/response-builder', () =>
     expect(buildPropagationEvidence(0, 0, 0)).toEqual([]);
   });
 
+  // DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED: evidence confidence must come from how many
+  // nodes/signals underlie it, never a fixed 'high' literal regardless of volume.
+  it('buildPropagationEvidence derives confidence from count, not a fixed literal', () => {
+    const sparse = buildPropagationEvidence(1, 2, 1);
+    expect(sparse[0].confidence).toBe('low');
+    expect(sparse[1].confidence).toBe('low');
+    const moderate = buildPropagationEvidence(3, 10, 2);
+    expect(moderate[0].confidence).toBe('medium');
+    expect(moderate[1].confidence).toBe('medium');
+    const abundant = buildPropagationEvidence(8, 10, 6);
+    expect(abundant[0].confidence).toBe('high');
+    expect(abundant[1].confidence).toBe('high');
+  });
+
   it('buildGovernanceFlags computes severity bands', () => {
     expect(buildGovernanceFlags(0, 5)).toEqual([]);
     expect(buildGovernanceFlags(4, 5)[0].severity).toBe('significant');

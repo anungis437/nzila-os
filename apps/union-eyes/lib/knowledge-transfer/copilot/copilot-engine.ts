@@ -35,6 +35,7 @@ import {
   buildPropagationEvidence,
   buildGovernanceFlags,
 } from '../copilot-explainability/response-builder';
+import { confidenceLabelFromCount } from '../governance/evidence-basis';
 import type { EvidenceReference, ReasoningLink, GovernanceFlag } from '../copilot-explainability/explainability-models';
 import type { CopilotQueryInput, CopilotQueryResult, CopilotMessage } from './copilot-models';
 
@@ -252,13 +253,15 @@ export async function processCopilotQuery(
       observation: `Organizational resilience score: ${resilienceIndex.overallScore}/100 (${resilienceIndex.status})`,
       dataPoint: `${resilienceIndex.overallScore}/100`,
       sourceType: 'resilience_index',
-      confidence: 'high',
+      // Derived from how many knowledge nodes the resilience index itself was computed from - not a fixed 'high'
+      // regardless of how little organizational data actually underlies the score (DEF-0B7-EXC-COPILOT-EXPLAINABILITY).
+      confidence: confidenceLabelFromCount(totalNodes),
     },
     {
       observation: `${resilienceIndex.dimensions.length} resilience dimensions analyzed`,
       dataPoint: resilienceIndex.dimensions.map((d) => `${d.name}: ${d.score}`).join(', '),
       sourceType: 'resilience_index',
-      confidence: 'high',
+      confidence: confidenceLabelFromCount(totalNodes),
     },
   ];
 

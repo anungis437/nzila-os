@@ -9,11 +9,13 @@
 
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory/memory-store';
 import { listReasoningSessions } from '@/lib/knowledge-transfer/reasoning-sessions/session-manager';
+import { MIN_COHORT_SIZE } from '@/lib/knowledge-transfer/governance/evidence-basis';
 import type {
   LearningTrajectoryReport,
   TrajectoryDataPoint,
   LearningMomentum,
   TrajectoryForecastPoint,
+  TrajectoryForecastStatus,
   MaturityMilestone,
 } from './trajectory-models';
 
@@ -60,11 +62,16 @@ function computeMomentum(points: TrajectoryDataPoint[]): LearningMomentum {
   return 'steady';
 }
 
+/**
+ * Builds a forecast only once there are enough resilience timeline points to extrapolate from at all. Two points
+ * define a line, not a trend: a linear projection from a two-point history is indistinguishable from noise, so
+ * none is offered below MIN_COHORT_SIZE (DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST-EXTRAPOLATES-TWO-TYPED-SCORES).
+ */
 function buildForecast(
   points: TrajectoryDataPoint[],
   momentum: LearningMomentum,
 ): TrajectoryForecastPoint[] {
-  if (points.length < 2) return [];
+  if (points.length < MIN_COHORT_SIZE) return [];
 
   const latest = points[points.length - 1].resilienceScore;
   const trend = points[points.length - 1].resilienceScore - points[0].resilienceScore;
@@ -193,6 +200,9 @@ export async function analyzeLearningTrajectory(orgId: string): Promise<Learning
       ? Math.round((totalInteractions / trajectorySpanDays) * 30 * 10) / 10
       : null;
 
+  const forecastStatus: TrajectoryForecastStatus =
+    forecast.length > 0 ? 'available' : 'unavailable_insufficient_data';
+
   return {
     organizationId: orgId,
     analyzedAt: new Date().toISOString(),
@@ -200,6 +210,7 @@ export async function analyzeLearningTrajectory(orgId: string): Promise<Learning
     momentum,
     momentumNarrative: momentumNarrative(momentum, currentScore),
     forecast,
+    forecastStatus,
     milestones,
     trajectorySpanDays,
     interactionsPerMonth,
@@ -207,11 +218,19 @@ export async function analyzeLearningTrajectory(orgId: string): Promise<Learning
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
       'Learning trajectories are organizational — not individual. Forecasts project a linear extrapolation of ' +
-      'organizational history forward and are intended for governance planning purposes, not as a statistical prediction.',
+      'organizational history forward and are intended for governance planning purposes, not as a statistical ' +
+      `prediction. ${forecastStatus === 'unavailable_insufficient_data'
+        ? `No forecast is offered with fewer than ${MIN_COHORT_SIZE} resilience timeline points: the observed ` +
+          'trajectoryPoints series is returned in full instead.'
+        : ''}`,
     methodologyNote:
-      'forecast is a linear extrapolation from the first and last typed resilience scores (as few as 2 points), ' +
-      "adjusted by a momentum multiplier; each point's projectionBand is a fixed formula (min(monthsAhead * 3, 20)), " +
-      "not an interval derived from the data's own variance - it is not a probabilistic or statistical forecast, " +
-      'and estimatedMonthsToNextMilestone compounds the same linear assumption.',
+      forecastStatus === 'unavailable_insufficient_data'
+        ? `Fewer than ${MIN_COHORT_SIZE} resilience timeline points were recorded, so no forecast is produced ` +
+          '(a linear projection from a handful of typed scores is not distinguishable from noise). ' +
+          'estimatedMonthsToNextMilestone is null for the same reason.'
+        : 'forecast is a linear extrapolation from the typed resilience score history, adjusted by a momentum ' +
+          "multiplier; each point's projectionBand is a fixed formula (min(monthsAhead * 3, 20)), not an interval " +
+          "derived from the data's own variance - it is not a probabilistic or statistical forecast, and " +
+          'estimatedMonthsToNextMilestone compounds the same linear assumption.',
   };
 }

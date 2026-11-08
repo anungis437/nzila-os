@@ -88,6 +88,13 @@ describe('generateDecisionBrief', () => {
 
     const brief = await generateDecisionBrief('org');
 
+    // DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS: evidence confidence must come from how many nodes
+    // underlie the claim, not a fixed literal chosen by recommendation category.
+    const redundancyRec = brief.recommendations.find((r) => r.category === 'redundancy_investment')!;
+    expect(redundancyRec.evidence[0].confidence).toBe('high'); // 9 single-source nodes >= MIN_COHORT_SIZE
+    const govRec = brief.recommendations.find((r) => r.category === 'governance_stabilization')!;
+    expect(govRec.evidence[0].confidence).toBe('medium'); // 3 single-source governance nodes, below MIN_COHORT_SIZE
+
     const categories = brief.recommendations.map((r) => r.category);
     expect(categories).toContain('redundancy_investment');
     expect(categories).toContain('governance_stabilization');

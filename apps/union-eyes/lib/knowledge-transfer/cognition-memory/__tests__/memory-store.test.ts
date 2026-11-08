@@ -5,8 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const { execute } = vi.hoisted(() => ({ execute: vi.fn() }));
 const { withRLSContext } = vi.hoisted(() => ({ withRLSContext: vi.fn() }));
 const { audit } = vi.hoisted(() => ({ audit: vi.fn() }));
+const { calculateResilienceIndex } = vi.hoisted(() => ({ calculateResilienceIndex: vi.fn() }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit }));
+vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex }));
 vi.mock('drizzle-orm', () => ({
   sql: Object.assign((..._a: unknown[]) => ({}), { raw: (s: string) => s }),
 }));
@@ -31,6 +33,7 @@ beforeEach(() => {
   withRLSContext.mockReset();
   audit.mockReset();
   audit.mockResolvedValue(undefined);
+  calculateResilienceIndex.mockReset();
   withRLSContext.mockImplementation(async (_ctx: unknown, op: (tx: unknown) => unknown) => op({ execute }));
 });
 
@@ -52,6 +55,10 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
     expect(entry.id).toBeDefined();
     expect(execute).toHaveBeenCalledTimes(1);
     expect(withRLSContext).toHaveBeenCalledWith({ organizationId: ORG }, expect.any(Function));
+    // Only a resilience_baseline entry is cross-checked against a measured index - a governance_reasoning entry's
+    // own typed score is not resilience data to compare.
+    expect(calculateResilienceIndex).not.toHaveBeenCalled();
+    expect(entry.measuredResilienceIndexAtCapture).toBeNull();
   });
 
   it('saveCognitionMemory applies defaults for optional fields', async () => {
@@ -60,6 +67,40 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
     expect(entry.tags).toEqual([]);
     expect(entry.resilienceScoreAtCapture).toBeNull();
     expect(entry.sessionId).toBeNull();
+    expect(calculateResilienceIndex).not.toHaveBeenCalled();
+  });
+
+  // DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR: a resilience_baseline entry's
+  // typed score is now returned alongside the independently measured index for the same organization.
+  describe('resilience_baseline measured-index cross-check', () => {
+    it('attaches the measured resilience index alongside the officer-typed score', async () => {
+      calculateResilienceIndex.mockResolvedValue({ overallScore: 62 });
+      const entry = await saveCognitionMemory(ORG, {
+        memoryType: 'resilience_baseline', title: 'Baseline', resilienceScoreAtCapture: 80,
+      } as never, USER);
+      expect(calculateResilienceIndex).toHaveBeenCalledWith(ORG);
+      expect(entry.resilienceScoreAtCapture).toBe(80);
+      expect(entry.measuredResilienceIndexAtCapture).toBe(62);
+    });
+
+    it('does not compute a measured index when no score was typed', async () => {
+      const entry = await saveCognitionMemory(ORG, {
+        memoryType: 'resilience_baseline', title: 'Baseline',
+      } as never, USER);
+      expect(calculateResilienceIndex).not.toHaveBeenCalled();
+      expect(entry.measuredResilienceIndexAtCapture).toBeNull();
+    });
+
+    it('saves the officer-typed score even when no measured index can be computed yet', async () => {
+      calculateResilienceIndex.mockRejectedValue(new Error('no dependency data'));
+      const entry = await saveCognitionMemory(ORG, {
+        memoryType: 'resilience_baseline', title: 'Baseline', resilienceScoreAtCapture: 80,
+      } as never, USER);
+      expect(entry.resilienceScoreAtCapture).toBe(80);
+      expect(entry.measuredResilienceIndexAtCapture).toBeNull();
+      // The save itself is unaffected by the measured index being unavailable.
+      expect(execute).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('loadCognitionMemory maps rows and builds a resilience timeline', async () => {

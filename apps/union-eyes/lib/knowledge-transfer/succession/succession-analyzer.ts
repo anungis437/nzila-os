@@ -16,6 +16,7 @@
 
 import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
+import { MIN_COHORT_SIZE, averageOrNull } from '../governance/evidence-basis';
 import { z } from 'zod';
 import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
@@ -75,8 +76,7 @@ export interface SuccessionFragilityReport {
 
 const UNION_ROLES = ['member', 'steward', 'chief_steward', 'officer', 'admin'] as const;
 
-/** Below this many interviews, a role's aggregate years-of-service and risk score are exactly one or a few departing people's own figures (matches the repo's small-cell convention, e.g. app/api/breaks/compliance). */
-const MIN_COHORT_SIZE = 5;
+/** Below this many interviews, a role's aggregate years-of-service and risk score are exactly one or a few departing people's own figures. Shared with every other DEF-0B7-COGA-PROFILES/COGB sibling engine via lib/knowledge-transfer/governance/evidence-basis.ts (matches the repo's small-cell convention, e.g. app/api/breaks/compliance). */
 
 const SUCCESSION_PROMPT = `You are an organizational succession analyst for a union organization.
 
@@ -109,10 +109,13 @@ const ReplySchema = z.object({
   executiveSummary: z.string().min(1).max(4000),
 });
 
-function scoreReadiness(interviewCount: number, avgRisk: number): SuccessorReadiness {
+function scoreReadiness(interviewCount: number, avgRisk: number | null): SuccessorReadiness {
   if (interviewCount === 0) return 'none';
-  if (interviewCount === 1 && avgRisk >= 70) return 'minimal';
-  if (interviewCount >= 2 && avgRisk < 50) return 'adequate';
+  if (interviewCount === 1 && avgRisk !== null && avgRisk >= 70) return 'minimal';
+  // avgRisk === null means no interview for this role recorded a continuity risk score at all - that is an absence
+  // of risk measurement, not a confirmed low risk, so it must never satisfy the "adequate" (low measured risk)
+  // branch the way a genuinely measured avgRisk of 0 would. Falls through to 'partial': documented, risk unconfirmed.
+  if (interviewCount >= 2 && avgRisk !== null && avgRisk < 50) return 'adequate';
   return 'partial';
 }
 
@@ -166,20 +169,20 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
 
   const roleSuccessionStatus: RoleSuccessionStatus[] = [...roleMap.entries()].map(
     ([role, data]) => {
-      const avgRisk =
-        data.riskScores.length > 0
-          ? Math.round(data.riskScores.reduce((a, b) => a + b, 0) / data.riskScores.length)
-          : 0;
+      // null means no interview for this role recorded a continuity risk score at all - distinct from a genuinely
+      // measured average of exactly 0, which averageOrNull would also return as a plain 0, not null.
+      const avgRisk = averageOrNull(data.riskScores);
+      const roundedAvgRisk = avgRisk === null ? null : Math.round(avgRisk);
       const smallCellSuppressed = data.interviewCount > 0 && data.interviewCount < MIN_COHORT_SIZE;
       return {
         role,
         interviewCount: data.interviewCount,
         totalYearsOfServiceCaptured: smallCellSuppressed ? null : data.totalYears,
-        averageContinuityRiskScore: smallCellSuppressed ? null : avgRisk,
+        averageContinuityRiskScore: smallCellSuppressed ? null : roundedAvgRisk,
         smallCellSuppressed,
         undocumentedAreas: [...data.undocumented].slice(0, 6),
         keyTopicsCaptured: [...data.topics].slice(0, 8),
-        successorReadiness: scoreReadiness(data.interviewCount, avgRisk),
+        successorReadiness: scoreReadiness(data.interviewCount, roundedAvgRisk),
       };
     },
   );

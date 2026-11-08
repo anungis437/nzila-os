@@ -43,9 +43,8 @@ export interface OrganizationalResilienceIndex {
   recommendations: string[];
   /**
    * Every figure above is a heuristic derived from dependency-node and interview counts at this one point in
-   * time: trend is a risk-concentration snapshot (see its own doc comment), 'Estimated doc quality' is a 3-step
-   * function of interview count alone, and maturityLevel/status are score cut-off labels, not a validated
-   * assessment of documentation quality, governance maturity or change over time.
+   * time: trend is a risk-concentration snapshot (see its own doc comment), and maturityLevel/status are score
+   * cut-off labels, not a validated assessment of governance maturity or change over time.
    */
   methodologyNote: string;
 }
@@ -94,8 +93,11 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
       score: documentationScore,
       status: statusFromScore(documentationScore),
       components: [
+        // DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS: a separate
+        // "Estimated doc quality" figure used to be shown here as a 3-step function of this same interview count -
+        // a second number dressed up as an independent quality signal when it carried no information the raw
+        // count to its left did not already carry. The raw count is the only honest figure available.
         { name: 'Published interviews', value: interviews.length },
-        { name: 'Estimated doc quality', value: interviews.length >= 8 ? 75 : interviews.length >= 4 ? 50 : 25 },
       ],
       recommendations: documentationScore < 60 ? ['Capture more interviews', 'Create runbooks and procedures'] : [],
     },
@@ -164,8 +166,7 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
     recommendations,
     methodologyNote:
       'trend is a single-snapshot risk-concentration signal (no prior snapshot exists to compare against, so it ' +
-      "can never read 'improving'); 'Estimated doc quality' is a 3-step function of interview count alone, not a " +
-      'measured quality assessment; maturityLevel and status are score cut-off labels on counts of dependency ' +
+      "can never read 'improving'); maturityLevel and status are score cut-off labels on counts of dependency " +
       'nodes and interviews, not a validated governance or documentation maturity assessment.',
   };
 }

@@ -13,6 +13,7 @@ import { sql } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { inOrganization, isUuid } from '../org-scope';
+import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
   PROVENANCE_KEY,
   type MemoryProvenance,
@@ -22,6 +23,30 @@ import {
   type MemoryStatus,
   type ResilienceSnapshotPoint,
 } from './memory-models';
+
+/**
+ * For a resilience_baseline entry with a typed score, independently computes the current resilience index so the
+ * saved entry can carry a measured figure alongside the officer's own statement - not a check that blocks or
+ * corrects the save (the officer's observation is still recorded as given), but context a reader needs to tell
+ * "an officer typed this number" from "this number was computed" (DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR).
+ * Returns null when there is no dependency data yet to compute an index from, or this entry is not a scored
+ * resilience_baseline at all.
+ */
+async function measuredResilienceIndexFor(
+  orgId: string,
+  memoryType: SaveMemoryInput['memoryType'],
+  resilienceScoreAtCapture: number | null | undefined,
+): Promise<number | null> {
+  if (memoryType !== 'resilience_baseline' || resilienceScoreAtCapture == null) return null;
+  try {
+    const index = await calculateResilienceIndex(orgId);
+    return index.overallScore;
+  } catch {
+    // No dependency data to measure from yet (calculateResilienceIndex refuses rather than guess) - the officer's
+    // own figure is still saved, just with nothing measured to compare it against at this point in time.
+    return null;
+  }
+}
 
 function splitProvenance(raw: unknown): { payload: Record<string, unknown>; provenance: MemoryProvenance } {
   const { [PROVENANCE_KEY]: stamped, ...payload } = (raw as Record<string, unknown> | null) ?? {};
@@ -87,6 +112,11 @@ export async function saveCognitionMemory(
       details: { memoryType: input.memoryType, sessionId: input.sessionId ?? null },
     });
   });
+  const measuredResilienceIndexAtCapture = await measuredResilienceIndexFor(
+    orgId,
+    input.memoryType,
+    input.resilienceScoreAtCapture,
+  );
   return {
     id,
     organizationId: orgId,
@@ -95,6 +125,7 @@ export async function saveCognitionMemory(
     contextSummary: input.contextSummary ?? '',
     payload: input.payload ?? {},
     resilienceScoreAtCapture: input.resilienceScoreAtCapture ?? null,
+    measuredResilienceIndexAtCapture,
     tags: input.tags ?? [],
     keyInsights: input.keyInsights ?? [],
     sessionId: input.sessionId ?? null,

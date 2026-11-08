@@ -16,6 +16,7 @@ import {
   type GovernanceFlag,
   type CopilotConfidence,
 } from './explainability-models';
+import { confidenceLabelFromCount } from '../governance/evidence-basis';
 
 /**
  * Assess overall confidence from a set of evidence references.
@@ -89,7 +90,7 @@ export function buildPropagationEvidence(
       observation: `${singleSourceCount} of ${totalNodes} knowledge areas have single-source coverage`,
       dataPoint: `${Math.round((singleSourceCount / totalNodes) * 100)}% single-source concentration`,
       sourceType: 'graph_computation',
-      confidence: 'high',
+      confidence: confidenceLabelFromCount(singleSourceCount),
     });
   }
   if (bottleneckCount > 0) {
@@ -97,7 +98,7 @@ export function buildPropagationEvidence(
       observation: `${bottleneckCount} operational bottlenecks identified in dependency graph`,
       dataPoint: `${bottleneckCount} bottleneck nodes`,
       sourceType: 'graph_computation',
-      confidence: 'high',
+      confidence: confidenceLabelFromCount(bottleneckCount),
     });
   }
   return references;

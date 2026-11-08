@@ -81,8 +81,10 @@ export interface GovernanceCultureProfile {
   disciplineProfile: GovernanceDisciplineProfile;
   /** Observed culture evolution phases over time. */
   evolutionPhases: CultureEvolutionPhase[];
-  /** Continuity culture score 0–100 (organizational discipline composite). */
-  cultureScore: number;
+  /** Continuity culture score 0–100 (organizational discipline composite). Null below the minimum cohort of recorded
+   *  interactions (DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE): a sparse or empty history has no
+   *  composite to report, and a formula's own default-branch output must not stand in for one. */
+  cultureScore: number | null;
   /** Entries analyzed. */
   entriesAnalyzed: number;
   /** Disclaimer for governance-safe interpretation. */

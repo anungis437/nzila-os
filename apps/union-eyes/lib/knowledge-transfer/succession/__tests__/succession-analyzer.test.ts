@@ -127,6 +127,26 @@ describe('lib/knowledge-transfer/succession/succession-analyzer', () => {
     expect(officer?.averageContinuityRiskScore).toBe(40);
   });
 
+  // DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS: two interviews with no
+  // stored continuity risk score must never read as "adequate" (low measured risk) the way a genuinely measured
+  // average of zero would - null (no score recorded) must not satisfy the same "< 50" branch as a real 0.
+  it('does not report adequate readiness from two interviews with no recorded risk score', async () => {
+    whereMock.mockResolvedValue([
+      interview('admin', null), interview('admin', null), interview('admin', null), interview('admin', null), interview('admin', null),
+    ]);
+    generateMock.mockResolvedValue({
+      content: JSON.stringify({
+        criticalOperationalGaps: [], documentationPriorities: [], continuityRecommendations: [], governanceMitigations: [],
+        executiveSummary: 'summary',
+      }),
+    });
+    const report = await analyzeSuccessionFragility('org-1');
+    const admin = report.roleSuccessionStatus.find((r) => r.role === 'admin');
+    expect(admin?.interviewCount).toBe(5);
+    expect(admin?.averageContinuityRiskScore).toBeNull();
+    expect(admin?.successorReadiness).toBe('partial');
+  });
+
   it('fails instead of returning a canned summary when the model reply is not usable', async () => {
     whereMock.mockResolvedValue([interview('steward', 50)]);
     generateMock.mockResolvedValue({ content: 'not json' });

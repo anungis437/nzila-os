@@ -6,6 +6,7 @@ import {
   isPublishAllowed,
   describeAccessRestriction,
   readableSensitivityLevels,
+  requiresReclassificationApproval,
 } from '../consent-controls';
 
 describe('lib/knowledge-transfer/governance/consent-controls', () => {
@@ -44,5 +45,33 @@ describe('lib/knowledge-transfer/governance/consent-controls', () => {
     expect(describeAccessRestriction('public_internal', true)).toContain('Semantic search: enabled');
     expect(describeAccessRestriction('public_internal', false)).toContain('Semantic search: disabled');
     expect(describeAccessRestriction('privileged', true)).toContain('Semantic search: disabled');
+  });
+
+  // DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW
+  describe('requiresReclassificationApproval', () => {
+    it('requires approval when lowering out of legal_sensitive or executive_confidential', () => {
+      expect(requiresReclassificationApproval('legal_sensitive', 'public_internal')).toBe(true);
+      expect(requiresReclassificationApproval('legal_sensitive', 'restricted')).toBe(true);
+      expect(requiresReclassificationApproval('legal_sensitive', 'privileged')).toBe(true);
+      expect(requiresReclassificationApproval('executive_confidential', 'public_internal')).toBe(true);
+      expect(requiresReclassificationApproval('executive_confidential', 'privileged')).toBe(true);
+    });
+
+    it('does not require approval for a lateral move between the two most restrictive tiers', () => {
+      expect(requiresReclassificationApproval('legal_sensitive', 'executive_confidential')).toBe(false);
+      expect(requiresReclassificationApproval('executive_confidential', 'legal_sensitive')).toBe(false);
+    });
+
+    it('does not require approval for staying at the same level or upgrading', () => {
+      expect(requiresReclassificationApproval('public_internal', 'public_internal')).toBe(false);
+      expect(requiresReclassificationApproval('public_internal', 'restricted')).toBe(false);
+      expect(requiresReclassificationApproval('restricted', 'privileged')).toBe(false);
+      expect(requiresReclassificationApproval('privileged', 'legal_sensitive')).toBe(false);
+    });
+
+    it('does not require approval for moves entirely below the top tier', () => {
+      expect(requiresReclassificationApproval('privileged', 'public_internal')).toBe(false);
+      expect(requiresReclassificationApproval('restricted', 'public_internal')).toBe(false);
+    });
   });
 });
