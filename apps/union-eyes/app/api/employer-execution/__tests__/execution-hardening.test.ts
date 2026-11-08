@@ -2,11 +2,39 @@ import { describe, expect, it } from "vitest";
 import {
   buildReplayDiff,
   calculatePayroll,
-  createEvidenceChainLink,
+  createEvidencePack,
   enforcePayrollLifecycleTransition,
   resolvePayrollRules,
-  verifyEvidenceChainFromLinks,
+  verifyEvidenceChainFromArtifacts,
+  type EvidenceManifestArtifactRecord,
 } from "../_lib";
+
+/** Builds a realistic `evidence_manifest` artifact row exactly as payroll-run-transitions.ts persists one: the
+ *  stored artifactHash column is the pack's own manifestHash, and manifestJson is the manifest with its chain link
+ *  embedded - so every test fixture here is a GENUINELY valid, cryptographically-sealed artifact, not a hand-typed
+ *  stand-in. */
+function buildArtifact(
+  entityType: "payroll_run" | "remittance_run" | "replay" | "approval" | "adjustment_run",
+  runRefId: string,
+  organizationId: string,
+  parentLink?: { linkId: string; sealHash: string; chainDepth: number } | null,
+): { artifact: EvidenceManifestArtifactRecord; chainLink: ReturnType<typeof createEvidencePack>["chainLink"] } {
+  const pack = createEvidencePack({
+    entityType,
+    runRefId,
+    organizationId,
+    artifacts: [],
+    metadata: { parentLink: parentLink ?? null },
+  });
+  return {
+    artifact: {
+      organizationId,
+      artifactHash: pack.manifestHash,
+      manifestJson: { ...pack.manifest, chainLink: pack.chainLink },
+    },
+    chainLink: pack.chainLink,
+  };
+}
 
 const sampleEntries = [
   {
@@ -364,39 +392,122 @@ describe("Employer Execution hardening helpers", () => {
   });
 
   it("validates evidence chain continuity and detects tampering", () => {
-    const payrollLink = createEvidenceChainLink({
-      organizationId: "org-1",
-      entityType: "payroll_run",
-      targetEntityId: "run-1",
-      manifestHash: "manifest-1",
-      sealHash: "seal-1",
-      parent: null,
+    const { artifact: payrollArtifact, chainLink: payrollLink } = buildArtifact("payroll_run", "run-1", "org-1");
+    const { artifact: remittanceArtifact, chainLink: remittanceLink } = buildArtifact("remittance_run", "remit-1", "org-1", {
+      linkId: payrollLink.linkId,
+      sealHash: payrollLink.sealHash,
+      chainDepth: payrollLink.chainDepth,
     });
-    const remittanceLink = createEvidenceChainLink({
+
+    const valid = verifyEvidenceChainFromArtifacts([payrollArtifact, remittanceArtifact], {
       organizationId: "org-1",
       entityType: "remittance_run",
       targetEntityId: "remit-1",
-      manifestHash: "manifest-2",
-      sealHash: "seal-2",
-      parent: {
-        linkId: payrollLink.linkId,
-        sealHash: payrollLink.sealHash,
-        chainDepth: payrollLink.chainDepth,
-      },
     });
-
-    const valid = verifyEvidenceChainFromLinks([payrollLink, remittanceLink]);
     expect(valid.valid).toBe(true);
+    expect(valid.checkedLinks).toBe(2);
 
-    const broken = verifyEvidenceChainFromLinks([
-      payrollLink,
-      {
-        ...remittanceLink,
-        parentSealHash: "tampered-seal",
+    const tamperedParentSeal: EvidenceManifestArtifactRecord = {
+      ...remittanceArtifact,
+      manifestJson: {
+        ...remittanceArtifact.manifestJson,
+        chainLink: { ...remittanceLink, parentSealHash: "tampered-seal" },
       },
-    ]);
+    };
+    const broken = verifyEvidenceChainFromArtifacts([payrollArtifact, tamperedParentSeal], {
+      organizationId: "org-1",
+      entityType: "remittance_run",
+      targetEntityId: "remit-1",
+    });
     expect(broken.valid).toBe(false);
     expect(broken.issues.some((issue) => issue.includes("Parent seal mismatch"))).toBe(true);
+  });
+
+  it("detects tampered manifest content even when the chain link's own claimed fields are internally consistent", () => {
+    const { artifact } = buildArtifact("payroll_run", "run-tamper", "org-1");
+    const tampered: EvidenceManifestArtifactRecord = {
+      ...artifact,
+      manifestJson: { ...artifact.manifestJson, status: "forged-approved" },
+    };
+    const result = verifyEvidenceChainFromArtifacts([tampered], {
+      organizationId: "org-1",
+      entityType: "payroll_run",
+      targetEntityId: "run-tamper",
+    });
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((issue) => issue.includes("Content integrity failure"))).toBe(true);
+  });
+
+  it("detects a forged seal that was never produced by EVIDENCE_SEAL_KEY", () => {
+    const { artifact, chainLink } = buildArtifact("payroll_run", "run-forged-seal", "org-1");
+    const forged: EvidenceManifestArtifactRecord = {
+      ...artifact,
+      manifestJson: { ...artifact.manifestJson, chainLink: { ...chainLink, sealHash: "0".repeat(64) } },
+    };
+    const result = verifyEvidenceChainFromArtifacts([forged], {
+      organizationId: "org-1",
+      entityType: "payroll_run",
+      targetEntityId: "run-forged-seal",
+    });
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((issue) => issue.includes("Seal authenticity failure"))).toBe(true);
+  });
+
+  it("refuses a swapped artifact whose linkId does not match its own entity, target and content", () => {
+    const { artifact: a } = buildArtifact("payroll_run", "run-a", "org-1");
+    const { artifact: b } = buildArtifact("payroll_run", "run-b", "org-1");
+    // Splice run-b's chain link onto run-a's artifact content: content integrity (manifestHash) is internally
+    // consistent within the swapped pieces only if constructed carelessly - here the linkId was computed for run-b's
+    // own manifest hash, not run-a's, so it fails identity even before content integrity would catch it.
+    const swapped: EvidenceManifestArtifactRecord = {
+      organizationId: "org-1",
+      artifactHash: a.artifactHash,
+      manifestJson: { ...a.manifestJson, chainLink: (b.manifestJson as { chainLink: unknown }).chainLink },
+    };
+    const result = verifyEvidenceChainFromArtifacts([swapped], {
+      organizationId: "org-1",
+      entityType: "payroll_run",
+      targetEntityId: "run-a",
+    });
+    expect(result.valid).toBe(false);
+  });
+
+  it("refuses a link that belongs to a different organization than the caller's", () => {
+    const { artifact } = buildArtifact("payroll_run", "run-cross-tenant", "org-victim");
+    const result = verifyEvidenceChainFromArtifacts([artifact], {
+      organizationId: "org-attacker",
+      entityType: "payroll_run",
+      targetEntityId: "run-cross-tenant",
+    });
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((issue) => issue.includes("expected organization"))).toBe(true);
+  });
+
+  it("refuses when no evidence chain link exists for the expected entity", () => {
+    const { artifact } = buildArtifact("payroll_run", "run-real", "org-1");
+    const result = verifyEvidenceChainFromArtifacts([artifact], {
+      organizationId: "org-1",
+      entityType: "payroll_run",
+      targetEntityId: "run-does-not-exist",
+    });
+    expect(result.valid).toBe(false);
+    expect(result.checkedLinks).toBe(0);
+  });
+
+  it("refuses a replayed link reused under a different claimed target", () => {
+    const { artifact, chainLink } = buildArtifact("payroll_run", "run-original", "org-1");
+    // Same artifact content and seal, but the chain link now claims a different targetEntityId than the one its
+    // linkId and seal were actually computed for.
+    const replayed: EvidenceManifestArtifactRecord = {
+      ...artifact,
+      manifestJson: { ...artifact.manifestJson, chainLink: { ...chainLink, targetEntityId: "run-replayed-onto" } },
+    };
+    const result = verifyEvidenceChainFromArtifacts([replayed], {
+      organizationId: "org-1",
+      entityType: "payroll_run",
+      targetEntityId: "run-replayed-onto",
+    });
+    expect(result.valid).toBe(false);
   });
 
   it("blocks approval when compliance gates are not satisfied", () => {
