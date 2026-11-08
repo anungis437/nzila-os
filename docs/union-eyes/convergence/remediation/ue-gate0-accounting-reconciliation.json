@@ -3,13 +3,13 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 712,
+    "overlayImplemented": 713,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 59,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 35,
-    "overlayPartial": 25,
+    "creditedByEarlierRuns": 60,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 36,
+    "overlayPartial": 24,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 65,
+    "unresolvedByOverlay": 64,
     "untouchedByOverlay": 40,
     "qualificationVerified": 0,
     "closed": 0
@@ -17,8 +17,8 @@
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 712,
-    "partial": 25,
+    "implemented": 713,
+    "partial": 24,
     "untouched": 40,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
@@ -26,7 +26,6 @@
       "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
       "DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY",
       "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
-      "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
       "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
       "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
       "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
@@ -571,6 +570,22 @@
       "regressionTest": "apps/union-eyes/lib/ai/__tests__/chatbot-moderation-fail-closed.contract.test.ts",
       "files": [
         "apps/union-eyes/lib/ai/chatbot-service.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
+      "batch": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
+      "sourceCommit": null,
+      "regressionTest": "lib/education/__tests__/reminder-delivery.pglite.test.ts — 'claims only once for overlapping runs and a repeated cron, but independently per tier' directly covers the second-run-same-day scenario the defect named. 12/12 tests passed across reminder-delivery.pglite.test.ts and reminder-queries.pglite.test.ts.",
+      "files": [
+        "apps/union-eyes/lib/education/reminder-queries.ts",
+        "apps/union-eyes/lib/education/__tests__/reminder-queries.pglite.test.ts",
+        "apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts",
+        "apps/union-eyes/lib/education/reminder-delivery.ts",
+        "apps/union-eyes/lib/education/__tests__/reminder-delivery.pglite.test.ts",
+        "apps/union-eyes/lib/email/training-notifications.ts",
+        "apps/union-eyes/db/migrations/20261103_in_app_notifications_dedupe_key.sql"
       ],
       "hasIndependentRegressionEvidence": true
     },
