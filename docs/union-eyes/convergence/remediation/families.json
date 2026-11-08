@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 714,
- "partial": 25,
- "outstanding": 63,
- "accountedFor": 63,
+ "corrected": 715,
+ "partial": 28,
+ "outstanding": 62,
+ "accountedFor": 62,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -129,10 +129,10 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 8,
+   "defects": 7,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 8,
+    "MEDIUM": 7,
     "LOW": 0
    },
    "namedRoutes": 3,
@@ -142,7 +142,7 @@
     "0B.9": 1,
     "0B.10": 2,
     "0B.11": 1,
-    "0B.12": 2
+    "0B.12": 1
    }
   },
   {
@@ -379,7 +379,8 @@
    },
    {
     "id": "DEF-0B10-PIL-PUBLIC-APPLICATION-SENDS-THE-TYPED-CONTACT-TO-HUBSPOT-WITH-NO-PROOF-OF-THE-ADDRESS-AND-NO-CONSENT-DECISION",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN",
@@ -387,15 +388,13 @@
    },
    {
     "id": "DEF-0B11-PRP-DUES-PAY-POST-SENDS-THE-ORGANIZATION-AND-MEMBER-USER-ID-TO-THE-PROCESSOR-FOR-A-MERCHANT-ACCOUNT-NO-SOURCE-NAMES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B12-WBK-CHECKOUT-SENDS-THE-BEARER-WORKBOOK-ID-TO-STRIPE-IN-THE-REDIRECT-ADDRESSES-AND-METADATA",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    }
   ],
   "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY": [
