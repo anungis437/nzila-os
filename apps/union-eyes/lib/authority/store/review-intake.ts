@@ -224,6 +224,9 @@ export async function listMemberReviewIntake(
       }
       const decision = decide(request, facts, resource, now)
       if (decision.effect !== 'allow') continue
+      if (!decision.authority.some((source) => source.kind === 'mandate' && isUuid(source.id))) {
+        throw new AuthorityStoreError('DENIED', 'OVERSIGHT_AUTHORITY_PROVENANCE_MISSING: refuse unauditable disclosure')
+      }
       // Internal-only provenance; never included in the member-facing review list.
       // A failed audit collector aborts the enclosing read transaction (fail closed).
       input.onOversightAuthorization?.(resource.id, decision.authority)
