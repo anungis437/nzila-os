@@ -426,6 +426,7 @@ test('unexpected top-level sections cannot truncate the resolved dependency inve
 })
 
 
+
 test('YAML document boundaries and bare top-level scalars cannot evade snapshot inventory', () => {
   for (const separator of ['---', '...', 'unexpected-scalar']) {
     withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n' + separator + '\n  node-forge@1.4.0:\n', (file) =>
