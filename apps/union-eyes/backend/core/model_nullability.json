@@ -4174,15 +4174,9 @@
    "provider_payload_json"
   ],
   "reward_wallet_ledger": [
-   "award_id",
-   "description",
    "expires_at",
    "memo",
-   "points_change",
-   "reference_id",
-   "reference_type",
-   "source_id",
-   "transaction_type"
+   "source_id"
   ],
   "rl1_tax_slips": [
    "amendment_reason",
