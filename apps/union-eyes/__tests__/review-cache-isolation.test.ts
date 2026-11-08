@@ -18,6 +18,7 @@ describe('review response cache isolation', () => {
     expect(route).toContain('return privateJson({ success: true, ...list })')
     expect(route).toContain('return privateJson({ success: true, ...opened, alreadyOpen: !created }')
     expect(route).toContain('return reviewErrorResponse(error)')
+    expect(route).toContain("denied.headers.set('Cache-Control', PRIVATE_RESPONSE_HEADERS['Cache-Control'])")
     expect(route).toContain('return privateJson({ success: false, error:')
   })
 })
