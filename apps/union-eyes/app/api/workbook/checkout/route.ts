@@ -25,6 +25,8 @@ import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
+import { recordExternalDisclosure } from '@/lib/audit/external-disclosure';
+import { UE_SYSTEM_ORG_ID } from '@/lib/ai-client';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -137,6 +139,21 @@ export async function POST(request: NextRequest) {
       tierId: SELF_GUIDED_TIER_ID,
       sessionId: session.id,
     });
+
+    // The workbook id is the bearer credential for an unclaimed workbook's memory holders; it is disclosed to Stripe in
+    // metadata and the redirect addresses above. No tenant exists yet for a pseudonymous checkout, so the record is kept
+    // under the system organization, mirroring this route's own unclaimed-workbook read above.
+    await withSystemContext((tx) =>
+      recordExternalDisclosure(tx, {
+        organizationId: UE_SYSTEM_ORG_ID,
+        processor: 'stripe',
+        resourceType: 'workbooks',
+        resourceId: workbookId,
+        dataClasses: ['workbook_id'],
+        purpose: 'Self-serve workbook tier checkout (session metadata and redirect URLs)',
+        merchantOfRecord: 'platform',
+      }),
+    );
 
     return NextResponse.json({ url: session.url });
   } catch (err) {

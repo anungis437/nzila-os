@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   upsertContact: vi.fn(),
   createDeal: vi.fn(),
+  recordExternalDisclosure: vi.fn(),
   inserted: [] as Array<Record<string, unknown>>,
   open: 0,
   openedDuringCrm: [] as number[],
@@ -55,6 +56,7 @@ vi.mock('@/lib/services/crm-service', () => ({
   upsertContact: (...args: unknown[]) => { m.openedDuringCrm.push(m.open); return m.upsertContact(...args); },
   createDeal: (...args: unknown[]) => { m.openedDuringCrm.push(m.open); return m.createDeal(...args); },
 }));
+vi.mock('@/lib/audit/external-disclosure', () => ({ recordExternalDisclosure: m.recordExternalDisclosure }));
 
 const valid = {
   organizationName: 'Local 42',
@@ -91,10 +93,33 @@ describe('POST /api/pilot/apply (public intake)', () => {
 
     expect(response.status).toBe(201);
     expect(await response.json()).toEqual({ ok: true, id: 'app-1' });
-    expect(m.contexts).toBe(1);
     expect(m.inserted).toHaveLength(1);
     expect(m.inserted[0]).toMatchObject({ organizationName: 'Local 42', contactEmail: 'pat@example.org', memberCount: 120, readinessScore: '7' });
     expect(m.openedDuringCrm).toEqual([0, 0]);
+  });
+
+  it('records the external disclosure to HubSpot once the contact sync succeeds', async () => {
+    await post(valid);
+
+    expect(m.recordExternalDisclosure).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        processor: 'hubspot',
+        resourceType: 'pilot_applications',
+        resourceId: 'app-1',
+      }),
+    );
+    // Insert + disclosure audit, both via the system role.
+    expect(m.contexts).toBe(2);
+  });
+
+  it('does not record a disclosure when the HubSpot contact sync is skipped or fails', async () => {
+    m.upsertContact.mockResolvedValue(null);
+
+    await post(valid);
+
+    expect(m.recordExternalDisclosure).not.toHaveBeenCalled();
+    expect(m.contexts).toBe(1);
   });
 
   it('never stores a reserved key an anonymous applicant seeded in the free-form responses', async () => {

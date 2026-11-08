@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { crudRoutes } from '@/lib/api/crud-factory';
 import { pilotApplications } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { recordExternalDisclosure } from '@/lib/audit/external-disclosure';
+import { UE_SYSTEM_ORG_ID } from '@/lib/ai-client';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS_PER_IP } from '@/lib/rate-limiter';
 import { clientAddress } from '@/lib/public-intake/guard';
@@ -199,6 +201,30 @@ export async function POST(request: NextRequest) {
           ue_pilot_app_id: row.id,
         },
       });
+
+      // The applicant typed this contact into a public, unauthenticated form; no proof of address control is collected
+      // and no organization exists yet for a tenant record, so the disclosure is kept under the system organization.
+      // upsertContact/createDeal above already no-op when HubSpot is unconfigured or the call failed (contactId is
+      // null in both cases) — this only runs once data has actually left for HubSpot.
+      await withSystemContext((tx) =>
+        recordExternalDisclosure(tx, {
+          organizationId: UE_SYSTEM_ORG_ID,
+          processor: 'hubspot',
+          resourceType: 'pilot_applications',
+          resourceId: row.id,
+          dataClasses: [
+            'contact_name',
+            'email',
+            'phone',
+            'organization_name',
+            'member_count',
+            'organization_type',
+            'readiness_score',
+            'pilot_application_id',
+          ],
+          purpose: 'CRM lead sync for pilot-program applications',
+        }),
+      );
     }
 
     return NextResponse.json({ ok: true, id: row.id }, { status: 201 });

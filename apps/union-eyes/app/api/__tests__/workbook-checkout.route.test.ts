@@ -10,6 +10,7 @@ const m = vi.hoisted(() => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
   rows: [] as Array<{ reportTierId: string | null }>,
   withSystemContext: vi.fn(),
+  recordExternalDisclosure: vi.fn(),
 }));
 
 vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: m.checkRateLimit }));
@@ -18,6 +19,7 @@ vi.mock('@/db/schema/workbook-schema', () => ({ workbooks: { id: 'id', reportTie
 vi.mock('@/lib/icra/tiers', () => ({ WORKBOOK_TIERS: { workbook_self_guided: { name: 'Self-guided', selfServe: true, amountCents: 240000 } } }));
 vi.mock('@nzila/payments-stripe', () => ({ getStripeClient: () => ({ checkout: { sessions: { create: m.create } } }) }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/audit/external-disclosure', () => ({ recordExternalDisclosure: m.recordExternalDisclosure }));
 
 function post() {
   return new NextRequest('http://localhost/api/workbook/checkout', {
@@ -62,7 +64,22 @@ describe('workbook/checkout route', () => {
     vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://app.example.test');
     const { POST } = await import('../workbook/checkout/route');
     await POST(post());
-    expect(m.withSystemContext).toHaveBeenCalledTimes(1);
+    expect(m.withSystemContext).toHaveBeenCalled();
+  });
+
+  it('records the external disclosure of the workbook id to Stripe', async () => {
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://app.example.test');
+    const { POST } = await import('../workbook/checkout/route');
+    await POST(post());
+    expect(m.recordExternalDisclosure).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        processor: 'stripe',
+        resourceType: 'workbooks',
+        resourceId: WORKBOOK,
+        dataClasses: ['workbook_id'],
+      }),
+    );
   });
 
   it('answers 404 for a workbook that is not there and 503 when the lookup fails', async () => {
