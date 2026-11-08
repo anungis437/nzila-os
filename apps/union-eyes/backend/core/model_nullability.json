@@ -4809,6 +4809,7 @@
    "ip_address",
    "respondent_email",
    "respondent_name",
+   "response_token_hash",
    "time_spent_seconds",
    "user_agent",
    "user_id"
