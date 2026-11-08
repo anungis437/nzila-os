@@ -9,6 +9,7 @@ import { integrationSyncLog } from '@/db/schema';
 import { integrationProviderEnum, syncStatusEnum, syncTypeEnum } from '@/db/schema/domains/infrastructure/integrations';
 import { eq, and, desc } from 'drizzle-orm';
 import cron, { type ScheduledTask } from 'node-cron';
+import { acquireLock, releaseLock, isLocked } from '@/lib/services/cache-service';
 import {
   IntegrationProvider,
   SyncType,
@@ -41,10 +42,15 @@ export interface SyncJobConfig {
  * Sync Engine
  * Manages sync jobs and execution
  */
+// A sync's external network calls (HRIS/accounting/insurance providers) have no fixed upper bound, so the lock TTL is a
+// generous safety net, not the normal release path: the finally block below releases it immediately on completion.
+// A lock that outlives a crashed process still expires instead of blocking that job forever.
+const SYNC_LOCK_TTL_SECONDS = 600;
+const SYNC_LOCK_NAMESPACE = 'integration-sync';
+
 export class SyncEngine {
   private static instance: SyncEngine;
   private factory: IntegrationFactory;
-  private runningJobs: Set<string> = new Set();
   private scheduledTasks: Map<string, ScheduledTask> = new Map();
 
   private constructor() {
@@ -84,8 +90,10 @@ export class SyncEngine {
 
     const jobKey = `${organizationId}:${provider}:${options.type}`;
 
-    // Check if job already running
-    if (this.runningJobs.has(jobKey)) {
+    // A distributed lock (not a process-local Set) so two instances of this app cannot run the same
+    // organization/provider/type sync at once.
+    const lockToken = await acquireLock(jobKey, SYNC_LOCK_TTL_SECONDS, SYNC_LOCK_NAMESPACE);
+    if (!lockToken) {
       throw new IntegrationError(
         'Sync job already running',
         provider,
@@ -93,7 +101,6 @@ export class SyncEngine {
       );
     }
 
-    this.runningJobs.add(jobKey);
     const startTime = Date.now();
 
     try {
@@ -153,9 +160,10 @@ export class SyncEngine {
 
       throw error;
     } finally {
-      this.runningJobs.delete(jobKey);
+      await releaseLock(jobKey, lockToken, SYNC_LOCK_NAMESPACE);
     }
   }
+
 
   /**
    * Execute full sync
@@ -361,15 +369,15 @@ export class SyncEngine {
   }
 
   /**
-   * Check if sync is currently running
+   * Check if sync is currently running (reads the distributed lock; does not acquire it).
    */
-  isSyncRunning(
+  async isSyncRunning(
     organizationId: string,
     provider: IntegrationProvider,
     type: SyncType
-  ): boolean {
+  ): Promise<boolean> {
     const jobKey = `${organizationId}:${provider}:${type}`;
-    return this.runningJobs.has(jobKey);
+    return isLocked(jobKey, SYNC_LOCK_NAMESPACE);
   }
 }
 

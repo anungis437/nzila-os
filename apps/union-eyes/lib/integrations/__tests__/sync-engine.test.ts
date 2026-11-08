@@ -30,7 +30,25 @@ const h = vi.hoisted(() => {
     }),
     validate: vi.fn(() => true),
   };
-  return { q, db, factory, cron, cronCb: undefined as undefined | (() => unknown) };
+  // A real SET-NX-style exclusive lock, held in memory for this test file only: an honest double of the Redis-backed
+  // lock in lib/services/cache-service.ts, so a test proves real mutual-exclusion semantics, not a stubbed-true/false.
+  const locks = new Map<string, string>();
+  const lockKey = (name: string, namespace: string) => `${namespace}:${name}`;
+  const acquireLock = vi.fn(async (name: string, _ttlSeconds?: number, namespace = 'lock') => {
+    const key = lockKey(name, namespace);
+    if (locks.has(key)) return null;
+    const token = `tok-${Math.random()}`;
+    locks.set(key, token);
+    return token;
+  });
+  const releaseLock = vi.fn(async (name: string, token: string, namespace = 'lock') => {
+    const key = lockKey(name, namespace);
+    if (locks.get(key) !== token) return false;
+    locks.delete(key);
+    return true;
+  });
+  const isLocked = vi.fn(async (name: string, namespace = 'lock') => locks.has(lockKey(name, namespace)));
+  return { q, db, factory, cron, cronCb: undefined as undefined | (() => unknown), locks, acquireLock, releaseLock, isLocked };
 });
 
 vi.mock('@/db/db', () => ({ db: h.db }));
@@ -39,6 +57,11 @@ vi.mock('node-cron', () => ({ default: h.cron }));
 vi.mock('../factory', () => ({ IntegrationFactory: { getInstance: () => h.factory } }));
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+vi.mock('@/lib/services/cache-service', () => ({
+  acquireLock: h.acquireLock,
+  releaseLock: h.releaseLock,
+  isLocked: h.isLocked,
 }));
 
 import { SyncEngine, executeFullSync, executeIncrementalSync, getSyncHistory } from '../sync-engine';
@@ -62,6 +85,7 @@ describe('SyncEngine', () => {
 
   beforeEach(() => {
     h.q.length = 0;
+    h.locks.clear();
     vi.clearAllMocks();
     h.cron.validate.mockReturnValue(true);
     h.factory.getIntegration.mockResolvedValue(makeIntegration());
@@ -90,8 +114,43 @@ describe('SyncEngine', () => {
     await expect(
       engine.executeSync('org1', IntegrationProvider.WORKDAY, { type: SyncType.FULL })
     ).rejects.toThrow('sync boom');
-    expect(engine.isSyncRunning('org1', IntegrationProvider.WORKDAY, SyncType.FULL)).toBe(false);
+    expect(await engine.isSyncRunning('org1', IntegrationProvider.WORKDAY, SyncType.FULL)).toBe(false);
   });
+
+  it('executeSync refuses a second concurrent run for the same organization/provider/type via the distributed lock, and releases it once the first finishes', async () => {
+    push([{ id: 'log-concurrent' }]); // createSyncLog for the first run (org1)
+    let resolveSync: (v: unknown) => void = () => {};
+    const inFlight = new Promise((resolve) => { resolveSync = resolve; });
+    // org1's sync pauses on inFlight; a different organization gets the normal, immediately-resolving integration.
+    h.factory.getIntegration.mockImplementation(async (organizationId: string) =>
+      organizationId === 'org1' ? { sync: () => inFlight } : makeIntegration(),
+    );
+
+    const first = engine.executeSync('org1', IntegrationProvider.WORKDAY, { type: SyncType.FULL });
+    // Poll this test's own lock-map double (not a guess at an exact microtask-tick count) until the first
+    // call's acquireLock has actually landed, bounded so a real failure to acquire fails fast instead of hanging.
+    for (let i = 0; i < 50 && h.locks.size === 0; i++) await Promise.resolve();
+    expect(h.locks.size).toBe(1);
+
+    expect(await engine.isSyncRunning('org1', IntegrationProvider.WORKDAY, SyncType.FULL)).toBe(true);
+    await expect(
+      engine.executeSync('org1', IntegrationProvider.WORKDAY, { type: SyncType.FULL })
+    ).rejects.toMatchObject({ code: 'SYNC_IN_PROGRESS' });
+    // A different organization is a different lock key and is not blocked by the first run.
+    push([{ id: 'log-other-org' }]);
+    push({});
+    await expect(
+      engine.executeSync('org2', IntegrationProvider.WORKDAY, { type: SyncType.FULL })
+    ).resolves.toMatchObject({ success: true });
+
+    push({}); // updateSyncLog for the first run
+    resolveSync({
+      success: true, recordsProcessed: 1, recordsCreated: 1, recordsUpdated: 0, recordsFailed: 0, cursor: 'c', errors: [],
+    });
+    await first;
+    expect(await engine.isSyncRunning('org1', IntegrationProvider.WORKDAY, SyncType.FULL)).toBe(false);
+  });
+
 
   it('executeFullSync delegates to executeSync', async () => {
     push([{ id: 'log2' }]);
@@ -163,8 +222,8 @@ describe('SyncEngine', () => {
     expect(rows).toHaveLength(2);
   });
 
-  it('isSyncRunning reflects running state', () => {
-    expect(engine.isSyncRunning('org1', IntegrationProvider.WORKDAY, SyncType.FULL)).toBe(false);
+  it('isSyncRunning reflects running state', async () => {
+    expect(await engine.isSyncRunning('org1', IntegrationProvider.WORKDAY, SyncType.FULL)).toBe(false);
   });
 
   it('convenience executeFullSync works', async () => {

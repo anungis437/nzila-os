@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 714,
- "partial": 24,
+ "partial": 25,
  "outstanding": 63,
  "accountedFor": 63,
  "families": [
@@ -478,7 +478,8 @@
    },
    {
     "id": "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
-    "severity": "LOW"
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
