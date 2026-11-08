@@ -100,7 +100,7 @@ describe('/api/reviews', () => {
     const body = await response.json()
     expect(body.oversight).toHaveLength(1)
     expect(JSON.stringify(body)).not.toContain('adverse')
-    expect(m.list).toHaveBeenCalledWith(expect.anything(), expect.anything(), { organizationId: ORG, actorUserId: 'user_member' })
+    expect(m.list).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.objectContaining({ organizationId: ORG, actorUserId: 'user_member', onOversightAuthorization: expect.any(Function) }))
   })
 
   describe('hardening (Gate 0 DEF-0C1-REV)', () => {
@@ -155,6 +155,41 @@ describe('/api/reviews', () => {
       m.auth.mockResolvedValue({ userId: null })
       const response = await post(JSON.stringify({ reviewType: 'complaint' }))
       expect(response.status).toBe(401)
+    })
+
+    it('audits exact oversight mandate provenance without exposing it in the response', async () => {
+      const id = '11111111-1111-4111-8111-111111111111'
+      const mandate = '33333333-3333-4333-8333-333333333333'
+      m.list.mockImplementation(async (_tx, _deps, input) => {
+        input.onOversightAuthorization(id, [{ kind: 'mandate', id: mandate, instrument: 'governance_review' }])
+        return { own: [], oversight: [{ id, reviewType: 'appeal', status: 'open', complainantUserId: 'user_other', classification: 'privileged' }], notificationDelivered: false, notificationPolicy: 'not_adopted' }
+      })
+      const { GET } = await import('../reviews/route')
+      const response = await GET()
+      expect(response.status).toBe(200)
+      expect(response.headers.get('cache-control')).toContain('no-store')
+      expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+        action: 'review.oversight.read',
+        details: expect.objectContaining({
+          authorityByReview: [{ reviewId: id, sources: [{ kind: 'mandate', id: mandate, instrument: 'governance_review' }] }],
+        }),
+      }))
+      const body = await response.text()
+      expect(body).not.toContain(mandate)
+      expect(body).not.toContain('authorityByReview')
+    })
+
+    it('fails closed when transactional oversight audit persistence fails', async () => {
+      const id = '11111111-1111-4111-8111-111111111111'
+      m.list.mockResolvedValue({ own: [], oversight: [{ id, reviewType: 'appeal', status: 'open', classification: 'standard' }], notificationDelivered: false, notificationPolicy: 'not_adopted' })
+      m.audit.mockRejectedValueOnce(new Error('audit persistence failed'))
+      const { GET } = await import('../reviews/route')
+      const response = await GET()
+      expect(response.status).toBe(500)
+      expect(response.headers.get('cache-control')).toContain('no-store')
+      const body = await response.text()
+      expect(body).not.toContain(id)
+      expect(body).not.toContain('audit persistence failed')
     })
 
     it('records an oversight read in the same transaction, naming the reviews disclosed, and records nothing for an own-only list', async () => {
