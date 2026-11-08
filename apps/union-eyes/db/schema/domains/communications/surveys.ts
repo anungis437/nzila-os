@@ -171,6 +171,13 @@ export const surveyResponses = pgTable(
     ipAddress: inet('ip_address'),
     userAgent: text('user_agent'),
 
+    // Anonymous-response authority. userId is intentionally NULL for an anonymous response (see responses/route.ts),
+    // so a bare response id is not sufficient authority to act on it - any caller who knew or enumerated the id could
+    // otherwise modify or complete someone else's anonymous answers. responseTokenHash is the SHA-256 hash of a
+    // high-entropy capability token issued exactly once, at creation (see lib/communications/survey-response-capability.ts),
+    // and never set for an identified response (ownership via userId is sufficient there).
+    responseTokenHash: text('response_token_hash'),
+
     // Metadata
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

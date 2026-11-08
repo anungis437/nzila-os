@@ -8,7 +8,7 @@
    "ADMIN_AUTH": 18,
    "CAPABILITY_TOKEN": 13,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 137,
+   "CRUD_FACTORY": 136,
    "DELEGATED": 17,
    "NONE": 21,
    "ORG_AUTH": 9,
@@ -17,14 +17,14 @@
    "ROLE_AUTH": 104,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 388,
+   "WITH_API": 389,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
    "ADMIN_AUTH": 17,
    "CAPABILITY_TOKEN": 8,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 83,
+   "CRUD_FACTORY": 82,
    "DELEGATED": 10,
    "NONE": 8,
    "ORG_AUTH": 4,
@@ -33,13 +33,13 @@
    "ROLE_AUTH": 55,
    "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 233
+   "WITH_API": 234
   },
   "mutatingByAudit": {
-   "ATOMIC": 159,
+   "ATOMIC": 160,
    "ATOMIC_SERVICE": 120,
    "COMPUTE_ONLY": 32,
-   "CRUD_ATOMIC": 83,
+   "CRUD_ATOMIC": 82,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 27,
    "INTENT_OUTCOME": 28,
@@ -48,10 +48,10 @@
   },
   "mutatingByData": {
    "AMBIENT_DB": 1,
-   "CRUD_TENANT_TX": 83,
+   "CRUD_TENANT_TX": 82,
    "NONE": 311,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 234
+   "TENANT_TX": 235
   }
  },
  "routes": [
@@ -4278,11 +4278,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "CRUD_FACTORY",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "CRUD_ATOMIC"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "communications/surveys/[surveyId]/results/route.ts",

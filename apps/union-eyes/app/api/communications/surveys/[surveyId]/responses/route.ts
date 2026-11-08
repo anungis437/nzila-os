@@ -3,63 +3,94 @@
  * Never return individual identity, IP, user-agent, or response rows to a
  * steward: anonymous survey participants must remain anonymous.
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
 import { withApi, ApiError, zUUID } from '@/lib/api/framework';
+import { withRLSContext } from '@/lib/db/with-rls-context';
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
+import { issueResponseCapability } from '@/lib/communications/survey-response-capability';
 import { db } from '@/db/db';
 import { surveys, surveyResponses } from '@/db/schema';
 import { and, eq, count } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
-const { POST } = crudRoutes({
-  table: surveyResponses,
-  pk: 'id',
-  tags: ['Surveys'],
-  orgScoped: true,
-  // The path survey is authoritative; JSON may omit it but may not change it.
-  createPathBinding: { paramName: 'surveyId', field: 'surveyId' },
-  // A response is opened empty: the survey comes from the path, and the respondent, status and times are set by beforeCreate.
-  writableFields: ['surveyId'],
-  writeRole: 'member',
-  // A member cannot create a response for another tenant's survey, impersonate
-  // another respondent, or bypass a survey's anonymous-identity setting.
-  beforeCreate: async (values, { organizationId, userId }) => {
-    if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');
-    const parsed = zUUID.safeParse(values.surveyId);
-    if (!parsed.success) throw ApiError.badRequest('Invalid survey identifier');
-    const [survey] = await db.select({
-      id: surveys.id,
-      allowAnonymous: surveys.allowAnonymous,
-      status: surveys.status,
-      publishedAt: surveys.publishedAt,
-      closesAt: surveys.closesAt,
-    }).from(surveys).where(and(
-      eq(surveys.id, parsed.data),
-      eq(surveys.organizationId, organizationId),
-    )).limit(1);
-    if (!survey) throw ApiError.notFound('Survey not found');
-    if (survey.status !== 'active' && survey.status !== 'published') {
-      throw ApiError.forbidden('Survey is not accepting responses');
-    }
-    const now = Date.now();
-    if (!survey.publishedAt || survey.publishedAt.getTime() > now || (survey.closesAt && survey.closesAt.getTime() <= now)) {
-      throw ApiError.forbidden('Survey is not open');
-    }
-    return {
-      ...values,
-      surveyId: survey.id,
-      userId: survey.allowAnonymous ? null : userId,
-      respondentName: null,
-      respondentEmail: null,
-      ipAddress: null,
-      userAgent: null,
-      status: 'in_progress',
-      completedAt: null,
-      startedAt: new Date(),
-    };
+export const POST = withApi(
+  {
+    auth: { required: true, minRole: 'member' },
+    requireOrg: true,
+    openapi: {
+      tags: ['Surveys'],
+      summary: 'Open a new in-progress response to a survey',
+      description:
+        'A member cannot create a response for another tenant\'s survey, impersonate another respondent, or bypass ' +
+        'a survey\'s anonymous-identity setting. An anonymous response (the survey\'s own allowAnonymous setting) ' +
+        'is issued a one-time response capability token in this call\'s response body — present it as the ' +
+        'x-survey-response-token header on every later call against this response id; it is never shown again.',
+    },
   },
-});
-export { POST };
+  async ({ params, organizationId, userId }) => {
+    if (!organizationId || !userId) throw ApiError.forbidden('Organization context required');
+    const parsed = zUUID.safeParse(params.surveyId);
+    if (!parsed.success) throw ApiError.badRequest('Invalid survey identifier');
+
+    return withRLSContext({ organizationId }, async (tx) => {
+      const [survey] = await tx
+        .select({
+          id: surveys.id,
+          allowAnonymous: surveys.allowAnonymous,
+          status: surveys.status,
+          publishedAt: surveys.publishedAt,
+          closesAt: surveys.closesAt,
+        })
+        .from(surveys)
+        .where(and(eq(surveys.id, parsed.data), eq(surveys.organizationId, organizationId)))
+        .limit(1);
+      if (!survey) throw ApiError.notFound('Survey not found');
+      if (survey.status !== 'active' && survey.status !== 'published') {
+        throw ApiError.forbidden('Survey is not accepting responses');
+      }
+      const now = Date.now();
+      if (!survey.publishedAt || survey.publishedAt.getTime() > now || (survey.closesAt && survey.closesAt.getTime() <= now)) {
+        throw ApiError.forbidden('Survey is not open');
+      }
+
+      const capability = survey.allowAnonymous ? issueResponseCapability() : null;
+
+      const [created] = await tx
+        .insert(surveyResponses)
+        .values({
+          organizationId,
+          surveyId: survey.id,
+          userId: survey.allowAnonymous ? null : userId,
+          responseTokenHash: capability?.tokenHash ?? null,
+          respondentName: null,
+          respondentEmail: null,
+          ipAddress: null,
+          userAgent: null,
+          status: 'in_progress',
+          completedAt: null,
+          startedAt: new Date(),
+        })
+        .returning();
+
+      await persistAtomicAudit(tx, {
+        organizationId,
+        userId,
+        action: 'survey.response.created',
+        resourceType: 'survey_responses',
+        resourceId: created.id,
+        details: { surveyId: survey.id, anonymous: survey.allowAnonymous },
+      });
+
+      return {
+        id: created.id,
+        surveyId: created.surveyId,
+        status: created.status,
+        startedAt: created.startedAt,
+        ...(capability ? { responseToken: capability.token } : {}),
+      };
+    });
+  },
+);
 
 export const GET = withApi(
   {

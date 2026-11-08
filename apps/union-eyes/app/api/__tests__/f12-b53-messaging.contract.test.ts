@@ -57,7 +57,9 @@ describe('B53 messaging records and retained communications', () => {
     const text = read('app/api/communications/surveys/[surveyId]/responses/route.ts')
     expect(text).toContain('eq(surveys.organizationId, organizationId)')
     expect(text).toContain('Survey is not open')
-    expect(text).toContain("createPathBinding: { paramName: 'surveyId', field: 'surveyId' }")
+    // The inserted row's surveyId comes from the path-resolved survey record, not a client-supplied value — a
+    // client cannot bind a response to a different survey than the one the path and organization scope resolved.
+    expect(text).toContain('surveyId: survey.id')
     expect(text).toContain('zUUID.safeParse(params.surveyId)')
   })
 })

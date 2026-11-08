@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { hashResponseCapability, RESPONSE_CAPABILITY_HEADER } from '@/lib/communications/survey-response-capability';
 
 const m = vi.hoisted(() => ({
   withApi: vi.fn(),
@@ -40,7 +41,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/schema', () => ({
-  surveyResponses: { id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', status: 'status', userId: 'userId' },
+  surveyResponses: { id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', status: 'status', userId: 'userId', responseTokenHash: 'responseTokenHash' },
   surveyQuestions: { id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', required: 'required' },
   surveyAnswers: { questionId: 'questionId', responseId: 'responseId', organizationId: 'organizationId' },
 }));
@@ -52,6 +53,10 @@ async function loadRoute() {
 const SURVEY_ID = '11111111-1111-4111-8111-111111111111';
 const RESPONSE_ID = '22222222-2222-4222-8222-222222222222';
 
+function request(headers: Record<string, string> = {}) {
+  return { headers: { get: (name: string) => headers[name.toLowerCase()] ?? null } } as unknown as Request;
+}
+
 describe('survey response completion route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -62,11 +67,13 @@ describe('survey response completion route', () => {
     m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: unknown) => unknown) => (ctx: unknown) => handler(ctx));
   });
 
-  const ctx = (body: Record<string, unknown> = {}) => ({
+  const ctx = (body: Record<string, unknown> = {}, overrides: Record<string, unknown> = {}) => ({
+    request: request(),
     params: { surveyId: SURVEY_ID, responseId: RESPONSE_ID },
     organizationId: 'org_1',
     userId: 'user_1',
     body,
+    ...overrides,
   });
 
   it('completes a response with no required questions', async () => {
@@ -124,5 +131,36 @@ describe('survey response completion route', () => {
     m.updateRow = [];
     const { PATCH } = await loadRoute();
     await expect(PATCH(ctx())).rejects.toMatchObject({ code: 'CONFLICT' });
+  });
+
+  describe('DEF-0B5-SURVEY-RESPONSES-IDENTIFIED-OR-ANONYMOUS-RESPONSE-MUTATION-AUTHORITY', () => {
+    it('refuses to complete an anonymous response when no capability token is presented', async () => {
+      m.selectQueue.push([{ id: RESPONSE_ID, status: 'in_progress', userId: null, responseTokenHash: hashResponseCapability('right-token') }]);
+      const { PATCH } = await loadRoute();
+      await expect(PATCH(ctx())).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses to complete an anonymous response when the wrong capability token is presented', async () => {
+      m.selectQueue.push([{ id: RESPONSE_ID, status: 'in_progress', userId: null, responseTokenHash: hashResponseCapability('right-token') }]);
+      const { PATCH } = await loadRoute();
+      await expect(PATCH(ctx({}, { request: request({ [RESPONSE_CAPABILITY_HEADER]: 'wrong-token' }) }))).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses to complete a legacy anonymous response with no stored capability hash at all', async () => {
+      m.selectQueue.push([{ id: RESPONSE_ID, status: 'in_progress', userId: null, responseTokenHash: null }]);
+      const { PATCH } = await loadRoute();
+      await expect(PATCH(ctx({}, { request: request({ [RESPONSE_CAPABILITY_HEADER]: 'anything' }) }))).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    });
+
+    it('completes an anonymous response when the correct capability token is presented', async () => {
+      m.selectQueue.push([{ id: RESPONSE_ID, status: 'in_progress', userId: null, responseTokenHash: hashResponseCapability('right-token') }]);
+      m.selectQueue.push([]); // no required questions
+      const { PATCH } = await loadRoute();
+      await expect(
+        PATCH(ctx({}, { request: request({ [RESPONSE_CAPABILITY_HEADER]: 'right-token' }) })),
+      ).resolves.toMatchObject({ status: 'completed' });
+    });
   });
 });
