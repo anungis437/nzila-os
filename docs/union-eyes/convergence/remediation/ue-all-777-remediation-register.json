@@ -92,7 +92,7 @@
     "engineeringCorrected": 721,
     "engineeringRemaining": 56,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 34
+    "engineeringPartial": 35
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -8331,10 +8331,34 @@
       "title": "The behaviour pattern, governance culture, learning archetype, governance adaptation, governance coherence, governance momentum and adaptive resilience routes derive their scores, postures, archetypes and narratives from counts, types and dates of cognition memory entries and reasoning sessions, whose memoryType, title and resilienceScoreAtCapture an officer chooses when saving them through the memory route; an organization with no entries is reported as governance stagnant (archetype score 100, strongly characterized), so the output measures use of the analytics tools and officer-entered scores, not governance decisions, and is presented as the governance culture, momentum, coherence and archetype of the organization.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "FIXED_THIS_RUN",
+        "paths": [
+          "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-models.ts",
+          "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-classifier.ts",
+          "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/__tests__/archetype-classifier.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/__tests__/archetype-classifier.test.ts"
+        ],
+        "commits": [
+          "5ecbf19a5"
+        ],
+        "repair": "Fixed the exact, title-quoted concrete claim: with zero interactions, governance_stagnant's fit formula summed to 180 (clamped to the scoring ceiling of 100) with confidence floored at 40 and a narrative saying 'Strongly characterized'. Removed the totalInteractions===0 bonus term (score now 90, below the ceiling), added an explicit confidence floor of 0 for zero interactions, and replaced the narrative with an explicit 'no recorded history, confidence is 0' disclosure. Added a methodologyNote disclosing fits are derived from officer-entered counts/types, not verified governance decisions.",
+        "limits": "This run source-fixed only learning-archetype classification (classifyLearningArchetype), the one engine with a concrete, title-quoted reproducible bug (score 100 from zero data). The title also names behavior-pattern, governance-culture, governance-adaptation, governance-coherence, governance-momentum and adaptive-resilience - these were NOT individually audited for the same class of zero-data overconfidence this run; they remain unverified against this title's broader claim and are the reason this stays at PARTIAL rather than IMPLEMENTED.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/learning-archetypes -> 3/3 passing (updated for confidence=0/evidence/narrative on zero history). Broader sweep (learning-archetypes + organizational-operating-intelligence) -> 5 files/38 passing. typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B160-GATE3-ARCHETYPE-ZERO-DATA-FIX",
+        "path": "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-models.ts;apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-classifier.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/__tests__/archetype-classifier.test.ts",
+        "explanation": "Fixed the one concrete, reproducible bug the title names explicitly (zero data scoring as a confident, ceiling-clamped 'governance_stagnant' archetype) in classifyLearningArchetype only. The other 6 engines the title names (behavior pattern, governance culture, governance adaptation, governance coherence, governance momentum, adaptive resilience) were not individually audited for the same zero-data-overconfidence pattern this run - kept at PARTIAL pending that broader audit.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",

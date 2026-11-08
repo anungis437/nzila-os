@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 721,
- "partial": 34,
+ "partial": 35,
  "outstanding": 56,
  "accountedFor": 56,
  "families": [
@@ -282,7 +282,8 @@
    },
    {
     "id": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
