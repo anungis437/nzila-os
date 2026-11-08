@@ -2,7 +2,7 @@
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
  "corrected": 717,
- "partial": 29,
+ "partial": 30,
  "outstanding": 60,
  "accountedFor": 60,
  "families": [
@@ -402,7 +402,8 @@
    },
    {
     "id": "DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B11-PRP-RECONCILIATION-ENGINE-FABRICATES-FEE-SETTLEMENT-MATCHES-AND-SUMS-REFUNDED-PAYMENTS-AS-RECEIVED",

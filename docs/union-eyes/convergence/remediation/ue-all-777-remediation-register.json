@@ -92,7 +92,7 @@
     "engineeringCorrected": 717,
     "engineeringRemaining": 60,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 29
+    "engineeringPartial": 30
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -5731,10 +5731,32 @@
       "title": "The evidence seal of payroll, remittance and replay evidence is sha256 of the entity type, run id and manifest hash with no key, signature or external anchor, stored as an artifact named evidence-seal.sig beside the manifest it covers, and the chain verification compares stored parent seal hashes and depths only and never recomputes a manifest or seal hash, so anyone able to write the artifact rows can rewrite a chain that still verifies.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/app/api/employer-execution/_lib.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/employer-execution/__tests__/_lib.evidence-seal.test.ts"
+        ],
+        "commits": [
+          "c018299ee0d96250cb35cbcd7560e9ab65014054"
+        ],
+        "repair": "The chain link id and top-level seal are now HMAC-SHA256 keyed by EVIDENCE_SEAL_KEY (the same institution-provisioned key lib/evidence-export.ts already uses for case evidence packs; it was registered in lib/config/env-registry.ts but never wired into this employer-execution evidence chain), instead of a plain, publicly-recomputable sha256. Exported verifyEvidenceSeal() recomputes the seal from the claimed entityType/runRefId/manifestHash and compares via timingSafeEqual. Fails closed in production if the key is unset or under 32 characters. Plain sha256 is kept for non-authenticating content hashes (artifact hashes, the manifest's own hash, CSV row-dedup hashes).",
+        "limits": "verifyEvidenceChainFromLinks (the chain-consistency checker the 3 route callers use) still only compares stored parent/child seal fields to each other; it does not yet call verifyEvidenceSeal to recompute a seal from manifest/artifact content, which would need each route to pass that content through to the verifier. That remains a separate, larger, tracked gap.",
+        "verificationNote": "Workstream B (fix/ue-gate0-final-convergence): local vitest run confirms the new test file (6/6) plus the existing employer-execution route/worker tests (18 + 13 = 31) pass unaffected. Typecheck and eslint clean. Not a CI run at a recorded SHA."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B148-GATE0-RESIDUAL-WORKSTREAM-B-EVIDENCE-SEAL-HMAC",
+        "path": "apps/union-eyes/app/api/employer-execution/_lib.ts",
+        "regressionTest": "apps/union-eyes/app/api/employer-execution/__tests__/_lib.evidence-seal.test.ts",
+        "explanation": "The seal and chain link id can no longer be forged by someone without EVIDENCE_SEAL_KEY (closes the more severe half of the finding: forging a NEW valid seal). Marked PARTIAL because chain verification still does not recompute hashes from content - it only checks stored-value chain consistency, so a chain whose stored seals were never actually validated against the underlying manifest could still pass this specific check.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY",
