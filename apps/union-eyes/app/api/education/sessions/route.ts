@@ -95,9 +95,12 @@ const sessionCrudOptions: CrudOptions & { itemRoute?: false } = {
   },
 };
 
-const { GET, POST } = crudRoutes(sessionCrudOptions);
+// `table`/`omitFromResponse` are re-stated as direct properties (not just spread) on both calls
+// below so the frontend response-shape census (which reads a `crudRoutes({ table, ... })` call's
+// own literal, not an indirection through a shared variable) can still resolve the row shape.
+const { GET, POST } = crudRoutes({ ...sessionCrudOptions, table: courseSessions, omitFromResponse: ['sessionBudget', 'actualCost'] });
 // No [id]/route.ts exists for sessions; the admin screens submit edits and deletes with `?id=` on
 // this collection URL instead, so the item-mode handlers (same options, same authorization) are
 // exposed here rather than under a path segment.
-const { PATCH, DELETE } = queryIdMutations(crudRoutes({ ...sessionCrudOptions, itemRoute: true }));
+const { PATCH, DELETE } = queryIdMutations(crudRoutes({ ...sessionCrudOptions, table: courseSessions, omitFromResponse: ['sessionBudget', 'actualCost'], itemRoute: true }));
 export { GET, POST, PATCH, DELETE };

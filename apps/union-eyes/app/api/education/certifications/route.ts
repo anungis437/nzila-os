@@ -79,9 +79,12 @@ const certificationCrudOptions: CrudOptions & { itemRoute?: false } = {
   },
 };
 
-const { GET, POST } = crudRoutes(certificationCrudOptions);
+// `table` is re-stated as a direct property (not just spread) on both calls below so the
+// frontend response-shape census (which reads a `crudRoutes({ table, ... })` call's own
+// literal, not an indirection through a shared variable) can still resolve the row shape.
+const { GET, POST } = crudRoutes({ ...certificationCrudOptions, table: memberCertifications });
 // No [id]/route.ts exists for certifications; the admin screens submit edits and deletes with
 // `?id=` on this collection URL instead, so the item-mode handlers (same options, same
 // authorization) are exposed here rather than under a path segment.
-const { PATCH, DELETE } = queryIdMutations(crudRoutes({ ...certificationCrudOptions, itemRoute: true }));
+const { PATCH, DELETE } = queryIdMutations(crudRoutes({ ...certificationCrudOptions, table: memberCertifications, itemRoute: true }));
 export { GET, POST, PATCH, DELETE };
