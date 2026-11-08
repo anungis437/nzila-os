@@ -31,12 +31,23 @@ export interface OrganizationalResilienceIndex {
   status: 'critical' | 'at_risk' | 'adequate' | 'strong';
   /** Performance across dimensions */
   dimensions: ResilienceIndexDimension[];
-  /** Trend (improving/stable/degrading) */
-  trend: 'improving' | 'stable' | 'degrading';
+  /**
+   * A single-snapshot risk-concentration signal, not a trend measured across time: 'degrading' when over 40% of
+   * dependency nodes are single-source, else 'stable'. There is no prior snapshot to compare against, so this can
+   * never read 'improving' - the label names a current risk level, not a direction of change.
+   */
+  trend: 'stable' | 'degrading';
   /** Maturity level */
   maturityLevel: 'initial' | 'developing' | 'managed' | 'optimized';
   /** Actionable recommendations */
   recommendations: string[];
+  /**
+   * Every figure above is a heuristic derived from dependency-node and interview counts at this one point in
+   * time: trend is a risk-concentration snapshot (see its own doc comment), 'Estimated doc quality' is a 3-step
+   * function of interview count alone, and maturityLevel/status are score cut-off labels, not a validated
+   * assessment of documentation quality, governance maturity or change over time.
+   */
+  methodologyNote: string;
 }
 
 async function loadPublishedInterviews(orgId: string) {
@@ -132,7 +143,8 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
     overallScore >= 40 ? 'developing' :
     'initial';
 
-  // Trend (heuristic)
+  // A single-snapshot risk-concentration signal, not a measured trend: there is no prior snapshot to compare
+  // against, so this can never read 'improving' (see the field's own doc comment on OrganizationalResilienceIndex).
   const trend = propagationMap.nodes.filter((node) => node.isSingleSource).length > propagationMap.nodes.length * 0.4 ? 'degrading' : 'stable' as const;
 
   // Overall recommendations
@@ -150,6 +162,11 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
     trend,
     maturityLevel,
     recommendations,
+    methodologyNote:
+      'trend is a single-snapshot risk-concentration signal (no prior snapshot exists to compare against, so it ' +
+      "can never read 'improving'); 'Estimated doc quality' is a 3-step function of interview count alone, not a " +
+      'measured quality assessment; maturityLevel and status are score cut-off labels on counts of dependency ' +
+      'nodes and interviews, not a validated governance or documentation maturity assessment.',
   };
 }
 

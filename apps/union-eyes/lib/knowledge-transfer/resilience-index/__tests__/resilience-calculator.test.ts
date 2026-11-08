@@ -75,8 +75,11 @@ describe('calculateResilienceIndex', () => {
     expect(idx.overallScore).toBeLessThanOrEqual(100);
     expect(['initial', 'developing', 'managed', 'optimized']).toContain(idx.maturityLevel);
     expect(['critical', 'at_risk', 'adequate', 'strong']).toContain(idx.status);
-    expect(['improving', 'stable', 'degrading']).toContain(idx.trend);
+    // DEF-0B7-COGB-RESILIENCE-INDEX: trend is a single-snapshot risk-concentration signal, never 'improving' -
+    // there is no prior snapshot to compare against.
+    expect(['stable', 'degrading']).toContain(idx.trend);
     expect(idx.trend).toBe('stable');
+    expect(idx.methodologyNote).toMatch(/single-snapshot|heuristic|not a (measured|validated)/i);
   });
 
   it('flags degrading trend and low scores for a fragile single-source org', async () => {
