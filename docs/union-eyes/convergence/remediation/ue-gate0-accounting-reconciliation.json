@@ -3,23 +3,23 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 718,
+    "overlayImplemented": 719,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 65,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 41,
+    "creditedByEarlierRuns": 66,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 42,
     "overlayPartial": 29,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 59,
-    "untouchedByOverlay": 30,
+    "unresolvedByOverlay": 58,
+    "untouchedByOverlay": 29,
     "qualificationVerified": 0,
     "closed": 0
   },
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 718,
+    "implemented": 719,
     "partial": 29,
-    "untouched": 30,
+    "untouched": 29,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
       "DEF-0B1-BILLING-SCHEDULER-LATENT",
@@ -30,7 +30,7 @@
       "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
       "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
       "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
-      "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",
+      "DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS",
       "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-RELEASES-LATEST-VERSION-NOT-GRANTED-VERSION",
       "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
       "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
@@ -61,7 +61,6 @@
       "DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED",
       "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
       "DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS",
-      "DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS",
       "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
       "DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS",
       "DEF-0B7-COGB-MEMORY-ENGINES-RESTATE-OFFICER-TYPED-ENTRIES-AS-MEASURED-CONDITION",
@@ -641,6 +640,17 @@
         "apps/union-eyes/lib/api/crud-factory.ts"
       ],
       "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",
+      "batch": "B151-GATE3-COGNITION-ANALYTICS-ENVELOPE-CONFIDENCE",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts",
+      "files": [
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B7-COGB-DYNAMICS-ENGINES-EMBED-LITERAL-NUMBERS-AND-CLAIMS-AS-MEASUREMENTS",

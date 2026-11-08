@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 718,
+ "corrected": 719,
  "partial": 29,
- "outstanding": 59,
- "accountedFor": 59,
+ "outstanding": 58,
+ "accountedFor": 58,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -27,16 +27,15 @@
   {
    "family": "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED",
    "purpose": "Stubs, fabricated figures and false-success answers: return 501 or implement for real",
-   "defects": 2,
+   "defects": 1,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 2,
+    "MEDIUM": 1,
     "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
-    "0B.7": 1,
     "0B.8": 1
    }
   },
@@ -237,11 +236,6 @@
    }
   ],
   "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED": [
-   {
-    "id": "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",
-    "severity": "MEDIUM",
-    "partial": true
-   },
    {
     "id": "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
     "severity": "MEDIUM",
@@ -450,7 +444,8 @@
    },
    {
     "id": "DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS",
-    "severity": "MEDIUM"
+    "severity": "MEDIUM",
+    "partial": true
    },
    {
     "id": "DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS",

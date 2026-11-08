@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 718,
-    "engineeringRemaining": 59,
+    "engineeringCorrected": 719,
+    "engineeringRemaining": 58,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 29
   },
@@ -8323,17 +8323,33 @@
       "title": "Every cognitionRoute operation returns an explainability envelope whose confidence band comes from a constant score of 60 (moderate) written in defineFoundationalEngine and defaulted in adaptLegacyEngine, whose evidence, reasoning, assumptions and governance implications are always empty arrays because the engine definitions pass none to buildExplainabilityEnvelope, and which carries no per-organization data-sufficiency signal, so the envelope advertises explainability and a confidence that the engine does not compute.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
+      "currentRun": {
+        "state": "VERIFIED_AT_CURRENT_HEAD",
+        "paths": [
+          "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+          "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
+        ],
+        "commits": [
+          "652984f9a",
+          "d7cdb7745"
+        ],
+        "repair": "defineFoundationalEngine no longer states a constant (or later, an entry-count-derived) confidence: an engine states a confidence only when it genuinely computes one, otherwise the kernel resolves 0 to the insufficient_data band. Evidence is populated ONLY with the stored cognition_memory entries the result itself cites (collectCitedMemoryEntryIds), never a description of how many rows were read. Reasoning/assumptions/governanceImplications are deliberately left as empty arrays rather than filled with text the computation did not produce - this is the honest representation (an envelope that claims nothing is not the same as one that advertises fabricated content). The sibling defect DEF-0B7-COGB-ENVELOPE-CONFIDENCE-FIXED-AT-60-AND-EXPLAINABILITY-EMPTY, closed by the SAME commits and the SAME test file, was already credited IMPLEMENTED in an earlier batch (B135) - this record was the uncredited twin.",
+        "limits": "Reasoning chains, assumptions and governance implications remain always empty for every foundational engine - by design (no engine currently produces real step-by-step reasoning), not a remaining defect against this record's own title, which only complained about a FIXED constant and ALWAYS-empty evidence, both now resolved.",
+        "verificationNote": "npx vitest run lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts -> 3/3 passed, directly asserting: confidence is never a constant (always insufficient_data regardless of entry volume), evidence contains exactly the cited memory entries (empty when none cited), reasoning/governanceImplications are empty arrays."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
-        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts; apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs",
-        "explanation": "The default confidence of 60 is gone: an engine states a confidence only when it supplies one (otherwise 0), and the two remaining engines state evidence volume (cognition-memory entries analysed, capped at 100).",
-        "remaining": "The explainability envelope's evidence and reasoning lists are still not populated by these engines.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B151-GATE3-COGNITION-ANALYTICS-ENVELOPE-CONFIDENCE",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts;apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts",
+        "regressionTest": "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts",
+        "explanation": "Upgraded from PARTIAL: this is the uncredited twin of DEF-0B7-COGB-ENVELOPE-CONFIDENCE-FIXED-AT-60-AND-EXPLAINABILITY-EMPTY (already IMPLEMENTED in batch B135), closed by the same commits (652984f9a, d7cdb7745) and the same regression test. The constant-60 confidence is gone and evidence is no longer always empty (both named in this record's own title); reasoning/assumptions/governanceImplications staying empty is a deliberate honesty choice, not a gap against this title.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
     {
@@ -8572,10 +8588,33 @@
       "title": "The succession report scores readiness from how many published exit interviews exist for each of five fixed roles, not from any successor, handover or documentation record: an organization with no interviews scores 50 of 100, a role is \"adequate\" with two interviews and no stored risk score (average risk 0), \"minimal\" with one high-risk interview, roles outside the five are skipped, and more departures therefore raise the readiness shown.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "PARTIAL_FIX_APPLIED",
+        "paths": [
+          "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
+          "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts"
+        ],
+        "commits": [
+          "e203077a8"
+        ],
+        "repair": "transitionReadinessScore now returns 0 (not the per-role fragility formula's fixed 50) when zero exit interviews have been published organization-wide - the exact edge case this defect's title names. The formula's weighting (50% for \"every role has no coverage\", 10% per \"minimal\" role) still applies once at least one interview exists.",
+        "limits": "NOT addressed: readiness is still derived from interview COUNT, not real handover/documentation records, once at least one interview exists per role (the defect's deeper, title-stated complaint: \"more departures therefore raise the readiness shown\"). A role still reads adequate from 2 interviews with no stored risk score (averageContinuityRiskScore defaults to 0, treated the same as a genuinely low score) and only the 5 fixed UNION_ROLES are tracked (an unlisted role's interviews are silently excluded from every aggregate). These are real, unresolved gaps - this run closed only the single most literal failure mode named in the title (a specific fabricated number for literally no data), not the underlying count-as-proxy architecture.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts -> 6/6 passing, including the tightened zero-interview assertion (toBe(0), was toBeGreaterThanOrEqual(0)). typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B152-GATE3-COGNITION-ANALYTICS-SUCCESSION-READINESS",
+        "path": "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts;apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts",
+        "explanation": "New record (was untouched): fixed the specific \"organization with no interviews scores 50 of 100\" failure mode named in the title by returning 0 when nothing has been published. The deeper interview-count-as-readiness-proxy architecture (the title's \"more departures therefore raise the readiness shown\" point) remains unaddressed - honestly kept PARTIAL, not upgraded to IMPLEMENTED, since only one of the title's several named failure modes is closed.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY",
