@@ -15546,18 +15546,21 @@
         "state": "SOURCE_PATCHED_CI_PENDING",
         "paths": [
           "apps/union-eyes/db/schema/domains/pilot/pilot-demo-seeds.ts",
-          "apps/union-eyes/db/migrations/20261108_pilot_demo_seeds_row_ids.sql",
-          "apps/union-eyes/db/migrations/20261108_pilot_demo_seeds_row_ids_rollback.sql",
+          "apps/union-eyes/db/migrations-cache/0057_pilot_demo_seeds_row_ids.sql",
+          "apps/union-eyes/db/migrations-cache/0057_pilot_demo_seeds_row_ids.rollback.sql",
           "apps/union-eyes/app/api/pilot/demo-data/route.ts"
         ],
         "regressionPaths": [
-          "apps/union-eyes/app/api/__tests__/pilot-demo-data.route.test.ts"
+          "apps/union-eyes/app/api/__tests__/pilot-demo-data.route.test.ts",
+          "apps/union-eyes/db/__tests__/pilot-demo-data-purge-safety.postgres.test.ts"
         ],
-        "repair": "pilot_demo_seeds gains employer_ids/grievance_ids (text[]); the seed route now captures the exact client-assigned row ids on the marker, and the purge route deletes by exact id (inArray) instead of a GRV-DEMO-/lr-demo@ name/email pattern match, so it removes precisely the rows this seed created. Rows seeded before this migration keep employer_ids/grievance_ids NULL; the purge falls back to the prior pattern-match only for those legacy markers, so already-seeded pilot orgs are not stranded with undeletable demo data.",
-        "limits": "Does not add a demo marker column to the live employers/grievances tables themselves, so seeded demo rows remain indistinguishable from real rows to any OTHER code path (e.g. pilot metrics counting cases managed) that does not go through this route. That remains a separate, tracked gap.",
-        "verificationNote": "Workstream A (fix/ue-gate0-final-convergence): local vitest run confirms app/api/__tests__/pilot-demo-data.route.test.ts (11/11, 4 new) passes. Migration applied twice against a throwaway pgvector/pgvector:0.8.1-pg16 container (idempotent, second apply NOTICE-skips existing columns) and the rollback verified to cleanly drop both columns. Typecheck and eslint clean. Not a CI run at a recorded SHA.",
+        "repair": "pilot_demo_seeds gains employer_ids/grievance_ids (text[]), delivered as scoped cache migration 0057 (the prior run incorrectly placed this migration in the frozen apps/union-eyes/db/migrations/ lineage, which the governed bootstrap refuses to replay; corrected to the active db/migrations-cache/ chain this run). The seed route captures the exact client-assigned row ids on the marker at seed time. The purge route verifies ownership before any mutation: a verified nonempty id list deletes exactly those rows (inArray), a verified empty list skips that category's delete entirely, and a legacy marker (employer_ids or grievance_ids still NULL, seeded before this migration) is refused outright with 409 and no mutation at all - the prior GRV-DEMO-/lr-demo@ name/email pattern-match fallback for legacy markers has been removed entirely, since it could delete a real grievance or employer that happened to match the pattern.",
+        "limits": "Does not add a demo marker column to the live employers/grievances tables themselves, so seeded demo rows remain indistinguishable from real rows to any OTHER code path (e.g. pilot metrics counting cases managed) that does not go through this route - that remains a separate, tracked gap, unchanged by this run. A legacy marker (seeded before employer_ids/grievance_ids existed) can no longer be purged through this route at all; it requires controlled manual reconciliation (e.g. direct, reviewed deletion keyed off the real demo dataset's known names/emails, not an automated pattern match) - this trades a residual unpurgeable legacy state for eliminating the destructive-deletion risk, which this run treats as the correct priority.",
+        "verificationNote": "Gate 2A (fix/ue-gate0-final-convergence): local vitest run confirms app/api/__tests__/pilot-demo-data.route.test.ts (12/12, rewritten for the select-before-mutate/legacy-refusal/empty-category-skip flow) passes. NEW native PostgreSQL test (db/__tests__/pilot-demo-data-purge-safety.postgres.test.ts, 2/2) runs the real, unmodified route against a real Postgres connection and proves a real grievance/employer matching the historical demo naming pattern survives both purge paths (normal exact-id purge, and legacy-marker refusal). Migration 0057 independently verified against the real governed scoped-migration executor (not an ad-hoc script) via a disposable pgvector/pgvector:0.8.1-pg16 container: correct application, idempotent re-run, and a clean rollback. Typecheck and eslint clean. Not yet a CI run at a recorded SHA (native PG 15/16 CI jobs were failing on this exact migration before this run's root-cause fix; re-verification via real CI pending).",
         "commits": [
-          "56eda57771517bd2bb24607caebf1e992f9b2d04"
+          "56eda57771517bd2bb24607caebf1e992f9b2d04",
+          "be376955d",
+          "a46df5c993c2e5c730b350a1bb0b02324f8a1d9a"
         ]
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
@@ -15565,10 +15568,10 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B145-GATE0-RESIDUAL-WORKSTREAM-A-DEMO-DATA-AND-ORPHAN-VERIFICATION",
-        "path": "apps/union-eyes/db/schema/domains/pilot/pilot-demo-seeds.ts; apps/union-eyes/db/migrations/20261108_pilot_demo_seeds_row_ids.sql; apps/union-eyes/app/api/pilot/demo-data/route.ts",
-        "regressionTest": "apps/union-eyes/app/api/__tests__/pilot-demo-data.route.test.ts",
-        "explanation": "Purge now deletes by the exact row ids this seed created (employer_ids/grievance_ids captured at seed time), not by name/email pattern; legacy markers without these columns fall back to the prior pattern-match purge. Does not add a demo marker to the live tables, so pilot-metrics miscounting (a separate concern named in the same finding) is not addressed.",
+        "batch": "GATE0-DIRECTIVE-GATE2A-DEMO-DATA-PURGE-SAFETY",
+        "path": "apps/union-eyes/db/schema/domains/pilot/pilot-demo-seeds.ts; apps/union-eyes/db/migrations-cache/0057_pilot_demo_seeds_row_ids.sql; apps/union-eyes/app/api/pilot/demo-data/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/pilot-demo-data.route.test.ts; apps/union-eyes/db/__tests__/pilot-demo-data-purge-safety.postgres.test.ts",
+        "explanation": "Purge now verifies row ownership before any mutation: a verified id list (possibly empty) deletes exactly those rows and nothing else; a legacy marker with no verified ownership (employer_ids/grievance_ids NULL) is refused outright (409), with no name/email pattern-match fallback of any kind - the prior PARTIAL run's fallback-to-pattern-match-for-legacy-rows behavior has been removed as itself unsafe. A native PostgreSQL test proves a real row matching the demo naming pattern survives every purge path. Still PARTIAL: does not add a demo marker to the live tables, so pilot-metrics miscounting (a separate concern named in the same finding) is not addressed, and a legacy marker now has no automated purge path at all pending manual reconciliation.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
