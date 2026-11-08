@@ -183,6 +183,14 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
           typeof adv.vulnerable_versions !== 'string' || !adv.vulnerable_versions.trim()) {
         throw new Error(`Invalid advisory record for ${pkgName}`)
       }
+      // Reject conflicting package identity supplied by the registry instead of
+      // silently overwriting it with the response-map key. Inconsistent audit
+      // evidence must not be normalized into a seemingly trustworthy finding.
+      for (const alias of ['package', 'module_name', 'name']) {
+        if (Object.prototype.hasOwnProperty.call(adv, alias) && adv[alias] !== pkgName) {
+          throw new Error(`Conflicting advisory package identity for ${pkgName}`)
+        }
+      }
       const key = String(adv.id)
       // Never let a repeated advisory ID overwrite an earlier finding. The
       // registry may return several affected versions for one package; a
