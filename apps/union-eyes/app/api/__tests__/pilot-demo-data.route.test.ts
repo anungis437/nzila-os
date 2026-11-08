@@ -138,7 +138,7 @@ describe('pilot/demo-data route', () => {
 
   it('DELETE returns not found when there is no open seed, deleting nothing and auditing nothing', async () => {
     const { DELETE } = await loadRoute();
-    m.updateQueue.push([]);
+    m.selectQueue.push([]);
     const response = await DELETE(new Request('http://localhost/api/pilot/demo-data', { method: 'DELETE' }), { organizationId: 'org_1', userId: 'u1' });
     expect(response.status).toBe(404);
     expect(mockDb.delete).not.toHaveBeenCalled();
@@ -147,6 +147,7 @@ describe('pilot/demo-data route', () => {
 
   it('DELETE purges demo data with the audit on the same transaction', async () => {
     const { DELETE } = await loadRoute();
+    m.selectQueue.push([{ employerIds: ['e-1'], grievanceIds: ['g-1'] }]);
     m.updateQueue.push([{ id: 'seed-1' }]);
 
     const response = await DELETE(new Request('http://localhost/api/pilot/demo-data', { method: 'DELETE' }), { organizationId: 'org_1', userId: 'u1' });
@@ -163,7 +164,8 @@ describe('pilot/demo-data route', () => {
   // DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN
   it('DELETE purges by exact seeded row id when the marker carries one, not by name/email pattern', async () => {
     const { DELETE } = await loadRoute();
-    m.updateQueue.push([{ id: 'seed-1', employerIds: ['e-1', 'e-2'], grievanceIds: ['g-1'] }]);
+    m.selectQueue.push([{ employerIds: ['e-1', 'e-2'], grievanceIds: ['g-1'] }]);
+    m.updateQueue.push([{ id: 'seed-1' }]);
 
     const response = await DELETE(new Request('http://localhost/api/pilot/demo-data', { method: 'DELETE' }), { organizationId: 'org_1', userId: 'u1' });
 
@@ -172,14 +174,29 @@ describe('pilot/demo-data route', () => {
     expect(m.deleteWhereClauses.every((sql) => !/like/i.test(sql))).toBe(true);
   });
 
-  it('DELETE falls back to the legacy name/email pattern only for a marker seeded before row ids existed', async () => {
+  it('DELETE refuses outright for a legacy marker with no verified ownership, deleting and auditing nothing', async () => {
     const { DELETE } = await loadRoute();
-    m.updateQueue.push([{ id: 'seed-1', employerIds: null, grievanceIds: null }]);
+    m.selectQueue.push([{ employerIds: null, grievanceIds: null }]);
+
+    const response = await DELETE(new Request('http://localhost/api/pilot/demo-data', { method: 'DELETE' }), { organizationId: 'org_1', userId: 'u1' });
+
+    expect(response.status).toBe(409);
+    expect(mockDb.update).not.toHaveBeenCalled();
+    expect(mockDb.delete).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('DELETE deletes nothing for a category whose verified id list is empty, without falling back to a pattern', async () => {
+    const { DELETE } = await loadRoute();
+    m.selectQueue.push([{ employerIds: [], grievanceIds: ['g-1'] }]);
+    m.updateQueue.push([{ id: 'seed-1' }]);
 
     const response = await DELETE(new Request('http://localhost/api/pilot/demo-data', { method: 'DELETE' }), { organizationId: 'org_1', userId: 'u1' });
 
     expect(response.status).toBe(200);
-    expect(m.deleteWhereClauses.some((sql) => /like/i.test(sql))).toBe(true);
+    // Only the grievances delete runs (non-empty id list); the employers delete is skipped entirely, not pattern-matched.
+    expect(mockDb.delete).toHaveBeenCalledTimes(1);
+    expect(m.deleteWhereClauses.every((sql) => !/like/i.test(sql))).toBe(true);
   });
 
   it('POST captures the exact generated employer and grievance ids on the seed marker', async () => {
@@ -200,6 +217,7 @@ describe('pilot/demo-data route', () => {
 
   it('DELETE fails when the audit cannot be written', async () => {
     const { DELETE } = await loadRoute();
+    m.selectQueue.push([{ employerIds: ['e-1'], grievanceIds: ['g-1'] }]);
     m.updateQueue.push([{ id: 'seed-1' }]);
     m.persistAtomicAudit.mockRejectedValueOnce(new Error('audit down'));
 

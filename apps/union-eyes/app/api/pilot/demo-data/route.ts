@@ -24,7 +24,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { pilotDemoSeeds } from "@/db/schema/domains/pilot/pilot-demo-seeds";
 import { employers } from "@/db/schema/union-structure-schema";
 import { grievances } from "@/db/schema/domains/claims/grievances";
-import { eq, and, like, isNull, isNotNull, inArray } from "drizzle-orm";
+import { eq, and, isNull, isNotNull, inArray } from "drizzle-orm";
 
 // Thrown inside the seed transaction so a lost race rolls back the rows it had already inserted.
 class DemoSeedConflict extends Error {}
@@ -181,35 +181,48 @@ export const DELETE = withOrganizationAuth(async (_request, context) => {
     // The purge, the marker and the audit record commit together. The marker is closed first and only if it was open,
     // so a concurrent purge or a missing seed deletes nothing.
     let purged = false;
+    let legacyRefusal = false;
     try {
       await withRLSContext({ organizationId }, async (tx) => {
+        // Row ownership is verified before any mutation. employerIds/grievanceIds are set once, at seed time, and
+        // never updated afterward (see POST above), so reading them here ahead of the close/delete is race-free: no
+        // concurrent request can change what this seed owns between this read and the delete below.
+        const [existing] = await tx
+          .select({ employerIds: pilotDemoSeeds.employerIds, grievanceIds: pilotDemoSeeds.grievanceIds })
+          .from(pilotDemoSeeds)
+          .where(and(eq(pilotDemoSeeds.organizationId, organizationId), isNull(pilotDemoSeeds.purgedAt)));
+        if (!existing) throw new DemoSeedConflict();
+
+        // A marker seeded before employer_ids/grievance_ids existed has no proven ownership record: there is no
+        // name/email pattern fallback here. Deleting by a GRV-DEMO-/lr-demo@ pattern could destroy a real grievance
+        // or employer that happens to match it. The purge is refused outright; the marker stays open (not purged)
+        // for controlled, manual reconciliation instead.
+        if (existing.employerIds === null || existing.grievanceIds === null) {
+          legacyRefusal = true;
+          return;
+        }
+
         const closed = await tx
           .update(pilotDemoSeeds)
           .set({ purgedAt: new Date(), updatedAt: new Date() })
           .where(and(eq(pilotDemoSeeds.organizationId, organizationId), isNull(pilotDemoSeeds.purgedAt)))
-          .returning({ id: pilotDemoSeeds.id, employerIds: pilotDemoSeeds.employerIds, grievanceIds: pilotDemoSeeds.grievanceIds });
+          .returning({ id: pilotDemoSeeds.id });
         if (closed.length === 0) throw new DemoSeedConflict();
 
-        // Delete exactly the rows this seed created. Rows seeded before employer_ids/grievance_ids existed have
-        // those columns null; only for those legacy markers does the purge fall back to the prior name/email
-        // pattern match, so already-seeded pilot orgs are not stranded with undeletable demo data.
-        const { employerIds, grievanceIds } = closed[0];
+        // A verified id list with zero entries means this seed created none of that category: nothing is deleted
+        // for it, not a pattern match. A nonempty list deletes exactly those rows, never anything else.
+        const { employerIds, grievanceIds } = existing;
 
-        await tx
-          .delete(grievances)
-          .where(
-            grievanceIds && grievanceIds.length > 0
-              ? and(eq(grievances.organizationId, organizationId), inArray(grievances.id, grievanceIds))
-              : and(eq(grievances.organizationId, organizationId), like(grievances.grievanceNumber, "GRV-DEMO-%")),
-          );
-
-        await tx
-          .delete(employers)
-          .where(
-            employerIds && employerIds.length > 0
-              ? and(eq(employers.organizationId, organizationId), inArray(employers.id, employerIds))
-              : and(eq(employers.organizationId, organizationId), like(employers.email, "lr-demo@%")),
-          );
+        if (grievanceIds.length > 0) {
+          await tx
+            .delete(grievances)
+            .where(and(eq(grievances.organizationId, organizationId), inArray(grievances.id, grievanceIds)));
+        }
+        if (employerIds.length > 0) {
+          await tx
+            .delete(employers)
+            .where(and(eq(employers.organizationId, organizationId), inArray(employers.id, employerIds)));
+        }
 
         await persistAtomicAudit(tx, {
           organizationId,
@@ -217,12 +230,20 @@ export const DELETE = withOrganizationAuth(async (_request, context) => {
           action: CAPE_AUDIT_EVENTS.PILOT_DEMO_DATA_PURGED,
           resourceType: 'pilot_demo_seeds',
           resourceId: closed[0].id,
-          details: { runtimeMode, telemetryTag: 'demo_mode_mutation' },
+          // The audit records exactly which ids were deleted, not just that a purge happened.
+          details: { runtimeMode, telemetryTag: 'demo_mode_mutation', deletedEmployerIds: employerIds, deletedGrievanceIds: grievanceIds },
         });
       });
-      purged = true;
+      purged = !legacyRefusal;
     } catch (error) {
       if (!(error instanceof DemoSeedConflict)) throw error;
+    }
+
+    if (legacyRefusal) {
+      return standardErrorResponse(
+        ErrorCode.CONFLICT,
+        "This demo seed predates per-row ownership tracking and cannot be purged automatically without risking unrelated real records; it requires controlled manual reconciliation.",
+      );
     }
 
     if (!purged) {
