@@ -1,7 +1,7 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1010,
+  "routes": 1011,
   "mutating": 680,
   "kernel": 62,
   "byGuard": {
@@ -13,11 +13,11 @@
    "NONE": 21,
    "ORG_AUTH": 9,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 240,
+   "RETIRED": 238,
    "ROLE_AUTH": 104,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 383,
+   "WITH_API": 386,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -29,29 +29,29 @@
    "NONE": 8,
    "ORG_AUTH": 4,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 225,
+   "RETIRED": 223,
    "ROLE_AUTH": 55,
    "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 229
+   "WITH_API": 231
   },
   "mutatingByAudit": {
-   "ATOMIC": 156,
-   "ATOMIC_SERVICE": 119,
+   "ATOMIC": 157,
+   "ATOMIC_SERVICE": 120,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 83,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 27,
    "INTENT_OUTCOME": 28,
    "NO_WRITES_FOUND": 9,
-   "NONE": 224
+   "NONE": 222
   },
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 83,
-   "NONE": 313,
+   "NONE": 311,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 230
+   "TENANT_TX": 232
   }
  },
  "routes": [
@@ -4025,26 +4025,36 @@
     "GET",
     "PATCH"
    ],
-   "mutating": true,
-   "guard": "RETIRED",
+   "retiredMethods": [
+    "PATCH",
+    "DELETE"
+   ],
+   "mutating": false,
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "READ_ONLY"
   },
   {
    "route": "communications/campaigns/[id]/send-test/route.ts",
    "methods": [
     "DELETE",
     "GET",
-    "PATCH"
+    "PATCH",
+    "POST"
+   ],
+   "retiredMethods": [
+    "GET",
+    "PATCH",
+    "DELETE"
    ],
    "mutating": true,
-   "guard": "RETIRED",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "NONE",
-   "audit": "NONE"
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "communications/campaigns/route.ts",
@@ -5737,7 +5747,9 @@
   {
    "route": "education/certifications/route.ts",
    "methods": [
+    "DELETE",
     "GET",
+    "PATCH",
     "POST"
    ],
    "mutating": true,
@@ -5816,7 +5828,9 @@
   {
    "route": "education/programs/route.ts",
    "methods": [
+    "DELETE",
     "GET",
+    "PATCH",
     "POST"
    ],
    "mutating": true,
@@ -5871,7 +5885,9 @@
   {
    "route": "education/sessions/route.ts",
    "methods": [
+    "DELETE",
     "GET",
+    "PATCH",
     "POST"
    ],
    "mutating": true,
@@ -6055,6 +6071,18 @@
    "subordinate": null,
    "data": "TENANT_TX",
    "audit": "ATOMIC"
+  },
+  {
+   "route": "employer-execution/timesheets/[batchId]/mapping/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "employer-execution/timesheets/route.ts",
