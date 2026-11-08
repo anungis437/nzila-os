@@ -1,8 +1,8 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1011,
-  "mutating": 680,
+  "routes": 1013,
+  "mutating": 682,
   "kernel": 62,
   "byGuard": {
    "ADMIN_AUTH": 18,
@@ -17,7 +17,7 @@
    "ROLE_AUTH": 104,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 386,
+   "WITH_API": 388,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -33,10 +33,10 @@
    "ROLE_AUTH": 55,
    "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 231
+   "WITH_API": 233
   },
   "mutatingByAudit": {
-   "ATOMIC": 157,
+   "ATOMIC": 159,
    "ATOMIC_SERVICE": 120,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 83,
@@ -51,7 +51,7 @@
    "CRUD_TENANT_TX": 83,
    "NONE": 311,
    "SYSTEM_CONTEXT": 53,
-   "TENANT_TX": 232
+   "TENANT_TX": 234
   }
  },
  "routes": [
@@ -4246,6 +4246,30 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
+  },
+  {
+   "route": "communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
+  },
+  {
+   "route": "communications/surveys/[surveyId]/responses/[responseId]/route.ts",
+   "methods": [
+    "PATCH"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC"
   },
   {
    "route": "communications/surveys/[surveyId]/responses/route.ts",
