@@ -111,6 +111,13 @@ export function parseLockfilePackages(lockfilePath) {
     if (/^[^\s#][^:]*:/.test(line)) {
       throw new Error('Unexpected top-level section after pnpm snapshots; dependency inventory incomplete')
     }
+    // YAML document boundaries and bare top-level scalars must not split the
+    // resolved graph into a second document that the inventory still trusts.
+    // Comments and blank lines are permitted; pnpm emits no other unindented
+    // content inside snapshots.
+    if (line.trim() && !line.trimStart().startsWith('#') && !line.startsWith(' ')) {
+      throw new Error('Unexpected unindented content in pnpm snapshots; audit inventory ambiguous')
+    }
     // pnpm v9 emits two-space YAML indentation levels. Reject every odd
     // indentation depth, including deeper malformed keys that would otherwise
     // be silently omitted from the audited dependency graph.
