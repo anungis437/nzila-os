@@ -5013,29 +5013,35 @@
       "currentRun": {
         "state": "SOURCE_PATCHED_CI_PENDING",
         "paths": [
+          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts",
           "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts",
-          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/route.ts"
+          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/route.ts",
+          "apps/union-eyes/lib/communications/survey-response-capability.ts",
+          "apps/union-eyes/db/migrations-cache/0058_survey_response_capability.sql"
         ],
         "regressionPaths": [
+          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/__tests__/route.test.ts",
           "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/__tests__/route.test.ts",
-          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/__tests__/route.test.ts"
+          "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/__tests__/route.test.ts",
+          "apps/union-eyes/lib/communications/__tests__/survey-response-capability.test.ts"
         ],
         "commits": [
-          "7129d521531621b8cf7fb58d54f12c5650457bed"
+          "7129d521531621b8cf7fb58d54f12c5650457bed",
+          "0ff24a083"
         ],
-        "repair": "Added the two missing routes. POST .../responses/[responseId]/answers writes one answer per call (text, number or choices - exactly one shape), upserted by the existing (responseId, questionId) unique constraint so a respondent can change an answer before submitting; refuses once the response is completed, and an identified response may only be answered by its own respondent (an anonymous response has no owning user by design, matching the existing response-creation route's trust model). PATCH .../responses/[responseId] marks a response completed once every required question (survey_questions.required) has a matching answer, refusing with the missing question ids otherwise, with a status predicate guarding against two concurrent completions. Both are audited (persistAtomicAudit, same withRLSContext transaction as the mutation) - route-coverage-manifest's audit-gap ratchet test correctly flagged the first draft of these routes for lacking this, which is how the gap was caught before commit.",
-        "limits": "Answer-shape validation against the question's declared type (text length bounds, numeric rating range, valid choice ids) is not implemented - only the polymorphic 'exactly one field' shape is enforced. Full per-question-type validation remains a separate, tracked gap.",
-        "verificationNote": "Workstream D (fix/ue-gate0-final-convergence): local vitest run confirms both new test files (8 + 7 = 15 passing) and the route-coverage-manifest/edge-route-config suites (25/25) after regenerating the manifest (1011 -> 1013 routes). Typecheck and eslint clean. Not a CI run at a recorded SHA."
+        "repair": "Gate 2B closes two remaining gaps the earlier PARTIAL run left open. First, an authorization gap this run's own review discovered (not previously tracked here): an anonymous response's userId is NULL by design, so the existing 'if (response.userId && response.userId !== userId)' ownership check did nothing for it - any org member who knew or enumerated the response id could submit answers on its behalf or mark it completed. Fixed with a capability-token mechanism (lib/communications/survey-response-capability.ts): the response-creation route issues a high-entropy token for an anonymous response, returns it exactly once in that call's body, and stores only its SHA-256 hash (survey_responses.responseTokenHash, migration 0058); the answers and completion routes verify a presented token (x-survey-response-token header) against that hash with a constant-time comparison, and refuse outright (no weaker fallback) when none is presented, the wrong one is, or none was ever issued (a legacy anonymous response). An identified response is unaffected: ownership via userId remains sufficient and no token is ever issued for it. Second, the already-tracked per-question-type validation gap: answers/route.ts now validates a submitted answer against the question's own configured constraints (choices/minChoices/maxChoices, ratingMin/ratingMax, minLength/maxLength, allowOther), dispatching on which of those fields the question is configured with rather than a free-text questionType string, since no such convention is established or enforced anywhere else in this codebase.",
+        "limits": "Still not the entire respondent journey: no route under app/api serves a survey's questions to a respondent (only a steward-level results aggregate and an internal question lookup exist), so the frontend (app/[locale]/surveys/[surveyId]/page.tsx) still deliberately shows CapabilityUnavailable rather than a working survey - this predates and is unchanged by this run. This fix closes the authorization and answer-validation gaps in the write routes that do exist; it does not by itself make the respondent journey functional end to end, which is why this record is not marked IMPLEMENTED.",
+        "verificationNote": "Gate 2B (fix/ue-gate0-final-convergence): 52 new/rewritten tests across 4 files, all passing (25 answers-route capability+validation, 11 completion-route capability, 7 response-creation token issuance, 9 capability-helper unit tests). Updated f12-b53-messaging.contract.test.ts's stale createPathBinding assertion (crudRoutes-specific; the create route is no longer crudRoutes-based) to check the new implementation's equivalent client-supplied-survey-id protection. Regenerated the route-coverage manifest (the create route's classification moved from CRUD_FACTORY/CRUD_ATOMIC/CRUD_TENANT_TX to WITH_API/ATOMIC/TENANT_TX) and the V2 bootstrap source plan, both verified via their own CI-equivalent checks. Broad sweep (app/api/__tests__ + lib/communications, 438 files / 5819 tests) green. Typecheck and eslint clean. Not a CI run at a recorded SHA."
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B147-GATE0-RESIDUAL-WORKSTREAM-D-SURVEY-ANSWER-CAPABILITY",
-        "path": "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts; apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/route.ts",
-        "regressionTest": "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/__tests__/route.test.ts; apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/__tests__/route.test.ts",
-        "explanation": "The survey capability can now be completed through these routes: answers can be written and a response can be marked completed once its required questions are answered. Marked PARTIAL, not IMPLEMENTED, because per-question-type answer validation (text bounds, rating range, valid choice ids) is not yet implemented.",
+        "batch": "GATE0-DIRECTIVE-GATE2B-SURVEY-RESPONSE-CAPABILITY-AUTHORITY",
+        "path": "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/route.ts; apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts; apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/route.ts; apps/union-eyes/lib/communications/survey-response-capability.ts",
+        "regressionTest": "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/__tests__/route.test.ts; apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/__tests__/route.test.ts; apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/__tests__/route.test.ts; apps/union-eyes/lib/communications/__tests__/survey-response-capability.test.ts",
+        "explanation": "An anonymous response is now authorized by a one-time capability token verified against a stored hash, not by a bare response id (the gap this run's own review found: the prior PARTIAL run's ownership check was a no-op for userId-null responses). Per-question-type answer validation (choice membership, rating bounds, text length, allowOther) is also now implemented, closing the gap the prior run correctly flagged as remaining. Still PARTIAL, not IMPLEMENTED: no route yet serves a survey's questions to a respondent, so the full respondent journey is still not functional end to end (the frontend deliberately refuses for this reason, unchanged by this run).",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
