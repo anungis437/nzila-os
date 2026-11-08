@@ -148,16 +148,16 @@
   {
    "family": "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY",
    "purpose": "Abuse controls: rate limits, idempotency keys and replay protection",
-   "defects": 3,
+   "defects": 2,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 3,
+    "MEDIUM": 2,
     "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
-    "0B.6": 2,
+    "0B.6": 1,
     "0B.11": 1
    }
   },
@@ -196,11 +196,11 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 17,
+   "defects": 18,
    "severity": {
     "HIGH": 0,
     "MEDIUM": 15,
-    "LOW": 2
+    "LOW": 3
    },
    "namedRoutes": 3,
    "namedFiles": 0,
@@ -208,7 +208,7 @@
     "0B.5": 2,
     "0B.6": 2,
     "0B.7": 5,
-    "0B.8": 2,
+    "0B.8": 3,
     "0B.10": 3,
     "0B.11": 1,
     "0B.12": 2
@@ -401,11 +401,6 @@
     "partial": true
    },
    {
-    "id": "DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B11-PRP-RECONCILIATION-ENGINE-FABRICATES-FEE-SETTLEMENT-MATCHES-AND-SUMS-REFUNDED-PAYMENTS-AS-RECEIVED",
     "severity": "MEDIUM"
    }
@@ -473,6 +468,11 @@
    {
     "id": "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",
     "severity": "MEDIUM"
+   },
+   {
+    "id": "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
+    "severity": "LOW",
+    "partial": true
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
