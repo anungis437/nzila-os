@@ -3,13 +3,13 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 710,
+    "overlayImplemented": 711,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 57,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 33,
-    "overlayPartial": 27,
+    "creditedByEarlierRuns": 58,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 34,
+    "overlayPartial": 26,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 67,
+    "unresolvedByOverlay": 66,
     "untouchedByOverlay": 40,
     "qualificationVerified": 0,
     "closed": 0
@@ -17,8 +17,8 @@
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 710,
-    "partial": 27,
+    "implemented": 711,
+    "partial": 26,
     "untouched": 40,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
@@ -28,7 +28,6 @@
       "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
       "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
       "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
-      "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
       "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
       "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
       "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",
@@ -587,6 +586,19 @@
         "apps/union-eyes/lib/employer-execution/__tests__/resolve-employment-mapping.pglite.test.ts"
       ],
       "hasIndependentRegressionEvidence": false
+    },
+    {
+      "defectId": "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
+      "batch": "B30-F09-F10-LIMITS-REPLAY-REMITTANCE-AND-CANCEL-CONTRACT",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/app/api/__tests__/employer-remittance-runs.route.test.ts (13/13 passed, including the new zero-amount-group case)",
+      "files": [
+        "apps/union-eyes/lib/employer-execution/csv-cell.ts",
+        "apps/union-eyes/lib/employer-execution/__tests__/csv-cell.test.ts",
+        "apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts",
+        "apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
     },
     {
       "defectId": "DEF-0B6-CMP-CRUD-ORG-SCOPE-NO-OP-ON-TABLE-WITHOUT-ORG-COLUMN",

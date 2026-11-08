@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 710,
-    "engineeringRemaining": 67,
+    "engineeringCorrected": 711,
+    "engineeringRemaining": 66,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 27
+    "engineeringPartial": 26
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -5738,12 +5738,12 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B30-F09-F10-LIMITS-REPLAY-REMITTANCE-AND-CANCEL-CONTRACT",
         "path": "apps/union-eyes/lib/employer-execution/csv-cell.ts; apps/union-eyes/lib/employer-execution/__tests__/csv-cell.test.ts; apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts; apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts",
-        "explanation": "The uploaded external employee id is neutralised against a leading formula character and quoted in the remittance CSV, and each remittance group reports the number of members who contribute to it rather than the payroll item count.",
-        "remaining": "The per-group member count is pinned by source only; no behavioural test drives the remittance route with a zero-amount group.",
-        "sourceBranch": "agents/ue-cursor-final-closure"
+        "explanation": "The uploaded external employee id is neutralised against a leading formula character and quoted in the remittance CSV, and each remittance group reports the number of members who contribute to it rather than the payroll item count. Added the missing behavioural test (P2 Gate 0 corrective convergence, B143): a 3-item payroll run where benefits is zero for one member and pension is zero for a different member, asserting the inserted employerRemittanceRunItems rows report memberCount 2 for each of those groups (not items.length 3), while dues (nonzero for all 3) reports memberCount 3. Verified as a genuine regression test by temporarily reverting contributing() to items.length and confirming the new test fails with the exact expected mismatch (received 3, expected 2), then restoring the clean source with zero diff from HEAD.",
+        "sourceBranch": "agents/ue-cursor-final-closure",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/employer-remittance-runs.route.test.ts (13/13 passed, including the new zero-amount-group case)"
       }
     },
     {

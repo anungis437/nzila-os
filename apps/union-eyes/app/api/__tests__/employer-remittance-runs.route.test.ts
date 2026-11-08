@@ -236,6 +236,30 @@ describe('employer-execution/remittance-runs route', () => {
     });
   });
 
+  it('POST reports each remittance group member count as the members who contribute to it, not the payroll item count, when a group amount is zero for some members', async () => {
+    const { POST } = await loadRoute();
+    // 3 payroll items; benefits is zero for item b2, pension is zero for item b3 — neither group's
+    // member count may equal items.length (3), each must equal only the members with a nonzero amount.
+    const mixedItems = [
+      { employeeExternalId: 'b1', duesAmount: '10.00', benefitAmount: '5.00', pensionAmount: '3.00', grossPay: '100', netPay: '82' },
+      { employeeExternalId: 'b2', duesAmount: '10.00', benefitAmount: '0.00', pensionAmount: '3.00', grossPay: '100', netPay: '87' },
+      { employeeExternalId: 'b3', duesAmount: '10.00', benefitAmount: '5.00', pensionAmount: '0.00', grossPay: '100', netPay: '85' },
+    ];
+    m.selectQueue.push([approvedRun], [], [], mixedItems);
+
+    await POST(postCtx('executor_1'));
+
+    const groupItemsInsert = m.inserts[1]!.values as Array<{ groupKey: string; amount: string; memberCount: string }>;
+    const byGroup = Object.fromEntries(groupItemsInsert.map((row) => [row.groupKey, row]));
+
+    // dues is nonzero for all 3 items.
+    expect(byGroup.dues).toMatchObject({ memberCount: '3' });
+    // benefits is zero for b2 — only 2 members actually contribute, not items.length (3).
+    expect(byGroup.benefits).toMatchObject({ memberCount: '2' });
+    // pension is zero for b3 — only 2 members actually contribute, not items.length (3).
+    expect(byGroup.pension).toMatchObject({ memberCount: '2' });
+  });
+
   it('POST chains the evidence from the payroll run seal and ignores replay manifests', async () => {
     const { POST } = await loadRoute();
     m.selectQueue.push(

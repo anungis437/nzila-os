@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 710,
- "partial": 27,
- "outstanding": 67,
- "accountedFor": 67,
+ "corrected": 711,
+ "partial": 26,
+ "outstanding": 66,
+ "accountedFor": 66,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -165,16 +165,15 @@
   {
    "family": "F10-FINANCIAL-AND-PAYMENT",
    "purpose": "Financial and payment integrity",
-   "defects": 2,
+   "defects": 1,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 2,
+    "MEDIUM": 1,
     "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
-    "0B.6": 1,
     "0B.10": 1
    }
   },
@@ -427,11 +426,6 @@
    }
   ],
   "F10-FINANCIAL-AND-PAYMENT": [
-   {
-    "id": "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
-    "severity": "MEDIUM",
-    "partial": true
-   },
    {
     "id": "DEF-0B10-PIL-COMMERCIAL-TERMS-ARE-SET-BY-ONE-ADMINISTRATOR-FROM-A-TYPED-MEMBER-COUNT-AND-AMOUNT-WITH-NO-APPLICANT-ACCEPTANCE",
     "severity": "MEDIUM"
