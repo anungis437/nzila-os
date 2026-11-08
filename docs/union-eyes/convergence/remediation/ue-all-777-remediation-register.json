@@ -89,8 +89,8 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 720,
-    "engineeringRemaining": 57,
+    "engineeringCorrected": 721,
+    "engineeringRemaining": 56,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
     "engineeringPartial": 31
   },
@@ -8917,10 +8917,34 @@
       "title": "The memory-based engines compute only from ue_cognition_memory rows that an officer creates through POST cognition-memory with a self-declared memory type and an optional self-declared resilience score between 0 and 100 (saveCognitionMemory has that one caller), so trajectory, learning, personality, habit, mitigation, dynamics and coordination results restate typed entries and typed numbers as measured organizational condition, and a score absent from an entry removes it from the timeline.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "VERIFIED_AT_CURRENT_HEAD",
+        "paths": [
+          "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+          "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts",
+          "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts"
+        ],
+        "commits": [
+          "16d8c2615"
+        ],
+        "repair": "The 5 memory-driven engines the title names (learning=institutionalLearningEngine, trajectory=learningTrajectoryEngine, personality=governancePersonalityEngine, habit=resilienceHabitsEngine, mitigation=mitigationEffectivenessEngine) are already wrapped by defineFoundationalEngine (kernel-bridge-foundational.ts), whose own header comment explains the design: confidence is always 0/insufficient_data because no engine here computes a validated score, evidence cites only the real cognition-memory entry ids a result names (never a count claim), and reasoning/assumptions/governanceImplications stay empty rather than fabricated. This is the actual exposure path (app/api/exit-interviews/organizational-cognition/route.ts -> runFullInstitutionalCognition -> these engines), not the raw per-engine function alone. Added an end-to-end test proving this against seeded data mixing scored and unscored officer-typed entries: confidence never inflates past insufficient_data, evidence never fabricates, and an unscored entry still counts toward entriesAnalyzed (memory-store.test.ts already separately proves resilienceTimeline, a SCORE-trend-specific view, correctly and deliberately excludes unscored entries while store.entries keeps the full set - this is the intended separation, not data loss).",
+        "limits": "None against this title's own compound claim (restating typed entries as measured condition, and a score-absent entry disappearing from the timeline): the envelope never claims measured confidence for self-declared data, and the 'disappears from timeline' fact is real but scoped correctly - entriesAnalyzed/totalEntries (what every consuming narrative actually reports as organizational memory depth) use the full entries set, not the scored-only resilienceTimeline.",
+        "verificationNote": "npx vitest run apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts -> 6/6 passing. typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B156-GATE3-MEMORY-ENGINES-ENVELOPE-HONESTY",
+        "path": "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts;apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts",
+        "regressionTest": "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts;apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
+        "explanation": "Register-search-first find: the real exposure path for these 5 engines (defineFoundationalEngine's envelope, not the raw per-engine function) already refuses to fabricate confidence/evidence/reasoning/assumptions around officer-typed data - confirmed by the wrapper's own header comment and proved end-to-end this run. The 'score absent removes it from the timeline' detail is accurate but is the deliberately scoped, already-tested behavior of resilienceTimeline specifically (a resilience-SCORE-trend view); entriesAnalyzed/totalEntries (what gets reported as organizational memory depth) correctly use the full, unfiltered entries set. No code change needed; added the missing engine-level regression test proving the envelope path's honesty.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-DYNAMICS-ENGINES-EMBED-LITERAL-NUMBERS-AND-CLAIMS-AS-MEASUREMENTS",

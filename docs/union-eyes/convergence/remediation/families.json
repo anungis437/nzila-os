@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 720,
+ "corrected": 721,
  "partial": 31,
- "outstanding": 57,
- "accountedFor": 57,
+ "outstanding": 56,
+ "accountedFor": 56,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -127,16 +127,16 @@
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 7,
+   "defects": 6,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 7,
+    "MEDIUM": 6,
     "LOW": 0
    },
    "namedRoutes": 3,
    "namedFiles": 0,
    "tranches": {
-    "0B.7": 2,
+    "0B.7": 1,
     "0B.9": 1,
     "0B.10": 2,
     "0B.11": 1,
@@ -344,10 +344,6 @@
    }
   ],
   "F08-PII-DISCLOSURE-AND-PROJECTION": [
-   {
-    "id": "DEF-0B7-COGB-MEMORY-ENGINES-RESTATE-OFFICER-TYPED-ENTRIES-AS-MEASURED-CONDITION",
-    "severity": "MEDIUM"
-   },
    {
     "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-RELEASES-LATEST-VERSION-NOT-GRANTED-VERSION",
     "severity": "MEDIUM",

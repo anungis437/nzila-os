@@ -3,23 +3,23 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 720,
+    "overlayImplemented": 721,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 67,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 43,
+    "creditedByEarlierRuns": 68,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 44,
     "overlayPartial": 31,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 57,
-    "untouchedByOverlay": 26,
+    "unresolvedByOverlay": 56,
+    "untouchedByOverlay": 25,
     "qualificationVerified": 0,
     "closed": 0
   },
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 720,
+    "implemented": 721,
     "partial": 31,
-    "untouched": 26,
+    "untouched": 25,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
       "DEF-0B1-BILLING-SCHEDULER-LATENT",
@@ -63,7 +63,6 @@
       "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
       "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
       "DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS",
-      "DEF-0B7-COGB-MEMORY-ENGINES-RESTATE-OFFICER-TYPED-ENTRIES-AS-MEASURED-CONDITION",
       "DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST-EXTRAPOLATES-TWO-TYPED-SCORES",
       "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",
       "DEF-0B7-PLT-EQUITY-SNAPSHOT-SCHEMA-HAS-NO-SMALL-CELL-RULE",
@@ -660,6 +659,17 @@
       "files": [
         "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
         "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-COGB-MEMORY-ENGINES-RESTATE-OFFICER-TYPED-ENTRIES-AS-MEASURED-CONDITION",
+      "batch": "B156-GATE3-MEMORY-ENGINES-ENVELOPE-HONESTY",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts;apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
+      "files": [
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },
