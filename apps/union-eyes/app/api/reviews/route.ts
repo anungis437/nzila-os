@@ -24,6 +24,17 @@ import { caseAuthorizationResponse } from '@/lib/cases/case-authorization'
 
 export const dynamic = 'force-dynamic'
 
+// Review payloads can include complainant identities and privileged classifications.
+// Dynamic rendering alone does not prevent intermediary or browser HTTP caching.
+const PRIVATE_RESPONSE_HEADERS = { 'Cache-Control': 'no-store, private' } as const
+
+function privateJson(body: unknown, init?: { status?: number; headers?: Record<string, string> }): NextResponse {
+  return NextResponse.json(body, {
+    ...init,
+    headers: { ...init?.headers, ...PRIVATE_RESPONSE_HEADERS },
+  })
+}
+
 const openSchema = z.object({
   reviewType: z.enum(REVIEW_INTAKE_TYPES),
   adverseUserIds: z.array(z.string().min(1).max(255)).max(8).optional(),
@@ -75,18 +86,18 @@ function reviewErrorResponse(error: unknown): NextResponse {
       INVALID_CONTEXT: 400,
     }
     if (code === 'REVIEW_INTAKE_LIMIT') {
-      return NextResponse.json({ success: false, error: 'RATE_LIMITED', code }, { status: 429, headers: { 'Retry-After': '3600' } })
+      return privateJson({ success: false, error: 'RATE_LIMITED', code }, { status: 429, headers: { 'Retry-After': '3600' } })
     }
-    return NextResponse.json({ success: false, error: error.code, code }, { status: status[error.code] })
+    return privateJson({ success: false, error: error.code, code }, { status: status[error.code] })
   }
   const denied = caseAuthorizationResponse(error)
   if (denied) return denied
   if (error instanceof ApiError) {
-    return NextResponse.json({ success: false, error: error.code }, { status: error.code === ErrorCode.FORBIDDEN ? 403 : 401 })
+    return privateJson({ success: false, error: error.code }, { status: error.code === ErrorCode.FORBIDDEN ? 403 : 401 })
   }
   // Anything else (a database or row-level-security failure, a binding error) is logged and answered in the same structured shape.
   logger.error('review route failed', error instanceof Error ? error : new Error(String(error)))
-  return NextResponse.json({ success: false, error: 'INTERNAL_ERROR', code: 'INTERNAL_ERROR' }, { status: 500 })
+  return privateJson({ success: false, error: 'INTERNAL_ERROR', code: 'INTERNAL_ERROR' }, { status: 500 })
 }
 
 export async function GET() {
@@ -108,7 +119,7 @@ export async function GET() {
       }
       return result
     })
-    return NextResponse.json({ success: true, ...list })
+    return privateJson({ success: true, ...list })
   } catch (error) {
     return reviewErrorResponse(error)
   }
@@ -120,14 +131,14 @@ export async function POST(request: Request) {
     let raw: unknown
     try {
       const text = await readBoundedBody(request)
-      if (text === null) return NextResponse.json({ success: false, error: 'PAYLOAD_TOO_LARGE', code: 'PAYLOAD_TOO_LARGE' }, { status: 413 })
+      if (text === null) return privateJson({ success: false, error: 'PAYLOAD_TOO_LARGE', code: 'PAYLOAD_TOO_LARGE' }, { status: 413 })
       raw = JSON.parse(text)
     } catch {
-      return NextResponse.json({ success: false, error: 'INVALID_INPUT', code: 'INVALID_INPUT' }, { status: 400 })
+      return privateJson({ success: false, error: 'INVALID_INPUT', code: 'INVALID_INPUT' }, { status: 400 })
     }
     const parsed = openSchema.safeParse(raw)
     if (!parsed.success) {
-      return NextResponse.json({ success: false, error: 'VALIDATION_ERROR', code: 'VALIDATION_ERROR' }, { status: 400 })
+      return privateJson({ success: false, error: 'VALIDATION_ERROR', code: 'VALIDATION_ERROR' }, { status: 400 })
     }
     const { created, ...opened } = await withRLSContext({ organizationId: who.organizationId }, async (tx) =>
       openMemberReview(drizzleExecutor(tx), kernelDeps, {
@@ -138,7 +149,7 @@ export async function POST(request: Request) {
       }),
     )
     // A repeat of an already open review answers with that review (200) instead of writing another permanent row (201).
-    return NextResponse.json({ success: true, ...opened, alreadyOpen: !created }, { status: created ? 201 : 200 })
+    return privateJson({ success: true, ...opened, alreadyOpen: !created }, { status: created ? 201 : 200 })
   } catch (error) {
     return reviewErrorResponse(error)
   }
