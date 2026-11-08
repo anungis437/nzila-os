@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 716,
- "partial": 29,
- "outstanding": 61,
- "accountedFor": 61,
+ "corrected": 717,
+ "partial": 28,
+ "outstanding": 60,
+ "accountedFor": 60,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -196,11 +196,11 @@
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 18,
+   "defects": 17,
    "severity": {
     "HIGH": 0,
     "MEDIUM": 15,
-    "LOW": 3
+    "LOW": 2
    },
    "namedRoutes": 3,
    "namedFiles": 0,
@@ -208,7 +208,7 @@
     "0B.5": 2,
     "0B.6": 2,
     "0B.7": 5,
-    "0B.8": 3,
+    "0B.8": 2,
     "0B.10": 3,
     "0B.11": 1,
     "0B.12": 2
@@ -471,11 +471,6 @@
    {
     "id": "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
-    "severity": "LOW",
-    "partial": true
    },
    {
     "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",

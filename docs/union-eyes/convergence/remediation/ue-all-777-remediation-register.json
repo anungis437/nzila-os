@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 716,
-    "engineeringRemaining": 61,
+    "engineeringCorrected": 717,
+    "engineeringRemaining": 60,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 29
+    "engineeringPartial": 28
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -10711,17 +10711,36 @@
       "title": "The sync engine prevents concurrent runs with a process-local Set keyed organization, provider and type, and the integration factory caches adapter instances in a process-local Map keyed organization and provider that the sync route never evicts, so two instances can run the same synchronization at once and a reconfigured integration can keep serving the adapter built from the earlier configuration until the process restarts.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/lib/integrations/control-plane.ts",
+          "apps/union-eyes/lib/integrations/sync-engine.ts",
+          "apps/union-eyes/lib/services/cache-service.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/integrations/__tests__/control-plane-audit.test.ts",
+          "apps/union-eyes/lib/integrations/__tests__/sync-engine.test.ts",
+          "apps/union-eyes/lib/services/__tests__/cache-service.test.ts",
+          "apps/union-eyes/lib/services/__tests__/cache-service-lock.redis-integration.test.ts"
+        ],
+        "commits": [
+          "198c904188dc5b49f6bac98be02eae44d63313e3",
+          "c7281cdf5a22e50956e14d21d7e0d0c5e0133348"
+        ],
+        "repair": "Closes both halves this record's 'remaining' text left open. (1) Instance cache: the prior round's grep only checked app/api for integrationConfigs writes and found none; the actual writes are in lib/integrations/control-plane.ts (configureIntegrationForOrg, setIntegrationActivationForOrg), called by app/api/integrations/framework routes. Both now call IntegrationFactory.getInstance().clearCache(organizationId, provider) after their transaction commits, so a credential/settings/webhook/enabled change no longer keeps serving the adapter built from the prior configuration. Confirmed by grep across the whole tree (not just app/api) that these are the only .update(integrationConfigs)/.insert(integrationConfigs) call sites. (2) Sync concurrency: SyncEngine.executeSync now renews its distributed lock (cache-service.ts's existing, previously-unused extendLock, token-bound via its own Lua script) at half the 600s TTL; a renewal that fails or cannot be confirmed marks the lease lost, stops further renewal attempts, and downgrades an otherwise-successful result to PARTIAL (never masks an already-FAILED result). isLocked (and its only caller, isSyncRunning) now returns null, not false, when Redis is unreachable, so an outage can no longer be read as a confirmed 'not running'.",
+        "limits": "The new real-Redis integration test (cache-service-lock.redis-integration.test.ts) is opt-in (UE_TEST_REDIS_URL gate) and is not wired into any CI job in this change - it was run locally against a throwaway pinned redis:7-alpine container (6/6 passing) but CI does not yet guarantee it executes against a provisioned Redis service. No crash-recovery test simulates an actual killed process; crash recovery still relies on the pre-existing TTL-expiry safety net, which the real-Redis test does independently prove expires correctly.",
+        "verificationNote": "Workstream C (fix/ue-gate0-final-convergence): local vitest run confirms all 4 regression paths pass (control-plane-audit.test.ts 11/11, sync-engine.test.ts 18/18, cache-service.test.ts 61/61 combined with sync-engine, cache-service-lock.redis-integration.test.ts 6/6 run locally with UE_TEST_REDIS_URL set against a real container, 0/0 executed and cleanly skipped without it). Typecheck and eslint clean. Not a CI run at a recorded SHA."
+      },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
-        "path": "apps/union-eyes/lib/integrations/sync-engine.ts; apps/union-eyes/lib/integrations/__tests__/sync-engine.test.ts; apps/union-eyes/lib/services/cache-service.ts; apps/union-eyes/lib/services/__tests__/cache-service.test.ts",
-        "explanation": "P2 Gate 0 corrective convergence: fixed the sync-concurrency half of this defect. The sync engine's runningJobs process-local Set is removed; SyncEngine.executeSync now acquires a distributed Redis-backed lock (lib/services/cache-service.ts's existing acquireLock/releaseLock, unused by any other caller until now) keyed on organization:provider:type before any work begins, and releases it in the same finally block that used to clear the Set entry, so two app instances can no longer run the same organization/provider/type sync at once. The lock TTL (600s) is a generous safety net for a crashed process, not the normal release path \u2014 a healthy run releases its lock immediately on completion or failure. isSyncRunning() is now async and reads the lock (added isLocked() to cache-service.ts, a read-only redis.exists check using the lock's own key convention, since no existing helper exposed this); it has no production caller today (only tests), so this is not a breaking change to any route.",
-        "remaining": "The integration factory's instances Map (adapter object cache, lib/integrations/factory.ts) is still process-local: a reconfigured integration can still serve the adapter built from the earlier configuration until the process restarts. factory.ts already exposes clearCache(organizationId, provider), but grepped app/api for integrationConfigs and found no route that updates integration configuration and could call it \u2014 wiring real cache invalidation needs that call site to exist first, which is a separate, larger item.",
-        "regressionTest": "lib/services/__tests__/cache-service.test.ts (46/46, including 3 new isLocked cases, one proving it fails closed to false on a Redis error); lib/integrations/__tests__/sync-engine.test.ts (15/15, including a new test proving real mutual-exclusion: a second concurrent executeSync for the same organization/provider/type is refused with SYNC_IN_PROGRESS while the first is in flight, a different organization is not blocked, and the lock is released once the first completes). Verified as a genuine regression test: reverted sync-engine.ts to the old Set-based version via git stash (keeping the new test), observed 5 of 15 tests fail (cascading state pollution from the old Set never being cleared under the new test's call pattern), then restored the fix via git stash pop, confirming a clean diff and 15/15 passing again.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B146-GATE0-RESIDUAL-WORKSTREAM-C-SYNC-LEASE-AND-FACTORY-CACHE",
+        "path": "apps/union-eyes/lib/integrations/control-plane.ts; apps/union-eyes/lib/integrations/sync-engine.ts; apps/union-eyes/lib/services/cache-service.ts",
+        "regressionTest": "apps/union-eyes/lib/integrations/__tests__/control-plane-audit.test.ts; apps/union-eyes/lib/integrations/__tests__/sync-engine.test.ts; apps/union-eyes/lib/services/__tests__/cache-service.test.ts; apps/union-eyes/lib/services/__tests__/cache-service-lock.redis-integration.test.ts",
+        "explanation": "Both named mechanisms (process-local sync-concurrency guard, process-local instance cache) are no longer process-local-only: the guard now renews its distributed lock for long-running syncs, and the instance cache is invalidated at its real (lib-layer, not route-layer) write call sites. Real-Redis proof for the lock primitives is opt-in and not yet CI-wired, honestly noted in limits.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
