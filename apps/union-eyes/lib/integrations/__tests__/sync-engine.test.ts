@@ -4,13 +4,20 @@ import { IntegrationProvider, SyncType, SyncStatus } from '../types';
 const h = vi.hoisted(() => {
   const q: unknown[] = [];
   const shift = () => (q.length ? q.shift() : []);
+  const setCalls: Record<string, unknown>[] = [];
   const makeChain = () => {
     const c: Record<string, unknown> = {};
     for (const m of [
-      'select', 'from', 'where', 'orderBy', 'limit', 'set', 'values', 'returning',
+      'select', 'from', 'where', 'orderBy', 'limit', 'values', 'returning',
       'onConflictDoUpdate', 'update', 'insert', 'delete', 'innerJoin', 'leftJoin',
       'offset', 'groupBy',
     ]) c[m] = () => c;
+    // set() is recorded (not just chained) so a test can see exactly what updateSyncLog wrote - in particular, the
+    // status/error it chose when a sync's lease was lost mid-run.
+    c.set = (changes: Record<string, unknown>) => {
+      setCalls.push(changes);
+      return c;
+    };
     (c as { then: unknown }).then = (
       res: (v: unknown) => unknown,
       rej: (e: unknown) => unknown
@@ -47,8 +54,14 @@ const h = vi.hoisted(() => {
     locks.delete(key);
     return true;
   });
+  // Token-checked, like releaseLock: only "renews" (a no-op for this in-memory double, which has no TTL/expiry of its
+  // own) when the caller's token still matches what is held. A stale or already-lost token returns false.
+  const extendLock = vi.fn(async (name: string, token: string, _ttlSeconds?: number, namespace = 'lock') => {
+    const key = lockKey(name, namespace);
+    return locks.get(key) === token;
+  });
   const isLocked = vi.fn(async (name: string, namespace = 'lock') => locks.has(lockKey(name, namespace)));
-  return { q, db, factory, cron, cronCb: undefined as undefined | (() => unknown), locks, acquireLock, releaseLock, isLocked };
+  return { q, db, factory, cron, cronCb: undefined as undefined | (() => unknown), locks, acquireLock, releaseLock, extendLock, isLocked, setCalls };
 });
 
 vi.mock('@/db/db', () => ({ db: h.db }));
@@ -61,6 +74,7 @@ vi.mock('@/lib/logger', () => ({
 vi.mock('@/lib/services/cache-service', () => ({
   acquireLock: h.acquireLock,
   releaseLock: h.releaseLock,
+  extendLock: h.extendLock,
   isLocked: h.isLocked,
 }));
 
@@ -86,6 +100,7 @@ describe('SyncEngine', () => {
   beforeEach(() => {
     h.q.length = 0;
     h.locks.clear();
+    h.setCalls.length = 0;
     vi.clearAllMocks();
     h.cron.validate.mockReturnValue(true);
     h.factory.getIntegration.mockResolvedValue(makeIntegration());
@@ -151,6 +166,100 @@ describe('SyncEngine', () => {
     expect(await engine.isSyncRunning('org1', IntegrationProvider.WORKDAY, SyncType.FULL)).toBe(false);
   });
 
+
+  // DEF: SyncEngine lease renewal (Workstream C) - a sync whose external calls outlive the lock TTL must keep renewing
+  // its own lock, or a second instance could acquire the same jobKey while this one is still running.
+  it('renews the lock before the TTL would expire for a sync that runs longer than the renewal interval', async () => {
+    push([{ id: 'log-renew' }]); // createSyncLog
+    let resolveSync: (v: unknown) => void = () => {};
+    const inFlight = new Promise((resolve) => { resolveSync = resolve; });
+    h.factory.getIntegration.mockResolvedValue({ sync: () => inFlight });
+
+    vi.useFakeTimers();
+    try {
+      const run = engine.executeSync('org1', IntegrationProvider.WORKDAY, { type: SyncType.FULL });
+      await vi.advanceTimersByTimeAsync(0); // let acquireLock/createSyncLog settle
+
+      // Advance past one renewal tick (TTL/2 = 300s at the current 600s TTL).
+      await vi.advanceTimersByTimeAsync(300_000);
+      expect(h.extendLock).toHaveBeenCalledTimes(1);
+      expect(h.extendLock).toHaveBeenCalledWith(
+        'org1:workday:full', expect.any(String), 600, 'integration-sync',
+      );
+      // The renewal succeeded (the honest-double extendLock checks the token still matches), so the lock the
+      // concurrency check reads is still held well past the halfway point of the original TTL.
+      expect(await engine.isSyncRunning('org1', IntegrationProvider.WORKDAY, SyncType.FULL)).toBe(true);
+
+      push({}); // updateSyncLog
+      resolveSync({ success: true, recordsProcessed: 1, recordsCreated: 1, recordsUpdated: 0, recordsFailed: 0, cursor: 'c', errors: [] });
+      const result = await run;
+      expect(result.success).toBe(true);
+      expect(result.metadata?.leaseRenewalLost).toBeUndefined();
+      expect(h.setCalls.at(-1)).toMatchObject({ status: SyncStatus.SUCCESS });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('stops renewing and downgrades a successful result to PARTIAL when a renewal tick fails (lease lost)', async () => {
+    push([{ id: 'log-lost' }]); // createSyncLog
+    let resolveSync: (v: unknown) => void = () => {};
+    const inFlight = new Promise((resolve) => { resolveSync = resolve; });
+    h.factory.getIntegration.mockResolvedValue({ sync: () => inFlight });
+    // Simulates either another holder having taken over after an expiry, or Redis being unreachable for the renewal.
+    h.extendLock.mockResolvedValue(false);
+
+    vi.useFakeTimers();
+    try {
+      const run = engine.executeSync('org1', IntegrationProvider.WORKDAY, { type: SyncType.FULL });
+      await vi.advanceTimersByTimeAsync(0);
+
+      await vi.advanceTimersByTimeAsync(300_000); // first renewal tick fails -> lease marked lost
+      expect(h.extendLock).toHaveBeenCalledTimes(1);
+
+      // A second full interval period must not retry: once the lease is lost, no further renewal is attempted.
+      await vi.advanceTimersByTimeAsync(300_000);
+      expect(h.extendLock).toHaveBeenCalledTimes(1);
+
+      push({}); // updateSyncLog
+      resolveSync({ success: true, recordsProcessed: 1, recordsCreated: 1, recordsUpdated: 0, recordsFailed: 0, cursor: 'c', errors: [] });
+      const result = await run;
+
+      // The sync itself still reports success (we cannot interrupt an in-flight third-party call), but a result whose
+      // exclusivity could not be guaranteed for the full duration is never reported as a clean success.
+      expect(result.success).toBe(true);
+      expect(result.metadata).toMatchObject({ leaseRenewalLost: true });
+      expect(h.setCalls.at(-1)).toMatchObject({ status: SyncStatus.PARTIAL });
+      expect(String(h.setCalls.at(-1)?.error)).toMatch(/lease/i);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a sync that already failed stays FAILED (not masked as PARTIAL) even if the lease was also lost', async () => {
+    push([{ id: 'log-failed-and-lost' }]); // createSyncLog
+    let rejectSync: (e: unknown) => void = () => {};
+    const inFlight = new Promise((_resolve, reject) => { rejectSync = reject; });
+    h.factory.getIntegration.mockResolvedValue({ sync: () => inFlight });
+    h.extendLock.mockResolvedValue(false);
+
+    vi.useFakeTimers();
+    try {
+      const run = engine.executeSync('org1', IntegrationProvider.WORKDAY, { type: SyncType.FULL });
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(300_000);
+      expect(h.extendLock).toHaveBeenCalledTimes(1);
+
+      rejectSync(new Error('adapter boom'));
+      await expect(run).rejects.toThrow('adapter boom');
+      // executeSync rethrows before writing a sync-log update in this path (matches the pre-existing throw/catch
+      // behaviour); the lease-lost renewal loop still must not keep running once the call has settled.
+      await vi.advanceTimersByTimeAsync(300_000);
+      expect(h.extendLock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 
   it('executeFullSync delegates to executeSync', async () => {
     push([{ id: 'log2' }]);

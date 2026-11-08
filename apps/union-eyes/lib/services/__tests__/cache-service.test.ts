@@ -408,11 +408,11 @@ describe('cache-service', () => {
       expect(await isLocked('my-lock')).toBe(false);
     });
 
-    it('fails closed to false on a Redis error', async () => {
+    it('returns null (not false), distinct from a confirmed unlocked key, on a Redis error', async () => {
       redisMocks.mockExists.mockRejectedValue(new Error('redis down'));
       const { initRedis, isLocked } = await import('../cache-service');
       initRedis();
-      expect(await isLocked('my-lock')).toBe(false);
+      expect(await isLocked('my-lock')).toBeNull();
     });
   });
 
