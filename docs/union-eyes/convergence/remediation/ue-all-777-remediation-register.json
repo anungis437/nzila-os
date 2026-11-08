@@ -92,7 +92,7 @@
     "engineeringCorrected": 721,
     "engineeringRemaining": 56,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 31
+    "engineeringPartial": 32
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -8739,10 +8739,34 @@
       "title": "The propagation map treats two tags that appear together in two interviews as a dependency whose direction is whichever tag has the lower interview count, marks a tag in one interview as a sole expert whose loss \"would create compliance gap\", and derives path impact, exposure and recovery weeks from fixed formulas, so inferred statements about dependency, sole ownership and recovery time are returned as findings with no record of an actual process, system or owner.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "FIXED_THIS_RUN",
+        "paths": [
+          "apps/union-eyes/lib/knowledge-transfer/propagation/propagation-models.ts",
+          "apps/union-eyes/lib/knowledge-transfer/propagation/dependency-propagator.ts",
+          "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/dependency-propagator.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/dependency-propagator.test.ts"
+        ],
+        "commits": [
+          "d843d2d87"
+        ],
+        "repair": "Added a PROPAGATION_METHODOLOGY_NOTE constant and a methodologyNote field on PropagationMap (present on both the empty and populated return paths) stating every figure is inferred from exit-interview tag frequency/co-occurrence, never verified against a real org chart, system-ownership record or recovery drill. Reworded every sensitivityReason branch (the exact title-quoted 'Sole expert...loss would create compliance gap' phrase is gone) and the edge rationale/direction text to name the pattern they rest on and explicitly say 'not confirmed against any role or ownership record', instead of asserting the inferred condition as settled fact.",
+        "limits": "The underlying computation is unchanged and remains genuinely heuristic: bottleneck/sole-source/dependency-direction/recovery-week figures are still derived purely from interview-tag frequency and co-occurrence counts, not from any actual process, system or owner record - this run makes that basis honestly disclosed in every returned string, it does not replace the heuristic with verified organizational data (no such data source exists for this feature). Register kept at PARTIAL, not upgraded to IMPLEMENTED, because the title's underlying epistemic gap (inference substituting for verification) is disclosed, not closed.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/propagation/__tests__/dependency-propagator.test.ts -> 3/3 passing (extended with methodologyNote/hedged-text assertions). Broader sweep lib/knowledge-transfer/propagation + lib/organizational-operating-intelligence -> 5 files/38 passing. typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B157-GATE3-PROPAGATION-DISCLOSURE",
+        "path": "apps/union-eyes/lib/knowledge-transfer/propagation/propagation-models.ts;apps/union-eyes/lib/knowledge-transfer/propagation/dependency-propagator.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/dependency-propagator.test.ts",
+        "explanation": "Fixed the concrete, title-quoted overclaiming text this run: sensitivityReason/rationale strings no longer state inferred dependency/sole-ownership/compliance-gap conclusions as settled fact: a new methodologyNote field and reworded reason/rationale strings explicitly name the tag-frequency/co-occurrence basis and say 'not confirmed' against any real record. Kept at PARTIAL because the underlying computation remains a heuristic (no verified org-chart/system-ownership/recovery-drill data source exists to replace it with) - this closes the disclosure gap, not the heuristic-vs-verified gap itself.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-COGB-TOPIC-CATEGORY-BY-SUBSTRING-DRIVES-CRITICAL-SENSITIVITY",
