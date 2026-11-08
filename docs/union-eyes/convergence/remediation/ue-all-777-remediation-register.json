@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 48,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 715,
-    "engineeringRemaining": 62,
+    "engineeringCorrected": 716,
+    "engineeringRemaining": 61,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 28
+    "engineeringPartial": 29
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -9431,10 +9431,31 @@
       "title": "The public event registration component fetches /api/events/{slug} without credentials and renders ticket price and free status, but the route requires an authenticated session at the member floor, compares the path value to the uuid primary key of calendar_events, and calendar_events has no slug, ticket price or free flag, so the public page can never load an event through it and a slug that is not a uuid reaches the database as a uuid comparison.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [],
+        "regressionPaths": [
+          "apps/union-eyes/scripts/__tests__/orphan-census.test.ts",
+          "apps/union-eyes/scripts/__tests__/page-link-census.test.ts"
+        ],
+        "commits": [
+          "a0404b79b31a2df3a878a6d5b3fa61aae928372c"
+        ],
+        "repair": "Re-investigated during Workstream A triage. The caller this finding describes, apps/union-eyes/components/public/event-registration-page.tsx (684 lines), was deleted outright (not refactored) in commit a0404b79b, a prior-session 'mismatch census' cleanup batch that removed frontend code found calling endpoints/fields the backend does not serve. Independently confirmed at this commit: the file no longer exists anywhere in the tree (git log/ls), no component anywhere calls /api/events/{slug} expecting ticketPrice or a free flag (repo-wide grep for ticketPrice/isFree/is_free: zero matches), and calendar_events genuinely has no slug, ticket_price or is_free column, matching the finding's own claim. The surviving app/api/events/[id]/route.ts correctly requires an authenticated member-floor session and delegates to the canonical calendar/events/[id] route.",
+        "limits": "No regression test specifically targets this exact defect id; evidence is the repo-wide orphan/page-link census gates (which would fail if a component called a non-existent public events-by-slug shape) plus direct source/git-history verification in this session, not a dedicated unit test.",
+        "verificationNote": "Workstream A (fix/ue-gate0-final-convergence): source and git-history verification only (grep + git log/show at this commit), plus independently re-ran the two repo-wide orphan/page-link gate tests (24/24 passing) rather than trusting the absence alone. Not a CI run at a recorded SHA; no regression test enumerated specific to this record."
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B145-GATE0-RESIDUAL-WORKSTREAM-A-DEMO-DATA-AND-ORPHAN-VERIFICATION",
+        "path": "apps/union-eyes/app/api/events/[id]/route.ts",
+        "regressionTest": "apps/union-eyes/scripts/__tests__/orphan-census.test.ts; apps/union-eyes/scripts/__tests__/page-link-census.test.ts",
+        "explanation": "The broken public caller (components/public/event-registration-page.tsx) was deleted in a0404b79b, predating this session; no replacement calls the non-existent public shape. The events/[id] route remains correctly authenticated. Register-only correction, no source change in this commit.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-PLT-EVENT-OCCURRENCES-PATH-ADDRESSES-WHOLE-EVENT-ROW",
@@ -15456,10 +15477,35 @@
       "title": "The demo-data route (officer floor, pilot or demo runtime) inserts four employers named for real federal departments with e-mail addresses on real government domains (lr-demo@tbs-sct.gc.ca and others) and fictional grievances with named grievants into the employers and grievances tables of the officer organization, the same tables that hold real records, with no demo marker column on either row (only a GRV-DEMO- number prefix and an lr-demo@ address prefix), so the seeded cases are counted as cases managed by the pilot metrics and listed with real grievances, and the purge deletes every row of the organization whose grievance number starts with GRV-DEMO- or whose employer e-mail starts with lr-demo@ whether or not the seed created it.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "SOURCE_PATCHED_CI_PENDING",
+        "paths": [
+          "apps/union-eyes/db/schema/domains/pilot/pilot-demo-seeds.ts",
+          "apps/union-eyes/db/migrations/20261108_pilot_demo_seeds_row_ids.sql",
+          "apps/union-eyes/db/migrations/20261108_pilot_demo_seeds_row_ids_rollback.sql",
+          "apps/union-eyes/app/api/pilot/demo-data/route.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/app/api/__tests__/pilot-demo-data.route.test.ts"
+        ],
+        "repair": "pilot_demo_seeds gains employer_ids/grievance_ids (text[]); the seed route now captures the exact client-assigned row ids on the marker, and the purge route deletes by exact id (inArray) instead of a GRV-DEMO-/lr-demo@ name/email pattern match, so it removes precisely the rows this seed created. Rows seeded before this migration keep employer_ids/grievance_ids NULL; the purge falls back to the prior pattern-match only for those legacy markers, so already-seeded pilot orgs are not stranded with undeletable demo data.",
+        "limits": "Does not add a demo marker column to the live employers/grievances tables themselves, so seeded demo rows remain indistinguishable from real rows to any OTHER code path (e.g. pilot metrics counting cases managed) that does not go through this route. That remains a separate, tracked gap.",
+        "verificationNote": "Workstream A (fix/ue-gate0-final-convergence): local vitest run confirms app/api/__tests__/pilot-demo-data.route.test.ts (11/11, 4 new) passes. Migration applied twice against a throwaway pgvector/pgvector:0.8.1-pg16 container (idempotent, second apply NOTICE-skips existing columns) and the rollback verified to cleanly drop both columns. Typecheck and eslint clean. Not a CI run at a recorded SHA.",
+        "commits": [
+          "56eda57771517bd2bb24607caebf1e992f9b2d04"
+        ]
+      },
+      "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B145-GATE0-RESIDUAL-WORKSTREAM-A-DEMO-DATA-AND-ORPHAN-VERIFICATION",
+        "path": "apps/union-eyes/db/schema/domains/pilot/pilot-demo-seeds.ts; apps/union-eyes/db/migrations/20261108_pilot_demo_seeds_row_ids.sql; apps/union-eyes/app/api/pilot/demo-data/route.ts",
+        "regressionTest": "apps/union-eyes/app/api/__tests__/pilot-demo-data.route.test.ts",
+        "explanation": "Purge now deletes by the exact row ids this seed created (employer_ids/grievance_ids captured at seed time), not by name/email pattern; legacy markers without these columns fall back to the prior pattern-match purge. Does not add a demo marker to the live tables, so pilot-metrics miscounting (a separate concern named in the same finding) is not addressed.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B10-PIL-PILOT-ADOPTION-ENGAGEMENT-AND-RESOLUTION-FIGURES-ARE-ROW-UPDATE-PROXIES-AND-OPEN-CASE-AGE-WITH-STORED-FIGURES-AS-FALLBACK",
