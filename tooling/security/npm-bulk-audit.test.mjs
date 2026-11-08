@@ -424,3 +424,13 @@ test('unexpected top-level sections cannot truncate the resolved dependency inve
   withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n  node-forge@1.4.0:\n'.replaceAll('\n', '\n'), (file) =>
     assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici', 'node-forge']))
 })
+
+
+test('YAML document boundaries and bare top-level scalars cannot evade snapshot inventory', () => {
+  for (const separator of ['---', '...', 'unexpected-scalar']) {
+    withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n' + separator + '\n  node-forge@1.4.0:\n', (file) =>
+      assert.throws(() => parseLockfilePackages(file), /Unexpected unindented content/, separator))
+  }
+  withLockfile('lockfileVersion: 9.0\nsnapshots:\n  undici@7.29.1:\n# harmless comment\n\n  node-forge@1.4.0:\n', (file) =>
+    assert.deepEqual([...parseLockfilePackages(file).keys()], ['undici', 'node-forge']))
+})
