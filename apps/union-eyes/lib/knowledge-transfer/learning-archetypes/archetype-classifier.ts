@@ -99,7 +99,11 @@ function scoreFits(
   const score = (archetypeId: LearningArchetypeId, raw: number): Archetypefit => ({
     archetypeId,
     score: Math.min(Math.max(Math.round(raw), 0), 100),
-    confidence: totalInteractions >= 10 ? 80 : totalInteractions >= 5 ? 60 : 40,
+    // Zero recorded interactions means nothing was observed to classify, not a confidently-measured archetype -
+    // the fitting formulas below would otherwise still clamp a 'governance_stagnant' fit to its ceiling from
+    // nothing but an empty history (see classifyLearningArchetype's own zero-interaction guard, which this
+    // floor backs up rather than relies on alone).
+    confidence: totalInteractions === 0 ? 0 : totalInteractions >= 10 ? 80 : totalInteractions >= 5 ? 60 : 40,
   });
 
   fits.push(score('proactive_stabilizer',
@@ -152,7 +156,6 @@ function scoreFits(
   ));
 
   fits.push(score('governance_stagnant',
-    (totalInteractions === 0 ? 90 : 0) +
     (totalInteractions < 3 ? 50 : 0) +
     (trend === 'insufficient_data' ? 40 : 0) +
     (trend === 'declining' && totalInteractions < 5 ? 20 : 0)
@@ -218,8 +221,14 @@ export async function classifyLearningArchetype(orgId: string): Promise<Archetyp
   if (govCount > 0) evidence.push(`${govCount} governance decisions documented.`);
   if (sessionCount > 0) evidence.push(`${sessionCount} reasoning sessions in history.`);
   if (scores.length > 0) evidence.push(`Resilience trend: ${trend} (${scores.length} data points).`);
+  // DEF-0B7-COGA-PROFILES: zero recorded interactions is an empty history, never evidence that governance
+  // itself is stagnant, fragmented or any other archetype - say so explicitly rather than letting whichever
+  // archetype's formula happens to score highest on zero inputs read as a confident characterization.
+  if (totalInteractions === 0) evidence.push('No cognition memory entries or reasoning sessions recorded for this organization yet.');
 
-  const evolutionContext = secondaryArchetype
+  const evolutionContext = totalInteractions === 0
+    ? `No governance interactions have been recorded yet, so "${primaryArchetype.name}" is not a characterization of this organization's governance - it is the nearest label available on an empty history; classificationConfidence is 0.`
+    : secondaryArchetype
     ? `Primary archetype "${primaryArchetype.name}" with secondary characteristics of "${secondaryArchetype.name}" — indicating a transitional governance posture.`
     : `Strongly characterized as "${primaryArchetype.name}" based on available governance history.`;
 
@@ -235,5 +244,11 @@ export async function classifyLearningArchetype(orgId: string): Promise<Archetyp
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
       'These archetypes characterize organizational governance style — not individual employees. Classifications are derived from organizational continuity records and are intended for governance strategy planning.',
+    methodologyNote:
+      'Archetype fit scores, governance culture/momentum/coherence postures and adaptive-resilience narratives are ' +
+      'all derived from counts, types and dates of cognition memory entries an officer chooses to type in through ' +
+      'the memory route and reasoning-session activity - they measure use of these analytics tools and officer-' +
+      'entered scores, not verified governance decisions. classificationConfidence is 0 when there are no recorded ' +
+      'interactions at all.',
   };
 }

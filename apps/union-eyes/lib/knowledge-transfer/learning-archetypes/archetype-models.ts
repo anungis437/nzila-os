@@ -53,10 +53,12 @@ export interface ArchetypeClassificationResult {
   classificationEvidence: string[];
   /** Archetype evolution context — how this org has moved archetypically. */
   evolutionContext: string;
-  /** Classification confidence 0–100. */
+  /** Classification confidence 0–100; 0 when there are no recorded interactions at all. */
   classificationConfidence: number;
   /** Number of entries analyzed. */
   entriesAnalyzed: number;
   /** Governance-safe disclaimer. */
   interpretationGuidance: string;
+  /** Discloses that fits/postures are derived from officer-entered counts and types, not verified governance decisions. */
+  methodologyNote: string;
 }
