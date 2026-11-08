@@ -70,7 +70,17 @@ describe('member review intake', () => {
     await k.grantMandate('governance_review', U.auditor, ['monitor'], { scope: { resourceIds: [opened.id] } })
     await k.grantMandate('governance_review', U.reviewer, ['monitor'], { scope: { resourceIds: [opened.id] } })
 
-    const allowed = await k.as(U.auditor)((t) => listMemberReviewIntake(t, k.deps, { organizationId: ORG, actorUserId: U.auditor }))
+    const capturedAuthority: Array<{ reviewId: string; sources: readonly { kind: string; id: string; instrument: string }[] }> = []
+    const allowed = await k.as(U.auditor)((t) => listMemberReviewIntake(t, k.deps, {
+      organizationId: ORG, actorUserId: U.auditor,
+      onOversightAuthorization: (reviewId, sources) => capturedAuthority.push({ reviewId, sources }),
+    }))
+    expect(capturedAuthority).toHaveLength(1)
+    expect(capturedAuthority[0].reviewId).toBe(opened.id)
+    expect(capturedAuthority[0].sources).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: 'mandate', id: expect.any(String), instrument: expect.any(String) }),
+    ]))
+    expect(JSON.stringify(allowed)).not.toContain(capturedAuthority[0].sources[0].id)
     expect(allowed.oversight).toEqual([
       expect.objectContaining({ id: opened.id, reviewType: 'appeal', complainantUserId: U.member2, classification: 'standard' }),
     ])
