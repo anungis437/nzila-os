@@ -92,7 +92,7 @@
     "engineeringCorrected": 721,
     "engineeringRemaining": 56,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 35
+    "engineeringPartial": 36
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -7937,10 +7937,34 @@
       "title": "The copilot returns an evidence envelope built from the aggregate counts and fixed sentences (three reasoning steps whose first claims a retrieval from published exit interviews that the model never received, fixed assumptions, evidence confidence high) around a model answer whose claims are linked to none of it, and the envelope is not persisted (explainabilityRef null), so the history shows no lineage although the engine header says each response is persisted with its explainability envelope.",
       "ledgerMilestone": "NOT_IN_PRIORITY_REMEDIATION_LEDGER",
       "priorEvidence": null,
-      "currentRun": null,
-      "currentHeadVerification": "NOT_REQUALIFIED_IN_THIS_RUN",
+      "currentRun": {
+        "state": "FIXED_THIS_RUN",
+        "paths": [
+          "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-models.ts",
+          "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts",
+          "apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts"
+        ],
+        "regressionPaths": [
+          "apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts"
+        ],
+        "commits": [
+          "4e30417f8"
+        ],
+        "repair": "Fixed the two concrete, title-quoted claims: (1) explainabilityRef was hardcoded to null on every stored message despite the engine's own header comment claiming responses are 'persisted with explainability envelope' - replaced the field with CopilotMessage.explainability (the real envelope), persisted inline in the JSONB messages array; (2) reasoning step 1 said 'Retrieved organizational dependency propagation map from published exit interviews' as if the MODEL performed a retrieval - reworded all 3 steps to say the SYSTEM computed/supplied context vs what the model did with it.",
+        "limits": "The title also names 'fixed assumptions' and 'evidence confidence high' - the 3 assumption strings passed to buildExplainabilityEnvelope and the hardcoded confidence:'high' on propagation/resilience evidence references are UNCHANGED this run; they remain fixed text/values not derived from the specific interaction. This is why the record stays at PARTIAL.",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts -> 17/17 passing (new test proves persistence + no false retrieval claim, via an upgraded sql mock that preserves interpolated values). Broader sweep (copilot + exit-interviews routes) -> 2 files/23 passing. typecheck clean."
+      },
+      "currentHeadVerification": "VERIFIED_AT_CURRENT_HEAD",
       "institutionalAcceptance": "NOT_RECORDED",
-      "closed": false
+      "closed": false,
+      "engineeringCorrection": {
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
+        "batch": "B161-GATE3-COPILOT-EXPLAINABILITY-PERSISTENCE",
+        "path": "apps/union-eyes/lib/knowledge-transfer/copilot/copilot-models.ts;apps/union-eyes/lib/knowledge-transfer/copilot/copilot-engine.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts",
+        "explanation": "Fixed 2 of the title's 3 concrete claims this run: the envelope is now genuinely persisted (no more dangling explainabilityRef:null), and the first reasoning step no longer claims the model performed a retrieval it never did. The 'fixed assumptions' and 'evidence confidence high' claims remain true at current HEAD (both are still hardcoded, not derived per-interaction) - kept at PARTIAL pending that remaining work.",
+        "sourceBranch": "fix/ue-gate0-final-convergence"
+      }
     },
     {
       "defectId": "DEF-0B7-EXC-COPILOT-CONTEXT-IS-CLIENT-SUPPLIED-HISTORY",
