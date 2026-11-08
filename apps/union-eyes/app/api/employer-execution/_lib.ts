@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash, createHmac, timingSafeEqual } from "crypto";
 import {
   buildExecutableRules,
   calculatePayrollRun,
@@ -13,6 +13,48 @@ import {
 
 export function sha256(input: string): string {
   return createHash("sha256").update(input).digest("hex");
+}
+
+/**
+ * DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH: the evidence chain's seal and link id were a plain, unkeyed sha256 of public
+ * fields (entity type, run id, manifest hash) - anyone able to write the artifact rows could recompute a matching hash
+ * for tampered content, so the chain still "verified". EVIDENCE_SEAL_KEY is the same institution-provisioned HMAC key
+ * lib/evidence-export.ts already uses for case evidence packs (lib/config/env-registry.ts documents it: "HMAC key that
+ * seals exported evidence packs"); it was registered but never wired into this employer-execution evidence chain.
+ * Fails closed in production: an unset or too-short key throws rather than silently falling back to an unkeyed hash.
+ */
+function getEvidenceSealKey(): string {
+  const key = process.env.EVIDENCE_SEAL_KEY;
+  if (!key || key.length < 32) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("EVIDENCE_SEAL_KEY environment variable (>= 32 characters) is required in production");
+    }
+    return "dev-evidence-seal-key-not-for-production-use-only";
+  }
+  return key;
+}
+
+/** HMAC-SHA256 hex digest, keyed by EVIDENCE_SEAL_KEY. Use for every value a chain or caller trusts as tamper-evident
+ *  (the chain link id, the seal); never for plain content-addressing hashes (artifact/manifest/row hashes), which stay
+ *  unkeyed sha256 since their purpose is deduplication/content-identification, not authentication. */
+function sealedHash(input: string): string {
+  return createHmac("sha256", getEvidenceSealKey()).update(input).digest("hex");
+}
+
+/** Recomputes the seal from the claimed entity type, run id and manifest hash and compares it to the stored seal in
+ *  constant time. Returns false (not a throw) on any mismatch, including a key reachable only in a different
+ *  environment - a caller that cannot verify must treat the evidence as unverified, not crash the request. */
+export function verifyEvidenceSeal(input: { entityType: string; runRefId: string; manifestHash: string; seal: string }): boolean {
+  let expected: string;
+  try {
+    expected = sealedHash(`${input.entityType}:${input.runRefId}:${input.manifestHash}`);
+  } catch {
+    return false;
+  }
+  const left = Buffer.from(expected, "utf8");
+  const right = Buffer.from(input.seal, "utf8");
+  if (left.length !== right.length) return false;
+  return timingSafeEqual(left, right);
 }
 
 export type RuleItemInput = {
@@ -232,7 +274,7 @@ export function createEvidenceChainLink(input: {
   parent?: Pick<EvidenceChainLink, "linkId" | "sealHash" | "chainDepth"> | null;
 }): EvidenceChainLink {
   return {
-    linkId: sha256(`${input.entityType}:${input.targetEntityId}:${input.manifestHash}`),
+    linkId: sealedHash(`${input.entityType}:${input.targetEntityId}:${input.manifestHash}`),
     organizationId: input.organizationId,
     entityType: input.entityType,
     targetEntityId: input.targetEntityId,
@@ -331,7 +373,7 @@ export function createEvidencePack(input: {
   };
 
   const manifestHash = sha256(JSON.stringify(manifest));
-  const seal = sha256(`${input.entityType}:${input.runRefId}:${manifestHash}`);
+  const seal = sealedHash(`${input.entityType}:${input.runRefId}:${manifestHash}`);
   const chainLink = createEvidenceChainLink({
     organizationId: input.organizationId,
     entityType: input.entityType,
