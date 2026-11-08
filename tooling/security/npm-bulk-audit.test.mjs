@@ -47,6 +47,16 @@ test('registry response is strictly typed and bound to installed packages', () =
   )
 })
 
+test('registry advisory package aliases cannot contradict the audited package', () => {
+  const packages = new Map([['node-forge', new Set(['1.4.0'])]])
+  const advisory = { id: 1244017, severity: 'high', title: 'PEM DoS', vulnerable_versions: '<1.4.1' }
+  for (const alias of ['package', 'module_name', 'name']) {
+    assert.throws(() => normalizeAdvisoryResponse({ 'node-forge': [{ ...advisory, [alias]: 'unrelated-package' }] }, packages), /Conflicting advisory package identity/)
+    assert.throws(() => normalizeAdvisoryResponse({ 'node-forge': [{ ...advisory, [alias]: null }] }, packages), /Conflicting advisory package identity/)
+  }
+  assert.equal(normalizeAdvisoryResponse({ 'node-forge': [{ ...advisory, package: 'node-forge', module_name: 'node-forge' }] }, packages)['1244017'].package, 'node-forge')
+})
+
 test('missing or empty vulnerable version ranges cannot certify advisory coverage', () => {
   const packages = new Map([['node-forge', new Set(['1.4.0'])]])
   for (const range of [undefined, null, '', '   ', 42]) {
