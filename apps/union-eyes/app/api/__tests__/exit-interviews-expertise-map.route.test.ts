@@ -60,4 +60,24 @@ describe('exit-interviews/expertise-map route', () => {
     // A `data` key of its own would reach the screen as json.data.data, one level below where it reads `domains`.
     expect(result).not.toHaveProperty('data');
   });
+
+  // DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS: averageRiskScore read 0 for a domain no interview ever
+  // scored, indistinguishable from a domain genuinely scored 0. hasRiskData names which one it is.
+  it('reports hasRiskData: true when a domain has a scored interview, false when none does', async () => {
+    m.db.select.mockReturnValue({
+      from: vi.fn(() => ({
+        where: vi.fn(async () => [
+          { id: 'i1', roleInUnion: 'steward', expertiseTags: ['payroll'], topics: [], continuityRiskScore: 60 },
+          { id: 'i2', roleInUnion: 'officer', expertiseTags: ['scheduling'], topics: [], continuityRiskScore: null },
+        ]),
+      })),
+    } as any);
+    const { GET } = await loadRoute();
+    const result = await GET({ organizationId: 'org_1' });
+
+    const payroll = result.domains.find((d: { domain: string }) => d.domain === 'payroll');
+    const scheduling = result.domains.find((d: { domain: string }) => d.domain === 'scheduling');
+    expect(payroll).toMatchObject({ hasRiskData: true, averageRiskScore: 60 });
+    expect(scheduling).toMatchObject({ hasRiskData: false, averageRiskScore: 0 });
+  });
 });

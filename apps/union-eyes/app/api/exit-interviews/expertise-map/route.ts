@@ -110,6 +110,9 @@ export const GET = withApi(
         coverageCount: data.coverageCount,
         roles: [...data.roles],
         isSingleSource,
+        // 0 is a real possible average, so a reader cannot tell "no interview for this domain carried a risk score" from
+        // "the recorded risk is zero" by the number alone - hasRiskData names which one this is.
+        hasRiskData: data.riskCount > 0,
         averageRiskScore:
           data.riskCount > 0 ? Math.round(data.totalRisk / data.riskCount) : 0,
         riskLevel: riskLevel(data.coverageCount, isSingleSource),
