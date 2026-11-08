@@ -7,6 +7,12 @@
  * All models remain organizationally scoped — no employee evaluation.
  */
 
+/** Carried verbatim on every PropagationMap; see the field's own doc comment for why. */
+export const PROPAGATION_METHODOLOGY_NOTE =
+  'Inferred from exit-interview tag frequency and co-occurrence, not from a verified org chart, system-ownership ' +
+  'record, process document or recovery drill. Treat direction, sensitivity, dependency and recovery-time figures ' +
+  'as pattern-based estimates to investigate, not as findings about a real process, system or owner.';
+
 export interface DependencyNode {
   /** Unique identifier for this dependency node */
   id: string;
@@ -113,6 +119,14 @@ export interface OperationalCouplingAnalysis {
 export interface PropagationMap {
   organizationId: string;
   generatedAt: string;
+  /**
+   * Every node, edge, bottleneck and impact figure below is inferred from how often and alongside which other
+   * tags a topic is mentioned across published exit interviews - never from a verified org chart, system-ownership
+   * record, process document or recovery drill. Direction, sensitivity, dependency and recovery-time figures are
+   * pattern-based estimates; treat as a starting point for investigation, not a finding about a real process,
+   * system or owner.
+   */
+  methodologyNote: string;
   /** Nodes in the dependency graph */
   nodes: DependencyNode[];
   /** Edges in the dependency graph */

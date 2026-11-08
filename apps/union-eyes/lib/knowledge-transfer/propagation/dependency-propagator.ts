@@ -25,6 +25,7 @@ import {
   type PropagationPath,
   computeImpactScore,
   estimateRecoveryTime,
+  PROPAGATION_METHODOLOGY_NOTE,
 } from './propagation-models';
 
 /**
@@ -61,6 +62,7 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
     return {
       organizationId: orgId,
       generatedAt: new Date().toISOString(),
+      methodologyNote: PROPAGATION_METHODOLOGY_NOTE,
       nodes: [],
       edges: [],
       downstreamImpacts: [],
@@ -86,36 +88,36 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
     if (isSingleSource) {
       if (topic.category === 'governance' || topic.category === 'compliance') {
         sensitivity = 'critical';
-        reason = `Sole expert in ${topic.category} area; loss would create compliance gap`;
+        reason = `Tagged ${topic.category} in exactly 1 interview; this pattern would indicate a sole expert, so if real, losing them could create a compliance gap - not confirmed against any role or ownership record`;
       } else if (topic.category === 'system' || topic.category === 'vendor') {
         sensitivity = 'high';
-        reason = `Single operator of critical system/vendor relationship`;
+        reason = `Tagged in exactly 1 interview; pattern suggests a single operator of this system/vendor relationship, not confirmed against a system-ownership record`;
       } else {
         sensitivity = 'high';
-        reason = `Single source of knowledge; undocumented risk`;
+        reason = `Tagged in exactly 1 interview; pattern suggests a single source of this knowledge, not confirmed as undocumented`;
       }
     } else if (frequency === 2) {
       if (topic.category === 'governance' || topic.category === 'compliance') {
         sensitivity = 'high';
-        reason = `Limited redundancy in critical governance function`;
+        reason = `Tagged ${topic.category} in only 2 interviews; pattern suggests limited redundancy, not confirmed against a governance record`;
       } else if (topic.category === 'system') {
         sensitivity = 'medium';
-        reason = `System operated by limited number of people`;
+        reason = `Tagged in only 2 interviews; pattern suggests this system is operated by a limited number of people`;
       } else {
         sensitivity = 'medium';
-        reason = `Knowledge concentrated in 2 sources`;
+        reason = `Tagged in only 2 interviews; pattern suggests knowledge concentrated in 2 sources`;
       }
     } else if (frequency <= 4) {
       if (topic.category === 'governance') {
         sensitivity = 'medium';
-        reason = `Governance knowledge in limited circulation`;
+        reason = `Tagged governance in ${frequency} interviews; pattern suggests limited circulation`;
       } else {
         sensitivity = 'medium';
-        reason = `Knowledge distributed but not widely`;
+        reason = `Tagged in ${frequency} interviews; pattern suggests knowledge distributed but not widely`;
       }
     } else {
       sensitivity = 'low';
-      reason = `Knowledge reasonably distributed across multiple sources`;
+      reason = `Tagged in ${frequency} interviews; pattern suggests knowledge reasonably distributed across multiple sources`;
     }
 
     return {
@@ -164,7 +166,7 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
       dependsOnId: depOnId,
       strength,
       evidenceCount: edge.weight,
-      rationale: `Topics co-occur in ${edge.weight} interviews; indicates operational coupling`,
+      rationale: `Topics co-occur in ${edge.weight} interviews; direction is inferred from which tag appears in fewer interviews, not confirmed against a real process or system record`,
     };
   }).filter((edge): edge is DependencyEdge => edge !== null);
 
@@ -209,6 +211,7 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
   return {
     organizationId: orgId,
     generatedAt: new Date().toISOString(),
+    methodologyNote: PROPAGATION_METHODOLOGY_NOTE,
     nodes,
     edges,
     downstreamImpacts,

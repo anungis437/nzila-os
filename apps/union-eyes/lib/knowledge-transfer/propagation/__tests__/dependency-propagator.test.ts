@@ -97,6 +97,8 @@ describe('buildDependencyPropagationMap', () => {
     expect(map.bottlenecks).toEqual([]);
     expect(map.resilience.recommendations).toEqual([]);
     expect(typeof map.generatedAt).toBe('string');
+    // DEF-0B7-COGB-PROPAGATION-DEPENDENCIES: the map always discloses its inference basis, even when empty.
+    expect(map.methodologyNote).toMatch(/inferred|pattern/i);
     // buildTopicGraph must NOT be called on the empty path
     expect(mocks.buildTopicGraph).not.toHaveBeenCalled();
   });
@@ -182,6 +184,14 @@ describe('buildDependencyPropagationMap', () => {
     // isSingleSource flag
     expect(byId.gov_sole.isSingleSource).toBe(true);
     expect(byId.common.isSingleSource).toBe(false);
+
+    // DEF-0B7-COGB-PROPAGATION-DEPENDENCIES: a sole-source finding reads as a pattern to investigate, never as a
+    // confirmed fact about a real role, system or process - every declarative claim is qualified.
+    expect(map.methodologyNote).toMatch(/inferred|pattern/i);
+    expect(byId.gov_sole.sensitivityReason).toMatch(/not confirmed|pattern/i);
+    expect(byId.gov_sole.sensitivityReason).not.toMatch(/^Sole expert.*would create compliance gap$/);
+    expect(byId.system_sole.sensitivityReason).toMatch(/not confirmed|pattern/i);
+    expect(map.edges.every((e) => /inferred|not confirmed/i.test(e.rationale))).toBe(true);
 
     // Edges: the 'ghost' edge is filtered to null/removed; 6 valid edges remain
     expect(map.edges.length).toBe(6);
