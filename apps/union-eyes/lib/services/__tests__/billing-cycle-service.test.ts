@@ -272,6 +272,35 @@ describe('BillingCycleService', () => {
       expect(result).toMatchObject({ success: true, transactionsCreated: 0, totalAmount: 0, members: { processed: 1, skipped: 1 } });
     });
 
+    it('bills a member joining on the final UTC calendar day even when periodEnd is midnight', async () => {
+      const { tx, inserts } = fakeTx([member(MEMBER, { joinedAt: new Date('2026-03-31T18:30:00.000Z') })]);
+      mockCalculate.mockResolvedValueOnce(calculation('assignment-last-day', 31));
+
+      const result = await BillingCycleService.generateBillingCycle({
+        ...cycle,
+        periodEnd: new Date('2026-03-31T00:00:00.000Z'),
+      });
+
+      expect(tx.insert).toHaveBeenCalledOnce();
+      expect(inserts).toHaveLength(1);
+      expect(inserts[0]).toMatchObject({ amount: '1', periodEnd: '2026-03-31' });
+      expect(result).toMatchObject({ success: true, transactionsCreated: 1, members: { skipped: 0 } });
+    });
+
+    it('still skips a member joining on the next UTC calendar day when periodEnd is midnight', async () => {
+      const { tx, inserts } = fakeTx([member(MEMBER, { joinedAt: new Date('2026-04-01T00:00:00.000Z') })]);
+      mockCalculate.mockResolvedValueOnce(calculation('assignment-next-day', 31));
+
+      const result = await BillingCycleService.generateBillingCycle({
+        ...cycle,
+        periodEnd: new Date('2026-03-31T00:00:00.000Z'),
+      });
+
+      expect(tx.insert).not.toHaveBeenCalled();
+      expect(inserts).toHaveLength(0);
+      expect(result).toMatchObject({ success: true, transactionsCreated: 0, members: { skipped: 1 } });
+    });
+
     it('skips charges that prorate to zero cents instead of creating receivables', async () => {
       const { tx, inserts } = fakeTx([member(MEMBER, { joinedAt: new Date('2026-03-31T00:00:00.000Z') })]);
       mockCalculate.mockResolvedValueOnce(calculation('assignment-small', 0.01));
