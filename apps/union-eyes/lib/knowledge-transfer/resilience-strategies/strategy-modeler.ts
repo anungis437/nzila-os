@@ -7,7 +7,7 @@
  * This is organizational capacity planning — not workforce management.
  */
 
-import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import { loadGraphEvidence, hasAnyVerifiedEvidence } from '../propagation/graph-evidence-service';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
   type StrategyType,
@@ -163,10 +163,11 @@ export const PROJECTED_GAIN_NOT_MEASURED_REASON =
  * Returns prioritized strategies and phased implementation plan.
  */
 export async function buildResilienceRoadmap(orgId: string): Promise<ResilienceRoadmap> {
-  const [propagationMap, resilienceIndex] = await Promise.all([
-    buildDependencyPropagationMap(orgId),
+  const [evidence, resilienceIndex] = await Promise.all([
+    loadGraphEvidence(orgId),
     calculateResilienceIndex(orgId),
   ]);
+  const propagationMap = evidence.exploratory;
 
   const nodes = propagationMap.nodes;
   const singleSourceCount = nodes.filter((n) => n.isSingleSource).length;
@@ -247,5 +248,9 @@ export async function buildResilienceRoadmap(orgId: string): Promise<ResilienceR
     phase2Foundation,
     phase3Sustained,
     maturityNarrative,
+    verifiedEvidenceCoverage: {
+      nodesWithVerifiedEvidence: propagationMap.nodes.filter((node) => hasAnyVerifiedEvidence(evidence, node.id)).length,
+      totalNodes: propagationMap.nodes.length,
+    },
   };
 }

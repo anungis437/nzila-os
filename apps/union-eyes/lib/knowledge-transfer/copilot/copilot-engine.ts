@@ -28,7 +28,7 @@ import {
   UE_APP_KEY,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
-import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import { loadGraphEvidence, hasAnyVerifiedEvidence } from '../propagation/graph-evidence-service';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
   buildExplainabilityEnvelope,
@@ -102,6 +102,7 @@ function buildSystemPrompt(
   totalNodes: number,
   bottleneckCount: number,
   criticalGaps: string[],
+  verifiedNodeCount: number,
 ): string {
   return `You are a governance-aware organizational continuity advisor for a union organization (org: ${orgId}).
 
@@ -112,6 +113,9 @@ CURRENT ORGANIZATIONAL CONTEXT:
 - Knowledge concentration: ${singleSourceCount} of ${totalNodes} knowledge areas are single-source
 - Operational bottlenecks: ${bottleneckCount}
 - Critical gaps: ${criticalGaps.length > 0 ? criticalGaps.join('; ') : 'none identified'}
+- Evidence basis: the counts above come from exit-interview tag co-occurrence (exploratory), not from a verified
+  record of organizational structure. ${verifiedNodeCount} of ${totalNodes} knowledge areas have at least one
+  currently-verified dependency relationship on file; treat the rest as unconfirmed signal, not fact.
 
 BEHAVIORAL CONSTRAINTS — STRICTLY ENFORCED:
 1. You ONLY discuss organizational continuity, governance resilience, documentation, and organizational knowledge.
@@ -119,7 +123,7 @@ BEHAVIORAL CONSTRAINTS — STRICTLY ENFORCED:
 3. You NEVER recommend disciplinary actions or assess individual worker value.
 4. All framing must be ORGANIZATIONAL — processes, governance structures, documentation gaps.
 5. Every claim must reference specific organizational data when available.
-6. Acknowledge uncertainty explicitly — do not overstate confidence.
+6. Acknowledge uncertainty explicitly — do not overstate confidence, and distinguish verified from exploratory data.
 
 RESPONSE FORMAT:
 - Answer the question with specific, organizational framing
@@ -186,10 +190,11 @@ export async function processCopilotQuery(
   }
 
   // Load org continuity context
-  const [propagationMap, resilienceIndex] = await Promise.all([
-    buildDependencyPropagationMap(orgId),
+  const [graphEvidence, resilienceIndex] = await Promise.all([
+    loadGraphEvidence(orgId),
     calculateResilienceIndex(orgId),
   ]);
+  const propagationMap = graphEvidence.exploratory;
 
   const nodes = propagationMap.nodes;
   const singleSourceCount = nodes.filter((n) => n.isSingleSource).length;
@@ -200,6 +205,7 @@ export async function processCopilotQuery(
   const criticalGaps = resilienceIndex.dimensions
     .filter((d) => d.score < 40)
     .map((d) => d.name);
+  const verifiedNodeCount = nodes.filter((n) => hasAnyVerifiedEvidence(graphEvidence, n.id)).length;
 
   // Build system prompt with org context
   const systemPrompt = buildSystemPrompt(
@@ -209,6 +215,7 @@ export async function processCopilotQuery(
     totalNodes,
     bottleneckCount,
     criticalGaps,
+    verifiedNodeCount,
   );
 
   // Build message history
@@ -356,6 +363,7 @@ export async function processCopilotQuery(
     followUpSuggestions: followUps,
     organizationalContext: `Continuity analysis for organization ${orgId}. Resilience score: ${resilienceIndex.overallScore}/100.`,
     generatedAt: now,
+    verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: verifiedNodeCount, totalNodes },
   };
 }
 

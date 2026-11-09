@@ -21,6 +21,9 @@ export interface GovernanceNode {
   dependsOn: string[];
   downstreamProcesses: string[];
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  /** 'verified' when a currently-verified dependency record names this node; 'exploratory' when the label is
+   *  only from exit-interview tag co-occurrence. */
+  evidenceBasis: 'verified' | 'exploratory';
 }
 
 export interface GovernanceImpactData {
@@ -33,7 +36,12 @@ export interface GovernanceImpactData {
     cascadedProcesses: string[];
     severity: string;
     cascadeDepth: number;
+    evidenceBasis: 'verified' | 'exploratory';
   }>;
+  /** How the analysis determines what is verified vs. exploratory. */
+  methodologyNote: string;
+  /** How many governance nodes have at least one currently-verified relationship on file. */
+  verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: number; totalNodes: number };
 }
 
 const RISK_COLORS: Record<string, string> = {
@@ -85,6 +93,11 @@ export function GovernanceImpactExplorer({ data }: Props) {
           <div className="text-2xl font-semibold text-red-700">{data.criticalGovernanceGaps.length}</div>
           <div className="text-xs text-red-600">Critical Gaps</div>
         </div>
+      </div>
+
+      {/* Evidence-basis disclosure: what is confirmed vs. inferred from exit-interview tag co-occurrence */}
+      <div className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+        {data.verifiedEvidenceCoverage.nodesWithVerifiedEvidence} of {data.verifiedEvidenceCoverage.totalNodes} governance nodes have a currently-verified dependency record on file; the rest are exploratory signal only. {data.methodologyNote}
       </div>
 
       {/* Critical governance gaps */}
@@ -155,6 +168,9 @@ export function GovernanceImpactExplorer({ data }: Props) {
                 {node.isSingleSource && (
                   <span className="text-xs bg-amber-50 text-amber-600 border border-amber-200 rounded px-1.5">single</span>
                 )}
+                <span className={`text-xs rounded px-1.5 border ${node.evidenceBasis === 'verified' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                  {node.evidenceBasis}
+                </span>
               </div>
             </div>
           </button>
@@ -205,6 +221,9 @@ export function GovernanceImpactExplorer({ data }: Props) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-medium text-slate-800">Trigger: {risk.triggerNode}</span>
                   <span className="text-xs text-slate-500">→ {risk.cascadedProcesses.length} downstream</span>
+                  <span className={`text-xs rounded px-1.5 border ${risk.evidenceBasis === 'verified' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                    {risk.evidenceBasis}
+                  </span>
                   <span className={`text-xs rounded px-1.5 ml-auto ${
                     risk.severity === 'critical' ? 'bg-red-50 text-red-600' :
                     risk.severity === 'high' ? 'bg-orange-50 text-orange-600' :

@@ -79,4 +79,7 @@ export interface ResilienceRoadmap {
   phase3Sustained: string[];
   /** Overall maturity progression narrative */
   maturityNarrative: string;
+  /** How many of the dependency nodes behind this roadmap have at least one currently-verified relationship on
+   *  file, out of how many nodes exist in total. */
+  verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: number; totalNodes: number };
 }

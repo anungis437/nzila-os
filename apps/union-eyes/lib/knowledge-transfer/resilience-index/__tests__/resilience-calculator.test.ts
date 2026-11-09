@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
 vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[] }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[], listVerifiedDependencies: vi.fn() }));
 
 function makeChain() {
   const chain: Record<string, unknown> = {};
@@ -21,6 +21,9 @@ function makeChain() {
 vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
 }));
+vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
+  listVerifiedDependencies: mocks.listVerifiedDependencies,
+}));
 vi.mock('@/db/db', () => ({ db: { select: vi.fn(() => makeChain()) } }));
 // The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
 vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
@@ -30,7 +33,7 @@ vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
 vi.mock('@/db/schema', () => ({
   exitInterviews: { organizationId: 'organizationId', status: 'status' },
 }));
-vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
+vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, relations: () => ({}) }));
 
 import { calculateResilienceIndex } from '../resilience-calculator';
 
@@ -54,6 +57,7 @@ describe('calculateResilienceIndex', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.interviews = [];
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
   });
 
   it('computes a strong index for a well-distributed, well-documented org', async () => {
@@ -152,5 +156,24 @@ describe('calculateResilienceIndex', () => {
     const idx = await calculateResilienceIndex('org');
     expect(idx.dimensions.every((d) => Number.isFinite(d.score))).toBe(true);
     expect(Number.isFinite(idx.overallScore)).toBe(true);
+  });
+
+  it('reports verifiedEvidenceCoverage as an aggregate signal, zero with no verified relationships', async () => {
+    mocks.interviews = [];
+    mocks.buildMap.mockResolvedValue(mapWith([n('a', 2, 'general', false, 'low'), n('b', 2, 'general', false, 'low')]));
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
+    const idx = await calculateResilienceIndex('org');
+    expect(idx.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 0, totalNodes: 2 });
+
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      {
+        id: 'vd1', organizationId: 'org', dependentNodeId: 'a', dependsOnNodeId: 'b',
+        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', status: 'verified',
+        submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
+        createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+    const idxVerified = await calculateResilienceIndex('org');
+    expect(idxVerified.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 2, totalNodes: 2 });
   });
 });

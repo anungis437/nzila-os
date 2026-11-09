@@ -382,6 +382,9 @@ export function ContinuityPlanningWorkspace() {
                   {roadmapData.projectedScore === null && roadmapData.projectionNotMeasuredReason && (
                     <p className="mt-1 text-xs text-slate-500">{roadmapData.projectionNotMeasuredReason}</p>
                   )}
+                  <p className="mt-1 text-xs text-slate-400">
+                    {roadmapData.verifiedEvidenceCoverage.nodesWithVerifiedEvidence} of {roadmapData.verifiedEvidenceCoverage.totalNodes} underlying knowledge nodes have a currently-verified dependency record on file; the rest are exploratory signal only.
+                  </p>
                 </div>
               </div>
 

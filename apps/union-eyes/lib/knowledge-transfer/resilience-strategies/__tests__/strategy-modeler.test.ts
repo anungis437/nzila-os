@@ -1,16 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
 
-const { buildDependencyPropagationMap, calculateResilienceIndex } = vi.hoisted(() => ({
+const { buildDependencyPropagationMap, calculateResilienceIndex, listVerifiedDependencies } = vi.hoisted(() => ({
   buildDependencyPropagationMap: vi.fn(),
   calculateResilienceIndex: vi.fn(),
+  listVerifiedDependencies: vi.fn(async () => []),
 }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
+vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies }));
 vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex }));
 
 import { buildResilienceRoadmap } from '../strategy-modeler';
 
 function node(overrides: Record<string, unknown> = {}) {
-  return { isSingleSource: false, category: 'operational', nodeType: 'process', ...overrides };
+  return { id: 'node', isSingleSource: false, category: 'operational', nodeType: 'process', ...overrides };
 }
 
 function resilienceIndex(score: number, docScore = 50) {
@@ -69,5 +71,19 @@ describe('lib/knowledge-transfer/resilience-strategies/strategy-modeler', () => 
     calculateResilienceIndex.mockResolvedValue(resilienceIndex(68, 30));
     const adq = await buildResilienceRoadmap('org-4');
     expect(adq.maturityNarrative).toContain('adequate');
+  });
+
+  it('reports verifiedEvidenceCoverage as an aggregate signal, zero with no verified relationships', async () => {
+    buildDependencyPropagationMap.mockResolvedValue({ nodes: [node({ id: 'n1' }), node({ id: 'n2' })] });
+    calculateResilienceIndex.mockResolvedValue(resilienceIndex(50, 50));
+    listVerifiedDependencies.mockResolvedValueOnce([]);
+    const noEvidence = await buildResilienceRoadmap('org-5');
+    expect(noEvidence.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 0, totalNodes: 2 });
+
+    listVerifiedDependencies.mockResolvedValueOnce([
+      { dependentNodeId: 'n1', dependsOnNodeId: 'n2', status: 'verified' },
+    ]);
+    const withEvidence = await buildResilienceRoadmap('org-5');
+    expect(withEvidence.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 2, totalNodes: 2 });
   });
 });

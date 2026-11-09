@@ -84,6 +84,11 @@ describe('lib/knowledge-transfer/copilot/copilot-engine', () => {
     expect(result.overallEvidenceCoverage).toBe('medium');
   });
 
+  it('reports verifiedEvidenceCoverage as zero when no verified dependency records exist, and never silently drops it', async () => {
+    const result = await processCopilotQuery(ORG, { query: 'What is most fragile and at risk?' }, USER);
+    expect(result.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 0, totalNodes: 3 });
+  });
+
   it('persists the explainability envelope inline with the assistant message, and never claims the model itself retrieved data (DEF-0B7-EXC-COPILOT-EXPLAINABILITY)', async () => {
     await processCopilotQuery(ORG, { query: 'What is most fragile and at risk?' }, USER);
     // Find the UPDATE ue_copilot_conversations call that appends the assistant message (its JSON-stringified

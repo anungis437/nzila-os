@@ -17,6 +17,7 @@ import { sql } from 'drizzle-orm';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { inOrganization } from '../org-scope';
 import { buildDependencyPropagationMap } from './dependency-propagator';
+import { resolveCurrentNodeId } from './graph-identity';
 import type {
   VerifiedDependencyRecord,
   SubmitVerifiedDependencyInput,
@@ -69,11 +70,15 @@ function rowToRecord(row: VerifiedDependencyRow): VerifiedDependencyRecord {
  * authorized, existing organizational nodes" requires - this does not retroactively invalidate an ALREADY-verified
  * record if its nodes later drift (lookupVerifiedDependency still returns it; a human reviewer owns revalidation
  * on an explicit re-review), it only gates new submissions and new verifications.
+ *
+ * Resolution is canonical-identity-tolerant (graph-identity.ts): a node id that differs from a current node only
+ * by case, whitespace or punctuation still resolves, closing the collision/drift class the shared evidence
+ * contract requires - but a label retired or genuinely renamed into a different canonical key is never guessed at.
  */
 async function assertNodesCurrentlyExist(orgId: string, nodeIds: string[]): Promise<void> {
   const propagationMap = await buildDependencyPropagationMap(orgId);
-  const currentIds = new Set(propagationMap.nodes.map((node) => node.id));
-  const unknown = nodeIds.filter((id) => !currentIds.has(id));
+  const currentIds = propagationMap.nodes.map((node) => node.id);
+  const unknown = nodeIds.filter((id) => resolveCurrentNodeId(currentIds, id) === null);
   if (unknown.length > 0) {
     throw new Error(`The following node id(s) do not correspond to any current dependency node for this organization: ${unknown.join(', ')}`);
   }

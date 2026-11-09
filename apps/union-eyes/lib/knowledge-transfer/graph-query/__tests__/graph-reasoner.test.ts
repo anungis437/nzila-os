@@ -8,10 +8,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { GraphQuery, QueryType } from '../query-models';
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn() }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), listVerifiedDependencies: vi.fn() }));
 
 vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
+}));
+vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
+  listVerifiedDependencies: mocks.listVerifiedDependencies,
 }));
 
 import { executeGraphQuery } from '../graph-reasoner';
@@ -92,6 +95,7 @@ describe('executeGraphQuery', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.buildMap.mockResolvedValue(richMap());
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
   });
 
   const types: QueryType[] = [
@@ -223,5 +227,23 @@ describe('executeGraphQuery', () => {
     });
     const manyBottlenecks = await executeGraphQuery('org-1', q('knowledge_redundancy'));
     expect(manyBottlenecks.evidenceCoverageScore).toBe(sparse.evidenceCoverageScore);
+  });
+
+  it('tags every finding exploratory with no verified evidence, and verified when a record names its subject node id', async () => {
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
+    const exploratoryOnly = await executeGraphQuery('org-1', q('isolated_knowledge'));
+    expect(exploratoryOnly.findings.length).toBeGreaterThan(0);
+    expect(exploratoryOnly.findings.every((f) => f.evidenceBasis === 'exploratory')).toBe(true);
+
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      {
+        id: 'vd1', organizationId: 'org-1', dependentNodeId: 'gov_sole', dependsOnNodeId: 'some_system',
+        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', status: 'verified',
+        submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
+        createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+    const withVerified = await executeGraphQuery('org-1', q('isolated_knowledge'));
+    expect(withVerified.findings.find((f) => f.entityId === 'gov_sole')?.evidenceBasis).toBe('verified');
   });
 });

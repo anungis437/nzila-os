@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
-const { buildDependencyPropagationMap, orderByMock } = vi.hoisted(() => ({
+const { buildDependencyPropagationMap, orderByMock, listVerifiedDependencies } = vi.hoisted(() => ({
   buildDependencyPropagationMap: vi.fn(),
   orderByMock: vi.fn(),
+  listVerifiedDependencies: vi.fn(async () => []),
 }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
+vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies }));
 vi.mock('@/db/db', () => ({
   db: { select: () => ({ from: () => ({ where: orderByMock }) }) },
 }));
@@ -21,7 +23,7 @@ vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derived
 import { forecastContinuityTrends } from '../continuity-forecaster';
 
 function node(overrides: Record<string, unknown> = {}) {
-  return { isSingleSource: false, category: 'operational', frequency: 2, continuitySensitivity: 'moderate', ...overrides };
+  return { id: 'node', isSingleSource: false, category: 'operational', frequency: 2, continuitySensitivity: 'moderate', ...overrides };
 }
 
 describe('lib/knowledge-transfer/forecasting/continuity-forecaster', () => {

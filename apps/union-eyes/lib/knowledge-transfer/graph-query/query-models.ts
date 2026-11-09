@@ -5,6 +5,8 @@
  * Enables natural questions about organizational dependencies, fragility, and risk.
  */
 
+import type { EvidenceBasis } from '../propagation/graph-evidence-service';
+
 export type QueryType =
   | 'isolated_knowledge'
   | 'continuity_bottlenecks'
@@ -37,7 +39,9 @@ export interface QueryResult {
   /** Human-readable interpretation of what was found */
   summary: string;
   /** Core findings */
-  findings: QueryFinding[];
+  findings: Array<QueryFinding & { /** 'verified' only when a currently-verified dependency record names this
+   *  finding's subject node id; otherwise 'exploratory' - never silently omitted (DEF-0B7-COGB-PROPAGATION-
+   *  DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE). */ evidenceBasis: EvidenceBasis }>;
   /** Why these results matter */
   significance: string;
   /** Recommended follow-up actions */

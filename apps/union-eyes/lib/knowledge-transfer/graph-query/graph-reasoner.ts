@@ -5,10 +5,10 @@
  * Enables discovering patterns: isolated knowledge, bottlenecks, fragility, risks.
  */
 
-import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { GraphQuery, QueryResult, QueryFinding } from './query-models';
 import type { PropagationMap } from '../propagation/propagation-models';
 import { evidenceCoverageScoreFromSampleSize } from '../governance/evidence-basis';
+import { loadGraphEvidence, evidenceBasisForNode } from '../propagation/graph-evidence-service';
 
 type QueryResponse = {
   findings: QueryFinding[];
@@ -18,8 +18,9 @@ type QueryResponse = {
 };
 
 export async function executeGraphQuery(orgId: string, query: GraphQuery): Promise<QueryResult> {
-  // Build the dependency graph
-  const propagationMap = await buildDependencyPropagationMap(orgId);
+  // Build the dependency graph, plus the currently-verified relationships every finding below is checked against.
+  const evidence = await loadGraphEvidence(orgId);
+  const propagationMap = evidence.exploratory;
 
   let findings: QueryFinding[] = [];
   let summary = '';
@@ -57,13 +58,18 @@ export async function executeGraphQuery(orgId: string, query: GraphQuery): Promi
   }
 
   const evidenceCoverageScore = calculateEvidenceCoverageScore(propagationMap);
+  // Every finding is tagged with its evidence basis here, in one place, rather than each of the nine query
+  // functions above computing it separately - a finding whose subject node id does not resolve to a specific
+  // verified node safely defaults to 'exploratory' (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-
+  // INFERRED-FROM-TAG-CO-OCCURRENCE).
+  const taggedFindings = findings.map((finding) => ({ ...finding, evidenceBasis: evidenceBasisForNode(evidence, finding.entityId) }));
 
   return {
     organizationId: orgId,
     executedAt: new Date().toISOString(),
     query,
     summary,
-    findings,
+    findings: taggedFindings,
     significance,
     recommendations,
     evidenceCoverageScore,

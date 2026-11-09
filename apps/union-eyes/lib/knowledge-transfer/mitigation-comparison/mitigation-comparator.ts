@@ -14,6 +14,7 @@
  */
 
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import { loadGraphEvidence, hasAnyVerifiedEvidence } from '../propagation/graph-evidence-service';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
   type MitigationScenario,
@@ -221,10 +222,11 @@ export async function compareMitigations(
   orgId: string,
   scenarios: MitigationScenario[],
 ): Promise<MitigationComparison> {
-  const [propagationMap, resilienceIndex] = await Promise.all([
-    buildDependencyPropagationMap(orgId),
+  const [evidence, resilienceIndex] = await Promise.all([
+    loadGraphEvidence(orgId),
     calculateResilienceIndex(orgId),
   ]);
+  const propagationMap = evidence.exploratory;
 
   const baselineScore = resilienceIndex.overallScore;
 
@@ -272,5 +274,9 @@ export async function compareMitigations(
       'Baseline exposure per node comes from its sensitivity label (20, 45, 70 or 90), not from a measurement.',
     ],
     noNodesEvaluated,
+    verifiedEvidenceCoverage: {
+      nodesWithVerifiedEvidence: propagationMap.nodes.filter((node) => hasAnyVerifiedEvidence(evidence, node.id)).length,
+      totalNodes: propagationMap.nodes.length,
+    },
   };
 }

@@ -396,6 +396,9 @@ export function ContinuitySimulationWorkspace() {
                     <li key={assumption}>• {assumption}</li>
                   ))}
                 </ul>
+                <p className="mt-1">
+                  {mitigationData.verifiedEvidenceCoverage.nodesWithVerifiedEvidence} of {mitigationData.verifiedEvidenceCoverage.totalNodes} underlying knowledge nodes have a currently-verified dependency record on file; the rest are exploratory signal only.
+                </p>
               </details>
             </div>
           ) : (

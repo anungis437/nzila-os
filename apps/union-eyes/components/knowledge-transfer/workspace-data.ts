@@ -89,6 +89,7 @@ export function toGovernanceImpact(cascade: GovernanceCascadeAnalysis, map: Prop
       dependsOn: map.edges.filter((edge) => edge.dependentId === governance.id).map((edge) => labelOf(edge.dependsOnId)),
       downstreamProcesses: (map.downstreamImpacts.find((impact) => impact.nodeId === governance.id)?.allAffectedNodes ?? []).map(labelOf),
       riskLevel: governance.criticality,
+      evidenceBasis: governance.evidenceBasis,
     };
   });
   return {
@@ -101,7 +102,13 @@ export function toGovernanceImpact(cascade: GovernanceCascadeAnalysis, map: Prop
       cascadedProcesses: risk.impactedAreas.map(labelOf),
       severity: risk.severity,
       cascadeDepth: risk.cascadeDepth,
+      evidenceBasis: risk.evidenceBasis,
     })),
+    methodologyNote: cascade.methodologyNote,
+    verifiedEvidenceCoverage: {
+      nodesWithVerifiedEvidence: nodes.filter((node) => node.evidenceBasis === 'verified').length,
+      totalNodes: nodes.length,
+    },
   };
 }
 
@@ -152,6 +159,8 @@ export interface MitigationView {
   /** The figures are the result of these assumptions, not of a calibrated model. */
   assumptions: string[];
   noNodesEvaluated: boolean;
+  /** How many of the underlying dependency nodes have at least one currently-verified relationship on file. */
+  verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: number; totalNodes: number };
 }
 
 /** `requested` is what was sent: the answer lists its scenarios in the order they were asked for. */
@@ -174,5 +183,6 @@ export function toMitigationView(comparison: MitigationComparison, requested: Mi
     residualRisks: comparison.residualRisks,
     assumptions: comparison.assumptions,
     noNodesEvaluated: comparison.noNodesEvaluated,
+    verifiedEvidenceCoverage: comparison.verifiedEvidenceCoverage,
   };
 }

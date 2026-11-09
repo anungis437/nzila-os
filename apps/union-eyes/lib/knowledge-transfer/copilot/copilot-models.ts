@@ -88,4 +88,8 @@ export interface CopilotQueryResult {
   followUpSuggestions: string[];
   organizationalContext: string;
   generatedAt: string;
+  /** How many of the dependency nodes behind this response have at least one currently-verified relationship on
+   *  file, out of how many nodes exist in total. The AI context and counts above are exploratory (label co-occurrence
+   *  inference) unless covered here. */
+  verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: number; totalNodes: number };
 }

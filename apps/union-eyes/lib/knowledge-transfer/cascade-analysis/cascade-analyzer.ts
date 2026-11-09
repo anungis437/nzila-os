@@ -4,19 +4,23 @@
  * Analyze how governance failures cascade through operations.
  */
 
-import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import { loadGraphEvidence, evidenceBasisForNode, GRAPH_EVIDENCE_METHODOLOGY_NOTE, type EvidenceBasis } from '../propagation/graph-evidence-service';
 
 export interface GovernanceCascadeAnalysis {
   organizationId: string;
   generatedAt: string;
+  /** See GRAPH_EVIDENCE_METHODOLOGY_NOTE: every per-item evidenceBasis below says whether that specific item is
+   *  backed by a currently-verified dependency record or is exploratory-only (inferred from tag co-occurrence). */
+  methodologyNote: string;
   /** Governance/compliance nodes in the org */
-  governanceNodes: Array<{ id: string; label: string; criticality: 'high' | 'critical' }>;
+  governanceNodes: Array<{ id: string; label: string; criticality: 'high' | 'critical'; evidenceBasis: EvidenceBasis }>;
   /** How governance failures cascade */
   cascadeRisks: Array<{
     governanceGap: string;
     impactedAreas: string[];
     severity: 'high' | 'critical';
     cascadeDepth: number;
+    evidenceBasis: EvidenceBasis;
   }>;
   /**
    * Areas that depend on a compliance node. No regulation, obligation or deadline is assessed: the entries state a dependency,
@@ -29,7 +33,8 @@ export interface GovernanceCascadeAnalysis {
 }
 
 export async function analyzeCascadeRisks(orgId: string): Promise<GovernanceCascadeAnalysis> {
-  const propagationMap = await buildDependencyPropagationMap(orgId);
+  const evidence = await loadGraphEvidence(orgId);
+  const propagationMap = evidence.exploratory;
 
   const governanceNodes: GovernanceCascadeAnalysis['governanceNodes'] = propagationMap.nodes
     .filter((node) => node.category === 'governance' || node.category === 'compliance')
@@ -37,6 +42,7 @@ export async function analyzeCascadeRisks(orgId: string): Promise<GovernanceCasc
       id: node.id,
       label: node.label,
       criticality: node.continuitySensitivity === 'critical' ? 'critical' : 'high',
+      evidenceBasis: evidenceBasisForNode(evidence, node.id),
     }));
 
   const cascadeRisks = governanceNodes.map((gov) => {
@@ -47,6 +53,7 @@ export async function analyzeCascadeRisks(orgId: string): Promise<GovernanceCasc
       impactedAreas: impact?.allAffectedNodes || [],
       severity,
       cascadeDepth: impact?.propagationPaths[0]?.chainDepth || 1,
+      evidenceBasis: gov.evidenceBasis,
     };
   });
 
@@ -63,6 +70,7 @@ export async function analyzeCascadeRisks(orgId: string): Promise<GovernanceCasc
   return {
     organizationId: orgId,
     generatedAt: new Date().toISOString(),
+    methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
     governanceNodes,
     cascadeRisks,
     regulatoryRisks,

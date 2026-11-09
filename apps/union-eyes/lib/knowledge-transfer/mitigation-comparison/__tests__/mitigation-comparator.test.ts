@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
-const { buildDependencyPropagationMap, calculateResilienceIndex } = vi.hoisted(() => ({
+const { buildDependencyPropagationMap, calculateResilienceIndex, listVerifiedDependencies } = vi.hoisted(() => ({
   buildDependencyPropagationMap: vi.fn(),
   calculateResilienceIndex: vi.fn(),
+  listVerifiedDependencies: vi.fn(async () => []),
 }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
+vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies }));
 vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex }));
 
 import { compareMitigations } from '../mitigation-comparator';
@@ -69,5 +71,24 @@ describe('lib/knowledge-transfer/mitigation-comparison/mitigation-comparator', (
     expect(comparison.noNodesEvaluated).toBe(true);
     expect(comparison.recommendedScenario).toBe('');
     expect(comparison.recommendationRationale).toContain('nothing was evaluated');
+  });
+
+  it('reports verifiedEvidenceCoverage as an aggregate signal, zero with no verified relationships', async () => {
+    const nodes = [node('n1'), node('n2')];
+    buildDependencyPropagationMap.mockResolvedValue({ nodes });
+    calculateResilienceIndex.mockResolvedValue({ overallScore: 50 });
+    listVerifiedDependencies.mockResolvedValueOnce([]);
+    const comparison = await compareMitigations('org-3', [
+      { mitigationType: 'cross_training', targetNodeIds: ['n1'], investmentLevel: 'medium', durationWeeks: 10 },
+    ]);
+    expect(comparison.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 0, totalNodes: 2 });
+
+    listVerifiedDependencies.mockResolvedValueOnce([
+      { dependentNodeId: 'n1', dependsOnNodeId: 'n2', status: 'verified' },
+    ]);
+    const comparisonWithEvidence = await compareMitigations('org-3', [
+      { mitigationType: 'cross_training', targetNodeIds: ['n1'], investmentLevel: 'medium', durationWeeks: 10 },
+    ]);
+    expect(comparisonWithEvidence.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 2, totalNodes: 2 });
   });
 });

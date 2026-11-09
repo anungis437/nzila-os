@@ -106,6 +106,10 @@ export interface MitigationComparison {
   assumptions: string[];
   /** True when no scenario reached any node, so every figure above is zero because nothing was evaluated. */
   noNodesEvaluated: boolean;
+  /** How many of the dependency nodes behind this comparison have at least one currently-verified relationship on
+   *  file, out of how many nodes exist in total (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-
+   *  FROM-TAG-CO-OCCURRENCE). */
+  verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: number; totalNodes: number };
 }
 
 /**

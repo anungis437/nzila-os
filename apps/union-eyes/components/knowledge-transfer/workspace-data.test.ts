@@ -131,8 +131,9 @@ describe('toGovernanceImpact', () => {
   const cascade: GovernanceCascadeAnalysis = {
     organizationId: 'org',
     generatedAt: 'now',
-    governanceNodes: [{ id: 'gov', label: 'Bylaw amendment procedure', criticality: 'critical' }],
-    cascadeRisks: [{ governanceGap: 'Bylaw amendment procedure', impactedAreas: ['payroll'], severity: 'critical', cascadeDepth: 2 }],
+    methodologyNote: 'Exploratory unless a currently-verified dependency record is on file.',
+    governanceNodes: [{ id: 'gov', label: 'Bylaw amendment procedure', criticality: 'critical', evidenceBasis: 'exploratory' }],
+    cascadeRisks: [{ governanceGap: 'Bylaw amendment procedure', impactedAreas: ['payroll'], severity: 'critical', cascadeDepth: 2, evidenceBasis: 'exploratory' }],
     regulatoryRisks: [],
     regulatoryAssessment: 'dependency_only_no_regulation_assessed',
     recommendations: [],
@@ -144,12 +145,20 @@ describe('toGovernanceImpact', () => {
     expect(impact.totalGovernanceProcesses).toBe(1)
     expect(impact.singleSourceProcesses).toBe(1)
     expect(impact.criticalGovernanceGaps).toEqual(['Bylaw amendment procedure'])
-    expect(impact.nodes).toEqual([{ id: 'gov', name: 'Bylaw amendment procedure', type: 'governance', isSingleSource: true, dependsOn: [], downstreamProcesses: ['payroll label'], riskLevel: 'critical' }])
-    expect(impact.cascadeRisks).toEqual([{ triggerNode: 'Bylaw amendment procedure', cascadedProcesses: ['payroll label'], severity: 'critical', cascadeDepth: 2 }])
+    expect(impact.nodes).toEqual([{ id: 'gov', name: 'Bylaw amendment procedure', type: 'governance', isSingleSource: true, dependsOn: [], downstreamProcesses: ['payroll label'], riskLevel: 'critical', evidenceBasis: 'exploratory' }])
+    expect(impact.cascadeRisks).toEqual([{ triggerNode: 'Bylaw amendment procedure', cascadedProcesses: ['payroll label'], severity: 'critical', cascadeDepth: 2, evidenceBasis: 'exploratory' }])
+    expect(impact.methodologyNote).toBe('Exploratory unless a currently-verified dependency record is on file.')
+    expect(impact.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 0, totalNodes: 1 })
+  })
+
+  it('counts a governance node as verified evidence coverage only when its evidenceBasis says verified', () => {
+    const impact = toGovernanceImpact({ ...cascade, governanceNodes: [{ ...cascade.governanceNodes[0], evidenceBasis: 'verified' }] }, MAP)
+    expect(impact.nodes[0].evidenceBasis).toBe('verified')
+    expect(impact.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 1, totalNodes: 1 })
   })
 
   it('has no gap to report when nothing is critical, and names an area the map does not have by its id rather than inventing a label', () => {
-    const impact = toGovernanceImpact({ ...cascade, cascadeRisks: [{ governanceGap: 'x', impactedAreas: ['unknown-node'], severity: 'high', cascadeDepth: 1 }] }, MAP)
+    const impact = toGovernanceImpact({ ...cascade, cascadeRisks: [{ governanceGap: 'x', impactedAreas: ['unknown-node'], severity: 'high', cascadeDepth: 1, evidenceBasis: 'exploratory' }] }, MAP)
     expect(impact.criticalGovernanceGaps).toEqual([])
     expect(impact.cascadeRisks[0].cascadedProcesses).toEqual(['unknown-node'])
   })
@@ -195,6 +204,7 @@ describe('toMitigationView', () => {
     basis: 'ASSUMED_EFFECTIVENESS_NOT_CALIBRATED',
     assumptions: ['Effectiveness is a fixed table of assumed multipliers.'],
     noNodesEvaluated: false,
+    verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: 1, totalNodes: 4 },
   } as unknown as MitigationComparison
 
   it('lays the answer out beside what was asked for, names the recommended scenario by its label, and carries the assumptions', () => {
@@ -208,6 +218,7 @@ describe('toMitigationView', () => {
     expect(view.recommended).toBe('cross_training label')
     expect(view.assumptions).toEqual(['Effectiveness is a fixed table of assumed multipliers.'])
     expect(view.residualRisks).toEqual(['payroll remains single-source'])
+    expect(view.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 1, totalNodes: 4 })
   })
 
   it('recommends nothing when nothing was evaluated, and does not guess what was asked for a scenario it cannot match to a request', () => {

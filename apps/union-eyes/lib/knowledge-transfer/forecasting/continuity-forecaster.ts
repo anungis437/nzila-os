@@ -10,8 +10,8 @@
  * the series and the projections are empty and the trend is `insufficient_data`.
  */
 
-import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { PropagationMap } from '../propagation/propagation-models';
+import { loadGraphEvidence, hasAnyVerifiedEvidence } from '../propagation/graph-evidence-service';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { inOrganization } from '../org-scope';
 import { exitInterviews } from '@/db/schema';
@@ -35,7 +35,8 @@ async function countEligibleInterviews(orgId: string): Promise<number> {
 }
 
 export async function forecastContinuityTrends(orgId: string): Promise<ContinuityForecast> {
-  const propagationMap = await buildDependencyPropagationMap(orgId);
+  const evidence = await loadGraphEvidence(orgId);
+  const propagationMap = evidence.exploratory;
   const interviewCount = await countEligibleInterviews(orgId);
   const now = new Date().toISOString();
 
@@ -54,6 +55,10 @@ export async function forecastContinuityTrends(orgId: string): Promise<Continuit
     ...(metrics ? { currentMetrics: metrics } : {}),
     dataPoints: interviewCount,
     note: 'No trend is reported: a measured history of the dependency map is not held. Current metrics are measured from eligible interviews only.',
+    verifiedEvidenceCoverage: {
+      nodesWithVerifiedEvidence: propagationMap.nodes.filter((node) => hasAnyVerifiedEvidence(evidence, node.id)).length,
+      totalNodes: propagationMap.nodes.length,
+    },
   };
 }
 
