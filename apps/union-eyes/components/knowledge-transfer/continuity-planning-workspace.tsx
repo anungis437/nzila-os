@@ -13,8 +13,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { ContinuityRecommendation, DecisionBrief } from '@/lib/knowledge-transfer/decision-intelligence/decision-models';
 import type { ResilienceRoadmap } from '@/lib/knowledge-transfer/resilience-strategies/strategy-models';
+import { VerifiedDependenciesPanel } from './verified-dependencies-panel';
 
-type PlanningTab = 'brief' | 'roadmap' | 'actions';
+type PlanningTab = 'brief' | 'roadmap' | 'actions' | 'verified_dependencies';
 
 // What the screen reads is what the services return: the routes answer these types under `data`, so a field the service does not have fails to compile here.
 type Recommendation = ContinuityRecommendation;
@@ -161,6 +162,7 @@ export function ContinuityPlanningWorkspace() {
     { id: 'brief', label: 'Decision Brief' },
     { id: 'roadmap', label: 'Resilience Roadmap' },
     { id: 'actions', label: 'Planning Actions' },
+    { id: 'verified_dependencies', label: 'Verified Dependencies' },
   ];
 
   return (
@@ -238,6 +240,25 @@ export function ContinuityPlanningWorkspace() {
                   {briefData.governanceExposureSummary}
                 </div>
               )}
+
+              {/* Confirmed dependency risk - only ever populated from verified evidence, never the exploratory graph above */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <div className="text-xs font-semibold text-slate-700 mb-1">Confirmed Dependency Risk</div>
+                {briefData.confirmedDependencyRiskStatus === 'no_verified_dependency_evidence_recorded' ? (
+                  <p className="text-xs text-slate-600">
+                    No dependency has been verified yet. The exploratory findings above are pattern-based and have not been
+                    independently confirmed — submit evidence under Verified Dependencies to change that.
+                  </p>
+                ) : (
+                  <ul className="space-y-1">
+                    {briefData.confirmedDependencyRisks.map((risk, i) => (
+                      <li key={i} className="text-xs text-slate-700">
+                        • {risk.dependentLabel} depends on {risk.dependsOnLabel} ({risk.processOrSystem}, verified by {risk.responsibleAuthority})
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
               {/* Recommendations */}
               <div>
@@ -514,6 +535,9 @@ export function ContinuityPlanningWorkspace() {
           )}
         </div>
       )}
+
+      {/* Verified Dependencies Tab */}
+      {activeTab === 'verified_dependencies' && <VerifiedDependenciesPanel />}
     </div>
   );
 }

@@ -5,7 +5,7 @@
  * scoped migration 0018. Application code must not issue DDL for them.
  */
 
-import { pgTable, uuid, text, integer, jsonb, timestamp, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, jsonb, timestamp, index, varchar } from 'drizzle-orm/pg-core';
 
 export const ueCognitionMemory = pgTable('ue_cognition_memory', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -59,4 +59,30 @@ export const ueCopilotConversations = pgTable('ue_copilot_conversations', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   orgIdx: index('ue_copilot_conversations_org_idx').on(table.organizationId, table.createdAt),
+}));
+
+/**
+ * Verified dependency evidence, separate from the exploratory propagation map. Created by platform migration 0085
+ * and protected by scoped 0059. Application code (lib/knowledge-transfer/propagation/verified-dependency-store.ts)
+ * reaches this table through raw SQL, like its ue_cognition_memory sibling above - this declaration exists so the
+ * table is canonically declared for storage-authority/governance tooling, not as the runtime query path.
+ */
+export const ueVerifiedDependencyEvidence = pgTable('ue_verified_dependency_evidence', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  dependentNodeId: text('dependent_node_id').notNull(),
+  dependsOnNodeId: text('depends_on_node_id').notNull(),
+  processOrSystem: varchar('process_or_system', { length: 300 }).notNull(),
+  responsibleAuthority: varchar('responsible_authority', { length: 300 }).notNull(),
+  evidenceReference: varchar('evidence_reference', { length: 500 }).notNull(),
+  status: varchar('status', { length: 20 }).notNull().default('pending_review'),
+  submittedBy: text('submitted_by').notNull(),
+  reviewedBy: text('reviewed_by'),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  reviewNotes: varchar('review_notes', { length: 1000 }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  orgIdx: index('ue_verified_dependency_evidence_org_idx').on(table.organizationId, table.status),
+  lookupIdx: index('ue_verified_dependency_evidence_lookup_idx').on(table.organizationId, table.dependentNodeId, table.dependsOnNodeId, table.status),
 }));

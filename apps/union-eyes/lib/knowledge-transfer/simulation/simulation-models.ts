@@ -75,6 +75,28 @@ export interface ContinuitySimulationResult {
   organizationId: string;
   generatedAt: string;
   scenario: SimulationScenario;
+  /**
+   * Type-level marker, not just prose: every figure below is a scenario projection built from the exploratory
+   * propagation graph (interview tag co-occurrence), never from verified operational dependency evidence. See
+   * verifiedDependencyContext for how much of this specific projection touches a node with verified evidence on
+   * file, and lib/knowledge-transfer/propagation/verified-dependency-models.ts for the separate, verified graph
+   * (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE).
+   */
+  evidenceBasis: 'exploratory_simulation';
+  /**
+   * Every domain impact, recovery timeline, degradation figure and exacerbated weakness below is a hypothetical
+   * scenario model computed from exit-interview tag co-occurrence and the scenario's own stated assumptions - not
+   * a verified measurement of current operational dependency, ownership or recovery time. Useful for discussion
+   * and continuity planning; never report it as a confirmed statement of present organizational risk.
+   */
+  methodologyNote: string;
+  /**
+   * How many of this scenario's affected nodes have at least one currently-verified dependency record on file,
+   * out of how many were affected in total. 0 affected-with-verified-evidence does not mean the scenario is
+   * wrong - it means nothing here is independently corroborated yet, which a reader needs to know before citing
+   * this projection as more than a planning exercise.
+   */
+  verifiedDependencyContext: { affectedNodesWithVerifiedEvidence: number; totalAffectedNodes: number };
   /** Pre-simulation continuity baseline score */
   baselineContinuityScore: number;
   /** Post-simulation continuity score (immediate impact) */

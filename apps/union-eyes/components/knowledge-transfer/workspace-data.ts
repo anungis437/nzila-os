@@ -70,6 +70,8 @@ export function toPlayback(result: ContinuitySimulationResult, label: string): P
     recoveryWeek: null,
     twelveWeekProjection: result.twelveWeekProjection,
     autonomousRecoveryProbability: result.autonomousRecoveryProbability,
+    methodologyNote: result.methodologyNote,
+    verifiedDependencyContext: result.verifiedDependencyContext,
   };
 }
 

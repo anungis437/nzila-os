@@ -11,7 +11,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 import type { SimulationScenario, SimulationType } from '../simulation-models';
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[] }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[], listVerifiedDependencies: vi.fn() }));
 
 function makeChain() {
   const chain: Record<string, unknown> = {};
@@ -23,6 +23,9 @@ function makeChain() {
 vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
 }));
+vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
+  listVerifiedDependencies: mocks.listVerifiedDependencies,
+}));
 vi.mock('@/db/db', () => ({ db: { select: vi.fn(() => makeChain()) } }));
 // The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
 vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
@@ -30,7 +33,7 @@ vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
   inOrganization: async (_organizationId: string, work: (tx: unknown) => Promise<unknown>) => work((await import('@/db/db')).db),
 }));
 vi.mock('@/db/schema', () => ({ exitInterviews: { organizationId: 'organizationId', status: 'status' } }));
-vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
+vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, relations: () => ({}) }));
 
 import { simulateContinuityImpact } from '../continuity-simulator';
 
@@ -59,6 +62,7 @@ describe('simulateContinuityImpact', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.interviews = [];
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
   });
 
   // DEF-0B7-EXC-SIMULATION-UNMATCHED-NODES-RETURN-REASSURING-RESULT-AND-ROLES-ARE-IGNORED: a scenario that matches nothing used to
@@ -74,6 +78,34 @@ describe('simulateContinuityImpact', () => {
     mocks.buildMap.mockResolvedValue(mapWith([n('a', 'governance', true, ['Treasurer']), n('b', 'system', false, ['President'])]));
     const result = await simulateContinuityImpact('org', { simulationType: 'retirement', affectedNodeIds: [], affectedRoles: ['treasurer'] });
     expect(result.domainImpacts.map((d) => d.domain)).toEqual(['a']);
+  });
+
+  // DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE: the simulation is a
+  // scenario model over the exploratory graph, never a confirmed-impact claim. Every result discloses that basis
+  // at the type level, and discloses how much of the specific scenario touches independently-verified evidence.
+  it('discloses its exploratory evidence basis and reports zero verified-dependency coverage with no verified records', async () => {
+    mocks.interviews = [{ id: 'i1' }];
+    mocks.buildMap.mockResolvedValue(mapWith([n('a', 'system', true)]));
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
+    const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
+    expect(result.evidenceBasis).toBe('exploratory_simulation');
+    expect(result.methodologyNote).toMatch(/hypothetical scenario/i);
+    expect(result.verifiedDependencyContext).toEqual({ affectedNodesWithVerifiedEvidence: 0, totalAffectedNodes: 1 });
+  });
+
+  it('reports verified-dependency coverage for an affected node that has a verified record', async () => {
+    mocks.interviews = [{ id: 'i1' }];
+    mocks.buildMap.mockResolvedValue(mapWith([n('a', 'system', true), n('b', 'system', false)]));
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      {
+        id: 'vd1', organizationId: 'org', dependentNodeId: 'a', dependsOnNodeId: 'b',
+        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', status: 'verified',
+        submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
+        createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+    const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
+    expect(result.verifiedDependencyContext).toEqual({ affectedNodesWithVerifiedEvidence: 1, totalAffectedNodes: 1 });
   });
   it('simulates a critical multi-domain governance + vendor loss', async () => {
     mocks.interviews = [{ id: 'i1' }, { id: 'i2' }];

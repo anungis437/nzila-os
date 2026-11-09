@@ -99,6 +99,8 @@ describe('toPlayback', () => {
     exacerbatedWeaknesses: [{ weaknessType: 'single_source', affectedArea: 'payroll', severity: 'high', isExacerbated: true, mitigation: 'document it' }],
     twelveWeekProjection: 55,
     autonomousRecoveryProbability: 30,
+    methodologyNote: 'scenario model, not a confirmed measurement',
+    verifiedDependencyContext: { affectedNodesWithVerifiedEvidence: 0, totalAffectedNodes: 1 },
   } as unknown as ContinuitySimulationResult
 
   it("plays back the simulation's own timeline, with a domain affected from the week it is exposed", () => {
@@ -114,6 +116,8 @@ describe('toPlayback', () => {
     expect(playback.bottlenecksExposed).toEqual(['payroll'])
     expect(playback.twelveWeekProjection).toBe(55)
     expect(playback.autonomousRecoveryProbability).toBe(30)
+    expect(playback.methodologyNote).toBe('scenario model, not a confirmed measurement')
+    expect(playback.verifiedDependencyContext).toEqual({ affectedNodesWithVerifiedEvidence: 0, totalAffectedNodes: 1 })
   })
 
   it('shows no mitigation and no recovery week, because the simulation models neither', () => {

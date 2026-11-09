@@ -19,6 +19,7 @@ import { inOrganization } from '../org-scope';
 import { ApiError } from '@/lib/api/errors';
 import { exitInterviews } from '@/db/schema';
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import { listVerifiedDependencies } from '../propagation/verified-dependency-store';
 import type { DependencyNode, PropagationMap } from '../propagation/propagation-models';
 import type {
   SimulationScenario,
@@ -35,6 +36,13 @@ import {
 } from './simulation-models';
 
 type PublishedInterview = Awaited<ReturnType<typeof loadPublishedInterviews>>[number];
+
+/** Carried verbatim on every ContinuitySimulationResult; see the field's own doc comment for why. */
+const SIMULATION_METHODOLOGY_NOTE =
+  'Every domain impact, recovery timeline, degradation figure and exacerbated weakness is a hypothetical scenario ' +
+  'model computed from exit-interview tag co-occurrence and the scenario\'s own stated assumptions, not a verified ' +
+  'measurement of current operational dependency, ownership or recovery time. Useful for discussion and ' +
+  'continuity planning; never report it as a confirmed statement of present organizational risk.';
 
 async function loadPublishedInterviews(orgId: string) {
   // Read as the runtime role in the organization's own tenant transaction.
@@ -150,10 +158,22 @@ export async function simulateContinuityImpact(
     immediateImpactScore >= 40 ? 'medium' :
     'low';
 
+  // How much of this specific projection touches a node with independently-verified dependency evidence on file -
+  // never gates the simulation (exploratory scenario modeling is kept, per DEF-0B7-COGB), just discloses its basis.
+  const verifiedRecords = await listVerifiedDependencies(orgId, 'verified');
+  const verifiedNodeIds = new Set(verifiedRecords.flatMap((record) => [record.dependentNodeId, record.dependsOnNodeId]));
+  const verifiedDependencyContext = {
+    affectedNodesWithVerifiedEvidence: affectedNodes.filter((node) => verifiedNodeIds.has(node.id)).length,
+    totalAffectedNodes: affectedNodes.length,
+  };
+
   return {
     organizationId: orgId,
     generatedAt: new Date().toISOString(),
     scenario,
+    evidenceBasis: 'exploratory_simulation' as const,
+    methodologyNote: SIMULATION_METHODOLOGY_NOTE,
+    verifiedDependencyContext,
     baselineContinuityScore,
     immediateImpactScore,
     twelveWeekProjection,

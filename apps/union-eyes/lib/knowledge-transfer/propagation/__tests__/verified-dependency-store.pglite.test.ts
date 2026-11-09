@@ -11,7 +11,7 @@ import { vi } from 'vitest';
 //  - a revoked record is never again reported as verified
 //  - a lookup for a different organization's node ids never sees another organization's evidence
 
-const state = vi.hoisted(() => ({ db: null as unknown }));
+const state = vi.hoisted(() => ({ db: null as unknown, nodeIds: ['a', 'b', 'same_node', 'finance_clerk', 'payroll_system', 'finance_clerk_pending', 'payroll_system_pending'] as string[] }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   // Production (postgres-js) returns row arrays from tx.execute(); PGlite's driver wraps them in { rows }. Adapt
@@ -28,6 +28,12 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   },
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () => undefined) }));
+// Node-identity validation (assertNodesCurrentlyExist) checks submitted/verified node ids against the CURRENT
+// propagation map - mocked here (overridable per-test via state.nodeIds) so this file stays focused on the
+// verified-dependency table's own real-SQL behavior (not a second pglite fixture for exit_interviews/topic-graph).
+vi.mock('../dependency-propagator', () => ({
+  buildDependencyPropagationMap: async () => ({ nodes: state.nodeIds.map((id) => ({ id })) }),
+}));
 
 const ORG_A = '11111111-1111-4111-8111-111111111111';
 const ORG_B = '22222222-2222-4222-8222-222222222222';
@@ -67,6 +73,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await pg.exec('TRUNCATE ue_verified_dependency_evidence');
+  state.nodeIds = ['a', 'b', 'same_node', 'finance_clerk', 'payroll_system', 'finance_clerk_pending', 'payroll_system_pending'];
 });
 
 describe('verified dependency evidence — real PGlite SQL', () => {
@@ -78,6 +85,16 @@ describe('verified dependency evidence — real PGlite SQL', () => {
         processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
       }, 'u1'),
     ).rejects.toThrow();
+  });
+
+  it('refuses a submission referencing a node id absent from the current dependency graph', async () => {
+    const { submitVerifiedDependency } = await import('../verified-dependency-store');
+    await expect(
+      submitVerifiedDependency(ORG_A, {
+        dependentNodeId: 'a', dependsOnNodeId: 'node_that_no_longer_exists',
+        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
+      }, 'u1'),
+    ).rejects.toThrow(/do not correspond to any current dependency node/);
   });
 
   it('starts pending_review and reports unavailable (no_verified_evidence_recorded) before any review', async () => {
@@ -102,6 +119,25 @@ describe('verified dependency evidence — real PGlite SQL', () => {
         ['same-user', record.id],
       ),
     ).rejects.toThrow();
+  });
+
+  it('refuses to verify a pending submission whose node has drifted out of the current dependency graph by review time', async () => {
+    const { submitVerifiedDependency, reviewVerifiedDependency } = await import('../verified-dependency-store');
+    const record = await submitVerifiedDependency(ORG_A, {
+      dependentNodeId: 'a', dependsOnNodeId: 'b', processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
+    }, 'submitter-1');
+
+    // Time passes; the organization's dependency graph no longer has node 'b' (relabeled, tag fell out of use, etc).
+    state.nodeIds = state.nodeIds.filter((id) => id !== 'b');
+
+    await expect(
+      reviewVerifiedDependency(ORG_A, record.id, 'verified', 'reviewer-a', undefined),
+    ).rejects.toThrow(/do not correspond to any current dependency node/);
+
+    // Rejecting (not verifying) a drifted submission is still allowed - a reviewer should be able to close out a
+    // submission that no longer makes sense, without that action itself needing the node to still exist.
+    const rejected = await reviewVerifiedDependency(ORG_A, record.id, 'rejected', 'reviewer-a', 'node no longer exists');
+    expect(rejected?.status).toBe('rejected');
   });
 
   it('two reviewers racing to review the same pending submission resolve to exactly one winner', async () => {

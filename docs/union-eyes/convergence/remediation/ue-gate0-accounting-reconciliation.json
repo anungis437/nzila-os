@@ -740,18 +740,29 @@
     },
     {
       "defectId": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
-      "batch": "B163-FAMILY1-STRICT-CLOSURE",
+      "batch": "B164-FAMILY1-INTEGRATION-QUALIFICATION-CLOSURE",
       "sourceCommit": null,
-      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/verified-dependency-store.pglite.test.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
+      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/verified-dependency-store.pglite.test.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts;apps/union-eyes/lib/knowledge-transfer/simulation/__tests__/continuity-simulator.test.ts;apps/union-eyes/app/api/exit-interviews/verified-dependencies/__tests__/*.test.ts;apps/union-eyes/db/__tests__/rls-storage-authority-registry-composition.test.ts;apps/union-eyes/db/__tests__/rls-storage-authority-manifest-invariants.test.ts",
       "files": [
         "apps/union-eyes/db/migrations-platform/0085_verified_dependency_evidence.sql",
         "apps/union-eyes/db/migrations-cache/0059_verified_dependency_evidence_rls_closure.sql",
+        "apps/union-eyes/db/rls-storage-authority/analytics-ai.ts",
+        "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
+        "apps/union-eyes/lib/operations/catalog-authority-contract.json",
         "apps/union-eyes/lib/knowledge-transfer/propagation/verified-dependency-models.ts",
         "apps/union-eyes/lib/knowledge-transfer/propagation/verified-dependency-store.ts",
         "apps/union-eyes/lib/knowledge-transfer/propagation/propagation-models.ts",
         "apps/union-eyes/lib/knowledge-transfer/propagation/dependency-propagator.ts",
         "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-engine.ts",
-        "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-models.ts"
+        "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-models.ts",
+        "apps/union-eyes/lib/knowledge-transfer/simulation/continuity-simulator.ts",
+        "apps/union-eyes/lib/knowledge-transfer/simulation/simulation-models.ts",
+        "apps/union-eyes/app/api/exit-interviews/verified-dependencies/route.ts",
+        "apps/union-eyes/app/api/exit-interviews/verified-dependencies/[id]/route.ts",
+        "apps/union-eyes/components/knowledge-transfer/verified-dependencies-panel.tsx",
+        "apps/union-eyes/components/knowledge-transfer/continuity-planning-workspace.tsx",
+        "apps/union-eyes/components/knowledge-transfer/propagation-playback/propagation-playback.tsx",
+        "apps/union-eyes/components/knowledge-transfer/workspace-data.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },

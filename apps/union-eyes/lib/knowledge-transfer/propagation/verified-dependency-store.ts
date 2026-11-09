@@ -16,6 +16,7 @@
 import { sql } from 'drizzle-orm';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { inOrganization } from '../org-scope';
+import { buildDependencyPropagationMap } from './dependency-propagator';
 import type {
   VerifiedDependencyRecord,
   SubmitVerifiedDependencyInput,
@@ -59,6 +60,25 @@ function rowToRecord(row: VerifiedDependencyRow): VerifiedDependencyRecord {
   };
 }
 
+/**
+ * Dependency node ids are derived from mutable interview tag labels (topic-graph-builder.ts), so a submission or a
+ * pending review can reference an id that no longer corresponds to any current node - the label changed, the
+ * underlying tag fell out of use, or it never existed. Checking against the CURRENT propagation map (not a cached
+ * or historical one) at both submission and verification time is what DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-
+ * SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE's "validate that submitted dependency references resolve to
+ * authorized, existing organizational nodes" requires - this does not retroactively invalidate an ALREADY-verified
+ * record if its nodes later drift (lookupVerifiedDependency still returns it; a human reviewer owns revalidation
+ * on an explicit re-review), it only gates new submissions and new verifications.
+ */
+async function assertNodesCurrentlyExist(orgId: string, nodeIds: string[]): Promise<void> {
+  const propagationMap = await buildDependencyPropagationMap(orgId);
+  const currentIds = new Set(propagationMap.nodes.map((node) => node.id));
+  const unknown = nodeIds.filter((id) => !currentIds.has(id));
+  if (unknown.length > 0) {
+    throw new Error(`The following node id(s) do not correspond to any current dependency node for this organization: ${unknown.join(', ')}`);
+  }
+}
+
 /** Submits new verified-dependency evidence. Always starts pending_review — nothing is self-certifying. */
 export async function submitVerifiedDependency(
   orgId: string,
@@ -68,6 +88,7 @@ export async function submitVerifiedDependency(
   if (input.dependentNodeId === input.dependsOnNodeId) {
     throw new Error('dependentNodeId and dependsOnNodeId must differ');
   }
+  await assertNodesCurrentlyExist(orgId, [input.dependentNodeId, input.dependsOnNodeId]);
   const rows = await inOrganization(orgId, async (tx) => {
     const inserted = await tx.execute(sql`
       INSERT INTO ue_verified_dependency_evidence
@@ -102,6 +123,15 @@ export async function reviewVerifiedDependency(
   reviewedBy: string,
   reviewNotes: string | undefined,
 ): Promise<VerifiedDependencyRecord | null> {
+  if (decision === 'verified') {
+    // Re-validate at the moment of verification, not just at submission: time may have passed and the underlying
+    // node(s) may no longer exist in the organization's current dependency graph.
+    const rows = await inOrganization(orgId, (tx) =>
+      tx.execute(sql`SELECT dependent_node_id, depends_on_node_id FROM ue_verified_dependency_evidence WHERE id = ${id} AND organization_id = ${orgId}`),
+    );
+    const target = (rows as unknown as Array<{ dependent_node_id: string; depends_on_node_id: string }>)[0];
+    if (target) await assertNodesCurrentlyExist(orgId, [target.dependent_node_id, target.depends_on_node_id]);
+  }
   return inOrganization(orgId, async (tx) => {
     const updated = await tx.execute(sql`
       UPDATE ue_verified_dependency_evidence
