@@ -16,7 +16,7 @@ const built = read('docs/union-eyes/convergence/remediation/ue-gate0-defect-elim
   totals: { implementedPendingQualification: number }
 }
 
-const f06 = source.batches.filter((batch) => /^B1(0[5-9]|[1-9]\d)-/.test(batch.id))
+const f06 = source.batches.filter((batch) => /^B1(0[5-9]|[1-9]\d)-F06-/.test(batch.id))
 
 // Files a batch named as evidence that were deleted afterwards, each with the reason.
 const REMOVED_LATER: Record<string, string> = {
@@ -35,8 +35,8 @@ describe('F06 ledger provenance', () => {
     for (const batch of f06) expect(batch.touches?.length ?? 0, batch.id).toBeGreaterThan(0)
   })
 
-  it('names the commit of every F06 batch except the newest, which the next batch fills in', () => {
-    for (const batch of f06.slice(0, -1)) expect(batch.evidenceCommit, batch.id).toMatch(/^[0-9a-f]{9,40}$/)
+  it('names the commit of every F06 batch', () => {
+    for (const batch of f06) expect(batch.evidenceCommit, batch.id).toMatch(/^[0-9a-f]{9,40}$/)
   })
 
   it('lists, for the small-group suppression defect, B111 and its commit alongside the later R2 step', () => {
@@ -46,7 +46,7 @@ describe('F06 ledger provenance', () => {
     expect(b111?.evidenceCommit).toBe('b15818963')
     expect(b111?.files.some((file) => file.endsWith('lib/reports/report-config-validation.ts'))).toBe(true)
     expect(history.some((step) => step.batch.startsWith('B113-'))).toBe(true)
-    expect(built.entries[id as string].status).toBe('PARTIAL')
+    expect(built.entries[id as string].status).toBe('IMPLEMENTED_PENDING_QUALIFICATION')
   })
 
   it('names only source files that exist, so the evidence is recoverable', () => {
