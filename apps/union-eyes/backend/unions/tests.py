@@ -8,6 +8,7 @@ from datetime import date
 from decimal import Decimal
 
 from auth_core.models import OrganizationMembers, Organizations
+from django.db import connection
 from django.test import TestCase
 from django.utils import timezone
 
@@ -429,6 +430,27 @@ class TestMemberRelationshipScoresStr(TestCase):
 
 
 # ===== 24–29. Survey/Poll models =====
+def create_valid_survey_response():
+    """Create a response bound to the immutable questionnaire version its database key requires."""
+    survey = create_valid(Surveys)
+    questionnaire_version_id = uuid.uuid4()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            INSERT INTO survey_questionnaire_versions
+                (id, organization_id, survey_id, version, content_digest, questions)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            [questionnaire_version_id, survey.organization_id, survey.id, 1, "0" * 64, "[]"],
+        )
+    return create_valid(
+        SurveyResponses,
+        organization_id=survey.organization_id,
+        survey_id=survey.id,
+        questionnaire_version_id=questionnaire_version_id,
+    )
+
+
 class TestSurveysCreate(TestCase):
     def test_create(self):
         obj = create_valid(Surveys)
@@ -453,24 +475,26 @@ class TestSurveyQuestionsStr(TestCase):
 
 class TestSurveyResponsesCreate(TestCase):
     def test_create(self):
-        obj = create_valid(SurveyResponses)
+        obj = create_valid_survey_response()
         self.assertIsNotNone(obj.id)
 
 
 class TestSurveyResponsesStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(create_valid(SurveyResponses)), str)
+        self.assertIsInstance(str(create_valid_survey_response()), str)
 
 
 class TestSurveyAnswersCreate(TestCase):
     def test_create(self):
-        obj = create_valid(SurveyAnswers)
+        response = create_valid_survey_response()
+        obj = create_valid(SurveyAnswers, response_id=response.id)
         self.assertIsNotNone(obj.id)
 
 
 class TestSurveyAnswersStr(TestCase):
     def test_str(self):
-        self.assertIsInstance(str(create_valid(SurveyAnswers)), str)
+        response = create_valid_survey_response()
+        self.assertIsInstance(str(create_valid(SurveyAnswers, response_id=response.id)), str)
 
 
 class TestPollsCreate(TestCase):

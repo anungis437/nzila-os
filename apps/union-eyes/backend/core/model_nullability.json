@@ -1694,6 +1694,7 @@
    "created_by",
    "custom_fields",
    "dba_name",
+   "demo_seed_id",
    "email",
    "established_date",
    "federal_corporation_number",
@@ -2503,6 +2504,7 @@
    "cba_section",
    "closed_at",
    "created_by",
+   "demo_seed_id",
    "desired_outcome",
    "employer_id",
    "employer_name",
@@ -3182,7 +3184,10 @@
    "last_renewal_reminder",
    "opted_in_at",
    "opted_out_at",
+   "organization_id",
    "purpose_description",
+   "scope_id",
+   "scope_kind",
    "user_agent"
   ],
   "member_relationship_scores": [
@@ -3569,6 +3574,7 @@
   ],
   "organization_members": [
    "deleted_at",
+   "demo_seed_id",
    "department",
    "exemption_approved_at",
    "exemption_approved_by",
@@ -4664,6 +4670,9 @@
    "shares_count"
   ],
   "sso_providers": [
+   "approval_reference",
+   "approved_at",
+   "approved_by",
    "metadata",
    "oidc_authorization_endpoint",
    "oidc_client_id",

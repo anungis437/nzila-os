@@ -115,7 +115,7 @@ class HolidaysSerializer(serializers.ModelSerializer):
 class StewardAssignmentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = StewardAssignments
-        fields = ['id', 'created_at', 'updated_at', 'organization_id', 'survey_id', 'questionnaire_version_id']
+        fields = ['id', 'created_at', 'updated_at', 'organization_id']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 
