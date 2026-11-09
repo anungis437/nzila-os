@@ -11,8 +11,8 @@
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import { forecastContinuityTrends } from '../forecasting/continuity-forecaster';
-import type { DependencyNode, PropagationMap } from '../propagation/propagation-models';
-import { listVerifiedDependencies } from '../propagation/verified-dependency-store';
+import type { DependencyNode } from '../propagation/propagation-models';
+import { loadGraphEvidence } from '../propagation/graph-evidence-service';
 import { evidenceCoverageFromCount } from '../governance/evidence-basis';
 import {
   type ContinuityRecommendation,
@@ -233,29 +233,33 @@ function buildVendorRecommendation(
 }
 
 /**
- * Checks the verified dependency graph (never the exploratory propagation map alone) and returns the confirmed
- * dependency risks a decision brief may report as established. Returns status
- * 'no_verified_dependency_evidence_recorded' with an empty risk list when the organization has no currently-verified
- * dependency evidence — this is an explicit "unavailable", never a silent fall-back to inferred/exploratory edges
- * presented as confirmed (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE).
+ * Returns the dependencies a decision brief may report as established: exactly the CURRENT verified dependencies
+ * (graph-evidence-service.ts's single evaluator - node references resolved, fingerprint current, evidence current),
+ * in their verified direction, each with its evidence tier. A record that is verified in the database but no longer
+ * current is never reported as confirmed; when only such records exist the status says re-verification is required.
+ * Never a fall-back to inferred/exploratory edges presented as confirmed
+ * (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE).
  */
 export async function assessConfirmedDependencyRisk(
   orgId: string,
-  propagationMap: PropagationMap,
 ): Promise<{ risks: ConfirmedDependencyRisk[]; status: DecisionBrief['confirmedDependencyRiskStatus'] }> {
-  const verifiedRecords = await listVerifiedDependencies(orgId, 'verified');
-  if (verifiedRecords.length === 0) {
-    return { risks: [], status: 'no_verified_dependency_evidence_recorded' };
+  const evidence = await loadGraphEvidence(orgId);
+  if (evidence.currentVerified.length === 0) {
+    return {
+      risks: [],
+      status: evidence.staleVerified.length > 0 ? 'verified_dependency_evidence_requires_reverification' : 'no_verified_dependency_evidence_recorded',
+    };
   }
-  const labelFor = (nodeId: string) => propagationMap.nodes.find((n) => n.id === nodeId)?.label ?? nodeId;
-  const risks: ConfirmedDependencyRisk[] = verifiedRecords.map((record) => ({
-    dependentNodeId: record.dependentNodeId,
-    dependentLabel: labelFor(record.dependentNodeId),
-    dependsOnNodeId: record.dependsOnNodeId,
-    dependsOnLabel: labelFor(record.dependsOnNodeId),
+  const labelFor = (nodeId: string) => evidence.context.nodesById.get(nodeId)?.label ?? nodeId;
+  const risks: ConfirmedDependencyRisk[] = evidence.currentVerified.map(({ record, dependentNodeId, dependsOnNodeId, evidenceTier }) => ({
+    dependentNodeId,
+    dependentLabel: labelFor(dependentNodeId),
+    dependsOnNodeId,
+    dependsOnLabel: labelFor(dependsOnNodeId),
     processOrSystem: record.processOrSystem,
     responsibleAuthority: record.responsibleAuthority,
     evidenceReference: record.evidenceReference,
+    evidenceTier,
     verifiedAt: record.reviewedAt ?? record.updatedAt,
   }));
   return { risks, status: 'verified_dependency_evidence_available' };
@@ -345,7 +349,7 @@ export async function generateDecisionBrief(orgId: string): Promise<DecisionBrie
     criticalGaps.push('Continuity health is trending downward without intervention');
   }
 
-  const confirmedDependencyRisk = await assessConfirmedDependencyRisk(orgId, propagationMap);
+  const confirmedDependencyRisk = await assessConfirmedDependencyRisk(orgId);
 
   // Governance exposure summary
   const govExposurePct = govNodes.length > 0

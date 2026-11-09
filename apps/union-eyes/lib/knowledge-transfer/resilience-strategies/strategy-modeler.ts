@@ -7,7 +7,7 @@
  * This is organizational capacity planning — not workforce management.
  */
 
-import { loadGraphEvidence, hasAnyVerifiedEvidence } from '../propagation/graph-evidence-service';
+import { loadGraphEvidence, verifiedEdgeCoverage } from '../propagation/graph-evidence-service';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
   type StrategyType,
@@ -248,9 +248,6 @@ export async function buildResilienceRoadmap(orgId: string): Promise<ResilienceR
     phase2Foundation,
     phase3Sustained,
     maturityNarrative,
-    verifiedEvidenceCoverage: {
-      nodesWithVerifiedEvidence: propagationMap.nodes.filter((node) => hasAnyVerifiedEvidence(evidence, node.id)).length,
-      totalNodes: propagationMap.nodes.length,
-    },
+    verifiedEvidenceCoverage: verifiedEdgeCoverage(evidence),
   };
 }

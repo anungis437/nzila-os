@@ -21,34 +21,44 @@ export interface GovernanceNode {
   dependsOn: string[];
   downstreamProcesses: string[];
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
-  /** 'verified' when a currently-verified dependency record names this node; 'exploratory' when the label is
-   *  only from exit-interview tag co-occurrence. */
-  evidenceBasis: 'verified' | 'exploratory';
+  /** Always 'exploratory': a node's classification and risk level come from exit-interview tag co-occurrence.
+   *  Verified dependency evidence confirms directed relationships, never a node's own properties. */
+  evidenceBasis: 'exploratory';
 }
+
+export type EvidenceTierLabel = 'system_resolved_document' | 'human_attested_external';
+
+const TIER_LABELS: Record<EvidenceTierLabel, string> = {
+  system_resolved_document: 'stored document',
+  human_attested_external: 'external source, reviewer-attested',
+};
 
 export interface GovernanceImpactData {
   totalGovernanceProcesses: number;
   singleSourceProcesses: number;
-  /** Exploratory-derived: severity 'critical' from tag co-occurrence, regardless of verification. A hypothesis,
-   *  never presented as a confirmed finding on its own - see confirmedCriticalGovernanceGaps for that. */
+  /** Severity 'critical' from tag co-occurrence. A hypothesis, whether or not any cascade is verified. */
   criticalGovernanceGaps: string[];
-  /** The SUBSET of criticalGovernanceGaps currently backed by a verified dependency record - the only entries an
-   *  API response, calculation or UI may present as a CONFIRMED critical governance gap. */
-  confirmedCriticalGovernanceGaps: string[];
+  /** Governance gaps whose failure reaches at least one area through a fully verified, correctly-directed chain.
+   *  The cascade is confirmed; the gap's severity is still inferred. */
+  governanceGapsWithVerifiedCascade: string[];
   nodes: GovernanceNode[];
   cascadeRisks: Array<{
     triggerNode: string;
     cascadedProcesses: string[];
+    /** Inferred from continuity sensitivity, never confirmed by dependency evidence. */
     severity: string;
     cascadeDepth: number;
     evidenceBasis: 'verified' | 'exploratory';
+    /** The downstream processes reached through a fully verified chain, each with that chain and its evidence. */
+    confirmedCascadedProcesses: Array<{ name: string; chain: string[]; evidenceTier: EvidenceTierLabel }>;
   }>;
-  /** The SUBSET of cascadeRisks with evidenceBasis 'verified' - the only entries safe to present as confirmed. */
+  /** Cascades reduced to their confirmed part (only verified-chain processes) - the only entries safe to present as
+   *  confirmed cascades. Severity remains inferred. */
   confirmedCascadeRisks: GovernanceImpactData['cascadeRisks'];
   /** How the analysis determines what is verified vs. exploratory. */
   methodologyNote: string;
-  /** How many governance nodes have at least one currently-verified relationship on file. */
-  verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: number; totalNodes: number };
+  /** How many cascades reach at least one area through a fully verified chain. */
+  verifiedEvidenceCoverage: { cascadesWithVerifiedChain: number; totalCascades: number };
 }
 
 const RISK_COLORS: Record<string, string> = {
@@ -97,23 +107,23 @@ export function GovernanceImpactExplorer({ data }: Props) {
           <div className="text-xs text-amber-600">Single-Source ({concentrationPct}%)</div>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
-          <div className="text-2xl font-semibold text-red-700">{data.confirmedCriticalGovernanceGaps.length}</div>
-          <div className="text-xs text-red-600">Confirmed Critical Gaps</div>
+          <div className="text-2xl font-semibold text-red-700">{data.governanceGapsWithVerifiedCascade.length}</div>
+          <div className="text-xs text-red-600">Gaps With a Verified Cascade</div>
         </div>
       </div>
 
       {/* Evidence-basis disclosure: what is confirmed vs. inferred from exit-interview tag co-occurrence */}
       <div className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-        {data.verifiedEvidenceCoverage.nodesWithVerifiedEvidence} of {data.verifiedEvidenceCoverage.totalNodes} governance nodes have a currently-verified dependency record on file; the rest are exploratory signal only. {data.methodologyNote}
+        {data.verifiedEvidenceCoverage.cascadesWithVerifiedChain} of {data.verifiedEvidenceCoverage.totalCascades} governance cascades reach at least one area through a chain of currently-verified dependencies; everything else, and every severity, is exploratory signal only. {data.methodologyNote}
       </div>
 
       {/* Critical governance gaps: confirmed (verified evidence) and exploratory (hypothesis) are rendered in
           clearly separate sections - never merged into one list a caller might mistake as all confirmed. */}
-      {data.confirmedCriticalGovernanceGaps.length > 0 && (
+      {data.governanceGapsWithVerifiedCascade.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-          <div className="text-xs font-semibold text-red-700 mb-1">Confirmed Critical Governance Continuity Gaps</div>
+          <div className="text-xs font-semibold text-red-700 mb-1">Governance Gaps With a Verified Cascade (severity inferred)</div>
           <div className="flex flex-wrap gap-1.5">
-            {data.confirmedCriticalGovernanceGaps.map((gap) => (
+            {data.governanceGapsWithVerifiedCascade.map((gap) => (
               <span key={gap} className="text-xs bg-red-100 text-red-700 border border-red-200 rounded px-2 py-0.5">{gap}</span>
             ))}
           </div>
@@ -186,9 +196,7 @@ export function GovernanceImpactExplorer({ data }: Props) {
                 {node.isSingleSource && (
                   <span className="text-xs bg-amber-50 text-amber-600 border border-amber-200 rounded px-1.5">single</span>
                 )}
-                <span className={`text-xs rounded px-1.5 border ${node.evidenceBasis === 'verified' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
-                  {node.evidenceBasis}
-                </span>
+                <span className="text-xs rounded px-1.5 border bg-slate-100 text-slate-500 border-slate-200">{node.evidenceBasis}</span>
               </div>
             </div>
           </button>
@@ -250,8 +258,18 @@ export function GovernanceImpactExplorer({ data }: Props) {
                 </div>
                 <p className="text-xs text-slate-500">
                   Cascade depth {risk.cascadeDepth}
-                  {risk.cascadedProcesses.length > 0 ? ` · affects ${risk.cascadedProcesses.join(', ')}` : ''}
+                  {risk.cascadedProcesses.length > 0 ? ` · affects ${risk.cascadedProcesses.join(', ')} (inferred)` : ''}
+                  {' · severity inferred'}
                 </p>
+                {risk.confirmedCascadedProcesses.length > 0 && (
+                  <ul className="mt-1 space-y-0.5">
+                    {risk.confirmedCascadedProcesses.map((process) => (
+                      <li key={process.name} className="text-xs text-emerald-700">
+                        Verified: {process.chain.join(' → ')} ({TIER_LABELS[process.evidenceTier]})
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             ))}
           </div>

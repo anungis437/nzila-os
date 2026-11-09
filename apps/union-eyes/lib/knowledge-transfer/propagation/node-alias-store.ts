@@ -1,5 +1,5 @@
 /**
- * Node Alias Store — durable, explicitly-authorized identity/alias mapping (graph-identity.ts's resolveConceptLabel).
+ * Node Alias Store — durable, explicitly-authorized identity/alias mapping (graph-identity.ts's resolveNodeReference).
  * Uses the ue_graph_node_alias table (platform migration 0086, RLS scoped 0060). This module never issues DDL and
  * every statement runs on the tenant runtime identity via inOrganization/withRLSContext.
  *
@@ -12,6 +12,7 @@
 import { sql } from 'drizzle-orm';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { inOrganization } from '../org-scope';
+import { canonicalNodeIdentityKey } from './graph-identity';
 import type { NodeAlias, CreateNodeAliasInput } from './verified-dependency-models';
 
 interface NodeAliasRow {
@@ -41,24 +42,38 @@ function rowToAlias(row: NodeAliasRow): NodeAlias {
 }
 
 /**
- * Records a new alias, superseding any prior active alias for the same label in the same transaction (never a
- * silent duplicate active mapping - the unique index on (organization_id, alias_label) WHERE superseded_at IS NULL
- * enforces this at the database layer too). Refuses a self-referential alias (a label aliased to itself names no
- * migration at all).
+ * Records a new alias, superseding every prior active alias with the same IDENTITY KEY (not just the same raw text -
+ * "Payroll" and "payroll " name one label) in the same transaction, so a label never has two active mappings (the
+ * unique index on (organization_id, alias_label) WHERE superseded_at IS NULL backs the exact-text case at the
+ * database layer). Refuses an alias whose two sides have the same identity key (it would name no migration at all),
+ * and an alias whose target is itself an active alias label (aliases are one level deep: no chains, no cycles).
  */
 export async function createNodeAlias(orgId: string, input: CreateNodeAliasInput, createdBy: string): Promise<NodeAlias> {
   if (input.aliasLabel.trim().length === 0 || input.canonicalConceptLabel.trim().length === 0) {
     throw new Error('aliasLabel and canonicalConceptLabel must not be empty');
   }
-  if (input.aliasLabel === input.canonicalConceptLabel) {
+  const aliasKey = canonicalNodeIdentityKey(input.aliasLabel);
+  const targetKey = canonicalNodeIdentityKey(input.canonicalConceptLabel);
+  if (aliasKey === targetKey) {
     throw new Error('aliasLabel and canonicalConceptLabel must differ');
   }
   return inOrganization(orgId, async (tx) => {
-    await tx.execute(sql`
-      UPDATE ue_graph_node_alias
-      SET superseded_by = ${createdBy}, superseded_at = now()
-      WHERE organization_id = ${orgId} AND alias_label = ${input.aliasLabel} AND superseded_at IS NULL
-    `);
+    // Serialize alias decisions per organization so two concurrent creations cannot both leave an active mapping.
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('ue_graph_node_alias:' || ${orgId}))`);
+    const active = (await tx.execute(
+      sql`SELECT id, alias_label FROM ue_graph_node_alias WHERE organization_id = ${orgId} AND superseded_at IS NULL`,
+    )) as unknown as Array<{ id: string; alias_label: string }>;
+    if (active.some((row) => canonicalNodeIdentityKey(row.alias_label) === targetKey)) {
+      throw new Error('canonicalConceptLabel is itself an active alias; point the alias at the current label directly');
+    }
+    const superseded = active.filter((row) => canonicalNodeIdentityKey(row.alias_label) === aliasKey).map((row) => row.id);
+    for (const id of superseded) {
+      await tx.execute(sql`
+        UPDATE ue_graph_node_alias
+        SET superseded_by = ${createdBy}, superseded_at = now()
+        WHERE id = ${id} AND organization_id = ${orgId} AND superseded_at IS NULL
+      `);
+    }
     const inserted = await tx.execute(sql`
       INSERT INTO ue_graph_node_alias (organization_id, alias_label, canonical_concept_label, reason, created_by)
       VALUES (${orgId}, ${input.aliasLabel}, ${input.canonicalConceptLabel}, ${input.reason}, ${createdBy})
@@ -71,7 +86,7 @@ export async function createNodeAlias(orgId: string, input: CreateNodeAliasInput
       resourceType: 'ue_graph_node_alias',
       resourceId: record.id,
       userId: createdBy,
-      details: { aliasLabel: input.aliasLabel, canonicalConceptLabel: input.canonicalConceptLabel },
+      details: { aliasLabel: input.aliasLabel, canonicalConceptLabel: input.canonicalConceptLabel, supersededAliasIds: superseded },
     });
     return rowToAlias(record);
   });

@@ -66,10 +66,10 @@ describe('node alias store — real PGlite SQL', () => {
     const { createNodeAlias, listActiveNodeAliases } = await import('../node-alias-store');
     const alias = await createNodeAlias(
       ORG_A,
-      { aliasLabel: 'payroll clerk', canonicalConceptLabel: 'payroll_specialist', reason: 'title standardized' },
+      { aliasLabel: 'payroll steward', canonicalConceptLabel: 'payroll_specialist', reason: 'title standardized' },
       'reviewer-1',
     );
-    expect(alias.aliasLabel).toBe('payroll clerk');
+    expect(alias.aliasLabel).toBe('payroll steward');
     expect(alias.canonicalConceptLabel).toBe('payroll_specialist');
     expect(alias.supersededAt).toBeNull();
 
@@ -82,12 +82,12 @@ describe('node alias store — real PGlite SQL', () => {
     const { createNodeAlias, listActiveNodeAliases, listAllNodeAliases } = await import('../node-alias-store');
     const first = await createNodeAlias(
       ORG_A,
-      { aliasLabel: 'payroll clerk', canonicalConceptLabel: 'payroll_specialist', reason: 'initial mapping' },
+      { aliasLabel: 'payroll steward', canonicalConceptLabel: 'payroll_specialist', reason: 'initial mapping' },
       'reviewer-1',
     );
     const second = await createNodeAlias(
       ORG_A,
-      { aliasLabel: 'payroll clerk', canonicalConceptLabel: 'payroll_lead', reason: 'role was recategorized' },
+      { aliasLabel: 'payroll steward', canonicalConceptLabel: 'payroll_lead', reason: 'role was recategorized' },
       'reviewer-2',
     );
 
@@ -110,7 +110,7 @@ describe('node alias store — real PGlite SQL', () => {
       createNodeAlias(ORG_A, { aliasLabel: '  ', canonicalConceptLabel: 'payroll_specialist', reason: 'x' }, 'reviewer-1'),
     ).rejects.toThrow(/must not be empty/);
     await expect(
-      createNodeAlias(ORG_A, { aliasLabel: 'payroll clerk', canonicalConceptLabel: '  ', reason: 'x' }, 'reviewer-1'),
+      createNodeAlias(ORG_A, { aliasLabel: 'payroll steward', canonicalConceptLabel: '  ', reason: 'x' }, 'reviewer-1'),
     ).rejects.toThrow(/must not be empty/);
   });
 
@@ -123,8 +123,8 @@ describe('node alias store — real PGlite SQL', () => {
 
   it('never returns or mutates another organization\'s aliases', async () => {
     const { createNodeAlias, listActiveNodeAliases, listAllNodeAliases } = await import('../node-alias-store');
-    await createNodeAlias(ORG_A, { aliasLabel: 'payroll clerk', canonicalConceptLabel: 'payroll_specialist', reason: 'x' }, 'reviewer-1');
-    await createNodeAlias(ORG_B, { aliasLabel: 'payroll clerk', canonicalConceptLabel: 'payroll_lead', reason: 'y' }, 'reviewer-2');
+    await createNodeAlias(ORG_A, { aliasLabel: 'payroll steward', canonicalConceptLabel: 'payroll_specialist', reason: 'x' }, 'reviewer-1');
+    await createNodeAlias(ORG_B, { aliasLabel: 'payroll steward', canonicalConceptLabel: 'payroll_lead', reason: 'y' }, 'reviewer-2');
 
     const activeA = await listActiveNodeAliases(ORG_A);
     const activeB = await listActiveNodeAliases(ORG_B);
@@ -137,5 +137,24 @@ describe('node alias store — real PGlite SQL', () => {
     const allA = await listAllNodeAliases(ORG_A);
     expect(allA).toHaveLength(1);
     expect(allA[0]?.supersededAt).toBeNull();
+  });
+  it('supersedes an active alias whose label differs only cosmetically, so one label never has two active mappings', async () => {
+    const { createNodeAlias, listActiveNodeAliases } = await import('../node-alias-store');
+    await createNodeAlias(ORG_A, { aliasLabel: 'Payroll_Steward', canonicalConceptLabel: 'payroll_specialist', reason: 'x' }, 'reviewer-1');
+    await createNodeAlias(ORG_A, { aliasLabel: 'payroll  steward', canonicalConceptLabel: 'payroll_lead', reason: 'y' }, 'reviewer-2');
+    const active = await listActiveNodeAliases(ORG_A);
+    expect(active).toHaveLength(1);
+    expect(active[0]?.canonicalConceptLabel).toBe('payroll_lead');
+  });
+
+  it('refuses an alias whose two sides differ only cosmetically, and an alias pointing at another alias (no chains)', async () => {
+    const { createNodeAlias } = await import('../node-alias-store');
+    await expect(
+      createNodeAlias(ORG_A, { aliasLabel: 'Payroll_Specialist', canonicalConceptLabel: 'payroll specialist', reason: 'x' }, 'reviewer-1'),
+    ).rejects.toThrow(/must differ/);
+    await createNodeAlias(ORG_A, { aliasLabel: 'payroll steward', canonicalConceptLabel: 'payroll_specialist', reason: 'x' }, 'reviewer-1');
+    await expect(
+      createNodeAlias(ORG_A, { aliasLabel: 'pay desk', canonicalConceptLabel: 'Payroll_Steward', reason: 'x' }, 'reviewer-1'),
+    ).rejects.toThrow(/itself an active alias/);
   });
 });

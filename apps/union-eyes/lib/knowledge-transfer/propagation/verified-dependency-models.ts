@@ -17,11 +17,22 @@
 
 export type VerifiedDependencyStatus = 'pending_review' | 'verified' | 'rejected' | 'revoked';
 
-/** 'document' resolves evidenceDocumentId against the real documents table at submission (existence + the
- *  submitter's authorization) and at every read (existence only - see graph-evidence-service.ts). 'external_citation'
- *  is free text the system cannot resolve (e.g. a collective agreement clause number) - honestly typed as
- *  unverifiable-by-the-system rather than carrying the same evidentiary weight as a resolved document. */
+/** 'document' names a stored document, resolved and content-bound at submission (existence, organization, active
+ *  status, the submitter's authorization, and the exact version/content hash) and re-checked at every read (still
+ *  active AND still the same content - see evidence-document-reference.ts). 'external_citation' is text naming
+ *  evidence outside this system (e.g. a collective agreement clause) that the system cannot resolve. */
 export type EvidenceReferenceType = 'document' | 'external_citation';
+
+/**
+ * How strongly a CURRENT verified record's evidence is established, carried on every confirmed finding so a reader
+ * never mistakes an attested external source for a system-resolved record:
+ *  - system_resolved_document: a stored document the system resolved, bound to its exact content at verification and
+ *    unchanged since.
+ *  - human_attested_external: an external citation the reviewer (a person distinct from the submitter) attested, in
+ *    writing and under their own name, to having checked against the source. Accountable, but not machine-verified.
+ *  - unverified_external_citation: an external citation with no such attestation. Never backs a confirmed finding.
+ */
+export type EvidenceTier = 'system_resolved_document' | 'human_attested_external' | 'unverified_external_citation';
 
 export interface VerifiedDependencyRecord {
   id: string;
@@ -36,6 +47,18 @@ export interface VerifiedDependencyRecord {
   evidenceReferenceType: EvidenceReferenceType;
   /** Set only when evidenceReferenceType is 'document'. */
   evidenceDocumentId: string | null;
+  /** The referenced document's exact content identity ("version:<n>:<contentHash>" or "sha256:<hash>"), captured at
+   *  submission and refreshed at verification. Null for an external citation, or a document row from before this
+   *  column existed (treated as changed: fail closed). */
+  evidenceDocumentIntegrity: string | null;
+  /** For an external citation: the reviewer's written statement of how they checked the cited source. Present only
+   *  together with externalAttestedBy/At, and only when the reviewer is not the submitter. */
+  externalAttestation: string | null;
+  externalAttestedBy: string | null;
+  externalAttestedAt: string | null;
+  /** The identity-key version (graph-identity.ts) sourceFingerprint was computed under. 1 for rows from before
+   *  version 2 existed. */
+  identityKeyVersion: 1 | 2;
   /** Deterministic hash (graph-fingerprint.ts) of the dependent/dependsOn nodes' canonical label, category and
    *  nodeType, captured at submission and refreshed at every verification. Null on a row from before this column
    *  existed - treated identically to a mismatch (fail closed, never silently trusted) by graph-evidence-service.ts. */
@@ -47,6 +70,11 @@ export interface VerifiedDependencyRecord {
   reviewNotes: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/** A verification decision on an external citation must carry the reviewer's attestation (see EvidenceTier). */
+export interface ExternalAttestationInput {
+  attestation: string;
 }
 
 export interface SubmitVerifiedDependencyInput {
@@ -73,15 +101,36 @@ export type VerifiedDependencyReviewDecision = 'verified' | 'rejected';
  * as confirmable right now.
  */
 export type VerifiedDependencyLookup =
-  | { state: 'verified'; record: VerifiedDependencyRecord }
-  | { state: 'unavailable'; reason: 'no_verified_evidence_recorded' | 'all_evidence_revoked_or_rejected' | 'requires_reverification' };
+  | { state: 'verified'; record: VerifiedDependencyRecord; evidenceTier: Exclude<EvidenceTier, 'unverified_external_citation'> }
+  | {
+      state: 'unavailable';
+      reason: 'no_verified_evidence_recorded' | 'all_evidence_revoked_or_rejected' | 'requires_reverification' | 'node_reference_ambiguous' | 'node_not_current';
+      staleReasons?: EvidenceStaleReason[];
+    };
 
 /** Why a nominally-'verified' row is excluded from the currently-confirmable set at read time. */
-export type EvidenceStaleReason = 'node_no_longer_current' | 'source_fingerprint_mismatch' | 'evidence_reference_no_longer_resolves';
+export type EvidenceStaleReason =
+  | 'node_no_longer_current'
+  | 'node_reference_ambiguous'
+  | 'source_fingerprint_mismatch'
+  | 'legacy_fingerprint_ambiguous'
+  | 'evidence_reference_no_longer_resolves'
+  | 'evidence_document_changed'
+  | 'external_evidence_not_attested';
 
 export interface StaleVerifiedDependency {
   record: VerifiedDependencyRecord;
   staleReasons: EvidenceStaleReason[];
+}
+
+/** A verified record that is CURRENT right now, with its two node references resolved to current node ids (the
+ *  identity every consumer compares) and its evidence tier. Direction is preserved: dependentNodeId depends on
+ *  dependsOnNodeId, never the reverse. */
+export interface CurrentVerifiedDependency {
+  record: VerifiedDependencyRecord;
+  dependentNodeId: string;
+  dependsOnNodeId: string;
+  evidenceTier: Exclude<EvidenceTier, 'unverified_external_citation'>;
 }
 
 /** A durable, explicitly-authorized alias from a label to the CURRENT canonical label of the same real-world

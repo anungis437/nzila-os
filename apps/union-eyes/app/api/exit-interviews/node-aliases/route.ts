@@ -2,13 +2,15 @@
  * GET  /api/exit-interviews/node-aliases — List the organization's graph node identity aliases (active and superseded)
  * POST /api/exit-interviews/node-aliases — Record a new alias (durable identity/alias mapping)
  *
- * graph-identity.ts's canonicalNodeIdentityKey only tolerates COSMETIC drift (case, spacing, punctuation) in a
- * label-derived propagation-map node id; it deliberately never guesses across a SEMANTIC rename or a label
- * collision, to avoid silently attributing verified evidence to the wrong concept. This route is how that kind of
+ * graph-identity.ts's resolveNodeReference only tolerates differences that cannot change what a label names
+ * (underscores for spaces, case, Unicode composition, whitespace runs); it never guesses across a SEMANTIC rename,
+ * and reports a COLLISION (two current nodes, or two aliases, matching one reference) as ambiguous rather than
+ * picking one. This route is how that kind of
  * identity change is migrated instead: an authorized reviewer explicitly records that a label now refers to the
  * same real-world concept as an existing one, with a reason. Never inferred; always this explicit, audited action.
- * A new alias supersedes (never deletes) any prior active alias for the same label, so the full history of
- * identity decisions is preserved (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-
+ * A new alias supersedes (never deletes) any prior active alias with the same identity key, so the full history of
+ * identity decisions is preserved. Any change to which node a verified dependency resolves to makes that record
+ * require re-verification. GET reports, for each active alias, what its target resolves to right now (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-
  * OCCURRENCE, Family 1 exit).
  *
  * Requires: national_officer+ to create (the same reviewer floor as verified-dependency review and governance
@@ -20,6 +22,8 @@ import { z } from 'zod';
 import { withApi, ApiError } from '@/lib/api/framework';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { createNodeAlias, listAllNodeAliases } from '@/lib/knowledge-transfer/propagation/node-alias-store';
+import { loadGraphEvidenceContext } from '@/lib/knowledge-transfer/propagation/graph-evidence-evaluator';
+import { resolveNodeReference } from '@/lib/knowledge-transfer/propagation/graph-identity';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,12 +43,17 @@ export const GET = withApi(
     openapi: {
       tags: ['Knowledge Transfer'],
       summary: 'List graph node identity aliases',
-      description: 'Lists the organization\'s full alias history (active and superseded), newest first.',
+      description: 'Lists the organization\'s full alias history (active and superseded), newest first. Each active alias carries what its target resolves to in the current graph (resolved, not_found or ambiguous).',
     },
   },
   async ({ organizationId }) => {
-    const aliases = await listAllNodeAliases(organizationId!);
-    return { data: aliases };
+    const [aliases, { context }] = await Promise.all([listAllNodeAliases(organizationId!), loadGraphEvidenceContext(organizationId!, [])]);
+    const data = aliases.map((alias) => {
+      if (alias.supersededAt !== null) return { ...alias, targetResolution: null };
+      const resolution = resolveNodeReference(context.aliases, context.currentNodeIds, alias.canonicalConceptLabel);
+      return { ...alias, targetResolution: resolution };
+    });
+    return { data };
   },
 );
 

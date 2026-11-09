@@ -28,8 +28,7 @@ vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({
   listActiveNodeAliases: mocks.listActiveNodeAliases,
 }));
 vi.mock('@/lib/knowledge-transfer/propagation/evidence-document-reference', () => ({
-  documentCurrentlyResolves: async () => true,
-  resolveEvidenceDocumentForSubmission: async () => 'resolved',
+  loadEvidenceDocumentIntegrity: async () => new Map(),
 }));
 vi.mock('@/db/db', () => ({ db: { select: vi.fn(() => makeChain()) } }));
 // The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
@@ -43,7 +42,7 @@ vi.mock('@/db/schema', () => ({
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, relations: () => ({}) }));
 
 import { calculateResilienceIndex } from '../resilience-calculator';
-import { computeSourceFingerprint } from '@/lib/knowledge-transfer/propagation/graph-fingerprint';
+import { currentVerifiedRecord } from '@/lib/knowledge-transfer/propagation/__tests__/verified-record-fixture';
 
 function n(id: string, frequency: number, category: string, isSingleSource: boolean, sensitivity = 'low') {
   return {
@@ -52,10 +51,12 @@ function n(id: string, frequency: number, category: string, isSingleSource: bool
   };
 }
 
-function mapWith(nodes: unknown[], bottlenecks: unknown[] = []) {
+function mapWith(nodes: unknown[], bottlenecks: unknown[] = [], edges: Array<[string, string]> = []) {
   return {
     organizationId: 'org', generatedAt: new Date().toISOString(),
-    nodes, edges: [], downstreamImpacts: [], upstreamDependencies: [],
+    nodes,
+    edges: edges.map(([dependentId, dependsOnId]) => ({ dependentId, dependsOnId, strength: 'medium', evidenceCount: 1, rationale: '' })),
+    downstreamImpacts: [], upstreamDependencies: [],
     couplingAnalysis: [], bottlenecks,
     resilience: { recommendations: [], priorityOrder: [], estimatedEffort: {} },
   };
@@ -166,25 +167,43 @@ describe('calculateResilienceIndex', () => {
     expect(Number.isFinite(idx.overallScore)).toBe(true);
   });
 
-  it('reports verifiedEvidenceCoverage as an aggregate signal, zero with no verified relationships', async () => {
+  it('reports verifiedEvidenceCoverage as directed edge coverage, zero with no verified relationships', async () => {
+    const a = n('a', 2, 'general', false, 'low');
+    const b = n('b', 2, 'general', false, 'low');
+    const c = n('c', 2, 'general', false, 'low');
     mocks.interviews = [];
-    mocks.buildMap.mockResolvedValue(mapWith([n('a', 2, 'general', false, 'low'), n('b', 2, 'general', false, 'low')]));
+    // Inferred edges: a depends on b, and c depends on a.
+    mocks.buildMap.mockResolvedValue(mapWith([a, b, c], [], [['a', 'b'], ['c', 'a']]));
     mocks.listVerifiedDependencies.mockResolvedValue([]);
     const idx = await calculateResilienceIndex('org');
-    expect(idx.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 0, totalNodes: 2 });
+    expect(idx.verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 2, verifiedEdgeCount: 0, ratio: 0, fullyVerified: false });
 
-    mocks.listVerifiedDependencies.mockResolvedValue([
-      {
-        id: 'vd1', organizationId: 'org', dependentNodeId: 'a', dependsOnNodeId: 'b',
-        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
-        evidenceReferenceType: 'external_citation', evidenceDocumentId: null,
-        sourceFingerprint: computeSourceFingerprint(n('a', 2, 'general', false, 'low'), n('b', 2, 'general', false, 'low')),
-        status: 'verified',
-        submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
-        createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(a, b)]);
     const idxVerified = await calculateResilienceIndex('org');
-    expect(idxVerified.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 2, totalNodes: 2 });
+    expect(idxVerified.verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 2, verifiedEdgeCount: 1, ratio: 0.5, fullyVerified: false });
+  });
+
+  it('does not count a verified record pointing the opposite way of an inferred edge, nor one that merely involves a node', async () => {
+    const a = n('a', 2, 'general', false, 'low');
+    const b = n('b', 2, 'general', false, 'low');
+    const c = n('c', 2, 'general', false, 'low');
+    mocks.interviews = [];
+    mocks.buildMap.mockResolvedValue(mapWith([a, b, c], [], [['a', 'b'], ['c', 'a']]));
+    // b depends on a (reversed vs the inferred a->b) and a depends on c (reversed vs c->a): every node participates
+    // in a current verified record, yet no inferred edge's direction is verified.
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(b, a), currentVerifiedRecord(a, c)]);
+    const idx = await calculateResilienceIndex('org');
+    expect(idx.verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 2, verifiedEdgeCount: 0, ratio: 0, fullyVerified: false });
+  });
+
+  it('does not count a verified record whose external evidence is unattested or self-attested', async () => {
+    const a = n('a', 2, 'general', false, 'low');
+    const b = n('b', 2, 'general', false, 'low');
+    mocks.interviews = [];
+    mocks.buildMap.mockResolvedValue(mapWith([a, b], [], [['a', 'b']]));
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(a, b, { externalAttestedBy: 'u1' })]);
+    expect((await calculateResilienceIndex('org')).verifiedEvidenceCoverage.verifiedEdgeCount).toBe(0);
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(a, b)]);
+    expect((await calculateResilienceIndex('org')).verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 1, verifiedEdgeCount: 1, ratio: 1, fullyVerified: true });
   });
 });

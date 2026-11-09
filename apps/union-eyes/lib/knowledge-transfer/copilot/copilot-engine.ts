@@ -28,7 +28,7 @@ import {
   UE_APP_KEY,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
-import { loadGraphEvidence, hasAnyVerifiedEvidence } from '../propagation/graph-evidence-service';
+import { loadGraphEvidence, verifiedEdgeCoverage, type VerifiedEdgeCoverage } from '../propagation/graph-evidence-service';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
   buildExplainabilityEnvelope,
@@ -102,7 +102,7 @@ function buildSystemPrompt(
   totalNodes: number,
   bottleneckCount: number,
   criticalGaps: string[],
-  verifiedNodeCount: number,
+  coverage: VerifiedEdgeCoverage,
 ): string {
   return `You are a governance-aware organizational continuity advisor for a union organization (org: ${orgId}).
 
@@ -114,8 +114,9 @@ CURRENT ORGANIZATIONAL CONTEXT:
 - Operational bottlenecks: ${bottleneckCount}
 - Critical gaps: ${criticalGaps.length > 0 ? criticalGaps.join('; ') : 'none identified'}
 - Evidence basis: the counts above come from exit-interview tag co-occurrence (exploratory), not from a verified
-  record of organizational structure. ${verifiedNodeCount} of ${totalNodes} knowledge areas have at least one
-  currently-verified dependency relationship on file; treat the rest as unconfirmed signal, not fact.
+  record of organizational structure. ${coverage.verifiedEdgeCount} of ${coverage.exploratoryEdgeCount} inferred
+  dependencies are currently verified in their stated direction; treat every other dependency, and every node-level
+  figure, as unconfirmed signal, not fact.
 
 BEHAVIORAL CONSTRAINTS — STRICTLY ENFORCED:
 1. You ONLY discuss organizational continuity, governance resilience, documentation, and organizational knowledge.
@@ -205,7 +206,7 @@ export async function processCopilotQuery(
   const criticalGaps = resilienceIndex.dimensions
     .filter((d) => d.score < 40)
     .map((d) => d.name);
-  const verifiedNodeCount = nodes.filter((n) => hasAnyVerifiedEvidence(graphEvidence, n.id)).length;
+  const coverage = verifiedEdgeCoverage(graphEvidence);
 
   // Build system prompt with org context
   const systemPrompt = buildSystemPrompt(
@@ -215,7 +216,7 @@ export async function processCopilotQuery(
     totalNodes,
     bottleneckCount,
     criticalGaps,
-    verifiedNodeCount,
+    coverage,
   );
 
   // Build message history
@@ -363,7 +364,7 @@ export async function processCopilotQuery(
     followUpSuggestions: followUps,
     organizationalContext: `Continuity analysis for organization ${orgId}. Resilience score: ${resilienceIndex.overallScore}/100.`,
     generatedAt: now,
-    verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: verifiedNodeCount, totalNodes },
+    verifiedEvidenceCoverage: coverage,
   };
 }
 

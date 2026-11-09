@@ -1,5 +1,10 @@
 /**
- * PATCH /api/exit-interviews/verified-dependencies/[id] — Review (verify/reject) or revoke dependency evidence
+ * PATCH /api/exit-interviews/verified-dependencies/[id] — Review (verify/reject), re-verify or revoke dependency evidence
+ *
+ * Verifying an external citation, or re-verifying one, requires externalAttestation: the reviewer's own written
+ * statement of how they checked the cited source (recorded under their identity). 'reverify' brings a verified record
+ * that has become stale (renamed/re-classified node, changed alias, changed document, legacy fingerprint, missing
+ * attestation) current again by re-attesting it against the graph and evidence as they stand now.
  *
  * Review and revocation are senior, distinct-reviewer actions - never the submitter, and never the same identity
  * twice. See lib/knowledge-transfer/propagation/verified-dependency-store.ts for the conditional-update semantics
@@ -16,7 +21,9 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import {
   reviewVerifiedDependency,
+  reverifyVerifiedDependency,
   revokeVerifiedDependency,
+  VerifiedDependencyInputError,
 } from '@/lib/knowledge-transfer/propagation/verified-dependency-store';
 
 export const dynamic = 'force-dynamic';
@@ -25,9 +32,20 @@ export const dynamic = 'force-dynamic';
 const VERIFIED_DEPENDENCY_REVIEWER_MIN_ROLE = 'national_officer';
 
 const PatchSchema = z.object({
-  action: z.enum(['verify', 'reject', 'revoke']),
+  action: z.enum(['verify', 'reject', 'revoke', 'reverify']),
   reviewNotes: z.string().max(1000).optional(),
+  externalAttestation: z.string().trim().min(1).max(2000).optional(),
 }).strict();
+
+/** A correctable request (bad evidence, missing attestation) is 400; a node that no longer resolves, or resolves
+ *  ambiguously, is a state conflict the reviewer must fix first (409). */
+function toApiError(error: unknown): never {
+  if (error instanceof VerifiedDependencyInputError) {
+    if (error.code === 'node_not_current' || error.code === 'node_reference_ambiguous') throw ApiError.conflict(error.message, { code: error.code });
+    throw ApiError.badRequest(error.message, { code: error.code });
+  }
+  throw error;
+}
 
 export const PATCH = withApi(
   {
@@ -37,7 +55,7 @@ export const PATCH = withApi(
     openapi: {
       tags: ['Knowledge Transfer'],
       summary: 'Review or revoke dependency evidence',
-      description: 'Verifies, rejects a pending submission, or revokes a currently-verified record. Requires national_officer+ and a reviewer distinct from the submitter.',
+      description: 'Verifies or rejects a pending submission, re-verifies a stale verified record, or revokes a verified record. Requires national_officer+ and a reviewer distinct from the submitter; verifying an external citation requires externalAttestation.',
     },
   },
   async ({ params, organizationId, userId, body }) => {
@@ -51,8 +69,17 @@ export const PATCH = withApi(
       return { data: revoked };
     }
 
+    const attestation = body.externalAttestation ? { attestation: body.externalAttestation } : undefined;
+    if (body.action === 'reverify') {
+      const reverified = await reverifyVerifiedDependency(organizationId!, params.id, userId!, body.reviewNotes, attestation).catch(toApiError);
+      if (!reverified) {
+        throw ApiError.conflict('This record is not a stale verified record, was changed concurrently, or the reviewer must be a different identity than the submitter; reload and retry');
+      }
+      return { data: reverified };
+    }
+
     const decision = body.action === 'verify' ? 'verified' : 'rejected';
-    const reviewed = await reviewVerifiedDependency(organizationId!, params.id, decision, userId!, body.reviewNotes);
+    const reviewed = await reviewVerifiedDependency(organizationId!, params.id, decision, userId!, body.reviewNotes, attestation).catch(toApiError);
     if (!reviewed) {
       throw ApiError.conflict('This record is no longer pending review, has already been decided, or the reviewer must be a different identity than the submitter');
     }

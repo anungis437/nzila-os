@@ -26,6 +26,8 @@ vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
 vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
   listVerifiedDependencies: mocks.listVerifiedDependencies,
 }));
+vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({ listActiveNodeAliases: async () => [] }));
+vi.mock('@/lib/knowledge-transfer/propagation/evidence-document-reference', () => ({ loadEvidenceDocumentIntegrity: async () => new Map() }));
 vi.mock('@/db/db', () => ({ db: { select: vi.fn(() => makeChain()) } }));
 // The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
 vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
@@ -36,6 +38,7 @@ vi.mock('@/db/schema', () => ({ exitInterviews: { organizationId: 'organizationI
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, relations: () => ({}) }));
 
 import { simulateContinuityImpact } from '../continuity-simulator';
+import { currentVerifiedRecord } from '../../propagation/__tests__/verified-record-fixture';
 
 function n(id: string, category: string, isSingleSource: boolean, roles = ['President']) {
   return {
@@ -90,22 +93,42 @@ describe('simulateContinuityImpact', () => {
     const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
     expect(result.evidenceBasis).toBe('exploratory_simulation');
     expect(result.methodologyNote).toMatch(/hypothetical scenario/i);
-    expect(result.verifiedDependencyContext).toEqual({ affectedNodesWithVerifiedEvidence: 0, totalAffectedNodes: 1 });
+    expect(result.verifiedDependencyContext).toEqual({ verifiedImpacts: [], totalAffectedNodes: 1 });
   });
 
-  it('reports verified-dependency coverage for an affected node that has a verified record', async () => {
+  it('corroborates a downstream impact only through a verified dependency in the impact direction', async () => {
     mocks.interviews = [{ id: 'i1' }];
-    mocks.buildMap.mockResolvedValue(mapWith([n('a', 'system', true), n('b', 'system', false)]));
-    mocks.listVerifiedDependencies.mockResolvedValue([
-      {
-        id: 'vd1', organizationId: 'org', dependentNodeId: 'a', dependsOnNodeId: 'b',
-        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', status: 'verified',
-        submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
-        createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
+    const a = n('a', 'system', true);
+    const b = n('b', 'system', false);
+    mocks.buildMap.mockResolvedValue(mapWith([a, b]));
+    // b depends on a: a failure of a reaches b.
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(b, a)]);
     const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
-    expect(result.verifiedDependencyContext).toEqual({ affectedNodesWithVerifiedEvidence: 1, totalAffectedNodes: 1 });
+    expect(result.verifiedDependencyContext).toEqual({
+      verifiedImpacts: [{ fromNodeId: 'a', nodeId: 'b', chain: ['a', 'b'], evidenceTier: 'human_attested_external' }],
+      totalAffectedNodes: 1,
+    });
+  });
+
+  it('corroborates nothing when the affected node merely appears in a verified record pointing the other way', async () => {
+    mocks.interviews = [{ id: 'i1' }];
+    const a = n('a', 'system', true);
+    const b = n('b', 'system', false);
+    mocks.buildMap.mockResolvedValue(mapWith([a, b]));
+    // a depends on b: a failure of a does not reach b.
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(a, b)]);
+    const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
+    expect(result.verifiedDependencyContext).toEqual({ verifiedImpacts: [], totalAffectedNodes: 1 });
+  });
+
+  it('corroborates nothing from a verified record that is no longer current', async () => {
+    mocks.interviews = [{ id: 'i1' }];
+    const a = n('a', 'system', true);
+    const b = n('b', 'system', false);
+    mocks.buildMap.mockResolvedValue(mapWith([a, b]));
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(b, a, { sourceFingerprint: 'drifted' })]);
+    const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
+    expect(result.verifiedDependencyContext.verifiedImpacts).toEqual([]);
   });
   it('simulates a critical multi-domain governance + vendor loss', async () => {
     mocks.interviews = [{ id: 'i1' }, { id: 'i2' }];

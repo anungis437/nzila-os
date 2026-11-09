@@ -8,6 +8,8 @@
  * documentation, governance distribution, operational redundancy.
  */
 
+import type { VerifiedEdgeCoverage } from '@/lib/knowledge-transfer/propagation/graph-evidence-service';
+
 export type StrategyType =
   | 'documentation_foundation'
   | 'knowledge_decentralization'
@@ -81,5 +83,7 @@ export interface ResilienceRoadmap {
   maturityNarrative: string;
   /** How many of the dependency nodes behind this roadmap have at least one currently-verified relationship on
    *  file, out of how many nodes exist in total. */
-  verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: number; totalNodes: number };
+  /** Directed inferred dependencies whose exact direction is currently verified (verifiedEdgeCoverage). Never a
+   *  count of nodes that merely appear in some verified record. */
+  verifiedEvidenceCoverage: VerifiedEdgeCoverage;
 }

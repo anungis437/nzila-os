@@ -12,10 +12,11 @@
  */
 
 import { z } from 'zod';
-import { withApi } from '@/lib/api/framework';
+import { withApi, ApiError } from '@/lib/api/framework';
 import {
   submitVerifiedDependency,
-  listVerifiedDependencies,
+  listVerifiedDependenciesWithCurrentness,
+  VerifiedDependencyInputError,
 } from '@/lib/knowledge-transfer/propagation/verified-dependency-store';
 
 export const dynamic = 'force-dynamic';
@@ -44,11 +45,11 @@ export const GET = withApi(
     openapi: {
       tags: ['Knowledge Transfer'],
       summary: 'List verified dependency evidence',
-      description: 'Lists the organization\'s verified-dependency-evidence records, optionally filtered by status.',
+      description: 'Lists the organization\'s verified-dependency-evidence records, optionally filtered by status, each verified record with whether it is current right now (and its evidence tier) or requires re-verification (and why).',
     },
   },
   async ({ organizationId, query }) => {
-    const records = await listVerifiedDependencies(organizationId!, query.status);
+    const records = await listVerifiedDependenciesWithCurrentness(organizationId!, query.status);
     return { data: records };
   },
 );
@@ -65,7 +66,15 @@ export const POST = withApi(
     },
   },
   async ({ organizationId, userId, body }) => {
-    const record = await submitVerifiedDependency(organizationId!, body, userId!);
-    return { data: record };
+    try {
+      const record = await submitVerifiedDependency(organizationId!, body, userId!);
+      return { data: record };
+    } catch (error) {
+      if (error instanceof VerifiedDependencyInputError) {
+        if (error.code === 'node_not_current' || error.code === 'node_reference_ambiguous') throw ApiError.conflict(error.message, { code: error.code });
+        throw ApiError.badRequest(error.message, { code: error.code });
+      }
+      throw error;
+    }
   },
 );

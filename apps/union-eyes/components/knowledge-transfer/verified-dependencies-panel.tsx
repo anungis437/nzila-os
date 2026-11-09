@@ -5,12 +5,38 @@
  *
  * The reviewer interface for lib/knowledge-transfer/propagation/verified-dependency-store.ts
  * (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE): submit a directional
- * dependency for review, see every record's status, and (national_officer+) verify, reject or revoke a record.
- * The API enforces the reviewer floor and the distinct-submitter rule; this panel surfaces whatever it returns
- * (including a 403/409) rather than guessing who is allowed to act.
+ * dependency for review, see every record's status and - for a verified record - whether it is CURRENT right now
+ * (with its evidence tier) or requires re-verification (with the reasons), and (national_officer+) verify, reject,
+ * re-verify or revoke a record. Verifying or re-verifying an external citation requires the reviewer's written
+ * attestation. The API enforces the reviewer floor and the distinct-submitter rule; this panel surfaces whatever it
+ * returns (including a 400/403/409) rather than guessing who is allowed to act.
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { envelopeRow, envelopeRows, failureText, readApiError } from '@/lib/client/api-envelope';
+import { NodeAliasPanel } from './node-alias-panel';
+
+type EvidenceTier = 'system_resolved_document' | 'human_attested_external';
+
+type Currentness =
+  | { state: 'not_verified' }
+  | { state: 'current'; evidenceTier: EvidenceTier; resolvedDependentNodeId: string; resolvedDependsOnNodeId: string }
+  | { state: 'requires_reverification'; staleReasons: string[] };
+
+const TIER_LABELS: Record<EvidenceTier, string> = {
+  system_resolved_document: 'stored document, content-bound',
+  human_attested_external: 'external source, reviewer-attested',
+};
+
+const STALE_REASON_LABELS: Record<string, string> = {
+  node_no_longer_current: 'a node no longer exists in the current graph',
+  node_reference_ambiguous: 'a node reference now matches more than one node (record an alias to disambiguate)',
+  source_fingerprint_mismatch: 'a node was renamed, re-classified or re-targeted since verification',
+  legacy_fingerprint_ambiguous: 'verified under the old identity rules, which cannot tell two current nodes apart',
+  evidence_reference_no_longer_resolves: 'the evidence document is archived, deleted or inaccessible',
+  evidence_document_changed: 'the evidence document has a new version or different content',
+  external_evidence_not_attested: 'the external citation has no reviewer attestation',
+};
 
 interface VerifiedDependencyRecord {
   id: string;
@@ -21,12 +47,15 @@ interface VerifiedDependencyRecord {
   evidenceReference: string;
   evidenceReferenceType: 'document' | 'external_citation';
   evidenceDocumentId: string | null;
+  externalAttestation: string | null;
+  externalAttestedBy: string | null;
   status: 'pending_review' | 'verified' | 'rejected' | 'revoked';
   submittedBy: string;
   reviewedBy: string | null;
   reviewNotes: string | null;
   createdAt: string;
   updatedAt: string;
+  currentness: Currentness;
 }
 
 const STATUS_STYLES: Record<VerifiedDependencyRecord['status'], string> = {
@@ -49,17 +78,17 @@ export function VerifiedDependenciesPanel() {
   const [submission, setSubmission] = useState(EMPTY_SUBMISSION);
   const [submitting, setSubmitting] = useState(false);
   const [actioningId, setActioningId] = useState<string | null>(null);
+  const [attestations, setAttestations] = useState<Record<string, string>>({});
 
   const fetchRecords = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const res = await fetch('/api/exit-interviews/verified-dependencies');
-      const json = (await res.json()) as { data?: VerifiedDependencyRecord[]; error?: string };
-      if (!res.ok) throw new Error(json.error ?? 'Failed to load verified dependencies');
-      setRecords(json.data ?? []);
+      if (!res.ok) throw new Error(await readApiError(res, 'Failed to load verified dependencies'));
+      setRecords(envelopeRows(await res.json()) as VerifiedDependencyRecord[]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load verified dependencies');
+      setError(failureText(err, 'Failed to load verified dependencies'));
     } finally {
       setLoading(false);
     }
@@ -80,31 +109,39 @@ export function VerifiedDependenciesPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const json = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(json.error ?? 'Failed to submit dependency evidence');
+      if (!res.ok) throw new Error(await readApiError(res, 'Failed to submit dependency evidence'));
+      // The route answers with the record it wrote; a different shape is a failure, not a silent success.
+      envelopeRow(await res.json());
       setSubmission(EMPTY_SUBMISSION);
       await fetchRecords();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit dependency evidence');
+      setError(failureText(err, 'Failed to submit dependency evidence'));
     } finally {
       setSubmitting(false);
     }
   };
 
-  const act = async (id: string, action: 'verify' | 'reject' | 'revoke') => {
+  const act = async (record: VerifiedDependencyRecord, action: 'verify' | 'reject' | 'revoke' | 'reverify') => {
+    const id = record.id;
     try {
       setActioningId(id);
       setError(null);
+      const attestation = attestations[id]?.trim();
+      const needsAttestation = (action === 'verify' || action === 'reverify') && record.evidenceReferenceType === 'external_citation';
+      if (needsAttestation && !attestation) {
+        throw new Error('Describe how you checked the cited external source before verifying it');
+      }
       const res = await fetch(`/api/exit-interviews/verified-dependencies/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify(needsAttestation ? { action, externalAttestation: attestation } : { action }),
       });
-      const json = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(json.error ?? `Failed to ${action} this record`);
+      if (!res.ok) throw new Error(await readApiError(res, `Failed to ${action} this record`));
+      // The route answers with the record it wrote; a different shape is a failure, not a silent success.
+      envelopeRow(await res.json());
       await fetchRecords();
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to ${action} this record`);
+      setError(failureText(err, `Failed to ${action} this record`));
     } finally {
       setActioningId(null);
     }
@@ -123,7 +160,9 @@ export function VerifiedDependenciesPanel() {
       <p className="text-sm text-slate-600">
         Verified dependency evidence is a separate, reviewed graph from the exploratory propagation map: a directional
         dependency here is only treated as established once a reviewer distinct from the submitter attributes it to a
-        named process or system and a named responsible authority, with an evidence reference.
+        named process or system and a named responsible authority, with an evidence reference - and only while it is
+        current: if a node is renamed or re-classified, an alias changes, or the evidence document changes, the record
+        must be re-verified before anything relies on it. Direction matters: A depends on B never confirms B depends on A.
       </p>
 
       {error && (
@@ -169,8 +208,8 @@ export function VerifiedDependenciesPanel() {
             value={submission.evidenceReferenceType}
             onChange={(e) => setSubmission((prev) => ({ ...prev, evidenceReferenceType: e.target.value as 'document' | 'external_citation' }))}
           >
-            <option value="external_citation">External citation (not system-verifiable)</option>
-            <option value="document">Stored document (resolved + access-checked)</option>
+            <option value="external_citation">External citation (needs reviewer attestation)</option>
+            <option value="document">Stored document (resolved, access-checked, content-bound)</option>
           </select>
           {submission.evidenceReferenceType === 'document' && (
             <input
@@ -206,43 +245,83 @@ export function VerifiedDependenciesPanel() {
                   <div className="opacity-70">
                     Evidence: {record.evidenceReference}{' '}
                     <span className={`uppercase text-[9px] rounded px-1 ${record.evidenceReferenceType === 'document' ? 'bg-emerald-100' : 'bg-slate-100'}`}>
-                      {record.evidenceReferenceType === 'document' ? 'resolved document' : 'unverified citation'}
+                      {record.evidenceReferenceType === 'document' ? 'stored document' : record.externalAttestation ? 'external, attested' : 'external, unattested'}
                     </span>
                   </div>
+                  {record.externalAttestation && (
+                    <div className="opacity-70">Attestation ({record.externalAttestedBy}): {record.externalAttestation}</div>
+                  )}
                   <div className="opacity-70 uppercase text-[10px] mt-1">{record.status}</div>
+                  {record.currentness.state === 'current' && (
+                    <div className="text-[11px] mt-1 text-emerald-800">Current - {TIER_LABELS[record.currentness.evidenceTier]}</div>
+                  )}
+                  {record.currentness.state === 'requires_reverification' && (
+                    <div className="text-[11px] mt-1 text-amber-800">
+                      Not current - requires re-verification:
+                      <ul className="list-disc ml-4">
+                        {record.currentness.staleReasons.map((reason) => (
+                          <li key={reason}>{STALE_REASON_LABELS[reason] ?? reason}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-                {record.status === 'pending_review' && (
-                  <div className="flex gap-1.5 shrink-0">
-                    <button
-                      onClick={() => act(record.id, 'verify')}
-                      disabled={actioningId === record.id}
-                      className="text-[11px] px-2 py-1 rounded bg-emerald-600 text-white disabled:opacity-40"
-                    >
-                      Verify
-                    </button>
-                    <button
-                      onClick={() => act(record.id, 'reject')}
-                      disabled={actioningId === record.id}
-                      className="text-[11px] px-2 py-1 rounded bg-slate-600 text-white disabled:opacity-40"
-                    >
-                      Reject
-                    </button>
+                <div className="flex flex-col gap-1.5 shrink-0 items-end">
+                  {record.evidenceReferenceType === 'external_citation' &&
+                    (record.status === 'pending_review' || record.currentness.state === 'requires_reverification') && (
+                      <textarea
+                        className="text-[11px] border border-slate-300 rounded px-2 py-1 w-56 bg-white"
+                        placeholder="Your attestation: how you checked the cited source"
+                        value={attestations[record.id] ?? ''}
+                        onChange={(e) => setAttestations((prev) => ({ ...prev, [record.id]: e.target.value }))}
+                      />
+                    )}
+                  <div className="flex gap-1.5">
+                    {record.status === 'pending_review' && (
+                      <>
+                        <button
+                          onClick={() => act(record, 'verify')}
+                          disabled={actioningId === record.id}
+                          className="text-[11px] px-2 py-1 rounded bg-emerald-600 text-white disabled:opacity-40"
+                        >
+                          Verify
+                        </button>
+                        <button
+                          onClick={() => act(record, 'reject')}
+                          disabled={actioningId === record.id}
+                          className="text-[11px] px-2 py-1 rounded bg-slate-600 text-white disabled:opacity-40"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    {record.currentness.state === 'requires_reverification' && (
+                      <button
+                        onClick={() => act(record, 'reverify')}
+                        disabled={actioningId === record.id}
+                        className="text-[11px] px-2 py-1 rounded bg-amber-600 text-white disabled:opacity-40"
+                      >
+                        Re-verify
+                      </button>
+                    )}
+                    {record.status === 'verified' && (
+                      <button
+                        onClick={() => act(record, 'revoke')}
+                        disabled={actioningId === record.id}
+                        className="text-[11px] px-2 py-1 rounded bg-red-600 text-white disabled:opacity-40"
+                      >
+                        Revoke
+                      </button>
+                    )}
                   </div>
-                )}
-                {record.status === 'verified' && (
-                  <button
-                    onClick={() => act(record.id, 'revoke')}
-                    disabled={actioningId === record.id}
-                    className="text-[11px] px-2 py-1 rounded bg-red-600 text-white disabled:opacity-40 shrink-0"
-                  >
-                    Revoke
-                  </button>
-                )}
+                </div>
               </div>
             </li>
           ))}
         </ul>
       )}
+
+      <NodeAliasPanel />
     </div>
   );
 }

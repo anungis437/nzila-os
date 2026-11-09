@@ -39,7 +39,8 @@ interface ExpertiseDomain {
   domain: string;
   category: string;
   coverageCount: number;
-  riskLevel: string;
+  /** How concentrated the topic's coverage is, from interview counts (expertise-map route) - not a measured risk. */
+  coverageConcentrationLevel: 'low' | 'medium' | 'high' | 'critical';
   roles: string[];
 }
 
@@ -166,9 +167,9 @@ function TopicPill({
   active: boolean;
 }) {
   const riskColor =
-    domain.riskLevel === 'critical' ? 'border-red-300 bg-red-50 text-red-700' :
-    domain.riskLevel === 'high' ? 'border-orange-300 bg-orange-50 text-orange-700' :
-    domain.riskLevel === 'medium' ? 'border-yellow-300 bg-yellow-50 text-yellow-700' :
+    domain.coverageConcentrationLevel === 'critical' ? 'border-red-300 bg-red-50 text-red-700' :
+    domain.coverageConcentrationLevel === 'high' ? 'border-orange-300 bg-orange-50 text-orange-700' :
+    domain.coverageConcentrationLevel === 'medium' ? 'border-yellow-300 bg-yellow-50 text-yellow-700' :
     'border-slate-200 bg-white text-slate-600';
 
   return (
@@ -207,10 +208,10 @@ export function OrganizationalMemoryExplorer() {
         const res = await fetch('/api/exit-interviews/expertise-map', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const payload = await res.json() as { data: { domains: ExpertiseDomain[] } };
-        // Show single-source and high-risk topics prominently
+        // Show the most concentrated (single-source first) topics prominently
         const sorted = [...(payload.data.domains ?? [])].sort((a, b) => {
           const order = { critical: 0, high: 1, medium: 2, low: 3 };
-          return (order[a.riskLevel as keyof typeof order] ?? 3) - (order[b.riskLevel as keyof typeof order] ?? 3);
+          return (order[a.coverageConcentrationLevel] ?? 3) - (order[b.coverageConcentrationLevel] ?? 3);
         });
         setExpertiseDomains(sorted.slice(0, 40));
         setDomainsFailed(false);

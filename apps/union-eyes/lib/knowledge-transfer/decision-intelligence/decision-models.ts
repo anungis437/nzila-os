@@ -82,6 +82,9 @@ export interface ConfirmedDependencyRisk {
   processOrSystem: string;
   responsibleAuthority: string;
   evidenceReference: string;
+  /** How the evidence is established: a stored document bound to its verified content, or an external source a
+   *  named reviewer attested. */
+  evidenceTier: 'system_resolved_document' | 'human_attested_external';
   verifiedAt: string;
 }
 
@@ -101,9 +104,9 @@ export interface DecisionBrief {
   /** Critical gaps requiring attention — exploratory, pattern-based observations to investigate, not confirmed findings */
   criticalGaps: string[];
   /**
-   * Dependency risks backed by verified evidence. Always [] when confirmedDependencyRiskStatus is
-   * 'no_verified_dependency_evidence_recorded' — callers must read that status, not treat an empty array here as
-   * "no risk exists"; it means no dependency has been verified yet, which is a different fact.
+   * Dependency risks backed by CURRENT verified evidence. Always [] unless confirmedDependencyRiskStatus is
+   * 'verified_dependency_evidence_available' — callers must read that status, not treat an empty array here as
+   * "no risk exists"; it means no dependency is verified and current, which is a different fact.
    */
   confirmedDependencyRisks: ConfirmedDependencyRisk[];
   /**
@@ -111,7 +114,10 @@ export interface DecisionBrief {
    * must never be silently treated as "low risk" — it means verification has not happened, not that dependencies
    * are safe.
    */
-  confirmedDependencyRiskStatus: 'no_verified_dependency_evidence_recorded' | 'verified_dependency_evidence_available';
+  confirmedDependencyRiskStatus:
+    | 'no_verified_dependency_evidence_recorded'
+    | 'verified_dependency_evidence_requires_reverification'
+    | 'verified_dependency_evidence_available';
   /** Governance exposure summary */
   governanceExposureSummary: string;
   /** Overall decision framing for organizational leaders */

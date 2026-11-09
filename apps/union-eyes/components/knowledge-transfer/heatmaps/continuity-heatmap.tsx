@@ -21,8 +21,11 @@ interface ExpertiseDomain {
   coverageCount: number;
   roles: string[];
   isSingleSource: boolean;
+  /** Whether any interview for this domain carried a risk score; averageRiskScore is 0 when none did. */
+  hasRiskData: boolean;
   averageRiskScore: number;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  /** How concentrated coverage is (from interview counts) - not a measured risk. */
+  coverageConcentrationLevel: 'low' | 'medium' | 'high' | 'critical';
 }
 
 interface HeatmapCell {

@@ -11,7 +11,7 @@
  */
 
 import type { PropagationMap } from '../propagation/propagation-models';
-import { loadGraphEvidence, hasAnyVerifiedEvidence } from '../propagation/graph-evidence-service';
+import { loadGraphEvidence, verifiedEdgeCoverage } from '../propagation/graph-evidence-service';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { inOrganization } from '../org-scope';
 import { exitInterviews } from '@/db/schema';
@@ -55,10 +55,7 @@ export async function forecastContinuityTrends(orgId: string): Promise<Continuit
     ...(metrics ? { currentMetrics: metrics } : {}),
     dataPoints: interviewCount,
     note: 'No trend is reported: a measured history of the dependency map is not held. Current metrics are measured from eligible interviews only.',
-    verifiedEvidenceCoverage: {
-      nodesWithVerifiedEvidence: propagationMap.nodes.filter((node) => hasAnyVerifiedEvidence(evidence, node.id)).length,
-      totalNodes: propagationMap.nodes.length,
-    },
+    verifiedEvidenceCoverage: verifiedEdgeCoverage(evidence),
   };
 }
 

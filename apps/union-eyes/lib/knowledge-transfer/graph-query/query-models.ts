@@ -5,7 +5,7 @@
  * Enables natural questions about organizational dependencies, fragility, and risk.
  */
 
-import type { EvidenceBasis } from '../propagation/graph-evidence-service';
+import type { EvidenceBasis, ConfirmedEdge } from '../propagation/graph-evidence-service';
 
 export type QueryType =
   | 'isolated_knowledge'
@@ -39,10 +39,16 @@ export interface QueryResult {
   /** Human-readable interpretation of what was found */
   summary: string;
   /** Core findings */
-  findings: Array<QueryFinding & { /** 'verified' only when a currently-verified dependency record names this
-   *  finding's subject node id; otherwise 'exploratory' - never silently omitted (DEF-0B7-COGB-PROPAGATION-
-   *  DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE). */ evidenceBasis: EvidenceBasis }>;
-  /** The SUBSET of findings currently backed by a verified dependency record - the only entries an API response,
+  findings: Array<QueryFinding & {
+    /** 'verified' only for a dependency-path finding every directed edge of whose dependencyChain is currently
+     *  verified. A finding about a node (isolation, bottleneck, sensitivity, concentration) is always 'exploratory':
+     *  dependency evidence confirms relationships, never a node's inferred properties (DEF-0B7-COGB-PROPAGATION-
+     *  DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE). */
+    evidenceBasis: EvidenceBasis;
+    /** For a 'verified' finding: the verified record behind each edge and its evidence tier. */
+    verifiedBy?: ConfirmedEdge[];
+  }>;
+  /** The SUBSET of findings whose asserted dependency chain is fully verified - the only entries an API response,
    *  calculation or UI may present as a CONFIRMED organizational fact. An evidenceBasis tag on findings alone is
    *  not sufficient when a caller's business metric or claim presents a result as verified operational risk; this
    *  pre-filtered view is what that caller must use instead of filtering findings by tag itself. Every entry here
@@ -79,6 +85,9 @@ export interface QueryFinding {
   mitigation?: string;
   /** Evidence chain explaining why this finding occurred */
   evidenceChain: string[];
+  /** For a dependency-path finding: the impact chain it asserts (origin first; each next node depends on the
+   *  previous one). Only a finding that asserts such a chain can ever be confirmed - see graph-reasoner.ts. */
+  dependencyChain?: string[];
 }
 
 export interface IsolatedKnowledgeResult extends QueryFinding {

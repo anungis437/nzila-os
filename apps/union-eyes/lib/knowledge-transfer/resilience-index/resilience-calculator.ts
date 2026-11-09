@@ -4,9 +4,10 @@
  * Measure organizational continuity resilience across multiple dimensions.
  */
 
+import type { VerifiedEdgeCoverage } from '@/lib/knowledge-transfer/propagation/graph-evidence-service';
 import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import type { PropagationMap } from '../propagation/propagation-models';
-import { loadGraphEvidence, hasAnyVerifiedEvidence } from '../propagation/graph-evidence-service';
+import { loadGraphEvidence, verifiedEdgeCoverage } from '../propagation/graph-evidence-service';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { inOrganization } from '../org-scope';
 import { ApiError } from '@/lib/api/errors';
@@ -50,7 +51,9 @@ export interface OrganizationalResilienceIndex {
   /** How many of the dependency nodes behind this index have at least one currently-verified relationship on
    *  file, out of how many nodes exist in total - an aggregate corroboration signal, never a per-dimension gate
    *  (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE). */
-  verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: number; totalNodes: number };
+  /** Directed inferred dependencies whose exact direction is currently verified (verifiedEdgeCoverage). Never a
+   *  count of nodes that merely appear in some verified record. */
+  verifiedEvidenceCoverage: VerifiedEdgeCoverage;
 }
 
 async function loadPublishedInterviews(orgId: string) {
@@ -173,10 +176,7 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
       'trend is a single-snapshot risk-concentration signal (no prior snapshot exists to compare against, so it ' +
       "can never read 'improving'); maturityLevel and status are score cut-off labels on counts of dependency " +
       'nodes and interviews, not a validated governance or documentation maturity assessment.',
-    verifiedEvidenceCoverage: {
-      nodesWithVerifiedEvidence: propagationMap.nodes.filter((node) => hasAnyVerifiedEvidence(evidence, node.id)).length,
-      totalNodes: propagationMap.nodes.length,
-    },
+    verifiedEvidenceCoverage: verifiedEdgeCoverage(evidence),
   };
 }
 

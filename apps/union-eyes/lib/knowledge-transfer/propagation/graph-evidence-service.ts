@@ -3,183 +3,264 @@
  * verified-dependency graph.
  *
  * Every consumer of organizational dependency data (cascade analysis, graph querying, forecasting, resilience
- * index, mitigation comparison, strategy modeling, copilot context, continuity simulation, institutional
- * intelligence kernels, the propagation API, and every frontend workspace) must load evidence through
- * loadGraphEvidence and check it through the helpers below - never build a separate, bespoke confidence/risk/
- * currentness computation against buildDependencyPropagationMap or listVerifiedDependencies directly.
+ * index, mitigation comparison, strategy modeling, copilot context, continuity simulation, decision intelligence,
+ * the propagation API, the verified-dependency lookup, and every frontend workspace) loads evidence through
+ * loadGraphEvidence and asks it questions through the claim API below - never a separate, bespoke confidence/risk/
+ * currentness computation against buildDependencyPropagationMap or listVerifiedDependencies.
  *
  * Two kinds of fact are distinguished everywhere, by runtime behavior, not just accompanying text:
  *   - EXPLORATORY: propagationMap.nodes/edges/bottlenecks/downstreamImpacts, inferred from exit-interview tag
- *     co-occurrence. A valuable discovery signal; never a confirmed operational fact. Exploratory output remains
- *     fully functional everywhere - it is never suppressed - but every consumer must tag it as exploratory,
- *     never present it as established.
- *   - VERIFIED: ue_verified_dependency_evidence rows with status 'verified' - a reviewer distinct from the
- *     submitter attributed a named process/system and responsible authority to a directional relationship. Only
- *     this evidence may back a confirmed organizational risk, succession, simulation or compliance conclusion.
+ *     co-occurrence. A discovery signal and never a confirmed operational fact. It is never suppressed, but every
+ *     consumer tags it as a hypothesis.
+ *   - CONFIRMED: a specific, DIRECTED claim ("A depends on B", or a chain of such edges) every edge of which is backed
+ *     by a CURRENT verified record (evaluateRecordCurrentness). A node's participation in some verified record
+ *     confirms nothing about any other claim involving that node - there is deliberately no node-level confirmation.
  *
- * (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE)
+ * Family 1 final correction (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE).
  */
 
-import { buildDependencyPropagationMap } from './dependency-propagator';
 import { listVerifiedDependencies } from './verified-dependency-store';
-import { canonicalNodeIdentityKey, resolveConceptLabel, type AliasLookup } from './graph-identity';
-import { computeSourceFingerprint } from './graph-fingerprint';
-import { listActiveNodeAliases } from './node-alias-store';
-import { documentCurrentlyResolves } from './evidence-document-reference';
-import type { PropagationMap, DependencyNode } from './propagation-models';
-import type { VerifiedDependencyRecord, EvidenceStaleReason, StaleVerifiedDependency } from './verified-dependency-models';
+import { resolveNodeReference, type NodeResolution } from './graph-identity';
+import { evaluateRecordCurrentness, loadGraphEvidenceContext, type GraphEvidenceContext } from './graph-evidence-evaluator';
+import type { PropagationMap } from './propagation-models';
+import type { CurrentVerifiedDependency, EvidenceTier, StaleVerifiedDependency, VerifiedDependencyRecord } from './verified-dependency-models';
 
-/** Every figure in the exploratory half of this envelope is inferred, never measured - see PropagationMap.methodologyNote. */
+export { evaluateRecordCurrentness, loadGraphEvidenceContext, type GraphEvidenceContext, type RecordCurrentness } from './graph-evidence-evaluator';
+
 export const GRAPH_EVIDENCE_METHODOLOGY_NOTE =
   'This envelope carries two distinct kinds of fact: an exploratory graph inferred from exit-interview tag ' +
-  'co-occurrence (never a confirmed operational fact, however the figures are labelled), and a separate set of ' +
-  'currently-verified relationships, each attributed by a reviewer distinct from the submitter to a named ' +
-  'process/system and responsible authority, whose underlying nodes and evidence reference are confirmed CURRENT ' +
-  'at read time (not merely verified at some point in the past) before being treated as confirmable. A consumer ' +
-  'reporting a confirmed risk, dependency, succession or compliance conclusion must use the current-verified half ' +
-  'only, and must say so explicitly when no verified evidence exists rather than silently substituting the ' +
-  'exploratory graph.';
+  'co-occurrence (a hypothesis, never a confirmed operational fact, however the figures are labelled), and a set ' +
+  'of currently-verified DIRECTED dependencies, each attributed by a reviewer distinct from the submitter to a named ' +
+  'process/system and responsible authority, whose nodes, classification and evidence are confirmed CURRENT at read ' +
+  'time. A finding is confirmed only when every directed dependency it rests on is currently verified; a node ' +
+  'appearing in some verified dependency confirms nothing else about that node. Each confirmed finding carries the ' +
+  'evidence tier of its weakest edge: a system-resolved document, or an external source attested by a named reviewer.';
 
-/** Loaded together so every consumer checks the SAME evidence at the SAME moment. */
 export interface GraphEvidence {
   organizationId: string;
   generatedAt: string;
   methodologyNote: string;
-  /** The inferred graph. Still fully functional for discovery/scenario use - never suppressed, always tagged. */
+  /** The inferred graph. Fully functional for discovery/scenario use - never suppressed, always a hypothesis. */
   exploratory: PropagationMap;
-  /** Verified AND currently valid: status 'verified', fingerprint matches the nodes' current attributes (resolved
-   *  through aliases), and a 'document' evidence reference still resolves. This - and only this - set backs a
-   *  confirmed conclusion. */
-  verifiedRelationships: VerifiedDependencyRecord[];
-  /** Nominally 'verified' in the database but excluded above: the node drifted, the fingerprint no longer matches,
-   *  or the evidence reference no longer resolves. Full review history is untouched (status stays 'verified', not
-   *  deleted or mutated) - these are surfaced separately for audit/UI visibility and re-verification workflows,
-   *  never silently dropped or silently treated as confirmable. */
-  staleVerifiedRelationships: StaleVerifiedDependency[];
-  /** Canonical identity keys (see graph-identity.ts) of every node appearing in a CURRENT verified relationship. */
-  verifiedNodeKeys: Set<string>;
-}
-
-function nodeAttributesOf(node: DependencyNode) {
-  return { label: node.label, category: node.category, nodeType: node.nodeType };
-}
-
-/** Resolves a verified record's two node ids to their CURRENT node (alias-aware), and the reasons (if any) it is
- *  no longer current: the node no longer resolves at all, its fingerprint no longer matches, or (for a 'document'
- *  evidence reference) the referenced document no longer resolves. */
-async function staleReasonsFor(
-  record: VerifiedDependencyRecord,
-  currentIds: readonly string[],
-  aliases: readonly AliasLookup[],
-  byId: Map<string, DependencyNode>,
-): Promise<EvidenceStaleReason[]> {
-  const reasons: EvidenceStaleReason[] = [];
-  const dependentId = resolveConceptLabel(aliases, currentIds, record.dependentNodeId);
-  const dependsOnId = resolveConceptLabel(aliases, currentIds, record.dependsOnNodeId);
-  const dependent = dependentId ? byId.get(dependentId) : undefined;
-  const dependsOn = dependsOnId ? byId.get(dependsOnId) : undefined;
-  if (!dependent || !dependsOn) {
-    reasons.push('node_no_longer_current');
-  } else {
-    const current = computeSourceFingerprint(nodeAttributesOf(dependent), nodeAttributesOf(dependsOn));
-    if (record.sourceFingerprint === null || record.sourceFingerprint !== current) reasons.push('source_fingerprint_mismatch');
-  }
-  if (record.evidenceReferenceType === 'document' && record.evidenceDocumentId) {
-    const resolves = await documentCurrentlyResolves(record.organizationId, record.evidenceDocumentId);
-    if (!resolves) reasons.push('evidence_reference_no_longer_resolves');
-  }
-  return reasons;
+  /** CURRENT verified dependencies, references resolved to current node ids, direction preserved. The only input to
+   *  a confirmed claim. */
+  currentVerified: CurrentVerifiedDependency[];
+  /** Nominally 'verified' in the database but not current, with every reason. Review history is untouched - these
+   *  are surfaced for re-verification, never silently dropped and never treated as confirmable. */
+  staleVerified: StaleVerifiedDependency[];
+  /** The snapshot the above was evaluated against; consumers resolve their own node references through it. */
+  context: GraphEvidenceContext;
 }
 
 export async function loadGraphEvidence(orgId: string): Promise<GraphEvidence> {
-  const [exploratory, nominallyVerified, aliases] = await Promise.all([
-    buildDependencyPropagationMap(orgId),
-    listVerifiedDependencies(orgId, 'verified'),
-    listActiveNodeAliases(orgId),
-  ]);
-  const currentIds = exploratory.nodes.map((node) => node.id);
-  const byId = new Map(exploratory.nodes.map((node) => [node.id, node]));
-
-  const verifiedRelationships: VerifiedDependencyRecord[] = [];
-  const staleVerifiedRelationships: StaleVerifiedDependency[] = [];
-  await Promise.all(
-    nominallyVerified.map(async (record) => {
-      const staleReasons = await staleReasonsFor(record, currentIds, aliases, byId);
-      if (staleReasons.length === 0) verifiedRelationships.push(record);
-      else staleVerifiedRelationships.push({ record, staleReasons });
-    }),
-  );
-
-  const verifiedNodeKeys = new Set(
-    verifiedRelationships.flatMap((record) => [canonicalNodeIdentityKey(record.dependentNodeId), canonicalNodeIdentityKey(record.dependsOnNodeId)]),
-  );
+  const nominallyVerified = await listVerifiedDependencies(orgId, 'verified');
+  const { context, exploratory } = await loadGraphEvidenceContext(orgId, nominallyVerified);
+  const currentVerified: CurrentVerifiedDependency[] = [];
+  const staleVerified: StaleVerifiedDependency[] = [];
+  for (const record of nominallyVerified) {
+    const result = evaluateRecordCurrentness(record, context);
+    if (result.current) currentVerified.push(result.dependency);
+    else staleVerified.push({ record, staleReasons: result.staleReasons });
+  }
   return {
     organizationId: orgId,
     generatedAt: new Date().toISOString(),
     methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
     exploratory,
-    verifiedRelationships,
-    staleVerifiedRelationships,
-    verifiedNodeKeys,
+    currentVerified,
+    staleVerified,
+    context,
   };
 }
 
-/** Is there a currently-verified relationship between these two node ids, in either direction? Identity-tolerant
- *  (matches on canonicalNodeIdentityKey, not raw string equality), so minor label drift does not silently drop a
- *  verified relationship's applicability. */
-export function hasVerifiedRelationship(evidence: GraphEvidence, nodeIdA: string, nodeIdB: string): boolean {
-  const keyA = canonicalNodeIdentityKey(nodeIdA);
-  const keyB = canonicalNodeIdentityKey(nodeIdB);
-  return evidence.verifiedRelationships.some((record) => {
-    const dependentKey = canonicalNodeIdentityKey(record.dependentNodeId);
-    const dependsOnKey = canonicalNodeIdentityKey(record.dependsOnNodeId);
-    return (dependentKey === keyA && dependsOnKey === keyB) || (dependentKey === keyB && dependsOnKey === keyA);
+// ---------------------------------------------------------------------------------------------------------------
+// Claim API - the only way a consumer may call something confirmed
+// ---------------------------------------------------------------------------------------------------------------
+
+/** Resolves a consumer's node reference through the same snapshot the evidence was evaluated against. */
+export function resolveEvidenceNode(evidence: GraphEvidence, reference: string): NodeResolution {
+  return resolveNodeReference(evidence.context.aliases, evidence.context.currentNodeIds, reference);
+}
+
+export interface DependencyEdgeClaim {
+  /** The node that depends on the other. */
+  dependentNodeId: string;
+  /** The node depended upon. */
+  dependsOnNodeId: string;
+}
+
+export type DependencyClaim =
+  | ({ kind: 'dependency' } & DependencyEdgeClaim)
+  /** A path of directed edges, every one of which must be verified (e.g. a cascade from a failing node to an
+   *  impacted area). An empty chain is never confirmed. */
+  | { kind: 'dependency_chain'; edges: DependencyEdgeClaim[] };
+
+export interface ConfirmedEdge {
+  edge: DependencyEdgeClaim;
+  record: VerifiedDependencyRecord;
+  evidenceTier: Exclude<EvidenceTier, 'unverified_external_citation'>;
+}
+
+export type HypothesisReason =
+  | 'no_verified_evidence_recorded'
+  | 'edge_not_verified'
+  | 'requires_reverification'
+  | 'node_reference_ambiguous'
+  | 'node_not_current'
+  | 'empty_claim';
+
+export type ClaimAssessment =
+  | {
+      status: 'confirmed';
+      verifiedBy: ConfirmedEdge[];
+      /** The weakest tier among the edges: one attested external edge makes the whole claim attested-external. */
+      evidenceTier: Exclude<EvidenceTier, 'unverified_external_citation'>;
+    }
+  | {
+      status: 'hypothesis';
+      reason: HypothesisReason;
+      /** The edges of the claim that are NOT currently verified. */
+      unverifiedEdges: DependencyEdgeClaim[];
+    };
+
+/** The current verified record for one directed edge, by RESOLVED node id. A→B never matches B→A. */
+function currentEdge(evidence: GraphEvidence, dependentId: string, dependsOnId: string): CurrentVerifiedDependency | undefined {
+  return evidence.currentVerified.find((d) => d.dependentNodeId === dependentId && d.dependsOnNodeId === dependsOnId);
+}
+
+/** Whether a stale verified record exists for this directed edge (so the reason is "re-verify", not "never verified"). */
+function staleEdgeExists(evidence: GraphEvidence, dependentId: string, dependsOnId: string): boolean {
+  return evidence.staleVerified.some(({ record }) => {
+    const a = resolveEvidenceNode(evidence, record.dependentNodeId);
+    const b = resolveEvidenceNode(evidence, record.dependsOnNodeId);
+    // A stale record whose references no longer resolve can still be the one this edge names by its raw reference.
+    const aId = a.status === 'resolved' ? a.nodeId : record.dependentNodeId;
+    const bId = b.status === 'resolved' ? b.nodeId : record.dependsOnNodeId;
+    return aId === dependentId && bId === dependsOnId;
   });
 }
 
-/** Does this node participate in ANY currently-verified relationship, as dependent or depended-upon? */
-export function hasAnyVerifiedEvidence(evidence: GraphEvidence, nodeId: string): boolean {
-  return evidence.verifiedNodeKeys.has(canonicalNodeIdentityKey(nodeId));
+const TIER_STRENGTH: Record<Exclude<EvidenceTier, 'unverified_external_citation'>, number> = {
+  system_resolved_document: 2,
+  human_attested_external: 1,
+};
+
+export function assessDependencyClaim(evidence: GraphEvidence, claim: DependencyClaim): ClaimAssessment {
+  const edges = claim.kind === 'dependency' ? [{ dependentNodeId: claim.dependentNodeId, dependsOnNodeId: claim.dependsOnNodeId }] : claim.edges;
+  if (edges.length === 0) return { status: 'hypothesis', reason: 'empty_claim', unverifiedEdges: [] };
+
+  const verifiedBy: ConfirmedEdge[] = [];
+  const unverifiedEdges: DependencyEdgeClaim[] = [];
+  let reason: HypothesisReason | null = null;
+  const note = (r: HypothesisReason) => {
+    // The most actionable reason wins: identity problems, then re-verification, then plain absence.
+    const rank: HypothesisReason[] = ['node_reference_ambiguous', 'node_not_current', 'requires_reverification', 'edge_not_verified'];
+    if (reason === null || rank.indexOf(r) < rank.indexOf(reason)) reason = r;
+  };
+
+  for (const edge of edges) {
+    const a = resolveEvidenceNode(evidence, edge.dependentNodeId);
+    const b = resolveEvidenceNode(evidence, edge.dependsOnNodeId);
+    if (a.status !== 'resolved' || b.status !== 'resolved') {
+      unverifiedEdges.push(edge);
+      note(a.status === 'ambiguous' || b.status === 'ambiguous' ? 'node_reference_ambiguous' : 'node_not_current');
+      continue;
+    }
+    const found = currentEdge(evidence, a.nodeId, b.nodeId);
+    if (found) {
+      verifiedBy.push({ edge, record: found.record, evidenceTier: found.evidenceTier });
+    } else {
+      unverifiedEdges.push(edge);
+      note(staleEdgeExists(evidence, a.nodeId, b.nodeId) ? 'requires_reverification' : 'edge_not_verified');
+    }
+  }
+
+  if (unverifiedEdges.length > 0) {
+    const noneRecorded = evidence.currentVerified.length === 0 && evidence.staleVerified.length === 0;
+    return { status: 'hypothesis', reason: noneRecorded ? 'no_verified_evidence_recorded' : (reason ?? 'edge_not_verified'), unverifiedEdges };
+  }
+  const evidenceTier = verifiedBy.reduce<ConfirmedEdge['evidenceTier']>(
+    (weakest, e) => (TIER_STRENGTH[e.evidenceTier] < TIER_STRENGTH[weakest] ? e.evidenceTier : weakest),
+    'system_resolved_document',
+  );
+  return { status: 'confirmed', verifiedBy, evidenceTier };
 }
 
-/** The standard evidence-basis tag every per-item output in a consumer's result must carry - attach this
- *  alongside the item, never compute a separate bespoke confidence/risk label from the same inputs. */
+/** Directed: is "dependent depends on dependsOn" currently verified? Never true for the reverse direction. */
+export function hasVerifiedDependency(evidence: GraphEvidence, dependentNodeId: string, dependsOnNodeId: string): boolean {
+  return assessDependencyClaim(evidence, { kind: 'dependency', dependentNodeId, dependsOnNodeId }).status === 'confirmed';
+}
+
+/** The tag every per-item consumer output carries. 'verified' ONLY when assessDependencyClaim confirmed the item's
+ *  specific directed claim; everything else is 'exploratory' (a hypothesis from the inferred graph). */
 export type EvidenceBasis = 'verified' | 'exploratory';
 
-export function evidenceBasisForNode(evidence: GraphEvidence, nodeId: string): EvidenceBasis {
-  return hasAnyVerifiedEvidence(evidence, nodeId) ? 'verified' : 'exploratory';
-}
-
-export function evidenceBasisForPair(evidence: GraphEvidence, nodeIdA: string, nodeIdB: string): EvidenceBasis {
-  return hasVerifiedRelationship(evidence, nodeIdA, nodeIdB) ? 'verified' : 'exploratory';
+export function evidenceBasisOf(assessment: ClaimAssessment): EvidenceBasis {
+  return assessment.status === 'confirmed' ? 'verified' : 'exploratory';
 }
 
 /**
- * The confirmed-reading claim gate every consumer must use before reporting a finding tied to specific node(s) as
- * an established organizational fact. Returns the supplied value only when verified evidence backs it; otherwise
- * an explicit, reasoned 'unavailable' - never a silent fall-back to the exploratory graph presented as confirmed.
+ * Aggregate coverage of the exploratory graph by current verified edges, for consumers that report a single
+ * organization-level figure (resilience index, forecasts, strategy and mitigation comparisons, copilot context). It
+ * counts DIRECTED exploratory edges whose exact direction is verified - never nodes that merely participate in some
+ * verified record - so an aggregate can say "k of n inferred dependencies are confirmed" and nothing stronger.
  */
-export type ConfirmedOrUnavailable<T> =
-  | { status: 'confirmed'; value: T; verifiedBy: VerifiedDependencyRecord[] }
-  | { status: 'unavailable'; reason: 'no_verified_evidence_recorded' | 'no_verified_evidence_for_node' | 'requires_reverification' };
-
-function staleKeysOf(evidence: GraphEvidence): Set<string> {
-  return new Set(
-    evidence.staleVerifiedRelationships.flatMap(({ record }) => [canonicalNodeIdentityKey(record.dependentNodeId), canonicalNodeIdentityKey(record.dependsOnNodeId)]),
-  );
+export interface VerifiedEdgeCoverage {
+  exploratoryEdgeCount: number;
+  verifiedEdgeCount: number;
+  /** verifiedEdgeCount / exploratoryEdgeCount, or 0 when there are no edges. */
+  ratio: number;
+  /** True only when every exploratory edge is verified (and there is at least one). */
+  fullyVerified: boolean;
 }
 
-export function confirmedForNode<T>(evidence: GraphEvidence, nodeId: string, value: T): ConfirmedOrUnavailable<T> {
-  if (evidence.verifiedRelationships.length === 0 && evidence.staleVerifiedRelationships.length === 0) {
-    return { status: 'unavailable', reason: 'no_verified_evidence_recorded' };
+export function verifiedEdgeCoverage(evidence: GraphEvidence, edges: PropagationMap['edges'] = evidence.exploratory.edges): VerifiedEdgeCoverage {
+  const verifiedEdgeCount = edges.filter((edge) => hasVerifiedDependency(evidence, edge.dependentId, edge.dependsOnId)).length;
+  return {
+    exploratoryEdgeCount: edges.length,
+    verifiedEdgeCount,
+    ratio: edges.length === 0 ? 0 : verifiedEdgeCount / edges.length,
+    fullyVerified: edges.length > 0 && verifiedEdgeCount === edges.length,
+  };
+}
+
+/**
+ * Every node a failure of `originRef` reaches through CURRENT verified dependencies only, with the directed chain that
+ * reaches it (origin first; each next node verifiably depends on the previous one) and that chain's assessment. This
+ * is how a consumer confirms an impact claim "if X fails, Y is affected": Y is confirmed only when such a chain exists.
+ * Shortest chain wins; cycles are not followed.
+ */
+export function verifiedImpactChains(
+  evidence: GraphEvidence,
+  originRef: string,
+): Map<string, { chain: string[]; assessment: Extract<ClaimAssessment, { status: 'confirmed' }> }> {
+  const result = new Map<string, { chain: string[]; assessment: Extract<ClaimAssessment, { status: 'confirmed' }> }>();
+  const origin = resolveEvidenceNode(evidence, originRef);
+  if (origin.status !== 'resolved') return result;
+  const dependentsOf = new Map<string, string[]>();
+  for (const dep of evidence.currentVerified) {
+    dependentsOf.set(dep.dependsOnNodeId, [...(dependentsOf.get(dep.dependsOnNodeId) ?? []), dep.dependentNodeId]);
   }
-  const key = canonicalNodeIdentityKey(nodeId);
-  if (!hasAnyVerifiedEvidence(evidence, nodeId)) {
-    if (staleKeysOf(evidence).has(key)) return { status: 'unavailable', reason: 'requires_reverification' };
-    return { status: 'unavailable', reason: 'no_verified_evidence_for_node' };
+  const queue: string[][] = [[origin.nodeId]];
+  const seen = new Set([origin.nodeId]);
+  while (queue.length > 0) {
+    const chain = queue.shift()!;
+    const last = chain[chain.length - 1];
+    for (const next of dependentsOf.get(last) ?? []) {
+      if (seen.has(next)) continue;
+      seen.add(next);
+      const nextChain = [...chain, next];
+      const assessment = assessDependencyClaim(evidence, { kind: 'dependency_chain', edges: impactChainEdges(nextChain) });
+      if (assessment.status === 'confirmed') {
+        result.set(next, { chain: nextChain, assessment });
+        queue.push(nextChain);
+      }
+    }
   }
-  const verifiedBy = evidence.verifiedRelationships.filter(
-    (record) => canonicalNodeIdentityKey(record.dependentNodeId) === key || canonicalNodeIdentityKey(record.dependsOnNodeId) === key,
-  );
-  return { status: 'confirmed', value, verifiedBy };
+  return result;
+}
+
+/** The directed edges an impact chain [origin, a, b, ...] asserts: a depends on origin, b depends on a, ... */
+export function impactChainEdges(chain: readonly string[]): DependencyEdgeClaim[] {
+  return chain.slice(1).map((dependent, i) => ({ dependentNodeId: dependent, dependsOnNodeId: chain[i] }));
 }

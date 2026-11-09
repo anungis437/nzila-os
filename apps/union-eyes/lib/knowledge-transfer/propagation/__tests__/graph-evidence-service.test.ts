@@ -1,41 +1,43 @@
 /**
  * Direct unit coverage for the shared graph-evidence contract (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-
- * SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE). Every consumer (cascade analysis, graph querying, forecasting,
- * resilience index, mitigation comparison, strategy modeling, copilot context, institutional intelligence
- * kernels) loads evidence through loadGraphEvidence and checks it through these helpers; this file proves the
- * contract's own logic directly, rather than relying solely on indirect coverage through each consumer.
+ * SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE, Family 1 final correction). Every consumer loads evidence through
+ * loadGraphEvidence and may call something confirmed only through assessDependencyClaim (or the helpers built on it).
+ * This file proves, directly: directed claims, claim-level (not node-level) confirmation, chain confirmation, the
+ * evidence tier carried by a confirmation, and aggregate coverage that counts verified directed edges only.
  */
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { buildDependencyPropagationMap, listVerifiedDependencies, listActiveNodeAliases, documentCurrentlyResolves } = vi.hoisted(() => ({
+const { buildDependencyPropagationMap, listVerifiedDependencies, listActiveNodeAliases, loadEvidenceDocumentIntegrity } = vi.hoisted(() => ({
   buildDependencyPropagationMap: vi.fn(),
   listVerifiedDependencies: vi.fn(),
-  listActiveNodeAliases: vi.fn(async () => []),
-  documentCurrentlyResolves: vi.fn(async () => true),
+  listActiveNodeAliases: vi.fn(async () => [] as Array<{ aliasLabel: string; canonicalConceptLabel: string }>),
+  loadEvidenceDocumentIntegrity: vi.fn(async () => new Map<string, { active: boolean; integrity: string | null }>()),
 }));
 vi.mock('../dependency-propagator', () => ({ buildDependencyPropagationMap }));
 vi.mock('../verified-dependency-store', () => ({ listVerifiedDependencies }));
 vi.mock('../node-alias-store', () => ({ listActiveNodeAliases }));
-vi.mock('../evidence-document-reference', () => ({ documentCurrentlyResolves }));
+vi.mock('../evidence-document-reference', () => ({ loadEvidenceDocumentIntegrity }));
 
 import {
   loadGraphEvidence,
-  hasVerifiedRelationship,
-  hasAnyVerifiedEvidence,
-  evidenceBasisForNode,
-  evidenceBasisForPair,
-  confirmedForNode,
+  assessDependencyClaim,
+  hasVerifiedDependency,
+  evidenceBasisOf,
+  verifiedEdgeCoverage,
+  verifiedImpactChains,
+  impactChainEdges,
   GRAPH_EVIDENCE_METHODOLOGY_NOTE,
-  type GraphEvidence,
 } from '../graph-evidence-service';
 import { computeSourceFingerprint } from '../graph-fingerprint';
 
-function propagationMap(nodeIds: string[]) {
+const NODE = (id: string) => ({ id, label: id, category: 'operational', nodeType: 'process' });
+
+function propagationMap(nodeIds: string[], edges: Array<[string, string]> = []) {
   return {
     organizationId: 'org-1',
     generatedAt: 'now',
-    nodes: nodeIds.map((id) => ({ id, label: id, category: 'operational', nodeType: 'process' })),
-    edges: [],
+    nodes: nodeIds.map(NODE),
+    edges: edges.map(([dependentId, dependsOnId]) => ({ dependentId, dependsOnId, strength: 'medium', evidenceCount: 1, rationale: '' })),
     downstreamImpacts: [],
     upstreamDependencies: [],
     couplingAnalysis: [],
@@ -45,11 +47,7 @@ function propagationMap(nodeIds: string[]) {
   };
 }
 
-const CURRENT_FINGERPRINT = computeSourceFingerprint(
-  { label: 'Payroll_System', category: 'operational', nodeType: 'process' },
-  { label: 'Bylaw_Amendment', category: 'operational', nodeType: 'process' },
-);
-
+/** A verified record for dependent -> dependsOn that is current against propagationMap(...) unless overridden. */
 function verifiedRecord(dependentNodeId: string, dependsOnNodeId: string, overrides: Record<string, unknown> = {}) {
   return {
     id: `v-${dependentNodeId}-${dependsOnNodeId}`,
@@ -61,7 +59,12 @@ function verifiedRecord(dependentNodeId: string, dependsOnNodeId: string, overri
     evidenceReference: 'ref',
     evidenceReferenceType: 'external_citation' as const,
     evidenceDocumentId: null,
-    sourceFingerprint: CURRENT_FINGERPRINT,
+    evidenceDocumentIntegrity: null,
+    externalAttestation: 'checked the clause',
+    externalAttestedBy: 'user-b',
+    externalAttestedAt: 'now',
+    identityKeyVersion: 2 as const,
+    sourceFingerprint: computeSourceFingerprint(NODE(dependentNodeId), NODE(dependsOnNodeId), 2),
     status: 'verified' as const,
     submittedBy: 'user-a',
     reviewedBy: 'user-b',
@@ -73,213 +76,128 @@ function verifiedRecord(dependentNodeId: string, dependsOnNodeId: string, overri
   };
 }
 
+async function evidenceFor(nodeIds: string[], records: ReturnType<typeof verifiedRecord>[], edges: Array<[string, string]> = []) {
+  buildDependencyPropagationMap.mockResolvedValueOnce(propagationMap(nodeIds, edges));
+  listVerifiedDependencies.mockResolvedValueOnce(records);
+  return loadGraphEvidence('org-1');
+}
+
+beforeEach(() => {
+  listActiveNodeAliases.mockResolvedValue([]);
+  loadEvidenceDocumentIntegrity.mockResolvedValue(new Map());
+});
+
 describe('loadGraphEvidence', () => {
-  it('loads the exploratory map and verified relationships together, and builds canonical node keys from both directions', async () => {
-    buildDependencyPropagationMap.mockResolvedValue(propagationMap(['Payroll_System', 'Bylaw_Amendment', 'Vendor_X']));
-    listVerifiedDependencies.mockResolvedValue([verifiedRecord('Payroll_System', 'Bylaw_Amendment')]);
-
-    const evidence = await loadGraphEvidence('org-1');
-
-    expect(listVerifiedDependencies).toHaveBeenCalledWith('org-1', 'verified');
-    expect(evidence.exploratory.nodes.map((n) => n.id)).toEqual(['Payroll_System', 'Bylaw_Amendment', 'Vendor_X']);
-    expect(evidence.verifiedRelationships.length).toBe(1);
-    expect(evidence.staleVerifiedRelationships).toEqual([]);
-    expect(evidence.verifiedNodeKeys.has('payroll system')).toBe(true);
-    expect(evidence.verifiedNodeKeys.has('bylaw amendment')).toBe(true);
-    expect(evidence.verifiedNodeKeys.has('vendor x')).toBe(false);
+  it('splits current from stale with the single evaluator, preserving direction and resolving to current ids', async () => {
+    const evidence = await evidenceFor(['A', 'B', 'C'], [verifiedRecord('a', 'B'), verifiedRecord('B', 'Gone')]);
     expect(evidence.methodologyNote).toBe(GRAPH_EVIDENCE_METHODOLOGY_NOTE);
-    expect(evidence.organizationId).toBe('org-1');
+    expect(evidence.currentVerified).toHaveLength(1);
+    expect(evidence.currentVerified[0]).toMatchObject({ dependentNodeId: 'A', dependsOnNodeId: 'B', evidenceTier: 'human_attested_external' });
+    expect(evidence.staleVerified.map((s) => s.staleReasons)).toEqual([['node_no_longer_current']]);
   });
 
-  it('produces an empty verifiedNodeKeys set when there are no verified relationships', async () => {
-    buildDependencyPropagationMap.mockResolvedValue(propagationMap(['Payroll_System']));
-    listVerifiedDependencies.mockResolvedValue([]);
-
-    const evidence = await loadGraphEvidence('org-1');
-    expect(evidence.verifiedNodeKeys.size).toBe(0);
-    expect(evidence.verifiedRelationships).toEqual([]);
-    expect(evidence.staleVerifiedRelationships).toEqual([]);
-  });
-
-  it('excludes a nominally-verified record whose node no longer exists in the current graph, surfacing it as stale with node_no_longer_current', async () => {
-    buildDependencyPropagationMap.mockResolvedValue(propagationMap(['Payroll_System']));
-    listVerifiedDependencies.mockResolvedValue([verifiedRecord('Payroll_System', 'Retired_Node')]);
-
-    const evidence = await loadGraphEvidence('org-1');
-    expect(evidence.verifiedRelationships).toEqual([]);
-    expect(evidence.staleVerifiedRelationships).toHaveLength(1);
-    expect(evidence.staleVerifiedRelationships[0].staleReasons).toEqual(['node_no_longer_current']);
-    expect(evidence.verifiedNodeKeys.size).toBe(0);
-  });
-
-  it('excludes a nominally-verified record whose node attributes changed since verification, surfacing source_fingerprint_mismatch', async () => {
-    const map = propagationMap(['Payroll_System', 'Bylaw_Amendment']);
-    map.nodes[0].category = 'vendor'; // was 'operational' when CURRENT_FINGERPRINT was computed
-    buildDependencyPropagationMap.mockResolvedValue(map);
-    listVerifiedDependencies.mockResolvedValue([verifiedRecord('Payroll_System', 'Bylaw_Amendment')]);
-
-    const evidence = await loadGraphEvidence('org-1');
-    expect(evidence.verifiedRelationships).toEqual([]);
-    expect(evidence.staleVerifiedRelationships[0].staleReasons).toEqual(['source_fingerprint_mismatch']);
-  });
-
-  it('excludes a nominally-verified record whose document evidence reference no longer resolves', async () => {
-    buildDependencyPropagationMap.mockResolvedValue(propagationMap(['Payroll_System', 'Bylaw_Amendment']));
-    listVerifiedDependencies.mockResolvedValue([
-      verifiedRecord('Payroll_System', 'Bylaw_Amendment', { evidenceReferenceType: 'document', evidenceDocumentId: 'doc-1' }),
+  it('treats document evidence whose content changed, or that lost its binding, as stale', async () => {
+    loadEvidenceDocumentIntegrity.mockResolvedValue(new Map([
+      ['doc-1', { active: true, integrity: 'version:2:new' }],
+      ['doc-2', { active: true, integrity: 'sha256:same' }],
+    ]));
+    const doc = (id: string, integrity: string | null) => ({ evidenceReferenceType: 'document' as const, evidenceDocumentId: id, evidenceDocumentIntegrity: integrity, externalAttestation: null, externalAttestedBy: null, externalAttestedAt: null });
+    const evidence = await evidenceFor(['A', 'B', 'C', 'D'], [
+      verifiedRecord('A', 'B', doc('doc-1', 'version:1:old')),
+      verifiedRecord('A', 'C', doc('doc-2', 'sha256:same')),
+      verifiedRecord('A', 'D', doc('doc-2', null)),
     ]);
-    documentCurrentlyResolves.mockResolvedValueOnce(false);
-
-    const evidence = await loadGraphEvidence('org-1');
-    expect(evidence.verifiedRelationships).toEqual([]);
-    expect(evidence.staleVerifiedRelationships[0].staleReasons).toEqual(['evidence_reference_no_longer_resolves']);
+    expect(evidence.currentVerified.map((d) => [d.dependsOnNodeId, d.evidenceTier])).toEqual([['C', 'system_resolved_document']]);
+    expect(evidence.staleVerified.map((s) => s.staleReasons)).toEqual([['evidence_document_changed'], ['evidence_document_changed']]);
   });
 
-  it('treats a null sourceFingerprint (a legacy row predating the column) the same as a mismatch - fail closed, never trusted', async () => {
-    buildDependencyPropagationMap.mockResolvedValue(propagationMap(['Payroll_System', 'Bylaw_Amendment']));
-    listVerifiedDependencies.mockResolvedValue([verifiedRecord('Payroll_System', 'Bylaw_Amendment', { sourceFingerprint: null })]);
-
-    const evidence = await loadGraphEvidence('org-1');
-    expect(evidence.verifiedRelationships).toEqual([]);
-    expect(evidence.staleVerifiedRelationships[0].staleReasons).toEqual(['source_fingerprint_mismatch']);
+  it('never lets an unattested external citation, or one attested by its own submitter, back a confirmation', async () => {
+    const evidence = await evidenceFor(['A', 'B', 'C'], [
+      verifiedRecord('A', 'B', { externalAttestation: null, externalAttestedBy: null, externalAttestedAt: null }),
+      verifiedRecord('A', 'C', { externalAttestedBy: 'user-a' }),
+    ]);
+    expect(evidence.currentVerified).toEqual([]);
+    expect(evidence.staleVerified.map((s) => s.staleReasons)).toEqual([['external_evidence_not_attested'], ['external_evidence_not_attested']]);
   });
 });
 
-describe('hasVerifiedRelationship', () => {
-  const evidence: GraphEvidence = {
-    organizationId: 'org-1',
-    generatedAt: 'now',
-    methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
-    exploratory: propagationMap(['Payroll_System', 'Bylaw_Amendment', 'Vendor_X']),
-    verifiedRelationships: [verifiedRecord('Payroll_System', 'Bylaw_Amendment')],
-    staleVerifiedRelationships: [],
-    verifiedNodeKeys: new Set(['payroll system', 'bylaw amendment']),
-  };
-
-  it('is true in either direction for a verified pair', () => {
-    expect(hasVerifiedRelationship(evidence, 'Payroll_System', 'Bylaw_Amendment')).toBe(true);
-    expect(hasVerifiedRelationship(evidence, 'Bylaw_Amendment', 'Payroll_System')).toBe(true);
+describe('directed claims', () => {
+  it('A depends on B is confirmed; B depends on A is a hypothesis', async () => {
+    const evidence = await evidenceFor(['A', 'B'], [verifiedRecord('A', 'B')]);
+    expect(hasVerifiedDependency(evidence, 'A', 'B')).toBe(true);
+    expect(hasVerifiedDependency(evidence, 'B', 'A')).toBe(false);
+    expect(assessDependencyClaim(evidence, { kind: 'dependency', dependentNodeId: 'B', dependsOnNodeId: 'A' })).toEqual({
+      status: 'hypothesis',
+      reason: 'edge_not_verified',
+      unverifiedEdges: [{ dependentNodeId: 'B', dependsOnNodeId: 'A' }],
+    });
   });
 
-  it('is identity-tolerant: matches on canonical key, not raw string equality', () => {
-    expect(hasVerifiedRelationship(evidence, 'payroll_system', 'BYLAW AMENDMENT')).toBe(true);
+  it('a node\'s participation in one verified dependency confirms nothing about its other relationships', async () => {
+    const evidence = await evidenceFor(['A', 'B', 'C'], [verifiedRecord('A', 'B')]);
+    expect(hasVerifiedDependency(evidence, 'A', 'C')).toBe(false);
+    expect(hasVerifiedDependency(evidence, 'C', 'B')).toBe(false);
   });
 
-  it('is false for a pair with no verified relationship between them', () => {
-    expect(hasVerifiedRelationship(evidence, 'Payroll_System', 'Vendor_X')).toBe(false);
-  });
-
-  it('is false when a node simply has other verified evidence but not with this specific partner', () => {
-    expect(hasVerifiedRelationship(evidence, 'Bylaw_Amendment', 'Vendor_X')).toBe(false);
-  });
-});
-
-describe('hasAnyVerifiedEvidence / evidenceBasisForNode / evidenceBasisForPair', () => {
-  const evidence: GraphEvidence = {
-    organizationId: 'org-1',
-    generatedAt: 'now',
-    methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
-    exploratory: propagationMap(['Payroll_System', 'Bylaw_Amendment', 'Vendor_X']),
-    verifiedRelationships: [verifiedRecord('Payroll_System', 'Bylaw_Amendment')],
-    staleVerifiedRelationships: [],
-    verifiedNodeKeys: new Set(['payroll system', 'bylaw amendment']),
-  };
-
-  it('reports verified for a node participating in any verified relationship', () => {
-    expect(hasAnyVerifiedEvidence(evidence, 'Payroll_System')).toBe(true);
-    expect(evidenceBasisForNode(evidence, 'Payroll_System')).toBe('verified');
-  });
-
-  it('reports exploratory for a node with no verified relationship at all', () => {
-    expect(hasAnyVerifiedEvidence(evidence, 'Vendor_X')).toBe(false);
-    expect(evidenceBasisForNode(evidence, 'Vendor_X')).toBe('exploratory');
-  });
-
-  it('reports exploratory for a node id absent from the graph entirely, never throwing', () => {
-    expect(evidenceBasisForNode(evidence, 'Nonexistent_Node')).toBe('exploratory');
-  });
-
-  it('evidenceBasisForPair mirrors hasVerifiedRelationship', () => {
-    expect(evidenceBasisForPair(evidence, 'Payroll_System', 'Bylaw_Amendment')).toBe('verified');
-    expect(evidenceBasisForPair(evidence, 'Payroll_System', 'Vendor_X')).toBe('exploratory');
-  });
-});
-
-describe('confirmedForNode', () => {
-  it('is unavailable with no_verified_evidence_recorded when the organization has no verified relationships at all', () => {
-    const evidence: GraphEvidence = {
-      organizationId: 'org-1',
-      generatedAt: 'now',
-      methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
-      exploratory: propagationMap(['Payroll_System']),
-      verifiedRelationships: [],
-      staleVerifiedRelationships: [],
-      verifiedNodeKeys: new Set(),
-    };
-    const result = confirmedForNode(evidence, 'Payroll_System', { some: 'value' });
-    expect(result).toEqual({ status: 'unavailable', reason: 'no_verified_evidence_recorded' });
-  });
-
-  it('is unavailable with no_verified_evidence_for_node when other nodes are verified but not this one', () => {
-    const evidence: GraphEvidence = {
-      organizationId: 'org-1',
-      generatedAt: 'now',
-      methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
-      exploratory: propagationMap(['Payroll_System', 'Vendor_X']),
-      verifiedRelationships: [verifiedRecord('Payroll_System', 'Bylaw_Amendment')],
-      staleVerifiedRelationships: [],
-      verifiedNodeKeys: new Set(['payroll system', 'bylaw amendment']),
-    };
-    const result = confirmedForNode(evidence, 'Vendor_X', { some: 'value' });
-    expect(result).toEqual({ status: 'unavailable', reason: 'no_verified_evidence_for_node' });
-  });
-
-  it('is unavailable with requires_reverification when the only evidence for this node is stale, not simply absent', () => {
-    const staleRecord = verifiedRecord('Payroll_System', 'Bylaw_Amendment');
-    const evidence: GraphEvidence = {
-      organizationId: 'org-1',
-      generatedAt: 'now',
-      methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
-      exploratory: propagationMap(['Payroll_System', 'Bylaw_Amendment']),
-      verifiedRelationships: [],
-      staleVerifiedRelationships: [{ record: staleRecord, staleReasons: ['source_fingerprint_mismatch'] }],
-      verifiedNodeKeys: new Set(),
-    };
-    const result = confirmedForNode(evidence, 'Payroll_System', { some: 'value' });
-    expect(result).toEqual({ status: 'unavailable', reason: 'requires_reverification' });
-  });
-
-  it('is confirmed with the supplied value and the backing verified records when evidence exists for the node', () => {
-    const record = verifiedRecord('Payroll_System', 'Bylaw_Amendment');
-    const evidence: GraphEvidence = {
-      organizationId: 'org-1',
-      generatedAt: 'now',
-      methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
-      exploratory: propagationMap(['Payroll_System', 'Bylaw_Amendment']),
-      verifiedRelationships: [record],
-      staleVerifiedRelationships: [],
-      verifiedNodeKeys: new Set(['payroll system', 'bylaw amendment']),
-    };
-    const result = confirmedForNode(evidence, 'Payroll_System', { risk: 'high' });
-    expect(result.status).toBe('confirmed');
-    if (result.status === 'confirmed') {
-      expect(result.value).toEqual({ risk: 'high' });
-      expect(result.verifiedBy).toEqual([record]);
+  it('carries the verified record and its tier on a confirmation', async () => {
+    const evidence = await evidenceFor(['A', 'B'], [verifiedRecord('A', 'B')]);
+    const assessment = assessDependencyClaim(evidence, { kind: 'dependency', dependentNodeId: 'a', dependsOnNodeId: 'b' });
+    expect(assessment.status).toBe('confirmed');
+    if (assessment.status === 'confirmed') {
+      expect(assessment.evidenceTier).toBe('human_attested_external');
+      expect(assessment.verifiedBy[0].record.id).toBe('v-A-B');
     }
+    expect(evidenceBasisOf(assessment)).toBe('verified');
   });
 
-  it('never silently substitutes the exploratory graph as confirmed — the gate is binary on verified evidence alone', () => {
-    const evidence: GraphEvidence = {
-      organizationId: 'org-1',
-      generatedAt: 'now',
-      methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
-      exploratory: propagationMap(Array.from({ length: 20 }, (_, i) => `Node_${i}`)),
-      verifiedRelationships: [],
-      staleVerifiedRelationships: [],
-      verifiedNodeKeys: new Set(),
-    };
-    for (const node of evidence.exploratory.nodes) {
-      expect(confirmedForNode(evidence, node.id, 'anything').status).toBe('unavailable');
-    }
+  it('reports re-verification, ambiguity and absence distinctly', async () => {
+    const stale = await evidenceFor(['A', 'B'], [verifiedRecord('A', 'B', { sourceFingerprint: 'drifted' })]);
+    expect(assessDependencyClaim(stale, { kind: 'dependency', dependentNodeId: 'A', dependsOnNodeId: 'B' })).toMatchObject({ status: 'hypothesis', reason: 'requires_reverification' });
+    const ambiguous = await evidenceFor(['A', 'B', 'b'], [verifiedRecord('A', 'C')]);
+    expect(assessDependencyClaim(ambiguous, { kind: 'dependency', dependentNodeId: 'A', dependsOnNodeId: 'B' })).toMatchObject({ status: 'hypothesis', reason: 'node_reference_ambiguous' });
+    const none = await evidenceFor(['A', 'B'], []);
+    expect(assessDependencyClaim(none, { kind: 'dependency', dependentNodeId: 'A', dependsOnNodeId: 'B' })).toMatchObject({ status: 'hypothesis', reason: 'no_verified_evidence_recorded' });
+  });
+
+  it('resolves claims through the same aliases as the evidence', async () => {
+    listActiveNodeAliases.mockResolvedValue([{ aliasLabel: 'Old_B', canonicalConceptLabel: 'B' }]);
+    const evidence = await evidenceFor(['A', 'B'], [verifiedRecord('A', 'B')]);
+    expect(hasVerifiedDependency(evidence, 'A', 'Old_B')).toBe(true);
+  });
+});
+
+describe('chain claims', () => {
+  it('confirms a chain only when every directed edge is verified, and carries the weakest tier', async () => {
+    loadEvidenceDocumentIntegrity.mockResolvedValue(new Map([['doc-1', { active: true, integrity: 'sha256:x' }]]));
+    const evidence = await evidenceFor(['A', 'B', 'C', 'D'], [
+      verifiedRecord('B', 'A', { evidenceReferenceType: 'document', evidenceDocumentId: 'doc-1', evidenceDocumentIntegrity: 'sha256:x', externalAttestation: null, externalAttestedBy: null, externalAttestedAt: null }),
+      verifiedRecord('C', 'B'),
+    ]);
+    const full = assessDependencyClaim(evidence, { kind: 'dependency_chain', edges: impactChainEdges(['A', 'B', 'C']) });
+    expect(full).toMatchObject({ status: 'confirmed', evidenceTier: 'human_attested_external' });
+    const partial = assessDependencyClaim(evidence, { kind: 'dependency_chain', edges: impactChainEdges(['A', 'B', 'C', 'D']) });
+    expect(partial).toMatchObject({ status: 'hypothesis', unverifiedEdges: [{ dependentNodeId: 'D', dependsOnNodeId: 'C' }] });
+    expect(assessDependencyClaim(evidence, { kind: 'dependency_chain', edges: [] })).toMatchObject({ status: 'hypothesis', reason: 'empty_claim' });
+  });
+
+  it('verifiedImpactChains follows only verified edges in the impact direction', async () => {
+    const evidence = await evidenceFor(['A', 'B', 'C', 'D'], [verifiedRecord('B', 'A'), verifiedRecord('C', 'B'), verifiedRecord('A', 'D')]);
+    const chains = verifiedImpactChains(evidence, 'A');
+    expect([...chains.keys()].sort()).toEqual(['B', 'C']);
+    expect(chains.get('C')?.chain).toEqual(['A', 'B', 'C']);
+    // D is something A depends on: a failure of A does not reach D.
+    expect(chains.has('D')).toBe(false);
+  });
+});
+
+describe('verifiedEdgeCoverage', () => {
+  it('counts verified directed exploratory edges, never participating nodes', async () => {
+    const evidence = await evidenceFor(['A', 'B', 'C'], [verifiedRecord('A', 'B')], [['A', 'B'], ['B', 'A'], ['A', 'C']]);
+    expect(verifiedEdgeCoverage(evidence)).toEqual({ exploratoryEdgeCount: 3, verifiedEdgeCount: 1, ratio: 1 / 3, fullyVerified: false });
+  });
+
+  it('is zero, not full, with no edges', async () => {
+    const evidence = await evidenceFor(['A'], []);
+    expect(verifiedEdgeCoverage(evidence)).toEqual({ exploratoryEdgeCount: 0, verifiedEdgeCount: 0, ratio: 0, fullyVerified: false });
   });
 });

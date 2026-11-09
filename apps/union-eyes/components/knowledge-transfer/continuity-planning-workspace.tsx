@@ -249,11 +249,17 @@ export function ContinuityPlanningWorkspace() {
                     No dependency has been verified yet. The exploratory findings above are pattern-based and have not been
                     independently confirmed — submit evidence under Verified Dependencies to change that.
                   </p>
+                ) : briefData.confirmedDependencyRiskStatus === 'verified_dependency_evidence_requires_reverification' ? (
+                  <p className="text-xs text-slate-600">
+                    Dependencies were verified, but none is current: a node, its classification or the evidence changed since
+                    verification. Re-verify them under Verified Dependencies before relying on them.
+                  </p>
                 ) : (
                   <ul className="space-y-1">
                     {briefData.confirmedDependencyRisks.map((risk, i) => (
                       <li key={i} className="text-xs text-slate-700">
-                        • {risk.dependentLabel} depends on {risk.dependsOnLabel} ({risk.processOrSystem}, verified by {risk.responsibleAuthority})
+                        • {risk.dependentLabel} depends on {risk.dependsOnLabel} ({risk.processOrSystem}; responsible: {risk.responsibleAuthority}; evidence:{' '}
+                        {risk.evidenceTier === 'system_resolved_document' ? 'stored document' : 'external source, reviewer-attested'})
                       </li>
                     ))}
                   </ul>
@@ -383,7 +389,7 @@ export function ContinuityPlanningWorkspace() {
                     <p className="mt-1 text-xs text-slate-500">{roadmapData.projectionNotMeasuredReason}</p>
                   )}
                   <p className="mt-1 text-xs text-slate-400">
-                    {roadmapData.verifiedEvidenceCoverage.nodesWithVerifiedEvidence} of {roadmapData.verifiedEvidenceCoverage.totalNodes} underlying knowledge nodes have a currently-verified dependency record on file; the rest are exploratory signal only.
+                    {roadmapData.verifiedEvidenceCoverage.verifiedEdgeCount} of {roadmapData.verifiedEvidenceCoverage.exploratoryEdgeCount} inferred dependencies are currently verified in their stated direction; every other dependency, and every node-level figure, is exploratory signal only.
                   </p>
                 </div>
               </div>

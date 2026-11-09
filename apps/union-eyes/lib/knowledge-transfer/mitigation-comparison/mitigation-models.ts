@@ -8,6 +8,8 @@
  * resilience, not evaluating or managing individuals.
  */
 
+import type { VerifiedEdgeCoverage } from '@/lib/knowledge-transfer/propagation/graph-evidence-service';
+
 export type MitigationType =
   | 'documentation_campaign'
   | 'cross_training'
@@ -109,7 +111,9 @@ export interface MitigationComparison {
   /** How many of the dependency nodes behind this comparison have at least one currently-verified relationship on
    *  file, out of how many nodes exist in total (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-
    *  FROM-TAG-CO-OCCURRENCE). */
-  verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: number; totalNodes: number };
+  /** Directed inferred dependencies whose exact direction is currently verified (verifiedEdgeCoverage). Never a
+   *  count of nodes that merely appear in some verified record. */
+  verifiedEvidenceCoverage: VerifiedEdgeCoverage;
 }
 
 /**

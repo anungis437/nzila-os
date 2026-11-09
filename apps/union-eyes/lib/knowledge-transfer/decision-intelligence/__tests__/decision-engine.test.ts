@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), resilience: vi.fn(), forecast: vi.fn(), listVerifiedDependencies: vi.fn(), listActiveNodeAliases: vi.fn(async () => []) }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), resilience: vi.fn(), forecast: vi.fn(), listVerifiedDependencies: vi.fn(), listActiveNodeAliases: vi.fn(async () => []), loadEvidenceDocumentIntegrity: vi.fn() }));
 
 vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
@@ -18,6 +18,9 @@ vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => 
 vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({
   listActiveNodeAliases: mocks.listActiveNodeAliases,
 }));
+vi.mock('@/lib/knowledge-transfer/propagation/evidence-document-reference', () => ({
+  loadEvidenceDocumentIntegrity: mocks.loadEvidenceDocumentIntegrity,
+}));
 vi.mock('@/lib/knowledge-transfer/resilience-index/resilience-calculator', () => ({
   calculateResilienceIndex: mocks.resilience,
 }));
@@ -25,7 +28,8 @@ vi.mock('@/lib/knowledge-transfer/forecasting/continuity-forecaster', () => ({
   forecastContinuityTrends: mocks.forecast,
 }));
 
-import { generateDecisionBrief } from '../decision-engine';
+import { generateDecisionBrief, assessConfirmedDependencyRisk } from '../decision-engine';
+import { currentVerifiedRecord } from '@/lib/knowledge-transfer/propagation/__tests__/verified-record-fixture';
 
 function node(id: string, category: string, isSingleSource: boolean, sensitivity = 'low', frequency = 5) {
   return {
@@ -56,6 +60,7 @@ describe('generateDecisionBrief', () => {
     mocks.resilience.mockResolvedValue(resilienceIndex(80, 'strong', [{ name: 'Knowledge Redundancy', score: 85 }]));
     mocks.buildMap.mockResolvedValue(propMap([node('x', 'general', false)]));
     mocks.listVerifiedDependencies.mockResolvedValue([]);
+    mocks.loadEvidenceDocumentIntegrity.mockResolvedValue(new Map());
   });
 
   it('produces no recommendations for a healthy org', async () => {
@@ -134,15 +139,15 @@ describe('generateDecisionBrief', () => {
     expect(brief.confirmedDependencyRisks).toEqual([]);
   });
 
-  it('reports confirmed dependency risk only from verified evidence, never the exploratory graph', async () => {
-    mocks.buildMap.mockResolvedValue(propMap([node('payroll_system', 'system', true, 'critical'), node('finance_clerk', 'expertise', false)]));
+  const PAYROLL = node('payroll_system', 'system', true, 'critical');
+  const STEWARD = node('finance_steward', 'expertise', false);
+
+  it('reports confirmed dependency risk only from CURRENT verified evidence, in its verified direction, with its evidence tier', async () => {
+    mocks.buildMap.mockResolvedValue(propMap([PAYROLL, STEWARD]));
     mocks.listVerifiedDependencies.mockResolvedValue([
-      {
-        id: 'vd1', organizationId: 'org', dependentNodeId: 'finance_clerk', dependsOnNodeId: 'payroll_system',
-        processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director',
-        evidenceReference: 'SOP-114 v3', status: 'verified', submittedBy: 'u1', reviewedBy: 'u2',
-        reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null, createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
-      },
+      currentVerifiedRecord(STEWARD, PAYROLL, {
+        id: 'vd1', processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director', evidenceReference: 'SOP-114 v3',
+      }),
     ]);
 
     const brief = await generateDecisionBrief('org');
@@ -150,15 +155,63 @@ describe('generateDecisionBrief', () => {
     expect(brief.confirmedDependencyRiskStatus).toBe('verified_dependency_evidence_available');
     expect(brief.confirmedDependencyRisks).toHaveLength(1);
     expect(brief.confirmedDependencyRisks[0]).toMatchObject({
-      dependentNodeId: 'finance_clerk',
-      dependentLabel: 'finance_clerk',
+      dependentNodeId: 'finance_steward',
+      dependentLabel: 'finance_steward',
       dependsOnNodeId: 'payroll_system',
       dependsOnLabel: 'payroll_system',
       processOrSystem: 'Payroll processing',
       responsibleAuthority: 'Finance Director',
       evidenceReference: 'SOP-114 v3',
+      evidenceTier: 'human_attested_external',
       verifiedAt: '2026-01-01T00:00:00.000Z',
     });
+  });
+
+  it('carries the system_resolved_document tier for a document record bound to its unchanged content', async () => {
+    mocks.buildMap.mockResolvedValue(propMap([PAYROLL, STEWARD]));
+    mocks.loadEvidenceDocumentIntegrity.mockResolvedValue(new Map([['doc-1', { active: true, integrity: 'sha256:abc' }]]));
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      currentVerifiedRecord(STEWARD, PAYROLL, {
+        evidenceReferenceType: 'document', evidenceDocumentId: 'doc-1', evidenceDocumentIntegrity: 'sha256:abc',
+        externalAttestation: null, externalAttestedBy: null, externalAttestedAt: null,
+      }),
+    ]);
+    const result = await assessConfirmedDependencyRisk('org');
+    expect(result.status).toBe('verified_dependency_evidence_available');
+    expect(result.risks.map((r) => r.evidenceTier)).toEqual(['system_resolved_document']);
+  });
+
+  it('never reports a stale verified record as confirmed, and says re-verification is required', async () => {
+    mocks.buildMap.mockResolvedValue(propMap([PAYROLL, STEWARD]));
+    mocks.loadEvidenceDocumentIntegrity.mockResolvedValue(new Map([['doc-1', { active: true, integrity: 'version:2:new' }]]));
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      // Classification drifted since verification (payroll_system was 'vendor' then).
+      currentVerifiedRecord(STEWARD, { ...PAYROLL, category: 'vendor' }, { id: 'drifted' }),
+      // External citation attested by its own submitter.
+      currentVerifiedRecord(PAYROLL, STEWARD, { id: 'self-attested', externalAttestedBy: 'u1' }),
+      // Document whose content changed after verification.
+      currentVerifiedRecord(STEWARD, PAYROLL, {
+        id: 'doc-changed', evidenceReferenceType: 'document', evidenceDocumentId: 'doc-1', evidenceDocumentIntegrity: 'version:1:old',
+        externalAttestation: null, externalAttestedBy: null, externalAttestedAt: null,
+      }),
+    ]);
+
+    const brief = await generateDecisionBrief('org');
+    expect(brief.confirmedDependencyRiskStatus).toBe('verified_dependency_evidence_requires_reverification');
+    expect(brief.confirmedDependencyRisks).toEqual([]);
+  });
+
+  it('reports only the current records when current and stale verified records coexist', async () => {
+    const ledger = node('ledger', 'system', false);
+    mocks.buildMap.mockResolvedValue(propMap([PAYROLL, STEWARD, ledger]));
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      currentVerifiedRecord(STEWARD, PAYROLL, { id: 'current' }),
+      // References a node that no longer exists in the graph.
+      currentVerifiedRecord(STEWARD, node('retired_tool', 'system', false), { id: 'gone' }),
+    ]);
+    const result = await assessConfirmedDependencyRisk('org');
+    expect(result.status).toBe('verified_dependency_evidence_available');
+    expect(result.risks.map((r) => [r.dependentNodeId, r.dependsOnNodeId])).toEqual([['finance_steward', 'payroll_system']]);
   });
 
   it('covers at_risk and adequate state + moderate/low governance tiers', async () => {

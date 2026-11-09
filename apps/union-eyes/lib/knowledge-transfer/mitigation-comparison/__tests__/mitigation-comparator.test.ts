@@ -9,10 +9,11 @@ const { buildDependencyPropagationMap, calculateResilienceIndex, listVerifiedDep
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
 vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies }));
 vi.mock('../../propagation/node-alias-store', () => ({ listActiveNodeAliases }));
+vi.mock('../../propagation/evidence-document-reference', () => ({ loadEvidenceDocumentIntegrity: async () => new Map() }));
 vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex }));
 
 import { compareMitigations } from '../mitigation-comparator';
-import { computeSourceFingerprint } from '../../propagation/graph-fingerprint';
+import { currentVerifiedRecord } from '../../propagation/__tests__/verified-record-fixture';
 
 function node(id: string, overrides: Record<string, unknown> = {}) {
   return {
@@ -26,6 +27,11 @@ function node(id: string, overrides: Record<string, unknown> = {}) {
   };
 }
 
+/** A propagation map with the given nodes and inferred directed edges [dependent, dependsOn]. */
+function map(nodes: unknown[], edges: Array<[string, string]> = []) {
+  return { nodes, edges: edges.map(([dependentId, dependsOnId]) => ({ dependentId, dependsOnId, strength: 'medium', evidenceCount: 1, rationale: '' })) };
+}
+
 describe('lib/knowledge-transfer/mitigation-comparison/mitigation-comparator', () => {
   it('compares multiple scenarios and recommends the strongest', async () => {
     const nodes = [
@@ -35,7 +41,7 @@ describe('lib/knowledge-transfer/mitigation-comparison/mitigation-comparator', (
       node('n4', { continuitySensitivity: 'low', isSingleSource: true }),
       node('n5', { category: 'compliance' }),
     ];
-    buildDependencyPropagationMap.mockResolvedValue({ nodes });
+    buildDependencyPropagationMap.mockResolvedValue(map(nodes));
     calculateResilienceIndex.mockResolvedValue({ overallScore: 50 });
 
     const comparison = await compareMitigations('org-1', [
@@ -63,7 +69,7 @@ describe('lib/knowledge-transfer/mitigation-comparison/mitigation-comparator', (
   });
 
   it('handles unknown mitigation type with default action plan and no affected nodes', async () => {
-    buildDependencyPropagationMap.mockResolvedValue({ nodes: [node('x', { isSingleSource: false, continuitySensitivity: 'low' })] });
+    buildDependencyPropagationMap.mockResolvedValue(map([node('x', { isSingleSource: false, continuitySensitivity: 'low' })]));
     calculateResilienceIndex.mockResolvedValue({ overallScore: 70 });
     const comparison = await compareMitigations('org-2', [
       { mitigationType: 'unknown_type' as never, targetNodeIds: [], investmentLevel: 'medium', durationWeeks: 30 },
@@ -76,22 +82,35 @@ describe('lib/knowledge-transfer/mitigation-comparison/mitigation-comparator', (
     expect(comparison.recommendationRationale).toContain('nothing was evaluated');
   });
 
-  it('reports verifiedEvidenceCoverage as an aggregate signal, zero with no verified relationships', async () => {
+  it('reports verifiedEvidenceCoverage as directed edge coverage, zero with no verified relationships', async () => {
     const nodes = [node('n1'), node('n2')];
-    buildDependencyPropagationMap.mockResolvedValue({ nodes });
+    buildDependencyPropagationMap.mockResolvedValue(map(nodes, [['n1', 'n2']]));
     calculateResilienceIndex.mockResolvedValue({ overallScore: 50 });
     listVerifiedDependencies.mockResolvedValueOnce([]);
     const comparison = await compareMitigations('org-3', [
       { mitigationType: 'cross_training', targetNodeIds: ['n1'], investmentLevel: 'medium', durationWeeks: 10 },
     ]);
-    expect(comparison.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 0, totalNodes: 2 });
+    expect(comparison.verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 1, verifiedEdgeCount: 0, ratio: 0, fullyVerified: false });
 
-    listVerifiedDependencies.mockResolvedValueOnce([
-      { dependentNodeId: 'n1', dependsOnNodeId: 'n2', status: 'verified', sourceFingerprint: computeSourceFingerprint(node('n1'), node('n2')), evidenceReferenceType: 'external_citation', evidenceDocumentId: null },
-    ]);
+    listVerifiedDependencies.mockResolvedValueOnce([currentVerifiedRecord(node('n1'), node('n2'))]);
     const comparisonWithEvidence = await compareMitigations('org-3', [
       { mitigationType: 'cross_training', targetNodeIds: ['n1'], investmentLevel: 'medium', durationWeeks: 10 },
     ]);
-    expect(comparisonWithEvidence.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 2, totalNodes: 2 });
+    expect(comparisonWithEvidence.verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 1, verifiedEdgeCount: 1, ratio: 1, fullyVerified: true });
+  });
+
+  it('does not count a reversed verified record, nor one whose node was reclassified since verification', async () => {
+    buildDependencyPropagationMap.mockResolvedValue(map([node('n1'), node('n2'), node('n3')], [['n1', 'n2'], ['n1', 'n3']]));
+    calculateResilienceIndex.mockResolvedValue({ overallScore: 50 });
+    listVerifiedDependencies.mockResolvedValueOnce([
+      // n2 depends on n1: the opposite of the inferred n1 -> n2.
+      currentVerifiedRecord(node('n2'), node('n1')),
+      // n1 -> n3 was verified while n3 was classified 'governance'; it is 'operational' now, so the attestation is stale.
+      currentVerifiedRecord(node('n1'), node('n3', { category: 'governance' })),
+    ]);
+    const comparison = await compareMitigations('org-4', [
+      { mitigationType: 'cross_training', targetNodeIds: ['n1'], investmentLevel: 'medium', durationWeeks: 10 },
+    ]);
+    expect(comparison.verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 2, verifiedEdgeCount: 0, ratio: 0, fullyVerified: false });
   });
 });

@@ -91,12 +91,15 @@ export interface ContinuitySimulationResult {
    */
   methodologyNote: string;
   /**
-   * How many of this scenario's affected nodes have at least one currently-verified dependency record on file,
-   * out of how many were affected in total. 0 affected-with-verified-evidence does not mean the scenario is
-   * wrong - it means nothing here is independently corroborated yet, which a reader needs to know before citing
-   * this projection as more than a planning exercise.
+   * The part of this scenario's projected spread that is corroborated: each node reached from an affected node through
+   * a chain of currently-verified, correctly-directed dependencies (origin first), with the weakest evidence tier on
+   * that chain. An affected node merely appearing in some verified record corroborates nothing. An empty list does not
+   * mean the scenario is wrong - it means none of its spread is independently corroborated yet.
    */
-  verifiedDependencyContext: { affectedNodesWithVerifiedEvidence: number; totalAffectedNodes: number };
+  verifiedDependencyContext: {
+    verifiedImpacts: Array<{ fromNodeId: string; nodeId: string; chain: string[]; evidenceTier: 'system_resolved_document' | 'human_attested_external' }>;
+    totalAffectedNodes: number;
+  };
   /** Pre-simulation continuity baseline score */
   baselineContinuityScore: number;
   /** Post-simulation continuity score (immediate impact) */

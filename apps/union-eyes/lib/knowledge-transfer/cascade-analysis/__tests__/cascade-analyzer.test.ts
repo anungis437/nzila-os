@@ -4,9 +4,10 @@ const { buildDependencyPropagationMap, listVerifiedDependencies, listActiveNodeA
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
 vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies }));
 vi.mock('../../propagation/node-alias-store', () => ({ listActiveNodeAliases }));
+vi.mock('../../propagation/evidence-document-reference', () => ({ loadEvidenceDocumentIntegrity: async () => new Map() }));
 
 import { analyzeCascadeRisks } from '../cascade-analyzer';
-import { computeSourceFingerprint } from '../../propagation/graph-fingerprint';
+import { currentVerifiedRecord } from '../../propagation/__tests__/verified-record-fixture';
 
 function node(id: string, category: string, sensitivity = 'high') {
   return {
@@ -64,32 +65,94 @@ describe('lib/knowledge-transfer/cascade-analysis/cascade-analyzer', () => {
     expect(result.cascadeRisks.every((r) => r.evidenceBasis === 'exploratory')).toBe(true);
   });
 
-  it('tags a governance node as verified when a currently-verified dependency record names it', async () => {
-    const g1 = node('g1', 'governance', 'critical');
-    const financeSystem = { id: 'finance_system', label: 'Finance System', nodeType: 'system', category: 'operational', frequency: 1, associatedRoles: [], isSingleSource: false, continuitySensitivity: 'low', sensitivityReason: 'r' };
-    buildDependencyPropagationMap.mockResolvedValue({
+  /** g1 (governance, critical) with inferred downstream impact on a1, a2, b1; a1 and a2 are operational areas. */
+  function cascadeMap(extraNodes: ReturnType<typeof area>[] = []) {
+    return {
       organizationId: 'org-1', generatedAt: '2025-01-01',
-      nodes: [g1, financeSystem],
-      edges: [], downstreamImpacts: [], upstreamDependencies: [], couplingAnalysis: [], bottlenecks: [],
+      nodes: [node('g1', 'governance', 'critical'), area('a1'), area('a2'), area('b1'), ...extraNodes],
+      edges: [],
+      downstreamImpacts: [
+        { nodeId: 'g1', directDependents: ['a1', 'a2'], allAffectedNodes: ['a1', 'a2', 'b1'], propagationPaths: [{ chainDepth: 3 } as never], totalExposureScore: 0, governanceExposure: [], vendorDependencyExposure: [], mitigation: { priority: 'high', actions: [] } },
+      ],
+      upstreamDependencies: [], couplingAnalysis: [], bottlenecks: [],
       resilience: { recommendations: [], priorityOrder: [], estimatedEffort: {} },
-    });
+    };
+  }
+  function area(id: string) {
+    return { id, label: `L-${id}`, nodeType: 'process', category: 'operational', frequency: 1, associatedRoles: [], isSingleSource: false, continuitySensitivity: 'low', sensitivityReason: 'r' };
+  }
+
+  it('keeps a governance node exploratory, and confirms no cascade, when a verified record merely involves it or points the wrong way', async () => {
+    buildDependencyPropagationMap.mockResolvedValue(cascadeMap());
+    // g1 depends on a1: a real, current verified record naming g1 - but in the direction opposite to the impact
+    // (a failure of g1 does not reach a1 through "g1 depends on a1").
+    listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(node('g1', 'governance', 'critical'), area('a1'))]);
+    const result = await analyzeCascadeRisks('org-1');
+    expect(result.governanceNodes.find((n) => n.id === 'g1')?.evidenceBasis).toBe('exploratory');
+    const g1Risk = result.cascadeRisks.find((r) => r.governanceNodeId === 'g1')!;
+    expect(g1Risk.evidenceBasis).toBe('exploratory');
+    expect(g1Risk.confirmedImpactedAreas).toEqual([]);
+    expect(g1Risk.severityBasis).toBe('exploratory');
+    expect(result.confirmedCascadeRisks).toEqual([]);
+    // The inferred cascade is still reported in full, as a hypothesis.
+    expect(result.exploratoryCascadeHypotheses.find((r) => r.governanceNodeId === 'g1')?.impactedAreas).toEqual(['a1', 'a2', 'b1']);
+  });
+
+  it('does not confirm a cascade from a verified record between two OTHER nodes in the cascade', async () => {
+    buildDependencyPropagationMap.mockResolvedValue(cascadeMap());
+    // b1 depends on a1 is verified, but nothing verified connects a1 to g1: no chain from the governance node exists.
+    listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(area('b1'), area('a1'))]);
+    const result = await analyzeCascadeRisks('org-1');
+    expect(result.cascadeRisks.find((r) => r.governanceNodeId === 'g1')?.confirmedImpactedAreas).toEqual([]);
+    expect(result.confirmedCascadeRisks).toEqual([]);
+  });
+
+  it('confirms only the areas reached through a fully verified chain in the impact direction; severity stays exploratory', async () => {
+    buildDependencyPropagationMap.mockResolvedValue(cascadeMap());
+    const g1 = node('g1', 'governance', 'critical');
+    // a1 depends on g1, b1 depends on a1: g1 -> a1 -> b1 is a fully verified impact chain. a2 has no verified edge.
+    listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(area('a1'), g1), currentVerifiedRecord(area('b1'), area('a1'))]);
+    const result = await analyzeCascadeRisks('org-1');
+
+    // Node properties are never confirmed by dependency evidence.
+    expect(result.governanceNodes.find((n) => n.id === 'g1')?.evidenceBasis).toBe('exploratory');
+    const g1Risk = result.cascadeRisks.find((r) => r.governanceNodeId === 'g1')!;
+    expect(g1Risk.evidenceBasis).toBe('verified');
+    expect(g1Risk.impactedAreas).toEqual(['a1', 'a2', 'b1']);
+    expect(g1Risk.confirmedImpactedAreas.map((a) => [a.nodeId, a.chain, a.evidenceTier])).toEqual([
+      ['a1', ['g1', 'a1'], 'human_attested_external'],
+      ['b1', ['g1', 'a1', 'b1'], 'human_attested_external'],
+    ]);
+    expect(g1Risk.confirmedImpactedAreas.find((a) => a.nodeId === 'b1')?.verifiedBy.map((e) => e.record.id)).toEqual(['vd-a1-g1', 'vd-b1-a1']);
+
+    // The confirmed view holds ONLY the confirmed areas, depth from the longest confirmed chain, severity still a hypothesis.
+    expect(result.confirmedCascadeRisks).toHaveLength(1);
+    const confirmed = result.confirmedCascadeRisks[0];
+    expect(confirmed.impactedAreas).toEqual(['a1', 'b1']);
+    expect(confirmed.impactedAreas).not.toContain('a2');
+    expect(confirmed.cascadeDepth).toBe(3);
+    expect(confirmed.severity).toBe('critical');
+    expect(confirmed.severityBasis).toBe('exploratory');
+
+    // The unconfirmed remainder stays available as a hypothesis.
+    const hypothesis = result.exploratoryCascadeHypotheses.find((r) => r.governanceNodeId === 'g1')!;
+    expect(hypothesis.impactedAreas).toEqual(['a2']);
+    expect(hypothesis.evidenceBasis).toBe('exploratory');
+    expect(hypothesis.confirmedImpactedAreas).toEqual([]);
+  });
+
+  it('does not confirm an area past a broken link, nor through a verified record that is no longer current', async () => {
+    buildDependencyPropagationMap.mockResolvedValue(cascadeMap());
+    const g1 = node('g1', 'governance', 'critical');
     listVerifiedDependencies.mockResolvedValue([
-      {
-        id: 'vd1', organizationId: 'org-1', dependentNodeId: 'g1', dependsOnNodeId: 'finance_system',
-        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
-        evidenceReferenceType: 'external_citation', evidenceDocumentId: null,
-        sourceFingerprint: computeSourceFingerprint(g1, financeSystem),
-        status: 'verified',
-        submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
-        createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
-      },
+      // a1 depends on g1, but it was verified while a1 was classified 'governance': stale, so the chain starts nowhere.
+      currentVerifiedRecord({ ...area('a1'), category: 'governance' }, g1),
+      // b1 depends on a1 is current - but without a current g1 -> a1 link it is unreachable from g1.
+      currentVerifiedRecord(area('b1'), area('a1')),
     ]);
     const result = await analyzeCascadeRisks('org-1');
-    expect(result.governanceNodes.find((n) => n.id === 'g1')?.evidenceBasis).toBe('verified');
-    // DEF-0B7 Family 1 exit (C): an evidenceBasis tag alone is not sufficient - a caller claiming a confirmed risk
-    // must use the pre-filtered confirmedCascadeRisks, never cascadeRisks filtered by tag itself.
-    expect(result.confirmedCascadeRisks.map((r) => r.governanceGap)).toEqual(['L-g1']);
-    expect(result.exploratoryCascadeHypotheses).toEqual([]);
+    expect(result.cascadeRisks.find((r) => r.governanceNodeId === 'g1')?.confirmedImpactedAreas).toEqual([]);
+    expect(result.confirmedCascadeRisks).toEqual([]);
   });
 
   it('handles orgs with no governance nodes', async () => {

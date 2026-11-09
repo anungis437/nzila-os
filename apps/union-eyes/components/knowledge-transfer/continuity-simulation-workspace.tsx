@@ -397,7 +397,7 @@ export function ContinuitySimulationWorkspace() {
                   ))}
                 </ul>
                 <p className="mt-1">
-                  {mitigationData.verifiedEvidenceCoverage.nodesWithVerifiedEvidence} of {mitigationData.verifiedEvidenceCoverage.totalNodes} underlying knowledge nodes have a currently-verified dependency record on file; the rest are exploratory signal only.
+                  {mitigationData.verifiedEvidenceCoverage.verifiedEdgeCount} of {mitigationData.verifiedEvidenceCoverage.exploratoryEdgeCount} inferred dependencies are currently verified in their stated direction; every other dependency, and every node-level figure, is exploratory signal only.
                 </p>
               </details>
             </div>

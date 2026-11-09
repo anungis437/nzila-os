@@ -21,7 +21,7 @@ vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({
 }));
 
 import { executeGraphQuery } from '../graph-reasoner';
-import { computeSourceFingerprint } from '@/lib/knowledge-transfer/propagation/graph-fingerprint';
+import { currentVerifiedRecord } from '@/lib/knowledge-transfer/propagation/__tests__/verified-record-fixture';
 
 function richMap() {
   return {
@@ -233,30 +233,77 @@ describe('executeGraphQuery', () => {
     expect(manyBottlenecks.evidenceCoverageScore).toBe(sparse.evidenceCoverageScore);
   });
 
-  it('tags every finding exploratory with no verified evidence, and verified when a record names its subject node id', async () => {
+  function richNode(id: string) {
+    return richMap().nodes.find((n) => n.id === id)!;
+  }
+  /** A current verified record: `dependent` depends on `dependsOn`, fingerprinted over richMap()'s nodes. */
+  function verified(dependent: string, dependsOn: string) {
+    return currentVerifiedRecord(richNode(dependent), richNode(dependsOn));
+  }
+
+  it('tags every node finding exploratory, even when a current verified record names its node', async () => {
     mocks.listVerifiedDependencies.mockResolvedValue([]);
     const exploratoryOnly = await executeGraphQuery('org-1', q('isolated_knowledge'));
     expect(exploratoryOnly.findings.length).toBeGreaterThan(0);
     expect(exploratoryOnly.findings.every((f) => f.evidenceBasis === 'exploratory')).toBe(true);
+    expect(exploratoryOnly.confirmedFindings).toEqual([]);
 
-    const { nodes } = richMap();
-    const govSole = nodes.find((n) => n.id === 'gov_sole')!;
-    const complianceX = nodes.find((n) => n.id === 'compliance_x')!;
-    mocks.listVerifiedDependencies.mockResolvedValue([
-      {
-        id: 'vd1', organizationId: 'org-1', dependentNodeId: 'gov_sole', dependsOnNodeId: 'compliance_x',
-        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
-        evidenceReferenceType: 'external_citation', evidenceDocumentId: null,
-        sourceFingerprint: computeSourceFingerprint(govSole, complianceX),
-        status: 'verified',
-        submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
-        createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
+    // gov_sole participates in a current verified dependency (in both directions). A node finding about gov_sole
+    // asserts no directed dependency, so the record confirms nothing about it.
+    mocks.listVerifiedDependencies.mockResolvedValue([verified('compliance_x', 'gov_sole'), verified('gov_sole', 'vendor_a')]);
     const withVerified = await executeGraphQuery('org-1', q('isolated_knowledge'));
-    expect(withVerified.findings.find((f) => f.entityId === 'gov_sole')?.evidenceBasis).toBe('verified');
-    // DEF-0B7 Family 1 exit (C): an evidenceBasis tag alone is not sufficient - a caller claiming a confirmed
-    // finding must use the pre-filtered confirmedFindings, never findings filtered by tag itself.
-    expect(withVerified.confirmedFindings.map((f) => f.entityId)).toEqual(['gov_sole']);
+    const govFinding = withVerified.findings.find((f) => f.entityId === 'gov_sole');
+    expect(govFinding).toBeDefined();
+    expect(govFinding?.evidenceBasis).toBe('exploratory');
+    expect(govFinding).not.toHaveProperty('verifiedBy');
+    expect(withVerified.findings.every((f) => f.evidenceBasis === 'exploratory')).toBe(true);
+    expect(withVerified.confirmedFindings).toEqual([]);
+  });
+
+  it('confirms a propagation_paths finding only when every edge of its chain is verified in the impact direction', async () => {
+    // Paths: gov_sole -> compliance_x (2 nodes), and gov_sole -> compliance_x -> system_b -> common_c (4 nodes).
+    // Only the first edge is verified: compliance_x depends on gov_sole.
+    mocks.listVerifiedDependencies.mockResolvedValue([verified('compliance_x', 'gov_sole')]);
+    const result = await executeGraphQuery('org-1', q('propagation_paths'));
+    const short = result.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x')!;
+    const long = result.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x_system_b_common_c')!;
+    expect(short.evidenceBasis).toBe('verified');
+    expect(short.verifiedBy?.map((e) => e.record.id)).toEqual(['vd-compliance_x-gov_sole']);
+    expect(short.verifiedBy?.[0].evidenceTier).toBe('human_attested_external');
+    // Partially verified chain stays a hypothesis.
+    expect(long.evidenceBasis).toBe('exploratory');
+    expect(long).not.toHaveProperty('verifiedBy');
+    expect(result.confirmedFindings.map((f) => f.entityId)).toEqual(['path_gov_sole_compliance_x']);
+
+    // Verify the rest of the long chain: now it is confirmed too, with every edge's record in chain order.
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      verified('compliance_x', 'gov_sole'),
+      verified('system_b', 'compliance_x'),
+      verified('common_c', 'system_b'),
+    ]);
+    const full = await executeGraphQuery('org-1', q('propagation_paths'));
+    const fullLong = full.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x_system_b_common_c')!;
+    expect(fullLong.evidenceBasis).toBe('verified');
+    expect(fullLong.verifiedBy?.map((e) => e.record.id)).toEqual(['vd-compliance_x-gov_sole', 'vd-system_b-compliance_x', 'vd-common_c-system_b']);
+  });
+
+  it('keeps a propagation_paths finding exploratory when its edge is verified only in the reverse direction', async () => {
+    // gov_sole depends on compliance_x is verified - the reverse of the chain's claim (compliance_x depends on gov_sole).
+    mocks.listVerifiedDependencies.mockResolvedValue([verified('gov_sole', 'compliance_x')]);
+    const result = await executeGraphQuery('org-1', q('propagation_paths'));
+    const short = result.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x')!;
+    expect(short.evidenceBasis).toBe('exploratory');
+    expect(short).not.toHaveProperty('verifiedBy');
+    expect(result.confirmedFindings).toEqual([]);
+  });
+
+  it('keeps a propagation_paths finding exploratory when its verified record is no longer current', async () => {
+    // Verified while compliance_x was classified 'operational'; it is 'compliance' now, so the fingerprint is stale.
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      currentVerifiedRecord({ ...richNode('compliance_x'), category: 'operational' }, richNode('gov_sole')),
+    ]);
+    const result = await executeGraphQuery('org-1', q('propagation_paths'));
+    expect(result.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x')?.evidenceBasis).toBe('exploratory');
+    expect(result.confirmedFindings).toEqual([]);
   });
 });

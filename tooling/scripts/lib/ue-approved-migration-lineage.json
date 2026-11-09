@@ -923,6 +923,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-gate0-final-convergence",
         "note": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE (Family 1 exit, round 5): adds source_fingerprint, evidence_reference_type and evidence_document_id to ue_verified_dependency_evidence (read-time currentness and evidence-reference resolution, fail-closed, no background job, full review history preserved) and a new ue_graph_node_alias table (durable, explicitly-authorized, supersede-not-delete identity/alias mapping beyond cosmetic-drift canonicalization). RLS is scoped (cache) 0060."
+      },
+      {
+        "tag": "0087_verified_dependency_evidence_binding",
+        "sha256": "e97359df7c1cbcc7d0644ab11d9d2b47ef2ccac43aea57d8cfe092c11db4a977",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE (Family 1 final correction): adds evidence_document_integrity (document evidence bound to exact version/content hash), external_attestation/external_attested_by/external_attested_at (all-or-none, external citations only, attester distinct from submitter) and identity_key_version (smallint, default 1, CHECK 1|2) to ue_verified_dependency_evidence. Read-time, fail-closed enforcement in graph-evidence-evaluator.ts; no background job; review history preserved. RLS unchanged (cache 0059 covers the table)."
       }
     ]
   }

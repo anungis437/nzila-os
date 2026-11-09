@@ -8,7 +8,7 @@
 import type { GraphQuery, QueryResult, QueryFinding } from './query-models';
 import type { PropagationMap } from '../propagation/propagation-models';
 import { evidenceCoverageScoreFromSampleSize } from '../governance/evidence-basis';
-import { loadGraphEvidence, evidenceBasisForNode } from '../propagation/graph-evidence-service';
+import { loadGraphEvidence, assessDependencyClaim, impactChainEdges } from '../propagation/graph-evidence-service';
 
 type QueryResponse = {
   findings: QueryFinding[];
@@ -58,11 +58,16 @@ export async function executeGraphQuery(orgId: string, query: GraphQuery): Promi
   }
 
   const evidenceCoverageScore = calculateEvidenceCoverageScore(propagationMap);
-  // Every finding is tagged with its evidence basis here, in one place, rather than each of the nine query
-  // functions above computing it separately - a finding whose subject node id does not resolve to a specific
-  // verified node safely defaults to 'exploratory' (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-
-  // INFERRED-FROM-TAG-CO-OCCURRENCE).
-  const taggedFindings = findings.map((finding) => ({ ...finding, evidenceBasis: evidenceBasisForNode(evidence, finding.entityId) }));
+  // Every finding is tagged here, in one place. Only a finding that asserts a directed dependency chain can be
+  // confirmed, and only when every edge of that chain is currently verified in that direction; a finding about a
+  // node is always exploratory (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE).
+  const taggedFindings: QueryResult['findings'] = findings.map((finding) => {
+    if (!finding.dependencyChain || finding.dependencyChain.length < 2) return { ...finding, evidenceBasis: 'exploratory' as const };
+    const assessment = assessDependencyClaim(evidence, { kind: 'dependency_chain', edges: impactChainEdges(finding.dependencyChain) });
+    return assessment.status === 'confirmed'
+      ? { ...finding, evidenceBasis: 'verified' as const, verifiedBy: assessment.verifiedBy }
+      : { ...finding, evidenceBasis: 'exploratory' as const };
+  });
 
   return {
     organizationId: orgId,
@@ -324,6 +329,7 @@ function queryPropagationPaths(
 
   const findings: QueryFinding[] = allPaths.slice(0, 10).map((path) => ({
     entityId: `path_${path.chainPath.join('_')}`,
+    dependencyChain: path.chainPath,
     label: `Propagation chain (${path.chainDepth} steps, impact: ${path.disruptionScope})`,
     entityType: 'path',
     significance: `If first node fails, failure cascades through ${path.chainDepth} intermediate steps to affect: ${path.affectedRoles.join(', ')}`,
