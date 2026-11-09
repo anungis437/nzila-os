@@ -748,6 +748,7 @@ class SurveyResponses(BaseModel):
 
     organization_id = models.UUIDField()
     survey_id = models.UUIDField()
+    questionnaire_version_id = models.UUIDField()
     user_id = models.TextField(null=True, blank=True)
     respondent_email = models.CharField(max_length=255, null=True, blank=True)
     respondent_name = models.CharField(max_length=255, null=True, blank=True)
@@ -827,6 +828,9 @@ class MemberLocationConsent(BaseModel):
     """Migrated from drizzle: geofence.ts"""
 
     user_id = models.CharField(max_length=255, blank=True)
+    organization_id = models.UUIDField(null=True, blank=True)
+    scope_kind = models.CharField(max_length=16, null=True, blank=True)
+    scope_id = models.UUIDField(null=True, blank=True)
     consent_status = models.CharField(max_length=20, default='never_asked')
     opted_in_at = models.DateTimeField(null=True, blank=True)
     opted_out_at = models.DateTimeField(null=True, blank=True)
@@ -2055,6 +2059,7 @@ class Employers(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
     organization_id = models.UUIDField()
+    demo_seed_id = models.UUIDField(null=True, blank=True, editable=False)
     name = models.CharField(max_length=255)
     legal_name = models.CharField(max_length=255, null=True, blank=True)
     dba_name = models.CharField(max_length=255, null=True, blank=True)

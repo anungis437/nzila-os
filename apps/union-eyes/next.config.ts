@@ -393,6 +393,15 @@ const nextConfig: NextConfig = {
       immutable: require.resolve('immutable/dist/immutable.js'),
       'js-yaml': require.resolve('js-yaml'),
     };
+    // Workspace packages use NodeNext's explicit `.js` specifiers while their
+    // development exports point at TypeScript source. Resolve those specifiers
+    // to source during the application build; emitted JavaScript still keeps
+    // the standards-compliant `.js` form.
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      '.js': ['.ts', '.tsx', '.js'],
+      '.mjs': ['.mts', '.mjs'],
+    };
 
     // Reduce memory usage
     config.infrastructureLogging = {

@@ -925,11 +925,11 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
       'components/dues/dues-payment-portal.tsx — reflects the member ledger only: it renders no payment form and no payment-method manager (both components were removed with the unmounted UI)',
       'app/api/dues/autopay/route.ts — confirmed does not exist (404)',
       'app/api/dues/payment-methods/[id]/route.ts (DELETE) and .../set-default/route.ts (POST) — confirmed do not exist (404)',
-      'Settlement now exists and is proven (lib/dues/dues-settlement.ts, verified Stripe webhook, idempotent, audited) but member dues collection is NOT initial launch scope: the initiation routes answer 501 unless UE_MEMBER_DUES_PAYMENTS=1 (lib/dues/member-dues-flag.ts)',
+      'Settlement now exists and is proven (lib/dues/dues-settlement.ts, verified Stripe webhook, idempotent, audited) but member dues collection is NOT initial launch scope: the initiation routes answer 501, and UE_MEMBER_DUES_PAYMENTS=1 no longer switches them on: no source names the merchant account or records the member consent to disclose the organization and member ids to the processor (lib/dues/member-dues-flag.ts)',
     ],
     targetWave: 0,
     notes:
-      'DISABLED, DORMANT. Owner decision (closed): dues are handled in an external system and Union Eyes reflects data at best, so member dues collection is not to be enabled and no member payment UI is to be built. The server-owned initiation (create-payment-intent, portal/dues/pay) and the verified-webhook settlement into member_dues_ledger remain implemented and off by default (UE_MEMBER_DUES_PAYMENTS unset).',
+      'DISABLED, DORMANT. Owner decision (closed): dues are handled in an external system and Union Eyes reflects data at best, so member dues collection is not to be enabled and no member payment UI is to be built. The server-owned initiation (create-payment-intent, portal/dues/pay) and the verified-webhook settlement into member_dues_ledger remain implemented and off; no deployment flag switches initiation on.',
   },
 
   // ------------------------------------------------------------------------

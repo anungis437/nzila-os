@@ -24,9 +24,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 /* ── hoisted mocks ──────────────────────────────────────────────────── */
 
-const { mockGetCurrentUser, mockIsPlatformAdminUser, mockDbSelect, mockDbUpdate, mockPersistAtomicAudit, mockTx } = vi.hoisted(() => ({
+const { mockGetCurrentUser, mockIsPlatformAdminUser, mockRequirePlatformStaffAuthority, mockDbSelect, mockDbUpdate, mockPersistAtomicAudit, mockTx } = vi.hoisted(() => ({
   mockGetCurrentUser: vi.fn(),
   mockIsPlatformAdminUser: vi.fn(),
+  mockRequirePlatformStaffAuthority: vi.fn(),
   mockDbSelect: vi.fn(),
   mockDbUpdate: vi.fn(),
   mockPersistAtomicAudit: vi.fn(),
@@ -67,6 +68,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mockPersistAtomicAudit }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: mockRequirePlatformStaffAuthority }));
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
@@ -194,6 +196,10 @@ describe('pilot-ownership', () => {
     lockCalls = [];
     mockPersistAtomicAudit.mockResolvedValue(undefined);
     mockIsPlatformAdminUser.mockImplementation(async (userId: string) => PLATFORM_STAFF_IDS.has(userId));
+    mockRequirePlatformStaffAuthority.mockImplementation(async ({ userId }: { userId: string }) => {
+      if (!PLATFORM_STAFF_IDS.has(userId)) throw new Error('Platform staff authority required');
+      return { authorityId: 'pilot-platform-authority' };
+    });
   });
 
   describe('getPilotClaimedOrganizationId', () => {
@@ -239,13 +245,16 @@ describe('pilot-ownership', () => {
       mockGetCurrentUser.mockResolvedValue(platformStaff);
       const decision = await authorizePilotAccess(ORG_B);
       expect(decision).toMatchObject({ ok: true, reason: 'platform' });
-      expect(mockIsPlatformAdminUser).toHaveBeenCalledWith(platformStaff.id);
+      expect(mockRequirePlatformStaffAuthority).toHaveBeenCalledWith(
+        { userId: platformStaff.id, organizationId: ORG_A },
+        'platform.pilot.manage',
+      );
     });
 
-    it('4b. an app_owner holding the platform-staff authority is allowed across orgs even with no org context', async () => {
+    it('4b. an app_owner without an acting organization is denied even if their identity is platform staff', async () => {
       mockGetCurrentUser.mockResolvedValue(appOwner);
       const decision = await authorizePilotAccess(ORG_B);
-      expect(decision).toMatchObject({ ok: true, reason: 'platform' });
+      expect(decision).toEqual({ ok: false, status: 403, reason: 'actor-missing-org-context' });
     });
 
     it.each([
@@ -260,7 +269,7 @@ describe('pilot-ownership', () => {
 
     it('4e. an app_owner title whose platform-staff authority is not confirmed is denied across orgs', async () => {
       mockGetCurrentUser.mockResolvedValue(appOwner);
-      mockIsPlatformAdminUser.mockResolvedValue(false);
+      mockRequirePlatformStaffAuthority.mockRejectedValue(new Error('Platform staff authority required'));
       const decision = await authorizePilotAccess(ORG_B);
       expect(decision).toEqual({ ok: false, status: 403, reason: 'actor-missing-org-context' });
     });

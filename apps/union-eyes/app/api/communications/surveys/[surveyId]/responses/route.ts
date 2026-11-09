@@ -8,8 +8,9 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { issueResponseCapability } from '@/lib/communications/survey-response-capability';
 import { db } from '@/db/db';
-import { surveys, surveyResponses } from '@/db/schema';
-import { and, eq, count } from 'drizzle-orm';
+import { surveys, surveyResponses, surveyQuestions, surveyQuestionnaireVersions, surveyAnonymousParticipations, type SurveyQuestionSnapshot } from '@/db/schema';
+import { and, asc, count, desc, eq, sql } from 'drizzle-orm';
+import { anonymousParticipationDigest, questionnaireDigest } from '@/lib/communications/survey-questionnaire';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,7 @@ export const POST = withApi(
         .select({
           id: surveys.id,
           allowAnonymous: surveys.allowAnonymous,
+          allowMultipleResponses: surveys.allowMultipleResponses,
           status: surveys.status,
           publishedAt: surveys.publishedAt,
           closesAt: surveys.closesAt,
@@ -53,6 +55,49 @@ export const POST = withApi(
         throw ApiError.forbidden('Survey is not open');
       }
 
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${survey.id}::text))`);
+      const questions = await tx
+        .select({
+          id: surveyQuestions.id,
+          questionText: surveyQuestions.questionText,
+          questionType: surveyQuestions.questionType,
+          description: surveyQuestions.description,
+          orderIndex: surveyQuestions.orderIndex,
+          section: surveyQuestions.section,
+          required: surveyQuestions.required,
+          choices: surveyQuestions.choices,
+          allowOther: surveyQuestions.allowOther,
+          minChoices: surveyQuestions.minChoices,
+          maxChoices: surveyQuestions.maxChoices,
+          ratingMin: surveyQuestions.ratingMin,
+          ratingMax: surveyQuestions.ratingMax,
+          minLength: surveyQuestions.minLength,
+          maxLength: surveyQuestions.maxLength,
+          placeholder: surveyQuestions.placeholder,
+          showIf: surveyQuestions.showIf,
+        })
+        .from(surveyQuestions)
+        .where(and(eq(surveyQuestions.surveyId, survey.id), eq(surveyQuestions.organizationId, organizationId)))
+        .orderBy(asc(surveyQuestions.orderIndex), asc(surveyQuestions.id)) as SurveyQuestionSnapshot[];
+      if (questions.length === 0) throw ApiError.conflict('Survey has no published questionnaire');
+      const contentDigest = questionnaireDigest(questions);
+      let [questionnaireVersion] = await tx.select().from(surveyQuestionnaireVersions).where(and(eq(surveyQuestionnaireVersions.surveyId, survey.id), eq(surveyQuestionnaireVersions.contentDigest, contentDigest))).limit(1);
+      if (!questionnaireVersion) {
+        const [latest] = await tx.select({ version: surveyQuestionnaireVersions.version }).from(surveyQuestionnaireVersions).where(eq(surveyQuestionnaireVersions.surveyId, survey.id)).orderBy(desc(surveyQuestionnaireVersions.version)).limit(1);
+        [questionnaireVersion] = await tx.insert(surveyQuestionnaireVersions).values({ organizationId, surveyId: survey.id, version: (latest?.version ?? 0) + 1, contentDigest, questions }).returning();
+      }
+
+      if (survey.allowAnonymous && !survey.allowMultipleResponses) {
+        const principalDigest = anonymousParticipationDigest(survey.id, userId);
+        if (!principalDigest) throw ApiError.capabilityUnavailable('Anonymous single-response surveys require the participation HMAC key');
+        const [participation] = await tx.insert(surveyAnonymousParticipations).values({ organizationId, surveyId: survey.id, principalDigest }).onConflictDoNothing().returning({ id: surveyAnonymousParticipations.id });
+        if (!participation) throw ApiError.conflict('An anonymous response has already been opened for this survey');
+      }
+      if (!survey.allowAnonymous && !survey.allowMultipleResponses) {
+        const [existing] = await tx.select({ id: surveyResponses.id }).from(surveyResponses).where(and(eq(surveyResponses.surveyId, survey.id), eq(surveyResponses.organizationId, organizationId), eq(surveyResponses.userId, userId))).limit(1);
+        if (existing) throw ApiError.conflict('A response has already been opened for this survey');
+      }
+
       const capability = survey.allowAnonymous ? issueResponseCapability() : null;
 
       const [created] = await tx
@@ -60,6 +105,7 @@ export const POST = withApi(
         .values({
           organizationId,
           surveyId: survey.id,
+          questionnaireVersionId: questionnaireVersion.id,
           userId: survey.allowAnonymous ? null : userId,
           responseTokenHash: capability?.tokenHash ?? null,
           respondentName: null,
@@ -86,6 +132,7 @@ export const POST = withApi(
         surveyId: created.surveyId,
         status: created.status,
         startedAt: created.startedAt,
+        questionnaireVersion: { id: questionnaireVersion.id, version: questionnaireVersion.version, contentDigest, questions },
         ...(capability ? { responseToken: capability.token } : {}),
       };
     });

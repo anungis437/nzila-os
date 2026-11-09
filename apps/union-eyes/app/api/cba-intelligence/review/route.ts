@@ -1,6 +1,6 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { withRLSContext } from "@/lib/db/with-rls-context";
-import { requireSystemAdmin } from "@/lib/api-auth-guard";
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
   getReviewQueue,
@@ -41,8 +41,8 @@ export const GET = withApi(
       summary: "Get review queue with pending items",
     },
   },
-  async ({ query }) => {
-    await requireSystemAdmin();
+  async ({ query, userId, organizationId }) => {
+    await requirePlatformStaffAuthority({ userId, organizationId }, 'platform.cba_dataset.curate');
     if (query.counts) {
       return getReviewQueueCounts();
     }
@@ -77,7 +77,7 @@ export const POST = withApi(
   },
   async ({ body, userId, organizationId }) => {
     if (!userId) throw ApiError.unauthorized("User context required");
-    await requireSystemAdmin();
+    await requirePlatformStaffAuthority({ userId, organizationId }, 'platform.cba_dataset.curate');
     if (!organizationId) throw ApiError.badRequest("Organization context required");
 
     // The decision, the status it sets on its target and the audit record commit together.

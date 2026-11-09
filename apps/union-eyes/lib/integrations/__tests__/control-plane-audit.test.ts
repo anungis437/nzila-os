@@ -9,6 +9,9 @@ const m = vi.hoisted(() => {
     persistAtomicAudit: vi.fn(),
     executeSync: vi.fn(),
     clearCache: vi.fn(),
+    rotateCredential: vi.fn(),
+    credentialReadiness: vi.fn(),
+    refuseUnavailableActivation: vi.fn(),
     order: [] as string[],
   };
   const chain = (rows: () => unknown[], op: string) => {
@@ -41,6 +44,7 @@ const tx = m.tx;
 vi.mock('@/db/db', () => ({ db: m.tx }));
 vi.mock('@/db/schema', () => ({
   integrationConfigs: { id: 'id', organizationId: 'organizationId', provider: 'provider', enabled: 'enabled' },
+  integrationConfigVersions: { id: 'versionId' },
   integrationProviderEnum: { enumValues: [] },
   integrationTypeEnum: { enumValues: [] },
 }));
@@ -68,6 +72,12 @@ vi.mock('@/lib/integrations/provider-policy', () => ({
   findDisallowedSettingsKeys: () => [],
   findUnapprovedEntities: () => [],
 }));
+vi.mock('@/lib/integrations/credential-store', () => ({
+  rotateIntegrationCredentialBinding: m.rotateCredential,
+  integrationCredentialReadiness: m.credentialReadiness,
+}));
+vi.mock('@/lib/reality/activation-guard', () => ({ refuseUnavailableActivation: m.refuseUnavailableActivation }));
+vi.mock('@/lib/reality/configuration-effect', () => ({ INTEGRATION_SYNC_EFFECT: { inEffect: false } }));
 
 import { IntegrationProvider, IntegrationType, SyncType } from '@/lib/integrations/types';
 import {
@@ -88,12 +98,15 @@ describe('integration control plane — audit', () => {
     m.order = [];
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.executeSync.mockResolvedValue({ success: true });
+    m.rotateCredential.mockResolvedValue({ id: 'binding_1', version: 1 });
+    m.credentialReadiness.mockResolvedValue({ stored: true, resolvable: true });
+    m.refuseUnavailableActivation.mockRejectedValue(Object.assign(new Error('Integration synchronization is unavailable'), { code: 'CAPABILITY_UNAVAILABLE' }));
   });
 
   it('configure audits the creation on the same transaction without echoing settings or credentials', async () => {
     await configureIntegrationForOrg(
       'org_1',
-      { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, settings: { region: 'ca' }, credentialRef: 'vault/secret-1' },
+      { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, settings: { region: 'ca' }, credentialRef: 'env://UE_INTEGRATION_BAMBOOHR' },
       'steward_1',
     );
 
@@ -106,25 +119,26 @@ describe('integration control plane — audit', () => {
         details: expect.objectContaining({ settingsKeys: ['region'], credentialRefChanged: true }),
       }),
     );
-    expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('vault/secret-1');
+    expect(JSON.stringify(m.persistAtomicAudit.mock.calls)).not.toContain('UE_INTEGRATION_BAMBOOHR');
   });
 
-  it('never reports credentials as stored or resolvable: only a reference is held and nothing resolves it', async () => {
+  it('reports managed credential readiness without returning the secret or its reference', async () => {
     const config = await configureIntegrationForOrg(
       'org_1',
-      { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, settings: { region: 'ca' }, credentialRef: 'vault://x' },
+      { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, settings: { region: 'ca' }, credentialRef: 'env://UE_INTEGRATION_BAMBOOHR' },
       'u1',
     );
-    expect(config.credentialsStored).toBe(false);
-    expect(config.credentialsResolvable).toBe(false);
+    expect(config.credentialsStored).toBe(true);
+    expect(config.credentialsResolvable).toBe(true);
+    expect(JSON.stringify(config)).not.toContain('UE_INTEGRATION_BAMBOOHR');
   });
 
-  const existing = { ...config, enabled: true, settings: { region: 'ca' }, webhookUrl: 'https://hooks.example/x', credentials: { credentialRef: 'vault/old' } };
+  const existing = { ...config, activeVersion: 1, enabled: true, settings: { region: 'ca' }, webhookUrl: 'https://hooks.example/x', credentials: { bindingId: 'binding_old', version: 1 } };
 
   it('changing only the credential reference leaves enabled, settings and webhook URL as they were', async () => {
     m.existing = [existing];
-    await configureIntegrationForOrg('org_1', { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, credentialRef: 'vault/new' }, 'steward_1');
-    expect(Object.keys(m.sets[0]).sort()).toEqual(['credentials', 'updatedAt']);
+    await configureIntegrationForOrg('org_1', { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, credentialRef: 'env://UE_INTEGRATION_BAMBOOHR_NEXT' }, 'steward_1');
+    expect(Object.keys(m.sets[0]).sort()).toEqual(['activeVersion', 'credentials', 'updatedAt']);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(tx, expect.objectContaining({
       details: expect.objectContaining({ settingsChanged: false, webhookUrlChanged: false, credentialRefChanged: true, previouslyEnabled: true }),
     }));
@@ -140,7 +154,7 @@ describe('integration control plane — audit', () => {
     m.existing = [existing];
     m.updateRows = [];
     await expect(
-      configureIntegrationForOrg('org_1', { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, enabled: true }, 'steward_1'),
+      configureIntegrationForOrg('org_1', { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, enabled: false }, 'steward_1'),
     ).rejects.toMatchObject({ code: 'CONFLICT' });
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.clearCache).not.toHaveBeenCalled();
@@ -151,7 +165,7 @@ describe('integration control plane — audit', () => {
   it('configure clears the cached adapter instance for this organization and provider after a successful save', async () => {
     await configureIntegrationForOrg(
       'org_1',
-      { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, settings: { region: 'ca' }, credentialRef: 'vault/secret-1' },
+      { provider: IntegrationProvider.BAMBOOHR, type: IntegrationType.HRIS, settings: { region: 'ca' }, credentialRef: 'env://UE_INTEGRATION_BAMBOOHR' },
       'steward_1',
     );
     expect(m.clearCache).toHaveBeenCalledWith('org_1', IntegrationProvider.BAMBOOHR);
@@ -165,30 +179,34 @@ describe('integration control plane — audit', () => {
     ).rejects.toThrow('audit unavailable');
   });
 
-  it('activation audits the change with the previous state and refuses (409, no audit) when the integration changed concurrently', async () => {
-    m.existing = [config];
-    await setIntegrationActivationForOrg('org_1', 'cfg_1', true, 'steward_1');
+  it('activation is refused before a write, while deactivation remains audited', async () => {
+    m.existing = [{ ...config, enabled: true }];
+    await expect(setIntegrationActivationForOrg('org_1', 'cfg_1', true, 'steward_1')).rejects.toMatchObject({ code: 'CAPABILITY_UNAVAILABLE' });
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.clearCache).not.toHaveBeenCalled();
+
+    await setIntegrationActivationForOrg('org_1', 'cfg_1', false, 'steward_1');
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       tx,
-      expect.objectContaining({ action: 'integration.activate', resourceId: 'cfg_1', details: expect.objectContaining({ previouslyEnabled: false }) }),
+      expect.objectContaining({ action: 'integration.deactivate', resourceId: 'cfg_1', details: expect.objectContaining({ previouslyEnabled: true }) }),
     );
     expect(m.clearCache).toHaveBeenCalledWith('org_1', 'bamboohr');
 
     m.persistAtomicAudit.mockClear();
     m.clearCache.mockClear();
     m.updateRows = [];
-    await expect(setIntegrationActivationForOrg('org_1', 'cfg_1', true, 'steward_1')).rejects.toMatchObject({ code: 'CONFLICT' });
+    await expect(setIntegrationActivationForOrg('org_1', 'cfg_1', false, 'steward_1')).rejects.toMatchObject({ code: 'CONFLICT' });
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.clearCache).not.toHaveBeenCalled();
   });
 
   it('activation treats another organization\u2019s integration as not found, with no audit', async () => {
     m.existing = [];
-    await expect(setIntegrationActivationForOrg('org_1', 'cfg_other', true, 'steward_1')).rejects.toThrow('not found');
+    await expect(setIntegrationActivationForOrg('org_1', 'cfg_other', false, 'steward_1')).rejects.toThrow('not found');
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
-  it('sync records its intent before it runs and its outcome after, and does not run if the intent cannot be recorded', async () => {
+  it('sync is refused before configuration, audit-intent or adapter execution', async () => {
     m.existing = [{ ...config, enabled: true }];
     m.executeSync.mockImplementationOnce(async () => {
       m.order.push('sync');
@@ -198,17 +216,11 @@ describe('integration control plane — audit', () => {
       m.order.push(entry.action);
     });
 
-    await initiateTenantIntegrationSync('org_1', 'steward_1', { integrationId: 'cfg_1', syncType: SyncType.INCREMENTAL });
-
-    expect(m.order.filter((step) => step === 'integration.sync.requested' || step === 'sync' || step === 'integration.sync.completed'))
-      .toEqual(['integration.sync.requested', 'sync', 'integration.sync.completed']);
-
-    m.executeSync.mockClear();
-    m.persistAtomicAudit.mockReset();
-    m.persistAtomicAudit.mockRejectedValue(new Error('audit unavailable'));
     await expect(
       initiateTenantIntegrationSync('org_1', 'steward_1', { integrationId: 'cfg_1', syncType: SyncType.INCREMENTAL }),
-    ).rejects.toThrow('could not be written');
+    ).rejects.toMatchObject({ code: 'CAPABILITY_UNAVAILABLE' });
+    expect(m.refuseUnavailableActivation).toHaveBeenCalledWith(expect.objectContaining({ action: 'integration.sync_blocked' }));
+    expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.executeSync).not.toHaveBeenCalled();
   });
 
@@ -216,7 +228,7 @@ describe('integration control plane — audit', () => {
     m.existing = [{ ...config, enabled: false }];
     await expect(
       initiateTenantIntegrationSync('org_1', 'steward_1', { integrationId: 'cfg_1', syncType: SyncType.INCREMENTAL }),
-    ).rejects.toThrow('disabled');
+    ).rejects.toMatchObject({ code: 'CAPABILITY_UNAVAILABLE' });
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.executeSync).not.toHaveBeenCalled();
   });

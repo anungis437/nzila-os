@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withApiAuth } from '@/lib/api-auth-guard';
-import {
-  type CanadianJurisdiction,
-  BREAK_RULES,
-  OVERTIME_RULES,
-  TERMINATION_NOTICE,
-  WCB_BOARDS,
-} from '@/lib/canadian-labour-standards';
+import { type CanadianJurisdiction } from '@/lib/canadian-labour-standards';
+import { resolveStatutoryRules } from '@/lib/canadian-labour-standards/rule-resolver';
 
 /** Map jurisdiction code from ISO-style "CA-XX" to our module's format */
 export const RULE_CATEGORIES = ['workers_compensation_board_reference', 'break_rule', 'overtime', 'termination_notice'] as const;
@@ -22,70 +17,13 @@ export function parseJurisdictionCode(code: string): CanadianJurisdiction | null
   return Object.prototype.hasOwnProperty.call(mapping, code) ? mapping[code] : null;
 }
 
-function buildRulesForJurisdiction(jur: CanadianJurisdiction) {
-  const rules: Array<{ ruleName: string; ruleCategory: string; legalReference: string; parameters: Record<string, unknown> }> = [];
-
-  // Board reference only. WCB employer reporting and worker claim filing
-  // periods are not interchangeable with grievance/arbitration deadlines.
-  // The legacy generic day values are not legally qualified for scheduling.
-  const wcb = WCB_BOARDS[jur];
-  if (wcb) {
-    rules.push({
-      ruleName: 'Workers Compensation Board Reference — Verify Applicable Deadlines',
-      ruleCategory: 'workers_compensation_board_reference',
-      legalReference: wcb.statute,
-      parameters: {
-        boardName: wcb.name,
-        boardAcronym: wcb.acronym,
-        portalUrl: wcb.portalUrl,
-        verificationRequired: true,
-      },
-    });
-  }
-
-  // Break rules
-  const breaks = BREAK_RULES[jur];
-  if (breaks) {
-    for (const br of breaks) {
-      rules.push({
-        ruleName: br.description,
-        ruleCategory: 'break_rule',
-        legalReference: `${br.statute}, ${br.article}`,
-        parameters: { duration_minutes: br.durationMinutes, paid: br.paid, trigger_hours: br.consecutiveHoursTrigger },
-      });
-    }
-  }
-
-  // Overtime
-  const ot = OVERTIME_RULES[jur];
-  if (ot) {
-    rules.push({
-      ruleName: 'Overtime Threshold',
-      ruleCategory: 'overtime',
-      legalReference: `${ot.statute}, ${ot.article}`,
-      parameters: { daily_hours: ot.dailyThresholdHours, weekly_hours: ot.weeklyThresholdHours, multiplier: ot.multiplier },
-    });
-  }
-
-  // Termination notice
-  const tn = TERMINATION_NOTICE[jur];
-  if (tn) {
-    rules.push({
-      ruleName: 'Termination Notice Schedule',
-      ruleCategory: 'termination_notice',
-      legalReference: `${tn.statute}, ${tn.article}`,
-      parameters: { tiers: tn.tiers },
-    });
-  }
-
-  return rules;
-}
-
 async function handler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const jurisdictionParam = searchParams.get('jurisdiction') || 'CA-FED';
     const category = searchParams.get('category');
+    const eventDateRaw = searchParams.get('eventDate');
+    const eventDate = eventDateRaw ? new Date(eventDateRaw) : new Date();
 
     const jur = parseJurisdictionCode(jurisdictionParam);
     if (!jur) {
@@ -94,15 +32,29 @@ async function handler(request: NextRequest) {
     if (category && !(RULE_CATEGORIES as readonly string[]).includes(category)) {
       return NextResponse.json({ success: false, error: 'Unknown rule category', code: 'INVALID_CATEGORY', allowed: RULE_CATEGORIES }, { status: 400 });
     }
-    const allRules = buildRulesForJurisdiction(jur);
-
-    const rules = category
-      ? allRules.filter((rule) => rule.ruleCategory === category)
-      : allRules;
+    if (Number.isNaN(eventDate.getTime())) {
+      return NextResponse.json({ success: false, error: 'Invalid eventDate', code: 'INVALID_EVENT_DATE' }, { status: 400 });
+    }
+    const resolved = await resolveStatutoryRules(jur, eventDate, category ?? undefined);
+    if (resolved.status === 'unknown') {
+      return NextResponse.json({ success: true, jurisdiction: jurisdictionParam, eventDate: eventDate.toISOString(), ruleStatus: 'unknown', reason: resolved.reason, data: [] });
+    }
+    const rules = resolved.rules.map((rule) => ({
+      ruleName: String(rule.payload.name ?? rule.ruleKey),
+      ruleCategory: rule.category,
+      legalReference: null,
+      parameters: rule.payload,
+      version: rule.version,
+      source: rule.source,
+      effectiveFrom: rule.effectiveFrom,
+      effectiveUntil: rule.effectiveUntil,
+    }));
 
     return NextResponse.json({
       success: true,
       jurisdiction: jurisdictionParam,
+      eventDate: eventDate.toISOString(),
+      ruleStatus: 'governed',
       data: rules,
     });
   } catch (_error) {

@@ -38,7 +38,13 @@ vi.mock('@/lib/api/framework', async () => {
     z,
     withApi: vi.fn((cfg: any, handler: (...args: any[]) => unknown) => {
       m.configs[cfg?.openapi?.summary ?? 'unknown'] = cfg;
-      return handler;
+      return (ctx: any) => handler({
+        request: new Request('http://localhost/api/employer-execution/replay/run_1', {
+          method: 'POST',
+          headers: { 'idempotency-key': 'replay-request-1' },
+        }),
+        ...ctx,
+      });
     }),
     ApiError: {
       badRequest: (message: string) => makeError(400, message),
@@ -90,11 +96,18 @@ describe('employer-execution/replay/[runId] route', () => {
 
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: any) => Promise<unknown>) => {
       const tx = {
+        select: vi.fn(() => makeSelectChain()),
+        update: vi.fn(() => ({
+          set: vi.fn(() => ({
+            where: vi.fn(() => ({ returning: vi.fn(async () => [{ id: 'intent_1' }]) })),
+          })),
+        })),
         insert: vi.fn(() => ({
           values: vi.fn((values: any) => {
             m.inserts.push({ values });
             const pending: any = Promise.resolve(undefined);
             pending.returning = vi.fn(async () => [{ id: 'replay_1', diffHash: 'hash_1' }]);
+            pending.onConflictDoNothing = vi.fn(() => pending);
             return pending;
           }),
         })),
@@ -229,7 +242,8 @@ describe('employer-execution/replay/[runId] route', () => {
 
     expect(result.data.replay.id).toBe('replay_0');
     expect(result.data.repeated).toBe(true);
-    expect(m.inserts).toHaveLength(0);
+    // The idempotency claim is attempted with ON CONFLICT DO NOTHING; no replay/evidence row is added.
+    expect(m.inserts).toHaveLength(1);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
   });
 
@@ -253,8 +267,8 @@ describe('employer-execution/replay/[runId] route', () => {
 
     await POST({ organizationId: 'org_1', userId: 'user_1', params: { runId: 'run_1' }, body: { mode: 'exact' } } as any);
 
-    // The transaction exposes insert only; any update/delete of the run would have thrown.
-    expect(m.lastTx.update).toBeUndefined();
+    // The only update capability is needed to complete the replay intent; source payroll runs remain insert-only here.
+    expect(m.lastTx.update).toBeDefined();
     expect(m.lastTx.delete).toBeUndefined();
     expect(m.inserts.some((insert) => insert.values?.eventCode)).toBe(false);
   });

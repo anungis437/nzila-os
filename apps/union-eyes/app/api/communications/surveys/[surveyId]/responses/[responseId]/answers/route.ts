@@ -15,7 +15,7 @@ import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { RESPONSE_CAPABILITY_HEADER, verifyResponseCapability } from '@/lib/communications/survey-response-capability';
-import { surveyResponses, surveyQuestions, surveyAnswers } from '@/db/schema';
+import { surveyResponses, surveyQuestionnaireVersions, surveyAnswers } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -86,27 +86,16 @@ export const POST = withApi(
         }
       }
 
-      const [question] = await tx
-        .select({
-          id: surveyQuestions.id,
-          choices: surveyQuestions.choices,
-          allowOther: surveyQuestions.allowOther,
-          minChoices: surveyQuestions.minChoices,
-          maxChoices: surveyQuestions.maxChoices,
-          ratingMin: surveyQuestions.ratingMin,
-          ratingMax: surveyQuestions.ratingMax,
-          minLength: surveyQuestions.minLength,
-          maxLength: surveyQuestions.maxLength,
-        })
-        .from(surveyQuestions)
-        .where(
-          and(
-            eq(surveyQuestions.id, body.questionId),
-            eq(surveyQuestions.surveyId, surveyId.data),
-            eq(surveyQuestions.organizationId, organizationId),
-          ),
-        )
+      const [questionnaire] = await tx
+        .select({ questions: surveyQuestionnaireVersions.questions })
+        .from(surveyQuestionnaireVersions)
+        .where(and(
+          eq(surveyQuestionnaireVersions.id, response.questionnaireVersionId),
+          eq(surveyQuestionnaireVersions.surveyId, surveyId.data),
+          eq(surveyQuestionnaireVersions.organizationId, organizationId),
+        ))
         .limit(1);
+      const question = questionnaire?.questions.find((candidate) => candidate.id === body.questionId);
       if (!question) throw ApiError.notFound('Question');
 
       validateAnswerAgainstQuestion(body, question);
@@ -219,4 +208,3 @@ function validateAnswerAgainstQuestion(body: AnswerBody, question: QuestionConst
     throw ApiError.badRequest('This question does not allow an "other" response');
   }
 }
-

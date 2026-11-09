@@ -208,8 +208,8 @@ describe('pilot/demo-data route', () => {
     const response = await POST(new Request('http://localhost/api/pilot/demo-data', { method: 'POST' }), { organizationId: 'org_1', userId: 'u1' });
 
     expect(response.status).toBe(200);
-    // insert() is called for employers, then grievances, then the pilot_demo_seeds marker, in that order.
-    const markerInsertCall = mockDb.insert.mock.results[2].value.values;
+    // The ownership marker is inserted before the generated rows, and every generated row carries its seed id.
+    const markerInsertCall = mockDb.insert.mock.results[0].value.values;
     expect(markerInsertCall).toHaveBeenCalledWith(
       expect.objectContaining({ employerIds: ['e-1', 'e-2'], grievanceIds: ['g-1'] }),
     );

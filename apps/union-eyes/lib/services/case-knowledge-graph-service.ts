@@ -5,6 +5,7 @@ import { collectiveAgreements } from '@/db/schema/domains/agreements/collective-
 import { organizationMembers } from '@/db/schema/organization-members-schema';
 import { getRelatedDocuments, type RelatedDocument } from '@/lib/services/case-related-documents-service';
 import type { DocumentAuthorizationActor } from '@/lib/services/document-authorization-service';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 export type CaseGraphNodeType =
   | 'case'
@@ -151,7 +152,7 @@ export async function buildCaseGraph(params: {
       organizationId: grievances.organizationId,
     })
     .from(grievances)
-    .where(and(eq(grievances.id, params.caseId), eq(grievances.organizationId, params.orgId)))
+    .where(and(eq(grievances.id, params.caseId), eq(grievances.organizationId, params.orgId), productionGrievanceCondition()))
     .limit(1);
 
   if (!caseRow) {

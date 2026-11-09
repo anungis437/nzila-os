@@ -39,7 +39,8 @@ import { db } from '@/db';
 import { commercialContracts, orgSubscriptions, pilotApplications, platformInvoices, organizations, organizationMembers } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { getCurrentUser, hasMinRole, isPlatformAdminUser, type UserRole } from '@/lib/api-auth-guard';
+import { getCurrentUser, hasMinRole, type UserRole } from '@/lib/api-auth-guard';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { logger } from '@/lib/logger';
 
 /**
@@ -50,8 +51,16 @@ import { logger } from '@/lib/logger';
  */
 export async function hasPilotPlatformAuthority(): Promise<boolean> {
   const user = await getCurrentUser();
-  if (!user?.id) return false;
-  return isPlatformAdminUser(user.id);
+  if (!user?.id || !user.organizationId) return false;
+  try {
+    await requirePlatformStaffAuthority(
+      { userId: user.id, organizationId: user.organizationId },
+      'platform.pilot.manage',
+    );
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export type PilotAccessDecision =
@@ -546,12 +555,21 @@ export async function authorizePilotAccess(
   }
 
   // Only the explicit platform-staff authority acts across organizations; a role title or rank does not (#1116).
-  if (await isPlatformAdminUser(user.id)) {
-    return {
-      ok: true,
-      reason: 'platform',
-      actorOrganizationId: typeof user.organizationId === 'string' ? user.organizationId : null,
-    };
+  if (typeof user.organizationId === 'string' && user.organizationId.trim()) {
+    try {
+      await requirePlatformStaffAuthority(
+        { userId: user.id, organizationId: user.organizationId },
+        'platform.pilot.manage',
+      );
+      return {
+        ok: true,
+        reason: 'platform',
+        actorOrganizationId: user.organizationId,
+      };
+    } catch {
+      // Continue into the direct tenant ownership decision. Platform identity
+      // without a live mandate must not erase an otherwise valid same-org ACL.
+    }
   }
 
   // Non-platform actors must have an org context AND own the pilot's org.

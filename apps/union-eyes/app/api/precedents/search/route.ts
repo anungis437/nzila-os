@@ -9,6 +9,8 @@ import { z } from "zod";
 import { toPublicPrecedentSummary } from "@/lib/precedents/public-decision-view";
 import { withApi } from '@/lib/api/framework';
 import { logger } from '@/lib/logger';
+import { db } from '@/db/db';
+import { resolvePrecedentJurisdictions } from '@/lib/precedents/jurisdiction-preference-resolver';
 
 import {
   ErrorCode,
@@ -22,6 +24,7 @@ const precedentSearchSchema = z.object({
     .object({
       precedentValue: z.array(z.string().max(50)).max(10),
       tribunal: z.array(z.string().max(50)).max(20),
+      jurisdiction: z.array(z.string().min(2).max(20)).max(16),
     })
     .partial()
     .strict()
@@ -36,7 +39,7 @@ export const POST = withApi(
     rlsOrgContext: true,
     openapi: { tags: ['Precedents'], summary: 'Search arbitration precedents' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId, userId }) => {
   try {
       let body: unknown;
       try {
@@ -56,12 +59,21 @@ export const POST = withApi(
       }
 
       const { query, filters, limit } = validation.data;
+      const jurisdictionPreference = await resolvePrecedentJurisdictions(db, {
+        organizationId: organizationId!,
+        userId: userId!,
+        requestOverride: filters.jurisdiction,
+      });
 
-      const results = await searchPrecedents(query, filters, limit);
+      const results = await searchPrecedents(query, {
+        ...filters,
+        jurisdiction: jurisdictionPreference.applied ? jurisdictionPreference.jurisdictions : undefined,
+      }, limit);
 
       return NextResponse.json({ 
         precedents: results.map(toPublicPrecedentSummary),
-        count: results.length
+        count: results.length,
+        jurisdictionPreference,
       });
     } catch (error) {
       if ((error as { code?: string } | null)?.code === 'INVALID_PRECEDENT_FILTER') {

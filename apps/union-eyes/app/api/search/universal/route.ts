@@ -24,6 +24,7 @@ import {
 } from '@/lib/services/document-governance-service';
 import { hasDocumentContextAccess } from '@/lib/services/document-member-scope';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 function scoreText(value: string | null | undefined, query: string) {
   if (!value) {
@@ -75,6 +76,7 @@ export const GET = withOrganizationAuth(async (request, context) => {
     .where(
       and(
         eq(grievances.organizationId, organizationId),
+        productionGrievanceCondition(),
         or(
           ilike(grievances.grievanceNumber, `%${q}%`),
           ilike(grievances.title, `%${q}%`),

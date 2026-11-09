@@ -30,8 +30,8 @@ const locationConsentSchema = z.object({
   // The digest GET served with the notice: the acknowledgement names the exact text, not only its version label.
   noticeDigest: z.string().regex(/^[a-f0-9]{64}$/),
   acknowledged: z.literal(true),
-  allowedDuringStrike: z.boolean().default(false),
-  allowedDuringEvents: z.boolean().default(false),
+  scopeKind: z.enum(['strike', 'event']),
+  scopeId: z.guid(),
 }).strict();
 
 
@@ -65,10 +65,9 @@ export const POST = withApiAuth(async (req: NextRequest) => {
         { status: 409, headers: { 'Cache-Control': 'no-store' } },
       );
     }
-    const { allowedDuringStrike, allowedDuringEvents } = parsed.data;
-    if (!allowedDuringStrike && !allowedDuringEvents) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Select at least one permitted tracking context');
-    }
+    const { scopeKind, scopeId } = parsed.data;
+    const allowedDuringStrike = scopeKind === 'strike';
+    const allowedDuringEvents = scopeKind === 'event';
     const { purpose, purposeDescription, consentText } = notice;
 
     // Get IP and User-Agent for audit
@@ -79,6 +78,9 @@ export const POST = withApiAuth(async (req: NextRequest) => {
       const granted = await GeofencePrivacyService.requestLocationConsent(
         {
           userId,
+          organizationId,
+          scopeKind,
+          scopeId,
           purpose,
           purposeDescription,
           consentText,
@@ -97,7 +99,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
         action: 'location.consent.grant',
         resourceType: 'member_location_consent',
         resourceId: granted.id,
-        details: { purpose, noticeVersion: notice.version, noticeDigest: notice.digest, allowedDuringStrike, allowedDuringEvents },
+        details: { purpose, noticeVersion: notice.version, noticeDigest: notice.digest, scopeKind, scopeId },
       });
       return granted;
     });
@@ -141,17 +143,21 @@ export const GET = withApiAuth(async (req: NextRequest) => {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'context must be "strike" or "event"');
     }
     const context = (rawContext ?? undefined) as "strike" | "event" | undefined;
+    const scopeId = searchParams.get('scopeId');
 
     const organizationId = await getOrganizationIdForUser(userId);
-    const hasConsent = await withRLSContext({ organizationId }, (tx) =>
-      GeofencePrivacyService.hasValidConsent(userId, context, tx),
-    );
+    const hasConsent = context && scopeId
+      ? await withRLSContext({ organizationId }, (tx) =>
+          GeofencePrivacyService.hasValidConsent(userId, organizationId, context, scopeId, tx),
+        )
+      : false;
 
     const notice = getLocationConsentNotice();
     return NextResponse.json({
       userId,
       hasConsent,
       context,
+      scopeId,
       notice: notice ? {
         version: notice.version,
         purpose: notice.purpose,
@@ -183,7 +189,7 @@ export const DELETE = withApiAuth(async (req: NextRequest) => {
 
     const erasedOnly = await withRLSContext({ organizationId }, async (tx) => {
       try {
-        const revoked = await GeofencePrivacyService.revokeLocationConsent(userId, reason || undefined, tx);
+        const revoked = await GeofencePrivacyService.revokeLocationConsent(userId, organizationId, reason || undefined, tx);
         await persistAtomicAudit(tx, {
           organizationId,
           userId,
@@ -197,7 +203,7 @@ export const DELETE = withApiAuth(async (req: NextRequest) => {
         if (!(error instanceof LocationConsentNotFoundError)) throw error;
         // No active consent to revoke does not mean no data: the member can still have location records (consent expired or already
         // withdrawn, a retention sweep that did not finish). Erasure does not depend on consent, so whatever remains is removed.
-        const erased = await GeofencePrivacyService.eraseLocationData(userId, tx);
+        const erased = await GeofencePrivacyService.eraseLocationData(userId, organizationId, tx);
         if (erased.total === 0) throw error; // nothing recorded and nothing held: the request has nothing to act on, and no log row is kept
         await persistAtomicAudit(tx, {
           organizationId,
@@ -226,4 +232,3 @@ export const DELETE = withApiAuth(async (req: NextRequest) => {
     );
   }
 });
-

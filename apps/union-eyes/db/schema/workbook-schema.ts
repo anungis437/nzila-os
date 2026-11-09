@@ -23,6 +23,8 @@
  * docs/categories/platform-and-operations/architecture/orm-governance/canonical-schema-topology.md
  */
 
+import { sql } from 'drizzle-orm';
+
 import {
   boolean,
   index,
@@ -285,6 +287,35 @@ export const workbookPurchases = pgTable(
   (t) => ({
     workbookIdx: index('workbook_purchases_workbook_idx').on(t.workbookId),
     stripeRefUniq: uniqueIndex('workbook_purchases_stripe_ref_uniq').on(t.stripePaymentRef),
+  }),
+);
+
+// Opaque, expiring bridge between the pseudonymous workbook and the payment
+// processor. Stripe receives only `publicRef`; the workbook id never crosses
+// the processor boundary. A verified webhook resolves the reference and a
+// browser may redeem it once after fulfilment.
+export const workbookCheckoutIntents = pgTable(
+  'workbook_checkout_intents',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workbookId: uuid('workbook_id')
+      .notNull()
+      .references(() => workbooks.id, { onDelete: 'cascade' }),
+    publicRefHash: varchar('public_ref_hash', { length: 64 }).notNull(),
+    tierId: varchar('tier_id', { length: 64 }).notNull(),
+    status: varchar('status', { length: 24 }).notNull().default('prepared'),
+    stripeSessionRef: varchar('stripe_session_ref', { length: 128 }),
+    stripePaymentRef: varchar('stripe_payment_ref', { length: 128 }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    fulfilledAt: timestamp('fulfilled_at', { withTimezone: true }),
+    redeemedAt: timestamp('redeemed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    publicRefUniq: uniqueIndex('workbook_checkout_intents_public_ref_uniq').on(t.publicRefHash),
+    workbookIdx: index('workbook_checkout_intents_workbook_idx').on(t.workbookId),
+    stripeSessionUniq: uniqueIndex('workbook_checkout_intents_stripe_session_uniq').on(t.stripeSessionRef).where(sql`${t.stripeSessionRef} IS NOT NULL`),
   }),
 );
 

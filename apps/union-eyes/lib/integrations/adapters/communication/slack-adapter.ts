@@ -96,6 +96,7 @@ export class SlackAdapter extends BaseIntegration {
   }
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
     await this.ensureConnected();
 
     const orgs = options.orgs || ['channels', 'messages', 'users', 'files'];
@@ -160,6 +161,7 @@ export class SlackAdapter extends BaseIntegration {
       });
 
       for (const channel of response.channels) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalCommunicationChannels)
@@ -226,6 +228,7 @@ export class SlackAdapter extends BaseIntegration {
       : undefined;
 
     for (const channel of channels) {
+      this.throwIfAborted();
       let cursor: string | undefined;
       let hasMore = true;
 
@@ -238,6 +241,7 @@ export class SlackAdapter extends BaseIntegration {
         });
 
         for (const message of response.messages) {
+          this.throwIfAborted();
           try {
             await db
               .insert(externalCommunicationMessages)
@@ -297,6 +301,7 @@ export class SlackAdapter extends BaseIntegration {
       });
 
       for (const user of response.users) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalCommunicationUsers)
@@ -362,6 +367,7 @@ export class SlackAdapter extends BaseIntegration {
     });
 
     for (const file of response.files) {
+      this.throwIfAborted();
       try {
         // Find channel DB ID if file is shared in a channel
         let channelDbId: string | null = null;

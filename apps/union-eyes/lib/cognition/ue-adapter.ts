@@ -19,6 +19,7 @@ import {
 } from '@nzila/ue-cognition';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { grievances } from '@/db/schema/domains/claims/grievances';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 import { grievanceEvents } from '@/db/schema/domains/claims/grievance-lifecycle';
 import { stewards } from '@/db/schema/domains/member/stewards';
 import { stewardAssignments } from '@/db/schema/union-structure-schema';
@@ -105,7 +106,7 @@ async function scoreGrievanceRiskIn(
   const [g] = await tx
     .select()
     .from(grievances)
-    .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)))
+    .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId), productionGrievanceCondition()))
     .limit(1);
   if (!g) return null;
 
@@ -218,6 +219,7 @@ export function scoreOrgRecentCases(organizationId: string, windowDays: number) 
       .where(and(
         eq(grievances.organizationId, organizationId),
         gte(grievances.updatedAt, since),
+        productionGrievanceCondition(),
       ))
       .limit(200);
     const out: Array<NonNullable<Awaited<ReturnType<typeof scoreGrievanceRiskIn>>>> = [];

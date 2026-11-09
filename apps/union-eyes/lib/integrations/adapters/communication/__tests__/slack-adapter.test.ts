@@ -176,7 +176,7 @@ describe('SlackAdapter', () => {
       const adapter = await makeConnected();
       const controller = new AbortController();
       controller.abort();
-      const r = await adapter.sync({ type: 'full', orgs: ['channels', 'messages'], abortSignal: controller.signal } as never);
+      const r = await adapter.sync({ type: 'full', orgs: ['channels', 'messages'], abortSignal: controller.signal, fencingToken: 'lease-test-1' } as never);
       expect(r.success).toBe(false);
       expect(h.client.getChannels).not.toHaveBeenCalled();
       expect(h.client.getChannelMessages).not.toHaveBeenCalled();
@@ -195,9 +195,10 @@ describe('SlackAdapter', () => {
         }
         return { channels: [{ id: 'c2', name: 'second-page', is_private: false, is_archived: false, created: 1700000000, creator: 'u1' }], nextCursor: undefined };
       });
-      const r = await adapter.sync({ type: 'full', orgs: ['channels'], abortSignal: controller.signal } as never);
-      // The first page was processed before the abort was observed; the second page was never fetched.
-      expect(r.recordsProcessed).toBe(1);
+      const r = await adapter.sync({ type: 'full', orgs: ['channels'], abortSignal: controller.signal, fencingToken: 'lease-test-2' } as never);
+      // The lease was lost while the page was in flight, so none of that page is
+      // written and the next page is never fetched.
+      expect(r.recordsProcessed).toBe(0);
       expect(h.client.getChannels).toHaveBeenCalledTimes(1);
       expect(r.success).toBe(false);
     });

@@ -23,6 +23,7 @@ import {
 } from '@/db/schema/ingestion-schema';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { logger } from '@/lib/logger';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -229,7 +230,7 @@ export async function scanBatchForDuplicates(
         organizationId: grievances.organizationId,
       })
       .from(grievances)
-      .where(inArray(grievances.id, resolvedIds));
+      .where(and(inArray(grievances.id, resolvedIds), productionGrievanceCondition()));
 
     // Load all org grievances NOT in this batch for comparison
     const existingCases = await db
@@ -243,6 +244,7 @@ export async function scanBatchForDuplicates(
       .where(
         and(
           eq(grievances.organizationId, organizationId),
+          productionGrievanceCondition(),
           sql`${grievances.id} NOT IN (${sql.join(resolvedIds.map(id => sql`${id}::uuid`), sql`, `)})`,
         ),
       );

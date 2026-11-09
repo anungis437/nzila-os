@@ -15,7 +15,7 @@ vi.mock('@/lib/api/framework', () => ({
 }))
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: m.rls }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }))
-vi.mock('@/lib/pension/pension-authority', () => ({ PENSION_ADMIN_ROLES: ['secretary_treasurer'] }))
+vi.mock('@/lib/pension/pension-authority', () => ({ requirePensionTrusteeMandate: vi.fn(async () => ({ id: 'mandate-1' })), PENSION_ADMIN_ROLES: ['secretary_treasurer'] }))
 vi.mock('@/db/schema', () => ({ pensionTrusteeMeetings: { id: 'id', organizationId: 'organizationId', createdAt: 'createdAt' } }))
 vi.mock('drizzle-orm', () => ({
   eq: (column: unknown, value: unknown) => ({ column, value }),

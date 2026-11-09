@@ -1,7 +1,7 @@
 import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
+import { PENSION_ADMIN_ROLES, requirePensionTrusteeMandate } from '@/lib/pension/pension-authority';
 import { pensionTrusteeMeetings } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
@@ -17,6 +17,12 @@ export const GET = withApi(
     if (!organizationId || !userId) throw ApiError.forbidden('Pension organization context required');
     const id = params.id;
     return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requirePensionTrusteeMandate(tx, {
+        organizationId,
+        userId,
+        planId: null,
+        action: 'pension:meeting:read',
+      });
       const [meeting] = await tx
         .select()
         .from(pensionTrusteeMeetings)

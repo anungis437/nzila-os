@@ -876,6 +876,7 @@ class OrganizationMembers(BaseModel):
     seniority = models.IntegerField(null=True, blank=True)
     union_join_date = models.DateTimeField(null=True, blank=True)
     metadata = models.JSONField(null=True, blank=True)
+    demo_seed_id = models.UUIDField(null=True, blank=True, editable=False)
     joined_at = models.DateTimeField(null=True, blank=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
     exemption_approved_at = models.DateTimeField(null=True, blank=True)
@@ -942,6 +943,10 @@ class SsoProviders(BaseModel):
     metadata = models.JSONField(default=dict, null=True, blank=True)
     created_by = models.CharField(max_length=255)
     updated_by = models.CharField(max_length=255, null=True, blank=True)
+    active_version = models.IntegerField(default=0, db_default=0, editable=False)
+    approved_by = models.CharField(max_length=255, null=True, blank=True, editable=False)
+    approved_at = models.DateTimeField(null=True, blank=True, editable=False)
+    approval_reference = models.CharField(max_length=255, null=True, blank=True, editable=False)
 
     class Meta:
         db_table = "sso_providers"

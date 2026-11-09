@@ -174,6 +174,7 @@ const holders = URL ? await import('@/app/api/workbook/[id]/memory-holders/route
 const holderOne = URL ? await import('@/app/api/workbook/[id]/memory-holders/[holderId]/route') : null
 const workbookExport = URL ? await import('@/app/api/workbook/[id]/export/route') : null
 const capability = URL ? await import('@/lib/workbook/workbook-capability') : null
+const workbookConsent = URL ? await import('@/lib/workbook/consent') : null
 
 type Row = Record<string, unknown>
 type Who = { organizationId: string; userId: string; role?: string }
@@ -641,8 +642,8 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
     const newWorkbook = async (options: { claimed?: boolean; tier?: string } = {}) => {
       const issued = capability!.issueWorkbookCapability()
       const { rows } = await admin.query(
-        `INSERT INTO workbooks (claimed_by_user_id, claimed_org_id, capability_token_hash, capability_token_expires_at, report_tier_id) VALUES ($1,$2,$3,$4,$5) RETURNING id::text AS id`,
-        [options.claimed ? claimant : null, options.claimed ? ORG_A : null, options.claimed ? null : issued.tokenHash, options.claimed ? null : issued.expiresAt, options.tier ?? null],
+        `INSERT INTO workbooks (claimed_by_user_id, claimed_org_id, capability_token_hash, capability_token_expires_at, report_tier_id, consent) VALUES ($1,$2,$3,$4,$5,$6::jsonb) RETURNING id::text AS id`,
+        [options.claimed ? claimant : null, options.claimed ? ORG_A : null, options.claimed ? null : issued.tokenHash, options.claimed ? null : issued.expiresAt, options.tier ?? null, JSON.stringify(workbookConsent!.issueWorkbookConsent())],
       )
       return { id: rows[0].id as string, token: issued.token }
     }

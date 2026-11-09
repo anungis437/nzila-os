@@ -60,7 +60,8 @@ describe('Gate 0 batch B67: cognition honesty, aggregate guards, audit and sync 
     const download = src('app/api/external/documents/[id]/download/route.ts')
     expect(download).not.toContain('generateSasUrl')
     expect(download).not.toContain('downloadUrl')
-    expect(download).toContain('readBlobBounded(latestVersion.storageKey, EXTERNAL_DOWNLOAD_MAX_BYTES)')
+    expect(download).toContain('readBlobBounded(pinnedVersion.storageKey, EXTERNAL_DOWNLOAD_MAX_BYTES)')
+    expect(download).toContain('decision.documentVersionNo')
     expect(download).toContain("delivery: 'served_by_route'")
   })
 

@@ -9,16 +9,9 @@
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
 import {
-  BREAK_RULES,
-  OVERTIME_RULES,
-  TERMINATION_NOTICE,
-  STATUTORY_HOLIDAYS,
-  WCB_BOARDS,
-  LRB_BOARDS,
-  ANTI_SCAB_PROVISIONS,
-  PAY_EQUITY_REGIMES,
   type CanadianJurisdiction,
 } from '@/lib/canadian-labour-standards';
+import { resolveStatutoryRules } from '@/lib/canadian-labour-standards/rule-resolver';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +57,7 @@ export const GET = withApi({
     tags: ['Labour Standards'],
     summary: 'Get full labour standards profile for a Canadian jurisdiction',
   },
-}, async ({ params }) => {
+}, async ({ params, request }) => {
   const code = params.jurisdiction?.toUpperCase() === 'FEDERAL'
     ? 'federal'
     : params.jurisdiction?.toUpperCase();
@@ -76,19 +69,30 @@ export const GET = withApi({
   }
 
   const jurisdiction = code as CanadianJurisdiction;
+  const eventDateRaw = new URL(request.url).searchParams.get('eventDate');
+  const eventDate = eventDateRaw ? new Date(eventDateRaw) : new Date();
+  if (Number.isNaN(eventDate.getTime())) throw ApiError.badRequest('eventDate must be a valid date');
+  const resolved = await resolveStatutoryRules(jurisdiction, eventDate);
+  if (resolved.status === 'unknown') {
+    return {
+      code: jurisdiction,
+      name: JURISDICTION_NAMES[jurisdiction],
+      eventDate: eventDate.toISOString(),
+      ruleStatus: 'unknown' as const,
+      reason: resolved.reason,
+      rules: [],
+      minimumWage: null,
+      minimumWageStatus: 'not_published' as const,
+    };
+  }
 
   const profile = {
     code: jurisdiction,
     name: JURISDICTION_NAMES[jurisdiction],
     employmentStandardsAct: ESA_NAMES[jurisdiction],
-    breakRules: BREAK_RULES[jurisdiction] ?? [],
-    overtimeRule: OVERTIME_RULES[jurisdiction],
-    terminationNotice: TERMINATION_NOTICE[jurisdiction],
-    statutoryHolidays: STATUTORY_HOLIDAYS[jurisdiction] ?? [],
-    workersCompBoard: WCB_BOARDS[jurisdiction],
-    labourRelationsBoard: LRB_BOARDS[jurisdiction],
-    antiScab: ANTI_SCAB_PROVISIONS[jurisdiction],
-    payEquity: PAY_EQUITY_REGIMES[jurisdiction],
+    eventDate: eventDate.toISOString(),
+    ruleStatus: 'governed' as const,
+    rules: resolved.rules,
     // No source of minimum wage rates is wired in, so none is published: a zero hourly rate reads as a real rate. Consumers get an
     // explicit null with the reason instead.
     minimumWage: null,

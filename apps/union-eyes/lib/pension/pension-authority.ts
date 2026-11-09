@@ -7,15 +7,38 @@
  * administration authority is the financial role already used for member financial data; every other caller is limited
  * to their own pension records.
  */
-import { and, eq } from 'drizzle-orm';
-import { organizationMembers, pensionMembers } from '@/db/schema';
+import { and, eq, gt, isNull, lte, or } from 'drizzle-orm';
+import { organizationMembers, pensionMembers, pensionTrusteeMandates } from '@/db/schema';
 import { FINANCIAL_MEMBER_DATA_ROLES } from '@/lib/finance/financial-authority';
 import type { RLSTx } from '@/lib/db/with-rls-context';
+import { ApiError } from '@/lib/api/errors';
 
 export const PENSION_ADMIN_ROLES = FINANCIAL_MEMBER_DATA_ROLES;
 
 export const isPensionAdministrator = (role: string | null | undefined): boolean =>
   !!role && (PENSION_ADMIN_ROLES as readonly string[]).includes(role);
+
+export async function requirePensionTrusteeMandate(
+  tx: RLSTx,
+  input: { organizationId: string; userId: string; planId?: string | null; action: string },
+) {
+  const now = new Date();
+  const [mandate] = await tx
+    .select()
+    .from(pensionTrusteeMandates)
+    .where(and(
+      eq(pensionTrusteeMandates.organizationId, input.organizationId),
+      eq(pensionTrusteeMandates.actorUserId, input.userId),
+      eq(pensionTrusteeMandates.action, input.action),
+      input.planId ? eq(pensionTrusteeMandates.planId, input.planId) : isNull(pensionTrusteeMandates.planId),
+      lte(pensionTrusteeMandates.validFrom, now),
+      gt(pensionTrusteeMandates.validUntil, now),
+      isNull(pensionTrusteeMandates.revokedAt),
+    ))
+    .limit(1);
+  if (!mandate) throw ApiError.forbidden('A live plan-scoped trustee mandate is required');
+  return mandate;
+}
 
 /**
  * The identifiers under which the caller's own pension records are filed in this organization: their membership id

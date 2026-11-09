@@ -17,7 +17,7 @@ import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { RESPONSE_CAPABILITY_HEADER, verifyResponseCapability } from '@/lib/communications/survey-response-capability';
-import { surveyResponses, surveyQuestions, surveyAnswers } from '@/db/schema';
+import { surveyResponses, surveyQuestionnaireVersions, surveyAnswers } from '@/db/schema';
 import { and, eq, ne } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -67,16 +67,17 @@ export const PATCH = withApi(
         }
       }
 
-      const requiredQuestions = await tx
-        .select({ id: surveyQuestions.id })
-        .from(surveyQuestions)
-        .where(
-          and(
-            eq(surveyQuestions.surveyId, surveyId.data),
-            eq(surveyQuestions.organizationId, organizationId),
-            eq(surveyQuestions.required, true),
-          ),
-        );
+      const [questionnaire] = await tx
+        .select({ questions: surveyQuestionnaireVersions.questions })
+        .from(surveyQuestionnaireVersions)
+        .where(and(
+          eq(surveyQuestionnaireVersions.id, response.questionnaireVersionId),
+          eq(surveyQuestionnaireVersions.surveyId, surveyId.data),
+          eq(surveyQuestionnaireVersions.organizationId, organizationId),
+        ))
+        .limit(1);
+      if (!questionnaire) throw ApiError.conflict('The questionnaire version for this response is unavailable');
+      const requiredQuestions = questionnaire.questions.filter((question) => question.required).map((question) => ({ id: question.id }));
 
       if (requiredQuestions.length > 0) {
         const answered = await tx
@@ -122,4 +123,3 @@ export const PATCH = withApi(
     });
   },
 );
-

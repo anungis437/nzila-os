@@ -16,8 +16,46 @@ import {
   timestamp,
   boolean,
   integer,
+  varchar,
+  jsonb,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { organizations } from '../../../schema-organizations';
+
+export const reportFieldGrants = pgTable('report_field_grants', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  principalUserId: varchar('principal_user_id', { length: 255 }).notNull(),
+  dataSourceId: varchar('data_source_id', { length: 100 }).notNull(),
+  purpose: varchar('purpose', { length: 100 }).notNull(),
+  allowedFields: jsonb('allowed_fields').$type<string[]>().notNull(),
+  allowedClasses: jsonb('allowed_classes').$type<string[]>().notNull(),
+  approvalReference: varchar('approval_reference', { length: 255 }).notNull(),
+  approvedBy: varchar('approved_by', { length: 255 }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: varchar('revoked_by', { length: 255 }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  principalSourceIdx: index('report_field_grants_principal_source_idx').on(t.organizationId, t.principalUserId, t.dataSourceId),
+}));
+
+export const reportDisclosureReceipts = pgTable('report_disclosure_receipts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  grantId: uuid('grant_id').notNull().references(() => reportFieldGrants.id, { onDelete: 'restrict' }),
+  actorUserId: varchar('actor_user_id', { length: 255 }).notNull(),
+  recipientUserId: varchar('recipient_user_id', { length: 255 }).notNull(),
+  purpose: varchar('purpose', { length: 100 }).notNull(),
+  dataSourceId: varchar('data_source_id', { length: 100 }).notNull(),
+  projectedFields: jsonb('projected_fields').$type<string[]>().notNull(),
+  rowCount: integer('row_count').notNull(),
+  rowSetDigest: varchar('row_set_digest', { length: 64 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  orgCreatedIdx: index('report_disclosure_receipts_org_created_idx').on(t.organizationId, t.createdAt),
+}));
 
 // =============================================================================
 // TABLE 1: analytics_scheduled_reports
@@ -358,4 +396,3 @@ export interface EngagementMetricsSummary {
 // Note: All tables, relations, and types are already exported with `export const`
 // at their declaration points above, so no additional re-export block is needed.
 // =============================================================================
-

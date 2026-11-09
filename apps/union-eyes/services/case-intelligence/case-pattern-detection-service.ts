@@ -2,6 +2,7 @@ import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { logger } from '@/lib/logger';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import type { DocumentAuthorizationActor } from '@/lib/services/document-authorization-service';
 import { getCaseIntelligenceConfig } from '@/services/case-intelligence/ml-relevance-service';
@@ -27,7 +28,7 @@ async function getCaseSnapshot(caseId: string, orgId: string) {
       createdAt: grievances.createdAt,
     })
     .from(grievances)
-    .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, orgId)))
+    .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, orgId), productionGrievanceCondition()))
     .limit(1);
 
   return (caseRow ?? null) as CaseSnapshot | null;
@@ -70,6 +71,7 @@ export async function findSimilarCases(params: {
     .where(
       and(
         eq(grievances.organizationId, params.context.orgId),
+        productionGrievanceCondition(),
         sql`${grievances.id} <> ${params.context.caseId}::uuid`,
       ),
     )

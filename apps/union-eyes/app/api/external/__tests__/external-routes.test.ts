@@ -621,7 +621,7 @@ describe('external grievance intake', () => {
   });
 
   it('opens an intake bound to the representative, the organization and this grievance', async () => {
-    const response = await postFile(new File([new Uint8Array([1, 2, 3])], 'a.pdf', { type: 'application/pdf' }));
+    const response = await postFile(new File(['%PDF-1.7\n'], 'a.pdf', { type: 'application/pdf' }));
     expect(response.status).toBe(201);
     expect(mocks.authorizeExternalMatterAccess).toHaveBeenCalledWith(mocks.db, expect.objectContaining({ requiredPermission: 'upload_documents' }), expect.anything());
     expect(mocks.openIntake).toHaveBeenCalledWith(

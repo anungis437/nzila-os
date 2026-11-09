@@ -176,13 +176,19 @@ export interface SyncOptions {
    * ownership of the job's distributed lock (a lease-renewal failure or a renewal that could not reach Redis to
    * confirm). An integration's sync() implementation SHOULD check this between external calls - batches, pages,
    * or entity types - and stop making further external calls as soon as it is aborted (BaseIntegration.throwIfAborted
-   * is a small helper for this). Not every integration checks it yet; for one that does not, a call already in
-   * flight when the lease is lost will still complete and its side effects will still happen - this signal reduces
-   * the window of unsupervised work, it does not guarantee zero overlap for an adapter that never checks it. Each
-   * external write an integration performs should still be idempotent (an upsert keyed by the provider's own
-   * natural id, not a blind insert) so a stale, abandoned call's effects are safe to encounter again on a later run.
+   * is the shared checkpoint used by every supported adapter). A call already in flight when the lease is lost may
+   * still complete at the transport boundary, so every adapter checks again before applying its local write. Each
+   * external write must remain idempotent (an upsert keyed by the provider's natural id, not a blind insert) so a
+   * stale, abandoned call's effects are safe to encounter again on a later run.
    */
   abortSignal?: AbortSignal;
+  /**
+   * Opaque token for the exact distributed lease held by SyncEngine. The
+   * engine always supplies this together with abortSignal; adapters reject a
+   * half-bound execution context so cancellation cannot be presented without
+   * the lease identity it fences.
+   */
+  fencingToken?: string;
 }
 
 export interface TrustedIntegrationExecutionContext {

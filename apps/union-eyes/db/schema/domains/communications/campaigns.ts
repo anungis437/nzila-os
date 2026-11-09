@@ -298,6 +298,41 @@ export const messageLog = pgTable('message_log', {
   createdAtIdx: index('idx_message_log_created').on(table.createdAt),
 }));
 
+export const campaignDeliveryOutbox = pgTable('campaign_delivery_outbox', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'cascade' }),
+  campaignId: uuid('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  audienceVersion: varchar('audience_version', { length: 64 }).notNull(),
+  recipientId: varchar('recipient_id', { length: 255 }).notNull(),
+  recipientEmail: varchar('recipient_email', { length: 255 }),
+  channel: campaignChannelEnum('channel').notNull(),
+  contentSnapshot: jsonb('content_snapshot').$type<{ subject: string; html: string }>().notNull(),
+  status: varchar('status', { length: 24 }).notNull().default('queued'),
+  attemptCount: integer('attempt_count').notNull().default(0),
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
+  nextAttemptAt: timestamp('next_attempt_at', { withTimezone: true }).notNull(),
+  claimedAt: timestamp('claimed_at', { withTimezone: true }),
+  consentCheckedAt: timestamp('consent_checked_at', { withTimezone: true }),
+  provider: varchar('provider', { length: 50 }),
+  providerMessageId: varchar('provider_message_id', { length: 255 }),
+  lastError: text('last_error'),
+  sentAt: timestamp('sent_at', { withTimezone: true }),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  audienceRecipientUq: uniqueIndex('campaign_delivery_outbox_audience_recipient_uniq')
+    .on(table.campaignId, table.audienceVersion, table.recipientId),
+  dispatchIdx: index('campaign_delivery_outbox_dispatch_idx')
+    .on(table.status, table.nextAttemptAt),
+  orgCampaignIdx: index('campaign_delivery_outbox_org_campaign_idx')
+    .on(table.organizationId, table.campaignId),
+}));
+
 // ============================================================================
 // COMMUNICATION PREFERENCES
 // ============================================================================
@@ -466,4 +501,3 @@ export type InsertCommunicationPreferences = typeof communicationPreferences.$in
 
 export type ConsentRecord = typeof consentRecords.$inferSelect;
 export type InsertConsentRecord = typeof consentRecords.$inferInsert;
-

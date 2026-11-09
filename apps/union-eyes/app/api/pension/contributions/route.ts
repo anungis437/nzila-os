@@ -4,7 +4,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { pensionContributions, pensionMembers } from '@/db/schema';
 import { eq, and, desc, inArray } from 'drizzle-orm';
-import { isPensionAdministrator, ownPensionIdentities, PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
+import { isPensionAdministrator, ownPensionIdentities, PENSION_ADMIN_ROLES, requirePensionTrusteeMandate } from '@/lib/pension/pension-authority';
 import { z } from 'zod';
 
 const createContributionSchema = z.object({
@@ -33,7 +33,7 @@ export const GET = withApi(
     const url = new URL(request.url);
     const memberId = url.searchParams.get('memberId');
 
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
       const conditions = [eq(pensionContributions.organizationId, organizationId)];
       if (isPensionAdministrator(user?.role)) {
         if (memberId) conditions.push(eq(pensionContributions.memberId, memberId));
@@ -59,11 +59,12 @@ export const POST = withApi(
       // The member must be a pension member of this organization; a contribution cannot be recorded against an id that names no one
       // here, or under a name the caller typed.
       const [member] = await tx
-        .select({ id: pensionMembers.id, name: pensionMembers.name })
+        .select({ id: pensionMembers.id, name: pensionMembers.name, planId: pensionMembers.planId })
         .from(pensionMembers)
         .where(and(eq(pensionMembers.id, parsed.memberId), eq(pensionMembers.organizationId, organizationId)))
         .limit(1);
       if (!member) throw ApiError.notFound('Pension member');
+      await requirePensionTrusteeMandate(tx, { organizationId, userId, planId: member.planId, action: 'pension:contribution:record' });
       const [contribution] = await tx
         .insert(pensionContributions)
         .values({ ...parsed, memberName: member.name, organizationId })

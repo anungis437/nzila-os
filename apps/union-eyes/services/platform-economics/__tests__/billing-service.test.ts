@@ -475,7 +475,7 @@ describe('platform-economics/billing-service', () => {
       // overdue invoices query
       pushSel([{ id: 'ov-1', metadata: null }]);
       // update overdue default []
-      const result = await runBillingLifecycleAutomation(runAt, 'cron');
+      const result = await runBillingLifecycleAutomation(['o1'], runAt, 'cron');
       expect(result.organizationsScanned).toBe(1);
       expect(result.invoiceGenerationSkipped).toBe(1);
       expect(result.invoicesFinalized).toBe(1);

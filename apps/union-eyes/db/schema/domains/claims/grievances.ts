@@ -151,6 +151,8 @@ export const grievances = pgTable("grievances", {
   
   // Organization
   organizationId: uuid("organization_id").notNull(),
+  /** Immutable provenance for rows created by the pilot demo-data lifecycle; null means production data. */
+  demoSeedId: uuid("demo_seed_id"),
   
   // Metadata
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow().$defaultFn(() => new Date()),
@@ -176,6 +178,7 @@ export const grievances = pgTable("grievances", {
   index("idx_grievances_employer").on(table.employerId),
   index("idx_grievances_cba").on(table.cbaId),
   index("idx_grievances_org").on(table.organizationId),
+  index("idx_grievances_demo_seed").on(table.organizationId, table.demoSeedId).where(sql`demo_seed_id IS NOT NULL`),
   index("idx_grievances_deadline").on(table.responseDeadline),
   uniqueIndex("ux_grievances_org_source_external_case").on(table.organizationId, table.sourceSystem, table.externalCaseId).where(sql`external_case_id IS NOT NULL`),
   index("idx_grievances_import_batch_id").on(table.importBatchId).where(sql`import_batch_id IS NOT NULL`),

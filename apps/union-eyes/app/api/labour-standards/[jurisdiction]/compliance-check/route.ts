@@ -9,17 +9,7 @@
 import { z } from 'zod';
 import { withApi } from '@/lib/api/with-api';
 import { ApiError } from '@/lib/api/errors';
-import {
-  BREAK_RULES,
-  OVERTIME_RULES,
-  TERMINATION_NOTICE,
-  STATUTORY_HOLIDAYS,
-  hasAntiScabLaw,
-  hasProactivePayEquity,
-  calculateOvertime,
-  calculateTerminationNotice,
-  type CanadianJurisdiction,
-} from '@/lib/canadian-labour-standards';
+import { resolveStatutoryRules } from '@/lib/canadian-labour-standards/rule-resolver';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +36,8 @@ const complianceBodySchema = z.object({
   usingReplacementWorkers: z.boolean().optional(),
   /** Has the org completed a pay equity exercise? */
   payEquityCompleted: z.boolean().optional(),
+  /** Date on which the represented facts occurred; rules are resolved at this instant. */
+  eventDate: z.coerce.date(),
 });
 
 interface ComplianceFinding {
@@ -71,91 +63,118 @@ export const POST = withApi({
     throw ApiError.badRequest(`Invalid jurisdiction: "${params.jurisdiction}"`);
   }
 
-  const jurisdiction = code as CanadianJurisdiction;
+  const jurisdiction = code;
   const findings: ComplianceFinding[] = [];
+  const resolved = await resolveStatutoryRules(jurisdiction, body.eventDate);
+  if (resolved.status === 'unknown') {
+    return {
+      jurisdiction,
+      eventDate: body.eventDate.toISOString(),
+      ruleStatus: 'unknown',
+      reason: resolved.reason,
+      totalFindings: 0,
+      violations: 0,
+      warnings: 0,
+      info: 0,
+      findings: [],
+    };
+  }
 
-  // ── Break rules ───────────────────────────────────────────────────────
-  const breakRules = BREAK_RULES[jurisdiction] ?? [];
-  const mealRule = breakRules.find((r) => r.type === 'meal');
+  const numberField = (payload: Record<string, unknown>, key: string): number | null =>
+    typeof payload[key] === 'number' && Number.isFinite(payload[key]) ? payload[key] as number : null;
+  const mealRule = resolved.rules.find((rule) => rule.category === 'break_rule' && rule.payload.type === 'meal');
 
   if (mealRule && body.dailyHours != null) {
-    if (body.dailyHours >= mealRule.consecutiveHoursTrigger) {
+    const trigger = numberField(mealRule.payload, 'consecutiveHoursTrigger');
+    const duration = numberField(mealRule.payload, 'durationMinutes');
+    if (trigger != null && duration != null && body.dailyHours >= trigger) {
       if (body.mealBreakProvided === false) {
         findings.push({
           severity: 'violation',
           category: 'breaks',
-          message: `Meal break required after ${mealRule.consecutiveHoursTrigger} consecutive hours (${mealRule.durationMinutes} min minimum)`,
-          legalReference: `${mealRule.statute}, ${mealRule.article}`,
+          message: `Reviewed rule version ${mealRule.version} requires a meal break after ${trigger} consecutive hours (${duration} min minimum)`,
+          legalReference: mealRule.source.uri,
         });
-      } else if (body.mealBreakMinutes != null && body.mealBreakMinutes < mealRule.durationMinutes) {
+      } else if (body.mealBreakMinutes != null && body.mealBreakMinutes < duration) {
         findings.push({
           severity: 'violation',
           category: 'breaks',
-          message: `Meal break must be at least ${mealRule.durationMinutes} minutes; ${body.mealBreakMinutes} provided`,
-          legalReference: `${mealRule.statute}, ${mealRule.article}`,
+          message: `Reviewed rule version ${mealRule.version} requires at least ${duration} minutes; ${body.mealBreakMinutes} provided`,
+          legalReference: mealRule.source.uri,
         });
       }
     }
   }
 
-  // ── Overtime ──────────────────────────────────────────────────────────
-  const overtimeRule = OVERTIME_RULES[jurisdiction];
+  const overtimeRule = resolved.rules.find((rule) => rule.category === 'overtime');
   if (overtimeRule && body.weeklyHours != null) {
-    const result = calculateOvertime(jurisdiction, body.dailyHours ?? 0, body.weeklyHours, 1);
-    if (result.overtimeHours > 0) {
+    const weekly = numberField(overtimeRule.payload, 'weeklyThresholdHours');
+    const daily = numberField(overtimeRule.payload, 'dailyThresholdHours');
+    const multiplier = numberField(overtimeRule.payload, 'multiplier');
+    const weeklyOvertime = weekly == null ? 0 : Math.max(0, body.weeklyHours - weekly);
+    const dailyOvertime = daily == null ? 0 : Math.max(0, (body.dailyHours ?? 0) - daily);
+    const overtimeHours = Math.max(weeklyOvertime, dailyOvertime);
+    if (overtimeHours > 0 && multiplier != null) {
       findings.push({
         severity: 'info',
         category: 'overtime',
-        message: `${result.overtimeHours.toFixed(1)} overtime hours at ${overtimeRule.multiplier}× rate`,
-        legalReference: `${overtimeRule.statute}, ${overtimeRule.article}`,
+        message: `${overtimeHours.toFixed(1)} overtime hours at ${multiplier}× rate under reviewed rule version ${overtimeRule.version}`,
+        legalReference: overtimeRule.source.uri,
       });
     }
   }
 
-  // ── Termination notice ────────────────────────────────────────────────
   if (body.tenureYears != null && body.terminationNoticeWeeks != null) {
-    const required = calculateTerminationNotice(jurisdiction, body.tenureYears);
-    if (body.terminationNoticeWeeks < required.weeks) {
-      const schedule = TERMINATION_NOTICE[jurisdiction];
+    const schedule = resolved.rules.find((rule) => rule.category === 'termination_notice');
+    const tiers = Array.isArray(schedule?.payload.tiers) ? schedule.payload.tiers as Array<Record<string, unknown>> : [];
+    const applicable = tiers.filter((tier) => typeof tier.minYears === 'number' && body.tenureYears! >= tier.minYears)
+      .sort((a, b) => Number(b.minYears) - Number(a.minYears))[0];
+    const requiredWeeks = applicable && typeof applicable.weeks === 'number' ? applicable.weeks : null;
+    if (schedule && requiredWeeks != null && body.terminationNoticeWeeks < requiredWeeks) {
       findings.push({
         severity: 'violation',
         category: 'termination_notice',
-        message: `${required.weeks} weeks notice required for ${body.tenureYears} years tenure; ${body.terminationNoticeWeeks} given`,
-        legalReference: `${schedule.statute}, ${schedule.article}`,
+        message: `${requiredWeeks} weeks notice required by reviewed rule version ${schedule.version}; ${body.terminationNoticeWeeks} given`,
+        legalReference: schedule.source.uri,
       });
     }
   }
 
-  // ── Statutory holidays ────────────────────────────────────────────────
-  const holidays = STATUTORY_HOLIDAYS[jurisdiction] ?? [];
-  if (body.statutoryHolidaysObserved != null && body.statutoryHolidaysObserved < holidays.length) {
+  const holidayRule = resolved.rules.find((rule) => rule.category === 'statutory_holidays');
+  const requiredHolidays = holidayRule ? numberField(holidayRule.payload, 'requiredCount') : null;
+  if (holidayRule && requiredHolidays != null && body.statutoryHolidaysObserved != null && body.statutoryHolidaysObserved < requiredHolidays) {
     findings.push({
       severity: 'warning',
       category: 'statutory_holidays',
-      message: `${holidays.length} statutory holidays required; only ${body.statutoryHolidaysObserved} observed`,
+      message: `${requiredHolidays} statutory holidays required by reviewed rule version ${holidayRule.version}; only ${body.statutoryHolidaysObserved} observed`,
+      legalReference: holidayRule.source.uri,
     });
   }
 
-  // ── Anti-scab ─────────────────────────────────────────────────────────
-  if (body.usingReplacementWorkers && hasAntiScabLaw(jurisdiction)) {
+  const antiScab = resolved.rules.find((rule) => rule.category === 'anti_scab' && rule.payload.prohibited === true);
+  if (body.usingReplacementWorkers && antiScab) {
     findings.push({
       severity: 'violation',
       category: 'anti_scab',
-      message: `Replacement workers prohibited during strikes/lockouts in ${jurisdiction}`,
+      message: `Replacement workers are prohibited by reviewed rule version ${antiScab.version}`,
+      legalReference: antiScab.source.uri,
     });
   }
 
-  // ── Pay equity ────────────────────────────────────────────────────────
-  if (body.payEquityCompleted === false && hasProactivePayEquity(jurisdiction)) {
+  const payEquity = resolved.rules.find((rule) => rule.category === 'pay_equity' && rule.payload.proactive === true);
+  if (body.payEquityCompleted === false && payEquity) {
     findings.push({
       severity: 'warning',
       category: 'pay_equity',
-      message: `Proactive pay equity exercise required in ${jurisdiction}`,
+      message: `A proactive pay equity exercise is required by reviewed rule version ${payEquity.version}`,
+      legalReference: payEquity.source.uri,
     });
   }
 
   return {
     jurisdiction,
+    eventDate: body.eventDate.toISOString(),
+    ruleStatus: 'governed',
     totalFindings: findings.length,
     violations: findings.filter((f) => f.severity === 'violation').length,
     warnings: findings.filter((f) => f.severity === 'warning').length,

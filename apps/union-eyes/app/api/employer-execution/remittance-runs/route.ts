@@ -230,6 +230,17 @@ export const POST = withApi(
       const summaryHash = sha256(JSON.stringify(summary));
       const csvHash = sha256(csvOutput);
       const jsonHash = sha256(jsonOutput);
+      const sourceRevisionHash = sha256(JSON.stringify({
+        payrollRunId: payrollRun.id,
+        status: payrollRun.status,
+        periodStart: payrollRun.periodStart,
+        periodEnd: payrollRun.periodEnd,
+        sourceBatchId: payrollRun.sourceBatchId,
+        ruleVersionId: payrollRun.cbaRuleVersionId,
+        calcTraceHash: payrollRun.calcTraceHash,
+        approvedBy: payrollRun.approvedBy,
+        approvedAt: payrollRun.approvedAt,
+      }));
 
       const [remittanceRun] = await tx
         .insert(employerRemittanceRuns)
@@ -242,6 +253,8 @@ export const POST = withApi(
           periodEnd: payrollRun.periodEnd,
           dueDate: dueDateIso,
           totalDue: totalDue.toString(),
+          packageSchemaVersion: 'ue-remittance-v1',
+          sourceRevisionHash,
           packageSummary: {
             dues: totals.dues,
             benefits: totals.benefits,
@@ -321,6 +334,15 @@ export const POST = withApi(
           },
         ],
       });
+
+      await tx.update(employerRemittanceRuns).set({
+        evidenceManifestHash: evidencePack.manifestHash,
+        updatedAt: new Date(),
+      }).where(and(
+        eq(employerRemittanceRuns.id, remittanceRun.id),
+        eq(employerRemittanceRuns.organizationId, organizationId),
+        eq(employerRemittanceRuns.sourceRevisionHash, sourceRevisionHash),
+      ));
 
       await tx.insert(employerExecutionArtifacts).values([
         {
@@ -418,6 +440,8 @@ export const POST = withApi(
           csvHash,
           jsonHash,
           evidenceManifestHash: evidencePack.manifestHash,
+          packageSchemaVersion: 'ue-remittance-v1',
+          sourceRevisionHash,
         },
       });
 

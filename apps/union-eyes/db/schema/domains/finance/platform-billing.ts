@@ -164,6 +164,47 @@ export const billingPeriods = pgTable('billing_periods', {
   orgPeriodIdx: uniqueIndex('billing_periods_org_label_idx').on(t.organizationId, t.label),
 }));
 
+export const billingAutomationMandates = pgTable('billing_automation_mandates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'restrict' }),
+  status: varchar('status', { length: 16 }).notNull().default('pending'),
+  cadence: varchar('cadence', { length: 16 }).notNull().default('monthly'),
+  issuedBy: varchar('issued_by', { length: 255 }).notNull(),
+  approvedBy: varchar('approved_by', { length: 255 }),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  validFrom: timestamp('valid_from', { withTimezone: true }).notNull(),
+  validUntil: timestamp('valid_until', { withTimezone: true }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: varchar('revoked_by', { length: 255 }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  orgActiveIdx: index('billing_automation_mandates_org_status_idx').on(t.organizationId, t.status),
+}));
+
+export const billingAutomationRuns = pgTable('billing_automation_runs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'restrict' }),
+  mandateId: uuid('mandate_id')
+    .notNull()
+    .references(() => billingAutomationMandates.id, { onDelete: 'restrict' }),
+  periodLabel: varchar('period_label', { length: 50 }).notNull(),
+  status: varchar('status', { length: 16 }).notNull().default('running'),
+  attemptCount: integer('attempt_count').notNull().default(1),
+  result: jsonb('result').$type<Record<string, unknown>>(),
+  lastError: text('last_error'),
+  startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  orgPeriodUniq: uniqueIndex('billing_automation_runs_org_period_uniq').on(t.organizationId, t.periodLabel),
+  statusIdx: index('billing_automation_runs_status_idx').on(t.status),
+}));
+
 // ============================================================================
 // PLATFORM INVOICES
 // ============================================================================

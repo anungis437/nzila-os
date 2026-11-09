@@ -55,6 +55,10 @@ export const ssoProviders = pgTable("sso_providers", {
   
   // Status
   enabled: boolean("enabled").notNull().default(false),
+  activeVersion: integer("active_version").notNull().default(0),
+  approvedBy: varchar("approved_by", { length: 255 }),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  approvalReference: varchar("approval_reference", { length: 255 }),
   
   // Metadata
   metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
@@ -68,6 +72,32 @@ export const ssoProviders = pgTable("sso_providers", {
   uniqueIndex("sso_providers_org_saml_entity_idx").on(table.organizationId, table.samlEntityId).where(sql`${table.samlEntityId} IS NOT NULL`),
   uniqueIndex("sso_providers_org_oidc_issuer_client_idx").on(table.organizationId, table.oidcIssuer, table.oidcClientId).where(sql`${table.oidcIssuer} IS NOT NULL`),
 ]);
+
+export const ssoProviderVersions = pgTable("sso_provider_versions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id").notNull(),
+  providerId: uuid("provider_id").notNull().references(() => ssoProviders.id, { onDelete: "cascade" }),
+  version: integer("version").notNull(),
+  configuration: jsonb("configuration").notNull(),
+  createdBy: varchar("created_by", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [uniqueIndex("sso_provider_versions_provider_version_uniq").on(table.providerId, table.version)]);
+
+export const ssoOidcAttempts = pgTable("sso_oidc_attempts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id").notNull(),
+  providerId: uuid("provider_id").notNull().references(() => ssoProviders.id, { onDelete: "cascade" }),
+  providerVersion: integer("provider_version").notNull(),
+  stateHash: varchar("state_hash", { length: 64 }).notNull().unique(),
+  nonceHash: varchar("nonce_hash", { length: 64 }).notNull(),
+  encryptedNonce: text("encrypted_nonce").notNull(),
+  encryptedCodeVerifier: text("encrypted_code_verifier").notNull(),
+  returnPath: varchar("return_path", { length: 500 }).notNull().default('/dashboard'),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  claimedAt: timestamp("claimed_at", { withTimezone: true }),
+  consumedAt: timestamp("consumed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
 
 /**
  * SCIM Configuration Table

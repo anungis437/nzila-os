@@ -12,6 +12,13 @@ const m = vi.hoisted(() => ({
 }));
 
 const WB = '11111111-1111-4111-8111-111111111111';
+const TEST_CONSENT = {
+  noticeVersion: 'ue-workbook-persistence-2026-11-09',
+  purposes: ['persist', 'process', 'share', 'checkout'],
+  granted: true,
+  grantedAt: '2026-11-09T00:00:00.000Z',
+  withdrawnAt: null,
+};
 
 // Shared select chain: consumed both by the authority ownership lookup (via the
 // system-context `tx`) and by the route's tier read (via the boundary `tx`).
@@ -21,7 +28,8 @@ const mockDb = {
     const chain = {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
-      limit: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
+      limit: vi.fn(async () => ((m.selectQueue.shift() ?? []) as Array<Record<string, unknown>>)
+        .map((row) => ({ consent: TEST_CONSENT, ...row }))),
     };
     return chain;
   }),

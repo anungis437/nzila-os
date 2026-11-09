@@ -21,6 +21,7 @@ import { organizations } from "@/db/schema-organizations";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { operationAuditResponse, performAtomicSystemAuditedOperation } from "@/lib/audit/operation-audit";
 import { DEFAULT_ORGANIZATION_ID } from "@/lib/organization-utils";
+import { pilotCaseFigures, pilotCaseStatsColumns, pilotCaseStatsWindow } from "@/lib/pilot/pilot-measurements";
 import type { PilotMilestone } from "@/types/marketing";
 
 export const dynamic = "force-dynamic";
@@ -33,8 +34,7 @@ const boundedInteger = (raw: string | null, fallback: number, min: number, max: 
   return Number.isFinite(value) ? Math.min(Math.max(value, min), max) : fallback;
 };
 
-type MemberStats = { organization_id: string; organizer_count: unknown; active_organizer_count: unknown; total_members: unknown; active_members: unknown };
-type CaseStats = { organization_id: string; cases_managed: unknown; avg_resolution_hours: unknown };
+type CaseStats = { organization_id: string; cases_managed: unknown; resolved_cases: unknown; avg_resolution_hours: unknown };
 
 export async function GET(request?: Request) {
   try {
@@ -99,43 +99,19 @@ export async function GET(request?: Request) {
       const milestoneRows = orgIds.length
         ? await tx.select().from(pilotMilestones).where(inArray(pilotMilestones.organizationId, orgIds))
         : [];
-      const memberStatRows = orgIds.length
-        ? Array.from(
-            await tx.execute(sql`
-              SELECT
-                organization_id::text AS organization_id,
-                COUNT(*) FILTER (WHERE role IN ('organizer', 'steward', 'president', 'vp', 'officer'))
-                  AS organizer_count,
-                COUNT(*) FILTER (WHERE role IN ('organizer', 'steward', 'president', 'vp', 'officer')
-                  AND updated_at > NOW() - INTERVAL '30 days')
-                  AS active_organizer_count,
-                COUNT(*) AS total_members,
-                COUNT(*) FILTER (WHERE updated_at > NOW() - INTERVAL '30 days')
-                  AS active_members
-              FROM organization_members
-              WHERE organization_id IN (${idList})
-                AND deleted_at IS NULL
-              GROUP BY organization_id
-            `),
-          ) as unknown as MemberStats[]
-        : [];
       const caseStatRows = orgIds.length
         ? Array.from(
             await tx.execute(sql`
               SELECT
                 organization_id::text AS organization_id,
-                COUNT(*) AS cases_managed,
-                AVG(
-                  EXTRACT(EPOCH FROM (COALESCE(resolved_at, NOW()) - created_at)) / 3600
-                ) AS avg_resolution_hours
+                ${pilotCaseStatsColumns()}
               FROM grievances
               WHERE organization_id IN (${idList})
-                AND created_at > NOW() - INTERVAL '30 days'
+                AND ${pilotCaseStatsWindow()}
               GROUP BY organization_id
             `),
           ) as unknown as CaseStats[]
         : [];
-      const memberStatsByOrg = new Map(memberStatRows.map((row) => [String(row.organization_id), row]));
       const caseStatsByOrg = new Map(caseStatRows.map((row) => [String(row.organization_id), row]));
 
       const orgMetrics = enrollments.map(({ enrollment, orgName, orgSlug }) => {
@@ -151,28 +127,7 @@ export async function GET(request?: Request) {
               completedAt: m.completedAt ?? undefined,
             }));
 
-          const mStats = memberStatsByOrg.get(orgId);
-          const organizerCount = Number(mStats?.organizer_count ?? 0);
-          const activeOrganizerCount = Number(mStats?.active_organizer_count ?? 0);
-          const totalMembers = Number(mStats?.total_members ?? 0);
-          const activeMembers = Number(mStats?.active_members ?? 0);
-
-          const organizerAdoptionRate =
-            organizerCount > 0
-              ? Math.round((activeOrganizerCount / organizerCount) * 100)
-              : enrollment.organizerAdoptionRate;
-
-          const memberEngagementRate =
-            totalMembers > 0
-              ? Math.round((activeMembers / totalMembers) * 100)
-              : enrollment.memberEngagementRate;
-
-          // Grievance stats
-          const cStats = caseStatsByOrg.get(orgId);
-          const casesManaged = Number(cStats?.cases_managed ?? enrollment.casesManaged);
-          const avgTimeToResolution = Math.round(
-            Number(cStats?.avg_resolution_hours ?? enrollment.avgTimeToResolution)
-          );
+          const figures = pilotCaseFigures(caseStatsByOrg.get(orgId));
 
           const enrolledAt = new Date(enrollment.enrolledAt);
           const daysActive = Math.max(
@@ -188,13 +143,14 @@ export async function GET(request?: Request) {
             organizationSlug: orgSlug,
             enrollmentDate: enrolledAt,
             daysActive,
-            organizerAdoptionRate,
-            memberEngagementRate,
-            casesManaged,
-            avgTimeToResolution,
+            organizerAdoptionRate: figures.organizerAdoptionRate,
+            memberEngagementRate: figures.memberEngagementRate,
+            casesManaged: figures.casesManaged,
+            avgTimeToResolution: figures.avgTimeToResolution,
             healthScore: enrollment.healthScore,
             milestones,
             lastCalculated: new Date(),
+            measurement: figures.measurement,
           };
         });
 

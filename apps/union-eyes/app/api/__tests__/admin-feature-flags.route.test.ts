@@ -26,6 +26,7 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withAdminAuth: m.withAdminAuth, withSystemAdminAuth: m.withSystemAdminAuth }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: vi.fn(async (context) => context) }));
 vi.mock('@/lib/feature-flags', () => {
   class FeatureFlagNotFoundError extends Error {}
   return {

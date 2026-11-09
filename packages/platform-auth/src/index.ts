@@ -72,6 +72,8 @@ export {
   type GuardResult,
 } from './guards'
 
+export { resolveExternalAuthIdentity, completeExternalProviderAuth } from './provider-identity'
+
 // ── Middleware Helpers ───────────────────────────────────────────────────────
 export {
   createPublicRouteMatcher,

@@ -9,6 +9,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { TurnstileWidget } from '@/components/icra/TurnstileWidget';
+import { WORKBOOK_CONSENT_NOTICE_VERSION } from '@/lib/workbook/consent';
 
 interface Props {
   locale: string;
@@ -21,6 +22,7 @@ export default function WorkbookStartClient({ locale, utm }: Props) {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [consented, setConsented] = useState(false);
 
   async function begin() {
     setBusy(true);
@@ -33,6 +35,7 @@ export default function WorkbookStartClient({ locale, utm }: Props) {
         body: JSON.stringify({
           locale: fr ? 'fr-CA' : 'en-CA',
           utm: { source: utm.source, medium: utm.medium, campaign: utm.campaign },
+          consent: { noticeVersion: WORKBOOK_CONSENT_NOTICE_VERSION, consentToPersist: true },
           ...(turnstileToken ? { turnstileToken } : {}),
         }),
       });
@@ -57,10 +60,16 @@ export default function WorkbookStartClient({ locale, utm }: Props) {
         <div className="mt-8">
           <TurnstileWidget onVerified={setTurnstileToken} locale={locale} />
         </div>
+        <label className="mt-6 flex items-start gap-3 text-sm text-stone-700">
+          <input type="checkbox" checked={consented} onChange={(event) => setConsented(event.target.checked)} className="mt-1" />
+          <span>{fr
+            ? 'Je consens à la conservation et au traitement de ce cahier, à son partage lorsque je le demande et à son utilisation pour le paiement. Je peux retirer ce consentement.'
+            : 'I consent to this workbook being stored and processed, shared when I request it, and used for checkout. I can withdraw this consent.'}</span>
+        </label>
         <button
           type="button"
           onClick={begin}
-          disabled={busy || turnstileToken === null}
+          disabled={busy || turnstileToken === null || !consented}
           className="mt-8 inline-flex items-center rounded-md bg-stone-900 px-5 py-2.5 text-sm font-medium text-stone-50 transition hover:bg-stone-700 disabled:opacity-50"
         >
           {fr ? 'Commencer' : 'Begin'}

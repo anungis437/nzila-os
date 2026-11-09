@@ -323,6 +323,20 @@ async function mutate(tx: RLSTx, args: FixtureApplyArgs, plan: FixtureResetPlan)
   const removed: FixtureCounts = { members: 0, grievances: 0 }
   const clearedStale: FixtureCounts = { members: 0, grievances: 0 }
 
+  const [fixtureMarker] = await tx
+    .select({ id: pilotFixtureRows.id })
+    .from(pilotFixtureRows)
+    .where(
+      and(
+        eq(pilotFixtureRows.organizationId, organizationId),
+        eq(pilotFixtureRows.fixtureSource, CUPE_BOOTSTRAP_SOURCE),
+        eq(pilotFixtureRows.resourceType, 'organization'),
+        eq(pilotFixtureRows.resourceId, organizationId),
+      ),
+    )
+    .limit(1)
+  if (!fixtureMarker) throw new Error('The fixture organization marker is missing')
+
   if (args.reset) {
     if (plan.remove.grievances.length) {
       const gone = await tx
@@ -365,6 +379,7 @@ async function mutate(tx: RLSTx, args: FixtureApplyArgs, plan: FixtureResetPlan)
     role: member.role,
     status: 'active',
     membershipNumber: member.member_number,
+    demoSeedId: fixtureMarker.id,
   }))
   const insertedMembers = memberRows.length
     ? await tx.insert(organizationMembers).values(memberRows).returning({ id: organizationMembers.id })

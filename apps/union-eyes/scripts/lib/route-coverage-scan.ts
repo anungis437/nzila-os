@@ -114,7 +114,7 @@ function guardOf(source: string): RouteGuard {
   // The identity provider's bearer token is the credential (lib/scim/scim-token.ts); the route acts for the token's organization.
   if (/authenticateScimRequest\(/.test(source)) return 'CAPABILITY_TOKEN'
   // The dedicated metrics:platform_operational:read service credential, compared in constant time; no session is accepted (#1118).
-  if (/authenticateMetricsService\(/.test(source)) return 'CAPABILITY_TOKEN'
+  if (/authenticateMetricsService\(|authenticateOperationalMetrics\(/.test(source)) return 'CAPABILITY_TOKEN'
   // requireSystemAdmin( is an administrator gate applied inside the handler; hasMinRole( is a role gate. Both were missed and the route
   // was reported as holding a bare session check.
   if (/withAdminAuth|withSystemAdminAuth|requireSystemAdmin\(/.test(source)) return 'ADMIN_AUTH'

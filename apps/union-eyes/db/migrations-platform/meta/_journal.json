@@ -624,6 +624,13 @@
       "when": 1759370052000,
       "tag": "0087_verified_dependency_evidence_binding",
       "breakpoints": true
+    },
+    {
+      "idx": 89,
+      "version": "7",
+      "when": 1759370053000,
+      "tag": "0088_gate0_checkout_and_payroll_integrity",
+      "breakpoints": true
     }
   ]
 }

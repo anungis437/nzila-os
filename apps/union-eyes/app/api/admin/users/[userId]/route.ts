@@ -46,6 +46,8 @@ import { createLogger } from '@nzila/os-core/telemetry';
 import { revokeMemberAccess, reactivateMemberAccess } from '@/lib/services/member-access-revocation-service';
 import { isPlatformAdminUser, ROLE_HIERARCHY } from '@/lib/api-auth-guard';
 import { directRoleIn, isAdministrativeRole, resolveOrganizationAccess } from '@/lib/organizations/read-authority';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 
 const logger = createLogger('union-eyes.admin.users');
 
@@ -82,6 +84,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
   if (!callerId || !(await isPlatformAdminUser(callerId))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
+  await requirePlatformStaffAuthority({ userId: callerId, organizationId: await getOrganizationIdForUser(callerId) }, 'platform.user_directory.manage');
 
   // [userId] route param = organizationMembers.id (membership row), not
   // the target member's own auth user id — see file header.
@@ -166,6 +169,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   if (!callerId || !(await isPlatformAdminUser(callerId))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
+  await requirePlatformStaffAuthority({ userId: callerId, organizationId: await getOrganizationIdForUser(callerId) }, 'platform.user_directory.manage');
 
   // [userId] route param = organizationMembers.id (membership row), not
   // the target member's own auth user id — see file header.

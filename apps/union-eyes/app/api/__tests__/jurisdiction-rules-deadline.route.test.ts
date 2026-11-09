@@ -3,6 +3,16 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({ withApiAuth: vi.fn() }));
 vi.mock('@/lib/api-auth-guard', () => ({ withApiAuth: m.withApiAuth }));
+vi.mock('@/lib/canadian-labour-standards/rule-resolver', () => ({
+  resolveStatutoryRules: vi.fn(async (_jurisdiction: string, _date: Date, category?: string) => ({
+    status: 'governed',
+    rules: category === 'workers_compensation_board_reference' ? [{
+      ruleKey: 'on-wsib', category, version: 1,
+      payload: { boardAcronym: 'WSIB', verificationRequired: true },
+      source: { uri: 'https://www.wsib.ca/' }, effectiveFrom: '2026-01-01', effectiveUntil: null,
+    }] : [],
+  })),
+}));
 
 async function loadRoute() { return import('../jurisdiction-rules/route'); }
 

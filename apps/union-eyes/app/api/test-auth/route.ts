@@ -11,6 +11,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@nzila/platform-auth/entra/server';
 import { isPlatformAdminUser } from '@/lib/api-auth-guard';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +34,7 @@ export async function GET(_req: NextRequest) {
   if (!(await isPlatformAdminUser(userId))) {
     return NextResponse.json({ passed: false, message: 'Platform administrator required' }, { status: 403 });
   }
+  await requirePlatformStaffAuthority({ userId, organizationId: await getOrganizationIdForUser(userId) }, 'platform.auth_diagnostics.run');
 
   // The same backend address every other route resolves; there is no localhost fallback to send a session token to.
   const DJANGO = djangoBase();
@@ -75,5 +78,4 @@ export async function GET(_req: NextRequest) {
     },
   });
 }
-
 

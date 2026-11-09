@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import { z } from "zod";
 import { withSystemAdminAuth } from '@/lib/api-auth-guard';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 
 import {
@@ -21,6 +22,7 @@ const adminJobsRetrySchema = z.object({
 
 // Job queues are platform-wide, so retrying a job needs platform authority.
 export const POST = withSystemAdminAuth(async (request, context) => {
+  await requirePlatformStaffAuthority(context, 'platform.jobs.manage');
   // Import job-queue functions (now delegates to Django Celery task API)
     const { retryJob } = await import('@/lib/job-queue');
     try {
@@ -67,4 +69,3 @@ return standardErrorResponse(
     );
     }
 });
-

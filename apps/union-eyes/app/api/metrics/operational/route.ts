@@ -7,52 +7,36 @@
  * No union claim, member, grievance, case or tenant tables may be queried.
  */
 import { NextResponse } from 'next/server'
-import { getAllQueueStats } from '@/lib/job-queue'
-import { constantTimeEquals } from '@/lib/security/constant-time'
 import { logger } from '@/lib/logger'
+import { authenticateOperationalMetrics, OPERATIONAL_METRICS_CAPABILITY, readOperationalMetrics } from '@/lib/observability/operational-metrics'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const CAPABILITY = 'metrics:platform_operational:read'
-
-function authenticateMetricsService(req: Request): 'allowed' | 'unconfigured' | 'denied' {
-  const expected = process.env.UE_METRICS_SERVICE_KEY
-  // Absence, underlength and secret re-use are configuration errors, never
-  // invitations to fall back to interactive/platform or shared AI authority.
-  if (!expected || expected.length < 32 ||
-      expected === process.env.AI_SERVICE_KEY ||
-      expected === process.env.QUEUE_STATUS_SERVICE_KEY) {
-    return 'unconfigured'
-  }
-  return constantTimeEquals(req.headers.get('x-service-key'), expected) ? 'allowed' : 'denied'
-}
-
 export async function GET(req: Request) {
-  const access = authenticateMetricsService(req)
+  const access = authenticateOperationalMetrics(req)
   if (access !== 'allowed') {
     // A caller without the matching credential is unauthorized whatever the server's configuration: answering 503 to an
     // anonymous request would tell it whether the key is configured. The unconfigured or unsafe state is the operator's to
     // see, so it is logged here (and the Control Plane consumer shows no data), never returned to the caller.
-    if (access === 'unconfigured') logger.error('operational_metrics_service_key_unconfigured', { capability: CAPABILITY })
+    if (access === 'unconfigured') logger.error('operational_metrics_service_key_unconfigured', { capability: OPERATIONAL_METRICS_CAPABILITY })
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: { 'Cache-Control': 'no-store' } })
   }
 
   logger.info('operational_metrics_service_authorized', {
     principal: 'control-plane-operational-metrics',
-    capability: CAPABILITY,
+    capability: OPERATIONAL_METRICS_CAPABILITY,
   })
 
   try {
-    const queueStats = await getAllQueueStats()
-    const queueDepth = queueStats.reduce((sum, q) => sum + (q.active ?? 0) + (q.reserved ?? 0) + (q.scheduled ?? 0), 0)
+    const snapshot = await readOperationalMetrics()
 
     return NextResponse.json({
       scope: 'platform',
       workflow_transition_rate: null,
       sla_violations: null,
       failure_like_updates: null,
-      queue_depth: queueDepth,
+      queue_depth: snapshot.queueDepth,
       request_count: null,
       error_rate: null,
       window: '24h',

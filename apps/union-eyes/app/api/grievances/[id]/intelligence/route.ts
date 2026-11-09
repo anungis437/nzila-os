@@ -15,6 +15,7 @@ import { findSimilarCases } from '@/services/case-intelligence/case-pattern-dete
 import { findPrecedentDocuments } from '@/services/case-intelligence/precedent-matching-service';
 import { getRelatedDocuments } from '@/services/case-intelligence/related-documents-service';
 import type { IntelligenceResponse } from '@/services/case-intelligence/types';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 export const GET = withApi(
   {
@@ -39,7 +40,7 @@ export const GET = withApi(
         createdBy: grievances.createdBy,
       })
       .from(grievances)
-      .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, organizationId)))
+      .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, organizationId), productionGrievanceCondition()))
       .limit(1);
 
     if (!grievance) {

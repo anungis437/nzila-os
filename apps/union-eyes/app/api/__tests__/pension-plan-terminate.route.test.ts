@@ -23,7 +23,7 @@ vi.mock('@/lib/api/framework', () => ({
     conflict: (msg: string) => err('CONFLICT', msg),
   },
 }));
-vi.mock('@/lib/pension/pension-authority', () => ({ PENSION_ADMIN_ROLES: ['financial_officer'] }));
+vi.mock('@/lib/pension/pension-authority', () => ({ requirePensionTrusteeMandate: vi.fn(async () => ({ id: 'mandate-1' })), PENSION_ADMIN_ROLES: ['financial_officer'] }));
 vi.mock('@/db/db', () => ({ db: {} }));
 vi.mock('@/db/schema', () => ({ pensionPlans: { id: 'id', organizationId: 'organization_id', status: 'status' } }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));

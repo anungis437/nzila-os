@@ -4,7 +4,7 @@
 // =====================================================
 
 import { pgTable, uuid, text, timestamp, integer, jsonb, boolean, date, pgEnum, index, uniqueIndex, type AnyPgColumn, varchar, numeric } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 
 // =====================================================
 // ENUMS
@@ -301,6 +301,9 @@ export const organizationMembers = pgTable(
     seniority: integer('seniority'),
     unionJoinDate: timestamp('union_join_date', { withTimezone: true }),
     metadata: jsonb('metadata').$type<Record<string, unknown> | null>(),
+    // Durable provenance for generated pilot members. Analytics excludes these
+    // rows rather than inferring demo data from names, emails, or identifiers.
+    demoSeedId: uuid('demo_seed_id'),
 
     // Member category & per-capita exemptions (mirrors QA baseline + Phase 5A
     // production schema). The `member_category` enum is created in
@@ -321,6 +324,7 @@ export const organizationMembers = pgTable(
   (table) => ({
     orgIdIdx: index('idx_organization_members_org_id').on(table.organizationId),
     userIdIdx: index('idx_organization_members_user_id').on(table.userId),
+    demoSeedIdx: index('idx_organization_members_demo_seed').on(table.organizationId, table.demoSeedId).where(sql`${table.demoSeedId} IS NOT NULL`),
     uniqueMembership: uniqueIndex('unique_org_membership').on(
       table.organizationId,
       table.userId

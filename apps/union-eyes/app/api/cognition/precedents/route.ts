@@ -16,6 +16,7 @@ import { visibleCaseIds } from '@/lib/cognition/case-visibility';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { and, eq, inArray } from 'drizzle-orm';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -55,6 +56,7 @@ export const POST = withOrganizationAuth(async (
       .where(and(
         eq(grievances.organizationId, context.organizationId),
         inArray(grievances.id, candidateIds),
+        productionGrievanceCondition(),
       ));
   } else {
     candidateRows = await db
@@ -63,6 +65,7 @@ export const POST = withOrganizationAuth(async (
       .where(and(
         eq(grievances.organizationId, context.organizationId),
         eq(grievances.type, body.type as typeof grievances.$inferSelect['type']),
+        productionGrievanceCondition(),
       ))
       .limit(50);
   }

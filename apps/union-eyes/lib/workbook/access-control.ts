@@ -41,6 +41,7 @@ import { getOrganizationIdForUser } from '@/lib/organization-utils';
 import { withExplicitUserContext, withSystemContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { appendPublicIntakeAudit, type PublicIntakeAuditEntry } from '@/lib/public-intake/intake-audit';
 import { workbookCapabilityHolds } from '@/lib/workbook/workbook-capability';
+import { activeWorkbookConsent } from '@/lib/workbook/consent';
 
 export type WorkbookAccessResult =
   | { ok: true }
@@ -102,6 +103,7 @@ async function resolveClaimedWorkbookAuthority(workbookId: string, capability: s
         claimedOrgId: workbooks.claimedOrgId,
         capabilityTokenHash: workbooks.capabilityTokenHash,
         capabilityTokenExpiresAt: workbooks.capabilityTokenExpiresAt,
+        consent: workbooks.consent,
       })
       .from(workbooks)
       .where(eq(workbooks.id, workbookId))
@@ -111,6 +113,11 @@ async function resolveClaimedWorkbookAuthority(workbookId: string, capability: s
 
   if (!ownership) {
     return { ok: false, status: 404, error: 'Workbook not found' };
+  }
+
+  // Consent is an authorization condition for every retrieval, processing, sharing and write path behind this common boundary.
+  if (!activeWorkbookConsent(ownership.consent)) {
+    return { ok: false, status: 403, error: 'Workbook consent is not active' };
   }
 
   if (!ownership.claimedByUserId) {

@@ -17,7 +17,7 @@ import { PilotMetrics, PilotHealthScoreBreakdown, PilotMilestone } from '@/types
  * - Effectiveness (resolution time): 20% (tangible improvement)
  * - Progress (milestones): 10% (implementation maturity)
  */
-export function calculatePilotHealth(metrics: PilotMetrics): number {
+export function calculatePilotHealth(metrics: PilotMetrics): number | null {
   const breakdown = calculatePilotHealthBreakdown(metrics);
   return breakdown.overall;
 }
@@ -36,11 +36,15 @@ export function calculatePilotHealthBreakdown(
     progress: 0.10,
   };
 
-  // Adoption score: target 80% of organizers active
-  const adoptionScore = Math.min((metrics.organizerAdoptionRate / 80) * 100, 100);
+  // Missing measurement is never converted into a score.
+  const adoptionScore = metrics.organizerAdoptionRate === null
+    ? null
+    : Math.min((metrics.organizerAdoptionRate / 80) * 100, 100);
 
   // Engagement score: target 40% of members engaged
-  const engagementScore = Math.min((metrics.memberEngagementRate / 40) * 100, 100);
+  const engagementScore = metrics.memberEngagementRate === null
+    ? null
+    : Math.min((metrics.memberEngagementRate / 40) * 100, 100);
 
   // Usage score: target 50 cases managed per month
   // Normalize by days active
@@ -51,43 +55,57 @@ export function calculatePilotHealthBreakdown(
   // Effectiveness score: target < 30 days to resolution
   // Lower is better, so inverse calculation
   const targetResolutionDays = 30;
-  const resolutionDays = Number(metrics.avgTimeToResolution) / 24; // Convert hours to days
-  const effectivenessScore = resolutionDays <= targetResolutionDays
-    ? 100
-    : Math.max(0, 100 - ((resolutionDays - targetResolutionDays) / targetResolutionDays) * 100);
+  const resolutionDays = metrics.avgTimeToResolution === null ? null : Number(metrics.avgTimeToResolution) / 24;
+  const effectivenessScore = resolutionDays === null
+    ? null
+    : resolutionDays <= targetResolutionDays
+      ? 100
+      : Math.max(0, 100 - ((resolutionDays - targetResolutionDays) / targetResolutionDays) * 100);
 
   // Progress score: milestone completion rate
   const completedMilestones = metrics.milestones.filter(m => m.status === 'complete').length;
-  const progressScore = (completedMilestones / metrics.milestones.length) * 100;
+  const progressScore = metrics.milestones.length > 0
+    ? (completedMilestones / metrics.milestones.length) * 100
+    : null;
 
   // Calculate weighted overall score
-  const overall = Math.round(
-    adoptionScore * weights.adoption +
-    engagementScore * weights.engagement +
-    usageScore * weights.usage +
-    effectivenessScore * weights.effectiveness +
-    progressScore * weights.progress
-  );
+  const overall = adoptionScore === null || engagementScore === null || effectivenessScore === null || progressScore === null
+    ? null
+    : Math.round(
+        adoptionScore * weights.adoption +
+        engagementScore * weights.engagement +
+        usageScore * weights.usage +
+        effectivenessScore * weights.effectiveness +
+        progressScore * weights.progress
+      );
 
   return {
     overall,
-    adoption: Math.round(adoptionScore),
-    engagement: Math.round(engagementScore),
+    adoption: adoptionScore === null ? null : Math.round(adoptionScore),
+    engagement: engagementScore === null ? null : Math.round(engagementScore),
     usage: Math.round(usageScore),
-    effectiveness: Math.round(effectivenessScore),
-    progress: Math.round(progressScore),
+    effectiveness: effectivenessScore === null ? null : Math.round(effectivenessScore),
+    progress: progressScore === null ? null : Math.round(progressScore),
   };
 }
 
 /**
  * Get health score status and interpretation
  */
-export function getHealthScoreStatus(score: number): {
-  status: 'excellent' | 'good' | 'needs-attention' | 'critical';
+export function getHealthScoreStatus(score: number | null): {
+  status: 'excellent' | 'good' | 'needs-attention' | 'critical' | 'not-measured';
   label: string;
   description: string;
   recommendations: string[];
 } {
+  if (score === null) {
+    return {
+      status: 'not-measured',
+      label: 'Not measured',
+      description: 'The pilot health score is not computed because required activity evidence is unavailable.',
+      recommendations: [],
+    };
+  }
   if (score >= 85) {
     return {
       status: 'excellent',
@@ -189,6 +207,14 @@ export function predictPilotSuccess(metrics: PilotMetrics): {
   const _healthScore = calculatePilotHealth(metrics);
   const breakdown = calculatePilotHealthBreakdown(metrics);
 
+  if (breakdown.adoption === null || breakdown.engagement === null || breakdown.effectiveness === null) {
+    return {
+      likelihood: 'uncertain',
+      confidence: 0,
+      reasoning: 'Not predicted: adoption, engagement or resolution effectiveness is not measured.',
+    };
+  }
+
   // Critical success factors
   const hasStrongAdoption = breakdown.adoption >= 70;
   const hasEngagement = breakdown.engagement >= 60;
@@ -246,7 +272,9 @@ export function generateHealthReport(metrics: PilotMetrics): {
   const prediction = predictPilotSuccess(metrics);
 
   return {
-    summary: `Pilot health score: ${breakdown.overall}/100 (${status.label}). ${status.description}`,
+    summary: breakdown.overall === null
+      ? `Pilot health score: not measured. ${status.description}`
+      : `Pilot health score: ${breakdown.overall}/100 (${status.label}). ${status.description}`,
     breakdown,
     status,
     milestones: milestoneHealth,
@@ -258,11 +286,11 @@ export function generateHealthReport(metrics: PilotMetrics): {
       },
       {
         label: 'Organizer Adoption',
-        value: `${metrics.organizerAdoptionRate.toFixed(0)}%`,
+        value: metrics.organizerAdoptionRate === null ? 'Not measured' : `${metrics.organizerAdoptionRate.toFixed(0)}%`,
       },
       {
         label: 'Member Engagement',
-        value: `${metrics.memberEngagementRate.toFixed(0)}%`,
+        value: metrics.memberEngagementRate === null ? 'Not measured' : `${metrics.memberEngagementRate.toFixed(0)}%`,
       },
       {
         label: 'Cases Managed',
@@ -270,7 +298,9 @@ export function generateHealthReport(metrics: PilotMetrics): {
       },
       {
         label: 'Avg Resolution Time',
-        value: `${(Number(metrics.avgTimeToResolution) / 24).toFixed(1)} days`,
+        value: metrics.avgTimeToResolution === null
+          ? 'Not measured'
+          : `${(Number(metrics.avgTimeToResolution) / 24).toFixed(1)} days`,
       },
     ],
   };

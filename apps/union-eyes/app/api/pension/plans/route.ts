@@ -2,7 +2,7 @@ import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
 import { listPage } from '@/lib/api/list-page';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { PENSION_ADMIN_ROLES, isPensionAdministrator } from '@/lib/pension/pension-authority';
+import { PENSION_ADMIN_ROLES, isPensionAdministrator, requirePensionTrusteeMandate } from '@/lib/pension/pension-authority';
 import { PLAN_STATUSES, PLAN_TYPES, activeEnrolmentCount, memberSafePlan, planFigureFields } from '@/lib/pension/plan-input';
 import { pensionPlans } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
@@ -52,7 +52,8 @@ export const POST = withApi(
   async ({ body, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const parsed = createPlanSchema.parse(body);
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requirePensionTrusteeMandate(tx, { organizationId, userId, planId: null, action: 'pension:plan:create' });
       const [plan] = await tx
         .insert(pensionPlans)
         .values({ ...parsed, organizationId })
@@ -69,4 +70,3 @@ export const POST = withApi(
     });
   },
 );
-

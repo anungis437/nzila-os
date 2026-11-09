@@ -564,7 +564,7 @@ export const financeEntries: StorageAuthorityEntry[] = [
   {
     table: "reconciliation_exceptions",
     classification: "TENANT_RLS_REQUIRED",
-    reason: "Manually verified (2026-09-04, finance.ts round 1): organization_id column present (db/schema/domains/finance/reconciliation.ts). Written by services/platform-economics/reconciliation-service.ts's runReconciliation() (`organizationId: pmt.organizationId` when inserting an unmatched-payment exception), called only from routes that require organizationId non-null — app/api/reconciliation/process/route.ts, app/api/dues/reconcile/route.ts.",
+    reason: "Manually verified (2026-09-04, finance.ts round 1): organization_id column present (db/schema/domains/finance/reconciliation.ts). Written by services/platform-economics/reconciliation-service.ts's runReconciliation() (`organizationId: input.organizationId` on every exception it inserts), called only from routes that require organizationId non-null — app/api/reconciliation/process/route.ts, app/api/dues/reconcile/route.ts.",
     supportingCapability: ["services/platform-economics/reconciliation-service.ts"],
     requiredRuntimePrivileges: ["SELECT", "INSERT", "UPDATE"],
     requiredSystemPrivileges: [],

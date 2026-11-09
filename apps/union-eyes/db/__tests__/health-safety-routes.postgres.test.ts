@@ -69,7 +69,7 @@ interface Family {
   required: string
   enumField?: { field: string; value: string }
   uuidField?: string
-  dateField: string
+  dateField?: string
   timestampField?: string
   hasCreatedBy: boolean
 }
@@ -166,7 +166,7 @@ describe.skipIf(!URL)('the CNESST and WCB routes on the combined schema, as the 
           key: 'payEquity', label: 'pay equity exercises', table: 'pay_equity_exercises', tableRef: () => schema!.payEquityExercises as never, retained: false, writer: 'officer',
           create: () => ({ exerciseType: 'initial', notes: `Exercise ${tag}` }),
           patch: { field: 'notes', column: 'notes', value: `Revised ${tag}` },
-          required: 'exerciseType', enumField: { field: 'status', value: 'not_a_status' }, dateField: 'resultsPostedDate', hasCreatedBy: false,
+          required: 'exerciseType', enumField: { field: 'status', value: 'not_a_status' }, hasCreatedBy: false,
         },
         {
           key: 'antiScab', label: 'anti-scab violations', table: 'anti_scab_violations', tableRef: () => schema!.antiScabViolations as never, retained: true, writer: 'steward',
@@ -297,19 +297,24 @@ describe.skipIf(!URL)('the CNESST and WCB routes on the combined schema, as the 
       faults.push(['a missing required field', missing, [family.required]])
       if (family.enumField) faults.push(['a value outside the enum', { ...body, [family.enumField.field]: family.enumField.value }, [family.enumField.field]])
       if (family.uuidField) faults.push(['a malformed uuid', { ...body, [family.uuidField]: 'not-a-uuid' }, [family.uuidField]])
-      faults.push(['a malformed date', { ...body, [family.dateField]: 'not-a-date' }, [family.dateField]])
-      faults.push(['an impossible date', { ...body, [family.dateField]: '2026-02-31' }, [family.dateField]])
+      if (family.dateField) {
+        faults.push(['a malformed date', { ...body, [family.dateField]: 'not-a-date' }, [family.dateField]])
+        faults.push(['an impossible date', { ...body, [family.dateField]: '2026-02-31' }, [family.dateField]])
+      }
       for (const [label, payload, fields] of faults) {
         const error = await rejection(call(collectionOf(family).POST, writerOf(family, 'A'), { body: payload }))
         expect(error, label).toBeInstanceOf(ApiError)
         expect((error as InstanceType<typeof ApiError>).code, label).toBe(ErrorCode.VALIDATION_ERROR)
         for (const field of fields) expect((error as Error).message, label).toContain(field)
       }
-      const patchFault = await rejection(call(itemOf(family).PATCH, writerOf(family, 'A'), { id: created.a, body: { [family.dateField]: 'not-a-date' } }))
-      expect((patchFault as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.VALIDATION_ERROR)
+      if (family.dateField) {
+        const patchFault = await rejection(call(itemOf(family).PATCH, writerOf(family, 'A'), { id: created.a, body: { [family.dateField]: 'not-a-date' } }))
+        expect((patchFault as InstanceType<typeof ApiError>)?.code).toBe(ErrorCode.VALIDATION_ERROR)
+      }
     })
 
     it('stores a well-formed ISO date and timestamp as sent', async () => {
+      if (!family.dateField) return
       const body = { ...family.create(), [family.dateField]: '2026-04-02' }
       const result = await call(collectionOf(family).POST, writerOf(family, 'A'), { body })
       const stored = (await admin.query(`SELECT ${snake(family.dateField)}::text AS value FROM public.${family.table} WHERE id = $1`, [result.data.id])).rows[0]

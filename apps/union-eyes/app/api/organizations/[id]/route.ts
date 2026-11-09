@@ -4,7 +4,8 @@ import { db } from '@/db/db'
 import { organizations } from '@/db/schema-organizations'
 import { eq, sql } from 'drizzle-orm'
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
-import { requireUserForOrganization, requireSystemAdmin, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
+import { requireUserForOrganization, ROLE_HIERARCHY } from '@/lib/api-auth-guard'
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import {
   canAdministerOrganization,
@@ -254,7 +255,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   // Archiving changes institutional standing. Local administrators cannot retire their own organization.
   // The same platform-governance authority required for PATCH status transitions is mandatory here.
   try {
-    await requireSystemAdmin()
+    await requirePlatformStaffAuthority({ userId: userCtx.userId, organizationId: id }, 'platform.organization.manage')
   } catch {
     return NextResponse.json({ error: 'Forbidden: organization archival requires platform governance' }, { status: 403 })
   }

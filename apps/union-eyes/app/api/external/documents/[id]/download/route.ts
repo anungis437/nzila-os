@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { documentLinks, documents, documentVersions } from '@/db/schema/documents-schema';
 import { BlobTooLargeError, readBlobBounded } from '@/lib/blob-client';
@@ -95,23 +95,23 @@ export const GET = withExternalMatterResourceAuth(
         return { kind: 'not_found' as const };
       }
 
-      // A grant pinned to a version releases that version only; a version added later is not covered by it. An unpinned (earlier) grant
-      // keeps releasing the current version.
+      // Every grant must name the reviewed version. A legacy null pin is ambiguous and therefore authorizes no download; it must be
+      // reissued after a person reviews the intended artifact. It must never silently widen to the current/latest version.
       const pinned = decision.documentVersionNo ?? null;
-      const [latestVersion] = await tx
+      if (pinned === null) return { kind: 'forbidden' as const };
+      const [pinnedVersion] = await tx
         .select({ id: documentVersions.id, versionNo: documentVersions.versionNo, storageKey: documentVersions.storageKey })
         .from(documentVersions)
         .where(
           and(
             eq(documentVersions.organizationId, organizationId),
             eq(documentVersions.documentId, row.id),
-            ...(pinned !== null ? [eq(documentVersions.versionNo, pinned)] : []),
+            eq(documentVersions.versionNo, pinned),
           ),
         )
-        .orderBy(desc(documentVersions.versionNo))
         .limit(1);
 
-      return { kind: 'located' as const, row, latestVersion };
+      return { kind: 'located' as const, row, pinnedVersion };
     });
 
     if (located.kind === 'forbidden') {
@@ -120,15 +120,15 @@ export const GET = withExternalMatterResourceAuth(
     if (located.kind === 'not_found') {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
-    const { row, latestVersion } = located;
+    const { row, pinnedVersion } = located;
 
-    if (!latestVersion?.storageKey) {
+    if (!pinnedVersion?.storageKey) {
       return NextResponse.json({ error: 'Download is not available' }, { status: 404 });
     }
 
     let bytes: Buffer;
     try {
-      bytes = await readBlobBounded(latestVersion.storageKey, EXTERNAL_DOWNLOAD_MAX_BYTES);
+      bytes = await readBlobBounded(pinnedVersion.storageKey, EXTERNAL_DOWNLOAD_MAX_BYTES);
     } catch (error) {
       if (error instanceof BlobTooLargeError) {
         return NextResponse.json({ error: 'This file is too large to download here' }, { status: 413 });
@@ -154,8 +154,8 @@ export const GET = withExternalMatterResourceAuth(
             matterType,
             matterId,
             documentId: row.id,
-            versionId: latestVersion.id,
-            versionNo: latestVersion.versionNo,
+            versionId: pinnedVersion.id,
+            versionNo: pinnedVersion.versionNo,
             delivery: 'served_by_route',
             sizeBytes: bytes.length,
           },

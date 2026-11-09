@@ -4,10 +4,14 @@ import { NextRequest } from 'next/server';
 const m = vi.hoisted(() => ({
   auth: vi.fn(),
   isPlatformAdmin: vi.fn(),
+  getOrganizationIdForUser: vi.fn(),
+  requirePlatformStaffAuthority: vi.fn(),
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/api-auth-guard', () => ({ isPlatformAdminUser: m.isPlatformAdmin }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.getOrganizationIdForUser }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requirePlatformStaffAuthority }));
 
 async function loadRoute() {
   return import('../test-auth/route');
@@ -17,6 +21,8 @@ describe('test-auth route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.isPlatformAdmin.mockResolvedValue(true);
+    m.getOrganizationIdForUser.mockResolvedValue('org_1');
+    m.requirePlatformStaffAuthority.mockResolvedValue({ userId: 'u1', organizationId: 'org_1' });
     m.auth.mockResolvedValue({ userId: 'u1', orgId: 'org_1', getToken: vi.fn(async () => 'token-1') });
     vi.stubEnv('DJANGO_API_URL', 'http://django.internal:8000');
     vi.stubEnv('NEXT_PUBLIC_DJANGO_API_URL', '');

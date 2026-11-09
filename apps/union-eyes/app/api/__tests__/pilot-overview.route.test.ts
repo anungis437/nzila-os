@@ -163,10 +163,7 @@ describe('pilot/overview route', () => {
       [enrollmentRow('org_1', 'Org 1')],
       [{ organizationId: 'org_1', name: 'Kickoff', description: 'desc', status: 'completed', targetDate: null, completedAt: null }],
     );
-    m.executeQueue.push(
-      [{ organization_id: 'org_1', organizer_count: 4, active_organizer_count: 2, total_members: 20, active_members: 10 }],
-      [{ organization_id: 'org_1', cases_managed: 12, avg_resolution_hours: 48 }],
-    );
+    m.executeQueue.push([{ organization_id: 'org_1', cases_managed: 12, resolved_cases: 8, avg_resolution_hours: 48 }]);
     const { GET } = await loadRoute();
 
     const response = await GET();
@@ -177,13 +174,13 @@ describe('pilot/overview route', () => {
     expect(json.organizations[0]).toMatchObject({
       organizationId: 'org_1',
       organizationName: 'Org 1',
-      organizerAdoptionRate: 50,
-      memberEngagementRate: 50,
+      organizerAdoptionRate: null,
+      memberEngagementRate: null,
       casesManaged: 12,
     });
     expect(json.organizations[0].milestones).toHaveLength(1);
     expect(json.pagination).toEqual({ limit: 25, offset: 0, total: 1, returned: 1 });
-    expect(mockDb.execute).toHaveBeenCalledTimes(2);
+    expect(mockDb.execute).toHaveBeenCalledTimes(1);
   });
 
   it('F06 A4: attributes figures to the right organization and never reads a neighbor figures', async () => {
@@ -194,18 +191,15 @@ describe('pilot/overview route', () => {
         { organizationId: 'org_1', name: 'Only org 1', description: '', status: 'completed', targetDate: null, completedAt: null },
       ],
     );
-    m.executeQueue.push(
-      [{ organization_id: 'org_2', organizer_count: 2, active_organizer_count: 2, total_members: 10, active_members: 5 }],
-      [{ organization_id: 'org_2', cases_managed: 9, avg_resolution_hours: 10 }],
-    );
+    m.executeQueue.push([{ organization_id: 'org_2', cases_managed: 9, resolved_cases: 7, avg_resolution_hours: 10 }]);
     const { GET } = await loadRoute();
 
     const json = await (await GET()).json();
     const [first, second] = json.organizations;
 
-    expect(first).toMatchObject({ organizationId: 'org_1', organizerAdoptionRate: 10, memberEngagementRate: 20, casesManaged: 5 });
+    expect(first).toMatchObject({ organizationId: 'org_1', organizerAdoptionRate: null, memberEngagementRate: null, casesManaged: 0 });
     expect(first.milestones).toHaveLength(1);
-    expect(second).toMatchObject({ organizationId: 'org_2', organizerAdoptionRate: 100, memberEngagementRate: 50, casesManaged: 9 });
+    expect(second).toMatchObject({ organizationId: 'org_2', organizerAdoptionRate: null, memberEngagementRate: null, casesManaged: 9 });
     expect(second.milestones).toHaveLength(0);
   });
 

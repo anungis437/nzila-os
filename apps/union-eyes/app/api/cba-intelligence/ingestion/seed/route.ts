@@ -1,4 +1,4 @@
-import { requireSystemAdmin } from "@/lib/api-auth-guard";
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { withApi, ApiError } from "@/lib/api/framework";
 import { performAtomicAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 import { seedSources } from "@/lib/services/cba-intelligence/seed-sources";
@@ -19,7 +19,7 @@ export const POST = withApi(
   async ({ userId, organizationId }) => {
     // The dataset is platform-wide (no organization column): changing it is platform authority, not an organization administrator's. The rows are
     // global reference data that the runtime role holds the grants on (the system role holds none), so the transaction is the acting organization's.
-    await requireSystemAdmin();
+    await requirePlatformStaffAuthority({ userId, organizationId }, 'platform.cba_dataset.curate');
     // The whole registry seed and its audit record commit in one transaction: a source that cannot be inserted, or an audit record
     // that cannot be written, leaves the registry as it was.
     try {

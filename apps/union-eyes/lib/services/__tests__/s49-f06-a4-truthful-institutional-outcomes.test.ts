@@ -68,14 +68,14 @@ describe('F06 batch 3 (A4): an outcome is recorded only when the system did it o
     expect(seal).toContain('remittanceRunId: remittance.id')
   })
 
-  it('stored SSO and integration configuration says it is not in effect on every read, write and audit record', () => {
+  it('SSO says its OIDC consumer is in effect while integration sync remains unavailable', () => {
     const effect = src('lib/reality/configuration-effect.ts')
-    expect(effect).toMatch(/SSO_SIGN_IN_EFFECT[^]*inEffect: false/)
+    expect(effect).toMatch(/SSO_SIGN_IN_EFFECT[^]*inEffect: true/)
     expect(effect).toMatch(/INTEGRATION_SYNC_EFFECT[^]*inEffect: false/)
     for (const file of ['app/api/enterprise/sso/providers/route.ts', 'app/api/enterprise/sso/providers/[id]/route.ts']) {
       expect(src(file)).toContain('SSO_SIGN_IN_EFFECT')
     }
-    expect(src('app/api/extensions/[id]/route.ts')).toContain('INTEGRATION_SYNC_EFFECT.inEffect')
+    expect(src('lib/integrations/control-plane.ts')).toContain('effect: INTEGRATION_SYNC_EFFECT')
     const registry = src('lib/reality/capability-registry.ts')
     expect(registry).toContain("id: 'UE-SSO-SIGN-IN'")
     expect(registry).toContain("id: 'UE-EXT-INTEGRATION-SYNC'")

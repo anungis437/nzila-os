@@ -74,6 +74,7 @@ const sessionCrudOptions: CrudOptions & { itemRoute?: false } = {
   tags: ["Scheduling"],
   orgScoped: true,
   readRole: 'member',
+  listFilters: { equals: { courseId: 'courseId', sessionStatus: 'sessionStatus' } },
   // Meeting URLs/codes can contain access secrets; accommodation locations and notes may disclose participant information.
   // None belongs in the member-wide catalogue. Enrolled members need a separately governed registration-scoped view.
   staffOnlyResponseFields: ['virtualMeetingUrl', 'virtualMeetingAccessCode', 'accommodationHotel', 'notes'],

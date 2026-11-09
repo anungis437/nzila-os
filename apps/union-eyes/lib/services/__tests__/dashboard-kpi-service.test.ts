@@ -457,6 +457,7 @@ describe("dashboard-kpi-service", () => {
       eq: vi.fn(() => ({})),
       gte: vi.fn(() => ({})),
       lt: vi.fn(() => ({})),
+      isNull: vi.fn(() => ({})),
     }));
     vi.doMock("@/lib/services/cache-service", () => ({
       cacheGet: cacheGetMock,
@@ -548,7 +549,7 @@ describe("dashboard-kpi-service", () => {
       strategicGoals: { __table: "goals" },
       employerRemittances: { __table: "remittances" },
     }));
-    vi.doMock("drizzle-orm", () => ({ and: vi.fn(() => ({})), eq: vi.fn(() => ({})), gte: vi.fn(() => ({})), lt: vi.fn(() => ({})) }));
+    vi.doMock("drizzle-orm", () => ({ and: vi.fn(() => ({})), eq: vi.fn(() => ({})), gte: vi.fn(() => ({})), lt: vi.fn(() => ({})), isNull: vi.fn(() => ({})) }));
     const cacheSet = vi.fn();
     vi.doMock("@/lib/services/cache-service", () => ({ cacheGet: vi.fn().mockResolvedValue(null), cacheSet }));
     vi.doMock("@/lib/db/with-rls-context", () => inContext(dbMock));
@@ -620,6 +621,7 @@ describe("dashboard-kpi-service", () => {
       eq: vi.fn(() => ({})),
       gte: vi.fn(() => ({})),
       lt: vi.fn(() => ({})),
+      isNull: vi.fn(() => ({})),
     }));
     vi.doMock("@/lib/services/cache-service", () => ({
       cacheGet: cacheGetMock,

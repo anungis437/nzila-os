@@ -271,9 +271,12 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
     const denial = await audits('platform.user_directory.read.denied', OUTSIDER)
     expect(denial).toHaveLength(1)
     expect(denial[0]).toMatchObject({ organization_id: ORG_B, user_id: OUTSIDER })
-    expect(denial[0].details).toMatchObject({ reason: 'no_platform_staff_authority' })
+    expect(denial[0].details).toMatchObject({ reason: 'not_platform_staff_eligible' })
 
-    await expect(modules!.staff.requirePlatformStaffAuthority({ userId: STAFF, organizationId: ORG_A }, 'platform.user_directory.read')).resolves.toEqual({ userId: STAFF, organizationId: ORG_A })
-    expect(await audits('platform.user_directory.read.denied', STAFF)).toHaveLength(0)
+    // Platform identity is eligibility only. Without a live, accepted, action-specific mandate it confers no cross-tenant authority.
+    await expect(modules!.staff.requirePlatformStaffAuthority({ userId: STAFF, organizationId: ORG_A }, 'platform.user_directory.read')).rejects.toMatchObject({ status: 403 })
+    const staffDenial = await audits('platform.user_directory.read.denied', STAFF)
+    expect(staffDenial).toHaveLength(1)
+    expect(staffDenial[0].details).toMatchObject({ reason: 'no_live_scoped_platform_staff_mandate' })
   })
 })

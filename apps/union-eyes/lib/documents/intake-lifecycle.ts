@@ -32,7 +32,8 @@ export const SYSTEM_REAPER_ACTOR = 'system:document-intake-reaper';
 export interface IntakeStorage {
   /** Stores the bytes at exactly this key (the implementation scans them). */
   put(key: string, bytes: Buffer, contentType: string): Promise<void>;
-  read(key: string): Promise<Buffer>;
+  /** Reads at most maxBytes of exactly this key; a larger object is refused (throws), never read whole into memory. */
+  read(key: string, maxBytes: number): Promise<Buffer>;
   /** Removes exactly this key; absence is success. */
   remove(key: string): Promise<void>;
 }
@@ -223,8 +224,10 @@ export async function checkIntakeForAcceptance(
 
   let bytes: Buffer;
   try {
-    bytes = await storage.read(row.storageKey);
-  } catch {
+    // The read is bounded by the size the server recorded: an object that has grown is refused without being pulled into memory.
+    bytes = await storage.read(row.storageKey, Number(row.sizeBytes));
+  } catch (error) {
+    if (error instanceof Error && error.name === 'BlobTooLargeError') return { ok: false, kind: 'object_changed' };
     return { ok: false, kind: 'object_missing' };
   }
   if (bytes.length !== Number(row.sizeBytes) || sha256Bytes(bytes) !== row.contentHash) return { ok: false, kind: 'object_changed' };

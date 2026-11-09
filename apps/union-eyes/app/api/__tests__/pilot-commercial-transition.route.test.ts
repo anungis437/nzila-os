@@ -7,20 +7,35 @@ const m = vi.hoisted(() => {
   const state = {
     selectQueue: [] as unknown[][],
     lockCalls: [] as Array<{ limit: number; mode: string }>,
+    lockedApplication: null as Record<string, unknown> | null,
   };
 
   const nextSelect = () => Promise.resolve((state.selectQueue.shift() ?? []) as unknown[]);
 
   const createSelectChain = () => {
+    let joinedAcceptance = false;
     const chain = {
       from: vi.fn(() => chain),
+      innerJoin: vi.fn(() => { joinedAcceptance = true; return chain; }),
       where: vi.fn(() => chain),
-      limit: vi.fn((n: number) => ({
-        for: vi.fn((mode: string) => {
+      orderBy: vi.fn(() => chain),
+      limit: vi.fn((n: number) => {
+        const selected = () => joinedAcceptance
+          ? Promise.resolve([{
+              offerId: 'offer-accepted-1',
+              amount: state.lockedApplication?.verifiedPilotAmount,
+              memberCountBasis: state.lockedApplication?.verifiedMemberCount,
+            }])
+          : nextSelect();
+        return {
+        for: vi.fn(async (mode: string) => {
           state.lockCalls.push({ limit: n, mode });
-          return nextSelect();
+          const rows = await nextSelect();
+          state.lockedApplication = (rows[0] as Record<string, unknown> | undefined) ?? null;
+          return rows;
         }),
-      })),
+        then: (resolve: (value: unknown[]) => unknown, reject: (reason: unknown) => unknown) => selected().then(resolve, reject),
+      }; }),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;
@@ -38,6 +53,7 @@ const m = vi.hoisted(() => {
     resetQueues: () => {
       state.selectQueue = [];
       state.lockCalls = [];
+      state.lockedApplication = null;
     },
     hasPilotPlatformAuthority: vi.fn(),
     getCurrentUser: vi.fn(),
@@ -132,6 +148,11 @@ vi.mock('@/lib/pilot/commercialization-wave1', () => ({
   inferPilotStatusFromCommercialState: m.inferPilotStatusFromCommercialState,
   isCommercialTransitionAllowed: m.isCommercialTransitionAllowed,
   normalizeCommercialState: m.normalizeCommercialState,
+  parsePriceBandLowerBound: () => 12000,
+}));
+vi.mock('@/lib/pilot/evidence-assessments', () => ({
+  loadCurrentPilotEvidence: vi.fn(async () => []),
+  proposalEvidenceFrom: vi.fn(() => ({ signals: {}, qualification: [] })),
 }));
 
 async function loadRoute() {

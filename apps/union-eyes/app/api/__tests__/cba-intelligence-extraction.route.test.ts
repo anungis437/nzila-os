@@ -14,6 +14,7 @@ vi.mock('@/lib/api/framework', () => ({
   ApiError: { conflict: (message: string) => Object.assign(new Error(message), { status: 409 }) },
 }));
 vi.mock('@/lib/api-auth-guard', () => ({ requireSystemAdmin: () => m.requireSystemAdmin() }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: () => m.requireSystemAdmin() }));
 vi.mock('@/lib/audit/operation-audit', () => ({
   performAuditedOperation: m.operation,
   operationAuditResponse: (e: unknown) =>

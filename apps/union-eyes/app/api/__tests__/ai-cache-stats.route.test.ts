@@ -19,6 +19,7 @@ vi.mock('@/lib/api-auth-guard', () => ({
   withSystemAdminAuth: m.withSystemAdminAuth,
   getCurrentUser: m.getCurrentUser,
 }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: vi.fn(async (context) => context) }));
 vi.mock('@/lib/audit/operation-audit', () => ({
   performAuditedOperation: m.operation,
   operationAuditResponse: (e: unknown) =>

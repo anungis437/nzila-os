@@ -270,13 +270,13 @@ describe('SyncEngine', () => {
     }
   });
 
-  it('passes an abort signal through to the integration, aborted once the lease is lost', async () => {
+  it('passes the abort signal and exact lease fence to the integration, then aborts on lease loss', async () => {
     push([{ id: 'log-signal' }]); // createSyncLog
-    let receivedOptions: { abortSignal?: AbortSignal } | undefined;
+    let receivedOptions: { abortSignal?: AbortSignal; fencingToken?: string } | undefined;
     let resolveSync: (v: unknown) => void = () => {};
     const inFlight = new Promise((resolve) => { resolveSync = resolve; });
     h.factory.getIntegration.mockResolvedValue({
-      sync: (options: { abortSignal?: AbortSignal }) => {
+      sync: (options: { abortSignal?: AbortSignal; fencingToken?: string }) => {
         receivedOptions = options;
         return inFlight;
       },
@@ -290,6 +290,7 @@ describe('SyncEngine', () => {
 
       expect(receivedOptions?.abortSignal).toBeInstanceOf(AbortSignal);
       expect(receivedOptions?.abortSignal?.aborted).toBe(false);
+      expect(receivedOptions?.fencingToken).toMatch(/^tok-/);
 
       push({}); // updateSyncLog for the cancelled run
       await vi.advanceTimersByTimeAsync(300_000); // renewal tick fails -> lease lost

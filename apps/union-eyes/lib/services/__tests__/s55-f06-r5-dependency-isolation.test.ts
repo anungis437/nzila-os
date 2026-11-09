@@ -10,20 +10,20 @@ const root = path.resolve(__dirname, '../../..')
 const src = (rel: string) => readFileSync(path.join(root, rel), 'utf8')
 
 describe('S55 F06 R5 dependency isolation', () => {
-  it('turning on an SSO provider or an integration goes through the activation guard before anything is stored', () => {
+  it('SSO activation uses independent approval while integrations retain the unavailable activation guard', () => {
     const create = src('app/api/enterprise/sso/providers/route.ts')
-    expect(create.indexOf('refuseUnavailableActivation(')).toBeGreaterThan(0)
-    expect(create.indexOf('refuseUnavailableActivation(')).toBeLessThan(create.indexOf('encryptSecret(validated'))
+    expect(create).toContain('enabled: false')
     const patch = src('app/api/enterprise/sso/providers/[id]/route.ts')
-    expect(patch.indexOf('refuseUnavailableActivation(')).toBeLessThan(patch.indexOf('.update(ssoProviders)'))
-    const ext = src('app/api/extensions/[id]/route.ts')
-    expect(ext.indexOf('refuseUnavailableActivation(')).toBeLessThan(ext.indexOf('.update(apiIntegrations)'))
+    expect(patch).toContain('A distinct organization administrator must approve SSO activation')
+    expect(patch).toContain('ssoProviderVersions')
+    const control = src('lib/integrations/control-plane.ts')
+    expect(control.indexOf('refuseUnavailableActivation({')).toBeLessThan(control.indexOf('SyncEngine.getInstance().executeSync'))
   })
 
   it('the guard stops refusing only when the effect itself says a consumer exists', () => {
     expect(src('lib/reality/activation-guard.ts')).toContain('if (input.effect.inEffect || input.asked.length === 0) return')
     const effect = src('lib/reality/configuration-effect.ts')
-    expect(effect).toMatch(/SSO_SIGN_IN_EFFECT[^]*?inEffect: false/)
+    expect(effect).toMatch(/SSO_SIGN_IN_EFFECT[^]*?inEffect: true/)
     expect(effect).toMatch(/INTEGRATION_SYNC_EFFECT[^]*?inEffect: false/)
   })
 

@@ -32,6 +32,7 @@ import { IndustrialAllianceAdapter } from './adapters/insurance/ia-adapter';
 import { SlackAdapter } from './adapters/communication/slack-adapter';
 import { TeamsAdapter } from './adapters/communication/teams-adapter';
 import { LinkedInLearningAdapter } from './adapters/lms/linkedin-learning-adapter';
+import { resolveIntegrationCredentials } from './credential-store';
 
 /**
  * Integration Factory
@@ -80,16 +81,6 @@ export class IntegrationFactory {
       );
     }
 
-    // Check environment variables
-    const envCheck = this.registry.checkEnvironmentVars(provider);
-    if (!envCheck.available) {
-      throw new IntegrationError(
-        `Missing required environment variables: ${envCheck.missing.join(', ')}`,
-        provider,
-        'MISSING_ENV_VARS'
-      );
-    }
-
     // Load configuration from database
     const config = await this.loadConfig(organizationId, provider);
     if (!config) {
@@ -108,9 +99,16 @@ export class IntegrationFactory {
       );
     }
 
+    // Credentials are resolved only at the execution boundary. The database
+    // stores a tenant/provider binding and version, never the secret payload.
+    const runtimeConfig: IntegrationConfig = {
+      ...config,
+      credentials: await resolveIntegrationCredentials(db, organizationId, provider),
+    };
+
     // Create new instance
-    instance = this.createInstance(provider, organizationId, config);
-    await instance.initialize(config);
+    instance = this.createInstance(provider, organizationId, runtimeConfig);
+    await instance.initialize(runtimeConfig);
 
     // Cache instance
     this.instances.set(cacheKey, instance);

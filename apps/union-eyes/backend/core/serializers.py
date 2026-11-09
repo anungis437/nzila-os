@@ -10,7 +10,7 @@ class AlertRulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlertRules
         fields = ['id', 'created_at', 'updated_at', 'organization']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'active_version']
 
 
 class AlertConditionsSerializer(serializers.ModelSerializer):
@@ -316,7 +316,7 @@ class IntegrationConfigsSerializer(serializers.ModelSerializer):
         model = IntegrationConfigs
         fields = '__all__'
         extra_kwargs = {'credentials': {'write_only': True}}
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'active_version']
 
 
 class IntegrationSyncLogSerializer(serializers.ModelSerializer):

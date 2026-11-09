@@ -11,13 +11,22 @@ const m = vi.hoisted(() => ({
 
 function selectChain(queue: unknown[][]) {
   const c: Record<string, unknown> = {};
-  for (const fn of ['from', 'where']) c[fn] = () => c;
-  c.limit = async () => (queue.shift() ?? []);
+  let table: { __name?: string } | undefined;
+  c.from = (value: { __name?: string }) => { table = value; return c; };
+  c.where = () => c;
+  c.orderBy = async () => table?.__name === 'questions'
+    ? [{ id: 'question-1', questionText: 'Question', questionType: 'text', orderIndex: 1, required: false }]
+    : [];
+  c.limit = async () => {
+    if (table?.__name === 'questionnaireVersions') return [{ id: 'version-1', version: 1 }];
+    return queue.shift() ?? [];
+  };
   return c;
 }
 
 const tx = {
   select: vi.fn(() => selectChain(m.selectQueue)),
+  execute: vi.fn(async () => undefined),
   insert: vi.fn(() => ({
     values: (v: Record<string, unknown>) => {
       m.insertValues = v;
@@ -38,8 +47,16 @@ vi.mock('@/db/db', () => ({
   db: { select: vi.fn(() => selectChain(m.dbSelectQueue)) },
 }));
 vi.mock('@/db/schema', () => ({
-  surveys: { id: 'id', organizationId: 'organizationId', allowAnonymous: 'allowAnonymous', status: 'status', publishedAt: 'publishedAt', closesAt: 'closesAt' },
+  surveys: { __name: 'surveys', id: 'id', organizationId: 'organizationId', allowAnonymous: 'allowAnonymous', allowMultipleResponses: 'allowMultipleResponses', status: 'status', publishedAt: 'publishedAt', closesAt: 'closesAt' },
   surveyResponses: { id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', status: 'status', responseTokenHash: 'responseTokenHash' },
+  surveyQuestions: {
+    __name: 'questions', id: 'questionId', surveyId: 'questionSurveyId', organizationId: 'questionOrganizationId',
+    questionText: 'questionText', questionType: 'questionType', description: 'description', orderIndex: 'orderIndex', section: 'section', required: 'required',
+    choices: 'choices', allowOther: 'allowOther', minChoices: 'minChoices', maxChoices: 'maxChoices', ratingMin: 'ratingMin', ratingMax: 'ratingMax',
+    minLength: 'minLength', maxLength: 'maxLength', placeholder: 'placeholder', showIf: 'showIf',
+  },
+  surveyQuestionnaireVersions: { __name: 'questionnaireVersions', id: 'versionId', surveyId: 'versionSurveyId', version: 'version', contentDigest: 'contentDigest' },
+  surveyAnonymousParticipations: { id: 'participationId' },
 }));
 
 async function loadRoute() {
@@ -47,7 +64,7 @@ async function loadRoute() {
 }
 
 const SURVEY_ID = '11111111-1111-4111-8111-111111111111';
-const OPEN_SURVEY = { id: SURVEY_ID, status: 'published', publishedAt: new Date('2020-01-01'), closesAt: null };
+const OPEN_SURVEY = { id: SURVEY_ID, status: 'published', publishedAt: new Date('2020-01-01'), closesAt: null, allowMultipleResponses: true };
 
 describe('survey response creation route', () => {
   beforeEach(() => {

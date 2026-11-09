@@ -17,7 +17,7 @@ vi.mock('@/lib/api/framework', () => ({
 }))
 vi.mock('@/lib/api/list-page', () => ({ listPage: () => ({ limit: 1, offset: 0 }) }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }))
-vi.mock('@/lib/pension/pension-authority', () => ({ isPensionAdministrator: vi.fn(), ownPensionIdentities: vi.fn(), PENSION_ADMIN_ROLES: ['pension_administrator'] }))
+vi.mock('@/lib/pension/pension-authority', () => ({ isPensionAdministrator: vi.fn(), ownPensionIdentities: vi.fn(), requirePensionTrusteeMandate: vi.fn(async () => ({ id: 'mandate-1' })), PENSION_ADMIN_ROLES: ['pension_administrator'] }))
 vi.mock('@/db/schema', () => ({ pensionContributions: { id: 'id' }, pensionMembers: { id: 'id', name: 'name', organizationId: 'organizationId' } }))
 vi.mock('drizzle-orm', async (importOriginal) => ({ ...(await importOriginal<typeof import('drizzle-orm')>()), eq: vi.fn(() => 'eq'), and: vi.fn(() => 'and'), desc: vi.fn(), inArray: vi.fn() }))
 vi.mock('@/lib/db/with-rls-context', () => ({

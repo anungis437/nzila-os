@@ -75,6 +75,7 @@ beforeAll(async () => {
   pg = created.pg;
   state.db = created.db;
   // The table helper creates columns only; the production uniqueness of a user on a roster is a separate index.
+  await pg.exec('ALTER TABLE grievances ADD COLUMN demo_seed_id uuid;');
   await pg.exec('CREATE UNIQUE INDEX unique_org_membership ON organization_members (organization_id, user_id)');
 });
 

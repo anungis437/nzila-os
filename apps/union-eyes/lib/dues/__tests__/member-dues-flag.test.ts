@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const m = vi.hoisted(() => ({
   initiateDuesPayment: vi.fn(),
@@ -33,6 +33,10 @@ const context = { organizationId: 'org_1', userId: 'user_1' }
 const flag = 'UE_MEMBER_DUES_PAYMENTS'
 
 describe('member dues payment is a dormant optional capability', () => {
+  afterEach(() => {
+    delete process.env[flag]
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     delete process.env[flag]
@@ -47,12 +51,20 @@ describe('member dues payment is a dormant optional capability', () => {
   })
 
   describe('flag helper', () => {
-    it('is off unless explicitly set to 1, whatever Stripe configuration exists', async () => {
+    it('is off whatever Stripe configuration exists', async () => {
       const { isMemberDuesPaymentEnabled } = await import('../member-dues-flag')
       expect(isMemberDuesPaymentEnabled({})).toBe(false)
       expect(isMemberDuesPaymentEnabled({ STRIPE_SECRET_KEY: 'sk_test_x' })).toBe(false)
       expect(isMemberDuesPaymentEnabled({ UE_MEMBER_DUES_PAYMENTS: 'true' })).toBe(false)
-      expect(isMemberDuesPaymentEnabled({ UE_MEMBER_DUES_PAYMENTS: '1' })).toBe(true)
+    })
+
+    // DEF-0B11-PRP-DUES-PAY-POST-SENDS-THE-ORGANIZATION-AND-MEMBER-USER-ID-TO-THE-PROCESSOR: no source names the merchant account
+    // or records the member's consent to disclose the organization and member ids to the processor, and the owner decision is that
+    // Union Eyes does not collect dues. The deployment flag alone can no longer switch collection on.
+    it('stays off even when UE_MEMBER_DUES_PAYMENTS=1, and says why', async () => {
+      const { isMemberDuesPaymentEnabled, assertMemberDuesPaymentEnabled } = await import('../member-dues-flag')
+      expect(isMemberDuesPaymentEnabled({ UE_MEMBER_DUES_PAYMENTS: '1', STRIPE_SECRET_KEY: 'sk_test_x' })).toBe(false)
+      expect(() => assertMemberDuesPaymentEnabled({ UE_MEMBER_DUES_PAYMENTS: '1' })).toThrow(/merchant account/)
     })
   })
 
@@ -67,16 +79,13 @@ describe('member dues payment is a dormant optional capability', () => {
       expect(m.initiateDuesPayment).not.toHaveBeenCalled()
     })
 
-    it('initiates a server-owned payment when explicitly enabled', async () => {
+    it('still answers 501 and sends nothing to the processor when the deployment flag is set', async () => {
       process.env[flag] = '1'
       const { POST } = await import('../../../app/api/dues/create-payment-intent/route')
-      const result = await (
-        POST as unknown as (c: unknown) => Promise<{ paymentIntentId: string }>
-      )(context)
-      expect(result.paymentIntentId).toBe('pi_1')
-      expect(m.initiateDuesPayment).toHaveBeenCalledWith(
-        expect.objectContaining({ organizationId: 'org_1', userId: 'user_1' }),
-      )
+      await expect((POST as unknown as (c: unknown) => Promise<unknown>)(context)).rejects.toMatchObject({
+        code: 'NOT_IMPLEMENTED',
+      })
+      expect(m.initiateDuesPayment).not.toHaveBeenCalled()
     })
   })
 
@@ -91,11 +100,13 @@ describe('member dues payment is a dormant optional capability', () => {
       expect(m.initiateDuesPayment).not.toHaveBeenCalled()
     })
 
-    it('initiates a server-owned payment when explicitly enabled', async () => {
+    it('still answers 501 and sends neither the organization nor the member id to the processor when the deployment flag is set', async () => {
       process.env[flag] = '1'
       const { POST } = await import('../../../app/api/portal/dues/pay/route')
-      await (POST as unknown as (c: unknown) => Promise<unknown>)(context)
-      expect(m.initiateDuesPayment).toHaveBeenCalledTimes(1)
+      await expect((POST as unknown as (c: unknown) => Promise<unknown>)(context)).rejects.toMatchObject({
+        code: 'NOT_IMPLEMENTED',
+      })
+      expect(m.initiateDuesPayment).not.toHaveBeenCalled()
     })
   })
 
@@ -117,6 +128,14 @@ describe('member dues payment is a dormant optional capability', () => {
       const response = await (POST as unknown as (c: unknown) => Promise<Response>)({ ...context, body })
       expect(response.status).toBe(501)
       expect(await response.json()).toMatchObject({ code: 'NOT_IMPLEMENTED' })
+      expect(m.createCheckoutSession).not.toHaveBeenCalled()
+    })
+
+    it('answers 501 without touching the payment service even when the deployment flag is set', async () => {
+      process.env[flag] = '1'
+      const { POST } = await import('../../../app/api/payments/checkout/create/route')
+      const response = await (POST as unknown as (c: unknown) => Promise<Response>)({ ...context, body })
+      expect(response.status).toBe(501)
       expect(m.createCheckoutSession).not.toHaveBeenCalled()
     })
   })

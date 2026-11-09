@@ -20,9 +20,10 @@ const state = vi.hoisted(() => ({
   removed: [] as string[],
   putFails: false,
   removeFails: false,
+  readBounds: [] as number[],
   storage: null as unknown as {
     put: (key: string, bytes: Buffer, type: string) => Promise<void>;
-    read: (key: string) => Promise<Buffer>;
+    read: (key: string, maxBytes: number) => Promise<Buffer>;
     remove: (key: string) => Promise<void>;
   },
 }));
@@ -32,9 +33,12 @@ state.storage = {
     if (state.putFails) throw new Error('scanner unavailable');
     state.blobs.set(key, bytes);
   },
-  read: async (key) => {
+  // Like readBlobBounded: the size is checked before anything is read, and an object over the bound is refused.
+  read: async (key, maxBytes) => {
+    state.readBounds.push(maxBytes);
     const blob = state.blobs.get(key);
     if (!blob) throw new Error('BlobNotFound');
+    if (blob.length > maxBytes) throw Object.assign(new Error('too large'), { name: 'BlobTooLargeError' });
     return blob;
   },
   remove: async (key) => {
@@ -258,6 +262,15 @@ describe('acceptance check', () => {
     const gone = await openOk('gone');
     state.blobs.delete(gone.key);
     expect(await check(gone.view.intakeId)).toEqual({ ok: false, kind: 'object_missing' });
+  });
+
+  // DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ: the object is read with the recorded size as its bound.
+  it('reads the object bounded by the recorded size, and refuses one that has grown without reading it whole', async () => {
+    const grown = await openOk('small');
+    state.readBounds = [];
+    state.blobs.set(grown.key, Buffer.alloc(10 * 1024 * 1024, 1));
+    expect(await check(grown.view.intakeId)).toEqual({ ok: false, kind: 'object_changed' });
+    expect(state.readBounds).toEqual([Buffer.byteLength('small')]);
   });
 });
 

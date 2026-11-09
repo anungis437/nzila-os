@@ -2,6 +2,7 @@ import { and, desc, eq, or, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { assignedCaseRepresentativeIds } from '@/lib/services/case-access-service';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 import { documents, documentLinks } from '@/db/schema/documents-schema';
 import {
   filterAuthorizedDocumentsForActor,
@@ -187,7 +188,7 @@ export async function getRelatedDocuments(params: {
       createdAt: grievances.createdAt,
     })
     .from(grievances)
-    .where(and(eq(grievances.id, params.caseId), eq(grievances.organizationId, params.orgId)))
+    .where(and(eq(grievances.id, params.caseId), eq(grievances.organizationId, params.orgId), productionGrievanceCondition()))
     .limit(1);
 
   if (!caseRow) {
@@ -228,6 +229,7 @@ export async function getRelatedDocuments(params: {
         .where(
           and(
             eq(grievances.organizationId, params.orgId),
+            productionGrievanceCondition(),
             sql`${grievances.id} <> ${params.caseId}::uuid`,
             or(
               caseRow.grievantId ? eq(grievances.grievantId, caseRow.grievantId) : sql`false`,

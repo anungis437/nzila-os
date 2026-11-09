@@ -114,6 +114,8 @@ export class WorkdayAdapter extends BaseIntegration {
   // ==========================================================================
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const startTime = Date.now();
@@ -127,6 +129,7 @@ export class WorkdayAdapter extends BaseIntegration {
       const orgs = options.orgs || this.capabilities.supportedEntities;
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           this.logOperation('sync', { message: `Syncing ${entity}` });
 
@@ -215,6 +218,7 @@ export class WorkdayAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getEmployees({
         limit: this.BATCH_SIZE,
         offset,
@@ -222,6 +226,7 @@ export class WorkdayAdapter extends BaseIntegration {
       });
 
       for (const workdayEmployee of response.data) {
+        this.throwIfAborted();
         try {
           // Check if employee exists (scoped to this org + provider to prevent
           // cross-tenant row collisions on externalId)
@@ -318,12 +323,14 @@ export class WorkdayAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getPositions({
         limit: this.BATCH_SIZE,
         offset,
       });
 
       for (const workdayPosition of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalPositions.findFirst({
             where: and(
@@ -395,12 +402,14 @@ export class WorkdayAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getDepartments({
         limit: this.BATCH_SIZE,
         offset,
       });
 
       for (const workdayDept of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalDepartments.findFirst({
             where: and(

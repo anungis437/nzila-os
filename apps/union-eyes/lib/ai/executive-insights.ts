@@ -27,6 +27,7 @@ import { complianceAlerts } from '@/db/schema/domains/compliance/employer-compli
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { logger } from '@/lib/logger';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 // ============================================================================
 // TYPES
@@ -251,13 +252,14 @@ async function gatherOrgContext(
     (await tx
       .select({ value: count() })
       .from(grievances)
-      .where(and(eq(grievances.organizationId, organizationId), gte(grievances.createdAt, sinceDate))))[0],
+      .where(and(eq(grievances.organizationId, organizationId), productionGrievanceCondition(), gte(grievances.createdAt, sinceDate))))[0],
     (await tx
       .select({ value: count() })
       .from(grievances)
       .where(
         and(
           eq(grievances.organizationId, organizationId),
+          productionGrievanceCondition(),
           sql`${grievances.status} NOT IN ('closed', 'withdrawn', 'settled')`,
         ),
       ))[0],
@@ -267,6 +269,7 @@ async function gatherOrgContext(
       .where(
         and(
           eq(grievances.organizationId, organizationId),
+          productionGrievanceCondition(),
           eq(grievances.status, 'arbitration'),
           gte(grievances.createdAt, sinceDate),
         ),

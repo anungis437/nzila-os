@@ -44,6 +44,7 @@ vi.mock('@/lib/api/standardized-responses', () => ({
 }));
 
 const DIGEST = 'a'.repeat(64);
+const SCOPE_ID = '11111111-1111-4111-8111-111111111111';
 
 async function loadRoute() {
   return import('../location/consent/route');
@@ -69,7 +70,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
   // DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED
   it('POST refuses client-authored text, absent acknowledgment, forged version and invalid permissions', async () => {
     const { POST } = await loadRoute();
-    const base = { noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringStrike: true };
+    const base = { noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, scopeKind: 'strike', scopeId: SCOPE_ID };
     for (const extra of [
       { allowedDuringStrike: 'false' },
       { allowedDuringEvents: 1 },
@@ -95,14 +96,14 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     const { POST } = await loadRoute();
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
       method: 'POST',
-      body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringStrike: true }),
+      body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, scopeKind: 'strike', scopeId: SCOPE_ID }),
     }));
     expect(response.status).toBe(200);
     expect(m.requestLocationConsent).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: 'caller-own-id', purpose: 'foreground_location_tracking',
         purposeDescription: 'Server description', consentText: 'Approved exact notice',
-        noticeVersion: 'v1', noticeDigest: DIGEST, allowedDuringStrike: true,
+        noticeVersion: 'v1', noticeDigest: DIGEST, scopeKind: 'strike', scopeId: SCOPE_ID, allowedDuringStrike: true,
       }),
       m.tx,
     );
@@ -120,7 +121,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     const { POST } = await loadRoute();
     m.getLocationConsentNotice.mockReturnValueOnce(null);
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
-      method: 'POST', body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringStrike: true }),
+      method: 'POST', body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, scopeKind: 'strike', scopeId: SCOPE_ID }),
     }));
     expect(response.status).toBe(503);
     expect(m.requestLocationConsent).not.toHaveBeenCalled();
@@ -141,7 +142,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
       method: 'POST',
-      body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringEvents: true }),
+      body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, scopeKind: 'event', scopeId: SCOPE_ID }),
     }));
 
     expect(response.status).toBe(500);
@@ -154,7 +155,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     const response = await POST(new NextRequest('http://localhost/api/location/consent', {
       method: 'POST',
-      body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, allowedDuringEvents: true }),
+      body: JSON.stringify({ noticeVersion: 'v1', noticeDigest: DIGEST, acknowledged: true, scopeKind: 'event', scopeId: SCOPE_ID }),
     }));
 
     expect(response.status).toBe(409);
@@ -173,10 +174,10 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
   it('GET checks consent status only for the authenticated caller, ignoring a client-supplied ?userId=', async () => {
     const { GET } = await loadRoute();
 
-    await GET(new NextRequest('http://localhost/api/location/consent?userId=attacker-supplied-victim-id&context=strike'));
+    await GET(new NextRequest(`http://localhost/api/location/consent?userId=attacker-supplied-victim-id&context=strike&scopeId=${SCOPE_ID}`));
 
     expect(m.getOrganizationIdForUser).toHaveBeenCalledWith('caller-own-id');
-    expect(m.hasValidConsent).toHaveBeenCalledWith('caller-own-id', 'strike', m.tx);
+    expect(m.hasValidConsent).toHaveBeenCalledWith('caller-own-id', 'org-1', 'strike', SCOPE_ID, m.tx);
   });
 
   it('GET returns the current exact notice for member review without changing consent', async () => {
@@ -206,10 +207,10 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     const { GET } = await loadRoute();
     m.hasValidConsent.mockRejectedValueOnce(new Error('RLS read refused'));
 
-    const response = await GET(new NextRequest('http://localhost/api/location/consent?context=strike'));
+    const response = await GET(new NextRequest(`http://localhost/api/location/consent?context=strike&scopeId=${SCOPE_ID}`));
 
     expect(response.status).toBe(500);
-    expect(m.hasValidConsent).toHaveBeenCalledWith('caller-own-id', 'strike', m.tx);
+    expect(m.hasValidConsent).toHaveBeenCalledWith('caller-own-id', 'org-1', 'strike', SCOPE_ID, m.tx);
   });
 
   it('DELETE revokes consent only for the authenticated caller, ignoring a client-supplied ?userId=', async () => {
@@ -217,7 +218,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
 
     await DELETE(new NextRequest('http://localhost/api/location/consent?userId=attacker-supplied-victim-id&reason=done'));
 
-    expect(m.revokeLocationConsent).toHaveBeenCalledWith('caller-own-id', 'done', m.tx);
+    expect(m.revokeLocationConsent).toHaveBeenCalledWith('caller-own-id', 'org-1', 'done', m.tx);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(
       m.tx,
       expect.objectContaining({ userId: 'caller-own-id', action: 'location.consent.revoke', resourceId: 'consent_1' }),
@@ -233,7 +234,7 @@ describe('location/consent route (PR #752 round 17 — self-service consent IDOR
     const response = await DELETE(new NextRequest('http://localhost/api/location/consent?reason=gdpr'));
 
     expect(response.status).toBe(200);
-    expect(m.eraseLocationData).toHaveBeenCalledWith('caller-own-id', m.tx);
+    expect(m.eraseLocationData).toHaveBeenCalledWith('caller-own-id', 'org-1', m.tx);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.tx, expect.objectContaining({
       userId: 'caller-own-id', action: 'location.data.erase',
       details: expect.objectContaining({ trackingRecordsDeleted: 2, eventRecordsDeleted: 1 }),

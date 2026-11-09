@@ -12,6 +12,7 @@ import { withSystemAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard'
 import { performAtomicSystemAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { addressSha256, liftAddressSuppression } from '@/lib/communications/address-suppression';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,7 @@ const liftSchema = z.object({
 });
 
 export const POST = withSystemAdminAuth(async (request, context: BaseAuthContext) => {
+  await requirePlatformStaffAuthority(context, 'platform.email_suppressions.manage');
   const parsed = liftSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'An address and a reason of at least 10 characters are required');

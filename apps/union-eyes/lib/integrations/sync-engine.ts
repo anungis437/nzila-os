@@ -179,7 +179,11 @@ export class SyncEngine {
         provider,
         options
       );
-      const syncOptions: SyncOptions = { ...preparedOptions, abortSignal: abortController.signal };
+      const syncOptions: SyncOptions = {
+        ...preparedOptions,
+        abortSignal: abortController.signal,
+        fencingToken: lockToken,
+      };
 
       // Races the integration's sync() against the lease-loss signal. If the lease is lost before sync() resolves,
       // this method stops waiting on it rather than trusting however much further progress it silently makes: the

@@ -22,6 +22,9 @@ vi.mock('drizzle-orm', () => ({
   and: vi.fn((...args: any[]) => args),
   or: vi.fn((...args: any[]) => args),
   desc: vi.fn(),
+  lte: vi.fn((...args: any[]) => args),
+  gt: vi.fn((...args: any[]) => args),
+  isNull: vi.fn((...args: any[]) => args),
   sql: vi.fn(),
   relations: vi.fn(() => ({})),
 }));
@@ -33,6 +36,13 @@ vi.mock('@/db/schema', () => ({
     eventType: 'eventType',
     payload: 'payload',
     processedAt: 'processedAt',
+  },
+  shopifyWebhookSecretVersions: {
+    secretRef: 'secretRef',
+    orgId: 'orgId',
+    status: 'status',
+    validFrom: 'validFrom',
+    validUntil: 'validUntil',
   },
 }));
 
@@ -58,6 +68,14 @@ vi.mock('@/lib/db/with-rls-context', () => {
   return {
     withSystemContext: vi.fn((fn: (tx: unknown) => Promise<unknown>) =>
       fn({
+        select: () => {
+          const chain: any = {
+            from: () => chain,
+            where: () => chain,
+            limit: async () => [{ secretRef: 'env://UE_SHOPIFY_TEST_SECRET' }],
+          };
+          return chain;
+        },
         insert: mocks.mockInsert,
         query: {
           webhookReceipts: {
@@ -257,17 +275,17 @@ describe('webhook-service', () => {
   /* =================== getWebhookSecret =================== */
   describe('getWebhookSecret', () => {
     it('returns env var value for shopify', async () => {
-      vi.stubEnv('SHOPIFY_WEBHOOK_SECRET', 'shp_secret_xyz');
+      vi.stubEnv('UE_SHOPIFY_TEST_SECRET', 'shp_secret_xyz');
 
-      const result = await getWebhookSecret('shopify');
+      const result = await getWebhookSecret('11111111-1111-4111-8111-111111111111');
 
       expect(result).toBe('shp_secret_xyz');
     });
 
     it('throws when secret is not configured', async () => {
-      vi.stubEnv('SHOPIFY_WEBHOOK_SECRET', '');
+      vi.stubEnv('UE_SHOPIFY_TEST_SECRET', '');
 
-      await expect(getWebhookSecret('shopify')).rejects.toThrow();
+      await expect(getWebhookSecret('11111111-1111-4111-8111-111111111111')).rejects.toThrow();
     });
   });
 });

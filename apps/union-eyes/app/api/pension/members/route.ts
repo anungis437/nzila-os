@@ -2,7 +2,7 @@ import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
 import { listPage } from '@/lib/api/list-page';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { PENSION_ADMIN_ROLES, isPensionAdministrator } from '@/lib/pension/pension-authority';
+import { PENSION_ADMIN_ROLES, isPensionAdministrator, requirePensionTrusteeMandate } from '@/lib/pension/pension-authority';
 import { organizationMembers, pensionMembers, pensionPlans } from '@/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { z } from 'zod';
@@ -85,7 +85,7 @@ export const POST = withApi(
   async ({ body, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const parsed = createMemberSchema.parse(body);
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
       // The plan must be this organization's, and the member is enrolled under that plan's own name.
       const [plan] = await tx
         .select({ id: pensionPlans.id, planName: pensionPlans.planName })
@@ -93,6 +93,7 @@ export const POST = withApi(
         .where(and(eq(pensionPlans.id, parsed.planId), eq(pensionPlans.organizationId, organizationId)))
         .limit(1);
       if (!plan) throw ApiError.notFound('Pension plan');
+      await requirePensionTrusteeMandate(tx, { organizationId, userId, planId: plan.id, action: 'pension:member:enroll' });
       // The person must be an active member of this organization; an id that names no membership here, a membership of another
       // organization, or a removed membership is refused and nothing is written.
       const [membership] = await tx
@@ -125,5 +126,4 @@ export const POST = withApi(
     });
   },
 );
-
 

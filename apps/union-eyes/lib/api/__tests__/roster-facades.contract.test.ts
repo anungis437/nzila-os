@@ -34,9 +34,9 @@ describe('roster facade routes', () => {
       'admin/segments', 'admin/segments/[id]', 'admin/segments/[id]/execute', 'admin/system/settings', 'admin/update-role', 'admin/roles/batch',
       'admin/pki/certificates', 'admin/pki/certificates/[id]', 'admin/pki/signatures', 'admin/pki/workflows', 'auth/role', 'debug/user-role',
       'bulk-import', 'member/ai-feedback', 'members/search', 'members/[id]/roles',
-      'equity/monitoring', 'equity/self-identify', 'equity/snapshots', 'support/metrics', 'support/sla', 'support/tickets',
+      'support/metrics', 'support/sla', 'support/tickets',
       'support/tickets/[id]', 'support/tickets/[id]/assign', 'support/tickets/[id]/comments', 'organizing/assignments',
-      'organizing/assignments/[id]', 'organizing/card-check', 'organizing/committee', 'organizing/forms/generate', 'organizing/labour-board',
+      'organizing/assignments/[id]', 'organizing/card-check', 'organizing/committee', 'organizing/labour-board',
       'organizing/nlrb-filings', 'organizing/notes', 'organizing/notes/[id]', 'organizing/sequences', 'organizing/sequences/[id]',
       'organizing/sequences/[id]/enroll', 'organizing/support-percentage', 'organizing/workplace-mapping', 'continuity/inheritance',
       'onboarding/readiness', 'onboarding/transfers', 'reports/[id]/share', 'upload', 'enterprise/integrations', 'events/[id]/occurrences',
@@ -72,16 +72,14 @@ describe('roster facade routes', () => {
 
   // DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY: these two were pure 501 facades (both still
   // in the `converted` list above as of an earlier round); schedule's GET and send-test's POST are now real
-  // operations (a consent/preference-evaluated audience preview, and a real test send), covered in detail
-  // by lib/api/__tests__/f12-communications.contract.test.ts. Every OTHER method on both routes still
-  // correctly refuses with 501, which this asserts here so they are not silently dropped from this file's
-  // "every former facade accounted for" tracking.
-  it('the campaign schedule and send-test routes still refuse every method they do not implement', () => {
+  // operations (a consent/preference-evaluated outbox schedule, and a real test send), covered in detail
+  // by lib/api/__tests__/f12-communications.contract.test.ts.
+  it('the campaign schedule is a dedicated outbox lifecycle and send-test refuses its unimplemented methods', () => {
     const schedule = files.find((f) => f.route === 'communications/campaigns/[id]/schedule');
     expect(schedule, 'communications/campaigns/[id]/schedule exists').toBeTruthy();
-    expect(schedule!.text).toContain('ApiError.notImplemented');
-    expect(schedule!.text).toMatch(/export const PATCH = notImplemented;/);
-    expect(schedule!.text).toMatch(/export const DELETE = notImplemented;/);
+    expect(schedule!.text).toContain('campaignDeliveryOutbox');
+    expect(schedule!.text).toMatch(/export const PATCH = POST;/);
+    expect(schedule!.text).toContain('communications.campaign.cancelled');
 
     const sendTest = files.find((f) => f.route === 'communications/campaigns/[id]/send-test');
     expect(sendTest, 'communications/campaigns/[id]/send-test exists').toBeTruthy();

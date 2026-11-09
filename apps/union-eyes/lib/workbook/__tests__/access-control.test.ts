@@ -13,6 +13,14 @@ const m = vi.hoisted(() => ({
   appendPublicIntakeAudit: vi.fn(),
 }));
 
+const TEST_CONSENT = {
+  noticeVersion: 'ue-workbook-persistence-2026-11-09',
+  purposes: ['persist', 'process', 'share', 'checkout'],
+  granted: true,
+  grantedAt: '2026-11-09T00:00:00.000Z',
+  withdrawnAt: null,
+};
+
 // A single-row workbook select chain fed by selectQueue. The claimed-workbook
 // authority resolver performs its trusted ownership lookup through this handle
 // (passed as the system-context `tx`).
@@ -21,7 +29,8 @@ const mockTx = {
     const chain = {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
-      limit: vi.fn(async () => (m.selectQueue.shift() ?? []) as unknown[]),
+      limit: vi.fn(async () => ((m.selectQueue.shift() ?? []) as Array<Record<string, unknown>>)
+        .map((row) => ({ consent: TEST_CONSENT, ...row }))),
     };
     return chain;
   }),

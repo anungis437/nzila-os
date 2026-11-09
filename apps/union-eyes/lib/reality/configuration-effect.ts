@@ -1,10 +1,10 @@
 /**
  * What a stored configuration does today, and exactly what stands between it and doing something.
  *
- * Some administrator-saved configuration has no runtime consumer yet: nothing reads an SSO provider at sign-in, and nothing runs an
- * integration's synchronization. Saving, enabling, repointing or deleting such a row is recorded faithfully, but a response or audit
- * record that only says "updated" or "enabled" reads as though the change took effect. Every response and audit record for these
- * configurations carries this statement instead.
+ * Administrator-saved configuration must state whether a qualified runtime consumer exists. OIDC SSO now has one, but only for an
+ * independently approved immutable provider version and a pre-provisioned subject binding. Generic integration configuration still has
+ * no approved synchronization consumer. Every response and audit record carries the corresponding statement instead of implying that
+ * storing a row activated capabilities that do not exist.
  *
  * The statement is specific, not a blanket "not implemented". It names the ONE operation that is blocked and what each requirement is
  * and who owns it (the configuration itself, engineering, an institutional approval, or the provider). A requirement is reported met only
@@ -35,17 +35,17 @@ export interface ConfigurationEffect {
 }
 
 export const SSO_SIGN_IN_EFFECT: ConfigurationEffect = {
-  inEffect: false,
+  inEffect: true,
   capability: 'UE-SSO-SIGN-IN',
   notice:
-    'This provider configuration is stored only. No sign-in, token exchange, provisioning or SCIM code reads it in this release, so enabling it or turning on auto-provisioning does not change how anyone signs in.',
+    'An independently approved OIDC configuration is consumed by the federated sign-in flow. SAML, just-in-time provisioning and SCIM activation remain unavailable.',
   blockedOperation: {
     operation: 'auth.sso.federated_sign_in',
     requires: [
       'complete provider configuration (configuration)',
       'the institution approves this identity provider for this organization (institution)',
-      'verified ownership of the sign-in email domains (engineering, after approval)',
-      'platform authentication supports federation through this provider (engineering, after approval)',
+      'a pre-provisioned verified provider-subject binding (institution)',
+      'an active membership in the configured organization (institution)',
     ],
   },
 }
@@ -84,12 +84,12 @@ export function ssoReadiness(row: Row): Readiness {
   const saml = row.providerType === 'saml'
   const complete = saml
     ? present(row.samlEntityId) && present(row.samlSsoUrl) && present(row.samlCertificate)
-    : present(row.oidcIssuer) && present(row.oidcClientId) && present(row.oidcClientSecret) && present(row.oidcAuthorizationEndpoint) && present(row.oidcTokenEndpoint)
+    : present(row.oidcIssuer) && present(row.oidcClientId) && present(row.oidcClientSecret)
   return readiness([
-    requirement('configuration_complete', 'configuration', complete, saml ? 'entity id, single sign-on URL and certificate' : 'issuer, client id, client secret, authorization and token endpoints'),
-    requirement('provider_approved_by_institution', 'institution', false, 'no approval of an identity provider for this organization is recorded anywhere'),
-    requirement('email_domain_ownership_verified', 'engineering', false, 'no domain verification exists, so a provider could claim another organization\'s addresses'),
-    requirement('platform_authentication_federation', 'engineering', false, 'platform authentication does not federate through organization-configured providers'),
+    requirement('configuration_complete', 'configuration', complete, saml ? 'entity id, single sign-on URL and certificate' : 'issuer, client id and client secret; endpoints are issuer-discovered and same-host constrained'),
+    requirement('provider_approved_by_institution', 'institution', present(row.approvedBy) && present(row.approvedAt) && present(row.approvalReference), 'distinct tenant approval and its evidence reference'),
+    requirement('provider_subject_binding', 'institution', false, 'provider-list readiness cannot establish a caller-specific verified immutable subject binding; sign-in checks it and never binds by email'),
+    requirement('platform_authentication_federation', 'engineering', !saml, 'OIDC state, nonce, PKCE, token validation and opaque session promotion are wired; SAML is unavailable'),
   ])
 }
 

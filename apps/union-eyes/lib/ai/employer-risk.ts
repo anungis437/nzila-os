@@ -27,6 +27,7 @@ import { grievances } from '@/db/schema/domains/claims/grievances';
 import { auditAiInteraction, buildAiEnvelope, type AiResponseEnvelope } from './ai-feature-guard';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { logger } from '@/lib/logger';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 // ============================================================================
 // TYPES
@@ -143,6 +144,7 @@ export async function deriveRiskSignals(
       and(
         eq(grievances.employerId, employerId),
         eq(grievances.organizationId, organizationId),
+        productionGrievanceCondition(),
         gte(grievances.createdAt, thirtyDaysAgo),
       ),
     );
@@ -165,6 +167,7 @@ export async function deriveRiskSignals(
       and(
         eq(grievances.employerId, employerId),
         eq(grievances.organizationId, organizationId),
+        productionGrievanceCondition(),
         eq(grievances.status, 'arbitration'),
         gte(grievances.createdAt, twelveMonthsAgo),
       ),

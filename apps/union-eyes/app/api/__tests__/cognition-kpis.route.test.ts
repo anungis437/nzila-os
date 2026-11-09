@@ -20,6 +20,15 @@ vi.mock('@/lib/audit-logger', () => ({
   AuditEventType: { DATA_ACCESS: 'data_access' },
   AuditSeverity: { LOW: 'low' },
 }));
+vi.mock('@nzila/ue-cognition', () => ({
+  computeKpiSnapshot: vi.fn(() => ({
+    id: 'kpi_1', modelVersion: 'test', estimatedAdminHoursSaved: 4, estimatedRoiCad: 200,
+    assumptions: [
+      { key: 'loadedHourlyRateCad', value: 50 }, { key: 'minutesSavedPerCase', value: 10 },
+      { key: 'workingDaysPerYear', value: 250 }, { key: 'stewardUtilization', value: 0.8 },
+    ],
+  })),
+}));
 
 async function loadRoute() {
   return import('../cognition/kpis/route');

@@ -119,6 +119,8 @@ export class FreshBooksAdapter extends BaseIntegration {
   // ==========================================================================
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const _startTime = Date.now();
@@ -132,6 +134,7 @@ export class FreshBooksAdapter extends BaseIntegration {
       const orgs = options.orgs || this.capabilities.supportedEntities;
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           this.logOperation('sync', { entity, message: `Syncing ${entity}` });
 
@@ -221,6 +224,7 @@ export class FreshBooksAdapter extends BaseIntegration {
       : undefined;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getInvoices({
         page,
         perPage: this.PER_PAGE,
@@ -228,6 +232,7 @@ export class FreshBooksAdapter extends BaseIntegration {
       });
 
       for (const invoice of response.invoices) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalInvoices.findFirst({
             where: and(
@@ -298,12 +303,14 @@ export class FreshBooksAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getPayments({
         page,
         perPage: this.PER_PAGE,
       });
 
       for (const payment of response.payments) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalPayments.findFirst({
             where: and(
@@ -361,12 +368,14 @@ export class FreshBooksAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getClients({
         page,
         perPage: this.PER_PAGE,
       });
 
       for (const client of response.clients) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalCustomers.findFirst({
             where: and(
@@ -429,12 +438,14 @@ export class FreshBooksAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getExpenses({
         page,
         perPage: this.PER_PAGE,
       });
 
       for (const expense of response.expenses) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalAccounts.findFirst({
             where: and(

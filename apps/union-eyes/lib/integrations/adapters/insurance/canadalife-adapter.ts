@@ -112,6 +112,8 @@ export class CanadaLifeAdapter extends BaseIntegration {
   }
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const _startTime = Date.now();
@@ -126,6 +128,7 @@ export class CanadaLifeAdapter extends BaseIntegration {
       const modifiedSince = options.cursor ? new Date(options.cursor) : undefined;
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           switch (entity) {
             case 'policies':
@@ -186,10 +189,12 @@ export class CanadaLifeAdapter extends BaseIntegration {
     let page = 1;
 
     while (true) {
+      this.throwIfAborted();
       const policies = await this.client!.getPolicies(page, this.PAGE_SIZE, modifiedSince);
       if (policies.length === 0) break;
 
       for (const policy of policies) {
+        this.throwIfAborted();
         try {
           const existing = await db.select().from(externalInsurancePolicies).where(
             and(
@@ -243,10 +248,12 @@ export class CanadaLifeAdapter extends BaseIntegration {
     let page = 1;
 
     while (true) {
+      this.throwIfAborted();
       const claims = await this.client!.getClaims(page, this.PAGE_SIZE, modifiedSince);
       if (claims.length === 0) break;
 
       for (const claim of claims) {
+        this.throwIfAborted();
         try {
           const existing = await db.select().from(externalInsuranceClaims).where(
             and(
@@ -303,10 +310,12 @@ export class CanadaLifeAdapter extends BaseIntegration {
     let page = 1;
 
     while (true) {
+      this.throwIfAborted();
       const beneficiaries = await this.client!.getBeneficiaries(page, this.PAGE_SIZE);
       if (beneficiaries.length === 0) break;
 
       for (const beneficiary of beneficiaries) {
+        this.throwIfAborted();
         try {
           const existing = await db.select().from(externalInsuranceBeneficiaries).where(
             and(

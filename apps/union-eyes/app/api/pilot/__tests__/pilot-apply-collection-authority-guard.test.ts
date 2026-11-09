@@ -135,6 +135,7 @@ describe('pilot/apply collection route POST — public intake governance (PR #75
         contactName: 'Ash Bee',
         contactEmail: 'ash@example.com',
         memberCount: 100,
+        crmConsent: { granted: false, noticeVersion: 'pilot-contact-v1' },
       }),
     }));
 
@@ -154,6 +155,7 @@ describe('pilot/apply collection route POST — public intake governance (PR #75
         organizationName: 'Local 1',
         contactName: 'Ash Bee',
         contactEmail: 'ash@example.com',
+        crmConsent: { granted: false, noticeVersion: 'pilot-contact-v1' },
         responses: { organizationId: 'attacker-claimed-org' },
       }),
     }));
@@ -179,6 +181,7 @@ describe('pilot/apply collection route POST — public intake governance (PR #75
         organizationName: 'Local 1',
         contactName: 'Ash Bee',
         contactEmail: 'ash@example.com',
+        crmConsent: { granted: false, noticeVersion: 'pilot-contact-v1' },
         responses: {
           organizationId: 'claimed-org',
           commercialState: 'subscription_active',

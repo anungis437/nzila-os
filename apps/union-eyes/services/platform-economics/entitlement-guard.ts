@@ -34,6 +34,7 @@ export const PLATFORM_MODULES = {
   GRIEVANCE_CASE_SUITE: 'grievance_case_suite',
   FINANCIAL_INTELLIGENCE_SUITE: 'financial_intelligence_suite',
   AI_ADVANCED_INSIGHTS: 'ai_advanced_insights',
+  VOICE_TRANSCRIPTION: 'voice_transcription',
   ALLOCATION_ENGINE: 'allocation_engine',
   TRANSACTION_FEES: 'transaction_fees',
   COMMERCIAL_REPORTING: 'commercial_reporting',
@@ -129,6 +130,17 @@ export const PLATFORM_MODULE_DISPLAY: Record<PlatformModuleKey, ModuleDisplay> =
       'Representatives invoke reviewer-assisted prompts within entitlement-controlled budgets; every suggestion is reviewable, override-able, and audit-logged.',
     aiSafetyDescription:
       'Off by default. Activated only through the deployment contract. Never makes autonomous decisions; every output is attributed, reasoned, and subject to representative review and override.',
+  },
+  voice_transcription: {
+    displayName: 'Voice Transcription',
+    narrativeTagline:
+      'Consent-bound transcription that converts authorized recordings into reviewable working text.',
+    organizationalDescription:
+      'Preserves authorized spoken records as governed, searchable text while retaining consent and provenance controls.',
+    operationalDescription:
+      'Representatives transcribe consented recordings into drafts that remain subject to human review and correction.',
+    aiSafetyDescription:
+      'Off by default. Requires recorded consent and an active entitlement; transcripts are drafts and never constitute autonomous findings or decisions.',
   },
   allocation_engine: {
     displayName: 'Allocation Engine',

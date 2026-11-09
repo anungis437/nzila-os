@@ -131,7 +131,8 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
     const measured = await measure(URL!)
     const counts = summarize(measured.findings)
     for (const [kind, ceiling] of Object.entries(ADVISORY_CEILING)) {
-      expect(counts[kind] ?? 0, `${kind} grew past its ceiling`).toBeLessThanOrEqual(ceiling)
+      const open = measured.findings.filter((finding) => finding.kind === kind)
+      expect(counts[kind] ?? 0, `${kind} grew past its ceiling\n${render(open)}`).toBeLessThanOrEqual(ceiling)
     }
     // Every finding kind outside the strict and advisory sets would be an unclassified class.
     const known = new Set<string>([...STRICT_KINDS, ...Object.keys(ADVISORY_CEILING)])
@@ -247,8 +248,9 @@ describe.skipIf(!URL)('declared-versus-physical convergence', () => {
     const integrityCounts = summarize(integrityOpen.findings)
     expect(integrityCounts.FK_ABSENT).toBe(293)
     // Gate 0 corrective convergence: db/schema/award-templates-schema.ts (a dead duplicate reward_wallet_ledger
-    // declaration) was deleted, taking its 3 declared indexes with it — 797 - 3 = 794.
-    expect(integrityCounts.INDEX_ABSENT).toBe(794)
+    // declaration) was deleted, taking its 3 declared indexes with it. Platform 0088 now owns two later partial
+    // uniqueness indexes, so rolling back the older 0066 generator leaves 792 declared indexes open.
+    expect(integrityCounts.INDEX_ABSENT).toBe(792)
     expect(integrityCounts.CHECK_ABSENT).toBe(36)
     expect(integrityCounts.NOT_NULL_ABSENT).toBe(294)
 

@@ -12,8 +12,13 @@ const m = vi.hoisted(() => ({
 
 function selectChain() {
   const c: Record<string, unknown> = {};
-  for (const fn of ['from', 'where']) c[fn] = () => c;
-  c.limit = async () => (m.selectQueue.shift() ?? []);
+  c.from = () => c;
+  c.where = () => c;
+  c.limit = async () => {
+    const rows = (m.selectQueue.shift() ?? []) as Array<Record<string, unknown>>;
+    if (rows[0] && Object.hasOwn(rows[0], 'choices')) return [{ questions: rows }];
+    return rows.map((row) => ({ questionnaireVersionId: 'version-1', ...row }));
+  };
   return c;
 }
 
@@ -42,11 +47,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/schema', () => ({
   surveyResponses: { id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', status: 'status', userId: 'userId', responseTokenHash: 'responseTokenHash' },
-  surveyQuestions: {
-    id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', required: 'required',
-    choices: 'choices', allowOther: 'allowOther', minChoices: 'minChoices', maxChoices: 'maxChoices',
-    ratingMin: 'ratingMin', ratingMax: 'ratingMax', minLength: 'minLength', maxLength: 'maxLength',
-  },
+  surveyQuestionnaireVersions: { id: 'versionId', surveyId: 'versionSurveyId', organizationId: 'versionOrganizationId', questions: 'questions' },
   surveyAnswers: {
     id: 'id', responseId: 'responseId', questionId: 'questionId', organizationId: 'organizationId',
     answerText: 'answerText', answerNumber: 'answerNumber', answerChoices: 'answerChoices', answerOther: 'answerOther', answeredAt: 'answeredAt',

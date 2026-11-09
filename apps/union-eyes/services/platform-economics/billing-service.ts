@@ -181,7 +181,7 @@ export async function closeBillingPeriod(
   if (period.isClosed) throw new Error(`Period ${period.label} is already closed`);
 
   // Guard: require completed reconciliation with no open exceptions
-  await requireReconciliation(billingPeriodId);
+  await requireReconciliation(billingPeriodId, period.organizationId);
 
   const [updated] = await db
     .update(billingPeriods)
@@ -687,13 +687,18 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
   return payment;
 }
 
-export async function runBillingLifecycleAutomation(runAt = new Date(), actor = 'system:billing-cron') {
+export async function runBillingLifecycleAutomation(
+  organizationIds: string[],
+  runAt = new Date(),
+  actor = 'system:billing-cron',
+) {
+  if (organizationIds.length === 0) throw new Error('Billing automation requires at least one mandate-scoped organization');
   const subscriptions = await db
     .select({
       organizationId: orgSubscriptions.organizationId,
     })
     .from(orgSubscriptions)
-    .where(eq(orgSubscriptions.status, 'active'));
+    .where(and(eq(orgSubscriptions.status, 'active'), inArray(orgSubscriptions.organizationId, organizationIds)));
 
   const monthStart = new Date(Date.UTC(runAt.getUTCFullYear(), runAt.getUTCMonth(), 1, 0, 0, 0));
   const monthEnd = new Date(Date.UTC(runAt.getUTCFullYear(), runAt.getUTCMonth() + 1, 0, 23, 59, 59));
@@ -816,7 +821,7 @@ export async function getInvoices(organizationId: string, limit = 50, offset = 0
     .offset(offset);
 }
 
-/** eader is the caller's tenant transaction when the read and its audit record must commit together; it defaults to the shared handle. */
+/** Reader is the caller's tenant transaction when the read and its audit record must commit together; it defaults to the shared handle. */
 export async function getInvoiceWithLineItems(invoiceId: string, organizationId: string, reader: Pick<typeof db, 'select'> = db) {
   const [invoice] = await reader
     .select()

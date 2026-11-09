@@ -115,6 +115,9 @@ describe('employer-execution/remittance-runs route', () => {
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: any) => Promise<unknown>) => {
       const tx = {
         select: vi.fn(() => makeSelectChain()),
+        update: vi.fn(() => ({
+          set: vi.fn(() => ({ where: vi.fn(async () => []) })),
+        })),
         insert: vi.fn(() => ({
           values: vi.fn((values: any) => {
             m.inserts.push({ values });

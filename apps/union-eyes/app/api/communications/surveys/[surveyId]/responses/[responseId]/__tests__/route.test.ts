@@ -11,8 +11,14 @@ const m = vi.hoisted(() => ({
 
 function selectChain() {
   const c: Record<string, unknown> = {};
-  for (const fn of ['from', 'where']) c[fn] = () => c;
-  c.limit = async () => (m.selectQueue.shift() ?? []);
+  let table: { __name?: string } | undefined;
+  c.from = (value: { __name?: string }) => { table = value; return c; };
+  c.where = () => c;
+  c.limit = async () => {
+    const rows = (m.selectQueue.shift() ?? []) as Array<Record<string, unknown>>;
+    if (table?.__name === 'questionnaireVersions') return [{ questions: rows.map((row) => ({ required: true, ...row })) }];
+    return rows.map((row) => ({ questionnaireVersionId: 'version-1', ...row }));
+  };
   // Plain select (no .limit()) used for the required-questions and answered-ids lookups resolves via await directly.
   (c as { then: unknown }).then = (res: (v: unknown) => unknown) => Promise.resolve(m.selectQueue.shift() ?? []).then(res);
   return c;
@@ -42,7 +48,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/db/schema', () => ({
   surveyResponses: { id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', status: 'status', userId: 'userId', responseTokenHash: 'responseTokenHash' },
-  surveyQuestions: { id: 'id', surveyId: 'surveyId', organizationId: 'organizationId', required: 'required' },
+  surveyQuestionnaireVersions: { __name: 'questionnaireVersions', id: 'versionId', surveyId: 'versionSurveyId', organizationId: 'versionOrganizationId', questions: 'questions' },
   surveyAnswers: { questionId: 'questionId', responseId: 'responseId', organizationId: 'organizationId' },
 }));
 

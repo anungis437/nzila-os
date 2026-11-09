@@ -9,6 +9,7 @@ import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
 import { grievances, stewards } from '@/db/schema';
 import { organizationMembers } from '@/db/schema-organizations';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 /** Statuses present in the live grievance status column that end a case. */
 const TERMINAL_STATUSES = ['closed', 'settled', 'withdrawn', 'denied'] as const;
@@ -35,7 +36,7 @@ export function loadStewardsDashboard(organizationId: string, now: Date = new Da
 
   return withRLSContext({ organizationId }, async (tx) => {
     const activeStewards = and(eq(stewards.orgId, organizationId), eq(stewards.active, true));
-    const inOrganization = eq(grievances.organizationId, organizationId);
+    const inOrganization = and(eq(grievances.organizationId, organizationId), productionGrievanceCondition());
 
     const [{ total: totalStewards, caseload }] = await tx
       .select({

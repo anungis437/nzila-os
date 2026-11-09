@@ -13,9 +13,11 @@ describe('Gate 0 batch B96: honest availability and endpoint rules', () => {
     expect(route).not.toContain('listEngagementSnapshots')
   })
 
-  it('accepts only a public http(s) address as an integration endpoint', () => {
+  it('accepts only a managed credential reference and provider-approved settings for an integration', () => {
     const route = src('app/api/extensions/[id]/route.ts')
-    expect(route).toContain('assertPublicHttpUrl(value)')
-    expect(route).toContain("'Must be a public http(s) address'")
+    expect(route).toContain('credentialRef: z.string().trim().min(1).max(255)')
+    const control = src('lib/integrations/control-plane.ts')
+    expect(control).toContain('assertApprovedSettingsKeys(input.provider, input.settings)')
+    expect(control).toContain('rotateIntegrationCredentialBinding')
   })
 })

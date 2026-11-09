@@ -4,6 +4,7 @@ import { grievances } from '@/db/schema/domains/claims/grievances';
 import { collectiveAgreements } from '@/db/schema/domains/agreements/collective-agreements';
 import { organizationMembers } from '@/db/schema/organization-members-schema';
 import type { DocumentAuthorizationActor } from '@/lib/services/document-authorization-service';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 import { getRelatedDocuments } from '@/services/case-intelligence/related-documents-service';
 import type { IntelligenceContext } from '@/services/case-intelligence/types';
 
@@ -35,7 +36,13 @@ export async function buildCaseGraph(params: {
       organizationId: grievances.organizationId,
     })
     .from(grievances)
-    .where(and(eq(grievances.id, params.context.caseId), eq(grievances.organizationId, params.context.orgId)))
+    .where(
+      and(
+        eq(grievances.id, params.context.caseId),
+        eq(grievances.organizationId, params.context.orgId),
+        productionGrievanceCondition(),
+      ),
+    )
     .limit(1);
 
   if (!caseRow) {

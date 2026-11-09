@@ -9,8 +9,8 @@
  *     organization by its row-level security, and no role can delete a row;
  *   - committee_memberships (promoted: the committee workspace reads the caller's own active membership to let a member read a committee) is visible only through its
  *     committee's organization, and the runtime role can read it and nothing else;
- *   - integration_sync_logs (promoted: deleting an integration first looks for synchronization history) is visible only through its integration's organization, so an
- *     integration that has run is refused deletion and one that has not is deleted;
+ *   - integration_sync_logs remains tenant-readable for legacy synchronization history, while the compatibility delete surface delegates to the canonical, versioned
+ *     integration control plane and deactivates a configuration without erasing either its configuration or version history;
  *   - the steward routes that complete a training registration and record attendance (course_registrations UPDATE, and the SELECT ... FOR UPDATE before it) run as the
  *     runtime role, inside the caller's organization only;
  *   - a signature profile is replaced (user_signatures UPDATE of the previous default, then the insert) and a clause comparison is stored with its RETURNING read
@@ -167,36 +167,42 @@ describe.skipIf(!URL)('the promoted and corrected tenant paths, as the real runt
     })
   })
 
-  describe('integration_sync_logs (deleting an integration)', () => {
-    let withHistory: string
-    let withoutHistory: string
+  describe('the canonical integration compatibility delete and legacy sync-history read', () => {
+    let first: string
+    let second: string
+    let legacyHistory: string
 
     beforeAll(async () => {
-      const integration = async (org: string, name: string) =>
-        (await rows(`INSERT INTO api_integrations (organization_id, name, integration_type, connection_type, created_by, field_mapping) VALUES ($1, $2, 'hris', 'api', 'seed', '{}'::jsonb) RETURNING id::text AS id`, [org, name]))[0].id as string
-      withHistory = await integration(ORG_A, `Has history ${tag}`)
-      withoutHistory = await integration(ORG_A, `No history ${tag}`)
-      await admin.query(`INSERT INTO integration_sync_logs (integration_id, sync_type, direction, status) VALUES ($1, 'manual', 'inbound', 'success')`, [withHistory])
+      const integration = async (org: string) => {
+        const id = (await rows(`INSERT INTO integration_configs (organization_id, type, provider, credentials, settings, enabled, active_version) VALUES ($1, 'hris', 'bamboohr', '{}'::jsonb, '{}'::jsonb, true, 1) RETURNING id::text AS id`, [org]))[0].id as string
+        await admin.query(`INSERT INTO integration_config_versions (integration_id, organization_id, version, type, provider, settings, enabled, created_by) VALUES ($1,$2,1,'hris','bamboohr','{}'::jsonb,true,'seed')`, [id, org])
+        return id
+      }
+      first = await integration(ORG_A)
+      second = await integration(ORG_A)
+      legacyHistory = (await rows(`INSERT INTO api_integrations (organization_id, name, integration_type, connection_type, created_by, field_mapping) VALUES ($1, $2, 'hris', 'api', 'seed', '{}'::jsonb) RETURNING id::text AS id`, [ORG_A, `Legacy history ${tag}`]))[0].id as string
+      await admin.query(`INSERT INTO integration_sync_logs (integration_id, sync_type, direction, status) VALUES ($1, 'manual', 'inbound', 'success')`, [legacyHistory])
     })
 
     const remove = (organizationId: string, userId: string, id: string) => (extensions.DELETE as unknown as Handler)({ params: { id }, organizationId, userId })
 
-    it('refuses to delete an integration that has run, whose history the delete would erase, and keeps the integration and its history', async () => {
-      await expect(remove(ORG_A, ADMIN_A, withHistory)).rejects.toMatchObject({ message: expect.stringMatching(/synchronization history/i) })
-      expect(await rows(`SELECT count(*)::int AS n FROM api_integrations WHERE id = $1`, [withHistory])).toEqual([{ n: 1 }])
-      expect(await rows(`SELECT count(*)::int AS n FROM integration_sync_logs WHERE integration_id = $1`, [withHistory])).toEqual([{ n: 1 }])
+    it('deactivates rather than erases a canonical integration and preserves its version history', async () => {
+      await remove(ORG_A, ADMIN_A, first)
+
+      expect(await rows(`SELECT enabled, active_version FROM integration_configs WHERE id = $1`, [first])).toEqual([{ enabled: false, active_version: 2 }])
+      expect(await rows(`SELECT version, enabled FROM integration_config_versions WHERE integration_id = $1 ORDER BY version`, [first])).toEqual([{ version: 1, enabled: true }, { version: 2, enabled: false }])
     })
 
-    it('deletes an integration that has never run', async () => {
-      await remove(ORG_A, ADMIN_A, withoutHistory)
+    it('applies the same non-destructive compatibility behavior to another configuration', async () => {
+      await remove(ORG_A, ADMIN_A, second)
 
-      expect(await rows(`SELECT count(*)::int AS n FROM api_integrations WHERE id = $1`, [withoutHistory])).toEqual([{ n: 0 }])
+      expect(await rows(`SELECT enabled FROM integration_configs WHERE id = $1`, [second])).toEqual([{ enabled: false }])
     })
 
-    it('shows the history only through its integration\'s organization, and another organization cannot delete the integration', async () => {
+    it('shows legacy history only through its integration\'s organization, and another organization cannot deactivate the canonical integration', async () => {
       expect(await count(ORG_A, 'integration_sync_logs')).toBe(1)
       expect(await count(ORG_B, 'integration_sync_logs')).toBe(0)
-      await expect(remove(ORG_B, ADMIN_B, withHistory)).rejects.toMatchObject({ message: expect.stringMatching(/integration/i) })
+      await expect(remove(ORG_B, ADMIN_B, first)).rejects.toMatchObject({ message: expect.stringMatching(/integration/i) })
     })
 
     it('grants the runtime role a read and nothing else, and the system role nothing', async () => {

@@ -379,6 +379,30 @@ export const shopifyConfig = pgTable('shopify_config', {
 }));
 
 /**
+ * Versioned Shopify webhook verification secrets. A retiring version remains
+ * valid only through its explicit overlap window, allowing Shopify secret
+ * rotation without falling back to one platform-global secret.
+ */
+export const shopifyWebhookSecretVersions = pgTable('shopify_webhook_secret_versions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  version: integer('version').notNull(),
+  secretRef: varchar('secret_ref', { length: 255 }).notNull(),
+  status: varchar('status', { length: 16 }).$type<'active' | 'retiring' | 'revoked'>().notNull(),
+  validFrom: timestamp('valid_from', { withTimezone: true }).notNull(),
+  validUntil: timestamp('valid_until', { withTimezone: true }),
+  createdBy: varchar('created_by', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: varchar('revoked_by', { length: 255 }),
+}, (table) => ({
+  orgVersionUq: uniqueIndex('shopify_webhook_secret_versions_org_version_uniq').on(table.orgId, table.version),
+  verificationIdx: index('shopify_webhook_secret_versions_verify_idx').on(table.orgId, table.status, table.validFrom, table.validUntil),
+  statusCheck: check('shopify_webhook_secret_versions_status_check', sql`${table.status} IN ('active', 'retiring', 'revoked')`),
+  validityCheck: check('shopify_webhook_secret_versions_validity_check', sql`${table.validUntil} IS NULL OR ${table.validUntil} > ${table.validFrom}`),
+}));
+
+/**
  * Webhook Receipts
  * Idempotency tracking for external webhooks
  */
@@ -574,6 +598,8 @@ export type NewRewardRedemption = typeof rewardRedemptions.$inferInsert;
 
 export type ShopifyConfig = typeof shopifyConfig.$inferSelect;
 export type NewShopifyConfig = typeof shopifyConfig.$inferInsert;
+export type ShopifyWebhookSecretVersion = typeof shopifyWebhookSecretVersions.$inferSelect;
+export type NewShopifyWebhookSecretVersion = typeof shopifyWebhookSecretVersions.$inferInsert;
 
 export type WebhookReceipt = typeof webhookReceipts.$inferSelect;
 export type NewWebhookReceipt = typeof webhookReceipts.$inferInsert;

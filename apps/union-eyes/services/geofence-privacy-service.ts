@@ -10,7 +10,8 @@ import {
   locationDeletionLog,
   locationTrackingConfig,
 } from "@/db/schema/geofence-privacy-schema";
-import { eq, and, lte, ne, or } from "drizzle-orm";
+import { calendarEvents } from "@/db/schema/calendar-schema";
+import { eq, and, lte, ne, or, isNotNull } from "drizzle-orm";
 
 /**
  * Geofence Privacy Service
@@ -24,6 +25,9 @@ import { eq, and, lte, ne, or } from "drizzle-orm";
 
 export interface LocationConsentRequest {
   userId: string;
+  organizationId: string;
+  scopeKind: "strike" | "event";
+  scopeId: string;
   purpose: string;
   purposeDescription: string;
   consentText: string;
@@ -45,6 +49,8 @@ export interface LocationTrackingRequest {
   accuracy?: number;
   altitude?: number;
   purpose: string;
+  scopeKind: "strike" | "event";
+  scopeId: string;
   activityType?: string;
   strikeId?: string;
   eventId?: string;
@@ -140,11 +146,18 @@ export class GeofencePrivacyService {
         request.consentText !== notice.consentText) {
       throw new Error("Location consent notice unavailable or mismatched");
     }
+    await this.resolveLocationScope(request.organizationId, request.scopeKind, request.scopeId, tx);
     // Check if user already has active consent
     const existing = await tx
       .select()
       .from(memberLocationConsent)
-      .where(eq(memberLocationConsent.userId, request.userId))
+      .where(and(
+        eq(memberLocationConsent.userId, request.userId),
+        eq(memberLocationConsent.organizationId, request.organizationId),
+        eq(memberLocationConsent.consentPurpose, request.scopeKind),
+        eq(memberLocationConsent.scopeKind, request.scopeKind),
+        eq(memberLocationConsent.scopeId, request.scopeId),
+      ))
       .limit(1);
 
     if (existing.length > 0 &&
@@ -161,10 +174,13 @@ export class GeofencePrivacyService {
 
     const grant = {
       userId: request.userId,
+      organizationId: request.organizationId,
+      scopeKind: request.scopeKind,
+      scopeId: request.scopeId,
       consentStatus: "opted_in",
       optedInAt: new Date(),
       optedOutAt: null,
-      consentPurpose: request.purpose,
+      consentPurpose: request.scopeKind,
       purposeDescription: request.purposeDescription,
       foregroundOnly: true, // ALWAYS true - no background tracking
       allowedDuringStrike: request.allowedDuringStrike || false,
@@ -183,7 +199,13 @@ export class GeofencePrivacyService {
       .insert(memberLocationConsent)
       .values(grant)
       .onConflictDoUpdate({
-        target: memberLocationConsent.userId,
+        target: [
+          memberLocationConsent.userId,
+          memberLocationConsent.organizationId,
+          memberLocationConsent.consentPurpose,
+          memberLocationConsent.scopeKind,
+          memberLocationConsent.scopeId,
+        ],
         set: { ...grant, updatedAt: new Date() },
         setWhere: or(
           ne(memberLocationConsent.consentStatus, "opted_in"),
@@ -213,19 +235,23 @@ export class GeofencePrivacyService {
    * Revoke location tracking consent and delete the member's location data in the same transaction.
    * Throws LocationConsentNotFoundError when there is no consent to revoke.
    */
-  static async revokeLocationConsent(userId: string, reason?: string, tx: RLSTx = db) {
+  static async revokeLocationConsent(userId: string, organizationId: string, reason?: string, tx: RLSTx = db) {
     const revoked = await tx
       .update(memberLocationConsent)
       .set({
         consentStatus: "opted_out",
         optedOutAt: new Date(),
       })
-      .where(and(eq(memberLocationConsent.userId, userId), ne(memberLocationConsent.consentStatus, "opted_out")))
+      .where(and(
+        eq(memberLocationConsent.userId, userId),
+        eq(memberLocationConsent.organizationId, organizationId),
+        ne(memberLocationConsent.consentStatus, "opted_out"),
+      ))
       .returning({ id: memberLocationConsent.id });
     if (revoked.length === 0) throw new LocationConsentNotFoundError();
 
     // Delete all existing location data immediately
-    const deleted = await this.deleteAllUserLocationData(userId, "consent_revoked", tx);
+    const deleted = await this.deleteAllUserLocationData(userId, organizationId, "consent_revoked", tx);
 
     // Audit log
     await this.logAuditAction(
@@ -244,21 +270,32 @@ export class GeofencePrivacyService {
    * never recorded while rows remain (a retention sweep that failed, rows written before consent was tracked), and the right to
    * have them removed does not depend on a consent row. Returns how many records were removed.
    */
-  static async eraseLocationData(userId: string, tx: RLSTx = db) {
-    const deleted = await this.deleteAllUserLocationData(userId, "erasure_requested", tx);
+  static async eraseLocationData(userId: string, organizationId: string, tx: RLSTx = db) {
+    const deleted = await this.deleteAllUserLocationData(userId, organizationId, "erasure_requested", tx);
     return { ...deleted, total: deleted.trackingRecordsDeleted + deleted.eventRecordsDeleted };
   }
 
   /**
    * Check if user has valid location tracking consent
    */
-  static async hasValidConsent(userId: string, context?: "strike" | "event", tx: RLSTx = db): Promise<boolean> {
+  static async hasValidConsent(
+    userId: string,
+    organizationId: string,
+    scopeKind: "strike" | "event",
+    scopeId: string,
+    tx: RLSTx = db,
+  ): Promise<boolean> {
+    await this.resolveLocationScope(organizationId, scopeKind, scopeId, tx);
     const consent = await tx
       .select()
       .from(memberLocationConsent)
       .where(
         and(
           eq(memberLocationConsent.userId, userId),
+          eq(memberLocationConsent.organizationId, organizationId),
+          eq(memberLocationConsent.consentPurpose, scopeKind),
+          eq(memberLocationConsent.scopeKind, scopeKind),
+          eq(memberLocationConsent.scopeId, scopeId),
           eq(memberLocationConsent.consentStatus, "opted_in")
         )
       )
@@ -278,11 +315,11 @@ export class GeofencePrivacyService {
     }
 
     // Check context-specific permissions
-    if (context === "strike" && !userConsent.allowedDuringStrike) {
+    if (scopeKind === "strike" && !userConsent.allowedDuringStrike) {
       return false;
     }
 
-    if (context === "event" && !userConsent.allowedDuringEvents) {
+    if (scopeKind === "event" && !userConsent.allowedDuringEvents) {
       return false;
     }
 
@@ -299,12 +336,20 @@ export class GeofencePrivacyService {
       ? "strike"
       : tracking.purpose === "event" ? "event" : null;
     if (!consentContext) throw new Error("Location tracking purpose is not covered by the current consent");
-    // There is no organization-bound strike/event register lookup for these IDs.
-    // Never persist a caller-provided association as a verified institutional fact.
-    if (tracking.strikeId || tracking.eventId) {
-      throw new Error("Location tracking cannot link an unverified strike or event");
-    }
-    const hasConsent = await this.hasValidConsent(tracking.userId, consentContext, tx);
+    if (tracking.scopeKind !== consentContext) throw new Error("Location scope does not match purpose");
+    const resolvedScope = await this.resolveLocationScope(
+      tracking.organizationId,
+      tracking.scopeKind,
+      tracking.scopeId,
+      tx,
+    );
+    const hasConsent = await this.hasValidConsent(
+      tracking.userId,
+      tracking.organizationId,
+      tracking.scopeKind,
+      tracking.scopeId,
+      tx,
+    );
     if (!hasConsent) {
       throw new Error("Location tracking requires explicit opt-in consent");
     }
@@ -336,8 +381,8 @@ export class GeofencePrivacyService {
         trackingType: "foreground_only", // NEVER background
         purpose: tracking.purpose,
         activityType: tracking.activityType,
-        strikeId: tracking.strikeId,
-        eventId: tracking.eventId,
+        strikeId: tracking.scopeKind === "strike" ? resolvedScope.linkedId : null,
+        eventId: tracking.scopeKind === "event" ? resolvedScope.linkedId : null,
         autoDeleteScheduled: true,
       })
       .returning();
@@ -421,7 +466,7 @@ export class GeofencePrivacyService {
     // attendance. A fence with no verified strike link may answer the spatial
     // question but must not persist precise member coordinates.
     if (inside && fence.strikeId) {
-      const consented = await this.hasValidConsent(userId, "strike", tx);
+      const consented = await this.hasValidConsent(userId, trustedUnionLocalId, "strike", geofenceId, tx);
       if (consented) {
         const config = await this.getConfig(tx);
         if (config.locationTrackingEnabled === true &&
@@ -574,17 +619,17 @@ export class GeofencePrivacyService {
   /**
    * Delete all location data for a specific user
    */
-  private static async deleteAllUserLocationData(userId: string, reason: string, tx: RLSTx = db) {
+  private static async deleteAllUserLocationData(userId: string, organizationId: string, reason: string, tx: RLSTx = db) {
     // Delete tracking records
     const deletedTracking = await tx
       .delete(locationTracking)
-      .where(eq(locationTracking.userId, userId))
+      .where(and(eq(locationTracking.userId, userId), eq(locationTracking.organizationId, organizationId)))
       .returning({ id: locationTracking.id, at: locationTracking.recordedAt, organizationId: locationTracking.organizationId });
 
     // Delete geofence events
     const deletedEvents = await tx
       .delete(geofenceEvents)
-      .where(eq(geofenceEvents.userId, userId))
+      .where(and(eq(geofenceEvents.userId, userId), eq(geofenceEvents.organizationId, organizationId)))
       .returning({ id: geofenceEvents.id, at: geofenceEvents.eventTime, organizationId: geofenceEvents.organizationId });
 
     // Log the deletion: one entry per organization the member's rows belonged to, with their real span, initiated by the member.
@@ -602,6 +647,40 @@ export class GeofencePrivacyService {
       trackingRecordsDeleted: deletedTracking.length,
       eventRecordsDeleted: deletedEvents.length,
     };
+  }
+
+  private static async resolveLocationScope(
+    organizationId: string,
+    scopeKind: "strike" | "event",
+    scopeId: string,
+    tx: RLSTx,
+  ): Promise<{ linkedId: string }> {
+    if (scopeKind === "strike") {
+      const [row] = await tx
+        .select({ linkedId: geofences.strikeId })
+        .from(geofences)
+        .where(and(
+          eq(geofences.id, scopeId),
+          eq(geofences.unionLocalId, organizationId),
+          eq(geofences.status, "active"),
+          isNotNull(geofences.strikeId),
+        ))
+        .limit(1);
+      if (!row?.linkedId) throw new Error("Location scope is not an active organization strike geofence");
+      return { linkedId: row.linkedId };
+    }
+
+    const [row] = await tx
+      .select({ linkedId: calendarEvents.id })
+      .from(calendarEvents)
+      .where(and(
+        eq(calendarEvents.id, scopeId),
+        eq(calendarEvents.organizationId, organizationId),
+        eq(calendarEvents.status, "scheduled"),
+      ))
+      .limit(1);
+    if (!row) throw new Error("Location scope is not an active organization event");
+    return { linkedId: row.linkedId };
   }
 
   /**

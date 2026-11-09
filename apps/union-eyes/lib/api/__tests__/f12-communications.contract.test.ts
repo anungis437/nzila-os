@@ -18,17 +18,19 @@ describe('F12 communications records', () => {
   });
 
   // DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY: schedule's GET is now a real,
-  // read-only audience preview (evaluates the platform's real consent/preference tables) and
+  // audience preview and durable outbox scheduling (evaluates the platform's real consent/preference tables) and
   // send-test's POST now really sends to one explicit test address - neither commits to or performs
-  // a real campaign send, and both still refuse every other method they do not implement.
-  it('schedule exposes a real read-only audience preview and refuses every mutation', () => {
+  // a direct campaign send: the schedule route only writes an auditable outbox for a separate approved dispatcher.
+  it('schedule previews the audience and freezes consent-evaluated deliveries into an auditable outbox', () => {
     const schedule = read('communications/campaigns/[id]/schedule');
     expect(schedule).toContain('evaluateCampaignAudience');
     expect(schedule).toContain('export const GET');
     expect(schedule).not.toMatch(/export const GET = notImplemented/);
-    expect(schedule).toContain('export const PATCH = notImplemented');
-    expect(schedule).toContain('export const DELETE = notImplemented');
-    expect(schedule).toContain('ApiError.notImplemented');
+    expect(schedule).toContain('campaignDeliveryOutbox');
+    expect(schedule).toContain('export const POST');
+    expect(schedule).toContain('export const PATCH = POST');
+    expect(schedule).toContain("status: 'queued'");
+    expect(schedule).not.toContain('sendEmail');
   });
 
   it('send-test exposes a real POST that sends only to one explicit test address and refuses every other method', () => {

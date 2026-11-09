@@ -17,6 +17,7 @@ import { z } from 'zod';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { performAtomicAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { withSystemAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 
 import {
   ErrorCode,
@@ -41,6 +42,7 @@ const toggleFlagSchema = z.object({
  * the system-administrator fact), not an organization's own "admin" title (DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY).
  */
 export const GET = withSystemAdminAuth(async (request, context: BaseAuthContext) => {
+  await requirePlatformStaffAuthority(context, 'platform.feature_flags.manage');
   const { userId } = context;
 
   const flags = await getAllFeatureFlags();
@@ -72,6 +74,7 @@ export const GET = withSystemAdminAuth(async (request, context: BaseAuthContext)
  * runs, and is superseded by the platform-admin requirement.
  */
 export const PATCH = withSystemAdminAuth(async (request, context: BaseAuthContext) => {
+  await requirePlatformStaffAuthority(context, 'platform.feature_flags.manage');
   let rawBody: any;
   try {
     rawBody = await request.json();
@@ -158,5 +161,4 @@ if (error instanceof FeatureFlagNotFoundError) {
       throw error;
     }
 });
-
 

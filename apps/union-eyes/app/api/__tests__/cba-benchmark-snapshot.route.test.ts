@@ -7,7 +7,7 @@ const m = vi.hoisted(() => ({
   save: vi.fn(),
   getAgreement: vi.fn(),
   getSnapshots: vi.fn(),
-  requireSystemAdmin: vi.fn(),
+  requirePlatformStaffAuthority: vi.fn(),
   operation: vi.fn(),
   isPlatformAdmin: vi.fn(),
 }));
@@ -19,9 +19,11 @@ vi.mock('@/lib/api/framework', () => ({
     notFound: (r: string) => Object.assign(new Error(r), { status: 404 }),
     unauthorized: (r: string) => Object.assign(new Error(r), { status: 401 }),
     conflict: (r: string) => Object.assign(new Error(r), { status: 409 }),
+    forbidden: (r: string) => Object.assign(new Error(r), { status: 403 }),
   },
 }));
-vi.mock('@/lib/api-auth-guard', () => ({ requireSystemAdmin: () => m.requireSystemAdmin(), isPlatformAdminUser: (id: string) => m.isPlatformAdmin(id) }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requirePlatformStaffAuthority }));
+vi.mock('@/lib/services/cba-intelligence/review-visibility', () => ({ canReadUnreviewed: (_userId: string, _organizationId: string) => m.isPlatformAdmin() }));
 vi.mock('@/lib/audit/operation-audit', () => ({
   performAtomicAuditedOperation: m.operation,
   operationAuditResponse: (e: unknown) => ((e as { code?: string })?.code === 'OPERATION_AUDIT_UNAVAILABLE' ? { status: 409, body: { error: { message: 'not performed' } } } : null),
@@ -38,7 +40,7 @@ const ctx = { params: { id: 'a1' }, userId: 'u1', organizationId: 'org-1' };
 describe('cba-intelligence/benchmark/[id]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.requireSystemAdmin.mockResolvedValue(undefined);
+    m.requirePlatformStaffAuthority.mockResolvedValue({ userId: 'u1', organizationId: 'org-1' });
     m.isPlatformAdmin.mockResolvedValue(false);
     m.getAgreement.mockResolvedValue({ id: 'a1', reviewStatus: 'approved' });
     m.getSnapshots.mockResolvedValue([]);
@@ -79,7 +81,7 @@ describe('cba-intelligence/benchmark/[id]', () => {
   });
 
   it('POST requires a platform administrator before anything is computed or written', async () => {
-    m.requireSystemAdmin.mockRejectedValue(Object.assign(new Error('System administrator privileges required'), { status: 403 }));
+    m.requirePlatformStaffAuthority.mockRejectedValue(Object.assign(new Error('Scoped platform authority required'), { status: 403 }));
     const { POST } = await import('../cba-intelligence/benchmark/[id]/route');
     await expect((POST as never as (c: unknown) => Promise<unknown>)({ ...ctx, body: {} })).rejects.toMatchObject({ status: 403 });
     expect(m.operation).not.toHaveBeenCalled();

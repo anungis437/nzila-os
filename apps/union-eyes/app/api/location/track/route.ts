@@ -31,10 +31,12 @@ const locationTrackSchema = z.object({
   altitude: z.number().optional(),
   // Other purposes require a separately approved consent context.
   purpose: z.enum(["strike", "picket", "event"]),
+  scopeKind: z.enum(["strike", "event"]),
+  scopeId: z.guid("Invalid scopeId"),
   activityType: z.string().max(100).optional(),
-  strikeId: z.guid("Invalid strikeId").optional(),
-  eventId: z.guid("Invalid eventId").optional(),
 });
+
+const strictLocationTrackSchema = locationTrackSchema.strict();
 
 export const POST = withApiAuth(async (req: NextRequest) => {
   try {
@@ -46,7 +48,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     const body = await req.json();
     
     // Validate request body
-    const validation = locationTrackSchema.safeParse(body);
+    const validation = strictLocationTrackSchema.safeParse(body);
     if (!validation.success) {
       return standardErrorResponse(
         ErrorCode.VALIDATION_ERROR,
@@ -54,13 +56,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
       );
     }
 
-    const { latitude, longitude, accuracy, altitude, purpose, activityType, strikeId, eventId } = validation.data;
-    // Until an organization-bound strike/event ownership resolver exists, a
-    // caller-supplied UUID is not a verified link and cannot be stored.
-    if (strikeId || eventId) {
-      return standardErrorResponse(ErrorCode.VALIDATION_ERROR,
-        'Strike and event linkage is unavailable until organization ownership can be verified');
-    }
+    const { latitude, longitude, accuracy, altitude, purpose, scopeKind, scopeId, activityType } = validation.data;
 
     // Track location (the service verifies consent). The point and its audit record commit together; the audit names
     // the purpose and the strike or event, never the coordinates.
@@ -75,9 +71,9 @@ export const POST = withApiAuth(async (req: NextRequest) => {
         accuracy,
         altitude,
         purpose,
+        scopeKind,
+        scopeId,
         activityType,
-        strikeId,
-        eventId,
       }, tx);
       await persistAtomicAudit(tx, {
         organizationId,
@@ -85,7 +81,7 @@ export const POST = withApiAuth(async (req: NextRequest) => {
         action: 'location.track.record',
         resourceType: 'location_tracking',
         resourceId: recorded.id,
-        details: { purpose, strikeId: strikeId ?? null, eventId: eventId ?? null },
+        details: { purpose, scopeKind, scopeId },
       });
       return recorded;
     });
@@ -107,4 +103,3 @@ export const POST = withApiAuth(async (req: NextRequest) => {
     return NextResponse.json({ error: "Failed to track location" }, { status: 500 });
   }
 });
-

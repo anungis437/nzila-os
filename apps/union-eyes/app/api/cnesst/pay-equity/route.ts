@@ -18,12 +18,10 @@ const { GET, POST } = crudRoutes({
   orgScoped: true,
   readRole: 'steward',
   writeRole: 'officer',
-  // The exercise's committee and job-class facts. Status, the adjustment amount and payment date, the CNESST declaration and
-  // documents are not set through the generic route.
+  // Lifecycle state and step-specific legal/financial facts change only through /[id]/transition.
   writableFields: [
-    'exerciseType', 'committeeFormed', 'committeeFormationDate', 'workerMembers', 'employerMembers', 'maleJobClasses',
-    'femaleJobClasses', 'mixedJobClasses', 'evaluationMethod', 'resultsPostedDate', 'contestDeadline',
-    'maintenanceEvaluationDate', 'nextMaintenanceDue', 'notes',
+    'exerciseType', 'workerMembers', 'employerMembers', 'maleJobClasses',
+    'femaleJobClasses', 'mixedJobClasses', 'evaluationMethod', 'notes',
   ],
 });
 export { GET, POST };

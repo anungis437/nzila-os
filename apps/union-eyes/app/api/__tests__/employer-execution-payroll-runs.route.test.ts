@@ -92,6 +92,7 @@ describe('employer-execution/payroll-runs route', () => {
 
     m.withRLSContext.mockImplementation((_ctx: unknown, fn: any) => {
       const tx = {
+        execute: vi.fn(async () => undefined),
         select: vi.fn(() => ({
           from: vi.fn(() => makeQuery(m.selectResults.shift() ?? [])),
         })),
@@ -240,7 +241,8 @@ describe('employer-execution/payroll-runs route', () => {
   it('POST prepares a preview run, records the preparer and audits on the same transaction', async () => {
     const { POST } = await loadRoute();
     m.selectResults = [
-      [{ id: 'batch_1', employerId: 'emp_1', status: 'validated', sourceFileHash: 'source-hash', worksiteId: 'site_1', bargainingUnitId: 'bu_1' }],
+      [{ id: 'batch_1', employerId: 'emp_1', status: 'validated', periodStart: '2026-01-01', periodEnd: '2026-01-15', sourceFileHash: 'source-hash', worksiteId: 'site_1', bargainingUnitId: 'bu_1' }],
+      [],
       timesheetRows,
       [activeRuleVersion],
       [{ id: 'rule_item_1', precedence: 1 }],
@@ -281,7 +283,8 @@ describe('employer-execution/payroll-runs route', () => {
   it('POST rolls back (rejects) when the atomic audit cannot be written', async () => {
     const { POST } = await loadRoute();
     m.selectResults = [
-      [{ id: 'batch_1', employerId: 'emp_1', status: 'validated', worksiteId: null, bargainingUnitId: null }],
+      [{ id: 'batch_1', employerId: 'emp_1', status: 'validated', periodStart: '2026-01-01', periodEnd: '2026-01-15', worksiteId: null, bargainingUnitId: null }],
+      [],
       timesheetRows,
       [activeRuleVersion],
       [],
@@ -294,7 +297,7 @@ describe('employer-execution/payroll-runs route', () => {
   it('POST creates an official payroll run, compliance events and audit on one transaction', async () => {
     const { POST } = await loadRoute();
     m.selectResults = [
-      [{ id: 'batch_1', employerId: 'emp_1', status: 'validated', sourceFileHash: 'source-hash', worksiteId: 'site_1', bargainingUnitId: 'bu_1' }],
+      [{ id: 'batch_1', employerId: 'emp_1', status: 'validated', periodStart: '2026-01-01', periodEnd: '2026-01-15', sourceFileHash: 'source-hash', worksiteId: 'site_1', bargainingUnitId: 'bu_1' }],
       [],
       [
         ...timesheetRows,

@@ -34,8 +34,9 @@ async function loadRoute() {
 describe('ml/query route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.AI_SERVICE_URL = 'http://ai.local';
+    process.env.AI_SERVICE_URL = 'https://ai.example.test';
     process.env.AI_SERVICE_TOKEN = 'token';
+    process.env.ML_QUERY_DISCLOSURE_POLICY_REF = 'policy-2026-01';
     m.createRateLimitHeaders.mockReturnValue({ 'x-ratelimit-limit': '20' });
     m.checkRateLimit.mockResolvedValue({ allowed: true });
     m.guardAiFeature.mockResolvedValue(null);
@@ -125,7 +126,7 @@ describe('ml/query route', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it('returns 500 when AI service URL is missing', async () => {
+  it('returns 503 when AI service URL is missing', async () => {
     const { POST } = await loadRoute();
     delete process.env.AI_SERVICE_URL;
 
@@ -133,6 +134,6 @@ describe('ml/query route', () => {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: 'How many claims?' }),
     }), { userId: 'u1', organizationId: 'org_1' });
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(503);
   });
 });

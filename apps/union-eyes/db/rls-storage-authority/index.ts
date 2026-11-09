@@ -24,6 +24,7 @@ import { documentsEvidenceEntries } from './documents-evidence'
 import { financeEntries } from './finance'
 import { financialServiceLatentEntries } from './financial-service-latent'
 import { frameworkDedicatedEntries } from './framework-dedicated'
+import { gate0ResidualEntries } from './gate0-residual'
 import { governanceEntries } from './governance'
 import { healthSafetyEntries } from './health-safety'
 import { integrationsWorkersEntries } from './integrations-workers'
@@ -42,6 +43,7 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   ...financeEntries,
   ...financialServiceLatentEntries,
   ...frameworkDedicatedEntries,
+  ...gate0ResidualEntries,
   ...governanceEntries,
   ...healthSafetyEntries,
   ...integrationsWorkersEntries,

@@ -24,9 +24,10 @@ describe('Gate 0 batch B102: truthful audit, settings and not-implemented answer
     expect(src('lib/external-resource-middleware.ts')).toMatch(/catch \(error\)[\s\S]*status: 403/)
   })
 
-  it('tells the caller when a sync ran but its outcome record could not be written', () => {
+  it('keeps integration sync fail-closed before an external adapter can run', () => {
     expect(src('lib/audit/operation-audit.ts')).toContain('op.outcomeReport.recorded = recorded')
-    expect(src('app/api/integrations/framework/[id]/sync/route.ts')).toContain('auditOutcomeRecorded: auditOutcome.recorded')
+    const control = src('lib/integrations/control-plane.ts')
+    expect(control.indexOf("action: 'integration.sync_blocked'")).toBeLessThan(control.indexOf('SyncEngine.getInstance().executeSync'))
   })
 
   it('answers the enterprise data subject request route with 501 instead of a misleading 403', () => {

@@ -25,6 +25,7 @@ import { pilotDemoSeeds } from "@/db/schema/domains/pilot/pilot-demo-seeds";
 import { employers } from "@/db/schema/union-structure-schema";
 import { grievances } from "@/db/schema/domains/claims/grievances";
 import { eq, and, isNull, isNotNull, inArray } from "drizzle-orm";
+import { randomUUID } from 'node:crypto';
 
 // Thrown inside the seed transaction so a lost race rolls back the rows it had already inserted.
 class DemoSeedConflict extends Error {}
@@ -86,17 +87,11 @@ export const POST = withOrganizationAuth(async (_request, context) => {
 
       if (existing.length > 0 && !existing[0].purgedAt) return false;
 
-      if (demoEmployers.length > 0) {
-        await tx.insert(employers).values(demoEmployers);
-      }
-      if (demoGrievances.length > 0) {
-        await tx.insert(grievances).values(demoGrievances);
-      }
-
       // The exact ids this seed is about to insert (generateDemoEmployers/generateDemoGrievances assign id
       // client-side), so the purge can later delete precisely these rows instead of matching on name/email pattern.
       const employerIds = demoEmployers.map((e) => e.id);
       const grievanceIds = demoGrievances.map((g) => g.id);
+      const seedId = existing[0]?.id ?? randomUUID();
 
       if (existing.length > 0) {
         // Re-seed after a purge: only a purged marker may be reopened.
@@ -117,6 +112,7 @@ export const POST = withOrganizationAuth(async (_request, context) => {
         if (reopened.length === 0) throw new DemoSeedConflict();
       } else {
         await tx.insert(pilotDemoSeeds).values({
+          id: seedId,
           organizationId,
           seededBy: userId,
           employerCount: summary.employers,
@@ -124,6 +120,13 @@ export const POST = withOrganizationAuth(async (_request, context) => {
           employerIds,
           grievanceIds,
         });
+      }
+
+      if (demoEmployers.length > 0) {
+        await tx.insert(employers).values(demoEmployers.map((row) => ({ ...row, demoSeedId: seedId })));
+      }
+      if (demoGrievances.length > 0) {
+        await tx.insert(grievances).values(demoGrievances.map((row) => ({ ...row, demoSeedId: seedId })));
       }
 
       await persistAtomicAudit(tx, {
@@ -188,7 +191,7 @@ export const DELETE = withOrganizationAuth(async (_request, context) => {
         // never updated afterward (see POST above), so reading them here ahead of the close/delete is race-free: no
         // concurrent request can change what this seed owns between this read and the delete below.
         const [existing] = await tx
-          .select({ employerIds: pilotDemoSeeds.employerIds, grievanceIds: pilotDemoSeeds.grievanceIds })
+          .select({ id: pilotDemoSeeds.id, employerIds: pilotDemoSeeds.employerIds, grievanceIds: pilotDemoSeeds.grievanceIds })
           .from(pilotDemoSeeds)
           .where(and(eq(pilotDemoSeeds.organizationId, organizationId), isNull(pilotDemoSeeds.purgedAt)));
         if (!existing) throw new DemoSeedConflict();
@@ -216,12 +219,12 @@ export const DELETE = withOrganizationAuth(async (_request, context) => {
         if (grievanceIds.length > 0) {
           await tx
             .delete(grievances)
-            .where(and(eq(grievances.organizationId, organizationId), inArray(grievances.id, grievanceIds)));
+            .where(and(eq(grievances.organizationId, organizationId), eq(grievances.demoSeedId, existing.id), inArray(grievances.id, grievanceIds)));
         }
         if (employerIds.length > 0) {
           await tx
             .delete(employers)
-            .where(and(eq(employers.organizationId, organizationId), inArray(employers.id, employerIds)));
+            .where(and(eq(employers.organizationId, organizationId), eq(employers.demoSeedId, existing.id), inArray(employers.id, employerIds)));
         }
 
         await persistAtomicAudit(tx, {

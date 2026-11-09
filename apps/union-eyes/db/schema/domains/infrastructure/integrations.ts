@@ -3,7 +3,8 @@
  * Drizzle ORM schema definitions for integration tables
  */
 
-import { pgTable, uuid, text, jsonb, boolean, timestamp, integer, pgEnum, varchar, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, jsonb, boolean, timestamp, integer, pgEnum, varchar, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { organizations } from '../../../schema-organizations';
 
 // Enums
@@ -88,10 +89,46 @@ export const integrationConfigs = pgTable('integration_configs', {
   settings: jsonb('settings'),
   webhookUrl: text('webhook_url'),
   enabled: boolean('enabled').default(true),
+  activeVersion: integer('active_version').notNull().default(1),
   lastSyncAt: timestamp('last_sync_at'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
+
+export const integrationConfigVersions = pgTable('integration_config_versions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  integrationId: uuid('integration_id').notNull().references(() => integrationConfigs.id, { onDelete: 'restrict' }),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  version: integer('version').notNull(),
+  type: integrationTypeEnum('type').notNull(),
+  provider: integrationProviderEnum('provider').notNull(),
+  credentialBindingId: uuid('credential_binding_id'),
+  settings: jsonb('settings'),
+  webhookUrl: text('webhook_url'),
+  enabled: boolean('enabled').notNull(),
+  createdBy: varchar('created_by', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  integrationVersionUq: uniqueIndex('integration_config_versions_integration_version_uniq').on(table.integrationId, table.version),
+  orgIdx: index('integration_config_versions_org_idx').on(table.organizationId, table.integrationId),
+}));
+
+export const integrationCredentialBindings = pgTable('integration_credential_bindings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  provider: integrationProviderEnum('provider').notNull(),
+  version: integer('version').notNull(),
+  secretRef: varchar('secret_ref', { length: 255 }).notNull(),
+  status: varchar('status', { length: 16 }).notNull().default('active'),
+  createdBy: varchar('created_by', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: varchar('revoked_by', { length: 255 }),
+}, (t) => ({
+  orgProviderVersionUq: uniqueIndex('integration_credential_bindings_org_provider_version_uniq').on(t.organizationId, t.provider, t.version),
+  oneActiveUq: uniqueIndex('integration_credential_bindings_one_active_uniq').on(t.organizationId, t.provider).where(sql`${t.status} = 'active'`),
+  activeLookupIdx: index('integration_credential_bindings_active_idx').on(t.organizationId, t.provider, t.status),
+}));
 
 export const integrationSyncLog = pgTable('integration_sync_log', {
   id: uuid('id').primaryKey().defaultRandom(),

@@ -26,6 +26,7 @@ export abstract class BaseIntegration implements IIntegration {
   protected config?: IntegrationConfig;
   protected initialized = false;
   protected connected = false;
+  private activeSyncOptions?: Pick<SyncOptions, 'abortSignal' | 'fencingToken'>;
 
   constructor(
     public readonly type: IntegrationType,
@@ -78,11 +79,29 @@ export abstract class BaseIntegration implements IIntegration {
    * Cooperative cancellation check for a long-running sync(). Call this between external calls - batches, pages,
    * or entity types - in a sync() implementation. Throws once SyncEngine has signalled that it can no longer
    * confirm exclusive ownership of this job's distributed lock (a lease-renewal failure), so the sync stops making
-   * further external calls instead of continuing unsupervised. A sync() that never calls this is unaffected - the
-   * signal is opt-in per adapter, not a change to any adapter that does not check it.
+   * further external calls or writes instead of continuing unsupervised. Every supported adapter establishes the
+   * active signal at sync entry and checks it before entity, page and record boundaries.
    */
-  protected throwIfAborted(options: SyncOptions): void {
-    if (options.abortSignal?.aborted) {
+  protected beginSync(options: SyncOptions): void {
+    if (Boolean(options.abortSignal) !== Boolean(options.fencingToken)) {
+      throw new IntegrationError(
+        'Sync execution must bind the cancellation signal and distributed fencing token together',
+        this.provider,
+        'SYNC_FENCE_CONTEXT_INVALID'
+      );
+    }
+    this.activeSyncOptions = options;
+  }
+
+  protected throwIfAborted(options: Pick<SyncOptions, 'abortSignal' | 'fencingToken'> | undefined = this.activeSyncOptions): void {
+    if (this.activeSyncOptions?.fencingToken && options?.fencingToken !== this.activeSyncOptions.fencingToken) {
+      throw new IntegrationError(
+        'Sync aborted: fencing token changed during adapter execution',
+        this.provider,
+        'SYNC_FENCE_MISMATCH'
+      );
+    }
+    if (options?.abortSignal?.aborted) {
       throw new IntegrationError(
         'Sync aborted: lease on the distributed job lock was lost or could not be renewed',
         this.provider,

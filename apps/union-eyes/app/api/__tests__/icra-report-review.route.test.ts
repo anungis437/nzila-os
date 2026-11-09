@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
   persistAtomicAudit: vi.fn(),
   userId: 'reviewer-1' as string | null,
   requireSystemAdmin: vi.fn(),
+  requirePlatformStaffAuthority: vi.fn(),
   actingOrg: vi.fn(),
 }));
 
@@ -39,6 +40,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: (fn: (tx: any) 
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: async () => ({ userId: m.userId }) }));
 vi.mock('@/lib/api-auth-guard', () => ({ requireSystemAdmin: m.requireSystemAdmin }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requirePlatformStaffAuthority }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 // Disclosed addition (F06 A2): an unclaimed assessment is audited against the reviewer's acting organization.
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.actingOrg }));
@@ -67,6 +69,7 @@ describe('icra/report/[assessmentId]/review route', () => {
     m.userId = 'reviewer-1';
     m.actingOrg.mockResolvedValue('org_acting');
     m.requireSystemAdmin.mockResolvedValue(undefined);
+    m.requirePlatformStaffAuthority.mockResolvedValue({ authorityId: 'authority-1' });
     m.extractPersistedAdaptiveReportAISlot.mockReturnValue(null);
     m.resolveAdaptiveReportAISlot.mockReturnValue({ reviewWorkflow: { status: 'pending' } });
     m.applyAdaptiveReportReviewDecision.mockReturnValue({ reviewWorkflow: { status: 'approved' } });
@@ -99,7 +102,7 @@ describe('icra/report/[assessmentId]/review route', () => {
 
   it('returns 403 for a signed-in caller without platform governance authority, and writes nothing', async () => {
     const { POST } = await loadRoute();
-    m.requireSystemAdmin.mockRejectedValue(new Error('System administrator privileges required'));
+    m.requirePlatformStaffAuthority.mockRejectedValue(new Error('Platform staff authority required'));
     const response = await POST(plain(), ok);
     expect(response.status).toBe(403);
     expect(mockDb.update).not.toHaveBeenCalled();
