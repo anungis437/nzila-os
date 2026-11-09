@@ -62,6 +62,7 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
     return {
       organizationId: orgId,
       generatedAt: new Date().toISOString(),
+      evidenceState: 'exploratory',
       methodologyNote: PROPAGATION_METHODOLOGY_NOTE,
       nodes: [],
       edges: [],
@@ -211,6 +212,7 @@ export async function buildDependencyPropagationMap(orgId: string): Promise<Prop
   return {
     organizationId: orgId,
     generatedAt: new Date().toISOString(),
+    evidenceState: 'exploratory',
     methodologyNote: PROPAGATION_METHODOLOGY_NOTE,
     nodes,
     edges,

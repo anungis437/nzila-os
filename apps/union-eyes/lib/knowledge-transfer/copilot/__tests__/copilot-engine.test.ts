@@ -24,7 +24,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap: h.buildDependencyPropagationMap }));
 vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex: h.calculateResilienceIndex }));
 vi.mock('../../copilot-explainability/response-builder', () => ({
-  buildPropagationEvidence: () => [{ observation: 'p', dataPoint: '1', sourceType: 'propagation', confidence: 'high' }],
+  buildPropagationEvidence: () => [{ observation: 'p', dataPoint: '1', sourceType: 'propagation', evidenceCoverage: 'high' }],
   buildGovernanceFlags: () => [],
   buildExplainabilityEnvelope: (evidence: unknown, reasoning: unknown, assumptions: unknown, govFlags: unknown, limitations: unknown) => ({
     evidenceReferences: evidence,
@@ -32,7 +32,7 @@ vi.mock('../../copilot-explainability/response-builder', () => ({
     governanceFlags: govFlags,
     assumptions,
     limitations,
-    overallConfidence: 'medium',
+    overallEvidenceCoverage: 'medium',
   }),
 }));
 
@@ -81,7 +81,7 @@ describe('lib/knowledge-transfer/copilot/copilot-engine', () => {
     expect(result.summary.endsWith('…')).toBe(true);
     expect(result.followUpSuggestions[0]).toContain('fragile');
     expect(result.evidenceReferences).toBeTruthy();
-    expect(result.overallConfidence).toBe('medium');
+    expect(result.overallEvidenceCoverage).toBe('medium');
   });
 
   it('persists the explainability envelope inline with the assistant message, and never claims the model itself retrieved data (DEF-0B7-EXC-COPILOT-EXPLAINABILITY)', async () => {

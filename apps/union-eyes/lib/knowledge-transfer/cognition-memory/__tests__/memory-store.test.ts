@@ -6,9 +6,12 @@ const { execute } = vi.hoisted(() => ({ execute: vi.fn() }));
 const { withRLSContext } = vi.hoisted(() => ({ withRLSContext: vi.fn() }));
 const { audit } = vi.hoisted(() => ({ audit: vi.fn() }));
 const { calculateResilienceIndex } = vi.hoisted(() => ({ calculateResilienceIndex: vi.fn() }));
+const { simulateContinuityImpact } = vi.hoisted(() => ({ simulateContinuityImpact: vi.fn() }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: audit }));
 vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex }));
+vi.mock('../../simulation/continuity-simulator', () => ({ simulateContinuityImpact }));
+vi.mock('../../governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }));
 vi.mock('drizzle-orm', () => ({
   sql: Object.assign((..._a: unknown[]) => ({}), { raw: (s: string) => s }),
 }));
@@ -58,7 +61,7 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
     // Only a resilience_baseline entry is cross-checked against a measured index - a governance_reasoning entry's
     // own typed score is not resilience data to compare.
     expect(calculateResilienceIndex).not.toHaveBeenCalled();
-    expect(entry.measuredResilienceIndexAtCapture).toBeNull();
+    expect(entry.algorithmComputedResilienceIndexAtCapture).toBeNull();
   });
 
   it('saveCognitionMemory applies defaults for optional fields', async () => {
@@ -80,7 +83,7 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
       } as never, USER);
       expect(calculateResilienceIndex).toHaveBeenCalledWith(ORG);
       expect(entry.resilienceScoreAtCapture).toBe(80);
-      expect(entry.measuredResilienceIndexAtCapture).toBe(62);
+      expect(entry.algorithmComputedResilienceIndexAtCapture).toBe(62);
     });
 
     it('does not compute a measured index when no score was typed', async () => {
@@ -88,7 +91,7 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
         memoryType: 'resilience_baseline', title: 'Baseline',
       } as never, USER);
       expect(calculateResilienceIndex).not.toHaveBeenCalled();
-      expect(entry.measuredResilienceIndexAtCapture).toBeNull();
+      expect(entry.algorithmComputedResilienceIndexAtCapture).toBeNull();
     });
 
     it('saves the officer-typed score even when no measured index can be computed yet', async () => {
@@ -97,9 +100,147 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
         memoryType: 'resilience_baseline', title: 'Baseline', resilienceScoreAtCapture: 80,
       } as never, USER);
       expect(entry.resilienceScoreAtCapture).toBe(80);
-      expect(entry.measuredResilienceIndexAtCapture).toBeNull();
+      expect(entry.algorithmComputedResilienceIndexAtCapture).toBeNull();
       // The save itself is unaffected by the measured index being unavailable.
       expect(execute).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR: a simulation_snapshot given a
+  // scenario is never the officer's own stated result - the server runs the real simulation workflow itself.
+  describe('simulation_snapshot dual provenance', () => {
+    const SCENARIO = { simulationType: 'retirement' as const, affectedNodeIds: ['n1', 'n2'] };
+    const SIMULATION_RESULT = {
+      organizationId: ORG,
+      generatedAt: '2026-01-01T00:00:00.000Z',
+      scenario: SCENARIO,
+      baselineContinuityScore: 70,
+      immediateImpactScore: 55.4,
+      twelveWeekProjection: 60,
+      overallImpactSeverity: 'high' as const,
+      domainImpacts: [],
+      degradationTimeline: [],
+      exacerbatedWeaknesses: [],
+      immediateActions: [],
+      mitigation30Day: [],
+      remediation90Day: [],
+      recoveryEffortEstimate: 'medium' as const,
+      autonomousRecoveryProbability: 0.4,
+      governanceBodiesAffected: 0,
+      complianceRiskCreated: false,
+      executiveSummary: 'summary',
+    };
+
+    it('runs the real simulation workflow and persists a system_generated entry when a scenario is given', async () => {
+      simulateContinuityImpact.mockResolvedValue(SIMULATION_RESULT);
+      execute.mockResolvedValueOnce([{ id: 'interview-1' }, { id: 'interview-2' }]); // currentEvidenceIds
+      execute.mockResolvedValueOnce(undefined); // the INSERT itself
+
+      const entry = await saveCognitionMemory(ORG, {
+        memoryType: 'simulation_snapshot',
+        title: 'Retirement wave',
+        contextSummary: '',
+        payload: { officerNote: 'this should be ignored' },
+        scenario: SCENARIO,
+      } as never, USER);
+
+      expect(simulateContinuityImpact).toHaveBeenCalledWith(ORG, SCENARIO);
+      expect(entry.provenance).toMatchObject({
+        source: 'system_generated',
+        recordedBy: USER,
+        workflow: 'simulateContinuityImpact',
+        scenario: SCENARIO,
+        inputEvidenceIds: ['interview-1', 'interview-2'],
+      });
+      // The real result is the payload - the officer's own payload for this call is never stored.
+      expect(entry.payload).not.toHaveProperty('officerNote');
+      expect(entry.payload).toMatchObject({ executiveSummary: 'summary' });
+      // The result's own immediateImpactScore is the resilience figure, not an officer's guess.
+      expect(entry.resilienceScoreAtCapture).toBe(55);
+    });
+
+    it('saves an officer-typed simulation_snapshot as officer_asserted when no scenario is given', async () => {
+      const entry = await saveCognitionMemory(ORG, {
+        memoryType: 'simulation_snapshot',
+        title: 'My own notes on a retirement',
+        contextSummary: '',
+        payload: { note: 'officer wrote this' },
+      } as never, USER);
+
+      expect(simulateContinuityImpact).not.toHaveBeenCalled();
+      expect(entry.provenance).toEqual({ source: 'officer_asserted', recordedBy: USER });
+      expect(entry.payload).toEqual({ note: 'officer wrote this' });
+    });
+
+    it('reports historical verification as unavailable for an officer_asserted simulation_snapshot read back from storage', async () => {
+      execute.mockResolvedValueOnce([
+        {
+          id: 'r1', organization_id: ORG, memory_type: 'simulation_snapshot', title: 'Old snapshot',
+          payload: { note: 'typed in', __provenance: { source: 'officer_asserted', recordedBy: 'u1' } },
+          resilience_score_at_capture: null, created_at: '2025-01-01T00:00:00.000Z', updated_at: '2025-01-01T00:00:00.000Z',
+        },
+      ]);
+      const store = await loadCognitionMemory(ORG, {});
+      expect(store.entries[0].historicalVerification).toEqual({
+        checked: true,
+        reconcilable: false,
+        reason: 'scenario_not_reconstructable',
+      });
+    });
+
+    it('reports historical verification as predating provenance tracking when the stored payload has no provenance key at all', async () => {
+      execute.mockResolvedValueOnce([
+        {
+          id: 'r1', organization_id: ORG, memory_type: 'simulation_snapshot', title: 'Very old snapshot',
+          payload: { note: 'typed in before provenance existed' },
+          resilience_score_at_capture: null, created_at: '2024-01-01T00:00:00.000Z', updated_at: '2024-01-01T00:00:00.000Z',
+        },
+      ]);
+      const store = await loadCognitionMemory(ORG, {});
+      expect(store.entries[0].historicalVerification).toEqual({
+        checked: true,
+        reconcilable: false,
+        reason: 'predates_provenance_tracking',
+      });
+    });
+
+    it('reports historical verification as not_applicable for a system_generated entry read back from storage', async () => {
+      execute.mockResolvedValueOnce([
+        {
+          id: 'r1', organization_id: ORG, memory_type: 'simulation_snapshot', title: 'Real run',
+          payload: {
+            executiveSummary: 'x',
+            __provenance: {
+              source: 'system_generated', recordedBy: 'u1', workflow: 'simulateContinuityImpact',
+              modelVersion: 'continuity-simulator-v1', scenario: SCENARIO, computedAt: '2026-01-01T00:00:00.000Z', inputEvidenceIds: ['i1'],
+            },
+          },
+          resilience_score_at_capture: 55, created_at: '2026-01-01T00:00:00.000Z', updated_at: '2026-01-01T00:00:00.000Z',
+        },
+      ]);
+      const store = await loadCognitionMemory(ORG, {});
+      expect(store.entries[0].provenance?.source).toBe('system_generated');
+      expect(store.entries[0].historicalVerification).toEqual({ checked: true, reconcilable: true, reason: 'not_applicable' });
+    });
+
+    // Decision 1 adversarial follow-up: a capture-time algorithm-computed figure must survive a reload, not merely
+    // appear on the response to the save call that produced it.
+    it('returns the algorithm-computed resilience index from a prior save on a later read, unchanged', async () => {
+      execute.mockResolvedValueOnce([
+        {
+          id: 'r1', organization_id: ORG, memory_type: 'resilience_baseline', title: 'Baseline',
+          payload: {
+            __provenance: { source: 'officer_asserted', recordedBy: 'u1' },
+            __algorithmComputedResilienceIndexAtCapture: 62,
+          },
+          resilience_score_at_capture: 80, created_at: '2026-01-01T00:00:00.000Z', updated_at: '2026-01-01T00:00:00.000Z',
+        },
+      ]);
+      const store = await loadCognitionMemory(ORG, {});
+      expect(store.entries[0].resilienceScoreAtCapture).toBe(80);
+      expect(store.entries[0].algorithmComputedResilienceIndexAtCapture).toBe(62);
+      // The reserved key never leaks into the officer-visible payload.
+      expect(store.entries[0].payload).not.toHaveProperty('__algorithmComputedResilienceIndexAtCapture');
     });
   });
 

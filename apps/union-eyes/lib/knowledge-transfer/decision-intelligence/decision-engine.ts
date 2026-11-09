@@ -11,11 +11,13 @@
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import { forecastContinuityTrends } from '../forecasting/continuity-forecaster';
-import type { DependencyNode } from '../propagation/propagation-models';
-import { confidenceLabelFromCount } from '../governance/evidence-basis';
+import type { DependencyNode, PropagationMap } from '../propagation/propagation-models';
+import { listVerifiedDependencies } from '../propagation/verified-dependency-store';
+import { evidenceCoverageFromCount } from '../governance/evidence-basis';
 import {
   type ContinuityRecommendation,
   type DecisionBrief,
+  type ConfirmedDependencyRisk,
 } from './decision-models';
 
 let _recCounter = 0;
@@ -42,12 +44,12 @@ function buildSingleSourceRecommendation(
       {
         observation: `${singleSourceCount} of ${totalNodes} knowledge nodes have single-source coverage`,
         dataPoint: `${pct}% single-source concentration`,
-        confidence: confidenceLabelFromCount(singleSourceCount),
+        evidenceCoverage: evidenceCoverageFromCount(singleSourceCount),
       },
       {
         observation: `Critical areas include: ${topNodes.join(', ')}`,
         dataPoint: `Top ${topNodes.length} single-source critical nodes identified`,
-        confidence: confidenceLabelFromCount(criticalSingleSource.length),
+        evidenceCoverage: evidenceCoverageFromCount(criticalSingleSource.length),
       },
     ],
     reasoningChain: [
@@ -103,7 +105,7 @@ function buildGovernanceRecommendation(
       {
         observation: `${govSingleSource} of ${totalGovNodes} governance nodes are single-source`,
         dataPoint: `${Math.round((govSingleSource / Math.max(totalGovNodes, 1)) * 100)}% governance concentration`,
-        confidence: confidenceLabelFromCount(govSingleSource),
+        evidenceCoverage: evidenceCoverageFromCount(govSingleSource),
       },
     ],
     reasoningChain: [
@@ -153,7 +155,7 @@ function buildDocumentationRecommendation(
       {
         observation: `${undocumentedChainCount} single-source chains with no documentation signals`,
         dataPoint: `${Math.round((undocumentedChainCount / Math.max(totalNodes, 1)) * 100)}% of nodes are undocumented chains`,
-        confidence: confidenceLabelFromCount(undocumentedChainCount),
+        evidenceCoverage: evidenceCoverageFromCount(undocumentedChainCount),
       },
     ],
     reasoningChain: [
@@ -202,7 +204,7 @@ function buildVendorRecommendation(
       {
         observation: `${vendorSingleSource} vendor nodes identified as single-source dependencies`,
         dataPoint: `${vendorSingleSource} vendors with no identified alternatives`,
-        confidence: confidenceLabelFromCount(vendorSingleSource),
+        evidenceCoverage: evidenceCoverageFromCount(vendorSingleSource),
       },
     ],
     reasoningChain: [
@@ -228,6 +230,35 @@ function buildVendorRecommendation(
     ],
     estimatedResilienceGain: Math.min(15, vendorSingleSource * 3),
   };
+}
+
+/**
+ * Checks the verified dependency graph (never the exploratory propagation map alone) and returns the confirmed
+ * dependency risks a decision brief may report as established. Returns status
+ * 'no_verified_dependency_evidence_recorded' with an empty risk list when the organization has no currently-verified
+ * dependency evidence — this is an explicit "unavailable", never a silent fall-back to inferred/exploratory edges
+ * presented as confirmed (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE).
+ */
+export async function assessConfirmedDependencyRisk(
+  orgId: string,
+  propagationMap: PropagationMap,
+): Promise<{ risks: ConfirmedDependencyRisk[]; status: DecisionBrief['confirmedDependencyRiskStatus'] }> {
+  const verifiedRecords = await listVerifiedDependencies(orgId, 'verified');
+  if (verifiedRecords.length === 0) {
+    return { risks: [], status: 'no_verified_dependency_evidence_recorded' };
+  }
+  const labelFor = (nodeId: string) => propagationMap.nodes.find((n) => n.id === nodeId)?.label ?? nodeId;
+  const risks: ConfirmedDependencyRisk[] = verifiedRecords.map((record) => ({
+    dependentNodeId: record.dependentNodeId,
+    dependentLabel: labelFor(record.dependentNodeId),
+    dependsOnNodeId: record.dependsOnNodeId,
+    dependsOnLabel: labelFor(record.dependsOnNodeId),
+    processOrSystem: record.processOrSystem,
+    responsibleAuthority: record.responsibleAuthority,
+    evidenceReference: record.evidenceReference,
+    verifiedAt: record.reviewedAt ?? record.updatedAt,
+  }));
+  return { risks, status: 'verified_dependency_evidence_available' };
 }
 
 /**
@@ -296,21 +327,25 @@ export async function generateDecisionBrief(orgId: string): Promise<DecisionBrie
     continuityStrengths.push(`${wellCovered} operational areas have multi-person knowledge coverage`);
   }
 
-  // Critical gaps
+  // Critical gaps — exploratory, pattern-based observations (interview tag co-occurrence) worth investigating,
+  // never phrased as confirmed findings. Confirmed dependency risk is reported separately below, from verified
+  // evidence only (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE).
   const criticalGaps: string[] = [];
   if (criticalSingleSource.length > 0) {
-    criticalGaps.push(`${criticalSingleSource.length} critical-sensitivity areas have no knowledge backup`);
+    criticalGaps.push(`Exploratory pattern analysis suggests ${criticalSingleSource.length} critical-sensitivity area${criticalSingleSource.length === 1 ? '' : 's'} may have no knowledge backup (inferred from interview tag co-occurrence, not verified)`);
   }
   if (govSingleSource.length > 0) {
-    criticalGaps.push(`${govSingleSource.length} governance/compliance processes are single-source`);
+    criticalGaps.push(`Exploratory pattern analysis suggests ${govSingleSource.length} governance/compliance process${govSingleSource.length === 1 ? '' : 'es'} may be single-source (inferred from interview tag co-occurrence, not verified)`);
   }
   const criticalBottlenecks = propagationMap.bottlenecks?.filter((bottleneck) => bottleneck.riskLevel === 'critical') ?? [];
   if (criticalBottlenecks.length > 0) {
-    criticalGaps.push(`${criticalBottlenecks.length} critical operational bottlenecks identified`);
+    criticalGaps.push(`Exploratory pattern analysis identified ${criticalBottlenecks.length} potential critical operational bottleneck${criticalBottlenecks.length === 1 ? '' : 's'} (inferred from interview tag co-occurrence, not verified)`);
   }
   if (forecast.trendDirection === 'degrading') {
     criticalGaps.push('Continuity health is trending downward without intervention');
   }
+
+  const confirmedDependencyRisk = await assessConfirmedDependencyRisk(orgId, propagationMap);
 
   // Governance exposure summary
   const govExposurePct = govNodes.length > 0
@@ -343,6 +378,8 @@ export async function generateDecisionBrief(orgId: string): Promise<DecisionBrie
     topPriority: topRec,
     continuityStrengths,
     criticalGaps,
+    confirmedDependencyRisks: confirmedDependencyRisk.risks,
+    confirmedDependencyRiskStatus: confirmedDependencyRisk.status,
     governanceExposureSummary,
     executiveSummary,
   };

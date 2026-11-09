@@ -276,7 +276,7 @@ export function ContinuityPlanningWorkspace() {
                               {rec.evidence.map((e, i) => (
                                 <div key={i} className="text-xs text-slate-600 flex gap-2 mb-1">
                                   <span className="text-slate-400">{i + 1}.</span>
-                                  <span>{e.observation} <span className="text-slate-400">({e.confidence} confidence)</span></span>
+                                  <span>{e.observation} <span className="text-slate-400">({e.evidenceCoverage} evidence coverage)</span></span>
                                 </div>
                               ))}
                             </div>

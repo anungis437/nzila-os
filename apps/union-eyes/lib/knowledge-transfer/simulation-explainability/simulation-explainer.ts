@@ -5,6 +5,7 @@
  */
 
 import type { ContinuitySimulationResult } from '../simulation/simulation-models';
+import { evidenceCoverageScoreFromSampleSize } from '../governance/evidence-basis';
 
 export interface SimulationExplanation {
   simulationId: string;
@@ -20,8 +21,14 @@ export interface SimulationExplanation {
   keyAssumptions: string[];
   /** Sources of impact calculations */
   sourceEvidence: Array<{ source: string; contribution: string }>;
-  /** Confidence intervals */
-  confidenceLevels: Record<string, number>;
+  /**
+   * How many operational domains this simulation actually modeled (0-100) - a volume measure, never a claim that
+   * the immediate, 12-week or recovery figures are independently validated. Previously three fixed literals
+   * (75/50/60) returned unconditionally for every simulation regardless of its actual domainImpacts; replaced with
+   * the same evidence-coverage convention used elsewhere in this family (DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-
+   * OVER-TAG-COUNTS) rather than inventing a fixed-per-field "confidence" this function has no basis to assert.
+   */
+  evidenceCoverageScore: number;
   /** Limitations and caveats */
   limitations: string[];
 }
@@ -84,11 +91,7 @@ export function explainSimulation(simulation: ContinuitySimulationResult): Simul
       { source: 'Interview content analysis', contribution: 'Determines documentation quality' },
       { source: 'Organizational structure', contribution: 'Maps role dependencies' },
     ],
-    confidenceLevels: {
-      'immediate_impact': 75,
-      '12_week_projection': 50,
-      'recovery_probability': 60,
-    },
+    evidenceCoverageScore: evidenceCoverageScoreFromSampleSize(simulation.domainImpacts.length),
     limitations: [
       'Simulation assumes independent failures (ignores simultaneous disruptions)',
       'Recovery estimates based on organizational maturity heuristics',

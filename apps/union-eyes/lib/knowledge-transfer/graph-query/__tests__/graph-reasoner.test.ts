@@ -115,8 +115,8 @@ describe('executeGraphQuery', () => {
       expect(typeof result.significance).toBe('string');
       expect(Array.isArray(result.findings)).toBe(true);
       expect(result.recommendations.length).toBeGreaterThan(0);
-      expect(result.confidenceScore).toBeGreaterThanOrEqual(0);
-      expect(result.confidenceScore).toBeLessThanOrEqual(100);
+      expect(result.evidenceCoverageScore).toBeGreaterThanOrEqual(0);
+      expect(result.evidenceCoverageScore).toBeLessThanOrEqual(100);
       expect(typeof result.executedAt).toBe('string');
     });
   }
@@ -194,7 +194,7 @@ describe('executeGraphQuery', () => {
     expect(result.findings[0].entityId).toBe('redundancy_summary');
   });
 
-  it('confidence score reflects empty findings/bottlenecks', async () => {
+  it('evidence coverage score is derived from interview volume alone, not from how many findings or bottlenecks were surfaced', async () => {
     mocks.buildMap.mockResolvedValue({
       ...richMap(),
       nodes: [{
@@ -204,7 +204,24 @@ describe('executeGraphQuery', () => {
       bottlenecks: [],
       downstreamImpacts: [],
     });
-    const result = await executeGraphQuery('org-1', q('knowledge_redundancy'));
-    expect(result.confidenceScore).toBeGreaterThanOrEqual(0);
+    const sparse = await executeGraphQuery('org-1', q('knowledge_redundancy'));
+    // One interview total (frequency: 1) is below MIN_COHORT_SIZE, so coverage is the lowest non-zero tier (40),
+    // regardless of how many findings or bottlenecks this particular query surfaced.
+    expect(sparse.evidenceCoverageScore).toBe(40);
+
+    mocks.buildMap.mockResolvedValue({
+      ...richMap(),
+      nodes: [{
+        id: 'x', label: 'X', nodeType: 'expertise', category: 'general', frequency: 1,
+        associatedRoles: [], isSingleSource: false, continuitySensitivity: 'low', sensitivityReason: '',
+      }],
+      // Many bottlenecks must NOT inflate the evidence-coverage score - interview volume is unchanged.
+      bottlenecks: [
+        { nodeId: 'x', reason: 'single_source', riskLevel: 'critical', affectedRoles: [] },
+        { nodeId: 'x', reason: 'high_dependents', riskLevel: 'critical', affectedRoles: [] },
+      ],
+    });
+    const manyBottlenecks = await executeGraphQuery('org-1', q('knowledge_redundancy'));
+    expect(manyBottlenecks.evidenceCoverageScore).toBe(sparse.evidenceCoverageScore);
   });
 });

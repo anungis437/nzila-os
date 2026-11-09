@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
     badRequest: vi.fn((msg: string) => Object.assign(new Error(msg), { status: 400 })),
     notFound: vi.fn((msg: string) => Object.assign(new Error(msg), { status: 404 })),
     conflict: vi.fn((msg: string) => Object.assign(new Error(msg), { status: 409 })),
+    forbidden: vi.fn((msg: string) => Object.assign(new Error(msg), { status: 403 })),
   },
   selectQueue: [] as unknown[][],
   updateReturningQueue: [] as unknown[][],
@@ -15,6 +16,7 @@ const m = vi.hoisted(() => ({
   updates: [] as Array<{ table: unknown; set: Record<string, unknown> }>,
   inserted: [] as Array<{ table: unknown; values: Record<string, unknown> }>,
   erase: vi.fn(),
+  hasMinRole: vi.fn(),
 }));
 
 const mockDb = {
@@ -47,6 +49,7 @@ vi.mock('@/lib/api/framework', () => ({
   withApi: m.withApi,
   ApiError: m.ApiError,
 }));
+vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
 vi.mock('@/db/db', () => ({ db: mockDb }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_o: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb) }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
@@ -89,6 +92,8 @@ describe('exit-interviews/[id]/governance route', () => {
     m.insertReturningQueue = [];
     m.updates = [];
     m.inserted = [];
+    // Default: the acting user clears the senior-reviewer bar for approval tests that don't care about it.
+    m.hasMinRole.mockResolvedValue(true);
     m.withApi.mockImplementation(
       (_config: unknown, handler: (ctx: any) => Promise<unknown>) =>
         async (_request: NextRequest, ctx: any = { params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'u1', body: {} }) => {
@@ -355,6 +360,25 @@ describe('exit-interviews/[id]/governance route', () => {
       }));
     });
 
+    // DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW (adversarial follow-up): approving a
+    // reclassification must never reactivate consent the retiree already withdrew.
+    it('PATCH approval never reactivates a withdrawn consent', async () => {
+      const { PATCH } = await loadRoute();
+      m.selectQueue.push(
+        [{ id: 'iv_1', sensitivityLevel: 'legal_sensitive', consentGranted: false, updatedAt: new Date() }],
+        [{ id: 'evt_req_1', eventType: 'governance_updated', payload: { kind: 'reclassification_requested', requestedLevel: 'public_internal', previousLevel: 'legal_sensitive', requestedBy: 'admin-a', reason: null } }],
+      );
+      m.updateReturningQueue.push([{ id: 'iv_1', sensitivityLevel: 'public_internal', consentGranted: false }]);
+
+      await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+        params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'admin-b', body: { approveReclassificationEventId: 'evt_req_1' },
+      });
+
+      expect(m.updates[0].set).not.toHaveProperty('consentGranted');
+      expect(m.updates[0].set).not.toHaveProperty('consentGrantedAt');
+      expect(m.updates[0].set).not.toHaveProperty('consentGrantedBy');
+    });
+
     it('PATCH refuses self-approval of a reclassification request', async () => {
       const { PATCH } = await loadRoute();
       m.selectQueue.push(
@@ -398,6 +422,44 @@ describe('exit-interviews/[id]/governance route', () => {
 
       expect(response.status).toBe(404);
     });
+
+    it('PATCH refuses approval from a reviewer who does not clear the senior-reviewer bar', async () => {
+      const { PATCH } = await loadRoute();
+      m.hasMinRole.mockResolvedValue(false);
+      m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'legal_sensitive', consentGranted: true, updatedAt: new Date() }]);
+
+      const response = await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+        params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'admin-b', body: { approveReclassificationEventId: 'evt_req_1' },
+      });
+
+      expect(response.status).toBe(403);
+      expect(mockDb.update).not.toHaveBeenCalled();
+      // The role check short-circuits before even loading the request event.
+      expect(m.selectQueue.length).toBe(0);
+    });
+
+    // DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW (adversarial follow-up): two
+    // reviewers racing on the SAME pending request can both pass every pre-check (both read the interview before
+    // either commits), but only one conditional UPDATE can actually match the row version both of them read.
+    it('PATCH treats a conditional-update race on the same approval as exactly-once: the loser gets 409, not a double apply', async () => {
+      const { PATCH } = await loadRoute();
+      const readAt = new Date('2026-01-01T00:00:00Z');
+      m.selectQueue.push(
+        [{ id: 'iv_1', sensitivityLevel: 'legal_sensitive', consentGranted: true, updatedAt: readAt }],
+        [{ id: 'evt_req_1', eventType: 'governance_updated', payload: { kind: 'reclassification_requested', requestedLevel: 'public_internal', previousLevel: 'legal_sensitive', requestedBy: 'admin-a', reason: null } }],
+      );
+      // The conditional UPDATE's WHERE (id, org, updatedAt=readAt) matches zero rows: a concurrent winner already
+      // moved updatedAt away from readAt by the time this request's UPDATE executed.
+      m.updateReturningQueue.push([]);
+
+      const response = await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+        params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'admin-b', body: { approveReclassificationEventId: 'evt_req_1' },
+      });
+
+      expect(response.status).toBe(409);
+      expect(m.audit).not.toHaveBeenCalled();
+      expect(m.inserted.some((i) => (i.values as { payload?: { kind?: string } }).payload?.kind === 'reclassification_approved')).toBe(false);
+    });
   });
 
   describe('optimistic concurrency (expectedUpdatedAt)', () => {
@@ -426,6 +488,24 @@ describe('exit-interviews/[id]/governance route', () => {
       });
 
       expect(response.status).toBe(200);
+    });
+
+    // The actual mutation is ALWAYS conditioned on the row version this request itself read, independent of whether
+    // the client supplied expectedUpdatedAt at all - a concurrent writer between this request's read and its write
+    // is caught even when the client sends no expectedUpdatedAt.
+    it('PATCH rejects with 409 when a concurrent write already moved the row even though no expectedUpdatedAt was supplied', async () => {
+      const { PATCH } = await loadRoute();
+      m.selectQueue.push([{ id: 'iv_1', sensitivityLevel: 'restricted', consentGranted: true, updatedAt: new Date('2026-01-01T00:00:00Z') }]);
+      // The conditional UPDATE matched zero rows: something else committed first.
+      m.updateReturningQueue.push([]);
+
+      const response = await PATCH(new NextRequest('http://localhost/api/exit-interviews/iv_1/governance', { method: 'PATCH' }), {
+        params: { id: 'iv_1' }, organizationId: 'org_1', userId: 'u1',
+        body: { sensitivityLevel: 'public_internal' },
+      });
+
+      expect(response.status).toBe(409);
+      expect(m.audit).not.toHaveBeenCalled();
     });
   });
 });

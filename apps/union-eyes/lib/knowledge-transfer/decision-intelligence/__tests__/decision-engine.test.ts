@@ -7,10 +7,13 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), resilience: vi.fn(), forecast: vi.fn() }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), resilience: vi.fn(), forecast: vi.fn(), listVerifiedDependencies: vi.fn() }));
 
 vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
+}));
+vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
+  listVerifiedDependencies: mocks.listVerifiedDependencies,
 }));
 vi.mock('@/lib/knowledge-transfer/resilience-index/resilience-calculator', () => ({
   calculateResilienceIndex: mocks.resilience,
@@ -49,6 +52,7 @@ describe('generateDecisionBrief', () => {
     mocks.forecast.mockResolvedValue({ trendDirection: 'stable' });
     mocks.resilience.mockResolvedValue(resilienceIndex(80, 'strong', [{ name: 'Knowledge Redundancy', score: 85 }]));
     mocks.buildMap.mockResolvedValue(propMap([node('x', 'general', false)]));
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
   });
 
   it('produces no recommendations for a healthy org', async () => {
@@ -88,12 +92,13 @@ describe('generateDecisionBrief', () => {
 
     const brief = await generateDecisionBrief('org');
 
-    // DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS: evidence confidence must come from how many nodes
-    // underlie the claim, not a fixed literal chosen by recommendation category.
+    // DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS: evidence coverage must come from how many nodes
+    // underlie the claim, not a fixed literal chosen by recommendation category - and it is coverage (volume), not
+    // a claim that the recommendation is correct.
     const redundancyRec = brief.recommendations.find((r) => r.category === 'redundancy_investment')!;
-    expect(redundancyRec.evidence[0].confidence).toBe('high'); // 9 single-source nodes >= MIN_COHORT_SIZE
+    expect(redundancyRec.evidence[0].evidenceCoverage).toBe('high'); // 9 single-source nodes >= MIN_COHORT_SIZE
     const govRec = brief.recommendations.find((r) => r.category === 'governance_stabilization')!;
-    expect(govRec.evidence[0].confidence).toBe('medium'); // 3 single-source governance nodes, below MIN_COHORT_SIZE
+    expect(govRec.evidence[0].evidenceCoverage).toBe('medium'); // 3 single-source governance nodes, below MIN_COHORT_SIZE
 
     const categories = brief.recommendations.map((r) => r.category);
     expect(categories).toContain('redundancy_investment');
@@ -111,12 +116,46 @@ describe('generateDecisionBrief', () => {
     // critical gaps populated incl forecast degrading + bottlenecks + gov single-source
     expect(brief.criticalGaps.some((g) => g.includes('critical-sensitivity'))).toBe(true);
     expect(brief.criticalGaps.some((g) => g.includes('governance/compliance'))).toBe(true);
-    expect(brief.criticalGaps.some((g) => g.includes('bottlenecks'))).toBe(true);
+    expect(brief.criticalGaps.some((g) => g.includes('bottleneck'))).toBe(true);
+    // gaps derived from the exploratory propagation map must say so, not read as confirmed findings
+    expect(brief.criticalGaps.some((g) => g.includes('Exploratory pattern analysis'))).toBe(true);
     expect(brief.criticalGaps.some((g) => g.includes('trending downward'))).toBe(true);
     // governance exposure highly concentrated (100% single source)
     expect(brief.governanceExposureSummary).toContain('highly concentrated');
     expect(brief.executiveSummary).toContain('Highest priority');
     expect(brief.executiveSummary).toContain('degrading');
+
+    // DEF-0B7-COGB: with no verified dependency evidence recorded, confirmed risk is explicitly unavailable, never
+    // silently filled from the exploratory propagation map used for criticalGaps above.
+    expect(brief.confirmedDependencyRiskStatus).toBe('no_verified_dependency_evidence_recorded');
+    expect(brief.confirmedDependencyRisks).toEqual([]);
+  });
+
+  it('reports confirmed dependency risk only from verified evidence, never the exploratory graph', async () => {
+    mocks.buildMap.mockResolvedValue(propMap([node('payroll_system', 'system', true, 'critical'), node('finance_clerk', 'expertise', false)]));
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      {
+        id: 'vd1', organizationId: 'org', dependentNodeId: 'finance_clerk', dependsOnNodeId: 'payroll_system',
+        processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director',
+        evidenceReference: 'SOP-114 v3', status: 'verified', submittedBy: 'u1', reviewedBy: 'u2',
+        reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null, createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    const brief = await generateDecisionBrief('org');
+
+    expect(brief.confirmedDependencyRiskStatus).toBe('verified_dependency_evidence_available');
+    expect(brief.confirmedDependencyRisks).toHaveLength(1);
+    expect(brief.confirmedDependencyRisks[0]).toMatchObject({
+      dependentNodeId: 'finance_clerk',
+      dependentLabel: 'finance_clerk',
+      dependsOnNodeId: 'payroll_system',
+      dependsOnLabel: 'payroll_system',
+      processOrSystem: 'Payroll processing',
+      responsibleAuthority: 'Finance Director',
+      evidenceReference: 'SOP-114 v3',
+      verifiedAt: '2026-01-01T00:00:00.000Z',
+    });
   });
 
   it('covers at_risk and adequate state + moderate/low governance tiers', async () => {

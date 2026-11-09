@@ -3,13 +3,13 @@
   "population": 777,
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
-    "overlayImplemented": 728,
+    "overlayImplemented": 730,
     "ledgerImplemented": 653,
-    "creditedByEarlierRuns": 75,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 51,
-    "overlayPartial": 30,
+    "creditedByEarlierRuns": 77,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 53,
+    "overlayPartial": 28,
     "ledgerPartial": 24,
-    "unresolvedByOverlay": 49,
+    "unresolvedByOverlay": 47,
     "untouchedByOverlay": 19,
     "qualificationVerified": 0,
     "closed": 0
@@ -17,8 +17,8 @@
   "mutuallyExclusiveAccounting": {
     "rule": "Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. \"outstanding\"/\"remaining\" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.",
     "population": 777,
-    "implemented": 728,
-    "partial": 30,
+    "implemented": 730,
+    "partial": 28,
     "untouched": 19,
     "partialIds": [
       "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
@@ -29,8 +29,6 @@
       "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
       "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
       "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
-      "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
-      "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
       "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-RELEASES-LATEST-VERSION-NOT-GRANTED-VERSION",
       "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
       "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
@@ -672,6 +670,19 @@
       "hasIndependentRegressionEvidence": true
     },
     {
+      "defectId": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
+      "batch": "B163-FAMILY1-STRICT-CLOSURE",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
+      "files": [
+        "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
+        "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts",
+        "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
+        "apps/union-eyes/app/api/exit-interviews/cognition-memory/route.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
       "defectId": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
       "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
       "sourceCommit": null,
@@ -724,6 +735,23 @@
         "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
         "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
         "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts"
+      ],
+      "hasIndependentRegressionEvidence": true
+    },
+    {
+      "defectId": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
+      "batch": "B163-FAMILY1-STRICT-CLOSURE",
+      "sourceCommit": null,
+      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/verified-dependency-store.pglite.test.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
+      "files": [
+        "apps/union-eyes/db/migrations-platform/0085_verified_dependency_evidence.sql",
+        "apps/union-eyes/db/migrations-cache/0059_verified_dependency_evidence_rls_closure.sql",
+        "apps/union-eyes/lib/knowledge-transfer/propagation/verified-dependency-models.ts",
+        "apps/union-eyes/lib/knowledge-transfer/propagation/verified-dependency-store.ts",
+        "apps/union-eyes/lib/knowledge-transfer/propagation/propagation-models.ts",
+        "apps/union-eyes/lib/knowledge-transfer/propagation/dependency-propagator.ts",
+        "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-engine.ts",
+        "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-models.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },

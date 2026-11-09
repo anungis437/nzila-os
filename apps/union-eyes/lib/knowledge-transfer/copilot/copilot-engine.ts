@@ -35,7 +35,7 @@ import {
   buildPropagationEvidence,
   buildGovernanceFlags,
 } from '../copilot-explainability/response-builder';
-import { confidenceLabelFromCount } from '../governance/evidence-basis';
+import { evidenceCoverageFromCount } from '../governance/evidence-basis';
 import type { EvidenceReference, ReasoningLink, GovernanceFlag } from '../copilot-explainability/explainability-models';
 import type { CopilotQueryInput, CopilotQueryResult, CopilotMessage } from './copilot-models';
 
@@ -255,13 +255,14 @@ export async function processCopilotQuery(
       sourceType: 'resilience_index',
       // Derived from how many knowledge nodes the resilience index itself was computed from - not a fixed 'high'
       // regardless of how little organizational data actually underlies the score (DEF-0B7-EXC-COPILOT-EXPLAINABILITY).
-      confidence: confidenceLabelFromCount(totalNodes),
+      // Evidence coverage, not confidence: it says how much was looked at, not whether the index is correct.
+      evidenceCoverage: evidenceCoverageFromCount(totalNodes),
     },
     {
       observation: `${resilienceIndex.dimensions.length} resilience dimensions analyzed`,
       dataPoint: resilienceIndex.dimensions.map((d) => `${d.name}: ${d.score}`).join(', '),
       sourceType: 'resilience_index',
-      confidence: confidenceLabelFromCount(totalNodes),
+      evidenceCoverage: evidenceCoverageFromCount(totalNodes),
     },
   ];
 
@@ -351,7 +352,7 @@ export async function processCopilotQuery(
     governanceFlags: explainability.governanceFlags,
     assumptions: explainability.assumptions,
     limitations: explainability.limitations,
-    overallConfidence: explainability.overallConfidence,
+    overallEvidenceCoverage: explainability.overallEvidenceCoverage,
     followUpSuggestions: followUps,
     organizationalContext: `Continuity analysis for organization ${orgId}. Resilience score: ${resilienceIndex.overallScore}/100.`,
     generatedAt: now,

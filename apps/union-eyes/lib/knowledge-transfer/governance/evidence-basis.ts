@@ -14,6 +14,16 @@
  * for an explicit insufficient-evidence result. A caller must always be able to tell
  * "nothing was recorded" from "something was recorded and it happened to be a low or zero
  * value".
+ *
+ * Evidence VOLUME is not the same thing as evidence CONFIDENCE. Five self-reported,
+ * officer-typed observations are five data points, not five validations: more of them
+ * changes how much there is to look at, never whether the underlying claim is true. The
+ * functions below are named and return types accordingly - "evidence coverage", never
+ * "confidence" - because nothing in this module (or in the officer-asserted records it
+ * reads) establishes source verification, measurement validity or analytical confidence.
+ * A caller that has an actual, defensible basis for confidence (independent verification,
+ * a validated model, corroborating evidence from a different source) should compute and
+ * label that separately; it must never be synthesized from record count alone.
  */
 
 /**
@@ -24,17 +34,36 @@
  */
 export const MIN_COHORT_SIZE = 5;
 
+/** How much self-reported evidence backs a figure - a volume measure, not a truth or validation measure. */
+export type EvidenceCoverage = 'low' | 'medium' | 'high';
+
 /**
- * A 0-100 confidence figure derived from how many interactions/entries/records informed a
- * classification - not from any statistical measure of correctness. Zero interactions
- * means nothing was observed, so confidence is 0, never a floor value that would read as a
- * confidently-measured result on an empty history.
+ * A 0-100 evidence-coverage figure derived from how many interactions/entries/records
+ * informed a classification - purely a count, never a statistical measure of correctness,
+ * source verification or measurement validity. Zero interactions means nothing was
+ * observed, so coverage is 0, never a floor value that would read as a validated result on
+ * an empty history. Do not label this (or anything derived from it) "confidence": record
+ * count says nothing about whether the records themselves are true.
  */
-export function confidenceFromSampleSize(sampleSize: number): number {
+export function evidenceCoverageScoreFromSampleSize(sampleSize: number): number {
   if (sampleSize <= 0) return 0;
   if (sampleSize >= 10) return 80;
   if (sampleSize >= MIN_COHORT_SIZE) return 60;
   return 40;
+}
+
+/**
+ * An evidence-coverage label derived from how many nodes/signals/records underlie a single
+ * claim - never a fixed literal chosen by category, and never a claim about whether that
+ * claim is correct. "high" coverage on five self-reported records means five records were
+ * looked at, not that the records are reliable, verified or that the claim they support is
+ * true. Shared by the decision-brief, copilot-explainability and propagation-derived
+ * evidence builders so the same count always implies the same label.
+ */
+export function evidenceCoverageFromCount(count: number): EvidenceCoverage {
+  if (count >= MIN_COHORT_SIZE) return 'high';
+  if (count >= 2) return 'medium';
+  return 'low';
 }
 
 /**
@@ -51,20 +80,10 @@ export function averageOrNull(scores: readonly number[]): number | null {
 /**
  * Whether a sample is large enough that a per-cohort figure no longer reads as a specific
  * small number of individuals' own data. Below this, aggregate figures should be withheld
- * (small-cell suppression) rather than computed and shown.
+ * (small-cell suppression, a privacy control) rather than computed and shown. This is
+ * unrelated to whether the figure is statistically reliable once shown - small-cell
+ * suppression protects identities, it does not certify an estimate above the threshold.
  */
 export function meetsMinimumCohort(sampleSize: number): boolean {
   return sampleSize >= MIN_COHORT_SIZE;
-}
-
-/**
- * A 'low' | 'medium' | 'high' confidence label derived from how many nodes/signals/records
- * actually underlie a single claim or evidence reference - not a fixed literal chosen by
- * category or evidence type. Shared by the decision-brief, copilot-explainability and
- * propagation-derived evidence builders so the same count always implies the same label.
- */
-export function confidenceLabelFromCount(count: number): 'low' | 'medium' | 'high' {
-  if (count >= MIN_COHORT_SIZE) return 'high';
-  if (count >= 2) return 'medium';
-  return 'low';
 }

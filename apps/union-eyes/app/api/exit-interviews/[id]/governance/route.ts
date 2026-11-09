@@ -8,18 +8,26 @@
  * never indexed does the same. Taking the copy out of service deactivates it and erases its embedding. All changes are audit-logged.
  *
  * Lowering a published interview out of legal_sensitive or executive_confidential does not apply immediately: it is
- * recorded as a pending request (pendingApproval: true, no row changed) that a DIFFERENT admin must approve via
+ * recorded as a pending request (pendingApproval: true, no row changed) that a reviewer with a role senior to the
+ * requesting administrator (national_officer+, never the requester themselves) must approve via
  * approveReclassificationEventId before the level actually changes (DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW).
  *
- * A caller that read the interview before this call may pass expectedUpdatedAt; a mismatch (someone else changed it
- * since) is rejected with 409 rather than silently overwriting a change this caller never saw.
+ * Every mutating path conditions its UPDATE on the row's updated_at at the moment this request read it (not merely
+ * an optional client-supplied value): if a concurrent request already changed the row, the conditional UPDATE
+ * matches zero rows and this request is rejected with 409, never silently overwriting or double-applying a change.
+ * This is also what gives a pending approval event exactly-once consumption - two concurrent approvals of the same
+ * event can both pass their pre-checks, but only one's conditional UPDATE can actually match and commit.
  *
- * Access: admin+
+ * A caller that read the interview well before this call may additionally pass expectedUpdatedAt, checked against
+ * the same fresh read, so a stale client-side cache is rejected even before a transaction is opened.
+ *
+ * Access: admin+ to request; a role senior to admin (national_officer+), and never the requester, to approve.
  */
 
 import { and, eq, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { withApi, ApiError } from '@/lib/api/framework';
+import { hasMinRole } from '@/lib/api-auth-guard';
 import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -29,13 +37,17 @@ import { eraseKnowledgeBaseEmbeddings } from '@/lib/ai/knowledge-base-embeddings
 
 export const dynamic = 'force-dynamic';
 
+/** Senior enough to review a downgrade out of the two most restrictive tiers - strictly above the admin floor that
+ *  can request one, so the reviewer is never merely another instance of the same authority that requested it. */
+const RECLASSIFICATION_REVIEWER_MIN_ROLE = 'national_officer';
+
 const governanceSchema = z.object({
   sensitivityLevel: z
     .enum(['public_internal', 'restricted', 'privileged', 'legal_sensitive', 'executive_confidential'])
     .optional(),
   consentGranted: z.boolean().optional(),
   consentNotes: z.string().max(1000).optional(),
-  /** Id of a prior PATCH's pending-approval event this call approves. Must come from a different admin than the one who requested it. */
+  /** Id of a prior PATCH's pending-approval event this call approves. Must come from a different, more senior reviewer than the one who requested it. */
   approveReclassificationEventId: z.string().uuid().optional(),
   /** Optimistic concurrency: the interview's updatedAt this caller last read. A mismatch means someone else changed it since. */
   expectedUpdatedAt: z.string().datetime().optional(),
@@ -73,9 +85,11 @@ export const PATCH = withApi(
       .limit(1);
 
     if (!existing) throw ApiError.notFound('Exit interview');
+    // Every later write in this request conditions its UPDATE on exactly this value, read once, here.
+    const readAtUpdatedAt = existing.updatedAt;
 
     // Optimistic concurrency: a caller acting on a stale read must not silently overwrite a change it never saw.
-    if (body?.expectedUpdatedAt && new Date(body.expectedUpdatedAt).getTime() !== new Date(existing.updatedAt).getTime()) {
+    if (body?.expectedUpdatedAt && new Date(body.expectedUpdatedAt).getTime() !== new Date(readAtUpdatedAt).getTime()) {
       throw ApiError.conflict('This interview changed since it was last read; reload and retry');
     }
 
@@ -85,10 +99,14 @@ export const PATCH = withApi(
       throw ApiError.conflict('Retiree consent cannot be granted through this route; no consent was recorded');
     }
 
-    // Approving a pending reclassification request: load the request event, verify it is still live and that the
-    // approver is not the requester, then apply the previously-requested level. No other field may be changed in
-    // the same call - approval is its own, narrow action.
+    // Approving a pending reclassification request: load the request event, verify it is still live, that the
+    // reviewer is senior to an admin and is not the requester, then apply the previously-requested level. No other
+    // field may be changed in the same call - approval is its own, narrow action.
     if (body?.approveReclassificationEventId) {
+      if (!(await hasMinRole(RECLASSIFICATION_REVIEWER_MIN_ROLE))) {
+        throw ApiError.forbidden(`Approving a reclassification requires at least ${RECLASSIFICATION_REVIEWER_MIN_ROLE}`);
+      }
+
       const [requestEvent] = await db
         .select()
         .from(exitInterviewEvents)
@@ -107,7 +125,7 @@ export const PATCH = withApi(
         throw ApiError.notFound('Pending reclassification request');
       }
       if (payload.requestedBy === userId) {
-        throw ApiError.conflict('A different administrator must approve this reclassification');
+        throw ApiError.conflict('A different, more senior reviewer must approve this reclassification');
       }
       if (payload.previousLevel !== existing.sensitivityLevel) {
         throw ApiError.conflict('The interview\'s sensitivity level changed since this request was made; it is no longer valid');
@@ -118,9 +136,16 @@ export const PATCH = withApi(
         const [row] = await tx
           .update(exitInterviews)
           .set({ sensitivityLevel: payload.requestedLevel, updatedAt: now, updatedBy: userId } as never)
-          .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
+          // Conditioned on the exact row version this request read: a concurrent approval (or any other concurrent
+          // write) that already moved updatedAt away from readAtUpdatedAt makes this match zero rows instead of
+          // double-applying the approval or overwriting a change this request never saw.
+          .where(and(
+            eq(exitInterviews.id, params.id),
+            eq(exitInterviews.organizationId, organizationId!),
+            eq(exitInterviews.updatedAt, readAtUpdatedAt),
+          ))
           .returning();
-        if (!row) throw ApiError.notFound('Exit interview');
+        if (!row) throw ApiError.conflict('This interview changed since the approval request was read; reload and retry');
 
         let deactivatedKnowledgeBaseIds: string[] = [];
         let erasedEmbeddingIds: string[] = [];
@@ -177,7 +202,7 @@ export const PATCH = withApi(
       };
     }
 
-    // Lowering a published interview out of legal_sensitive/executive_confidential is deferred to a second admin:
+    // Lowering a published interview out of legal_sensitive/executive_confidential is deferred to a senior reviewer:
     // record the request and return without changing the row.
     if (body?.sensitivityLevel && requiresReclassificationApproval(existing.sensitivityLevel, body.sensitivityLevel)) {
       const requestPayload: ReclassificationRequestPayload = {
@@ -195,7 +220,7 @@ export const PATCH = withApi(
             organizationId: organizationId!,
             eventType: 'governance_updated',
             actorUserId: userId!,
-            notes: body.consentNotes ?? 'Reclassification requested, pending a second administrator\'s approval',
+            notes: body.consentNotes ?? `Reclassification requested, pending a ${RECLASSIFICATION_REVIEWER_MIN_ROLE}+ reviewer's approval`,
             payload: requestPayload as never,
           })
           .returning();
@@ -214,7 +239,7 @@ export const PATCH = withApi(
         data: existing,
         pendingApproval: true,
         pendingApprovalEventId: requestEventId,
-        message: 'This change lowers the interview out of its most restrictive tier and requires a different administrator\'s approval. Nothing has changed yet.',
+        message: `This change lowers the interview out of its most restrictive tier and requires a ${RECLASSIFICATION_REVIEWER_MIN_ROLE}+ reviewer's approval. Nothing has changed yet.`,
       };
     }
 
@@ -238,9 +263,15 @@ export const PATCH = withApi(
       const [row] = await tx
         .update(exitInterviews)
         .set(updates as never)
-        .where(and(eq(exitInterviews.id, params.id), eq(exitInterviews.organizationId, organizationId!)))
+        // Conditioned on the exact row version this request read (see readAtUpdatedAt above): a concurrent write
+        // that already moved updated_at makes this match zero rows instead of silently overwriting it.
+        .where(and(
+          eq(exitInterviews.id, params.id),
+          eq(exitInterviews.organizationId, organizationId!),
+          eq(exitInterviews.updatedAt, readAtUpdatedAt),
+        ))
         .returning();
-      if (!row) throw ApiError.notFound('Exit interview');
+      if (!row) throw ApiError.conflict('This interview changed since it was last read; reload and retry');
 
       // An interview that may no longer be indexed (consent withdrawn or never recorded, or a level that is never indexed) takes its
       // knowledge-base copy out of service in the same transaction: the copy is deactivated and its embedding, a derivative of the

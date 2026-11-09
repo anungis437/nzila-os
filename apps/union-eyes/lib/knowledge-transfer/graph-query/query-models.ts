@@ -42,8 +42,14 @@ export interface QueryResult {
   significance: string;
   /** Recommended follow-up actions */
   recommendations: string[];
-  /** Confidence in findings (0-100) */
-  confidenceScore: number;
+  /**
+   * How much interview evidence backs these findings (0-100) - a volume measure of how many interviews
+   * contributed, never a claim that the findings themselves are statistically validated or confirmed
+   * (DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS: evidence coverage must come from how many
+   * records underlie the claim, not a formula that also rewards finding more issues as if that made the
+   * analysis itself more certain).
+   */
+  evidenceCoverageScore: number;
 }
 
 export interface QueryFinding {

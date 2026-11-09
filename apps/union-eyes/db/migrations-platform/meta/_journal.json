@@ -603,6 +603,13 @@
       "when": 1759370040000,
       "tag": "0084_ml_predictions_relax_legacy_not_null",
       "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "7",
+      "when": 1759370050000,
+      "tag": "0085_verified_dependency_evidence",
+      "breakpoints": true
     }
   ]
 }

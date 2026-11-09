@@ -10,7 +10,7 @@
 
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory/memory-store';
 import { listReasoningSessions } from '@/lib/knowledge-transfer/reasoning-sessions/session-manager';
-import { confidenceFromSampleSize } from '@/lib/knowledge-transfer/governance/evidence-basis';
+import { evidenceCoverageScoreFromSampleSize } from '@/lib/knowledge-transfer/governance/evidence-basis';
 import type {
   ArchetypeClassificationResult,
   LearningArchetype,
@@ -104,8 +104,8 @@ function scoreFits(
     // the fitting formulas below would otherwise still clamp a 'governance_stagnant' fit to its ceiling from
     // nothing but an empty history (see classifyLearningArchetype's own zero-interaction guard, which this
     // floor backs up rather than relies on alone). Shared with every other DEF-0B7-COGA-PROFILES sibling engine
-    // via confidenceFromSampleSize so the same sample size always implies the same confidence.
-    confidence: confidenceFromSampleSize(totalInteractions),
+    // via evidenceCoverageScoreFromSampleSize: a VOLUME figure, not a claim that the fit itself is correct.
+    evidenceCoverage: evidenceCoverageScoreFromSampleSize(totalInteractions),
   });
 
   fits.push(score('proactive_stabilizer',
@@ -229,10 +229,15 @@ export async function classifyLearningArchetype(orgId: string): Promise<Archetyp
   if (totalInteractions === 0) evidence.push('No cognition memory entries or reasoning sessions recorded for this organization yet.');
 
   const evolutionContext = totalInteractions === 0
-    ? `No governance interactions have been recorded yet, so "${primaryArchetype.name}" is not a characterization of this organization's governance - it is the nearest label available on an empty history; classificationConfidence is 0.`
+    ? `No governance interactions have been recorded yet, so "${primaryArchetype.name}" is not a characterization of this organization's governance - it is the nearest label available on an empty history; classificationEvidenceCoverage is 0.`
     : secondaryArchetype
     ? `Primary archetype "${primaryArchetype.name}" with secondary characteristics of "${secondaryArchetype.name}" — indicating a transitional governance posture.`
-    : `Strongly characterized as "${primaryArchetype.name}" based on available governance history.`;
+    // A low top fit score (out of a forced ranking across all 8 archetypes) is not a strong match merely for
+    // having no close second - say so, rather than calling every single non-tied result "strongly characterized"
+    // regardless of how weak the actual top score is.
+    : primary.score >= 60
+    ? `Strongly characterized as "${primaryArchetype.name}" based on available governance history.`
+    : `The closest available archetype is "${primaryArchetype.name}", but the match itself is weak (fit score ${primary.score}/100) - treat this as a tentative label, not a strong characterization.`;
 
   return {
     organizationId: orgId,
@@ -242,18 +247,18 @@ export async function classifyLearningArchetype(orgId: string): Promise<Archetyp
     archetypeFits,
     classificationEvidence: evidence,
     evolutionContext,
-    classificationConfidence: primary.confidence,
+    classificationEvidenceCoverage: primary.evidenceCoverage,
     entriesAnalyzed: totalEntries,
     interpretationGuidance:
       'These archetypes characterize organizational governance style — not individual employees. Classifications are derived from organizational continuity records and are intended for governance strategy planning.',
     methodologyNote:
       'Archetype fit scores are derived from counts, types and dates of cognition memory entries an officer ' +
       'chooses to type in through the memory route and reasoning-session activity - they measure use of these ' +
-      'analytics tools and officer-entered scores, not verified governance decisions. classificationConfidence is ' +
-      '0 when there are no recorded interactions at all, and uses the same confidenceFromSampleSize scale as the ' +
-      'sibling behaviour-pattern and governance-culture engines. Governance momentum and governance coherence are ' +
-      'not computed from these counts at all (they refuse to run rather than return an entry-count ratio dressed ' +
-      'as a measured outcome); governance adaptation and adaptive resilience report their own insufficient-history ' +
-      'states directly.',
+      'analytics tools and officer-entered scores, not verified governance decisions. classificationEvidenceCoverage ' +
+      'is a volume figure (0 when there are no recorded interactions at all), not a claim that the classification ' +
+      'is correct, and uses the same evidenceCoverageScoreFromSampleSize scale as the sibling behaviour-pattern and ' +
+      'governance-culture engines. Governance momentum and governance coherence are not computed from these counts ' +
+      'at all (they refuse to run rather than return an entry-count ratio dressed as a measured outcome); ' +
+      'governance adaptation and adaptive resilience report their own insufficient-history states directly.',
   };
 }

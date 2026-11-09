@@ -35,8 +35,10 @@ export interface LearningArchetype {
 /** Archetype fit scoring — how strongly this org matches each archetype. */
 export interface Archetypefit {
   archetypeId: LearningArchetypeId;
-  score: number;       // 0–100 match strength
-  confidence: number;  // 0–100 confidence
+  score: number;             // 0–100 match strength
+  /** 0-100 evidence coverage (how many interactions/sessions informed this fit) - NOT a measure of whether the
+   *  fit is correct. See lib/knowledge-transfer/governance/evidence-basis.ts. */
+  evidenceCoverage: number;
 }
 
 /** The result of organizational archetype classification. */
@@ -53,8 +55,9 @@ export interface ArchetypeClassificationResult {
   classificationEvidence: string[];
   /** Archetype evolution context — how this org has moved archetypically. */
   evolutionContext: string;
-  /** Classification confidence 0–100; 0 when there are no recorded interactions at all. */
-  classificationConfidence: number;
+  /** 0-100 evidence coverage behind the classification; 0 when there are no recorded interactions at all. Not a
+   *  measure of whether the classification is correct - see methodologyNote. */
+  classificationEvidenceCoverage: number;
   /** Number of entries analyzed. */
   entriesAnalyzed: number;
   /** Governance-safe disclaimer. */
@@ -62,3 +65,4 @@ export interface ArchetypeClassificationResult {
   /** Discloses that fits/postures are derived from officer-entered counts and types, not verified governance decisions. */
   methodologyNote: string;
 }
+

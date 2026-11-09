@@ -120,6 +120,13 @@ export interface PropagationMap {
   organizationId: string;
   generatedAt: string;
   /**
+   * Type-level marker, not just prose: every node, edge, bottleneck and impact figure in this map is exploratory —
+   * inferred from exit-interview tag co-occurrence, never from verified operational evidence. See
+   * verified-dependency-models.ts for the separate, verified graph that confirmed risk, succession, simulation and
+   * compliance findings must check instead of this one.
+   */
+  evidenceState: 'exploratory';
+  /**
    * Every node, edge, bottleneck and impact figure below is inferred from how often and alongside which other
    * tags a topic is mentioned across published exit interviews - never from a verified org chart, system-ownership
    * record, process document or recovery drill. Direction, sensitivity, dependency and recovery-time figures are

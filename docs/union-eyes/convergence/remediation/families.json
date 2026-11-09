@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 728,
- "partial": 30,
- "outstanding": 49,
- "accountedFor": 49,
+ "corrected": 730,
+ "partial": 28,
+ "outstanding": 47,
+ "accountedFor": 47,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -74,17 +74,16 @@
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 5,
+   "defects": 4,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 5,
+    "MEDIUM": 4,
     "LOW": 0
    },
    "namedRoutes": 1,
    "namedFiles": 0,
    "tranches": {
     "0B.5": 1,
-    "0B.7": 1,
     "0B.10": 1,
     "0B.11": 2
    }
@@ -109,17 +108,16 @@
   {
    "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
    "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
-   "defects": 5,
+   "defects": 4,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 5,
+    "MEDIUM": 4,
     "LOW": 0
    },
    "namedRoutes": 1,
    "namedFiles": 0,
    "tranches": {
     "0B.1": 1,
-    "0B.7": 1,
     "0B.8": 1,
     "0B.10": 2
    }
@@ -271,11 +269,6 @@
     "severity": "MEDIUM"
    },
    {
-    "id": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
     "id": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
     "severity": "MEDIUM"
    },
@@ -315,11 +308,6 @@
    {
     "id": "DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY",
     "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
-    "severity": "MEDIUM",
-    "partial": true
    },
    {
     "id": "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",

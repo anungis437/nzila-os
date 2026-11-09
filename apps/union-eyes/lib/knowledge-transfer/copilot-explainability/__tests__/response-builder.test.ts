@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  assessConfidence,
+  assessEvidenceCoverage,
   buildExplainabilityEnvelope,
   buildExplainableResponse,
   buildPropagationEvidence,
@@ -8,20 +8,20 @@ import {
 } from '../response-builder';
 import type { EvidenceReference } from '../explainability-models';
 
-function ev(confidence: 'high' | 'medium' | 'low'): EvidenceReference {
-  return { observation: 'o', dataPoint: 'd', sourceType: 'graph_computation', confidence };
+function ev(evidenceCoverage: 'high' | 'medium' | 'low'): EvidenceReference {
+  return { observation: 'o', dataPoint: 'd', sourceType: 'graph_computation', evidenceCoverage };
 }
 
 describe('lib/knowledge-transfer/copilot-explainability/response-builder', () => {
-  it('assessConfidence covers all bands', () => {
-    expect(assessConfidence([])).toBe('insufficient_data');
-    expect(assessConfidence([ev('high'), ev('high'), ev('high')])).toBe('high');
-    expect(assessConfidence([ev('high'), ev('medium'), ev('medium'), ev('low')])).toBe('medium');
-    expect(assessConfidence([ev('high'), ev('low'), ev('low'), ev('low'), ev('low')])).toBe('low');
-    expect(assessConfidence([ev('low'), ev('low'), ev('low'), ev('low'), ev('low')])).toBe('insufficient_data');
+  it('assessEvidenceCoverage covers all bands', () => {
+    expect(assessEvidenceCoverage([])).toBe('insufficient_data');
+    expect(assessEvidenceCoverage([ev('high'), ev('high'), ev('high')])).toBe('high');
+    expect(assessEvidenceCoverage([ev('high'), ev('medium'), ev('medium'), ev('low')])).toBe('medium');
+    expect(assessEvidenceCoverage([ev('high'), ev('low'), ev('low'), ev('low'), ev('low')])).toBe('low');
+    expect(assessEvidenceCoverage([ev('low'), ev('low'), ev('low'), ev('low'), ev('low')])).toBe('insufficient_data');
   });
 
-  it('buildExplainabilityEnvelope assembles fields with derived confidence', () => {
+  it('buildExplainabilityEnvelope assembles fields with derived evidence coverage', () => {
     const env = buildExplainabilityEnvelope(
       [ev('high'), ev('high')],
       [{ step: 1, statement: 's', basis: 'b' } as never],
@@ -30,7 +30,7 @@ describe('lib/knowledge-transfer/copilot-explainability/response-builder', () =>
       ['limit'],
       'verify here',
     );
-    expect(env.overallConfidence).toBe('high');
+    expect(env.overallEvidenceCoverage).toBe('high');
     expect(env.assumptions).toEqual(['assume']);
     expect(env.limitations).toEqual(['limit']);
     expect(env.verificationGuidance).toBe('verify here');
@@ -57,18 +57,19 @@ describe('lib/knowledge-transfer/copilot-explainability/response-builder', () =>
     expect(buildPropagationEvidence(0, 0, 0)).toEqual([]);
   });
 
-  // DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED: evidence confidence must come from how many
-  // nodes/signals underlie it, never a fixed 'high' literal regardless of volume.
-  it('buildPropagationEvidence derives confidence from count, not a fixed literal', () => {
+  // DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED: evidence coverage must come from how many
+  // nodes/signals underlie it, never a fixed 'high' literal regardless of volume - and it is coverage (volume),
+  // never a claim the evidence itself is verified or correct.
+  it('buildPropagationEvidence derives evidence coverage from count, not a fixed literal', () => {
     const sparse = buildPropagationEvidence(1, 2, 1);
-    expect(sparse[0].confidence).toBe('low');
-    expect(sparse[1].confidence).toBe('low');
+    expect(sparse[0].evidenceCoverage).toBe('low');
+    expect(sparse[1].evidenceCoverage).toBe('low');
     const moderate = buildPropagationEvidence(3, 10, 2);
-    expect(moderate[0].confidence).toBe('medium');
-    expect(moderate[1].confidence).toBe('medium');
+    expect(moderate[0].evidenceCoverage).toBe('medium');
+    expect(moderate[1].evidenceCoverage).toBe('medium');
     const abundant = buildPropagationEvidence(8, 10, 6);
-    expect(abundant[0].confidence).toBe('high');
-    expect(abundant[1].confidence).toBe('high');
+    expect(abundant[0].evidenceCoverage).toBe('high');
+    expect(abundant[1].evidenceCoverage).toBe('high');
   });
 
   it('buildGovernanceFlags computes severity bands', () => {

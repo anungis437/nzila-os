@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 81,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 728,
-    "engineeringRemaining": 49,
+    "engineeringCorrected": 730,
+    "engineeringRemaining": 47,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 30
+    "engineeringPartial": 28
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -8171,13 +8171,14 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
-        "path": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts;apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts;apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B163-FAMILY1-STRICT-CLOSURE",
+        "path": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts;apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts;apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts;apps/union-eyes/app/api/exit-interviews/cognition-memory/route.ts",
         "regressionTest": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
-        "explanation": "resilience_baseline entries now carry a measuredResilienceIndexAtCapture figure computed independently at save time, giving a reader a measured reference point next to the officer's own typed score for the first time.",
-        "remaining": "Nothing yet checks a simulation_snapshot's figures against a real simulation replay; this requires standardizing what parameters a simulation_snapshot payload must capture before a deterministic replay is possible, which is a product/engineering design decision beyond this round's scope.",
-        "sourceBranch": "fix/ue-gate0-final-convergence"
+        "explanation": "The remaining gap (no check against a real simulation for simulation_snapshot entries) is closed by a dual-provenance contract rather than a replay-after-the-fact: MemoryProvenance is now a discriminated union of officer_asserted and system_generated. A POST with memoryType simulation_snapshot AND a scenario (the same SimulationScenario shape simulateContinuityImpact already accepts, now exposed through a strict Zod schema on the route) runs the REAL simulateContinuityImpact(orgId, scenario) workflow server-side, discards the caller's own payload for that call, and persists the actual simulation result together with recordedBy, workflow, modelVersion, computedAt and inputEvidenceIds - so a system_generated entry is never a caller assertion at all, it is a server-computed record of a real run. An officer who saves without a scenario still gets the pre-existing officer_asserted path unchanged, clearly labeled as such. Separately, the previously-reported persistence bug (measuredResilienceIndexAtCapture computed and returned but never saved to the row) is fixed: the renamed algorithmComputedResilienceIndexAtCapture (renamed to avoid implying a heuristic index is an independently measured fact) is now written into the JSONB payload's reserved key in the same INSERT that creates the row, and is read back correctly on every subsequent load - proven by a save-then-reload round-trip test, not just the immediate save response. A new historicalVerification field on every read ({checked, reconcilable, reason}) tells a reader outright when an OLD, pre-existing officer_asserted simulation_snapshot row predates this provenance tracking entirely, versus when it has provenance but still cannot be replayed - never silently presenting old data as either kind.",
+        "remaining": "No frontend component yet surfaces provenance, algorithmComputedResilienceIndexAtCapture or historicalVerification to a user (grepped: zero .tsx consumers of these fields) - there being no existing UI for this distinction to refine, none was added. No dedicated route-level test file exists for cognition-memory/route.ts beyond the store-level tests plus a clean workspace typecheck.",
+        "sourceBranch": "fix/ue-gate0-final-convergence",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/cognition-memory -> 22/22 passing (incl. a dedicated save-then-reload round-trip test for algorithmComputedResilienceIndexAtCapture, 5 new tests for the dual-provenance save/read paths). npx tsc --noEmit -p . -> exit 0. Full apps/union-eyes Family 1 regression sweep (480 files / 6073 tests) green."
       }
     },
     {
@@ -8868,13 +8869,14 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
-        "path": "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-engine.ts;apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
-        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
-        "explanation": "Evidence confidence presented in the continuity decision brief is now tied to actual node counts instead of a fixed literal, reducing (but not eliminating) the family of overclaims this finding describes.",
-        "remaining": "The underlying dependency-direction and sole-expert inference in dependency-propagator.ts is unchanged from the prior batch: still a deterministic formula over tag co-occurrence, now hedged in prose only. The underlying computation is unchanged and remains genuinely heuristic: bottleneck/sole-source/dependency-direction/recovery-week figures are still derived purely from interview-tag frequency and co-occurrence counts, not from any actual process, system or owner record - this run makes that basis honestly disclosed in every returned string, it does not replace the heuristic with verified organizational data (no such data source exists for this feature). Register kept at PARTIAL, not upgraded to IMPLEMENTED, because the title's underlying epistemic gap (inference substituting for verification) is disclosed, not closed.",
-        "sourceBranch": "fix/ue-gate0-final-convergence"
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B163-FAMILY1-STRICT-CLOSURE",
+        "path": "apps/union-eyes/db/migrations-platform/0085_verified_dependency_evidence.sql;apps/union-eyes/db/migrations-cache/0059_verified_dependency_evidence_rls_closure.sql;apps/union-eyes/lib/knowledge-transfer/propagation/verified-dependency-models.ts;apps/union-eyes/lib/knowledge-transfer/propagation/verified-dependency-store.ts;apps/union-eyes/lib/knowledge-transfer/propagation/propagation-models.ts;apps/union-eyes/lib/knowledge-transfer/propagation/dependency-propagator.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-engine.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/decision-models.ts",
+        "regressionTest": "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/verified-dependency-store.pglite.test.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
+        "explanation": "The missing data source the prior round identified (\"no such data source exists for this feature\") now exists: ue_verified_dependency_evidence (platform migration 0085, RLS scoped 0059) is a separate, review-gated table. A directional dependency between two propagation-map node ids is 'verified' only once a reviewer distinct from the submitter (enforced by a DB CHECK, not just application code) attributes it to a named process/system and named responsible authority, with an evidence reference; submissions start pending_review and a verified record can later be revoked. PropagationMap gained a literal-typed evidenceState:'exploratory' field (a type-level marker, not just the pre-existing prose methodologyNote), so the inferred graph is self-documenting as exploratory at the type level. decision-engine.ts's generateDecisionBrief - the consumer that produces the continuity decision brief's confirmed-reading findings - now calls the new assessConfirmedDependencyRisk, which checks listVerifiedDependencies(orgId,'verified') and returns confirmedDependencyRisks + an explicit confirmedDependencyRiskStatus ('no_verified_dependency_evidence_recorded' | 'verified_dependency_evidence_available'). When no verified evidence exists, the brief reports that status explicitly rather than silently substituting the exploratory graph for a confirmed claim; the pre-existing exploratory-derived criticalGaps strings were reworded to say 'Exploratory pattern analysis suggests...(inferred from interview tag co-occurrence, not verified)' instead of reading as bare findings.",
+        "remaining": "dependency-propagator.ts's own direction/sole-expert inference formulas over tag co-occurrence are unchanged (still genuinely heuristic, now clearly typed and labeled exploratory) - the fix is the existence of, and gating behind, the parallel verified graph, not a rewrite of the inference itself (an org's actual dependency structure cannot be inferred from interview tags alone; it has to be verified by a person, which is what the new table captures). Of the ~14 files reading PropagationMap/DependencyNode across this codebase (graph-reasoner.ts, resilience-calculator.ts, copilot-engine.ts, continuity-simulator.ts, cascade-analyzer.ts, strategy-modeler.ts, continuity-forecaster.ts, mitigation-comparator.ts, workbook/engines/continuityDependencyGraph.ts, app/api/exit-interviews/propagation/route.ts, components/knowledge-transfer/workspace-data.ts, kernel-bridge-foundational.ts), only decision-engine.ts (the one producing confirmed-reading continuity findings) was wired to the verified graph this round; the others still read the exploratory graph only, unchanged from before this round - not a regression, but not yet extended to the verified-evidence gate either. No HTTP route yet exists for submit/review/revoke of verified dependency evidence - only the lib store functions, directly tested against real PGlite SQL (self-dependent rejection, pending-then-lookup, reviewer-distinct DB CHECK, concurrent-review race resolving to exactly one winner, revoke-then-relookup, cross-tenant isolation).",
+        "sourceBranch": "fix/ue-gate0-final-convergence",
+        "verificationNote": "npx vitest run lib/knowledge-transfer/propagation lib/knowledge-transfer/decision-intelligence -> all passing (6 new real-SQL tests in verified-dependency-store.pglite.test.ts, 2 new tests in decision-engine.test.ts). npx tsc --noEmit -p . -> exit 0. Full apps/union-eyes Family 1 regression sweep (480 files / 6073 tests) green."
       }
     },
     {

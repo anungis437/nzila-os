@@ -11,7 +11,7 @@
 import { randomUUID } from 'crypto';
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory/memory-store';
 import { listReasoningSessions } from '@/lib/knowledge-transfer/reasoning-sessions/session-manager';
-import { meetsMinimumCohort } from '@/lib/knowledge-transfer/governance/evidence-basis';
+import { meetsMinimumCohort, evidenceCoverageScoreFromSampleSize } from '@/lib/knowledge-transfer/governance/evidence-basis';
 import type {
   GovernanceCultureProfile,
   ContinuityCulturePosture,
@@ -108,6 +108,7 @@ function buildIndicators(
   govCount: number,
   totalEntries: number,
   avgDays: number | null,
+  timelineLength: number,
 ): CultureIndicator[] {
   const indicators: CultureIndicator[] = [];
 
@@ -117,7 +118,7 @@ function buildIndicators(
       observation: `${totalEntries} continuity memory entries recorded across the analysis window.`,
       evidence: `${totalEntries} cognition memory events captured.`,
       valence: totalEntries >= 10 ? 'positive' : 'neutral',
-      confidence: 85,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(totalEntries),
     });
   }
 
@@ -127,7 +128,7 @@ function buildIndicators(
       observation: `${sessionCount} reasoning sessions initiated — organizational inquiry is active.`,
       evidence: `${sessionCount} reasoning sessions in the analysis window.`,
       valence: 'positive',
-      confidence: 80,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(sessionCount),
     });
   }
 
@@ -137,7 +138,7 @@ function buildIndicators(
       observation: `${mitCount} mitigation comparisons recorded — governance responds to continuity risks.`,
       evidence: `${mitCount} mitigation_comparison memory entries.`,
       valence: 'positive',
-      confidence: 75,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(mitCount),
     });
   }
 
@@ -147,7 +148,7 @@ function buildIndicators(
       observation: `${govCount} governance decisions captured in organizational memory.`,
       evidence: `${govCount} governance_reasoning or decision_brief entries.`,
       valence: 'positive',
-      confidence: 78,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(govCount),
     });
   }
 
@@ -158,7 +159,8 @@ function buildIndicators(
       observation: `Average ${avgDays} days between governance activities.`,
       evidence: `Derived from chronological memory timestamps.`,
       valence,
-      confidence: 70,
+      // Cadence itself is derived from the same entries/sessions whose timestamps were averaged.
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(totalEntries + sessionCount),
     });
   }
 
@@ -168,7 +170,7 @@ function buildIndicators(
       observation: 'Organizational resilience is trending upward — governance culture is producing measurable improvement.',
       evidence: 'Resilience timeline shows consistent upward movement.',
       valence: 'positive',
-      confidence: 88,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(timelineLength),
     });
   } else if (trend === 'declining') {
     indicators.push({
@@ -176,7 +178,7 @@ function buildIndicators(
       observation: 'Resilience is trending downward — governance culture may need reinforcement.',
       evidence: 'Resilience timeline shows consistent downward movement.',
       valence: 'negative',
-      confidence: 82,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(timelineLength),
     });
   } else if (trend === 'volatile') {
     indicators.push({
@@ -184,7 +186,7 @@ function buildIndicators(
       observation: 'Resilience scores show volatility — governance practices may be inconsistently applied.',
       evidence: 'High variance in resilience timeline scores.',
       valence: 'negative',
-      confidence: 75,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(timelineLength),
     });
   }
 
@@ -311,7 +313,7 @@ export async function analyzeGovernanceCulture(orgId: string): Promise<Governanc
   const posture = dominantPosture(sessionCount, mitCount, govCount, totalEntries, trend);
   const health = cultureHealthSignal(trend, totalEntries + sessionCount);
   const cultureScore = computeCultureScore(trend, engagementConsistency, mitFollowThrough, totalEntries, sessionCount);
-  const indicators = buildIndicators(trend, sessionCount, mitCount, govCount, totalEntries, avgDays);
+  const indicators = buildIndicators(trend, sessionCount, mitCount, govCount, totalEntries, avgDays, scores.length);
   const evolutionPhases = buildEvolutionPhases(timeline, posture);
 
   return {

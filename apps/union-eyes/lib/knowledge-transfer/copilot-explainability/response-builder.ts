@@ -14,17 +14,18 @@ import {
   type EvidenceReference,
   type ReasoningLink,
   type GovernanceFlag,
-  type CopilotConfidence,
+  type CopilotEvidenceCoverage,
 } from './explainability-models';
-import { confidenceLabelFromCount } from '../governance/evidence-basis';
+import { evidenceCoverageFromCount } from '../governance/evidence-basis';
 
 /**
- * Assess overall confidence from a set of evidence references.
+ * Assess overall evidence coverage from a set of evidence references - a volume measure (how much was looked at),
+ * never a claim that the response's content is correct or independently verified.
  */
-export function assessConfidence(evidence: EvidenceReference[]): CopilotConfidence {
+export function assessEvidenceCoverage(evidence: EvidenceReference[]): CopilotEvidenceCoverage {
   if (evidence.length === 0) return 'insufficient_data';
-  const highCount = evidence.filter((e) => e.confidence === 'high').length;
-  const mediumCount = evidence.filter((e) => e.confidence === 'medium').length;
+  const highCount = evidence.filter((e) => e.evidenceCoverage === 'high').length;
+  const mediumCount = evidence.filter((e) => e.evidenceCoverage === 'medium').length;
   const ratio = (highCount + mediumCount * 0.5) / evidence.length;
   if (ratio >= 0.8) return 'high';
   if (ratio >= 0.5) return 'medium';
@@ -48,7 +49,7 @@ export function buildExplainabilityEnvelope(
     reasoningChain,
     assumptions,
     governanceFlags,
-    overallConfidence: assessConfidence(evidence),
+    overallEvidenceCoverage: assessEvidenceCoverage(evidence),
     limitations,
     verificationGuidance,
   };
@@ -90,7 +91,7 @@ export function buildPropagationEvidence(
       observation: `${singleSourceCount} of ${totalNodes} knowledge areas have single-source coverage`,
       dataPoint: `${Math.round((singleSourceCount / totalNodes) * 100)}% single-source concentration`,
       sourceType: 'graph_computation',
-      confidence: confidenceLabelFromCount(singleSourceCount),
+      evidenceCoverage: evidenceCoverageFromCount(singleSourceCount),
     });
   }
   if (bottleneckCount > 0) {
@@ -98,7 +99,7 @@ export function buildPropagationEvidence(
       observation: `${bottleneckCount} operational bottlenecks identified in dependency graph`,
       dataPoint: `${bottleneckCount} bottleneck nodes`,
       sourceType: 'graph_computation',
-      confidence: confidenceLabelFromCount(bottleneckCount),
+      evidenceCoverage: evidenceCoverageFromCount(bottleneckCount),
     });
   }
   return references;

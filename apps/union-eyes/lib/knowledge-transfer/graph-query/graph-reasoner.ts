@@ -8,6 +8,7 @@
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { GraphQuery, QueryResult, QueryFinding } from './query-models';
 import type { PropagationMap } from '../propagation/propagation-models';
+import { evidenceCoverageScoreFromSampleSize } from '../governance/evidence-basis';
 
 type QueryResponse = {
   findings: QueryFinding[];
@@ -55,7 +56,7 @@ export async function executeGraphQuery(orgId: string, query: GraphQuery): Promi
       break;
   }
 
-  const confidenceScore = calculateConfidenceScore(propagationMap, findings);
+  const evidenceCoverageScore = calculateEvidenceCoverageScore(propagationMap);
 
   return {
     organizationId: orgId,
@@ -65,7 +66,7 @@ export async function executeGraphQuery(orgId: string, query: GraphQuery): Promi
     findings,
     significance,
     recommendations,
-    confidenceScore,
+    evidenceCoverageScore,
   };
 }
 
@@ -411,13 +412,14 @@ function queryKnowledgeRedundancy(
   };
 }
 
-function calculateConfidenceScore(propagationMap: PropagationMap, findings: QueryFinding[]): number {
-  // Confidence based on data quality
+/**
+ * How much interview evidence backs this query's findings - purely how many interviews contributed to the
+ * nodes in the graph, never a claim that the findings are statistically validated. Previously also added bonus
+ * points for findings.length>0 and bottlenecks.length>0, which rewarded finding MORE potential issues as if that
+ * made the analysis more certain; removed as the same anti-pattern evidence-basis.ts exists to eliminate
+ * (DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS).
+ */
+function calculateEvidenceCoverageScore(propagationMap: PropagationMap): number {
   const interviewCount = propagationMap.nodes.reduce((sum, node) => sum + node.frequency, 0);
-  let confidence = Math.min(interviewCount * 10, 80); // Max 80% without additional validation
-
-  if (findings.length > 0) confidence += 10; // More findings = more confidence
-  if (propagationMap.bottlenecks.length > 0) confidence += 10; // Clear structures increase confidence
-
-  return Math.min(confidence, 100);
+  return evidenceCoverageScoreFromSampleSize(interviewCount);
 }

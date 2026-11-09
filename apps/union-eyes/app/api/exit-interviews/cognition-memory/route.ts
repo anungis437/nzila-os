@@ -3,6 +3,11 @@
  * GET  /api/exit-interviews/cognition-memory — Load org cognition memory
  * POST /api/exit-interviews/cognition-memory — Save a new cognition memory entry
  *
+ * A memoryType 'simulation_snapshot' call with a scenario runs the real simulateContinuityImpact workflow
+ * server-side and persists its real output as a system_generated entry (payload is ignored for that call). Without
+ * a scenario, any memoryType (including simulation_snapshot) saves the officer's own payload as officer_asserted
+ * (DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR).
+ *
  * Requires: officer+
  * Entitlement: union_knowledge_suite
  */
@@ -26,6 +31,22 @@ const GetMemoryQuerySchema = z.object({
 
 const MAX_PAYLOAD_BYTES = 16 * 1024;
 
+const SimulationScenarioSchema = z.object({
+  simulationType: z.enum([
+    'retirement',
+    'sudden_departure',
+    'vendor_loss',
+    'governance_knowledge_loss',
+    'undocumented_process_loss',
+    'procedural_fragmentation',
+    'bottleneck_collapse',
+  ]),
+  affectedNodeIds: z.array(z.string().max(200)).max(50),
+  affectedRoles: z.array(z.string().max(100)).max(20).optional(),
+  timelineWeeks: z.number().int().min(0).max(520).optional(),
+  context: z.string().max(1000).optional(),
+}).strict();
+
 const SaveMemorySchema = z.object({
   memoryType: z.enum([
     'simulation_snapshot',
@@ -48,8 +69,17 @@ const SaveMemorySchema = z.object({
   tags: z.array(z.string().min(1).max(64)).max(20).optional(),
   keyInsights: z.array(z.string().min(1).max(500)).max(20).optional(),
   sessionId: z.string().max(100).optional(),
+  /**
+   * For memoryType 'simulation_snapshot' only: when given, the server runs the real simulation workflow itself
+   * and persists its real output as a system_generated entry; payload is ignored for this call. Rejected for any
+   * other memoryType - a simulation can only be run and recorded against a simulation_snapshot.
+   */
+  scenario: SimulationScenarioSchema.optional(),
   /** Archive an existing entry by ID */
   archiveId: z.guid().optional(),
+}).refine((body) => !body.scenario || body.memoryType === 'simulation_snapshot', {
+  message: 'scenario is only accepted for memoryType simulation_snapshot',
+  path: ['scenario'],
 });
 
 export const GET = withApi(
@@ -89,6 +119,7 @@ export const POST = withApi(
       tags: body.tags,
       keyInsights: body.keyInsights,
       sessionId: body.sessionId,
+      scenario: body.scenario,
     }, userId!);
     return { data: entry };
   },

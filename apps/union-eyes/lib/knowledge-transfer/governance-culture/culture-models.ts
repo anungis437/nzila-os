@@ -33,8 +33,9 @@ export interface CultureIndicator {
   evidence: string;
   /** Positive or negative contribution to culture health. */
   valence: 'positive' | 'negative' | 'neutral';
-  /** 0–100 confidence in this indicator. */
-  confidence: number;
+  /** 0-100 evidence coverage behind this indicator (how many entries/sessions informed it) - a volume measure,
+   *  not a claim that the indicator is correct. See lib/knowledge-transfer/governance/evidence-basis.ts. */
+  evidenceCoverage: number;
 }
 
 /** Longitudinal governance discipline observation. */

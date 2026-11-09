@@ -65,7 +65,8 @@ export interface CopilotQueryResult {
     observation: string;
     dataPoint: string;
     sourceType: string;
-    confidence: string;
+    /** Evidence volume behind this reference, not a claim it is correct or verified. */
+    evidenceCoverage: string;
   }>;
   /** Reasoning steps */
   reasoningChain: Array<{
@@ -82,7 +83,8 @@ export interface CopilotQueryResult {
   }>;
   assumptions: string[];
   limitations: string[];
-  overallConfidence: string;
+  /** Overall evidence volume behind the response, not a claim that its content is verified or correct. */
+  overallEvidenceCoverage: string;
   followUpSuggestions: string[];
   organizationalContext: string;
   generatedAt: string;
