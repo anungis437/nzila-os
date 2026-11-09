@@ -11315,6 +11315,283 @@
         { "defectId": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION", "status": "IMPLEMENTED_PENDING_QUALIFICATION", "files": ["apps/union-eyes/lib/services/precedent-audited-service.ts"] },
         { "defectId": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403", "status": "IMPLEMENTED_PENDING_QUALIFICATION", "files": ["apps/union-eyes/app/api/enterprise/dsr/requests/route.ts"] }
       ]
+    },
+    {
+      "id": "B170-GATE0-RESIDUAL-45-FULL-ENGINEERING-CLOSURE",
+      "family": "Integrated residual-45 engineering closure across F01-F12 with fail-closed authority, consent, financial, disclosure, lifecycle, and audit contracts",
+      "evidenceCommit": "a6ed0264e",
+      "items": [
+        {
+          "prefix": "DEF-0B1-BILLING-SCHEDULER-LATENT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/cron/billing-lifecycle/route.ts", "apps/union-eyes/services/platform-economics/billing-service.ts"],
+          "explanation": "Authenticated, tenant-authorized billing execution uses bounded windows, durable idempotent state, retry reconciliation and truthful outcomes."
+        },
+        {
+          "prefix": "DEF-0B7-PLT-EQUITY-SNAPSHOT-SCHEMA-HAS-NO-SMALL-CELL-RULE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/equity/equity-snapshot-projection.ts", "apps/union-eyes/lib/equity/__tests__/equity-snapshot-projection.test.ts"],
+          "explanation": "Server projection enforces minimum-cell and complementary suppression before equity snapshots leave the trust boundary."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED-ONE-GLOBAL-SECRET-AND-HEADER-KEYED-LIMIT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts", "apps/union-eyes/lib/services/rewards/shopify-secret-store.ts"],
+          "explanation": "Shopify handling verifies tenant-bound shops, rotating secrets, provider signatures and replay, and rate-limits the verified integration identity."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/integrations/credential-store.ts", "apps/union-eyes/lib/integrations/control-plane.ts"],
+          "explanation": "Tenant credentials support protected resolution, rotation, revocation and audit; metadata alone never reports a credential usable."
+        },
+        {
+          "prefix": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/cron/education-reminders/route.ts", "apps/union-eyes/app/api/__tests__/cron-education-reminders.route.test.ts"],
+          "explanation": "Reminder eligibility is tenant-scoped and opt-out aware, with atomic send markers, bounded work, retry protection and outcome reconciliation."
+        },
+        {
+          "prefix": "DEF-0B9-ML-METRICS-ROUTE-SERVES-STORED-ANALYTICS-ROWS-WHERE-THE-PROMETHEUS-ENDPOINT-IS-DOCUMENTED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/metrics/prometheus/route.ts", "apps/union-eyes/lib/observability/operational-metrics.ts"],
+          "explanation": "A distinct authorized Prometheus endpoint emits provenance-backed operational metrics with safe labels and bounded cardinality."
+        },
+        {
+          "prefix": "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/pay-equity/pay-equity-lifecycle.ts", "apps/union-eyes/app/api/cnesst/pay-equity/[id]/transition/route.ts"],
+          "explanation": "Pay-equity exercises have a version-bound evidence state machine, assignments, deadlines, guarded transitions, review and atomic audit."
+        },
+        {
+          "prefix": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/pension/pension-authority.ts", "apps/union-eyes/app/api/pension/plans/[id]/route.ts"],
+          "explanation": "Pension writes require live resource-scoped trustee or mandate authority, independent decisions, revocation checks and transactional audit."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-RECONCILIATION-SERVICE-QUERIES-THROUGH-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/services/platform-economics/reconciliation-service.ts", "apps/union-eyes/db/rls-storage-authority/finance.ts"],
+          "explanation": "Reconciliation uses caller-bound tenant transactions and database RLS rather than a shared handle plus route predicates."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-RECONCILIATION-RESOLVE-IS-A-STATUS-AND-NOTE-ONLY-WITH-NO-SECOND-APPROVER-OR-LEDGER-EFFECT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/reconciliation/resolve/route.ts", "apps/union-eyes/db/schema/domains/finance/reconciliation.ts"],
+          "explanation": "Resolution requires independent approval and atomically posts balanced idempotent ledger effects with immutable evidence and correction semantics."
+        },
+        {
+          "prefix": "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/services/__tests__/s48-f06-a2-local-transaction-atomicity.test.ts", "apps/union-eyes/lib/__tests__/gate0-residual-final-acceptance.contract.test.ts"],
+          "explanation": "Local mutations and audits share transactions; external effects use durable intents, outbox receipts and replay-safe reconciliation."
+        },
+        {
+          "prefix": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/extensions/[id]/route.ts", "apps/union-eyes/lib/integrations/control-plane.ts"],
+          "explanation": "Tenant-owned extension configuration now supports validation, protected credentials, versions, audit and guarded runtime activation."
+        },
+        {
+          "prefix": "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/auth/sso/start/route.ts", "apps/union-eyes/app/api/auth/sso/callback/route.ts", "apps/union-eyes/lib/sso/oidc-runtime.ts"],
+          "explanation": "Activated tenant SSO settings now drive sign-in with issuer, redirect, state, nonce and provider binding; invalid settings fail closed."
+        },
+        {
+          "prefix": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/reports/field-grants/route.ts", "apps/union-eyes/app/api/reports/execute/route.ts"],
+          "explanation": "Reports require definition and field grants, project only authorized sensitivities, and record the fields and bounded row set disclosed."
+        },
+        {
+          "prefix": "DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/platform/platform-staff.ts", "apps/union-eyes/lib/platform/__tests__/platform-staff.test.ts"],
+          "explanation": "Issue #1116 is enforced: platform identity is not a tenant ACL and cross-organization action requires a live direct-scoped mandate."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/db/schema/domains/compliance/statutory-rules.ts", "apps/union-eyes/lib/canadian-labour-standards/rule-resolver.ts"],
+          "explanation": "Rules now carry provenance, versions, effective intervals, source digests, review and citation state, with explicit unsupported results."
+        },
+        {
+          "prefix": "DEF-0B10-PEN-BENEFIT-CLAIMS-CAN-BE-FILED-BUT-NO-ROUTE-CAN-DECIDE-OR-PAY-THEM",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/pension/benefits/[id]/transition/route.ts", "apps/union-eyes/db/schema/domains/finance/pension.ts"],
+          "explanation": "Claims progress through evidence verification, decision, independent approval, settlement preparation and governed handoff; payout stays fail closed."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-PLATFORM-TIER-OF-THE-PILOT-ROUTES-IS-ANY-ROLE-TITLE-AT-OR-ABOVE-SYSTEM-ADMIN-LEVEL-AND-NOT-A-PLATFORM-MANDATE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/pilot/pilot-ownership.ts", "apps/union-eyes/app/api/pilot/apply/[id]/commercial-transition/route.ts"],
+          "explanation": "Pilot administration requires scoped platform operating authority; generic system-admin hierarchy grants no route or database bypass."
+        },
+        {
+          "prefix": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-RELEASES-LATEST-VERSION-NOT-GRANTED-VERSION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/external/documents/[id]/download/route.ts", "apps/union-eyes/app/api/external/documents/[id]/download/route.pglite.test.ts"],
+          "explanation": "Downloads bind the exact approved version, recipient, purpose, sensitivity, expiry and revocation with durable disclosure audit."
+        },
+        {
+          "prefix": "DEF-0B9-ML-QUERY-SENDS-FREE-TEXT-AND-ARBITRARY-CONTEXT-TO-AN-EXTERNAL-SERVICE-WITH-NO-DISCLOSURE-DECISION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/ai/ml-query-disclosure.ts", "apps/union-eyes/app/api/ml/query/route.ts"],
+          "explanation": "ML egress requires provider policy, purpose-bound disclosure, classification, minimization, permitted transformation and durable audit."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-PUBLIC-APPLICATION-SENDS-THE-TYPED-CONTACT-TO-HUBSPOT-WITH-NO-PROOF-OF-THE-ADDRESS-AND-NO-CONSENT-DECISION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/pilot/apply/route.ts", "apps/union-eyes/db/schema/domains/pilot/pilot-contact-lifecycle.ts"],
+          "explanation": "CRM disclosure waits for address proof and granular consent, preserves purpose and withdrawal, and uses a durable provider outbox."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/pilot/demo-provenance.ts", "apps/union-eyes/lib/pilot/fixture-bootstrap.ts"],
+          "explanation": "Demo rows carry tenant and seed provenance, stay out of analytics, and purge only by provenance, never name, email or number."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-DUES-PAY-POST-SENDS-THE-ORGANIZATION-AND-MEMBER-USER-ID-TO-THE-PROCESSOR-FOR-A-MERCHANT-ACCOUNT-NO-SOURCE-NAMES",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/portal/dues/pay/route.ts", "apps/union-eyes/lib/services/payment-service.ts"],
+          "explanation": "Dues payment uses an opaque tenant session, minimal metadata, verified merchant identity and durable audit without raw internal identifiers."
+        },
+        {
+          "prefix": "DEF-0B12-WBK-CHECKOUT-SENDS-THE-BEARER-WORKBOOK-ID-TO-STRIPE-IN-THE-REDIRECT-ADDRESSES-AND-METADATA",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/workbook/checkout-intent.ts", "apps/union-eyes/app/api/workbook/checkout/redeem/route.ts"],
+          "explanation": "Checkout exposes an opaque expiring reference; redemption validates tenant, payment, scope, expiry and single use without bearer workbook metadata."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/employer-execution/replay/[runId]/route.ts", "apps/union-eyes/app/api/__tests__/employer-replay-run-id.route.test.ts"],
+          "explanation": "Replay uses a durable exactly-once intent bound to approved source revision, with concurrency, retry and lost-response safe transitions."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-RECONCILIATION-ENGINE-FABRICATES-FEE-SETTLEMENT-MATCHES-AND-SUMS-REFUNDED-PAYMENTS-AS-RECEIVED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/services/platform-economics/reconciliation-service.ts", "apps/union-eyes/services/platform-economics/__tests__/reconciliation-service.test.ts"],
+          "explanation": "Classification uses stored provider or bank evidence and distinguishes receipts, refunds, reversals, fees and unmatched entries."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/db/schema/domains/employer-execution/employer-remittance-runs.ts", "apps/union-eyes/app/api/employer-execution/remittance-runs/[id]/submission/route.ts"],
+          "explanation": "Remittance uses a canonical versioned package bound to employer, tenant, period, evidence, validation, submission and reconciliation."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-COMMERCIAL-TERMS-ARE-SET-BY-ONE-ADMINISTRATOR-FROM-A-TYPED-MEMBER-COUNT-AND-AMOUNT-WITH-NO-APPLICANT-ACCEPTANCE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/pilot/commercial-offers.ts", "apps/union-eyes/app/api/pilot/apply/[id]/commercial-offer/[offerId]/accept/route.ts"],
+          "explanation": "Immutable offers carry pricing basis, verified counterparty acceptance, amendments, expiry and transactional evidence."
+        },
+        {
+          "prefix": "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/education/sessions/route.ts", "apps/union-eyes/components/education/CourseCatalog.tsx"],
+          "explanation": "Education UI and API agree on implemented list, create, review, update and completion operations with truthful unsupported states."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-PILOT-ADOPTION-ENGAGEMENT-AND-RESOLUTION-FIGURES-ARE-ROW-UPDATE-PROXIES-AND-OPEN-CASE-AGE-WITH-STORED-FIGURES-AS-FALLBACK",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/pilot/pilot-measurements.ts", "apps/union-eyes/lib/customer-success/dashboard-data.ts"],
+          "explanation": "Pilot measures derive from versioned lifecycle events and reproducible denominators, returning unavailable when evidence is absent."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-PILOT-CURRENT-READS-THE-SESSION-ORGANIZATION-UNDER-THE-SYSTEM-CONTEXT-SO-THE-EXPLICIT-PREDICATE-IS-THE-ONLY-SCOPE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/pilot/current/route.ts", "apps/union-eyes/app/api/__tests__/pilot-current.route.test.ts"],
+          "explanation": "Current-pilot reads execute in the session tenant context with database RLS for direct, list and analytic access."
+        },
+        {
+          "prefix": "DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts", "apps/union-eyes/db/schema/domains/communications/campaigns.ts"],
+          "explanation": "Campaigns resolve consent-eligible recipients into a durable outbox with suppression, retry, revocation and provider receipts."
+        },
+        {
+          "prefix": "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/communications/survey-questionnaire.ts", "apps/union-eyes/app/api/communications/surveys/[surveyId]/responses/[responseId]/answers/route.ts"],
+          "explanation": "The survey journey serves a versioned questionnaire, validates and persists answers, finalizes once and preserves anonymous authority."
+        },
+        {
+          "prefix": "DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/employer-execution/payroll-runs/route.ts", "apps/union-eyes/db/schema/domains/employer-execution/employer-artifacts.ts"],
+          "explanation": "Payroll preparation binds employer, tenant, period and source revision with uniqueness, concurrency, idempotency and evidence."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/compliance/evaluate/route.ts", "apps/union-eyes/db/schema/domains/compliance/employer-compliance.ts"],
+          "explanation": "Authorized evaluation writes durable compliance alerts and reports from authenticated source evidence for real read consumers."
+        },
+        {
+          "prefix": "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/equity/consent/route.ts", "apps/union-eyes/db/schema/domains/compliance/equity-privacy.ts"],
+          "explanation": "Versioned server consent scopes equity purpose and fields, withdrawal, retention, suppression, storage and disclosure grants."
+        },
+        {
+          "prefix": "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/integrations/sync-engine.ts", "apps/union-eyes/lib/integrations/base-integration.ts"],
+          "explanation": "Durable distributed leases, fencing tokens and adapter cancellation prevent overlapping workers from committing stale effects."
+        },
+        {
+          "prefix": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/documents/intake-storage.ts", "apps/union-eyes/lib/documents/intake-lifecycle.ts"],
+          "explanation": "Uploads stream within server limits to quarantine, derive type and size, require verified scan receipts, and fail closed before promotion."
+        },
+        {
+          "prefix": "DEF-0B8-JUR-LOCATION-CONSENT-IS-NOT-BOUND-TO-PURPOSE-ORGANIZATION-OR-STRIKE",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/app/api/location/consent/route.ts", "apps/union-eyes/db/schema/domains/compliance/geofence.ts"],
+          "explanation": "Location consent binds principal, tenant, purpose, action or strike, fields, time and revocation and cannot be reused."
+        },
+        {
+          "prefix": "DEF-0B10-ORG-FORM-GENERATION-ROUTE-RETURNS-JSON-AND-THE-CLIENT-SAVES-IT-AS-THE-PDF",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/organizing/form-pdf.ts", "apps/union-eyes/app/api/organizing/forms/generate/route.ts"],
+          "explanation": "Validated authoritative input now produces real PDF bytes with correct MIME, safe filename and provenance."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-APPLICATION-OWNERSHIP-BEFORE-VERIFICATION-RESTS-ON-THE-ORGANIZATION-ID-THE-ANONYMOUS-APPLICANT-TYPED-INTO-THE-FORM",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/pilot/pilot-ownership.ts", "apps/union-eyes/app/api/pilot/apply/route.ts"],
+          "explanation": "Applications begin unbound and use verified claimant ownership; typed organization IDs grant no access or approval."
+        },
+        {
+          "prefix": "DEF-0B10-PIL-PROPOSAL-SCORES-AND-CUSTOMER-SUCCESS-SIGNALS-ARE-COMPUTED-FROM-THE-APPLICANT-SELF-ASSESSED-READINESS-SCORE-AND-THE-STAGE-REACHED",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/pilot/evidence-assessments.ts", "apps/union-eyes/app/api/pilot/apply/[id]/evidence-assessments/route.ts"],
+          "explanation": "Scores come from provenance-bearing evidence and reviewer decisions, with explicit unassessed results when support is insufficient."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW-UNVALIDATED-FLAGS-AND-NO-SERVER-CONSUMER",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/precedents/jurisdiction-preference-resolver.ts", "apps/union-eyes/app/api/precedents/search/route.ts"],
+          "explanation": "Tenant uniqueness and flag validation back governed mutation, and precedent search consumes the resolved preferences."
+        },
+        {
+          "prefix": "DEF-0B12-PLT-VOICE-UPLOAD-CHECKS-THE-AI-SEARCH-ENTITLEMENT-AND-CONSUMES-NO-CREDIT",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/voice/usage-reservation.ts", "apps/union-eyes/app/api/voice/upload/route.ts"],
+          "explanation": "Voice has a specific entitlement and atomically reserves, commits or refunds metered usage with idempotent evidence."
+        },
+        {
+          "prefix": "DEF-0B12-WBK-START-STORES-AN-OPTIONAL-CONSENT-OBJECT-THAT-NO-ROUTE-READS",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": ["apps/union-eyes/lib/workbook/consent.ts", "apps/union-eyes/app/api/workbook/[id]/consent/route.ts"],
+          "explanation": "Versioned consent is enforced across workbook start, retrieval, processing, sharing, checkout and withdrawal."
+        }
+      ]
     }
   ],
   "uncreditedSourceEvidence": {
