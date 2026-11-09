@@ -101,7 +101,14 @@ export function parseLockfilePackages(lockfilePath) {
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i]
     if (/^[^\s#][^:]*:/.test(line)) break // next top-level YAML section
-    if (!line.startsWith('  ') || line.startsWith('    ') || !line.trim() || line.trimStart().startsWith('#')) continue
+    if (!line.trim() || line.trimStart().startsWith('#')) continue
+    // Invalid indentation must never silently remove an installed package from
+    // the audit inventory. Nested mapping content is indented four or more
+    // spaces; resolved snapshot keys are indented exactly two spaces.
+    if (/^\t/.test(line) || /^ {1}(?:[^ ]|$)/.test(line) || /^ {3}[^ ]/.test(line)) {
+      throw new Error('Malformed snapshot indentation in pnpm-lock.yaml')
+    }
+    if (!line.startsWith('  ') || line.startsWith('    ')) continue
     // pnpm writes a snapshot key either bare or single-quoted (it quotes every key
     // that starts with `@`), followed by `:` and either nothing (a nested mapping
     // follows) or an empty inline mapping ` {}` (a package with no dependencies).
