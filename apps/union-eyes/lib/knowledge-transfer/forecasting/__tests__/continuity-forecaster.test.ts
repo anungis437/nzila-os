@@ -1,12 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 
-const { buildDependencyPropagationMap, orderByMock, listVerifiedDependencies } = vi.hoisted(() => ({
+const { buildDependencyPropagationMap, orderByMock, listVerifiedDependencies, listActiveNodeAliases } = vi.hoisted(() => ({
   buildDependencyPropagationMap: vi.fn(),
   orderByMock: vi.fn(),
   listVerifiedDependencies: vi.fn(async () => []),
+  listActiveNodeAliases: vi.fn(async () => []),
 }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
 vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies }));
+vi.mock('../../propagation/node-alias-store', () => ({ listActiveNodeAliases }));
 vi.mock('@/db/db', () => ({
   db: { select: () => ({ from: () => ({ where: orderByMock }) }) },
 }));

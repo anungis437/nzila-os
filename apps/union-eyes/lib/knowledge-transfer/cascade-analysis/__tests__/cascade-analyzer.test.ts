@@ -1,10 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-const { buildDependencyPropagationMap, listVerifiedDependencies } = vi.hoisted(() => ({ buildDependencyPropagationMap: vi.fn(), listVerifiedDependencies: vi.fn() }));
+const { buildDependencyPropagationMap, listVerifiedDependencies, listActiveNodeAliases } = vi.hoisted(() => ({ buildDependencyPropagationMap: vi.fn(), listVerifiedDependencies: vi.fn(), listActiveNodeAliases: vi.fn(async () => []) }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
 vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies }));
+vi.mock('../../propagation/node-alias-store', () => ({ listActiveNodeAliases }));
 
 import { analyzeCascadeRisks } from '../cascade-analyzer';
+import { computeSourceFingerprint } from '../../propagation/graph-fingerprint';
 
 function node(id: string, category: string, sensitivity = 'high') {
   return {
@@ -63,22 +65,31 @@ describe('lib/knowledge-transfer/cascade-analysis/cascade-analyzer', () => {
   });
 
   it('tags a governance node as verified when a currently-verified dependency record names it', async () => {
+    const g1 = node('g1', 'governance', 'critical');
+    const financeSystem = { id: 'finance_system', label: 'Finance System', nodeType: 'system', category: 'operational', frequency: 1, associatedRoles: [], isSingleSource: false, continuitySensitivity: 'low', sensitivityReason: 'r' };
     buildDependencyPropagationMap.mockResolvedValue({
       organizationId: 'org-1', generatedAt: '2025-01-01',
-      nodes: [node('g1', 'governance', 'critical')],
+      nodes: [g1, financeSystem],
       edges: [], downstreamImpacts: [], upstreamDependencies: [], couplingAnalysis: [], bottlenecks: [],
       resilience: { recommendations: [], priorityOrder: [], estimatedEffort: {} },
     });
     listVerifiedDependencies.mockResolvedValue([
       {
         id: 'vd1', organizationId: 'org-1', dependentNodeId: 'g1', dependsOnNodeId: 'finance_system',
-        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', status: 'verified',
+        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
+        evidenceReferenceType: 'external_citation', evidenceDocumentId: null,
+        sourceFingerprint: computeSourceFingerprint(g1, financeSystem),
+        status: 'verified',
         submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
         createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
       },
     ]);
     const result = await analyzeCascadeRisks('org-1');
     expect(result.governanceNodes.find((n) => n.id === 'g1')?.evidenceBasis).toBe('verified');
+    // DEF-0B7 Family 1 exit (C): an evidenceBasis tag alone is not sufficient - a caller claiming a confirmed risk
+    // must use the pre-filtered confirmedCascadeRisks, never cascadeRisks filtered by tag itself.
+    expect(result.confirmedCascadeRisks.map((r) => r.governanceGap)).toEqual(['L-g1']);
+    expect(result.exploratoryCascadeHypotheses).toEqual([]);
   });
 
   it('handles orgs with no governance nodes', async () => {

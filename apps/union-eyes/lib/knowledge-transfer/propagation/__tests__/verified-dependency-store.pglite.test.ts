@@ -11,7 +11,14 @@ import { vi } from 'vitest';
 //  - a revoked record is never again reported as verified
 //  - a lookup for a different organization's node ids never sees another organization's evidence
 
-const state = vi.hoisted(() => ({ db: null as unknown, nodeIds: ['a', 'b', 'same_node', 'finance_clerk', 'payroll_system', 'finance_clerk_pending', 'payroll_system_pending'] as string[] }));
+const state = vi.hoisted(() => ({
+  db: null as unknown,
+  nodeIds: ['a', 'b', 'same_node', 'finance_clerk', 'payroll_system', 'finance_clerk_pending', 'payroll_system_pending'] as string[],
+  // Each id's category/nodeType, consulted by the mocked buildDependencyPropagationMap below so source-fingerprint
+  // computation (graph-fingerprint.ts) is meaningful - a node-drift test can change an id's category here to prove
+  // the fingerprint check reacts to it.
+  nodeAttrs: {} as Record<string, { category: string; nodeType: string }>,
+}));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   // Production (postgres-js) returns row arrays from tx.execute(); PGlite's driver wraps them in { rows }. Adapt
@@ -32,7 +39,16 @@ vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: vi.fn(async () 
 // propagation map - mocked here (overridable per-test via state.nodeIds) so this file stays focused on the
 // verified-dependency table's own real-SQL behavior (not a second pglite fixture for exit_interviews/topic-graph).
 vi.mock('../dependency-propagator', () => ({
-  buildDependencyPropagationMap: async () => ({ nodes: state.nodeIds.map((id) => ({ id })) }),
+  buildDependencyPropagationMap: async () => ({
+    nodes: state.nodeIds.map((id) => ({ id, label: id, ...(state.nodeAttrs[id] ?? { category: 'operational', nodeType: 'process' }) })),
+  }),
+}));
+vi.mock('../node-alias-store', () => ({
+  listActiveNodeAliases: async () => [],
+}));
+vi.mock('../evidence-document-reference', () => ({
+  resolveEvidenceDocumentForSubmission: async () => 'resolved',
+  documentCurrentlyResolves: async () => true,
 }));
 
 const ORG_A = '11111111-1111-4111-8111-111111111111';
@@ -51,6 +67,9 @@ beforeAll(async () => {
        process_or_system varchar(300) not null,
        responsible_authority varchar(300) not null,
        evidence_reference varchar(500) not null,
+       evidence_reference_type varchar(20) not null default 'external_citation',
+       evidence_document_id uuid,
+       source_fingerprint varchar(128),
        status varchar(20) not null default 'pending_review',
        submitted_by text not null,
        reviewed_by text,
@@ -62,6 +81,17 @@ beforeAll(async () => {
        constraint ue_verified_dependency_evidence_not_self_dependent check (dependent_node_id <> depends_on_node_id),
        constraint ue_verified_dependency_evidence_reviewer_distinct check (reviewed_by is null or reviewed_by <> submitted_by)
      )`,
+    `CREATE TABLE ue_graph_node_alias (
+       id uuid primary key default gen_random_uuid(),
+       organization_id uuid not null,
+       alias_label text not null,
+       canonical_concept_label text not null,
+       reason varchar(500) not null,
+       created_by text not null,
+       created_at timestamptz not null default now(),
+       superseded_by text,
+       superseded_at timestamptz
+     )`,
   ]);
   pg = created.pg;
   state.db = created.db;
@@ -72,8 +102,9 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await pg.exec('TRUNCATE ue_verified_dependency_evidence');
+  await pg.exec('TRUNCATE ue_verified_dependency_evidence, ue_graph_node_alias');
   state.nodeIds = ['a', 'b', 'same_node', 'finance_clerk', 'payroll_system', 'finance_clerk_pending', 'payroll_system_pending'];
+  state.nodeAttrs = {};
 });
 
 describe('verified dependency evidence — real PGlite SQL', () => {
@@ -82,7 +113,7 @@ describe('verified dependency evidence — real PGlite SQL', () => {
     await expect(
       submitVerifiedDependency(ORG_A, {
         dependentNodeId: 'same_node', dependsOnNodeId: 'same_node',
-        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
+        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', evidenceReferenceType: 'external_citation',
       }, 'u1'),
     ).rejects.toThrow();
   });
@@ -92,7 +123,7 @@ describe('verified dependency evidence — real PGlite SQL', () => {
     await expect(
       submitVerifiedDependency(ORG_A, {
         dependentNodeId: 'a', dependsOnNodeId: 'node_that_no_longer_exists',
-        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
+        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', evidenceReferenceType: 'external_citation',
       }, 'u1'),
     ).rejects.toThrow(/do not correspond to any current dependency node/);
   });
@@ -101,7 +132,7 @@ describe('verified dependency evidence — real PGlite SQL', () => {
     const { submitVerifiedDependency, lookupVerifiedDependency } = await import('../verified-dependency-store');
     await submitVerifiedDependency(ORG_A, {
       dependentNodeId: 'finance_clerk_pending', dependsOnNodeId: 'payroll_system_pending',
-      processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director', evidenceReference: 'SOP-114',
+      processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director', evidenceReference: 'SOP-114', evidenceReferenceType: 'external_citation',
     }, 'submitter-1');
 
     const lookup = await lookupVerifiedDependency(ORG_A, 'finance_clerk_pending', 'payroll_system_pending');
@@ -111,7 +142,7 @@ describe('verified dependency evidence — real PGlite SQL', () => {
   it('refuses a same-identity review even if application code attempted it (reviewer-distinct CHECK)', async () => {
     const { submitVerifiedDependency } = await import('../verified-dependency-store');
     const record = await submitVerifiedDependency(ORG_A, {
-      dependentNodeId: 'a', dependsOnNodeId: 'b', processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
+      dependentNodeId: 'a', dependsOnNodeId: 'b', processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', evidenceReferenceType: 'external_citation',
     }, 'same-user');
     await expect(
       pg.query(
@@ -124,7 +155,7 @@ describe('verified dependency evidence — real PGlite SQL', () => {
   it('refuses to verify a pending submission whose node has drifted out of the current dependency graph by review time', async () => {
     const { submitVerifiedDependency, reviewVerifiedDependency } = await import('../verified-dependency-store');
     const record = await submitVerifiedDependency(ORG_A, {
-      dependentNodeId: 'a', dependsOnNodeId: 'b', processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
+      dependentNodeId: 'a', dependsOnNodeId: 'b', processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', evidenceReferenceType: 'external_citation',
     }, 'submitter-1');
 
     // Time passes; the organization's dependency graph no longer has node 'b' (relabeled, tag fell out of use, etc).
@@ -144,7 +175,7 @@ describe('verified dependency evidence — real PGlite SQL', () => {
     const { submitVerifiedDependency, reviewVerifiedDependency, listVerifiedDependencies } = await import('../verified-dependency-store');
     const record = await submitVerifiedDependency(ORG_A, {
       dependentNodeId: 'finance_clerk', dependsOnNodeId: 'payroll_system',
-      processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director', evidenceReference: 'SOP-114',
+      processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director', evidenceReference: 'SOP-114', evidenceReferenceType: 'external_citation',
     }, 'submitter-1');
 
     const [resultA, resultB] = await Promise.all([
@@ -166,7 +197,7 @@ describe('verified dependency evidence — real PGlite SQL', () => {
     const { submitVerifiedDependency, reviewVerifiedDependency, revokeVerifiedDependency, lookupVerifiedDependency } = await import('../verified-dependency-store');
     const record = await submitVerifiedDependency(ORG_A, {
       dependentNodeId: 'finance_clerk', dependsOnNodeId: 'payroll_system',
-      processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director', evidenceReference: 'SOP-114',
+      processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director', evidenceReference: 'SOP-114', evidenceReferenceType: 'external_citation',
     }, 'submitter-1');
     await reviewVerifiedDependency(ORG_A, record.id, 'verified', 'reviewer-a', undefined);
 
@@ -188,7 +219,7 @@ describe('verified dependency evidence — real PGlite SQL', () => {
     const { submitVerifiedDependency, reviewVerifiedDependency, lookupVerifiedDependency, revokeVerifiedDependency, listVerifiedDependencies } = await import('../verified-dependency-store');
     const recordA = await submitVerifiedDependency(ORG_A, {
       dependentNodeId: 'finance_clerk', dependsOnNodeId: 'payroll_system',
-      processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director', evidenceReference: 'SOP-114',
+      processOrSystem: 'Payroll processing', responsibleAuthority: 'Finance Director', evidenceReference: 'SOP-114', evidenceReferenceType: 'external_citation',
     }, 'submitter-1');
     await reviewVerifiedDependency(ORG_A, recordA.id, 'verified', 'reviewer-a', undefined);
 

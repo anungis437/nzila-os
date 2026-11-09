@@ -1,8 +1,8 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1015,
-  "mutating": 684,
+  "routes": 1016,
+  "mutating": 685,
   "kernel": 62,
   "byGuard": {
    "ADMIN_AUTH": 18,
@@ -14,7 +14,7 @@
    "ORG_AUTH": 9,
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 238,
-   "ROLE_AUTH": 106,
+   "ROLE_AUTH": 107,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 389,
@@ -30,14 +30,14 @@
    "ORG_AUTH": 4,
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 223,
-   "ROLE_AUTH": 57,
+   "ROLE_AUTH": 58,
    "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 234
   },
   "mutatingByAudit": {
    "ATOMIC": 160,
-   "ATOMIC_SERVICE": 122,
+   "ATOMIC_SERVICE": 123,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 82,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -49,7 +49,7 @@
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 82,
-   "NONE": 313,
+   "NONE": 314,
    "SYSTEM_CONTEXT": 53,
    "TENANT_TX": 235
   }
@@ -6802,6 +6802,19 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "READ_ONLY"
+  },
+  {
+   "route": "exit-interviews/node-aliases/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "ROLE_AUTH",
+   "kernel": false,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "exit-interviews/operating-rhythms/route.ts",

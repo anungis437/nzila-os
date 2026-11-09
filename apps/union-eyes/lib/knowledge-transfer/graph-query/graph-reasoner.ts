@@ -70,6 +70,7 @@ export async function executeGraphQuery(orgId: string, query: GraphQuery): Promi
     query,
     summary,
     findings: taggedFindings,
+    confirmedFindings: taggedFindings.filter((finding) => finding.evidenceBasis === 'verified'),
     significance,
     recommendations,
     evidenceCoverageScore,

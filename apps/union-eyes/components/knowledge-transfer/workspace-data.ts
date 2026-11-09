@@ -96,8 +96,16 @@ export function toGovernanceImpact(cascade: GovernanceCascadeAnalysis, map: Prop
     totalGovernanceProcesses: nodes.length,
     singleSourceProcesses: nodes.filter((node) => node.isSingleSource).length,
     criticalGovernanceGaps: cascade.cascadeRisks.filter((risk) => risk.severity === 'critical').map((risk) => risk.governanceGap),
+    confirmedCriticalGovernanceGaps: cascade.confirmedCascadeRisks.filter((risk) => risk.severity === 'critical').map((risk) => risk.governanceGap),
     nodes,
     cascadeRisks: cascade.cascadeRisks.map((risk) => ({
+      triggerNode: risk.governanceGap,
+      cascadedProcesses: risk.impactedAreas.map(labelOf),
+      severity: risk.severity,
+      cascadeDepth: risk.cascadeDepth,
+      evidenceBasis: risk.evidenceBasis,
+    })),
+    confirmedCascadeRisks: cascade.confirmedCascadeRisks.map((risk) => ({
       triggerNode: risk.governanceGap,
       cascadedProcesses: risk.impactedAreas.map(labelOf),
       severity: risk.severity,

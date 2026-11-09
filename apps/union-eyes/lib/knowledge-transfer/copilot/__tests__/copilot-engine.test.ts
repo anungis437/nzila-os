@@ -22,6 +22,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
   UE_SYSTEM_ORG_ID: 'sys',
 }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap: h.buildDependencyPropagationMap }));
+vi.mock('../../propagation/evidence-document-reference', () => ({ documentCurrentlyResolves: async () => true, resolveEvidenceDocumentForSubmission: async () => 'resolved' }));
 vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex: h.calculateResilienceIndex }));
 vi.mock('../../copilot-explainability/response-builder', () => ({
   buildPropagationEvidence: () => [{ observation: 'p', dataPoint: '1', sourceType: 'propagation', evidenceCoverage: 'high' }],

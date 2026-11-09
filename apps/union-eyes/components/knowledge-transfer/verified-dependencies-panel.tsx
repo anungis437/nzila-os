@@ -19,6 +19,8 @@ interface VerifiedDependencyRecord {
   processOrSystem: string;
   responsibleAuthority: string;
   evidenceReference: string;
+  evidenceReferenceType: 'document' | 'external_citation';
+  evidenceDocumentId: string | null;
   status: 'pending_review' | 'verified' | 'rejected' | 'revoked';
   submittedBy: string;
   reviewedBy: string | null;
@@ -34,7 +36,11 @@ const STATUS_STYLES: Record<VerifiedDependencyRecord['status'], string> = {
   revoked: 'bg-red-50 border-red-200 text-red-700',
 };
 
-const EMPTY_SUBMISSION = { dependentNodeId: '', dependsOnNodeId: '', processOrSystem: '', responsibleAuthority: '', evidenceReference: '' };
+const EMPTY_SUBMISSION = {
+  dependentNodeId: '', dependsOnNodeId: '', processOrSystem: '', responsibleAuthority: '', evidenceReference: '',
+  evidenceReferenceType: 'external_citation' as 'document' | 'external_citation',
+  evidenceDocumentId: '',
+};
 
 export function VerifiedDependenciesPanel() {
   const [records, setRecords] = useState<VerifiedDependencyRecord[]>([]);
@@ -67,10 +73,12 @@ export function VerifiedDependenciesPanel() {
     try {
       setSubmitting(true);
       setError(null);
+      const { evidenceDocumentId, ...rest } = submission;
+      const payload = submission.evidenceReferenceType === 'document' ? { ...rest, evidenceDocumentId } : rest;
       const res = await fetch('/api/exit-interviews/verified-dependencies', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submission),
+        body: JSON.stringify(payload),
       });
       const json = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(json.error ?? 'Failed to submit dependency evidence');
@@ -102,7 +110,13 @@ export function VerifiedDependenciesPanel() {
     }
   };
 
-  const canSubmit = Object.values(submission).every((value) => value.trim().length > 0);
+  const canSubmit =
+    submission.dependentNodeId.trim().length > 0 &&
+    submission.dependsOnNodeId.trim().length > 0 &&
+    submission.processOrSystem.trim().length > 0 &&
+    submission.responsibleAuthority.trim().length > 0 &&
+    submission.evidenceReference.trim().length > 0 &&
+    (submission.evidenceReferenceType === 'external_citation' || submission.evidenceDocumentId.trim().length > 0);
 
   return (
     <div className="space-y-5">
@@ -146,10 +160,26 @@ export function VerifiedDependenciesPanel() {
           />
           <input
             className="text-xs border border-slate-300 rounded px-2 py-1.5 col-span-2"
-            placeholder="Evidence reference (document, SOP, record locator)"
+            placeholder="Evidence reference (document title, SOP, record locator)"
             value={submission.evidenceReference}
             onChange={(e) => setSubmission((prev) => ({ ...prev, evidenceReference: e.target.value }))}
           />
+          <select
+            className="text-xs border border-slate-300 rounded px-2 py-1.5"
+            value={submission.evidenceReferenceType}
+            onChange={(e) => setSubmission((prev) => ({ ...prev, evidenceReferenceType: e.target.value as 'document' | 'external_citation' }))}
+          >
+            <option value="external_citation">External citation (not system-verifiable)</option>
+            <option value="document">Stored document (resolved + access-checked)</option>
+          </select>
+          {submission.evidenceReferenceType === 'document' && (
+            <input
+              className="text-xs border border-slate-300 rounded px-2 py-1.5"
+              placeholder="Document ID (uuid)"
+              value={submission.evidenceDocumentId}
+              onChange={(e) => setSubmission((prev) => ({ ...prev, evidenceDocumentId: e.target.value }))}
+            />
+          )}
         </div>
         <button
           onClick={submit}
@@ -173,7 +203,12 @@ export function VerifiedDependenciesPanel() {
                 <div className="text-xs">
                   <div className="font-medium">{record.dependentNodeId} depends on {record.dependsOnNodeId}</div>
                   <div>{record.processOrSystem} — {record.responsibleAuthority}</div>
-                  <div className="opacity-70">Evidence: {record.evidenceReference}</div>
+                  <div className="opacity-70">
+                    Evidence: {record.evidenceReference}{' '}
+                    <span className={`uppercase text-[9px] rounded px-1 ${record.evidenceReferenceType === 'document' ? 'bg-emerald-100' : 'bg-slate-100'}`}>
+                      {record.evidenceReferenceType === 'document' ? 'resolved document' : 'unverified citation'}
+                    </span>
+                  </div>
                   <div className="opacity-70 uppercase text-[10px] mt-1">{record.status}</div>
                 </div>
                 {record.status === 'pending_review' && (

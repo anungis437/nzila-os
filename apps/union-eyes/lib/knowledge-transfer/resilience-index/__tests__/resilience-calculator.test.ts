@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // The SQL of the eligibility condition is proven against real SQL in app/api/__tests__/interview-derived-analytics.pglite.test.ts.
 vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[], listVerifiedDependencies: vi.fn() }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[], listVerifiedDependencies: vi.fn(), listActiveNodeAliases: vi.fn(async () => []) }));
 
 function makeChain() {
   const chain: Record<string, unknown> = {};
@@ -24,6 +24,13 @@ vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
 vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
   listVerifiedDependencies: mocks.listVerifiedDependencies,
 }));
+vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({
+  listActiveNodeAliases: mocks.listActiveNodeAliases,
+}));
+vi.mock('@/lib/knowledge-transfer/propagation/evidence-document-reference', () => ({
+  documentCurrentlyResolves: async () => true,
+  resolveEvidenceDocumentForSubmission: async () => 'resolved',
+}));
 vi.mock('@/db/db', () => ({ db: { select: vi.fn(() => makeChain()) } }));
 // The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
 vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
@@ -36,6 +43,7 @@ vi.mock('@/db/schema', () => ({
 vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, relations: () => ({}) }));
 
 import { calculateResilienceIndex } from '../resilience-calculator';
+import { computeSourceFingerprint } from '@/lib/knowledge-transfer/propagation/graph-fingerprint';
 
 function n(id: string, frequency: number, category: string, isSingleSource: boolean, sensitivity = 'low') {
   return {
@@ -168,7 +176,10 @@ describe('calculateResilienceIndex', () => {
     mocks.listVerifiedDependencies.mockResolvedValue([
       {
         id: 'vd1', organizationId: 'org', dependentNodeId: 'a', dependsOnNodeId: 'b',
-        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', status: 'verified',
+        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
+        evidenceReferenceType: 'external_citation', evidenceDocumentId: null,
+        sourceFingerprint: computeSourceFingerprint(n('a', 2, 'general', false, 'low'), n('b', 2, 'general', false, 'low')),
+        status: 'verified',
         submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
         createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
       },

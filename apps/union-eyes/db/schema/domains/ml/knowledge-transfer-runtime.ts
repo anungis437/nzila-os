@@ -63,9 +63,10 @@ export const ueCopilotConversations = pgTable('ue_copilot_conversations', {
 
 /**
  * Verified dependency evidence, separate from the exploratory propagation map. Created by platform migration 0085
- * and protected by scoped 0059. Application code (lib/knowledge-transfer/propagation/verified-dependency-store.ts)
- * reaches this table through raw SQL, like its ue_cognition_memory sibling above - this declaration exists so the
- * table is canonically declared for storage-authority/governance tooling, not as the runtime query path.
+ * (base columns) and 0086 (source_fingerprint, evidence_reference_type, evidence_document_id), protected by scoped
+ * 0059. Application code (lib/knowledge-transfer/propagation/verified-dependency-store.ts) reaches this table
+ * through raw SQL, like its ue_cognition_memory sibling above - this declaration exists so the table is
+ * canonically declared for storage-authority/governance tooling, not as the runtime query path.
  */
 export const ueVerifiedDependencyEvidence = pgTable('ue_verified_dependency_evidence', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -75,6 +76,9 @@ export const ueVerifiedDependencyEvidence = pgTable('ue_verified_dependency_evid
   processOrSystem: varchar('process_or_system', { length: 300 }).notNull(),
   responsibleAuthority: varchar('responsible_authority', { length: 300 }).notNull(),
   evidenceReference: varchar('evidence_reference', { length: 500 }).notNull(),
+  evidenceReferenceType: varchar('evidence_reference_type', { length: 20 }).notNull().default('external_citation'),
+  evidenceDocumentId: uuid('evidence_document_id'),
+  sourceFingerprint: varchar('source_fingerprint', { length: 128 }),
   status: varchar('status', { length: 20 }).notNull().default('pending_review'),
   submittedBy: text('submitted_by').notNull(),
   reviewedBy: text('reviewed_by'),
@@ -85,4 +89,24 @@ export const ueVerifiedDependencyEvidence = pgTable('ue_verified_dependency_evid
 }, (table) => ({
   orgIdx: index('ue_verified_dependency_evidence_org_idx').on(table.organizationId, table.status),
   lookupIdx: index('ue_verified_dependency_evidence_lookup_idx').on(table.organizationId, table.dependentNodeId, table.dependsOnNodeId, table.status),
+}));
+
+/**
+ * Durable, explicitly-authorized node identity/alias mapping (graph-identity.ts's resolveConceptLabel). Created by
+ * platform migration 0086 and protected by scoped 0060, same helper as ue_verified_dependency_evidence above.
+ * Application code (lib/knowledge-transfer/propagation/node-alias-store.ts) reaches this table through raw SQL -
+ * this declaration exists so the table is canonically declared for storage-authority/governance tooling.
+ */
+export const ueGraphNodeAlias = pgTable('ue_graph_node_alias', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  aliasLabel: text('alias_label').notNull(),
+  canonicalConceptLabel: text('canonical_concept_label').notNull(),
+  reason: varchar('reason', { length: 500 }).notNull(),
+  createdBy: text('created_by').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  supersededBy: text('superseded_by'),
+  supersededAt: timestamp('superseded_at', { withTimezone: true }),
+}, (table) => ({
+  orgIdx: index('ue_graph_node_alias_org_idx').on(table.organizationId),
 }));

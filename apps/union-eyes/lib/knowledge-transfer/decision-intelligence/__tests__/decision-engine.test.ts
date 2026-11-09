@@ -7,13 +7,16 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), resilience: vi.fn(), forecast: vi.fn(), listVerifiedDependencies: vi.fn() }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), resilience: vi.fn(), forecast: vi.fn(), listVerifiedDependencies: vi.fn(), listActiveNodeAliases: vi.fn(async () => []) }));
 
 vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
 }));
 vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
   listVerifiedDependencies: mocks.listVerifiedDependencies,
+}));
+vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({
+  listActiveNodeAliases: mocks.listActiveNodeAliases,
 }));
 vi.mock('@/lib/knowledge-transfer/resilience-index/resilience-calculator', () => ({
   calculateResilienceIndex: mocks.resilience,

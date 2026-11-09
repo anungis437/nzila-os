@@ -740,9 +740,9 @@
     },
     {
       "defectId": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
-      "batch": "B165-FAMILY1-ATOMIC-CONVERGENCE",
+      "batch": "B166-FAMILY1-EVIDENCE-LIFECYCLE-IDENTITY-AND-REFERENCE-INTEGRITY",
       "sourceCommit": null,
-      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/verified-dependency-store.pglite.test.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts;apps/union-eyes/lib/knowledge-transfer/simulation/__tests__/continuity-simulator.test.ts;apps/union-eyes/app/api/exit-interviews/verified-dependencies/__tests__/*.test.ts;apps/union-eyes/db/__tests__/rls-storage-authority-registry-composition.test.ts;apps/union-eyes/db/__tests__/rls-storage-authority-manifest-invariants.test.ts;apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/graph-identity.test.ts;apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/graph-evidence-service.test.ts;apps/union-eyes/lib/knowledge-transfer/cascade-analysis/__tests__/cascade-analyzer.test.ts;apps/union-eyes/lib/knowledge-transfer/graph-query/__tests__/graph-reasoner.test.ts;apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts;apps/union-eyes/lib/knowledge-transfer/forecasting/__tests__/continuity-forecaster.test.ts;apps/union-eyes/lib/knowledge-transfer/mitigation-comparison/__tests__/mitigation-comparator.test.ts;apps/union-eyes/lib/knowledge-transfer/resilience-strategies/__tests__/strategy-modeler.test.ts;apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts;apps/union-eyes/components/knowledge-transfer/workspace-data.test.ts;apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts",
+      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/verified-dependency-store.pglite.test.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts;apps/union-eyes/lib/knowledge-transfer/simulation/__tests__/continuity-simulator.test.ts;apps/union-eyes/app/api/exit-interviews/verified-dependencies/__tests__/*.test.ts;apps/union-eyes/db/__tests__/rls-storage-authority-registry-composition.test.ts;apps/union-eyes/db/__tests__/rls-storage-authority-manifest-invariants.test.ts;apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/graph-identity.test.ts;apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/graph-evidence-service.test.ts;apps/union-eyes/lib/knowledge-transfer/cascade-analysis/__tests__/cascade-analyzer.test.ts;apps/union-eyes/lib/knowledge-transfer/graph-query/__tests__/graph-reasoner.test.ts;apps/union-eyes/lib/knowledge-transfer/resilience-index/__tests__/resilience-calculator.test.ts;apps/union-eyes/lib/knowledge-transfer/forecasting/__tests__/continuity-forecaster.test.ts;apps/union-eyes/lib/knowledge-transfer/mitigation-comparison/__tests__/mitigation-comparator.test.ts;apps/union-eyes/lib/knowledge-transfer/resilience-strategies/__tests__/strategy-modeler.test.ts;apps/union-eyes/lib/knowledge-transfer/copilot/__tests__/copilot-engine.test.ts;apps/union-eyes/components/knowledge-transfer/workspace-data.test.ts;apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts;apps/union-eyes/lib/knowledge-transfer/propagation/__tests__/node-alias-store.test.ts;apps/union-eyes/app/api/exit-interviews/node-aliases/__tests__/node-aliases.route.test.ts",
       "files": [
         "apps/union-eyes/db/migrations-platform/0085_verified_dependency_evidence.sql",
         "apps/union-eyes/db/migrations-cache/0059_verified_dependency_evidence_rls_closure.sql",
@@ -781,7 +781,14 @@
         "apps/union-eyes/components/knowledge-transfer/governance-impact/governance-impact-explorer.tsx",
         "apps/union-eyes/components/knowledge-transfer/workspace-data.ts",
         "apps/union-eyes/components/knowledge-transfer/continuity-simulation-workspace.tsx",
-        "apps/union-eyes/components/knowledge-transfer/continuity-planning-workspace.tsx"
+        "apps/union-eyes/components/knowledge-transfer/continuity-planning-workspace.tsx",
+        "apps/union-eyes/db/migrations-platform/0086_graph_evidence_integrity_and_identity.sql",
+        "apps/union-eyes/db/migrations-cache/0060_graph_node_alias_rls_closure.sql",
+        "apps/union-eyes/lib/knowledge-transfer/propagation/graph-fingerprint.ts",
+        "apps/union-eyes/lib/knowledge-transfer/propagation/node-alias-store.ts",
+        "apps/union-eyes/lib/knowledge-transfer/propagation/evidence-document-reference.ts",
+        "apps/union-eyes/app/api/exit-interviews/node-aliases/route.ts",
+        "apps/union-eyes/lib/knowledge-transfer/mitigation-comparison/mitigation-comparator.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },

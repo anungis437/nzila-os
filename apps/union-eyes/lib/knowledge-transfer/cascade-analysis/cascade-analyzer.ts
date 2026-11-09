@@ -22,6 +22,15 @@ export interface GovernanceCascadeAnalysis {
     cascadeDepth: number;
     evidenceBasis: EvidenceBasis;
   }>;
+  /** The SUBSET of cascadeRisks currently backed by a verified dependency record naming the governance node - the
+   *  only entries an API response, calculation or UI may present as a CONFIRMED organizational risk. Every entry
+   *  here also appears in cascadeRisks; this is not additional data, it is the pre-filtered confirmed view every
+   *  caller reporting a "confirmed risk" count or list must use instead of filtering cascadeRisks by tag itself
+   *  (an evidenceBasis label alone is not sufficient when the business metric still claims verified risk). */
+  confirmedCascadeRisks: GovernanceCascadeAnalysis['cascadeRisks'];
+  /** cascadeRisks with evidenceBasis 'exploratory' - a hypothesis from tag co-occurrence, explicitly kept
+   *  available as discovery signal, never silently dropped or suppressed. */
+  exploratoryCascadeHypotheses: GovernanceCascadeAnalysis['cascadeRisks'];
   /**
    * Areas that depend on a compliance node. No regulation, obligation or deadline is assessed: the entries state a dependency,
    * not a regulatory finding.
@@ -73,6 +82,8 @@ export async function analyzeCascadeRisks(orgId: string): Promise<GovernanceCasc
     methodologyNote: GRAPH_EVIDENCE_METHODOLOGY_NOTE,
     governanceNodes,
     cascadeRisks,
+    confirmedCascadeRisks: cascadeRisks.filter((risk) => risk.evidenceBasis === 'verified'),
+    exploratoryCascadeHypotheses: cascadeRisks.filter((risk) => risk.evidenceBasis === 'exploratory'),
     regulatoryRisks,
     regulatoryAssessment: 'dependency_only_no_regulation_assessed',
     recommendations: [],

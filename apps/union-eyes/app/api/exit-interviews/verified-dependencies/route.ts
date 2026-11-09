@@ -32,6 +32,8 @@ const SubmitSchema = z.object({
   processOrSystem: z.string().min(1).max(300),
   responsibleAuthority: z.string().min(1).max(300),
   evidenceReference: z.string().min(1).max(500),
+  evidenceReferenceType: z.enum(['document', 'external_citation']),
+  evidenceDocumentId: z.string().uuid().optional(),
 }).strict();
 
 export const GET = withApi(

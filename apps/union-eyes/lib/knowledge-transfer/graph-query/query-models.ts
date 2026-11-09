@@ -42,6 +42,12 @@ export interface QueryResult {
   findings: Array<QueryFinding & { /** 'verified' only when a currently-verified dependency record names this
    *  finding's subject node id; otherwise 'exploratory' - never silently omitted (DEF-0B7-COGB-PROPAGATION-
    *  DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE). */ evidenceBasis: EvidenceBasis }>;
+  /** The SUBSET of findings currently backed by a verified dependency record - the only entries an API response,
+   *  calculation or UI may present as a CONFIRMED organizational fact. An evidenceBasis tag on findings alone is
+   *  not sufficient when a caller's business metric or claim presents a result as verified operational risk; this
+   *  pre-filtered view is what that caller must use instead of filtering findings by tag itself. Every entry here
+   *  also appears in findings. */
+  confirmedFindings: QueryResult['findings'];
   /** Why these results matter */
   significance: string;
   /** Recommended follow-up actions */

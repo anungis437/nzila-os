@@ -410,6 +410,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-gate0-final-convergence",
         "note": "Row security for ue_verified_dependency_evidence (platform 0085): FORCE RLS + the direct-org tenant policy, same helper as the cognition-memory family (0018)."
+      },
+      {
+        "tag": "0060_graph_node_alias_rls_closure",
+        "sha256": "9095ab2154d999dcad1b83665c7f8108a1158f4ce08502e5c23c201f6c80623d",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Row security for ue_graph_node_alias (platform 0086): FORCE RLS + the direct-org tenant policy, same helper as 0059. ue_verified_dependency_evidence's own new columns (source_fingerprint, evidence_reference_type, evidence_document_id) need no new policy - an ADD COLUMN does not change existing RLS coverage."
       }
     ],
     "platform": [
@@ -909,6 +916,13 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-gate0-final-convergence",
         "note": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE: new table ue_verified_dependency_evidence, the verified operational dependency graph separate from the exploratory, tag-co-occurrence-inferred propagation map. A directional dependency is verified only once a reviewer distinct from the submitter (DB CHECK) attributes it to a named process/system and responsible authority with an evidence reference. RLS is scoped (cache) 0059."
+      },
+      {
+        "tag": "0086_graph_evidence_integrity_and_identity",
+        "sha256": "fd321d7453f0c0425e99171856eb2b46a22880e2c5c733c4484d6dc9d2a80b21",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE (Family 1 exit, round 5): adds source_fingerprint, evidence_reference_type and evidence_document_id to ue_verified_dependency_evidence (read-time currentness and evidence-reference resolution, fail-closed, no background job, full review history preserved) and a new ue_graph_node_alias table (durable, explicitly-authorized, supersede-not-delete identity/alias mapping beyond cosmetic-drift canonicalization). RLS is scoped (cache) 0060."
       }
     ]
   }

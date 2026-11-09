@@ -346,4 +346,15 @@ export const analyticsAiEntries: StorageAuthorityEntry[] = [
     invocationAuthority: "TENANT_USER",
     dbExecutionPrincipal: "TENANT_RUNTIME",
     reviewPriority: "NONE",
+  },
+  {
+    table: "ue_graph_node_alias",
+    classification: "TENANT_RLS_REQUIRED",
+    reason: "Direct organization_id uuid NOT NULL, created by platform migration 0086 and protected by scoped 0060 (FORCE RLS, same ue_create_direct_org_rls_policy helper as the ue_verified_dependency_evidence family). Reached only through lib/knowledge-transfer/propagation/node-alias-store.ts and the authenticated route under app/api/exit-interviews/node-aliases/, which run every statement inside inOrganization/withRLSContext on the tenant runtime identity. Runtime DML is SELECT, INSERT and UPDATE (creating a new alias conditionally supersedes a prior active one in the same transaction; there is no DELETE path - history is preserved, never removed - and no schema authority).",
+    supportingCapability: ["app/api/exit-interviews/node-aliases/route.ts","lib/knowledge-transfer/propagation/node-alias-store.ts"],
+    requiredRuntimePrivileges: ["SELECT","INSERT","UPDATE"],
+    requiredSystemPrivileges: [],
+    invocationAuthority: "TENANT_USER",
+    dbExecutionPrincipal: "TENANT_RUNTIME",
+    reviewPriority: "NONE",
   },]

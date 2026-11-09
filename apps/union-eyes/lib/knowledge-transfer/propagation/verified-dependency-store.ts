@@ -17,7 +17,10 @@ import { sql } from 'drizzle-orm';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { inOrganization } from '../org-scope';
 import { buildDependencyPropagationMap } from './dependency-propagator';
-import { resolveCurrentNodeId } from './graph-identity';
+import { resolveConceptLabel } from './graph-identity';
+import { computeSourceFingerprint } from './graph-fingerprint';
+import { listActiveNodeAliases } from './node-alias-store';
+import { resolveEvidenceDocumentForSubmission } from './evidence-document-reference';
 import type {
   VerifiedDependencyRecord,
   SubmitVerifiedDependencyInput,
@@ -33,6 +36,9 @@ interface VerifiedDependencyRow {
   process_or_system: string;
   responsible_authority: string;
   evidence_reference: string;
+  evidence_reference_type: VerifiedDependencyRecord['evidenceReferenceType'];
+  evidence_document_id: string | null;
+  source_fingerprint: string | null;
   status: VerifiedDependencyRecord['status'];
   submitted_by: string;
   reviewed_by: string | null;
@@ -51,6 +57,9 @@ function rowToRecord(row: VerifiedDependencyRow): VerifiedDependencyRecord {
     processOrSystem: row.process_or_system,
     responsibleAuthority: row.responsible_authority,
     evidenceReference: row.evidence_reference,
+    evidenceReferenceType: row.evidence_reference_type,
+    evidenceDocumentId: row.evidence_document_id,
+    sourceFingerprint: row.source_fingerprint,
     status: row.status,
     submittedBy: row.submitted_by,
     reviewedBy: row.reviewed_by,
@@ -68,20 +77,59 @@ function rowToRecord(row: VerifiedDependencyRow): VerifiedDependencyRecord {
  * or historical one) at both submission and verification time is what DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-
  * SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE's "validate that submitted dependency references resolve to
  * authorized, existing organizational nodes" requires - this does not retroactively invalidate an ALREADY-verified
- * record if its nodes later drift (lookupVerifiedDependency still returns it; a human reviewer owns revalidation
- * on an explicit re-review), it only gates new submissions and new verifications.
+ * record if its nodes later drift (lookupVerifiedDependency reports requires_reverification in that case - see
+ * below - rather than silently continuing to treat it as verified), it only gates new submissions and new
+ * verifications from being created against an already-stale node.
  *
- * Resolution is canonical-identity-tolerant (graph-identity.ts): a node id that differs from a current node only
- * by case, whitespace or punctuation still resolves, closing the collision/drift class the shared evidence
- * contract requires - but a label retired or genuinely renamed into a different canonical key is never guessed at.
+ * Resolution is alias-aware (resolveConceptLabel, graph-identity.ts): tolerant of cosmetic drift (case, whitespace,
+ * punctuation) and of an explicit, durable alias a reviewer has recorded for a semantic rename or collision - but a
+ * label retired or genuinely renamed with no recorded alias is never guessed at.
  */
+async function currentNodeAttributes(orgId: string): Promise<{ currentIds: string[]; aliases: Awaited<ReturnType<typeof listActiveNodeAliases>>; byId: Map<string, { label: string; category: string; nodeType: string }> }> {
+  const [propagationMap, aliases] = await Promise.all([buildDependencyPropagationMap(orgId), listActiveNodeAliases(orgId)]);
+  return {
+    currentIds: propagationMap.nodes.map((node) => node.id),
+    aliases,
+    byId: new Map(propagationMap.nodes.map((node) => [node.id, { label: node.label, category: node.category, nodeType: node.nodeType }])),
+  };
+}
+
 async function assertNodesCurrentlyExist(orgId: string, nodeIds: string[]): Promise<void> {
-  const propagationMap = await buildDependencyPropagationMap(orgId);
-  const currentIds = propagationMap.nodes.map((node) => node.id);
-  const unknown = nodeIds.filter((id) => resolveCurrentNodeId(currentIds, id) === null);
+  const { currentIds, aliases } = await currentNodeAttributes(orgId);
+  const unknown = nodeIds.filter((id) => resolveConceptLabel(aliases, currentIds, id) === null);
   if (unknown.length > 0) {
     throw new Error(`The following node id(s) do not correspond to any current dependency node for this organization: ${unknown.join(', ')}`);
   }
+}
+
+/** The fingerprint for a (dependentNodeId, dependsOnNodeId) pair, resolved through aliases to their CURRENT node
+ *  attributes. Callers must have already confirmed both ids resolve (assertNodesCurrentlyExist) - throws if not. */
+async function currentFingerprint(orgId: string, dependentNodeId: string, dependsOnNodeId: string): Promise<string> {
+  const { currentIds, aliases, byId } = await currentNodeAttributes(orgId);
+  const dependentId = resolveConceptLabel(aliases, currentIds, dependentNodeId);
+  const dependsOnId = resolveConceptLabel(aliases, currentIds, dependsOnNodeId);
+  const dependent = dependentId ? byId.get(dependentId) : null;
+  const dependsOn = dependsOnId ? byId.get(dependsOnId) : null;
+  if (!dependent || !dependsOn) throw new Error('Cannot fingerprint a node id that does not currently resolve');
+  return computeSourceFingerprint(dependent, dependsOn);
+}
+
+/** Validates an evidence reference at submission: 'document' must resolve to a real, active, same-organization
+ *  document the submitter is authorized to view (lib/knowledge-transfer/propagation/evidence-document-reference.ts).
+ *  'external_citation' is accepted as-is - honestly unverifiable, never silently upgraded to look resolved. */
+async function assertEvidenceReferenceValid(
+  orgId: string,
+  input: Pick<SubmitVerifiedDependencyInput, 'evidenceReferenceType' | 'evidenceDocumentId'>,
+  submittedBy: string,
+): Promise<void> {
+  if (input.evidenceReferenceType === 'external_citation') {
+    if (input.evidenceDocumentId) throw new Error('evidenceDocumentId must not be set when evidenceReferenceType is external_citation');
+    return;
+  }
+  if (!input.evidenceDocumentId) throw new Error('evidenceDocumentId is required when evidenceReferenceType is document');
+  const resolution = await resolveEvidenceDocumentForSubmission(orgId, input.evidenceDocumentId, submittedBy);
+  if (resolution === 'not_found') throw new Error('evidenceDocumentId does not resolve to an active document in this organization');
+  if (resolution === 'not_authorized') throw new Error('You are not authorized to reference this document as evidence');
 }
 
 /** Submits new verified-dependency evidence. Always starts pending_review — nothing is self-certifying. */
@@ -94,12 +142,14 @@ export async function submitVerifiedDependency(
     throw new Error('dependentNodeId and dependsOnNodeId must differ');
   }
   await assertNodesCurrentlyExist(orgId, [input.dependentNodeId, input.dependsOnNodeId]);
+  await assertEvidenceReferenceValid(orgId, input, submittedBy);
+  const fingerprint = await currentFingerprint(orgId, input.dependentNodeId, input.dependsOnNodeId);
   const rows = await inOrganization(orgId, async (tx) => {
     const inserted = await tx.execute(sql`
       INSERT INTO ue_verified_dependency_evidence
-        (organization_id, dependent_node_id, depends_on_node_id, process_or_system, responsible_authority, evidence_reference, status, submitted_by)
+        (organization_id, dependent_node_id, depends_on_node_id, process_or_system, responsible_authority, evidence_reference, evidence_reference_type, evidence_document_id, source_fingerprint, status, submitted_by)
       VALUES
-        (${orgId}, ${input.dependentNodeId}, ${input.dependsOnNodeId}, ${input.processOrSystem}, ${input.responsibleAuthority}, ${input.evidenceReference}, 'pending_review', ${submittedBy})
+        (${orgId}, ${input.dependentNodeId}, ${input.dependsOnNodeId}, ${input.processOrSystem}, ${input.responsibleAuthority}, ${input.evidenceReference}, ${input.evidenceReferenceType}, ${input.evidenceDocumentId ?? null}, ${fingerprint}, 'pending_review', ${submittedBy})
       RETURNING *
     `);
     const record = (inserted as unknown as VerifiedDependencyRow[])[0];
@@ -128,19 +178,25 @@ export async function reviewVerifiedDependency(
   reviewedBy: string,
   reviewNotes: string | undefined,
 ): Promise<VerifiedDependencyRecord | null> {
+  let refreshedFingerprint: string | null = null;
   if (decision === 'verified') {
     // Re-validate at the moment of verification, not just at submission: time may have passed and the underlying
-    // node(s) may no longer exist in the organization's current dependency graph.
+    // node(s) may no longer exist in the organization's current dependency graph. Verification re-attests the
+    // CURRENT state, so the fingerprint is recomputed fresh here, not copied from submission time.
     const rows = await inOrganization(orgId, (tx) =>
       tx.execute(sql`SELECT dependent_node_id, depends_on_node_id FROM ue_verified_dependency_evidence WHERE id = ${id} AND organization_id = ${orgId}`),
     );
     const target = (rows as unknown as Array<{ dependent_node_id: string; depends_on_node_id: string }>)[0];
-    if (target) await assertNodesCurrentlyExist(orgId, [target.dependent_node_id, target.depends_on_node_id]);
+    if (target) {
+      await assertNodesCurrentlyExist(orgId, [target.dependent_node_id, target.depends_on_node_id]);
+      refreshedFingerprint = await currentFingerprint(orgId, target.dependent_node_id, target.depends_on_node_id);
+    }
   }
   return inOrganization(orgId, async (tx) => {
     const updated = await tx.execute(sql`
       UPDATE ue_verified_dependency_evidence
       SET status = ${decision}, reviewed_by = ${reviewedBy}, reviewed_at = now(), review_notes = ${reviewNotes ?? null}, updated_at = now()
+        ${decision === 'verified' ? sql`, source_fingerprint = ${refreshedFingerprint}` : sql``}
       WHERE id = ${id}
         AND organization_id = ${orgId}
         AND status = 'pending_review'
@@ -227,7 +283,19 @@ export async function lookupVerifiedDependency(
   );
   const all = (rows as unknown as VerifiedDependencyRow[]).map(rowToRecord);
   const verified = all.find((r) => r.status === 'verified');
-  if (verified) return { state: 'verified', record: verified };
+  if (verified) {
+    // Verified in the database is necessary but not sufficient: confirm the fingerprint recorded at verification
+    // still matches the nodes' CURRENT attributes, resolved through aliases. A null fingerprint (a row predating
+    // this column) is treated the same as a mismatch - fail closed, never silently trusted.
+    let current: string | null = null;
+    try {
+      current = await currentFingerprint(orgId, dependentNodeId, dependsOnNodeId);
+    } catch {
+      current = null;
+    }
+    if (current !== null && verified.sourceFingerprint === current) return { state: 'verified', record: verified };
+    return { state: 'unavailable', reason: 'requires_reverification' };
+  }
   // A submission still awaiting review is not yet "revoked or rejected" - that reason is reserved for a decisive
   // negative outcome. Pending (like no submission at all) is just "nothing verified yet".
   const hasPending = all.some((r) => r.status === 'pending_review');
@@ -235,3 +303,4 @@ export async function lookupVerifiedDependency(
   if (hasDecisiveNegative && !hasPending) return { state: 'unavailable', reason: 'all_evidence_revoked_or_rejected' };
   return { state: 'unavailable', reason: 'no_verified_evidence_recorded' };
 }
+

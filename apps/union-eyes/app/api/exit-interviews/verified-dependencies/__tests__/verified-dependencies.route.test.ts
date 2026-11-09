@@ -3,11 +3,15 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 const m = vi.hoisted(() => ({
   submitVerifiedDependency: vi.fn(),
   listVerifiedDependencies: vi.fn(),
+  listActiveNodeAliases: vi.fn(async () => []),
 }));
 
 vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
   submitVerifiedDependency: m.submitVerifiedDependency,
   listVerifiedDependencies: m.listVerifiedDependencies,
+}));
+vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({
+  listActiveNodeAliases: m.listActiveNodeAliases,
 }));
 vi.mock('@/lib/api/framework', async () => {
   const { z } = await import('zod');

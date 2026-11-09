@@ -29,7 +29,12 @@ export interface GovernanceNode {
 export interface GovernanceImpactData {
   totalGovernanceProcesses: number;
   singleSourceProcesses: number;
+  /** Exploratory-derived: severity 'critical' from tag co-occurrence, regardless of verification. A hypothesis,
+   *  never presented as a confirmed finding on its own - see confirmedCriticalGovernanceGaps for that. */
   criticalGovernanceGaps: string[];
+  /** The SUBSET of criticalGovernanceGaps currently backed by a verified dependency record - the only entries an
+   *  API response, calculation or UI may present as a CONFIRMED critical governance gap. */
+  confirmedCriticalGovernanceGaps: string[];
   nodes: GovernanceNode[];
   cascadeRisks: Array<{
     triggerNode: string;
@@ -38,6 +43,8 @@ export interface GovernanceImpactData {
     cascadeDepth: number;
     evidenceBasis: 'verified' | 'exploratory';
   }>;
+  /** The SUBSET of cascadeRisks with evidenceBasis 'verified' - the only entries safe to present as confirmed. */
+  confirmedCascadeRisks: GovernanceImpactData['cascadeRisks'];
   /** How the analysis determines what is verified vs. exploratory. */
   methodologyNote: string;
   /** How many governance nodes have at least one currently-verified relationship on file. */
@@ -90,8 +97,8 @@ export function GovernanceImpactExplorer({ data }: Props) {
           <div className="text-xs text-amber-600">Single-Source ({concentrationPct}%)</div>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
-          <div className="text-2xl font-semibold text-red-700">{data.criticalGovernanceGaps.length}</div>
-          <div className="text-xs text-red-600">Critical Gaps</div>
+          <div className="text-2xl font-semibold text-red-700">{data.confirmedCriticalGovernanceGaps.length}</div>
+          <div className="text-xs text-red-600">Confirmed Critical Gaps</div>
         </div>
       </div>
 
@@ -100,13 +107,24 @@ export function GovernanceImpactExplorer({ data }: Props) {
         {data.verifiedEvidenceCoverage.nodesWithVerifiedEvidence} of {data.verifiedEvidenceCoverage.totalNodes} governance nodes have a currently-verified dependency record on file; the rest are exploratory signal only. {data.methodologyNote}
       </div>
 
-      {/* Critical governance gaps */}
-      {data.criticalGovernanceGaps.length > 0 && (
+      {/* Critical governance gaps: confirmed (verified evidence) and exploratory (hypothesis) are rendered in
+          clearly separate sections - never merged into one list a caller might mistake as all confirmed. */}
+      {data.confirmedCriticalGovernanceGaps.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-          <div className="text-xs font-semibold text-red-700 mb-1">Critical Governance Continuity Gaps</div>
+          <div className="text-xs font-semibold text-red-700 mb-1">Confirmed Critical Governance Continuity Gaps</div>
+          <div className="flex flex-wrap gap-1.5">
+            {data.confirmedCriticalGovernanceGaps.map((gap) => (
+              <span key={gap} className="text-xs bg-red-100 text-red-700 border border-red-200 rounded px-2 py-0.5">{gap}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {data.criticalGovernanceGaps.length > 0 && (
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+          <div className="text-xs font-semibold text-slate-600 mb-1">Exploratory: Critical Governance Continuity Hypotheses (not yet verified)</div>
           <div className="flex flex-wrap gap-1.5">
             {data.criticalGovernanceGaps.map((gap) => (
-              <span key={gap} className="text-xs bg-red-100 text-red-700 border border-red-200 rounded px-2 py-0.5">{gap}</span>
+              <span key={gap} className="text-xs bg-slate-100 text-slate-600 border border-slate-200 rounded px-2 py-0.5">{gap}</span>
             ))}
           </div>
         </div>

@@ -1,15 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
 
-const { buildDependencyPropagationMap, calculateResilienceIndex, listVerifiedDependencies } = vi.hoisted(() => ({
+const { buildDependencyPropagationMap, calculateResilienceIndex, listVerifiedDependencies, listActiveNodeAliases } = vi.hoisted(() => ({
   buildDependencyPropagationMap: vi.fn(),
   calculateResilienceIndex: vi.fn(),
   listVerifiedDependencies: vi.fn(async () => []),
+  listActiveNodeAliases: vi.fn(async () => []),
 }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
 vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies }));
+vi.mock('../../propagation/node-alias-store', () => ({ listActiveNodeAliases }));
 vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex }));
 
 import { compareMitigations } from '../mitigation-comparator';
+import { computeSourceFingerprint } from '../../propagation/graph-fingerprint';
 
 function node(id: string, overrides: Record<string, unknown> = {}) {
   return {
@@ -84,7 +87,7 @@ describe('lib/knowledge-transfer/mitigation-comparison/mitigation-comparator', (
     expect(comparison.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 0, totalNodes: 2 });
 
     listVerifiedDependencies.mockResolvedValueOnce([
-      { dependentNodeId: 'n1', dependsOnNodeId: 'n2', status: 'verified' },
+      { dependentNodeId: 'n1', dependsOnNodeId: 'n2', status: 'verified', sourceFingerprint: computeSourceFingerprint(node('n1'), node('n2')), evidenceReferenceType: 'external_citation', evidenceDocumentId: null },
     ]);
     const comparisonWithEvidence = await compareMitigations('org-3', [
       { mitigationType: 'cross_training', targetNodeIds: ['n1'], investmentLevel: 'medium', durationWeeks: 10 },

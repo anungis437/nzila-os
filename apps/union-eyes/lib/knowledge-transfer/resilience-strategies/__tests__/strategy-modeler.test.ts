@@ -1,15 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
 
-const { buildDependencyPropagationMap, calculateResilienceIndex, listVerifiedDependencies } = vi.hoisted(() => ({
+const { buildDependencyPropagationMap, calculateResilienceIndex, listVerifiedDependencies, listActiveNodeAliases } = vi.hoisted(() => ({
   buildDependencyPropagationMap: vi.fn(),
   calculateResilienceIndex: vi.fn(),
   listVerifiedDependencies: vi.fn(async () => []),
+  listActiveNodeAliases: vi.fn(async () => []),
 }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap }));
 vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies }));
+vi.mock('../../propagation/node-alias-store', () => ({ listActiveNodeAliases }));
 vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex }));
 
 import { buildResilienceRoadmap } from '../strategy-modeler';
+import { computeSourceFingerprint } from '../../propagation/graph-fingerprint';
 
 function node(overrides: Record<string, unknown> = {}) {
   return { id: 'node', isSingleSource: false, category: 'operational', nodeType: 'process', ...overrides };
@@ -81,7 +84,7 @@ describe('lib/knowledge-transfer/resilience-strategies/strategy-modeler', () => 
     expect(noEvidence.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 0, totalNodes: 2 });
 
     listVerifiedDependencies.mockResolvedValueOnce([
-      { dependentNodeId: 'n1', dependsOnNodeId: 'n2', status: 'verified' },
+      { dependentNodeId: 'n1', dependsOnNodeId: 'n2', status: 'verified', sourceFingerprint: computeSourceFingerprint(node({ id: 'n1' }), node({ id: 'n2' })), evidenceReferenceType: 'external_citation', evidenceDocumentId: null },
     ]);
     const withEvidence = await buildResilienceRoadmap('org-5');
     expect(withEvidence.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 2, totalNodes: 2 });

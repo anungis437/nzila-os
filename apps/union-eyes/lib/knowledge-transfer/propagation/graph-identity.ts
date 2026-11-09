@@ -45,3 +45,31 @@ export function resolveCurrentNodeId(currentNodeIds: readonly string[], candidat
   const match = currentNodeIds.find((id) => canonicalNodeIdentityKey(id) === candidateKey);
   return match ?? null;
 }
+
+/** An active (non-superseded) alias, as consulted by resolveConceptLabel. See NodeAlias in verified-dependency-models.ts. */
+export interface AliasLookup {
+  aliasLabel: string;
+  canonicalConceptLabel: string;
+}
+
+/**
+ * Resolves a node id/label to a CURRENT node id, tolerant of both cosmetic drift (via resolveCurrentNodeId) and
+ * explicit, durable aliasing (via aliases - a semantic rename or collision a reviewer has recorded). Aliases are
+ * checked FIRST and are never inferred: only an exact canonical-key match against a recorded alias's aliasLabel
+ * redirects resolution to that alias's canonicalConceptLabel, which is then itself resolved against the current
+ * graph (cosmetic-tolerant). Returns null when nothing - neither an alias nor a direct current node - resolves,
+ * exactly like resolveCurrentNodeId; this function never falls back to a fuzzy guess across two different
+ * canonical keys that have no explicit alias connecting them.
+ */
+export function resolveConceptLabel(
+  aliases: readonly AliasLookup[],
+  currentNodeIds: readonly string[],
+  candidateNodeId: string,
+): string | null {
+  const direct = resolveCurrentNodeId(currentNodeIds, candidateNodeId);
+  if (direct !== null) return direct;
+  const candidateKey = canonicalNodeIdentityKey(candidateNodeId);
+  const alias = aliases.find((a) => canonicalNodeIdentityKey(a.aliasLabel) === candidateKey);
+  if (!alias) return null;
+  return resolveCurrentNodeId(currentNodeIds, alias.canonicalConceptLabel);
+}

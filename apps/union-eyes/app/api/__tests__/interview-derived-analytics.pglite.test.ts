@@ -75,6 +75,9 @@ beforeAll(async () => {
        process_or_system varchar(300) not null,
        responsible_authority varchar(300) not null,
        evidence_reference varchar(500) not null,
+       evidence_reference_type varchar(20) not null default 'external_citation',
+       evidence_document_id uuid,
+       source_fingerprint varchar(128),
        status varchar(20) not null default 'pending_review',
        submitted_by text not null,
        reviewed_by text,
@@ -85,6 +88,17 @@ beforeAll(async () => {
        constraint ue_verified_dependency_evidence_status_check check (status in ('pending_review','verified','rejected','revoked')),
        constraint ue_verified_dependency_evidence_not_self_dependent check (dependent_node_id <> depends_on_node_id),
        constraint ue_verified_dependency_evidence_reviewer_distinct check (reviewed_by is null or reviewed_by <> submitted_by)
+     )`,
+    `CREATE TABLE ue_graph_node_alias (
+       id uuid primary key default gen_random_uuid(),
+       organization_id uuid not null,
+       alias_label text not null,
+       canonical_concept_label text not null,
+       reason varchar(500) not null,
+       created_by text not null,
+       created_at timestamptz not null default now(),
+       superseded_by text,
+       superseded_at timestamptz
      )`,
   ]);
   pg = created.pg;

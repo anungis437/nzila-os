@@ -8,7 +8,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { GraphQuery, QueryType } from '../query-models';
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), listVerifiedDependencies: vi.fn() }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), listVerifiedDependencies: vi.fn(), listActiveNodeAliases: vi.fn(async () => []) }));
 
 vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
@@ -16,8 +16,12 @@ vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
 vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
   listVerifiedDependencies: mocks.listVerifiedDependencies,
 }));
+vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({
+  listActiveNodeAliases: mocks.listActiveNodeAliases,
+}));
 
 import { executeGraphQuery } from '../graph-reasoner';
+import { computeSourceFingerprint } from '@/lib/knowledge-transfer/propagation/graph-fingerprint';
 
 function richMap() {
   return {
@@ -235,15 +239,24 @@ describe('executeGraphQuery', () => {
     expect(exploratoryOnly.findings.length).toBeGreaterThan(0);
     expect(exploratoryOnly.findings.every((f) => f.evidenceBasis === 'exploratory')).toBe(true);
 
+    const { nodes } = richMap();
+    const govSole = nodes.find((n) => n.id === 'gov_sole')!;
+    const complianceX = nodes.find((n) => n.id === 'compliance_x')!;
     mocks.listVerifiedDependencies.mockResolvedValue([
       {
-        id: 'vd1', organizationId: 'org-1', dependentNodeId: 'gov_sole', dependsOnNodeId: 'some_system',
-        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x', status: 'verified',
+        id: 'vd1', organizationId: 'org-1', dependentNodeId: 'gov_sole', dependsOnNodeId: 'compliance_x',
+        processOrSystem: 'x', responsibleAuthority: 'x', evidenceReference: 'x',
+        evidenceReferenceType: 'external_citation', evidenceDocumentId: null,
+        sourceFingerprint: computeSourceFingerprint(govSole, complianceX),
+        status: 'verified',
         submittedBy: 'u1', reviewedBy: 'u2', reviewedAt: '2026-01-01T00:00:00.000Z', reviewNotes: null,
         createdAt: '2025-12-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
       },
     ]);
     const withVerified = await executeGraphQuery('org-1', q('isolated_knowledge'));
     expect(withVerified.findings.find((f) => f.entityId === 'gov_sole')?.evidenceBasis).toBe('verified');
+    // DEF-0B7 Family 1 exit (C): an evidenceBasis tag alone is not sufficient - a caller claiming a confirmed
+    // finding must use the pre-filtered confirmedFindings, never findings filtered by tag itself.
+    expect(withVerified.confirmedFindings.map((f) => f.entityId)).toEqual(['gov_sole']);
   });
 });
