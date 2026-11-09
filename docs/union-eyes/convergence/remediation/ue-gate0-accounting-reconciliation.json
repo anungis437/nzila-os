@@ -671,7 +671,7 @@
     },
     {
       "defectId": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
-      "batch": "B163-FAMILY1-STRICT-CLOSURE",
+      "batch": "B168-FAMILY1-NINE-FINDING-ACCEPTANCE",
       "sourceCommit": null,
       "regressionTest": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
       "files": [
@@ -711,7 +711,7 @@
     },
     {
       "defectId": "DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS",
-      "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+      "batch": "B168-FAMILY1-NINE-FINDING-ACCEPTANCE",
       "sourceCommit": null,
       "regressionTest": "apps/union-eyes/app/api/__tests__/exit-interviews-expertise-map.route.test.ts;apps/union-eyes/lib/knowledge-transfer/continuity-risk/__tests__/risk-detector.test.ts;apps/union-eyes/lib/knowledge-transfer/decision-intelligence/__tests__/decision-engine.test.ts",
       "files": [
@@ -728,13 +728,14 @@
     },
     {
       "defectId": "DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS",
-      "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
+      "batch": "B168-FAMILY1-NINE-FINDING-ACCEPTANCE",
       "sourceCommit": null,
       "regressionTest": "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts",
       "files": [
         "apps/union-eyes/lib/knowledge-transfer/succession/succession-analyzer.ts",
         "apps/union-eyes/lib/knowledge-transfer/governance/evidence-basis.ts",
-        "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts"
+        "apps/union-eyes/lib/knowledge-transfer/succession/__tests__/succession-analyzer.test.ts",
+        "apps/union-eyes/components/knowledge-transfer/continuity-intelligence-cockpit.tsx"
       ],
       "hasIndependentRegressionEvidence": true
     },

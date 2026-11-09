@@ -155,8 +155,11 @@ describe('lib/knowledge-transfer/cognition-memory/memory-store', () => {
       // The real result is the payload - the officer's own payload for this call is never stored.
       expect(entry.payload).not.toHaveProperty('officerNote');
       expect(entry.payload).toMatchObject({ executiveSummary: 'summary' });
-      // The result's own immediateImpactScore is the resilience figure, not an officer's guess.
-      expect(entry.resilienceScoreAtCapture).toBe(55);
+      // The result's immediateImpactScore measures the simulated disruption (higher is worse). It is kept in the stored
+      // result and is never recorded as a resilience score, so it can never reach the resilience timeline.
+      expect(entry.payload).toMatchObject({ immediateImpactScore: 55.4 });
+      expect(entry.resilienceScoreAtCapture).toBeNull();
+      expect(entry.algorithmComputedResilienceIndexAtCapture).toBeNull();
     });
 
     it('saves an officer-typed simulation_snapshot as officer_asserted when no scenario is given', async () => {

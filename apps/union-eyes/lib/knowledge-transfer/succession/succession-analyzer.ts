@@ -1,15 +1,16 @@
 /**
  * Succession Fragility Analyzer
  *
- * Analyzes organizational succession readiness from published exit interviews.
+ * Analyzes organizational succession FRAGILITY (what departures left undocumented) from published exit interviews.
  * Identifies operational replacement gaps, undocumented transition areas,
  * and procedural dependencies that need governance attention.
  *
  * This is ORGANIZATIONAL RESILIENCE ANALYSIS.
  * It NEVER evaluates individual worker value, productivity, or replaceability.
  *
- * The readiness score (0–100) measures how well documented the organization's
- * operational knowledge is — not the quality of its people.
+ * It does not score successor readiness: no successor, handover or documentation record exists in the data model,
+ * and counting exit interviews as readiness made more departures read as more readiness. transitionReadinessScore is
+ * therefore null with its basis stated; departureDocumentation reports what the interviews actually establish.
  *
  * INV-01: All AI calls via getAiClient()
  */
@@ -22,7 +23,7 @@ import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { ApiError } from '@/lib/api/errors';
-import { exitInterviews } from '@/db/schema';
+import { exitInterviews, exitInterviewRoleEnum } from '@/db/schema';
 import {
   buildOrgAiTrace,
   getAiClient,
@@ -32,7 +33,11 @@ import {
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
 
-export type SuccessorReadiness = 'none' | 'minimal' | 'partial' | 'adequate';
+/** How documented a role's DEPARTURES are, from the published exit interviews alone. This is not successor readiness:
+ *  the data model holds no successor, handover or documentation record, so readiness cannot be assessed and more
+ *  departures must never read as more readiness (DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-
+ *  SUCCESSOR-READINESS, Family 1 acceptance). */
+export type DepartureDocumentation = 'no_interview' | 'single_interview' | 'multiple_interviews';
 
 export interface RoleSuccessionStatus {
   role: string;
@@ -48,18 +53,20 @@ export interface RoleSuccessionStatus {
   undocumentedAreas: string[];
   /** Key topics captured from this role */
   keyTopicsCaptured: string[];
-  /** Assessment of succession documentation readiness */
-  successorReadiness: SuccessorReadiness;
+  /** How documented this role's departures are - never a readiness verdict. */
+  departureDocumentation: DepartureDocumentation;
 }
 
 export interface SuccessionFragilityReport {
   organizationId: string;
   generatedAt: string;
-  /**
-   * 0–100. HIGHER = more transition-ready (inverse of fragility).
-   * This measures DOCUMENTATION COVERAGE, not individual capability.
-   */
-  transitionReadinessScore: number;
+  /** Always null: no successor, handover or documentation record exists to assess readiness from. Interview counts
+   *  measure departures, and scoring them as readiness made more departures read as more readiness. */
+  transitionReadinessScore: null;
+  transitionReadinessBasis: 'not_assessed_no_successor_records';
+  /** Roles (from the exit-interview role enum) with at least one published exit interview, out of all roles. A count
+   *  of documented departures, not of prepared successors. */
+  departureDocumentationCoverage: { rolesWithInterviews: number; totalRoles: number };
   roleSuccessionStatus: RoleSuccessionStatus[];
   /** Operational areas where no documented handoff procedure exists */
   criticalOperationalGaps: string[];
@@ -74,7 +81,8 @@ export interface SuccessionFragilityReport {
   modelGenerated: boolean;
 }
 
-const UNION_ROLES = ['member', 'steward', 'chief_steward', 'officer', 'admin'] as const;
+/** Every role the schema allows on an exit interview - never a hand-maintained subset that would skip a role. */
+const UNION_ROLES = exitInterviewRoleEnum.enumValues;
 
 /** Below this many interviews, a role's aggregate years-of-service and risk score are exactly one or a few departing people's own figures. Shared with every other DEF-0B7-COGA-PROFILES/COGB sibling engine via lib/knowledge-transfer/governance/evidence-basis.ts (matches the repo's small-cell convention, e.g. app/api/breaks/compliance). */
 
@@ -109,14 +117,9 @@ const ReplySchema = z.object({
   executiveSummary: z.string().min(1).max(4000),
 });
 
-function scoreReadiness(interviewCount: number, avgRisk: number | null): SuccessorReadiness {
-  if (interviewCount === 0) return 'none';
-  if (interviewCount === 1 && avgRisk !== null && avgRisk >= 70) return 'minimal';
-  // avgRisk === null means no interview for this role recorded a continuity risk score at all - that is an absence
-  // of risk measurement, not a confirmed low risk, so it must never satisfy the "adequate" (low measured risk)
-  // branch the way a genuinely measured avgRisk of 0 would. Falls through to 'partial': documented, risk unconfirmed.
-  if (interviewCount >= 2 && avgRisk !== null && avgRisk < 50) return 'adequate';
-  return 'partial';
+function departureDocumentationOf(interviewCount: number): DepartureDocumentation {
+  if (interviewCount === 0) return 'no_interview';
+  return interviewCount === 1 ? 'single_interview' : 'multiple_interviews';
 }
 
 export async function analyzeSuccessionFragility(orgId: string, actorUserId?: string): Promise<SuccessionFragilityReport> {
@@ -182,30 +185,15 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
         smallCellSuppressed,
         undocumentedAreas: [...data.undocumented].slice(0, 6),
         keyTopicsCaptured: [...data.topics].slice(0, 8),
-        successorReadiness: scoreReadiness(data.interviewCount, roundedAvgRisk),
+        departureDocumentation: departureDocumentationOf(data.interviewCount),
       };
     },
   );
 
-  // Readiness score = inverse of fragility (percentage of roles with at least partial coverage).
-  // With zero published interviews organization-wide there is no documentation coverage to measure at all: every role
-  // reads 'none' by construction, and the per-role formula below would otherwise compute a fixed 50 from that shape
-  // alone (the weight it gives to "every role has no coverage"), presenting a specific number for an organization
-  // this analysis has not actually looked at yet.
-  const rolesWithNone = roleSuccessionStatus.filter((r) => r.successorReadiness === 'none').length;
-  const rolesWithMinimal = roleSuccessionStatus.filter(
-    (r) => r.successorReadiness === 'minimal',
-  ).length;
-  const transitionReadinessScore =
-    published.length === 0
-      ? 0
-      : Math.max(
-          0,
-          100 -
-            Math.round(
-              Math.min((rolesWithNone / UNION_ROLES.length) * 50 + rolesWithMinimal * 10, 100),
-            ),
-        );
+  const departureDocumentationCoverage = {
+    rolesWithInterviews: roleSuccessionStatus.filter((r) => r.interviewCount > 0).length,
+    totalRoles: roleSuccessionStatus.length,
+  };
 
   let criticalOperationalGaps: string[] = [];
   let documentationPriorities: string[] = [];
@@ -275,7 +263,9 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
   return {
     organizationId: orgId,
     generatedAt: new Date().toISOString(),
-    transitionReadinessScore,
+    transitionReadinessScore: null,
+    transitionReadinessBasis: 'not_assessed_no_successor_records',
+    departureDocumentationCoverage,
     roleSuccessionStatus,
     criticalOperationalGaps,
     documentationPriorities,

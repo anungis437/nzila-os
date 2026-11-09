@@ -178,8 +178,11 @@ export async function saveCognitionMemory(
       computedAt,
       inputEvidenceIds,
     };
-    // The real result's own immediateImpactScore is the resilience figure for this capture, not an officer's guess.
-    resilienceScoreAtCapture = Math.round(result.immediateImpactScore);
+    // A simulation's immediateImpactScore measures how severe the simulated disruption is (higher is worse); it is not a
+    // resilience score (higher is better) and must never be plotted or differenced as one. It stays in the stored result
+    // (payload.immediateImpactScore); the resilience timeline only ever holds scores whose source it can name
+    // (DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR, Family 1 acceptance).
+    resilienceScoreAtCapture = null;
   } else {
     storedPayload = input.payload ?? {};
     provenanceStamp = { source: 'officer_asserted', recordedBy: userId };

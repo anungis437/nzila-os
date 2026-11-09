@@ -82,6 +82,7 @@ describe('lib/knowledge-transfer/continuity-risk/risk-detector', () => {
     // DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS: zero interviews means nothing was assessed, which
     // must not read as a measured risk score of 0 (= "assessed and found safe").
     expect(report.overallRiskScore).toBeNull();
+    expect(report.scoreBasis).toBe('fixed_rule_index_over_interview_counts');
     expect(report.executiveSummary).toContain('No published interviews');
     expect(generateMock).not.toHaveBeenCalled();
   });
@@ -92,5 +93,17 @@ describe('lib/knowledge-transfer/continuity-risk/risk-detector', () => {
     const report = await detectContinuityRisks('org-4');
     // Derived from the schema's full role enum, not a hand-maintained subset that can silently omit 'member'.
     expect(report.coverageGaps.sort()).toEqual(['admin', 'chief_steward', 'member', 'steward']);
+  });
+
+  it('states that the score is a fixed-rule index over interview counts, with the exact rule, never a measured risk', async () => {
+    const { CONTINUITY_RISK_METHODOLOGY_NOTE } = await import('../risk-detector');
+    whereMock.mockResolvedValue([interview({ id: 'i1', roleInUnion: 'steward', topics: ['arbitration'], expertiseTags: ['grievances'], continuityRiskScore: 80 })]);
+    generateMock.mockResolvedValue({ content: 'not json' });
+    const report = await detectContinuityRisks('org-4');
+    expect(report.overallRiskScore).not.toBeNull();
+    expect(report.scoreBasis).toBe('fixed_rule_index_over_interview_counts');
+    expect(report.methodologyNote).toBe(CONTINUITY_RISK_METHODOLOGY_NOTE);
+    expect(report.methodologyNote).toMatch(/not a measured or calibrated risk/);
+    expect(report.methodologyNote).toMatch(/8 points per single-source topic \(at most 40\)/);
   });
 });

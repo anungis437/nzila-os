@@ -46,6 +46,10 @@ export interface OrgContinuityRiskReport {
   /** 0–100. Higher = more fragile. Null when there are no published interviews: there is nothing to assess, and a
    *  risk score of 0 would read as "assessed and found safe" rather than "not yet assessed". */
   overallRiskScore: number | null;
+  /** What overallRiskScore is: a fixed-rule index over interview counts, never a measured or calibrated risk. */
+  scoreBasis: 'fixed_rule_index_over_interview_counts';
+  /** The rule itself, stated so a reader can see exactly what the number counts. */
+  methodologyNote: string;
   riskFlags: ContinuityRiskFlag[];
   /** Topics covered by only ONE exit interview — single-source knowledge */
   singleSourceTopics: string[];
@@ -149,6 +153,13 @@ function detectCoverageGaps(interviews: Array<{ roleInUnion: string }>): string[
  * Compute an overall org risk score (0–100) from detected signals. Null with zero published interviews: there is
  * no signal at all to score, and 0 would be indistinguishable from "assessed and found safe".
  */
+/** The exact rule computeRiskScore applies, carried on every report (DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS). */
+export const CONTINUITY_RISK_METHODOLOGY_NOTE =
+  'overallRiskScore is a fixed-rule index over counts from published exit interviews, not a measured or calibrated ' +
+  'risk: 8 points per single-source topic (at most 40), 15 per schema role with no interview (at most 30), 4 per ' +
+  'expertise domain named once (at most 20) and 5 per interview with a stored risk score of 70 or more (at most 10), ' +
+  'capped at 100. It shows where interview coverage is thin; it does not assess the organization.';
+
 function computeRiskScore(params: {
   singleSourceCount: number;
   coverageGapCount: number;
@@ -233,6 +244,8 @@ export async function detectContinuityRisks(orgId: string): Promise<OrgContinuit
     generatedAt: new Date().toISOString(),
     totalPublishedInterviews: publishedInterviews.length,
     overallRiskScore,
+    scoreBasis: 'fixed_rule_index_over_interview_counts',
+    methodologyNote: CONTINUITY_RISK_METHODOLOGY_NOTE,
     riskFlags,
     singleSourceTopics,
     coverageGaps,
