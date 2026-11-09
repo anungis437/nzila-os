@@ -138,6 +138,7 @@ describe('INV-11 — Every API route has authorization', () => {
     'getCurrentUser(',          // getCurrentUser() — Clerk auth check
     'timingSafeEqual(',         // Cron secret verification via timing-safe compare
     'authenticateMetricsService(', // Dedicated read-only metrics machine capability guard (#1118); route-level denial tests
+    'authenticateOperationalMetrics(', // Union Eyes fixed-cardinality platform metrics capability; constant-time dedicated-key guard
     'CRON_SECRET',              // Cron route secret verification
     'verifyShopifySignature(',  // Shopify webhook signature verification
     'withRoleAuth(',             // Role-based auth guard wrapper
@@ -249,6 +250,7 @@ describe('INV-11 — Every API route has authorization', () => {
       // route-specific capability guard (whose deny paths are tested in UE).
       expect(hasAuth('const equal = constantTimeEquals(userValue, candidate)')).toBe(false)
       expect(hasAuth('const result = authenticateMetricsService(req)')).toBe(true)
+      expect(hasAuth('const result = authenticateOperationalMetrics(req)')).toBe(true)
     })
 
     it('recognizes a Stripe webhook that verifies its signature (verifyStripeSignature)', () => {

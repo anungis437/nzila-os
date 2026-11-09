@@ -1,6 +1,7 @@
 /** DELETE withdraws workbook consent. All ordinary workbook routes use the shared access boundary, which refuses the withdrawn record. */
 import { NextResponse } from 'next/server';
 import { and, eq, isNull } from 'drizzle-orm';
+import { z } from 'zod';
 import { workbooks } from '@/db/schema/workbook-schema';
 import { extractWorkbookCapability } from '@/lib/workbook/workbook-capability';
 import { withClaimedWorkbookAccess } from '@/lib/workbook/access-control';
@@ -8,9 +9,12 @@ import { activeWorkbookConsent } from '@/lib/workbook/consent';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 
 export const dynamic = 'force-dynamic';
+const WorkbookRouteParamsSchema = z.object({ id: z.string().uuid() }).strict();
 
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
+  const parsedParams = WorkbookRouteParamsSchema.safeParse(await context.params);
+  if (!parsedParams.success) return NextResponse.json({ error: 'Valid workbook id is required' }, { status: 400 });
+  const { id } = parsedParams.data;
   const result = await withClaimedWorkbookAccess(
     { workbookId: id, operation: 'write', capability: extractWorkbookCapability(request, id) },
     async (authority) => {

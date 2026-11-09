@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
+import { z } from 'zod';
 import { pilotApplications, pilotCommercialAcceptances, pilotCommercialOffers } from '@/db/schema';
 import { getCurrentUser } from '@/lib/api-auth-guard';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -9,19 +10,26 @@ import { PILOT_COMMERCIAL_NOTICE_VERSION } from '@/lib/pilot/commercial-offers';
 
 export const dynamic = 'force-dynamic';
 
+const AcceptanceBodySchema = z.object({
+  authorityEvidenceRef: z.string().trim().min(1).max(500),
+  noticeVersion: z.literal(PILOT_COMMERCIAL_NOTICE_VERSION),
+  termsDigest: z.string().regex(/^[a-f0-9]{64}$/),
+}).strict();
+
+const IdempotencyKeySchema = z.string().trim().min(1).max(200);
+
 export async function POST(request: NextRequest, context?: { params?: Promise<{ id: string; offerId: string }> | { id: string; offerId: string } }) {
   const actor = await getCurrentUser();
   if (!actor?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const params = context?.params ? await context.params : undefined;
   if (!params?.id || !params.offerId) return NextResponse.json({ error: 'Application and offer ids are required' }, { status: 400 });
-  const requestId = request.headers.get('idempotency-key')?.trim();
-  const body = await request.json().catch(() => null) as null | Record<string, unknown>;
-  const authorityEvidenceRef = typeof body?.authorityEvidenceRef === 'string' ? body.authorityEvidenceRef.trim() : '';
-  const noticeVersion = typeof body?.noticeVersion === 'string' ? body.noticeVersion : '';
-  const acceptedTermsDigest = typeof body?.termsDigest === 'string' ? body.termsDigest : '';
-  if (!requestId || !authorityEvidenceRef || noticeVersion !== PILOT_COMMERCIAL_NOTICE_VERSION || !/^[a-f0-9]{64}$/.test(acceptedTermsDigest)) {
+  const parsedRequestId = IdempotencyKeySchema.safeParse(request.headers.get('idempotency-key'));
+  const parsedBody = AcceptanceBodySchema.safeParse(await request.json().catch(() => null));
+  if (!parsedRequestId.success || !parsedBody.success) {
     return NextResponse.json({ error: `Idempotency-Key, authorityEvidenceRef, exact termsDigest and noticeVersion ${PILOT_COMMERCIAL_NOTICE_VERSION} are required` }, { status: 400 });
   }
+  const requestId = parsedRequestId.data;
+  const { authorityEvidenceRef, noticeVersion, termsDigest: acceptedTermsDigest } = parsedBody.data;
 
   const [snapshot] = await withSystemContext((tx) => tx.select({ organizationId: pilotCommercialOffers.organizationId }).from(pilotCommercialOffers).where(and(eq(pilotCommercialOffers.id, params.offerId), eq(pilotCommercialOffers.applicationId, params.id))).limit(1));
   if (!snapshot) return NextResponse.json({ error: 'Offer not found' }, { status: 404 });

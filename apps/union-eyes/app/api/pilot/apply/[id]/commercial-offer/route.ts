@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { and, desc, eq, sql } from 'drizzle-orm';
-import { db } from '@/db';
+import { z } from 'zod';
 import { pilotApplications, pilotCommercialOffers } from '@/db/schema';
 import { getCurrentUser } from '@/lib/api-auth-guard';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -9,6 +9,16 @@ import { commercialTermsDigest } from '@/lib/pilot/commercial-offers';
 import { authorizePilotAccess, getPilotEffectiveOrganizationId, hasPilotPlatformAuthority } from '@/lib/pilot/pilot-ownership';
 
 export const dynamic = 'force-dynamic';
+
+const CommercialOfferBodySchema = z.object({
+  amount: z.string().regex(/^\d+(?:\.\d{1,2})?$/),
+  currency: z.string().regex(/^[A-Z]{3}$/).default('CAD'),
+  pricingBasis: z.string().trim().min(1).max(500),
+  memberCountBasis: z.number().int().min(1).max(10_000_000),
+  memberCountEvidenceRef: z.string().trim().min(1).max(500),
+  terms: z.record(z.string(), z.unknown()).refine((value) => JSON.stringify(value).length <= 20_000, 'Terms are too large'),
+  expiresAt: z.coerce.date().refine((value) => value.getTime() > Date.now(), 'Expiry must be in the future'),
+}).strict();
 
 const routeId = async (context?: { params?: Promise<{ id: string }> | { id: string } }) => (context?.params ? await context.params : undefined)?.id;
 
@@ -34,17 +44,11 @@ export async function POST(request: NextRequest, context?: { params?: Promise<{ 
   if (!actor?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!id) return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
 
-  const body = await request.json().catch(() => null) as null | Record<string, unknown>;
-  const amount = typeof body?.amount === 'string' && /^\d+(?:\.\d{1,2})?$/.test(body.amount) ? body.amount : null;
-  const currency = typeof body?.currency === 'string' && /^[A-Z]{3}$/.test(body.currency) ? body.currency : 'CAD';
-  const pricingBasis = typeof body?.pricingBasis === 'string' ? body.pricingBasis.trim() : '';
-  const memberCountBasis = Number(body?.memberCountBasis);
-  const memberCountEvidenceRef = typeof body?.memberCountEvidenceRef === 'string' ? body.memberCountEvidenceRef.trim() : '';
-  const terms = body?.terms && typeof body.terms === 'object' && !Array.isArray(body.terms) ? body.terms as Record<string, unknown> : null;
-  const expiresAt = typeof body?.expiresAt === 'string' ? new Date(body.expiresAt) : new Date(Number.NaN);
-  if (!amount || !pricingBasis || !Number.isInteger(memberCountBasis) || memberCountBasis < 1 || !memberCountEvidenceRef || !terms || !Number.isFinite(expiresAt.getTime()) || expiresAt <= new Date()) {
+  const parsedBody = CommercialOfferBodySchema.safeParse(await request.json().catch(() => null));
+  if (!parsedBody.success) {
     return NextResponse.json({ error: 'Valid amount, pricingBasis, evidenced memberCountBasis, terms and future expiresAt are required' }, { status: 400 });
   }
+  const { amount, currency, pricingBasis, memberCountBasis, memberCountEvidenceRef, terms, expiresAt } = parsedBody.data;
 
   const offer = await withSystemContext(async (tx) => {
     await tx.execute(sql`SELECT id FROM pilot_applications WHERE id = ${id}::uuid FOR UPDATE`);

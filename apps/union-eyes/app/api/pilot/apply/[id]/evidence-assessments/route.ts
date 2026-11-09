@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
 import { and, eq, isNull } from 'drizzle-orm';
+import { z } from 'zod';
 import { getCurrentUser } from '@/lib/api-auth-guard';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { pilotApplications, pilotEvidenceAssessments } from '@/db/schema';
@@ -10,6 +11,16 @@ import { loadCurrentPilotEvidence, type PilotEvidenceDimension } from '@/lib/pil
 
 export const dynamic = 'force-dynamic';
 const DIMENSIONS = new Set<PilotEvidenceDimension>(['adoption', 'activity', 'champion', 'risk', 'readiness', 'fit', 'revenue', 'strategic_value']);
+const EvidenceAssessmentBodySchema = z.object({
+  dimension: z.enum(['adoption', 'activity', 'champion', 'risk', 'readiness', 'fit', 'revenue', 'strategic_value']),
+  score: z.number().int().min(0).max(100),
+  evidenceType: z.string().trim().min(1).max(200),
+  evidenceRef: z.string().trim().min(1).max(2_000),
+  observedBy: z.string().trim().min(1).max(200),
+  methodologyVersion: z.string().trim().min(1).max(200),
+  observedAt: z.coerce.date(),
+  expiresAt: z.coerce.date().nullable().default(null),
+}).strict();
 const routeId = async (context?: { params?: Promise<{ id: string }> | { id: string } }) => (context?.params ? await context.params : undefined)?.id;
 
 export async function GET(_request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) {
@@ -31,16 +42,12 @@ export async function POST(request: NextRequest, context?: { params?: Promise<{ 
   const id = await routeId(context);
   if (!actor?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!id) return NextResponse.json({ error: 'Pilot application id is required' }, { status: 400 });
-  const body = await request.json().catch(() => null) as null | Record<string, unknown>;
-  const dimension = body?.dimension as PilotEvidenceDimension;
-  const score = Number(body?.score);
-  const evidenceType = typeof body?.evidenceType === 'string' ? body.evidenceType.trim() : '';
-  const evidenceRef = typeof body?.evidenceRef === 'string' ? body.evidenceRef.trim() : '';
-  const observedBy = typeof body?.observedBy === 'string' ? body.observedBy.trim() : '';
-  const methodologyVersion = typeof body?.methodologyVersion === 'string' ? body.methodologyVersion.trim() : '';
-  const observedAt = typeof body?.observedAt === 'string' ? new Date(body.observedAt) : new Date(Number.NaN);
-  const expiresAt = typeof body?.expiresAt === 'string' ? new Date(body.expiresAt) : null;
-  if (!DIMENSIONS.has(dimension) || !Number.isInteger(score) || score < 0 || score > 100 || !evidenceType || !evidenceRef || !observedBy || observedBy === actor.id || !methodologyVersion || !Number.isFinite(observedAt.getTime()) || observedAt > new Date() || (expiresAt && (!Number.isFinite(expiresAt.getTime()) || expiresAt <= new Date()))) {
+  const parsedBody = EvidenceAssessmentBodySchema.safeParse(await request.json().catch(() => null));
+  if (!parsedBody.success) {
+    return NextResponse.json({ error: 'A valid dimension, 0-100 score, independent observer, evidence, methodology and observation time are required' }, { status: 400 });
+  }
+  const { dimension, score, evidenceType, evidenceRef, observedBy, methodologyVersion, observedAt, expiresAt } = parsedBody.data;
+  if (!DIMENSIONS.has(dimension as PilotEvidenceDimension) || observedBy === actor.id || observedAt > new Date() || (expiresAt && expiresAt <= new Date())) {
     return NextResponse.json({ error: 'A valid dimension, 0-100 score, independent observer, evidence, methodology and observation time are required' }, { status: 400 });
   }
   const evidenceDigest = createHash('sha256').update(`${evidenceType}\0${evidenceRef}`).digest('hex');
