@@ -35,12 +35,12 @@ describe('current source-bound SYSTEM mutation contracts', () => {
       readFileSync(path.join(root, 'apps/union-eyes/scripts/bootstrap-v2/source.ts'), 'utf8'),
     ).toContain(frozen)
   })
-  it('binds the exact 80 authorized relations, source callers and real selector columns', () => {
+  it('binds the exact 89 authorized relations, source callers and real selector columns', () => {
     const contracts = systemMutationContracts(plan)
     expect(contracts.map((contract) => contract.table)).toEqual(
       systemMutationRules(plan).map((rule) => rule.table),
     )
-    expect(contracts).toHaveLength(80)
+    expect(contracts).toHaveLength(89)
     for (const contract of contracts) expect(contract.callerDigest).toMatch(/^[a-f0-9]{64}$/)
   })
   it('fails closed on a changed mutation census instead of silently dropping tables', () => {

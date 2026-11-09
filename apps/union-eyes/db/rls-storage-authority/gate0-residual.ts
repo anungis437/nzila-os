@@ -17,6 +17,24 @@ type Spec = readonly [
 
 const migration = 'db/migrations-platform/0088_gate0_checkout_and_payroll_integrity.sql'
 
+const productionCapabilities: Readonly<Record<string, readonly string[]>> = {
+  billing_automation_runs: ['app/api/cron/billing-lifecycle/route.ts'],
+  equity_purpose_consents: ['lib/equity/retention.ts'],
+  equity_self_identification_records: ['lib/equity/retention.ts'],
+  pilot_commercial_acceptances: [
+    'app/api/pilot/apply/[id]/commercial-offer/[offerId]/accept/route.ts',
+  ],
+  pilot_commercial_offers: ['app/api/pilot/apply/[id]/commercial-offer/route.ts'],
+  pilot_contact_verifications: ['app/api/pilot/apply/route.ts'],
+  pilot_evidence_assessments: ['app/api/pilot/apply/[id]/evidence-assessments/route.ts'],
+  sso_oidc_attempts: ['lib/sso/oidc-runtime.ts'],
+  sso_provider_versions: ['app/api/enterprise/sso/providers/[id]/route.ts'],
+  workbook_checkout_intents: [
+    'app/api/workbook/checkout/route.ts',
+    'app/api/payments/webhooks/stripe/route.ts',
+  ],
+}
+
 /**
  * Tables introduced by the final Gate 0 residual migration. Keeping this
  * cohort together makes admission atomic: a new physical table cannot be
@@ -25,7 +43,7 @@ const migration = 'db/migrations-platform/0088_gate0_checkout_and_payroll_integr
 const specs: readonly Spec[] = [
   ['billing_automation_mandates', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], ['SELECT'], 'MIXED', 'MIXED'],
   ['billing_automation_runs', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT', 'UPDATE'], 'SYSTEM_SCHEDULE', 'SYSTEM_RUNTIME'],
-  ['campaign_delivery_outbox', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], ['SELECT', 'INSERT', 'UPDATE'], 'MIXED', 'MIXED'],
+  ['campaign_delivery_outbox', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
   ['document_upload_quarantines', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], ['SELECT', 'INSERT', 'UPDATE'], 'MIXED', 'MIXED'],
   ['dues_payment_disclosure_consents', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], ['SELECT', 'INSERT', 'UPDATE'], 'MIXED', 'MIXED'],
   ['dues_payment_merchant_configs', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], ['SELECT', 'INSERT', 'UPDATE'], 'MIXED', 'MIXED'],
@@ -43,10 +61,12 @@ const specs: readonly Spec[] = [
   ['pension_benefit_settlement_handoffs', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
   ['pension_trustee_decisions', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
   ['pension_trustee_mandates', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
-  ['pilot_commercial_acceptances', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT', 'UPDATE'], 'PLATFORM_ADMIN', 'SYSTEM_RUNTIME'],
+  ['pilot_commercial_acceptances', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT'], 'PLATFORM_ADMIN', 'SYSTEM_RUNTIME'],
   ['pilot_commercial_offers', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT', 'UPDATE'], 'PLATFORM_ADMIN', 'SYSTEM_RUNTIME'],
-  ['pilot_contact_verifications', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT', 'UPDATE'], 'MIXED', 'SYSTEM_RUNTIME'],
-  ['pilot_crm_disclosure_outbox', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT', 'UPDATE'], 'WORKER', 'SYSTEM_RUNTIME'],
+  ['pilot_contact_verifications', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT'], 'MIXED', 'SYSTEM_RUNTIME'],
+  // No verification provider or CRM dispatcher is active. Keep the durable outbox physically present but
+  // grant no execution principal access until a reviewed worker is source-bound to it.
+  ['pilot_crm_disclosure_outbox', 'SYSTEM_ONLY', [], [], 'WORKER', 'SYSTEM_RUNTIME'],
   ['pilot_evidence_assessments', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT', 'UPDATE'], 'PLATFORM_ADMIN', 'SYSTEM_RUNTIME'],
   ['reconciliation_resolution_decisions', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
   ['reconciliation_resolution_postings', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
@@ -54,11 +74,11 @@ const specs: readonly Spec[] = [
   ['report_field_grants', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
   ['shopify_webhook_secret_versions', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], ['SELECT'], 'MIXED', 'MIXED'],
   ['sso_oidc_attempts', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT', 'UPDATE'], 'MIXED', 'SYSTEM_RUNTIME'],
-  ['sso_provider_versions', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], ['SELECT', 'INSERT'], 'MIXED', 'MIXED'],
+  ['sso_provider_versions', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], ['SELECT'], 'MIXED', 'MIXED'],
   ['statutory_rule_versions', 'GLOBAL_REFERENCE_DATA', ['SELECT'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
   ['survey_anonymous_participations', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
   ['survey_questionnaire_versions', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
-  ['voice_usage_reservations', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], ['SELECT', 'INSERT', 'UPDATE'], 'MIXED', 'MIXED'],
+  ['voice_usage_reservations', 'TENANT_RLS_REQUIRED', ['SELECT', 'INSERT', 'UPDATE'], [], 'TENANT_USER', 'TENANT_RUNTIME'],
   ['workbook_checkout_intents', 'SYSTEM_ONLY', [], ['SELECT', 'INSERT', 'UPDATE'], 'MIXED', 'SYSTEM_RUNTIME'],
 ]
 
@@ -67,7 +87,7 @@ export const gate0ResidualEntries: StorageAuthorityEntry[] = specs.map(
     table,
     classification,
     reason: `Gate 0 residual closure: authority, FORCE-RLS policy, and least-privilege DML are defined by ${migration}; runtime consumers use the corresponding governed route/service transaction.`,
-    supportingCapability: [migration],
+    supportingCapability: [migration, ...(productionCapabilities[table] ?? [])],
     requiredRuntimePrivileges,
     requiredSystemPrivileges,
     invocationAuthority,
