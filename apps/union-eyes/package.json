@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "tsx scripts/align-org-schema.ts",
     "dev": "next dev --webpack --port 3002",
-    "build": "next build --webpack",
+    "build": "node --max-old-space-size=6144 ../../node_modules/next/dist/bin/next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "node --max-old-space-size=8192 ../../node_modules/typescript/lib/tsc.js --noEmit",

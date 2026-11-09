@@ -230,7 +230,11 @@ async function up() {
 
 function startApp() {
   const filter = ['--filter', '@nzila/union-eyes']
-  if (PROD && (REBUILD || !existsSync(join(APP, '.next', 'BUILD_ID')))) run('pnpm', [...filter, 'exec', 'next', 'build'], { env: runtimeEnv() })
+  // Use the application's canonical build command. Calling `next build`
+  // directly defaults to Turbopack in Next 16 and bypasses the webpack
+  // extension aliases required by NodeNext-style workspace source imports.
+  if (PROD && (REBUILD || !existsSync(join(APP, '.next', 'BUILD_ID'))))
+    run('pnpm', [...filter, 'build'], { env: runtimeEnv() })
   const serve = PROD ? ['exec', 'next', 'start', '--hostname', '127.0.0.1', '--port', String(PORT_APP)] : ['dev']
   const log = openSync(join(STATE, 'app.log'), 'a')
   const child = spawn('pnpm', [...filter, ...serve], {
