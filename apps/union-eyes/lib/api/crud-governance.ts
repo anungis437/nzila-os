@@ -18,7 +18,9 @@ import { ApiError } from '@/lib/api/errors'
  */
 export type CrudGovernanceClass = 'DENIED' | 'SUBJECT_OWNED' | 'OWN_ROWS_READ' | 'READ_ONLY' | 'OPERATIONAL'
 
-const SUBJECT_OWNED = ['data_subject_access_requests', 'user_consents', 'consent_records'] as const
+// data_subject_access_requests left this registry when every legacy DSAR generic route was retired with a truthful 501.
+// An unlisted table remains fail-closed, so a future generic route must make a fresh governance decision.
+const SUBJECT_OWNED = ['user_consents', 'consent_records'] as const
 
 const DENIED = [
   'documents',

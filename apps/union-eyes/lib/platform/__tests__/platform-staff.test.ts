@@ -86,12 +86,15 @@ describe('requirePlatformStaffAuthority', () => {
     expect(m.loggerError).toHaveBeenCalledWith('platform_authority_denial_not_recorded', { capability: 'platform.stats.read', error: 'audit store down' })
   })
 
-  it('names exactly the platform capabilities: three reads and the pilot fixture operation', () => {
+  it('names exactly the platform capabilities: five reads, the pilot fixture operation and marketing publication', () => {
     expect([...PLATFORM_CAPABILITIES]).toEqual([
       'platform.user_directory.read',
       'platform.member_activity.read',
       'platform.stats.read',
       'platform.pilot_fixture.manage',
+      'platform.organization_directory.read',
+      'platform.database_health.read',
+      'platform.marketing_content.publish',
     ])
   })
 })

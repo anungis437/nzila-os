@@ -1,19 +1,8 @@
-/**
- * CRUD collection route for dataSubjectAccessRequests
- */
-import { crudRoutes } from '@/lib/api/crud-factory';
-import { dataSubjectAccessRequests } from '@/db/schema';
+/** GDPR/DSAR requests are unavailable until an organization-owned workflow is implemented. */
+import { withApi } from '@/lib/api/framework';
+import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';
-
-const { GET, POST } = crudRoutes({
-  table: dataSubjectAccessRequests,
-  pk: 'id',
-  tags: ["Compliance"],
-  orgScoped: true,
-  unscopedByDesign: 'data subject requests are subject-owned and refused without an owner column by CRUD governance; no organization discriminator',
-  readRole: 'member',
-  writeRole: 'steward',
-  writableFields: ['userId', 'requestType', 'province', 'requestDescription', 'requestedDataTypes'],
-});
-export { GET, POST };
+const unavailable = () => { throw ApiError.notImplemented('Data subject requests are not implemented; no organization-owned DSAR workflow is authorized.'); };
+export const GET = withApi({ auth: { required: true }, openapi: { tags: ['Compliance'], summary: 'DSAR requests — NOT_IMPLEMENTED' } }, unavailable);
+export const POST = withApi({ auth: { required: true }, openapi: { tags: ['Compliance'], summary: 'DSAR requests — NOT_IMPLEMENTED' } }, unavailable);

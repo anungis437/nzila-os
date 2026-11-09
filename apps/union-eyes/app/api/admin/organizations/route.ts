@@ -12,16 +12,24 @@ import { organizations } from '@/db/schema';
 import { ne, ilike, or } from 'drizzle-orm';
 import { withApi } from '@/lib/api/framework';
 import { withSystemContext } from '@/lib/db/with-rls-context';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 
 export const dynamic = 'force-dynamic';
 
 const iso = (value: Date | string | null | undefined) => (value ? new Date(value).toISOString() : null);
 
-// A platform operation over the platform's own record of the organizations it serves, gated by platform authority (platform_lead); its one
+// A platform operation over the platform's own record of the organizations it serves. The platform_lead title is only a floor: the read
+// needs the platform-staff mandate (DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY), checked before any system transaction is opened. Its one
 // statement runs as the system role and touches only the organizations table.
 export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
-  async (ctx) => withSystemContext(async () => {
+  async (ctx) => {
+    await requirePlatformStaffAuthority(ctx, 'platform.organization_directory.read');
+    return listOrganizations(ctx);
+  },
+);
+
+const listOrganizations = (ctx: { request: Request }) => withSystemContext(async () => {
     const url = new URL(ctx.request.url);
     const search = url.searchParams.get('search')?.trim() ?? '';
 
@@ -64,5 +72,4 @@ export const GET = withApi(
       createdAt: iso(o.createdAt),
       updatedAt: iso(o.updatedAt),
     }));
-  }),
-);
+});

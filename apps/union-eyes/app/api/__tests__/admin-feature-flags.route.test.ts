@@ -145,7 +145,25 @@ describe('admin/feature-flags route', () => {
   it('PATCH is gated by withSystemAdminAuth, not the ordinary per-org withAdminAuth (round 51: feature_flags is platform-wide, an org admin must not flip it)', async () => {
     await loadRoute();
     expect(m.withSystemAdminAuth).toHaveBeenCalled();
-    expect(m.withAdminAuth).toHaveBeenCalledTimes(1); // GET only
+    // DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY: GET is a platform-wide read too, so neither method is behind an organization's admin title.
+    expect(m.withAdminAuth).not.toHaveBeenCalled();
+  });
+
+  it('GET is gated by withSystemAdminAuth: the flags and their targeting lists name other organizations and users (DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY)', async () => {
+    await loadRoute();
+    expect(m.withSystemAdminAuth).toHaveBeenCalledTimes(2); // GET and PATCH
+  });
+
+  it('GET is refused, and reads no flag, when withSystemAdminAuth denies (an organization admin is not a platform administrator)', async () => {
+    m.withSystemAdminAuth.mockImplementation(
+      () => () => new Response(JSON.stringify({ error: 'Forbidden: System administrator privileges required' }), { status: 403 }),
+    );
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/admin/feature-flags'), { userId: 'u1', organizationId: 'org_1' } as any);
+
+    expect(response.status).toBe(403);
+    expect(m.getAllFeatureFlags).not.toHaveBeenCalled();
+    expect(m.logApiAuditEvent).not.toHaveBeenCalled();
   });
 
   it('PATCH is rejected when withSystemAdminAuth denies (ordinary org admin, not a platform admin)', async () => {

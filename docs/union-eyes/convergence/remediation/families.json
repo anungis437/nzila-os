@@ -1,10 +1,10 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 730,
- "partial": 28,
- "outstanding": 47,
- "accountedFor": 47,
+ "corrected": 732,
+ "partial": 26,
+ "outstanding": 45,
+ "accountedFor": 45,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
@@ -41,19 +41,16 @@
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 4,
+   "defects": 1,
    "severity": {
-    "HIGH": 2,
+    "HIGH": 0,
     "MEDIUM": 1,
-    "LOW": 1
+    "LOW": 0
    },
-   "namedRoutes": 2,
+   "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
-    "0B.2": 1,
-    "0B.6": 1,
-    "0B.10": 1,
-    "0B.11": 1
+    "0B.6": 1
    }
   },
   {
@@ -160,15 +157,16 @@
   {
    "family": "F10-FINANCIAL-AND-PAYMENT",
    "purpose": "Financial and payment integrity",
-   "defects": 1,
+   "defects": 2,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 1,
+    "MEDIUM": 2,
     "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
    "tranches": {
+    "0B.6": 1,
     "0B.10": 1
    }
   },
@@ -236,22 +234,7 @@
   ],
   "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE": [
    {
-    "id": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-OPL-14",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
+    "id": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
     "severity": "MEDIUM",
     "partial": true
    }
@@ -367,6 +350,11 @@
    }
   ],
   "F10-FINANCIAL-AND-PAYMENT": [
+   {
+    "id": "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
+    "severity": "MEDIUM",
+    "partial": true
+   },
    {
     "id": "DEF-0B10-PIL-COMMERCIAL-TERMS-ARE-SET-BY-ONE-ADMINISTRATOR-FROM-A-TYPED-MEMBER-COUNT-AND-AMOUNT-WITH-NO-APPLICANT-ACCEPTANCE",
     "severity": "MEDIUM"

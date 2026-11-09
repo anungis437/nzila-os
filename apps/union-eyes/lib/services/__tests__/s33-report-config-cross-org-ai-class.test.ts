@@ -13,11 +13,12 @@ describe('Gate 0 batch B89: stored report contract, cross-organization read, AI 
     expect(src('app/api/reports/execute/route.ts')).toContain("from '@/lib/reports/report-config-validation'")
   })
 
-  it('reads and audits the cross-organization aggregate under the system role', () => {
+  // Superseded by DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY (#1116, #1118): the cross-organization aggregate is refused for every caller, so
+  // the route neither reads analytics_metrics under the system role nor writes a read audit. The system role's SELECT grant is unchanged.
+  it('refuses the cross-organization aggregate without reading it under any role', () => {
     const route = src('app/api/analytics/cross-org/route.ts')
-    expect(route).toContain('withSystemContext(async (tx)')
-    expect(route).not.toMatch(/await db\b/)
-    expect(route.indexOf('.limit(1000)')).toBeLessThan(route.indexOf("action: 'analytics.cross_org.read'"))
+    expect(route).toContain('ApiError.forbidden(')
+    expect(route).not.toMatch(/withSystemContext|withRLSContext|analyticsMetrics|\bdb\b/)
     const manifest = src('db/rls-storage-authority/analytics-ai.ts')
     const entry = manifest.slice(manifest.indexOf('table: "analytics_metrics"'), manifest.indexOf('table: "analytics_scheduled_reports"'))
     expect(entry).toContain('requiredSystemPrivileges: ["SELECT"]')

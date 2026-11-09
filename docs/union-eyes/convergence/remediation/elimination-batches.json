@@ -11255,6 +11255,66 @@
           ]
         }
       ]
+    },
+    {
+      "id": "B169-F03-DIRECT-SCOPED-AUTHORITY-AND-TRUTHFUL-REFUSAL",
+      "family": "F03 integrated closure: direct organization scope, non-tenant operational statistics, governed precedent sharing, and truthful DSAR refusal",
+      "evidenceCommit": null,
+      "items": [
+        {
+          "prefix": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/admin/users/route.ts",
+            "apps/union-eyes/lib/platform/user-directory.ts",
+            "apps/union-eyes/lib/platform/__tests__/user-directory.test.ts",
+            "apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts"
+          ],
+          "explanation": "The platform directory now requires a non-empty explicit organizationIds scope derived from the caller's live direct administrator memberships. The query applies that allow-list in SQL and returns no rows when scope is absent or empty; platform administrator identity alone never expands the read across tenants. Unit, route, and native PostgreSQL 15/16 tests pin direct scope, empty-scope refusal, masked projection, and audit rollback."
+        },
+        {
+          "prefix": "DEF-0B10-OPL-14",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/lib/queries/platform-stats.ts",
+            "apps/union-eyes/app/api/platform/stats/route.ts",
+            "apps/union-eyes/components/dashboards/nzila-ops-dashboard.tsx",
+            "apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts"
+          ],
+          "explanation": "The platform statistics surface is limited to operational metadata the system role is actually allowed to read. Tenant financial figures (settlements and per-capita rates) remain withdrawn rather than inferred, defaulted, or exposed under platform identity. Native PostgreSQL 15/16 catalog and result tests prove the projection and absence of settlements privilege."
+        },
+        {
+          "prefix": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/precedents/route.ts",
+            "apps/union-eyes/app/api/precedents/drafts/[id]/review/route.ts",
+            "apps/union-eyes/lib/services/precedent-audited-service.ts",
+            "apps/union-eyes/lib/services/__tests__/precedent-review.test.ts",
+            "apps/union-eyes/app/api/__tests__/precedents-draft-review.route.test.ts",
+            "apps/union-eyes/db/__tests__/precedent-library.postgres.test.ts"
+          ],
+          "explanation": "POST creates an organization-owned private draft with provenance instead of publishing into the shared library. Sharing, rejection, and revocation are explicit audited review outcomes; self-review is forbidden and reviewer authority denies all callers until the institution appoints an authorized reviewer. Thus no platform or role identity can publish cross-tenant content by default, while the complete review and revocation mechanism is present and tested."
+        },
+        {
+          "prefix": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "files": [
+            "apps/union-eyes/app/api/enterprise/dsr/requests/route.ts",
+            "apps/union-eyes/app/api/gdpr/requests/route.ts",
+            "apps/union-eyes/app/api/gdpr/data-erasure/route.ts",
+            "apps/union-eyes/app/api/gdpr/consents/route.ts",
+            "apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts"
+          ],
+          "explanation": "Every legacy or enterprise DSAR route that was bound to the unowned generic table now truthfully returns HTTP 501 NOT_IMPLEMENTED instead of a misleading authorization refusal or generic CRUD access. No request is accepted until an institution-owned workflow exists; the separate implemented privacy-consent endpoint is unchanged. Source contracts pin all four retired surfaces and prohibit crudRoutes from returning silently."
+        }
+      ],
+      "touches": [
+        { "defectId": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ", "status": "IMPLEMENTED_PENDING_QUALIFICATION", "files": ["apps/union-eyes/lib/platform/user-directory.ts"] },
+        { "defectId": "DEF-0B10-OPL-14", "status": "IMPLEMENTED_PENDING_QUALIFICATION", "files": ["apps/union-eyes/lib/queries/platform-stats.ts"] },
+        { "defectId": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION", "status": "IMPLEMENTED_PENDING_QUALIFICATION", "files": ["apps/union-eyes/lib/services/precedent-audited-service.ts"] },
+        { "defectId": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403", "status": "IMPLEMENTED_PENDING_QUALIFICATION", "files": ["apps/union-eyes/app/api/enterprise/dsr/requests/route.ts"] }
+      ]
     }
   ],
   "uncreditedSourceEvidence": {

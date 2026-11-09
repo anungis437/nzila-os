@@ -20,7 +20,7 @@ const tx = {
 }
 
 vi.mock('drizzle-orm', async (orig) => ({ ...(await orig<typeof import('drizzle-orm')>()), and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }))
-vi.mock('@/db/schema', () => ({ arbitrationDecisions: { id: 'id', sourceOrganizationId: 'sourceOrganizationId', accessRestrictions: 'accessRestrictions' } }))
+vi.mock('@/db/schema', () => ({ arbitrationDecisions: { id: 'id', sourceOrganizationId: 'sourceOrganizationId', accessRestrictions: 'accessRestrictions', isPublic: 'isPublic' } }))
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_c: unknown, fn: (t: unknown) => Promise<unknown>) => fn(tx) }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }))
 
@@ -66,6 +66,19 @@ describe('precedent review', () => {
     const result = await reviewPrecedentAudited({ organizationId: ORG, userId: 'reviewer' }, { id: 'p1', outcome: 'reject', redactionConfirmed: false, consentConfirmed: false })
     expect(result).toMatchObject({ ok: true, publicationStatus: 'review_rejected' })
     expect(h.sets[0]).toMatchObject({ isPublic: false, accessRestrictions: 'review_rejected' })
+  })
+
+  it('revokes a previously shared decision and records the withdrawal atomically', async () => {
+    const published = { ...pending, isPublic: true, accessRestrictions: null }
+    h.selectRows = [[published]]
+    h.updateRows = [[{ ...published, isPublic: false, accessRestrictions: 'sharing_revoked' }]]
+    const result = await reviewPrecedentAudited(
+      { organizationId: ORG, userId: 'reviewer' },
+      { id: 'p1', outcome: 'revoke', redactionConfirmed: false, consentConfirmed: false, notes: 'consent withdrawn' },
+    )
+    expect(result).toMatchObject({ ok: true, publicationStatus: 'sharing_revoked' })
+    expect(h.sets[0]).toMatchObject({ isPublic: false, accessRestrictions: 'sharing_revoked' })
+    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'precedent.review.revoked' }))
   })
 
   it('refuses to share without the redaction and consent attestation, before touching the database', async () => {

@@ -13,7 +13,6 @@ import { organizationMembers, organizations } from '@/db/schema'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 
 export const DIRECTORY_PAGE_LIMIT = 100
-export const ACTIVITY_MAX_LIMIT = 50
 export const MIN_SEARCH_LENGTH = 3
 
 /** `j***@example.org`: enough to tell two people apart, not enough to write to them. */
@@ -24,14 +23,6 @@ export function maskEmail(email: string | null | undefined): string | null {
   return `${email[0]}***${email.slice(at)}`
 }
 
-/** `Pat M.` from `Pat Morgan`; a single word stays as its first letter and a dot. */
-export function abbreviateName(name: string | null | undefined): string {
-  const parts = (name ?? '').trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return 'Member'
-  if (parts.length === 1) return `${parts[0][0]}.`
-  return `${parts[0]} ${parts[parts.length - 1][0]}.`
-}
-
 export const escapeLike = (term: string): string => term.replace(/[\\%_]/g, '\\$&')
 
 export function normalizeSearch(raw: string | null | undefined): { term: string; tooShort: boolean } {
@@ -40,23 +31,22 @@ export function normalizeSearch(raw: string | null | undefined): { term: string;
 }
 
 /**
- * `organizationIds`, when given, bounds the directory to those organizations (the route passes the organizations the caller directly
- * administers, issue #1116); an empty list reads nothing.
+ * Members of exactly the organizations named in `organizationIds` - the caller's own directly-administered organizations. The scope is
+ * required, not a filter: there is no call shape that reads every organization's people, and an empty scope reads nothing (issue #1116;
+ * DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ, F03).
  */
 export async function listPlatformUsers(
   tx: RLSTx,
-  input: { search?: string | null; organizationId?: string | null; organizationIds?: readonly string[] },
+  input: { search?: string | null; organizationId?: string | null; organizationIds: readonly string[] },
 ) {
-  if (input.organizationIds && input.organizationIds.length === 0) return []
+  if (!Array.isArray(input.organizationIds) || input.organizationIds.length === 0) return []
   const { term } = normalizeSearch(input.search)
   // A removed member's tombstone is not part of a cross-organization directory.
   const conditions: SQL[] = [isNull(organizationMembers.deletedAt)]
   const matching = term ? or(ilike(organizationMembers.name, `%${escapeLike(term)}%`), ilike(organizationMembers.email, `%${escapeLike(term)}%`)) : undefined
   if (matching) conditions.push(matching)
   if (input.organizationId) conditions.push(sql`${organizationMembers.organizationId}::text = ${input.organizationId}`)
-  if (input.organizationIds) {
-    conditions.push(sql`${organizationMembers.organizationId}::text IN (${sql.join(input.organizationIds.map((id) => sql`${id}`), sql`, `)})`)
-  }
+  conditions.push(sql`${organizationMembers.organizationId}::text IN (${sql.join(input.organizationIds.map((id) => sql`${id}`), sql`, `)})`)
 
   const rows = await tx
     .select({
@@ -86,34 +76,4 @@ export async function listPlatformUsers(
     lastLogin: null,
     joinedAt: row.joinedAt ?? row.createdAt,
   }))
-}
-
-export async function recentMemberActivity(tx: RLSTx, limit: number) {
-  const bounded = Math.min(Math.max(Math.trunc(Number.isFinite(limit) ? limit : 10), 1), ACTIVITY_MAX_LIMIT)
-  const rows = await tx
-    .select({
-      id: organizationMembers.id,
-      name: organizationMembers.name,
-      role: organizationMembers.role,
-      organizationId: organizationMembers.organizationId,
-      orgName: organizations.name,
-      createdAt: organizationMembers.createdAt,
-    })
-    .from(organizationMembers)
-    .leftJoin(organizations, sql`${organizations.id}::text = ${organizationMembers.organizationId}::text`)
-    .where(isNull(organizationMembers.deletedAt))
-    .orderBy(desc(organizationMembers.createdAt))
-    .limit(bounded)
-
-  return rows.map((row) => {
-    const who = abbreviateName(row.name)
-    return {
-      id: row.id,
-      type: 'member_added',
-      description: `${who} joined ${row.orgName ?? 'organization'} as ${row.role}`,
-      user: who,
-      organizationName: row.orgName,
-      timestamp: row.createdAt,
-    }
-  })
 }

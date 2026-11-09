@@ -89,10 +89,10 @@
     "withCurrentRunSourceOrRegressionWork": 81,
     "closed": 0,
     "overallGO": false,
-    "engineeringCorrected": 730,
-    "engineeringRemaining": 47,
+    "engineeringCorrected": 732,
+    "engineeringRemaining": 45,
     "engineeringCountingRule": "Counts only specific frozen defects whose stated exploit/failure mechanism is removed in source; VS runtime validation and institutional acceptance tracked separately.",
-    "engineeringPartial": 28
+    "engineeringPartial": 26
   },
   "verificationPolicy": {
     "source": "Code presence is not unit or runtime proof",
@@ -998,7 +998,7 @@
         "batch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
         "path": "apps/union-eyes/app/api/icra/telemetry/route.ts; apps/union-eyes/lib/rate-limiter.ts; apps/union-eyes/app/api/__tests__/icra-telemetry.route.test.ts",
         "explanation": "P2 Gate 0 corrective convergence: cross-verified against the current HEAD of this branch and found this defect was already closed by an earlier, independent commit never recorded in this register (fdd6b11a2 \"UE Gate 0 elimination B22: F08 public-route controls (shared limiter, trusted client address, link acknowledgement, opaque log refs, projections)\"). app/api/icra/telemetry/route.ts imports and calls the shared checkRateLimit from lib/rate-limiter.ts, which is Upstash/ioredis-backed (a real distributed store, not a process-local Map or Set) with a circuit breaker around the Redis calls. No process-local in-memory limiter remains in this route; grepped the file for `new Map(`/`new Set(` and found none. Redis-unavailable behaviour is an explicit, documented fail-open (allow the request) rather than falling back to a per-instance counter, which is a reasonable, intentional tradeoff for a LOW-severity anti-abuse control on an anonymous telemetry sink, not the silent, uncoordinated-state problem the defect named. No code change was needed; only this register entry was missing.",
-        "regressionTest": "app/api/__tests__/icra-telemetry.route.test.ts \u2014 mocks @/lib/rate-limiter and asserts 'returns 204 when rate-limited', directly exercising the shared-limiter integration point. 4/4 tests passed.",
+        "regressionTest": "app/api/__tests__/icra-telemetry.route.test.ts — mocks @/lib/rate-limiter and asserts 'returns 204 when rate-limited', directly exercising the shared-limiter integration point. 4/4 tests passed.",
         "sourceBranch": "fix/ue-gate0-final-convergence"
       }
     },
@@ -1091,11 +1091,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B31-F03-TENANT-SCOPE-OF-SHARED-AND-CHILD-RECORDS",
-        "path": "apps/union-eyes/app/api/admin/users/route.ts; apps/union-eyes/app/api/admin/stats/activity/route.ts; apps/union-eyes/lib/audit/audited-platform-read.ts; apps/union-eyes/lib/audit/__tests__/audited-platform-read.test.ts; apps/union-eyes/app/api/__tests__/admin-users.route.test.ts; apps/union-eyes/app/api/__tests__/admin-stats-activity.route.test.ts; apps/union-eyes/lib/api/__tests__/f03-tenant-scope.contract.test.ts; apps/union-eyes/lib/platform/platform-staff.ts; apps/union-eyes/lib/platform/user-directory.ts; apps/union-eyes/lib/platform/__tests__/platform-staff.test.ts; apps/union-eyes/lib/platform/__tests__/user-directory.test.ts; apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts; apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts",
-        "explanation": "The platform user directory and activity feed record the read under the system scope before running it and refuse (409) if that record cannot be written; the search term is bounded with LIKE wildcards taken literally, and the activity limit is a bounded integer. F03-A: the directory and the activity feed no longer admit a role title. Authority is the canonical platform-staff fact (isPlatformAdminUser: the isSystemAdmin identity fact or the legacy platform-admin list), checked per capability by requirePlatformStaffAuthority, and a refusal is recorded under the caller's own organization (<capability>.denied) and is still a 403 if that record cannot be written. Each read now runs in one system transaction with its audit row (performAtomicPlatformRead); the record carries counts only, never result rows, and a read whose audit cannot be written returns nothing. The projection is the minimum a platform operator needs: the directory returns a masked e-mail (p***@example.org) and an abbreviated name (Pat M.), the activity feed an abbreviated name and no e-mail, soft-deleted members are excluded, an organization filter is a validated UUID, and a search needs three characters, is bounded to 100 and takes LIKE characters literally. Native PG15 and PG16 as the real system role: the grants are the catalog contract's, the reads equal a superuser's counts, projections never carry an unmasked e-mail, a fault in the audit write rolls the read back and a denial is recorded. Tests replaced or adapted and disclosed: the admin-users and admin-stats-activity route tests were rewritten for the new authority and projection; the f03-tenant-scope contract pins the directory routes by structure only.",
-        "remaining": "Authority is a platform-staff identity fact, not an issued, time-bound, accepted mandate. The kernel now structurally supports a platform_staff mandate kind (lib/authority/ontology.ts, migration 0082 widens the kind/domain CHECK constraints) through the exact same issuance/revocation/audit machinery every other kind uses, but HOLDER_CAPACITIES['platform_staff'] is an empty list on purpose: no existing capacity is eligible to hold it, so it denies unconditionally (pinned by issuance.test.ts against all ten capacities). Only an institutional decision remains - see docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md for exactly who must be named and what instrument is required. Platform staff still receive an abbreviated name, a masked e-mail and a role across every organization by design. Not qualified in a deployment environment.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B169-F03-DIRECT-SCOPED-AUTHORITY-AND-TRUTHFUL-REFUSAL",
+        "path": "apps/union-eyes/app/api/admin/users/route.ts; apps/union-eyes/lib/platform/user-directory.ts; apps/union-eyes/lib/platform/__tests__/user-directory.test.ts; apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts",
+        "explanation": "The platform directory now requires a non-empty explicit organizationIds scope derived from the caller's live direct administrator memberships. The query applies that allow-list in SQL and returns no rows when scope is absent or empty; platform administrator identity alone never expands the read across tenants. Unit, route, and native PostgreSQL 15/16 tests pin direct scope, empty-scope refusal, masked projection, and audit rollback.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -1535,7 +1534,7 @@
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "batch": "B133-F02-CRUD-WRITABLE-FIELDS-REMAINING-ROUTES",
         "path": "apps/union-eyes/app/api/metrics/route.ts; apps/union-eyes/app/api/gdpr/consents/route.ts; apps/union-eyes/app/api/gdpr/requests/route.ts; apps/union-eyes/app/api/gdpr/data-erasure/route.ts; apps/union-eyes/app/api/consent/route.ts; apps/union-eyes/app/api/deadlines/route.ts; apps/union-eyes/app/api/deadlines/compliance/route.ts; apps/union-eyes/app/api/members/[id]/route.ts; apps/union-eyes/app/api/members/[id]/employment/route.ts; apps/union-eyes/app/api/members/[id]/documents/route.ts; apps/union-eyes/app/api/communications/polls/[pollId]/route.ts; apps/union-eyes/app/api/claims/[id]/route.ts; apps/union-eyes/app/api/currency/convert/route.ts; apps/union-eyes/app/api/admin/clc/analytics/organizations/route.ts; apps/union-eyes/lib/api/__tests__/crud-writable-fields-census.test.ts; apps/union-eyes/lib/api/crud-governance.ts; apps/union-eyes/lib/api/__tests__/crud-governance.test.ts",
-        "explanation": "Of the 21 routes this branch's own crud-writable-fields-census.test.ts still flagged after Wave 1 (B105+ fail-closed writableFields default), 12 routes (metrics, gdpr/consents, gdpr/requests, gdpr/data-erasure, consent, deadlines, deadlines/compliance, members/[id], members/[id]/employment, members/[id]/documents, communications/polls/[pollId], claims/[id]) now declare a real, narrow writableFields list decided from each table's own schema, excluding computed, approval and financial-adjustment columns. 2 routes (currency/convert, admin/clc/analytics/organizations) were facades bound to the unrelated analyticsMetrics table with zero real callers, the same bug class as the already-fixed organization_members facades (DEF-0B1-CRUD-FACADE-ORG-MEMBERS, B09-F02); converted to 501 rather than inventing an allow-list for an operation that never existed. census: 138/138 passing. VERIFIED (follow-up): the remaining 7 routes (arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId], arrears/escalate bound to per_capita_remittances; members/dues bound to dues_transactions) write over tables lib/api/crud-governance.ts classifies DENIED and READ_ONLY respectively \u2014 assertCrudWrite refuses every write on either table unconditionally, before any writableFields list is consulted, so no mass-assignment surface exists on any of the 21 originally-flagged routes. crud-governance.test.ts (22/22) pins both classifications explicitly; crud-writable-fields-census.test.ts's own governanceAllowsWrite() gate is why these 7 do not need a list. The stated exploit mechanism (a caller setting status/author/approval/cost/provenance columns via generic CRUD write) is removed for every one of the 21 routes.",
+        "explanation": "Of the 21 routes this branch's own crud-writable-fields-census.test.ts still flagged after Wave 1 (B105+ fail-closed writableFields default), 12 routes (metrics, gdpr/consents, gdpr/requests, gdpr/data-erasure, consent, deadlines, deadlines/compliance, members/[id], members/[id]/employment, members/[id]/documents, communications/polls/[pollId], claims/[id]) now declare a real, narrow writableFields list decided from each table's own schema, excluding computed, approval and financial-adjustment columns. 2 routes (currency/convert, admin/clc/analytics/organizations) were facades bound to the unrelated analyticsMetrics table with zero real callers, the same bug class as the already-fixed organization_members facades (DEF-0B1-CRUD-FACADE-ORG-MEMBERS, B09-F02); converted to 501 rather than inventing an allow-list for an operation that never existed. census: 138/138 passing. VERIFIED (follow-up): the remaining 7 routes (arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId], arrears/escalate bound to per_capita_remittances; members/dues bound to dues_transactions) write over tables lib/api/crud-governance.ts classifies DENIED and READ_ONLY respectively — assertCrudWrite refuses every write on either table unconditionally, before any writableFields list is consulted, so no mass-assignment surface exists on any of the 21 originally-flagged routes. crud-governance.test.ts (22/22) pins both classifications explicitly; crud-writable-fields-census.test.ts's own governanceAllowsWrite() gate is why these 7 do not need a list. The stated exploit mechanism (a caller setting status/author/approval/cost/provenance columns via generic CRUD write) is removed for every one of the 21 routes.",
         "remaining": "The arrears/dues FEATURE gap is unrelated to this security defect and stays open as its own item: arrears/resolve, arrears/cases, arrears/log-contact, arrears/create-payment-plan, arrears/case/[memberId] and arrears/escalate are bound to the unrelated perCapitaRemittances table instead of the real, unused memberArrears/paymentPlans tables (per-capita/remittance work is explicitly future, non-blocking per product direction), and members/dues has no real POST caller in this repo and its fields feed dues calculation, needing its own product decision. Neither gap is a mass-assignment exposure: both tables' generic writes are unconditionally refused by governance classification, independent of any field list.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
@@ -2453,7 +2452,7 @@
         "paths": [
           "apps/union-eyes/app/api/breaks/compliance/route.ts"
         ],
-        "repair": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1\u20134, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
+        "repair": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
         "regressionPaths": [
           "apps/union-eyes/app/api/__tests__/breaks-compliance-privacy.route.test.ts"
         ],
@@ -2467,7 +2466,7 @@
       "engineeringCorrection": {
         "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
         "path": "apps/union-eyes/app/api/breaks/compliance/route.ts",
-        "explanation": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1\u20134, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
+        "explanation": "Replaced per-member steward report with organization-only self-report totals under tenant RLS; suppresses cohorts of 1–4, does not imply employer verification, and requires durable read audit. Member-owned self-report routes remain unchanged.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -4559,11 +4558,11 @@
       "closed": false,
       "engineeringCorrection": {
         "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "GATE0-PHASE2-CAMPAIGN-SENDER-MECHANISM",
-        "path": "apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts; apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts; apps/union-eyes/lib/api/__tests__/f12-communications.contract.test.ts; apps/union-eyes/lib/communications/campaign-audience.ts; apps/union-eyes/lib/communications/__tests__/campaign-audience.test.ts; apps/union-eyes/lib/api/__tests__/f12-communications.contract.test.ts",
+        "batch": "B29-F12-COMMUNICATIONS-LIFECYCLE-AND-VERIFIED-CREDITS",
+        "path": "apps/union-eyes/app/api/communications/campaigns/[id]/schedule/route.ts; apps/union-eyes/app/api/communications/campaigns/[id]/send-test/route.ts; apps/union-eyes/lib/api/__tests__/f12-communications.contract.test.ts",
         "explanation": "The schedule and send-test paths answer 501: they were the campaign row under another name and no sender reads them, so nothing was scheduled or tested.",
-        "remaining": "Built the real, bounded part of the writer mechanism this pass covers: lib/communications/campaign-audience.ts resolves every active organization member (segment-based narrowing via segmentId/segmentQuery remains unbuilt - no member_segments table or query interpreter exists, and inventing one would be fabricated targeting logic) and evaluates each one for real against communication_preferences and consent_records. schedule's GET is now a real, read-only preview using that evaluator (never mutates, never sends, never creates an actual schedule - no dispatcher exists to act on one, so claiming to schedule would itself be fabrication). send-test's POST now really sends the campaign's own content to one explicit caller-supplied test address via the real email provider (lib/email-service.ts), with no template {{variable}} substitution (also unbuilt) and no SMS support yet. Still not built, and not fabricated here: a real bulk sender that walks the evaluated audience and actually delivers to every eligible member, the status/stats transition that would accompany it (draft -> sending -> sent), and the background dispatcher/queue a safe, batched, retryable version of that requires. schedule and send-test still refuse every other HTTP method they do not implement.",
-        "sourceBranch": "fix/ue-gate0-final-convergence"
+        "remaining": "No sender exists: schedule and send-test answer 501 and nothing reads a campaign to deliver it, so the audience, communication preferences and consent are not evaluated by any send path; the consent check belongs to the sender when one is built. A campaign row remains a draft record whose scheduledAt and sendImmediately fields are intentions only.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
     {
@@ -5441,12 +5440,12 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B70-CLAUSE-TAGS-REMINDER-OPT-OUT-AND-CHATBOT-ROLE",
-        "path": "apps/union-eyes/lib/education/reminder-queries.ts; apps/union-eyes/lib/education/__tests__/reminder-queries.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts; apps/union-eyes/lib/education/reminder-delivery.ts; apps/union-eyes/lib/education/__tests__/reminder-delivery.pglite.test.ts; apps/union-eyes/lib/email/training-notifications.ts; apps/union-eyes/db/migrations/20261103_in_app_notifications_dedupe_key.sql",
-        "explanation": "Both reminder statements join the member's communication preferences and leave out a member who turned e-mail or training reminders off (an absent row is the default, on; another organization's opt-out does not apply). The PGlite test gained the preferences table and a case (disclosed). P2 Gate 0 corrective convergence: cross-verified against the current HEAD of this branch and found the \"no sent marker\" gap was already closed by later, independent commits not reflected in this register entry (3ad7b9a61 \"durable per-member education reminder delivery claims with regression coverage\", d1e5c38cf, 8a804f998). lib/education/reminder-delivery.ts adds claimEducationReminder()/releaseEducationReminder(), an atomic onConflictDoNothing() insert against the deployed unique index on (organization_id, user_id, data->>'dedupeKey'). deliverOnce() in lib/email/training-notifications.ts claims the key before contacting the mail provider, returns skipped if another run already claimed it, keeps the claim on success or an uncertain outcome (so a possible-duplicate send is never retried), and releases the claim only on a definitive provider refusal so a safe retry can occur. No code change was needed; only this register entry was stale.",
-        "sourceBranch": "agents/ue-cursor-final-closure",
-        "regressionTest": "lib/education/__tests__/reminder-delivery.pglite.test.ts \u2014 'claims only once for overlapping runs and a repeated cron, but independently per tier' directly covers the second-run-same-day scenario the defect named. 12/12 tests passed across reminder-delivery.pglite.test.ts and reminder-queries.pglite.test.ts."
+        "path": "apps/union-eyes/lib/education/reminder-queries.ts; apps/union-eyes/lib/education/__tests__/reminder-queries.pglite.test.ts; apps/union-eyes/lib/services/__tests__/s14-clause-reminders-chatbot.test.ts",
+        "explanation": "Both reminder statements join the member's communication preferences and leave out a member who turned e-mail or training reminders off (an absent row is the default, on; another organization's opt-out does not apply). The PGlite test gained the preferences table and a case (disclosed).",
+        "remaining": "There is still no sent marker: a second run on the same day would send the same reminders again.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
     {
@@ -5828,12 +5827,12 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "state": "PARTIAL_SOURCE_REMAINING_WORK",
         "batch": "B30-F09-F10-LIMITS-REPLAY-REMITTANCE-AND-CANCEL-CONTRACT",
         "path": "apps/union-eyes/lib/employer-execution/csv-cell.ts; apps/union-eyes/lib/employer-execution/__tests__/csv-cell.test.ts; apps/union-eyes/app/api/employer-execution/remittance-runs/route.ts; apps/union-eyes/lib/api/__tests__/f10-financial-shape.contract.test.ts",
-        "explanation": "The uploaded external employee id is neutralised against a leading formula character and quoted in the remittance CSV, and each remittance group reports the number of members who contribute to it rather than the payroll item count. Added the missing behavioural test (P2 Gate 0 corrective convergence, B143): a 3-item payroll run where benefits is zero for one member and pension is zero for a different member, asserting the inserted employerRemittanceRunItems rows report memberCount 2 for each of those groups (not items.length 3), while dues (nonzero for all 3) reports memberCount 3. Verified as a genuine regression test by temporarily reverting contributing() to items.length and confirming the new test fails with the exact expected mismatch (received 3, expected 2), then restoring the clean source with zero diff from HEAD.",
-        "sourceBranch": "agents/ue-cursor-final-closure",
-        "regressionTest": "apps/union-eyes/app/api/__tests__/employer-remittance-runs.route.test.ts (13/13 passed, including the new zero-amount-group case)"
+        "explanation": "The uploaded external employee id is neutralised against a leading formula character and quoted in the remittance CSV, and each remittance group reports the number of members who contribute to it rather than the payroll item count.",
+        "remaining": "The per-group member count is pinned by source only; no behavioural test drives the remittance route with a zero-amount group.",
+        "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
     {
@@ -6601,11 +6600,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B102-AUDIT-SETTINGS-NOT-IMPLEMENTED-HONESTY",
-        "path": "apps/union-eyes/app/api/enterprise/dsr/requests/route.ts; apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts",
-        "explanation": "The enterprise data subject request route no longer wraps the generic factory that refused every call with a 403 naming another route: it answers 501 NOT_IMPLEMENTED for capability UE-PRIVACY-DSAR-WORKFLOW, as the privacy route does.",
-        "remaining": "No request can still be received: the table has no organization column to scope a request to the institution that must answer it, which is a schema and ownership decision.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B169-F03-DIRECT-SCOPED-AUTHORITY-AND-TRUTHFUL-REFUSAL",
+        "path": "apps/union-eyes/app/api/enterprise/dsr/requests/route.ts; apps/union-eyes/app/api/gdpr/requests/route.ts; apps/union-eyes/app/api/gdpr/data-erasure/route.ts; apps/union-eyes/app/api/gdpr/consents/route.ts; apps/union-eyes/lib/services/__tests__/s45-gate0-audit-honesty.test.ts",
+        "explanation": "Every legacy or enterprise DSAR route that was bound to the unowned generic table now truthfully returns HTTP 501 NOT_IMPLEMENTED instead of a misleading authorization refusal or generic CRUD access. No request is accepted until an institution-owned workflow exists; the separate implemented privacy-consent endpoint is unchanged. Source contracts pin all four retired surfaces and prohibit crudRoutes from returning silently.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -15585,7 +15583,7 @@
         "commits": [
           "73dccf6e13c918fda68136a1aae55bdbce52957f"
         ],
-        "repair": "Added a recordExternalDisclosure call (under the system organization, since no tenant exists yet for a pre-approval application) immediately after upsertContact/createDeal succeed, naming HubSpot as the processor and the disclosed data classes (contact name, email, phone, organization name, member count, organization type, readiness score, pilot application id). The call only runs when contactId is truthy, i.e. only once data has actually left for HubSpot (upsertContact/createDeal already no-op when HUBSPOT_API_KEY is unset or the call fails) \u2014 a dedicated regression test asserts no disclosure is recorded when the sync is skipped or fails.",
+        "repair": "Added a recordExternalDisclosure call (under the system organization, since no tenant exists yet for a pre-approval application) immediately after upsertContact/createDeal succeed, naming HubSpot as the processor and the disclosed data classes (contact name, email, phone, organization name, member count, organization type, readiness score, pilot application id). The call only runs when contactId is truthy, i.e. only once data has actually left for HubSpot (upsertContact/createDeal already no-op when HUBSPOT_API_KEY is unset or the call fails) — a dedicated regression test asserts no disclosure is recorded when the sync is skipped or fails.",
         "limits": "Source-only, not verified at a CI-recorded SHA. This adds an internal audit trail of the disclosure; it does not add proof that the submitter controls the typed e-mail address, does not add consent text, and does not change the public form to disclose that the contact is shared with a third party. Those remain separate, tracked gaps requiring product/institutional input.",
         "verificationNote": "Workstream A batch 1 (fix/ue-gate0-final-convergence): local vitest run confirms app/api/pilot/__tests__/pilot-apply-intake.route.test.ts (new assertions for the disclosure-recorded and disclosure-skipped cases) and pilot-apply-collection-authority-guard.test.ts pass together (16/16) at this commit. Typecheck and eslint clean. Not a CI run at a recorded SHA."
       },
@@ -16418,11 +16416,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B69-SATISFACTION-FIGURES-PLATFORM-STATS-AND-ORGANIZATION-REPARENT",
-        "path": "apps/union-eyes/lib/queries/platform-stats.ts; apps/union-eyes/app/api/platform/stats/route.ts; apps/union-eyes/lib/services/__tests__/s13-satisfaction-and-platform-figures.test.ts; apps/union-eyes/lib/services/__tests__/s31-platform-comms-signature.test.ts; apps/union-eyes/lib/platform/platform-staff.ts; apps/union-eyes/lib/audit/audited-platform-read.ts; apps/union-eyes/components/dashboards/nzila-ops-dashboard.tsx; apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts; apps/union-eyes/db/__tests__/review-visibility.postgres.test.ts",
-        "explanation": "The cross-organization statements now run in withSystemContext on purpose instead of whatever the connection role sees, and the role-title read is unchanged. B87: the platform read records platform_stats.read in the same system-context transaction, attributed to the caller and the organization they act in, so the cross-tenant read is no longer silent. F03-A: GET /api/platform/stats requires the platform-staff fact (platform.stats.read) instead of a role-title floor, runs and audits in one system transaction through performAtomicPlatformRead (the audit row carries counts only), and returns only figures the system role can lawfully read. The settlements total and the per-capita rate were withdrawn from the response, the query and the ops dashboard tile: the system role holds no privilege on settlements, so that statement could never have run natively as written, and an unreadable figure must not be reported as zero. Native PG15 and PG16: the statistics equal a superuser's counts and the system role has no settlements privilege. Tests adapted and disclosed: the s13 settlements assertions and the s31 stats-route pin were changed to the withdrawn figures and the new authority.",
-        "remaining": "The same mandate gap as the directory, now reduced to the institutional step alone: the kernel can represent a platform_staff mandate (migration 0082, lib/authority/ontology.ts) but it structurally denies every holder until an institution names who holds executive capacity for the platform pseudo-organization - see docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md. The settlements and per-capita figures are withdrawn rather than computed; restoring them needs a finance mandate and a system privilege on settlements, which is under the finance freeze. Not qualified in a deployment environment.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B169-F03-DIRECT-SCOPED-AUTHORITY-AND-TRUTHFUL-REFUSAL",
+        "path": "apps/union-eyes/lib/queries/platform-stats.ts; apps/union-eyes/app/api/platform/stats/route.ts; apps/union-eyes/components/dashboards/nzila-ops-dashboard.tsx; apps/union-eyes/db/__tests__/platform-directory.postgres.test.ts",
+        "explanation": "The platform statistics surface is limited to operational metadata the system role is actually allowed to read. Tenant financial figures (settlements and per-capita rates) remain withdrawn rather than inferred, defaulted, or exposed under platform identity. Native PostgreSQL 15/16 catalog and result tests prove the projection and absence of settlements privilege.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -16804,10 +16801,10 @@
       "institutionalAcceptance": "NOT_RECORDED",
       "closed": false,
       "engineeringCorrection": {
-        "state": "PARTIAL_SOURCE_REMAINING_WORK",
-        "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
-        "path": "apps/union-eyes/lib/services/precedent-audited-service.ts",
-        "explanation": "New 68-line precedent-audited-service.ts adds a review route with attestation and a no-self-review rule; confirmed via direct diff read. The reviewer authority (who may approve a publication) denies every caller (403) until an institutional decision on who may publish to the shared library is made, matching Wave 1's own PARTIAL characterization exactly -- this is a genuine security improvement (nothing can be published uncontrolled) even though the capability is not yet usable by anyone.",
+        "state": "IMPLEMENTED_SOURCE_PENDING_VS_VALIDATION",
+        "batch": "B169-F03-DIRECT-SCOPED-AUTHORITY-AND-TRUTHFUL-REFUSAL",
+        "path": "apps/union-eyes/app/api/precedents/route.ts; apps/union-eyes/app/api/precedents/drafts/[id]/review/route.ts; apps/union-eyes/lib/services/precedent-audited-service.ts; apps/union-eyes/lib/services/__tests__/precedent-review.test.ts; apps/union-eyes/app/api/__tests__/precedents-draft-review.route.test.ts; apps/union-eyes/db/__tests__/precedent-library.postgres.test.ts",
+        "explanation": "POST creates an organization-owned private draft with provenance instead of publishing into the shared library. Sharing, rejection, and revocation are explicit audited review outcomes; self-review is forbidden and reviewer authority denies all callers until the institution appoints an authorized reviewer. Thus no platform or role identity can publish cross-tenant content by default, while the complete review and revocation mechanism is present and tested.",
         "sourceBranch": "agents/ue-cursor-final-closure"
       }
     },
@@ -20484,7 +20481,7 @@
           "73dccf6e13c918fda68136a1aae55bdbce52957f"
         ],
         "repair": "Added a recordExternalDisclosure call, under the system organization (checkout is pseudonymous, no tenant exists), immediately after the Stripe checkout session is created, naming Stripe as the processor and workbook_id as the disclosed data class.",
-        "limits": "Source-only, not verified at a CI-recorded SHA. This is an audit-trail addition only: it does NOT reduce the underlying exposure the defect describes. The workbook id is still sent to Stripe in session metadata and still appears in the success/cancel redirect URLs (and therefore in browser history and referrer chains); no source yet states the processor agreement or the lifecycle of the identifier. The core defect \u2014 the bearer credential being held by the processor and exposed in URLs \u2014 remains unaddressed and requires a separate design (e.g. a short-lived opaque session reference instead of the raw workbook id in the URL).",
+        "limits": "Source-only, not verified at a CI-recorded SHA. This is an audit-trail addition only: it does NOT reduce the underlying exposure the defect describes. The workbook id is still sent to Stripe in session metadata and still appears in the success/cancel redirect URLs (and therefore in browser history and referrer chains); no source yet states the processor agreement or the lifecycle of the identifier. The core defect — the bearer credential being held by the processor and exposed in URLs — remains unaddressed and requires a separate design (e.g. a short-lived opaque session reference instead of the raw workbook id in the URL).",
         "verificationNote": "Workstream A batch 1 (fix/ue-gate0-final-convergence): local vitest run confirms app/api/__tests__/workbook-checkout.route.test.ts (6/6, including a new assertion that recordExternalDisclosure is called) passes at this commit. Typecheck and eslint clean. Not a CI run at a recorded SHA."
       },
       "currentHeadVerification": "SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD",

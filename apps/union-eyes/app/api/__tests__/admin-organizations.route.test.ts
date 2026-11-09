@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
   // How many system transactions are open right now
   systemDepth: { value: 0 },
   openAtSelect: [] as number[],
+  requirePlatformStaffAuthority: vi.fn(),
 }));
 
 function makeChain(rows: unknown[]) {
@@ -35,6 +36,9 @@ vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemCon
 
 vi.mock('@/db/db', () => ({ db: mockDb }));
 
+// DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY: the platform_lead title is a floor; the directory needs the platform-staff mandate.
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requirePlatformStaffAuthority }));
+
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
   return {
@@ -62,6 +66,7 @@ describe('admin/organizations route', () => {
     m.selectQueue = [];
     m.openAtSelect.length = 0;
     m.systemDepth.value = 0;
+    m.requirePlatformStaffAuthority.mockImplementation(async (ctx: { userId: string; organizationId: string }) => ({ userId: ctx.userId, organizationId: ctx.organizationId }));
     m.withSystemContext.mockImplementation(async (run: (tx: unknown) => Promise<unknown>) => {
       m.systemDepth.value++;
       try {
@@ -84,6 +89,23 @@ describe('admin/organizations route', () => {
       const response = await GET(new NextRequest('http://localhost/api/admin/organizations'));
       expect((response as Response).status, role).toBe(403);
     }
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(mockDb.select).not.toHaveBeenCalled();
+  });
+
+  it('requires the platform-staff mandate for the directory read, not the platform_lead title', async () => {
+    const { GET } = await loadRoute();
+    m.selectQueue.push([]);
+    await GET(new NextRequest('http://localhost/api/admin/organizations'));
+    expect(m.requirePlatformStaffAuthority).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u1', organizationId: 'org_1' }), 'platform.organization_directory.read');
+  });
+
+  it('refuses a platform lead without the platform-staff mandate, before any system transaction is opened or any row read', async () => {
+    const { ApiError } = await import('@/lib/api/errors');
+    m.requirePlatformStaffAuthority.mockRejectedValue(ApiError.forbidden('Acting across organizations needs platform-staff authority; a role title is not enough'));
+    const { GET } = await loadRoute();
+    const response = await GET(new NextRequest('http://localhost/api/admin/organizations'));
+    expect((response as Response).status).toBe(403);
     expect(m.withSystemContext).not.toHaveBeenCalled();
     expect(mockDb.select).not.toHaveBeenCalled();
   });

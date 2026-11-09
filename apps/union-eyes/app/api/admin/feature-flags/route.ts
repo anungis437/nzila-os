@@ -16,7 +16,7 @@ import {
 import { z } from 'zod';
 import { logApiAuditEvent } from '@/lib/middleware/api-security';
 import { performAtomicAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
-import { withAdminAuth, withSystemAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
+import { withSystemAdminAuth, type BaseAuthContext } from '@/lib/api-auth-guard';
 
 import {
   ErrorCode,
@@ -35,8 +35,12 @@ const toggleFlagSchema = z.object({
 
 /**
  * Get all feature flags
+ *
+ * The flags are platform configuration, and a flag's targeting lists name other organizations and users (allowedOrganizations,
+ * allowedUsers). Reading them is a platform-wide read, so it needs the same platform authority as toggling one (withSystemAdminAuth ->
+ * the system-administrator fact), not an organization's own "admin" title (DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY).
  */
-export const GET = withAdminAuth(async (request, context: BaseAuthContext) => {
+export const GET = withSystemAdminAuth(async (request, context: BaseAuthContext) => {
   const { userId } = context;
 
   const flags = await getAllFeatureFlags();

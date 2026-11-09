@@ -19,6 +19,9 @@ export const PLATFORM_CAPABILITIES = [
   'platform.member_activity.read',
   'platform.stats.read',
   'platform.pilot_fixture.manage',
+  'platform.organization_directory.read',
+  'platform.database_health.read',
+  'platform.marketing_content.publish',
 ] as const
 export type PlatformCapability = (typeof PLATFORM_CAPABILITIES)[number]
 

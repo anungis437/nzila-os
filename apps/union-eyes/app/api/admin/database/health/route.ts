@@ -18,6 +18,7 @@ import { db } from '@/db/db';
 import { sql } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { withApi } from '@/lib/api/framework';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,9 +65,12 @@ function principalIssues(tenant: PrincipalInfo, system: PrincipalInfo): string[]
   return issues;
 }
 
+// The platform_lead title is only a floor: database health (sizes, connections, the roles both connections run as) is platform
+// infrastructure, read with the platform-staff mandate (DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY), checked before any statement runs.
 export const GET = withApi(
   { auth: { required: true, minRole: 'platform_lead' } },
-  async () => {
+  async (ctx) => {
+    await requirePlatformStaffAuthority(ctx, 'platform.database_health.read');
     // Outside of withSystemContext(), the module-level `db` import resolves
     // to the ordinary tenant connection (union_eyes_runtime post-remediation) —
     // see db/system-context-storage.ts.

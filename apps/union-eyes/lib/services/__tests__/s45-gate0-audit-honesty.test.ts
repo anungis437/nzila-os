@@ -30,8 +30,15 @@ describe('Gate 0 batch B102: truthful audit, settings and not-implemented answer
   })
 
   it('answers the enterprise data subject request route with 501 instead of a misleading 403', () => {
-    const route = src('app/api/enterprise/dsr/requests/route.ts')
-    expect(route).toContain('ApiError.notImplemented(MESSAGE)')
-    expect(route).not.toContain('crudRoutes')
+    for (const path of [
+      'app/api/enterprise/dsr/requests/route.ts',
+      'app/api/gdpr/requests/route.ts',
+      'app/api/gdpr/data-erasure/route.ts',
+      'app/api/gdpr/consents/route.ts',
+    ]) {
+      const route = src(path)
+      expect(route, path).toContain('ApiError.notImplemented(')
+      expect(route, path).not.toContain('crudRoutes')
+    }
   })
 })

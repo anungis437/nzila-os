@@ -1,8 +1,8 @@
 /**
  * POST /api/precedents/drafts/[id]/review — review a typed arbitration decision that is pending review.
  *
- * Body: { outcome: 'share' | 'reject', redactionConfirmed, consentConfirmed, notes? }. 'share' moves the decision into the shared precedent library;
- * 'reject' keeps it private and marks it review_rejected. The reviewer's authority is checked first and is not designated yet (see
+ * Body: { outcome: 'share' | 'reject' | 'revoke', redactionConfirmed, consentConfirmed, notes? }. 'share' moves the decision into the shared precedent library;
+ * 'reject' keeps it private, and 'revoke' withdraws a previously shared decision. The reviewer's authority is checked first and is not designated yet (see
  * lib/services/precedent-review-authority.ts): until the institution decides who may publish to the shared library, every review is refused with
  * 403 and nothing changes (DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION).
  */
@@ -13,7 +13,7 @@ import { reviewPrecedentAudited } from '@/lib/services/precedent-audited-service
 export const dynamic = 'force-dynamic';
 
 const reviewSchema = z.object({
-  outcome: z.enum(['share', 'reject']),
+  outcome: z.enum(['share', 'reject', 'revoke']),
   redactionConfirmed: z.boolean(),
   consentConfirmed: z.boolean(),
   notes: z.string().max(2000).optional(),
@@ -24,7 +24,7 @@ export const POST = withApi(
   {
     auth: { required: true, minRole: 'member' },
     body: reviewSchema,
-    openapi: { tags: ['Precedents'], summary: 'Review a precedent draft (share into the library or reject)' },
+    openapi: { tags: ['Precedents'], summary: 'Review, share, reject, or revoke a precedent' },
   },
   async ({ body, params, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.forbidden();
@@ -42,7 +42,7 @@ export const POST = withApi(
         case 'not_found':
           throw ApiError.notFound('Precedent draft');
         case 'not_pending':
-          throw ApiError.conflict('The precedent is not pending review');
+          throw ApiError.conflict(body.outcome === 'revoke' ? 'The precedent is not currently shared' : 'The precedent is not pending review');
         case 'self_review':
           throw ApiError.forbidden('A precedent is reviewed by someone other than the person who typed it');
         case 'attestation_required':

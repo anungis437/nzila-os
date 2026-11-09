@@ -2,22 +2,22 @@
  "register": "UE-CONV-K-008",
  "summary": {
   "routes": 1016,
-  "mutating": 685,
+  "mutating": 688,
   "kernel": 62,
   "byGuard": {
    "ADMIN_AUTH": 18,
    "CAPABILITY_TOKEN": 13,
    "CRON_SECRET": 1,
-   "CRUD_FACTORY": 136,
+   "CRUD_FACTORY": 133,
    "DELEGATED": 17,
    "NONE": 21,
    "ORG_AUTH": 9,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 238,
+   "RETIRED": 244,
    "ROLE_AUTH": 107,
    "SESSION_AUTH": 52,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 389,
+   "WITH_API": 386,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -29,11 +29,11 @@
    "NONE": 8,
    "ORG_AUTH": 4,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 223,
+   "RETIRED": 229,
    "ROLE_AUTH": 58,
    "SESSION_AUTH": 29,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 234
+   "WITH_API": 231
   },
   "mutatingByAudit": {
    "ATOMIC": 160,
@@ -42,15 +42,15 @@
    "CRUD_ATOMIC": 82,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 27,
-   "INTENT_OUTCOME": 28,
+   "INTENT_OUTCOME": 25,
    "NO_WRITES_FOUND": 9,
-   "NONE": 222
+   "NONE": 228
   },
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 82,
-   "NONE": 314,
-   "SYSTEM_CONTEXT": 53,
+   "NONE": 318,
+   "SYSTEM_CONTEXT": 52,
    "TENANT_TX": 235
   }
  },
@@ -217,11 +217,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
-   "audit": "INTENT_OUTCOME"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "admin/clc/analytics/annual-report/route.ts",
@@ -457,11 +457,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "NONE"
   },
   {
    "route": "admin/duplicates/route.ts",
@@ -802,11 +802,11 @@
     "POST"
    ],
    "mutating": true,
-   "guard": "WITH_API",
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "INTENT_OUTCOME"
+   "audit": "NONE"
   },
   {
    "route": "admin/pilot-status/route.ts",
@@ -1474,7 +1474,7 @@
    "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
-   "data": "SYSTEM_CONTEXT",
+   "data": "NONE",
    "audit": "READ_ONLY"
   },
   {
@@ -7650,12 +7650,12 @@
     "GET",
     "POST"
    ],
-   "mutating": false,
-   "guard": "CRUD_FACTORY",
+   "mutating": true,
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "READ_ONLY"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "gdpr/cookie-consent/route.ts",
@@ -7676,12 +7676,12 @@
     "GET",
     "POST"
    ],
-   "mutating": false,
-   "guard": "CRUD_FACTORY",
+   "mutating": true,
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "READ_ONLY"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "gdpr/data-export/route.ts",
@@ -7702,12 +7702,12 @@
     "GET",
     "POST"
    ],
-   "mutating": false,
-   "guard": "CRUD_FACTORY",
+   "mutating": true,
+   "guard": "RETIRED",
    "kernel": false,
    "subordinate": null,
-   "data": "CRUD_TENANT_TX",
-   "audit": "READ_ONLY"
+   "data": "NONE",
+   "audit": "NONE"
   },
   {
    "route": "governance/board-packets/[id]/distribute/route.ts",
