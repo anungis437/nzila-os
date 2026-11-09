@@ -375,6 +375,30 @@ export class BillingCycleService {
       periodEnd
     );
 
+    // A member joining after this period is ineligible. Do not persist a zero-value
+    // pending charge, including when a dues assignment exists for a later period.
+    if (member.joinedAt && new Date(member.joinedAt).getTime() > periodEnd.getTime()) {
+      return {
+        memberId: member.id,
+        memberName: member.membershipNumber || member.userId,
+        success: true,
+        skipped: true,
+        skipReason: 'Member joined after the billing period',
+      };
+    }
+
+    // A rounded zero-value charge is not a receivable; preserve the skipped
+    // result in both previews and execution instead of creating ledger noise.
+    if (toCents(proRatedAmount) === 0) {
+      return {
+        memberId: member.id,
+        memberName: member.membershipNumber || member.userId,
+        success: true,
+        skipped: true,
+        skipReason: 'No billable amount for this period',
+      };
+    }
+
     // Allocate to COPE/PAC/Strike Fund (simplified - can be made configurable)
     const breakdown = this.allocateDuesBreakdown(proRatedAmount);
 
