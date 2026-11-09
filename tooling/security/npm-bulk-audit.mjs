@@ -156,7 +156,9 @@ export function normalizeAdvisoryResponse(raw, pkgMap) {
             typeof adv.id === 'string' && /^[1-9][0-9]*$/.test(adv.id) &&
             Number.isSafeInteger(Number(adv.id))) ||
           !SEVERITY_ORDER.includes(adv.severity) ||
-          typeof adv.title !== 'string' || !adv.title.trim()) {
+          typeof adv.title !== 'string' || !adv.title.trim() ||
+          (adv.vulnerable_versions !== undefined &&
+            (typeof adv.vulnerable_versions !== 'string' || !adv.vulnerable_versions.trim()))) {
         throw new Error(`Invalid advisory record for ${pkgName}`)
       }
       const key = String(adv.id)

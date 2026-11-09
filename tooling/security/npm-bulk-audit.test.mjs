@@ -47,6 +47,20 @@ test('registry response is strictly typed and bound to installed packages', () =
   )
 })
 
+test('malformed npm vulnerable version ranges fail closed without discarding valid ranges', () => {
+  const packages = new Map([['node-forge', new Set(['1.4.0'])]])
+  for (const vulnerable_versions of [null, {}, [], 123, '', '  ']) {
+    assert.throws(
+      () => normalizeAdvisoryResponse({ 'node-forge': [{ id: 1244017, severity: 'high', title: 'PEM DoS', vulnerable_versions }] }, packages),
+      /Invalid advisory record/,
+    )
+  }
+  const valid = normalizeAdvisoryResponse({
+    'node-forge': [{ id: 1244017, severity: 'high', title: 'PEM DoS', vulnerable_versions: '<1.4.1' }],
+  }, packages)
+  assert.equal(valid['1244017'].vulnerable_versions, '<1.4.1')
+})
+
 test('noncanonical advisory IDs cannot alias valid advisory identities', () => {
   const packages = new Map([['node-forge', new Set(['1.4.0'])]])
   for (const id of ['001244017', ' 1244017', '1e3', '+1244017', '0', 0, -1, 1.5, null]) {
