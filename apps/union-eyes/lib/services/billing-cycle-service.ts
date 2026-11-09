@@ -377,7 +377,8 @@ export class BillingCycleService {
 
     // A member joining after this period is ineligible. Do not persist a zero-value
     // pending charge, including when a dues assignment exists for a later period.
-    if (member.joinedAt && new Date(member.joinedAt).getTime() > periodEnd.getTime()) {
+    // Match the UTC calendar-day semantics used by proration and persisted period dates.
+    if (member.joinedAt && new Date(member.joinedAt).toISOString().slice(0, 10) > periodEnd.toISOString().slice(0, 10)) {
       return {
         memberId: member.id,
         memberName: member.membershipNumber || member.userId,
