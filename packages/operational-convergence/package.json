@@ -20,5 +20,5 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "devDependencies": { "vitest": "^5.0.5" }
+  "devDependencies": { "vitest": "^5.1.0" }
 }

@@ -51,6 +51,6 @@
   "devDependencies": {
     "drizzle-kit": "^0.30.0",
     "typescript": "^6",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }
