@@ -261,6 +261,28 @@ describe('BillingCycleService', () => {
       expect(inserts[0]).toMatchObject({ amount: '16', metadata: { isProRated: true } });
     });
 
+    it('skips members joining after the cycle without creating a pending zero-value charge', async () => {
+      const { tx, inserts } = fakeTx([member(MEMBER, { joinedAt: new Date('2026-04-01T00:00:00.000Z') })]);
+      mockCalculate.mockResolvedValueOnce(calculation('assignment-future', 100));
+
+      const result = await BillingCycleService.generateBillingCycle(cycle);
+
+      expect(tx.insert).not.toHaveBeenCalled();
+      expect(inserts).toHaveLength(0);
+      expect(result).toMatchObject({ success: true, transactionsCreated: 0, totalAmount: 0, members: { processed: 1, skipped: 1 } });
+    });
+
+    it('skips charges that prorate to zero cents instead of creating receivables', async () => {
+      const { tx, inserts } = fakeTx([member(MEMBER, { joinedAt: new Date('2026-03-31T00:00:00.000Z') })]);
+      mockCalculate.mockResolvedValueOnce(calculation('assignment-small', 0.01));
+
+      const result = await BillingCycleService.generateBillingCycle(cycle);
+
+      expect(tx.insert).not.toHaveBeenCalled();
+      expect(inserts).toHaveLength(0);
+      expect(result).toMatchObject({ success: true, transactionsCreated: 0, totalAmount: 0, members: { skipped: 1 } });
+    });
+
     it('previews the amounts without writing a charge', async () => {
       const { tx, inserts } = fakeTx([member(MEMBER)]);
       mockCalculate.mockResolvedValueOnce(calculation('assignment-4', 80));
