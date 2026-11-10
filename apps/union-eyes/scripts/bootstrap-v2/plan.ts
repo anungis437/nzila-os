@@ -3,12 +3,13 @@ import assert from 'node:assert/strict'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { format } from 'prettier'
-import { buildPlan, folder } from './source'
+import { assertCurrentSourceCommitments, buildPlan, folder } from './source'
 
 export async function main() {
   const wheelhouse = process.env.UE_V2_WHEELHOUSE
   if (!wheelhouse) throw new Error('UE_V2_WHEELHOUSE_REQUIRED')
   const plan = await buildPlan(wheelhouse)
+  assertCurrentSourceCommitments(plan)
   mkdirSync(folder, { recursive: true })
   const bytes = await format(JSON.stringify(plan), { parser: 'json' })
   const target = path.join(folder, 'UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json')

@@ -24,7 +24,10 @@ export const FUNCTION_OWNER_ROLES = [
 const roles = FUNCTION_OWNER_ROLES.join(',')
 const EXTENSION_LINE = 'CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;'
 
-export function transformSchemaDump(dump: string): string {
+export function transformSchemaDump(
+  dump: string,
+  options: { vectorExtensionExpected?: boolean } = {},
+): string {
   if (dump.includes('\r'))
     throw new Error('UE_RESTORE_DUMP_HAS_CRLF: the dump must keep LF line endings')
   const out: string[] = []
@@ -53,8 +56,9 @@ export function transformSchemaDump(dump: string): string {
       out.push(`GRANT CREATE ON SCHEMA user_management TO ${roles};`)
     }
   }
-  if (extensionLines !== 1)
-    throw new Error(`UE_RESTORE_EXPECTED_ONE_VECTOR_EXTENSION_LINE (found ${extensionLines})`)
+  const expectedExtensionLines = options.vectorExtensionExpected === false ? 0 : 1
+  if (extensionLines !== expectedExtensionLines)
+    throw new Error(`UE_RESTORE_VECTOR_EXTENSION_COUNT (expected ${expectedExtensionLines}, found ${extensionLines})`)
   if (restrictSeen !== 1 || unrestrictSeen !== 1)
     throw new Error('UE_RESTORE_EXPECTED_ONE_RESTRICT_MARKER_PAIR')
   if (userManagementSeen !== 1)

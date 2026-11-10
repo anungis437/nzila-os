@@ -102,6 +102,37 @@ test('deployment parameters must be staging, digest-bound and free of test bypas
   }
 })
 
+test('Entra identifiers must be a complete pair and credentials stay out of parameters', () => {
+  const m = manifest()
+  const client = { value: 'c0a29862-9432-4b54-bb25-796ff987091f' }
+  const tenant = { value: '5082b8be-b04d-4a13-b61c-b6397670177b' }
+  assert.deepEqual(
+    deploymentParameterDefects(parameters({ entraClientId: client, entraTenantId: tenant }), m),
+    [],
+  )
+  for (const invalid of [
+    { entraClientId: client },
+    { entraTenantId: tenant },
+    { entraClientId: client, entraTenantId: { value: 'common' } },
+  ]) {
+    assert.ok(
+      deploymentParameterDefects(parameters(invalid), m).includes(
+        'PARAMETERS_ENTRA_IDENTIFIERS_INVALID',
+      ),
+    )
+  }
+  assert.ok(
+    deploymentParameterDefects(
+      parameters({
+        entraClientId: client,
+        entraTenantId: tenant,
+        entraClientSecret: { value: 'must-not-be-in-source' },
+      }),
+      m,
+    ).includes('PARAMETERS_FILE_CARRIES_SECRET'),
+  )
+})
+
 test('infrastructure bootstrap requires an explicit boolean and retains staging and digest gates', () => {
   const m = manifest()
   for (const value of [true, false]) {
