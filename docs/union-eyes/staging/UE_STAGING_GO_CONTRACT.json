@@ -4,10 +4,10 @@
   "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
   "generatedOn": "2026-11-10",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
-  "acceptedStagingCandidateSha": "86c328e3e1fdd76e6ba11e85237b103d31e2836d",
-  "stagingWorkflowDefinitionSha": "86c328e3e1fdd76e6ba11e85237b103d31e2836d",
+  "acceptedStagingCandidateSha": "283869caad944e45f760f9d60d122d56a2248015",
+  "stagingWorkflowDefinitionSha": "283869caad944e45f760f9d60d122d56a2248015",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Candidate 86c328e3e1fdd76e6ba11e85237b103d31e2836d contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source PRs #1167 and #1168 are still completing final CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.",
+  "verdictReason": "Candidate 283869caad944e45f760f9d60d122d56a2248015 contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source PRs #1167 and #1168 are still completing final CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -44,7 +44,7 @@
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Engineering baseline e87e3799f3cd9a2408f75d846bc5ec676dae3847 and exact proposed source/workflow 86c328e3e1fdd76e6ba11e85237b103d31e2836d are identified; main ancestry and built image identity remain to be verified."
+      "evidence": "Engineering baseline e87e3799f3cd9a2408f75d846bc5ec676dae3847 and exact proposed source/workflow 283869caad944e45f760f9d60d122d56a2248015 are identified; main ancestry and built image identity remain to be verified."
     },
     {
       "id": "SOURCE_ENGINEERING",
