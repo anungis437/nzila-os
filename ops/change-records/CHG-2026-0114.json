@@ -1,6 +1,6 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 staging qualification deployment for Gate 0 candidate 80bb3eaf",
+  "title": "Union Eyes V2 staging qualification deployment for Gate 0 candidate 2eb48a0e",
   "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. This proposed record does not authorize a merge, production release, institutional mandate, financial activation, or self-approval.",
   "service": "union-eyes",
   "environment": "STAGING",
@@ -18,16 +18,23 @@
   "rollback_plan": "Use the ue-v2-staging-deploy workflow's captured prior digest and revision to restore the previous staging revision. If migration or runtime qualification fails, stop acceptance, preserve evidence, and execute the separately reviewed staging rollback path. Do not touch production or delete the staging stack under this change.",
   "test_evidence_refs": [
     "https://github.com/anungis437/nzila-os/pull/1137",
+    "https://github.com/anungis437/nzila-os/pull/1155",
+    "https://github.com/anungis437/nzila-os/pull/1157",
+    "https://github.com/anungis437/nzila-os/actions/runs/42737529056",
+    "https://github.com/anungis437/nzila-os/actions/runs/42745600190",
     "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json",
     "docs/union-eyes/staging/UE_GATE0_QUALIFICATION_CENSUS.json"
   ],
   "linked_prs": [
-    "1137"
+    "1137",
+    "1155",
+    "1156",
+    "1157"
   ],
   "linked_commits": [
-    "80bb3eaf5240548d21b43124af95a9fad65fd29a"
+    "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9"
   ],
   "status": "PROPOSED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-09T19:20:00-05:00"
+  "updated_at": "2026-11-09T22:00:00-05:00"
 }
