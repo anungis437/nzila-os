@@ -12,13 +12,21 @@ WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 
 az acr repository show --name "$ACR_NAME" --image "${REPOSITORY}@${DIGEST}" -o json > "$WORKDIR/show.json"
-TOKEN="$(az acr login --name "$ACR_NAME" --expose-token --query accessToken -o tsv)"
+# `az acr login --expose-token` labels the returned ACR refresh token as
+# `accessToken`. A refresh token cannot authenticate registry API requests
+# directly; exchange it for a repository-scoped pull token first.
+REFRESH_TOKEN="$(az acr login --name "$ACR_NAME" --expose-token --query accessToken -o tsv)"
+TOKEN="$(curl -fsS -X POST "https://${ACR_NAME}.azurecr.io/oauth2/token" \
+  --data-urlencode 'grant_type=refresh_token' \
+  --data-urlencode "service=${ACR_NAME}.azurecr.io" \
+  --data-urlencode "scope=repository:${REPOSITORY}:pull" \
+  --data-urlencode "refresh_token=${REFRESH_TOKEN}" | jq -er '.access_token')"
 curl -fsS \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Accept: application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json" \
   "https://${ACR_NAME}.azurecr.io/v2/${REPOSITORY}/manifests/${DIGEST}" > "$WORKDIR/manifest.json"
 CONFIG_DIGEST="$(jq -r '.config.digest' "$WORKDIR/manifest.json")"
-curl -fsS \
+curl -fsSL \
   -H "Authorization: Bearer ${TOKEN}" \
   "https://${ACR_NAME}.azurecr.io/v2/${REPOSITORY}/blobs/${CONFIG_DIGEST}" > "$WORKDIR/config.json"
 
