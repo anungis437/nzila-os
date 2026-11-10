@@ -54,10 +54,10 @@ export function canonicalCatalogContract(base = baseContract) {
     { schema: 'public', table: 'platform_identity_bindings', role: binding.role, privilege: 'SELECT', columns: [...binding.selectColumns].sort() },
     { schema: 'public', table: 'organization_members', role: AUTH_EXECUTION_ROLES.system, privilege: 'SELECT', columns: ['id', 'organization_id', 'status', 'user_id'] },
     { schema: 'public', table: 'organization_members', role: AUTH_EXECUTION_ROLES.system, privilege: 'UPDATE', columns: ['status', 'updated_at'] },
-    // The system role upserts these tables and may read only the predicate columns (scripts/bootstrap-v2/service-column-contracts.ts).
-    { schema: 'public', table: 'commercial_contracts', role: 'union_eyes_system', privilege: 'SELECT', columns: ['contract_number', 'id'] },
-    { schema: 'public', table: 'external_data_sync_log', role: 'union_eyes_system', privilege: 'SELECT', columns: ['sync_id'] },
   )
+  // Both service lookup contracts are covered by independently declared table-level
+  // system SELECT in the current authority manifest. The compiler deliberately emits
+  // no redundant column ACL; requiring one here would reject its exact output.
   const canonical = { ...payload, approvedRuntimeDefiners: [
     ...runtimeFunctions.map(entry => ({ schema: 'user_management', name: entry.name, owner: entry.owner })),
     {schema:'public',name:'ue_case_assignee_authorized',owner:CASE_ASSIGNEE_PREDICATE_OWNER},

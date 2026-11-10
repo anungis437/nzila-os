@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-10T16:00:29.714245+00:00",
+  "roleId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/providers/Microsoft.Authorization/roleDefinitions/ec673f50-7e39-499c-b389-c0dd7c9335ac",
+  "assignableScopes": [
+    "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg"
+  ],
+  "addedActions": [
+    "Microsoft.Insights/components/read",
+    "Microsoft.Insights/components/write"
+  ],
+  "beforeDefinitionSha256": "ac58963b0c10cb7a6b2583a92ecff191c02e6e31856e42ab6452fd155f626c4d",
+  "afterDefinitionSha256": "61aa5cc751f4103fa1ce418f80aba346498b2314d452a584799526841c66ddf1",
+  "productionScope": false,
+  "dataPlaneActionsAdded": []
+}

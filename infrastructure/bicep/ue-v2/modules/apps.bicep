@@ -48,6 +48,13 @@ var secretNames = [
   'resend-api-key'
   'storage-account-key'
 ]
+var stagingAuthSystemSecretNames = deploymentEnvironment == 'staging' ? ['auth-system-database-url'] : []
+var stagingEnvironment = deploymentEnvironment == 'staging' ? [
+  { name: 'TARGET_ENVIRONMENT', value: 'staging' }
+  { name: 'UE_APP_URL', value: appUrl }
+  { name: 'UE_MARKETING_URL', value: effectiveSiteUrl }
+  { name: 'UE_FRONTEND_IMAGE_DIGEST', value: last(split(appImage, '@')) }
+] : []
 var stripeSecretNames = enableStripe ? ['stripe-secret-key', 'stripe-webhook-secret'] : []
 var entraConfigured = !empty(entraClientId) && !empty(entraTenantId)
 var entraSecretNames = entraConfigured ? ['azure-ad-client-secret'] : []
@@ -59,7 +66,7 @@ var entraEnv = entraConfigured ? concat([
   { name: 'AZURE_AD_STAGING_SINGLE_TENANT', value: 'true' }
   { name: 'AZURE_AD_STAGING_SESSION_MAX_AGE_SECONDS', value: '900' }
 ] : []) : []
-var secrets = [for n in concat(secretNames, stripeSecretNames, entraSecretNames): {
+var secrets = [for n in concat(secretNames, stagingAuthSystemSecretNames, stripeSecretNames, entraSecretNames): {
   name: n
   keyVaultUrl: '${kvBase}secrets/${n}'
   identity: identityId
@@ -173,7 +180,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'DATABASE_URL', secretRef: 'database-url' }
             { name: 'SYSTEM_DATABASE_URL', secretRef: 'system-database-url' }
             { name: 'AUTH_DATABASE_URL', secretRef: 'auth-database-url' }
-            { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: 'auth-database-url' }
+            { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: deploymentEnvironment == 'staging' ? 'auth-system-database-url' : 'auth-database-url' }
             { name: 'AUTH_SECRET', secretRef: 'auth-secret' }
             { name: 'AUTH_MFA_ENCRYPTION_KEY', secretRef: 'mfa-encryption-key' }
             { name: 'VOTING_SECRET', secretRef: 'voting-secret' }
@@ -181,7 +188,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'REDIS_URL', secretRef: 'redis-url' }
             { name: 'RESEND_API_KEY', secretRef: 'resend-api-key' }
             { name: 'AZURE_STORAGE_ACCOUNT_KEY', secretRef: 'storage-account-key' }
-          ], stripeEnv, entraEnv)
+          ], stripeEnv, entraEnv, stagingEnvironment)
         }
       ]
       scale: {
