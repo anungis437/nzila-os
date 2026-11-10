@@ -110,7 +110,10 @@ export async function inspectNativeDependencies(client: pg.Client): Promise<Nati
 }
 export const catalogDigest = (objects: CatalogObject[]) => hash(JSON.stringify(objects))
 export const canonicalType = (type: string) =>
-  type.replace(/^varchar/, 'character varying').replace(/\s*,\s*/g, ',')
+  type
+    .replace(/^varchar/, 'character varying')
+    .replace(/^time$/, 'time without time zone')
+    .replace(/\s*,\s*/g, ',')
 
 export function assertLocalTarget(config: pg.ClientConfig) {
   if (
