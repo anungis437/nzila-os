@@ -127,7 +127,7 @@ resource server 'Microsoft.DBforPostgreSQL/flexibleServers@2023-12-01-preview' =
   })
   sku: {
     name: sku
-    tier: startsWith(sku, 'B_') ? 'Burstable' : 'GeneralPurpose'
+    tier: isBurstable ? 'Burstable' : 'GeneralPurpose'
   }
   properties: {
     version: '16'
@@ -308,7 +308,7 @@ resource readReplicas 'Microsoft.DBforPostgreSQL/flexibleServers@2023-12-01-prev
     })
     sku: {
       name: sku
-      tier: startsWith(sku, 'B_') ? 'Burstable' : 'GeneralPurpose'
+      tier: isBurstable ? 'Burstable' : 'GeneralPurpose'
     }
     properties: {
       createMode: 'Replica'
