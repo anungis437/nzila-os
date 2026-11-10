@@ -45,7 +45,7 @@ test('staging contract fails closed without real deployment evidence', () => {
   assert.equal(contract.verdict, 'STAGING_NO_GO')
   assert.equal(contract.boundaries.productionAuthorized, false)
   assert.equal(contract.boundaries.mergeAuthorizedByThisContract, false)
-  assert.ok(contract.criteria.some(item => item.id === 'AUTHORIZED_STAGING_DEPLOYMENT' && item.status === 'EXTERNAL_HOLD'))
+  assert.ok(contract.criteria.some(item => item.id === 'AUTHORIZED_STAGING_DEPLOYMENT' && item.status === 'NOT_PROVEN'))
   assert.ok(contract.criteria.some(item => item.id === 'API_AND_POSTGRES_TENANT_ISOLATION' && item.status === 'NOT_PROVEN'))
   assert.ok(contract.externalBlockers.every(item => item.engineeringBypassPermitted === false))
 })

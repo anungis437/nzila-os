@@ -218,7 +218,7 @@ test('CLI fails closed on a missing change record and a tag manifest', () => {
 
 test('CHG-2026-0114 founder direction accepts only the exact candidate and preserves staging boundaries', () => {
   const approved = JSON.parse(fs.readFileSync(path.join(REPO, 'ops/change-records/CHG-2026-0114.json'), 'utf8'))
-  const sha = '2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9'
+  const sha = '884391997bb797637615361f2782697604d6d973'
   const opts = { changeId: 'CHG-2026-0114', sourceSha: sha, nowMs: Date.parse('2026-11-10T12:00:00Z') }
   assert.deepEqual(changeRecordDefects(approved, opts), [])
   assert.ok(changeRecordDefects({ ...approved, environment: 'PROD' }, opts).includes('CHANGE_RECORD_WRONG_ENVIRONMENT'))

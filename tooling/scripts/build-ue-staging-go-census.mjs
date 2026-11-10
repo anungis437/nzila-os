@@ -10,8 +10,8 @@ const readJson = relative => JSON.parse(fs.readFileSync(path.join(root, relative
 
 const ENGINEERING_BASELINE_SHA = 'e87e3799f3cd9a2408f75d846bc5ec676dae3847'
 const GENERATED_ON = '2026-11-10'
-const STAGING_CANDIDATE_SHA = '2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9'
-const STAGING_WORKFLOW_SHA = 'd43a640e5a2a2e88b7e61986360aa5b6f87cedc4'
+const STAGING_CANDIDATE_SHA = '884391997bb797637615361f2782697604d6d973'
+const STAGING_WORKFLOW_SHA = '884391997bb797637615361f2782697604d6d973'
 const outputDirectory = path.join(root, 'docs/union-eyes/staging')
 
 const register = readJson('docs/union-eyes/convergence/remediation/ue-all-777-remediation-register.json')
@@ -163,7 +163,7 @@ const contract = {
   acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
   stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
   verdict: 'STAGING_NO_GO',
-  verdictReason: 'The source baseline and founder-operated staging authorization are ready. Azure what-if run 42753019682 completed its provider preflight successfully, so the previous Canada Central environment quota hold is no longer evidenced. That run's post-what-if gate failed on an exact symbolic AcrPull assignment; its narrowly scoped fix is in PR #1159 and combined here. Fresh integrated what-if, controlled staging apply and deployed Phase 3A evidence are still required. No staging deployment has occurred.',
+  verdictReason: `The source baseline and founder-operated staging authorization are ready. PR #1162 corrected the PostgreSQL SKU contract, AcrPull role GUID and least-privilege provider actions proven by controlled apply run 42765284956. Exact-SHA build run 42769631537 produced replacement candidate ${STAGING_CANDIDATE_SHA}. A fresh reviewed what-if, controlled staging apply and deployed Phase 3A evidence are still required; successful partial resources from the failed apply are not runtime acceptance.`,
   decisionAuthority: {
     role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
@@ -199,8 +199,8 @@ const contract = {
     ['CANDIDATE_IDENTITY', 'PASS', `Engineering baseline ${ENGINEERING_BASELINE_SHA}, staging image/source ${STAGING_CANDIDATE_SHA}, and workflow definition ${STAGING_WORKFLOW_SHA} are unambiguous and contained on main.`],
     ['SOURCE_ENGINEERING', 'PASS', 'Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries.'],
     ['LOCAL_HOLISTIC_REGRESSION', 'NON_BLOCKING_HOST_LIMITATION', 'Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.'],
-    ['FINAL_CANDIDATE_CI', 'PASS', 'PR #1155 validated the staging candidate with 103 passing and 11 intentionally skipped checks; PR #1157 validated the final read-only what-if workflow correction with 102 passing and 11 intentionally skipped checks.'],
-    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'The source candidate, protected GitHub environments, OIDC identities, least-privilege roles, and digest-pinned images are configured. On 2026-11-10, Azure what-if in run 42753019682 completed successfully, superseding the previous capacity preflight. The post-what-if gate rejected a symbolic registry AcrPull role assignment; the bounded fix from PR #1159 is combined with founder approval and must pass CI and a new what-if before apply. No staging deployment has occurred.'],
+    ['FINAL_CANDIDATE_CI', 'PASS', 'PR #1162 validated the Azure provider-contract correction with 104 passing checks and 9 intentional skips. Exact-SHA build run 42769631537 built and attested the replacement app image and mirrored utility images.'],
+    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'Protected GitHub environments, OIDC identities, least-privilege roles and digest-pinned images are configured. Controlled apply run 42765284956 passed plan, reviewed what-if, change-window and founder environment gates, then failed closed on provider-contract defects before complete deployment. The corrected replacement candidate still requires a fresh reviewed what-if and successful apply.'],
     ['DEPLOYED_REVISION_IDENTITY', 'NOT_PROVEN', 'No staging revision running this candidate is identified.'],
     ['DATABASE_MIGRATIONS', 'NOT_PROVEN', 'No real candidate-bound staging migration receipt exists.'],
     ['ENTRA_AUTHENTICATED_SESSIONS', 'NOT_PROVEN', 'No real staging Entra/session acceptance exists for this candidate.'],
