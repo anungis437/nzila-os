@@ -24,6 +24,7 @@ function fixture(phase = 'FINAL') {
     'union_eyes_runtime',
     'union_eyes_system',
     'nzila_auth_gateway',
+    'nzila_auth_system_gateway',
     'reader',
   ]
   const reference = [

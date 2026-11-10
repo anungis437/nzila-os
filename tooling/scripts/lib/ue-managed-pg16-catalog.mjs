@@ -5,6 +5,7 @@ export const MANAGED_PG16_LOGIN_TARGETS = Object.freeze({
   ue_staging_runtime: 'union_eyes_runtime',
   ue_staging_system: 'union_eyes_system',
   ue_staging_auth: 'nzila_auth_gateway',
+  ue_staging_auth_system: 'nzila_auth_system_gateway',
 })
 const operatorName = 'uev2admin'
 const verifiedProofs = new WeakSet()

@@ -5,6 +5,7 @@ import assert from 'node:assert/strict'
 import { randomBytes, randomUUID, createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import pg from 'pg'
+import postgres from 'postgres'
 const root = path.resolve(__dirname, '../..')
 const base = path.join(root, 'apps/union-eyes/scripts/bootstrap-v2')
 const { inspectCatalog, catalogDigest, verifyCurrentModels } = require(
@@ -265,6 +266,96 @@ async function main() {
   const final = await qualify(runtime, 'FINAL')
   await forbiddenWithSavepoint(runtime, 'SELECT * FROM public.ue_v2_bootstrap_receipt')
   await runtime.query('COMMIT')
+  phase = 'real-application-credential-contexts'
+  function loginUrl(login: string, initialRole?: string) {
+    const u = new URL(`postgresql://${login}:${loginPasswords[login]}@127.0.0.1:${port}/${db}`)
+    u.searchParams.set('sslmode', 'disable')
+    if (initialRole) u.searchParams.set('options', `-c role=${initialRole}`)
+    return u.toString()
+  }
+  const { executeAuthContext, closeAuthClients } = require(
+    path.join(root, 'packages/db/src/auth-client.ts'),
+  )
+  const priorAuth = process.env.AUTH_DATABASE_URL,
+    priorSystemAuth = process.env.AUTH_SYSTEM_DATABASE_URL
+  try {
+    process.env.AUTH_DATABASE_URL = loginUrl('ue_staging_auth')
+    process.env.AUTH_SYSTEM_DATABASE_URL = loginUrl('ue_staging_auth_system')
+    const providerRole = await executeAuthContext(
+      {
+        phase: 'provider',
+        provider: 'entra',
+        providerSubject: 'synthetic-native-credential-boundary',
+      },
+      async (tx: any) =>
+        (await tx.execute(require('drizzle-orm').sql`SELECT current_user AS role`))[0].role,
+    )
+    const cleanupRole = await executeAuthContext(
+      {
+        phase: 'cleanup',
+        actorUserId: 'synthetic-native-credential-boundary',
+        reason: 'Local role qualification only',
+      },
+      async (tx: any) =>
+        (await tx.execute(require('drizzle-orm').sql`SELECT current_user AS role`))[0].role,
+    )
+    assert.equal(providerRole, 'nzila_auth_provider')
+    assert.equal(cleanupRole, 'nzila_auth_cleanup')
+    process.env.AUTH_SYSTEM_DATABASE_URL = loginUrl('ue_staging_auth')
+    await assert.rejects(
+      executeAuthContext(
+        {
+          phase: 'cleanup',
+          actorUserId: 'synthetic-native-credential-boundary',
+          reason: 'Negative credential-boundary control',
+        },
+        async () => true,
+      ),
+      /Unsafe auth database principal/,
+    )
+  } finally {
+    await closeAuthClients()
+    if (priorAuth === undefined) delete process.env.AUTH_DATABASE_URL
+    else process.env.AUTH_DATABASE_URL = priorAuth
+    if (priorSystemAuth === undefined) delete process.env.AUTH_SYSTEM_DATABASE_URL
+    else process.env.AUTH_SYSTEM_DATABASE_URL = priorSystemAuth
+  }
+  for (const [login, initialRole] of [
+    ['ue_staging_runtime', 'union_eyes_runtime'],
+    ['ue_staging_system', 'union_eyes_system'],
+  ]) {
+    const url = loginUrl(login, initialRole)
+    const connection = new pg.Client({ connectionString: url })
+    await connection.connect()
+    clients.push(connection)
+    assert.equal((await connection.query('SELECT current_user AS role')).rows[0].role, initialRole)
+    if (login === 'ue_staging_runtime') {
+      const priorCanonical = process.env.UE_CANONICAL_BOOTSTRAP_V2
+      try {
+        process.env.UE_CANONICAL_BOOTSTRAP_V2 = '1'
+        const { evaluateCatalogAdmission } = require(
+          path.join(root, 'apps/union-eyes/lib/operations/catalog-admission.ts'),
+        )
+        const admission = await evaluateCatalogAdmission(
+          async (statement: string) => (await connection.query(statement)).rows,
+        )
+        assert.equal(
+          admission.ok,
+          true,
+          'PACKAGED_CATALOG_ADMISSION:' + JSON.stringify(admission.violations),
+        )
+      } finally {
+        if (priorCanonical === undefined) delete process.env.UE_CANONICAL_BOOTSTRAP_V2
+        else process.env.UE_CANONICAL_BOOTSTRAP_V2 = priorCanonical
+      }
+    }
+    const sql = postgres(url, { max: 1, prepare: false })
+    try {
+      assert.equal((await sql`SELECT current_user AS role`)[0].role, initialRole)
+    } finally {
+      await sql.end({ timeout: 5 })
+    }
+  }
   phase = 'real-negative-controls'
   await admin.query(
     'GRANT ue_v2_owner TO ue_staging_runtime WITH ADMIN FALSE, INHERIT FALSE, SET TRUE',
@@ -309,6 +400,10 @@ async function main() {
     extraOwnerMembershipRejected: true,
     directLoginTableGrantRejected: true,
     temporaryOperatorSetGrantRemoved: true,
+    distinctOrdinaryAndSystemAuthContextsPassed: true,
+    reusedOrdinaryAuthCredentialRejected: true,
+    initialRoleConnectionOptionsPassedBothDrivers: true,
+    packagedCatalogAdmissionPassed: true,
     qualifierSourceDigest: hash(fs.readFileSync(__filename)),
     profileSourceDigest: hash(
       fs.readFileSync(path.join(__dirname, 'lib/ue-managed-pg16-catalog.mjs')),

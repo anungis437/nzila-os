@@ -14,7 +14,7 @@ operator; discarding them from a catalog comparison would hide real escalation.
 
 The managed profile enumerates every permitted membership, grantor and option:
 canonical internal grants made by `uev2admin`, provider-owned creator grants,
-three NOINHERIT application logins, and one temporary owner SET delegation during
+four NOINHERIT application logins, and one temporary owner SET delegation during
 an open restore. FINAL requires removal of that temporary delegation. Additional
 owner/gateway/admin membership, direct login privileges, changed ACLs, RLS flags,
 function bodies, ownership, missing objects and duplicate identities all fail.
@@ -31,8 +31,12 @@ The local-only command accepts a hash-checked qualified export, creates its own
 pinned Docker PostgreSQL with a non-superuser administrator and provider-owned
 public schema, and restores the actual emitted SQL. It transfers public schema
 ownership while the operator still owns the empty database, before transferring
-the database to the canonical owner. Three genuine restricted logins then prove
-bare-access and cross-role denials. Native negative controls add an owner-role
+the database to the canonical owner. Four genuine restricted logins then prove
+bare-access and cross-role denials. The actual auth client proves separate ordinary
+and system gateway contexts and rejects reusing the ordinary credential for the
+system context. Both pg and postgres.js prove the startup role options required
+by shared read-only health/catalog inspection. The real packaged admission
+queries must pass against the restored catalog. Native negative controls add an owner-role
 membership and a direct table grant; qualification must reject both. The
 command removes only its own disposable container and accepts no remote target.
 
@@ -48,12 +52,12 @@ negative tests. Local results are prerequisite evidence, explicitly
 `stagingAcceptance=false`. An actual Azure qualification must additionally bind
 the owned staging server, private address, TLS peer, database, source/image,
 export hashes and real native snapshots. It must use FINAL, pin `azuresu` as
-provider grantor, preserve the raw probe result, and verify the three real
+provider grantor, preserve the raw probe result, and verify the four real
 application login roles. No simulated session, Azure response, or metadata
 substitution is permitted. Unexpected existing target state stops the restore.
 
 The [measured local receipt](evidence/ue-v2-managed-pg16-local-20261110.json)
-records 23,849 canonical objects, 23,877 managed objects, 13 native login denials,
+records 23,849 canonical objects, 23,878 managed objects, 21 native login denials,
 the retained fixture graph difference, and both rejected privilege injections.
 The comparator's 22 tests and the CLI's strict isolated typecheck also passed.
 The export source in this local procedure rehearsal is recorded explicitly;
