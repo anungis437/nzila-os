@@ -311,6 +311,7 @@ jobs:
             --template-file "source/$TEMPLATE" \
             --parameters "@$RUNNER_TEMP/plan/deploy-parameters.json" \
             --parameters dbAdminPassword="$THROWAWAY" \
+            --validation-level ProviderNoRbac \
             --result-format FullResourcePayloads \
             --no-pretty-print -o json > "$RUNNER_TEMP/evidence/what-if.json"
           jq -r '"| Change | Resource |", "|---|---|", (.changes[] | "| \(.changeType) | `\(.resourceId)` |")' \
