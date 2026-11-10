@@ -51,7 +51,7 @@ env:
   CRON_REPOSITORY: ue-cron-curl
   EXPECTED_SUBSCRIPTION_ID: d562ba7f-d891-4504-a489-10917c0ebaaf
   STAGING_MARKETING_URL: https://staging.unioneyes.app
-  STAGING_APP_URL: https://staging-app.unioneyes.app
+  STAGING_APP_URL: https://nzila-ue-v2-staging-app.whitemoss-055b7430.canadacentral.azurecontainerapps.io
 
 jobs:
   plan:
@@ -185,11 +185,13 @@ jobs:
             --build-arg "RELEASE_ID=UE-V2-STAGING-${SHA}" \
             --build-arg "NEXT_PUBLIC_SITE_URL=${STAGING_MARKETING_URL}" \
             --build-arg "NEXT_PUBLIC_APP_URL=${STAGING_APP_URL}" \
+            --build-arg "NEXT_PUBLIC_SITE_URL_STAGING=${STAGING_MARKETING_URL}" \
+            --build-arg "NEXT_PUBLIC_APP_URL_STAGING=${STAGING_APP_URL}" \
             --build-arg UE_ENVIRONMENT=staging \
             --build-arg NEXT_PUBLIC_APP_ENV=staging \
-            --build-arg UE_DEPLOYMENT_TYPE=standard \
-            --build-arg UE_FEATURE_PROFILE=full \
-            --build-arg NEXT_PUBLIC_UE_FEATURE_PROFILE=full \
+            --build-arg UE_DEPLOYMENT_TYPE=staging \
+            --build-arg UE_FEATURE_PROFILE=internal \
+            --build-arg NEXT_PUBLIC_UE_FEATURE_PROFILE=internal \
             --build-arg "UE_MARKETING_URL=${STAGING_MARKETING_URL}" \
             --build-arg "UE_APP_URL=${STAGING_APP_URL}" \
             --label "org.opencontainers.image.revision=${SHA}" \

@@ -42,19 +42,39 @@ export async function initOtel(config: OtelConfig): Promise<void> {
         instrumentations?: unknown[]
       }) => NodeSdkLike
     }
-    const { getNodeAutoInstrumentations } = await import('@opentelemetry/auto-instrumentations-node')
-    const { OTLPTraceExporter } = (await import('@opentelemetry/exporter-trace-otlp-http')) as {
-      OTLPTraceExporter: new (config: { url: string }) => unknown
-    }
+    const { getNodeAutoInstrumentations } =
+      await import('@opentelemetry/auto-instrumentations-node')
     const { resourceFromAttributes } = await import('@opentelemetry/resources')
-    const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } = await import(
-      '@opentelemetry/semantic-conventions'
-    )
+    const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } =
+      await import('@opentelemetry/semantic-conventions')
 
     const endpoint =
-      config.endpoint ??
-      process.env.OTEL_EXPORTER_OTLP_ENDPOINT ??
-      'http://localhost:4318'
+      config.endpoint ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'http://localhost:4318'
+
+    // ACA's managed collector injects grpc; HTTP exporters cannot send to it.
+    const protocol =
+      process.env.OTEL_EXPORTER_OTLP_TRACES_PROTOCOL ??
+      process.env.OTEL_EXPORTER_OTLP_PROTOCOL ??
+      'http/json'
+    let endpointEnd = endpoint.length
+    while (endpointEnd > 0 && endpoint.charCodeAt(endpointEnd - 1) === 47) endpointEnd--
+    const baseEndpoint = endpoint.slice(0, endpointEnd)
+    let traceExporter: unknown
+    if (protocol === 'grpc') {
+      const { OTLPTraceExporter } = await import('@opentelemetry/exporter-trace-otlp-grpc')
+      traceExporter = new OTLPTraceExporter({
+        url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ?? baseEndpoint,
+      })
+    } else if (protocol === 'http/json') {
+      const { OTLPTraceExporter } = (await import('@opentelemetry/exporter-trace-otlp-http')) as {
+        OTLPTraceExporter: new (config: { url: string }) => unknown
+      }
+      traceExporter = new OTLPTraceExporter({
+        url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ?? `${baseEndpoint}/v1/traces`,
+      })
+    } else {
+      throw new Error(`Unsupported OTLP trace protocol: ${protocol}`)
+    }
 
     const sdk = new NodeSDK({
       resource: resourceFromAttributes({
@@ -63,7 +83,7 @@ export async function initOtel(config: OtelConfig): Promise<void> {
         'deployment.environment': process.env.NODE_ENV ?? 'development',
         ...config.attributes,
       }),
-      traceExporter: new OTLPTraceExporter({ url: `${endpoint}/v1/traces` }),
+      traceExporter,
       instrumentations: [
         getNodeAutoInstrumentations({
           '@opentelemetry/instrumentation-http': { enabled: true },
@@ -74,7 +94,9 @@ export async function initOtel(config: OtelConfig): Promise<void> {
     sdk.start()
     console.log(`[otel] Initialized for ${config.appName} → ${endpoint}`)
 
-    const nodeProcess = (globalThis as { process?: { on?: (event: string, cb: () => void) => void } }).process
+    const nodeProcess = (
+      globalThis as { process?: { on?: (event: string, cb: () => void) => void } }
+    ).process
     nodeProcess?.on?.('SIGTERM', () => {
       sdk.shutdown().catch(console.error)
     })
@@ -99,7 +121,10 @@ export async function withSpan<T>(
     const { trace, context, SpanStatusCode } = (await import('@opentelemetry/api')) as {
       trace: {
         getTracer: (name: string) => {
-          startSpan: (spanName: string, options: { attributes: Record<string, string | number | boolean> }) => {
+          startSpan: (
+            spanName: string,
+            options: { attributes: Record<string, string | number | boolean> },
+          ) => {
             setStatus: (status: { code: number; message?: string }) => void
             end: () => void
           }
@@ -115,10 +140,7 @@ export async function withSpan<T>(
     const tracer = trace.getTracer('nzila-os')
     const span = tracer.startSpan(name, { attributes })
     try {
-      const result = await context.with(
-        trace.setSpan(context.active(), span),
-        fn,
-      )
+      const result = await context.with(trace.setSpan(context.active(), span), fn)
       span.setStatus({ code: SpanStatusCode.OK })
       return result
     } catch (err) {

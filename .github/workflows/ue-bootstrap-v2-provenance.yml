@@ -13,6 +13,8 @@ on:
       - 'apps/union-eyes/**'
       - 'docs/union-eyes/bootstrap-v2/**'
       - 'pnpm-lock.yaml'
+      - 'tooling/scripts/qualify-ue-managed-pg16-restore.cts'
+      - 'tooling/scripts/lib/ue-managed-pg16-catalog*'
       - '.github/workflows/ue-bootstrap-v2-provenance.yml'
   workflow_dispatch:
 
@@ -87,6 +89,23 @@ jobs:
 
       - name: Pull the pinned PostgreSQL image the native fixture runs with --pull never
         run: docker pull pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
+
+      - name: Qualify the managed PostgreSQL 16 restore and restricted login boundary
+        working-directory: apps/union-eyes
+        env:
+          DOCKER_DEFAULT_PLATFORM: linux/amd64
+        run: |
+          set -euo pipefail
+          pnpm exec tsx ../../tooling/scripts/export-ue-v2-staging-schema.cts --out "$RUNNER_TEMP/ue-managed-reference"
+          pnpm exec tsx ../../tooling/scripts/qualify-ue-managed-pg16-restore.cts --export "$RUNNER_TEMP/ue-managed-reference" --receipt "$RUNNER_TEMP/ue-managed-pg16-proof.json"
+
+      - name: Preserve the measured managed-role qualification receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-managed-pg16-proof-${{ github.run_id }}
+          path: ${{ runner.temp }}/ue-managed-pg16-proof.json
+          retention-days: 90
+          if-no-files-found: error
 
       # The plan installs into a fresh container per suite. runtime-security-native (378 cases, over ten minutes
       # locally) is not run here.
