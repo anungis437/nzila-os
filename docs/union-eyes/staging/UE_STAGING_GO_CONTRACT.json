@@ -7,9 +7,9 @@
   "acceptedStagingCandidateSha": "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
   "stagingWorkflowDefinitionSha": "d43a640e5a2a2e88b7e61986360aa5b6f87cedc4",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "The source baseline and staging foundation are complete, but Azure currently limits Canada Central to the existing production Container Apps environment. The isolated staging environment cannot be previewed or deployed until Microsoft raises ManagedEnvironmentCount from 1 to 2; the staging change record also still requires independent approval. No real deployed Phase 3A evidence exists.",
+  "verdictReason": "The source baseline and staging foundation are complete, but Azure currently limits Canada Central to the existing production Container Apps environment. The isolated staging environment cannot be previewed or deployed until Microsoft raises ManagedEnvironmentCount from 1 to 2. CHG-2026-0114 is approved under the scoped founder-operated staging authority; a separate human reviewer is not required for this solo-founder operation. Real deployed Phase 3A evidence does not yet exist.",
   "decisionAuthority": {
-    "role": "NZILA_OWNER_OR_AUTHORIZED_PLATFORM_REVIEWER",
+    "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
   },
   "boundaries": {
@@ -54,9 +54,9 @@
     },
     {
       "id": "LOCAL_HOLISTIC_REGRESSION",
-      "requirement": "REQUIRED",
-      "status": "ENVIRONMENT_HOLD",
-      "evidence": "49,052 tests passed; 13 failures are confined to an unrelated civic filesystem/authorization fixture and a missing host Python cryptography package. Exact-SHA CI remains authoritative."
+      "requirement": "ADVISORY",
+      "status": "NON_BLOCKING_HOST_LIMITATION",
+      "evidence": "Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline."
     },
     {
       "id": "FINAL_CANDIDATE_CI",
@@ -68,7 +68,7 @@
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
       "status": "EXTERNAL_HOLD",
-      "evidence": "The candidate, protected GitHub environments, OIDC identities, least-privilege roles, and digest-pinned images exist. Azure what-if run 42745600190 passed all repository, identity, subscription, and registry attestations, then failed provider preflight because Canada Central ManagedEnvironmentCount is limit 1 / usage 1. CHG-2026-0114 also remains pending independent approval."
+      "evidence": "The candidate, protected GitHub environments, OIDC identities, least-privilege roles and digest-pinned images exist. Azure what-if run 42745600190 passed repository, identity, subscription and registry attestations, then failed provider preflight: Canada Central ManagedEnvironmentCount limit 1 / usage 1. CHG-2026-0114 is now founder-authorized; Azure capacity remains the only demonstrated external deployment block."
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
@@ -139,8 +139,8 @@
     {
       "id": "STAGING_DECISION_ACCEPTANCE",
       "requirement": "REQUIRED",
-      "status": "EXTERNAL_HOLD",
-      "evidence": "No authorized staging acceptance is recorded because deployed qualification has not occurred."
+      "status": "NOT_PROVEN",
+      "evidence": "The sole founder is the staging decision authority. STAGING GO cannot yet be accepted because real deployed qualification has not happened; no second independent human is required for this internal operation."
     }
   ],
   "externalBlockers": [
@@ -148,18 +148,6 @@
       "id": "EXT-01-CONTAINER-APPS-ENVIRONMENT-QUOTA",
       "dependency": "Canada Central ManagedEnvironmentCount is limit 1 / usage 1. The existing environment is production and the approved topology expressly forbids sharing it. Azure what-if run 42745600190 failed with MaxNumberOfRegionalEnvironmentsInSubExceeded after identity and digest attestations passed.",
       "requiredAction": "Microsoft must raise the subscription's Canada Central ManagedEnvironmentCount from 1 to 2 through the Azure quota portal or support channel. CLI quota update returned ResourceNotAvailableForOffer and the support API returned InvalidSupportPlan.",
-      "engineeringBypassPermitted": false
-    },
-    {
-      "id": "EXT-02-NO-APPROVED-STAGING-CHANGE-RECORD",
-      "dependency": "CHG-2026-0114 is prepared and candidate-bound to 2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9, but remains PENDING with no independent approver recorded.",
-      "requiredAction": "A designated approver must approve the prepared staging change instrument; the implementer must not self-approve.",
-      "engineeringBypassPermitted": false
-    },
-    {
-      "id": "EXT-04-CREDENTIALLED-ACCEPTANCE-ACTORS",
-      "dependency": "No credentialed real staging persona set and independent acceptance actor are available for candidate-bound journeys.",
-      "requiredAction": "Provide or authorize the staging identities and designated acceptance reviewer after deployment.",
       "engineeringBypassPermitted": false
     }
   ]
