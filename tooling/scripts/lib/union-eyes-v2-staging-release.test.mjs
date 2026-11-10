@@ -139,7 +139,7 @@ test('what-if accepts only the exact symbolic AcrPull assignment Azure emits for
   const registryId = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.ContainerRegistry/registries/nzilaventuresacr`
   const identityId = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/nzila-ue-v2-staging-id`
   const principalReference = `reference('${identityId}', '2023-01-31').principalId`
-  const roleId = '7f951dda-4ed3-4680-a7ca-43fe172d0f3b'
+  const roleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
   const resourceId = `[extensionResourceId('${registryId}', 'Microsoft.Authorization/roleAssignments', guid('${registryId}', ${principalReference}, '${roleId}'))]`
   const symbolic = {
     status: 'Succeeded',
@@ -176,6 +176,16 @@ test('what-if fingerprint ignores order and case but not change type', () => {
   const c = { changes: [{ resourceId: `${STAGING}/A`, changeType: 'Modify' }, { resourceId: `${STAGING}/B`, changeType: 'NoChange' }] }
   assert.equal(whatIfFingerprint(a), whatIfFingerprint(b))
   assert.notEqual(whatIfFingerprint(a), whatIfFingerprint(c))
+})
+
+test('Azure provider contracts use the live AcrPull role and PostgreSQL SKU names', () => {
+  const acrModule = fs.readFileSync(path.join(REPO, 'infrastructure/bicep/ue-v2/modules/acr-pull.bicep'), 'utf8')
+  const postgresModule = fs.readFileSync(path.join(REPO, 'infrastructure/bicep/modules/postgres.bicep'), 'utf8')
+  const stagingParameters = JSON.parse(fs.readFileSync(path.join(REPO, 'infrastructure/bicep/ue-v2/main.staging.parameters.json'), 'utf8'))
+  assert.match(acrModule, /7f951dda-4ed3-4680-a7ca-43fe172d538d/)
+  assert.doesNotMatch(acrModule, /7f951dda-4ed3-4680-a7ca-43fe172d0f3b/)
+  assert.equal(stagingParameters.parameters.dbSku.value, 'Standard_B1ms')
+  assert.match(postgresModule, /startsWith\(sku, 'Standard_B'\)/)
 })
 
 test('only the new subscription and tenant are accepted', () => {

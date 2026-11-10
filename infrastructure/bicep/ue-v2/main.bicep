@@ -68,7 +68,7 @@ param dbAdminPassword string
 param dbAdminLogin string = 'uev2admin'
 param appDatabaseName string = env == 'prod' ? 'ue_v2_prod' : 'ue_v2_staging'
 @description('PostgreSQL SKU (allowed values are enforced by ../modules/postgres.bicep). Burstable SKUs get no HA and no geo backup.')
-param dbSku string = env == 'prod' ? 'GP_Standard_D4ds_v5' : 'B_Standard_B1ms'
+param dbSku string = env == 'prod' ? 'Standard_D4ds_v5' : 'Standard_B1ms'
 param dbStorageGb int = env == 'prod' ? 256 : 32
 param dbBackupRetentionDays int = env == 'prod' ? 35 : 7
 param dbHighAvailability bool = env == 'prod'
@@ -76,7 +76,7 @@ param dbGeoRedundantBackup bool = env == 'prod'
 @description('Let Azure apply the default (cheapest) storage performance tier for dbStorageGb instead of the module\'s fixed P15/P20/P30 mapping.')
 param dbUseDefaultStorageTier bool = env != 'prod'
 @description('max_connections override. 0 keeps the module default (200 without PgBouncer). Burstable B1ms supports 50.')
-param dbMaxConnections int = startsWith(dbSku, 'B_') ? 50 : 0
+param dbMaxConnections int = startsWith(dbSku, 'Standard_B') ? 50 : 0
 
 @description('Application replica bounds. Staging scales to zero; raise them for an acceptance run.')
 param appMinReplicas int = env == 'prod' ? 2 : 0

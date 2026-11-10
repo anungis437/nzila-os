@@ -10,7 +10,7 @@
 //
 // Usage:
 //   az deployment group create -g nzila-prod-rg \
-//     -f main.bicep -p env=prod dbSku=GP_Standard_E8ds_v5
+//     -f main.bicep -p env=prod dbSku=Standard_E8ds_v5
 // ──────────────────────────────────────────────────────────────────────────────
 
 param serverName string
@@ -19,13 +19,13 @@ param env string
 
 @description('PostgreSQL Flexible Server SKU. Scale path: B1ms → D4ds_v5 → E8ds_v5 → E16ds_v5 → E32ds_v5')
 @allowed([
-  'B_Standard_B1ms'         // Dev: 1 vCore, 2 GiB
-  'GP_Standard_D4ds_v5'     // Prod 10K: 4 vCores, 16 GiB
-  'GP_Standard_E8ds_v5'     // Prod 100K: 8 vCores, 64 GiB
-  'GP_Standard_E16ds_v5'    // Prod 500K: 16 vCores, 128 GiB
-  'GP_Standard_E32ds_v5'    // Prod 1M+: 32 vCores, 256 GiB
+  'Standard_B1ms'         // Dev: 1 vCore, 2 GiB
+  'Standard_D4ds_v5'     // Prod 10K: 4 vCores, 16 GiB
+  'Standard_E8ds_v5'     // Prod 100K: 8 vCores, 64 GiB
+  'Standard_E16ds_v5'    // Prod 500K: 16 vCores, 128 GiB
+  'Standard_E32ds_v5'    // Prod 1M+: 32 vCores, 256 GiB
 ])
-param sku string = 'GP_Standard_D4ds_v5'
+param sku string = 'Standard_D4ds_v5'
 
 @description('Storage in GB. Range: 32–32768')
 @minValue(32)
@@ -110,7 +110,7 @@ param aadAdminPrincipalType string = 'ServicePrincipal'
 param tags object = {}
 
 // Computed: Burstable SKUs do not support zone-redundant HA or geo-redundant backups.
-var isBurstable = startsWith(sku, 'B_')
+var isBurstable = startsWith(sku, 'Standard_B')
 var effectiveHa = highAvailability && !isBurstable
 var effectiveGeoBackup = geoRedundantBackup && !isBurstable
 var useVnet = !empty(delegatedSubnetResourceId)

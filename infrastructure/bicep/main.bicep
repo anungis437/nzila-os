@@ -23,7 +23,7 @@ param container_env_name string = 'nzila-${env}-env'
 // Change these values in .bicepparam files — no code changes needed.
 
 @description('Database SKU — scale path: B1ms → D4 → E8 → E16 → E32')
-param dbSku string = env == 'prod' ? 'GP_Standard_E8ds_v5' : (env == 'staging' ? 'GP_Standard_D4ds_v5' : 'B_Standard_B1ms')
+param dbSku string = env == 'prod' ? 'Standard_E8ds_v5' : (env == 'staging' ? 'Standard_D4ds_v5' : 'Standard_B1ms')
 
 @description('Database storage in GB')
 param dbStorageGb int = env == 'prod' ? 1024 : (env == 'staging' ? 256 : 32)
