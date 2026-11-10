@@ -49,6 +49,11 @@ var secretNames = [
   'storage-account-key'
 ]
 var stagingAuthSystemSecretNames = deploymentEnvironment == 'staging' ? ['auth-system-database-url'] : []
+var authSystemEnvironment = deploymentEnvironment == 'staging' ? [
+  { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: 'auth-system-database-url' }
+] : [
+  { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: 'auth-database-url' }
+]
 var stagingEnvironment = deploymentEnvironment == 'staging' ? [
   { name: 'TARGET_ENVIRONMENT', value: 'staging' }
   { name: 'UE_APP_URL', value: appUrl }
@@ -180,7 +185,6 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'DATABASE_URL', secretRef: 'database-url' }
             { name: 'SYSTEM_DATABASE_URL', secretRef: 'system-database-url' }
             { name: 'AUTH_DATABASE_URL', secretRef: 'auth-database-url' }
-            { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: deploymentEnvironment == 'staging' ? 'auth-system-database-url' : 'auth-database-url' }
             { name: 'AUTH_SECRET', secretRef: 'auth-secret' }
             { name: 'AUTH_MFA_ENCRYPTION_KEY', secretRef: 'mfa-encryption-key' }
             { name: 'VOTING_SECRET', secretRef: 'voting-secret' }
@@ -188,7 +192,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'REDIS_URL', secretRef: 'redis-url' }
             { name: 'RESEND_API_KEY', secretRef: 'resend-api-key' }
             { name: 'AZURE_STORAGE_ACCOUNT_KEY', secretRef: 'storage-account-key' }
-          ], stripeEnv, entraEnv, stagingEnvironment)
+          ], stripeEnv, entraEnv, authSystemEnvironment, stagingEnvironment)
         }
       ]
       scale: {
