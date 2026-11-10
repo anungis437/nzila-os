@@ -1,0 +1,33 @@
+{
+  "change_id": "CHG-2026-0114",
+  "title": "Union Eyes V2 staging qualification deployment for Gate 0 candidate 80bb3eaf",
+  "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. This proposed record does not authorize a merge, production release, institutional mandate, financial activation, or self-approval.",
+  "service": "union-eyes",
+  "environment": "STAGING",
+  "change_type": "NORMAL",
+  "risk_level": "HIGH",
+  "impact_summary": "Creates or updates only the dedicated Union Eyes V2 staging stack in nzila-canada-staging-rg and applies the candidate's staging migrations. No production resource, client data, production DNS, real financial settlement, or institution-specific authority is in scope.",
+  "requested_by": "anungis437",
+  "approvers_required": [
+    "authorized_platform_change_reviewer"
+  ],
+  "approved_by": [],
+  "approval_status": "PENDING",
+  "implementation_window_start": "2026-11-10T00:00:00Z",
+  "implementation_window_end": "2026-11-17T23:59:59Z",
+  "rollback_plan": "Use the ue-v2-staging-deploy workflow's captured prior digest and revision to restore the previous staging revision. If migration or runtime qualification fails, stop acceptance, preserve evidence, and execute the separately reviewed staging rollback path. Do not touch production or delete the staging stack under this change.",
+  "test_evidence_refs": [
+    "https://github.com/anungis437/nzila-os/pull/1137",
+    "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json",
+    "docs/union-eyes/staging/UE_GATE0_QUALIFICATION_CENSUS.json"
+  ],
+  "linked_prs": [
+    "1137"
+  ],
+  "linked_commits": [
+    "80bb3eaf5240548d21b43124af95a9fad65fd29a"
+  ],
+  "status": "PROPOSED",
+  "created_at": "2026-11-09T19:20:00-05:00",
+  "updated_at": "2026-11-09T19:20:00-05:00"
+}
