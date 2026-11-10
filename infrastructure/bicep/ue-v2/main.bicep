@@ -441,12 +441,27 @@ module acrPull 'modules/acr-pull.bicep' = {
   }
 }
 
+// Staging traces remain in Canada Central and use the environment's existing workspace.
+resource stagingInsights 'Microsoft.Insights/components@2020-02-02' = if (env == 'staging') {
+  name: '${prefix}-insights'
+  location: location
+  kind: 'web'
+  tags: tags
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: law.id
+    IngestionMode: 'LogAnalytics'
+    RetentionInDays: 30
+    DisableLocalAuth: false
+  }
+}
+
 // ── Container Apps environment (VNet-integrated; internal in prod) and workloads ─
 resource acaEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: '${prefix}-env'
   location: location
   tags: tags
-  properties: {
+  properties: union({
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
@@ -457,7 +472,15 @@ resource acaEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
     vnetConfiguration: { infrastructureSubnetId: acaSubnetId, internal: acaInternal }
     workloadProfiles: [{ name: 'Consumption', workloadProfileType: 'Consumption' }]
     zoneRedundant: true
-  }
+  }, env == 'staging' ? {
+    appInsightsConfiguration: {
+      connectionString: stagingInsights!.properties.ConnectionString
+    }
+    openTelemetryConfiguration: {
+      tracesConfiguration: { destinations: ['appInsights'] }
+      logsConfiguration: { destinations: ['appInsights'] }
+    }
+  } : {})
   dependsOn: [logAnalytics]
 }
 

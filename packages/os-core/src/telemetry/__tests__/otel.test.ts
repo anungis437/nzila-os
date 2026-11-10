@@ -50,9 +50,7 @@ describe('otel', () => {
       await initOtel({ appName: 'test-app' })
 
       expect(mockStart).toHaveBeenCalledTimes(1)
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Initialized for test-app'),
-      )
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Initialized for test-app'))
 
       // Second call should be no-op
       await initOtel({ appName: 'test-app' })
@@ -60,6 +58,57 @@ describe('otel', () => {
 
       consoleSpy.mockRestore()
     })
+
+    it.each([
+      ['grpc', 'http://otel.service.k8se-apps:4317/', 'http://otel.service.k8se-apps:4317'],
+      ['http/json', 'http://collector:4318/', 'http://collector:4318/v1/traces'],
+    ])(
+      'sends %s spans to its matching collector transport',
+      async (protocol, endpoint, expectedUrl) => {
+        process.env.OTEL_EXPORTER_OTLP_PROTOCOL = protocol
+        process.env.OTEL_EXPORTER_OTLP_ENDPOINT = endpoint
+        delete process.env.OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
+        delete process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+        const grpc = vi.fn(),
+          http = vi.fn(),
+          start = vi.fn()
+        vi.doMock('@opentelemetry/sdk-node', () => ({
+          NodeSDK: class {
+            start = start
+            shutdown = vi.fn()
+          },
+        }))
+        vi.doMock('@opentelemetry/auto-instrumentations-node', () => ({
+          getNodeAutoInstrumentations: () => [],
+        }))
+        vi.doMock('@opentelemetry/exporter-trace-otlp-grpc', () => ({
+          OTLPTraceExporter: class {
+            constructor(opts: unknown) {
+              grpc(opts)
+            }
+          },
+        }))
+        vi.doMock('@opentelemetry/exporter-trace-otlp-http', () => ({
+          OTLPTraceExporter: class {
+            constructor(opts: unknown) {
+              http(opts)
+            }
+          },
+        }))
+        vi.doMock('@opentelemetry/resources', () => ({
+          resourceFromAttributes: (attrs: unknown) => attrs,
+        }))
+        vi.doMock('@opentelemetry/semantic-conventions', () => ({
+          ATTR_SERVICE_NAME: 'service.name',
+          ATTR_SERVICE_VERSION: 'service.version',
+        }))
+        const { initOtel } = await loadModule()
+        await initOtel({ appName: 'union-eyes' })
+        expect(protocol === 'grpc' ? grpc : http).toHaveBeenCalledWith({ url: expectedUrl })
+        expect(protocol === 'grpc' ? http : grpc).not.toHaveBeenCalled()
+        expect(start).toHaveBeenCalledOnce()
+      },
+    )
 
     it('falls back gracefully when OTel packages are missing', async () => {
       vi.doMock('@opentelemetry/sdk-node', () => {

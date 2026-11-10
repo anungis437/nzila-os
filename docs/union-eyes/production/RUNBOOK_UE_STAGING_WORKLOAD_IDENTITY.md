@@ -184,6 +184,8 @@ cat > ue-staging-deployer-role.json <<JSON
     "Microsoft.Cache/locations/*",
     "Microsoft.DBforPostgreSQL/flexibleServers/*",
     "Microsoft.DBforPostgreSQL/locations/*",
+    "Microsoft.Insights/components/read",
+    "Microsoft.Insights/components/write",
     "Microsoft.Insights/metricAlerts/*",
     "Microsoft.Insights/actionGroups/*",
     "Microsoft.Insights/scheduledQueryRules/*",
