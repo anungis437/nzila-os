@@ -42,13 +42,13 @@ function requireContextOrganization(context: YogaInitialContext): string {
 export const resolvers = {
   Query: {
     // Claims
-    claim: async (_parent: any, { id }: { id: string }, _context: YogaInitialContext) => {
+    claim: async (_parent: unknown, { id }: { id: string }, _context: YogaInitialContext) => {
       const result = await db.select().from(claims).where(eq(claims.claimId, id)).limit(1);
       return result[0] || null;
     },
 
     claims: async (
-      _parent: any,
+      _parent: unknown,
       { filters, pagination }: { filters?: { status?: string }; pagination?: { first?: number } },
       _context: YogaInitialContext
     ) => {
@@ -58,8 +58,7 @@ export const resolvers = {
       let query = db.select().from(claims);
 
       if (filters?.status) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        query = query.where(eq(claims.status, filters.status as any)) as typeof query;
+        query = query.where(eq(claims.status, filters.status as typeof claims.$inferSelect['status'])) as typeof query;
       }
 
       const results = await query.limit(limit).offset(offset).orderBy(desc(claims.createdAt));
@@ -80,13 +79,13 @@ export const resolvers = {
     },
 
     // Members
-    member: async (_parent: any, { id }: { id: string }, _context: YogaInitialContext) => {
+    member: async (_parent: unknown, { id }: { id: string }, _context: YogaInitialContext) => {
       const result = await db.select().from(profiles).where(eq(profiles.userId, id)).limit(1);
       return result[0] || null;
     },
 
     members: async (
-      _parent: any,
+      _parent: unknown,
       { status, pagination }: { status?: string; pagination?: { first?: number } },
       _context: YogaInitialContext
     ) => {
@@ -137,7 +136,7 @@ export const resolvers = {
       });
     },
 
-    pensionProcessor: async (_parent: any, { planType }: { planType: string }) => {
+    pensionProcessor: async (_parent: unknown, { planType }: { planType: string }) => {
       const factory = PensionProcessorFactory.getInstance();
       const processor = factory.getProcessor(planType as PensionPlanType);
       const capabilities = processor.getCapabilities();
@@ -155,7 +154,7 @@ export const resolvers = {
     },
 
     contributionRates: async (
-      _parent: any, 
+      _parent: unknown, 
       { planType, year }: { planType: string; year: number }
     ) => {
       const factory = PensionProcessorFactory.getInstance();
@@ -173,7 +172,7 @@ export const resolvers = {
       };
     },
 
-    remittance: async (_parent: any, { id }: { id: string }) => {
+    remittance: async (_parent: unknown, { id }: { id: string }) => {
       const result = await db
         .select()
         .from(perCapitaRemittances)
@@ -200,12 +199,12 @@ export const resolvers = {
     },
 
     remittances: async (
-      _parent: any, 
+      _parent: unknown, 
       { planType: _planType, status: filterStatus }: { planType?: string; status?: string }
     ) => {
       let query = db.select().from(perCapitaRemittances);
 
-      const conditions: SQL<any>[] = [];
+      const conditions: SQL[] = [];
       if (filterStatus) {
         conditions.push(eq(perCapitaRemittances.status, filterStatus.toLowerCase()));
       }
@@ -237,14 +236,14 @@ export const resolvers = {
 
     // Insurance
     insuranceClaims: async (
-      _parent: any,
+      _parent: unknown,
       { provider, status, startDate, endDate, pagination }: { provider?: string; status?: string; startDate?: string; endDate?: string; pagination?: { first?: number } }
     ) => {
       const limit = pagination?.first || 50;
       
       let query = db.select().from(externalInsuranceClaims);
 
-      const conditions: SQL<any>[] = [];
+      const conditions: SQL[] = [];
       if (provider) {
         conditions.push(eq(externalInsuranceClaims.externalProvider, provider.toLowerCase()));
       }
@@ -283,12 +282,12 @@ export const resolvers = {
     },
 
     insurancePolicies: async (
-      _parent: any,
+      _parent: unknown,
       { provider, status }: { provider?: string; status?: string }
     ) => {
       let query = db.select().from(externalInsurancePolicies);
 
-      const conditions: SQL<any>[] = [];
+      const conditions: SQL[] = [];
       if (provider) {
         conditions.push(eq(externalInsurancePolicies.externalProvider, provider.toLowerCase()));
       }
@@ -363,9 +362,9 @@ export const resolvers = {
   Mutation: {
     // Claims
     createClaim: async (
-      _parent: any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { input }: { input: Record<string, any> },
+      _parent: unknown,
+       
+      { input }: { input: Record<string, unknown> },
       _context: YogaInitialContext
     ) => {
       const result = await db.insert(claims).values({
@@ -387,9 +386,9 @@ export const resolvers = {
     },
 
     updateClaim: async (
-      _parent: any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { id, input }: { id: string; input: Record<string, any> },
+      _parent: unknown,
+       
+      { id, input }: { id: string; input: Record<string, unknown> },
       context: YogaInitialContext
     ) => {
       const organizationId = requireContextOrganization(context);
@@ -398,8 +397,8 @@ export const resolvers = {
       const result = await db
         .update(claims)
         .set({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...(changes as Record<string, any>),
+           
+          ...changes,
           updatedAt: new Date(),
         })
         .where(and(eq(claims.claimId, id), eq(claims.organizationId, organizationId)))
@@ -409,7 +408,7 @@ export const resolvers = {
     },
 
     deleteClaim: async (
-      _parent: any,
+      _parent: unknown,
       { id }: { id: string },
       context: YogaInitialContext
     ) => {
@@ -420,7 +419,7 @@ export const resolvers = {
 
     // Voting
     castVote: async (
-      _parent: any,
+      _parent: unknown,
       { voteId: _voteId, optionId: _optionId }: { voteId: string; optionId: string },
       _context: YogaInitialContext
     ) => {
@@ -430,9 +429,9 @@ export const resolvers = {
 
     // Pension Contributions
     calculatePensionContribution: async (
-      _parent: any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { input }: { input: Record<string, any> }
+      _parent: unknown,
+       
+      { input }: { input: Record<string, unknown> }
     ) => {
       const factory = PensionProcessorFactory.getInstance();
       const processor = factory.getProcessor(input.planType as PensionPlanType);
@@ -474,9 +473,9 @@ export const resolvers = {
     },
 
     createRemittance: async (
-      _parent: any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { input }: { input: Record<string, any> }
+      _parent: unknown,
+       
+      { input }: { input: Record<string, unknown> }
     ) => {
       const factory = PensionProcessorFactory.getInstance();
       const processor = factory.getProcessor(input.planType as PensionPlanType);
@@ -554,7 +553,7 @@ export const resolvers = {
     },
 
     submitRemittance: async (
-      _parent: any,
+      _parent: unknown,
       { id }: { id: string }
     ) => {
       const factory = PensionProcessorFactory.getInstance();
@@ -580,7 +579,7 @@ export const resolvers = {
 
     // Insurance Sync
     syncInsuranceProvider: async (
-      _parent: any,
+      _parent: unknown,
       { provider }: { provider: string }
     ) => {
       try {
@@ -628,8 +627,8 @@ export const resolvers = {
 
   // Field Resolvers
   Claim: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    claimant: async (parent: Record<string, any>, _args: any, _context: YogaInitialContext) => {
+     
+    claimant: async (parent: typeof claims.$inferSelect, _args: unknown, _context: YogaInitialContext) => {
       if (!parent.memberId) return null;
       const result = await db
         .select()
@@ -639,8 +638,8 @@ export const resolvers = {
       return result[0] || null;
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    assignee: async (parent: Record<string, any>, _args: any, _context: YogaInitialContext) => {
+     
+    assignee: async (parent: typeof claims.$inferSelect, _args: unknown, _context: YogaInitialContext) => {
       if (!parent.assignedTo) return null;
       const result = await db
         .select()
@@ -652,8 +651,8 @@ export const resolvers = {
   },
 
   Member: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    claims: async (parent: Record<string, any>, _args: any, _context: YogaInitialContext) => {
+     
+    claims: async (parent: typeof profiles.$inferSelect, _args: unknown, _context: YogaInitialContext) => {
       const results = await db
         .select()
         .from(claims)

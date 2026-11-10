@@ -36,7 +36,7 @@ describe('lib/knowledge-transfer/learning-archetypes/archetype-classifier', () =
     expect(result.primaryArchetype).toBeDefined();
     expect(result.archetypeFits.length).toBe(8);
     expect(result.classificationEvidence.length).toBeGreaterThan(0);
-    expect(result.classificationConfidence).toBeGreaterThan(0);
+    expect(result.classificationEvidenceCoverage).toBeGreaterThan(0);
   });
 
   it('classifies a stagnant organization with no history', async () => {
@@ -45,7 +45,12 @@ describe('lib/knowledge-transfer/learning-archetypes/archetype-classifier', () =
     const result = await classifyLearningArchetype('org-2');
     expect(result.primaryArchetype.id).toBe('governance_stagnant');
     expect(result.secondaryArchetype).toBeNull();
-    expect(result.classificationEvidence.length).toBe(0);
+    // DEF-0B7-COGA-PROFILES: zero interactions is an empty history, not a confidently-measured archetype -
+    // evidence coverage is explicitly 0, and the evidence/narrative say so rather than implying a strong characterization.
+    expect(result.classificationEvidenceCoverage).toBe(0);
+    expect(result.classificationEvidence).toEqual(['No cognition memory entries or reasoning sessions recorded for this organization yet.']);
+    expect(result.evolutionContext).toMatch(/not a characterization|evidenceCoverage is 0/i);
+    expect(result.methodologyNote).toMatch(/officer-entered|not verified governance decisions/i);
   });
 
   it('handles a volatile organization', async () => {

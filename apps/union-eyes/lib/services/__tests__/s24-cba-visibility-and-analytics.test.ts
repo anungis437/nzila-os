@@ -17,8 +17,8 @@ describe('Gate 0 batch B80: CBA review visibility, analytics honesty and organiz
   // DEF-0B4-CBA-INTEL-SHARED-DATASET-NO-TENANT-PREDICATE (F03-B): the review queue was decided by an organization steward floor, which is a role title in
   // one organization and no authority over a dataset every organization reads and the platform curates.
   it('applies the visibility rule to the list, the export and the agreement with its wages and clauses, decided by platform authority and never a role floor', () => {
-    expect(src('app/api/cba-intelligence/agreements/route.ts')).toContain('reviewStatusFilter(await canReadUnreviewed(userId)')
-    expect(src('app/api/cba-intelligence/agreements/export/route.ts')).toContain('reviewStatusFilter(await canReadUnreviewed(userId)')
+    expect(src('app/api/cba-intelligence/agreements/route.ts')).toContain('reviewStatusFilter(await canReadUnreviewed(userId, organizationId)')
+    expect(src('app/api/cba-intelligence/agreements/export/route.ts')).toContain('reviewStatusFilter(await canReadUnreviewed(userId, organizationId)')
     const item = src('app/api/cba-intelligence/agreements/[id]/route.ts')
     expect(item).toContain('(!curator && agreement.reviewStatus !== "approved")')
     expect(item).toContain('approvedOnly: !curator')
@@ -75,7 +75,8 @@ describe('Gate 0 batch B80: CBA review visibility, analytics honesty and organiz
   it('verified: cross-committee synthesis stores nothing and answers 501; the survey responses route is bound to its path survey', () => {
     expect(src('app/api/committees/[id]/intelligence/route.ts')).toContain('ApiError.notImplemented')
     const responses = src('app/api/communications/surveys/[surveyId]/responses/route.ts')
-    expect(responses).toContain("createPathBinding: { paramName: 'surveyId', field: 'surveyId' }")
+    // The inserted row's surveyId comes from the path-resolved survey record, not a client-supplied value.
+    expect(responses).toContain('surveyId: survey.id')
     expect(responses).toContain('eq(surveyResponses.surveyId, surveyId)')
   })
 

@@ -14,7 +14,6 @@
  * @layer 5 — Finance Outputs & Reconciliation
  */
 
-import { db } from '@/db';
 import {
   reconciliationRuns,
   reconciliationMatches,
@@ -30,7 +29,7 @@ import {
 import { eq, and, gte, lte, inArray, sql, desc } from 'drizzle-orm';
 import { ApiError } from '@/lib/api/errors';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import type { RLSTx } from '@/lib/db/with-rls-context';
+import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { addMoney, subtractMoney, absMoney, toCents } from '@/lib/decimal-safe';
 
 // ============================================================================
@@ -52,8 +51,37 @@ export interface ReconciliationResult {
   totalMatches: number;
   totalExceptions: number;
   invoiceAmountCad: string;
+  /** Received money only: completed payments, each provider reference once. Refunded payments are never counted as received. */
   paymentAmountCad: string;
   varianceCad: string;
+  /** Payments in the period whose status is refunded: reported, never summed into paymentAmountCad. */
+  refundedPayments: number;
+  refundedAmountCad: string;
+  /** Fee events that name a settlement batch. They are NOT reported as matched: no settlement amount is read (see below). */
+  feeEventsWithUnverifiedSettlement: number;
+  /** Exception types the run does not test, so a zero count for them is not a finding. */
+  checksNotPerformed: string[];
+}
+
+/**
+ * The fee-settlement comparison needs the per-event settlement amount, which lives in fee_settlement_lines. That relation is revoked from the
+ * runtime and system roles (platform migration 0065) and granting it is a finance privilege decision under the finance freeze, so the run does
+ * not verify fee settlements and says so instead of recording a match whose target amount is the fee amount copied.
+ * missing_fee_event needs a rule for which payments must carry a fee, and orphaned_refund needs a refund record separate from the payment it
+ * reverses; neither source exists.
+ */
+export const RECONCILIATION_CHECKS_NOT_PERFORMED = ['fee_settlement', 'missing_fee_event', 'orphaned_refund'] as const;
+
+/**
+ * Every reconciliation read and write runs in the organization's tenant context (app.current_org_id set on the transaction), so row-level
+ * security binds it as well as the organization predicates written in each query. A caller that already holds that organization's tenant
+ * transaction (a route that checked the financial mandate in it) passes it, so the mandate check and the reconciliation are one transaction.
+ */
+function inOrganization<T>(organizationId: string, tx: RLSTx | undefined, work: (tx: RLSTx) => Promise<T>): Promise<T> {
+  if (!organizationId || organizationId.trim() === '') {
+    throw ApiError.badRequest('An organization is required for reconciliation');
+  }
+  return tx ? work(tx) : withRLSContext({ organizationId }, work);
 }
 
 // ============================================================================
@@ -65,6 +93,7 @@ export interface ReconciliationResult {
  */
 export async function runReconciliation(
   input: RunReconciliationInput,
+  tenantTx?: RLSTx,
 ): Promise<ReconciliationResult> {
   // Never permit an organization-less reconciliation. That legacy mode scanned
   // and matched invoices, payments and fees from unrelated tenants in one run.
@@ -76,7 +105,7 @@ export async function runReconciliation(
     throw ApiError.badRequest('The reconciliation period ends before it starts');
   }
 
-  return await db.transaction(async (tx) => {
+  return await inOrganization(input.organizationId, tenantTx, async (tx) => {
     // 0. A run for an organization is repeatable only as a refusal: the same organization and period are reconciled once. A second run
     // inserted a second set of exceptions beside the first, so the open-exception list doubled with every click. The lock serialises two
     // runs started together; the billing period, when named, must be the organization's own.
@@ -152,16 +181,44 @@ export async function runReconciliation(
     let totalExceptions = 0;
     let invoiceAmountCad = '0.00';
     let paymentAmountCad = '0.00';
+    let refundedAmountCad = '0.00';
 
     for (const inv of invoices) {
       invoiceAmountCad = addMoney(invoiceAmountCad, inv.totalAmount ?? '0.00');
     }
+
+    // 4b. A refunded payment is not money received: it is reported beside the total and never summed into it or matched to an invoice, so
+    // the invoice it was allocated to reads as unpaid unless another payment covers it. A second completed payment carrying a provider
+    // reference already seen is a duplicate_payment exception, not a second receipt.
+    const refunded = payments.filter((p) => p.status === 'refunded');
+    for (const pmt of refunded) refundedAmountCad = addMoney(refundedAmountCad, pmt.amount ?? '0.00');
+    const received: typeof payments = [];
+    const firstByReference = new Map<string, string>();
     for (const pmt of payments) {
+      if (pmt.status !== 'completed') continue;
+      const reference = pmt.externalReference?.trim();
+      const first = reference ? firstByReference.get(`${pmt.method}:${reference}`) : undefined;
+      if (first) {
+        await tx.insert(reconciliationExceptions).values({
+          runId: run.id,
+          organizationId: input.organizationId,
+          exceptionType: 'duplicate_payment',
+          status: 'open',
+          sourceType: 'payment',
+          sourceId: pmt.id,
+          actualAmountCad: pmt.amount,
+          description: `Payment ${pmt.id} carries the same ${pmt.method} reference as payment ${first}; it is not counted as a second receipt`,
+        });
+        totalExceptions++;
+        continue;
+      }
+      if (reference) firstByReference.set(`${pmt.method}:${reference}`, pmt.id);
+      received.push(pmt);
       paymentAmountCad = addMoney(paymentAmountCad, pmt.amount ?? '0.00');
     }
 
     // 5. Fetch payment allocations to link payments → invoices
-    const paymentIds = payments.map((p) => p.id);
+    const paymentIds = received.map((p) => p.id);
     const allocations = paymentIds.length > 0
       ? await tx
           .select()
@@ -177,14 +234,14 @@ export async function runReconciliation(
       allocationsByPaymentId.set(alloc.paymentId, existing);
     }
 
-    // 5b. Match payments to invoices via allocations
-    for (const pmt of payments) {
+    // 5b. Match received payments to invoices via allocations
+    for (const pmt of received) {
       const pmtAllocations = allocationsByPaymentId.get(pmt.id);
       if (!pmtAllocations || pmtAllocations.length === 0) {
         // Unmatched payment — exception
         await tx.insert(reconciliationExceptions).values({
           runId: run.id,
-          organizationId: pmt.organizationId,
+          organizationId: input.organizationId,
           exceptionType: 'unmatched_payment',
           status: 'open',
           sourceType: 'payment',
@@ -204,7 +261,7 @@ export async function runReconciliation(
           // Payment allocation references invoice outside this period
           await tx.insert(reconciliationExceptions).values({
             runId: run.id,
-            organizationId: pmt.organizationId,
+            organizationId: input.organizationId,
             exceptionType: 'unmatched_payment',
             status: 'open',
             sourceType: 'payment',
@@ -241,7 +298,7 @@ export async function runReconciliation(
         if (Math.abs(toCents(variance)) > 1) {
           await tx.insert(reconciliationExceptions).values({
             runId: run.id,
-            organizationId: inv.organizationId,
+            organizationId: input.organizationId,
             exceptionType: 'amount_discrepancy',
             status: 'open',
             sourceType: 'invoice',
@@ -261,7 +318,7 @@ export async function runReconciliation(
       if (!matchedInvoiceIds.has(inv.id) && inv.status !== 'void' && inv.status !== 'draft') {
         await tx.insert(reconciliationExceptions).values({
           runId: run.id,
-          organizationId: inv.organizationId,
+          organizationId: input.organizationId,
           exceptionType: 'unmatched_invoice',
           status: 'open',
           sourceType: 'invoice',
@@ -273,7 +330,9 @@ export async function runReconciliation(
       }
     }
 
-    // 7. Fee event reconciliation — check for missing fee events on monetized payments
+    // 7. Fee events in the period. A fee event that names a settlement batch is counted, not matched: the settlement amount for the event is
+    // not read (RECONCILIATION_CHECKS_NOT_PERFORMED), and a match that copies the fee amount as its own target with a zero variance would
+    // report as reconciled what was never compared.
     const feeConditions = [
       gte(transactionFeeEvents.capturedAt, input.periodStart),
       lte(transactionFeeEvents.capturedAt, input.periodEnd),
@@ -284,23 +343,8 @@ export async function runReconciliation(
       .from(transactionFeeEvents)
       .where(and(...feeConditions));
 
-    // Match fee events with settlement batches
-    for (const fee of feeEvents) {
-      if (fee.settlementBatchId) {
-        await tx.insert(reconciliationMatches).values({
-          runId: run.id,
-          matchType: 'fee_settlement',
-          sourceType: 'fee_event',
-          sourceId: fee.id,
-          targetType: 'settlement_batch',
-          targetId: fee.settlementBatchId,
-          sourceAmountCad: fee.feeAmountCad,
-          targetAmountCad: fee.feeAmountCad,
-          varianceCad: '0.00',
-        });
-        totalMatches++;
-      }
-    }
+    const feeEventsWithUnverifiedSettlement = feeEvents.filter((fee) => Boolean(fee.settlementBatchId)).length;
+    const checksNotPerformed = [...RECONCILIATION_CHECKS_NOT_PERFORMED];
 
     // 8. Finalize run
     const varianceCad = subtractMoney(invoiceAmountCad, paymentAmountCad);
@@ -316,6 +360,12 @@ export async function runReconciliation(
         invoiceAmountCad,
         paymentAmountCad,
         varianceCad,
+        metadata: {
+          refundedPayments: refunded.length,
+          refundedAmountCad,
+          feeEventsWithUnverifiedSettlement,
+          checksNotPerformed,
+        },
         completedAt: new Date(),
       })
       .where(
@@ -327,7 +377,7 @@ export async function runReconciliation(
 
     // The run, its matches and exceptions, and these audit records commit or roll back together: a failed audit write leaves no run, and
     // a run that rolls back leaves no audit event behind.
-    const auditTx = tx as unknown as RLSTx;
+    const auditTx = tx;
     await persistAtomicAudit(auditTx, {
       organizationId: input.organizationId,
       userId: input.runBy ?? null,
@@ -341,6 +391,9 @@ export async function runReconciliation(
         totalMatches,
         totalExceptions,
         varianceCad,
+        refundedPayments: refunded.length,
+        feeEventsWithUnverifiedSettlement,
+        checksNotPerformed,
       },
     });
 
@@ -372,6 +425,10 @@ export async function runReconciliation(
       invoiceAmountCad,
       paymentAmountCad,
       varianceCad,
+      refundedPayments: refunded.length,
+      refundedAmountCad,
+      feeEventsWithUnverifiedSettlement,
+      checksNotPerformed,
     };
   });
 }
@@ -391,10 +448,11 @@ export async function resolveException(
     resolvedBy: string;
     notes: string;
   },
+  tenantTx?: RLSTx,
 ): Promise<ReconciliationException> {
   // The status change and its audit record are one transaction: a failed audit write leaves the exception open, so a write-off can never
   // stand without its record. The update is conditional on the exception still being open, so two resolvers cannot both succeed.
-  return db.transaction(async (tx) => {
+  return inOrganization(organizationId, tenantTx, async (tx) => {
     const [updated] = await tx
       .update(reconciliationExceptions)
       .set({
@@ -417,7 +475,7 @@ export async function resolveException(
       throw new Error(`Exception ${exceptionId} not found or already resolved`);
     }
 
-    await persistAtomicAudit(tx as unknown as RLSTx, {
+    await persistAtomicAudit(tx, {
       organizationId,
       userId: resolution.resolvedBy,
       action: 'reconciliation.exception.resolved',
@@ -442,13 +500,16 @@ export async function resolveException(
 export async function getReconciliationRun(
   runId: string,
   organizationId: string,
+  tenantTx?: RLSTx,
 ): Promise<ReconciliationRun | null> {
-  const [run] = await db
-    .select()
-    .from(reconciliationRuns)
-    .where(and(eq(reconciliationRuns.id, runId), eq(reconciliationRuns.organizationId, organizationId)))
-    .limit(1);
-  return run ?? null;
+  return inOrganization(organizationId, tenantTx, async (tx) => {
+    const [run] = await tx
+      .select()
+      .from(reconciliationRuns)
+      .where(and(eq(reconciliationRuns.id, runId), eq(reconciliationRuns.organizationId, organizationId)))
+      .limit(1);
+    return run ?? null;
+  });
 }
 
 /**
@@ -461,6 +522,7 @@ export async function listExceptions(
   organizationId: string,
   statusFilter: readonly string[] = ['open', 'under_review'],
   limit: number = MAX_EXCEPTIONS_PER_READ,
+  tenantTx?: RLSTx,
 ): Promise<ReconciliationException[]> {
   // A status outside the vocabulary is the caller's error, not a cast that reaches the database as an invalid enum value, and the list is
   // bounded and ordered, so a large backlog is read in pages rather than whole.
@@ -469,17 +531,19 @@ export async function listExceptions(
     throw ApiError.badRequest(`status must be one or more of: ${EXCEPTION_STATUSES.join(', ')}`);
   }
   const bounded = Math.min(MAX_EXCEPTIONS_PER_READ, Math.max(1, Math.trunc(limit) || MAX_EXCEPTIONS_PER_READ));
-  return await db
-    .select()
-    .from(reconciliationExceptions)
-    .where(
-      and(
-        eq(reconciliationExceptions.organizationId, organizationId),
-        inArray(reconciliationExceptions.status, valid),
-      ),
-    )
-    .orderBy(desc(reconciliationExceptions.createdAt))
-    .limit(bounded);
+  return inOrganization(organizationId, tenantTx, (tx) =>
+    tx
+      .select()
+      .from(reconciliationExceptions)
+      .where(
+        and(
+          eq(reconciliationExceptions.organizationId, organizationId),
+          inArray(reconciliationExceptions.status, valid),
+        ),
+      )
+      .orderBy(desc(reconciliationExceptions.createdAt))
+      .limit(bounded),
+  );
 }
 
 /**
@@ -488,13 +552,20 @@ export async function listExceptions(
  */
 export async function requireReconciliation(
   billingPeriodId: string,
+  organizationId: string,
+  tenantTx?: RLSTx,
 ): Promise<ReconciliationRun> {
-  const [run] = await db
+  return inOrganization(organizationId, tenantTx, (tx) => requireReconciliationIn(tx, billingPeriodId, organizationId));
+}
+
+async function requireReconciliationIn(tx: RLSTx, billingPeriodId: string, organizationId: string): Promise<ReconciliationRun> {
+  const [run] = await tx
     .select()
     .from(reconciliationRuns)
     .where(
       and(
         eq(reconciliationRuns.billingPeriodId, billingPeriodId),
+        eq(reconciliationRuns.organizationId, organizationId),
         eq(reconciliationRuns.status, 'completed'),
       ),
     )
@@ -506,12 +577,13 @@ export async function requireReconciliation(
     );
   }
 
-  const openExceptions = await db
+  const openExceptions = await tx
     .select()
     .from(reconciliationExceptions)
     .where(
       and(
         eq(reconciliationExceptions.runId, run.id),
+        eq(reconciliationExceptions.organizationId, organizationId),
         inArray(reconciliationExceptions.status, ['open', 'under_review']),
       ),
     );

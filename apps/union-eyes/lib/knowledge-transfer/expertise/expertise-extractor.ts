@@ -14,6 +14,7 @@
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -138,7 +139,7 @@ export async function extractExpertise(interview: ExitInterview): Promise<Expert
       { role: 'system', content: EXTRACTION_SYSTEM_PROMPT },
       { role: 'user', content: buildExtractionInput(interview) },
     ],
-    dataClass: 'internal',
+    dataClass: toGatewayDataClass('confidential'),
   });
 
   return { ...parseProfile(result.content), sourceInterviewId: interview.id };

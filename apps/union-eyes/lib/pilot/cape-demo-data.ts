@@ -24,10 +24,10 @@ function daysAgo(n: number): Date {
 
 export function generateDemoEmployers(organizationId: string) {
   return [
-    { id: uuidv4(), organizationId, name: 'Treasury Board Secretariat', employerType: 'federal' as const, email: 'lr-demo@tbs-sct.gc.ca' },
-    { id: uuidv4(), organizationId, name: 'Canada Revenue Agency', employerType: 'federal' as const, email: 'lr-demo@cra-arc.gc.ca' },
-    { id: uuidv4(), organizationId, name: 'Public Services and Procurement Canada', employerType: 'federal' as const, email: 'lr-demo@pspc.gc.ca' },
-    { id: uuidv4(), organizationId, name: 'Statistics Canada', employerType: 'federal' as const, email: 'lr-demo@statcan.gc.ca' },
+    { id: uuidv4(), organizationId, name: 'CAPE Demo Employer One', employerType: 'federal' as const, email: 'labour-relations-1@demo.invalid' },
+    { id: uuidv4(), organizationId, name: 'CAPE Demo Employer Two', employerType: 'federal' as const, email: 'labour-relations-2@demo.invalid' },
+    { id: uuidv4(), organizationId, name: 'CAPE Demo Employer Three', employerType: 'federal' as const, email: 'labour-relations-3@demo.invalid' },
+    { id: uuidv4(), organizationId, name: 'CAPE Demo Employer Four', employerType: 'federal' as const, email: 'labour-relations-4@demo.invalid' },
   ];
 }
 
@@ -42,7 +42,7 @@ export function generateDemoGrievances(organizationId: string) {
       type: 'contract' as const, status: 'investigating' as const, priority: 'high' as const,
       title: 'EC-06 Classification Dispute — Policy Analyst',
       description: 'Member performing EC-07 level work for 18+ months without reclassification. Supervisory duties added without compensation adjustment.',
-      employerName: 'Treasury Board Secretariat', grievantName: 'Claire Fontaine',
+      employerName: 'CAPE Demo Employer One', grievantName: 'Demo Member One',
       filedDate: daysAgo(12), incidentDate: daysAgo(45),
     },
     {
@@ -51,7 +51,7 @@ export function generateDemoGrievances(organizationId: string) {
       type: 'discipline' as const, status: 'filed' as const, priority: 'urgent' as const,
       title: 'Unjust 5-Day Suspension — Alleged Insubordination',
       description: 'Member suspended for refusing unsafe overtime. No progressive discipline applied. CBA Article 17.04 violated.',
-      employerName: 'Canada Revenue Agency', grievantName: 'Marc-Antoine Deschamps',
+      employerName: 'CAPE Demo Employer Two', grievantName: 'Demo Member Two',
       filedDate: daysAgo(3), incidentDate: daysAgo(7),
     },
     {
@@ -60,7 +60,7 @@ export function generateDemoGrievances(organizationId: string) {
       type: 'contract' as const, status: 'mediation' as const, priority: 'medium' as const,
       title: 'Remote Work Accommodation Denial',
       description: 'Request for telework accommodation for medical reasons denied without proper assessment. Duty to accommodate not met.',
-      employerName: 'Public Services and Procurement Canada', grievantName: 'Priya Sharma',
+      employerName: 'CAPE Demo Employer Three', grievantName: 'Demo Member Three',
       filedDate: daysAgo(30), incidentDate: daysAgo(40),
     },
     {
@@ -69,7 +69,7 @@ export function generateDemoGrievances(organizationId: string) {
       type: 'harassment' as const, status: 'draft' as const, priority: 'urgent' as const,
       title: 'Workplace Harassment Complaint — Toxic Management',
       description: 'Persistent verbal harassment from immediate supervisor. Multiple incidents documented over 6 months. HR complaint filed but no action taken.',
-      employerName: 'Treasury Board Secretariat', grievantName: 'James Makinde',
+      employerName: 'CAPE Demo Employer One', grievantName: 'Demo Member Four',
       filedDate: daysAgo(5), incidentDate: daysAgo(180),
     },
     {
@@ -78,7 +78,7 @@ export function generateDemoGrievances(organizationId: string) {
       type: 'contract' as const, status: 'settled' as const, priority: 'medium' as const,
       title: 'Overtime Pay Calculation Error — 3 Pay Periods',
       description: 'Overtime calculated at straight time instead of 1.5x for three consecutive pay periods. Affects approximately $4,200.',
-      employerName: 'Statistics Canada', grievantName: 'Sophie Tremblay',
+      employerName: 'CAPE Demo Employer Four', grievantName: 'Demo Member Five',
       filedDate: daysAgo(60), incidentDate: daysAgo(90),
     },
     {
@@ -87,7 +87,7 @@ export function generateDemoGrievances(organizationId: string) {
       type: 'contract' as const, status: 'arbitration' as const, priority: 'high' as const,
       title: 'Denial of Language Training — Bilingual Imperative Position',
       description: 'Member in bilingual imperative position denied access to language training for 2+ years. Career progression blocked.',
-      employerName: 'Canada Revenue Agency', grievantName: 'David Chen',
+      employerName: 'CAPE Demo Employer Two', grievantName: 'Demo Member Six',
       filedDate: daysAgo(90), incidentDate: daysAgo(730),
     },
     {
@@ -96,7 +96,7 @@ export function generateDemoGrievances(organizationId: string) {
       type: 'contract' as const, status: 'investigating' as const, priority: 'low' as const,
       title: 'Acting Pay Dispute — Temporary Assignment',
       description: 'Member acting in higher classification for 6 months. Acting pay rate disputed by employer.',
-      employerName: 'Public Services and Procurement Canada', grievantName: 'Amira Hassan',
+      employerName: 'CAPE Demo Employer Three', grievantName: 'Demo Member Seven',
       filedDate: daysAgo(20), incidentDate: daysAgo(25),
     },
     {
@@ -105,7 +105,7 @@ export function generateDemoGrievances(organizationId: string) {
       type: 'safety' as const, status: 'filed' as const, priority: 'high' as const,
       title: 'Ergonomic Assessment Refusal — Chronic Injury',
       description: 'Employer refuses to conduct ergonomic assessment despite documented repetitive strain injury. OHS requirements not met.',
-      employerName: 'Treasury Board Secretariat', grievantName: 'Robert Lafrenière',
+      employerName: 'CAPE Demo Employer One', grievantName: 'Demo Member Eight',
       filedDate: daysAgo(2), incidentDate: daysAgo(14),
     },
   ];

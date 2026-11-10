@@ -16,7 +16,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { auth } from '@nzila/platform-auth/entra/server';
-import { requireSystemAdmin } from '@/lib/api-auth-guard';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { icraAssessments, icraMaturityProfiles } from '@/db/schema/icra-schema';
@@ -55,8 +55,9 @@ export async function POST(request: Request, { params }: RouteContext) {
   if (!userId) {
     return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
   }
+  const actingOrganizationId = await getOrganizationIdForUser(userId).catch(() => null);
   try {
-    await requireSystemAdmin();
+    await requirePlatformStaffAuthority({ userId, organizationId: actingOrganizationId }, 'platform.icra_review.manage');
   } catch {
     return NextResponse.json({ error: 'Report review requires platform governance authority.' }, { status: 403 });
   }
@@ -89,7 +90,6 @@ export async function POST(request: Request, { params }: RouteContext) {
 
   // The organization the reviewer is acting in comes from the identity scope, not from the platform authority's database transaction: it is resolved
   // before that transaction opens, and only used (to key the audit record) for an assessment nobody has claimed.
-  const actingOrganizationId = await getOrganizationIdForUser(userId).catch(() => null);
 
   try {
     return await withSystemContext(async (tx) => {

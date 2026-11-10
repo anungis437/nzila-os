@@ -10,7 +10,7 @@
  *   node tooling/scripts/ue-runtime-up.mjs down    # stop the app and the database container
  *   node tooling/scripts/ue-runtime-up.mjs env     # print the environment the app and the tests use
  *
- * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --fresh --prod --rebuild --redis
+ * Needs Docker, Python (Django backend migrations), Node and pnpm. Options: --port-db 55430 --port-app 3002 --runtime-id worktree --fresh --prod --rebuild --redis
  * (--prod builds and serves the production bundle, the reliable mode for repeated acceptance runs).
  *
  * LOCAL ONLY. It uses a disposable container, synthetic credentials and the QA session cookie that the platform auth honours
@@ -43,8 +43,13 @@ const REBUILD = args.includes('--rebuild')
 // --redis adds a real Redis container so rate limiting and the cache run against the real dependency (and can be stopped to test degradation).
 const REDIS = args.includes('--redis')
 const PORT_REDIS = Number(opt('port-redis', '56379'))
-const REDIS_CONTAINER = 'ue-runtime-redis'
-const CONTAINER = 'ue-runtime-pg'
+const RUNTIME_ID = opt('runtime-id', '')
+if (RUNTIME_ID && !/^[a-z0-9][a-z0-9-]{0,31}$/.test(RUNTIME_ID)) {
+  throw new Error('Runtime ID must be 1-32 lowercase letters, digits, or hyphens')
+}
+const runtimeName = (base) => RUNTIME_ID ? `${base}-${RUNTIME_ID}` : base
+const REDIS_CONTAINER = runtimeName('ue-runtime-redis')
+const CONTAINER = runtimeName('ue-runtime-pg')
 const APP_DB = 'ue_runtime'
 const POSTGRES_VERSION = opt('postgres-version', '16')
 if (!['15', '16'].includes(POSTGRES_VERSION)) throw new Error('Only PostgreSQL 15 and 16 are supported for disposable QA fixtures')
@@ -225,7 +230,11 @@ async function up() {
 
 function startApp() {
   const filter = ['--filter', '@nzila/union-eyes']
-  if (PROD && (REBUILD || !existsSync(join(APP, '.next', 'BUILD_ID')))) run('pnpm', [...filter, 'exec', 'next', 'build'], { env: runtimeEnv() })
+  // Use the application's canonical build command. Calling `next build`
+  // directly defaults to Turbopack in Next 16 and bypasses the webpack
+  // extension aliases required by NodeNext-style workspace source imports.
+  if (PROD && (REBUILD || !existsSync(join(APP, '.next', 'BUILD_ID'))))
+    run('pnpm', [...filter, 'build'], { env: runtimeEnv() })
   const serve = PROD ? ['exec', 'next', 'start', '--hostname', '127.0.0.1', '--port', String(PORT_APP)] : ['dev']
   const log = openSync(join(STATE, 'app.log'), 'a')
   const child = spawn('pnpm', [...filter, ...serve], {

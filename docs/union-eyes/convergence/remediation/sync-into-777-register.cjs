@@ -9,7 +9,12 @@ const raw = fs.readFileSync(registerPath, 'utf8')
 const crlf = raw.includes('\r\n')
 const register = JSON.parse(raw)
 const ledger = JSON.parse(fs.readFileSync(path.join(dir, 'ue-gate0-defect-elimination.json'), 'utf8'))
-const BRANCH = 'agents/ue-cursor-final-closure'
+const LEGACY_BRANCH = 'agents/ue-cursor-final-closure'
+const INTEGRATION_BRANCH = 'fix/ue-gate0-final-convergence'
+const integrationBatches = new Set([
+  'B169-F03-DIRECT-SCOPED-AUTHORITY-AND-TRUTHFUL-REFUSAL',
+  'B170-GATE0-RESIDUAL-45-FULL-ENGINEERING-CLOSURE',
+])
 const byId = new Map(register.records.map((r) => [r.defectId, r]))
 const skipped = []
 let added = 0
@@ -31,7 +36,7 @@ for (const [id, entry] of Object.entries(ledger.entries)) {
     path: entry.files.join('; '),
     explanation: entry.explanation,
     ...(entry.remaining ? { remaining: entry.remaining } : {}),
-    sourceBranch: BRANCH,
+    sourceBranch: integrationBatches.has(entry.batch) ? INTEGRATION_BRANCH : LEGACY_BRANCH,
   }
   record.currentHeadVerification = 'SOURCE_PATCHED_NOT_VERIFIED_AT_CURRENT_HEAD'
   if (implemented) added += 1

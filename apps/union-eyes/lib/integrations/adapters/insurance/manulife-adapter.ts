@@ -126,6 +126,8 @@ export class ManulifeAdapter extends BaseIntegration {
   // ==========================================================================
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const _startTime = Date.now();
@@ -140,6 +142,7 @@ export class ManulifeAdapter extends BaseIntegration {
       const modifiedSince = options.cursor ? new Date(options.cursor) : undefined;
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           this.logOperation('sync', { message: `Syncing ${entity}` });
 
@@ -224,6 +227,7 @@ export class ManulifeAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getClaims({
         page,
         pageSize: this.PAGE_SIZE,
@@ -231,6 +235,7 @@ export class ManulifeAdapter extends BaseIntegration {
       });
 
       for (const claim of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalInsuranceClaims.findFirst({
             where: and(
@@ -300,12 +305,14 @@ export class ManulifeAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getPolicies({
         page,
         pageSize: this.PAGE_SIZE,
       });
 
       for (const policy of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalInsurancePolicies.findFirst({
             where: and(
@@ -367,12 +374,14 @@ export class ManulifeAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getBeneficiaries({
         page,
         pageSize: this.PAGE_SIZE,
       });
 
       for (const beneficiary of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalInsuranceBeneficiaries.findFirst({
             where: and(
@@ -434,12 +443,14 @@ export class ManulifeAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getUtilization({
         page,
         pageSize: this.PAGE_SIZE,
       });
 
       for (const util of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalBenefitUtilization.findFirst({
             where: and(

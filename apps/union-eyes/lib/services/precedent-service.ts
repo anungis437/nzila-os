@@ -83,7 +83,7 @@ export interface PrecedentFilters {
   arbitrator?: string;
   union?: string;
   employer?: string;
-  jurisdiction?: string;
+  jurisdiction?: string | string[];
   sector?: string;
   dateFrom?: Date;
   dateTo?: Date;
@@ -199,7 +199,8 @@ export async function listPrecedents(
     }
 
     if (filters.jurisdiction) {
-      conditions.push(eq(arbitrationDecisions.jurisdiction, filters.jurisdiction));
+      const jurisdictions = Array.isArray(filters.jurisdiction) ? filters.jurisdiction : [filters.jurisdiction];
+      if (jurisdictions.length > 0) conditions.push(inArray(arbitrationDecisions.jurisdiction, jurisdictions));
     }
 
     if (filters.sector) {
@@ -366,6 +367,10 @@ export async function searchPrecedents(
 
     if (precedentValues) conditions.push(inArray(arbitrationDecisions.precedentValue, precedentValues));
     if (tribunals) conditions.push(inArray(arbitrationDecisions.tribunal, tribunals));
+    if (filters.jurisdiction) {
+      const jurisdictions = Array.isArray(filters.jurisdiction) ? filters.jurisdiction : [filters.jurisdiction];
+      if (jurisdictions.length > 0) conditions.push(inArray(arbitrationDecisions.jurisdiction, jurisdictions));
+    }
 
     const results = await db
       .select()
@@ -386,14 +391,19 @@ export async function searchPrecedents(
  */
 export async function getPrecedentsByIssueType(
   issueType: string,
-  limit: number = 20
+  limit: number = 20,
+  jurisdictions: string[] = [],
 ): Promise<ArbitrationDecision[]> {
   try {
     // This would use JSONB operations in production
     const results = await db
       .select()
       .from(arbitrationDecisions)
-      .where(and(sharedDecisions(), sql`${arbitrationDecisions.issueTypes}::jsonb ? ${issueType}`))
+      .where(and(
+        sharedDecisions(),
+        sql`${arbitrationDecisions.issueTypes}::jsonb ? ${issueType}`,
+        jurisdictions.length > 0 ? inArray(arbitrationDecisions.jurisdiction, jurisdictions) : undefined,
+      ))
       .orderBy(desc(precedentRank), desc(arbitrationDecisions.decisionDate))
       .limit(limit);
 
@@ -576,15 +586,16 @@ export async function getTopArbitrators(limit: number = 20): Promise<ArbitratorP
 /**
  * Get precedent statistics
  */
-export async function getPrecedentStatistics() {
+export async function getPrecedentStatistics(jurisdictions: string[] = []) {
   try {
+    const scope = and(sharedDecisions(), jurisdictions.length > 0 ? inArray(arbitrationDecisions.jurisdiction, jurisdictions) : undefined);
     const byOutcome = await db
       .select({
         outcome: arbitrationDecisions.outcome,
         count: sql<number>`count(*)::int`,
       })
       .from(arbitrationDecisions)
-      .where(sharedDecisions())
+      .where(scope)
       .groupBy(arbitrationDecisions.outcome);
 
     const byTribunal = await db
@@ -593,13 +604,13 @@ export async function getPrecedentStatistics() {
         count: sql<number>`count(*)::int`,
       })
       .from(arbitrationDecisions)
-      .where(sharedDecisions())
+      .where(scope)
       .groupBy(arbitrationDecisions.tribunal);
 
     const [{ total }] = await db
       .select({ total: sql<number>`count(*)::int` })
       .from(arbitrationDecisions)
-      .where(sharedDecisions());
+      .where(scope);
 
     return {
       total,
@@ -615,12 +626,12 @@ export async function getPrecedentStatistics() {
 /**
  * Get most cited precedents
  */
-export async function getMostCitedPrecedents(limit: number = 10): Promise<ArbitrationDecision[]> {
+export async function getMostCitedPrecedents(limit: number = 10, jurisdictions: string[] = []): Promise<ArbitrationDecision[]> {
   try {
     const precedents = await db
       .select()
       .from(arbitrationDecisions)
-      .where(sharedDecisions())
+      .where(and(sharedDecisions(), jurisdictions.length > 0 ? inArray(arbitrationDecisions.jurisdiction, jurisdictions) : undefined))
       .orderBy(desc(arbitrationDecisions.citationCount))
       .limit(limit);
 
@@ -630,4 +641,3 @@ export async function getMostCitedPrecedents(limit: number = 10): Promise<Arbitr
     throw new Error("Failed to fetch most cited precedents");
   }
 }
-

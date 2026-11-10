@@ -14,6 +14,7 @@
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -181,7 +182,8 @@ ${clauseContent}`
       profileKey: UE_PROFILES.CLAUSE_CLASSIFICATION,
       promptKey: UE_PROFILES.CLAUSE_CLASSIFICATION,
       input: `${systemPrompt}\n\n${userContent}`,
-      dataClass: 'internal',
+      // Clause text is the organization's own negotiated agreement content, not public or purely operational.
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     const result = response.data as Record<string, unknown>;
@@ -245,7 +247,7 @@ Return JSON with:
       profileKey: UE_PROFILES.TAG_GENERATION,
       promptKey: UE_PROFILES.TAG_GENERATION,
       input: `${systemPrompt}\n\nClause Type: ${clauseType}\n\nContent: ${clauseContent}`,
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     const result = response.data as Record<string, unknown>;
@@ -290,7 +292,7 @@ Return JSON with:
       profileKey: UE_PROFILES.CROSS_REFERENCE,
       promptKey: UE_PROFILES.CROSS_REFERENCE,
       input: `${systemPrompt}\n\n${clauseContent}`,
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     const result = response.data as Record<string, unknown>;
@@ -360,7 +362,8 @@ Return JSON with:
       profileKey: UE_PROFILES.PRECEDENT_CLASSIFICATION,
       promptKey: UE_PROFILES.PRECEDENT_CLASSIFICATION,
       input: `${systemPrompt}\n\nCase: ${caseTitle}\n\nFacts: ${facts}\n\nReasoning: ${reasoning}\n\nDecision: ${decision}`,
-      dataClass: 'internal',
+      // Arbitration case facts, reasoning and decision are grievance/arbitration record content.
+      dataClass: toGatewayDataClass('grievance_legal'),
     });
 
     const result = response.data as Record<string, unknown>;

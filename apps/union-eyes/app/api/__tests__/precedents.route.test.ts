@@ -19,6 +19,9 @@ vi.mock('@/lib/services/precedent-service', () => ({
 vi.mock('@/lib/services/precedent-audited-service', () => ({
   createPrecedentAudited: m.createPrecedentAudited,
 }));
+vi.mock('@/lib/precedents/jurisdiction-preference-resolver', () => ({
+  resolvePrecedentJurisdictions: vi.fn(async () => ({ applied: false, jurisdictions: [], source: 'none' })),
+}));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }));
 
 const { caller, declared, resetCaller } = await import('./support/with-api-stub');
@@ -71,7 +74,7 @@ describe('precedents route', () => {
     expect(m.listPrecedents).toHaveBeenCalledWith(expect.any(Object), expect.objectContaining({ page: 2, limit: 30 }));
     m.getMostCitedPrecedents.mockResolvedValue([]);
     expect((await GET(new NextRequest('http://localhost/api/precedents?mostCited=true&limit=100'))).status).toBe(200);
-    expect(m.getMostCitedPrecedents).toHaveBeenCalledWith(100);
+    expect(m.getMostCitedPrecedents).toHaveBeenCalledWith(100, []);
   });
 
   it('returns precedent statistics', async () => {
@@ -80,7 +83,7 @@ describe('precedents route', () => {
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json).toEqual({ total: 12 });
+    expect(json).toEqual({ total: 12, jurisdictionPreference: { applied: false, jurisdictions: [], source: 'none' } });
   });
 
   async function validBody(overrides: Record<string, unknown> = {}) {

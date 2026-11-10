@@ -1,7 +1,7 @@
 /**
  * CRUD collection route for courseSessions
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
+import { crudRoutes, queryIdMutations, type CrudOptions } from '@/lib/api/crud-factory';
 import { courseSessions, trainingCourses } from '@/db/schema';
 import { assertOrganizationOwns } from '@/lib/api/org-references';
 import { ApiError } from '@/lib/api/errors';
@@ -68,12 +68,13 @@ export function validateEducationSessionCreate(values: Record<string, unknown>):
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
+const sessionCrudOptions: CrudOptions & { itemRoute?: false } = {
   table: courseSessions,
   pk: 'id',
   tags: ["Scheduling"],
   orgScoped: true,
   readRole: 'member',
+  listFilters: { equals: { courseId: 'courseId', sessionStatus: 'sessionStatus' } },
   // Meeting URLs/codes can contain access secrets; accommodation locations and notes may disclose participant information.
   // None belongs in the member-wide catalogue. Enrolled members need a separately governed registration-scoped view.
   staffOnlyResponseFields: ['virtualMeetingUrl', 'virtualMeetingAccessCode', 'accommodationHotel', 'notes'],
@@ -93,5 +94,14 @@ const { GET, POST } = crudRoutes({
     await assertOrganizationOwns([{ field: 'courseId', value: values.courseId, table: trainingCourses }], organizationId);
     return values;
   },
-});
-export { GET, POST };
+};
+
+// `table`/`omitFromResponse` are re-stated as direct properties (not just spread) on both calls
+// below so the frontend response-shape census (which reads a `crudRoutes({ table, ... })` call's
+// own literal, not an indirection through a shared variable) can still resolve the row shape.
+const { GET, POST } = crudRoutes({ ...sessionCrudOptions, table: courseSessions, omitFromResponse: ['sessionBudget', 'actualCost'] });
+// No [id]/route.ts exists for sessions; the admin screens submit edits and deletes with `?id=` on
+// this collection URL instead, so the item-mode handlers (same options, same authorization) are
+// exposed here rather than under a path segment.
+const { PATCH, DELETE } = queryIdMutations(crudRoutes({ ...sessionCrudOptions, table: courseSessions, omitFromResponse: ['sessionBudget', 'actualCost'], itemRoute: true }));
+export { GET, POST, PATCH, DELETE };

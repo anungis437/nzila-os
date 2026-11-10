@@ -4,9 +4,10 @@
  * Measure organizational continuity resilience across multiple dimensions.
  */
 
+import type { VerifiedEdgeCoverage } from '@/lib/knowledge-transfer/propagation/graph-evidence-service';
 import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
-import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { PropagationMap } from '../propagation/propagation-models';
+import { loadGraphEvidence, verifiedEdgeCoverage } from '../propagation/graph-evidence-service';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { inOrganization } from '../org-scope';
 import { ApiError } from '@/lib/api/errors';
@@ -31,12 +32,28 @@ export interface OrganizationalResilienceIndex {
   status: 'critical' | 'at_risk' | 'adequate' | 'strong';
   /** Performance across dimensions */
   dimensions: ResilienceIndexDimension[];
-  /** Trend (improving/stable/degrading) */
-  trend: 'improving' | 'stable' | 'degrading';
+  /**
+   * A single-snapshot risk-concentration signal, not a trend measured across time: 'degrading' when over 40% of
+   * dependency nodes are single-source, else 'stable'. There is no prior snapshot to compare against, so this can
+   * never read 'improving' - the label names a current risk level, not a direction of change.
+   */
+  trend: 'stable' | 'degrading';
   /** Maturity level */
   maturityLevel: 'initial' | 'developing' | 'managed' | 'optimized';
   /** Actionable recommendations */
   recommendations: string[];
+  /**
+   * Every figure above is a heuristic derived from dependency-node and interview counts at this one point in
+   * time: trend is a risk-concentration snapshot (see its own doc comment), and maturityLevel/status are score
+   * cut-off labels, not a validated assessment of governance maturity or change over time.
+   */
+  methodologyNote: string;
+  /** How many of the dependency nodes behind this index have at least one currently-verified relationship on
+   *  file, out of how many nodes exist in total - an aggregate corroboration signal, never a per-dimension gate
+   *  (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE). */
+  /** Directed inferred dependencies whose exact direction is currently verified (verifiedEdgeCoverage). Never a
+   *  count of nodes that merely appear in some verified record. */
+  verifiedEvidenceCoverage: VerifiedEdgeCoverage;
 }
 
 async function loadPublishedInterviews(orgId: string) {
@@ -51,7 +68,8 @@ async function loadPublishedInterviews(orgId: string) {
 }
 
 export async function calculateResilienceIndex(orgId: string): Promise<OrganizationalResilienceIndex> {
-  const propagationMap = await buildDependencyPropagationMap(orgId);
+  const evidence = await loadGraphEvidence(orgId);
+  const propagationMap = evidence.exploratory;
   const interviews = await loadPublishedInterviews(orgId);
 
   // Four of the five dimensions are measured over the dependency map. With no nodes they divide by zero, or read a strong score from the
@@ -83,8 +101,11 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
       score: documentationScore,
       status: statusFromScore(documentationScore),
       components: [
+        // DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS: a separate
+        // "Estimated doc quality" figure used to be shown here as a 3-step function of this same interview count -
+        // a second number dressed up as an independent quality signal when it carried no information the raw
+        // count to its left did not already carry. The raw count is the only honest figure available.
         { name: 'Published interviews', value: interviews.length },
-        { name: 'Estimated doc quality', value: interviews.length >= 8 ? 75 : interviews.length >= 4 ? 50 : 25 },
       ],
       recommendations: documentationScore < 60 ? ['Capture more interviews', 'Create runbooks and procedures'] : [],
     },
@@ -132,7 +153,8 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
     overallScore >= 40 ? 'developing' :
     'initial';
 
-  // Trend (heuristic)
+  // A single-snapshot risk-concentration signal, not a measured trend: there is no prior snapshot to compare
+  // against, so this can never read 'improving' (see the field's own doc comment on OrganizationalResilienceIndex).
   const trend = propagationMap.nodes.filter((node) => node.isSingleSource).length > propagationMap.nodes.length * 0.4 ? 'degrading' : 'stable' as const;
 
   // Overall recommendations
@@ -150,6 +172,11 @@ export async function calculateResilienceIndex(orgId: string): Promise<Organizat
     trend,
     maturityLevel,
     recommendations,
+    methodologyNote:
+      'trend is a single-snapshot risk-concentration signal (no prior snapshot exists to compare against, so it ' +
+      "can never read 'improving'); maturityLevel and status are score cut-off labels on counts of dependency " +
+      'nodes and interviews, not a validated governance or documentation maturity assessment.',
+    verifiedEvidenceCoverage: verifiedEdgeCoverage(evidence),
   };
 }
 

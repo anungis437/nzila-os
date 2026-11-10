@@ -7,11 +7,13 @@ const m = vi.hoisted(() => ({
   tables: [] as unknown[],
   organizations: { __table: 'organizations' },
   organizationMembers: { __table: 'organization_members' },
+  requirePlatformStaffAuthority: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi }));
 vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
 vi.mock('@/db/db', () => ({ db: m.db }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requirePlatformStaffAuthority }));
 vi.mock('@/db/schema', () => ({ organizations: m.organizations, organizationMembers: m.organizationMembers }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();
@@ -30,8 +32,9 @@ async function loadRoute() {
 describe('admin/stats/overview route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.withApi.mockImplementation((_cfg: unknown, handler: () => Promise<unknown>) =>
-      () => handler());
+    m.withApi.mockImplementation((_cfg: unknown, handler: (ctx: unknown) => Promise<unknown>) =>
+      () => handler({ userId: 'u1', organizationId: 'org_1' }));
+    m.requirePlatformStaffAuthority.mockResolvedValue({ userId: 'u1', organizationId: 'org_1' });
     m.withSystemContext.mockImplementation(async (fn: () => Promise<unknown>) => fn());
     m.db.select.mockImplementation(() => ({
       from: vi.fn((table: unknown) => {
@@ -56,5 +59,21 @@ describe('admin/stats/overview route', () => {
     });
     expect(m.tables).toEqual([m.organizations]);
     expect(m.tables).not.toContain(m.organizationMembers);
+  });
+
+  // DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY: the platform_lead title is only a floor.
+  it('requires the platform-staff mandate before any statement runs', async () => {
+    const { GET } = await loadRoute();
+    await GET();
+    expect(m.requirePlatformStaffAuthority).toHaveBeenCalledWith({ userId: 'u1', organizationId: 'org_1' }, 'platform.stats.read');
+  });
+
+  it('refuses a platform lead without the platform-staff mandate, opening no system transaction and reading nothing', async () => {
+    m.requirePlatformStaffAuthority.mockRejectedValue(Object.assign(new Error('Acting across organizations needs platform-staff authority'), { status: 403 }));
+    const { GET } = await loadRoute();
+    await expect(GET()).rejects.toThrow('platform-staff authority');
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(m.db.select).not.toHaveBeenCalled();
+    expect(m.db.execute).not.toHaveBeenCalled();
   });
 });

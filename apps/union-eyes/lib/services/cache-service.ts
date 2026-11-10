@@ -490,6 +490,30 @@ export async function acquireLock(
 }
 
 /**
+ * Check whether a distributed lock is currently held, without acquiring it.
+ * Read-only: does not create, extend or clear the lock.
+ *
+ * Returns null, not false, when Redis could not be reached: a caller that treats null the same as false would read an
+ * outage as "confirmed unlocked", which is the opposite of the truth (unknown). false is only ever returned when Redis
+ * was actually asked and the key was confirmed absent.
+ */
+export async function isLocked(
+  lockName: string,
+  namespace = 'lock'
+): Promise<boolean | null> {
+  const redis = getRedis();
+  const lockKey = `${namespace}:${lockName}`;
+
+  try {
+    const result = await redis.exists(lockKey);
+    return result === 1;
+  } catch (error) {
+    logger.error(`[Lock] isLocked error for ${lockName}`, error instanceof Error ? error : new Error(String(error)));
+    return null;
+  }
+}
+
+/**
  * Release a distributed lock
  * Only releases if the token matches
  */

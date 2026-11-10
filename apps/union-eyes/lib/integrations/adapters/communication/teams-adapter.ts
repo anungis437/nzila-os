@@ -97,6 +97,8 @@ export class TeamsAdapter extends BaseIntegration {
   }
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     await this.ensureConnected();
 
     const orgs = options.orgs || ['teams', 'channels', 'messages', 'members', 'files'];
@@ -118,14 +120,17 @@ export class TeamsAdapter extends BaseIntegration {
       }
 
       if (orgs.includes('messages')) {
+        this.throwIfAborted(options);
         await this.syncMessages(options, results);
       }
 
       if (orgs.includes('members')) {
+        this.throwIfAborted(options);
         await this.syncMembers(options, results);
       }
 
       if (orgs.includes('files')) {
+        this.throwIfAborted(options);
         await this.syncFiles(options, results);
       }
 
@@ -152,12 +157,14 @@ export class TeamsAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client.getTeams({
         skipToken: nextLink,
         top: PAGE_SIZE,
       });
 
       for (const team of response.teams) {
+        this.throwIfAborted();
         try {
           // Sync the team as a "team" type channel
           const _teamChannel = await db
@@ -211,12 +218,14 @@ export class TeamsAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client.getChannels(teamId, {
         skipToken: nextLink,
         top: PAGE_SIZE,
       });
 
       for (const channel of response.channels) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalCommunicationChannels)
@@ -278,6 +287,7 @@ export class TeamsAdapter extends BaseIntegration {
       : undefined;
 
     for (const channel of channels) {
+      this.throwIfAborted();
       // Skip team-level entries, only process channels
       if (channel.channelType === 'team') continue;
       
@@ -287,6 +297,7 @@ export class TeamsAdapter extends BaseIntegration {
       let hasMore = true;
 
       while (hasMore) {
+        this.throwIfAborted();
         try {
           const response = await this.client.getChannelMessages(
             channel.parentChannelId,
@@ -299,6 +310,7 @@ export class TeamsAdapter extends BaseIntegration {
           );
 
           for (const message of response.messages) {
+            this.throwIfAborted();
             try {
               await db
                 .insert(externalCommunicationMessages)
@@ -363,10 +375,12 @@ export class TeamsAdapter extends BaseIntegration {
       );
 
     for (const team of teams) {
+      this.throwIfAborted();
       let nextLink: string | undefined;
       let hasMore = true;
 
       while (hasMore) {
+        this.throwIfAborted();
         try {
           const response = await this.client.getTeamMembers(team.externalId, {
             skipToken: nextLink,
@@ -374,6 +388,7 @@ export class TeamsAdapter extends BaseIntegration {
           });
 
           for (const member of response.members) {
+            this.throwIfAborted();
             try {
               const isAdmin = member.roles?.includes('owner') || false;
 
@@ -438,6 +453,7 @@ export class TeamsAdapter extends BaseIntegration {
       );
 
     for (const channel of channels) {
+      this.throwIfAborted();
       // Skip team-level entries
       if (channel.channelType === 'team') continue;
       if (!channel.parentChannelId) continue;
@@ -446,6 +462,7 @@ export class TeamsAdapter extends BaseIntegration {
       let hasMore = true;
 
       while (hasMore) {
+        this.throwIfAborted();
         try {
           const response = await this.client.getChannelFiles(
             channel.parentChannelId,
@@ -457,6 +474,7 @@ export class TeamsAdapter extends BaseIntegration {
           );
 
           for (const file of response.files) {
+            this.throwIfAborted();
             try {
               await db
                 .insert(externalCommunicationFiles)

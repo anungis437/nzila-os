@@ -19,6 +19,7 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api-auth-guard', () => ({
   withSystemAdminAuth: m.withSystemAdminAuth,
 }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: vi.fn(async (context) => context) }));
 
 vi.mock('@/lib/job-queue', () => ({
   pauseQueue: m.pauseQueue,

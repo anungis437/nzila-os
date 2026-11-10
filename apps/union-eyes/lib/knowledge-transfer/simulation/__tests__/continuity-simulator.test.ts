@@ -11,7 +11,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('@/lib/knowledge-transfer/governance/interview-access', () => ({ derivedAnalyticsCondition: () => 'derived-analytics-condition' }))
 import type { SimulationScenario, SimulationType } from '../simulation-models';
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[] }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), interviews: [] as unknown[], listVerifiedDependencies: vi.fn() }));
 
 function makeChain() {
   const chain: Record<string, unknown> = {};
@@ -23,6 +23,11 @@ function makeChain() {
 vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
 }));
+vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
+  listVerifiedDependencies: mocks.listVerifiedDependencies,
+}));
+vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({ listActiveNodeAliases: async () => [] }));
+vi.mock('@/lib/knowledge-transfer/propagation/evidence-document-reference', () => ({ loadEvidenceDocumentIntegrity: async () => new Map() }));
 vi.mock('@/db/db', () => ({ db: { select: vi.fn(() => makeChain()) } }));
 // The interviews are read through the organization's tenant transaction; the transaction here is the mocked handle.
 vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
@@ -30,9 +35,10 @@ vi.mock('@/lib/knowledge-transfer/org-scope', () => ({
   inOrganization: async (_organizationId: string, work: (tx: unknown) => Promise<unknown>) => work((await import('@/db/db')).db),
 }));
 vi.mock('@/db/schema', () => ({ exitInterviews: { organizationId: 'organizationId', status: 'status' } }));
-vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a }));
+vi.mock('drizzle-orm', () => ({ and: (...a: unknown[]) => a, eq: (...a: unknown[]) => a, relations: () => ({}) }));
 
 import { simulateContinuityImpact } from '../continuity-simulator';
+import { currentVerifiedRecord } from '../../propagation/__tests__/verified-record-fixture';
 
 function n(id: string, category: string, isSingleSource: boolean, roles = ['President']) {
   return {
@@ -59,6 +65,7 @@ describe('simulateContinuityImpact', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.interviews = [];
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
   });
 
   // DEF-0B7-EXC-SIMULATION-UNMATCHED-NODES-RETURN-REASSURING-RESULT-AND-ROLES-ARE-IGNORED: a scenario that matches nothing used to
@@ -74,6 +81,54 @@ describe('simulateContinuityImpact', () => {
     mocks.buildMap.mockResolvedValue(mapWith([n('a', 'governance', true, ['Treasurer']), n('b', 'system', false, ['President'])]));
     const result = await simulateContinuityImpact('org', { simulationType: 'retirement', affectedNodeIds: [], affectedRoles: ['treasurer'] });
     expect(result.domainImpacts.map((d) => d.domain)).toEqual(['a']);
+  });
+
+  // DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE: the simulation is a
+  // scenario model over the exploratory graph, never a confirmed-impact claim. Every result discloses that basis
+  // at the type level, and discloses how much of the specific scenario touches independently-verified evidence.
+  it('discloses its exploratory evidence basis and reports zero verified-dependency coverage with no verified records', async () => {
+    mocks.interviews = [{ id: 'i1' }];
+    mocks.buildMap.mockResolvedValue(mapWith([n('a', 'system', true)]));
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
+    const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
+    expect(result.evidenceBasis).toBe('exploratory_simulation');
+    expect(result.methodologyNote).toMatch(/hypothetical scenario/i);
+    expect(result.verifiedDependencyContext).toEqual({ verifiedImpacts: [], totalAffectedNodes: 1 });
+  });
+
+  it('corroborates a downstream impact only through a verified dependency in the impact direction', async () => {
+    mocks.interviews = [{ id: 'i1' }];
+    const a = n('a', 'system', true);
+    const b = n('b', 'system', false);
+    mocks.buildMap.mockResolvedValue(mapWith([a, b]));
+    // b depends on a: a failure of a reaches b.
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(b, a)]);
+    const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
+    expect(result.verifiedDependencyContext).toEqual({
+      verifiedImpacts: [{ fromNodeId: 'a', nodeId: 'b', chain: ['a', 'b'], evidenceTier: 'human_attested_external' }],
+      totalAffectedNodes: 1,
+    });
+  });
+
+  it('corroborates nothing when the affected node merely appears in a verified record pointing the other way', async () => {
+    mocks.interviews = [{ id: 'i1' }];
+    const a = n('a', 'system', true);
+    const b = n('b', 'system', false);
+    mocks.buildMap.mockResolvedValue(mapWith([a, b]));
+    // a depends on b: a failure of a does not reach b.
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(a, b)]);
+    const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
+    expect(result.verifiedDependencyContext).toEqual({ verifiedImpacts: [], totalAffectedNodes: 1 });
+  });
+
+  it('corroborates nothing from a verified record that is no longer current', async () => {
+    mocks.interviews = [{ id: 'i1' }];
+    const a = n('a', 'system', true);
+    const b = n('b', 'system', false);
+    mocks.buildMap.mockResolvedValue(mapWith([a, b]));
+    mocks.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(b, a, { sourceFingerprint: 'drifted' })]);
+    const result = await simulateContinuityImpact('org', scenario('retirement', ['a']));
+    expect(result.verifiedDependencyContext.verifiedImpacts).toEqual([]);
   });
   it('simulates a critical multi-domain governance + vendor loss', async () => {
     mocks.interviews = [{ id: 'i1' }, { id: 'i2' }];

@@ -68,6 +68,16 @@ describe('education/registrations: self-enrollment and cross-tenant FK protectio
     }
   });
 
+  // DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT: a staff caller (staffReadsAll) reads
+  // every member's registrations; without these, nothing narrows that organization-wide list to one
+  // member or one registration status, so a staff screen's own filter controls were silently ignored.
+  it('honours memberId and registrationStatus list filters for a staff caller reading every member\'s registrations', () => {
+    expect(routeOptions.listFilters).toEqual({
+      equals: { memberId: 'memberId', registrationStatus: 'registrationStatus' },
+    });
+  });
+
+
   it.each(['memberId', 'feePaid', 'feeWaived', 'courseFee', 'registrationStatus',
     'completed', 'attended', 'passed', 'certificateIssued', 'requiresApproval', 'unexpected'])(
     'refuses forged enrollment field %s before any database read', async (field) => {

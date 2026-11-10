@@ -15,6 +15,7 @@ import { collectiveAgreements } from '@/db/schema/domains/agreements/collective-
 import { apiIntegrations } from '@/db/schema/integration-schema'
 import { hasAuditedAction } from '@/lib/audit/audit-reader'
 import type { RLSTx } from '@/lib/db/with-rls-context'
+import { productionEmployerCondition } from '@/lib/pilot/demo-provenance'
 
 export const CHECKLIST_ITEM_IDS = [
   'org-seeded',
@@ -84,7 +85,7 @@ export async function verifyChecklistStep(
     }
     case 'employers-imported': {
       const n = await countOf(
-        tx.select({ n: sql<number>`count(*)` }).from(employers).where(eq(employers.organizationId, organizationId)),
+        tx.select({ n: sql<number>`count(*)` }).from(employers).where(and(eq(employers.organizationId, organizationId), productionEmployerCondition())),
       )
       return n > 0 ? { ok: true, evidence: { employers: n } } : { ok: false, missing: 'an employer record' }
     }

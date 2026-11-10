@@ -134,8 +134,8 @@ describe('schema and mutation batch program', () => {
     const disposition = JSON.parse(readFileSync(path.join(REGISTER, 'ue-canonical-schema-disposition.json'), 'utf8')).entries as Record<string, { disposition: string }>
     const baseline = JSON.parse(readFileSync(path.join(REGISTER, 'ue-mutation-scope-baseline.json'), 'utf8')).entries as Record<string, number>
     expect(program.applyNow).toBe(false)
-    expect(program.sourceMutationBaselineSum).toBe(13)
-    expect(program.mutationLiveSum).toBeLessThanOrEqual(13)
+    expect(program.sourceMutationBaselineSum).toBe(15)
+    expect(program.mutationLiveSum).toBeLessThanOrEqual(15)
     expect(program.censusCount).toBe(census.length)
     expect(program.schema.map((entry) => entry.table)).toEqual(census.map((entry) => entry.table).sort())
     expect(new Set(program.schema.map((entry) => entry.table)).size).toBe(census.length)

@@ -4,6 +4,8 @@ const m = vi.hoisted(() => ({
   withApi: vi.fn(),
   badRequest: vi.fn((message: string) => ({ apiError: true, status: 400, message })),
   conflict: vi.fn((message: string, details?: unknown) => ({ apiError: true, status: 409, message, details })),
+  forbidden: vi.fn((message: string) => ({ apiError: true, status: 403, message })),
+  notImplemented: vi.fn((message: string) => ({ apiError: true, status: 501, message })),
   select: vi.fn(),
   from: vi.fn(),
   where: vi.fn(),
@@ -16,7 +18,7 @@ const m = vi.hoisted(() => ({
   tx: {} as Record<string, unknown>,
 }));
 
-vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: m.badRequest, conflict: m.conflict } }));
+vi.mock('@/lib/api/framework', () => ({ withApi: m.withApi, ApiError: { badRequest: m.badRequest, conflict: m.conflict, forbidden: m.forbidden, notImplemented: m.notImplemented } }));
 vi.mock('@/db/schema/sso-scim-schema', () => ({
   ssoProviders: { id: 'sp.id', organizationId: 'sp.organizationId' },
 }));
@@ -92,33 +94,14 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
     expect(capturedPostOpts?.auth).toMatchObject({ required: true, minRole: 'admin' });
   });
 
-  // F06 R5: nothing reads a provider at sign-in, so a provider cannot be created already enabled or auto-provisioning. The attempt is
-  // recorded as the specific blocked operation, in its own record, and nothing is stored.
-  it.each([{ enabled: true }, { autoProvision: true }, { enabled: true, autoProvision: true }])('POST refuses to create a provider with %j and records the blocked operation', async (flags) => {
-    const body = { name: 'New IdP', providerType: 'oidc', attributeMapping: { email: 'email' }, ...flags };
-
-    let refused: { status?: number; message?: string; details?: { blockedOperation?: { operation: string } } } | undefined;
-    try { await capturedPostHandler!({ body, organizationId: 'org-real', userId: 'admin-user' }); } catch (error) { refused = error as typeof refused; }
-
-    expect(refused?.status).toBe(409);
-    expect(refused?.message).toContain('auth.sso.federated_sign_in');
-    expect(refused?.message).toContain('the institution approves this identity provider');
-    expect(refused?.details?.blockedOperation?.operation).toBe('auth.sso.federated_sign_in');
-    expect(m.audit).toHaveBeenCalledWith(
-      m.tx,
-      expect.objectContaining({
-        action: 'sso.provider.activate_blocked',
-        organizationId: 'org-real',
-        userId: 'admin-user',
-        details: expect.objectContaining({ blockedOperation: 'auth.sso.federated_sign_in', capability: 'UE-SSO-SIGN-IN', requested: Object.keys(flags) }),
-      }),
-      'failure',
-    );
+  it('POST separates creation from activation and refuses just-in-time provisioning', async () => {
+    await expect(capturedPostHandler!({ body: { name: 'New IdP', providerType: 'oidc', attributeMapping: {}, enabled: true }, organizationId: 'org-real', userId: 'admin-user' })).rejects.toMatchObject({ status: 403 });
+    await expect(capturedPostHandler!({ body: { name: 'New IdP', providerType: 'oidc', attributeMapping: {}, autoProvision: true }, organizationId: 'org-real', userId: 'admin-user' })).rejects.toMatchObject({ status: 501 });
     expect(m.insert).not.toHaveBeenCalled();
     expect(m.encryptSecret).not.toHaveBeenCalled();
   });
 
-  it('POST still stores a staged provider (disabled, not auto-provisioning) and says it is not in effect, with what each requirement needs', async () => {
+  it('POST stores a staged provider while accurately reporting that the OIDC sign-in consumer exists', async () => {
     m.returning.mockResolvedValue([{ id: 'sp-new', organizationId: 'org-real', enabled: false }]);
 
     const result = await capturedPostHandler!({
@@ -127,9 +110,9 @@ describe('enterprise/sso/providers route (round 53 — credential redaction on c
       userId: 'admin-user',
     }) as { effect: { inEffect: boolean; blockedOperation: { operation: string } } };
 
-    expect(result.effect).toMatchObject({ inEffect: false, blockedOperation: { operation: 'auth.sso.federated_sign_in' } });
+    expect(result.effect).toMatchObject({ inEffect: true, blockedOperation: { operation: 'auth.sso.federated_sign_in' } });
     expect(m.insert).toHaveBeenCalledOnce();
-    expect(m.audit).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'sso.provider.activate_blocked' }), 'failure');
+    expect(m.audit).toHaveBeenCalledWith(m.tx, expect.objectContaining({ action: 'sso.provider.create', details: expect.objectContaining({ inEffect: true }) }));
   });
 
   it('GET reports per provider what stands between its configuration and sign-in, from the stored row', async () => {

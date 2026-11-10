@@ -1,7 +1,7 @@
 import { withApi, ApiError, RATE_LIMITS } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { PENSION_ADMIN_ROLES, isPensionAdministrator } from '@/lib/pension/pension-authority';
+import { PENSION_ADMIN_ROLES, isPensionAdministrator, requirePensionTrusteeMandate } from '@/lib/pension/pension-authority';
 import { PLAN_STATUSES, PLAN_TYPES, activeEnrolmentCount, memberSafePlan, planFigureFields } from '@/lib/pension/plan-input';
 import { pensionPlans } from '@/db/schema';
 import { eq, and, ne } from 'drizzle-orm';
@@ -56,7 +56,8 @@ export const PATCH = withApi(
     const parsedChanges = updatePlanSchema.safeParse(body);
     if (!parsedChanges.success) throw ApiError.badRequest(parsedChanges.error.issues[0]?.message ?? 'Invalid pension plan update');
     const changes = parsedChanges.data;
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requirePensionTrusteeMandate(tx, { organizationId, userId, planId: id, action: 'pension:plan:update' });
       const [plan] = await tx
         .update(pensionPlans)
         .set({ ...changes, updatedAt: new Date() })
@@ -90,7 +91,8 @@ export const DELETE = withApi(
   async ({ params, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
     const id = planIdOf(params);
-    return withRLSContext({ organizationId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requirePensionTrusteeMandate(tx, { organizationId, userId, planId: id, action: 'pension:plan:terminate' });
       const [plan] = await tx
         .update(pensionPlans)
         .set({ status: 'terminated', updatedAt: new Date() })

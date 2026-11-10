@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 const h = vi.hoisted(() => {
   const queue: unknown[] = [];
+  const inserted: Array<Record<string, unknown>> = [];
+  const runUpdates: Array<Record<string, unknown>> = [];
   const makeChain = () => {
     const chain: Record<string, unknown> = {};
     for (const m of [
@@ -28,9 +30,23 @@ const h = vi.hoisted(() => {
     return chain;
   };
   const tx = {
-    insert: () => makeChain(),
+    insert: () => {
+      const chain = makeChain();
+      chain.values = (v: Record<string, unknown>) => {
+        inserted.push(v);
+        return chain;
+      };
+      return chain;
+    },
     select: () => makeChain(),
-    update: () => makeChain(),
+    update: () => {
+      const chain = makeChain();
+      chain.set = (v: Record<string, unknown>) => {
+        runUpdates.push(v);
+        return chain;
+      };
+      return chain;
+    },
     execute: async () => [],
   };
   const db = {
@@ -41,10 +57,19 @@ const h = vi.hoisted(() => {
     transaction: (fn: (t: typeof tx) => Promise<unknown>) => fn(tx),
   };
   const auditLog = vi.fn();
-  return { queue, db, auditLog };
+  const contexts: Array<Record<string, unknown>> = [];
+  return { queue, db, auditLog, inserted, runUpdates, contexts };
 });
 
 vi.mock('@/db', () => ({ db: h.db }));
+// DEF-0B11-PRP-RECONCILIATION-SERVICE-QUERIES-THROUGH-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY: the service opens the organization's
+// tenant context (not the shared db handle's own transaction). The stand-in records the context and runs the work on the queued transaction.
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: (ctx: Record<string, unknown>, fn: (t: unknown) => Promise<unknown>) => {
+    h.contexts.push(ctx);
+    return h.db.transaction(fn as never);
+  },
+}));
 vi.mock('@/db/schema', () =>
   new Proxy(
     {},
@@ -80,6 +105,9 @@ const pushSel = (...items: unknown[]) => h.queue.push(...items);
 
 beforeEach(() => {
   h.queue.length = 0;
+  h.inserted.length = 0;
+  h.runUpdates.length = 0;
+  h.contexts.length = 0;
   h.auditLog.mockReset();
 });
 
@@ -88,9 +116,9 @@ describe('platform-economics/reconciliation-service', () => {
     it('matches payments to invoices and records exceptions', async () => {
       const inv1 = { id: 'inv1', organizationId: 'o1', totalAmount: '10.00', invoiceNumber: 'INV-1', status: 'issued' };
       const inv2 = { id: 'inv2', organizationId: 'o1', totalAmount: '5.00', invoiceNumber: 'INV-2', status: 'issued' };
-      const pmt1 = { id: 'pmt1', organizationId: 'o1', amount: '12.00' };
-      const pmt2 = { id: 'pmt2', organizationId: 'o1', amount: '1.00' };
-      const pmt3 = { id: 'pmt3', organizationId: 'o1', amount: '1.00' };
+      const pmt1 = { id: 'pmt1', organizationId: 'o1', amount: '12.00', status: 'completed' };
+      const pmt2 = { id: 'pmt2', organizationId: 'o1', amount: '1.00', status: 'completed' };
+      const pmt3 = { id: 'pmt3', organizationId: 'o1', amount: '1.00', status: 'completed' };
       const alloc1 = { paymentId: 'pmt1', invoiceId: 'inv1', amount: '12.00' };
       const alloc3 = { paymentId: 'pmt3', invoiceId: 'missing', amount: '1.00' };
       const fee1 = { id: 'fee1', settlementBatchId: 'sb1', feeAmountCad: '1.00' };
@@ -107,9 +135,8 @@ describe('platform-economics/reconciliation-service', () => {
       pushSel([]); // 7 unmatched pmt2
       pushSel([]); // 8 unmatched pmt3 (missing invoice)
       pushSel([]); // 9 unmatched inv2
-      pushSel([fee1, fee2]); // 10 fee events
-      pushSel([]); // 11 fee1 match
-      pushSel([]); // 12 update run
+      pushSel([fee1, fee2]); // 10 fee events (fee1 names a settlement batch; it is counted, not matched)
+      pushSel([]); // 11 update run
 
       const result = await runReconciliation({
         organizationId: 'o1',
@@ -122,7 +149,13 @@ describe('platform-economics/reconciliation-service', () => {
       expect(result.runId).toBe('run-1');
       expect(result.totalInvoices).toBe(2);
       expect(result.totalPayments).toBe(3);
-      expect(result.totalMatches).toBe(2); // pmt1↔inv1 + fee1↔sb1
+      // Disclosed change (DEF-0B11-PRP-RECONCILIATION-ENGINE-FABRICATES-FEE-SETTLEMENT-MATCHES-AND-SUMS-REFUNDED-PAYMENTS-AS-RECEIVED): this
+      // asserted 2 (pmt1↔inv1 + fee1↔sb1). The fee1↔sb1 "match" copied the fee amount as its own target with a zero variance and compared
+      // nothing, so it is no longer recorded; fee1 is reported as an unverified settlement instead.
+      expect(result.totalMatches).toBe(1); // pmt1↔inv1
+      expect(result.feeEventsWithUnverifiedSettlement).toBe(1);
+      expect(h.inserted.some((v) => v.matchType === 'fee_settlement')).toBe(false);
+      expect(h.contexts).toEqual([{ organizationId: 'o1' }]);
       expect(result.totalExceptions).toBe(4); // discrepancy + 2 unmatched payments + unmatched invoice
       expect(h.auditLog).toHaveBeenCalled();
       expect(h.auditLog.mock.calls[0][1]).toMatchObject({ action: 'reconciliation.run.completed', resourceId: 'run-1' });
@@ -203,6 +236,105 @@ describe('platform-economics/reconciliation-service', () => {
     });
   });
 
+  // DEF-0B11-PRP-RECONCILIATION-ENGINE-FABRICATES-FEE-SETTLEMENT-MATCHES-AND-SUMS-REFUNDED-PAYMENTS-AS-RECEIVED
+  describe('runReconciliation counts only money received and records no match it did not compare', () => {
+    const period = { periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') };
+
+    it('never sums a refunded payment as received, never matches it to an invoice, and reports it beside the total', async () => {
+      const inv = { id: 'inv1', organizationId: 'o1', totalAmount: '100.00', invoiceNumber: 'INV-1', status: 'issued' };
+      const refundedPmt = { id: 'pr', organizationId: 'o1', amount: '100.00', status: 'refunded', method: 'stripe', externalReference: 'pi_1' };
+      pushSel([]); // no prior run
+      pushSel([{ id: 'run-r' }]); // insert run
+      pushSel([inv]); // invoices
+      pushSel([refundedPmt]); // payments
+      // no received payment → no allocation read
+      pushSel([]); // unmatched inv1
+      pushSel([]); // fee events
+      pushSel([]); // update run
+      const result = await runReconciliation({ organizationId: 'o1', ...period });
+      expect(result.paymentAmountCad).toBe('0.00');
+      expect(result.refundedPayments).toBe(1);
+      expect(result.refundedAmountCad).toBe('100.00');
+      expect(result.varianceCad).toBe('100.00');
+      expect(result.totalMatches).toBe(0);
+      expect(h.inserted.filter((v) => v.exceptionType === 'unmatched_invoice').map((v) => v.sourceId)).toEqual(['inv1']);
+      expect(h.inserted.some((v) => v.matchType === 'invoice_payment')).toBe(false);
+      expect(h.runUpdates.at(-1)).toMatchObject({ paymentAmountCad: '0.00', metadata: { refundedPayments: 1, refundedAmountCad: '100.00' } });
+    });
+
+    it('records a second completed payment with the same provider reference as duplicate_payment and counts the money once', async () => {
+      const a = { id: 'pa', organizationId: 'o1', amount: '40.00', status: 'completed', method: 'stripe', externalReference: 'pi_same' };
+      const b = { id: 'pb', organizationId: 'o1', amount: '40.00', status: 'completed', method: 'stripe', externalReference: 'pi_same' };
+      pushSel([]); // no prior run
+      pushSel([{ id: 'run-d' }]); // insert run
+      pushSel([]); // invoices
+      pushSel([a, b]); // payments
+      pushSel([]); // duplicate exception for pb
+      pushSel([]); // allocations (for pa only)
+      pushSel([]); // unmatched pa
+      pushSel([]); // fee events
+      pushSel([]); // update run
+      const result = await runReconciliation({ organizationId: 'o1', ...period });
+      expect(result.paymentAmountCad).toBe('40.00');
+      const duplicates = h.inserted.filter((v) => v.exceptionType === 'duplicate_payment');
+      expect(duplicates).toHaveLength(1);
+      expect(duplicates[0]).toMatchObject({ sourceId: 'pb', organizationId: 'o1', actualAmountCad: '40.00' });
+    });
+
+    it('does not record a fee_settlement match for a fee event that names a batch, and says which checks it did not perform', async () => {
+      const fee = { id: 'fee1', settlementBatchId: 'sb1', feeAmountCad: '3.00' };
+      pushSel([]); // no prior run
+      pushSel([{ id: 'run-f' }]); // insert run
+      pushSel([]); // invoices
+      pushSel([]); // payments
+      pushSel([fee]); // fee events
+      pushSel([]); // update run
+      const result = await runReconciliation({ organizationId: 'o1', ...period });
+      expect(result.totalMatches).toBe(0);
+      expect(result.feeEventsWithUnverifiedSettlement).toBe(1);
+      expect(result.checksNotPerformed).toEqual(['fee_settlement', 'missing_fee_event', 'orphaned_refund']);
+      expect(h.inserted.some((v) => v.matchType === 'fee_settlement')).toBe(false);
+      expect(h.auditLog.mock.calls[0][1]).toMatchObject({ details: { feeEventsWithUnverifiedSettlement: 1, checksNotPerformed: ['fee_settlement', 'missing_fee_event', 'orphaned_refund'] } });
+    });
+  });
+
+  // DEF-0B11-PRP-RECONCILIATION-SERVICE-QUERIES-THROUGH-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY
+  describe('every entry point runs in the organization tenant context or the caller\'s tenant transaction', () => {
+    it('opens the organization context for each read and write when no transaction is handed in', async () => {
+      pushSel([{ id: 'ex1' }]);
+      await resolveException('ex1', 'o1', { status: 'resolved', resolvedBy: 'u', notes: 'checked the deposit' });
+      pushSel([]);
+      await getReconciliationRun('run-1', 'o2');
+      pushSel([]);
+      await listExceptions('o3');
+      pushSel([{ id: 'run-1' }]);
+      pushSel([]);
+      await requireReconciliation('bp1', 'o4');
+      expect(h.contexts).toEqual([{ organizationId: 'o1' }, { organizationId: 'o2' }, { organizationId: 'o3' }, { organizationId: 'o4' }]);
+    });
+
+    it('joins the caller\'s tenant transaction instead of opening its own', async () => {
+      const callerTx = { select: () => ({ from: () => ({ where: () => ({ limit: async () => [{ id: 'run-1' }] }) }) }) };
+      expect(await getReconciliationRun('run-1', 'o1', callerTx as never)).toEqual({ id: 'run-1' });
+      expect(h.contexts).toEqual([]);
+    });
+
+    it('refuses a blank organization before opening any context', async () => {
+      await expect(getReconciliationRun('run-1', '')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      await expect(requireReconciliation('bp1', ' ')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      expect(h.contexts).toEqual([]);
+    });
+
+    it('binds the period-closure guard to the organization on the run and on its exceptions', async () => {
+      vi.mocked(eq).mockClear();
+      pushSel([{ id: 'run-1' }]);
+      pushSel([]);
+      await requireReconciliation('bp1', 'org-A');
+      const scoped = vi.mocked(eq).mock.calls.filter(([column, value]) => (column as { __col?: string })?.__col === 'organizationId' && value === 'org-A');
+      expect(scoped).toHaveLength(2);
+    });
+  });
+
   describe('resolveException', () => {
     it('resolves an open exception', async () => {
       pushSel([{ id: 'ex1', organizationId: 'o1' }]); // update returning
@@ -276,19 +408,19 @@ describe('platform-economics/reconciliation-service', () => {
   describe('requireReconciliation', () => {
     it('throws when there is no completed run', async () => {
       pushSel([]); // run lookup empty
-      await expect(requireReconciliation('bp1')).rejects.toThrow('no completed reconciliation run');
+      await expect(requireReconciliation('bp1', 'o1')).rejects.toThrow('no completed reconciliation run');
     });
 
     it('throws when open exceptions remain', async () => {
       pushSel([{ id: 'run-1' }]); // run
       pushSel([{ id: 'ex1' }]); // open exceptions
-      await expect(requireReconciliation('bp1')).rejects.toThrow('unresolved reconciliation exception');
+      await expect(requireReconciliation('bp1', 'o1')).rejects.toThrow('unresolved reconciliation exception');
     });
 
     it('returns the run when reconciliation is clean', async () => {
       pushSel([{ id: 'run-1' }]); // run
       pushSel([]); // no open exceptions
-      const run = await requireReconciliation('bp1');
+      const run = await requireReconciliation('bp1', 'o1');
       expect(run.id).toBe('run-1');
     });
   });

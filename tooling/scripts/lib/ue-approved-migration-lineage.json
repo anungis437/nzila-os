@@ -389,6 +389,34 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-g0-wave1-c",
         "note": "DEF-0B8 external org-from-query: one SELECT policy on representation_authorities that, with no organization context, shows the authenticated principal only their own authority rows, so the external middleware checks the authority before opening the named organization's tenant transaction"
+      },
+      {
+        "tag": "0057_pilot_demo_seeds_row_ids",
+        "sha256": "877f801c1396b603b97f26375b3705eaacc2da9bde43722ff79f4570a0b42854",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Pre-existing gap closure: registers a prior rounds pilot-demo-seed row-id migration left unregistered; verified byte-identical against the existing committed file, no content change."
+      },
+      {
+        "tag": "0058_survey_response_capability",
+        "sha256": "a5199b105549605ddb80f77e7abcf1bda0ae3af342e526a378b2a68462f97fd4",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Pre-existing gap closure: registers DEF-0B5 survey_responses.response_token_hash (SHA-256 hash of a one-time anonymous-response capability token) left unregistered by the session that authored it; verified byte-identical against the existing committed file, no content change."
+      },
+      {
+        "tag": "0059_verified_dependency_evidence_rls_closure",
+        "sha256": "09d9584c971a2a8868e36d51d2e0c6fd7941ec4d9f503e3853694ada4f4f9de7",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Row security for ue_verified_dependency_evidence (platform 0085): FORCE RLS + the direct-org tenant policy, same helper as the cognition-memory family (0018)."
+      },
+      {
+        "tag": "0060_graph_node_alias_rls_closure",
+        "sha256": "9095ab2154d999dcad1b83665c7f8108a1158f4ce08502e5c23c201f6c80623d",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Row security for ue_graph_node_alias (platform 0086): FORCE RLS + the direct-org tenant policy, same helper as 0059. ue_verified_dependency_evidence's own new columns (source_fingerprint, evidence_reference_type, evidence_document_id) need no new policy - an ADD COLUMN does not change existing RLS coverage."
       }
     ],
     "platform": [
@@ -860,6 +888,48 @@
         "status": "UNQUALIFIED",
         "introducedBy": "fix/ue-g0-wave1-d1",
         "note": "Nullable organization_id on location_tracking, geofence_events and location_deletion_log, so the retention sweep and a member's erasure log one entry per organization of the rows removed (DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION). No backfill; rollback refuses while a value exists."
+      },
+      {
+        "tag": "0082_platform_staff_mandate_kind",
+        "sha256": "f0ff8784157a9247676b52958b6acb413fd61d5dd32890626abbb1a1ba6aaaef",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Widens ue_authority_mandates_kind_chk and ue_authority_rule_domain_chk to accept 'platform_staff', so the kernel can represent (never issues) a platform-wide mandate for DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ / DEF-0B10-OPL-14. No row created, no behavior change; see docs/union-eyes/convergence/decisions/platform-staff-mandate-decision-record.md for the remaining institutional step."
+      },
+      {
+        "tag": "0083_reward_wallet_ledger_drop_legacy_columns",
+        "sha256": "37fe1c742215eb473827b5015b182610474bf0a9afc5b7d6fc46328afbc6c1de",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Drops six nullable columns (award_id, description, points_change, reference_id, reference_type, transaction_type) left over from a superseded points-based reward_wallet_ledger shape that bootstrap V2's current Drizzle declaration never carried. Zero production TypeScript references any of the six; fails closed and refuses to run if any row still has non-null data in them. Restores agreement between the Django model and the Drizzle-canonical, bootstrap-v2 declaration (scripts/bootstrap-v2/reward-source.test.ts)."
+      },
+      {
+        "tag": "0084_ml_predictions_relax_legacy_not_null",
+        "sha256": "9da49e2e746631e4305887ec5c8571c5046161d53b5767afff3ce716b8006102",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "Relaxes NOT NULL on three legacy ml_predictions columns (model_name, model_version, target_date) that three historical migrations create but platform migration 0019 never touches, matching a since-shadowed Drizzle declaration (db/schema/domains/analytics/analytics.ts) superseded by the canonical one (db/schema/domains/ml/predictions.ts). Zero production code supplies all three on every insert path (the SLA breach risk route and actions/analytics-actions.ts's generatePredictions both omit at least one), so a table built from the legacy SQL refuses every current write. Guarded per-column to no-op where the column does not exist or is already nullable; rollback refuses per-column if any row already holds a null there."
+      },
+      {
+        "tag": "0085_verified_dependency_evidence",
+        "sha256": "89af9979fc14bacc0aba7857855fd9d900fe35651444c7fe17ede558028879b4",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE: new table ue_verified_dependency_evidence, the verified operational dependency graph separate from the exploratory, tag-co-occurrence-inferred propagation map. A directional dependency is verified only once a reviewer distinct from the submitter (DB CHECK) attributes it to a named process/system and responsible authority with an evidence reference. RLS is scoped (cache) 0059."
+      },
+      {
+        "tag": "0086_graph_evidence_integrity_and_identity",
+        "sha256": "fd321d7453f0c0425e99171856eb2b46a22880e2c5c733c4484d6dc9d2a80b21",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE (Family 1 exit, round 5): adds source_fingerprint, evidence_reference_type and evidence_document_id to ue_verified_dependency_evidence (read-time currentness and evidence-reference resolution, fail-closed, no background job, full review history preserved) and a new ue_graph_node_alias table (durable, explicitly-authorized, supersede-not-delete identity/alias mapping beyond cosmetic-drift canonicalization). RLS is scoped (cache) 0060."
+      },
+      {
+        "tag": "0087_verified_dependency_evidence_binding",
+        "sha256": "e97359df7c1cbcc7d0644ab11d9d2b47ef2ccac43aea57d8cfe092c11db4a977",
+        "status": "UNQUALIFIED",
+        "introducedBy": "fix/ue-gate0-final-convergence",
+        "note": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE (Family 1 final correction): adds evidence_document_integrity (document evidence bound to exact version/content hash), external_attestation/external_attested_by/external_attested_at (all-or-none, external citations only, attester distinct from submitter) and identity_key_version (smallint, default 1, CHECK 1|2) to ue_verified_dependency_evidence. Read-time, fail-closed enforcement in graph-evidence-evaluator.ts; no background job; review history preserved. RLS unchanged (cache 0059 covers the table)."
       }
     ]
   }

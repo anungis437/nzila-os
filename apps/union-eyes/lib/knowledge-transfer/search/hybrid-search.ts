@@ -15,6 +15,7 @@ import { sqlIn } from '@/lib/db/sql-in';
 import { exitInterviews } from '@/db/schema';
 import {
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
@@ -77,7 +78,7 @@ async function generateQueryEmbedding(
       appKey: UE_APP_KEY,
       profileKey: UE_PROFILES.EMBEDDINGS,
       input: query,
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
     });
     const embedding = result.embeddings[0];
     embeddingCache.setCachedEmbedding(query, 'ai-sdk', embedding).catch(() => {});

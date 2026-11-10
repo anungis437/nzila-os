@@ -112,7 +112,8 @@ describe('pilot/apply/[id]/reference-profile route', () => {
     const payload = await response.json();
     expect(response.status).toBe(200);
     expect(payload.data.referenceProfile.pilotId).toBe('p1');
-    expect(payload.data.referenceProfile.dataSource).toBe('pilot_metrics');
+    expect(payload.data.referenceProfile.dataSource).toBe('unassessed_no_reviewed_evidence');
+    expect(payload.data.referenceProfile.deploymentMetrics).toMatchObject({ adoptionRate: null, engagementRate: null, casesManaged: null });
   });
 
   // DEF-0B10-PIL-REFERENCE-PROFILE-PRESENTS-A-DEFAULT-TESTIMONIAL-A-SIX-HOUR-FLOOR-AND-SCORE-DERIVED-FIGURES-AS-PILOT-OUTCOMES
@@ -128,7 +129,7 @@ describe('pilot/apply/[id]/reference-profile route', () => {
 
     expect(data.referenceProfile.testimonial).toBeNull();
     expect(data.referenceProfile.timeSaved).toBeNull();
-    expect(data.referenceProfile.dataSource).toBe('application_signals_not_measured');
+    expect(data.referenceProfile.dataSource).toBe('unassessed_no_reviewed_evidence');
     expect(data.caseStudy.outcomes).toEqual([]);
     expect(data.caseStudy.title).not.toContain('90-day');
     expect(data.caseStudy.quote).toBeNull();

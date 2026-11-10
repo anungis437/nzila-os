@@ -24,9 +24,9 @@ const handlers = crudRoutes({
   // PR #752 round 21: verifiedOrganizationId/verifiedBy/verifiedAt are
   // server-controlled — the ONLY legitimate writer is bindPilotOrganization()
   // via POST .../verify-organization or .../rebind-organization (both
-  // system_admin+). A same-org steward's generic PATCH must never be able to
+  // platform staff). A same-org steward's generic PATCH must never be able to
   // set, clear, or alter them. status/reviewedAt/approvedAt are likewise
-  // FSM-governed exclusively by commercial-transition (system_admin+) — not
+  // FSM-governed exclusively by commercial-transition (platform staff) — not
   // arbitrary steward-editable fields.
   blockedPatchFields: [
     'verifiedOrganizationId',
@@ -37,7 +37,7 @@ const handlers = crudRoutes({
     'approvedAt',
     // PR #752 round 25: platform-approved commercial terms — the ONLY
     // legitimate writer is approveCommercialTerms() via POST
-    // .../approve-commercial-terms (system_admin+). See
+    // .../approve-commercial-terms (platform staff). See
     // lib/pilot/commercial-terms-authority.ts.
     'verifiedMemberCount',
     'verifiedPilotAmount',

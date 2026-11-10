@@ -20,7 +20,7 @@ vi.mock('@/lib/api/framework', () => ({
 }))
 vi.mock('@/lib/api/list-page', () => ({ listPage: () => ({ limit: 1, offset: 0 }) }))
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }))
-vi.mock('@/lib/pension/pension-authority', () => ({ isPensionAdministrator: vi.fn(), PENSION_ADMIN_ROLES: ['pension_administrator'] }))
+vi.mock('@/lib/pension/pension-authority', () => ({ isPensionAdministrator: vi.fn(), requirePensionTrusteeMandate: vi.fn(async () => ({ id: 'mandate-1' })), PENSION_ADMIN_ROLES: ['pension_administrator'] }))
 vi.mock('@/db/schema', () => ({
   pensionMembers: { id: 'id', organizationId: 'organizationId', planId: 'planId', userId: 'userId', createdAt: 'createdAt' },
   pensionPlans: { id: 'id', planName: 'planName', organizationId: 'organizationId' },

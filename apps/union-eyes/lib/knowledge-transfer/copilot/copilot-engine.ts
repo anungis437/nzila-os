@@ -24,16 +24,18 @@ import { inOrganization, isUuid } from '../org-scope';
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
-import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import { loadGraphEvidence, verifiedEdgeCoverage, type VerifiedEdgeCoverage } from '../propagation/graph-evidence-service';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
   buildExplainabilityEnvelope,
   buildPropagationEvidence,
   buildGovernanceFlags,
 } from '../copilot-explainability/response-builder';
+import { evidenceCoverageFromCount } from '../governance/evidence-basis';
 import type { EvidenceReference, ReasoningLink, GovernanceFlag } from '../copilot-explainability/explainability-models';
 import type { CopilotQueryInput, CopilotQueryResult, CopilotMessage } from './copilot-models';
 
@@ -100,6 +102,7 @@ function buildSystemPrompt(
   totalNodes: number,
   bottleneckCount: number,
   criticalGaps: string[],
+  coverage: VerifiedEdgeCoverage,
 ): string {
   return `You are a governance-aware organizational continuity advisor for a union organization (org: ${orgId}).
 
@@ -110,6 +113,10 @@ CURRENT ORGANIZATIONAL CONTEXT:
 - Knowledge concentration: ${singleSourceCount} of ${totalNodes} knowledge areas are single-source
 - Operational bottlenecks: ${bottleneckCount}
 - Critical gaps: ${criticalGaps.length > 0 ? criticalGaps.join('; ') : 'none identified'}
+- Evidence basis: the counts above come from exit-interview tag co-occurrence (exploratory), not from a verified
+  record of organizational structure. ${coverage.verifiedEdgeCount} of ${coverage.exploratoryEdgeCount} inferred
+  dependencies are currently verified in their stated direction; treat every other dependency, and every node-level
+  figure, as unconfirmed signal, not fact.
 
 BEHAVIORAL CONSTRAINTS — STRICTLY ENFORCED:
 1. You ONLY discuss organizational continuity, governance resilience, documentation, and organizational knowledge.
@@ -117,7 +124,7 @@ BEHAVIORAL CONSTRAINTS — STRICTLY ENFORCED:
 3. You NEVER recommend disciplinary actions or assess individual worker value.
 4. All framing must be ORGANIZATIONAL — processes, governance structures, documentation gaps.
 5. Every claim must reference specific organizational data when available.
-6. Acknowledge uncertainty explicitly — do not overstate confidence.
+6. Acknowledge uncertainty explicitly — do not overstate confidence, and distinguish verified from exploratory data.
 
 RESPONSE FORMAT:
 - Answer the question with specific, organizational framing
@@ -184,10 +191,11 @@ export async function processCopilotQuery(
   }
 
   // Load org continuity context
-  const [propagationMap, resilienceIndex] = await Promise.all([
-    buildDependencyPropagationMap(orgId),
+  const [graphEvidence, resilienceIndex] = await Promise.all([
+    loadGraphEvidence(orgId),
     calculateResilienceIndex(orgId),
   ]);
+  const propagationMap = graphEvidence.exploratory;
 
   const nodes = propagationMap.nodes;
   const singleSourceCount = nodes.filter((n) => n.isSingleSource).length;
@@ -198,6 +206,7 @@ export async function processCopilotQuery(
   const criticalGaps = resilienceIndex.dimensions
     .filter((d) => d.score < 40)
     .map((d) => d.name);
+  const coverage = verifiedEdgeCoverage(graphEvidence);
 
   // Build system prompt with org context
   const systemPrompt = buildSystemPrompt(
@@ -207,6 +216,7 @@ export async function processCopilotQuery(
     totalNodes,
     bottleneckCount,
     criticalGaps,
+    coverage,
   );
 
   // Build message history
@@ -237,7 +247,8 @@ export async function processCopilotQuery(
         appKey: UE_APP_KEY,
         profileKey: COPILOT_PROFILE,
         input: messages,
-        dataClass: 'internal',
+        // Exit-interview content names a departing individual and their account of the organization.
+        dataClass: toGatewayDataClass('confidential'),
       }),
   );
 
@@ -250,32 +261,37 @@ export async function processCopilotQuery(
       observation: `Organizational resilience score: ${resilienceIndex.overallScore}/100 (${resilienceIndex.status})`,
       dataPoint: `${resilienceIndex.overallScore}/100`,
       sourceType: 'resilience_index',
-      confidence: 'high',
+      // Derived from how many knowledge nodes the resilience index itself was computed from - not a fixed 'high'
+      // regardless of how little organizational data actually underlies the score (DEF-0B7-EXC-COPILOT-EXPLAINABILITY).
+      // Evidence coverage, not confidence: it says how much was looked at, not whether the index is correct.
+      evidenceCoverage: evidenceCoverageFromCount(totalNodes),
     },
     {
       observation: `${resilienceIndex.dimensions.length} resilience dimensions analyzed`,
       dataPoint: resilienceIndex.dimensions.map((d) => `${d.name}: ${d.score}`).join(', '),
       sourceType: 'resilience_index',
-      confidence: 'high',
+      evidenceCoverage: evidenceCoverageFromCount(totalNodes),
     },
   ];
 
   const reasoning: ReasoningLink[] = [
     {
       stepNumber: 1,
-      reasoning: 'Retrieved organizational dependency propagation map from published exit interviews',
+      // Describes what the SYSTEM computed and supplied as context to the model - never a claim that the model
+      // itself performed a retrieval step (DEF-0B7-EXC-COPILOT-EXPLAINABILITY).
+      reasoning: 'System computed an organizational dependency propagation map from published exit interviews and supplied it as context',
       conclusion: `${totalNodes} knowledge nodes analyzed, ${singleSourceCount} single-source`,
       assumption: 'Published exit interviews reflect current organizational knowledge distribution',
     },
     {
       stepNumber: 2,
-      reasoning: 'Assessed multi-dimensional organizational resilience index',
+      reasoning: 'System computed a multi-dimensional organizational resilience index and supplied it as context',
       conclusion: `Overall resilience: ${resilienceIndex.overallScore}/100`,
       assumption: 'Resilience dimensions are weighted equally unless otherwise specified',
     },
     {
       stepNumber: 3,
-      reasoning: 'Formulated governance-safe response with organizational framing',
+      reasoning: 'Model formulated a governance-safe response with organizational framing from the supplied context',
       conclusion: answer.slice(0, 120) + (answer.length > 120 ? '…' : ''),
       assumption: 'Response addresses organizational continuity, not individual assessment',
     },
@@ -319,7 +335,7 @@ export async function processCopilotQuery(
       role: 'assistant',
       content: answer,
       createdAt: now,
-      explainabilityRef: null,
+      explainability,
     }, userId);
     await persistAtomicAudit(tx, {
       organizationId: orgId,
@@ -344,10 +360,11 @@ export async function processCopilotQuery(
     governanceFlags: explainability.governanceFlags,
     assumptions: explainability.assumptions,
     limitations: explainability.limitations,
-    overallConfidence: explainability.overallConfidence,
+    overallEvidenceCoverage: explainability.overallEvidenceCoverage,
     followUpSuggestions: followUps,
     organizationalContext: `Continuity analysis for organization ${orgId}. Resilience score: ${resilienceIndex.overallScore}/100.`,
     generatedAt: now,
+    verifiedEvidenceCoverage: coverage,
   };
 }
 

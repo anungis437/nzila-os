@@ -1,5 +1,4 @@
 import { withApi, ApiError, z } from "@/lib/api/framework";
-import { db } from "@/db";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { FINANCIAL_MEMBER_DATA_ROLES } from "@/lib/finance/financial-authority";
@@ -16,7 +15,7 @@ import {
   cbaRuleVersions,
   cbaRuleSetItems,
 } from "@/db/schema";
-import { and, asc, desc, eq, gte, isNull, lte, or } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNull, lte, or, sql } from "drizzle-orm";
 import { calculatePayroll, resolvePayrollRules, sha256 } from "../_lib";
 
 const createSchema = z.object({
@@ -63,11 +62,12 @@ export const POST = withApi(
       await requireEntitlement(organizationId, PLATFORM_MODULES.EMPLOYER_PAYROLL_OFFICIAL, userId ?? undefined);
     }
 
-    await withRLSContext({ organizationId, userId }, async (tx) => {
+    return withRLSContext({ organizationId, userId }, async (tx) => {
       await requireLiveFinancialMandate(tx, { organizationId, userId, action: "finance:prepare", requiresLedger: true });
-    });
+      // Serializes preparation for this tenant/batch/run type across every application worker.
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`payroll-prepare:${organizationId}:${body.timesheetBatchId}:${body.runType}`}, 0))`);
 
-    const [sourceBatch] = await db
+    const [sourceBatch] = await tx
       .select()
       .from(employerTimesheetBatches)
       .where(
@@ -82,27 +82,27 @@ export const POST = withApi(
     if (sourceBatch.status !== "validated") {
       throw ApiError.badRequest("Only a validated timesheet batch can be used to prepare a payroll run");
     }
+    if (body.periodStart !== String(sourceBatch.periodStart) || body.periodEnd !== String(sourceBatch.periodEnd)) {
+      throw ApiError.badRequest("Payroll period must exactly match the validated timesheet batch");
+    }
 
-    if (body.runType === "official") {
-      const [existingApproved] = await db
+    const [existingRun] = await tx
         .select({ id: employerPayrollRuns.id })
         .from(employerPayrollRuns)
         .where(
           and(
             eq(employerPayrollRuns.organizationId, organizationId),
             eq(employerPayrollRuns.sourceBatchId, body.timesheetBatchId),
-            eq(employerPayrollRuns.runType, "official"),
-            eq(employerPayrollRuns.status, "approved"),
+            eq(employerPayrollRuns.runType, body.runType),
           ),
         )
         .limit(1);
-
-      if (existingApproved) {
-        throw ApiError.badRequest("Official run already approved for this batch; create an adjustment run instead");
-      }
+    if (existingRun) {
+      const [run] = await tx.select().from(employerPayrollRuns).where(eq(employerPayrollRuns.id, existingRun.id)).limit(1);
+      return { data: { run, reused: true } };
     }
 
-    const timesheetEntries = await db
+    const timesheetEntries = await tx
       .select()
       .from(employerTimesheetEntries)
       .where(
@@ -114,8 +114,11 @@ export const POST = withApi(
       );
 
     if (!timesheetEntries.length) throw ApiError.badRequest("No valid timesheet entries found");
+    if (timesheetEntries.some((entry) => String(entry.shiftDate) < body.periodStart || String(entry.shiftDate) > body.periodEnd)) {
+      throw ApiError.badRequest("Timesheet entries must all fall inside the validated batch period");
+    }
 
-    const workDate = String(timesheetEntries[0]?.shiftDate ?? body.periodEnd);
+    const workDate = body.periodStart;
 
     const worksiteScope = sourceBatch.worksiteId
       ? or(eq(cbaRuleVersions.worksiteId, sourceBatch.worksiteId), isNull(cbaRuleVersions.worksiteId))
@@ -124,15 +127,15 @@ export const POST = withApi(
       ? or(eq(cbaRuleVersions.bargainingUnitId, sourceBatch.bargainingUnitId), isNull(cbaRuleVersions.bargainingUnitId))
       : isNull(cbaRuleVersions.bargainingUnitId);
 
-    const [activeRuleVersion] = await db
+    const [activeRuleVersion] = await tx
       .select()
       .from(cbaRuleVersions)
       .where(
         and(
           eq(cbaRuleVersions.organizationId, organizationId),
           eq(cbaRuleVersions.status, "active"),
-          lte(cbaRuleVersions.effectiveFrom, workDate),
-          or(gte(cbaRuleVersions.effectiveTo, workDate), isNull(cbaRuleVersions.effectiveTo)),
+          lte(cbaRuleVersions.effectiveFrom, body.periodStart),
+          or(gte(cbaRuleVersions.effectiveTo, body.periodEnd), isNull(cbaRuleVersions.effectiveTo)),
           or(eq(cbaRuleVersions.employerId, sourceBatch.employerId), isNull(cbaRuleVersions.employerId)),
           worksiteScope,
           bargainingScope,
@@ -145,7 +148,7 @@ export const POST = withApi(
       throw ApiError.badRequest("No active CBA rule version found for payroll period");
     }
 
-    const ruleItems = await db
+    const ruleItems = await tx
       .select()
       .from(cbaRuleSetItems)
       .where(
@@ -188,12 +191,11 @@ export const POST = withApi(
     const missingClassificationCount = timesheetEntries.filter((entry) => !entry.jobClassificationId).length;
     const missingEmploymentMappingCount = timesheetEntries.filter((entry) => !entry.memberEmploymentId).length;
 
-    const run = await withRLSContext({ organizationId }, async (tx) => {
       const [createdRun] = await tx
         .insert(employerPayrollRuns)
         .values({
           organizationId,
-          runCode: `pr-${Date.now()}`,
+          runCode: `pr-${sha256(`${organizationId}:${body.timesheetBatchId}:${body.runType}`).slice(0, 24)}`,
           runType: body.runType,
           status: "calculated",
           periodStart: body.periodStart,
@@ -300,9 +302,7 @@ export const POST = withApi(
         },
       });
 
-      return createdRun;
+      return { data: { run: createdRun, totals: calc.totals, reused: false } };
     });
-
-    return { data: { run, totals: calc.totals } };
   },
 );

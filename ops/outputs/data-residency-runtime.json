@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-11-03T08:12:57.671Z",
-  "status": "unverified",
+  "timestamp": "2026-11-09T01:41:29.726Z",
+  "status": "ok",
   "allowed_regions": [
     "canadacentral",
     "canadaeast"
   ],
   "resource_group_scope": null,
-  "total_resources_seen": 0,
+  "total_resources_seen": 6,
   "violations_count": 0,
   "violations": [],
-  "error": "Command failed: az resource list --output json\nERROR: AADSTS530035: Access has been blocked by security defaults. Trace ID: ec8042ee-7c7f-4317-9bcc-1d6cc7f72400 Correlation ID: c39a022d-82ba-4cc9-9703-30f707e62725 Timestamp: 2026-11-03 08:12:56Z\r\nRun the command below to authenticate interactively; additional arguments may be added as needed:\r\naz logout\r\naz login --tenant \"cc15259a-d2bf-421f-8e44-dccf8dc6232a\" --scope \"https://management.core.windows.net//.default\"\r\n"
+  "error": null
 }

@@ -20,6 +20,7 @@ function makeSelectChain(rows: unknown[]) {
 }
 
 const mockDb: any = {
+  execute: vi.fn(async () => undefined),
   select: vi.fn(() => makeSelectChain((m.selectQueue.shift() ?? []) as unknown[])),
 };
 

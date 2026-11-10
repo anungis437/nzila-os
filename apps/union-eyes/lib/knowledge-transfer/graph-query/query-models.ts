@@ -5,6 +5,8 @@
  * Enables natural questions about organizational dependencies, fragility, and risk.
  */
 
+import type { EvidenceBasis, ConfirmedEdge } from '../propagation/graph-evidence-service';
+
 export type QueryType =
   | 'isolated_knowledge'
   | 'continuity_bottlenecks'
@@ -37,13 +39,33 @@ export interface QueryResult {
   /** Human-readable interpretation of what was found */
   summary: string;
   /** Core findings */
-  findings: QueryFinding[];
+  findings: Array<QueryFinding & {
+    /** 'verified' only for a dependency-path finding every directed edge of whose dependencyChain is currently
+     *  verified. A finding about a node (isolation, bottleneck, sensitivity, concentration) is always 'exploratory':
+     *  dependency evidence confirms relationships, never a node's inferred properties (DEF-0B7-COGB-PROPAGATION-
+     *  DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE). */
+    evidenceBasis: EvidenceBasis;
+    /** For a 'verified' finding: the verified record behind each edge and its evidence tier. */
+    verifiedBy?: ConfirmedEdge[];
+  }>;
+  /** The SUBSET of findings whose asserted dependency chain is fully verified - the only entries an API response,
+   *  calculation or UI may present as a CONFIRMED organizational fact. An evidenceBasis tag on findings alone is
+   *  not sufficient when a caller's business metric or claim presents a result as verified operational risk; this
+   *  pre-filtered view is what that caller must use instead of filtering findings by tag itself. Every entry here
+   *  also appears in findings. */
+  confirmedFindings: QueryResult['findings'];
   /** Why these results matter */
   significance: string;
   /** Recommended follow-up actions */
   recommendations: string[];
-  /** Confidence in findings (0-100) */
-  confidenceScore: number;
+  /**
+   * How much interview evidence backs these findings (0-100) - a volume measure of how many interviews
+   * contributed, never a claim that the findings themselves are statistically validated or confirmed
+   * (DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS: evidence coverage must come from how many
+   * records underlie the claim, not a formula that also rewards finding more issues as if that made the
+   * analysis itself more certain).
+   */
+  evidenceCoverageScore: number;
 }
 
 export interface QueryFinding {
@@ -63,6 +85,9 @@ export interface QueryFinding {
   mitigation?: string;
   /** Evidence chain explaining why this finding occurred */
   evidenceChain: string[];
+  /** For a dependency-path finding: the impact chain it asserts (origin first; each next node depends on the
+   *  previous one). Only a finding that asserts such a chain can ever be confirmed - see graph-reasoner.ts. */
+  dependencyChain?: string[];
 }
 
 export interface IsolatedKnowledgeResult extends QueryFinding {

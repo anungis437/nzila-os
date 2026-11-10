@@ -35,6 +35,8 @@ vi.mock('@/lib/api-auth-guard', () => ({
   ROLE_HIERARCHY: { member: 1, steward: 2, officer: 3, admin: 4, system_admin: 5 },
   isPlatformAdminUser: vi.fn().mockResolvedValue(false),
 }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(async () => 'acting-org') }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requireSystemAdmin }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,

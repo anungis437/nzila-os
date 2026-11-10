@@ -341,6 +341,8 @@ interface ApiRouteRule {
   backingPage: string
   /** A named journey is unavailable; contract asserts explicit 501, never a fake CRUD-backed success. */
   unavailableUntilImplemented?: boolean
+  /** Cross-tenant content is refused before DB access when no direct-scoped grant exists. */
+  refusedWithoutDirectScope?: boolean
 }
 
 const API_ROUTE_MATRIX: ApiRouteRule[] = [
@@ -351,7 +353,7 @@ const API_ROUTE_MATRIX: ApiRouteRule[] = [
   { apiPath: 'organizing/notes',     expectedAuthPattern: 'withApi',              expectedMinRole: 'officer',              backingPage: 'organizing/notes', unavailableUntilImplemented: true },
   { apiPath: 'activities',           expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin (audit log)' },
   { apiPath: 'dues/calculate',       expectedAuthPattern: 'withApi',              expectedMinRole: 'member',               backingPage: 'admin/dues (own record; any other member needs the named financial role)' },
-  { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)' },
+  { apiPath: 'analytics/cross-org',  expectedAuthPattern: 'withApi',              expectedMinRole: 'platform_lead',        backingPage: 'cross-org analytics (platform)', refusedWithoutDirectScope: true },
 ]
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -556,6 +558,15 @@ describe('PERSONA_ACCESS_001 — API routes backing dashboard have auth and DB s
           expect(content).toContain('ApiError.notImplemented(')
           expect(content).toMatch(/required:\s*true/)
           expect(content).not.toContain('crudRoutes(')
+          return
+        }
+        if (rule.refusedWithoutDirectScope) {
+          // Platform identity is not a cross-tenant content grant. This route must refuse the
+          // request before opening a database path until an institution appoints direct scope.
+          expect(content).toContain('ApiError.forbidden(')
+          expect(content).toMatch(/required:\s*true/)
+          expect(content).not.toContain('crudRoutes(')
+          expect(content).not.toMatch(/@\/db\/(?:schema|db)|withSystemContext/)
           return
         }
         const hasSchemaImport =

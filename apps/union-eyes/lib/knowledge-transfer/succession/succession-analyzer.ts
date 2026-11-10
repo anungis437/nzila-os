@@ -1,61 +1,72 @@
 /**
  * Succession Fragility Analyzer
  *
- * Analyzes organizational succession readiness from published exit interviews.
+ * Analyzes organizational succession FRAGILITY (what departures left undocumented) from published exit interviews.
  * Identifies operational replacement gaps, undocumented transition areas,
  * and procedural dependencies that need governance attention.
  *
  * This is ORGANIZATIONAL RESILIENCE ANALYSIS.
  * It NEVER evaluates individual worker value, productivity, or replaceability.
  *
- * The readiness score (0–100) measures how well documented the organization's
- * operational knowledge is — not the quality of its people.
+ * It does not score successor readiness: no successor, handover or documentation record exists in the data model,
+ * and counting exit interviews as readiness made more departures read as more readiness. transitionReadinessScore is
+ * therefore null with its basis stated; departureDocumentation reports what the interviews actually establish.
  *
  * INV-01: All AI calls via getAiClient()
  */
 
 import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
+import { MIN_COHORT_SIZE, averageOrNull } from '../governance/evidence-basis';
 import { z } from 'zod';
 import { db } from '@/db/db';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { ApiError } from '@/lib/api/errors';
-import { exitInterviews } from '@/db/schema';
+import { exitInterviews, exitInterviewRoleEnum } from '@/db/schema';
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
 
-export type SuccessorReadiness = 'none' | 'minimal' | 'partial' | 'adequate';
+/** How documented a role's DEPARTURES are, from the published exit interviews alone. This is not successor readiness:
+ *  the data model holds no successor, handover or documentation record, so readiness cannot be assessed and more
+ *  departures must never read as more readiness (DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-
+ *  SUCCESSOR-READINESS, Family 1 acceptance). */
+export type DepartureDocumentation = 'no_interview' | 'single_interview' | 'multiple_interviews';
 
 export interface RoleSuccessionStatus {
   role: string;
   /** Number of published exit interviews from this role */
   interviewCount: number;
-  /** Total years of captured organizational service */
-  totalYearsOfServiceCaptured: number;
-  /** Average continuity risk score across interviews from this role */
-  averageContinuityRiskScore: number;
+  /** Total years of captured organizational service. Null below MIN_COHORT_SIZE: a 1-4 interview count would carry exactly those departing people's own years of service. */
+  totalYearsOfServiceCaptured: number | null;
+  /** Average continuity risk score across interviews from this role. Null below MIN_COHORT_SIZE for the same reason. */
+  averageContinuityRiskScore: number | null;
+  /** True when interviewCount is below MIN_COHORT_SIZE and the two fields above are withheld rather than naming a specific departing person's figures. */
+  smallCellSuppressed: boolean;
   /** Operational areas with no documented procedure handoff */
   undocumentedAreas: string[];
   /** Key topics captured from this role */
   keyTopicsCaptured: string[];
-  /** Assessment of succession documentation readiness */
-  successorReadiness: SuccessorReadiness;
+  /** How documented this role's departures are - never a readiness verdict. */
+  departureDocumentation: DepartureDocumentation;
 }
 
 export interface SuccessionFragilityReport {
   organizationId: string;
   generatedAt: string;
-  /**
-   * 0–100. HIGHER = more transition-ready (inverse of fragility).
-   * This measures DOCUMENTATION COVERAGE, not individual capability.
-   */
-  transitionReadinessScore: number;
+  /** Always null: no successor, handover or documentation record exists to assess readiness from. Interview counts
+   *  measure departures, and scoring them as readiness made more departures read as more readiness. */
+  transitionReadinessScore: null;
+  transitionReadinessBasis: 'not_assessed_no_successor_records';
+  /** Roles (from the exit-interview role enum) with at least one published exit interview, out of all roles. A count
+   *  of documented departures, not of prepared successors. */
+  departureDocumentationCoverage: { rolesWithInterviews: number; totalRoles: number };
   roleSuccessionStatus: RoleSuccessionStatus[];
   /** Operational areas where no documented handoff procedure exists */
   criticalOperationalGaps: string[];
@@ -70,7 +81,10 @@ export interface SuccessionFragilityReport {
   modelGenerated: boolean;
 }
 
-const UNION_ROLES = ['member', 'steward', 'chief_steward', 'officer', 'admin'] as const;
+/** Every role the schema allows on an exit interview - never a hand-maintained subset that would skip a role. */
+const UNION_ROLES = exitInterviewRoleEnum.enumValues;
+
+/** Below this many interviews, a role's aggregate years-of-service and risk score are exactly one or a few departing people's own figures. Shared with every other DEF-0B7-COGA-PROFILES/COGB sibling engine via lib/knowledge-transfer/governance/evidence-basis.ts (matches the repo's small-cell convention, e.g. app/api/breaks/compliance). */
 
 const SUCCESSION_PROMPT = `You are an organizational succession analyst for a union organization.
 
@@ -103,11 +117,9 @@ const ReplySchema = z.object({
   executiveSummary: z.string().min(1).max(4000),
 });
 
-function scoreReadiness(interviewCount: number, avgRisk: number): SuccessorReadiness {
-  if (interviewCount === 0) return 'none';
-  if (interviewCount === 1 && avgRisk >= 70) return 'minimal';
-  if (interviewCount >= 2 && avgRisk < 50) return 'adequate';
-  return 'partial';
+function departureDocumentationOf(interviewCount: number): DepartureDocumentation {
+  if (interviewCount === 0) return 'no_interview';
+  return interviewCount === 1 ? 'single_interview' : 'multiple_interviews';
 }
 
 export async function analyzeSuccessionFragility(orgId: string, actorUserId?: string): Promise<SuccessionFragilityReport> {
@@ -160,32 +172,28 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
 
   const roleSuccessionStatus: RoleSuccessionStatus[] = [...roleMap.entries()].map(
     ([role, data]) => {
-      const avgRisk =
-        data.riskScores.length > 0
-          ? Math.round(data.riskScores.reduce((a, b) => a + b, 0) / data.riskScores.length)
-          : 0;
+      // null means no interview for this role recorded a continuity risk score at all - distinct from a genuinely
+      // measured average of exactly 0, which averageOrNull would also return as a plain 0, not null.
+      const avgRisk = averageOrNull(data.riskScores);
+      const roundedAvgRisk = avgRisk === null ? null : Math.round(avgRisk);
+      const smallCellSuppressed = data.interviewCount > 0 && data.interviewCount < MIN_COHORT_SIZE;
       return {
         role,
         interviewCount: data.interviewCount,
-        totalYearsOfServiceCaptured: data.totalYears,
-        averageContinuityRiskScore: avgRisk,
+        totalYearsOfServiceCaptured: smallCellSuppressed ? null : data.totalYears,
+        averageContinuityRiskScore: smallCellSuppressed ? null : roundedAvgRisk,
+        smallCellSuppressed,
         undocumentedAreas: [...data.undocumented].slice(0, 6),
         keyTopicsCaptured: [...data.topics].slice(0, 8),
-        successorReadiness: scoreReadiness(data.interviewCount, avgRisk),
+        departureDocumentation: departureDocumentationOf(data.interviewCount),
       };
     },
   );
 
-  // Readiness score = inverse of fragility (percentage of roles with at least partial coverage)
-  const rolesWithNone = roleSuccessionStatus.filter((r) => r.successorReadiness === 'none').length;
-  const rolesWithMinimal = roleSuccessionStatus.filter(
-    (r) => r.successorReadiness === 'minimal',
-  ).length;
-  const fragility = Math.min(
-    (rolesWithNone / UNION_ROLES.length) * 50 + rolesWithMinimal * 10,
-    100,
-  );
-  const transitionReadinessScore = Math.max(0, 100 - Math.round(fragility));
+  const departureDocumentationCoverage = {
+    rolesWithInterviews: roleSuccessionStatus.filter((r) => r.interviewCount > 0).length,
+    totalRoles: roleSuccessionStatus.length,
+  };
 
   let criticalOperationalGaps: string[] = [];
   let documentationPriorities: string[] = [];
@@ -212,7 +220,7 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
             persistAtomicAudit(tx, { organizationId: orgId, userId: actorUserId, action, resourceType: 'exit_interviews', resourceId: orgId, details }),
           )
         : Promise.resolve();
-    await audit('exit_interview.succession_analysis.requested', { interviews: published.length, dataClass: 'internal' });
+    await audit('exit_interview.succession_analysis.requested', { interviews: published.length, dataClass: toGatewayDataClass('confidential') });
 
     let result;
     try {
@@ -225,7 +233,7 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
           { role: 'system', content: SUCCESSION_PROMPT },
           { role: 'user', content: inputText },
         ],
-        dataClass: 'internal',
+        dataClass: toGatewayDataClass('confidential'),
       });
     } catch (error) {
       await audit('exit_interview.succession_analysis.failed', { reason: error instanceof Error ? error.name : 'unknown' }).catch(() => undefined);
@@ -255,7 +263,9 @@ export async function analyzeSuccessionFragility(orgId: string, actorUserId?: st
   return {
     organizationId: orgId,
     generatedAt: new Date().toISOString(),
-    transitionReadinessScore,
+    transitionReadinessScore: null,
+    transitionReadinessBasis: 'not_assessed_no_successor_records',
+    departureDocumentationCoverage,
     roleSuccessionStatus,
     criticalOperationalGaps,
     documentationPriorities,

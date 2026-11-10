@@ -78,7 +78,7 @@ describe('S6 verified and small fixes', () => {
   })
 
   it('answers 501, not generic CRUD, on the locals paths and the equity self-identification path (verified existing implementation)', () => {
-    for (const route of ['app/api/locals/route.ts', 'app/api/locals/[id]/route.ts', 'app/api/equity/self-identify/route.ts']) {
+    for (const route of ['app/api/locals/route.ts', 'app/api/locals/[id]/route.ts']) {
       const source = read(route)
       expect(source, route).toContain('ApiError.notImplemented')
       expect(source, route).not.toContain('crudRoutes')
@@ -117,11 +117,17 @@ describe('S6 verified and small fixes', () => {
   })
 
   it('answers 501, not generic CRUD, on the campaign analytics path', () => {
-    for (const route of ['app/api/communications/campaigns/[id]/analytics/route.ts', 'app/api/communications/campaigns/[id]/schedule/route.ts', 'app/api/communications/campaigns/[id]/send-test/route.ts']) {
+    for (const route of ['app/api/communications/campaigns/[id]/analytics/route.ts']) {
       const source = read(route)
       expect(source, route).toContain('ApiError.notImplemented')
       expect(source, route).not.toContain('crudRoutes')
     }
+    const schedule = read('app/api/communications/campaigns/[id]/schedule/route.ts')
+    expect(schedule).toContain('campaignDeliveryOutbox')
+    expect(schedule).not.toContain('crudRoutes')
+    const sendTest = read('app/api/communications/campaigns/[id]/send-test/route.ts')
+    expect(sendTest).toContain('sendEmail')
+    expect(sendTest).not.toContain('crudRoutes')
   })
 
   // DEF-0B5-POLLS-NO-CREATE-OR-VOTE-PATH: the poll vote path is now a real, dedicated vote (lib/communications/polls.ts, proven in

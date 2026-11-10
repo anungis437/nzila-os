@@ -61,6 +61,8 @@ vi.mock('@/lib/api-auth-guard', () => ({
   requireSystemAdmin: m.requireSystemAdmin,
   ROLE_HIERARCHY: { member: 1, steward: 2, admin: 3, owner: 4 },
 }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(async () => '11111111-1111-4111-8111-111111111111') }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requireSystemAdmin }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('drizzle-orm', async (importOriginal) => {
   const actual = await importOriginal<typeof import('drizzle-orm')>();

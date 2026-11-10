@@ -30,15 +30,20 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    await withRLSContext({ organizationId, userId }, (tx) =>
-      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', requiresLedger: true }),
-    );
-    const result = await runReconciliation({
-      organizationId,
-      periodStart: body.periodStart,
-      periodEnd: body.periodEnd,
-      billingPeriodId: body.billingPeriodId,
-      runBy: userId ?? undefined,
+    // The mandate check and the run are one tenant transaction: the reconciliation reads and writes under the organization's row-level
+    // security context, and a mandate revoked mid-request cannot be checked in one transaction and acted on in another.
+    const result = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', requiresLedger: true });
+      return runReconciliation(
+        {
+          organizationId,
+          periodStart: body.periodStart,
+          periodEnd: body.periodEnd,
+          billingPeriodId: body.billingPeriodId,
+          runBy: userId ?? undefined,
+        },
+        tx,
+      );
     });
     return { ...result };
   },
@@ -56,15 +61,16 @@ export const GET = withApi(
   },
   async ({ request, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    await withRLSContext({ organizationId, userId }, (tx) =>
-      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true }),
-    );
     const url = new URL(request.url);
     const runId = url.searchParams.get('runId');
     if (!runId) throw ApiError.badRequest('runId query parameter is required');
     if (!z.guid().safeParse(runId).success) throw ApiError.badRequest('runId must be a valid identifier');
-    // The lookup is bound to the caller's organization: another organization's run reads as not found.
-    const run = await getReconciliationRun(runId, organizationId);
+    // The lookup is bound to the caller's organization (another organization's run reads as not found) and runs in the same tenant
+    // transaction as the mandate check.
+    const run = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:view', requiresLedger: true });
+      return getReconciliationRun(runId, organizationId, tx);
+    });
     if (!run) throw ApiError.notFound('Reconciliation run not found');
     return run;
   },

@@ -189,9 +189,9 @@ class OrganizationMembersSerializer(serializers.ModelSerializer):
 class SsoProvidersSerializer(serializers.ModelSerializer):
     class Meta:
         model = SsoProviders
-        fields = '__all__'
+        exclude = ['approved_by', 'approved_at', 'approval_reference']
         extra_kwargs = {'oidc_client_secret': {'write_only': True}}
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'active_version']
 
 
 class ScimConfigurationsSerializer(serializers.ModelSerializer):

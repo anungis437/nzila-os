@@ -16,14 +16,20 @@
 import { INTERVIEW_READ_LIMIT } from '@/lib/knowledge-transfer/governance/interview-read-limit';
 import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { db } from '@/db/db';
-import { exitInterviews } from '@/db/schema';
+import { exitInterviews, exitInterviewRoleEnum } from '@/db/schema';
 import {
   buildOrgAiTrace,
   getAiClient,
+  toGatewayDataClass,
   UE_APP_KEY,
   UE_PROFILES,
   UE_SYSTEM_ORG_ID,
 } from '@/lib/ai/ai-client';
+
+/** The full set of roles the schema allows for an exit interview (member, steward, chief_steward, officer, admin) -
+ *  not a hand-maintained subset, so coverage-gap detection cannot silently drift out of step with roles the
+ *  organization can actually record. */
+const UNION_ROLE_VALUES = exitInterviewRoleEnum.enumValues;
 
 export interface ContinuityRiskFlag {
   flag: string;
@@ -37,8 +43,13 @@ export interface OrgContinuityRiskReport {
   organizationId: string;
   generatedAt: string;
   totalPublishedInterviews: number;
-  /** 0–100. Higher = more fragile. */
-  overallRiskScore: number;
+  /** 0–100. Higher = more fragile. Null when there are no published interviews: there is nothing to assess, and a
+   *  risk score of 0 would read as "assessed and found safe" rather than "not yet assessed". */
+  overallRiskScore: number | null;
+  /** What overallRiskScore is: a fixed-rule index over interview counts, never a measured or calibrated risk. */
+  scoreBasis: 'fixed_rule_index_over_interview_counts';
+  /** The rule itself, stated so a reader can see exactly what the number counts. */
+  methodologyNote: string;
   riskFlags: ContinuityRiskFlag[];
   /** Topics covered by only ONE exit interview — single-source knowledge */
   singleSourceTopics: string[];
@@ -129,25 +140,34 @@ function detectIsolatedExpertise(
 
 /**
  * Detect roles with no published interview (coverage gaps).
- * Compares roles present in published interviews vs the expected union role set.
+ * Compares roles present in published interviews vs the full set of roles the schema allows
+ * (exitInterviewRoleEnum) - not a hand-maintained subset, so this cannot silently drift out of
+ * step with roles the organization can actually record.
  */
 function detectCoverageGaps(interviews: Array<{ roleInUnion: string }>): string[] {
   const coveredRoles = new Set(interviews.map((i) => i.roleInUnion));
-  const allRoles = ['steward', 'chief_steward', 'officer', 'admin'];
-  return allRoles.filter((r) => !coveredRoles.has(r));
+  return UNION_ROLE_VALUES.filter((r) => !coveredRoles.has(r));
 }
 
 /**
- * Compute an overall org risk score (0–100) from detected signals.
+ * Compute an overall org risk score (0–100) from detected signals. Null with zero published interviews: there is
+ * no signal at all to score, and 0 would be indistinguishable from "assessed and found safe".
  */
+/** The exact rule computeRiskScore applies, carried on every report (DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS). */
+export const CONTINUITY_RISK_METHODOLOGY_NOTE =
+  'overallRiskScore is a fixed-rule index over counts from published exit interviews, not a measured or calibrated ' +
+  'risk: 8 points per single-source topic (at most 40), 15 per schema role with no interview (at most 30), 4 per ' +
+  'expertise domain named once (at most 20) and 5 per interview with a stored risk score of 70 or more (at most 10), ' +
+  'capped at 100. It shows where interview coverage is thin; it does not assess the organization.';
+
 function computeRiskScore(params: {
   singleSourceCount: number;
   coverageGapCount: number;
   isolatedExpertiseCount: number;
   highRiskInterviewCount: number;
   totalInterviews: number;
-}): number {
-  if (params.totalInterviews === 0) return 0;
+}): number | null {
+  if (params.totalInterviews === 0) return null;
   const base =
     Math.min(params.singleSourceCount * 8, 40) +
     Math.min(params.coverageGapCount * 15, 30) +
@@ -202,7 +222,7 @@ export async function detectContinuityRisks(orgId: string): Promise<OrgContinuit
         { role: 'system', content: RISK_ANALYSIS_PROMPT },
         { role: 'user', content: buildRiskInput(publishedInterviews) },
       ],
-      dataClass: 'internal',
+      dataClass: toGatewayDataClass('confidential'),
     });
 
     try {
@@ -224,6 +244,8 @@ export async function detectContinuityRisks(orgId: string): Promise<OrgContinuit
     generatedAt: new Date().toISOString(),
     totalPublishedInterviews: publishedInterviews.length,
     overallRiskScore,
+    scoreBasis: 'fixed_rule_index_over_interview_counts',
+    methodologyNote: CONTINUITY_RISK_METHODOLOGY_NOTE,
     riskFlags,
     singleSourceTopics,
     coverageGaps,

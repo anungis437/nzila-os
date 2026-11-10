@@ -98,7 +98,7 @@ export const POST = withApi(
     // OWASP AI: Feature flag + AI safety gate
     const blocked = await guardAiFeature(AI_FEATURES.AI_SEMANTIC_SEARCH, { userId: userId!, organizationId: organizationId! });
     if (blocked) return blocked;
-    enforceAISafety({ origin: 'semantic-search', action: 'POST', organizationId, userId, userRole: user?.role ?? 'member', dataClass: 'internal' });
+    enforceAISafety({ origin: 'semantic-search', action: 'POST', organizationId, userId, userRole: user?.role ?? 'member', dataClass: 'confidential' });
 
     try {
       const {

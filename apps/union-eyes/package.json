@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "tsx scripts/align-org-schema.ts",
     "dev": "next dev --webpack --port 3002",
-    "build": "next build",
+    "build": "node --max-old-space-size=6144 ../../node_modules/next/dist/bin/next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "node --max-old-space-size=8192 ../../node_modules/typescript/lib/tsc.js --noEmit",
@@ -203,6 +203,7 @@
     "immutable": "^5.1.9",
     "import-in-the-middle": "^2.0.6",
     "ioredis": "^5.4.1",
+    "jose": "^6.2.2",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.576.0",
     "mammoth": "^1.8.0",

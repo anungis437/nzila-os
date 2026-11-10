@@ -216,6 +216,7 @@ export async function getAggregatedMetrics(
   const { grievances } = await import('@/db/schema/domains/claims');
   const { analyticsMetrics } = await import('@/db/schema/analytics');
   const { eq, and, gte, lte, count, avg: _avg, sql } = await import('drizzle-orm');
+  const { productionGrievanceCondition } = await import('@/lib/pilot/demo-provenance');
   
   try {
     // Build base query conditions
@@ -237,7 +238,7 @@ export async function getAggregatedMetrics(
         avgResolutionHours: sql<number>`avg(extract(epoch from (${grievances.resolvedAt} - ${grievances.createdAt})) / 3600) filter (where ${grievances.resolvedAt} is not null)`,
       })
       .from(grievances)
-      .where(and(...conditions));
+      .where(and(...conditions, productionGrievanceCondition()));
     
     const cases = caseMetrics[0] || {
       total: 0,
@@ -294,7 +295,7 @@ export async function getAggregatedMetrics(
         total: count(),
       })
       .from(grievances)
-      .where(and(...conditions));
+      .where(and(...conditions, productionGrievanceCondition()));
     
     const slaRate = slaCompliant[0]?.total
       ? (slaCompliant[0].compliant / slaCompliant[0].total) * 100
@@ -641,4 +642,3 @@ export function getTopPerformingOfficers(
     })
     .slice(0, limit);
 }
-

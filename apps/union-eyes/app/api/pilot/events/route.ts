@@ -69,6 +69,9 @@ export const POST = withRoleAuth('member', async (req, context: BaseAuthContext)
     if (typeof sessionId !== "string" || sessionId.length > 100) {
       return NextResponse.json({ error: "sessionId must be text of at most 100 characters" }, { status: 400 });
     }
+    if (sessionId.startsWith('server:')) {
+      return NextResponse.json({ error: 'The server: session namespace is reserved for actions verified by server routes' }, { status: 400 });
+    }
     if (metadata !== undefined && metadata !== null) {
       const isObject = typeof metadata === "object" && !Array.isArray(metadata);
       if (!isObject || JSON.stringify(metadata).length > 4096) {

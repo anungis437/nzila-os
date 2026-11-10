@@ -1,120 +1,51 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY: the route used to aggregate every organization's analytics metrics for a platform_lead title (B89).
+// Each organization's metrics are its own content (#1116, #1118) and no cross-organization grant exists, so it is refused for every caller
+// and reads nothing: no system transaction, no select, no audit row of a read that did not happen.
 const m = vi.hoisted(() => ({
-  rows: [] as Array<Record<string, unknown>>,
-  select: vi.fn(),
-  withSystemContext: vi.fn((handler: (tx: unknown) => unknown) => handler({ select: (...args: unknown[]) => m.select(...args) })),
+  withSystemContext: vi.fn(),
+  withRLSContext: vi.fn(),
+  db: { select: vi.fn(), execute: vi.fn() },
   audit: vi.fn(),
+  config: undefined as unknown,
 }));
 
 vi.mock('@/lib/api/with-api', () => ({
-  withApi: vi.fn((_: unknown, handler: (...args: any[]) => unknown) => handler),
+  withApi: vi.fn((config: unknown, handler: (...args: any[]) => unknown) => {
+    m.config = config;
+    return handler;
+  }),
 }));
-
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 vi.mock('@/lib/api/errors', () => ({ ApiError: { forbidden: (message: string) => Object.assign(new Error(message), { status: 403 }) } }));
-
-vi.mock('@/db/schema', () => ({
-  analyticsMetrics: {
-    organizationId: 'organizationId',
-    metricType: 'metricType',
-    metricValue: 'metricValue',
-    metricUnit: 'metricUnit',
-    periodStart: 'periodStart',
-    periodEnd: 'periodEnd',
-    trend: 'trend',
-    createdAt: 'createdAt',
-  },
-}));
-
-// The read runs under the system role on purpose and is audited with the read (B89).
-vi.mock('@/lib/db/with-rls-context', () => ({
-  withSystemContext: m.withSystemContext,
-}));
-
-vi.mock('drizzle-orm', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('drizzle-orm')>();
-  return {
-    ...actual,
-    desc: vi.fn((column: unknown) => ({ desc: column })),
-  };
-});
+vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext, withRLSContext: m.withRLSContext }));
+vi.mock('@/db/db', () => ({ db: m.db }));
 
 async function loadRoute() {
   return import('../analytics/cross-org/route');
 }
 
-describe('/api/analytics/cross-org route', () => {
+describe('/api/analytics/cross-org route (refused)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.rows = [];
-    m.select.mockImplementation(() => ({
-      from: vi.fn(() => ({
-        orderBy: vi.fn(() => ({
-          limit: vi.fn(async () => m.rows),
-        })),
-      })),
-    }));
   });
 
-  it('returns aggregate-only metrics without raw organization rows', async () => {
-    m.rows = [
-      {
-        organizationId: 'liuna-local-001',
-        metricType: 'open_cases',
-        metricValue: '4',
-        metricUnit: 'count',
-        periodStart: new Date('2026-08-01T00:00:00.000Z'),
-        periodEnd: new Date('2026-08-31T23:59:59.000Z'),
-        trend: 'up',
-        metadata: { privilegedMatterId: 'do-not-expose' },
-      },
-      {
-        organizationId: 'liuna-local-002',
-        metricType: 'open_cases',
-        metricValue: '6',
-        metricUnit: 'count',
-        periodStart: new Date('2026-08-01T00:00:00.000Z'),
-        periodEnd: new Date('2026-08-31T23:59:59.000Z'),
-        trend: 'stable',
-        metadata: { memberId: 'do-not-expose' },
-      },
-    ];
-
-    const { GET, dynamic } = await loadRoute();
-    const result = await GET({ userId: 'u1', organizationId: 'org1' } as any);
-
+  it('keeps the authenticated platform_lead floor, which is not itself authority', async () => {
+    const { dynamic } = await loadRoute();
     expect(dynamic).toBe('force-dynamic');
-    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'analytics.cross_org.read', details: { sourceRowsAggregated: 2 } }));
-    expect(result).toEqual({
-      dataClass: 'aggregate_only',
-      sourceRowsAggregated: 2,
-      rawRowsExposed: false,
-      items: [{
-        metricType: 'open_cases',
-        metricUnit: 'count',
-        metricCount: 2,
-        contributingOrganizations: 2,
-        totalValue: 10,
-        averageValue: 5,
-        minValue: 4,
-        maxValue: 6,
-        periodStart: '2026-08-01T00:00:00.000Z',
-        periodEnd: '2026-08-31T23:59:59.000Z',
-        latestTrend: 'up',
-      }],
-    });
-
-    const serialized = JSON.stringify(result);
-    expect(serialized).not.toContain('liuna-local-001');
-    expect(serialized).not.toContain('liuna-local-002');
-    expect(serialized).not.toContain('privilegedMatterId');
-    expect(serialized).not.toContain('memberId');
+    expect(m.config).toMatchObject({ auth: { required: true, minRole: 'platform_lead' } });
   });
 
-  it('refuses a caller with no active organization and reads nothing', async () => {
+  it.each([
+    ['a platform lead acting in an organization', { userId: 'u1', organizationId: 'org1' }],
+    ['a caller with no active organization', { userId: 'u1', organizationId: null }],
+  ])('refuses %s with 403 and reads and audits nothing', async (_label, ctx) => {
     const { GET } = await loadRoute();
-    await expect(GET({ userId: 'u1', organizationId: null } as any)).rejects.toThrow('active organization');
-    expect(m.select).not.toHaveBeenCalled();
+    await expect((GET as (c: unknown) => Promise<unknown>)(ctx)).rejects.toMatchObject({ status: 403, message: expect.stringContaining('no cross-organization grant exists') });
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+    expect(m.db.select).not.toHaveBeenCalled();
+    expect(m.audit).not.toHaveBeenCalled();
   });
 });

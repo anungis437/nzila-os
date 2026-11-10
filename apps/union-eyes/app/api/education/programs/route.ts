@@ -1,12 +1,12 @@
 /**
  * CRUD collection route for trainingPrograms
  */
-import { crudRoutes } from '@/lib/api/crud-factory';
+import { crudRoutes, queryIdMutations, type CrudOptions } from '@/lib/api/crud-factory';
 import { trainingPrograms } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
-const { GET, POST } = crudRoutes({
+const programCrudOptions: CrudOptions & { itemRoute?: false } = {
   table: trainingPrograms,
   pk: 'id',
   tags: ["Scheduling"],
@@ -15,5 +15,14 @@ const { GET, POST } = crudRoutes({
   writeRole: 'officer',
   // The program's content. CLC approval is an accreditation fact and is not set through this generic route.
   writableFields: ['programName', 'programDescription', 'programDuration', 'requiredCourses', 'electiveCourses', 'minimumRequiredCourses', 'minimumElectiveCourses', 'providesCertification', 'certificationName', 'isActive', 'notes'],
-});
-export { GET, POST };
+};
+
+// `table` is re-stated as a direct property (not just spread) on both calls below so the
+// frontend response-shape census (which reads a `crudRoutes({ table, ... })` call's own
+// literal, not an indirection through a shared variable) can still resolve the row shape.
+const { GET, POST } = crudRoutes({ ...programCrudOptions, table: trainingPrograms });
+// No [id]/route.ts exists for programs; the admin screens submit edits and deletes with `?id=` on
+// this collection URL instead, so the item-mode handlers (same options, same authorization) are
+// exposed here rather than under a path segment.
+const { PATCH, DELETE } = queryIdMutations(crudRoutes({ ...programCrudOptions, table: trainingPrograms, itemRoute: true }));
+export { GET, POST, PATCH, DELETE };

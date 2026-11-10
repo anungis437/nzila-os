@@ -222,6 +222,7 @@ const ENTRIES: EnvEntry[] = [
     { name: 'CORS_ORIGIN', kind: 'config', required: 'optional', whenMissing: 'default:no cross-origin caller is allowed; same-origin only (proxy.ts)', provisionedBy: notNeeded('legacy single-origin spelling of CORS_ALLOWED_ORIGINS'), description: 'Legacy single-origin spelling of CORS_ALLOWED_ORIGINS.' },
     { name: 'AUTH_URL', kind: 'config', required: 'production', whenMissing: 'fail-closed', provisionedBy: [bicep(), workflow], externalConsumer: 'Auth.js (next-auth) reads it for callback URLs', description: 'Canonical URL the authentication library builds callbacks on; the app URL.', example: 'http://localhost:3002' },
     { name: 'AUTH_TRUST_HOST', kind: 'flag', required: 'production', whenMissing: 'fail-closed', provisionedBy: [bicep(), workflow], externalConsumer: 'Auth.js (next-auth) reads it to trust the forwarded host behind the ingress', description: 'true behind the Azure ingress so the authentication library trusts the forwarded host.', example: 'true' },
+    { name: 'NEXTAUTH_URL', kind: 'config', required: 'optional', whenMissing: 'default:NEXT_PUBLIC_APP_URL supplies the canonical OIDC callback origin', provisionedBy: notNeeded('legacy Auth.js spelling; the canonical application URL is already provisioned'), description: 'Legacy canonical application URL used when building the enterprise OIDC callback.' },
   ]),
   ...section('database', 'database', [
     { name: 'DATABASE_URL', kind: 'secret', required: 'production', minLength: 20, whenMissing: 'fail-closed', provisionedBy: [bicep('database-url'), workflow], description: 'Tenant-scoped PostgreSQL connection string (the non-bypass union_eyes_runtime role).' },
@@ -251,6 +252,8 @@ const ENTRIES: EnvEntry[] = [
     { name: 'NEXT_PUBLIC_NZILA_AUTH_ENABLE_PG_FALLBACK', kind: 'flag', required: 'optional', whenMissing: 'default:true, the client looks for the PostgreSQL password session', provisionedBy: notNeeded('the password session is a product feature, on by default'), description: 'Client-side mirror of NZILA_AUTH_ENABLE_PG_FALLBACK (build time).', example: 'true' },
     { name: 'UNION_EYES_ACCEPTANCE_AUTH_ENABLED', kind: 'flag', required: 'staging', whenMissing: 'fail-closed', provisionedBy: operator('staging acceptance runs set it on the staging revision for the run; no workflow does'), productionProof: 'packages/platform-auth/src/acceptance-auth.test.ts', description: 'Staging only: lets the acceptance harness sign in with the acceptance secret. Unset, the acceptance sign-in is off. Refused on any production target.' },
     { name: 'UNION_EYES_ACCEPTANCE_AUTH_SECRET', kind: 'secret', required: 'staging', minLength: 32, whenMissing: 'fail-closed', provisionedBy: operator('staging acceptance runs set it on the staging revision for the run; no workflow does'), productionProof: 'packages/platform-auth/src/acceptance-auth.test.ts', description: 'Staging only: shared secret of the acceptance sign-in (at least 32 characters). Refused on any production target.' },
+    { name: 'CORA_ACCEPTANCE_AUTH_ENABLED', kind: 'flag', required: 'dev-only', whenMissing: 'default:unset; the Cora local acceptance identity is disabled', provisionedBy: notNeeded('local acceptance tests only; every deployed environment signal disables it'), productionProof: 'packages/platform-auth/src/cora-acceptance-auth.test.ts', description: 'Local/test only: enables Cora acceptance authentication when every environment signal is local.' },
+    { name: 'CORA_ACCEPTANCE_AUTH_SECRET', kind: 'secret', required: 'dev-only', minLength: 32, whenMissing: 'fail-closed', provisionedBy: notNeeded('local acceptance tests only; every deployed environment signal disables it'), productionProof: 'packages/platform-auth/src/cora-acceptance-auth.test.ts', description: 'Local/test only: signing secret for Cora acceptance identities.' },
   ]),
   ...section('authorization', 'authorization', [
     { name: 'PLATFORM_ADMIN_USER_IDS', kind: 'config', required: 'optional', whenMissing: 'fail-closed', provisionedBy: workflow, description: 'Comma-separated user ids that hold platform administrator access across organizations. Empty means nobody does.' },
@@ -260,7 +263,6 @@ const ENTRIES: EnvEntry[] = [
     { name: 'DEV_ROLE_OVERRIDE', kind: 'config', required: 'dev-only', whenMissing: 'default:unset; roles come from membership', provisionedBy: notNeeded('development only: refused outside NODE_ENV=development and on any deployed runtime'), productionProof: 'lib/auth/__tests__/dev-role-override.test.ts', description: 'Development only: act as this role instead of the signed-in role.' },
     { name: 'UE_ALLOW_DEFAULT_ORG', kind: 'flag', required: 'dev-only', whenMissing: 'default:unset; a signed-in user with no organization gets none', provisionedBy: notNeeded('development only: ignored on any deployed runtime'), productionProof: 'lib/__tests__/organization-utils.test.ts', description: 'Development only: fall back to the default organization when a user has none.' },
     { name: 'UE_ALLOW_SEED_MEMBERSHIP_LINKING', kind: 'flag', required: 'dev-only', whenMissing: 'default:unset; the dashboard never links a seeded identity to a membership', provisionedBy: notNeeded('development only: ignored on any deployed runtime'), productionProof: 'lib/dashboard/__tests__/layout-bootstrap.test.ts', description: 'Development only: let the dashboard link a seeded identity to its seeded membership.' },
-    { name: 'UE_MEMBER_DUES_PAYMENTS', kind: 'flag', required: 'optional', capability: 'payments', whenMissing: 'default:unset; the member dues initiation routes answer 501 (lib/dues/member-dues-flag.ts)', provisionedBy: notNeeded('member dues collection is not part of the initial launch; set 1 only when it is enabled'), description: 'Set 1 to enable member-facing dues payment initiation.', example: '' },
   ]),
   ...section('keys', 'encryption', [
     { name: 'AZURE_KEY_VAULT_URL', kind: 'config', required: 'production', whenMissing: 'fail-closed', provisionedBy: bicep(), description: 'Azure Key Vault holding the PII encryption key. A deployed environment encrypts only through it.' },
@@ -280,6 +282,7 @@ const ENTRIES: EnvEntry[] = [
     { name: 'EMAIL_SUPPRESSION_HASH_KEY', kind: 'secret', required: 'production', capability: 'communications-tracking', minLength: 32, whenMissing: 'fail-closed', provisionedBy: bicep('email-suppression-hash-key'), description: 'Keyed-hash secret of the email suppression list: at least 32 characters, not a placeholder.' },
     { name: 'PUBLIC_INTAKE_AUDIT_KEY', kind: 'secret', required: 'production', capability: 'public-intake', minLength: 32, whenMissing: 'fail-closed', provisionedBy: bicep('public-intake-audit-key'), description: 'Keyed-hash secret that pseudonymises the network addresses in the public-intake audit trail: at least 32 characters, not a placeholder.' },
     { name: 'VOTING_SECRET', kind: 'secret', required: 'production', capability: 'voting', minLength: 32, whenMissing: 'fail-closed', provisionedBy: bicep('voting-secret'), description: 'Secret that blinds and verifies ballots: at least 32 characters, not a placeholder.' },
+    { name: 'SURVEY_PARTICIPATION_HMAC_KEY', kind: 'secret', required: 'optional', minLength: 32, whenMissing: 'fail-closed', provisionedBy: operator('a dedicated secret configured on the Union Eyes app; it must not be shared with ballot, tracking, or authentication keys'), description: 'Dedicated HMAC key for unlinkable per-survey participation proofs. Unset, anonymous single-response surveys refuse to open a response.' },
     { name: 'NZILA_FIPS_REQUIRED', kind: 'flag', required: 'optional', whenMissing: 'default:false; the runtime does not require a FIPS-validated crypto provider', provisionedBy: notNeeded('a stricter mode an operator opts into'), description: 'true refuses to start unless the OpenSSL FIPS provider is active.' },
     { name: 'NZILA_FIPS_STRICT', kind: 'flag', required: 'optional', whenMissing: 'default:false; non-FIPS algorithms are only reported', provisionedBy: notNeeded('a stricter mode an operator opts into'), description: 'true makes a non-FIPS algorithm an error instead of a report.' },
     { name: 'OPENSSL_CONF', kind: 'config', required: 'optional', capability: 'build', whenMissing: 'default:unset; the default OpenSSL configuration applies', provisionedBy: platform('the container image supplies it when it ships a FIPS provider'), description: 'OpenSSL configuration file (read to detect a FIPS provider).' },
@@ -366,6 +369,9 @@ const ENTRIES: EnvEntry[] = [
     member('shopify-rewards', 'SHOPIFY_ADMIN_TOKEN', 'secret', 'the Shopify rewards page reports the admin token as not configured', 'Shopify Admin API token.'),
     member('shopify-rewards', 'SHOPIFY_STOREFRONT_TOKEN', 'secret', 'the Shopify rewards page reports the storefront token as not configured', 'Shopify Storefront API token.'),
     member('shopify-rewards', 'SHOPIFY_WEBHOOK_SECRET', 'secret', 'the Shopify webhook route answers 500 and no event is accepted', 'Signing secret of the Shopify webhooks.'),
+    { name: 'PENSION_SETTLEMENT_PROVIDER_MANDATE_REF', kind: 'config', required: 'optional', whenMissing: 'fail-closed', provisionedBy: operator('set only after the pension institution approves the payout-provider mandate'), description: 'Institution-approved mandate reference required before a prepared pension settlement may be handed to a provider.' },
+    { name: 'UE_RECONCILIATION_DEBIT_ACCOUNT', kind: 'config', required: 'optional', whenMissing: 'fail-closed', provisionedBy: operator('set to the institution-approved debit ledger account'), description: 'Approved debit ledger account used for reconciliation postings.' },
+    { name: 'UE_RECONCILIATION_CREDIT_ACCOUNT', kind: 'config', required: 'optional', whenMissing: 'fail-closed', provisionedBy: operator('set to the institution-approved credit ledger account'), description: 'Approved credit ledger account used for reconciliation postings; must differ from the debit account.' },
   ]),
   ...section('ai', 'ai-assistant', [
     { name: 'AI_SDK_BASE_URL', kind: 'config', required: 'optional', whenMissing: 'default:NEXT_PUBLIC_APP_URL, the app itself, which proxies the AI runtime', provisionedBy: notNeeded('falls back to the app URL'), description: 'Base URL of the AI runtime the AI client calls.' },
@@ -373,6 +379,7 @@ const ENTRIES: EnvEntry[] = [
     { name: 'UE_METRICS_SERVICE_KEY', kind: 'secret', required: 'optional', capability: 'orchestration', minLength: 32, whenMissing: 'fail-closed', provisionedBy: operator('identical non-AI credential configured in Union Eyes and Control Plane'), description: 'Scoped service credential for metrics:platform_operational:read, at least 32 characters and distinct from AI_SERVICE_KEY and QUEUE_STATUS_SERVICE_KEY. Never confers tenant content access.' },
     { name: 'AI_SERVICE_URL', kind: 'config', required: 'optional', whenMissing: 'degraded:the ML query route answers that the AI service is not configured', provisionedBy: OPTIONAL_INTEGRATION, integration: 'ai-service', description: 'URL of the external AI service behind the ML query route.' },
     { name: 'AI_SERVICE_TOKEN', kind: 'secret', required: 'optional', minLength: 32, whenMissing: 'degraded:the ML query route calls the AI service without authorization and the service refuses it', provisionedBy: OPTIONAL_INTEGRATION, integration: 'ai-service', description: 'Bearer token for the external AI service (at least 32 characters).' },
+    { name: 'ML_QUERY_DISCLOSURE_POLICY_REF', kind: 'config', required: 'optional', whenMissing: 'fail-closed', provisionedBy: operator('set only after the institution approves the external ML disclosure policy'), description: 'Approved policy/evidence reference required before any natural-language query is disclosed to the external ML provider.' },
     { name: 'QUEUE_STATUS_SERVICE_KEY', kind: 'secret', required: 'optional', capability: 'orchestration', minLength: 32, whenMissing: 'fail-closed', provisionedBy: operator('shared with the monitoring caller of /api/union-eyes/queue-status'), description: 'Service key of /api/union-eyes/queue-status: 32+ characters, distinct from AI_SERVICE_KEY and UE_METRICS_SERVICE_KEY, no AI-key fallback. Unset, short or re-used, the machine path answers 401.' },
     member('azure-openai', 'AZURE_OPENAI_ENDPOINT', 'config', 'voice transcription answers that the service is not configured', 'Azure OpenAI endpoint (voice transcription).'),
     member('azure-openai', 'AZURE_OPENAI_API_KEY', 'secret', 'voice transcription answers that the service is not configured', 'Azure OpenAI API key (voice transcription).'),
@@ -518,6 +525,7 @@ const ENTRIES: EnvEntry[] = [
     { name: 'CI', kind: 'flag', required: 'test-only', capability: 'development', whenMissing: 'default:unset, the connection pool and timeouts are the local ones', provisionedBy: notNeeded('set by the CI provider, never by a deployment'), description: 'Set by CI providers; shrinks the connection pool and relaxes test timeouts.' },
     { name: 'VITEST', kind: 'flag', required: 'test-only', capability: 'development', whenMissing: 'default:unset, the production connection pool applies', provisionedBy: notNeeded('set by the test runner, never by a deployment'), description: 'Set by Vitest; selects the test connection pool.' },
     { name: 'PLAYWRIGHT_BASE_URL', kind: 'config', required: 'test-only', capability: 'development', whenMissing: 'default:http://localhost:3002, the local dev server', provisionedBy: notNeeded('read by the Playwright runtime configuration only'), description: 'Tests only: URL the Playwright runtime suite targets.' },
+    { name: 'PLAYWRIGHT_CHANNEL', kind: 'config', required: 'test-only', capability: 'development', whenMissing: 'default:unset, Playwright uses its bundled Chromium browser', provisionedBy: notNeeded('read by the Playwright runtime configuration only'), description: 'Tests only: optional installed browser channel used by the Playwright runtime suite.' },
     { name: 'UE_RUNTIME_ARTIFACTS', kind: 'config', required: 'test-only', capability: 'development', whenMissing: 'default:test-results/runtime', provisionedBy: notNeeded('read by the Playwright runtime configuration only'), description: 'Tests only: output directory of the Playwright runtime suite.' },
     { name: 'UE_RUNTIME_REPORT', kind: 'config', required: 'test-only', capability: 'development', whenMissing: 'default:test-results/runtime-report.json', provisionedBy: notNeeded('read by the Playwright runtime configuration only'), description: 'Tests only: JSON report file of the Playwright runtime suite.' },
     { name: 'NODE_OPTIONS', kind: 'config', required: 'test-only', capability: 'development', whenMissing: 'default:unset, Node.js default options apply', provisionedBy: notNeeded('read only by the Playwright web-server configuration'), description: 'Node.js options; the Playwright web server adds a larger heap.' },
@@ -550,6 +558,22 @@ const ENTRIES: EnvEntry[] = [
 export const ENV_REGISTRY: readonly EnvEntry[] = ENTRIES
 
 export const ENV_PATTERNS: readonly EnvPattern[] = [
+  {
+    file: 'lib/integrations/credential-store.ts',
+    key: 'validateManagedCredentialRef(binding.secretRef)',
+    produces: 'UE_INTEGRATION_<NAME> from a validated env://UE_INTEGRATION_<NAME> managed credential reference',
+    capability: 'integrations',
+    whenMissing: 'fail-closed',
+    description: 'Tenant integration credentials are resolved only from a validated managed reference; an absent value leaves the configuration disabled and unresolvable.',
+  },
+  {
+    file: 'lib/services/rewards/shopify-secret-store.ts',
+    key: 'match[1]',
+    produces: 'UE_SHOPIFY_<NAME> from a validated env://UE_SHOPIFY_<NAME> webhook-secret reference',
+    capability: 'integrations',
+    whenMissing: 'fail-closed',
+    description: 'A Shopify webhook secret version can be activated only when its validated managed environment reference is provisioned.',
+  },
   {
     file: 'lib/integrations/registry.ts',
     key: 'envVar',

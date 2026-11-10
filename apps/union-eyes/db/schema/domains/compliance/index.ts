@@ -30,3 +30,5 @@ export * from './whiplash';
 export * from './certifications';
 export * from './pci-dss';
 export * from './employer-compliance';
+export * from './statutory-rules';
+export * from './equity-privacy';

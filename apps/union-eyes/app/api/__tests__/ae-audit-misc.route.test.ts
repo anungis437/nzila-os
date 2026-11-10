@@ -17,6 +17,9 @@ const h = vi.hoisted(() => ({
   getSource: vi.fn(),
   updateSource: vi.fn(),
   deactivateSource: vi.fn(),
+  getIntegrationConfig: vi.fn(),
+  configureIntegration: vi.fn(),
+  setIntegrationActivation: vi.fn(),
 }));
 
 function chain(): Record<string, unknown> {
@@ -49,6 +52,7 @@ vi.mock('@/lib/api-auth-guard', () => ({
       handler(req, { userId: 'u1', organizationId: 'org-1', ...ctx });
   },
 }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: () => h.requireSystemAdmin() }));
 vi.mock('@/db/db', () => ({ db: {} }));
 vi.mock('@/db', () => ({ db: {} }));
 vi.mock('@/db/schema/integration-schema', () => ({
@@ -61,7 +65,8 @@ vi.mock('@/db/schema', () => ({
   outcomeEnum: { enumValues: ['settled'] },
   precedentValueEnum: { enumValues: ['high'] },
 }));
-vi.mock('drizzle-orm', () => ({
+vi.mock('drizzle-orm', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('drizzle-orm')>()),
   and: (...a: unknown[]) => a,
   eq: (...a: unknown[]) => a,
   sql: Object.assign((..._a: unknown[]) => 'sql', {}),
@@ -95,6 +100,11 @@ vi.mock('@/lib/services/cba-intelligence/source-registry-service', () => ({
   updateSource: h.updateSource,
   deactivateSource: h.deactivateSource,
 }));
+vi.mock('@/lib/integrations/control-plane', () => ({
+  getIntegrationConfigForOrg: h.getIntegrationConfig,
+  configureIntegrationForOrg: h.configureIntegration,
+  setIntegrationActivationForOrg: h.setIntegrationActivation,
+}));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { FORBIDDEN: 'FORBIDDEN', VALIDATION_ERROR: 'VALIDATION_ERROR', RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND', INTERNAL_ERROR: 'INTERNAL_ERROR', AUTH_REQUIRED: 'AUTH_REQUIRED', MISSING_REQUIRED_FIELD: 'MISSING_REQUIRED_FIELD', ALREADY_EXISTS: 'ALREADY_EXISTS' },
   standardErrorResponse: (code: string, message: string) =>
@@ -122,6 +132,9 @@ beforeEach(() => {
   h.getSource.mockReset();
   h.updateSource.mockReset();
   h.deactivateSource.mockReset();
+  h.getIntegrationConfig.mockReset();
+  h.configureIntegration.mockReset();
+  h.setIntegrationActivation.mockReset();
 });
 
 describe('precedents POST', () => {
@@ -155,29 +168,19 @@ describe('precedents POST', () => {
 });
 
 describe('extensions/[id]', () => {
-  it('PATCH and DELETE audit on the same transaction; a missing integration is 404 with no audit', async () => {
+  it('delegates PATCH and DELETE to the canonical versioned control plane', async () => {
     const { PATCH, DELETE } = await import('../extensions/[id]/route');
-    h.queue.push([{ id: 'i1' }]);
-    await PATCH({ params: { id: 'i1' }, request: { json: async () => ({ enabled: false }) }, organizationId: 'org-1', userId: 'u1' });
-    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'integration.update', organizationId: 'org-1', userId: 'u1', resourceId: 'i1' }));
+    const current = { id: 'i1', provider: 'slack', type: 'communication' };
+    h.getIntegrationConfig.mockResolvedValue(current);
+    h.configureIntegration.mockResolvedValue({ ...current, enabled: false, version: 2 });
+    h.setIntegrationActivation.mockResolvedValue({ ...current, enabled: false, version: 3 });
 
-    h.queue.push([]);
-    // Switching on is refused while no synchronization runs (activation guard, tested with the guard), so the missing-integration 404 is exercised by switching off.
-    await expect(PATCH({ params: { id: 'i1' }, request: { json: async () => ({ enabled: false }) }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 404 });
+    await PATCH({ params: { id: 'i1' }, body: { provider: 'slack', type: 'communication', enabled: false }, organizationId: 'org-1', userId: 'u1' });
+    expect(h.configureIntegration).toHaveBeenCalledWith('org-1', expect.objectContaining({ enabled: false }), 'u1');
 
-    h.audit.mockClear();
-    h.queue.push([{ id: 'i1' }], [], [{ id: 'i1', name: 'N' }]); // owned, no sync history, deleted
-    await DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' });
-    expect(h.audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'integration.delete', resourceId: 'i1' }));
-    h.audit.mockClear();
-    h.queue.push([]); // not the organization's integration
-    await expect(DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 404 });
-    expect(h.audit).not.toHaveBeenCalled();
-
-    // DEF-0B7-PLT-EXT-DELETE-HARD-DELETE-CASCADES-SYNC-LOG-HISTORY: an integration that has run keeps its history, so it is not deleted.
-    h.queue.push([{ id: 'i1' }], [{ id: 'log-1' }]);
-    await expect(DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' })).rejects.toMatchObject({ status: 409 });
-    expect(h.audit).not.toHaveBeenCalled();
+    const deleted = await DELETE({ params: { id: 'i1' }, organizationId: 'org-1', userId: 'u1' });
+    expect(h.setIntegrationActivation).toHaveBeenCalledWith('org-1', 'i1', false, 'u1');
+    expect(deleted).toMatchObject({ deleted: false, deactivated: true });
   });
 });
 

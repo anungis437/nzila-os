@@ -5,7 +5,7 @@ import { requireLiveFinancialMandate } from "@/lib/finance/require-live-financia
 import { PLATFORM_MODULES, requireEntitlement } from "@/services/platform-economics/entitlement-guard";
 import { employerPayrollRuns, employerPayrollRunItems, employerExecutionArtifacts } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
-import { verifyEvidenceChainFromLinks } from "../../_lib";
+import { verifyEvidenceChainFromArtifacts } from "../../_lib";
 import { approveRun, executeRun } from "@/lib/employer-execution/payroll-run-transitions";
 
 const LEGACY_TARGET_ID_COLUMN = "entityId" as const;
@@ -80,7 +80,18 @@ export const GET = withApi(
         createdAt: String(value.createdAt ?? new Date().toISOString()),
       }));
 
-    const chainVerification = verifyEvidenceChainFromLinks(chainLinks);
+    // Recomputes authenticated values from the artifacts' actual stored content (artifactHash, manifestJson) rather
+    // than trusting what a chain link merely claims about itself - see verifyEvidenceChainFromArtifacts's doc
+    // comment. Scoped to this caller's own organization and this run, so a cross-tenant or cross-run link can never
+    // verify here even if it is otherwise validly sealed.
+    const chainVerification = verifyEvidenceChainFromArtifacts(
+      artifacts.map((artifact) => ({
+        organizationId: artifact.organizationId,
+        artifactHash: artifact.artifactHash ?? "",
+        manifestJson: (artifact.manifestJson as Record<string, unknown>) ?? {},
+      })),
+      { organizationId, entityType: "payroll_run", targetEntityId: id },
+    );
 
     return { data: { run, items, chainLinks, chainVerification } };
   },

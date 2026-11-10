@@ -42,6 +42,12 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
+vi.mock('@/lib/api-auth-guard', () => ({
+  isPlatformAdminUser: async (userId: string) => userId === 'platform-admin-1',
+  ROLE_HIERARCHY: { member: 20, steward: 50, officer: 80, admin: 100 },
+}));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(async () => 'org-a') }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: vi.fn(async (context) => context) }));
 vi.mock('@nzila/os-core/telemetry', () => ({
   createLogger: () => ({ info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() }),
 }));
@@ -49,6 +55,7 @@ vi.mock('@/db/schema', () => ({
   organizationMembers: {
     id: 'id',
     status: 'status',
+    role: 'role',
     organizationId: 'organizationId',
     userId: 'userId',
     deletedAt: 'deletedAt',

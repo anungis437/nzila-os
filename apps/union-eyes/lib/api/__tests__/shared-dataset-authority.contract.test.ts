@@ -22,13 +22,14 @@ describe('the extracted CBA dataset is changed only with platform authority', ()
     ['cba-intelligence/sources/[id]', 'PATCH'],
   ];
 
-  it.each(mutating)('%s %s requires a platform administrator before it reads or writes anything', (route, method) => {
+  it.each(mutating)('%s %s requires direct scoped platform authority before it reads or writes anything', (route, method) => {
     const source = read(route);
     const start = source.indexOf(`export const ${method} = withApi(`);
     expect(start, `${route} exports ${method}`).toBeGreaterThanOrEqual(0);
     const handler = source.slice(start);
-    const guard = handler.indexOf('await requireSystemAdmin()');
-    expect(guard, `${route} ${method} calls requireSystemAdmin`).toBeGreaterThan(0);
+    const guard = handler.indexOf('await requirePlatformStaffAuthority(');
+    expect(guard, `${route} ${method} calls requirePlatformStaffAuthority`).toBeGreaterThan(0);
+    expect(handler).toContain("'platform.cba_dataset.curate'");
     // The guard comes first in the handler: before any service call or transaction.
     const firstEffect = handler.search(/withRLSContext\(|await [a-z][A-Za-z]+\(/);
     expect(guard).toBeLessThanOrEqual(firstEffect < 0 ? guard : Math.max(firstEffect, guard));

@@ -126,6 +126,8 @@ export class SunLifeAdapter extends BaseIntegration {
   // ==========================================================================
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const _startTime = Date.now();
@@ -140,6 +142,7 @@ export class SunLifeAdapter extends BaseIntegration {
       const modifiedSince = options.cursor ? new Date(options.cursor) : undefined;
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           this.logOperation('sync', { message: `Syncing ${entity}` });
 
@@ -224,12 +227,14 @@ export class SunLifeAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getPlans({
         page,
         pageSize: this.PAGE_SIZE,
       });
 
       for (const plan of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalBenefitPlans.findFirst({
             where: and(
@@ -292,6 +297,7 @@ export class SunLifeAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getEnrollments({
         page,
         pageSize: this.PAGE_SIZE,
@@ -299,6 +305,7 @@ export class SunLifeAdapter extends BaseIntegration {
       });
 
       for (const enrollment of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalBenefitEnrollments.findFirst({
             where: and(
@@ -363,12 +370,14 @@ export class SunLifeAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getDependents({
         page,
         pageSize: this.PAGE_SIZE,
       });
 
       for (const dependent of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalBenefitDependents.findFirst({
             where: and(
@@ -428,12 +437,14 @@ export class SunLifeAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getCoverage({
         page,
         pageSize: this.PAGE_SIZE,
       });
 
       for (const coverage of response.data) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalBenefitCoverage.findFirst({
             where: and(

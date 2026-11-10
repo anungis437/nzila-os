@@ -8,7 +8,7 @@
  * - notifications-schema.ts
  * - newsletter-schema.ts
  * - sms-communications-schema.ts
- * - survey-polling-schema.ts
+ * - surveys.ts
  * - communication-analytics-schema.ts
  * - push-notifications.ts
  * - campaigns.ts (Phase 4: Campaign management)

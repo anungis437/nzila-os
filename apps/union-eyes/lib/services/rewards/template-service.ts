@@ -2,7 +2,7 @@
  * Award Templates Service
  * Provides pre-configured award templates for quick recognition
  * 
- * Uses award_templates table from db/schema/award-templates-schema.ts
+ * Uses award_templates table from db/schema/domains/infrastructure/awards.ts
  */
 
 import { db } from '@/db';

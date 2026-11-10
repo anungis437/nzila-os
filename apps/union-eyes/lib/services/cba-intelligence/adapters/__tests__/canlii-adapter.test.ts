@@ -9,6 +9,7 @@ const loggerMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/logger", () => ({ logger: loggerMocks }));
+vi.mock("@/lib/security/outbound-url", () => ({ assertPublicHttpUrlResolved: vi.fn(async () => undefined) }));
 
 describe("CanliiAdapter", () => {
   beforeEach(() => {

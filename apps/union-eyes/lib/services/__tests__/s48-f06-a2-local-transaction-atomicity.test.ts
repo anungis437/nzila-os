@@ -18,8 +18,12 @@ describe('F06 batch 2 (A2): mutation and audit in one database transaction', () 
     expect(service).toContain('reconciliation.run.completed')
     expect(service).toContain('reconciliation.run.critical_variance')
     const resolve = service.slice(service.indexOf('export async function resolveException'))
-    expect(resolve.indexOf('db.transaction(')).toBeGreaterThan(-1)
-    expect(resolve.indexOf('db.transaction(')).toBeLessThan(resolve.indexOf('persistAtomicAudit('))
+    // Disclosed adaptation (DEF-0B11-PRP-RECONCILIATION-SERVICE-QUERIES-THROUGH-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY): the one
+    // transaction is now the organization's tenant transaction (inOrganization → withRLSContext, or the caller's), not db.transaction on
+    // the shared handle; the update and its audit still share it.
+    expect(resolve.indexOf('inOrganization(organizationId, tenantTx, async (tx)')).toBeGreaterThan(-1)
+    expect(resolve.indexOf('inOrganization(organizationId, tenantTx, async (tx)')).toBeLessThan(resolve.indexOf('persistAtomicAudit(tx'))
+    expect(service).not.toContain('db.transaction(')
   })
 
   it('audits every ICRA review decision, claimed or not, in the decision\'s transaction', () => {

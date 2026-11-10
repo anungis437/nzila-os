@@ -182,6 +182,24 @@ const BATCHES: BatchSpec[] = [
     proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts',
   },
   {
+    id: 'mutation-pay-equity-lifecycle',
+    order: 5.1,
+    ratchet: 'mutation-scope',
+    execution: 'cursor',
+    shrink: 'mutation-baseline',
+    action: 'The lifecycle compare-and-set names the exercise id, the caller organizationId and the prior status in the UPDATE predicate. The organization is request authority, not copied from the row under mutation. Do not weaken the row lock, transition validation or atomic audit.',
+    proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts and apps/union-eyes/lib/pay-equity/__tests__/pay-equity-lifecycle.test.ts',
+  },
+  {
+    id: 'mutation-workbook-consent',
+    order: 5.2,
+    ratchet: 'mutation-scope',
+    execution: 'cursor',
+    shrink: 'mutation-baseline',
+    action: 'Consent withdrawal constrains the UPDATE to the workbook id and the ownership state already established by the shared workbook authority boundary: the exact claimedByUserId for a claimed workbook, or claimedByUserId IS NULL for the capability-authorized preclaim path. Do not treat a workbook id as bearer authority.',
+    proof: 'apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts and apps/union-eyes/lib/workbook/__tests__/consent.test.ts',
+  },
+  {
     id: 'schema-retire-declaration',
     order: 6,
     ratchet: 'census',
@@ -338,7 +356,9 @@ const BATCHES: BatchSpec[] = [
 
 /** Counts at preparation. The baseline file may shrink. These counts stay. */
 export const SOURCE_MUTATION_COUNTS: Record<string, number> = {
+  'app/api/cnesst/pay-equity/[id]/transition/route.ts|pay_equity_exercises': 1,
   'app/api/payments/webhooks/stripe/route.ts|workbooks': 1,
+  'app/api/workbook/[id]/consent/route.ts|workbooks': 1,
   'app/api/workbook/[id]/claim/route.ts|workbooks': 1,
   'lib/pilot/pilot-ownership.ts|pilot_applications': 1,
   'lib/services/external-data/clc-partnership-service.ts|clc_sync_log': 1,
@@ -351,7 +371,9 @@ export const SOURCE_MUTATION_COUNTS: Record<string, number> = {
 }
 
 const MUTATION_BATCH: Record<string, string> = {
+  'app/api/cnesst/pay-equity/[id]/transition/route.ts|pay_equity_exercises': 'mutation-pay-equity-lifecycle',
   'app/api/payments/webhooks/stripe/route.ts|workbooks': 'mutation-workbook-unclaimed',
+  'app/api/workbook/[id]/consent/route.ts|workbooks': 'mutation-workbook-consent',
   'app/api/workbook/[id]/claim/route.ts|workbooks': 'mutation-workbook-unclaimed',
   'lib/pilot/pilot-ownership.ts|pilot_applications': 'mutation-pilot-rebind',
   'lib/services/external-data/clc-partnership-service.ts|clc_sync_log': 'mutation-clc-sync-log',

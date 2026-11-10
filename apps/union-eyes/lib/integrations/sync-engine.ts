@@ -9,6 +9,7 @@ import { integrationSyncLog } from '@/db/schema';
 import { integrationProviderEnum, syncStatusEnum, syncTypeEnum } from '@/db/schema/domains/infrastructure/integrations';
 import { eq, and, desc } from 'drizzle-orm';
 import cron, { type ScheduledTask } from 'node-cron';
+import { acquireLock, releaseLock, extendLock, isLocked } from '@/lib/services/cache-service';
 import {
   IntegrationProvider,
   SyncType,
@@ -41,10 +42,18 @@ export interface SyncJobConfig {
  * Sync Engine
  * Manages sync jobs and execution
  */
+// A sync's external network calls (HRIS/accounting/insurance providers) have no fixed upper bound, so the lock TTL is a
+// generous safety net, not the normal release path: the finally block below releases it immediately on completion.
+// A lock that outlives a crashed process still expires instead of blocking that job forever.
+const SYNC_LOCK_TTL_SECONDS = 600;
+const SYNC_LOCK_NAMESPACE = 'integration-sync';
+// Renew at roughly half the TTL so at least one renewal attempt can still land (and be retried by the next tick) before
+// the lock would otherwise expire from a missed or slow renewal.
+const SYNC_LOCK_RENEWAL_INTERVAL_MS = (SYNC_LOCK_TTL_SECONDS * 1000) / 2;
+
 export class SyncEngine {
   private static instance: SyncEngine;
   private factory: IntegrationFactory;
-  private runningJobs: Set<string> = new Set();
   private scheduledTasks: Map<string, ScheduledTask> = new Map();
 
   private constructor() {
@@ -84,8 +93,10 @@ export class SyncEngine {
 
     const jobKey = `${organizationId}:${provider}:${options.type}`;
 
-    // Check if job already running
-    if (this.runningJobs.has(jobKey)) {
+    // A distributed lock (not a process-local Set) so two instances of this app cannot run the same
+    // organization/provider/type sync at once.
+    const lockToken = await acquireLock(jobKey, SYNC_LOCK_TTL_SECONDS, SYNC_LOCK_NAMESPACE);
+    if (!lockToken) {
       throw new IntegrationError(
         'Sync job already running',
         provider,
@@ -93,8 +104,60 @@ export class SyncEngine {
       );
     }
 
-    this.runningJobs.add(jobKey);
+    // Fires the moment the lease can no longer be confirmed, so the integration (if it checks options.abortSignal
+    // between external calls - see BaseIntegration.throwIfAborted) stops making further ones instead of continuing
+    // unsupervised, and so this method itself stops waiting on/trusting the sync's eventual result (see the race
+    // below). JavaScript has no true preemption: a call already in flight at the moment of loss still completes and
+    // its side effects still happen: this narrows the window of unsupervised work for an adapter that cooperates,
+    // it does not guarantee zero overlap for one that does not.
+    const abortController = new AbortController();
+
+    // A sync whose external calls run longer than the TTL must keep renewing its own lock, or a second instance would
+    // acquire the same jobKey while this one is still running. The renewal is token-bound (cache-service's extendLock
+    // only extends the TTL if the stored value still matches our token), so it can never extend a lock another holder
+    // has since acquired. If a renewal tick fails - the token no longer matches (another holder won the lock after an
+    // expiry) or Redis could not be reached to confirm - the lease is treated as lost: no further renewal is attempted
+    // (a lock we no longer provably hold must not keep being claimed), the abort signal fires, and the eventual result
+    // is downgraded below rather than reported as a clean, fully-exclusive success.
+    let leaseLost = false;
+    let renewalInFlight = false;
+    const renewalTimer: ReturnType<typeof setInterval> = setInterval(() => {
+      if (renewalInFlight || leaseLost) return;
+      renewalInFlight = true;
+      extendLock(jobKey, lockToken, SYNC_LOCK_TTL_SECONDS, SYNC_LOCK_NAMESPACE)
+        .then((renewed) => {
+          if (!renewed && !leaseLost) {
+            leaseLost = true;
+            clearInterval(renewalTimer);
+            abortController.abort(new Error('SYNC_LEASE_RENEWAL_FAILED'));
+            logger.error('Sync lease lost: renewal did not confirm this instance still holds the lock', new Error('SYNC_LEASE_RENEWAL_FAILED'), {
+              organizationId,
+              provider,
+              syncType: options.type,
+            });
+          }
+        })
+        .catch((error) => {
+          // extendLock itself fails closed (catches internally and returns false), so reaching a rejection here would be
+          // unexpected; still treat it as lease loss rather than silently keep going on an unconfirmed lock.
+          if (!leaseLost) {
+            leaseLost = true;
+            clearInterval(renewalTimer);
+            abortController.abort(error instanceof Error ? error : new Error(String(error)));
+            logger.error('Sync lease renewal threw unexpectedly', error instanceof Error ? error : new Error(String(error)), {
+              organizationId,
+              provider,
+              syncType: options.type,
+            });
+          }
+        })
+        .finally(() => {
+          renewalInFlight = false;
+        });
+    }, SYNC_LOCK_RENEWAL_INTERVAL_MS);
+
     const startTime = Date.now();
+    let logId: string | undefined;
 
     try {
       logger.info('Starting sync job', {
@@ -105,30 +168,115 @@ export class SyncEngine {
       });
 
       // Create sync log entry
-      const logId = await this.createSyncLog(organizationId, provider, options);
+      logId = await this.createSyncLog(organizationId, provider, options);
 
       // Get integration instance
       const integration = await this.factory.getIntegration(organizationId, provider);
 
       // Determine sync parameters
-      const syncOptions = await this.prepareSyncOptions(
+      const preparedOptions = await this.prepareSyncOptions(
         organizationId,
         provider,
         options
       );
+      const syncOptions: SyncOptions = {
+        ...preparedOptions,
+        abortSignal: abortController.signal,
+        fencingToken: lockToken,
+      };
 
-      // Execute sync
-      const result = await integration.sync(syncOptions);
+      // Races the integration's sync() against the lease-loss signal. If the lease is lost before sync() resolves,
+      // this method stops waiting on it rather than trusting however much further progress it silently makes: the
+      // eventual settlement is still observed in the background (logged, never thrown as an unhandled rejection)
+      // for operator forensics, but it is not what gets reported as this call's result.
+      const syncPromise = integration.sync(syncOptions);
+      const abortedEarly = await Promise.race([
+        syncPromise.then(() => false as const),
+        new Promise<true>((resolve) => {
+          if (abortController.signal.aborted) {
+            resolve(true);
+            return;
+          }
+          abortController.signal.addEventListener('abort', () => resolve(true), { once: true });
+        }),
+      ]);
+
+      if (abortedEarly) {
+        // The integration either does not check the abort signal, or had not yet reached a checkpoint when the
+        // lease was lost: either way, this call no longer waits for or trusts its result. Observe what eventually
+        // happens without letting it crash the process or feed back into the result already being returned.
+        void syncPromise
+          .then((lateResult) => {
+            logger.warn('Sync result arrived after the lease was already lost and the run was reported cancelled; it was not applied', {
+              organizationId,
+              provider,
+              syncType: options.type,
+              lateSuccess: lateResult.success,
+              lateRecordsProcessed: lateResult.recordsProcessed,
+            });
+          })
+          .catch((lateError) => {
+            logger.warn('Sync eventually failed after the lease was already lost and the run was reported cancelled', {
+              organizationId,
+              provider,
+              syncType: options.type,
+              lateError: lateError instanceof Error ? lateError.message : String(lateError),
+            });
+          });
+
+        const cancelledResult: SyncResult = {
+          success: false,
+          recordsProcessed: 0,
+          recordsCreated: 0,
+          recordsUpdated: 0,
+          recordsFailed: 0,
+          errors: [{ entity: 'sync', error: 'Sync lease was lost; the run was cancelled before it could be confirmed complete' }] as any,
+          metadata: { leaseRenewalLost: true, abortedEarly: true },
+        };
+
+        await this.updateSyncLog(logId, organizationId, {
+          status: SyncStatus.CANCELLED,
+          recordsProcessed: 0,
+          recordsCreated: 0,
+          recordsUpdated: 0,
+          recordsFailed: 0,
+          error: 'Sync lease renewal failed or was lost before the run could be confirmed complete; the run was cancelled rather than trusted.',
+          completedAt: new Date(),
+        });
+
+        logger.error('Sync job cancelled: lease lost before completion could be confirmed', new Error('SYNC_LEASE_LOST'), {
+          organizationId,
+          provider,
+          syncType: options.type,
+          durationMs: Date.now() - startTime,
+        });
+
+        return cancelledResult;
+      }
+
+      const result = await syncPromise;
+
+      // A lease lost mid-run means exclusivity could not be guaranteed for the full duration: a real success is not
+      // reported as a clean one, so an operator reviewing sync history can go looking for a possible concurrent/duplicate
+      // run instead of trusting the result at face value. A sync that already failed stays failed; the note is appended,
+      // not used to mask the original error.
+      const status = result.success
+        ? (leaseLost ? SyncStatus.PARTIAL : SyncStatus.SUCCESS)
+        : SyncStatus.FAILED;
+      const leaseLostNote = 'Sync lease renewal failed or was lost during this run; exclusive ownership of the job lock is not guaranteed for its full duration.';
+      const error = leaseLost
+        ? [result.errors?.[0]?.error, leaseLostNote].filter(Boolean).join(' | ')
+        : result.errors?.[0]?.error;
 
       // Update sync log
       await this.updateSyncLog(logId, organizationId, {
-        status: result.success ? SyncStatus.SUCCESS : SyncStatus.FAILED,
+        status,
         recordsProcessed: result.recordsProcessed,
         recordsCreated: result.recordsCreated,
         recordsUpdated: result.recordsUpdated,
         recordsFailed: result.recordsFailed,
         cursor: result.cursor,
-        error: result.errors?.[0]?.error,
+        error,
         completedAt: new Date(),
       });
 
@@ -136,11 +284,12 @@ export class SyncEngine {
         organizationId,
         provider,
         success: result.success,
+        leaseLost,
         recordsProcessed: result.recordsProcessed,
         durationMs: Date.now() - startTime,
       });
 
-      return result;
+      return leaseLost ? { ...result, metadata: { ...result.metadata, leaseRenewalLost: true } } : result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       
@@ -153,9 +302,11 @@ export class SyncEngine {
 
       throw error;
     } finally {
-      this.runningJobs.delete(jobKey);
+      clearInterval(renewalTimer);
+      await releaseLock(jobKey, lockToken, SYNC_LOCK_NAMESPACE);
     }
   }
+
 
   /**
    * Execute full sync
@@ -361,15 +512,19 @@ export class SyncEngine {
   }
 
   /**
-   * Check if sync is currently running
+   * Check if sync is currently running (reads the distributed lock; does not acquire it).
+   *
+   * Returns null when Redis could not be reached to confirm either way - callers must not treat null the same as
+   * false. A caller deciding whether it is safe to start something else should treat null as "unknown, do not assume
+   * it is safe", not as a confirmed "not running".
    */
-  isSyncRunning(
+  async isSyncRunning(
     organizationId: string,
     provider: IntegrationProvider,
     type: SyncType
-  ): boolean {
+  ): Promise<boolean | null> {
     const jobKey = `${organizationId}:${provider}:${type}`;
-    return this.runningJobs.has(jobKey);
+    return isLocked(jobKey, SYNC_LOCK_NAMESPACE);
   }
 }
 

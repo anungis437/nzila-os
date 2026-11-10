@@ -396,6 +396,9 @@ export function ContinuitySimulationWorkspace() {
                     <li key={assumption}>• {assumption}</li>
                   ))}
                 </ul>
+                <p className="mt-1">
+                  {mitigationData.verifiedEvidenceCoverage.verifiedEdgeCount} of {mitigationData.verifiedEvidenceCoverage.exploratoryEdgeCount} inferred dependencies are currently verified in their stated direction; every other dependency, and every node-level figure, is exploratory signal only.
+                </p>
               </details>
             </div>
           ) : (

@@ -9,7 +9,7 @@
  */
 import { and, eq } from 'drizzle-orm';
 import { withApi, ApiError } from '@/lib/api/framework';
-import { ssoProviders } from '@/db/schema/sso-scim-schema';
+import { ssoProviders, ssoProviderVersions } from '@/db/schema/sso-scim-schema';
 import { encryptSecret } from '@/lib/encryption';
 import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
@@ -17,11 +17,10 @@ import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
 import { validateSsoProviderInput } from '@/lib/sso/provider-input';
 import { isUniqueViolation } from '@/lib/db/unique-violation';
 import { SSO_SIGN_IN_EFFECT, withConfigurationEffect } from '@/lib/reality/configuration-effect';
-import { refuseUnavailableActivation, requestedActivation } from '@/lib/reality/activation-guard';
 
 export const dynamic = 'force-dynamic';
 
-const PATCHABLE = ['name', 'enabled', 'autoProvision', 'requireGroups', 'roleMapping', 'samlEntityId', 'samlSsoUrl', 'samlCertificate', 'oidcIssuer', 'oidcClientId', 'oidcClientSecret'] as const;
+const PATCHABLE = ['name', 'enabled', 'autoProvision', 'requireGroups', 'roleMapping', 'samlEntityId', 'samlSsoUrl', 'samlCertificate', 'oidcIssuer', 'oidcClientId', 'oidcClientSecret', 'approvalReference'] as const;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const PATCH = withApi(
@@ -44,16 +43,7 @@ export const PATCH = withApi(
     for (const key of ['enabled', 'autoProvision'] as const) {
       if (patch[key] !== undefined && typeof patch[key] !== 'boolean') throw ApiError.badRequest(`${key} must be true or false`);
     }
-    // Turning a provider on is refused while nothing reads it at sign-in (lib/reality/activation-guard.ts); turning it off is not.
-    await refuseUnavailableActivation({
-      effect: SSO_SIGN_IN_EFFECT,
-      asked: requestedActivation(patch, ['enabled', 'autoProvision']),
-      organizationId,
-      userId,
-      action: 'sso.provider.activate_blocked',
-      resourceType: 'sso_providers',
-      resourceId: params.id,
-    });
+    if (patch.autoProvision === true) throw ApiError.notImplemented('SSO just-in-time provisioning is not implemented; a verified provider-subject binding is required');
     const assignable: readonly string[] = AUTH_TENANT_ASSIGNABLE_ROLES;
     if (patch.roleMapping !== undefined && patch.roleMapping !== null) {
       if (typeof patch.roleMapping !== 'object' || Array.isArray(patch.roleMapping)) throw ApiError.badRequest('roleMapping must be an object of group to role');
@@ -75,6 +65,19 @@ export const PATCH = withApi(
       if (!existing) throw ApiError.notFound('SSO provider');
 
       const willBeEnabled = typeof patch.enabled === 'boolean' ? patch.enabled : existing.enabled === true;
+      const configurationFields = ['name', 'requireGroups', 'roleMapping', 'samlEntityId', 'samlSsoUrl', 'samlCertificate', 'oidcIssuer', 'oidcClientId', 'oidcClientSecret'];
+      const changesConfiguration = configurationFields.some((field) => patch[field] !== undefined);
+      if (existing.enabled && changesConfiguration && patch.enabled !== true) {
+        throw ApiError.conflict('Changing an active provider requires an explicit, independently approved reactivation');
+      }
+      if (willBeEnabled && existing.providerType !== 'oidc') {
+        throw ApiError.notImplemented('Only the OIDC sign-in consumer is implemented');
+      }
+      const approvalReference = typeof patch.approvalReference === 'string' ? patch.approvalReference.trim() : '';
+      if (patch.enabled === true) {
+        if (!approvalReference || approvalReference.length > 255) throw ApiError.badRequest('approvalReference is required to activate SSO');
+        if (existing.createdBy === userId) throw ApiError.forbidden('A distinct organization administrator must approve SSO activation');
+      }
       // The merged configuration, not just the patch, has to be complete for its type before it can be enabled.
       const merged = {
         name: patch.name ?? existing.name,
@@ -107,7 +110,19 @@ export const PATCH = withApi(
       if (patch.samlCertificate !== undefined) assign('samlCertificate', validated.samlCertificate);
       if (patch.oidcIssuer !== undefined) assign('oidcIssuer', validated.oidcIssuer);
       if (patch.oidcClientId !== undefined) assign('oidcClientId', validated.oidcClientId);
-      if (validated.oidcClientSecret) assign('oidcClientSecret', await encryptSecret(validated.oidcClientSecret));
+      const encryptedSecret = validated.oidcClientSecret ? await encryptSecret(validated.oidcClientSecret) : existing.oidcClientSecret;
+      if (validated.oidcClientSecret) assign('oidcClientSecret', encryptedSecret);
+      const nextVersion = patch.enabled === true ? existing.activeVersion + 1 : existing.activeVersion;
+      if (patch.enabled === true) {
+        assign('activeVersion', nextVersion);
+        assign('approvedBy', userId);
+        assign('approvedAt', new Date());
+        assign('approvalReference', approvalReference);
+      } else if (patch.enabled === false) {
+        assign('approvedBy', null);
+        assign('approvedAt', null);
+        assign('approvalReference', null);
+      }
 
       let updated: { id: string; enabled: boolean | null };
       try {
@@ -121,13 +136,34 @@ export const PATCH = withApi(
         throw error;
       }
 
+      if (patch.enabled === true) {
+        await tx.insert(ssoProviderVersions).values({
+          organizationId,
+          providerId: existing.id,
+          version: nextVersion,
+          createdBy: userId,
+          configuration: {
+            providerType: existing.providerType,
+            name: validated.name,
+            oidcIssuer: validated.oidcIssuer,
+            oidcClientId: validated.oidcClientId,
+            oidcClientSecret: encryptedSecret,
+            oidcScopes: existing.oidcScopes,
+            attributeMapping: existing.attributeMapping,
+            roleMapping: patch.roleMapping ?? existing.roleMapping,
+            requireGroups: groups ?? existing.requireGroups,
+            approvalReference,
+          },
+        });
+      }
+
       await persistAtomicAudit(tx, {
         organizationId,
         userId,
         action: changed.includes('oidcClientSecret') ? 'sso.provider.rotate_secret' : 'sso.provider.update',
         resourceType: 'sso_providers',
         resourceId: params.id,
-        details: { fields: changed, enabled: updated.enabled === true, inEffect: SSO_SIGN_IN_EFFECT.inEffect },
+        details: { fields: changed, enabled: updated.enabled === true, providerVersion: nextVersion, approvalReference: patch.enabled === true ? approvalReference : null, inEffect: SSO_SIGN_IN_EFFECT.inEffect },
       });
       return withConfigurationEffect({ id: updated.id, enabled: updated.enabled === true, changed }, SSO_SIGN_IN_EFFECT);
     });

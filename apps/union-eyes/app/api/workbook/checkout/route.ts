@@ -19,12 +19,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { workbooks } from '@/db/schema/workbook-schema';
+import { workbookCheckoutIntents, workbooks } from '@/db/schema/workbook-schema';
 import { WORKBOOK_TIERS } from '@/lib/icra/tiers';
 import { getStripeClient } from '@nzila/payments-stripe';
 import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
+import { recordExternalDisclosure } from '@/lib/audit/external-disclosure';
+import { UE_SYSTEM_ORG_ID } from '@/lib/ai-client';
+import { activeWorkbookConsent } from '@/lib/workbook/consent';
+import { extractWorkbookCapability, workbookCapabilityHolds } from '@/lib/workbook/workbook-capability';
+import {
+  issueWorkbookCheckoutReference,
+  WORKBOOK_CHECKOUT_INTENT_TTL_MS,
+} from '@/lib/workbook/checkout-intent';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -57,7 +65,13 @@ export async function POST(request: NextRequest) {
     // system role explicitly rather than running on the pooled connection with no user context.
     const [row] = await withSystemContext(async (tx) =>
       tx
-        .select({ reportTierId: workbooks.reportTierId })
+        .select({
+          reportTierId: workbooks.reportTierId,
+          claimedByUserId: workbooks.claimedByUserId,
+          capabilityTokenHash: workbooks.capabilityTokenHash,
+          capabilityTokenExpiresAt: workbooks.capabilityTokenExpiresAt,
+          consent: workbooks.consent,
+        })
         .from(workbooks)
         .where(eq(workbooks.id, workbookId))
         .limit(1),
@@ -65,6 +79,12 @@ export async function POST(request: NextRequest) {
 
     if (!row) {
       return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
+    }
+    if (row.claimedByUserId || !workbookCapabilityHolds(extractWorkbookCapability(request, workbookId), row)) {
+      return NextResponse.json({ error: 'Workbook not found' }, { status: 404 });
+    }
+    if (!activeWorkbookConsent(row.consent)) {
+      return NextResponse.json({ error: 'Workbook consent is not active' }, { status: 403 });
     }
     existingTierId = row.reportTierId ?? null;
   } catch (err) {
@@ -92,8 +112,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Checkout is temporarily unavailable' }, { status: 503 });
   }
   const baseUrl = configuredBase ?? 'http://localhost:3000';
-  const successUrl = `${baseUrl}/workbook/${workbookId}?tier_unlocked=${SELF_GUIDED_TIER_ID}`;
-  const cancelUrl = `${baseUrl}/workbook/${workbookId}`;
+  const { publicRef, publicRefHash } = issueWorkbookCheckoutReference();
+  const expiresAt = new Date(Date.now() + WORKBOOK_CHECKOUT_INTENT_TTL_MS);
+  const successUrl = `${baseUrl}/workbook/checkout/complete?ref=${encodeURIComponent(publicRef)}`;
+  const cancelUrl = `${baseUrl}/workbook/checkout/cancelled?ref=${encodeURIComponent(publicRef)}`;
 
   const currency = (process.env.STRIPE_DEFAULT_CURRENCY ?? 'CAD').toLowerCase();
   const priceId = process.env.STRIPE_PRICE_WORKBOOK_SELF_GUIDED;
@@ -110,6 +132,16 @@ export async function POST(request: NextRequest) {
       };
 
   try {
+    await withSystemContext((tx) =>
+      tx.insert(workbookCheckoutIntents).values({
+        workbookId,
+        publicRefHash,
+        tierId: SELF_GUIDED_TIER_ID,
+        status: 'prepared',
+        expiresAt,
+      }),
+    );
+
     const stripe = getStripeClient();
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -118,25 +150,44 @@ export async function POST(request: NextRequest) {
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {
-        workbook_id: workbookId,
-        workbook_tier_id: SELF_GUIDED_TIER_ID,
+        checkout_intent_ref: publicRef,
         product: 'workbook',
       },
       customer_creation: 'if_required',
     }, {
       // A repeated request in the same window gets the session already opened instead of a new one.
-      idempotencyKey: `workbook-checkout:${workbookId}:${SELF_GUIDED_TIER_ID}:${Math.floor(Date.now() / CHECKOUT_REUSE_WINDOW_MS)}`,
+      idempotencyKey: `workbook-checkout:${publicRefHash}`,
     });
 
     if (!session.url) {
       throw new Error('Stripe returned no checkout URL');
     }
 
+    await withSystemContext((tx) =>
+      tx
+        .update(workbookCheckoutIntents)
+        .set({ status: 'session_created', stripeSessionRef: session.id, updatedAt: new Date() })
+        .where(eq(workbookCheckoutIntents.publicRefHash, publicRefHash)),
+    );
+
     logger.info('[workbook-checkout] Checkout session created', {
       workbookRef: opaqueRef(workbookId),
       tierId: SELF_GUIDED_TIER_ID,
       sessionId: session.id,
     });
+
+    // Only a random, expiring checkout reference crosses the processor boundary.
+    await withSystemContext((tx) =>
+      recordExternalDisclosure(tx, {
+        organizationId: UE_SYSTEM_ORG_ID,
+        processor: 'stripe',
+        resourceType: 'workbooks',
+        resourceId: workbookId,
+        dataClasses: ['opaque_checkout_intent'],
+        purpose: 'Self-serve workbook tier checkout',
+        merchantOfRecord: 'platform',
+      }),
+    );
 
     return NextResponse.json({ url: session.url });
   } catch (err) {

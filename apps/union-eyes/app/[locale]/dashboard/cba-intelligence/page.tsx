@@ -48,7 +48,7 @@ export default async function CbaIntelligencePage() {
 
   // Curating the shared dataset (reviewing it, saving its snapshots, reading what no reviewer has approved) is platform authority, and the routes demand it:
   // the controls are offered to the viewers who hold it, so no one is shown a tab or a button that only ever answers 403.
-  const canCurate = (await isSystemAdmin()) && (await canReadUnreviewed(user.userId));
+  const canCurate = (await isSystemAdmin()) && (await canReadUnreviewed(user.userId, user.organizationId));
 
   return (
     <>

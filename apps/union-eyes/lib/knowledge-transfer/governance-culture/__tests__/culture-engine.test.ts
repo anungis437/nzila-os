@@ -58,5 +58,10 @@ describe('lib/knowledge-transfer/governance-culture/culture-engine', () => {
     expect(profile.cultureHealth).toBe('insufficient_history');
     expect(profile.evolutionPhases).toEqual([]);
     expect(profile.disciplineProfile.documentationDiscipline).toBe('absent');
+    // DEF-0B7-COGA-PROFILES: below the minimum cohort there is no composite to report - null, not a specific number
+    // computed entirely from the scoring maps' own default branches on empty input.
+    expect(profile.cultureScore).toBeNull();
+    expect(profile.cultureSummary).not.toContain('Governance culture score:');
+    expect(profile.cultureSummary).toContain('Too few recorded interactions');
   });
 });

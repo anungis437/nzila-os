@@ -36,6 +36,7 @@ export const GET = withOrganizationAuth(async (
     SELECT AVG(EXTRACT(EPOCH FROM (resolved_at - filed_date)) / 86400.0)::float AS "avgDays"
     FROM grievances
     WHERE organization_id = ${context.organizationId}::uuid
+      AND demo_seed_id IS NULL
       AND resolved_at IS NOT NULL
       AND resolved_at >= ${windowStart.toISOString()}::timestamptz
   `) as any as Array<{ avgDays: number | null }>;

@@ -21,6 +21,17 @@ export const heavyTests = [
   "lib/member-integrity/__tests__/member-query-importers.test.ts",
 ];
 
+/**
+ * The repository-scan census tests (response-shape-census, untyped-read-census) walk the whole
+ * app with the TypeScript compiler API. They need a raised heap ceiling (see vitest.census.config.ts)
+ * and, unlike the rest of heavyTests, they do not tolerate sharing a long-lived worker process with
+ * whatever ran before them: observed one taking 44 minutes (vs. ~70s alone) and the other timing out
+ * when run after the docker- and postgres-dependent heavy tests in the same sequential worker, even
+ * with the raised ceiling, apparently from heap fragmentation carried over between files in that worker.
+ * They get their own project, after the heavy project, so they always start from a clean process.
+ */
+export const censusTests = ["scripts/__tests__/response-shape-census.test.ts", "scripts/__tests__/untyped-read-census.test.ts"];
+
 /** Runs in every worker before its test file: the tests resolve application files from the application directory (see the file). */
 export const sharedSetupFiles = [path.resolve(__dirname, "vitest.working-directory.ts")];
 

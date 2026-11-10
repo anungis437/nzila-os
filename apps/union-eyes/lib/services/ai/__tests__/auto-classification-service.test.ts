@@ -4,6 +4,7 @@ const mockExtract = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ extract: mockExtract }),
+  toGatewayDataClass: (c: string) => c,
   buildOrgAiTrace: vi.fn(() => ({
     component: 'test',
     action: 'mock',

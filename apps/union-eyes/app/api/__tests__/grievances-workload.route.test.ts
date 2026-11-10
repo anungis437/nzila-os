@@ -20,11 +20,16 @@ vi.mock('@/lib/api/framework', () => ({
 vi.mock('@/db', () => ({
   db: { select: () => ({ from: () => ({ where: async (condition: unknown) => { m.where(condition); return m.rows; } }) }) },
 }));
-vi.mock('@/db/schema/domains/claims/grievances', () => ({ grievances: { organizationId: 'organizationId' } }));
-vi.mock('drizzle-orm', () => ({ eq: (a: unknown, b: unknown) => { m.eq(a, b); return { eq: [a, b] }; } }));
+vi.mock('@/db/schema/domains/claims/grievances', () => ({ grievances: { organizationId: 'organizationId', demoSeedId: 'demoSeedId' } }));
+vi.mock('drizzle-orm', () => ({
+  eq: (a: unknown, b: unknown) => { m.eq(a, b); return { eq: [a, b] }; },
+  and: (...conditions: unknown[]) => conditions,
+  isNull: (column: unknown) => ({ isNull: column }),
+}));
 vi.mock('@/lib/cases/grievance-list-scope', () => ({
   grievanceCaseAuthorityScope: (organizationId: string, userId: string) => { m.scope(organizationId, userId); return 'ACTOR_SCOPE'; },
 }));
+vi.mock('@/lib/pilot/demo-provenance', () => ({ productionGrievanceCondition: () => 'PRODUCTION' }));
 
 const iso = (daysAgo: number) => new Date(Date.now() - daysAgo * 86_400_000).toISOString();
 
@@ -48,7 +53,7 @@ describe('GET /api/grievances/workload', () => {
     const { GET } = await import('../grievances/workload/route');
     const result = await GET({ organizationId: 'org-1', userId: 'steward-1' }) as { data: Record<string, number> };
     expect(m.scope).toHaveBeenCalledWith('org-1', 'steward-1');
-    expect(m.where).toHaveBeenCalledWith('ACTOR_SCOPE');
+    expect(m.where).toHaveBeenCalledWith(['ACTOR_SCOPE', 'PRODUCTION']);
     expect(result.data).toMatchObject({ activeCases: 2, overdueCases: 1, casesThisWeek: 2 });
   });
 
@@ -56,7 +61,7 @@ describe('GET /api/grievances/workload', () => {
     const { GET } = await import('../grievances/workload/route');
     await GET({ organizationId: 'org-1', userId: 'chief-1' });
     expect(m.scope).toHaveBeenCalledWith('org-1', 'chief-1');
-    expect(m.where).toHaveBeenCalledWith('ACTOR_SCOPE');
+    expect(m.where).toHaveBeenCalledWith(['ACTOR_SCOPE', 'PRODUCTION']);
     expect(m.eq).not.toHaveBeenCalled();
   });
 });

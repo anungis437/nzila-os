@@ -119,6 +119,8 @@ export class WaveAdapter extends BaseIntegration {
   // ==========================================================================
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const _startTime = Date.now();
@@ -132,6 +134,7 @@ export class WaveAdapter extends BaseIntegration {
       const orgs = options.orgs || this.capabilities.supportedEntities;
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           this.logOperation('sync', { entity, message: `Syncing ${entity}` });
 
@@ -206,12 +209,14 @@ export class WaveAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getInvoices({
         page,
         pageSize: this.PAGE_SIZE,
       });
 
       for (const invoice of response.invoices) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalInvoices.findFirst({
             where: and(
@@ -273,12 +278,14 @@ export class WaveAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getPayments({
         page,
         pageSize: this.PAGE_SIZE,
       });
 
       for (const payment of response.payments) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalPayments.findFirst({
             where: and(
@@ -336,12 +343,14 @@ export class WaveAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getCustomers({
         page,
         pageSize: this.PAGE_SIZE,
       });
 
       for (const customer of response.customers) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalCustomers.findFirst({
             where: and(

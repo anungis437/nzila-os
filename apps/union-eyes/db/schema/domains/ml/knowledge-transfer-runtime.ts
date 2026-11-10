@@ -5,7 +5,8 @@
  * scoped migration 0018. Application code must not issue DDL for them.
  */
 
-import { pgTable, uuid, text, integer, jsonb, timestamp, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, jsonb, timestamp, index, uniqueIndex, varchar, smallint, check } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 export const ueCognitionMemory = pgTable('ue_cognition_memory', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -59,4 +60,81 @@ export const ueCopilotConversations = pgTable('ue_copilot_conversations', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   orgIdx: index('ue_copilot_conversations_org_idx').on(table.organizationId, table.createdAt),
+}));
+
+/**
+ * Verified dependency evidence, separate from the exploratory propagation map. Created by platform migration 0085
+ * (base columns), 0086 (source_fingerprint, evidence_reference_type, evidence_document_id) and 0087 (evidence
+ * integrity, external attestation, identity_key_version), protected by scoped
+ * 0059. Application code (lib/knowledge-transfer/propagation/verified-dependency-store.ts) reaches this table
+ * through raw SQL, like its ue_cognition_memory sibling above - this declaration exists so the table is
+ * canonically declared for storage-authority/governance tooling, not as the runtime query path.
+ */
+export const ueVerifiedDependencyEvidence = pgTable('ue_verified_dependency_evidence', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  dependentNodeId: text('dependent_node_id').notNull(),
+  dependsOnNodeId: text('depends_on_node_id').notNull(),
+  processOrSystem: varchar('process_or_system', { length: 300 }).notNull(),
+  responsibleAuthority: varchar('responsible_authority', { length: 300 }).notNull(),
+  evidenceReference: varchar('evidence_reference', { length: 500 }).notNull(),
+  evidenceReferenceType: varchar('evidence_reference_type', { length: 20 }).notNull().default('external_citation'),
+  evidenceDocumentId: uuid('evidence_document_id'),
+  sourceFingerprint: varchar('source_fingerprint', { length: 128 }),
+  // Platform migration 0087: evidence bound to exactly what the reviewer attested (graph-evidence-evaluator.ts).
+  evidenceDocumentIntegrity: varchar('evidence_document_integrity', { length: 200 }),
+  externalAttestation: varchar('external_attestation', { length: 2000 }),
+  externalAttestedBy: text('external_attested_by'),
+  externalAttestedAt: timestamp('external_attested_at', { withTimezone: true }),
+  identityKeyVersion: smallint('identity_key_version').notNull().default(1),
+  status: varchar('status', { length: 20 }).notNull().default('pending_review'),
+  submittedBy: text('submitted_by').notNull(),
+  reviewedBy: text('reviewed_by'),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  reviewNotes: varchar('review_notes', { length: 1000 }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  orgIdx: index('ue_verified_dependency_evidence_org_idx').on(table.organizationId, table.status),
+  lookupIdx: index('ue_verified_dependency_evidence_lookup_idx').on(table.organizationId, table.dependentNodeId, table.dependsOnNodeId, table.status),
+  // The same constraints platform migrations 0085-0087 create, declared here so a schema built from this declaration
+  // (bootstrap V2) enforces them too rather than relying on application code alone.
+  statusCheck: check('ue_verified_dependency_evidence_status_check',
+    sql`${table.status} IN ('pending_review', 'verified', 'rejected', 'revoked')`),
+  notSelfDependent: check('ue_verified_dependency_evidence_not_self_dependent',
+    sql`${table.dependentNodeId} <> ${table.dependsOnNodeId}`),
+  reviewerDistinct: check('ue_verified_dependency_evidence_reviewer_distinct',
+    sql`${table.reviewedBy} IS NULL OR ${table.reviewedBy} <> ${table.submittedBy}`),
+  referenceTypeCheck: check('ue_verified_dependency_evidence_reference_type_check',
+    sql`${table.evidenceReferenceType} IN ('document', 'external_citation')`),
+  documentRefConsistent: check('ue_verified_dependency_evidence_document_ref_consistent',
+    sql`(${table.evidenceReferenceType} = 'document' AND ${table.evidenceDocumentId} IS NOT NULL) OR (${table.evidenceReferenceType} = 'external_citation' AND ${table.evidenceDocumentId} IS NULL)`),
+  identityKeyVersionCheck: check('ue_verified_dependency_evidence_identity_key_version_check',
+    sql`${table.identityKeyVersion} IN (1, 2)`),
+  documentIntegrityScope: check('ue_verified_dependency_evidence_document_integrity_scope',
+    sql`${table.evidenceReferenceType} = 'document' OR ${table.evidenceDocumentIntegrity} IS NULL`),
+  externalAttestationConsistent: check('ue_verified_dependency_evidence_external_attestation_consistent',
+    sql`(${table.externalAttestation} IS NULL AND ${table.externalAttestedBy} IS NULL AND ${table.externalAttestedAt} IS NULL) OR (${table.externalAttestation} IS NOT NULL AND length(btrim(${table.externalAttestation})) > 0 AND ${table.externalAttestedBy} IS NOT NULL AND ${table.externalAttestedAt} IS NOT NULL AND ${table.evidenceReferenceType} = 'external_citation' AND ${table.externalAttestedBy} <> ${table.submittedBy})`),
+}));
+
+/**
+ * Durable, explicitly-authorized node identity/alias mapping (graph-identity.ts's resolveNodeReference). Created by
+ * platform migration 0086 and protected by scoped 0060, same helper as ue_verified_dependency_evidence above.
+ * Application code (lib/knowledge-transfer/propagation/node-alias-store.ts) reaches this table through raw SQL -
+ * this declaration exists so the table is canonically declared for storage-authority/governance tooling.
+ */
+export const ueGraphNodeAlias = pgTable('ue_graph_node_alias', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull(),
+  aliasLabel: text('alias_label').notNull(),
+  canonicalConceptLabel: text('canonical_concept_label').notNull(),
+  reason: varchar('reason', { length: 500 }).notNull(),
+  createdBy: text('created_by').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  supersededBy: text('superseded_by'),
+  supersededAt: timestamp('superseded_at', { withTimezone: true }),
+}, (table) => ({
+  orgIdx: index('ue_graph_node_alias_org_idx').on(table.organizationId),
+  uniqueActive: uniqueIndex('ue_graph_node_alias_unique_active_idx').on(table.organizationId, table.aliasLabel).where(sql`superseded_at IS NULL`),
+  notSelfReferential: check('ue_graph_node_alias_not_self_referential', sql`${table.aliasLabel} <> ${table.canonicalConceptLabel}`),
 }));

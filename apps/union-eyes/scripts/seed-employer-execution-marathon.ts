@@ -437,6 +437,7 @@ async function seed() {
       totalDue: totalDue.toString(),
       packageSummary: { totalDue, itemCount: calc.items.length },
       outputFormats: ["csv", "json"],
+      sourceRevisionHash: sha256(JSON.stringify({ payrollRunId: PAYROLL_REPLAY_RUN_ID, revision: 1 })),
       immutableSnapshotLocked: true,
       generatedBy: "seed-script",
       generatedAt: new Date(),

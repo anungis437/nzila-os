@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STAGING_GO_CONTRACT",
+  "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
+  "generatedOn": "2026-11-09",
+  "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+  "verdict": "STAGING_NO_GO",
+  "verdictReason": "The source baseline is complete, but no approved deployment of that candidate and no real deployed Phase 3A evidence exist in the authorized staging environment.",
+  "decisionAuthority": {
+    "role": "NZILA_OWNER_OR_AUTHORIZED_PLATFORM_REVIEWER",
+    "acceptanceRecorded": false
+  },
+  "boundaries": {
+    "stagingOnly": true,
+    "productionAuthorized": false,
+    "mergeAuthorizedByThisContract": false,
+    "institutionalPowersInferred": false
+  },
+  "localValidation": {
+    "focusedRemediation": "PASS — 7 files, 65 tests",
+    "earlierRunEvidenceReplay": "PASS — 25 files, 238 tests; 1 native-only file and 13 environment-gated cases skipped",
+    "accountingAndProvenance": "PASS — 2 files, 10 tests",
+    "censusContract": "PASS — 3 tests",
+    "holisticRegression": {
+      "status": "ENVIRONMENT_HOLD",
+      "passedFiles": 3273,
+      "passedTests": 49052,
+      "skippedFiles": 116,
+      "skippedTests": 1682,
+      "failedFiles": 2,
+      "failedTests": 13,
+      "failures": [
+        "contract-tests/civic-oci-doctrine-integrity.test.ts — 10 unrelated civic authorization/filesystem-context fixture failures",
+        "scripts/bootstrap-v2/local-vault-fixture.test.ts — 3 fixtures could not import the host Python cryptography package"
+      ],
+      "unionEyesAccountingAuthorityOrCensusFailure": false
+    }
+  },
+  "passRule": "Every REQUIRED criterion must be PASS from real deployed evidence on the accepted staging revision; synthetic, local, source-only, or historical evidence cannot satisfy a runtime criterion.",
+  "criteria": [
+    {
+      "id": "CANDIDATE_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Engineering baseline SHA and draft PR #1137 are unambiguous."
+    },
+    {
+      "id": "SOURCE_ENGINEERING",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries."
+    },
+    {
+      "id": "LOCAL_HOLISTIC_REGRESSION",
+      "requirement": "REQUIRED",
+      "status": "ENVIRONMENT_HOLD",
+      "evidence": "49,052 tests passed; 13 failures are confined to an unrelated civic filesystem/authorization fixture and a missing host Python cryptography package. Exact-SHA CI remains authoritative."
+    },
+    {
+      "id": "FINAL_CANDIDATE_CI",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "The additive census/reconciliation commit has not yet been pushed and validated by exact-SHA CI."
+    },
+    {
+      "id": "AUTHORIZED_STAGING_DEPLOYMENT",
+      "requirement": "REQUIRED",
+      "status": "EXTERNAL_HOLD",
+      "evidence": "Approved V2 workflows require the candidate on main plus an approved SHA-bound staging change record and protected environments; those prerequisites do not exist."
+    },
+    {
+      "id": "DEPLOYED_REVISION_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "No staging revision running this candidate is identified."
+    },
+    {
+      "id": "DATABASE_MIGRATIONS",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "No real candidate-bound staging migration receipt exists."
+    },
+    {
+      "id": "ENTRA_AUTHENTICATED_SESSIONS",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "No real staging Entra/session acceptance exists for this candidate."
+    },
+    {
+      "id": "API_AND_POSTGRES_TENANT_ISOLATION",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "No candidate-bound real staging API plus native PostgreSQL isolation proof exists."
+    },
+    {
+      "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "Credentialed staging persona journeys are not recorded."
+    },
+    {
+      "id": "WORKERS_RETRIES_AND_DELIVERY",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "No real worker lease/recovery and successor reminder delivery receipts exist."
+    },
+    {
+      "id": "AUDIT_AND_TELEMETRY",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "No candidate-bound live audit persistence and Azure Monitor/OpenTelemetry evidence exists."
+    },
+    {
+      "id": "DOCUMENT_REVOCATION_PRIVACY_FINANCE",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "Deployed revocation, privacy/legal, and financial safety scenarios are not recorded."
+    },
+    {
+      "id": "OPERATIONAL_RECOVERY",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "Rollback, backup/restore, and recovery evidence is not candidate-bound."
+    },
+    {
+      "id": "CAPABILITY_TRUTHFULNESS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "The capability registry remains conservative, but deployed availability must be compared with it."
+    },
+    {
+      "id": "INSTITUTIONAL_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Platform-staff mandate remains decision-ready but not decided; restricted cross-tenant and financial powers remain deny-by-default."
+    },
+    {
+      "id": "STAGING_DECISION_ACCEPTANCE",
+      "requirement": "REQUIRED",
+      "status": "EXTERNAL_HOLD",
+      "evidence": "No authorized staging acceptance is recorded because deployed qualification has not occurred."
+    }
+  ],
+  "externalBlockers": [
+    {
+      "id": "EXT-01-CANDIDATE-NOT-MAIN",
+      "dependency": "The approved V2 staging build/deploy workflows accept only a source SHA on origin/main; PR #1137 is draft and unmerged.",
+      "requiredAction": "Authorized merge/release integration decision after the final exact-SHA checks pass.",
+      "engineeringBypassPermitted": false
+    },
+    {
+      "id": "EXT-02-NO-APPROVED-STAGING-CHANGE-RECORD",
+      "dependency": "No independently approved, merged, candidate-SHA-bound STAGING change record exists.",
+      "requiredAction": "A designated approver must approve the prepared staging change instrument; the implementer must not self-approve.",
+      "engineeringBypassPermitted": false
+    },
+    {
+      "id": "EXT-03-STAGING-FOUNDATION-ABSENT",
+      "dependency": "The current Azure subscription lacks the documented staging and CI resource groups and workload identities, and GitHub lacks the required ue-staging-plan and ue-staging environments.",
+      "requiredAction": "Authorized platform setup following the workload-identity runbook and protected-environment reviewer assignment.",
+      "engineeringBypassPermitted": false
+    },
+    {
+      "id": "EXT-04-CREDENTIALLED-ACCEPTANCE-ACTORS",
+      "dependency": "No credentialed real staging persona set and independent acceptance actor are available for candidate-bound journeys.",
+      "requiredAction": "Provide or authorize the staging identities and designated acceptance reviewer after deployment.",
+      "engineeringBypassPermitted": false
+    }
+  ]
+}

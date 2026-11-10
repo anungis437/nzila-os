@@ -33,8 +33,9 @@ describe('B51 SSO provider input (DEF-0B7-PLT-SSO-CREATE-STORES-UNVALIDATED-CONF
 
   it('creates a provider disabled and without auto-provisioning by default', () => {
     const route = read('app/api/enterprise/sso/providers/route.ts')
-    expect(route).toContain('autoProvision: autoProvision ?? false')
-    expect(route).toContain('enabled: enabled ?? false')
+    expect(route).toContain('autoProvision: false')
+    expect(route).toContain('enabled: false')
+    expect(route).toContain("if (enabled === true) throw ApiError.forbidden")
     expect(route).not.toContain('enabled ?? true')
   })
 })

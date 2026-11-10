@@ -126,6 +126,8 @@ export class GreenShieldAdapter extends BaseIntegration {
   // ==========================================================================
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const _startTime = Date.now();
@@ -140,6 +142,7 @@ export class GreenShieldAdapter extends BaseIntegration {
       const modifiedSince = options.cursor ? new Date(options.cursor) : undefined;
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           this.logOperation('sync', { message: `Syncing ${entity}` });
 
@@ -223,11 +226,13 @@ export class GreenShieldAdapter extends BaseIntegration {
     let page = 1;
 
     while (true) {
+      this.throwIfAborted();
       const plans = await this.client!.getPlans(page, this.PAGE_SIZE, modifiedSince);
       
       if (plans.length === 0) break;
 
       for (const plan of plans) {
+        this.throwIfAborted();
         try {
           const existing = await db
             .select()
@@ -288,11 +293,13 @@ export class GreenShieldAdapter extends BaseIntegration {
     let page = 1;
 
     while (true) {
+      this.throwIfAborted();
       const enrollments = await this.client!.getEnrollments(page, this.PAGE_SIZE, modifiedSince);
       
       if (enrollments.length === 0) break;
 
       for (const enrollment of enrollments) {
+        this.throwIfAborted();
         try {
           const existing = await db
             .select()
@@ -354,11 +361,13 @@ export class GreenShieldAdapter extends BaseIntegration {
     let page = 1;
 
     while (true) {
+      this.throwIfAborted();
       const claims = await this.client!.getClaims(page, this.PAGE_SIZE, modifiedSince);
       
       if (claims.length === 0) break;
 
       for (const claim of claims) {
+        this.throwIfAborted();
         try {
           const existing = await db
             .select()
@@ -424,11 +433,13 @@ export class GreenShieldAdapter extends BaseIntegration {
     let page = 1;
 
     while (true) {
+      this.throwIfAborted();
       const coverageList = await this.client!.getCoverage(page, this.PAGE_SIZE);
       
       if (coverageList.length === 0) break;
 
       for (const coverage of coverageList) {
+        this.throwIfAborted();
         try {
           const existing = await db
             .select()

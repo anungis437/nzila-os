@@ -97,6 +97,8 @@ export class LinkedInLearningAdapter extends BaseIntegration {
   }
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     await this.ensureConnected();
 
     const orgs = options.orgs || ['courses', 'enrollments', 'progress', 'completions', 'learners'];
@@ -111,6 +113,7 @@ export class LinkedInLearningAdapter extends BaseIntegration {
 
     try {
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         switch (entity) {
           case 'courses':
             await this.syncCourses(options, results);
@@ -156,6 +159,7 @@ export class LinkedInLearningAdapter extends BaseIntegration {
     const modifiedSince = options.cursor;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client.getCourses({
         start,
         count: PAGE_SIZE,
@@ -163,6 +167,7 @@ export class LinkedInLearningAdapter extends BaseIntegration {
       });
 
       for (const course of response.courses) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalLmsCourses)
@@ -216,6 +221,7 @@ export class LinkedInLearningAdapter extends BaseIntegration {
     const modifiedSince = options.cursor;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client.getEnrollments({
         start,
         count: PAGE_SIZE,
@@ -223,6 +229,7 @@ export class LinkedInLearningAdapter extends BaseIntegration {
       });
 
       for (const enrollment of response.enrollments) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalLmsEnrollments)
@@ -272,12 +279,14 @@ export class LinkedInLearningAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client.getProgress({
         start,
         count: PAGE_SIZE,
       });
 
       for (const progress of response.progress) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalLmsProgress)
@@ -328,6 +337,7 @@ export class LinkedInLearningAdapter extends BaseIntegration {
     const completedSince = options.cursor;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client.getCompletions({
         start,
         count: PAGE_SIZE,
@@ -335,6 +345,7 @@ export class LinkedInLearningAdapter extends BaseIntegration {
       });
 
       for (const completion of response.completions) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalLmsCompletions)
@@ -382,12 +393,14 @@ export class LinkedInLearningAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client.getLearners({
         start,
         count: PAGE_SIZE,
       });
 
       for (const learner of response.learners) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalLmsLearners)

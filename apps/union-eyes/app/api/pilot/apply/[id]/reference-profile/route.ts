@@ -26,7 +26,7 @@ type PilotMetricRow = typeof pilotMetrics.$inferSelect;
  * `application` (from `withLockedPilotMutation`) instead of the unlocked
  * snapshot GET uses, without duplicating this entire computation.
  */
-function computeReferenceProfileData(application: PilotApplicationRow, metric: PilotMetricRow | undefined) {
+function computeReferenceProfileData(application: PilotApplicationRow, _metric: PilotMetricRow | undefined) {
   const responses = (application.responses ?? {}) as Record<string, unknown>;
   const commercialState = normalizeCommercialState(responses.commercialState);
 
@@ -52,17 +52,14 @@ function computeReferenceProfileData(application: PilotApplicationRow, metric: P
     },
   );
 
-  const adoptionRate = metric?.organizerAdoptionRate
-    ? Number(metric.organizerAdoptionRate)
-    : proposal.signals.adoptionScore;
-  const engagementRate = metric?.memberEngagementRate
-    ? Number(metric.memberEngagementRate)
-    : proposal.signals.activityScore;
-  const healthScore = metric?.healthScore ? Number(metric.healthScore) : 100 - proposal.signals.riskScore;
-  const casesManaged = metric?.casesManaged ?? 0;
-  const daysActive = metric?.daysActive ?? 0;
-  // Without a stored metric row every figure below comes from the application's self-assessed signals, and is labelled so.
-  const measured = Boolean(metric);
+  // pilot_metrics predates evidence provenance and may contain the old row-update/stage proxies. It is not accepted as an
+  // outcome source. Reviewed observations are exposed only through the governed assessment lifecycle.
+  const adoptionRate = null;
+  const engagementRate = null;
+  const healthScore = null;
+  const casesManaged = null;
+  const daysActive = null;
+  const measured = false;
   const quoteText = typeof responses.referenceTestimonialQuote === 'string' ? responses.referenceTestimonialQuote.trim() : '';
   const textOrNull = (value: unknown) => (typeof value === 'string' && value.trim().length > 0 ? value.trim() : null);
 
@@ -70,7 +67,7 @@ function computeReferenceProfileData(application: PilotApplicationRow, metric: P
     pilotId: application.id,
     organizationName: application.organizationName,
     opportunityTier: proposal.qualificationScores.opportunityTier,
-    dataSource: measured ? 'pilot_metrics' : 'application_signals_not_measured',
+    dataSource: 'unassessed_no_reviewed_evidence',
     deploymentMetrics: {
       daysActive,
       casesManaged,
@@ -90,7 +87,7 @@ function computeReferenceProfileData(application: PilotApplicationRow, metric: P
 
   const caseStudy = {
     title: measured ? `${application.organizationName}: pilot outcomes` : `${application.organizationName}: pilot profile (no measured outcomes)`,
-    summary: `${application.organizationName} reached opportunity tier ${proposal.qualificationScores.opportunityTier} with overall score ${proposal.qualificationScores.overallOpportunityScore}.`,
+    summary: `${application.organizationName} has no reviewed outcome assessment; opportunity tier and score are unassessed.`,
     outcomes: measured
       ? [
           `Adoption rate: ${adoptionRate}`,

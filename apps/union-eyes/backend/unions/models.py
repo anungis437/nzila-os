@@ -137,12 +137,6 @@ class RewardWalletLedger(BaseModel):
     source_id = models.UUIDField(null=True, blank=True)
     memo = models.TextField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
-    award_id = models.UUIDField(null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    points_change = models.IntegerField(null=True, blank=True)
-    reference_id = models.CharField(max_length=255, null=True, blank=True)
-    reference_type = models.CharField(max_length=50, null=True, blank=True)
-    transaction_type = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         db_table = "reward_wallet_ledger"
@@ -754,6 +748,7 @@ class SurveyResponses(BaseModel):
 
     organization_id = models.UUIDField()
     survey_id = models.UUIDField()
+    questionnaire_version_id = models.UUIDField()
     user_id = models.TextField(null=True, blank=True)
     respondent_email = models.CharField(max_length=255, null=True, blank=True)
     respondent_name = models.CharField(max_length=255, null=True, blank=True)
@@ -763,6 +758,10 @@ class SurveyResponses(BaseModel):
     time_spent_seconds = models.IntegerField(null=True, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(null=True, blank=True)
+    # DEF-0B5-SURVEY-RESPONSES-IDENTIFIED-OR-ANONYMOUS-RESPONSE-MUTATION-AUTHORITY: SHA-256 hash of a one-time
+    # capability token issued at creation for an anonymous response (user_id NULL); never set for an identified
+    # response. See lib/communications/survey-response-capability.ts.
+    response_token_hash = models.TextField(null=True, blank=True)
 
     class Meta:
         db_table = "survey_responses"
@@ -829,6 +828,9 @@ class MemberLocationConsent(BaseModel):
     """Migrated from drizzle: geofence.ts"""
 
     user_id = models.CharField(max_length=255, blank=True)
+    organization_id = models.UUIDField(null=True, blank=True)
+    scope_kind = models.CharField(max_length=16, null=True, blank=True)
+    scope_id = models.UUIDField(null=True, blank=True)
     consent_status = models.CharField(max_length=20, default='never_asked')
     opted_in_at = models.DateTimeField(null=True, blank=True)
     opted_out_at = models.DateTimeField(null=True, blank=True)
@@ -2057,6 +2059,7 @@ class Employers(BaseModel):
     """Migrated from drizzle: union-structure-schema.ts"""
 
     organization_id = models.UUIDField()
+    demo_seed_id = models.UUIDField(null=True, blank=True, editable=False)
     name = models.CharField(max_length=255)
     legal_name = models.CharField(max_length=255, null=True, blank=True)
     dba_name = models.CharField(max_length=255, null=True, blank=True)

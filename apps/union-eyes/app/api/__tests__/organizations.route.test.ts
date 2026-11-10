@@ -30,6 +30,8 @@ const mockDb: any = {
 };
 
 vi.mock('@/lib/api-auth-guard', () => ({ auth: m.auth, requireSystemAdmin: m.requireSystemAdmin, ROLE_HIERARCHY: { member: 1, admin: 3 } }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(async () => 'org_1') }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requireSystemAdmin }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
 // The list is scoped by the shared read authority, whose SQL behaviour is proven in organizations-read-authority.pglite.test.ts;
 // here the caller is a direct administrator of org_1 so this suite keeps testing the route's mapping and creation rules.

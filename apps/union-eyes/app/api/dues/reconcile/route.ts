@@ -29,14 +29,13 @@ export const POST = withApi(
   },
   async ({ body, organizationId, userId }) => {
     if (!organizationId || !userId) throw ApiError.badRequest('Organization context required');
-    await withRLSContext({ organizationId, userId }, (tx) =>
-      requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', requiresLedger: true }),
-    );
-    const result = await runReconciliation({
-      organizationId,
-      periodStart: body.periodStart,
-      periodEnd: body.periodEnd,
-      runBy: userId ?? undefined,
+    // The mandate check and the run are one tenant transaction (row-level security applies to every reconciliation statement).
+    const result = await withRLSContext({ organizationId, userId }, async (tx) => {
+      await requireLiveFinancialMandate(tx, { organizationId, userId, action: 'finance:reconcile', requiresLedger: true });
+      return runReconciliation(
+        { organizationId, periodStart: body.periodStart, periodEnd: body.periodEnd, runBy: userId ?? undefined },
+        tx,
+      );
     });
     return { ...result };
   },

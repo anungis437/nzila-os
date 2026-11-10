@@ -49,6 +49,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
   UE_SYSTEM_ORG_ID: 'sys-org',
   UE_PROFILES: { CHATBOT: 'chatbot' },
   buildOrgAiTrace: () => ({ trace: 't1' }),
+  toGatewayDataClass: (c: string) => c,
   getAiClient: m.getAiClient,
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));

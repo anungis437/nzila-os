@@ -1,35 +1,29 @@
 /**
  * CRUD collection route for pilot applications
- * POST also syncs the applicant to HubSpot as a lead.
+ * POST stores the application and verifies control of the contact address.
  */
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { crudRoutes } from '@/lib/api/crud-factory';
-import { pilotApplications } from '@/db/schema';
+import { pilotApplications, pilotContactVerifications } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
-import { hasMinRole } from '@/lib/api-auth-guard';
 import { checkRateLimit, RATE_LIMITS_PER_IP } from '@/lib/rate-limiter';
 import { clientAddress } from '@/lib/public-intake/guard';
 import { logger } from '@/lib/logger';
 import { boundedJsonRecord } from '@/lib/api/bounded-json-record';
 import { readBoundedJson, RequestBodyTooLargeError } from '@/lib/api/bounded-json';
 import { sanitizeResponsesForPublicCreate } from '@/lib/pilot/responses-authority';
-import { upsertContact, createDeal } from '@/lib/services/crm-service';
+import { hasPilotPlatformAuthority } from '@/lib/pilot/pilot-ownership';
+import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
 // The body is the application plus a free-form `responses` object that is itself capped at 16 KiB below; nothing legitimate is larger.
 const MAX_BODY_BYTES = 64 * 1024;
 
-// PILOT_PLATFORM_ACCESS_MIN_LEVEL-equivalent gate (PR #752 round 17): this
-// table has no organizationId column (orgScoped can never filter it), and its
-// rows are sensitive prospective-customer intake data (contact info, member
-// counts, internal "challenges"/"goals") for organizations across the WHOLE
-// platform, not the caller's own org — matches lib/pilot/pilot-ownership.ts's
-// own choice of system_admin as the minimum cross-org pilot-data access
-// level. Previously gated only by an ordinary per-org steward-level role,
-// letting any steward at any org enumerate every other org's pilot
-// applications.
+// The table has no organizationId column (orgScoped can never filter it), and its rows are prospective-customer intake data
+// (contact details, member counts, challenges and goals) of every applicant: the list is platform-tier only (see GET below).
+// readRole stays as the factory's own floor; the platform-staff check before it is what decides.
 const { GET: listPilotApplications } = crudRoutes({
   table: pilotApplications,
   pk: 'id',
@@ -39,20 +33,15 @@ const { GET: listPilotApplications } = crudRoutes({
   writeRole: 'member',
 });
 
-// Every caller reaching this handler is already system_admin+ (checked
-// below, BEFORE the system connection is ever opened — PR #752 round 19: the
-// round-18 version elevated to withSystemContext first and relied on the
-// generated crudRoutes handler's own internal auth check, which meant an
-// unauthenticated/under-authorized request still triggered a system-
-// principal query before being rejected. Authenticate + authorize on the
-// ordinary connection first, THEN elevate for the actual cross-org query),
-// consistent with lib/pilot/pilot-ownership.ts's own platform-tier
-// execution model for the per-item routes.
+// The list is the platform tier: only the explicit platform-staff authority (hasPilotPlatformAuthority — the canonical
+// system-administrator fact or the named allow-list, never a role title such as system_admin, support_agent or data_analyst;
+// Gate 0 wave 2, DEF-0B10-PIL-PLATFORM-TIER-…) may read every organization's applications. It is checked on the caller's own
+// identity BEFORE the system connection is opened.
 export const GET = async (
   request: NextRequest,
   context?: { params?: Record<string, string> | Promise<Record<string, string>> },
 ) => {
-  if (!(await hasMinRole('system_admin'))) {
+  if (!(await hasPilotPlatformAuthority())) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
   return withSystemContext((_tx) => listPilotApplications(request, context));
@@ -84,6 +73,7 @@ const pilotApplicationBodySchema = z.object({
   responses: boundedJsonRecord({ maxBytes: 16 * 1024, maxKeys: 60, maxDepth: 4 }).optional(),
   // Only the score is read; any other key an anonymous caller adds is dropped rather than carried.
   assessment: z.object({ score: z.union([z.number().finite(), z.string().trim().max(20)]).optional() }).optional(),
+  crmConsent: z.object({ granted: z.boolean(), noticeVersion: z.string().min(1).max(100) }),
 });
 
 export async function POST(request: NextRequest) {
@@ -134,11 +124,13 @@ export async function POST(request: NextRequest) {
       goals,
       responses,
       assessment,
+      crmConsent,
     } = parsed.data;
 
     // Insert into DB. A prospective union applies before any organization exists, so the row has no organization for a tenant policy to
     // match: it is an intake record of the platform, written by the system role, and only after the body has been validated and the
-    // caller rate limited above. Nothing else is done on that connection: the CRM sync below happens after it is closed.
+    // caller rate limited above. No contact data leaves the platform before
+    // address control and purpose consent have both been established.
     const row = await withSystemContext(async (tx) => {
       const [created] = await tx
         .insert(pilotApplications)
@@ -164,44 +156,32 @@ export async function POST(request: NextRequest) {
           responses: sanitizeResponsesForPublicCreate(responses),
         })
         .returning();
+      await tx.insert(pilotContactVerifications).values({
+        applicationId: created.id,
+        emailKey: contactEmail.trim().toLowerCase(),
+        // A challenge cannot be delivered until an approved verification
+        // provider is activated. Keep only an unguessable digest and fail closed.
+        tokenHash: crypto.createHash('sha256').update(crypto.randomBytes(32)).digest('hex'),
+        status: 'pending',
+        crmConsentStatus: crmConsent.granted ? 'granted' : 'denied',
+        crmConsentVersion: crmConsent.noticeVersion,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        deliveryStatus: 'failed',
+      });
       return created;
     });
 
     logger.info('pilot_application:created', {
       id: row.id,
-      organization: organizationName,
-      email: contactEmail,
+      applicationId: row.id,
     });
 
-    // Sync to HubSpot (fire-and-forget — gracefully skips if unconfigured)
-    const [firstName, ...rest] = contactName.split(' ');
-    const contactId = await upsertContact({
-      email: contactEmail,
-      firstName,
-      lastName: rest.join(' ') || undefined,
-      properties: {
-        company: organizationName,
-        ...(contactPhone ? { phone: contactPhone } : {}),
-        ue_source: 'pilot-application',
-        ue_member_count: String(memberCount ?? ''),
-        ...(organizationType ? { ue_org_type: organizationType } : {}),
-      },
-    });
-
-    if (contactId) {
-      await createDeal({
-        name: `Pilot application — ${organizationName}`,
-        stage: 'pilot_applied',
-        contactId,
-        properties: {
-          ue_readiness_score: assessment?.score?.toString() ?? '',
-          ue_member_count: String(memberCount ?? ''),
-          ue_pilot_app_id: row.id,
-        },
-      });
-    }
-
-    return NextResponse.json({ ok: true, id: row.id }, { status: 201 });
+    return NextResponse.json({
+      ok: true,
+      id: row.id,
+      contactVerification: 'pending_provider_activation',
+      crmDisclosure: 'not_queued',
+    }, { status: 201 });
   } catch (err) {
     logger.error('pilot_application:error', { error: (err as Error).message });
     return NextResponse.json(

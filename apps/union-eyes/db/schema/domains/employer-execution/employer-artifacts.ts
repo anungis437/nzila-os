@@ -8,7 +8,9 @@ import {
   timestamp,
   jsonb,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from 'drizzle-orm';
 import { employerPayrollRuns } from "./employer-payroll-runs";
 import { employerRemittanceRuns } from "./employer-remittance-runs";
 
@@ -94,6 +96,30 @@ export const employerExecutionReplays = pgTable(
   }),
 );
 
+export const employerReplayIntents = pgTable(
+  'employer_replay_intents',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizationId: uuid('organization_id').notNull(),
+    sourcePayrollRunId: uuid('source_payroll_run_id').notNull().references(() => employerPayrollRuns.id, { onDelete: 'cascade' }),
+    requestKeyHash: varchar('request_key_hash', { length: 64 }).notNull(),
+    requestPayloadHash: varchar('request_payload_hash', { length: 64 }).notNull(),
+    sourceRevisionHash: varchar('source_revision_hash', { length: 64 }).notNull(),
+    sourceStatus: varchar('source_status', { length: 40 }).notNull(),
+    status: varchar('status', { length: 16 }).$type<'processing' | 'completed' | 'held'>().notNull().default('processing'),
+    replayId: uuid('replay_id').references(() => employerExecutionReplays.id, { onDelete: 'restrict' }),
+    createdBy: text('created_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    requestUq: uniqueIndex('employer_replay_intents_source_key_uniq').on(table.organizationId, table.sourcePayrollRunId, table.requestKeyHash),
+    replayUq: uniqueIndex('employer_replay_intents_replay_uniq').on(table.replayId).where(sql`${table.replayId} IS NOT NULL`),
+    statusIdx: index('employer_replay_intents_status_idx').on(table.organizationId, table.status, table.createdAt),
+  }),
+);
+
 export const employerExecutionEvidenceLinks = pgTable(
   "employer_execution_evidence_links",
   {
@@ -120,4 +146,5 @@ export const employerExecutionEvidenceLinks = pgTable(
 
 export type EmployerExecutionArtifact = typeof employerExecutionArtifacts.$inferSelect;
 export type EmployerExecutionReplay = typeof employerExecutionReplays.$inferSelect;
+export type EmployerReplayIntent = typeof employerReplayIntents.$inferSelect;
 export type EmployerExecutionEvidenceLink = typeof employerExecutionEvidenceLinks.$inferSelect;

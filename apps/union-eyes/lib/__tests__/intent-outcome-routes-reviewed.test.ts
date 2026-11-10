@@ -28,13 +28,10 @@ type Reason =
 
 const REVIEWED: Record<string, Reason> = {
   'admin/billing-cycles/route.ts': 'finance_frozen',
-  'admin/billing-cycles/trigger-scheduled/route.ts': 'finance_frozen',
   'admin/documents/legacy-backfill/route.ts': 'external_storage',
-  'admin/dues/send-reminders/route.ts': 'external_provider',
   'admin/ingest/route.ts': 'bulk_partial_progress',
   'admin/jobs/[action]/route.ts': 'external_job_queue',
   'admin/jobs/retry/route.ts': 'external_job_queue',
-  'admin/payments/retry-failed/route.ts': 'external_provider',
   'ai/cache-stats/route.ts': 'external_cache',
   'ai/classify/route.ts': 'external_provider',
   'ai/copilot/query/route.ts': 'external_provider',
@@ -62,6 +59,14 @@ const entries = (Array.isArray(manifest) ? manifest : (manifest.routes ?? manife
 const twoPhase = entries.filter((entry) => JSON.stringify(entry).includes('INTENT_OUTCOME')).map((entry) => String(entry.route)).sort()
 const read = (rel: string) => fs.readFileSync(path.join(app, rel), 'utf8')
 const auditOf = (route: string) => entries.find((entry) => entry.route === route)?.audit
+const entryOf = (route: string) => entries.find((entry) => entry.route === route)
+
+/** F03: platform identity is not a direct-scoped cross-tenant financial mandate. */
+const F03_REFUSED = [
+  'admin/billing-cycles/trigger-scheduled/route.ts',
+  'admin/dues/send-reminders/route.ts',
+  'admin/payments/retry-failed/route.ts',
+]
 
 /** Routes the file-level scan called two-phase only because a module they import also holds an unrelated two-phase call. */
 const NOW_ATOMIC = [
@@ -80,9 +85,17 @@ describe('routes recorded as two-phase (intent, effect, outcome) are each review
   })
 
   it('names a reason, none of them "database only", for every route that stays two-phase', () => {
-    expect(Object.keys(REVIEWED).length).toBe(28)
+    expect(Object.keys(REVIEWED).length).toBe(25)
     for (const [route, reason] of Object.entries(REVIEWED)) expect(reason, route).toBeTruthy()
     expect(Object.keys(REVIEWED)).not.toEqual(expect.arrayContaining(NOW_ATOMIC))
+  })
+})
+
+describe('F03 cross-organization financial routes remain truthful refusals', () => {
+  it.each(F03_REFUSED)('%s has no data or audit effect and cannot drift back to a two-phase operation', (route) => {
+    expect(entryOf(route)).toMatchObject({ data: 'NONE', audit: 'NONE' })
+    expect(read(`app/api/${route}`)).toContain('ErrorCode.NOT_IMPLEMENTED')
+    expect(read(`app/api/${route}`)).not.toContain('performAuditedOperation(')
   })
 })
 

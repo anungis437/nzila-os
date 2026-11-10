@@ -1,18 +1,20 @@
 import { parsePilotPayload, transitionPayloadSchema } from '@/lib/pilot/write-payloads';
 import { NextResponse, type NextRequest } from 'next/server';
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq, isNull } from 'drizzle-orm';
 import { db } from '@/db';
 import {
   billingAccounts,
   commercialContracts,
   orgSubscriptions,
   pilotApplications,
+  pilotCommercialAcceptances,
+  pilotCommercialOffers,
   platformInvoiceLineItems,
   platformInvoices,
   subscriptionPlans,
 } from '@/db/schema';
-import { withApiAuth, hasMinRole, getCurrentUser } from '@/lib/api-auth-guard';
-import { authorizePilotAccess, getPilotEffectiveOrganizationId, getPilotVerifiedOrganizationId } from '@/lib/pilot/pilot-ownership';
+import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { authorizePilotAccess, getPilotEffectiveOrganizationId, getPilotVerifiedOrganizationId, hasPilotPlatformAuthority } from '@/lib/pilot/pilot-ownership';
 import {
   buildPilotArtifactVersionRecord,
   buildPilotContractNumber,
@@ -37,6 +39,7 @@ import {
 } from '@/lib/pilot/counterpart-acceptance';
 import { recordAcceptanceDenial, type AcceptanceDenial } from '@/lib/pilot/acceptance-denial';
 import { logger } from '@/lib/logger';
+import { loadCurrentPilotEvidence, proposalEvidenceFrom } from '@/lib/pilot/evidence-assessments';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +58,17 @@ const EFFECT_TARGET_STATES: CommercialState[] = ['contract_sent', 'contract_sign
 const TERMS_REQUIRED_STATES: CommercialState[] = [
   'approved',
   'contract_sent',
+  'contract_signed',
+  'invoice_issued',
+  'pilot_active',
+  'pilot_complete',
+  'subscription_offered',
+  'subscription_active',
+];
+
+// An authenticated representative's offer acceptance is necessary but does not replace the separately governed
+// signature-provider evidence required below to activate a contract or create downstream financial effects.
+const ACCEPTED_OFFER_REQUIRED_STATES: CommercialState[] = [
   'contract_signed',
   'invoice_issued',
   'pilot_active',
@@ -126,7 +140,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
     // authorizePilotAccess check below) — check the same tier here, before
     // touching the database at all, so an under-authorized caller gets a
     // uniform 403 regardless of whether the pilot id exists.
-    const canAccess = await hasMinRole('system_admin');
+    const canAccess = await hasPilotPlatformAuthority();
     if (!canAccess) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -191,7 +205,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
     // (commercialContracts / billingAccounts / orgSubscriptions /
     // platformInvoices), so ordinary same-org self-service is not
     // sufficient authority here: only an independent platform-tier decision
-    // (system_admin+, per authorizePilotAccess's 'platform' branch) counts.
+    // (platform-staff authority, per authorizePilotAccess's 'platform' branch) counts.
     // The org VALUE used here doesn't affect the outcome for platform
     // actors (who pass regardless) or non-platform actors (who are
     // rejected regardless of same-org/cross-org) — only the actor's ROLE
@@ -319,6 +333,38 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         }
       }
 
+      if (ACCEPTED_OFFER_REQUIRED_STATES.includes(targetState)) {
+        const [acceptedOffer] = await tx
+          .select({
+            offerId: pilotCommercialOffers.id,
+            amount: pilotCommercialOffers.amount,
+            memberCountBasis: pilotCommercialOffers.memberCountBasis,
+          })
+          .from(pilotCommercialOffers)
+          .innerJoin(pilotCommercialAcceptances, eq(pilotCommercialAcceptances.offerId, pilotCommercialOffers.id))
+          .where(and(
+            eq(pilotCommercialOffers.applicationId, application.id),
+            eq(pilotCommercialOffers.organizationId, verifiedOrganizationId),
+            eq(pilotCommercialOffers.status, 'accepted'),
+            isNull(pilotCommercialAcceptances.revokedAt),
+          ))
+          .orderBy(desc(pilotCommercialOffers.version))
+          .limit(1);
+        if (!acceptedOffer) {
+          throw new CommercialTransitionRejected(409, {
+            error: 'No immutable commercial offer has been accepted by a direct representative of the verified applicant organization. Nothing was advanced.',
+          });
+        }
+        if (
+          Number(acceptedOffer.amount) !== Number(application.verifiedPilotAmount) ||
+          acceptedOffer.memberCountBasis !== application.verifiedMemberCount
+        ) {
+          throw new CommercialTransitionRejected(409, {
+            error: 'The accepted offer no longer matches the approved price or evidenced member-count basis. Issue and accept an amended offer.',
+          });
+        }
+      }
+
       // PR #752 round 27: an immutable record of the approval that produced
       // whatever artifact this transition creates, stamped into that
       // artifact's own metadata — so a LATER organization correction that
@@ -340,6 +386,7 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
           })
         : null;
 
+      const governedEvidence = proposalEvidenceFrom(await loadCurrentPilotEvidence(tx, application.id, now));
       const proposal = buildProposalPackage(
         {
           id: application.id,
@@ -357,8 +404,9 @@ export const POST = withApiAuth(async (request: NextRequest, context?: { params?
         },
         {
           commercialState: targetState,
-          championScore: typeof responses.championScore === 'number' ? responses.championScore : undefined,
-          activityScore: typeof responses.activityScore === 'number' ? responses.activityScore : undefined,
+          ...governedEvidence.signals,
+          reviewedEvidence: governedEvidence.qualification,
+          verifiedMemberCount: application.verifiedMemberCount,
         },
       );
       qualificationScores = proposal.qualificationScores;

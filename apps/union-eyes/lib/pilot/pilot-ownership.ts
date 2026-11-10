@@ -7,28 +7,27 @@
  *   application belongs to their organization OR the actor holds an explicit
  *   platform-level role.
  *
- * Ownership signal (PR #752 round 23):
- *   Application-layer authorization uses the EFFECTIVE owner —
- *   `getPilotEffectiveOrganizationId()`, defined as
- *   `verifiedOrganizationId ?? claimedOrganizationId` — never the claim
- *   alone. Before any platform-tier verification exists, the claim
- *   (`responses.organizationId`, an unauthenticated intake-form assertion)
- *   is the only signal available and is used as a low-stakes same-org
- *   self-service gate. Once `bindPilotOrganization()`/
- *   `rebindPilotOrganization()` establish a verified owner, THAT becomes
- *   authoritative everywhere — including after a rebind changes it — so the
- *   original claim can never keep granting (or keep denying) access once a
- *   platform-tier decision has superseded it. The eventual tenant RLS
- *   policy for this table must encode the SAME rule, not a claim-only
- *   JSONB policy (see `loadPilotApplicationForOwnershipCheck`'s doc
- *   comment).
+ * Ownership signal (Gate 0 wave 2, DEF-0B10-PIL-APPLICATION-OWNERSHIP-BEFORE-VERIFICATION-…):
+ *   Application-layer authorization uses the VERIFIED owner only —
+ *   `getPilotEffectiveOrganizationId()` returns `verifiedOrganizationId`, set
+ *   exclusively by a platform-staff `bindPilotOrganization()`/
+ *   `rebindPilotOrganization()`. The claim (`responses.organizationId`, typed
+ *   by the anonymous applicant on the public form) confers nothing: before the
+ *   platform has bound an application it belongs to no organization, so no
+ *   organization's stewards pass the same-organization check and only
+ *   platform staff can read or act on it. Previously the claim was the owner
+ *   until verification, which let an anonymous submitter choose whose
+ *   stewards could read, PATCH and generate content for the application.
  *
- * Platform-level actors:
- *   App-operations / system roles (level >= `system_admin`, i.e. 200) and
- *   users in `PLATFORM_ADMIN_USER_IDS` (resolved by `getCurrentUser()` to
- *   `app_owner`) may act across organizations by design. Organization-level
- *   roles (steward, officer, admin, president, …) remain org-scoped and must
- *   match the pilot's effective owning organization.
+ * Platform-level actors (Gate 0 wave 2, DEF-0B10-PIL-PLATFORM-TIER-…):
+ *   Only an explicit platform-staff authority — `isPlatformAdminUser()`: the
+ *   canonical binding's system-administrator fact, or the named
+ *   PLATFORM_ADMIN_USER_IDS allow-list outside the canonical mode (the same
+ *   authority `lib/platform/platform-staff.ts` requires) — may act across
+ *   organizations. A role title confers nothing: `system_admin`,
+ *   `support_agent`, `data_analyst` or any other title ranked at or above
+ *   level 200 in ROLE_HIERARCHY is not a platform mandate. Organization-level
+ *   roles remain scoped to the application's verified organization.
  *
  * This module intentionally does NOT change the existing role gate
  * (`hasMinRole('steward')`) on each route — it adds the org-ownership gate
@@ -40,16 +39,29 @@ import { db } from '@/db';
 import { commercialContracts, orgSubscriptions, pilotApplications, platformInvoices, organizations, organizationMembers } from '@/db/schema';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { getCurrentUser, hasMinRole, normalizeRole, ROLE_HIERARCHY, type UserRole } from '@/lib/api-auth-guard';
+import { getCurrentUser, hasMinRole, type UserRole } from '@/lib/api-auth-guard';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { logger } from '@/lib/logger';
 
 /**
- * Minimum role level that may act on a pilot application across organizations.
- * Aligned with `ROLE_HIERARCHY.system_admin` (200). Org-level executives
- * (admin = 140, president = 130, …) are intentionally BELOW this line so they
- * remain scoped to their own organization.
+ * Whether the current caller holds the explicit platform-staff authority the pilot platform tier requires (applications list,
+ * verify-organization, rebind-organization, approve-commercial-terms, commercial-transition and the cross-organization branch of
+ * every per-application route). It is `isPlatformAdminUser()` — the canonical binding's system-administrator fact, or the named
+ * PLATFORM_ADMIN_USER_IDS allow-list outside the canonical mode — never a role title or a rank in ROLE_HIERARCHY.
  */
-export const PILOT_PLATFORM_ACCESS_MIN_LEVEL: number = ROLE_HIERARCHY.system_admin;
+export async function hasPilotPlatformAuthority(): Promise<boolean> {
+  const user = await getCurrentUser();
+  if (!user?.id || !user.organizationId) return false;
+  try {
+    await requirePlatformStaffAuthority(
+      { userId: user.id, organizationId: user.organizationId },
+      'platform.pilot.manage',
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export type PilotAccessDecision =
   | { ok: true; reason: 'platform' | 'same-org'; actorOrganizationId: string | null }
@@ -61,18 +73,11 @@ export type PilotAccessDecision =
  * to make the provenance explicit).
  *
  * This value comes straight from `responses.organizationId` — a field
- * submitted wholesale, unauthenticated, by the public `/api/pilot/apply`
- * intake form (see that route's own POST handler). It is a CLIENT
- * ASSERTION, never server-attested identity. It is safe to use ONLY for the
- * same-org self-service access-control gate below (low stakes: a submitter
- * who claims org X can only ever see/edit the row they themselves claimed —
- * no cross-tenant read is possible since a REAL member of org X must ALSO
- * independently match that same claim to pass `authorizePilotAccess`).
- * It must NEVER be trusted as verified ownership for financial operations —
- * see app/api/pilot/apply/[id]/commercial-transition/route.ts, which
- * requires platform-tier authorization (not same-org self-service) before
- * using this value to resolve or create real billing/contract records,
- * precisely because this field cannot be trusted for that purpose.
+ * submitted, unauthenticated, by the public `/api/pilot/apply` intake form.
+ * It is a CLIENT ASSERTION, never server-attested identity, and it grants
+ * nothing: no access decision reads it (see `getPilotEffectiveOrganizationId`).
+ * It is kept only as what the applicant said, for the platform administrator
+ * who verifies the organization.
  * Returns null when no usable claim is present (fail closed).
  */
 export function getPilotClaimedOrganizationId(
@@ -103,18 +108,13 @@ export function getPilotVerifiedOrganizationId(
 }
 
 /**
- * The single ownership fact application-layer authorization must use (PR
- * #752 round 23).
+ * The single ownership fact application-layer authorization uses: the VERIFIED organization only.
  *
- * Before a platform-tier verification exists, the claim is the only signal
- * available. Once `bindPilotOrganization()`/`rebindPilotOrganization()`
- * establish a verified owner, it is authoritative — using the claim after
- * that point would let the ORIGINAL claimed organization keep passing
- * same-org access checks even after a rebind moves the real, verified
- * organization elsewhere (and would let the NEW verified organization's own
- * stewards be denied access to a pilot that is, in fact, now theirs). This
- * is the ownership rule every application-layer check — and the eventual
- * tenant RLS policy — must use, not the claim alone.
+ * Gate 0 wave 2 (DEF-0B10-PIL-APPLICATION-OWNERSHIP-BEFORE-VERIFICATION-…): this used to fall back to the claim
+ * (`responses.organizationId`) until a platform administrator bound the application, so the anonymous applicant decided
+ * whose stewards passed the same-organization check. The claim is now never an owner: an application no platform
+ * administrator has bound belongs to no organization (null), which denies every organization-scoped actor and leaves it
+ * to platform staff. Once bound (or rebound), the verified organization is authoritative everywhere, as before.
  */
 export function getPilotEffectiveOrganizationId(
   application:
@@ -122,7 +122,7 @@ export function getPilotEffectiveOrganizationId(
     | null
     | undefined,
 ): string | null {
-  return getPilotVerifiedOrganizationId(application) ?? getPilotClaimedOrganizationId(application);
+  return getPilotVerifiedOrganizationId(application);
 }
 
 /**
@@ -196,7 +196,7 @@ export async function pilotHasFinancialArtifacts(pilotId: string): Promise<boole
  * (PR #752 round 20; made immutable-by-default in round 21). This is the
  * ONLY function that may write `verified_organization_id`/`verified_by`/
  * `verified_at` — callers must already have confirmed platform-tier
- * authority (`hasMinRole('system_admin')`) before calling this; it does not
+ * authority (`hasPilotPlatformAuthority()`) before calling this; it does not
  * itself perform that check.
  *
  * Fails closed if the target organization does not exist (a claimed id that
@@ -554,14 +554,22 @@ export async function authorizePilotAccess(
     return { ok: false, status: 401, reason: 'unauthenticated' };
   }
 
-  // Platform-level actors may act across organizations by design.
-  const actorLevel = ROLE_HIERARCHY[normalizeRole(user.role ?? 'member')] ?? 0;
-  if (actorLevel >= PILOT_PLATFORM_ACCESS_MIN_LEVEL) {
-    return {
-      ok: true,
-      reason: 'platform',
-      actorOrganizationId: typeof user.organizationId === 'string' ? user.organizationId : null,
-    };
+  // Only the explicit platform-staff authority acts across organizations; a role title or rank does not (#1116).
+  if (typeof user.organizationId === 'string' && user.organizationId.trim()) {
+    try {
+      await requirePlatformStaffAuthority(
+        { userId: user.id, organizationId: user.organizationId },
+        'platform.pilot.manage',
+      );
+      return {
+        ok: true,
+        reason: 'platform',
+        actorOrganizationId: user.organizationId,
+      };
+    } catch {
+      // Continue into the direct tenant ownership decision. Platform identity
+      // without a live mandate must not erase an otherwise valid same-org ACL.
+    }
   }
 
   // Non-platform actors must have an org context AND own the pilot's org.
@@ -634,8 +642,8 @@ type FactoryRouteHandler = (
  * identical until the row's owning organization is known. That lookup must
  * therefore run under `withSystemContext()`, never the ordinary tenant
  * runtime connection: once a real RLS policy exists for this table (an
- * effective-owner policy — `verified_organization_id` when set, else the
- * JSONB claim — per the eventual policy-expansion design), a tenant-runtime
+ * verified-owner policy — `verified_organization_id` — per the eventual
+ * policy-expansion design), a tenant-runtime
  * connection would only be able to see rows that ALREADY match the caller's
  * own org — making the ownership check itself unable to detect (and
  * therefore reject) a cross-org id.

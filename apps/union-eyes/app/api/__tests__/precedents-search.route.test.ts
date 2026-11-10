@@ -7,6 +7,9 @@ const m = vi.hoisted(() => ({
 
 vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
 vi.mock('@/lib/services/precedent-service', () => ({ searchPrecedents: m.searchPrecedents }));
+vi.mock('@/lib/precedents/jurisdiction-preference-resolver', () => ({
+  resolvePrecedentJurisdictions: vi.fn(async () => ({ applied: false, jurisdictions: [], source: 'none' })),
+}));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() } }));
 
 const { caller, declared, resetCaller } = await import('./support/with-api-stub');
@@ -63,7 +66,7 @@ describe('precedents/search route', () => {
 
     expect(response.status).toBe(200);
     expect(json.count).toBe(2);
-    expect(m.searchPrecedents).toHaveBeenCalledWith('arbitration', {}, 10);
+    expect(m.searchPrecedents).toHaveBeenCalledWith('arbitration', { jurisdiction: undefined }, 10);
   });
 
   it('answers 400, and searches nothing, for a body that is not JSON, an empty query or a filter the search does not read', async () => {

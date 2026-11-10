@@ -25,17 +25,18 @@ describe('rls-storage-reachability-audit', () => {
   // SEPARATE_DATABASE_BOUNDARY without first proving no union-eyes-native
   // declaration exists anywhere), not a specific positive example.
 
-  it('REGRESSION: does not propose SEPARATE_DATABASE_BOUNDARY for a table with a real (unused) union-eyes-native declaration that also happens to share a name with a financial-service table', () => {
-    // room_bookings: has a genuine union-eyes-native declaration
-    // (db/schema/domains/scheduling/calendar.ts + db/schema/calendar-schema.ts,
-    // duplicate-schema pattern) that is currently unreachable from
-    // production code, AND a same-named table in services/financial-service.
-    // The naive "supportingCapability only shows financial-service" signal
-    // must not collapse this into SEPARATE_DATABASE_BOUNDARY.
+  it('REGRESSION: does not propose SEPARATE_DATABASE_BOUNDARY for a table with a real union-eyes-native declaration that also happens to share a name with a financial-service table', () => {
+    // room_bookings: has a genuine union-eyes-native declaration (db/schema/domains/scheduling/calendar.ts +
+    // db/schema/calendar-schema.ts, duplicate-schema pattern) AND a same-named table in
+    // services/financial-service. It was unreachable from production code when this test was written; the S03
+    // room-booking batch (lib/services/room-booking-service.ts) has since made it genuinely reachable, which is
+    // why the correct proposal is now UNKNOWN_REQUIRES_REVIEW, not LATENT_UNREACHABLE - the regression this test
+    // guards against is unaffected: the naive "supportingCapability only shows financial-service" signal must
+    // still never collapse this into SEPARATE_DATABASE_BOUNDARY, reachable or not.
     const result = analyzeTable('room_bookings');
     expect(result.declarations.some((d) => !d.isFinancialService)).toBe(true);
     expect(result.proposedClassification).not.toBe('SEPARATE_DATABASE_BOUNDARY');
-    expect(result.proposedClassification).toBe('LATENT_UNREACHABLE');
+    expect(result.proposedClassification).toBe('UNKNOWN_REQUIRES_REVIEW');
   });
 
   it('REGRESSION: same pattern for ue_governance_job_execution_state (has its own organization_id column)', () => {
@@ -52,8 +53,18 @@ describe('rls-storage-reachability-audit', () => {
     expect(result.proposedClassification).toBe('LATENT_UNREACHABLE');
   });
 
-  it('proposes UNKNOWN_REQUIRES_REVIEW (never a specific authority class) when real usage is found', () => {
+  it('proposes LATENT_UNREACHABLE for a real declaration whose only production consumers were since removed as dead code', () => {
+    // deadline_reminders (db/schema/deadline-engine-schema.ts) had real usage when this suite was written; the
+    // orphan-census purge in a0404b79b ("mismatch census batch 5") removed its only production consumers
+    // (components/deadlines/*, found unreachable by that commit's own orphan census) as dead code. Zero
+    // non-test references now exist anywhere in the repository (verified independently of this tool by grep).
     const result = analyzeTable('deadline_reminders');
+    expect(result.usageFiles).toEqual([]);
+    expect(result.proposedClassification).toBe('LATENT_UNREACHABLE');
+  });
+
+  it('proposes UNKNOWN_REQUIRES_REVIEW (never a specific authority class) when real usage is found', () => {
+    const result = analyzeTable('room_bookings');
     expect(result.usageFiles.length).toBeGreaterThan(0);
     expect(result.proposedClassification).toBe('UNKNOWN_REQUIRES_REVIEW');
     // Must never propose a specific authority classification — that always

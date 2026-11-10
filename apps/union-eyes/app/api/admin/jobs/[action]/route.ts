@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from "zod";
 import { withSystemAdminAuth } from "@/lib/api-auth-guard";
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 
 import {
   ErrorCode,
@@ -25,6 +26,7 @@ export const POST = async (request: NextRequest, { params: pendingParams }: { pa
   // The job queues are platform-wide: pausing one stops that work for every organization, so this needs platform
   // authority, not an organization administrator role.
   return withSystemAdminAuth(async (request, context) => {
+    await requirePlatformStaffAuthority(context, 'platform.jobs.manage');
   // Import job-queue functions (now delegates to Django Celery task API)
     const { pauseQueue, resumeQueue, cleanCompletedJobs } = await import('@/lib/job-queue');
     try {

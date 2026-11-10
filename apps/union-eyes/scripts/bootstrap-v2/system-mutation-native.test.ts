@@ -77,7 +77,7 @@ native('source-authorized native SYSTEM mutation SQL components (not whole calle
       }
     }, 120000)
   }
-  it('finishes the exact 80-table source-bound component census with no inferred caller mapping', async () => {
+  it('finishes the exact 89-table source-bound component census with no inferred caller mapping', async () => {
     const next = await iterator.next()
     expect(next.done).toBe(true)
     if (!next.done) throw new Error('UE_V2_SYSTEM_NATIVE_EXTRA_TABLE')
@@ -91,14 +91,14 @@ native('source-authorized native SYSTEM mutation SQL components (not whole calle
     )
     expect(reports.map((report) => report.table)).toEqual(rules.map((rule) => rule.table))
     expect(reports.filter((report) => report.status !== 'PASS')).toEqual([])
-    expect(reports).toHaveLength(80)
-    expect(next.value.qualified).toBe(80)
+    expect(reports).toHaveLength(89)
+    expect(next.value.qualified).toBe(89)
     expect(next.value.applicationActorMapping).toBe('NOT_PROVEN')
     expect(next.value.wholeSecurityQualification).toBe('NOT_PROVEN')
     expect(next.value.nativeSystemMutationQualification).toMatchObject({
       result: 'PASS',
-      denominator: 80,
-      qualified: 80,
+      denominator: 89,
+      qualified: 89,
       actualCallerExecution: 'NOT_PROVEN',
       wholeSecurityQualification: 'NOT_PROVEN',
     })

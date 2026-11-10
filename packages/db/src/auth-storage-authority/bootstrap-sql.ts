@@ -465,6 +465,13 @@ export function compileAuthBootstrapSql(options: {
     GRANT EXECUTE ON FUNCTION user_management.auth_provider_binding() TO ${q(roles.provider)};`)
   grant('users', roles.provider, 'SELECT')
   policy('users', roles.provider, 'SELECT', `user_id=user_management.auth_provider_user() AND is_active AND lifecycle_state='active'`)
+  grant('organization_users', roles.provider, 'SELECT (user_id,organization_id,role,is_active)')
+  policy('organization_users', roles.provider, 'SELECT', `user_id=user_management.auth_provider_user() AND is_active`)
+  grant('org_auth_policies', roles.provider, 'SELECT')
+  policy('org_auth_policies', roles.provider, 'SELECT', `EXISTS (SELECT 1 FROM user_management.organization_users ou WHERE ou.organization_id=org_auth_policies.organization_id AND ou.user_id=user_management.auth_provider_user() AND ou.is_active)`)
+  grant('user_sessions', roles.provider, 'SELECT (session_id,user_id,organization_id,expires_at), INSERT')
+  policy('user_sessions', roles.provider, 'SELECT', `user_id=user_management.auth_provider_user()`)
+  policy('user_sessions', roles.provider, 'INSERT', `user_id=user_management.auth_provider_user() AND (organization_id IS NULL OR EXISTS (SELECT 1 FROM user_management.organization_users ou WHERE ou.organization_id=user_sessions.organization_id AND ou.user_id=user_management.auth_provider_user() AND ou.is_active))`)
   statements.push(compileAuthOrgBindingSql({ ordinaryRole: ordinary }))
   return statements.join('\n')
 }

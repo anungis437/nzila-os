@@ -21,6 +21,7 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 // The body is optional: no body suggests clauses for the grievance's own description, a description searches with that text, a clauseId links that clause.
 const bodySchema = z.object({
@@ -53,6 +54,7 @@ export const POST = withApi(
         and(
           eq(grievances.id, grievanceId),
           eq(grievances.organizationId, organizationId),
+          productionGrievanceCondition(),
         ),
       );
 

@@ -5,7 +5,8 @@ const ORG = '11111111-1111-4111-8111-111111111111';
 const m = vi.hoisted(() => ({
   row: null as Record<string, unknown> | null,
   requireApiAuth: vi.fn(),
-  requireSystemAdmin: vi.fn(),
+  getCurrentUser: vi.fn(),
+  requirePlatformStaffAuthority: vi.fn(),
   getAllQueueStats: vi.fn(),
   getFailedJobs: vi.fn(),
   orgContexts: [] as unknown[],
@@ -14,11 +15,12 @@ const m = vi.hoisted(() => ({
 vi.mock('@/lib/api-auth-guard', () => ({
   withApiAuth: (handler: (...a: unknown[]) => unknown) => handler,
   requireApiAuth: m.requireApiAuth,
-  requireSystemAdmin: m.requireSystemAdmin,
+  getCurrentUser: m.getCurrentUser,
   // read at import time by lib/organizations/read-authority.ts, reached through the deprecation helper
   ROLE_HIERARCHY: { member: 1, steward: 2, officer: 3, admin: 4, system_admin: 5 },
   isPlatformAdminUser: vi.fn().mockResolvedValue(false),
 }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requirePlatformStaffAuthority }));
 vi.mock('@/lib/org-id-from-context', () => ({ resolveOrgIdFromContext: async (c: { organizationId?: string }) => c.organizationId ?? null }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => {
@@ -78,7 +80,8 @@ describe('GET /api/union-eyes/queue-status', () => {
     process.env.QUEUE_STATUS_SERVICE_KEY = 'svc-key-dedicated-to-queue-status-route';
     process.env.DJANGO_API_URL = 'http://django.internal';
     m.requireApiAuth.mockResolvedValue({});
-    m.requireSystemAdmin.mockResolvedValue(undefined);
+    m.getCurrentUser.mockResolvedValue({ id: 'platform-1', organizationId: ORG });
+    m.requirePlatformStaffAuthority.mockResolvedValue({ userId: 'platform-1', organizationId: ORG });
     m.getAllQueueStats.mockResolvedValue([{ name: 'celery', active: 1, reserved: 2, scheduled: 3 }]);
     m.getFailedJobs.mockResolvedValue([{ task_id: 't1', task_name: 'send', status: 'RETRY', date_done: 'x' }]);
   });
@@ -88,7 +91,7 @@ describe('GET /api/union-eyes/queue-status', () => {
   };
 
   it('refuses a signed-in member who is not a platform administrator, and reads no queue data', async () => {
-    m.requireSystemAdmin.mockRejectedValue(new Error('System administrator privileges required'));
+    m.requirePlatformStaffAuthority.mockRejectedValue(new Error('Scoped platform authority required'));
     const response = await call();
     expect(response.status).toBe(403);
     expect(m.getAllQueueStats).not.toHaveBeenCalled();

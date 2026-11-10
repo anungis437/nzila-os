@@ -33,8 +33,9 @@ export interface CultureIndicator {
   evidence: string;
   /** Positive or negative contribution to culture health. */
   valence: 'positive' | 'negative' | 'neutral';
-  /** 0–100 confidence in this indicator. */
-  confidence: number;
+  /** 0-100 evidence coverage behind this indicator (how many entries/sessions informed it) - a volume measure,
+   *  not a claim that the indicator is correct. See lib/knowledge-transfer/governance/evidence-basis.ts. */
+  evidenceCoverage: number;
 }
 
 /** Longitudinal governance discipline observation. */
@@ -81,8 +82,10 @@ export interface GovernanceCultureProfile {
   disciplineProfile: GovernanceDisciplineProfile;
   /** Observed culture evolution phases over time. */
   evolutionPhases: CultureEvolutionPhase[];
-  /** Continuity culture score 0–100 (organizational discipline composite). */
-  cultureScore: number;
+  /** Continuity culture score 0–100 (organizational discipline composite). Null below the minimum cohort of recorded
+   *  interactions (DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE): a sparse or empty history has no
+   *  composite to report, and a formula's own default-branch output must not stand in for one. */
+  cultureScore: number | null;
   /** Entries analyzed. */
   entriesAnalyzed: number;
   /** Disclaimer for governance-safe interpretation. */

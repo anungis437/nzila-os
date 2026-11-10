@@ -17,6 +17,7 @@ import { organizationMembers } from '@/db/schema-organizations';
 import { authUsers } from '@nzila/db/schema';
 import { authDb, withAuthContext } from '@nzila/platform-auth/auth-execution';
 import { logger } from '@/lib/logger';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 import type { RecipientSnapshot } from './types';
 
 export interface ResolveRecipientsInput {
@@ -66,7 +67,7 @@ export async function resolveGrievanceDeadlineRecipients(
       unionRepId: grievances.unionRepId,
     })
     .from(grievances)
-    .where(eq(grievances.id, input.grievanceId))
+    .where(and(eq(grievances.id, input.grievanceId), productionGrievanceCondition()))
     .limit(1);
 
   if (!grievance) {

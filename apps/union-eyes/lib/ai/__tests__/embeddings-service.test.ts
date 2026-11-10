@@ -7,6 +7,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
     component: 'test',
     action: 'mock',
   })),
+  toGatewayDataClass: (c: string) => c,
   UE_APP_KEY: 'union-eyes',
   UE_PROFILES: { EMBEDDINGS: 'ue-embeddings' },
   UE_SYSTEM_ORG_ID: '00000000-0000-0000-0000-000000000000',

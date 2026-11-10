@@ -2,11 +2,35 @@ import { describe, expect, it } from "vitest";
 import {
   buildReplayDiff,
   calculatePayroll,
-  createEvidenceChainLink,
+  createEvidencePack,
   enforcePayrollLifecycleTransition,
   resolvePayrollRules,
-  verifyEvidenceChainFromLinks,
+  verifyEvidenceChainFromArtifacts,
+  type EvidenceManifestArtifactRecord,
 } from "../_lib";
+
+function buildArtifact(
+  entityType: "payroll_run" | "remittance_run" | "replay" | "approval" | "adjustment_run",
+  runRefId: string,
+  organizationId: string,
+  parentLink?: { linkId: string; sealHash: string; chainDepth: number } | null,
+): { artifact: EvidenceManifestArtifactRecord; chainLink: ReturnType<typeof createEvidencePack>["chainLink"] } {
+  const pack = createEvidencePack({
+    entityType,
+    runRefId,
+    organizationId,
+    artifacts: [],
+    metadata: { parentLink: parentLink ?? null },
+  });
+  return {
+    artifact: {
+      organizationId,
+      artifactHash: pack.manifestHash,
+      manifestJson: { ...pack.manifest, chainLink: pack.chainLink },
+    },
+    chainLink: pack.chainLink,
+  };
+}
 
 const baselineEntries = [
   {
@@ -233,87 +257,59 @@ describe("Employer Execution scenario pack", () => {
   });
 
   it("E13 remittance linked to payroll evidence chain", () => {
-    const payrollLink = createEvidenceChainLink({
-      organizationId: "org-scenario",
-      entityType: "payroll_run",
-      targetEntityId: "payroll-1",
-      manifestHash: "manifest-payroll",
-      sealHash: "seal-payroll",
-      parent: null,
+    const { artifact: payrollArtifact, chainLink: payrollLink } = buildArtifact("payroll_run", "payroll-1", "org-scenario");
+    const { artifact: remittanceArtifact } = buildArtifact("remittance_run", "remittance-1", "org-scenario", {
+      linkId: payrollLink.linkId,
+      sealHash: payrollLink.sealHash,
+      chainDepth: payrollLink.chainDepth,
     });
-    const remittanceLink = createEvidenceChainLink({
+
+    const result = verifyEvidenceChainFromArtifacts([payrollArtifact, remittanceArtifact], {
       organizationId: "org-scenario",
       entityType: "remittance_run",
       targetEntityId: "remittance-1",
-      manifestHash: "manifest-remittance",
-      sealHash: "seal-remittance",
-      parent: {
-        linkId: payrollLink.linkId,
-        sealHash: payrollLink.sealHash,
-        chainDepth: payrollLink.chainDepth,
-      },
     });
-
-    const result = verifyEvidenceChainFromLinks([payrollLink, remittanceLink]);
     expect(result.valid).toBe(true);
     expect(result.checkedLinks).toBe(2);
   });
 
   it("E14 replay linked to payroll evidence chain", () => {
-    const payrollLink = createEvidenceChainLink({
-      organizationId: "org-scenario",
-      entityType: "payroll_run",
-      targetEntityId: "payroll-1",
-      manifestHash: "manifest-payroll",
-      sealHash: "seal-payroll",
-      parent: null,
+    const { artifact: payrollArtifact, chainLink: payrollLink } = buildArtifact("payroll_run", "payroll-1", "org-scenario");
+    const { artifact: replayArtifact } = buildArtifact("replay", "replay-1", "org-scenario", {
+      linkId: payrollLink.linkId,
+      sealHash: payrollLink.sealHash,
+      chainDepth: payrollLink.chainDepth,
     });
-    const replayLink = createEvidenceChainLink({
+
+    const result = verifyEvidenceChainFromArtifacts([payrollArtifact, replayArtifact], {
       organizationId: "org-scenario",
       entityType: "replay",
       targetEntityId: "replay-1",
-      manifestHash: "manifest-replay",
-      sealHash: "seal-replay",
-      parent: {
-        linkId: payrollLink.linkId,
-        sealHash: payrollLink.sealHash,
-        chainDepth: payrollLink.chainDepth,
-      },
     });
-
-    const result = verifyEvidenceChainFromLinks([payrollLink, replayLink]);
     expect(result.valid).toBe(true);
   });
 
   it("E15 broken evidence chain verification failure", () => {
-    const payrollLink = createEvidenceChainLink({
-      organizationId: "org-scenario",
-      entityType: "payroll_run",
-      targetEntityId: "payroll-1",
-      manifestHash: "manifest-payroll",
-      sealHash: "seal-payroll",
-      parent: null,
+    const { artifact: payrollArtifact, chainLink: payrollLink } = buildArtifact("payroll_run", "payroll-1", "org-scenario");
+    const { artifact: replayArtifact, chainLink: replayLink } = buildArtifact("replay", "replay-1", "org-scenario", {
+      linkId: payrollLink.linkId,
+      sealHash: payrollLink.sealHash,
+      chainDepth: payrollLink.chainDepth,
     });
-    const replayLink = createEvidenceChainLink({
+
+    const tampered: EvidenceManifestArtifactRecord = {
+      ...replayArtifact,
+      manifestJson: {
+        ...replayArtifact.manifestJson,
+        chainLink: { ...replayLink, parentSealHash: "invalid-parent-seal" },
+      },
+    };
+
+    const result = verifyEvidenceChainFromArtifacts([payrollArtifact, tampered], {
       organizationId: "org-scenario",
       entityType: "replay",
       targetEntityId: "replay-1",
-      manifestHash: "manifest-replay",
-      sealHash: "seal-replay",
-      parent: {
-        linkId: payrollLink.linkId,
-        sealHash: payrollLink.sealHash,
-        chainDepth: payrollLink.chainDepth,
-      },
     });
-
-    const result = verifyEvidenceChainFromLinks([
-      payrollLink,
-      {
-        ...replayLink,
-        parentSealHash: "invalid-parent-seal",
-      },
-    ]);
 
     expect(result.valid).toBe(false);
     expect(result.issues.some((issue) => issue.includes("Parent seal mismatch"))).toBe(true);

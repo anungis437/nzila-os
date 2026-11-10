@@ -44,6 +44,10 @@ const h = vi.hoisted(() => {
   };
 
   const tx = {
+    execute: async (...args: unknown[]) => {
+      state.calls.push({ op: "execute", args });
+      return [];
+    },
     select: () => {
       const rec: Record<string, any> = { op: "select" };
       state.calls.push(rec);
@@ -132,7 +136,13 @@ vi.mock("@/lib/api/framework", async () => {
     ApiError,
     z,
     withApi: (cfg: unknown, handler: (ctx: unknown) => unknown) =>
-      Object.assign((ctx: unknown) => handler(ctx), { cfg }),
+      Object.assign((ctx: unknown) => handler({
+        request: new Request('http://localhost/api/employer-execution/test', {
+          method: 'POST',
+          headers: { 'idempotency-key': 'hardening-replay-request-1' },
+        }),
+        ...(ctx as Record<string, unknown>),
+      }), { cfg }),
   };
 });
 vi.mock("@/db", () => ({ db: h.db }));
@@ -583,7 +593,7 @@ describe("remittance-runs POST (execute)", () => {
 describe("payroll-runs POST (prepare)", () => {
   const load = async () => (await import("../payroll-runs/route")).POST as any;
   const body = { timesheetBatchId: BATCH_ID, periodStart: "2026-04-01", periodEnd: "2026-04-15", runType: "preview", engineVersion: "engine-v1" };
-  const batch = (status = "validated") => ({ id: BATCH_ID, organizationId: ORG, employerId: "e", worksiteId: null, bargainingUnitId: null, status, sourceFileHash: "fh" });
+  const batch = (status = "validated") => ({ id: BATCH_ID, organizationId: ORG, employerId: "e", worksiteId: null, bargainingUnitId: null, status, periodStart: "2026-04-01", periodEnd: "2026-04-15", sourceFileHash: "fh" });
   const entry = {
     rowNumber: 2,
     employeeExternalId: "EMP-1",
@@ -603,7 +613,7 @@ describe("payroll-runs POST (prepare)", () => {
     rulesJson: { base_rate: 52, overtime: 1.5, double_time: 2, shift_premium: 0.1, travel: 0.5, dues: 0.02, benefits: 0.03, pension: 0.04 },
   };
   const happyReads = () => {
-    h.state.dbSelects = [[batch()], [entry], [ruleVersion], []];
+    h.state.selects = [[batch()], [], [entry], [ruleVersion], []];
     h.state.inserts = [[{ id: RUN_ID, runCode: "pr-1", totalGross: "416.00", totalNet: "1", totalDues: "1", totalBenefits: "1", totalPension: "1" }]];
   };
   const ctx = (userId: string | null) => ({ organizationId: ORG, userId, body });
@@ -643,9 +653,9 @@ describe("payroll-runs POST (prepare)", () => {
 
   it("is 404 with no write and no audit when the batch is not in the organization", async () => {
     const POST = await load();
-    h.state.dbSelects = [[]];
+    h.state.selects = [[]];
     await expect(POST(ctx(PREPARER))).rejects.toMatchObject({ code: "NOT_FOUND" });
-    const lookup = h.state.calls.find((c) => c.op === "db.select")!;
+    const lookup = h.state.calls.find((c) => c.op === "select")!;
     expect(paramsOf(lookup.where)).toEqual(expect.arrayContaining([ORG, BATCH_ID]));
     expect(h.withRLSContext).toHaveBeenCalledTimes(1);
     expect(h.audit).not.toHaveBeenCalled();
@@ -653,7 +663,7 @@ describe("payroll-runs POST (prepare)", () => {
 
   it("will not prepare a run from a batch that was not validated", async () => {
     const POST = await load();
-    h.state.dbSelects = [[batch("rejected")]];
+    h.state.selects = [[batch("rejected")]];
     await expect(POST(ctx(PREPARER))).rejects.toMatchObject({ code: "VALIDATION_ERROR" });
     expect(h.withRLSContext).toHaveBeenCalledTimes(1);
     expect(h.audit).not.toHaveBeenCalled();
@@ -688,7 +698,8 @@ describe("replay/[runId] POST", () => {
   const ctx = { organizationId: ORG, userId: EXECUTOR, params: { runId: RUN_ID }, body: { mode: "exact" } };
   const happyReads = (manifests: unknown[] = []) => {
     h.state.dbSelects = [[sourceRun()], [], manifests, [entry], [ruleVersion], []];
-    h.state.inserts = [[{ id: "rp-1", diffHash: "dh" }]];
+    h.state.inserts = [[{ id: "intent-1", status: "processing" }], [{ id: "rp-1", diffHash: "dh" }]];
+    h.state.updates = [[{ id: "intent-1" }]];
   };
 
   it("requires the named finance authority", async () => {
@@ -702,7 +713,7 @@ describe("replay/[runId] POST", () => {
     const response = await POST(ctx);
 
     expect(response.data.replay.id).toBe("rp-1");
-    expect(h.state.calls.filter((c) => c.op === "update")).toEqual([]);
+    expect(h.state.calls.filter((c) => c.op === "update").every((c) => c.table !== employerPayrollRuns)).toBe(true);
     expect(h.state.calls.some((c) => c.op === "insert" && c.table === employerPayrollRuns)).toBe(false);
     expect(h.audit).toHaveBeenCalledWith(
       h.tx,
@@ -713,7 +724,7 @@ describe("replay/[runId] POST", () => {
         details: expect.objectContaining({ sourcePayrollRunId: RUN_ID, mode: "exact", sourceAmounts: AMOUNTS }),
       }),
     );
-    expect(h.state.calls[h.state.calls.length - 1].op).toBe("audit");
+    expect(h.state.calls.findIndex((c) => c.op === "audit")).toBeLessThan(h.state.calls.findIndex((c) => c.op === "update"));
   });
 
   it("chains the replay from the run's own seal, not from an earlier replay", async () => {

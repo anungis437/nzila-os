@@ -4,14 +4,16 @@ const mocks = vi.hoisted(() => ({
   getAllQueueStats: vi.fn(),
   getFailedJobs: vi.fn(),
   requireApiAuth: vi.fn(),
-  requireSystemAdmin: vi.fn(),
+  getCurrentUser: vi.fn(),
+  requirePlatformStaffAuthority: vi.fn(),
 }))
 
 vi.mock('@/lib/job-queue', () => ({
   getAllQueueStats: mocks.getAllQueueStats,
   getFailedJobs: mocks.getFailedJobs,
 }))
-vi.mock('@/lib/api-auth-guard', () => ({ requireApiAuth: mocks.requireApiAuth, requireSystemAdmin: mocks.requireSystemAdmin }))
+vi.mock('@/lib/api-auth-guard', () => ({ requireApiAuth: mocks.requireApiAuth, getCurrentUser: mocks.getCurrentUser }))
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: mocks.requirePlatformStaffAuthority }))
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }))
 
 import { GET } from '../union-eyes/queue-status/route'
@@ -22,7 +24,8 @@ describe('queue status route', () => {
     delete process.env.DJANGO_API_URL
     delete process.env.NEXT_PUBLIC_DJANGO_API_URL
     mocks.requireApiAuth.mockResolvedValue({ userId: 'user-1' })
-    mocks.requireSystemAdmin.mockResolvedValue(undefined)
+    mocks.getCurrentUser.mockResolvedValue({ id: 'platform-1', organizationId: 'org-1' })
+    mocks.requirePlatformStaffAuthority.mockResolvedValue({ userId: 'platform-1', organizationId: 'org-1' })
   })
 
   afterEach(() => {
@@ -128,7 +131,7 @@ describe('queue status route', () => {
       process.env.QUEUE_STATUS_SERVICE_KEY = QUEUE_KEY
       mocks.requireApiAuth.mockResolvedValue({ userId: 'admin' })
       expect((await withKey('not-the-key')).status).toBe(401)
-      expect(mocks.requireSystemAdmin).not.toHaveBeenCalled()
+      expect(mocks.requirePlatformStaffAuthority).not.toHaveBeenCalled()
     })
 
     it('returns infrastructure fields only: no job arguments, results or tracebacks reach the caller', async () => {

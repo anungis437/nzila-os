@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { abbreviateName, escapeLike, listPlatformUsers, maskEmail, MIN_SEARCH_LENGTH, normalizeSearch } from '../user-directory'
+import { escapeLike, listPlatformUsers, maskEmail, MIN_SEARCH_LENGTH, normalizeSearch } from '../user-directory'
 
 // DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ: the projections that keep a cross-organization read to the minimum necessary.
 describe('maskEmail', () => {
@@ -21,24 +21,6 @@ describe('maskEmail', () => {
     expect(maskEmail(null)).toBeNull()
     expect(maskEmail(undefined)).toBeNull()
     expect(maskEmail('')).toBeNull()
-  })
-})
-
-describe('abbreviateName', () => {
-  it.each([
-    ['Pat Morgan', 'Pat M.'],
-    ['Pat Q Morgan', 'Pat M.'],
-    ['  Pat   Morgan  ', 'Pat M.'],
-    ['Pat', 'P.'],
-    ['', 'Member'],
-    [null, 'Member'],
-    [undefined, 'Member'],
-  ])('abbreviates %j as %j', (input, expected) => {
-    expect(abbreviateName(input)).toBe(expected)
-  })
-
-  it('never carries the surname', () => {
-    expect(abbreviateName('Pat Morgan')).not.toContain('Morgan')
   })
 })
 
@@ -69,5 +51,11 @@ describe('listPlatformUsers', () => {
   it('reads nothing when it is bounded to no organization', async () => {
     const tx = { select: () => { throw new Error('the membership table was read') } }
     await expect(listPlatformUsers(tx as never, { organizationIds: [] })).resolves.toEqual([])
+  })
+
+  it('has no unscoped call shape: a missing scope reads nothing rather than every organization', async () => {
+    const tx = { select: () => { throw new Error('the membership table was read') } }
+    await expect(listPlatformUsers(tx as never, {} as never)).resolves.toEqual([])
+    await expect(listPlatformUsers(tx as never, { organizationIds: undefined } as never)).resolves.toEqual([])
   })
 })

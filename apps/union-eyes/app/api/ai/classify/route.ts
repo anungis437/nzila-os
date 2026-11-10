@@ -88,7 +88,9 @@ export const POST = withApi(
 
     const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId: userId!, organizationId });
     if (blocked) return blocked;
-    enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId, userId, userRole: user?.role ?? 'member', dataClass: 'internal' });
+    // classify-precedent reads arbitration case facts (grievance_legal); every other action reads the organization's own clause text (confidential).
+    const classifyDataClass = body.action === 'classify-precedent' ? 'grievance_legal' : 'confidential';
+    enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId, userId, userRole: user?.role ?? 'member', dataClass: classifyDataClass });
 
     try {
       const {

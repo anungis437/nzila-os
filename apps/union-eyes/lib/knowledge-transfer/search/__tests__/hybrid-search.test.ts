@@ -40,6 +40,7 @@ vi.mock('drizzle-orm', () => ({
 }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ embed: h.embed }),
+  toGatewayDataClass: (c: string) => c,
   UE_APP_KEY: 'ue', UE_SYSTEM_ORG_ID: 'sys', UE_PROFILES: { EMBEDDINGS: 'emb' },
 }));
 vi.mock('@/lib/services/ai/embedding-cache', () => ({

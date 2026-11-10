@@ -60,7 +60,8 @@ async function loadCourses(): Promise<Course[]> {
 // The sessions route lists every session of the organization, so the course's own are picked out here (before they are read, so another course's
 // malformed row cannot hide this course's sessions).
 async function loadSessionsOf(courseId: string): Promise<CourseSession[]> {
-  const rows = await fetchAllRows<unknown>('/api/education/sessions');
+  const rows = await fetchAllRows<unknown>(`/api/education/sessions?courseId=${encodeURIComponent(courseId)}`);
+  // Keep the client-side assertion as a defence against a malformed or stale intermediary response.
   return rows.filter((row) => isRecord(row) && row.courseId === courseId).map(readSession);
 }
 

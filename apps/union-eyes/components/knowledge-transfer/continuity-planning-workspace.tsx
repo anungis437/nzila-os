@@ -13,8 +13,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { ContinuityRecommendation, DecisionBrief } from '@/lib/knowledge-transfer/decision-intelligence/decision-models';
 import type { ResilienceRoadmap } from '@/lib/knowledge-transfer/resilience-strategies/strategy-models';
+import { VerifiedDependenciesPanel } from './verified-dependencies-panel';
 
-type PlanningTab = 'brief' | 'roadmap' | 'actions';
+type PlanningTab = 'brief' | 'roadmap' | 'actions' | 'verified_dependencies';
 
 // What the screen reads is what the services return: the routes answer these types under `data`, so a field the service does not have fails to compile here.
 type Recommendation = ContinuityRecommendation;
@@ -161,6 +162,7 @@ export function ContinuityPlanningWorkspace() {
     { id: 'brief', label: 'Decision Brief' },
     { id: 'roadmap', label: 'Resilience Roadmap' },
     { id: 'actions', label: 'Planning Actions' },
+    { id: 'verified_dependencies', label: 'Verified Dependencies' },
   ];
 
   return (
@@ -239,6 +241,31 @@ export function ContinuityPlanningWorkspace() {
                 </div>
               )}
 
+              {/* Confirmed dependency risk - only ever populated from verified evidence, never the exploratory graph above */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <div className="text-xs font-semibold text-slate-700 mb-1">Confirmed Dependency Risk</div>
+                {briefData.confirmedDependencyRiskStatus === 'no_verified_dependency_evidence_recorded' ? (
+                  <p className="text-xs text-slate-600">
+                    No dependency has been verified yet. The exploratory findings above are pattern-based and have not been
+                    independently confirmed — submit evidence under Verified Dependencies to change that.
+                  </p>
+                ) : briefData.confirmedDependencyRiskStatus === 'verified_dependency_evidence_requires_reverification' ? (
+                  <p className="text-xs text-slate-600">
+                    Dependencies were verified, but none is current: a node, its classification or the evidence changed since
+                    verification. Re-verify them under Verified Dependencies before relying on them.
+                  </p>
+                ) : (
+                  <ul className="space-y-1">
+                    {briefData.confirmedDependencyRisks.map((risk, i) => (
+                      <li key={i} className="text-xs text-slate-700">
+                        • {risk.dependentLabel} depends on {risk.dependsOnLabel} ({risk.processOrSystem}; responsible: {risk.responsibleAuthority}; evidence:{' '}
+                        {risk.evidenceTier === 'system_resolved_document' ? 'stored document' : 'external source, reviewer-attested'})
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
               {/* Recommendations */}
               <div>
                 <h3 className="text-sm font-semibold text-slate-800 mb-3">
@@ -276,7 +303,7 @@ export function ContinuityPlanningWorkspace() {
                               {rec.evidence.map((e, i) => (
                                 <div key={i} className="text-xs text-slate-600 flex gap-2 mb-1">
                                   <span className="text-slate-400">{i + 1}.</span>
-                                  <span>{e.observation} <span className="text-slate-400">({e.confidence} confidence)</span></span>
+                                  <span>{e.observation} <span className="text-slate-400">({e.evidenceCoverage} evidence coverage)</span></span>
                                 </div>
                               ))}
                             </div>
@@ -361,6 +388,9 @@ export function ContinuityPlanningWorkspace() {
                   {roadmapData.projectedScore === null && roadmapData.projectionNotMeasuredReason && (
                     <p className="mt-1 text-xs text-slate-500">{roadmapData.projectionNotMeasuredReason}</p>
                   )}
+                  <p className="mt-1 text-xs text-slate-400">
+                    {roadmapData.verifiedEvidenceCoverage.verifiedEdgeCount} of {roadmapData.verifiedEvidenceCoverage.exploratoryEdgeCount} inferred dependencies are currently verified in their stated direction; every other dependency, and every node-level figure, is exploratory signal only.
+                  </p>
                 </div>
               </div>
 
@@ -514,6 +544,9 @@ export function ContinuityPlanningWorkspace() {
           )}
         </div>
       )}
+
+      {/* Verified Dependencies Tab */}
+      {activeTab === 'verified_dependencies' && <VerifiedDependenciesPanel />}
     </div>
   );
 }

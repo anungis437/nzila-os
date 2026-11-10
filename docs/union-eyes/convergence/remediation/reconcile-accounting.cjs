@@ -6,6 +6,11 @@
 // Every defect the overlay marks implemented must be accounted for exactly once: either by an elimination batch, or by an earlier run
 // whose record cites existing source. The script writes ue-gate0-accounting-reconciliation.json and exits non-zero on any inconsistency.
 // It never edits the frozen register, the overlay or the ledger.
+//
+// Gate 0 corrective convergence: also independently validates all three mutually-exclusive buckets (not just the
+// implemented count), including overlay.summary.engineeringPartial / engineeringRemaining against the per-record data,
+// and cross-checks the separately-generated families.json against these same canonical numbers — a generated artifact
+// going stale after a real register change (as families.json had) is now a reconciliation failure, not a silent drift.
 const fs = require('fs')
 const path = require('path')
 const root = path.resolve(__dirname, '../../../..')
@@ -22,6 +27,13 @@ const earlierRunCredits = []
 let batchCredits = 0
 let sameBatchAgreement = 0
 const batchDisagreements = []
+// Every one of the 777 frozen IDs falls into exactly one of these three buckets (verified below, not assumed):
+// a defect with no engineeringCorrection at all is UNTOUCHED, never counted as PARTIAL. "outstanding"/"remaining"
+// has always meant PARTIAL + UNTOUCHED together (see overlay.summary.engineeringRemaining); the two are not additive
+// with each other, and partial is a strict subset of outstanding, not a disjoint addition to it.
+const untouchedIds = []
+const partialIds = []
+const implementedIds = []
 
 for (const d of register) {
   const record = byId.get(d.id)
@@ -31,6 +43,10 @@ for (const d of register) {
   }
   const o = record.engineeringCorrection
   const l = ledger.entries[d.id]
+  if (o == null) untouchedIds.push(d.id)
+  else if (o.state === PART) partialIds.push(d.id)
+  else if (o.state === IMPL) implementedIds.push(d.id)
+  else problems.push(`unrecognized engineeringCorrection.state on ${d.id}: ${o.state}`)
   const overlayImpl = o?.state === IMPL
   const ledgerImpl = l?.status === LEDGER_IMPL
   if (ledgerImpl && !overlayImpl) problems.push(`ledger credits a defect the overlay does not: ${d.id}`)
@@ -67,6 +83,33 @@ if (overlayImplemented !== ledgerImplemented + earlierRunCredits.length) {
   problems.push(`credit does not reconcile: overlay ${overlayImplemented} != ledger ${ledgerImplemented} + earlier runs ${earlierRunCredits.length}`)
 }
 if (overlay.summary.engineeringCorrected !== overlayImplemented) problems.push('overlay summary.engineeringCorrected does not match its records')
+// Gate 0 corrective convergence: these two were previously unchecked, so a real state transition (a defect moving
+// untouched -> partial, or partial -> implemented) could advance the per-record data while summary.engineeringPartial /
+// summary.engineeringRemaining silently went stale — exactly what happened to families.json below before this fix.
+if (overlay.summary.engineeringPartial !== overlayPartial) problems.push(`overlay summary.engineeringPartial (${overlay.summary.engineeringPartial}) does not match its records (${overlayPartial})`)
+if (overlay.summary.engineeringRemaining !== partialIds.length + untouchedIds.length) problems.push(`overlay summary.engineeringRemaining (${overlay.summary.engineeringRemaining}) does not match partial + untouched (${partialIds.length + untouchedIds.length})`)
+if (implementedIds.length !== overlayImplemented) problems.push(`ID-level implemented count ${implementedIds.length} != aggregate overlayImplemented ${overlayImplemented}`)
+if (partialIds.length !== overlayPartial) problems.push(`ID-level partial count ${partialIds.length} != aggregate overlayPartial ${overlayPartial}`)
+if (implementedIds.length + partialIds.length + untouchedIds.length !== register.length) {
+  problems.push(`mutually-exclusive buckets do not sum to the population: ${implementedIds.length} + ${partialIds.length} + ${untouchedIds.length} != ${register.length}`)
+}
+const dup = (ids) => ids.length !== new Set(ids).size
+if (dup(implementedIds) || dup(partialIds) || dup(untouchedIds)) problems.push('duplicate defect ID found within a single accounting bucket')
+
+// Family classifications: classify-families.cjs is a separate, deterministic, rerunnable generator over the same
+// frozen register and overlay. Its own output must agree with this script's canonical numbers, or it is stale.
+const familiesPath = path.join(__dirname, 'families.json')
+let families = null
+if (fs.existsSync(familiesPath)) {
+  families = JSON.parse(fs.readFileSync(familiesPath, 'utf8'))
+  if (families.population !== register.length) problems.push(`families.json population (${families.population}) != register length (${register.length})`)
+  if (families.corrected !== overlayImplemented) problems.push(`families.json corrected (${families.corrected}) != overlay implemented (${overlayImplemented}); run classify-families.cjs`)
+  if (families.partial !== overlayPartial) problems.push(`families.json partial (${families.partial}) != overlay partial (${overlayPartial}); run classify-families.cjs`)
+  if (families.outstanding !== register.length - overlayImplemented) problems.push(`families.json outstanding (${families.outstanding}) != population - implemented (${register.length - overlayImplemented}); run classify-families.cjs`)
+  if (families.accountedFor !== families.outstanding) problems.push(`families.json accountedFor (${families.accountedFor}) != its own outstanding (${families.outstanding})`)
+} else {
+  problems.push('families.json not found; run classify-families.cjs')
+}
 
 const doc = {
   record: 'UE-GATE0-ACCOUNTING-RECONCILIATION',
@@ -79,16 +122,35 @@ const doc = {
     earlierRunCreditsWithIndependentRegressionEvidence: earlierRunCredits.filter((c) => c.hasIndependentRegressionEvidence).length,
     overlayPartial,
     ledgerPartial,
+    // DEPRECATED NAME, kept for existing consumers: this is partial + untouched together, NOT additional to overlayPartial.
+    // Use untouchedByOverlay (disjoint from overlayPartial) for a true "zero engineering work done" count.
     unresolvedByOverlay: register.length - overlayImplemented,
+    untouchedByOverlay: untouchedIds.length,
     qualificationVerified: 0,
     closed: 0,
   },
+  mutuallyExclusiveAccounting: {
+    rule: 'Every one of the 777 frozen defect IDs is counted in exactly one of these three buckets. implemented + partial + untouched always equals the population. "outstanding"/"remaining" in prose means partial + untouched together, never partial added on top of an outstanding figure that already includes it.',
+    population: register.length,
+    implemented: implementedIds.length,
+    partial: partialIds.length,
+    untouched: untouchedIds.length,
+    partialIds,
+    untouchedIds,
+  },
   agreement: { creditedByBoth: batchCredits, sameBatchLabel: sameBatchAgreement, differentBatchLabel: batchDisagreements.length },
+  familyClassifications: families ? { populationAgrees: families.population === register.length, correctedAgrees: families.corrected === overlayImplemented, partialAgrees: families.partial === overlayPartial, outstandingAgrees: families.outstanding === register.length - overlayImplemented } : { checked: false },
   batchLabelDifferences: batchDisagreements,
   earlierRunCredits,
   consistent: problems.length === 0,
   problems,
 }
 fs.writeFileSync(path.join(__dirname, 'ue-gate0-accounting-reconciliation.json'), JSON.stringify(doc, null, 2) + '\n')
-console.log(JSON.stringify({ totals: doc.totals, agreement: doc.agreement, consistent: doc.consistent, problems: problems.slice(0, 10) }))
+console.log(JSON.stringify({
+  totals: doc.totals,
+  mutuallyExclusiveAccounting: { ...doc.mutuallyExclusiveAccounting, partialIds: undefined, untouchedIds: undefined },
+  agreement: doc.agreement,
+  consistent: doc.consistent,
+  problems: problems.slice(0, 10),
+}))
 if (problems.length > 0) process.exit(1)

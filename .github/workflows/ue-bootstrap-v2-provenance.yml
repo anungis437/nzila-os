@@ -79,11 +79,16 @@ jobs:
         with:
           python-version: '3.11'
 
+      # local-vault-fixture needs the cryptography package: install it from the wheelhouse already built and
+      # hash-verified above (no new network trust - --no-index serves only the local, pinned-hash directory).
+      - name: Install cryptography from the hash-verified wheelhouse into the runner's interpreter
+        run: python -m pip install --no-index --find-links="$UE_V2_WHEELHOUSE" --require-hashes -r apps/union-eyes/backend/requirements.lock
+
       - name: Pull the pinned PostgreSQL image the native fixture runs with --pull never
         run: docker pull pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337
 
       # The plan installs into a fresh container per suite. runtime-security-native (378 cases, over ten minutes
-      # locally) is not run here; local-vault-fixture needs the cryptography package outside the wheelhouse image.
+      # locally) is not run here.
       - name: Native SYSTEM mutation, audit chain, launch-defect, organization-selection and manifest proofs
         env:
           UE_V2_NATIVE_MANIFEST: '1'
@@ -93,8 +98,20 @@ jobs:
           apps/union-eyes/scripts/bootstrap-v2/system-mutation-native.test.ts
           apps/union-eyes/scripts/bootstrap-v2/audit-chain-native.test.ts
           apps/union-eyes/scripts/bootstrap-v2/launch-defects-native.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/local-vault-fixture.test.ts
           apps/union-eyes/scripts/bootstrap-v2/organization-selection-native.test.ts
           apps/union-eyes/scripts/bootstrap-v2/manifest-native.test.ts
 
+      # local-vault-fixture.test.ts unconditionally rewrites its 5 ue-v2-local-vault-*.json /
+      # ue-v2-production-key-authority-*.json evidence files on every run, as genuine (not
+      # fabricated) proof of that run's own child-process network observations - their pid/port
+      # fields are OS-assigned per process and can never be the same between two runs, including
+      # two runs of the identical commit. A literal `git diff --exit-code` over the whole tree is
+      # structurally incompatible with that: it would fail here forever, on every PR, regardless
+      # of source changes. Excluded only these 5 known-volatile paths; everything else the native
+      # suite could have touched is still caught.
       - name: The checks left the tracked tree unchanged
-        run: git diff --exit-code
+        run: >-
+          git diff --exit-code -- .
+          ':(exclude)artifacts/ue-v2-local-vault-*.json'
+          ':(exclude)artifacts/ue-v2-production-key-authority-*.json'

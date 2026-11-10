@@ -83,6 +83,7 @@ export async function loadOverview(): Promise<OverviewStats> {
         COUNT(*) FILTER (WHERE status NOT IN ('settled', 'withdrawn', 'denied', 'closed')) as open,
         COUNT(*) FILTER (WHERE status = 'settled') as resolved
       FROM grievances
+      WHERE demo_seed_id IS NULL
     `)
   ).map((r: Record<string, unknown>) => r);
 
@@ -145,8 +146,8 @@ export async function loadOrgHealth(): Promise<OrgHealth[]> {
         o.member_count, o.active_member_count, o.clc_affiliated,
         COALESCE((SELECT COUNT(*) FROM support_tickets st WHERE st.organization_id = o.id AND st.status ${OPEN_TICKET}), 0) as open_tickets,
         (SELECT ROUND(AVG(st.satisfaction_rating), 1) FROM support_tickets st WHERE st.organization_id = o.id AND st.satisfaction_rating IS NOT NULL) as avg_ticket_satisfaction,
-        COALESCE((SELECT COUNT(*) FROM grievances g WHERE g.organization_id = o.id AND g.status NOT IN ('settled', 'withdrawn', 'denied', 'closed')), 0) as open_grievances,
-        COALESCE((SELECT COUNT(*) FROM grievances g WHERE g.organization_id = o.id AND g.status = 'settled'), 0) as resolved_grievances,
+        COALESCE((SELECT COUNT(*) FROM grievances g WHERE g.organization_id = o.id AND g.demo_seed_id IS NULL AND g.status NOT IN ('settled', 'withdrawn', 'denied', 'closed')), 0) as open_grievances,
+        COALESCE((SELECT COUNT(*) FROM grievances g WHERE g.organization_id = o.id AND g.demo_seed_id IS NULL AND g.status = 'settled'), 0) as resolved_grievances,
         COALESCE((SELECT COUNT(*) FROM collective_agreements ca WHERE ca.organization_id = o.id), 0) as total_cbas,
         (SELECT ROUND(AVG(n.score), 1) FROM customer_nps_surveys n WHERE n.organization_id = o.id) as nps_avg
       FROM organizations o

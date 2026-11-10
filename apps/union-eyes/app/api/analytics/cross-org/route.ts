@@ -1,137 +1,25 @@
 /**
- * Cross-org analytics — aggregates metrics across all organisations.
- * Requires platform-level auth (platform_lead or higher).
+ * GET /api/analytics/cross-org
+ *
+ * Refused for every caller. The route aggregated every organization's analytics metrics (counts, totals, averages, and the minimum and
+ * maximum, which with two contributing organizations are each organization's own figure) for anyone holding the platform_lead title. Those
+ * metrics are each organization's content: a platform title is no authority over them, nor is the platform-staff fact, even as an aggregate
+ * (issues #1116, #1118; DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY), and cross-organization grants are not built, so it is denied. No table is
+ * read. An organization's own analytics are served by /api/organizations/[id]/analytics under that organization's RLS context.
  */
 import { withApi } from '@/lib/api/with-api';
-import { analyticsMetrics } from '@/db/schema';
-import { desc } from 'drizzle-orm';
-import { withSystemContext } from '@/lib/db/with-rls-context';
-import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { ApiError } from '@/lib/api/errors';
 
 export const dynamic = 'force-dynamic';
 
-interface CrossOrgMetricRow {
-  organizationId: string;
-  metricType: string;
-  metricValue: string | number | null;
-  metricUnit: string | null;
-  periodStart: Date | string;
-  periodEnd: Date | string;
-  trend: string | null;
-}
-
-function numericValue(value: string | number | null): number {
-  if (typeof value === 'number') {
-    return Number.isFinite(value) ? value : 0;
-  }
-
-  const parsed = Number.parseFloat(value ?? '0');
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function isoDate(value: Date | string): string {
-  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
-}
-
-function buildAggregateSummary(rows: CrossOrgMetricRow[]) {
-  const groups = new Map<string, {
-    metricType: string;
-    metricUnit: string | null;
-    metricCount: number;
-    totalValue: number;
-    minValue: number;
-    maxValue: number;
-    periodStart: string;
-    periodEnd: string;
-    latestTrend: string | null;
-    organizations: Set<string>;
-  }>();
-
-  for (const row of rows) {
-    const value = numericValue(row.metricValue);
-    const periodStart = isoDate(row.periodStart);
-    const periodEnd = isoDate(row.periodEnd);
-    const current = groups.get(row.metricType);
-
-    if (!current) {
-      groups.set(row.metricType, {
-        metricType: row.metricType,
-        metricUnit: row.metricUnit,
-        metricCount: 1,
-        totalValue: value,
-        minValue: value,
-        maxValue: value,
-        periodStart,
-        periodEnd,
-        latestTrend: row.trend,
-        organizations: new Set([row.organizationId]),
-      });
-      continue;
-    }
-
-    current.metricCount += 1;
-    current.totalValue += value;
-    current.minValue = Math.min(current.minValue, value);
-    current.maxValue = Math.max(current.maxValue, value);
-    current.periodStart = periodStart < current.periodStart ? periodStart : current.periodStart;
-    current.periodEnd = periodEnd > current.periodEnd ? periodEnd : current.periodEnd;
-    current.latestTrend ??= row.trend;
-    current.organizations.add(row.organizationId);
-  }
-
-  return Array.from(groups.values()).map((group) => ({
-    metricType: group.metricType,
-    metricUnit: group.metricUnit,
-    metricCount: group.metricCount,
-    contributingOrganizations: group.organizations.size,
-    totalValue: group.totalValue,
-    averageValue: group.metricCount ? group.totalValue / group.metricCount : 0,
-    minValue: group.minValue,
-    maxValue: group.maxValue,
-    periodStart: group.periodStart,
-    periodEnd: group.periodEnd,
-    latestTrend: group.latestTrend,
-  }));
-}
-
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'platform_lead' },
-    openapi: { tags: ['Analytics'], summary: 'Cross-org aggregate analytics metrics' },
+    openapi: { tags: ['Analytics'], summary: 'Cross-organization analytics (refused: no cross-organization grant exists)' },
   },
-  async ({ userId, organizationId }) => {
-    if (!userId || !organizationId) throw ApiError.forbidden('An active organization is required to read cross-organization analytics');
-    // The read crosses every tenant, so it runs under the system role on purpose (not whatever the connection role happens to show) and is recorded with the read.
-    return withSystemContext(async (tx) => {
-      const rows = await tx
-        .select({
-          organizationId: analyticsMetrics.organizationId,
-          metricType: analyticsMetrics.metricType,
-          metricValue: analyticsMetrics.metricValue,
-          metricUnit: analyticsMetrics.metricUnit,
-          periodStart: analyticsMetrics.periodStart,
-          periodEnd: analyticsMetrics.periodEnd,
-          trend: analyticsMetrics.trend,
-        })
-        .from(analyticsMetrics)
-        .orderBy(desc(analyticsMetrics.createdAt))
-        .limit(1000);
-
-      await persistAtomicAudit(tx, {
-        userId,
-        organizationId,
-        resourceType: 'analytics_metrics',
-        action: 'analytics.cross_org.read',
-        details: { sourceRowsAggregated: rows.length },
-      });
-
-      return {
-        dataClass: 'aggregate_only',
-        items: buildAggregateSummary(rows as CrossOrgMetricRow[]),
-        sourceRowsAggregated: rows.length,
-        rawRowsExposed: false,
-      };
-    });
+  async () => {
+    throw ApiError.forbidden(
+      'Analytics across organizations are not available: each organization\'s metrics are its own content, and no cross-organization grant exists.',
+    );
   },
 );

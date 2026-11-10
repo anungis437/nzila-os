@@ -4,6 +4,7 @@ import { grievances } from '@/db/schema/domains/claims/grievances';
 import { assignedCaseRepresentativeIds } from '@/lib/services/case-access-service';
 import { documents, documentLinks } from '@/db/schema/documents-schema';
 import { logger } from '@/lib/logger';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 import {
   filterAuthorizedDocumentsForActor,
   type DocumentAuthorizationActor,
@@ -36,7 +37,7 @@ async function getCaseSnapshot(caseId: string, orgId: string) {
       createdAt: grievances.createdAt,
     })
     .from(grievances)
-    .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, orgId)))
+    .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, orgId), productionGrievanceCondition()))
     .limit(1);
 
   return (caseRow ?? null) as CaseSnapshot | null;
@@ -146,6 +147,7 @@ export async function getRelatedDocuments(params: {
         .where(
           and(
             eq(grievances.organizationId, params.context.orgId),
+            productionGrievanceCondition(),
             sql`${grievances.id} <> ${params.context.caseId}::uuid`,
             or(
               currentCase.grievantId ? eq(grievances.grievantId, currentCase.grievantId) : sql`false`,

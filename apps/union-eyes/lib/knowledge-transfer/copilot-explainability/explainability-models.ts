@@ -7,7 +7,10 @@
  * NO opaque AI responses. Every answer is auditable and governance-safe.
  */
 
-export type CopilotConfidence = 'high' | 'medium' | 'low' | 'insufficient_data';
+/** How much evidence (interviews/nodes/signals) backs a response - a volume measure, not a claim that the
+ *  response is correct, verified or statistically reliable. 'insufficient_data' means there was nothing to look
+ *  at at all. See lib/knowledge-transfer/governance/evidence-basis.ts. */
+export type CopilotEvidenceCoverage = 'high' | 'medium' | 'low' | 'insufficient_data';
 
 export type CopilotResponseType =
   | 'continuity_analysis'
@@ -26,7 +29,8 @@ export interface EvidenceReference {
   dataPoint: string;
   /** Source type: interview analysis, graph computation, simulation, forecast */
   sourceType: 'interview_analysis' | 'graph_computation' | 'simulation' | 'forecast' | 'resilience_index';
-  confidence: CopilotConfidence;
+  /** How much evidence backs this reference - not a claim the observation itself is correct. */
+  evidenceCoverage: CopilotEvidenceCoverage;
 }
 
 export interface ReasoningLink {
@@ -45,14 +49,20 @@ export interface GovernanceFlag {
 export interface CopilotExplainabilityEnvelope {
   /** What data was used to form this response */
   evidenceReferences: EvidenceReference[];
-  /** Step-by-step reasoning chain */
+  /** Step-by-step reasoning chain. Each link's own `assumption` is specific to that computation. */
   reasoningChain: ReasoningLink[];
-  /** Key assumptions made */
+  /**
+   * Standing methodology caveats that apply to every response from this engine (e.g. "based on published exit
+   * interviews", "single-source counts may undercount"). These are NOT derived from, or specific to, this
+   * particular query - they are the same limitations of the underlying analysis method every time. Do not present
+   * these as findings the model made about this interaction (DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED).
+   */
   assumptions: string[];
   /** Governance considerations surfaced */
   governanceFlags: GovernanceFlag[];
-  /** Overall confidence in the response */
-  overallConfidence: CopilotConfidence;
+  /** Overall evidence coverage behind the response - a volume measure (see CopilotEvidenceCoverage), not a claim
+   *  that the response's content is verified or correct. */
+  overallEvidenceCoverage: CopilotEvidenceCoverage;
   /** What this response does NOT cover */
   limitations: string[];
   /** How to verify or challenge this response */

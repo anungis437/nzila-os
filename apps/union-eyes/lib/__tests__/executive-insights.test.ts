@@ -40,6 +40,7 @@ vi.mock("drizzle-orm", () => ({
   desc: vi.fn((x: any) => x),
   count: vi.fn(() => "count"),
   sql: vi.fn(),
+  isNull: vi.fn((x: any) => ({ isNull: x })),
   relations: vi.fn(() => ({})),
 }));
 

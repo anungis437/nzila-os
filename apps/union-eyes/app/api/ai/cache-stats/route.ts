@@ -21,6 +21,7 @@ import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/ope
 import { embeddingCache } from '@/lib/services/ai/embedding-cache';
 import { logger } from '@/lib/logger';
 import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-responses';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 
 /**
  * GET /api/ai/cache-stats
@@ -30,6 +31,7 @@ import { ErrorCode, standardErrorResponse } from '@/lib/api/standardized-respons
  */
 export const GET = withSystemAdminAuth(async (_request: NextRequest, context: BaseAuthContext) => {
   try {
+    await requirePlatformStaffAuthority(context, 'platform.ai_cache.manage');
     const user = await getCurrentUser();
     
     // Get cache statistics
@@ -85,6 +87,7 @@ const aiCacheStatsSchema = z.object({
 
 export const POST = withSystemAdminAuth(async (request: NextRequest, context: BaseAuthContext) => {
   try {
+    await requirePlatformStaffAuthority(context, 'platform.ai_cache.manage');
     const user = await getCurrentUser();
     const body = await request.json();
     // Validate request body

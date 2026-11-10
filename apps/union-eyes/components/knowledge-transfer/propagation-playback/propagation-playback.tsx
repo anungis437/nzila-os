@@ -38,6 +38,13 @@ export interface PropagationPlaybackData {
   twelveWeekProjection?: number | null;
   /** Probability (0-100) that the organization recovers without outside help, when the simulation gives one. */
   autonomousRecoveryProbability?: number | null;
+  /** Every figure above is a scenario model over the exploratory propagation graph, never a confirmed operational fact - see methodologyNote for why. */
+  methodologyNote: string;
+  /** How many of this scenario's affected nodes have at least one currently-verified dependency record on file. */
+  verifiedDependencyContext: {
+    verifiedImpacts: Array<{ fromNodeId: string; nodeId: string; chain: string[]; evidenceTier: 'system_resolved_document' | 'human_attested_external' }>;
+    totalAffectedNodes: number;
+  };
 }
 
 interface Props {
@@ -105,6 +112,10 @@ export function PropagationPlayback({ playback }: Props) {
       <div>
         <h3 className="text-sm font-semibold text-slate-800">{playback.scenarioName}</h3>
         <p className="text-xs text-slate-500">Disruption type: {playback.disruptionType} — {maxWeek}-week simulation</p>
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2">
+          Scenario model, not a confirmed impact: {playback.verifiedDependencyContext.verifiedImpacts.length} downstream impact(s) from the{' '}
+          {playback.verifiedDependencyContext.totalAffectedNodes} affected node(s) are reached through a chain of currently-verified dependencies; the rest of the spread is inferred.
+        </p>
       </div>
 
       {/* Sparkline timeline */}

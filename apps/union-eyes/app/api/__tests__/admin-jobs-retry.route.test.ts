@@ -15,6 +15,7 @@ const m = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/api-auth-guard', () => ({ withSystemAdminAuth: m.withSystemAdminAuth }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: vi.fn(async (context) => context) }));
 vi.mock('@/lib/job-queue', () => ({ retryJob: m.retryJob }));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: {

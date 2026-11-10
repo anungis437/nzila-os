@@ -76,7 +76,12 @@ export const AUTH_PRIVILEGE_EXPECTATIONS: Record<string, Record<string, Record<s
     users: { SELECT: ['user_id', 'two_factor_enabled'], UPDATE: ['two_factor_enabled'] },
     mfa_totp: { SELECT: '*', UPDATE: ['disabled_at', 'updated_at'] }, auth_audit_log: { INSERT: '*' },
   },
-  nzila_auth_provider: { users: { SELECT: '*' } },
+  nzila_auth_provider: {
+    users: { SELECT: '*' },
+    organization_users: { SELECT: ['user_id', 'organization_id', 'role', 'is_active'] },
+    org_auth_policies: { SELECT: '*' },
+    user_sessions: { SELECT: ['session_id', 'user_id', 'organization_id', 'expires_at'], INSERT: '*' },
+  },
   nzila_auth_provider_reader: { users: { SELECT: ['user_id', 'is_system_admin', 'is_active', 'lifecycle_state'] } },
 }
 

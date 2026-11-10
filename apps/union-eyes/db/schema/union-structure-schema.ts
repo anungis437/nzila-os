@@ -22,7 +22,7 @@ import {
   uniqueIndex,
   pgEnum,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import { type PgColumn } from 'drizzle-orm/pg-core';
 import { organizations } from '../schema-organizations';
 import { profiles } from './domains/member/profiles';
@@ -131,6 +131,8 @@ export const employers = pgTable(
     organizationId: uuid('organization_id')
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
+    /** Immutable provenance for rows created by the pilot demo-data lifecycle; null means production data. */
+    demoSeedId: uuid('demo_seed_id'),
 
     // Basic Information
     name: varchar('name', { length: 255 }).notNull(),
@@ -188,6 +190,7 @@ export const employers = pgTable(
   },
   (table) => ({
     organizationIdx: index('idx_employers_organization').on(table.organizationId),
+    demoSeedIdx: index('idx_employers_demo_seed').on(table.organizationId, table.demoSeedId).where(sql`demo_seed_id IS NOT NULL`),
     statusIdx: index('idx_employers_status').on(table.status),
     nameIdx: index('idx_employers_name').on(table.name),
     parentCompanyIdx: index('idx_employers_parent_company').on(table.parentCompanyId),

@@ -18,7 +18,7 @@ import { derivedAnalyticsCondition } from '../governance/interview-access';
 import { inOrganization } from '../org-scope';
 import { ApiError } from '@/lib/api/errors';
 import { exitInterviews } from '@/db/schema';
-import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import { loadGraphEvidence, verifiedImpactChains } from '../propagation/graph-evidence-service';
 import type { DependencyNode, PropagationMap } from '../propagation/propagation-models';
 import type {
   SimulationScenario,
@@ -35,6 +35,13 @@ import {
 } from './simulation-models';
 
 type PublishedInterview = Awaited<ReturnType<typeof loadPublishedInterviews>>[number];
+
+/** Carried verbatim on every ContinuitySimulationResult; see the field's own doc comment for why. */
+const SIMULATION_METHODOLOGY_NOTE =
+  'Every domain impact, recovery timeline, degradation figure and exacerbated weakness is a hypothetical scenario ' +
+  'model computed from exit-interview tag co-occurrence and the scenario\'s own stated assumptions, not a verified ' +
+  'measurement of current operational dependency, ownership or recovery time. Useful for discussion and ' +
+  'continuity planning; never report it as a confirmed statement of present organizational risk.';
 
 async function loadPublishedInterviews(orgId: string) {
   // Read as the runtime role in the organization's own tenant transaction.
@@ -54,8 +61,10 @@ export async function simulateContinuityImpact(
   orgId: string,
   scenario: SimulationScenario,
 ): Promise<ContinuitySimulationResult> {
-  // Build propagation map (current organizational dependencies)
-  const propagationMap = await buildDependencyPropagationMap(orgId);
+  // Build propagation map (current organizational dependencies) and the current verified evidence, together, so the
+  // disclosure below is judged against the same graph the projection uses.
+  const evidence = await loadGraphEvidence(orgId);
+  const propagationMap = evidence.exploratory;
 
   // Load baseline (current interviews for doc quality assessment)
   const interviews = await loadPublishedInterviews(orgId);
@@ -150,10 +159,24 @@ export async function simulateContinuityImpact(
     immediateImpactScore >= 40 ? 'medium' :
     'low';
 
+  // Which downstream impacts of this scenario are corroborated: a node reached from an affected node through a chain
+  // of currently-verified, correctly-directed dependencies. Never gates the simulation (exploratory scenario modeling
+  // is kept, per DEF-0B7-COGB) - it discloses what part of the projected spread is backed by evidence.
+  const verifiedImpacts: ContinuitySimulationResult['verifiedDependencyContext']['verifiedImpacts'] = [];
+  for (const node of affectedNodes) {
+    for (const [nodeId, { chain, assessment }] of verifiedImpactChains(evidence, node.id)) {
+      verifiedImpacts.push({ fromNodeId: node.id, nodeId, chain, evidenceTier: assessment.evidenceTier });
+    }
+  }
+  const verifiedDependencyContext = { verifiedImpacts, totalAffectedNodes: affectedNodes.length };
+
   return {
     organizationId: orgId,
     generatedAt: new Date().toISOString(),
     scenario,
+    evidenceBasis: 'exploratory_simulation' as const,
+    methodologyNote: SIMULATION_METHODOLOGY_NOTE,
+    verifiedDependencyContext,
     baselineContinuityScore,
     immediateImpactScore,
     twelveWeekProjection,

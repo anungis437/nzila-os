@@ -10,6 +10,8 @@
  * - Trust metrics
  */
 
+import type { PilotMetricsMeasurement } from '@/lib/pilot/pilot-measurements';
+
 // ============================================================================
 // IMPACT METRICS
 // ============================================================================
@@ -180,22 +182,28 @@ export interface PilotMetrics {
   organizationSlug?: string;
   enrollmentDate: Date;
   daysActive: number;
-  organizerAdoptionRate: number; // percentage 0-100
-  memberEngagementRate: number; // percentage 0-100
+  /** Percentage 0-100, or null: not measured (no per-member activity is recorded; see lib/pilot/pilot-measurements.ts). */
+  organizerAdoptionRate: number | null;
+  /** Percentage 0-100, or null: not measured. */
+  memberEngagementRate: number | null;
   casesManaged: number;
-  avgTimeToResolution: number; // hours
-  healthScore: number; // 0-100
+  /** Hours, over resolved cases only; null when no case in the window was resolved. */
+  avgTimeToResolution: number | null;
+  healthScore: number; // 0-100, the value stored on the enrollment
   milestones: PilotMilestone[];
   lastCalculated: Date;
+  /** What each figure is (measured, stored or not measured), as the routes report it. */
+  measurement?: PilotMetricsMeasurement;
 }
 
+/** A component is null when its input is not measured; the overall score is null unless every component is measured. */
 export interface PilotHealthScoreBreakdown {
-  overall: number;
-  adoption: number;
-  engagement: number;
-  usage: number;
-  effectiveness: number;
-  progress: number;
+  overall: number | null;
+  adoption: number | null;
+  engagement: number | null;
+  usage: number | null;
+  effectiveness: number | null;
+  progress: number | null;
 }
 
 // ============================================================================

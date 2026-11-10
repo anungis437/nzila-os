@@ -264,6 +264,14 @@ describe("RAGService", () => {
     expect(results[1].excerpt).toBe("Short...");
   });
 
+  // DEF-0B2-AI-DATA-CLASS-DOWNGRADE: the embedded question can name individuals and their circumstances; it must not be declared 'internal'.
+  it("searchDocuments declares the embed call member_personal, not internal", async () => {
+    mocks.searchKb.mockResolvedValueOnce([]);
+    await rag.searchDocuments("grievance", { organizationId: "org-1" });
+    const request = mocks.mockAiEmbed.mock.calls[0][0];
+    expect(request.dataClass).toBe("sensitive");
+  });
+
   it("searchDocuments asks the database for the best matches above the threshold, scoped to the organization and the reader's levels", async () => {
     await rag.searchDocuments("grievance", {
       organizationId: "org-1",
@@ -403,6 +411,14 @@ describe("ChatbotService", () => {
     });
     expect(msg.role).toBe("assistant");
     expect(msg.content).toContain("union rights");
+  });
+
+  // DEF-0B2-AI-DATA-CLASS-DOWNGRADE: member chat text can name individuals and their circumstances; it must not be declared 'internal'.
+  it("sendMessage declares the generate call member_personal, not internal", async () => {
+    mocks.mockSelectLimit.mockResolvedValueOnce([session]).mockResolvedValueOnce([]);
+    await bot.sendMessage({ sessionId: "sess-1", userId: "user-1", organizationId: "org-1", content: "What are my rights?" });
+    const request = mocks.mockAiGenerate.mock.calls[0][0];
+    expect(request.dataClass).toBe("sensitive");
   });
 
   it("sendMessage retrieves knowledge for the sender's readable levels and gives the model the matched excerpts as context", async () => {

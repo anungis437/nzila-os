@@ -1,9 +1,9 @@
 /**
- * F06 R5 — what a stored but unconsumed configuration says it needs before it can do anything.
+ * F06 R5 — what configured capabilities say they need before they can do anything.
  *
- * SSO providers and integrations are saved by administrators and read by no runtime consumer. The statement they carry names the one blocked
- * operation and judges each requirement from the stored row: the configuration's own completeness is checked, and an approval or provider-side
- * fact that nothing records is reported unmet, never assumed. Secrets are inspected for presence and never returned.
+ * OIDC SSO has a runtime consumer, while generic integration sync remains unavailable. The statement judges each requirement from the stored
+ * row: the configuration's own completeness is checked, and an approval or provider-side fact that nothing records is reported unmet, never
+ * assumed. Secrets are inspected for presence and never returned.
  */
 import { describe, expect, it } from 'vitest'
 import {
@@ -18,7 +18,7 @@ const unmetCodes = (r: { requirements: readonly { code: string; met: boolean }[]
 
 describe('the statement is specific', () => {
   it('names the one blocked operation and what it requires, with who owns each requirement', () => {
-    expect(SSO_SIGN_IN_EFFECT.inEffect).toBe(false)
+    expect(SSO_SIGN_IN_EFFECT.inEffect).toBe(true)
     expect(SSO_SIGN_IN_EFFECT.blockedOperation.operation).toBe('auth.sso.federated_sign_in')
     expect(SSO_SIGN_IN_EFFECT.blockedOperation.requires.join(' ')).toMatch(/institution approves/)
     expect(INTEGRATION_SYNC_EFFECT.inEffect).toBe(false)
@@ -31,18 +31,20 @@ describe('SSO provider readiness', () => {
   const completeOidc = { providerType: 'oidc', oidcIssuer: 'https://idp.example.test', oidcClientId: 'c', oidcClientSecret: 'enc:abc', oidcAuthorizationEndpoint: 'https://idp/a', oidcTokenEndpoint: 'https://idp/t' }
   const completeSaml = { providerType: 'saml', samlEntityId: 'e', samlSsoUrl: 'https://idp/sso', samlCertificate: '-----CERT-----' }
 
-  it('judges configuration completeness from the row, and is still not ready: approval, domain verification and federation are not recorded anywhere', () => {
+  it('requires complete configuration and recorded independent approval; immutable subject binding is enforced at sign-in', () => {
     const r = ssoReadiness(completeOidc)
     expect(r.ready).toBe(false)
     expect(r.requirements.find((x) => x.code === 'configuration_complete')?.met).toBe(true)
-    expect(unmetCodes(r)).toEqual(['provider_approved_by_institution', 'email_domain_ownership_verified', 'platform_authentication_federation'])
+    expect(unmetCodes(r)).toEqual(['provider_approved_by_institution', 'provider_subject_binding'])
     expect(r.requirements.find((x) => x.code === 'provider_approved_by_institution')?.owner).toBe('institution')
     expect(ssoReadiness(completeSaml).requirements[0].met).toBe(true)
   })
 
   it('reports an incomplete configuration as such, for each provider type', () => {
     expect(ssoReadiness({ ...completeOidc, oidcClientSecret: null }).requirements[0].met).toBe(false)
-    expect(ssoReadiness({ ...completeOidc, oidcTokenEndpoint: '  ' }).requirements[0].met).toBe(false)
+    // OIDC endpoints are issuer-discovered and constrained to that issuer's host;
+    // a caller-stored endpoint is neither required nor trusted.
+    expect(ssoReadiness({ ...completeOidc, oidcTokenEndpoint: '  ' }).requirements[0].met).toBe(true)
     expect(ssoReadiness({ ...completeSaml, samlCertificate: null }).requirements[0].met).toBe(false)
   })
 

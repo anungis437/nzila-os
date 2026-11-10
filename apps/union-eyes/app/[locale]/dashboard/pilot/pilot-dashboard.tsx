@@ -122,6 +122,13 @@ export default function PilotDashboard({ supportEmail }: { supportEmail: string 
 // Platform Overview (NZILA sees all pilot orgs)
 // ============================================================================
 
+const percentOrNotMeasured = (value: number | null) => value === null ? 'Not measured' : `${value}%`;
+const scoreOrNotMeasured = (value: number | null) => value === null ? '—' : value;
+const pilotStatusColor = (status: string) => status === 'excellent' ? '#10b981'
+  : status === 'good' ? '#3b82f6'
+    : status === 'needs-attention' ? '#f59e0b'
+      : status === 'not-measured' ? '#6b7280' : '#ef4444';
+
 function PlatformOverview({
   orgs,
   onSelectOrg,
@@ -157,7 +164,7 @@ function PlatformOverview({
 
         <HumanCenteredCallout
           variant="transparency"
-          message="All metrics are calculated from system usage data. No individual surveillance—only organizational health."
+          message="Cases and milestones come from recorded events. Adoption and engagement are shown as not measured until real activity evidence exists; membership-row edits are never treated as use."
           className="mb-8"
         />
 
@@ -171,7 +178,7 @@ function PlatformOverview({
           </div>
           <div className="bg-white rounded-lg shadow-sm p-6 text-center">
             <div className="text-sm font-medium text-gray-500 mb-1">
-              Avg Health Score
+              Avg Health Score (stored enrollment value)
             </div>
             <div
               className="text-4xl font-bold"
@@ -265,15 +272,8 @@ function PlatformOverview({
                     <div
                       className="h-full transition-all duration-500"
                       style={{
-                        width: `${breakdown.overall}%`,
-                        backgroundColor:
-                          status.status === 'excellent'
-                            ? '#10b981'
-                            : status.status === 'good'
-                              ? '#3b82f6'
-                              : status.status === 'needs-attention'
-                                ? '#f59e0b'
-                                : '#ef4444',
+                        width: `${breakdown.overall ?? 0}%`,
+                        backgroundColor: pilotStatusColor(status.status),
                       }}
                     />
                   </div>
@@ -282,13 +282,13 @@ function PlatformOverview({
                   <div className="grid grid-cols-4 gap-3 text-center text-sm">
                     <div>
                       <div className="font-semibold text-gray-900">
-                        {org.organizerAdoptionRate}%
+                        {percentOrNotMeasured(org.organizerAdoptionRate)}
                       </div>
                       <div className="text-gray-500">Adoption</div>
                     </div>
                     <div>
                       <div className="font-semibold text-gray-900">
-                        {org.memberEngagementRate}%
+                        {percentOrNotMeasured(org.memberEngagementRate)}
                       </div>
                       <div className="text-gray-500">Engagement</div>
                     </div>
@@ -400,12 +400,8 @@ function OrgPilotDetail({ metrics, supportEmail }: { metrics: PilotMetrics; supp
           <div
             className="h-full transition-all duration-500"
             style={{
-              width: `${breakdown.overall}%`,
-              backgroundColor:
-                status.status === 'excellent' ? '#10b981' :
-                status.status === 'good' ? '#3b82f6' :
-                status.status === 'needs-attention' ? '#f59e0b' :
-                '#ef4444'
+              width: `${breakdown.overall ?? 0}%`,
+              backgroundColor: pilotStatusColor(status.status),
             }}
           />
         </div>
@@ -429,20 +425,20 @@ function OrgPilotDetail({ metrics, supportEmail }: { metrics: PilotMetrics; supp
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Organizer Adoption</h3>
-          <div className="text-4xl font-bold text-blue-600 mb-2">{breakdown.adoption}</div>
+          <div className="text-4xl font-bold text-blue-600 mb-2">{scoreOrNotMeasured(breakdown.adoption)}</div>
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-3">
-            <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${breakdown.adoption}%` }} />
+            <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${breakdown.adoption ?? 0}%` }} />
           </div>
-          <p className="text-sm text-gray-600">{metrics.organizerAdoptionRate}% of organizers actively using the system</p>
+          <p className="text-sm text-gray-600">{metrics.organizerAdoptionRate === null ? 'Not measured: no organizer activity event is recorded' : `${metrics.organizerAdoptionRate}% of organizers actively using the system`}</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Member Engagement</h3>
-          <div className="text-4xl font-bold text-green-600 mb-2">{breakdown.engagement}</div>
+          <div className="text-4xl font-bold text-green-600 mb-2">{scoreOrNotMeasured(breakdown.engagement)}</div>
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-3">
-            <div className="h-full bg-green-600 transition-all duration-500" style={{ width: `${breakdown.engagement}%` }} />
+            <div className="h-full bg-green-600 transition-all duration-500" style={{ width: `${breakdown.engagement ?? 0}%` }} />
           </div>
-          <p className="text-sm text-gray-600">{metrics.memberEngagementRate}% of members have interacted with the system</p>
+          <p className="text-sm text-gray-600">{metrics.memberEngagementRate === null ? 'Not measured: no member activity event is recorded' : `${metrics.memberEngagementRate}% of members have interacted with the system`}</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6">
@@ -456,18 +452,18 @@ function OrgPilotDetail({ metrics, supportEmail }: { metrics: PilotMetrics; supp
 
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Effectiveness</h3>
-          <div className="text-4xl font-bold text-orange-600 mb-2">{breakdown.effectiveness}</div>
+          <div className="text-4xl font-bold text-orange-600 mb-2">{scoreOrNotMeasured(breakdown.effectiveness)}</div>
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-3">
-            <div className="h-full bg-orange-600 transition-all duration-500" style={{ width: `${breakdown.effectiveness}%` }} />
+            <div className="h-full bg-orange-600 transition-all duration-500" style={{ width: `${breakdown.effectiveness ?? 0}%` }} />
           </div>
-          <p className="text-sm text-gray-600">Average time to resolution: {metrics.avgTimeToResolution} hours</p>
+          <p className="text-sm text-gray-600">{metrics.avgTimeToResolution === null ? 'Average time to resolution: not measured (no resolved case in the window)' : `Average time to resolution: ${metrics.avgTimeToResolution} hours (resolved cases only)`}</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Milestone Progress</h3>
-          <div className="text-4xl font-bold text-teal-600 mb-2">{breakdown.progress}</div>
+          <div className="text-4xl font-bold text-teal-600 mb-2">{scoreOrNotMeasured(breakdown.progress)}</div>
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-3">
-            <div className="h-full bg-teal-600 transition-all duration-500" style={{ width: `${breakdown.progress}%` }} />
+            <div className="h-full bg-teal-600 transition-all duration-500" style={{ width: `${breakdown.progress ?? 0}%` }} />
           </div>
           <p className="text-sm text-gray-600">
             {metrics.milestones.filter(m => m.status === 'complete').length} of {metrics.milestones.length} milestones complete

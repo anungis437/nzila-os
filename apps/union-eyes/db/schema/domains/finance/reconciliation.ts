@@ -15,8 +15,9 @@
 
 import {
   pgTable, pgEnum, uuid, varchar, text, timestamp, decimal,
-  integer, jsonb, index,
+  integer, jsonb, index, uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { organizations } from '../../../schema-organizations';
 
 // ============================================================================
@@ -137,6 +138,41 @@ export const reconciliationExceptions = pgTable('reconciliation_exceptions', {
   orgIdx: index('reconciliation_exceptions_org_idx').on(t.organizationId),
   statusIdx: index('reconciliation_exceptions_status_idx').on(t.status),
   typeIdx: index('reconciliation_exceptions_type_idx').on(t.exceptionType),
+}));
+
+export const reconciliationResolutionDecisions = pgTable('reconciliation_resolution_decisions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  exceptionId: uuid('exception_id').notNull().references(() => reconciliationExceptions.id, { onDelete: 'restrict' }),
+  disposition: varchar('disposition', { length: 24 }).notNull(),
+  status: varchar('status', { length: 16 }).notNull().default('pending'),
+  requestedBy: varchar('requested_by', { length: 255 }).notNull(),
+  requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow().notNull(),
+  approvedBy: varchar('approved_by', { length: 255 }),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  evidenceDigest: varchar('evidence_digest', { length: 64 }).notNull(),
+  notes: text('notes').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  pendingExceptionUq: uniqueIndex('reconciliation_resolution_decisions_exception_uniq').on(t.exceptionId),
+  orgStatusIdx: index('reconciliation_resolution_decisions_org_status_idx').on(t.organizationId, t.status),
+}));
+
+export const reconciliationResolutionPostings = pgTable('reconciliation_resolution_postings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  decisionId: uuid('decision_id').notNull().references(() => reconciliationResolutionDecisions.id, { onDelete: 'restrict' }),
+  debitAccount: varchar('debit_account', { length: 100 }).notNull(),
+  creditAccount: varchar('credit_account', { length: 100 }).notNull(),
+  debitAmountCad: decimal('debit_amount_cad', { precision: 14, scale: 2 }).notNull(),
+  creditAmountCad: decimal('credit_amount_cad', { precision: 14, scale: 2 }).notNull(),
+  reversalOfId: uuid('reversal_of_id'),
+  reason: text('reason').notNull(),
+  postedBy: varchar('posted_by', { length: 255 }).notNull(),
+  postedAt: timestamp('posted_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  decisionIdx: index('reconciliation_resolution_postings_decision_idx').on(t.decisionId),
+  reversalUq: uniqueIndex('reconciliation_resolution_postings_reversal_uniq').on(t.reversalOfId).where(sql`${t.reversalOfId} IS NOT NULL`),
 }));
 
 // ============================================================================

@@ -7,20 +7,35 @@ const m = vi.hoisted(() => {
   const state = {
     selectQueue: [] as unknown[][],
     lockCalls: [] as Array<{ limit: number; mode: string }>,
+    lockedApplication: null as Record<string, unknown> | null,
   };
 
   const nextSelect = () => Promise.resolve((state.selectQueue.shift() ?? []) as unknown[]);
 
   const createSelectChain = () => {
+    let joinedAcceptance = false;
     const chain = {
       from: vi.fn(() => chain),
+      innerJoin: vi.fn(() => { joinedAcceptance = true; return chain; }),
       where: vi.fn(() => chain),
-      limit: vi.fn((n: number) => ({
-        for: vi.fn((mode: string) => {
+      orderBy: vi.fn(() => chain),
+      limit: vi.fn((n: number) => {
+        const selected = () => joinedAcceptance
+          ? Promise.resolve([{
+              offerId: 'offer-accepted-1',
+              amount: state.lockedApplication?.verifiedPilotAmount,
+              memberCountBasis: state.lockedApplication?.verifiedMemberCount,
+            }])
+          : nextSelect();
+        return {
+        for: vi.fn(async (mode: string) => {
           state.lockCalls.push({ limit: n, mode });
-          return nextSelect();
+          const rows = await nextSelect();
+          state.lockedApplication = (rows[0] as Record<string, unknown> | undefined) ?? null;
+          return rows;
         }),
-      })),
+        then: (resolve: (value: unknown[]) => unknown, reject: (reason: unknown) => unknown) => selected().then(resolve, reject),
+      }; }),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;
@@ -38,8 +53,9 @@ const m = vi.hoisted(() => {
     resetQueues: () => {
       state.selectQueue = [];
       state.lockCalls = [];
+      state.lockedApplication = null;
     },
-    hasMinRole: vi.fn(),
+    hasPilotPlatformAuthority: vi.fn(),
     getCurrentUser: vi.fn(),
     persistAtomicAudit: vi.fn(),
     recordDenial: vi.fn(async () => true),
@@ -83,6 +99,7 @@ vi.mock('@/lib/pilot/pilot-ownership', () => ({
   authorizePilotAccess: m.authorizePilotAccess,
   getPilotEffectiveOrganizationId: m.getPilotEffectiveOrganizationId,
   getPilotVerifiedOrganizationId: m.getPilotVerifiedOrganizationId,
+  hasPilotPlatformAuthority: m.hasPilotPlatformAuthority,
 }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: m.withSystemContext,
@@ -95,7 +112,6 @@ vi.mock('@/lib/api-auth-guard', async (orig) => {
   const actual = await orig<typeof import('@/lib/api-auth-guard')>();
   return {
     ...actual,
-    hasMinRole: m.hasMinRole,
     getCurrentUser: m.getCurrentUser,
     withApiAuth: vi.fn(
       (handler: (req: NextRequest, ctx?: { params?: { id: string } }) => Promise<Response>) =>
@@ -132,6 +148,11 @@ vi.mock('@/lib/pilot/commercialization-wave1', () => ({
   inferPilotStatusFromCommercialState: m.inferPilotStatusFromCommercialState,
   isCommercialTransitionAllowed: m.isCommercialTransitionAllowed,
   normalizeCommercialState: m.normalizeCommercialState,
+  parsePriceBandLowerBound: () => 12000,
+}));
+vi.mock('@/lib/pilot/evidence-assessments', () => ({
+  loadCurrentPilotEvidence: vi.fn(async () => []),
+  proposalEvidenceFrom: vi.fn(() => ({ signals: {}, qualification: [] })),
 }));
 
 async function loadRoute() {
@@ -142,7 +163,7 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.resetQueues();
-    m.hasMinRole.mockResolvedValue(true);
+    m.hasPilotPlatformAuthority.mockResolvedValue(true);
     m.getCurrentUser.mockResolvedValue({ id: 'platform-admin-1', role: 'system_admin' });
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.authorizePilotAccess.mockResolvedValue({ ok: true, reason: 'platform', actorOrganizationId: null });
@@ -171,9 +192,9 @@ describe('pilot/apply/[id]/commercial-transition route', () => {
     });
   });
 
-  it('returns 403 when user lacks system_admin role', async () => {
+  it('returns 403 when the caller lacks platform-staff authority (a system_admin title is not enough)', async () => {
     const { POST } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+    m.hasPilotPlatformAuthority.mockResolvedValueOnce(false);
 
     const response = await POST(new NextRequest('http://localhost/api/pilot/apply/app-1/commercial-transition', {
       method: 'POST',

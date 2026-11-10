@@ -405,6 +405,7 @@ class Grievances(BaseModel):
 
     # Identity
     grievance_number = models.CharField(max_length=50, blank=True, unique=True)
+    demo_seed_id = models.UUIDField(null=True, blank=True, editable=False)
 
     # Classification
     type = models.CharField(max_length=20, choices=GRIEVANCE_TYPE_CHOICES, blank=True)

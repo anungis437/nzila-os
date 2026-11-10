@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
 import { withSystemAdminAuth } from '@/lib/api-auth-guard';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { performAuditedOperation, operationAuditResponse } from '@/lib/audit/operation-audit';
 import { backfillLegacyDocumentVersions } from '@/lib/documents/legacy-storage-backfill';
 
@@ -21,6 +22,7 @@ export const POST = withSystemAdminAuth(async (request, context) => {
   if (!organizationId || !userId) {
     return NextResponse.json({ error: { code: 'AUTH_REQUIRED', message: 'An acting organization is required' } }, { status: 401 });
   }
+  await requirePlatformStaffAuthority({ organizationId, userId }, 'platform.document_backfill.manage');
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) {

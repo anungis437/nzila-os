@@ -188,14 +188,17 @@ describe('location retention owner sweep', () => {
   it('a member\'s erasure logs each organization of the removed rows separately, initiated by the member, and logs nothing when nothing was removed', async () => {
     await seedTwoOrganizations()
     await pg.exec(`INSERT INTO geofence_events (user_id, geofence_id, organization_id, event_time, expires_at) VALUES ('user-a', gen_random_uuid(), '${ORG_B}', now() - interval '2 hours', now() + interval '22 hours')`)
-    const erased = await db.transaction(async (tx) => GeofencePrivacyService.eraseLocationData('user-a', tx as never))
-    expect(erased).toEqual({ trackingRecordsDeleted: 3, eventRecordsDeleted: 1, total: 4 })
+    const erased = await db.transaction(async (tx) => GeofencePrivacyService.eraseLocationData('user-a', ORG_A, tx as never))
+    expect(erased).toEqual({ trackingRecordsDeleted: 3, eventRecordsDeleted: 0, total: 3 })
+    const erasedOtherOrganization = await db.transaction(async (tx) => GeofencePrivacyService.eraseLocationData('user-a', ORG_B, tx as never))
+    expect(erasedOtherOrganization).toEqual({ trackingRecordsDeleted: 0, eventRecordsDeleted: 1, total: 1 })
     const rows = await entries()
     expect(rows.map(({ organization_id, record_count, deletion_type, initiated_by }) => ({ organization_id, record_count, deletion_type, initiated_by }))).toEqual([
       { organization_id: ORG_A, record_count: '3', deletion_type: 'user_request', initiated_by: 'user-a' },
       { organization_id: ORG_B, record_count: '1', deletion_type: 'user_request', initiated_by: 'user-a' },
     ])
-    await db.transaction(async (tx) => GeofencePrivacyService.eraseLocationData('user-a', tx as never))
+    await db.transaction(async (tx) => GeofencePrivacyService.eraseLocationData('user-a', ORG_A, tx as never))
+    await db.transaction(async (tx) => GeofencePrivacyService.eraseLocationData('user-a', ORG_B, tx as never))
     expect(await entries()).toHaveLength(2)
   })
 

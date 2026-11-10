@@ -1,4 +1,4 @@
-import { requireSystemAdmin } from "@/lib/api-auth-guard";
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { withRLSContext } from "@/lib/db/with-rls-context";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
@@ -79,7 +79,7 @@ export const PATCH = withApi(
   },
   async ({ params, body, userId, organizationId }) => {
     // The dataset is platform-wide (no organization column): changing it is platform authority, not an organization administrator's.
-    await requireSystemAdmin();
+    await requirePlatformStaffAuthority({ userId, organizationId }, 'platform.cba_dataset.curate');
     if (!userId || !organizationId) throw ApiError.badRequest("Organization context required");
     const { isActive, ...updateData } = body;
     const fields = Object.keys(updateData);

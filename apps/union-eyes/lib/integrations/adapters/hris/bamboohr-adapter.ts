@@ -117,6 +117,8 @@ export class BambooHRAdapter extends BaseIntegration {
   // ==========================================================================
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const startTime = Date.now();
@@ -130,6 +132,7 @@ export class BambooHRAdapter extends BaseIntegration {
       const orgs = options.orgs || this.capabilities.supportedEntities.filter(e => e !== 'time_off');
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           this.logOperation('sync', { entity, action: 'start' });
 
@@ -226,6 +229,7 @@ export class BambooHRAdapter extends BaseIntegration {
       }
 
       for (const bambooEmployee of employees) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalEmployees.findFirst({
             where: and(
@@ -315,6 +319,7 @@ export class BambooHRAdapter extends BaseIntegration {
       const departments = await this.client!.getDepartments();
 
       for (const bambooDept of departments) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalDepartments.findFirst({
             where: and(

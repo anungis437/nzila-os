@@ -71,7 +71,6 @@ describe('scheduled jobs manifest', () => {
     'cron/scheduled-reports': 'UE-CRON-SCHEDULED-REPORTS',
     'cron/monthly-dues': 'UE-CRON-MONTHLY-DUES',
     'cron/analytics/daily-metrics': 'UE-CRON-DAILY-METRICS',
-    'cron/billing-lifecycle': 'UE-CRON-BILLING-LIFECYCLE',
     'cron/calendar-sync': 'UE-ACTION-CALENDAR-SYNC',
   }
 

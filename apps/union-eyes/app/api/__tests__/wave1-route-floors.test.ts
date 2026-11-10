@@ -25,7 +25,10 @@ function routeFiles(dir: string): string[] {
 }
 
 describe('organizing campaign routes', () => {
-  const files = routeFiles(join(API, 'organizing')).filter((f) => readFileSync(f, 'utf8').includes('organizingCampaigns'));
+  const files = routeFiles(join(API, 'organizing')).filter((f) => {
+    const source = readFileSync(f, 'utf8');
+    return source.includes('organizingCampaigns') && source.includes('crudRoutes(');
+  });
 
   it('finds the campaign routes', () => {
     expect(files.map((p) => p.slice(API.length))).toHaveLength(1);
@@ -36,6 +39,15 @@ describe('organizing campaign routes', () => {
     expect(source).toMatch(/readRole:\s*'officer'/);
     expect(source).toMatch(/writeRole:\s*'officer'/);
     expect(source).not.toMatch(/(read|write)Role:\s*'member'/);
+  });
+});
+
+describe('reviewed organizing form generation', () => {
+  it('requires a steward and reads only its organization campaign', () => {
+    const source = readFileSync(join(API, 'organizing/forms/generate/route.ts'), 'utf8');
+    expect(source).toMatch(/minRole:\s*'steward'/);
+    expect(source).toContain('eq(organizingCampaigns.organizationId, organizationId)');
+    expect(source).not.toContain('export const GET');
   });
 });
 

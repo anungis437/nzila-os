@@ -6,6 +6,8 @@ const m = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   checkEntitlement: vi.fn(),
   audit: vi.fn(),
+  reserveVoiceUsage: vi.fn(),
+  finalizeVoiceUsage: vi.fn(),
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
@@ -23,6 +25,11 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (_context: unknown, cb: (tx: unknown) => Promise<unknown>) => cb({}),
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.audit }));
+vi.mock('@/lib/voice/usage-reservation', () => ({
+  voiceReservationCreditsForBytes: () => 1,
+  reserveVoiceUsage: m.reserveVoiceUsage,
+  finalizeVoiceUsage: m.finalizeVoiceUsage,
+}));
 vi.mock('@/lib/api/standardized-responses', () => ({
   ErrorCode: { VALIDATION_ERROR: 'VALIDATION_ERROR' },
   standardErrorResponse: (_code: string, message: string) =>
@@ -48,6 +55,7 @@ function buildRequest(file?: File, language?: string, consent: 'valid' | 'missin
   return new NextRequest('http://localhost/api/voice/upload', {
     method: 'POST',
     body: form,
+    headers: { 'idempotency-key': 'voice-upload-test-0001' },
   });
 }
 
@@ -61,6 +69,8 @@ describe('voice/upload route', () => {
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: null });
     m.checkEntitlement.mockResolvedValue({ allowed: true });
     m.audit.mockResolvedValue(undefined);
+    m.reserveVoiceUsage.mockResolvedValue({ replay: false, reservation: { id: 'reservation-1', status: 'reserved' } });
+    m.finalizeVoiceUsage.mockResolvedValue({ id: 'reservation-1', status: 'settled' });
     process.env.UE_VOICE_DISCLOSURE_NOTICE_VERSION = 'v1';
     process.env.UE_VOICE_DISCLOSURE_NOTICE_EN_CA = 'External transcription notice';
     process.env.UE_VOICE_DISCLOSURE_NOTICE_FR_CA = 'Avis de transcription externe';
@@ -71,6 +81,7 @@ describe('voice/upload route', () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({
       ok: true,
       status: 200,
+      headers: new Headers(),
       json: async () => ({
         text: 'transcribed text',
         language: 'en',
@@ -134,6 +145,7 @@ describe('voice/upload route', () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({
       ok: false,
       status: 404,
+      headers: new Headers(),
       text: async () => 'deployment missing',
     })));
     const file = new File([new Uint8Array([1, 2, 3])], 'ok.wav', { type: 'audio/wav' });
@@ -188,16 +200,18 @@ describe('voice/upload route', () => {
     const { POST } = await loadRoute();
     const order: string[] = [];
     m.audit.mockImplementation(async (_tx: unknown, event: any) => {
-      expect(event.details).toMatchObject({
-        noticeVersion: 'v1',
-        approvalReference: 'institutional-review-pending-fixture',
-        participantPermissionAsserted: true,
-      });
-      order.push('audit');
+      if (event.action === 'voice.usage.reserved') {
+        expect(event.details).toMatchObject({
+          noticeVersion: 'v1',
+          approvalReference: 'institutional-review-pending-fixture',
+          participantPermissionAsserted: true,
+        });
+        order.push('audit');
+      }
     });
     vi.stubGlobal('fetch', vi.fn(async () => {
       order.push('external');
-      return { ok: true, status: 200, json: async () => ({ text: 'hello' }) };
+      return { ok: true, status: 200, headers: new Headers(), json: async () => ({ text: 'hello' }) };
     }));
     const response = await POST(buildRequest(new File(['voice'], 'ok.wav', { type: 'audio/wav' })));
     expect(response.status).toBe(200);

@@ -42,7 +42,6 @@ describe('B53 messaging records and retained communications', () => {
   })
 
   it.each([
-    'app/api/organizing/forms/generate/route.ts',
     'app/api/organizing/labour-board/route.ts',
     'app/api/organizing/nlrb-filings/route.ts',
     'app/api/carbon/dashboard/route.ts',
@@ -53,11 +52,22 @@ describe('B53 messaging records and retained communications', () => {
     expect(text).not.toContain("searchParams.get('organizationId')")
   })
 
+  it('generates a real reviewed jurisdiction PDF and records its digest instead of returning JSON as a PDF', () => {
+    const text = read('app/api/organizing/forms/generate/route.ts')
+    expect(text).toContain("eq(organizingFormTemplateVersions.status, 'reviewed')")
+    expect(text).toContain("pdf.subarray(0, 5).toString('ascii') !== '%PDF-'")
+    expect(text).toContain("'Content-Type': 'application/pdf'")
+    expect(text).toContain('organizingFormGenerationReceipts')
+    expect(text).not.toContain('export const POST = notImplemented')
+  })
+
   it('binds a survey response to the survey of the caller organization and to an open survey (verified existing implementation)', () => {
     const text = read('app/api/communications/surveys/[surveyId]/responses/route.ts')
     expect(text).toContain('eq(surveys.organizationId, organizationId)')
     expect(text).toContain('Survey is not open')
-    expect(text).toContain("createPathBinding: { paramName: 'surveyId', field: 'surveyId' }")
+    // The inserted row's surveyId comes from the path-resolved survey record, not a client-supplied value — a
+    // client cannot bind a response to a different survey than the one the path and organization scope resolved.
+    expect(text).toContain('surveyId: survey.id')
     expect(text).toContain('zUUID.safeParse(params.surveyId)')
   })
 })

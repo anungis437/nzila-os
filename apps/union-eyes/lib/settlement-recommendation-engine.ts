@@ -8,7 +8,7 @@
 
 import { db } from "@/db/db";
 import { eq, and, desc, sql, inArray } from "drizzle-orm";
-import { claims, sharedClauseLibrary, type _Claim } from "@/db/schema";
+import { claims, sharedClauseLibrary } from "@/db/schema";
 
 // ============================================================================
 // TYPES
@@ -86,6 +86,30 @@ export type PredictionFeatures = {
   managementPosition?: string;
 };
 
+/** The claim fields this module's prediction and precedent-matching functions read. metadata is an untyped jsonb column; every access below goes through a local cast, matching the one already established in findSimilarPrecedents. */
+type ClaimForPrediction = {
+  claimId: string;
+  claimType: string;
+  priority: string;
+  department?: string | null;
+  description?: string | null;
+  filedAt?: Date | string | null;
+  incidentDate?: Date | string | null;
+  resolutionOutcome?: string | null;
+  metadata?: Record<string, unknown> | null;
+};
+
+/** The sharedClauseLibrary fields this module's clause-matching functions read. */
+type ClauseForMatching = {
+  id: string;
+  clauseNumber?: string | null;
+  clauseTitle: string;
+  clauseText: string;
+  clauseType?: string | null;
+};
+
+type OutcomePrediction = ReturnType<typeof predictOutcome>;
+
 // ============================================================================
 // SETTLEMENT PREDICTION
 // ============================================================================
@@ -153,8 +177,8 @@ return null;
 /**
  * Extract features from claim for prediction model
  */
-function extractPredictionFeatures(claim: any): PredictionFeatures {
-  const metadata = claim.metadata || {};
+function extractPredictionFeatures(claim: ClaimForPrediction): PredictionFeatures {
+  const metadata = (claim.metadata || {}) as Record<string, unknown>;
   
   return {
     claimType: claim.claimType,
@@ -168,8 +192,8 @@ function extractPredictionFeatures(claim: any): PredictionFeatures {
             (1000 * 60 * 60 * 24)
         )
       : 0,
-    violatedClauses: metadata.violatedClauses || [],
-    hasWitnesses: metadata.witnesses?.length > 0 || false,
+    violatedClauses: (metadata.violatedClauses as string[] | undefined) || [],
+    hasWitnesses: ((metadata.witnesses as unknown[] | undefined)?.length ?? 0) > 0,
     hasPastGrievances: false, // Would query database for this
     managementPosition: metadata.managementPosition,
   };
@@ -179,7 +203,7 @@ function extractPredictionFeatures(claim: any): PredictionFeatures {
  * Find precedent cases similar to current claim
  */
 async function findSimilarPrecedents(
-  claim: any,
+  claim: ClaimForPrediction,
   organizationId: string
 ): Promise<PrecedentCase[]> {
   try {
@@ -235,7 +259,7 @@ return [];
 /**
  * Calculate similarity score between two claims (0-100)
  */
-function calculateSimilarityScore(claim1: any, claim2: any): number {
+function calculateSimilarityScore(claim1: ClaimForPrediction, claim2: ClaimForPrediction): number {
   let score = 0;
 
   // Claim type match (30 points)
@@ -269,8 +293,8 @@ function calculateSimilarityScore(claim1: any, claim2: any): number {
   }
 
   // Violated clauses overlap (20 points)
-  const clauses1 = claim1.metadata?.violatedClauses || [];
-  const clauses2 = claim2.metadata?.violatedClauses || [];
+  const clauses1 = (claim1.metadata?.violatedClauses as string[] | undefined) || [];
+  const clauses2 = (claim2.metadata?.violatedClauses as string[] | undefined) || [];
   
   if (clauses1.length > 0 && clauses2.length > 0) {
     const overlap = clauses1.filter((c: string) => clauses2.includes(c)).length;
@@ -283,7 +307,7 @@ function calculateSimilarityScore(claim1: any, claim2: any): number {
 /**
  * Extract key factors that influenced case outcome
  */
-function extractKeyFactors(claim: any): string[] {
+function extractKeyFactors(claim: ClaimForPrediction): string[] {
   const factors: string[] = [];
   
   factors.push(`${claim.claimType} grievance`);
@@ -292,11 +316,11 @@ function extractKeyFactors(claim: any): string[] {
     factors.push("High priority issue");
   }
   
-  if (claim.metadata?.evidenceStrength > 7) {
+  if ((claim.metadata?.evidenceStrength as number | undefined ?? 0) > 7) {
     factors.push("Strong evidence");
   }
   
-  if (claim.metadata?.witnesses?.length > 2) {
+  if (((claim.metadata?.witnesses as unknown[] | undefined)?.length ?? 0) > 2) {
     factors.push("Multiple witnesses");
   }
   
@@ -311,7 +335,7 @@ function extractKeyFactors(claim: any): string[] {
  * Find relevant contract clauses for claim
  */
 async function findRelevantClauses(
-  claim: any,
+  claim: ClaimForPrediction,
   organizationId: string
 ): Promise<ClauseReference[]> {
   try {
@@ -354,7 +378,7 @@ return [];
 /**
  * Calculate clause relevance to claim (0-100)
  */
-function calculateClauseRelevance(clause: any, searchTerms: string[]): number {
+function calculateClauseRelevance(clause: ClauseForMatching, searchTerms: string[]): number {
   let score = 0;
   
   const clauseText = `${clause.clauseTitle} ${clause.clauseText} ${clause.clauseType || ""}`.toLowerCase();
@@ -386,7 +410,7 @@ function calculateClauseRelevance(clause: any, searchTerms: string[]): number {
 /**
  * Generate application context for clause
  */
-function generateApplicationContext(claim: any, clause: any): string {
+function generateApplicationContext(claim: ClaimForPrediction, clause: ClauseForMatching): string {
   return `${clause.clauseNumber || 'Clause'} applies to ${claim.claimType} issues. ${clause.clauseTitle} is relevant to this grievance.`;
 }
 
@@ -394,7 +418,7 @@ function generateApplicationContext(claim: any, clause: any): string {
  * Calculate reasoning factors that influence prediction
  */
 function calculateReasoningFactors(
-  claim: any,
+  claim: ClaimForPrediction,
   precedents: PrecedentCase[],
   clauses: ClauseReference[]
 ): ReasoningFactor[] {
@@ -424,7 +448,7 @@ function calculateReasoningFactors(
   });
 
   // Factor 3: Evidence quality
-  const evidenceStrength = claim.metadata?.evidenceStrength || 5;
+  const evidenceStrength = (claim.metadata?.evidenceStrength as number | undefined) || 5;
   
   factors.push({
     factor: "Evidence Quality",
@@ -447,14 +471,14 @@ function calculateReasoningFactors(
   });
 
   // Factor 5: Witness support
-  const hasWitnesses = claim.metadata?.witnesses?.length > 0;
+  const hasWitnesses = ((claim.metadata?.witnesses as unknown[] | undefined)?.length ?? 0) > 0;
   
   factors.push({
     factor: "Witness Support",
     weight: 0.1,
     impact: hasWitnesses ? "positive" : "negative",
     description: hasWitnesses
-      ? `${claim.metadata.witnesses.length} witnesses identified`
+      ? `${(claim.metadata?.witnesses as unknown[]).length} witnesses identified`
       : "No witnesses identified",
     confidence: 70,
   });
@@ -466,7 +490,7 @@ function calculateReasoningFactors(
  * Assess risk factors for the grievance
  */
 function assessRisk(
-  claim: any,
+  claim: ClaimForPrediction,
   precedents: PrecedentCase[],
   factors: ReasoningFactor[]
 ): RiskAssessment {
@@ -535,7 +559,7 @@ function assessRisk(
  * Predict outcome based on all factors
  */
 function predictOutcome(
-  claim: any,
+  claim: ClaimForPrediction,
   precedents: PrecedentCase[],
   factors: ReasoningFactor[]
 ): {
@@ -598,8 +622,8 @@ function predictOutcome(
  * Generate suggested actions based on prediction
  */
 function generateSuggestedActions(
-  claim: any,
-  prediction: any,
+  claim: ClaimForPrediction,
+  prediction: OutcomePrediction,
   risk: RiskAssessment,
   clauses: ClauseReference[]
 ): string[] {
@@ -651,7 +675,7 @@ function calculateEstimatedResolutionDays(precedents: PrecedentCase[]): number {
 /**
  * Calculate potential settlement value from precedents
  */
-function calculatePotentialSettlement(claim: any, precedents: PrecedentCase[]): number | undefined {
+function calculatePotentialSettlement(claim: ClaimForPrediction, precedents: PrecedentCase[]): number | undefined {
   const settledCases = precedents.filter((p) => p.settledAmount !== undefined);
   
   if (settledCases.length === 0) return undefined;

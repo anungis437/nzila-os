@@ -52,7 +52,8 @@ export const POST = withApi(
       userId,
       // The caller's own role, not a literal: the safety policy decides on who is asking.
       userRole: user?.role ?? 'member',
-      dataClass: 'internal',
+      // Member chat text can name individuals and their circumstances.
+      dataClass: 'member_personal',
     });
     const auditRefId = await auditAIInvocation({
       userId,

@@ -1,4 +1,4 @@
-import { requireSystemAdmin } from "@/lib/api-auth-guard";
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { withApi, ApiError, z } from "@/lib/api/framework";
 import { performAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 import {
@@ -30,7 +30,7 @@ export const POST = withApi(
   },
   async ({ body, userId, organizationId }) => {
     // The dataset is platform-wide (no organization column): changing it is platform authority, not an organization administrator's.
-    await requireSystemAdmin();
+    await requirePlatformStaffAuthority({ userId, organizationId }, 'platform.cba_dataset.curate');
     // The pipeline fetches external sources and writes jobs and documents across many statements, so it cannot share
     // one transaction: its intent is recorded first and nothing runs if that record cannot be written.
     try {

@@ -24,7 +24,7 @@ describe('Gate 0 batch B75: report filter operators and queue status', () => {
   it('verified: queue status needs the service key (constant-time) or a platform administrator, answers 401 for no session and returns no error text', () => {
     const route = src('app/api/union-eyes/queue-status/route.ts')
     expect(route).toContain('constantTimeEquals(')
-    expect(route).toContain('await requireSystemAdmin()')
+    expect(route).toContain("await requirePlatformStaffAuthority({ userId: actor?.id, organizationId: actor?.organizationId }, 'platform.queue.read')")
     expect(route).toContain("{ error: 'Authentication required' }, { status: 401 }")
     expect(route).toContain("error: 'Queue status unavailable'")
     expect(route).not.toContain('detail: String(err)')

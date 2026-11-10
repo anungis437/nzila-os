@@ -14,18 +14,17 @@ import { logger } from '@/lib/logger';
 import { guardPublicIntake } from '@/lib/public-intake/guard';
 import { opaqueRef } from '@/lib/icra/opaque-ref';
 import { issueWorkbookCapability, setWorkbookCapabilityCookie } from '@/lib/workbook/workbook-capability';
+import { issueWorkbookConsent, WORKBOOK_CONSENT_NOTICE_VERSION } from '@/lib/workbook/consent';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const bodySchema = z.object({
   locale: z.string().min(2).max(16).default('en-CA'),
-  consent: z
-    .object({
-      consentToPersist: z.boolean(),
-      consentToPersistAt: z.string().datetime().optional(),
-    })
-    .optional(),
+  consent: z.object({
+    noticeVersion: z.literal(WORKBOOK_CONSENT_NOTICE_VERSION),
+    consentToPersist: z.literal(true),
+  }),
   sectorBand: z.string().max(64).nullable().optional(),
   institutionSizeBand: z.string().max(64).nullable().optional(),
   utm: z
@@ -62,7 +61,8 @@ export async function POST(request: NextRequest) {
         .insert(workbooks)
         .values({
           locale,
-          consent: consent ?? null,
+          // The server supplies the timestamp and complete purpose set; client time is never evidence of consent.
+          consent: issueWorkbookConsent(),
           sectorBand: sectorBand ?? null,
           institutionSizeBand: institutionSizeBand ?? null,
           utmSource: utm?.source ?? null,

@@ -35,7 +35,7 @@ const m = vi.hoisted(() => {
     requireEntitlement: vi.fn(),
     requireLiveFinancialMandate: vi.fn(),
     persistAtomicAudit: vi.fn(),
-    verifyEvidenceChainFromLinks: vi.fn(),
+    verifyEvidenceChainFromArtifacts: vi.fn(),
     enforcePayrollLifecycleTransition: vi.fn(),
     createEvidencePack: vi.fn(),
     sha256: vi.fn(),
@@ -76,7 +76,7 @@ vi.mock('../employer-execution/_lib', () => ({
   createEvidencePack: m.createEvidencePack,
   enforcePayrollLifecycleTransition: m.enforcePayrollLifecycleTransition,
   sha256: m.sha256,
-  verifyEvidenceChainFromLinks: m.verifyEvidenceChainFromLinks,
+  verifyEvidenceChainFromArtifacts: m.verifyEvidenceChainFromArtifacts,
 }));
 // The real run-duties rules and the real _guard run; only the error type is swapped for one that carries a status.
 vi.mock('@/lib/api/errors', () => ({ ApiError: m.ApiError }));
@@ -139,7 +139,7 @@ describe('employer-execution/payroll-runs/[id] route', () => {
     m.requireEntitlement.mockResolvedValue(undefined);
     m.requireLiveFinancialMandate.mockResolvedValue({ mandateId: 'synthetic', ledgerWide: true, resourceIds: [], accountIds: [] });
     m.persistAtomicAudit.mockResolvedValue(undefined);
-    m.verifyEvidenceChainFromLinks.mockReturnValue({ valid: true });
+    m.verifyEvidenceChainFromArtifacts.mockReturnValue({ valid: true });
     m.enforcePayrollLifecycleTransition.mockImplementation(() => undefined);
     m.createEvidencePack.mockReturnValue({
       manifestHash: 'manifest_hash',

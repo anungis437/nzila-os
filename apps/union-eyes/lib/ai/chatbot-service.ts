@@ -53,7 +53,8 @@ async function aiGenerate(
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.CHATBOT,
     input,
-    dataClass: 'internal',
+    // Member text can name individuals and their circumstances; the gateway must classify it as such.
+    dataClass: toGatewayDataClass('member_personal'),
   });
   return {
     content: response.content,
@@ -120,7 +121,7 @@ async function aiEmbed(text: string, organizationId?: string): Promise<number[]>
     appKey: UE_APP_KEY,
     profileKey: UE_PROFILES.EMBEDDINGS,
     input: text,
-    dataClass: 'internal',
+    dataClass: toGatewayDataClass('member_personal'),
   });
   const embedding = response.embeddings[0];
 

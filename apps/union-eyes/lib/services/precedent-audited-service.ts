@@ -46,10 +46,10 @@ export async function createPrecedentAudited(
   });
 }
 
-export type PrecedentReviewOutcome = 'share' | 'reject';
+export type PrecedentReviewOutcome = 'share' | 'reject' | 'revoke';
 
 export type PrecedentReviewResult =
-  | { ok: true; precedent: typeof arbitrationDecisions.$inferSelect; publicationStatus: 'shared' | 'review_rejected' }
+  | { ok: true; precedent: typeof arbitrationDecisions.$inferSelect; publicationStatus: 'shared' | 'review_rejected' | 'sharing_revoked' }
   | { ok: false; kind: 'not_found' | 'not_pending' | 'self_review' | 'attestation_required' };
 
 /** The user who typed the decision, from the provenance createPrecedentAudited records (typed:<organization>:<user>). */
@@ -77,26 +77,32 @@ export async function reviewPrecedentAudited(
       .where(and(eq(arbitrationDecisions.id, input.id), eq(arbitrationDecisions.sourceOrganizationId, scope.organizationId)))
       .limit(1);
     if (!row) return { ok: false as const, kind: 'not_found' as const };
-    if (row.accessRestrictions !== 'pending_review') return { ok: false as const, kind: 'not_pending' as const };
+    const revoking = input.outcome === 'revoke';
+    if (revoking ? (!row.isPublic || Boolean(row.accessRestrictions)) : row.accessRestrictions !== 'pending_review') {
+      return { ok: false as const, kind: 'not_pending' as const };
+    }
     const submitter = precedentSubmitter(row.importedFrom);
     // A decision whose submitter is not on record cannot show its reviewer is someone else: refused, like a self-review.
     if (!submitter || submitter === scope.userId) return { ok: false as const, kind: 'self_review' as const };
 
     const shared = input.outcome === 'share';
+    const publicationStatus = revoking ? 'sharing_revoked' : shared ? 'shared' : 'review_rejected';
     const [updated] = await tx
       .update(arbitrationDecisions)
-      .set(shared ? { isPublic: true, accessRestrictions: null, updatedAt: new Date() } : { isPublic: false, accessRestrictions: 'review_rejected', updatedAt: new Date() })
+      .set(shared
+        ? { isPublic: true, accessRestrictions: null, updatedAt: new Date() }
+        : { isPublic: false, accessRestrictions: revoking ? 'sharing_revoked' : 'review_rejected', updatedAt: new Date() })
       .where(and(
         eq(arbitrationDecisions.id, input.id),
         eq(arbitrationDecisions.sourceOrganizationId, scope.organizationId),
-        eq(arbitrationDecisions.accessRestrictions, 'pending_review'),
+        revoking ? eq(arbitrationDecisions.isPublic, true) : eq(arbitrationDecisions.accessRestrictions, 'pending_review'),
       ))
       .returning();
     if (!updated) return { ok: false as const, kind: 'not_pending' as const };
     await persistAtomicAudit(tx, {
       organizationId: scope.organizationId,
       userId: scope.userId,
-      action: shared ? 'precedent.review.shared' : 'precedent.review.rejected',
+      action: revoking ? 'precedent.review.revoked' : shared ? 'precedent.review.shared' : 'precedent.review.rejected',
       resourceType: 'arbitration_decisions',
       resourceId: updated.id,
       details: {
@@ -109,6 +115,6 @@ export async function reviewPrecedentAudited(
         sourceOrganizationId: scope.organizationId,
       },
     });
-    return { ok: true as const, precedent: updated, publicationStatus: shared ? ('shared' as const) : ('review_rejected' as const) };
+    return { ok: true as const, precedent: updated, publicationStatus };
   });
 }

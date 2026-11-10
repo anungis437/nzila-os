@@ -7,7 +7,8 @@
 
 import { db } from '@/db/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 import type {
   WorkItemSource,
   IntakeSource,
@@ -27,7 +28,7 @@ export function createWorkItemSource(): WorkItemSource {
       const rows = await db
         .select()
         .from(grievances)
-        .where(eq(grievances.organizationId, orgId));
+        .where(and(eq(grievances.organizationId, orgId), productionGrievanceCondition()));
 
       return rows
         .filter((r) => ACTIVE_CASE_STATUSES.includes(r.status))
@@ -58,7 +59,7 @@ export function createIntakeSource(): IntakeSource {
       const rows = await db
         .select()
         .from(grievances)
-        .where(eq(grievances.organizationId, orgId));
+        .where(and(eq(grievances.organizationId, orgId), productionGrievanceCondition()));
 
       return rows
         .filter((r) => PENDING_INTAKE_STATUSES.includes(r.status))

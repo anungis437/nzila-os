@@ -26,6 +26,7 @@ export default defineConfig({
   outputDir: process.env.UE_RUNTIME_ARTIFACTS ?? 'test-results/runtime',
   use: {
     baseURL,
+    ...(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {}),
     trace: 'retain-on-failure',
     screenshot: 'on',
     video: 'off',

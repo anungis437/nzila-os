@@ -5,6 +5,8 @@
  * Forecast concentration growth, fragility accumulation, governance drift.
  */
 
+import type { VerifiedEdgeCoverage } from '@/lib/knowledge-transfer/propagation/graph-evidence-service';
+
 export interface ContinuityTrendPoint {
   /** Date of measurement */
   date: string;
@@ -62,6 +64,12 @@ export interface ContinuityForecast {
   recommendations: string[];
   /** When critical thresholds will be crossed (if current trend continues) */
   forecastedCrisisDate?: string;
+  /** How many of the dependency nodes behind this forecast have at least one currently-verified relationship on
+   *  file, out of how many nodes exist in total - an aggregate corroboration signal for the exploratory data this
+   *  forecast is built from (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE). */
+  /** Directed inferred dependencies whose exact direction is currently verified (verifiedEdgeCoverage). Never a
+   *  count of nodes that merely appear in some verified record. */
+  verifiedEvidenceCoverage: VerifiedEdgeCoverage;
 }
 
 export interface ForecastConfidenceMetrics {

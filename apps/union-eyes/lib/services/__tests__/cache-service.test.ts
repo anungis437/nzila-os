@@ -393,6 +393,29 @@ describe('cache-service', () => {
     });
   });
 
+  describe('isLocked', () => {
+    it('returns true when the lock key exists', async () => {
+      redisMocks.mockExists.mockResolvedValue(1);
+      const { initRedis, isLocked } = await import('../cache-service');
+      initRedis();
+      expect(await isLocked('my-lock')).toBe(true);
+    });
+
+    it('returns false when the lock key does not exist', async () => {
+      redisMocks.mockExists.mockResolvedValue(0);
+      const { initRedis, isLocked } = await import('../cache-service');
+      initRedis();
+      expect(await isLocked('my-lock')).toBe(false);
+    });
+
+    it('returns null (not false), distinct from a confirmed unlocked key, on a Redis error', async () => {
+      redisMocks.mockExists.mockRejectedValue(new Error('redis down'));
+      const { initRedis, isLocked } = await import('../cache-service');
+      initRedis();
+      expect(await isLocked('my-lock')).toBeNull();
+    });
+  });
+
   describe('releaseLock', () => {
     it('returns true when released', async () => {
       redisMocks.mockEval.mockResolvedValue(1);

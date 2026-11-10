@@ -236,7 +236,7 @@ describe('closeBillingPeriod', () => {
     state.updates.billingPeriods = [{ id: 'bp-1' }];
     const r = await closeBillingPeriod('bp-1', 'admin-1');
     expect(r.id).toBe('bp-1');
-    expect(requireReconciliation).toHaveBeenCalledWith('bp-1');
+    expect(requireReconciliation).toHaveBeenCalledWith('bp-1', 'org-1');
     expect(auditLog).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'billing_period_closed' }),
     );
@@ -502,7 +502,7 @@ describe('runBillingLifecycleAutomation', () => {
     state.selects.platformInvoices = [{ id: 'inv-1', invoiceNumber: 'INV-1', status: 'issued', metadata: null, issueDate: new Date('2025-01-01'), dueDate: new Date('2025-01-15') }];
     state.updates.platformInvoices = [{ id: 'inv-1' }];
 
-    const summary = await runBillingLifecycleAutomation(new Date('2025-02-01T00:00:00Z'), 'system:test');
+    const summary = await runBillingLifecycleAutomation(['org-1'], new Date('2025-02-01T00:00:00Z'), 'system:test');
     expect(summary.organizationsScanned).toBe(1);
     expect(summary.periodLabel).toBe('2025-02');
     expect(summary.invoiceGenerationSkipped).toBe(1);

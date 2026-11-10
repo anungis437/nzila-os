@@ -14,6 +14,8 @@ vi.mock('@/lib/api-auth-guard', () => ({
   isPlatformAdminUser: vi.fn().mockResolvedValue(true),
 }));
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: vi.fn().mockResolvedValue({ userId: 'admin-1' }) }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(async () => 'acting-org') }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: vi.fn().mockResolvedValue({ authorityId: 'authority-1' }) }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: async (...args: unknown[]) => (args[args.length - 1] as (tx: unknown) => unknown)({}),
   withSystemContext: async (fn: (tx: unknown) => unknown) => fn({

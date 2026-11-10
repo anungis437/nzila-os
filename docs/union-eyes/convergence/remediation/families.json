@@ -1,605 +1,180 @@
 {
  "generated": "deterministic from the frozen register and the overlay",
  "population": 777,
- "corrected": 697,
- "partial": 30,
- "outstanding": 80,
- "accountedFor": 80,
+ "corrected": 777,
+ "partial": 0,
+ "outstanding": 0,
+ "accountedFor": 0,
  "families": [
   {
    "family": "F01-CRON-SCHEDULER-WEBHOOK",
    "purpose": "Scheduled and provider-driven jobs: method, secret, scheduling, replay and failure reporting",
-   "defects": 4,
+   "defects": 0,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 1,
-    "LOW": 3
+    "MEDIUM": 0,
+    "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.1": 1,
-    "0B.5": 1,
-    "0B.7": 1,
-    "0B.8": 1
-   }
+   "tranches": {}
   },
   {
    "family": "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED",
    "purpose": "Stubs, fabricated figures and false-success answers: return 501 or implement for real",
-   "defects": 3,
+   "defects": 0,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 3,
+    "MEDIUM": 0,
     "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.7": 2,
-    "0B.8": 1
-   }
+   "tranches": {}
   },
   {
    "family": "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE",
    "purpose": "Tenant and system-role scope: add real predicates or kernel decisions",
-   "defects": 5,
+   "defects": 0,
    "severity": {
-    "HIGH": 2,
-    "MEDIUM": 2,
-    "LOW": 1
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0
    },
-   "namedRoutes": 2,
+   "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.2": 1,
-    "0B.6": 2,
-    "0B.10": 1,
-    "0B.11": 1
-   }
+   "tranches": {}
   },
   {
    "family": "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD",
    "purpose": "Generic-CRUD exposure and mass assignment: allow-lists, governance classification, response projection",
-   "defects": 2,
+   "defects": 0,
    "severity": {
-    "HIGH": 1,
+    "HIGH": 0,
     "MEDIUM": 0,
-    "LOW": 1
+    "LOW": 0
    },
-   "namedRoutes": 1,
-   "namedFiles": 2,
-   "tranches": {
-    "0B.3": 1,
-    "0B.9": 1
-   }
+   "namedRoutes": 0,
+   "namedFiles": 0,
+   "tranches": {}
   },
   {
    "family": "F05-INPUT-VALIDATION-AND-BOUNDS",
    "purpose": "Input validation, size and pagination bounds, and structured errors instead of 500s",
-   "defects": 10,
+   "defects": 0,
    "severity": {
-    "HIGH": 1,
-    "MEDIUM": 9,
+    "HIGH": 0,
+    "MEDIUM": 0,
     "LOW": 0
    },
-   "namedRoutes": 1,
+   "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.2": 1,
-    "0B.5": 1,
-    "0B.6": 1,
-    "0B.7": 3,
-    "0B.8": 1,
-    "0B.10": 1,
-    "0B.11": 2
-   }
+   "tranches": {}
   },
   {
    "family": "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS",
    "purpose": "Audit atomicity, completeness and access records",
-   "defects": 4,
+   "defects": 0,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 4,
+    "MEDIUM": 0,
     "LOW": 0
    },
-   "namedRoutes": 1,
+   "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.1": 1,
-    "0B.7": 2,
-    "0B.11": 1
-   }
+   "tranches": {}
   },
   {
    "family": "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL",
    "purpose": "Authorization beyond a role floor: object-level ownership, sensitivity and kernel decisions",
-   "defects": 8,
+   "defects": 0,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 7,
-    "LOW": 1
+    "MEDIUM": 0,
+    "LOW": 0
    },
-   "namedRoutes": 2,
+   "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.1": 1,
-    "0B.4": 1,
-    "0B.5": 1,
-    "0B.7": 2,
-    "0B.8": 1,
-    "0B.10": 2
-   }
+   "tranches": {}
   },
   {
    "family": "F08-PII-DISCLOSURE-AND-PROJECTION",
    "purpose": "Personal-data disclosure: project, redact or restrict returned fields",
-   "defects": 8,
+   "defects": 0,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 8,
+    "MEDIUM": 0,
     "LOW": 0
    },
-   "namedRoutes": 3,
+   "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.7": 2,
-    "0B.9": 1,
-    "0B.10": 2,
-    "0B.11": 1,
-    "0B.12": 2
-   }
+   "tranches": {}
   },
   {
    "family": "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY",
    "purpose": "Abuse controls: rate limits, idempotency keys and replay protection",
-   "defects": 3,
+   "defects": 0,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 3,
+    "MEDIUM": 0,
     "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.6": 2,
-    "0B.11": 1
-   }
+   "tranches": {}
   },
   {
    "family": "F10-FINANCIAL-AND-PAYMENT",
    "purpose": "Financial and payment integrity",
-   "defects": 2,
+   "defects": 0,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 2,
+    "MEDIUM": 0,
     "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.6": 1,
-    "0B.10": 1
-   }
+   "tranches": {}
   },
   {
    "family": "F11-AI-GOVERNANCE",
    "purpose": "AI governance: consent, sensitivity, explainability and human accountability",
-   "defects": 6,
+   "defects": 0,
    "severity": {
     "HIGH": 0,
-    "MEDIUM": 5,
-    "LOW": 1
+    "MEDIUM": 0,
+    "LOW": 0
    },
    "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.6": 1,
-    "0B.7": 1,
-    "0B.8": 1,
-    "0B.9": 1,
-    "0B.10": 2
-   }
+   "tranches": {}
   },
   {
    "family": "F12-OTHER-ROUTE-SPECIFIC",
    "purpose": "Route-specific defects with no shared mechanism yet",
-   "defects": 25,
+   "defects": 0,
    "severity": {
-    "HIGH": 1,
-    "MEDIUM": 19,
-    "LOW": 5
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0
    },
-   "namedRoutes": 5,
+   "namedRoutes": 0,
    "namedFiles": 0,
-   "tranches": {
-    "0B.1": 3,
-    "0B.2": 1,
-    "0B.5": 2,
-    "0B.6": 3,
-    "0B.7": 6,
-    "0B.8": 3,
-    "0B.10": 4,
-    "0B.11": 1,
-    "0B.12": 2
-   }
+   "tranches": {}
   }
  ],
  "members": {
-  "F01-CRON-SCHEDULER-WEBHOOK": [
-   {
-    "id": "DEF-0B1-BILLING-SCHEDULER-LATENT",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B5-COGNITION-KPI-ROI-FROM-ASSUMED-HOURS",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B7-PLT-EQUITY-SNAPSHOT-SCHEMA-HAS-NO-SMALL-CELL-RULE",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B8-ICRA-SHOPIFY-SHOP-DOMAIN-NEVER-CHECKED-ONE-GLOBAL-SECRET-AND-HEADER-KEYED-LIMIT",
-    "severity": "LOW",
-    "partial": true
-   }
-  ],
-  "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED": [
-   {
-    "id": "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGB-DYNAMICS-ENGINES-EMBED-LITERAL-NUMBERS-AND-CLAIMS-AS-MEASUREMENTS",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B8-ICRA-INTEGRATION-CREDENTIALS-NEVER-STORED-OR-RESOLVED-YET-REPORTED-STORED",
-    "severity": "MEDIUM",
-    "partial": true
-   }
-  ],
-  "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE": [
-   {
-    "id": "DEF-0B2-PLATFORM-DIRECTORY-UNSCOPED-READ",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B6-EDU-CRON-REMINDERS-IGNORE-OPT-OUT-AND-HAVE-NO-SENT-MARKER",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B6-CMP-DSR-GENERIC-ROUTE-REFUSES-WITH-MISLEADING-403",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-OPL-14",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-PRP-PRECEDENT-POST-PUBLISHES-INTO-THE-SHARED-LIBRARY-WITH-NO-REVIEW-PROVENANCE-OR-OWNING-ORGANIZATION",
-    "severity": "MEDIUM",
-    "partial": true
-   }
-  ],
-  "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD": [
-   {
-    "id": "DEF-0B3-CRUD-BODY-MASS-ASSIGNMENT",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B9-ML-METRICS-ROUTE-SERVES-STORED-ANALYTICS-ROWS-WHERE-THE-PROMETHEUS-ENDPOINT-IS-DOCUMENTED",
-    "severity": "LOW"
-   }
-  ],
-  "F05-INPUT-VALIDATION-AND-BOUNDS": [
-   {
-    "id": "DEF-0B2-AI-DATA-CLASS-DOWNGRADE",
-    "severity": "HIGH",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B5-PAY-EQUITY-NO-STATE-MACHINE-OR-DEADLINES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-SYS-EXTERNAL-DATA-SYNC-CONTRIBUTIONS-WRITE-OUTSIDE-SYSTEM-CONTEXT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-PEN-PENSION-ADMINISTRATION-WRITES-REST-ON-ONE-ROLE-TITLE-WITH-NO-MANDATE-OR-TRUSTEE-DECISION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-RECONCILIATION-SERVICE-QUERIES-THROUGH-THE-SHARED-DB-HANDLE-WITH-EXPLICIT-PREDICATES-ONLY",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-RECONCILIATION-RESOLVE-IS-A-STATUS-AND-NOTE-ONLY-WITH-NO-SECOND-APPROVER-OR-LEDGER-EFFECT",
-    "severity": "MEDIUM",
-    "partial": true
-   }
-  ],
-  "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS": [
-   {
-    "id": "DEF-0B1-NON-ATOMIC-AUDIT-INTENT-OUTCOME",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-PLT-EXT-CONFIGURATION-HAS-NO-CREATE-PATH-AND-NO-CONSUMER",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-PLT-SSO-CONFIGURATION-NEVER-CONSUMED-BY-SIGN-IN",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B11-RPT-EXECUTE-RETURNS-MEMBER-EMAIL-AND-CLAIM-ROWS-AT-AN-OFFICER-ROLE-TITLE-WITH-NO-FIELD-AUTHORITY-AND-NO-DURABLE-RECORD-OF-WHAT-WAS-RETURNED",
-    "severity": "MEDIUM",
-    "partial": true
-   }
-  ],
-  "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL": [
-   {
-    "id": "DEF-0B1-PLATFORM-ROLE-TITLE-AUTHORITY",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B4-OHS-ANTI-SCAB-RECORD-NO-AUTHOR-OR-CASE-AUTHORITY",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B5-COMMITTEE-READ-IGNORES-MEMBERSHIP",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-PLT-EVENT-ITEM-PUBLIC-REGISTRATION-CALLER-EXPECTS-PUBLIC-EVENT",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B8-JUR-STATUTORY-RULE-TABLES-ARE-UNVERSIONED-LITERALS-SERVED-WITH-STATUTE-CITATIONS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PEN-BENEFIT-CLAIMS-CAN-BE-FILED-BUT-NO-ROUTE-CAN-DECIDE-OR-PAY-THEM",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-PIL-PLATFORM-TIER-OF-THE-PILOT-ROUTES-IS-ANY-ROLE-TITLE-AT-OR-ABOVE-SYSTEM-ADMIN-LEVEL-AND-NOT-A-PLATFORM-MANDATE",
-    "severity": "MEDIUM"
-   }
-  ],
-  "F08-PII-DISCLOSURE-AND-PROJECTION": [
-   {
-    "id": "DEF-0B7-COGB-MEMORY-ENGINES-RESTATE-OFFICER-TYPED-ENTRIES-AS-MEASURED-CONDITION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXP-EXTERNAL-DOWNLOAD-RELEASES-LATEST-VERSION-NOT-GRANTED-VERSION",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B9-ML-QUERY-SENDS-FREE-TEXT-AND-ARBITRARY-CONTEXT-TO-AN-EXTERNAL-SERVICE-WITH-NO-DISCLOSURE-DECISION",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-PIL-PUBLIC-APPLICATION-SENDS-THE-TYPED-CONTACT-TO-HUBSPOT-WITH-NO-PROOF-OF-THE-ADDRESS-AND-NO-CONSENT-DECISION",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PIL-DEMO-DATA-INSERTS-FICTIONAL-GRIEVANCES-AND-NAMED-FEDERAL-EMPLOYERS-INTO-THE-LIVE-TABLES-WITH-NO-ROW-MARKER-AND-DELETES-BY-NUMBER-AND-EMAIL-PATTERN",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-DUES-PAY-POST-SENDS-THE-ORGANIZATION-AND-MEMBER-USER-ID-TO-THE-PROCESSOR-FOR-A-MERCHANT-ACCOUNT-NO-SOURCE-NAMES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B12-WBK-CHECKOUT-SENDS-THE-BEARER-WORKBOOK-ID-TO-STRIPE-IN-THE-REDIRECT-ADDRESSES-AND-METADATA",
-    "severity": "MEDIUM"
-   }
-  ],
-  "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY": [
-   {
-    "id": "DEF-0B6-EMP-REPLAY-NOT-IDEMPOTENT-GATES-APPROVAL",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-RECONCILIATION-ENGINE-FABRICATES-FEE-SETTLEMENT-MATCHES-AND-SUMS-REFUNDED-PAYMENTS-AS-RECEIVED",
-    "severity": "MEDIUM"
-   }
-  ],
-  "F10-FINANCIAL-AND-PAYMENT": [
-   {
-    "id": "DEF-0B6-EMP-REMITTANCE-PACKAGE-SHAPE",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-PIL-COMMERCIAL-TERMS-ARE-SET-BY-ONE-ADMINISTRATOR-FROM-A-TYPED-MEMBER-COUNT-AND-AMOUNT-WITH-NO-APPLICANT-ACCEPTANCE",
-    "severity": "MEDIUM"
-   }
-  ],
-  "F11-AI-GOVERNANCE": [
-   {
-    "id": "DEF-0B6-EDU-UI-CALLS-OPERATIONS-THE-ROUTES-DO-NOT-EXPORT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-EXC-COPILOT-EXPLAINABILITY-IS-FIXED-TEXT-AND-NOT-STORED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-JUR-LOCATION-CONSENT-TEXT-AND-PURPOSE-ARE-CLIENT-SUPPLIED-AND-UNVALIDATED",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PIL-PILOT-ADOPTION-ENGAGEMENT-AND-RESOLUTION-FIGURES-ARE-ROW-UPDATE-PROXIES-AND-OPEN-CASE-AGE-WITH-STORED-FIGURES-AS-FALLBACK",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PIL-PILOT-CURRENT-READS-THE-SESSION-ORGANIZATION-UNDER-THE-SYSTEM-CONTEXT-SO-THE-EXPLICIT-PREDICATE-IS-THE-ONLY-SCOPE",
-    "severity": "LOW"
-   }
-  ],
-  "F12-OTHER-ROUTE-SPECIFIC": [
-   {
-    "id": "DEF-0B1-ALLOWLIST-DRIFT",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B1-COMMS-TRACKING-GET-MUTATES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B1-ICRA-TELEMETRY-PROCESS-LOCAL-LIMIT",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B2-PKI-ATTESTATION-NOT-CRYPTOGRAPHIC",
-    "severity": "HIGH"
-   },
-   {
-    "id": "DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B5-SURVEY-ANSWERS-HAVE-NO-ROUTE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-EMP-PAYROLL-PREPARE-NOT-BOUND-AND-RACY",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B6-CMP-ALERT-AND-REPORT-TABLES-HAVE-NO-WRITER",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-INTERVIEW-DERIVED-ROLE-OUTPUT-IDENTIFIES-SINGLE-DEPARTING-PERSON",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-RESILIENCE-INDEX-TREND-AND-DOCUMENTATION-QUALITY-ARE-HEURISTIC-LABELS",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST-EXTRAPOLATES-TWO-TYPED-SCORES",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B7-PLT-EQUITY-CONSENT-AND-PRIVACY-PROMISES-NOT-BACKED-BY-SERVER",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-ICRA-SYNC-CONCURRENCY-GUARD-AND-INSTANCE-CACHE-ARE-PROCESS-LOCAL",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B8-FED-EXTERNAL-UPLOAD-CLIENT-CLAIMED-TYPE-SIZE-NO-SCAN-WHOLE-BLOB-READ",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B8-JUR-LOCATION-CONSENT-IS-NOT-BOUND-TO-PURPOSE-ORGANIZATION-OR-STRIKE",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-ORG-FORM-GENERATION-ROUTE-RETURNS-JSON-AND-THE-CLIENT-SAVES-IT-AS-THE-PDF",
-    "severity": "MEDIUM",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B10-ORG-CLIENTS-CALL-CAMPAIGN-ITEM-AND-V2-ROUTES-THAT-ANSWER-NO-CAMPAIGN-DATA",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B10-PIL-APPLICATION-OWNERSHIP-BEFORE-VERIFICATION-RESTS-ON-THE-ORGANIZATION-ID-THE-ANONYMOUS-APPLICANT-TYPED-INTO-THE-FORM",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B10-PIL-PROPOSAL-SCORES-AND-CUSTOMER-SUCCESS-SIGNALS-ARE-COMPUTED-FROM-THE-APPLICANT-SELF-ASSESSED-READINESS-SCORE-AND-THE-STAGE-REACHED",
-    "severity": "MEDIUM"
-   },
-   {
-    "id": "DEF-0B11-PRP-JURISDICTION-PREFERENCES-HAVE-NO-UNIQUE-ROW-UNVALIDATED-FLAGS-AND-NO-SERVER-CONSUMER",
-    "severity": "LOW",
-    "partial": true
-   },
-   {
-    "id": "DEF-0B12-PLT-VOICE-UPLOAD-CHECKS-THE-AI-SEARCH-ENTITLEMENT-AND-CONSUMES-NO-CREDIT",
-    "severity": "LOW"
-   },
-   {
-    "id": "DEF-0B12-WBK-START-STORES-AN-OPTIONAL-CONSENT-OBJECT-THAT-NO-ROUTE-READS",
-    "severity": "MEDIUM"
-   }
-  ]
+  "F01-CRON-SCHEDULER-WEBHOOK": [],
+  "F02-PLACEHOLDER-FABRICATED-OR-NOT-IMPLEMENTED": [],
+  "F03-CROSS-TENANT-SYSTEM-ROLE-AND-SCOPE": [],
+  "F04-MASS-ASSIGNMENT-AND-GENERIC-CRUD": [],
+  "F05-INPUT-VALIDATION-AND-BOUNDS": [],
+  "F06-AUDIT-ATOMICITY-AND-ACCESS-RECORDS": [],
+  "F07-AUTHORIZATION-ROLE-FLOOR-AND-OBJECT-LEVEL": [],
+  "F08-PII-DISCLOSURE-AND-PROJECTION": [],
+  "F09-RATE-LIMIT-IDEMPOTENCY-REPLAY": [],
+  "F10-FINANCIAL-AND-PAYMENT": [],
+  "F11-AI-GOVERNANCE": [],
+  "F12-OTHER-ROUTE-SPECIFIC": []
  }
 }

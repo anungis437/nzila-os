@@ -15,6 +15,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
     component: 'test',
     action: 'mock',
   })),
+  toGatewayDataClass: (c: string) => c,
   UE_APP_KEY: 'test-app-key',
   UE_PROFILES: {
     PRECEDENT_KEYWORDS: 'precedent-keywords',

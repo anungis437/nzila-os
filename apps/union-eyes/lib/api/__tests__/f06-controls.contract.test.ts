@@ -50,8 +50,11 @@ describe('F06 audit, retention and read-floor controls', () => {
   });
 
   // DEF-0B7-PLT-EXT-PATCH-STEWARD-FLOOR-REWRITES-ENDPOINT-AND-MAPPING
-  it('rewriting an integration endpoint needs an administrator', () => {
-    expect(route('extensions/[id]')).toMatch(/export const PATCH = withApi\(\s*\{\s*\/\/[^\n]*\n\s*auth: \{ required: true, minRole: 'admin' \}/);
+  it('rewriting an integration configuration uses the tenant control plane and never the disconnected legacy table', () => {
+    const text = route('extensions/[id]');
+    expect(text).toContain('configureIntegrationForOrg');
+    expect(text).toContain("auth: { required: true, minRole: 'steward' }");
+    expect(text).not.toContain('apiIntegrations');
   });
 
   // DEF-0B8-JUR-KNOWLEDGE-BASE-ITEM-GET-INCREMENTS-VIEW-COUNT-IN-SYSTEM-CONTEXT-WITHOUT-ORG-PREDICATE

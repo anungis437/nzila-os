@@ -14,6 +14,7 @@
  */
 
 import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
+import { loadGraphEvidence, verifiedEdgeCoverage } from '../propagation/graph-evidence-service';
 import { calculateResilienceIndex } from '../resilience-index/resilience-calculator';
 import {
   type MitigationScenario,
@@ -221,10 +222,11 @@ export async function compareMitigations(
   orgId: string,
   scenarios: MitigationScenario[],
 ): Promise<MitigationComparison> {
-  const [propagationMap, resilienceIndex] = await Promise.all([
-    buildDependencyPropagationMap(orgId),
+  const [evidence, resilienceIndex] = await Promise.all([
+    loadGraphEvidence(orgId),
     calculateResilienceIndex(orgId),
   ]);
+  const propagationMap = evidence.exploratory;
 
   const baselineScore = resilienceIndex.overallScore;
 
@@ -241,8 +243,12 @@ export async function compareMitigations(
   const residualNodes = propagationMap.nodes.filter(
     (node) => node.isSingleSource && !allTargeted.has(node.id),
   );
+  // DEF-0B7 Family 1 exit (C): "single-source" is itself an exploratory signal (no verified-dependency concept
+  // captures node attributes directly), but whether THIS node participates in any currently-verified relationship
+  // is still disclosed per entry - an evidenceBasis tag alone is not sufficient when the sentence reads as an
+  // established organizational fact, so the basis is named inline, not left to a separate field a caller could miss.
   const residualRisks = residualNodes.slice(0, 5).map(
-    (node) => `${node.label} remains single-source (${node.continuitySensitivity} sensitivity)`,
+    (node) => `${node.label} remains single-source (${node.continuitySensitivity} sensitivity) [exploratory]`,
   );
 
   const noNodesEvaluated = results.every((r) => r.domainDeltas.length === 0);
@@ -272,5 +278,6 @@ export async function compareMitigations(
       'Baseline exposure per node comes from its sensitivity label (20, 45, 70 or 90), not from a measurement.',
     ],
     noNodesEvaluated,
+    verifiedEvidenceCoverage: verifiedEdgeCoverage(evidence),
   };
 }

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, varchar, jsonb, boolean, decimal } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, varchar, jsonb, boolean, decimal, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
  * Geofence Privacy & Location Tracking Schema
@@ -8,7 +8,10 @@ import { pgTable, uuid, text, timestamp, varchar, jsonb, boolean, decimal } from
 // Member location consent (explicit opt-in required)
 export const memberLocationConsent = pgTable("member_location_consent", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id", { length: 255 }).notNull().unique(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  organizationId: uuid("organization_id"),
+  scopeKind: varchar("scope_kind", { length: 16 }),
+  scopeId: uuid("scope_id"),
   
   // Consent status
   consentStatus: varchar("consent_status", { length: 20 }).notNull().default("never_asked"), // "never_asked", "opted_in", "opted_out", "expired"
@@ -42,7 +45,11 @@ export const memberLocationConsent = pgTable("member_location_consent", {
   
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => ({
+  scopeUniq: uniqueIndex("member_location_consent_scope_uniq").on(
+    t.userId, t.organizationId, t.consentPurpose, t.scopeKind, t.scopeId,
+  ),
+}));
 
 // Location tracking data (24-hour retention only)
 export const locationTracking = pgTable("location_tracking", {
@@ -213,4 +220,3 @@ export const locationTrackingConfig = pgTable("location_tracking_config", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   updatedBy: varchar("updated_by", { length: 255 }),
 });
-

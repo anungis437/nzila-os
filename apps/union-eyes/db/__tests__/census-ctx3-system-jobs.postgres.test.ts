@@ -78,7 +78,7 @@ const { signTrackingPayload } = await import('@/lib/communications/tracking-toke
 type Row = Record<string, any>
 type Handler = (ctx: unknown) => Promise<Response>
 
-describe('the cross-organization system jobs and webhooks, as the real roles', () => {
+describe.skipIf(!URL)('the cross-organization system jobs and webhooks, as the real roles', () => {
   const tag = `cj${randomUUID().slice(0, 8)}`
   const ORG_A = randomUUID()
   const ORG_B = randomUUID()
@@ -288,7 +288,7 @@ describe('the cross-organization system jobs and webhooks, as the real roles', (
       new NextRequest('http://localhost/api/pilot/apply', { method: 'POST', headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.9' }, body: JSON.stringify(body) })
 
     it('records an application that names no organization as the system role, after the body is validated', async () => {
-      const response = await pilotApply.POST(application({ organizationName: `Prospect ${tag}`, contactName: 'Pat Applicant', contactEmail: `pat-${tag}@example.test`, memberCount: 120, organizationType: 'local', sectors: ['education'] }))
+      const response = await pilotApply.POST(application({ organizationName: `Prospect ${tag}`, contactName: 'Pat Applicant', contactEmail: `pat-${tag}@example.test`, memberCount: 120, organizationType: 'local', sectors: ['education'], crmConsent: { granted: false, noticeVersion: 'pilot-crm-v1' } }))
 
       expect(response.status, await response.clone().text()).toBeLessThan(300)
       expect(await rows(`SELECT organization_name, contact_email, member_count FROM pilot_applications WHERE contact_email = $1`, [`pat-${tag}@example.test`])).toEqual([{ organization_name: `Prospect ${tag}`, contact_email: `pat-${tag}@example.test`, member_count: 120 }])

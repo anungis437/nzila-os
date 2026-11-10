@@ -8,22 +8,29 @@ const h = vi.hoisted(() => ({
   calculateResilienceIndex: vi.fn(),
   audit: vi.fn(),
   operation: vi.fn(),
+  listVerifiedDependencies: vi.fn(),
+  listActiveNodeAliases: vi.fn(),
 }));
 
 vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: h.withRLSContext }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: h.audit }));
 vi.mock('@/lib/audit/operation-audit', () => ({ performAuditedOperation: h.operation }));
-vi.mock('drizzle-orm', () => ({ sql: Object.assign((..._a: unknown[]) => ({}), { raw: (s: string) => s }) }));
+vi.mock('drizzle-orm', () => ({ sql: Object.assign((...a: unknown[]) => ({ strings: a[0], values: a.slice(1) }), { raw: (s: string) => s }) }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ generate: h.generate }),
+  toGatewayDataClass: (c: string) => c,
   buildOrgAiTrace: (o: string) => ({ orgId: o }),
   UE_APP_KEY: 'ue',
   UE_SYSTEM_ORG_ID: 'sys',
 }));
 vi.mock('../../propagation/dependency-propagator', () => ({ buildDependencyPropagationMap: h.buildDependencyPropagationMap }));
+vi.mock('../../propagation/evidence-document-reference', () => ({ loadEvidenceDocumentIntegrity: async () => new Map() }));
+// The verified graph is read through the store; the REAL evaluator (graph-evidence-evaluator.ts) judges currentness.
+vi.mock('../../propagation/verified-dependency-store', () => ({ listVerifiedDependencies: h.listVerifiedDependencies }));
+vi.mock('../../propagation/node-alias-store', () => ({ listActiveNodeAliases: h.listActiveNodeAliases }));
 vi.mock('../../resilience-index/resilience-calculator', () => ({ calculateResilienceIndex: h.calculateResilienceIndex }));
 vi.mock('../../copilot-explainability/response-builder', () => ({
-  buildPropagationEvidence: () => [{ observation: 'p', dataPoint: '1', sourceType: 'propagation', confidence: 'high' }],
+  buildPropagationEvidence: () => [{ observation: 'p', dataPoint: '1', sourceType: 'propagation', evidenceCoverage: 'high' }],
   buildGovernanceFlags: () => [],
   buildExplainabilityEnvelope: (evidence: unknown, reasoning: unknown, assumptions: unknown, govFlags: unknown, limitations: unknown) => ({
     evidenceReferences: evidence,
@@ -31,28 +38,36 @@ vi.mock('../../copilot-explainability/response-builder', () => ({
     governanceFlags: govFlags,
     assumptions,
     limitations,
-    overallConfidence: 'medium',
+    overallEvidenceCoverage: 'medium',
   }),
 }));
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { processCopilotQuery, loadConversationHistory, listConversations } from '../copilot-engine';
+import { currentVerifiedRecord } from '../../propagation/__tests__/verified-record-fixture';
 
 const ORG = '11111111-1111-4111-8111-111111111111';
 const C1 = '55555555-5555-4555-8555-555555555555';
 const C2 = '66666666-6666-4666-8666-666666666666';
 const USER = 'user-1';
 
+const GOV = { id: 'gov', label: 'gov', nodeType: 'governance', isSingleSource: true, category: 'governance' };
+const OPS = { id: 'ops', label: 'ops', nodeType: 'process', isSingleSource: false, category: 'operational' };
+const COMP = { id: 'comp', label: 'comp', nodeType: 'process', isSingleSource: true, category: 'compliance' };
+
 function ctx() {
   h.buildDependencyPropagationMap.mockResolvedValue({
-    nodes: [
-      { isSingleSource: true, category: 'governance' },
-      { isSingleSource: false, category: 'operational' },
-      { isSingleSource: true, category: 'compliance' },
+    nodes: [GOV, OPS, COMP],
+    // Inferred: ops depends on gov, comp depends on gov.
+    edges: [
+      { dependentId: 'ops', dependsOnId: 'gov', strength: 'medium', evidenceCount: 1, rationale: '' },
+      { dependentId: 'comp', dependsOnId: 'gov', strength: 'medium', evidenceCount: 1, rationale: '' },
     ],
     bottlenecks: [{ id: 'b1' }],
   });
+  h.listVerifiedDependencies.mockResolvedValue([]);
+  h.listActiveNodeAliases.mockResolvedValue([]);
   h.calculateResilienceIndex.mockResolvedValue({
     overallScore: 55,
     status: 'developing',
@@ -80,7 +95,47 @@ describe('lib/knowledge-transfer/copilot/copilot-engine', () => {
     expect(result.summary.endsWith('…')).toBe(true);
     expect(result.followUpSuggestions[0]).toContain('fragile');
     expect(result.evidenceReferences).toBeTruthy();
-    expect(result.overallConfidence).toBe('medium');
+    expect(result.overallEvidenceCoverage).toBe('medium');
+  });
+
+  it('reports verifiedEvidenceCoverage as zero when no verified dependency records exist, and never silently drops it', async () => {
+    const result = await processCopilotQuery(ORG, { query: 'What is most fragile and at risk?' }, USER);
+    expect(result.verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 2, verifiedEdgeCount: 0, ratio: 0, fullyVerified: false });
+  });
+
+  it('reports verifiedEvidenceCoverage as the inferred edges verified in their stated direction, and tells the model the same', async () => {
+    h.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(OPS, GOV)]);
+    const result = await processCopilotQuery(ORG, { query: 'What is most fragile and at risk?' }, USER);
+    expect(result.verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 2, verifiedEdgeCount: 1, ratio: 0.5, fullyVerified: false });
+    const systemPrompt = (h.generate.mock.calls[0][0].input as Array<{ role: string; content: string }>).find((m) => m.role === 'system')?.content;
+    expect(systemPrompt).toMatch(/1 of 2 inferred\s+dependencies are currently verified in their stated direction/);
+  });
+
+  it('does not count a verified record pointing against an inferred edge, though both of its nodes appear in the graph', async () => {
+    // gov depends on ops: the reverse of the inferred ops -> gov. Every node of it participates; nothing is confirmed.
+    h.listVerifiedDependencies.mockResolvedValue([currentVerifiedRecord(GOV, OPS)]);
+    const result = await processCopilotQuery(ORG, { query: 'What is most fragile and at risk?' }, USER);
+    expect(result.verifiedEvidenceCoverage).toEqual({ exploratoryEdgeCount: 2, verifiedEdgeCount: 0, ratio: 0, fullyVerified: false });
+  });
+
+  it('persists the explainability envelope inline with the assistant message, and never claims the model itself retrieved data (DEF-0B7-EXC-COPILOT-EXPLAINABILITY)', async () => {
+    await processCopilotQuery(ORG, { query: 'What is most fragile and at risk?' }, USER);
+    // Find the UPDATE ue_copilot_conversations call that appends the assistant message (its JSON-stringified
+    // message is one of the raw interpolated `values`, not nested inside another JSON.stringify of the whole array).
+    const messageJson = h.execute.mock.calls
+      .map((call) => (call[0] as { values?: unknown[] } | undefined)?.values ?? [])
+      .flat()
+      .find((v): v is string => typeof v === 'string' && v.includes('"role":"assistant"'));
+    expect(messageJson).toBeDefined();
+    const [assistantMessage] = JSON.parse(messageJson!);
+    // The envelope is genuinely persisted, not a dangling null ref.
+    expect(assistantMessage.explainability).toBeTruthy();
+    expect(assistantMessage.explainability.reasoningChain.length).toBeGreaterThan(0);
+    expect(assistantMessage).not.toHaveProperty('explainabilityRef');
+    // No reasoning step claims the MODEL performed a retrieval it never received.
+    const reasoningText = JSON.stringify(assistantMessage.explainability.reasoningChain);
+    expect(reasoningText).not.toContain('"reasoning":"Retrieved');
+    expect(reasoningText).toContain('System computed');
   });
 
   it('returns governance follow-ups and reuses an existing conversation', async () => {

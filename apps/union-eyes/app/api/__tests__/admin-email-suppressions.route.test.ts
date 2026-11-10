@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({ lift: vi.fn(), atomic: vi.fn(), tx: { tx: true } }
 vi.mock('@/lib/api-auth-guard', () => ({
   withSystemAdminAuth: (handler: (r: NextRequest, c: unknown) => Promise<Response>) => (r: NextRequest, c: unknown = { userId: 'admin_1', organizationId: 'org_1' }) => handler(r, c),
 }))
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: vi.fn(async (context) => context) }))
 vi.mock('@/lib/audit/operation-audit', () => ({
   performAtomicSystemAuditedOperation: m.atomic,
   operationAuditResponse: (e: unknown) => (e instanceof Error && e.message === 'audit refused' ? { status: 409, body: { error: 'audit' } } : null),

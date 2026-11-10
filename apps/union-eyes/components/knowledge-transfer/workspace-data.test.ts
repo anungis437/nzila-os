@@ -99,6 +99,8 @@ describe('toPlayback', () => {
     exacerbatedWeaknesses: [{ weaknessType: 'single_source', affectedArea: 'payroll', severity: 'high', isExacerbated: true, mitigation: 'document it' }],
     twelveWeekProjection: 55,
     autonomousRecoveryProbability: 30,
+    methodologyNote: 'scenario model, not a confirmed measurement',
+    verifiedDependencyContext: { verifiedImpacts: [], totalAffectedNodes: 1 },
   } as unknown as ContinuitySimulationResult
 
   it("plays back the simulation's own timeline, with a domain affected from the week it is exposed", () => {
@@ -114,6 +116,8 @@ describe('toPlayback', () => {
     expect(playback.bottlenecksExposed).toEqual(['payroll'])
     expect(playback.twelveWeekProjection).toBe(55)
     expect(playback.autonomousRecoveryProbability).toBe(30)
+    expect(playback.methodologyNote).toBe('scenario model, not a confirmed measurement')
+    expect(playback.verifiedDependencyContext).toEqual({ verifiedImpacts: [], totalAffectedNodes: 1 })
   })
 
   it('shows no mitigation and no recovery week, because the simulation models neither', () => {
@@ -127,8 +131,11 @@ describe('toGovernanceImpact', () => {
   const cascade: GovernanceCascadeAnalysis = {
     organizationId: 'org',
     generatedAt: 'now',
-    governanceNodes: [{ id: 'gov', label: 'Bylaw amendment procedure', criticality: 'critical' }],
-    cascadeRisks: [{ governanceGap: 'Bylaw amendment procedure', impactedAreas: ['payroll'], severity: 'critical', cascadeDepth: 2 }],
+    methodologyNote: 'Exploratory unless a currently-verified dependency record is on file.',
+    governanceNodes: [{ id: 'gov', label: 'Bylaw amendment procedure', criticality: 'critical', evidenceBasis: 'exploratory' }],
+    cascadeRisks: [{ governanceGap: 'Bylaw amendment procedure', governanceNodeId: 'gov', impactedAreas: ['payroll'], severity: 'critical', severityBasis: 'exploratory', cascadeDepth: 2, evidenceBasis: 'exploratory', confirmedImpactedAreas: [] }],
+    confirmedCascadeRisks: [],
+    exploratoryCascadeHypotheses: [{ governanceGap: 'Bylaw amendment procedure', governanceNodeId: 'gov', impactedAreas: ['payroll'], severity: 'critical', severityBasis: 'exploratory', cascadeDepth: 2, evidenceBasis: 'exploratory', confirmedImpactedAreas: [] }],
     regulatoryRisks: [],
     regulatoryAssessment: 'dependency_only_no_regulation_assessed',
     recommendations: [],
@@ -140,12 +147,35 @@ describe('toGovernanceImpact', () => {
     expect(impact.totalGovernanceProcesses).toBe(1)
     expect(impact.singleSourceProcesses).toBe(1)
     expect(impact.criticalGovernanceGaps).toEqual(['Bylaw amendment procedure'])
-    expect(impact.nodes).toEqual([{ id: 'gov', name: 'Bylaw amendment procedure', type: 'governance', isSingleSource: true, dependsOn: [], downstreamProcesses: ['payroll label'], riskLevel: 'critical' }])
-    expect(impact.cascadeRisks).toEqual([{ triggerNode: 'Bylaw amendment procedure', cascadedProcesses: ['payroll label'], severity: 'critical', cascadeDepth: 2 }])
+    expect(impact.governanceGapsWithVerifiedCascade).toEqual([])
+    expect(impact.nodes).toEqual([{ id: 'gov', name: 'Bylaw amendment procedure', type: 'governance', isSingleSource: true, dependsOn: [], downstreamProcesses: ['payroll label'], riskLevel: 'critical', evidenceBasis: 'exploratory' }])
+    expect(impact.cascadeRisks).toEqual([{ triggerNode: 'Bylaw amendment procedure', cascadedProcesses: ['payroll label'], severity: 'critical', cascadeDepth: 2, evidenceBasis: 'exploratory', confirmedCascadedProcesses: [] }])
+    expect(impact.confirmedCascadeRisks).toEqual([])
+    expect(impact.methodologyNote).toBe('Exploratory unless a currently-verified dependency record is on file.')
+    expect(impact.verifiedEvidenceCoverage).toEqual({ cascadesWithVerifiedChain: 0, totalCascades: 1 })
+  })
+
+  it('separates a confirmed cascade from an exploratory one, shows each confirmed process with its verified chain and evidence tier, and never calls the severity confirmed', () => {
+    const confirmedArea = { nodeId: 'payroll', chain: ['gov', 'payroll'], evidenceTier: 'system_resolved_document' as const, verifiedBy: [] }
+    const confirmedRisk = { ...cascade.cascadeRisks[0], evidenceBasis: 'verified' as const, confirmedImpactedAreas: [confirmedArea] }
+    const impact = toGovernanceImpact({ ...cascade, cascadeRisks: [confirmedRisk], confirmedCascadeRisks: [confirmedRisk], exploratoryCascadeHypotheses: [] }, MAP)
+    expect(impact.governanceGapsWithVerifiedCascade).toEqual(['Bylaw amendment procedure'])
+    expect(impact.confirmedCascadeRisks).toEqual([{
+      triggerNode: 'Bylaw amendment procedure',
+      cascadedProcesses: ['payroll label'],
+      severity: 'critical',
+      cascadeDepth: 2,
+      evidenceBasis: 'verified',
+      confirmedCascadedProcesses: [{ name: 'payroll label', chain: ['gov label', 'payroll label'], evidenceTier: 'system_resolved_document' }],
+    }])
+    expect(impact.verifiedEvidenceCoverage).toEqual({ cascadesWithVerifiedChain: 1, totalCascades: 1 })
+    // A critical severity is still reported as an (inferred) critical gap, not as a confirmed one.
+    expect(impact.criticalGovernanceGaps).toEqual(['Bylaw amendment procedure'])
+    expect(impact).not.toHaveProperty('confirmedCriticalGovernanceGaps')
   })
 
   it('has no gap to report when nothing is critical, and names an area the map does not have by its id rather than inventing a label', () => {
-    const impact = toGovernanceImpact({ ...cascade, cascadeRisks: [{ governanceGap: 'x', impactedAreas: ['unknown-node'], severity: 'high', cascadeDepth: 1 }] }, MAP)
+    const impact = toGovernanceImpact({ ...cascade, cascadeRisks: [{ ...cascade.cascadeRisks[0], governanceGap: 'x', impactedAreas: ['unknown-node'], severity: 'high', cascadeDepth: 1 }] }, MAP)
     expect(impact.criticalGovernanceGaps).toEqual([])
     expect(impact.cascadeRisks[0].cascadedProcesses).toEqual(['unknown-node'])
   })
@@ -191,6 +221,7 @@ describe('toMitigationView', () => {
     basis: 'ASSUMED_EFFECTIVENESS_NOT_CALIBRATED',
     assumptions: ['Effectiveness is a fixed table of assumed multipliers.'],
     noNodesEvaluated: false,
+    verifiedEvidenceCoverage: { nodesWithVerifiedEvidence: 1, totalNodes: 4 },
   } as unknown as MitigationComparison
 
   it('lays the answer out beside what was asked for, names the recommended scenario by its label, and carries the assumptions', () => {
@@ -204,6 +235,7 @@ describe('toMitigationView', () => {
     expect(view.recommended).toBe('cross_training label')
     expect(view.assumptions).toEqual(['Effectiveness is a fixed table of assumed multipliers.'])
     expect(view.residualRisks).toEqual(['payroll remains single-source'])
+    expect(view.verifiedEvidenceCoverage).toEqual({ nodesWithVerifiedEvidence: 1, totalNodes: 4 })
   })
 
   it('recommends nothing when nothing was evaluated, and does not guess what was asked for a scenario it cannot match to a request', () => {

@@ -4,7 +4,7 @@
   "applyNow": false,
   "note": "Derived batch program for every remaining schema-census entry and the original mutation-scope statements. Program applyNow stays false. A mutation batch sets applyNow only when the live scan no longer counts every source statement in that batch, and the baseline file then shrinks to that scan. This file does not remove a census entry. Hold batches do not shrink either ratchet. Do not edit the mutation scanner or the route-coverage scanner to change a count. Do not regenerate a baseline except to record statements the live scan no longer counts. Finance issuance stays fail-closed. services/financial-service is not an approval path.",
   "censusCount": 0,
-  "sourceMutationBaselineSum": 13,
+  "sourceMutationBaselineSum": 15,
   "mutationBaselineSum": 0,
   "mutationLiveSum": 0,
   "graphComplete": true,
@@ -75,10 +75,47 @@
       "entryCount": 2,
       "statementCount": 2,
       "liveStatementCount": 0
+    },
+    {
+      "id": "mutation-pay-equity-lifecycle",
+      "order": 5.1,
+      "ratchet": "mutation-scope",
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The lifecycle compare-and-set names the exercise id, the caller organizationId and the prior status in the UPDATE predicate. The organization is request authority, not copied from the row under mutation. Do not weaken the row lock, transition validation or atomic audit.",
+      "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts and apps/union-eyes/lib/pay-equity/__tests__/pay-equity-lifecycle.test.ts",
+      "applyNow": true,
+      "entryCount": 1,
+      "statementCount": 1,
+      "liveStatementCount": 0
+    },
+    {
+      "id": "mutation-workbook-consent",
+      "order": 5.2,
+      "ratchet": "mutation-scope",
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "Consent withdrawal constrains the UPDATE to the workbook id and the ownership state already established by the shared workbook authority boundary: the exact claimedByUserId for a claimed workbook, or claimedByUserId IS NULL for the capability-authorized preclaim path. Do not treat a workbook id as bearer authority.",
+      "proof": "apps/union-eyes/lib/__tests__/mutation-scope-ratchet.test.ts and apps/union-eyes/lib/workbook/__tests__/consent.test.ts",
+      "applyNow": true,
+      "entryCount": 1,
+      "statementCount": 1,
+      "liveStatementCount": 0
     }
   ],
   "schema": [],
   "sourceMutations": [
+    {
+      "key": "app/api/cnesst/pay-equity/[id]/transition/route.ts|pay_equity_exercises",
+      "file": "app/api/cnesst/pay-equity/[id]/transition/route.ts",
+      "table": "pay_equity_exercises",
+      "batchId": "mutation-pay-equity-lifecycle",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
     {
       "key": "app/api/payments/webhooks/stripe/route.ts|workbooks",
       "file": "app/api/payments/webhooks/stripe/route.ts",
@@ -95,6 +132,17 @@
       "file": "app/api/workbook/[id]/claim/route.ts",
       "table": "workbooks",
       "batchId": "mutation-workbook-unclaimed",
+      "baselineCount": 1,
+      "liveCount": 0,
+      "execution": "implemented",
+      "shrink": "mutation-baseline",
+      "action": "The live scan no longer counts this statement. The caller tenant or the owning predicate is in the statement the scanner reads."
+    },
+    {
+      "key": "app/api/workbook/[id]/consent/route.ts|workbooks",
+      "file": "app/api/workbook/[id]/consent/route.ts",
+      "table": "workbooks",
+      "batchId": "mutation-workbook-consent",
       "baselineCount": 1,
       "liveCount": 0,
       "execution": "implemented",

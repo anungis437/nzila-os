@@ -7,6 +7,8 @@ import { withApi, ApiError } from '@/lib/api/framework';
 import { db } from '@/db';
 import { grievances } from '@/db/schema/domains/claims/grievances';
 import { grievanceCaseAuthorityScope } from '@/lib/cases/grievance-list-scope';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
+import { and } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +36,7 @@ export const GET = withApi(
     const rows = await db
       .select()
       .from(grievances)
-      .where(scope);
+      .where(and(scope, productionGrievanceCondition()));
 
     const activeCases = rows.filter(g => ACTIVE_STATUSES.includes(g.status)).length;
 

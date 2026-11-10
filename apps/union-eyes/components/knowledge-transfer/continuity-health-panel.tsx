@@ -14,7 +14,11 @@ interface ContinuityRiskReport {
   organizationId: string;
   generatedAt: string;
   totalPublishedInterviews: number;
-  overallRiskScore: number;
+  /** Null when there are no published interviews: nothing has been assessed yet. */
+  overallRiskScore: number | null;
+  /** The score is a fixed-rule index over interview counts, never a measured risk. */
+  scoreBasis: 'fixed_rule_index_over_interview_counts';
+  methodologyNote: string;
   riskFlags: RiskFlag[];
   singleSourceTopics: string[];
   coverageGaps: string[];
@@ -29,13 +33,23 @@ const RISK_COLOR: Record<string, string> = {
   critical: 'bg-red-100 text-red-800',
 };
 
-function RiskScore({ score }: { score: number }) {
+function RiskScore({ score }: { score: number | null }) {
+  if (score === null) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-muted-foreground">Not yet assessed</span>
+      </div>
+    );
+  }
   const color = score >= 70 ? 'text-red-600' : score >= 40 ? 'text-orange-500' : 'text-green-600';
-  const label = score >= 70 ? 'High Risk' : score >= 40 ? 'Moderate Risk' : 'Low Risk';
+  // A fixed-rule index over interview counts: it says how thin coverage looks, not that the organization is at high or
+  // low risk (DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS).
+  const label = score >= 70 ? 'Thin coverage' : score >= 40 ? 'Partial coverage' : 'Broad coverage';
   return (
     <div className="flex items-center gap-2">
       <span className={`text-3xl font-bold tabular-nums ${color}`}>{score}</span>
       <span className={`text-sm font-medium ${color}`}>{label}</span>
+      <span className="text-xs text-muted-foreground">(rule-based index)</span>
     </div>
   );
 }
@@ -102,6 +116,10 @@ export function ContinuityHealthPanel() {
         </div>
         <RiskScore score={report.overallRiskScore} />
       </div>
+
+      {report.overallRiskScore !== null && (
+        <p className="text-xs text-muted-foreground">{report.methodologyNote}</p>
+      )}
 
       {report.executiveSummary && (
         <p className="text-sm text-muted-foreground border-l-2 border-primary/30 pl-3">

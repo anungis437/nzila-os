@@ -7,6 +7,9 @@ function sim(): ContinuitySimulationResult {
     organizationId: 'org-1',
     generatedAt: '2025-01-01',
     scenario: { simulationType: 'retirement', affectedNodeIds: ['n1'] },
+    evidenceBasis: 'exploratory_simulation',
+    methodologyNote: 'test fixture methodology note',
+    verifiedDependencyContext: { affectedNodesWithVerifiedEvidence: 0, totalAffectedNodes: 1 },
     baselineContinuityScore: 70,
     immediateImpactScore: 55,
     twelveWeekProjection: 30,
@@ -41,7 +44,9 @@ describe('lib/knowledge-transfer/simulation-explainability/simulation-explainer'
     expect(exp.reasoningChain[3].assumption).toContain('1.2x');
     expect(exp.keyAssumptions.length).toBeGreaterThan(0);
     expect(exp.sourceEvidence.length).toBe(3);
-    expect(exp.confidenceLevels.immediate_impact).toBe(75);
+    // DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS: evidence coverage must come from how many domains
+    // this simulation actually modeled, not a fixed literal returned for every simulation regardless of input.
+    expect(exp.evidenceCoverageScore).toBe(40); // 1 domainImpact, below MIN_COHORT_SIZE
     expect(exp.limitations.length).toBeGreaterThan(0);
     expect(exp.simulationId).toMatch(/^sim_/);
   });
@@ -51,5 +56,17 @@ describe('lib/knowledge-transfer/simulation-explainability/simulation-explainer'
     s.degradationTimeline = [];
     const exp = explainSimulation(s);
     expect(exp.reasoningChain[3].assumption).toContain('1x');
+  });
+
+  it('evidence coverage score varies with how many domains were actually modeled, not a fixed number', () => {
+    const none = sim();
+    none.domainImpacts = [];
+    expect(explainSimulation(none).evidenceCoverageScore).toBe(0);
+
+    const many = sim();
+    many.domainImpacts = Array.from({ length: 10 }, (_, i) => ({
+      domain: `Domain ${i}`, impactSeverity: 'low' as const, degradationPercentage: 10, timeToExposure: 8, hasWorkarounds: true, workaroundComplexity: 'simple' as const,
+    }));
+    expect(explainSimulation(many).evidenceCoverageScore).toBe(80);
   });
 });

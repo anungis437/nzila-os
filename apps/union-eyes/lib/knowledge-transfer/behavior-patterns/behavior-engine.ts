@@ -114,21 +114,13 @@ function detectGovernanceStagnation(store: MemoryStore, sessionCount: number): I
   if (totalInteractions >= 5) return null; // Not stagnant if active
 
   const latest = store.entries[0];
-  if (!latest) {
-    return {
-      id: randomUUID(),
-      patternType: 'governance_stagnation',
-      label: 'Governance Stagnation',
-      description: 'No continuity governance activity has been recorded. The organization lacks organizational cognition history.',
-      evidencePoints: ['No cognition memory entries found.'],
-      occurrenceCount: 1,
-      evidenceStrength: 'strong',
-      isCurrentlyActive: true,
-      governanceImplication: 'Initiating regular governance reasoning sessions and documenting continuity assessments is recommended to begin building organizational intelligence.',
-      firstObservedAt: null,
-      mostRecentAt: null,
-    };
-  }
+  // Zero recorded interactions is an empty history, not a governance behavior pattern: there is no activity (or
+  // inactivity) to characterize, let alone characterize with "strong" evidence. The report's own learningSignal
+  // already reads 'insufficient_history' for this case (see detectBehaviorPatterns) - this function must not
+  // contradict that by fabricating a confidently-labeled pattern on nothing. Returning null here lets patterns stay
+  // empty and the dominant-pattern/narrative fields correctly say so instead of naming a pattern that was never
+  // observed.
+  if (!latest) return null;
 
   // Check recency
   const daysSince = (Date.now() - new Date(latest.createdAt).getTime()) / 86_400_000;

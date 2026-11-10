@@ -111,3 +111,31 @@ export function describeAccessRestriction(
     : 'Semantic search: disabled';
   return `${def.label} — ${def.description} ${indexStatus}.`;
 }
+
+/**
+ * Sensitivity rank: higher means more restrictive. legal_sensitive and executive_confidential share the top rank -
+ * moving between those two is a lateral move, not a downgrade.
+ */
+const SENSITIVITY_RANK: Record<ExitInterviewSensitivityLevel, number> = {
+  public_internal: 0,
+  restricted: 1,
+  privileged: 2,
+  legal_sensitive: 3,
+  executive_confidential: 3,
+};
+
+/**
+ * Whether lowering an interview from `from` to `to` requires a second admin's approval
+ * (DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW): any single administrator could
+ * previously move a published interview out of legal_sensitive or executive_confidential with no second approver
+ * and no legal-review step. Required whenever the current level is one of the two most restrictive tiers and the
+ * requested level is strictly less restrictive - lateral moves between the two most restrictive tiers, and any
+ * move to an equally or more restrictive level, do not need a second approver.
+ */
+export function requiresReclassificationApproval(
+  from: ExitInterviewSensitivityLevel,
+  to: ExitInterviewSensitivityLevel,
+): boolean {
+  return SENSITIVITY_RANK[from] === 3 && SENSITIVITY_RANK[to] < 3;
+}
+

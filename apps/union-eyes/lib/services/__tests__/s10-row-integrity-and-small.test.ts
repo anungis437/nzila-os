@@ -62,6 +62,7 @@ describe('Gate 0 batch B66/S09: small platform fixes and row integrity', () => {
   it('pins an external document download to the version its grant covers', () => {
     const download = src('app/api/external/documents/[id]/download/route.ts')
     expect(download).toContain('decision.documentVersionNo')
+    expect(download).toContain("if (pinned === null) return { kind: 'forbidden' as const }")
     expect(download).toContain('eq(documentVersions.versionNo, pinned)')
     expect(src('app/api/external/grievances/[id]/documents/upload/route.ts')).toContain('documentVersionNo: 1')
     expect(src('lib/services/external-resource-authorization-service.ts')).toContain('documentVersionNo:')

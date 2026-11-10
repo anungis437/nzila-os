@@ -46,6 +46,11 @@ import { GeofencePrivacyService } from '../geofence-privacy-service';
 import { LOCATION_CONSENT_DESCRIPTION, LOCATION_CONSENT_PURPOSE, locationConsentNoticeDigest } from '@/lib/location/consent-notice';
 
 const S = GeofencePrivacyService;
+const ORG = 'org-1';
+const EVENT_SCOPE = 'event-1';
+const STRIKE_SCOPE = 'g1';
+const eventScope = { linkedId: EVENT_SCOPE };
+const strikeScope = { linkedId: 's1' };
 const enabledConfig = (over: Record<string, unknown> = {}) => ({
   locationTrackingEnabled: true, backgroundTrackingAllowed: false,
   explicitOptInRequired: true, autoDeletionEnabled: true, ...over,
@@ -59,7 +64,7 @@ beforeEach(() => {
 
 describe('geofence-privacy-service', () => {
   describe('requestLocationConsent', () => {
-    const req = { userId: 'u1', purpose: LOCATION_CONSENT_PURPOSE, purposeDescription: LOCATION_CONSENT_DESCRIPTION, consentText: 'Approved exact notice', noticeVersion: 'v1',
+    const req = { userId: 'u1', organizationId: ORG, scopeKind: 'event' as const, scopeId: EVENT_SCOPE, purpose: LOCATION_CONSENT_PURPOSE, purposeDescription: LOCATION_CONSENT_DESCRIPTION, consentText: 'Approved exact notice', noticeVersion: 'v1', allowedDuringEvents: true,
       noticeDigest: locationConsentNoticeDigest({ version: 'v1', purpose: LOCATION_CONSENT_PURPOSE, purposeDescription: LOCATION_CONSENT_DESCRIPTION, consentText: 'Approved exact notice' }) };
 
     it('refuses direct service callers who forge the notice or omit the configured policy', async () => {
@@ -77,18 +82,19 @@ describe('geofence-privacy-service', () => {
     });
 
     it('grants consent when none exists', async () => {
-      pushSel([], [{ id: 'c1' }], []); // existing empty, insert, audit
+      pushSel([eventScope], [], [{ id: 'c1' }], []); // verified scope, existing empty, insert, audit
       const r = await S.requestLocationConsent(req);
       expect(r).toEqual({ id: 'c1' });
     });
 
     it('throws when an active consent already exists', async () => {
-      pushSel([{ id: 'c0', consentStatus: 'opted_in', expiresAt: new Date('2999-01-01'), consentVersion: 'v1' }]);
+      pushSel([eventScope], [{ id: 'c0', consentStatus: 'opted_in', expiresAt: new Date('2999-01-01'), consentVersion: 'v1' }]);
       await expect(S.requestLocationConsent(req)).rejects.toThrow('already has active');
     });
 
     it('allows re-consent under a new notice version instead of trapping an old active consent', async () => {
       pushSel(
+        [eventScope],
         [{ id: 'old', consentStatus: 'opted_in', consentVersion: 'v0', expiresAt: new Date('2999-01-01') }],
         [{ id: 'old', consentVersion: 'v1' }],
         [],
@@ -99,6 +105,7 @@ describe('geofence-privacy-service', () => {
 
     it('renews an expired or withdrawn consent row in place with an upsert (user_id is unique)', async () => {
       pushSel(
+        [eventScope],
         [{ id: 'c0', consentStatus: 'opted_in', expiresAt: new Date('2000-01-01') }], // existing expired
         [{ id: 'c0' }], // upsert returning (the conflict update applied)
         [], // audit
@@ -109,6 +116,7 @@ describe('geofence-privacy-service', () => {
 
     it('refuses the renewal when a concurrent grant already made the consent active', async () => {
       pushSel(
+        [eventScope],
         [{ id: 'c0', consentStatus: 'opted_out', expiresAt: null }],
         [], // the upsert predicate matched nothing
       );
@@ -117,8 +125,9 @@ describe('geofence-privacy-service', () => {
 
     it('works on the caller\u2019s transaction when one is given', async () => {
       h.db.select.mockClear();
+      const scopedRows = [[eventScope], []];
       const tx = {
-        select: vi.fn(() => ({ from: () => ({ where: () => ({ limit: async () => [] }) }) })),
+        select: vi.fn(() => ({ from: () => ({ where: () => ({ limit: async () => scopedRows.shift() ?? [] }) }) })),
         insert: vi.fn(() => ({
           values: () => ({
             onConflictDoUpdate: () => ({ returning: async () => [{ id: 'cx' }] }),
@@ -139,14 +148,14 @@ describe('geofence-privacy-service', () => {
       [], // deletion log insert
       [], // audit log
     );
-    const r = await S.revokeLocationConsent('u1', 'because');
+    const r = await S.revokeLocationConsent('u1', ORG, 'because');
     expect(h.db.update).toHaveBeenCalled();
     expect(r.consentId).toBe('c1');
   });
 
   it('eraseLocationData removes tracking and event rows without needing any consent, and reports the total', async () => {
     pushSel([{ id: 't1' }, { id: 't2' }], [{ id: 'e1' }], []); // tracking delete, events delete, deletion log insert
-    const r = await S.eraseLocationData('u1');
+    const r = await S.eraseLocationData('u1', ORG);
     expect(r).toEqual({ trackingRecordsDeleted: 2, eventRecordsDeleted: 1, total: 3 });
     expect(h.db.update).not.toHaveBeenCalled();
   });
@@ -154,55 +163,57 @@ describe('geofence-privacy-service', () => {
   it('revokeLocationConsent throws and deletes nothing when there is no consent to revoke', async () => {
     h.db.delete.mockClear();
     pushSel([]); // update matched nothing
-    await expect(S.revokeLocationConsent('u1')).rejects.toThrow('No active location consent');
+    await expect(S.revokeLocationConsent('u1', ORG)).rejects.toThrow('No active location consent');
     expect(h.db.delete).not.toHaveBeenCalled();
   });
 
   describe('hasValidConsent', () => {
     it('returns false with no consent', async () => {
-      pushSel([]);
-      expect(await S.hasValidConsent('u1')).toBe(false);
+      pushSel([strikeScope], []);
+      expect(await S.hasValidConsent('u1', ORG, 'strike', STRIKE_SCOPE)).toBe(false);
     });
 
     it('expires and returns false when past expiry', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2000-01-01') }], []);
-      expect(await S.hasValidConsent('u1')).toBe(false);
+      pushSel([strikeScope], [{ id: 'c1', expiresAt: new Date('2000-01-01') }]);
+      expect(await S.hasValidConsent('u1', ORG, 'strike', STRIKE_SCOPE)).toBe(false);
     });
 
     it('returns false for strike context without strike permission', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
-      expect(await S.hasValidConsent('u1', 'strike')).toBe(false);
+      pushSel([strikeScope], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
+      expect(await S.hasValidConsent('u1', ORG, 'strike', STRIKE_SCOPE)).toBe(false);
     });
 
     it('returns false for event context without event permission', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringEvents: false }]);
-      expect(await S.hasValidConsent('u1', 'event')).toBe(false);
+      pushSel([eventScope], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringEvents: false }]);
+      expect(await S.hasValidConsent('u1', ORG, 'event', EVENT_SCOPE)).toBe(false);
     });
 
     it('does not authorize tracking under a superseded or unconfigured notice', async () => {
-      pushSel([{ id: 'old', expiresAt: new Date('2999-01-01'), consentVersion: 'v0', allowedDuringStrike: true }]);
-      expect(await S.hasValidConsent('u1', 'strike')).toBe(false);
+      pushSel([strikeScope], [{ id: 'old', expiresAt: new Date('2999-01-01'), consentVersion: 'v0', allowedDuringStrike: true }]);
+      expect(await S.hasValidConsent('u1', ORG, 'strike', STRIKE_SCOPE)).toBe(false);
       delete process.env.UE_LOCATION_CONSENT_NOTICE_TEXT;
-      pushSel([{ id: 'current', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }]);
-      expect(await S.hasValidConsent('u1', 'strike')).toBe(false);
+      pushSel([strikeScope], [{ id: 'current', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }]);
+      expect(await S.hasValidConsent('u1', ORG, 'strike', STRIKE_SCOPE)).toBe(false);
     });
 
     it('returns true for a valid consent', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }]);
-      expect(await S.hasValidConsent('u1', 'strike')).toBe(true);
+      pushSel([strikeScope], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }]);
+      expect(await S.hasValidConsent('u1', ORG, 'strike', STRIKE_SCOPE)).toBe(true);
     });
   });
 
   describe('trackLocation', () => {
-    const tr = { userId: 'u1', latitude: 45.5, longitude: -73.5, purpose: 'strike' };
+    const tr = { userId: 'u1', organizationId: ORG, latitude: 45.5, longitude: -73.5, purpose: 'strike', scopeKind: 'strike' as const, scopeId: STRIKE_SCOPE };
 
     it('throws without consent', async () => {
-      pushSel([]); // hasValidConsent → none
+      pushSel([strikeScope], [strikeScope], []); // scope verification, hasValidConsent scope, no consent
       await expect(S.trackLocation(tr)).rejects.toThrow('explicit opt-in consent');
     });
 
     it('throws when tracking is globally disabled', async () => {
       pushSel(
+        [strikeScope],
+        [strikeScope],
         [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], // hasValidConsent
         [enabledConfig({ locationTrackingEnabled: false })], // getConfig
       );
@@ -210,7 +221,7 @@ describe('geofence-privacy-service', () => {
     });
 
     it('refuses a strike ping when the member did not allow tracking during strikes', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
+      pushSel([strikeScope], [strikeScope], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
       await expect(S.trackLocation(tr)).rejects.toThrow('explicit opt-in consent');
     });
 
@@ -224,36 +235,39 @@ describe('geofence-privacy-service', () => {
       expect(h.db.insert).not.toHaveBeenCalled();
     });
 
-    it('rejects caller-provided strike or event associations without a verified organization-bound resolver', async () => {
+    it('rejects a strike or event scope that the organization-bound resolver cannot verify', async () => {
       h.db.select.mockClear();
       h.db.insert.mockClear();
-      await expect(S.trackLocation({ ...tr, strikeId: '11111111-1111-4111-8111-111111111111' })).rejects.toThrow('unverified strike or event');
-      await expect(S.trackLocation({ ...tr, purpose: 'event', eventId: '22222222-2222-4222-8222-222222222222' })).rejects.toThrow('unverified strike or event');
-      expect(h.db.select).not.toHaveBeenCalled();
+      pushSel([], []);
+      await expect(S.trackLocation({ ...tr, scopeId: 'unknown-strike' })).rejects.toThrow('active organization strike');
+      await expect(S.trackLocation({ ...tr, purpose: 'event', scopeKind: 'event', scopeId: 'unknown-event' })).rejects.toThrow('active organization event');
+      expect(h.db.select).toHaveBeenCalledTimes(2);
       expect(h.db.insert).not.toHaveBeenCalled();
     });
 
     it('does not treat strike consent as event consent', async () => {
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true, allowedDuringEvents: false }]);
-      await expect(S.trackLocation({ ...tr, purpose: 'event' })).rejects.toThrow('explicit opt-in consent');
+      pushSel([eventScope], [eventScope], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true, allowedDuringEvents: false }]);
+      await expect(S.trackLocation({ ...tr, purpose: 'event', scopeKind: 'event', scopeId: EVENT_SCOPE })).rejects.toThrow('explicit opt-in consent');
     });
 
     it('does not auto-enable tracking when institutional configuration is absent', async () => {
       h.db.insert.mockClear();
-      pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], []);
+      pushSel([strikeScope], [strikeScope], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], []);
       await expect(S.trackLocation(tr)).rejects.toThrow('no approved configuration');
       expect(h.db.insert).not.toHaveBeenCalled();
     });
 
     it('refuses enabled but privacy-unsafe configurations', async () => {
       for (const override of [{ backgroundTrackingAllowed: true }, { explicitOptInRequired: false }, { autoDeletionEnabled: false }]) {
-        pushSel([{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], [enabledConfig(override)]);
+        pushSel([strikeScope], [strikeScope], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], [enabledConfig(override)]);
         await expect(S.trackLocation(tr)).rejects.toThrow('globally disabled');
       }
     });
 
     it('records a location point', async () => {
       pushSel(
+        [strikeScope],
+        [strikeScope],
         [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], // hasValidConsent
         [enabledConfig()], // getConfig
         [{ id: 'loc1' }], // insert returning
@@ -285,6 +299,7 @@ describe('geofence-privacy-service', () => {
     it('reports inside and logs an entry event for a strike-linked fence with strike consent', async () => {
       pushSel(
         [{ ...fence, strikeId: 's1' }],
+        [strikeScope],
         [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], // hasValidConsent
         [enabledConfig()], // getConfig
         [], // logGeofenceEvent insert
@@ -302,7 +317,7 @@ describe('geofence-privacy-service', () => {
     // DEF-0B8-JUR-GEOFENCE-GET-STORES-MEMBER-COORDINATES-WITHOUT-A-CONSENT-CHECK
     it('reports inside but stores no position for a member who has not opted in', async () => {
       h.db.insert.mockClear();
-      pushSel([fence], []); // no consent row
+      pushSel([fence]); // unlinked fence does not ask for consent
       const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.inside).toBe(true);
       expect(r.recorded).toBe(false);
@@ -311,7 +326,7 @@ describe('geofence-privacy-service', () => {
 
     it('stores no position while location tracking is globally disabled', async () => {
       h.db.insert.mockClear();
-      pushSel([{ ...fence, strikeId: 's1' }], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], [enabledConfig({ locationTrackingEnabled: false })]);
+      pushSel([{ ...fence, strikeId: 's1' }], [strikeScope], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: true }], [enabledConfig({ locationTrackingEnabled: false })]);
       const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.recorded).toBe(false);
       expect(h.db.insert).not.toHaveBeenCalled();
@@ -319,7 +334,7 @@ describe('geofence-privacy-service', () => {
 
     it('asks for the strike permission when the fence belongs to a strike', async () => {
       h.db.insert.mockClear();
-      pushSel([{ ...fence, strikeId: 's1' }], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
+      pushSel([{ ...fence, strikeId: 's1' }], [strikeScope], [{ id: 'c1', expiresAt: new Date('2999-01-01'), consentVersion: 'v1', allowedDuringStrike: false }]);
       const r = await S.checkGeofenceEntry('u1', 45.5, -73.5, 'g1', 'org-1');
       expect(r.recorded).toBe(false);
       expect(h.db.insert).not.toHaveBeenCalled();

@@ -46,12 +46,29 @@ describe('lib/knowledge-transfer/behavior-patterns/behavior-engine', () => {
     expect(report.learningSignal).toBe('periodic_learning');
   });
 
-  it('flags governance stagnation when there is no history', async () => {
+  it('reports insufficient history rather than a fabricated pattern when there is no history', async () => {
     loadCognitionMemory.mockResolvedValue(store());
     listReasoningSessions.mockResolvedValue([]);
     const report = await detectBehaviorPatterns('org-2');
-    expect(report.dominantPattern).toBe('governance_stagnation');
+    // An empty history is nothing observed, not "strong evidence" of a governance_stagnation pattern - DEF-0B7-COGA-PROFILES.
+    expect(report.patterns).toEqual([]);
+    expect(report.dominantPattern).toBeNull();
     expect(report.learningSignal).toBe('insufficient_history');
+    expect(report.behaviorNarrative).toContain('Insufficient organizational history');
+  });
+
+  it('still flags an extended governance gap when there is a stale but real entry', async () => {
+    const base = Date.now();
+    const entries = [
+      { memoryType: 'continuity_assessment', createdAt: new Date(base - 95 * DAY).toISOString() },
+    ];
+    loadCognitionMemory.mockResolvedValue(store({ entries }));
+    listReasoningSessions.mockResolvedValue([]);
+    const report = await detectBehaviorPatterns('org-2b');
+    // A real stale entry is an objective, dated fact worth flagging - unlike the zero-entries case above.
+    expect(report.dominantPattern).toBe('governance_stagnation');
+    const pattern = report.patterns.find((p) => p.patternType === 'governance_stagnation');
+    expect(pattern?.evidenceStrength).toBe('strong');
   });
 
   it('produces an empty-pattern narrative when active but featureless', async () => {

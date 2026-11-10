@@ -16,6 +16,7 @@
 
 import { withApi } from '@/lib/api/framework';
 import { derivedAnalyticsCondition } from '@/lib/knowledge-transfer/governance/interview-access';
+import { meetsMinimumCohort } from '@/lib/knowledge-transfer/governance/evidence-basis';
 import { db } from '@/db/db';
 import { exitInterviews } from '@/db/schema';
 
@@ -35,7 +36,13 @@ function categorizeDomain(tag: string): string {
   return 'operational';
 }
 
-function riskLevel(coverageCount: number, isSingleSource: boolean): 'low' | 'medium' | 'high' | 'critical' {
+/**
+ * Coverage-concentration level: how many people have ever discussed this domain, not a measured risk assessment.
+ * "critical"/"high" here mean "structurally single/thin-sourced", independent of whether the domain is
+ * substantively important or whether any interview recorded an actual continuity risk score for it - see
+ * hasRiskData/averageRiskScore on the same record for the (separate, possibly absent) measured-risk signal.
+ */
+function coverageConcentrationLevel(coverageCount: number, isSingleSource: boolean): 'low' | 'medium' | 'high' | 'critical' {
   if (isSingleSource) return coverageCount === 1 ? 'critical' : 'high';
   if (coverageCount <= 2) return 'medium';
   return 'low';
@@ -104,22 +111,31 @@ export const GET = withApi(
     const domains = [...domainMap.entries()].map(([domain, data]) => {
       const isSingleSource = data.coverageCount === 1;
       const category = categorizeDomain(domain);
+      // Below the minimum cohort, the role list names a specific one or few departing people rather than an
+      // organizational pattern - the same small-cell convention applied elsewhere (e.g. succession-analyzer.ts)
+      // (DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS: "returns the roles of the one interview behind
+      // a single-source tag").
+      const rolesSuppressed = !meetsMinimumCohort(data.coverageCount);
       return {
         domain,
         category,
         coverageCount: data.coverageCount,
-        roles: [...data.roles],
+        roles: rolesSuppressed ? [] : [...data.roles],
+        rolesSuppressed,
         isSingleSource,
+        // 0 is a real possible average, so a reader cannot tell "no interview for this domain carried a risk score" from
+        // "the recorded risk is zero" by the number alone - hasRiskData names which one this is.
+        hasRiskData: data.riskCount > 0,
         averageRiskScore:
           data.riskCount > 0 ? Math.round(data.totalRisk / data.riskCount) : 0,
-        riskLevel: riskLevel(data.coverageCount, isSingleSource),
+        coverageConcentrationLevel: coverageConcentrationLevel(data.coverageCount, isSingleSource),
       };
     });
 
     // Sort: critical first, then by coverage count ascending (least covered = most fragile)
     domains.sort((a, b) => {
       const order = { critical: 0, high: 1, medium: 2, low: 3 };
-      const riskDiff = order[a.riskLevel] - order[b.riskLevel];
+      const riskDiff = order[a.coverageConcentrationLevel] - order[b.coverageConcentrationLevel];
       if (riskDiff !== 0) return riskDiff;
       return a.coverageCount - b.coverageCount;
     });

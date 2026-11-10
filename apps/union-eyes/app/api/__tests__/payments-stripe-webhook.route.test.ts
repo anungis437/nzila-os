@@ -3,6 +3,14 @@ import { NextRequest } from 'next/server';
 import { createHmac } from 'node:crypto';
 
 const TEST_ORG_ID = '00000000-0000-0000-0000-000000000001';
+const WORKBOOK_CHECKOUT_REF = 'a'.repeat(43);
+const workbookIntent = (workbookId = 'workbook-1') => ({
+  id: 'intent-1',
+  workbookId,
+  tierId: 'workbook_self_guided',
+  status: 'pending',
+  stripeSessionRef: null,
+});
 
 const m = vi.hoisted(() => {
   const state = {
@@ -20,6 +28,7 @@ const m = vi.hoisted(() => {
       from: vi.fn(() => chain),
       where: vi.fn(() => chain),
       limit: vi.fn(() => chain),
+      for: vi.fn(() => chain),
       then: (resolve: (value: unknown[]) => unknown) => nextSelect().then(resolve),
     };
     return chain;
@@ -435,7 +444,7 @@ describe('payments/webhooks/stripe route', () => {
   it('upgrades workbook purchases and issues a claim token', async () => {
     const { POST } = await loadRoute('whsec_test');
     // Existence guard → fresh reservation wins → guarded update wins.
-    m.queueSelect([{ id: 'workbook-1' }]);
+    m.queueSelect([workbookIntent()]);
     m.queueInsert([{ id: 'purchase-1', workbookId: 'workbook-1' }]);
     m.queueUpdate([{ id: 'workbook-1' }]);
     const payload = JSON.stringify({
@@ -450,8 +459,7 @@ describe('payments/webhooks/stripe route', () => {
           customer_email: 'buyer@example.com',
           metadata: {
             product: 'workbook',
-            workbook_id: 'workbook-1',
-            workbook_tier_id: 'workbook_self_guided',
+            checkout_intent_ref: WORKBOOK_CHECKOUT_REF,
             organization_name: 'Union Eyes',
           },
         },
@@ -474,7 +482,7 @@ describe('payments/webhooks/stripe route', () => {
   it('treats an exact replay (same payment, same workbook) as an idempotent no-op', async () => {
     const { POST } = await loadRoute('whsec_test');
     // Existence guard → reservation conflicts → owning purchase is this workbook.
-    m.queueSelect([{ id: 'workbook-1' }], [{ workbookId: 'workbook-1' }]);
+    m.queueSelect([workbookIntent()], [{ workbookId: 'workbook-1' }]);
     m.queueInsert([]);
     const payload = JSON.stringify({
       id: 'evt_workbook_replay',
@@ -488,8 +496,7 @@ describe('payments/webhooks/stripe route', () => {
           customer_email: 'buyer@example.com',
           metadata: {
             product: 'workbook',
-            workbook_id: 'workbook-1',
-            workbook_tier_id: 'workbook_self_guided',
+            checkout_intent_ref: WORKBOOK_CHECKOUT_REF,
           },
         },
       },
@@ -507,7 +514,7 @@ describe('payments/webhooks/stripe route', () => {
   it('rejects a payment reference already owned by another workbook', async () => {
     const { POST } = await loadRoute('whsec_test');
     m.queueSelect(
-      [{ reportTierId: 'continuity_reflection', claimToken: null }],
+      [workbookIntent()],
       [{ workbookId: 'workbook-2' }],
     );
     m.queueInsert([]);
@@ -523,8 +530,7 @@ describe('payments/webhooks/stripe route', () => {
           customer_email: 'buyer@example.com',
           metadata: {
             product: 'workbook',
-            workbook_id: 'workbook-1',
-            workbook_tier_id: 'workbook_self_guided',
+            checkout_intent_ref: WORKBOOK_CHECKOUT_REF,
           },
         },
       },
@@ -546,7 +552,7 @@ describe('payments/webhooks/stripe route', () => {
     const { POST } = await loadRoute('whsec_test');
     // Existence guard passes, reservation wins, but the guarded UPDATE finds the
     // workbook already transitioned → zero rows → throw.
-    m.queueSelect([{ id: 'workbook-1' }]);
+    m.queueSelect([workbookIntent()]);
     m.queueInsert([{ id: 'purchase-1', workbookId: 'workbook-1' }]);
     m.queueUpdate([]);
     const payload = JSON.stringify({
@@ -561,8 +567,7 @@ describe('payments/webhooks/stripe route', () => {
           customer_email: 'buyer@example.com',
           metadata: {
             product: 'workbook',
-            workbook_id: 'workbook-1',
-            workbook_tier_id: 'workbook_self_guided',
+            checkout_intent_ref: WORKBOOK_CHECKOUT_REF,
           },
         },
       },
@@ -595,8 +600,7 @@ describe('payments/webhooks/stripe route', () => {
           customer_email: 'buyer@example.com',
           metadata: {
             product: 'workbook',
-            workbook_id: 'workbook-1',
-            workbook_tier_id: 'workbook_self_guided',
+            checkout_intent_ref: WORKBOOK_CHECKOUT_REF,
           },
         },
       },
@@ -617,7 +621,7 @@ describe('payments/webhooks/stripe route', () => {
     const { POST } = await loadRoute('whsec_test');
     // First attempt: reservation wins, guarded update returns zero → throw →
     // the mock restores the queue snapshot (models the reservation rolling back).
-    m.queueSelect([{ id: 'workbook-1' }]);
+    m.queueSelect([workbookIntent()]);
     m.queueInsert([{ id: 'purchase-1', workbookId: 'workbook-1' }]);
     m.queueUpdate([]);
     const makePayload = (eventId: string) =>
@@ -633,8 +637,7 @@ describe('payments/webhooks/stripe route', () => {
             customer_email: 'buyer@example.com',
             metadata: {
               product: 'workbook',
-              workbook_id: 'workbook-1',
-              workbook_tier_id: 'workbook_self_guided',
+              checkout_intent_ref: WORKBOOK_CHECKOUT_REF,
             },
           },
         },
@@ -648,7 +651,7 @@ describe('payments/webhooks/stripe route', () => {
     // Second identical delivery once the transient contention has cleared: the
     // reservation is available again and the guarded update now wins.
     m.resetQueues();
-    m.queueSelect([{ id: 'workbook-1' }]);
+    m.queueSelect([workbookIntent()]);
     m.queueInsert([{ id: 'purchase-1', workbookId: 'workbook-1' }]);
     m.queueUpdate([{ id: 'workbook-1' }]);
     const second = await POST(makeStripeRequest(makePayload('evt_retry_2'), 'whsec_test'));

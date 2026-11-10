@@ -87,25 +87,27 @@ export interface PilotApplicationCommercialInput {
 }
 
 export interface CommercialSignals {
-  adoptionScore: number;
-  activityScore: number;
-  championScore: number;
-  riskScore: number;
-  renewalLikelihood: 'low' | 'medium' | 'high';
-  expansionLikelihood: 'low' | 'medium' | 'high';
-  arrPotentialBand: 'small' | 'medium' | 'large';
+  adoptionScore: number | null;
+  activityScore: number | null;
+  championScore: number | null;
+  riskScore: number | null;
+  renewalLikelihood: 'low' | 'medium' | 'high' | 'unassessed';
+  expansionLikelihood: 'low' | 'medium' | 'high' | 'unassessed';
+  arrPotentialBand: 'small' | 'medium' | 'large' | 'unassessed';
+  evidenceStatus: 'reviewed' | 'unassessed';
 }
 
 export type OpportunityTier = 'A' | 'B' | 'C';
 
 export interface PilotQualificationScores {
-  pilotFitScore: number;
-  pilotRiskScore: number;
-  pilotRevenueScore: number;
-  pilotReadinessScore: number;
-  pilotStrategicValueScore: number;
-  overallOpportunityScore: number;
-  opportunityTier: OpportunityTier;
+  pilotFitScore: number | null;
+  pilotRiskScore: number | null;
+  pilotRevenueScore: number | null;
+  pilotReadinessScore: number | null;
+  pilotStrategicValueScore: number | null;
+  overallOpportunityScore: number | null;
+  opportunityTier: OpportunityTier | null;
+  evidenceStatus: 'reviewed' | 'unassessed';
 }
 
 export interface ProposalPackage {
@@ -184,41 +186,36 @@ export function calculatePilotQualificationScores(
   input: {
     readinessScore: number | null;
     commercialState: CommercialState;
+    reviewedEvidence?: {
+      fit: number;
+      risk: number;
+      revenue: number;
+      readiness: number;
+      strategicValue: number;
+    };
   },
 ): PilotQualificationScores {
-  const readiness = input.readinessScore ?? 55;
-  const memberCount = Math.max(1, application.memberCount || 1);
-  const stateIndex = Math.max(0, COMMERCIAL_STATE_ORDER.indexOf(input.commercialState));
-  const processProgress = Math.round((stateIndex / (COMMERCIAL_STATE_ORDER.length - 1)) * 100);
-  const coverageBreadth = Math.min(100, application.jurisdictions.length * 15 + application.sectors.length * 12);
-  const challengeLoad = application.challenges.length;
-  const hasKnownSystem = Boolean(application.currentSystem && application.currentSystem.trim().length > 0);
+  // Intake readiness, typed member counts and workflow stage are claims/process state, not observed outcomes.
+  // They must never be converted into measured-looking qualification or customer-success scores.
+  const evidence = input.reviewedEvidence;
+  if (!evidence) {
+    return {
+      pilotFitScore: null,
+      pilotRiskScore: null,
+      pilotRevenueScore: null,
+      pilotReadinessScore: null,
+      pilotStrategicValueScore: null,
+      overallOpportunityScore: null,
+      opportunityTier: null,
+      evidenceStatus: 'unassessed',
+    };
+  }
 
-  const memberScale = Math.log10(memberCount + 1) / Math.log10(10001);
-  const memberScaleScore = clampScore(memberScale * 100);
-
-  const strategicBaseByType =
-    application.organizationType === 'national'
-      ? 90
-      : application.organizationType === 'regional'
-        ? 78
-        : 65;
-
-  const pilotFitScore = clampScore(
-    readiness * 0.45 +
-      processProgress * 0.2 +
-      (100 - Math.min(80, challengeLoad * 8)) * 0.15 +
-      (hasKnownSystem ? 12 : 0) +
-      8,
-  );
-
-  const pilotRiskScore = clampScore(
-    100 - (readiness * 0.5 + processProgress * 0.25 + (hasKnownSystem ? 10 : 0) + Math.min(15, memberScaleScore * 0.15)),
-  );
-
-  const pilotRevenueScore = clampScore(memberScaleScore * 0.7 + processProgress * 0.3);
-  const pilotReadinessScore = clampScore(readiness * 0.8 + processProgress * 0.2);
-  const pilotStrategicValueScore = clampScore(strategicBaseByType * 0.6 + coverageBreadth * 0.4);
+  const pilotFitScore = clampScore(evidence.fit);
+  const pilotRiskScore = clampScore(evidence.risk);
+  const pilotRevenueScore = clampScore(evidence.revenue);
+  const pilotReadinessScore = clampScore(evidence.readiness);
+  const pilotStrategicValueScore = clampScore(evidence.strategicValue);
 
   const overallOpportunityScore = clampScore(
     pilotFitScore * 0.25 +
@@ -236,6 +233,7 @@ export function calculatePilotQualificationScores(
     pilotStrategicValueScore,
     overallOpportunityScore,
     opportunityTier: getOpportunityTier(overallOpportunityScore),
+    evidenceStatus: 'reviewed',
   };
 }
 
@@ -448,12 +446,13 @@ function buildPilotArtifacts(input: {
 }): PilotArtifactBundle {
   const pilotFee = input.economicsTier.targetPriceRange;
   const organizationName = input.application.organizationName;
+  const score = (value: number | null) => value === null ? 'unassessed' : String(value);
 
   const proposalSections = [
     {
       heading: 'Executive Summary',
       items: [
-        `${organizationName} qualifies as Tier ${input.qualificationScores.opportunityTier} with opportunity score ${input.qualificationScores.overallOpportunityScore}.`,
+        `${organizationName} has opportunity tier ${input.qualificationScores.opportunityTier ?? 'unassessed'} and opportunity score ${score(input.qualificationScores.overallOpportunityScore)}.`,
         `Recommended pilot economics: ${input.economicsTier.label} (${pilotFee}).`,
         `Qualification result: ${input.qualification}.`,
       ],
@@ -469,7 +468,7 @@ function buildPilotArtifacts(input: {
     {
       heading: 'Expected Outcomes',
       items: [
-        `Adoption trajectory score target: >= ${Math.max(70, input.signals.adoptionScore)}.`,
+        input.signals.adoptionScore === null ? 'Adoption trajectory: unassessed pending reviewed activity evidence.' : `Adoption trajectory score target: >= ${Math.max(70, input.signals.adoptionScore)}.`,
         `Renewal likelihood target: ${input.signals.renewalLikelihood}.`,
         `Expansion likelihood target: ${input.signals.expansionLikelihood}.`,
       ],
@@ -507,16 +506,16 @@ function buildPilotArtifacts(input: {
     {
       heading: 'Primary Success Metrics',
       items: [
-        `Pilot Fit Score target: >= ${Math.max(75, input.qualificationScores.pilotFitScore)}.`,
-        `Pilot Readiness Score target: >= ${Math.max(70, input.qualificationScores.pilotReadinessScore)}.`,
-        `Pilot Revenue Score target: >= ${Math.max(65, input.qualificationScores.pilotRevenueScore)}.`,
-        `Pilot Strategic Value Score target: >= ${Math.max(75, input.qualificationScores.pilotStrategicValueScore)}.`,
+        `Pilot Fit Score: ${score(input.qualificationScores.pilotFitScore)}.`,
+        `Pilot Readiness Score: ${score(input.qualificationScores.pilotReadinessScore)}.`,
+        `Pilot Revenue Score: ${score(input.qualificationScores.pilotRevenueScore)}.`,
+        `Pilot Strategic Value Score: ${score(input.qualificationScores.pilotStrategicValueScore)}.`,
       ],
     },
     {
       heading: 'Risk and Retention Indicators',
       items: [
-        `Pilot Risk Score target: <= ${Math.min(35, input.qualificationScores.pilotRiskScore)}.`,
+        `Pilot Risk Score: ${score(input.qualificationScores.pilotRiskScore)}.`,
         `Renewal likelihood target: ${input.signals.renewalLikelihood}.`,
         `Expansion likelihood target: ${input.signals.expansionLikelihood}.`,
       ],
@@ -663,8 +662,8 @@ export function buildPilotContractNumber(pilotApplicationId: string): string {
   return `PILOT-${pilotApplicationId.slice(0, 8).toUpperCase()}`;
 }
 
-export function getQualification(readinessScore: number | null, memberCount: number): 'qualified' | 'review-required' | 'defer' {
-  if (readinessScore === null) return 'review-required';
+export function getQualification(readinessScore: number | null, memberCount: number | null): 'qualified' | 'review-required' | 'defer' {
+  if (readinessScore === null || memberCount === null) return 'review-required';
   if (readinessScore >= 75 && memberCount <= 500) return 'qualified';
   if (readinessScore >= 55) return 'review-required';
   return 'defer';
@@ -672,18 +671,30 @@ export function getQualification(readinessScore: number | null, memberCount: num
 
 export function calculateCommercialSignals(input: {
   readinessScore: number | null;
+  adoptionScore?: number;
   championScore?: number;
   activityScore?: number;
+  riskScore?: number;
   commercialState: CommercialState;
   memberCount: number;
 }): CommercialSignals {
-  const readiness = input.readinessScore ?? 55;
-  const stateIndex = COMMERCIAL_STATE_ORDER.indexOf(input.commercialState);
-  const processProgress = stateIndex >= 0 ? Math.round((stateIndex / (COMMERCIAL_STATE_ORDER.length - 1)) * 100) : 0;
-  const adoptionScore = Math.max(0, Math.min(100, Math.round(readiness * 0.7 + processProgress * 0.3)));
-  const activityScore = Math.max(0, Math.min(100, Math.round((input.activityScore ?? processProgress) * 0.8 + readiness * 0.2)));
-  const championScore = Math.max(0, Math.min(100, Math.round(input.championScore ?? readiness * 0.75)));
-  const riskScore = Math.max(0, Math.min(100, Math.round(100 - ((adoptionScore + activityScore + championScore) / 3))));
+  const provided = [input.adoptionScore, input.activityScore, input.championScore, input.riskScore];
+  if (!provided.every((value) => typeof value === 'number' && Number.isFinite(value))) {
+    return {
+      adoptionScore: null,
+      activityScore: null,
+      championScore: null,
+      riskScore: null,
+      renewalLikelihood: 'unassessed',
+      expansionLikelihood: 'unassessed',
+      arrPotentialBand: 'unassessed',
+      evidenceStatus: 'unassessed',
+    };
+  }
+  const adoptionScore = clampScore(input.adoptionScore as number);
+  const activityScore = clampScore(input.activityScore as number);
+  const championScore = clampScore(input.championScore as number);
+  const riskScore = clampScore(input.riskScore as number);
 
   const renewalLikelihood: 'low' | 'medium' | 'high' =
     adoptionScore >= 75 && riskScore <= 30 ? 'high' : adoptionScore >= 55 ? 'medium' : 'low';
@@ -702,6 +713,7 @@ export function calculateCommercialSignals(input: {
     renewalLikelihood,
     expansionLikelihood,
     arrPotentialBand,
+    evidenceStatus: 'reviewed',
   };
 }
 
@@ -711,6 +723,16 @@ export function buildProposalPackage(
     commercialState?: CommercialState;
     championScore?: number;
     activityScore?: number;
+    adoptionScore?: number;
+    riskScore?: number;
+    reviewedEvidence?: {
+      fit: number;
+      risk: number;
+      revenue: number;
+      readiness: number;
+      strategicValue: number;
+    };
+    verifiedMemberCount?: number | null;
   },
 ): ProposalPackage {
   const scoreNumber =
@@ -721,17 +743,20 @@ export function buildProposalPackage(
 
   const commercialState = normalizeCommercialState(options?.commercialState);
   const economicsTier = getRecommendedEconomicsTier(application.memberCount);
-  const qualification = getQualification(readinessScore, application.memberCount);
+  const qualification = getQualification(options?.reviewedEvidence?.readiness ?? null, options?.verifiedMemberCount ?? null);
   const signals = calculateCommercialSignals({
     readinessScore,
     championScore: options?.championScore,
     activityScore: options?.activityScore,
+    adoptionScore: options?.adoptionScore,
+    riskScore: options?.riskScore,
     commercialState,
     memberCount: application.memberCount,
   });
   const qualificationScores = calculatePilotQualificationScores(application, {
     readinessScore,
     commercialState,
+    reviewedEvidence: options?.reviewedEvidence,
   });
   const artifacts = buildPilotArtifacts({
     application,
@@ -756,7 +781,7 @@ export function buildProposalPackage(
     `- Result: ${qualification}`,
     `- Readiness score: ${application.readinessScore ?? 'not provided'}`,
     `- Commercial state: ${commercialState}`,
-    `- Opportunity score: ${qualificationScores.overallOpportunityScore} (${qualificationScores.opportunityTier})`,
+    `- Opportunity score: ${qualificationScores.overallOpportunityScore ?? 'unassessed'} (${qualificationScores.opportunityTier ?? 'unassessed'})`,
     '',
     '## Pilot Economics',
     `- Recommended tier: ${economicsTier.label}`,
@@ -775,22 +800,22 @@ export function buildProposalPackage(
     '- Month 3: success review and commercial decision',
     '',
     '## Customer Success Signals',
-    `- Adoption score: ${signals.adoptionScore}`,
-    `- Activity score: ${signals.activityScore}`,
-    `- Champion score: ${signals.championScore}`,
-    `- Risk score: ${signals.riskScore}`,
+    `- Adoption score: ${signals.adoptionScore ?? 'unassessed'}`,
+    `- Activity score: ${signals.activityScore ?? 'unassessed'}`,
+    `- Champion score: ${signals.championScore ?? 'unassessed'}`,
+    `- Risk score: ${signals.riskScore ?? 'unassessed'}`,
     `- Renewal likelihood: ${signals.renewalLikelihood}`,
     `- Expansion likelihood: ${signals.expansionLikelihood}`,
     `- ARR potential band: ${signals.arrPotentialBand}`,
     '',
     '## Qualification Engine Scores',
-    `- Pilot fit score: ${qualificationScores.pilotFitScore}`,
-    `- Pilot risk score: ${qualificationScores.pilotRiskScore}`,
-    `- Pilot revenue score: ${qualificationScores.pilotRevenueScore}`,
-    `- Pilot readiness score: ${qualificationScores.pilotReadinessScore}`,
-    `- Pilot strategic value score: ${qualificationScores.pilotStrategicValueScore}`,
-    `- Overall opportunity score: ${qualificationScores.overallOpportunityScore}`,
-    `- Opportunity tier: ${qualificationScores.opportunityTier}`,
+    `- Pilot fit score: ${qualificationScores.pilotFitScore ?? 'unassessed'}`,
+    `- Pilot risk score: ${qualificationScores.pilotRiskScore ?? 'unassessed'}`,
+    `- Pilot revenue score: ${qualificationScores.pilotRevenueScore ?? 'unassessed'}`,
+    `- Pilot readiness score: ${qualificationScores.pilotReadinessScore ?? 'unassessed'}`,
+    `- Pilot strategic value score: ${qualificationScores.pilotStrategicValueScore ?? 'unassessed'}`,
+    `- Overall opportunity score: ${qualificationScores.overallOpportunityScore ?? 'unassessed'}`,
+    `- Opportunity tier: ${qualificationScores.opportunityTier ?? 'unassessed'}`,
     '',
     '## Intake Highlights',
     `- Organization type: ${application.organizationType}`,

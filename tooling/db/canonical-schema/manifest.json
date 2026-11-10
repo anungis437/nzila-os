@@ -3,7 +3,7 @@
   "description": "Published from Union Eyes runtime-schema authority oracle (disposition-adjusted REQUIRED). Not an independent table list.",
   "authoritySource": "reports/union-eyes-runtime-schema-authority-oracle.json",
   "publisherSecondSchemaAuthority": false,
-  "generatedAt": "2026-11-02T05:15:20.969Z",
+  "generatedAt": "2026-11-08T04:46:52.948Z",
   "tables": {
     "account_mappings": {
       "source": "apps/union-eyes/db/schema/domains/financial/chart-of-accounts.ts",
@@ -311,7 +311,7 @@
       "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
     "budget_pool": {
-      "source": "apps/union-eyes/db/schema/award-templates-schema.ts",
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/awards.ts",
       "requiredColumns": [
         "id",
         "organization_id",
@@ -1651,6 +1651,7 @@
       "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
       "requiredColumns": [
         "id",
+        "organization_id",
         "created_at",
         "updated_at"
       ],
@@ -1660,6 +1661,7 @@
       "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
       "requiredColumns": [
         "id",
+        "organization_id",
         "created_at",
         "updated_at"
       ],
@@ -1926,6 +1928,7 @@
       "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
       "requiredColumns": [
         "id",
+        "organization_id",
         "created_at",
         "updated_at"
       ],
@@ -1935,6 +1938,7 @@
       "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
       "requiredColumns": [
         "id",
+        "organization_id",
         "created_at",
         "updated_at"
       ],
@@ -1944,6 +1948,7 @@
       "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
       "requiredColumns": [
         "id",
+        "organization_id",
         "created_at",
         "updated_at"
       ],
@@ -1953,6 +1958,7 @@
       "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
       "requiredColumns": [
         "id",
+        "organization_id",
         "created_at",
         "updated_at"
       ],
@@ -2052,6 +2058,7 @@
       "source": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
       "requiredColumns": [
         "id",
+        "organization_id",
         "created_at",
         "updated_at"
       ],
@@ -2922,10 +2929,11 @@
       "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
     "reward_wallet_ledger": {
-      "source": "apps/union-eyes/db/schema/award-templates-schema.ts",
+      "source": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
       "requiredColumns": [
         "id",
         "organization_id",
+        "org_id",
         "created_at",
         "updated_at"
       ],

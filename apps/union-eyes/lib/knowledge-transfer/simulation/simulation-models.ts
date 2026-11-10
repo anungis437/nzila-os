@@ -75,6 +75,31 @@ export interface ContinuitySimulationResult {
   organizationId: string;
   generatedAt: string;
   scenario: SimulationScenario;
+  /**
+   * Type-level marker, not just prose: every figure below is a scenario projection built from the exploratory
+   * propagation graph (interview tag co-occurrence), never from verified operational dependency evidence. See
+   * verifiedDependencyContext for how much of this specific projection touches a node with verified evidence on
+   * file, and lib/knowledge-transfer/propagation/verified-dependency-models.ts for the separate, verified graph
+   * (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE).
+   */
+  evidenceBasis: 'exploratory_simulation';
+  /**
+   * Every domain impact, recovery timeline, degradation figure and exacerbated weakness below is a hypothetical
+   * scenario model computed from exit-interview tag co-occurrence and the scenario's own stated assumptions - not
+   * a verified measurement of current operational dependency, ownership or recovery time. Useful for discussion
+   * and continuity planning; never report it as a confirmed statement of present organizational risk.
+   */
+  methodologyNote: string;
+  /**
+   * The part of this scenario's projected spread that is corroborated: each node reached from an affected node through
+   * a chain of currently-verified, correctly-directed dependencies (origin first), with the weakest evidence tier on
+   * that chain. An affected node merely appearing in some verified record corroborates nothing. An empty list does not
+   * mean the scenario is wrong - it means none of its spread is independently corroborated yet.
+   */
+  verifiedDependencyContext: {
+    verifiedImpacts: Array<{ fromNodeId: string; nodeId: string; chain: string[]; evidenceTier: 'system_resolved_document' | 'human_attested_external' }>;
+    totalAffectedNodes: number;
+  };
   /** Pre-simulation continuity baseline score */
   baselineContinuityScore: number;
   /** Post-simulation continuity score (immediate impact) */

@@ -17,8 +17,11 @@ import { uniqueIndex,
   date,
   timestamp,
   index,
+  jsonb,
+  boolean,
+  check,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import { organizations } from '../../../schema-organizations';
 import { profiles } from '../../profiles-schema';
 
@@ -120,3 +123,39 @@ export const organizingCampaignsRelations = relations(organizingCampaigns, ({ on
 export type OrganizingCampaign = typeof organizingCampaigns.$inferSelect;
 export type NewOrganizingCampaign = typeof organizingCampaigns.$inferInsert;
 
+export const organizingFormTemplateVersions = pgTable('organizing_form_template_versions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  jurisdiction: varchar('jurisdiction', { length: 16 }).notNull(),
+  templateKey: varchar('template_key', { length: 100 }).notNull(),
+  version: integer('version').notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  status: varchar('status', { length: 20 }).$type<'draft' | 'reviewed' | 'withdrawn'>().notNull().default('draft'),
+  fieldSpec: jsonb('field_spec').$type<Array<{ key: string; label: string; source: string }>>().notNull(),
+  sourceUri: text('source_uri').notNull(),
+  sourceDigest: varchar('source_digest', { length: 64 }).notNull(),
+  reviewedBy: text('reviewed_by'),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  effectiveFrom: timestamp('effective_from', { withTimezone: true }).notNull(),
+  effectiveUntil: timestamp('effective_until', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  versionUq: uniqueIndex('organizing_form_template_versions_key_version_uniq').on(table.jurisdiction, table.templateKey, table.version),
+  lookupIdx: index('organizing_form_template_versions_lookup_idx').on(table.jurisdiction, table.status, table.effectiveFrom),
+  digestCheck: check('organizing_form_template_versions_digest_check', sql`${table.sourceDigest} ~ '^[a-f0-9]{64}$'`),
+}));
+
+export const organizingFormGenerationReceipts = pgTable('organizing_form_generation_receipts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'restrict' }),
+  campaignId: uuid('campaign_id').notNull().references(() => organizingCampaigns.id, { onDelete: 'restrict' }),
+  templateVersionId: uuid('template_version_id').notNull().references(() => organizingFormTemplateVersions.id, { onDelete: 'restrict' }),
+  generatedBy: text('generated_by').notNull(),
+  inputDigest: varchar('input_digest', { length: 64 }).notNull(),
+  pdfDigest: varchar('pdf_digest', { length: 64 }).notNull(),
+  fileName: varchar('file_name', { length: 255 }).notNull(),
+  validPdfHeader: boolean('valid_pdf_header').notNull(),
+  byteLength: integer('byte_length').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  campaignIdx: index('organizing_form_generation_receipts_campaign_idx').on(table.organizationId, table.campaignId, table.createdAt),
+}));

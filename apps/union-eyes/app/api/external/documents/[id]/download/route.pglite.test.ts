@@ -26,7 +26,7 @@ vi.mock('@/lib/external-resource-route-utils', () => ({
   resolveExternalDocumentResource: () => ({ organizationId: ORG, matterType: 'grievance', matterId: MATTER }),
 }));
 vi.mock('@/lib/services/external-resource-authorization-service', () => ({
-  authorizeExternalDocumentAccess: async () => ({ allowed: state.allowed }),
+  authorizeExternalDocumentAccess: async () => ({ allowed: state.allowed, documentVersionNo: state.allowed ? 2 : null }),
 }));
 vi.mock('@/lib/blob-client', () => {
   class BlobTooLargeError extends Error {}

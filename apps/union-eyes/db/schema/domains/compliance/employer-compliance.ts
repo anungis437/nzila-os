@@ -13,6 +13,8 @@ import {
   timestamp,
   jsonb,
   index,
+  uniqueIndex,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 // Canonical `employers` declaration lives in ../../union-structure-schema
@@ -65,6 +67,12 @@ export const employerReports = pgTable(
       .references(() => employers.id, { onDelete: "cascade" }),
     reportType: complianceReportTypeEnum("report_type").notNull(),
     dataJson: jsonb("data_json").$type<Record<string, unknown>>().notNull(),
+    sourceEventType: varchar('source_event_type', { length: 80 }).notNull(),
+    sourceEventId: uuid('source_event_id').notNull(),
+    sourceRevision: varchar('source_revision', { length: 64 }).notNull(),
+    evaluatorVersion: varchar('evaluator_version', { length: 100 }).notNull(),
+    ruleVersionId: uuid('rule_version_id'),
+    evaluationStatus: varchar('evaluation_status', { length: 20 }).$type<'governed' | 'unknown'>().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -73,6 +81,7 @@ export const employerReports = pgTable(
     index("idx_employer_reports_employer").on(table.employerId),
     index("idx_employer_reports_type").on(table.reportType),
     index("idx_employer_reports_created").on(table.createdAt),
+    uniqueIndex('employer_reports_source_evaluator_uniq').on(table.employerId, table.sourceEventType, table.sourceEventId, table.sourceRevision, table.evaluatorVersion),
   ],
 );
 
@@ -90,6 +99,11 @@ export const complianceAlerts = pgTable(
     alertType: complianceAlertTypeEnum("alert_type").notNull(),
     severity: complianceAlertSeverityEnum("severity").notNull(),
     message: text("message"),
+    sourceEventType: varchar('source_event_type', { length: 80 }).notNull(),
+    sourceEventId: uuid('source_event_id').notNull(),
+    sourceRevision: varchar('source_revision', { length: 64 }).notNull(),
+    evaluatorVersion: varchar('evaluator_version', { length: 100 }).notNull(),
+    ruleVersionId: uuid('rule_version_id'),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -101,6 +115,7 @@ export const complianceAlerts = pgTable(
     index("idx_compliance_alerts_severity").on(table.severity),
     index("idx_compliance_alerts_type").on(table.alertType),
     index("idx_compliance_alerts_created").on(table.createdAt),
+    uniqueIndex('compliance_alerts_source_evaluator_type_uniq').on(table.orgId, table.sourceEventType, table.sourceEventId, table.sourceRevision, table.evaluatorVersion, table.alertType),
   ],
 );
 

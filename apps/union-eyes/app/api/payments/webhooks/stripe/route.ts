@@ -12,10 +12,10 @@ import { withSystemContext } from '@/lib/db/with-rls-context'
 import { platformPayments, billingAccounts, transactionFeeEvents } from '@/db/schema'
 import { icraAssessments } from '@/db/schema/icra-schema'
 import { icraMaturityProfiles } from '@/db/schema/icra-schema'
-import { workbooks, workbookPurchases } from '@/db/schema/workbook-schema'
+import { workbookCheckoutIntents, workbooks, workbookPurchases } from '@/db/schema/workbook-schema'
 import { generateClaimToken, computeClaimExpiry } from '@/lib/icra/claim-tokens'
 import { deliverIcraClaimCredential } from '@/lib/icra/claim-delivery'
-import { eq, and, isNull } from 'drizzle-orm'
+import { eq, and, isNull, gt } from 'drizzle-orm'
 import type { InstitutionalContinuityProfile } from '@/lib/icra/types'
 import { auditLog, AuditEventType, AuditSeverity } from '@/lib/audit-logger'
 import {
@@ -38,6 +38,10 @@ import {
   settleDuesPaymentIntent,
   type StripePaymentIntentLike,
 } from '@/lib/dues/dues-settlement'
+import {
+  hashWorkbookCheckoutReference,
+  workbookCheckoutReferenceIsPlausible,
+} from '@/lib/workbook/checkout-intent'
 
 export const dynamic = 'force-dynamic'
 
@@ -616,11 +620,10 @@ export async function POST(request: NextRequest) {
           }
         } else if (session?.metadata?.product === 'workbook') {
           // ── Workbook (Self-Guided) tier fulfillment ──
-          const workbookId = session?.metadata?.workbook_id as string | undefined
-          const workbookTierId = session?.metadata?.workbook_tier_id as string | undefined
+          const checkoutRef = session?.metadata?.checkout_intent_ref as string | undefined
 
-          if (!workbookId || !workbookTierId) {
-            logger.warn('[stripe-webhook] Workbook session missing required metadata', {
+          if (!workbookCheckoutReferenceIsPlausible(checkoutRef)) {
+            logger.warn('[stripe-webhook] Workbook session missing valid opaque intent', {
               sessionId: session?.id,
             })
             break
@@ -636,22 +639,34 @@ export async function POST(request: NextRequest) {
             (session?.payment_intent as string | undefined) ?? (session?.id as string)
 
           let freshFulfillment = false
+          let workbookId: string | null = null
+          let workbookTierId: string | null = null
           try {
             // Single authority boundary. withSystemContext owns the system-role
             // transaction; every workbook-fulfilment write uses only `tx`. The
             // canonical serialization key is workbook_purchases.stripe_payment_ref
             // (globally unique) — not a workbook pre-read.
             freshFulfillment = await withSystemContext(async (tx) => {
-              // Existence guard only — does not decide fulfilment.
-              const [existing] = await tx
-                .select({ id: workbooks.id })
-                .from(workbooks)
-                .where(eq(workbooks.id, workbookId))
+              const [intent] = await tx
+                .select({
+                  id: workbookCheckoutIntents.id,
+                  workbookId: workbookCheckoutIntents.workbookId,
+                  tierId: workbookCheckoutIntents.tierId,
+                  status: workbookCheckoutIntents.status,
+                  stripeSessionRef: workbookCheckoutIntents.stripeSessionRef,
+                })
+                .from(workbookCheckoutIntents)
+                .where(and(
+                  eq(workbookCheckoutIntents.publicRefHash, hashWorkbookCheckoutReference(checkoutRef)),
+                  gt(workbookCheckoutIntents.expiresAt, new Date()),
+                ))
                 .limit(1)
-              if (!existing) {
-                logger.warn('[stripe-webhook] Workbook not found', { workbookId })
-                return false
+                .for('update')
+              if (!intent || (intent.stripeSessionRef && intent.stripeSessionRef !== session.id)) {
+                throw new Error('workbook_checkout_intent_invalid_or_expired')
               }
+              workbookId = intent.workbookId
+              workbookTierId = intent.tierId
 
               // Reserve the payment first. ON CONFLICT DO NOTHING on the unique
               // stripe_payment_ref serializes concurrent deliveries: a returned
@@ -659,9 +674,9 @@ export async function POST(request: NextRequest) {
               const reserved = await tx
                 .insert(workbookPurchases)
                 .values({
-                  workbookId,
+                  workbookId: intent.workbookId,
                   stripePaymentRef: paymentRef,
-                  tierId: workbookTierId,
+                  tierId: intent.tierId,
                   amountCents: typeof session?.amount_total === 'number' ? session.amount_total : 0,
                   currency: (session?.currency as string | undefined)?.toUpperCase() ?? 'CAD',
                   customerEmail,
@@ -689,7 +704,7 @@ export async function POST(request: NextRequest) {
                   })
                   .where(
                     and(
-                      eq(workbooks.id, workbookId),
+                      eq(workbooks.id, intent.workbookId),
                       isNull(workbooks.stripePaymentRef),
                       isNull(workbooks.claimToken),
                       isNull(workbooks.claimedByUserId),
@@ -703,9 +718,19 @@ export async function POST(request: NextRequest) {
                   throw new Error('workbook_already_transitioned')
                 }
 
+                await tx
+                  .update(workbookCheckoutIntents)
+                  .set({
+                    status: 'fulfilled',
+                    stripePaymentRef: paymentRef,
+                    fulfilledAt: new Date(),
+                    updatedAt: new Date(),
+                  })
+                  .where(eq(workbookCheckoutIntents.id, intent.id))
+
                 logger.info('[stripe-webhook] Workbook tier upgraded & claim token issued', {
-                  workbookId,
-                  tierId: workbookTierId,
+                  workbookRef: intent.id,
+                  tierId: intent.tierId,
                   sessionId: session.id,
                   claimEmailPresent: Boolean(customerEmail),
                 })
@@ -724,21 +749,20 @@ export async function POST(request: NextRequest) {
               if (!existingPurchase) {
                 throw new Error('workbook_purchase_conflict_unresolved')
               }
-              if (existingPurchase.workbookId !== workbookId) {
+              if (existingPurchase.workbookId !== intent.workbookId) {
                 throw new Error('workbook_payment_ref_cross_workbook')
               }
 
               // Legitimate replay — same payment, same workbook. No mutation.
               logger.info('[stripe-webhook] Workbook payment replay — no mutation', {
-                workbookId,
-                tierId: workbookTierId,
+                workbookRef: intent.id,
+                tierId: intent.tierId,
               })
               return false
             })
           } catch (wbErr) {
             logger.error('[stripe-webhook] Workbook fulfillment error', {
-              workbookId,
-              workbookTierId,
+              checkoutRefHash: hashWorkbookCheckoutReference(checkoutRef),
               err: wbErr,
             })
             return NextResponse.json(
@@ -750,11 +774,11 @@ export async function POST(request: NextRequest) {
           // CRM runs only after the transaction commits and only for fresh
           // fulfilment. Never inside the DB transaction. Non-blocking; a CRM
           // failure after a committed payment must not fail the webhook.
-          if (freshFulfillment) {
+          if (freshFulfillment && workbookId && workbookTierId) {
             try {
               await syncWorkbookPurchase({
                 workbookId,
-                tier: 'workbook_self_guided',
+                tier: workbookTierId as 'workbook_self_guided',
                 paymentReference: paymentRef,
                 amount:
                   typeof session?.amount_total === 'number'

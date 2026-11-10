@@ -122,6 +122,8 @@ export class XeroAdapter extends BaseIntegration {
   // ==========================================================================
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const _startTime = Date.now();
@@ -135,6 +137,7 @@ export class XeroAdapter extends BaseIntegration {
       const orgs = options.orgs || this.capabilities.supportedEntities;
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           this.logOperation('sync', { entity, message: `Syncing ${entity}` });
 
@@ -227,12 +230,14 @@ export class XeroAdapter extends BaseIntegration {
       : undefined;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getInvoices({
         page,
         modifiedSince,
       });
 
       for (const xeroInvoice of response.invoices) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalInvoices.findFirst({
             where: and(
@@ -304,12 +309,14 @@ export class XeroAdapter extends BaseIntegration {
       : undefined;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getPayments({
         page,
         modifiedSince,
       });
 
       for (const xeroPayment of response.payments) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalPayments.findFirst({
             where: and(
@@ -380,9 +387,11 @@ export class XeroAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getContacts({ page });
 
       for (const xeroContact of response.contacts) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalCustomers.findFirst({
             where: and(
@@ -444,9 +453,11 @@ export class XeroAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getAccounts({ page });
 
       for (const xeroAccount of response.accounts) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalAccounts.findFirst({
             where: and(

@@ -7,11 +7,12 @@ import crypto from 'crypto';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import {
   shopifyConfig,
+  shopifyWebhookSecretVersions,
   webhookReceipts,
   type NewWebhookReceipt,
   type WebhookReceipt,
 } from '@/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, or, isNull, lte, gt } from 'drizzle-orm';
 import { logger } from '@/lib/logger';
 import { parseDiscountReference } from './shopify-redemption-rules';
 
@@ -166,6 +167,61 @@ export async function resolveShopOrganization(shopDomain: string): Promise<strin
   return rows.length === 1 ? rows[0].orgId : null;
 }
 
+const SHOPIFY_MANAGED_SECRET_REF = /^env:\/\/(UE_SHOPIFY_[A-Z0-9_]{3,200})$/;
+
+export interface ShopifyWebhookAuthority {
+  organizationId: string;
+  shopDomain: string;
+  /** Current and explicitly time-bounded retiring secrets; never persisted or logged. */
+  verificationSecrets: readonly string[];
+}
+
+/**
+ * Resolve the exact configured shop and its currently valid secret versions.
+ * The untrusted shop header is only a routing hint until one of these
+ * tenant-bound secrets verifies the request.
+ */
+export async function resolveShopWebhookAuthority(shopDomain: string): Promise<ShopifyWebhookAuthority | null> {
+  const domain = shopDomain.trim().toLowerCase();
+  if (!/^[a-z0-9][a-z0-9.-]{0,251}$/.test(domain)) return null;
+
+  const resolved = await withSystemContext(async (tx) => {
+    const shops = await tx
+      .select({ organizationId: shopifyConfig.orgId, shopDomain: shopifyConfig.shopDomain })
+      .from(shopifyConfig)
+      .where(sql`lower(${shopifyConfig.shopDomain}) = ${domain}`)
+      .limit(2);
+    if (shops.length !== 1) return null;
+
+    const now = new Date();
+    const versions = await tx
+      .select({ secretRef: shopifyWebhookSecretVersions.secretRef })
+      .from(shopifyWebhookSecretVersions)
+      .where(and(
+        eq(shopifyWebhookSecretVersions.orgId, shops[0].organizationId),
+        sql`${shopifyWebhookSecretVersions.status} IN ('active', 'retiring')`,
+        lte(shopifyWebhookSecretVersions.validFrom, now),
+        or(isNull(shopifyWebhookSecretVersions.validUntil), gt(shopifyWebhookSecretVersions.validUntil, now)),
+      ));
+    return { shop: shops[0], versions };
+  });
+  if (!resolved || resolved.versions.length === 0) return null;
+
+  const secrets: string[] = [];
+  for (const version of resolved.versions) {
+    const match = SHOPIFY_MANAGED_SECRET_REF.exec(version.secretRef);
+    if (!match) return null;
+    const secret = process.env[match[1]];
+    if (!secret) return null;
+    secrets.push(secret);
+  }
+  return {
+    organizationId: resolved.shop.organizationId,
+    shopDomain: resolved.shop.shopDomain.toLowerCase(),
+    verificationSecrets: Object.freeze(secrets),
+  };
+}
+
 /**
  * Extract redemption ID from Shopify discount code
  * Discount codes are formatted as "UE" plus the redemption id without dashes (see shopify-redemption-rules)
@@ -231,26 +287,22 @@ export function parseShopifyHeaders(
  * @param orgId Organization ID
  * @returns Webhook secret
  */
-export async function getWebhookSecret(_orgId: string): Promise<string> {
-  // MVP: Use global env var
-  const globalSecret = process.env.SHOPIFY_WEBHOOK_SECRET;
-  
-  if (globalSecret) {
-    return globalSecret;
-  }
-
-  // Production: Fetch from shopify_config
-  // const config = await db.query.shopifyConfig.findFirst({
-  //   where: eq(shopifyConfig.orgId, orgId),
-  // });
-  // 
-  // if (!config?.webhookSecretRef) {
-  //   throw new Error('Shopify webhook secret not configured');
-  // }
-  // 
-  // // Fetch secret from Key Vault using secretRef
-  // return await fetchSecretFromKeyVault(config.webhookSecretRef);
-
-  throw new Error('SHOPIFY_WEBHOOK_SECRET environment variable not set');
+export async function getWebhookSecret(orgId: string): Promise<string> {
+  const resolved = await withSystemContext(async (tx) => {
+    const [row] = await tx
+      .select({ secretRef: shopifyWebhookSecretVersions.secretRef })
+      .from(shopifyWebhookSecretVersions)
+      .where(and(
+        eq(shopifyWebhookSecretVersions.orgId, orgId),
+        eq(shopifyWebhookSecretVersions.status, 'active'),
+        lte(shopifyWebhookSecretVersions.validFrom, new Date()),
+        or(isNull(shopifyWebhookSecretVersions.validUntil), gt(shopifyWebhookSecretVersions.validUntil, new Date())),
+      ))
+      .limit(1);
+    return row;
+  });
+  const match = resolved && SHOPIFY_MANAGED_SECRET_REF.exec(resolved.secretRef);
+  const secret = match ? process.env[match[1]] : undefined;
+  if (!secret) throw new Error('Tenant Shopify webhook secret is not resolvable');
+  return secret;
 }
-

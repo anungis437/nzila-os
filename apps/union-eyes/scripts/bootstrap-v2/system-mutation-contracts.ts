@@ -89,10 +89,22 @@ const callers = {
   scim_provisioned_users: 'lib/scim/provisioned-members.ts',
   workbook_memory_holders: 'lib/workbook/access-control.ts',
   workbook_modules: 'app/api/workbook/start/route.ts',
+  // Gate 0 final-residual relations. Each entry names the source that performs the mutation under SYSTEM
+  // context; tenant-only writers are deliberately absent from this census.
+  billing_automation_runs: 'app/api/cron/billing-lifecycle/route.ts',
+  equity_purpose_consents: 'lib/equity/retention.ts',
+  equity_self_identification_records: 'lib/equity/retention.ts',
+  pilot_commercial_acceptances:
+    'app/api/pilot/apply/[id]/commercial-offer/[offerId]/accept/route.ts',
+  pilot_commercial_offers: 'app/api/pilot/apply/[id]/commercial-offer/route.ts',
+  pilot_contact_verifications: 'app/api/pilot/apply/route.ts',
+  pilot_evidence_assessments: 'app/api/pilot/apply/[id]/evidence-assessments/route.ts',
+  sso_oidc_attempts: 'lib/sso/oidc-runtime.ts',
+  workbook_checkout_intents: 'app/api/workbook/checkout/route.ts',
 } as const
 
 /** The exact number of relations the plan grants a SYSTEM INSERT, UPDATE or DELETE; one source caller each. */
-export const SYSTEM_MUTATION_DENOMINATOR = 80
+export const SYSTEM_MUTATION_DENOMINATOR = 89
 
 export interface SystemMutationContract {
   table: string
@@ -170,7 +182,11 @@ export function systemMutationContracts(plan: V2Plan): SystemMutationContract[] 
     const callerUpdates: Record<string, [column: string, value: string]> = {
       contact_submissions: ['crm_status', 'recorded'],
       document_intakes: ['status', 'expired'],
+      equity_purpose_consents: ['status', 'expired'],
+      pilot_commercial_offers: ['status', 'superseded'],
+      pilot_evidence_assessments: ['superseded_at', '2026-10-13T12:00:00.000Z'],
       rbac_audit_log: ['review_notes', 'synthetic-system-update'],
+      sso_oidc_attempts: ['claimed_at', '2026-10-13T12:00:00.000Z'],
     }
     const updateColumn =
       updateColumns[rule.table] ??

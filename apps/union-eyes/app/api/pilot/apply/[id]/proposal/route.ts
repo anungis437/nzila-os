@@ -7,6 +7,7 @@ import { enforcePilotOwnership } from '@/lib/pilot/pilot-ownership';
 import { withSystemContext } from '@/lib/db/with-rls-context';
 import { buildProposalPackage, normalizeCommercialState } from '@/lib/pilot/commercialization-wave1';
 import { logger } from '@/lib/logger';
+import { loadCurrentPilotEvidence, proposalEvidenceFrom } from '@/lib/pilot/evidence-assessments';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,10 +41,7 @@ export const GET = withApiAuth(async (_request: NextRequest, context?: { params?
 
     const responses = (application.responses ?? {}) as Record<string, unknown>;
     const commercialState = normalizeCommercialState(responses.commercialState);
-    const championScore =
-      typeof responses.championScore === 'number' ? responses.championScore : undefined;
-    const activityScore =
-      typeof responses.activityScore === 'number' ? responses.activityScore : undefined;
+    const evidence = proposalEvidenceFrom(await withSystemContext((tx) => loadCurrentPilotEvidence(tx, application.id)));
 
     const proposal = buildProposalPackage(
       {
@@ -62,8 +60,9 @@ export const GET = withApiAuth(async (_request: NextRequest, context?: { params?
       },
       {
         commercialState,
-        championScore,
-        activityScore,
+        ...evidence.signals,
+        reviewedEvidence: evidence.qualification,
+        verifiedMemberCount: application.verifiedMemberCount,
       },
     );
 

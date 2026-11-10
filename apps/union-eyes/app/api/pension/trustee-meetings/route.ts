@@ -6,6 +6,7 @@
  */
 import { withApi, ApiError } from '@/lib/api/framework';
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { requirePensionTrusteeMandate } from '@/lib/pension/pension-authority';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { PENSION_ADMIN_ROLES } from '@/lib/pension/pension-authority';
 import { pensionTrusteeMeetings } from '@/db/schema';
@@ -70,6 +71,7 @@ export const GET = withApi(
     if (!parsed.success) throw ApiError.badRequest('Invalid trustee meeting pagination');
     const { page, pageSize } = parsed.data;
     return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requirePensionTrusteeMandate(tx, { organizationId, userId, planId: null, action: 'pension:meeting:read' });
       const meetings = await tx
         .select()
         .from(pensionTrusteeMeetings)
@@ -99,6 +101,7 @@ export const POST = withApi(
     const parsed = createMeetingSchema.strict().safeParse(body);
     if (!parsed.success) throw ApiError.badRequest('Invalid trustee meeting scheduling fields');
     return withRLSContext({ organizationId, userId }, async (tx) => {
+      await requirePensionTrusteeMandate(tx, { organizationId, userId, planId: null, action: 'pension:meeting:schedule' });
       const [meeting] = await tx
         .insert(pensionTrusteeMeetings)
         .values({ ...parsed.data, organizationId })

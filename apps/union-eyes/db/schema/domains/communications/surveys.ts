@@ -22,6 +22,7 @@ import {
   inet,
   index,
   unique,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { organizations } from '../../../schema-organizations';
@@ -139,6 +140,53 @@ export const surveyQuestions = pgTable(
   })
 );
 
+export type SurveyQuestionSnapshot = {
+  id: string;
+  questionText: string;
+  questionType: string;
+  description: string | null;
+  orderIndex: number;
+  section: string | null;
+  required: boolean;
+  choices: unknown;
+  allowOther: boolean;
+  minChoices: number | null;
+  maxChoices: number | null;
+  ratingMin: number | null;
+  ratingMax: number | null;
+  minLength: number | null;
+  maxLength: number | null;
+  placeholder: string | null;
+  showIf: unknown;
+};
+
+/** Immutable questionnaire snapshots. Responses bind to one exact version. */
+export const surveyQuestionnaireVersions = pgTable('survey_questionnaire_versions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  surveyId: uuid('survey_id').notNull().references(() => surveys.id, { onDelete: 'cascade' }),
+  version: integer('version').notNull(),
+  contentDigest: varchar('content_digest', { length: 64 }).notNull(),
+  questions: jsonb('questions').$type<SurveyQuestionSnapshot[]>().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  surveyVersionUq: uniqueIndex('survey_questionnaire_versions_survey_version_uniq').on(table.surveyId, table.version),
+  surveyDigestUq: uniqueIndex('survey_questionnaire_versions_survey_digest_uniq').on(table.surveyId, table.contentDigest),
+  organizationIdx: index('survey_questionnaire_versions_organization_idx').on(table.organizationId, table.surveyId),
+}));
+
+/** One-way participation proof, deliberately not linked to survey_responses or answers. */
+export const surveyAnonymousParticipations = pgTable('survey_anonymous_participations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  surveyId: uuid('survey_id').notNull().references(() => surveys.id, { onDelete: 'cascade' }),
+  principalDigest: varchar('principal_digest', { length: 64 }).notNull(),
+  recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  surveyPrincipalUq: uniqueIndex('survey_anonymous_participations_survey_principal_uniq').on(table.surveyId, table.principalDigest),
+  organizationIdx: index('survey_anonymous_participations_organization_idx').on(table.organizationId, table.surveyId),
+}));
+
 // =====================================================
 // SURVEY RESPONSES
 // =====================================================
@@ -153,6 +201,9 @@ export const surveyResponses = pgTable(
     surveyId: uuid('survey_id')
       .notNull()
       .references(() => surveys.id, { onDelete: 'cascade' }),
+    questionnaireVersionId: uuid('questionnaire_version_id')
+      .notNull()
+      .references(() => surveyQuestionnaireVersions.id, { onDelete: 'restrict' }),
 
     // Respondent info
     userId: text('user_id'),
@@ -171,6 +222,13 @@ export const surveyResponses = pgTable(
     ipAddress: inet('ip_address'),
     userAgent: text('user_agent'),
 
+    // Anonymous-response authority. userId is intentionally NULL for an anonymous response (see responses/route.ts),
+    // so a bare response id is not sufficient authority to act on it - any caller who knew or enumerated the id could
+    // otherwise modify or complete someone else's anonymous answers. responseTokenHash is the SHA-256 hash of a
+    // high-entropy capability token issued exactly once, at creation (see lib/communications/survey-response-capability.ts),
+    // and never set for an identified response (ownership via userId is sufficient there).
+    responseTokenHash: text('response_token_hash'),
+
     // Metadata
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -178,6 +236,7 @@ export const surveyResponses = pgTable(
   (table) => ({
     organizationIdx: index('idx_survey_responses_organization').on(table.organizationId),
     surveyIdx: index('idx_survey_responses_survey').on(table.surveyId),
+    questionnaireVersionIdx: index('idx_survey_responses_questionnaire_version').on(table.questionnaireVersionId),
     userIdx: index('idx_survey_responses_user').on(table.userId),
     statusIdx: index('idx_survey_responses_status').on(table.status),
     completedIdx: index('idx_survey_responses_completed').on(table.completedAt),
@@ -534,4 +593,3 @@ export interface PollResultsResponse {
     percentage: number;
   }>;
 }
-

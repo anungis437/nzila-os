@@ -27,9 +27,9 @@ export const GET = withApi(
       summary: "List CBA agreements with search and filters",
     },
   },
-  async ({ query, userId }) => {
+  async ({ query, userId, organizationId }) => {
     const { page, limit, ...filters } = query;
     // A reader sees approved agreements only; only the platform staff who curate the dataset may name any review status.
-    return listAgreements({ ...filters, reviewStatus: reviewStatusFilter(await canReadUnreviewed(userId), filters.reviewStatus) }, { page, limit });
+    return listAgreements({ ...filters, reviewStatus: reviewStatusFilter(await canReadUnreviewed(userId, organizationId), filters.reviewStatus) }, { page, limit });
   },
 );

@@ -32,6 +32,15 @@ vi.mock('@/lib/api/standardized-responses', () => ({
 async function loadRoute() {
   return import('../location/track/route');
 }
+const SCOPE_ID = '11111111-1111-4111-8111-111111111111';
+const trackingBody = (overrides: Record<string, unknown> = {}) => ({
+  latitude: 45.5,
+  longitude: -73.6,
+  purpose: 'strike',
+  scopeKind: 'strike',
+  scopeId: SCOPE_ID,
+  ...overrides,
+});
 
 describe('location/track route (PR #752 round 49 — self-service location-tracking IDOR fix)', () => {
   beforeEach(() => {
@@ -44,17 +53,12 @@ describe('location/track route (PR #752 round 49 — self-service location-track
     m.standardSuccessResponse.mockImplementation((data: unknown) => new Response(JSON.stringify(data), { status: 200 }));
   });
 
-  it('POST tracks location for the authenticated caller, ignoring a client-supplied userId in the body', async () => {
+  it('POST tracks location for the authenticated caller using the verified scope', async () => {
     const { POST } = await loadRoute();
 
     await POST(new NextRequest('http://localhost/api/location/track', {
       method: 'POST',
-      body: JSON.stringify({
-        userId: 'attacker-supplied-victim-id',
-        latitude: 45.5,
-        longitude: -73.6,
-        purpose: 'strike',
-      }),
+      body: JSON.stringify(trackingBody()),
     }));
 
     expect(m.trackLocation).toHaveBeenCalledWith(
@@ -62,7 +66,7 @@ describe('location/track route (PR #752 round 49 — self-service location-track
       m.tx,
     );
     const callArg = m.trackLocation.mock.calls[0][0];
-    expect(callArg.userId).not.toBe('attacker-supplied-victim-id');
+    expect(callArg).toMatchObject({ scopeKind: 'strike', scopeId: SCOPE_ID });
     // DEF-0B6-SYS-LOCATION-DELETION-LOG-FABRICATES-DATES-AND-HAS-NO-ORGANIZATION: the point carries the caller's server-resolved
     // organization, so its retention deletion is logged against that organization.
     expect(callArg.organizationId).toBe('org-1');
@@ -74,7 +78,7 @@ describe('location/track route (PR #752 round 49 — self-service location-track
 
     await POST(new NextRequest('http://localhost/api/location/track', {
       method: 'POST',
-      body: JSON.stringify({ latitude: 45.5, longitude: -73.6, purpose: 'strike' }),
+      body: JSON.stringify(trackingBody()),
     }));
 
     expect(m.persistAtomicAudit).toHaveBeenCalledTimes(1);
@@ -90,7 +94,7 @@ describe('location/track route (PR #752 round 49 — self-service location-track
 
     const response = await POST(new NextRequest('http://localhost/api/location/track', {
       method: 'POST',
-      body: JSON.stringify({ latitude: 45.5, longitude: -73.6, purpose: 'strike' }),
+      body: JSON.stringify(trackingBody()),
     }));
 
     expect(response.status).toBe(403);
@@ -101,7 +105,7 @@ describe('location/track route (PR #752 round 49 — self-service location-track
     const { POST } = await loadRoute();
     const request = () => new NextRequest('http://localhost/api/location/track', {
       method: 'POST',
-      body: JSON.stringify({ latitude: 45.5, longitude: -73.6, purpose: 'strike' }),
+      body: JSON.stringify(trackingBody()),
     });
     m.trackLocation.mockRejectedValueOnce(new Error('Location tracking is globally disabled'));
     expect((await POST(request())).status).toBe(503);
@@ -118,7 +122,7 @@ describe('location/track route (PR #752 round 49 — self-service location-track
 
     const response = await POST(new NextRequest('http://localhost/api/location/track', {
       method: 'POST',
-      body: JSON.stringify({ latitude: 45.5, longitude: -73.6, purpose: 'strike' }),
+      body: JSON.stringify(trackingBody()),
     }));
 
     expect(response.status).toBe(401);
@@ -129,7 +133,7 @@ describe('location/track route (PR #752 round 49 — self-service location-track
     const { POST } = await loadRoute();
     for (const purpose of ['meeting', 'organizing']) {
       const response = await POST(new NextRequest('http://localhost/api/location/track', {
-        method: 'POST', body: JSON.stringify({ latitude: 45.5, longitude: -73.6, purpose }),
+        method: 'POST', body: JSON.stringify(trackingBody({ purpose })),
       }));
       expect(response.status).toBe(400);
     }
@@ -157,7 +161,7 @@ describe('location/track route (PR #752 round 49 — self-service location-track
 
     const response = await POST(new NextRequest('http://localhost/api/location/track', {
       method: 'POST',
-      body: JSON.stringify({ latitude: 999, longitude: -73.6, purpose: 'strike' }),
+      body: JSON.stringify(trackingBody({ latitude: 999 })),
     }));
 
     expect(response.status).toBe(400);

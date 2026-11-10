@@ -96,6 +96,7 @@ export class SlackAdapter extends BaseIntegration {
   }
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
     await this.ensureConnected();
 
     const orgs = options.orgs || ['channels', 'messages', 'users', 'files'];
@@ -110,6 +111,7 @@ export class SlackAdapter extends BaseIntegration {
 
     try {
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         switch (entity) {
           case 'channels':
             await this.syncChannels(options, results);
@@ -151,6 +153,7 @@ export class SlackAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted(options);
       const response = await this.client.getChannels({
         cursor,
         limit: PAGE_SIZE,
@@ -158,6 +161,7 @@ export class SlackAdapter extends BaseIntegration {
       });
 
       for (const channel of response.channels) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalCommunicationChannels)
@@ -224,10 +228,12 @@ export class SlackAdapter extends BaseIntegration {
       : undefined;
 
     for (const channel of channels) {
+      this.throwIfAborted();
       let cursor: string | undefined;
       let hasMore = true;
 
       while (hasMore) {
+        this.throwIfAborted(options);
         const response = await this.client.getChannelMessages(channel.externalId, {
           cursor,
           limit: PAGE_SIZE,
@@ -235,6 +241,7 @@ export class SlackAdapter extends BaseIntegration {
         });
 
         for (const message of response.messages) {
+          this.throwIfAborted();
           try {
             await db
               .insert(externalCommunicationMessages)
@@ -287,12 +294,14 @@ export class SlackAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted(options);
       const response = await this.client.getUsers({
         cursor,
         limit: PAGE_SIZE,
       });
 
       for (const user of response.users) {
+        this.throwIfAborted();
         try {
           await db
             .insert(externalCommunicationUsers)
@@ -349,6 +358,7 @@ export class SlackAdapter extends BaseIntegration {
    * Sync files shared in workspace
    */
   private async syncFiles(options: SyncOptions, results: SyncResult): Promise<void> {
+    this.throwIfAborted(options);
     const tsFrom = options.cursor;
 
     const response = await this.client.getFiles({
@@ -357,6 +367,7 @@ export class SlackAdapter extends BaseIntegration {
     });
 
     for (const file of response.files) {
+      this.throwIfAborted();
       try {
         // Find channel DB ID if file is shared in a channel
         let channelDbId: string | null = null;

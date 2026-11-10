@@ -61,6 +61,7 @@ export const AUTH_ESTABLISHING_IDENTIFIERS = [
   "getCurrentUser(",
   "requireApiAuth(",
   "withPilotOwnership(",
+  "hasPilotPlatformAuthority(",
   "verifyCronAuth(",
   "verifyStripeSignature(",
   "verifyWebhookSignature(",

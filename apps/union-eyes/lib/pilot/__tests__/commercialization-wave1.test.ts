@@ -92,20 +92,16 @@ describe('lib/pilot/commercialization-wave1', () => {
   });
 
   describe('calculatePilotQualificationScores', () => {
-    it('returns clamped scores and a tier', () => {
+    it('does not manufacture qualification scores without reviewed evidence', () => {
       const s = calculatePilotQualificationScores(application, { readinessScore: 80, commercialState: 'pilot' });
-      expect(s.overallOpportunityScore).toBeGreaterThanOrEqual(0);
-      expect(s.overallOpportunityScore).toBeLessThanOrEqual(100);
-      expect(['A', 'B', 'C']).toContain(s.opportunityTier);
+      expect(s).toMatchObject({ overallOpportunityScore: null, opportunityTier: null, evidenceStatus: 'unassessed' });
     });
   });
 
   describe('calculateCommercialSignals', () => {
-    it('derives bounded scores and likelihood bands', () => {
+    it('does not derive commercial likelihoods from application-stage proxies', () => {
       const sig = calculateCommercialSignals({ readinessScore: 90, commercialState: 'pilot_active', memberCount: 12000 });
-      expect(sig.adoptionScore).toBeLessThanOrEqual(100);
-      expect(sig.arrPotentialBand).toBe('large');
-      expect(['low', 'medium', 'high']).toContain(sig.renewalLikelihood);
+      expect(sig).toMatchObject({ adoptionScore: null, arrPotentialBand: 'unassessed', renewalLikelihood: 'unassessed', evidenceStatus: 'unassessed' });
     });
   });
 

@@ -16,6 +16,14 @@ const m = vi.hoisted(() => ({
   lockOverride: null as null | { id: string; claimedByUserId: string | null; claimedOrgId: string | null },
 }));
 
+const TEST_CONSENT = {
+  noticeVersion: 'ue-workbook-persistence-2026-11-09',
+  purposes: ['persist', 'process', 'share', 'checkout'],
+  granted: true,
+  grantedAt: '2026-11-09T00:00:00.000Z',
+  withdrawnAt: null,
+};
+
 const mockDb = {
   select: vi.fn(() => {
     const chain: any = {
@@ -24,7 +32,8 @@ const mockDb = {
       orderBy: vi.fn(() => chain),
       for: vi.fn(async () => m.lockOverride ? [m.lockOverride] : m.lockedWorkbook ? [m.lockedWorkbook] : []),
       limit: vi.fn(async () => {
-        const rows = (m.selectQueue.shift() ?? []) as unknown[];
+        const rows = ((m.selectQueue.shift() ?? []) as Array<Record<string, unknown>>)
+          .map((row) => ({ consent: TEST_CONSENT, ...row }));
         const first = rows[0] as Record<string, unknown> | undefined;
         if (first && Object.hasOwn(first, 'claimedByUserId')) {
           m.lockedWorkbook = { id: String(first.id), claimedByUserId: first.claimedByUserId as string | null, claimedOrgId: first.claimedOrgId as string | null };

@@ -11,11 +11,13 @@ import { withExternalMatterResourceAuth } from '@/lib/external-resource-middlewa
 import { resolveExternalGrievanceResource } from '@/lib/external-resource-route-utils';
 import { checkRateLimit, RATE_LIMITS, createRateLimitHeaders } from '@/lib/rate-limiter';
 import { isMalwareScanError } from '@/lib/security/clamav';
-import { OCR_MIME_TYPES, OCR_MAX_BYTES } from '@/lib/documents/ocr-intake';
+import { OCR_MAX_BYTES } from '@/lib/documents/ocr-intake';
+import { verifyDeclaredContentType } from '@/lib/documents/content-signature';
 import { openIntake } from '@/lib/documents/intake-lifecycle';
 import { blobIntakeStorage } from '@/lib/documents/intake-storage';
 
 export const dynamic = 'force-dynamic';
+const MULTIPART_ENVELOPE_BYTES = 64 * 1024;
 
 export const POST = withExternalMatterResourceAuth(
   {
@@ -36,11 +38,24 @@ export const POST = withExternalMatterResourceAuth(
       return NextResponse.json({ error: 'Rate limit exceeded', resetIn: rate.resetIn }, { status: 429, headers: createRateLimitHeaders(rate) });
     }
 
+    const announced = Number(request.headers.get('content-length') ?? '');
+    if (Number.isFinite(announced) && announced > OCR_MAX_BYTES + MULTIPART_ENVELOPE_BYTES) {
+      return NextResponse.json({ error: 'File size is not allowed' }, { status: 413 });
+    }
+
     const form = await request.formData().catch(() => null);
     const file = form?.get('file');
     if (!form || !(file instanceof File)) return NextResponse.json({ error: 'File is required' }, { status: 400 });
     if (file.size <= 0 || file.size > OCR_MAX_BYTES) return NextResponse.json({ error: 'File size is not allowed' }, { status: 400 });
-    if (!(OCR_MIME_TYPES as readonly string[]).includes(file.type)) return NextResponse.json({ error: 'File type is not allowed' }, { status: 400 });
+    const bytes = Buffer.from(await file.arrayBuffer());
+    if (bytes.length <= 0 || bytes.length > OCR_MAX_BYTES) return NextResponse.json({ error: 'File size is not allowed' }, { status: 400 });
+    const typed = verifyDeclaredContentType(bytes, file.type);
+    if (!typed.ok) {
+      return NextResponse.json(
+        { error: typed.reason === 'type_not_allowed' ? 'File type is not allowed' : 'File content does not match its declared type' },
+        { status: 400 },
+      );
+    }
 
     const opened = await openIntake(
       {
@@ -49,8 +64,8 @@ export const POST = withExternalMatterResourceAuth(
         operation: 'create_document',
         targetDocumentId: null,
         filename: file.name,
-        mimeType: file.type,
-        bytes: Buffer.from(await file.arrayBuffer()),
+        mimeType: typed.mimeType,
+        bytes,
         matter: { type: context.matterType, id: context.matterId },
       },
       blobIntakeStorage,

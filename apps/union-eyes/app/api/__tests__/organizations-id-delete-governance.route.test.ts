@@ -24,6 +24,8 @@ vi.mock('@/lib/api-auth-guard', () => ({
   requireSystemAdmin: m.requireSystemAdmin,
   ROLE_HIERARCHY: { member: 20, admin: 140 },
 }));
+vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: vi.fn(async () => ORG) }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: m.requireSystemAdmin }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/lib/organizations/read-authority', () => ({
   canAdministerOrganization: () => true, canReadOrganization: () => true, resolveOrganizationAccess: async () => ({}),

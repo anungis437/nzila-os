@@ -5,9 +5,10 @@
  * Enables discovering patterns: isolated knowledge, bottlenecks, fragility, risks.
  */
 
-import { buildDependencyPropagationMap } from '../propagation/dependency-propagator';
 import type { GraphQuery, QueryResult, QueryFinding } from './query-models';
 import type { PropagationMap } from '../propagation/propagation-models';
+import { evidenceCoverageScoreFromSampleSize } from '../governance/evidence-basis';
+import { loadGraphEvidence, assessDependencyClaim, impactChainEdges } from '../propagation/graph-evidence-service';
 
 type QueryResponse = {
   findings: QueryFinding[];
@@ -17,8 +18,9 @@ type QueryResponse = {
 };
 
 export async function executeGraphQuery(orgId: string, query: GraphQuery): Promise<QueryResult> {
-  // Build the dependency graph
-  const propagationMap = await buildDependencyPropagationMap(orgId);
+  // Build the dependency graph, plus the currently-verified relationships every finding below is checked against.
+  const evidence = await loadGraphEvidence(orgId);
+  const propagationMap = evidence.exploratory;
 
   let findings: QueryFinding[] = [];
   let summary = '';
@@ -55,17 +57,28 @@ export async function executeGraphQuery(orgId: string, query: GraphQuery): Promi
       break;
   }
 
-  const confidenceScore = calculateConfidenceScore(propagationMap, findings);
+  const evidenceCoverageScore = calculateEvidenceCoverageScore(propagationMap);
+  // Every finding is tagged here, in one place. Only a finding that asserts a directed dependency chain can be
+  // confirmed, and only when every edge of that chain is currently verified in that direction; a finding about a
+  // node is always exploratory (DEF-0B7-COGB-PROPAGATION-DEPENDENCIES-AND-SENSITIVITY-INFERRED-FROM-TAG-CO-OCCURRENCE).
+  const taggedFindings: QueryResult['findings'] = findings.map((finding) => {
+    if (!finding.dependencyChain || finding.dependencyChain.length < 2) return { ...finding, evidenceBasis: 'exploratory' as const };
+    const assessment = assessDependencyClaim(evidence, { kind: 'dependency_chain', edges: impactChainEdges(finding.dependencyChain) });
+    return assessment.status === 'confirmed'
+      ? { ...finding, evidenceBasis: 'verified' as const, verifiedBy: assessment.verifiedBy }
+      : { ...finding, evidenceBasis: 'exploratory' as const };
+  });
 
   return {
     organizationId: orgId,
     executedAt: new Date().toISOString(),
     query,
     summary,
-    findings,
+    findings: taggedFindings,
+    confirmedFindings: taggedFindings.filter((finding) => finding.evidenceBasis === 'verified'),
     significance,
     recommendations,
-    confidenceScore,
+    evidenceCoverageScore,
   };
 }
 
@@ -316,6 +329,7 @@ function queryPropagationPaths(
 
   const findings: QueryFinding[] = allPaths.slice(0, 10).map((path) => ({
     entityId: `path_${path.chainPath.join('_')}`,
+    dependencyChain: path.chainPath,
     label: `Propagation chain (${path.chainDepth} steps, impact: ${path.disruptionScope})`,
     entityType: 'path',
     significance: `If first node fails, failure cascades through ${path.chainDepth} intermediate steps to affect: ${path.affectedRoles.join(', ')}`,
@@ -411,13 +425,14 @@ function queryKnowledgeRedundancy(
   };
 }
 
-function calculateConfidenceScore(propagationMap: PropagationMap, findings: QueryFinding[]): number {
-  // Confidence based on data quality
+/**
+ * How much interview evidence backs this query's findings - purely how many interviews contributed to the
+ * nodes in the graph, never a claim that the findings are statistically validated. Previously also added bonus
+ * points for findings.length>0 and bottlenecks.length>0, which rewarded finding MORE potential issues as if that
+ * made the analysis more certain; removed as the same anti-pattern evidence-basis.ts exists to eliminate
+ * (DEF-0B7-COGA-RISK-RATINGS-ARE-FIXED-RULES-OVER-TAG-COUNTS).
+ */
+function calculateEvidenceCoverageScore(propagationMap: PropagationMap): number {
   const interviewCount = propagationMap.nodes.reduce((sum, node) => sum + node.frequency, 0);
-  let confidence = Math.min(interviewCount * 10, 80); // Max 80% without additional validation
-
-  if (findings.length > 0) confidence += 10; // More findings = more confidence
-  if (propagationMap.bottlenecks.length > 0) confidence += 10; // Clear structures increase confidence
-
-  return Math.min(confidence, 100);
+  return evidenceCoverageScoreFromSampleSize(interviewCount);
 }

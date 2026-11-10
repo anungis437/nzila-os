@@ -23,12 +23,15 @@ const PUBLIC_BY_DESIGN: Record<string, string> = {
   'icra/telemetry/route.ts': 'Anonymous product telemetry for the public assessment; rate limited to 60 requests a minute.',
   'staging-proof/deadline-engine/scenario/route.ts': 'Staging proof harness. Answers only an image built for staging (build-time NEXT_PUBLIC_APP_ENV), with the runtime switches, an HMAC over a fresh timestamp and a single-use nonce; every run creates and retires its own synthetic organization.',
   'workbook/checkout/route.ts': 'Public workbook purchase; verifies the workbook exists, then creates a Stripe checkout.',
+  'workbook/checkout/redeem/route.ts': 'One-time redemption of a fulfilled checkout intent by an opaque high-entropy reference; rate limited and confined to that intent.',
   'workbook/start/route.ts': 'Public pseudonymous intake: creates a workbook with no tenant and no access to tenant data; the id is a bearer reference until an authenticated user claims it.',
 }
 
 /** Routes that only read or redirect and carry no guard: each is reachable without a session on purpose, and says why. Every other read route answers to withApi, a role or session check, a capability or a secret. */
 const PUBLIC_READS_BY_DESIGN: Record<string, string> = {
   'auth/[...nextauth]/route.ts': 'The identity provider\'s sign-in, callback and session handlers (@nzila/platform-auth/entra/config): the sign-in flow is the credential.',
+  'auth/sso/start/route.ts': 'Public OIDC sign-in initiation; accepts only a provider UUID, rate limits by trusted client address and discloses no provider configuration.',
+  'auth/sso/callback/route.ts': 'Public OIDC callback; requires a bounded single-use state and code, validates the provider response and rate limits by trusted client address.',
   'auth_core/health/route.ts': 'Health probe that combines the application health answer with the reachability of the Django API; no tenant data.',
   'health/liveness/route.ts': 'Liveness probe for the platform: answers 200 while the server runs.',
   'health/route.ts': 'Health probe for the platform: the dependency checks, no tenant data.',
@@ -77,6 +80,7 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
       'communications/unsubscribe/[recipientId]/route.ts': /verifyTrackingToken\(/,
       'workbook/start/route.ts': /guardPublicIntake/,
       'workbook/checkout/route.ts': /guardPublicIntake/,
+      'workbook/checkout/redeem/route.ts': /guardPublicIntake/,
       'icra/telemetry/route.ts': /checkRateLimit\(/,
       'staging-proof/deadline-engine/scenario/route.ts': /BUILD_APP_ENV:\s*process\.env\.NEXT_PUBLIC_APP_ENV/,
     };

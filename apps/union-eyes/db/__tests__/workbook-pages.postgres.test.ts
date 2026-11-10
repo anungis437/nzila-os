@@ -51,6 +51,7 @@ vi.mock('@/app/[locale]/workbook/[id]/memory-holders/MemoryHoldersClient', () =>
 
 const { savepointHarness, ambientDb, RUNTIME_ROLE } = await import('./native-savepoint-harness')
 const capabilities = URL ? await import('@/lib/workbook/workbook-capability') : null
+const consent = URL ? await import('@/lib/workbook/consent') : null
 const notice = URL ? await import('@/lib/workbook/holder-notice') : null
 const hub = URL ? (await import('@/app/[locale]/workbook/[id]/page')).default : null
 const memoryHolders = URL ? (await import('@/app/[locale]/workbook/[id]/memory-holders/page')).default : null
@@ -92,9 +93,9 @@ describe.skipIf(!URL)('the workbook pages on the combined schema, as the real ro
     openToken = issued.token
     const workbook = (id: string, tier: string | null, claimedBy: string | null, claimedOrg: string | null, hash: string | null, expires: Date | null) =>
       admin.query(
-        `INSERT INTO workbooks (id, status, report_tier_id, claimed_by_user_id, claimed_org_id, claimed_at, capability_token_hash, capability_token_expires_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [id, claimedBy ? 'active' : 'draft', tier, claimedBy, claimedOrg, claimedBy ? new Date() : null, hash, expires],
+        `INSERT INTO workbooks (id, status, report_tier_id, claimed_by_user_id, claimed_org_id, claimed_at, capability_token_hash, capability_token_expires_at, consent)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)`,
+        [id, claimedBy ? 'active' : 'draft', tier, claimedBy, claimedOrg, claimedBy ? new Date() : null, hash, expires, JSON.stringify(consent!.issueWorkbookConsent())],
       )
     await workbook(WB.open, 'workbook_self_guided', null, null, issued.tokenHash, issued.expiresAt)
     await workbook(WB.bare, null, null, null, null, null)

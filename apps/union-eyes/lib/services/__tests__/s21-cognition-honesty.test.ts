@@ -78,7 +78,8 @@ describe('Gate 0 batch B77: honest cognition inputs and outputs', () => {
 
   it('stamps each saved memory entry as officer-asserted with its author, and refuses the reserved key and oversize input', () => {
     const store = src('lib/knowledge-transfer/cognition-memory/memory-store.ts')
-    expect(store).toContain("[PROVENANCE_KEY]: { source: 'officer_asserted', recordedBy: userId }")
+    expect(store).toContain("provenanceStamp = { source: 'officer_asserted', recordedBy: userId }")
+    expect(store).toContain('[PROVENANCE_KEY]: provenanceStamp')
     expect(store).toContain("source: 'officer_asserted' as const")
     expect(PROVENANCE_KEY).toBe('__provenance')
     const route = src('app/api/exit-interviews/cognition-memory/route.ts')

@@ -10,6 +10,7 @@ import {
   employerPayrollRunItems,
   employerTimesheetEntries,
   employerExecutionReplays,
+  employerReplayIntents,
   employerExecutionArtifacts,
   employerExecutionEvidenceLinks,
   employerExecutionComplianceEvents,
@@ -43,10 +44,12 @@ export const POST = withApi(
     successStatus: 201,
     openapi: { tags: ["Employer Execution"], summary: "Replay payroll run and diff results" },
   },
-  async ({ organizationId, params, body, userId }) => {
+  async ({ organizationId, params, body, userId, request }) => {
     if (!organizationId || !userId) throw ApiError.badRequest("Organization context required");
     const runId = params?.runId;
     if (typeof runId !== "string") throw ApiError.badRequest("Source payroll run id is required");
+    const requestKey = request.headers.get('idempotency-key')?.trim();
+    if (!requestKey || requestKey.length > 200) throw ApiError.badRequest('A bounded Idempotency-Key header is required');
 
     // A replay reads every payroll item of the run and returns per-employee differences: the role title alone is not
     // financial authority, so it needs the same live view mandate as the run's own detail.
@@ -63,6 +66,57 @@ export const POST = withApi(
     if (!sourceRun) throw ApiError.notFound("Source payroll run not found");
     if (!sourceRun.sourceBatchId) throw ApiError.badRequest("Source payroll run is missing source batch reference");
     if (!sourceRun.cbaRuleVersionId) throw ApiError.badRequest("Source payroll run is missing CBA rule version reference");
+
+    const requestKeyHash = sha256(requestKey);
+    const requestPayloadHash = sha256(JSON.stringify({
+      mode: body.mode,
+      replayEngineVersion: body.replayEngineVersion ?? null,
+      replayRuleVersionId: body.replayRuleVersionId ?? null,
+    }));
+    const sourceRevisionHash = sha256(JSON.stringify({
+      id: sourceRun.id,
+      status: sourceRun.status,
+      updatedAt: sourceRun.updatedAt,
+      sourceBatchId: sourceRun.sourceBatchId,
+      cbaRuleVersionId: sourceRun.cbaRuleVersionId,
+      calcTraceHash: sourceRun.calcTraceHash,
+      amounts: recordedRunAmounts(sourceRun),
+    }));
+    const intent = await withRLSContext({ organizationId, userId }, async (tx) => {
+      const [created] = await tx.insert(employerReplayIntents).values({
+        organizationId,
+        sourcePayrollRunId: sourceRun.id,
+        requestKeyHash,
+        requestPayloadHash,
+        sourceRevisionHash,
+        sourceStatus: sourceRun.status,
+        status: 'processing',
+        createdBy: userId,
+      }).onConflictDoNothing().returning();
+      if (created) return { row: created, claimed: true } as const;
+      const [existing] = await tx.select().from(employerReplayIntents).where(and(
+        eq(employerReplayIntents.organizationId, organizationId),
+        eq(employerReplayIntents.sourcePayrollRunId, sourceRun.id),
+        eq(employerReplayIntents.requestKeyHash, requestKeyHash),
+      )).limit(1).for('update');
+      if (!existing) throw ApiError.conflict('Replay request is being established; retry with the same key');
+      if (existing.requestPayloadHash !== requestPayloadHash) throw ApiError.conflict('Idempotency-Key was already used with a different replay request');
+      if (existing.sourceRevisionHash !== sourceRevisionHash || existing.sourceStatus !== sourceRun.status) {
+        throw ApiError.conflict('The source run changed after this replay key was issued; use a new key after review');
+      }
+      return { row: existing, claimed: false } as const;
+    });
+    if (!intent.claimed) {
+      if (intent.row.status !== 'completed' || !intent.row.replayId) {
+        throw ApiError.conflict('Replay is already processing or held; retry later with the same key');
+      }
+      const [completed] = await db.select().from(employerExecutionReplays).where(and(
+        eq(employerExecutionReplays.organizationId, organizationId),
+        eq(employerExecutionReplays.id, intent.row.replayId),
+      )).limit(1);
+      if (!completed) throw ApiError.conflict('Completed replay receipt is unavailable for reconciliation');
+      return { data: { replay: completed, diff: completed.diffJson, repeated: true, intentId: intent.row.id } };
+    }
 
     const sourceItems = await db
       .select()
@@ -327,7 +381,10 @@ export const POST = withApi(
       );
     });
     if (priorReplay) {
-      return { data: { replay: priorReplay, diff, replayTotals: replayedTotals, repeated: true } };
+      await withRLSContext({ organizationId, userId }, (tx) => tx.update(employerReplayIntents).set({
+        status: 'completed', replayId: priorReplay.id, completedAt: new Date(), updatedAt: new Date(),
+      }).where(and(eq(employerReplayIntents.id, intent.row.id), eq(employerReplayIntents.status, 'processing'))));
+      return { data: { replay: priorReplay, diff, replayTotals: replayedTotals, repeated: true, intentId: intent.row.id } };
     }
 
     // A replay chains from the run's own seal, never from an earlier replay's manifest.
@@ -488,6 +545,18 @@ export const POST = withApi(
         },
       });
 
+      const [completedIntent] = await tx.update(employerReplayIntents).set({
+        status: 'completed',
+        replayId: createdReplay.id,
+        completedAt: new Date(),
+        updatedAt: new Date(),
+      }).where(and(
+        eq(employerReplayIntents.id, intent.row.id),
+        eq(employerReplayIntents.status, 'processing'),
+        eq(employerReplayIntents.sourceRevisionHash, sourceRevisionHash),
+      )).returning({ id: employerReplayIntents.id });
+      if (!completedIntent) throw ApiError.conflict('Replay intent changed before completion');
+
       return [createdReplay];
     });
 
@@ -496,6 +565,7 @@ export const POST = withApi(
         replay,
         diff,
         replayTotals: replayedTotals,
+        intentId: intent.row.id,
       },
     };
   },

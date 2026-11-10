@@ -11,10 +11,11 @@ import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { performAuditedOperation } from '@/lib/audit/operation-audit';
 import { ApiError } from '@/lib/api/errors';
-import { integrationConfigs, integrationProviderEnum, integrationTypeEnum } from '@/db/schema';
+import { integrationConfigs, integrationConfigVersions, integrationProviderEnum, integrationTypeEnum } from '@/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
 import { IntegrationRegistry } from './registry';
 import { SyncEngine } from './sync-engine';
+import { IntegrationFactory } from './factory';
 import {
   findDisallowedSettingsKeys,
   findUnapprovedEntities,
@@ -29,6 +30,12 @@ import {
   SyncType,
   TrustedIntegrationExecutionContext,
 } from './types';
+import {
+  integrationCredentialReadiness,
+  rotateIntegrationCredentialBinding,
+} from './credential-store';
+import { refuseUnavailableActivation } from '@/lib/reality/activation-guard';
+import { INTEGRATION_SYNC_EFFECT } from '@/lib/reality/configuration-effect';
 
 type IntegrationConfigRow = typeof integrationConfigs.$inferSelect;
 
@@ -101,7 +108,7 @@ function assertProviderType(provider: IntegrationProvider, type: IntegrationType
   }
 }
 
-function toPublicConfig(row: IntegrationConfigRow) {
+function toPublicConfig(row: IntegrationConfigRow, readiness = { stored: false, resolvable: false }) {
   return {
     id: row.id,
     organizationId: row.organizationId,
@@ -115,8 +122,8 @@ function toPublicConfig(row: IntegrationConfigRow) {
     updatedAt: row.updatedAt,
     // No secret is stored or resolved: the credentials column holds only a reference, and nothing turns it into a credential. The
     // field used to say true for every configuration, which a client read as an integration that could authenticate.
-    credentialsStored: false,
-    credentialsResolvable: false,
+    credentialsStored: readiness.stored,
+    credentialsResolvable: readiness.resolvable,
   };
 }
 
@@ -162,13 +169,27 @@ async function loadIntegrationById(organizationId: string, integrationId: string
 }
 
 export async function listIntegrationConfigsForOrg(organizationId: string) {
-  return withRLSContext({ organizationId }, async () => {
-    const rows = await db
+  return withRLSContext({ organizationId }, async (tx) => {
+    const rows = await tx
       .select()
       .from(integrationConfigs)
       .where(eq(integrationConfigs.organizationId, organizationId));
 
-    return rows.map(toPublicConfig);
+    return Promise.all(rows.map(async (row) => toPublicConfig(
+      row,
+      await integrationCredentialReadiness(tx, organizationId, row.provider as IntegrationProvider),
+    )));
+  });
+}
+
+/** Canonical item read used by both the framework route and the legacy `/extensions/:id` compatibility surface. */
+export async function getIntegrationConfigForOrg(organizationId: string, integrationId: string) {
+  return withRLSContext({ organizationId }, async (tx) => {
+    const row = await loadIntegrationById(organizationId, integrationId, tx);
+    return toPublicConfig(
+      row,
+      await integrationCredentialReadiness(tx, organizationId, row.provider as IntegrationProvider),
+    );
   });
 }
 
@@ -177,11 +198,17 @@ export async function configureIntegrationForOrg(
   input: ConfigureIntegrationInput,
   userId: string,
 ) {
+  if (input.enabled === true) {
+    await refuseUnavailableActivation({
+      organizationId, userId, effect: INTEGRATION_SYNC_EFFECT, asked: ['enabled'],
+      action: 'integration.activate_blocked', resourceType: 'integration_configs',
+    });
+  }
   assertKnownProvider(input.provider);
   assertProviderType(input.provider, input.type);
   assertApprovedSettingsKeys(input.provider, input.settings);
 
-  return withRLSContext({ organizationId }, async (tx) => {
+  const publicConfig = await withRLSContext({ organizationId }, async (tx) => {
     const [existing] = await tx
       .select()
       .from(integrationConfigs)
@@ -194,14 +221,22 @@ export async function configureIntegrationForOrg(
       .limit(1)
       .for('update');
 
+    const binding = input.credentialRef
+      ? await rotateIntegrationCredentialBinding(tx, { organizationId, provider: input.provider, secretRef: input.credentialRef, userId })
+      : null;
+    const readiness = await integrationCredentialReadiness(tx, organizationId, input.provider);
+    if (input.enabled === true && !readiness.resolvable) {
+      throw ApiError.conflict('Integration cannot be enabled until its managed credential is resolvable');
+    }
     const values = {
       organizationId,
       type: input.type as (typeof integrationTypeEnum.enumValues)[number],
       provider: input.provider as (typeof integrationProviderEnum.enumValues)[number],
-      credentials: { credentialRef: input.credentialRef ?? 'managed' },
+      credentials: binding ? { bindingId: binding.id, version: binding.version } : {},
       settings: input.settings ?? {},
       webhookUrl: input.webhookUrl ?? null,
-      enabled: input.enabled ?? false,
+      enabled: binding ? (input.enabled ?? false) : false,
+      activeVersion: existing ? existing.activeVersion + 1 : 1,
       updatedAt: new Date(),
     };
 
@@ -209,8 +244,8 @@ export async function configureIntegrationForOrg(
     if (existing) {
       // An update changes only what the caller supplied: a steward who sends just a credential reference must not switch the
       // integration off or clear its settings and webhook URL. (A create still takes the defaults: disabled, no settings.)
-      const changes: Partial<typeof values> = { updatedAt: values.updatedAt };
-      if (input.credentialRef) changes.credentials = values.credentials;
+      const changes: Partial<typeof values> = { updatedAt: values.updatedAt, activeVersion: values.activeVersion };
+      if (binding) changes.credentials = values.credentials;
       if (input.settings !== undefined) changes.settings = values.settings;
       if (input.webhookUrl !== undefined) changes.webhookUrl = values.webhookUrl;
       if (input.enabled !== undefined) changes.enabled = values.enabled;
@@ -234,6 +269,24 @@ export async function configureIntegrationForOrg(
       [config] = await tx.insert(integrationConfigs).values(values).returning();
     }
 
+    const credentialBindingId = binding?.id ?? (
+      config.credentials && typeof config.credentials === 'object' && typeof (config.credentials as Record<string, unknown>).bindingId === 'string'
+        ? String((config.credentials as Record<string, unknown>).bindingId)
+        : null
+    );
+    await tx.insert(integrationConfigVersions).values({
+      integrationId: config.id,
+      organizationId,
+      version: config.activeVersion,
+      type: config.type,
+      provider: config.provider,
+      credentialBindingId,
+      settings: config.settings,
+      webhookUrl: config.webhookUrl,
+      enabled: config.enabled ?? false,
+      createdBy: userId,
+    });
+
     // The audit names what changed without echoing settings or credential material.
     await persistAtomicAudit(tx, {
       organizationId,
@@ -252,8 +305,14 @@ export async function configureIntegrationForOrg(
         credentialRefChanged: !!input.credentialRef,
       },
     });
-    return toPublicConfig(config);
+    return toPublicConfig(config, readiness);
   });
+
+  // The cached adapter instance (credentials, settings) was built from whatever was saved before this write; serving it
+  // again after a credential/settings/webhook change would silently keep using stale configuration until the process
+  // restarts. Only this organization/provider pair is invalidated; every other cached integration is untouched.
+  IntegrationFactory.getInstance().clearCache(organizationId, input.provider);
+  return publicConfig;
 }
 
 export async function setIntegrationActivationForOrg(
@@ -262,14 +321,24 @@ export async function setIntegrationActivationForOrg(
   enabled: boolean,
   userId: string,
 ) {
-  return withRLSContext({ organizationId }, async (tx) => {
+  if (enabled) {
+    await refuseUnavailableActivation({
+      organizationId, userId, effect: INTEGRATION_SYNC_EFFECT, asked: ['enabled'],
+      action: 'integration.activate_blocked', resourceType: 'integration_configs', resourceId: integrationId,
+    });
+  }
+  const publicConfig = await withRLSContext({ organizationId }, async (tx) => {
     const config = await loadIntegrationById(organizationId, integrationId, tx);
     assertKnownProvider(config.provider as IntegrationProvider);
+    const readiness = await integrationCredentialReadiness(tx, organizationId, config.provider as IntegrationProvider);
+    if (enabled && !readiness.resolvable) {
+      throw ApiError.conflict('Integration cannot be activated until its managed credential is resolvable');
+    }
 
     // The predicate on the state read above keeps a concurrent change from being overwritten.
     const [updated] = await tx
       .update(integrationConfigs)
-      .set({ enabled, updatedAt: new Date() })
+      .set({ enabled, activeVersion: config.activeVersion + 1, updatedAt: new Date() })
       .where(
         and(
           eq(integrationConfigs.id, integrationId),
@@ -280,6 +349,20 @@ export async function setIntegrationActivationForOrg(
       .returning();
     if (!updated) throw ApiError.conflict('The integration was changed by someone else; reload and try again');
 
+    const credentials = updated.credentials as Record<string, unknown>;
+    await tx.insert(integrationConfigVersions).values({
+      integrationId: updated.id,
+      organizationId,
+      version: updated.activeVersion,
+      type: updated.type,
+      provider: updated.provider,
+      credentialBindingId: typeof credentials?.bindingId === 'string' ? credentials.bindingId : null,
+      settings: updated.settings,
+      webhookUrl: updated.webhookUrl,
+      enabled: updated.enabled ?? false,
+      createdBy: userId,
+    });
+
     await persistAtomicAudit(tx, {
       organizationId,
       userId,
@@ -288,8 +371,13 @@ export async function setIntegrationActivationForOrg(
       resourceId: integrationId,
       details: { provider: config.provider, previouslyEnabled: config.enabled ?? false },
     });
-    return toPublicConfig(updated);
+    return toPublicConfig(updated, readiness);
   });
+
+  // Disabling then re-enabling (or any activation change) must not keep serving a cached instance built under the prior
+  // enabled state.
+  IntegrationFactory.getInstance().clearCache(organizationId, publicConfig.provider as IntegrationProvider);
+  return publicConfig;
 }
 
 export async function initiateTenantIntegrationSync(
@@ -297,6 +385,10 @@ export async function initiateTenantIntegrationSync(
   userId: string,
   request: TenantSyncRequest,
 ): Promise<SyncResult> {
+  await refuseUnavailableActivation({
+    organizationId, userId, effect: INTEGRATION_SYNC_EFFECT, asked: ['enabled'],
+    action: 'integration.sync_blocked', resourceType: 'integration_configs', resourceId: request.integrationId,
+  });
   const config = await withRLSContext({ organizationId }, (tx) =>
     loadIntegrationById(organizationId, request.integrationId, tx),
   );

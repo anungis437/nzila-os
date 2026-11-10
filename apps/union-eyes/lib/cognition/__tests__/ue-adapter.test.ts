@@ -52,6 +52,7 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn((column: unknown, value: unknown) => ({ eq: [column, value] })),
   gte: vi.fn(() => 'gte'),
   sql: vi.fn(() => 'sql'),
+  isNull: vi.fn((column: unknown) => ({ isNull: column })),
   relations: vi.fn(() => ({})),
 }));
 
@@ -120,7 +121,7 @@ describe('scoreGrievanceRisk', () => {
 
     expect(h.contexts).toEqual([{ organizationId: 'org-1' }]);
     expect(h.statements).toEqual([
-      { where: { and: [{ eq: ['id', 'g1'] }, { eq: ['orgId', 'org-1'] }] }, context: 'org-1' },
+      { where: { and: [{ eq: ['id', 'g1'] }, { eq: ['orgId', 'org-1'] }, { isNull: undefined }] }, context: 'org-1' },
     ]);
   });
 

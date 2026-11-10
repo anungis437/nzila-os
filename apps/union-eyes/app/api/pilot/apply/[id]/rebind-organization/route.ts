@@ -17,8 +17,8 @@
  */
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { withApiAuth, hasMinRole, getCurrentUser } from '@/lib/api-auth-guard';
-import { rebindPilotOrganization } from '@/lib/pilot/pilot-ownership';
+import { withApiAuth, getCurrentUser } from '@/lib/api-auth-guard';
+import { hasPilotPlatformAuthority, rebindPilotOrganization } from '@/lib/pilot/pilot-ownership';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +30,7 @@ const rebindOrganizationBodySchema = z.object({
 export const POST = withApiAuth(async (request: NextRequest, context?: { params?: Promise<{ id: string }> | { id: string } }) => {
   // Platform-only, before any database access — same gate as
   // verify-organization; rebinding is strictly MORE sensitive, never less.
-  if (!(await hasMinRole('system_admin'))) {
+  if (!(await hasPilotPlatformAuthority())) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

@@ -48,6 +48,7 @@ describe('POST /api/precedents/drafts/[id]/review', () => {
     await import('../precedents/drafts/[id]/review/route')
     const schema = (m.withApi.mock.calls.at(-1)![0] as { body: { safeParse: (v: unknown) => { success: boolean } } }).body
     expect(schema.safeParse(body).success).toBe(true)
+    expect(schema.safeParse({ ...body, outcome: 'revoke' }).success).toBe(true)
     expect(schema.safeParse({ ...body, isPublic: true }).success).toBe(false)
   })
 })

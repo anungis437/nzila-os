@@ -41,6 +41,7 @@ export type GatedFeature =
   | 'ai_mamba'
   | 'ai_feedback'
   | 'ai_ingest'
+  | 'voice_transcription'
   // Advanced Features
   | 'advanced_analytics'
   | 'predictive_models'
@@ -96,6 +97,7 @@ export const TIER_FEATURES: Record<SubscriptionTier, GatedFeature[]> = {
     'ai_extract_clauses',
     'ai_match_precedents',
     'ai_semantic_search',
+    'voice_transcription',
     'advanced_analytics',
     'api_access',
   ],
@@ -110,6 +112,7 @@ export const TIER_FEATURES: Record<SubscriptionTier, GatedFeature[]> = {
     'ai_mamba',
     'ai_feedback',
     'ai_ingest',
+    'voice_transcription',
     'advanced_analytics',
     'predictive_models',
     'custom_workflows',
@@ -129,6 +132,7 @@ export const CREDIT_REQUIRING_FEATURES: GatedFeature[] = [
   'ai_match_precedents',
   'ai_semantic_search',
   'ai_mamba',
+  'voice_transcription',
 ];
 
 /** Credit cost per feature use */
@@ -142,6 +146,7 @@ export const CREDIT_COSTS: Record<GatedFeature, number> = {
   ai_mamba: 5,
   ai_feedback: 0, // Free - encourages improvement
   ai_ingest: 0,   // Free - data ingestion is valuable
+  voice_transcription: 1, // actual debit is per provider-reported started minute
   advanced_analytics: 2,
   predictive_models: 5,
   custom_workflows: 1,

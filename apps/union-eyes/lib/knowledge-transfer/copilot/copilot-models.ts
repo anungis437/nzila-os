@@ -13,13 +13,16 @@
  * - Produces disciplinary recommendations
  */
 
+import type { VerifiedEdgeCoverage } from '@/lib/knowledge-transfer/propagation/graph-evidence-service';
+import type { CopilotExplainabilityEnvelope } from '../copilot-explainability/explainability-models';
+
 export interface CopilotMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   createdAt: string;
-  /** Linked explainability data for assistant messages */
-  explainabilityRef?: string | null;
+  /** The explainability envelope for this assistant message, persisted inline (JSONB) with the conversation. */
+  explainability?: CopilotExplainabilityEnvelope | null;
 }
 
 export interface CopilotConversation {
@@ -63,7 +66,8 @@ export interface CopilotQueryResult {
     observation: string;
     dataPoint: string;
     sourceType: string;
-    confidence: string;
+    /** Evidence volume behind this reference, not a claim it is correct or verified. */
+    evidenceCoverage: string;
   }>;
   /** Reasoning steps */
   reasoningChain: Array<{
@@ -80,8 +84,15 @@ export interface CopilotQueryResult {
   }>;
   assumptions: string[];
   limitations: string[];
-  overallConfidence: string;
+  /** Overall evidence volume behind the response, not a claim that its content is verified or correct. */
+  overallEvidenceCoverage: string;
   followUpSuggestions: string[];
   organizationalContext: string;
   generatedAt: string;
+  /** How many of the dependency nodes behind this response have at least one currently-verified relationship on
+   *  file, out of how many nodes exist in total. The AI context and counts above are exploratory (label co-occurrence
+   *  inference) unless covered here. */
+  /** Directed inferred dependencies whose exact direction is currently verified (verifiedEdgeCoverage). Never a
+   *  count of nodes that merely appear in some verified record. */
+  verifiedEvidenceCoverage: VerifiedEdgeCoverage;
 }

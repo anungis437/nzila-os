@@ -32,7 +32,8 @@ const h = vi.hoisted(() => {
       this.initialized = true;
     }
   }
-  return { q, db, FakeAdapter };
+  const resolveCredentials = vi.fn();
+  return { q, db, FakeAdapter, resolveCredentials };
 });
 
 vi.mock('@/db/db', () => ({ db: h.db }));
@@ -40,6 +41,7 @@ vi.mock('@/db', () => ({ db: h.db }));
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
+vi.mock('../credential-store', () => ({ resolveIntegrationCredentials: h.resolveCredentials }));
 
 vi.mock('../adapters/hris/workday-adapter', () => ({ WorkdayAdapter: h.FakeAdapter }));
 vi.mock('../adapters/hris/bamboohr-adapter', () => ({ BambooHRAdapter: h.FakeAdapter }));
@@ -93,6 +95,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   factory.clearAllCache();
   setWorkdayEnv();
+  h.resolveCredentials.mockResolvedValue({ clientId: 'a', clientSecret: 'b', tenantId: 'c' });
 });
 
 describe('IntegrationFactory', () => {
@@ -129,10 +132,13 @@ describe('IntegrationFactory', () => {
     expect(refusal).toMatchObject({ code: 'NOT_IMPLEMENTED' });
   });
 
-  it('throws MISSING_ENV_VARS when env not configured', async () => {
-    clearWorkdayEnv();
+  it('fails closed when the managed credential binding is not resolvable', async () => {
+    push(enabledConfigRow());
+    h.resolveCredentials.mockRejectedValueOnce(Object.assign(new Error('Managed credential is not provisioned'), {
+      code: 'CREDENTIAL_UNRESOLVABLE',
+    }));
     await expect(factory.getIntegration('orgX', IntegrationProvider.WORKDAY)).rejects.toMatchObject({
-      code: 'MISSING_ENV_VARS',
+      code: 'CREDENTIAL_UNRESOLVABLE',
     });
   });
 

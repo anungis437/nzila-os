@@ -13,7 +13,25 @@ vi.mock('@/db/db', async () => {
   return { db: lateBoundDb(state) };
 });
 vi.mock('@/lib/db/with-rls-context', () => ({
-  withRLSContext: async (...a: unknown[]) => (a[a.length - 1] as (tx: unknown) => Promise<unknown>)(state.db),
+  // Production (postgres-js) returns row arrays from tx.execute(); the drizzle-orm/pglite driver used by this
+  // fixture wraps them in { rows, fields, affectedRows } instead. Adapt only that driver result envelope for raw
+  // tx.execute(sql`...`) callers (e.g. listVerifiedDependencies) so the store code under test stays the real,
+  // unmodified production code; Drizzle's own query-builder calls are untouched by this proxy.
+  withRLSContext: async (...a: unknown[]) => {
+    const db = state.db as { execute: (q: unknown) => Promise<unknown> };
+    const adapted = new Proxy(db, {
+      get(target, property) {
+        if (property === 'execute') {
+          return async (query: unknown) => {
+            const result = await target.execute(query);
+            return result && typeof result === 'object' && 'rows' in result ? (result as { rows: unknown }).rows : result;
+          };
+        }
+        return Reflect.get(target, property);
+      },
+    });
+    return (a[a.length - 1] as (tx: unknown) => Promise<unknown>)(adapted);
+  },
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: async (_tx: unknown, e: Record<string, unknown>) => void state.audit.push(e) }));
 vi.mock('@/lib/api/framework', () => ({
@@ -24,6 +42,7 @@ vi.mock('@/lib/ai/ai-client', () => ({
   UE_APP_KEY: 'ue',
   UE_PROFILES: { CONTINUITY_RISK: 'p' },
   UE_SYSTEM_ORG_ID: 'sys',
+  toGatewayDataClass: (c: string) => c,
   getAiClient: () => ({ generate: (input: unknown) => (state.generate as (i: unknown) => unknown)(input) }),
 }));
 
@@ -45,7 +64,43 @@ async function interview(title: string, level: string | null, over: { consent?: 
 beforeAll(async () => {
   const { exitInterviews, exitInterviewEvents } = await import('@/db/schema');
   const { createTableDatabase } = await import('./support/pglite-tables');
-  const created = await createTableDatabase([exitInterviews, exitInterviewEvents]);
+  const created = await createTableDatabase([exitInterviews, exitInterviewEvents], [
+    // continuity-forecaster.ts (via the shared graph-evidence-service.ts contract) reports verifiedEvidenceCoverage
+    // alongside its exploratory metrics - this table must exist even though no test here submits a verified row.
+    `CREATE TABLE ue_verified_dependency_evidence (
+       id uuid primary key default gen_random_uuid(),
+       organization_id uuid not null,
+       dependent_node_id text not null,
+       depends_on_node_id text not null,
+       process_or_system varchar(300) not null,
+       responsible_authority varchar(300) not null,
+       evidence_reference varchar(500) not null,
+       evidence_reference_type varchar(20) not null default 'external_citation',
+       evidence_document_id uuid,
+       source_fingerprint varchar(128),
+       status varchar(20) not null default 'pending_review',
+       submitted_by text not null,
+       reviewed_by text,
+       reviewed_at timestamptz,
+       review_notes varchar(1000),
+       created_at timestamptz not null default now(),
+       updated_at timestamptz not null default now(),
+       constraint ue_verified_dependency_evidence_status_check check (status in ('pending_review','verified','rejected','revoked')),
+       constraint ue_verified_dependency_evidence_not_self_dependent check (dependent_node_id <> depends_on_node_id),
+       constraint ue_verified_dependency_evidence_reviewer_distinct check (reviewed_by is null or reviewed_by <> submitted_by)
+     )`,
+    `CREATE TABLE ue_graph_node_alias (
+       id uuid primary key default gen_random_uuid(),
+       organization_id uuid not null,
+       alias_label text not null,
+       canonical_concept_label text not null,
+       reason varchar(500) not null,
+       created_by text not null,
+       created_at timestamptz not null default now(),
+       superseded_by text,
+       superseded_at timestamptz
+     )`,
+  ]);
   pg = created.pg;
   state.db = created.db;
 });

@@ -88,14 +88,14 @@ describe.skipIf(!URL)('the employer-execution page reads on the combined schema,
     await seedArtifact(ORG_B, 'art-b', ids.runB, null, '2026-03-03T00:00:00Z')
 
     ids.remitA = await one(
-      `INSERT INTO employer_remittance_runs (organization_id, payroll_run_id, run_code, period_start, period_end, due_date)
-       VALUES ($1, $2, $3, '2026-01-01', '2026-01-14', '2026-02-15') RETURNING id::text AS id`,
-      [ORG_A, ids.runA2, `RA-${tag}`],
+      `INSERT INTO employer_remittance_runs (organization_id, payroll_run_id, run_code, period_start, period_end, due_date, source_revision_hash)
+       VALUES ($1, $2, $3, '2026-01-01', '2026-01-14', '2026-02-15', $4) RETURNING id::text AS id`,
+      [ORG_A, ids.runA2, `RA-${tag}`, 'a'.repeat(64)],
     )
     ids.remitB = await one(
-      `INSERT INTO employer_remittance_runs (organization_id, payroll_run_id, run_code, period_start, period_end, due_date)
-       VALUES ($1, $2, $3, '2026-01-01', '2026-01-14', '2026-02-15') RETURNING id::text AS id`,
-      [ORG_B, ids.runB, `RB-${tag}`],
+      `INSERT INTO employer_remittance_runs (organization_id, payroll_run_id, run_code, period_start, period_end, due_date, source_revision_hash)
+       VALUES ($1, $2, $3, '2026-01-01', '2026-01-14', '2026-02-15', $4) RETURNING id::text AS id`,
+      [ORG_B, ids.runB, `RB-${tag}`, 'b'.repeat(64)],
     )
     await seedArtifact(ORG_A, 'remit-art-a', null, ids.remitA, '2026-03-04T00:00:00Z')
     await seedArtifact(ORG_B, 'remit-art-b', null, ids.remitB, '2026-03-04T00:00:00Z')

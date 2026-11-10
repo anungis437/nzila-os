@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
+import { recordExternalDisclosure } from '@/lib/audit/external-disclosure'
 import { fromCents, toCents } from '@/lib/decimal-safe'
 import { logger } from '@/lib/logger'
 
@@ -226,6 +227,18 @@ export async function initiateDuesPayment(input: {
       resourceId: pending.paymentId,
       userId,
       details: { paymentIntentId: intent.id, amount: pending.amount, currency: DUES_CURRENCY },
+    })
+    // The platform-managed Stripe client (lib/stripe), not a per-organization processor account,
+    // receives the organization and member identifiers below — see this file's module doc comment.
+    await recordExternalDisclosure(tx, {
+      organizationId,
+      userId,
+      processor: 'stripe',
+      resourceType: 'dues_transactions',
+      resourceId: pending.paymentId,
+      dataClasses: ['organization_id', 'member_user_id'],
+      purpose: 'Union dues payment processing (PaymentIntent metadata)',
+      merchantOfRecord: 'platform',
     })
   })
   return {

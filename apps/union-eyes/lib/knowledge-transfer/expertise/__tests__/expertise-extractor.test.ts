@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 const { generateMock } = vi.hoisted(() => ({ generateMock: vi.fn() }));
 vi.mock('@/lib/ai/ai-client', () => ({
   getAiClient: () => ({ generate: generateMock }),
+  toGatewayDataClass: (c: string) => c,
   buildOrgAiTrace: () => ({}),
   UE_APP_KEY: 'ue',
   UE_SYSTEM_ORG_ID: 'sys',

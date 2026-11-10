@@ -5873,10 +5873,14 @@
     "created_at",
     "id",
     "organization_id",
+    "questionnaire_version_id",
+    "survey_id",
     "updated_at"
    ],
    "required": [
-    "organization_id"
+    "organization_id",
+    "questionnaire_version_id",
+    "survey_id"
    ],
    "table": "survey_responses",
    "write_only": []

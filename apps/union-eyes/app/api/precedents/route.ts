@@ -17,6 +17,8 @@ import { z } from "zod";
 import { toPublicPrecedentSummary } from "@/lib/precedents/public-decision-view";
 import { withApi } from '@/lib/api/framework';
 import { logger } from '@/lib/logger';
+import { db } from '@/db/db';
+import { resolvePrecedentJurisdictions } from '@/lib/precedents/jurisdiction-preference-resolver';
 
 import {
   ErrorCode,
@@ -45,9 +47,15 @@ export const GET = withApi(
     rlsOrgContext: true,
     openapi: { tags: ['Precedents'], summary: 'List, filter and rank arbitration precedents' },
   },
-  async ({ request }) => {
+  async ({ request, organizationId, userId }) => {
   try {
       const { searchParams } = new URL(request.url);
+      const requestJurisdiction = searchParams.get('jurisdiction');
+      const jurisdictionPreference = await resolvePrecedentJurisdictions(db, {
+        organizationId: organizationId!,
+        userId: userId!,
+        requestOverride: requestJurisdiction ? [requestJurisdiction] : undefined,
+      });
       
       const page = boundedPositiveInt(searchParams.get("page"), 1, 10000);
       const mostCited = searchParams.get("mostCited") === "true";
@@ -62,22 +70,22 @@ export const GET = withApi(
 
       // Return statistics
       if (statistics) {
-        const stats = await getPrecedentStatistics();
-        return NextResponse.json(stats);
+        const stats = await getPrecedentStatistics(jurisdictionPreference.jurisdictions);
+        return NextResponse.json({ ...stats, jurisdictionPreference });
       }
 
       // Return most cited
       if (mostCited) {
         // Reuse validated, bounded collection limit.
-        const precedents = await getMostCitedPrecedents(limit);
-        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary) });
+        const precedents = await getMostCitedPrecedents(limit, jurisdictionPreference.jurisdictions);
+        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary), jurisdictionPreference });
       }
 
       // Return by issue type
       if (issueType) {
         // Reuse validated, bounded collection limit.
-        const precedents = await getPrecedentsByIssueType(issueType, limit);
-        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary), count: precedents.length });
+        const precedents = await getPrecedentsByIssueType(issueType, limit, jurisdictionPreference.jurisdictions);
+        return NextResponse.json({ precedents: precedents.map(toPublicPrecedentSummary), count: precedents.length, jurisdictionPreference });
       }
 
       // Build filters
@@ -127,10 +135,7 @@ export const GET = withApi(
         filters.employer = employer;
       }
 
-      const jurisdiction = searchParams.get("jurisdiction");
-      if (jurisdiction) {
-        filters.jurisdiction = jurisdiction;
-      }
+      if (jurisdictionPreference.applied) filters.jurisdiction = jurisdictionPreference.jurisdictions;
 
       const sector = searchParams.get("sector");
       if (sector) {
@@ -166,7 +171,7 @@ export const GET = withApi(
 
       const result = await listPrecedents(filters, { page, limit, sortBy, sortOrder: sortOrder as "asc" | "desc" });
 
-      return NextResponse.json({ ...result, precedents: result.precedents.map(toPublicPrecedentSummary) });
+      return NextResponse.json({ ...result, precedents: result.precedents.map(toPublicPrecedentSummary), jurisdictionPreference });
     } catch (error) {
       logger.error('Failed to list the precedents', { error });
       return standardErrorResponse(

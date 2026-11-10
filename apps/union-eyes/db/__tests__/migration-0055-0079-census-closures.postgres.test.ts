@@ -37,7 +37,7 @@ const statementsOf = (file: string, directory: 'migrations-platform' | 'migratio
 
 type Row = Record<string, any>
 
-describe('cache 0055, platform 0079 and the declared privileges, on real PostgreSQL', () => {
+describe.skipIf(!URL)('cache 0055, platform 0079 and the declared privileges, on real PostgreSQL', () => {
   const tag = randomUUID().slice(0, 8)
   const ORG_A = randomUUID()
   const ORG_B = randomUUID()

@@ -64,6 +64,7 @@ export const PUBLIC_API_ROUTES = new Set([
   '/api/auth/invite/accept',     // Accept an org-membership invite (token IS the credential)
   '/api/auth/methods',           // Discover allowed sign-in methods for an email/org
   '/api/auth/mfa/challenge',     // Consume MFA challenge token post-password (token IS the credential)
+  '/api/auth/me',                 // Session self-check; returns { user: null } when unauthenticated, never throws 401 (same guard class as /api/auth/methods)
   
   // ========================================================================
   // SCIM PROVISIONING
@@ -88,6 +89,16 @@ export const PUBLIC_API_ROUTES = new Set([
   // NOT cover /api/pilot/apply/[id]/** (those all require authentication).
   // ========================================================================
   '/api/pilot/apply', // Public pilot-program lead-intake form (POST only; GET requires system_admin, checked in the route handler itself)
+
+  // ========================================================================
+  // GDPR COMPLIANCE
+  // Justification: the cookie-consent banner runs before any session exists;
+  // the visitor's consentId (a browser-held v4 uuid) is the only credential,
+  // the route reads/writes on the system connection (handler-level RLS
+  // bypass) and getCurrentUser() is consulted only to optionally attribute
+  // an authenticated visitor's consent, never to gate the request.
+  // ========================================================================
+  '/api/gdpr/cookie-consent', // Cookie consent banner read (GET) and save (POST)
 
   // ========================================================================
   // DEV/TESTING ENDPOINTS

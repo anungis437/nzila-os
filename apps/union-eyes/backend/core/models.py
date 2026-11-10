@@ -1033,6 +1033,7 @@ class IntegrationConfigs(BaseModel):
     settings = models.JSONField(null=True, blank=True)
     webhook_url = models.TextField(null=True, blank=True)
     enabled = models.BooleanField(default=True, null=True, blank=True)
+    active_version = models.IntegerField(default=1, db_default=1, editable=False)
     last_sync_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:

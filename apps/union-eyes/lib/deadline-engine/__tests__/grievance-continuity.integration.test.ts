@@ -76,6 +76,7 @@ vi.mock('drizzle-orm', () => ({
   isNull: vi.fn(),
   isNotNull: vi.fn(),
   sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values }),
+  relations: vi.fn(() => ({})),
 }));
 
 import { scheduleGrievanceDeadlineReminders } from '../reminder-scheduler';

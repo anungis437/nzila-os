@@ -41,6 +41,7 @@ vi.mock("drizzle-orm", () => ({
   desc: vi.fn((x: any) => x),
   count: vi.fn(() => "count"),
   sql: vi.fn(),
+  isNull: vi.fn((x: any) => ({ isNull: x })),
   relations: vi.fn(() => ({})),
 }));
 
@@ -63,6 +64,7 @@ vi.mock("@/db/schema/domains/claims/grievances", () => ({
 const mockGenerate = vi.fn();
 vi.mock("@/lib/ai/ai-client", () => ({
   getAiClient: () => ({ generate: mockGenerate }),
+  toGatewayDataClass: (c: string) => c,
   UE_APP_KEY: "union-eyes",
   UE_PROFILES: {
     GRIEVANCE_TRIAGE: "ue-grievance-triage",

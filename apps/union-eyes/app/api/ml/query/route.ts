@@ -13,6 +13,7 @@ import {
   import { guardAiFeature } from '@/lib/ai/ai-feature-guard';
   import { AI_FEATURES } from '@/lib/services/feature-flags';
   import { enforceAISafety } from '@nzila/policies';
+import { decideMlQueryDisclosure, MlQueryProviderResponse } from '@/lib/ai/ml-query-disclosure';
 const QuerySchema = z.object({
   question: z.string().min(1).max(500),
   // A bounded flat map: the context goes to an external service, so it is not an arbitrary document.
@@ -81,6 +82,15 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
 
       const organizationScopeId = organizationId;
 
+    const aiServiceUrl = process.env.AI_SERVICE_URL;
+    const disclosure = decideMlQueryDisclosure({
+      question,
+      context: queryContext,
+      serviceUrl: aiServiceUrl,
+      policyRef: process.env.ML_QUERY_DISCLOSURE_POLICY_REF,
+    });
+    if (!disclosure.allowed) return NextResponse.json({ error: disclosure.reason }, { status: disclosure.status });
+
     // The disclosure is on the durable record before the text leaves: if the record cannot be written, nothing is sent. The record keeps
     // the length and a digest of the question, not its text.
     await withRLSContext({ organizationId, userId }, (tx) => persistAtomicAudit(tx, {
@@ -89,13 +99,17 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       action: 'ml.query.external_disclosure',
       resourceType: 'ml_query',
       resourceId: null,
-      details: { questionLength: question.length, questionSha256: createHash('sha256').update(question).digest('hex'), contextKeys: Object.keys(queryContext ?? {}).length },
+      details: {
+        questionLength: question.length,
+        questionSha256: createHash('sha256').update(question).digest('hex'),
+        contextKeys: Object.keys(disclosure.context),
+        policyRef: disclosure.policyRef,
+        providerOrigin: disclosure.providerOrigin,
+        purpose: 'organization operational question answering',
+      },
     }));
 
     // Call AI service for natural language query
-    const aiServiceUrl = process.env.AI_SERVICE_URL;
-    if (!aiServiceUrl) throw new Error('AI_SERVICE_URL is not configured');
-    
     const response = await fetch(`${aiServiceUrl}/api/query`, {
       method: 'POST',
       headers: {
@@ -106,7 +120,7 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       body: JSON.stringify({
         question,
         organizationId: organizationScopeId,
-        context: queryContext
+        context: disclosure.context
       })
     });
 
@@ -115,13 +129,15 @@ export const POST = withRoleAuth('steward', async (request: NextRequest, context
       throw new Error(errorData?.error || 'AI service query failed');
     }
 
-    const result = await response.json();
+    const result = MlQueryProviderResponse.parse(await response.json());
 
     // Generate follow-up suggestions based on the query type
     const suggestions = generateFollowUpSuggestions(question, result);
 
     return NextResponse.json({
-      ...result,
+      answer: result.answer,
+      confidence: result.confidence,
+      sources: result.sources,
       suggestions
     });
     
@@ -199,4 +215,3 @@ function generateFollowUpSuggestions(
   // Return up to 3 suggestions
   return suggestions.slice(0, 3);
 }
-

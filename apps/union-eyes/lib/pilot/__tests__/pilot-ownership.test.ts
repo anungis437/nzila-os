@@ -5,9 +5,14 @@
  *   1. same-org steward                → allowed
  *   2. cross-org steward               → denied (403)
  *   3. officer without org ownership   → denied (403)
- *   4. platform actor (system_admin /
- *      app_owner)                      → allowed (cross-org by design)
+ *   4. explicit platform-staff authority
+ *      (isPlatformAdminUser)           → allowed (cross-org by design)
+ *      a role title ranked >= 200
+ *      (system_admin, support_agent,
+ *      data_analyst) without it        → org-scoped (NOT platform)
  *      org-level admin (140)           → still org-scoped (NOT platform)
+ *   8. an application no platform administrator has bound (claim only)
+ *      → owned by no organization: the claimed organization's stewards are denied
  *   5. missing org context             → denied (403, fail closed)
  *   6. missing pilot application       → 404 (not a permission leak)
  *   7. unauthenticated actor           → denied (401)
@@ -19,8 +24,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 /* ── hoisted mocks ──────────────────────────────────────────────────── */
 
-const { mockGetCurrentUser, mockDbSelect, mockDbUpdate, mockPersistAtomicAudit, mockTx } = vi.hoisted(() => ({
+const { mockGetCurrentUser, mockIsPlatformAdminUser, mockRequirePlatformStaffAuthority, mockDbSelect, mockDbUpdate, mockPersistAtomicAudit, mockTx } = vi.hoisted(() => ({
   mockGetCurrentUser: vi.fn(),
+  mockIsPlatformAdminUser: vi.fn(),
+  mockRequirePlatformStaffAuthority: vi.fn(),
   mockDbSelect: vi.fn(),
   mockDbUpdate: vi.fn(),
   mockPersistAtomicAudit: vi.fn(),
@@ -38,6 +45,8 @@ vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
   return {
     ...actual,
     getCurrentUser: mockGetCurrentUser,
+    // The explicit platform-staff authority (the canonical system-administrator fact or the named allow-list), never a role title.
+    isPlatformAdminUser: mockIsPlatformAdminUser,
     hasMinRole: async (minRole: string) => {
       const user = await mockGetCurrentUser();
       if (!user) return false;
@@ -59,6 +68,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }));
 
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: mockPersistAtomicAudit }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: mockRequirePlatformStaffAuthority }));
 
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
@@ -75,7 +85,7 @@ import {
   rebindPilotOrganization,
   enforcePilotOwnership,
   withPilotOwnership,
-  PILOT_PLATFORM_ACCESS_MIN_LEVEL,
+  hasPilotPlatformAuthority,
 } from '../pilot-ownership';
 
 /* ── fixtures ───────────────────────────────────────────────────────── */
@@ -86,12 +96,21 @@ const ORG_B = 'org-bbbb-2222';
 const stewardOfA = { id: 'u-steward-a', organizationId: ORG_A, role: 'steward' };
 const officerOfA = { id: 'u-officer-a', organizationId: ORG_A, role: 'officer' };
 const adminOfA = { id: 'u-admin-a', organizationId: ORG_A, role: 'admin' };
-const systemAdmin = { id: 'u-sysadmin', organizationId: ORG_A, role: 'system_admin' };
+/** A role title ranked at the old platform threshold (200), with no platform-staff authority behind it. */
+const systemAdminTitle = { id: 'u-sysadmin', organizationId: ORG_A, role: 'system_admin' };
+const supportAgentTitle = { id: 'u-support', organizationId: ORG_A, role: 'support_agent' };
+const dataAnalystTitle = { id: 'u-analyst', organizationId: ORG_A, role: 'data_analyst' };
+/** Holders of the explicit platform-staff authority. */
+const platformStaff = { id: 'u-platform', organizationId: ORG_A, role: 'member' };
 const appOwner = { id: 'u-appowner', organizationId: null, role: 'app_owner' };
+const PLATFORM_STAFF_IDS = new Set([platformStaff.id, appOwner.id]);
 const stewardNoOrg = { id: 'u-steward-noorg', organizationId: null, role: 'steward' };
 
-const pilotOwnedByA = { responses: { organizationId: ORG_A } };
-const pilotOwnedByB = { responses: { organizationId: ORG_B } };
+/** Applications a platform administrator has bound (verified) to an organization. */
+const pilotOwnedByA = { responses: { organizationId: ORG_A }, verifiedOrganizationId: ORG_A };
+const pilotOwnedByB = { responses: { organizationId: ORG_B }, verifiedOrganizationId: ORG_B };
+/** An application only the anonymous applicant's typed claim points at an organization (not yet bound). */
+const pilotClaimingAOnly = { responses: { organizationId: ORG_A }, verifiedOrganizationId: null };
 const pilotNoOwner = { responses: {} };
 
 /** Selects bindPilotOrganization makes: the organization, the locked pilot row, then the member-address match. */
@@ -176,6 +195,11 @@ describe('pilot-ownership', () => {
     vi.clearAllMocks();
     lockCalls = [];
     mockPersistAtomicAudit.mockResolvedValue(undefined);
+    mockIsPlatformAdminUser.mockImplementation(async (userId: string) => PLATFORM_STAFF_IDS.has(userId));
+    mockRequirePlatformStaffAuthority.mockImplementation(async ({ userId }: { userId: string }) => {
+      if (!PLATFORM_STAFF_IDS.has(userId)) throw new Error('Platform staff authority required');
+      return { authorityId: 'pilot-platform-authority' };
+    });
   });
 
   describe('getPilotClaimedOrganizationId', () => {
@@ -217,16 +241,37 @@ describe('pilot-ownership', () => {
       expect(decision).toEqual({ ok: false, status: 403, reason: 'cross-org' });
     });
 
-    it('4a. platform system_admin is allowed across orgs', async () => {
-      mockGetCurrentUser.mockResolvedValue(systemAdmin);
+    it('4a. the explicit platform-staff authority is allowed across orgs', async () => {
+      mockGetCurrentUser.mockResolvedValue(platformStaff);
       const decision = await authorizePilotAccess(ORG_B);
       expect(decision).toMatchObject({ ok: true, reason: 'platform' });
+      expect(mockRequirePlatformStaffAuthority).toHaveBeenCalledWith(
+        { userId: platformStaff.id, organizationId: ORG_A },
+        'platform.pilot.manage',
+      );
     });
 
-    it('4b. platform app_owner is allowed across orgs even with no org context', async () => {
+    it('4b. an app_owner without an acting organization is denied even if their identity is platform staff', async () => {
       mockGetCurrentUser.mockResolvedValue(appOwner);
       const decision = await authorizePilotAccess(ORG_B);
-      expect(decision).toMatchObject({ ok: true, reason: 'platform' });
+      expect(decision).toEqual({ ok: false, status: 403, reason: 'actor-missing-org-context' });
+    });
+
+    it.each([
+      ['system_admin', systemAdminTitle],
+      ['support_agent', supportAgentTitle],
+      ['data_analyst', dataAnalystTitle],
+    ])('4d. a %s role title without the platform-staff authority is NOT a platform actor (cross-org denied)', async (_title, actor) => {
+      mockGetCurrentUser.mockResolvedValue(actor);
+      const decision = await authorizePilotAccess(ORG_B);
+      expect(decision).toEqual({ ok: false, status: 403, reason: 'cross-org' });
+    });
+
+    it('4e. an app_owner title whose platform-staff authority is not confirmed is denied across orgs', async () => {
+      mockGetCurrentUser.mockResolvedValue(appOwner);
+      mockRequirePlatformStaffAuthority.mockRejectedValue(new Error('Platform staff authority required'));
+      const decision = await authorizePilotAccess(ORG_B);
+      expect(decision).toEqual({ ok: false, status: 403, reason: 'actor-missing-org-context' });
     });
 
     it('4c. org-level admin (140) is NOT a platform actor and stays org-scoped (cross-org denied)', async () => {
@@ -256,8 +301,13 @@ describe('pilot-ownership', () => {
       expect(decision).toEqual({ ok: false, status: 401, reason: 'unauthenticated' });
     });
 
-    it('platform threshold is the system_admin level (200), above org-level executives', () => {
-      expect(PILOT_PLATFORM_ACCESS_MIN_LEVEL).toBe(200);
+    it('hasPilotPlatformAuthority is the platform-staff authority of the caller, never the role title', async () => {
+      mockGetCurrentUser.mockResolvedValue(systemAdminTitle);
+      await expect(hasPilotPlatformAuthority()).resolves.toBe(false);
+      mockGetCurrentUser.mockResolvedValue(platformStaff);
+      await expect(hasPilotPlatformAuthority()).resolves.toBe(true);
+      mockGetCurrentUser.mockResolvedValue(null);
+      await expect(hasPilotPlatformAuthority()).resolves.toBe(false);
     });
   });
 
@@ -273,6 +323,16 @@ describe('pilot-ownership', () => {
       expect(res).not.toBeNull();
       expect(res!.status).toBe(403);
       await expect(res!.json()).resolves.toEqual({ error: 'Forbidden' });
+    });
+
+    it('8. denies a steward of the CLAIMED organization while no platform administrator has bound the application', async () => {
+      mockGetCurrentUser.mockResolvedValue(stewardOfA);
+      const res = await enforcePilotOwnership(pilotClaimingAOnly);
+      expect(res).not.toBeNull();
+      expect(res!.status).toBe(403);
+      // Platform staff still reach it, to verify the organization.
+      mockGetCurrentUser.mockResolvedValue(platformStaff);
+      expect(await enforcePilotOwnership(pilotClaimingAOnly)).toBeNull();
     });
 
     it('returns a 401 response when unauthenticated', async () => {
@@ -317,6 +377,16 @@ describe('pilot-ownership', () => {
       const wrapped = withPilotOwnership(handler);
 
       const res = await wrapped(new Request('http://localhost/api/pilot/apply/p1') as never, makeNextContext('p1'));
+      expect(res.status).toBe(403);
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('8. blocks the claimed organization\'s steward with 403 on an unbound application and never calls the handler', async () => {
+      mockGetCurrentUser.mockResolvedValue(stewardOfA);
+      dbReturns([pilotClaimingAOnly]);
+      const handler = vi.fn().mockResolvedValue(new Response('ok', { status: 200 }));
+
+      const res = await withPilotOwnership(handler)(new Request('http://localhost/api/pilot/apply/p1') as never, makeNextContext('p1'));
       expect(res.status).toBe(403);
       expect(handler).not.toHaveBeenCalled();
     });
@@ -381,15 +451,15 @@ describe('pilot-ownership', () => {
     });
   });
 
-  describe('getPilotEffectiveOrganizationId (PR #752 round 23)', () => {
+  describe('getPilotEffectiveOrganizationId (PR #752 round 23; verified-only since Gate 0 wave 2)', () => {
     it('prefers the verified organization over the claim when both are present', () => {
       const application = { responses: { organizationId: ORG_A }, verifiedOrganizationId: ORG_B };
       expect(getPilotEffectiveOrganizationId(application)).toBe(ORG_B);
     });
 
-    it('falls back to the claim when no verified organization exists yet', () => {
+    it('never falls back to the claim: an application no platform administrator has bound has no owner (DEF-0B10-PIL-APPLICATION-OWNERSHIP-…)', () => {
       const application = { responses: { organizationId: ORG_A }, verifiedOrganizationId: null };
-      expect(getPilotEffectiveOrganizationId(application)).toBe(ORG_A);
+      expect(getPilotEffectiveOrganizationId(application)).toBeNull();
     });
 
     it('returns null when neither a verified organization nor a claim exists (fail closed)', () => {

@@ -19,8 +19,8 @@ export const GET = withApi(
       summary: "Get agreement details with wage adjustments and clauses",
     },
   },
-  async ({ params, userId }) => {
-    const curator = await canReadUnreviewed(userId);
+  async ({ params, userId, organizationId }) => {
+    const curator = await canReadUnreviewed(userId, organizationId);
     const agreement = await getAgreementById(params.id);
     // A reader does not learn that an unreviewed extraction exists; only the platform staff who curate the dataset see it.
     if (!agreement || (!curator && agreement.reviewStatus !== "approved")) throw ApiError.notFound("Agreement not found");

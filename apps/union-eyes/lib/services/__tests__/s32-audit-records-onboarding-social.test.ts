@@ -21,8 +21,9 @@ describe('Gate 0 batch B88: audit records for onboarding reads, social connectio
     expect(writer).toContain("resourceType: 'onboarding'")
   })
 
-  it('refuses a dry-run sync because nothing performs one', () => {
-    expect(src('app/api/integrations/framework/[id]/sync/route.ts')).toContain('dryRun: z.literal(false).optional()')
+  it('keeps every integration sync mode behind the unavailable-effect refusal', () => {
+    expect(src('lib/integrations/control-plane.ts')).toContain("action: 'integration.sync_blocked'")
+    expect(src('lib/integrations/control-plane.ts')).toContain('effect: INTEGRATION_SYNC_EFFECT')
   })
 
   it('audits social account listing and connection in the canonical log, the completion with the credential', () => {

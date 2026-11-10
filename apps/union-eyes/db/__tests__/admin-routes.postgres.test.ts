@@ -5,8 +5,8 @@
  * needs one:
  *   - the CLC analytics read the organization's per-capita remittances, and the representation protocol is a row of the organization's configuration. Outside a
  *     tenant transaction the ambient handle is the runtime role with no organization, on which row-level security shows both as empty;
- *   - the billing, dues-reminder and payment-retry operations are platform operations: they work across every organization, so they run as the system role
- *     (organization_billing_config is system-only, and the runtime role cannot read it at all), and only for a caller with platform authority.
+ *   - the billing, dues-reminder and payment-retry routes have no cross-tenant financial mandate. Platform identity keeps the authentication floor but does
+ *     not confer mutation authority, so the routes truthfully refuse execution before opening a system database context.
  * The unit tests replace the database and the CI HTTP runtime connects as a superuser, so neither noticed. This runs the unmodified routes and services against
  * the combined Django + Drizzle schema, with only the request boundary replaced (see native-route-harness.ts) and the e-mail and billing-cycle boundaries
  * recorded, and proves that
@@ -14,9 +14,7 @@
  *     handle with no organization sees no remittance;
  *   - the representation protocol is saved in the caller organization (as pending approval, audited with the save), read back only there, approved only by a
  *     different administrator, and a body that is not an approval is never read as one;
- *   - the platform operations see every organization's records: the reminder job reminds and marks the dues of both organizations, the retry job escalates the
- *     failed payments of both, the billing trigger enumerates the billing configuration of both, while a tenant handle sees only its own organization and the
- *     runtime role cannot read the billing configuration; each is recorded as an audited platform operation of the acting organization and user;
+ *   - the cross-organization financial routes return 501 even to a platform lead and leave dues, payments, billing boundaries and audits unchanged;
  *   - a caller below a route's role floor is refused before any statement runs.
  *
  * Skipped unless UE_AUTHORITY_COMBINED_URL points at an ADMIN connection to a disposable, fully bootstrapped database.
@@ -43,7 +41,7 @@ vi.mock('@/lib/rate-limiter', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/rate-limiter')>()),
   checkRateLimit: async () => ({ allowed: true, limit: 100, remaining: 99, resetIn: 60 }),
 }))
-// The e-mail and the per-organization billing cycle are the boundaries; what the jobs hand to them is what is asserted.
+// The e-mail and per-organization billing cycle boundaries prove that refused global jobs execute no downstream effect.
 vi.mock('@/lib/services/notification-service', () => ({
   getNotificationService: () => ({
     send: async (message: Record<string, any>) => {
@@ -302,8 +300,8 @@ describe.skipIf(!URL)('the admin routes on the combined schema, as the real role
   })
 
   describe('the platform operations', () => {
-    it('ask the wrapper for a platform lead, and for no tenant transaction: they run as the system role', () => {
-      for (const summary of ['Manually trigger the dues reminder job', 'Manually trigger the failed payment retry job', 'Manually trigger scheduled billing for every organization']) {
+    it('keeps the platform-lead authentication floor without opening a tenant transaction', () => {
+      for (const summary of ['Cross-organization dues reminders (not implemented)', 'Cross-organization payment retry (not implemented)', 'Cross-organization billing trigger (not implemented)']) {
         const options = summaryOf(summary)
         expect(options.auth?.minRole, summary).toBe('platform_lead')
         expect(options.rlsOrgContext, summary).toBeUndefined()
@@ -319,70 +317,48 @@ describe.skipIf(!URL)('the admin routes on the combined schema, as the real role
       expect(String((configuration as { cause?: { message?: string }; message?: string })?.cause?.message ?? configuration?.message)).toMatch(/permission denied/i)
     })
 
-    it('reminds the members of every organization, marks their dues, and records the operation as the acting organization and user', async () => {
+    it('refuses cross-organization dues reminders without changing any dues, audit, or notification boundary', async () => {
       const before = harness.audits.length
+      const rowsBefore = await query(`SELECT id, metadata FROM dues_transactions WHERE id = ANY($1) ORDER BY id`, [[DUES_A, DUES_B, DUES_LEGACY].sort()])
       boundary.messages.length = 0
       const result = await answer(await run(reminders!.POST, post(leadA, 'http://localhost/api/admin/dues/send-reminders')))
-      expect(result.status).toBe(200)
-      // The legacy dues row has no member to remind: it is reported as failed and never stops the others
-      expect(result.body.data).toMatchObject({ totalProcessed: 3, remindersSent: 2, remindersFailed: 1 })
-      expect(boundary.messages.map((message) => message.organizationId).sort()).toEqual([ORG_A, ORG_B].sort())
-      expect(boundary.messages.map((message) => message.recipientEmail).sort()).toEqual([`member-a-${tag}@union.test`, `member-b-${tag}@union.test`].sort())
-      const marked = await query(`SELECT id, metadata->>'sevenDayReminderSent' AS sent FROM dues_transactions WHERE id = ANY($1) ORDER BY id`, [[DUES_A, DUES_B, DUES_LEGACY].sort()])
-      expect(Object.fromEntries(marked.map((row) => [row.id, row.sent]))).toEqual({ [DUES_A]: 'true', [DUES_B]: 'true', [DUES_LEGACY]: null })
-      expect(harness.audits.slice(before)).toEqual(expect.arrayContaining([
-        expect.objectContaining({ action: 'platform.dues.send_reminders.requested', organizationId: ORG_A, userId: leadA.userId }),
-        expect.objectContaining({ action: 'platform.dues.send_reminders.completed', organizationId: ORG_A, userId: leadA.userId }),
-      ]))
-    })
-
-    it('does not remind the same dues twice', async () => {
-      boundary.messages.length = 0
-      const again = await answer(await run(reminders!.POST, post(leadA, 'http://localhost/api/admin/dues/send-reminders')))
-      expect(again.body.data).toMatchObject({ remindersSent: 0, remindersFailed: 1 })
+      expect(result.status).toBe(501)
+      expect(result.body.message).toContain('resource-scoped financial authorization instrument')
       expect(boundary.messages).toEqual([])
+      expect(harness.audits).toHaveLength(before)
+      expect(await query(`SELECT id, metadata FROM dues_transactions WHERE id = ANY($1) ORDER BY id`, [[DUES_A, DUES_B, DUES_LEGACY].sort()])).toEqual(rowsBefore)
     })
 
-    it('escalates the payments that failed too often in every organization, as the system role, and tells each organization', async () => {
+    it('refuses cross-organization payment retry without changing any payment, audit, or notification boundary', async () => {
       const before = harness.audits.length
+      const rowsBefore = await query(`SELECT id, status, metadata FROM dues_transactions WHERE id = ANY($1) ORDER BY id`, [[FAILED_A, FAILED_B].sort()])
       boundary.messages.length = 0
       const result = await answer(await run(retry!.POST, post(leadA, 'http://localhost/api/admin/payments/retry-failed')))
-      expect(result.status).toBe(200)
-      expect(result.body.data).toMatchObject({ markedForAdmin: 2, retriesFailed: 0 })
-      const escalated = await query(`SELECT id, status, metadata->>'requiresAdminIntervention' AS flagged FROM dues_transactions WHERE id = ANY($1) ORDER BY id`, [[FAILED_A, FAILED_B].sort()])
-      expect(escalated.map((row) => [row.status, row.flagged])).toEqual([['overdue', 'true'], ['overdue', 'true']])
-      // The administrators of each organization are told, from the dues of that organization (the member joins as text, inside the organization)
-      expect(boundary.messages.map((message) => [message.organizationId, message.metadata?.type, message.metadata?.transactionId]).sort()).toEqual(
-        [[ORG_A, 'dues_admin_intervention', FAILED_A], [ORG_B, 'dues_admin_intervention', FAILED_B]].sort(),
-      )
-      expect(harness.audits.slice(before)).toEqual(expect.arrayContaining([
-        expect.objectContaining({ action: 'platform.payments.retry_failed.requested', organizationId: ORG_A, userId: leadA.userId }),
-      ]))
-    })
-
-    it('does not escalate the same payment twice', async () => {
-      boundary.messages.length = 0
-      const again = await answer(await run(retry!.POST, post(leadA, 'http://localhost/api/admin/payments/retry-failed')))
-      expect(again.body.data).toMatchObject({ totalProcessed: 0, markedForAdmin: 0 })
+      expect(result.status).toBe(501)
+      expect(result.body.message).toContain('resource-scoped financial authorization instrument')
       expect(boundary.messages).toEqual([])
+      expect(harness.audits).toHaveLength(before)
+      expect(await query(`SELECT id, status, metadata FROM dues_transactions WHERE id = ANY($1) ORDER BY id`, [[FAILED_A, FAILED_B].sort()])).toEqual(rowsBefore)
     })
 
-    it('enumerates the billing configuration of every organization, which only the system role can read, and bills each', async () => {
+    it('refuses cross-organization billing without changing any audit or billing-cycle boundary', async () => {
       boundary.cycles.length = 0
       const before = harness.audits.length
       const result = await answer(await run(billing!.POST, post(leadA, 'http://localhost/api/admin/billing-cycles/trigger-scheduled', { frequency: 'monthly' })))
-      expect(result.status).toBe(200)
-      expect(result.body.data).toMatchObject({ failed: 0 })
-      expect(boundary.cycles.map((cycle) => cycle.organizationId)).toEqual(expect.arrayContaining([ORG_A, ORG_B]))
-      expect(harness.audits.slice(before)).toEqual(expect.arrayContaining([
-        expect.objectContaining({ action: 'platform.billing_cycle.trigger_scheduled.requested', organizationId: ORG_A, userId: leadA.userId }),
-      ]))
+      expect(result.status).toBe(501)
+      expect(result.body.message).toContain('resource-scoped financial authorization instrument')
+      expect(boundary.cycles).toEqual([])
+      expect(harness.audits).toHaveLength(before)
     })
 
-    it('answers a billing trigger with no frequency as a client error, and bills nobody', async () => {
+    it('refuses billing before parsing a malformed trigger body', async () => {
       boundary.cycles.length = 0
-      expect((await answer(await run(billing!.POST, post(leadA, 'http://localhost/api/admin/billing-cycles/trigger-scheduled', {})))).status).toBe(400)
+      const before = harness.audits.length
+      const result = await answer(await run(billing!.POST, post(leadA, 'http://localhost/api/admin/billing-cycles/trigger-scheduled', {})))
+      expect(result.status).toBe(501)
+      expect(result.body.message).toContain('resource-scoped financial authorization instrument')
       expect(boundary.cycles).toEqual([])
+      expect(harness.audits).toHaveLength(before)
     })
   })
 

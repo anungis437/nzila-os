@@ -20,9 +20,12 @@ interface ExpertiseDomain {
   category: string;
   coverageCount: number;
   roles: string[];
+  /** True when roles is withheld because coverageCount is below the minimum cohort - see expertise-map/route.ts. */
+  rolesSuppressed: boolean;
   isSingleSource: boolean;
   averageRiskScore: number;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  /** How many people have discussed this domain, not a measured risk assessment - see expertise-map/route.ts. */
+  coverageConcentrationLevel: 'low' | 'medium' | 'high' | 'critical';
 }
 
 interface ExpertiseMapData {
@@ -83,7 +86,7 @@ function DomainCard({ domain, isExpanded, onToggle }: {
   isExpanded: boolean;
   onToggle: () => void;
 }) {
-  const styles = RISK_STYLES[domain.riskLevel] ?? RISK_STYLES.low;
+  const styles = RISK_STYLES[domain.coverageConcentrationLevel] ?? RISK_STYLES.low;
 
   return (
     <button
@@ -99,7 +102,7 @@ function DomainCard({ domain, isExpanded, onToggle }: {
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className={`text-sm font-medium ${styles.text} truncate`}>{domain.domain}</span>
             <span className={`rounded px-1.5 py-0.5 text-xs font-medium flex-shrink-0 ${styles.badge}`}>
-              {RISK_LABELS[domain.riskLevel]}
+              {RISK_LABELS[domain.coverageConcentrationLevel]}
             </span>
           </div>
 
@@ -116,6 +119,11 @@ function DomainCard({ domain, isExpanded, onToggle }: {
                 <p className="text-muted-foreground">
                   <span className="font-medium text-slate-600">Roles covered: </span>
                   {domain.roles.join(', ')}
+                </p>
+              )}
+              {domain.rolesSuppressed && (
+                <p className="text-muted-foreground italic">
+                  Roles withheld: too few interviews cover this area to show roles without naming specific people.
                 </p>
               )}
               {domain.isSingleSource && (
@@ -169,7 +177,7 @@ export function ExpertiseMap({ initialData }: { initialData?: ExpertiseMapData }
     return data.domains.filter(
       (d) =>
         (!categoryFilter || d.category === categoryFilter) &&
-        (!riskFilter || d.riskLevel === riskFilter),
+        (!riskFilter || d.coverageConcentrationLevel === riskFilter),
     );
   }, [data, categoryFilter, riskFilter]);
 
@@ -202,8 +210,8 @@ export function ExpertiseMap({ initialData }: { initialData?: ExpertiseMapData }
     );
   }
 
-  const criticalCount = data.domains.filter((d) => d.riskLevel === 'critical').length;
-  const highCount = data.domains.filter((d) => d.riskLevel === 'high').length;
+  const criticalCount = data.domains.filter((d) => d.coverageConcentrationLevel === 'critical').length;
+  const highCount = data.domains.filter((d) => d.coverageConcentrationLevel === 'high').length;
 
   return (
     <div className="space-y-4">

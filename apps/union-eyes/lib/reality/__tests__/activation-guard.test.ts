@@ -56,7 +56,7 @@ describe('refuseUnavailableActivation', () => {
 
   it('refuses even when the refusal record cannot be written: an unrecorded refusal is not a reason to allow the activation', async () => {
     m.audit.mockRejectedValueOnce(new Error('audit down'))
-    await expect(refuseUnavailableActivation({ ...base, effect: SSO_SIGN_IN_EFFECT, asked: ['enabled'] })).rejects.toThrow('audit down')
+    await expect(refuseUnavailableActivation({ ...base, effect: INTEGRATION_SYNC_EFFECT, asked: ['enabled'] })).rejects.toThrow('audit down')
   })
 
   it('words the refusal from the effect', () => {

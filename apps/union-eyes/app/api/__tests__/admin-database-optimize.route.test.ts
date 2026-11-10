@@ -19,6 +19,7 @@ const m = vi.hoisted(() => ({
 
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }));
 vi.mock('@/lib/api-auth-guard', () => ({ isPlatformAdminUser: m.isPlatformAdminUser, getCurrentUser: m.getCurrentUser }));
+vi.mock('@/lib/platform/platform-staff', () => ({ requirePlatformStaffAuthority: vi.fn(async (context) => context) }));
 vi.mock('drizzle-orm', () => ({ sql: vi.fn((strings: TemplateStringsArray) => strings.join('?').trim().split(/\s+/)[0]) }));
 
 async function loadRoute() {

@@ -8,7 +8,8 @@
  */
 import { NextResponse } from 'next/server'
 import { getAllQueueStats, getFailedJobs } from '@/lib/job-queue'
-import { requireApiAuth, requireSystemAdmin } from '@/lib/api-auth-guard'
+import { requireApiAuth, getCurrentUser } from '@/lib/api-auth-guard'
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff'
 import { logger } from '@/lib/logger'
 import { constantTimeEquals } from '@/lib/security/constant-time'
 
@@ -49,7 +50,8 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
       }
       try {
-        await requireSystemAdmin()
+        const actor = await getCurrentUser()
+        await requirePlatformStaffAuthority({ userId: actor?.id, organizationId: actor?.organizationId }, 'platform.queue.read')
       } catch {
         return NextResponse.json({ error: 'Platform administrator authority required' }, { status: 403 })
       }
@@ -119,4 +121,3 @@ export async function GET(req: Request) {
     )
   }
 }
-

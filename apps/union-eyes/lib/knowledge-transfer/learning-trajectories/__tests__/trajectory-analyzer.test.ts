@@ -38,9 +38,16 @@ describe('lib/knowledge-transfer/learning-trajectories/trajectory-analyzer', () 
     expect(report.trajectoryPoints.length).toBe(6);
     expect(['accelerating', 'steady']).toContain(report.momentum);
     expect(report.forecast.length).toBe(3);
+    expect(report.forecastStatus).toBe('available');
     expect(report.milestones.some((m) => m.achieved)).toBe(true);
     expect(report.trajectorySpanDays).toBeGreaterThan(0);
     expect(report.interactionsPerMonth).not.toBeNull();
+    // DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST: the band is a fixed formula, not a statistical confidence
+    // interval - renamed off 'confidenceRange' and disclosed as such.
+    expect(report.forecast[0]).toHaveProperty('projectionBand');
+    expect(report.forecast[0]).not.toHaveProperty('confidenceRange');
+    expect(report.methodologyNote).toMatch(/linear extrapolation|fixed formula|not .*(probabilistic|statistical)/i);
+    expect(report.interpretationGuidance).not.toMatch(/probabilistic/i);
   });
 
   it('returns insufficient_data momentum and empty forecast with no timeline', async () => {
@@ -49,8 +56,29 @@ describe('lib/knowledge-transfer/learning-trajectories/trajectory-analyzer', () 
     const report = await analyzeLearningTrajectory('org-2');
     expect(report.momentum).toBe('insufficient_data');
     expect(report.forecast).toEqual([]);
+    expect(report.forecastStatus).toBe('unavailable_insufficient_data');
     expect(report.trajectorySpanDays).toBeNull();
     expect(report.estimatedMonthsToNextMilestone).toBeNull();
+  });
+
+  // DEF-0B7-COGB-LEARNING-TRAJECTORY-FORECAST-EXTRAPOLATES-TWO-TYPED-SCORES: a linear extrapolation from a
+  // handful of typed scores is not a forecast - none is offered below MIN_COHORT_SIZE (5) timeline points, and the
+  // observed series is returned in full instead of a fabricated projection.
+  it('withholds the forecast below the minimum cohort size even with a clear trend', async () => {
+    const timeline = [
+      timelinePoint(10, 90, 'a'),
+      timelinePoint(30, 60, 'b'),
+      timelinePoint(50, 30, 'c'),
+      timelinePoint(70, 1, 'd'),
+    ];
+    loadCognitionMemory.mockResolvedValue({ entries: [], resilienceTimeline: timeline } as never);
+    listReasoningSessions.mockResolvedValue([]);
+    const report = await analyzeLearningTrajectory('org-2b');
+    expect(report.trajectoryPoints.length).toBe(4);
+    expect(report.forecast).toEqual([]);
+    expect(report.forecastStatus).toBe('unavailable_insufficient_data');
+    expect(report.estimatedMonthsToNextMilestone).toBeNull();
+    expect(report.methodologyNote).toMatch(/fewer than 5|no forecast is produced/i);
   });
 
   it('handles a stalled trajectory', async () => {

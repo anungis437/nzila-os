@@ -1,4 +1,4 @@
-import { isPlatformAdminUser } from '@/lib/api-auth-guard'
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff'
 
 /**
  * Which extraction rows a reader may see. Extracted agreements, wage adjustments and clauses are machine output until a reviewer
@@ -23,8 +23,17 @@ export const CBA_DATASET_AUTHORITY = Object.freeze({
 })
 
 /** Whether this caller curates the dataset and may therefore read rows no reviewer has approved. */
-export async function canReadUnreviewed(userId: string | null | undefined): Promise<boolean> {
-  return Boolean(userId) && (await isPlatformAdminUser(userId as string))
+export async function canReadUnreviewed(
+  userId: string | null | undefined,
+  organizationId?: string | null,
+): Promise<boolean> {
+  if (!userId || !organizationId) return false
+  try {
+    await requirePlatformStaffAuthority({ userId, organizationId }, 'platform.cba_dataset.curate')
+    return true
+  } catch {
+    return false
+  }
 }
 
 export function reviewStatusFilter(isCurator: boolean, requested: string | undefined): string | undefined {

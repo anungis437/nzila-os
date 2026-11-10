@@ -34,9 +34,9 @@ describe('roster facade routes', () => {
       'admin/segments', 'admin/segments/[id]', 'admin/segments/[id]/execute', 'admin/system/settings', 'admin/update-role', 'admin/roles/batch',
       'admin/pki/certificates', 'admin/pki/certificates/[id]', 'admin/pki/signatures', 'admin/pki/workflows', 'auth/role', 'debug/user-role',
       'bulk-import', 'member/ai-feedback', 'members/search', 'members/[id]/roles',
-      'equity/monitoring', 'equity/self-identify', 'equity/snapshots', 'support/metrics', 'support/sla', 'support/tickets',
+      'support/metrics', 'support/sla', 'support/tickets',
       'support/tickets/[id]', 'support/tickets/[id]/assign', 'support/tickets/[id]/comments', 'organizing/assignments',
-      'organizing/assignments/[id]', 'organizing/card-check', 'organizing/committee', 'organizing/forms/generate', 'organizing/labour-board',
+      'organizing/assignments/[id]', 'organizing/card-check', 'organizing/committee', 'organizing/labour-board',
       'organizing/nlrb-filings', 'organizing/notes', 'organizing/notes/[id]', 'organizing/sequences', 'organizing/sequences/[id]',
       'organizing/sequences/[id]/enroll', 'organizing/support-percentage', 'organizing/workplace-mapping', 'continuity/inheritance',
       'onboarding/readiness', 'onboarding/transfers', 'reports/[id]/share', 'upload', 'enterprise/integrations', 'events/[id]/occurrences',
@@ -47,7 +47,7 @@ describe('roster facade routes', () => {
       'federations/[id]/remittances', 'federations/benchmark/grievances', 'jurisdiction/clc-compliance', 'jurisdiction/validate-deadline', 'locals',
       'locals/[id]', 'organizer/impact', 'portal/documents', 'portal/documents/upload', 'storage/cleanup', 'storage/usage', 'clauses/search',
       'movement-insights/trends', 'arbitration/precedents/[id]/citations', 'arbitration/precedents/[id]/documents', 'arbitration/precedents/search',
-      'reports/[id]/execute', 'reports/[id]/run', 'communications/templates/[id]/duplicate', 'investigations', 'investigations/audit', 'communications/campaigns/[id]/schedule', 'communications/campaigns/[id]/send-test', 'onboarding', 'wcb/claims', 'wcb/claims/[id]', 'social-media/feed', 'external-data', 'external-data/lrb', 'integrations/api-keys', 'reports/builder', 'reports/scheduled', 'reports/scheduled/[id]', 'reports/datasources/sample', 'healthwelfare/plans', 'reconciliation/bank', 'reconciliation/upload',
+      'reports/[id]/execute', 'reports/[id]/run', 'communications/templates/[id]/duplicate', 'investigations', 'investigations/audit', 'onboarding', 'wcb/claims', 'wcb/claims/[id]', 'social-media/feed', 'external-data', 'external-data/lrb', 'integrations/api-keys', 'reports/builder', 'reports/scheduled', 'reports/scheduled/[id]', 'reports/datasources/sample', 'healthwelfare/plans', 'reconciliation/bank', 'reconciliation/upload',
       'ml/recommendations', 'ml/predictions/churn-risk', 'ml/monitoring/alerts', 'billing/send-invoice', 'compliance/data-classification-policy', 'onboarding/smart-defaults', 'continuity/archives', 'continuity/docs',
     ];
     for (const route of converted) {
@@ -68,5 +68,24 @@ describe('roster facade routes', () => {
     expect(file!.text).toContain('requireLiveFinancialMandate');
     expect(file!.text).toMatch(/export const POST = withApi/);
     expect(file!.text).toMatch(/export const GET = withApi/);
+  });
+
+  // DEF-0B5-COMMS-CAMPAIGN-DETACHED-FROM-CONSENT-AND-DELIVERY: these two were pure 501 facades (both still
+  // in the `converted` list above as of an earlier round); schedule's GET and send-test's POST are now real
+  // operations (a consent/preference-evaluated outbox schedule, and a real test send), covered in detail
+  // by lib/api/__tests__/f12-communications.contract.test.ts.
+  it('the campaign schedule is a dedicated outbox lifecycle and send-test refuses its unimplemented methods', () => {
+    const schedule = files.find((f) => f.route === 'communications/campaigns/[id]/schedule');
+    expect(schedule, 'communications/campaigns/[id]/schedule exists').toBeTruthy();
+    expect(schedule!.text).toContain('campaignDeliveryOutbox');
+    expect(schedule!.text).toMatch(/export const PATCH = POST;/);
+    expect(schedule!.text).toContain('communications.campaign.cancelled');
+
+    const sendTest = files.find((f) => f.route === 'communications/campaigns/[id]/send-test');
+    expect(sendTest, 'communications/campaigns/[id]/send-test exists').toBeTruthy();
+    expect(sendTest!.text).toContain('ApiError.notImplemented');
+    expect(sendTest!.text).toMatch(/export const GET = notImplemented;/);
+    expect(sendTest!.text).toMatch(/export const PATCH = notImplemented;/);
+    expect(sendTest!.text).toMatch(/export const DELETE = notImplemented;/);
   });
 });

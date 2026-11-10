@@ -295,4 +295,29 @@ describe('health-scoring', () => {
       });
     });
   });
+
+  // DEF-0B10-PIL-PILOT-ADOPTION-…: a component whose input is not measured is null, and no overall score is computed from it.
+  describe('not measured inputs', () => {
+    it('leaves adoption, engagement and the overall score null when the rates are not measured', () => {
+      const result = calculatePilotHealthBreakdown(makeMetrics({ organizerAdoptionRate: null, memberEngagementRate: null }));
+      expect(result.adoption).toBeNull();
+      expect(result.engagement).toBeNull();
+      expect(result.overall).toBeNull();
+      expect(result.usage).toEqual(expect.any(Number));
+    });
+
+    it('leaves effectiveness null when no case was resolved', () => {
+      expect(calculatePilotHealthBreakdown(makeMetrics({ avgTimeToResolution: null })).effectiveness).toBeNull();
+    });
+
+    it('reports a not-measured status, no prediction and not-measured key metrics', () => {
+      const metrics = makeMetrics({ organizerAdoptionRate: null, memberEngagementRate: null, avgTimeToResolution: null });
+      expect(getHealthScoreStatus(null).status).toBe('not-measured');
+      expect(predictPilotSuccess(metrics)).toMatchObject({ likelihood: 'uncertain', confidence: 0 });
+      const report = generateHealthReport(metrics);
+      expect(report.summary).toContain('not measured');
+      expect(report.keyMetrics.filter((k) => k.value === 'Not measured')).toHaveLength(3);
+      expect(calculatePilotHealth(metrics)).toBeNull();
+    });
+  });
 });

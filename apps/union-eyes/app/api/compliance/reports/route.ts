@@ -17,7 +17,8 @@ import {
   standardErrorResponse,
   standardSuccessResponse,
 } from "@/lib/api/standardized-responses";
-import { eq, desc, inArray } from "drizzle-orm";
+import { and, eq, desc, inArray } from "drizzle-orm";
+import { productionEmployerCondition } from '@/lib/pilot/demo-provenance';
 
 const logger = createLogger("compliance-reports");
 
@@ -34,7 +35,7 @@ export const GET = withOrganizationAuth(async (_request, context) => {
     const orgEmployers = await db
       .select({ id: employers.id })
       .from(employers)
-      .where(eq(employers.organizationId, organizationId));
+      .where(and(eq(employers.organizationId, organizationId), productionEmployerCondition()));
 
     const employerIds = orgEmployers.map((e) => e.id);
 
@@ -53,7 +54,7 @@ export const GET = withOrganizationAuth(async (_request, context) => {
       })
       .from(employerReports)
       .innerJoin(employers, eq(employers.id, employerReports.employerId))
-      .where(inArray(employerReports.employerId, employerIds))
+      .where(and(inArray(employerReports.employerId, employerIds), productionEmployerCondition()))
       .orderBy(desc(employerReports.createdAt))
       .limit(500);
 

@@ -1,23 +1,18 @@
-Total distinct physical (schema, table) keys: 702
-Keys with >1 declaration: 341
-  - CONFLICTING_SCHEMA (proven incompatible): 15
-  - SAME_COLUMN_SET_UNVERIFIED (names match, full compatibility not proven): 3
-  - IDENTICAL_OR_PROVEN_COMPATIBLE: 323
+Total distinct physical (schema, table) keys: 626
+Keys with >1 declaration: 243
+  - CONFLICTING_SCHEMA (proven incompatible): 13
+  - SAME_COLUMN_SET_UNVERIFIED (names match, full compatibility not proven): 1
+  - IDENTICAL_OR_PROVEN_COMPATIBLE: 229
 
 === CONFLICTING_SCHEMA ===
-ml_predictions: db/schema/analytics.ts(mlPredictions)[15cols] | db/schema/domains/analytics/analytics.ts(mlPredictions)[15cols] | db/schema/domains/ml/predictions.ts(mlPredictions)[11cols] | db/schema/ml-predictions-schema.ts(mlPredictions)[11cols]
+ml_predictions: db/schema/analytics.ts(mlPredictions)[15cols] | db/schema/domains/analytics/analytics.ts(mlPredictions)[15cols] | db/schema/domains/ml/predictions.ts(mlPredictions)[13cols] | db/schema/ml-predictions-schema.ts(mlPredictions)[11cols]
   MIGRATION EVIDENCE: 20260507_fixup_create_break_glass_activations.sql
 insight_recommendations: db/schema/analytics.ts(insightRecommendations)[28cols] | db/schema/domains/analytics/analytics.ts(insightRecommendations)[27cols]
   MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 20260507_fixup_create_break_glass_activations.sql
 automation_rules: db/schema/automation-rules-schema.ts(automationRules)[21cols] | db/schema/domains/infrastructure/automation.ts(automationRules)[21cols] | db/schema/domains/infrastructure/rewards.ts(automationRules)[15cols] | db/schema/recognition-rewards-schema.ts(automationRules)[15cols]
   DIRECT IMPORT BYPASSING BARREL: db/schema/recognition-rewards-schema(automationRules) imported directly by: lib/services/rewards/automation-service.ts
   MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 0008_lean_mother_askani.sql
-reward_wallet_ledger: db/schema/award-templates-schema.ts(rewardWalletLedger)[11cols] | db/schema/domains/infrastructure/awards.ts(rewardWalletLedger)[11cols] | db/schema/domains/infrastructure/rewards.ts(rewardWalletLedger)[10cols] | db/schema/recognition-rewards-schema.ts(rewardWalletLedger)[10cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/infrastructure/rewards(rewardWalletLedger) imported directly by: lib/services/rewards/wallet-service.ts
-  DIRECT IMPORT BYPASSING BARREL: db/schema/recognition-rewards-schema(rewardWalletLedger) imported directly by: app/[locale]/dashboard/admin/rewards/analytics/page.tsx, lib/services/rewards/export-service.ts
-  MIGRATION EVIDENCE: 0005_lazy_kate_bishop.sql, 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 clc_sync_log: db/schema/clc-partnership-schema.ts(clcSyncLog)[16cols] | db/schema/clc-per-capita-schema.ts(clcSyncLog)[9cols] | db/schema/clc-sync-schema.ts(clcSyncLog)[23cols] | db/schema/domains/infrastructure/clc-partnership.ts(clcSyncLog)[16cols] | db/schema/domains/infrastructure/clc-per-capita.ts(clcSyncLog)[9cols] | db/schema/domains/infrastructure/clc-sync.ts(clcSyncLog)[23cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/clc-partnership-schema(clcSyncLog) imported directly by: lib/services/external-data/clc-partnership-service.ts
   MIGRATION EVIDENCE: 0002_true_selene.sql, 0008_lean_mother_askani.sql
 clc_webhook_log: db/schema/clc-per-capita-schema.ts(clcWebhookLog)[8cols] | db/schema/clc-sync-audit-schema.ts(clcWebhookLog)[10cols] | db/schema/clc-sync-schema.ts(clcWebhookLog)[23cols] | db/schema/domains/infrastructure/clc-audit.ts(clcWebhookLog)[10cols] | db/schema/domains/infrastructure/clc-per-capita.ts(clcWebhookLog)[8cols] | db/schema/domains/infrastructure/clc-sync.ts(clcWebhookLog)[23cols]
   DIRECT IMPORT BYPASSING BARREL: db/schema/clc-sync-audit-schema(clcWebhookLog) imported directly by: services/clc/clc-api-integration.ts
@@ -26,11 +21,8 @@ chart_of_accounts: db/schema/clc-sync-audit-schema.ts(chartOfAccounts)[16cols] |
   DIRECT IMPORT BYPASSING BARREL: db/schema/domains/financial/chart-of-accounts(chartOfAccounts) imported directly by: services/clc/chart-of-accounts.ts
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 communication_preferences: db/schema/communication-analytics-schema.ts(communicationPreferences)[18cols] | db/schema/domains/communications/analytics.ts(communicationPreferences)[18cols] | db/schema/domains/communications/campaigns.ts(communicationPreferences)[17cols]
-  DIRECT IMPORT BYPASSING BARREL: db/schema/communication-analytics-schema(communicationPreferences) imported directly by: lib/services/messaging/campaign-service.ts
   MIGRATION EVIDENCE: 0006_flat_stepford_cuckoos.sql, 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 consent_records: db/schema/data-governance-schema.ts(consentRecords)[22cols] | db/schema/domains/communications/campaigns.ts(consentRecords)[13cols]
-newsletter_list_subscribers: db/schema/domains/communications/newsletters.ts(newsletterListSubscribers)[8cols] | db/schema/newsletter-schema.ts(newsletterListSubscribers)[8cols]
-  MIGRATION EVIDENCE: 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 gl_account_mappings: db/schema/domains/finance/accounting.ts(glAccountMappings)[18cols] | db/schema/domains/infrastructure/erp.ts(glAccountMappings)[12cols]
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 dues_transactions: db/schema/domains/finance/dues.ts(duesTransactions)[30cols] | db/schema/dues-transactions-schema.ts(duesTransactions)[27cols]
@@ -40,45 +32,27 @@ payments: db/schema/domains/finance/payments.ts(payments)[27cols] | db/schema/fi
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
 payment_methods: db/schema/domains/finance/payments.ts(paymentMethods)[15cols] | db/schema/financial-payments-schema.ts(paymentMethods)[13cols]
   MIGRATION EVIDENCE: 0008_lean_mother_askani.sql
-webhook_deliveries: db/schema/domains/infrastructure/integrations.ts(webhookDeliveries)[10cols] | db/schema/integration-schema.ts(webhookDeliveries)[19cols]
+reward_wallet_ledger: db/schema/domains/infrastructure/rewards.ts(rewardWalletLedger)[12cols] | db/schema/recognition-rewards-schema.ts(rewardWalletLedger)[10cols]
+  DIRECT IMPORT BYPASSING BARREL: db/schema/domains/infrastructure/rewards(rewardWalletLedger) imported directly by: lib/rewards/page-reads.ts, lib/services/rewards/notification-service.ts, lib/services/rewards/wallet-service.ts, lib/utils/rewards-stats-utils.ts
+  MIGRATION EVIDENCE: 0005_lazy_kate_bishop.sql, 0008_lean_mother_askani.sql, 20260507_fixup_create_break_glass_activations.sql
 
 === SAME_COLUMN_SET_UNVERIFIED (column names match; type/nullability/default/FK not fully provable statically — verify against live schema before treating as safe) ===
-claim_precedent_analysis: db/schema/cba-intelligence-schema.ts(claimPrecedentAnalysis) | db/schema/domains/agreements/intelligence.ts(claimPrecedentAnalysis)
 defensibility_packs: db/schema/defensibility-packs-schema.ts(defensibilityPacks) | db/schema/domains/infrastructure/defensibility.ts(defensibilityPacks)
-pack_download_log: db/schema/defensibility-packs-schema.ts(packDownloadLog) | db/schema/domains/infrastructure/defensibility.ts(packDownloadLog)
 
 === IDENTICAL_OR_PROVEN_COMPATIBLE (column name, type, nullability, PK/unique/array/default-presence, and any resolvable FK target all agreed) ===
-accessibility_audits: db/schema/accessibility-schema.ts(accessibilityAudits) | db/schema/domains/infrastructure/accessibility.ts(accessibilityAudits)
-accessibility_issues: db/schema/accessibility-schema.ts(accessibilityIssues) | db/schema/domains/infrastructure/accessibility.ts(accessibilityIssues)
-wcag_success_criteria: db/schema/accessibility-schema.ts(wcagSuccessCriteria) | db/schema/domains/infrastructure/accessibility.ts(wcagSuccessCriteria)
-accessibility_test_suites: db/schema/accessibility-schema.ts(accessibilityTestSuites) | db/schema/domains/infrastructure/accessibility.ts(accessibilityTestSuites)
-accessibility_user_testing: db/schema/accessibility-schema.ts(accessibilityUserTesting) | db/schema/domains/infrastructure/accessibility.ts(accessibilityUserTesting)
 chat_sessions: db/schema/ai-chatbot-schema.ts(chatSessions) | db/schema/domains/ml/chatbot.ts(chatSessions)
 chat_messages: db/schema/ai-chatbot-schema.ts(chatMessages) | db/schema/domains/ml/chatbot.ts(chatMessages)
 knowledge_base: db/schema/ai-chatbot-schema.ts(knowledgeBase) | db/schema/domains/ml/chatbot.ts(knowledgeBase)
-chatbot_suggestions: db/schema/ai-chatbot-schema.ts(chatbotSuggestions) | db/schema/domains/ml/chatbot.ts(chatbotSuggestions)
-chatbot_analytics: db/schema/ai-chatbot-schema.ts(chatbotAnalytics) | db/schema/domains/ml/chatbot.ts(chatbotAnalytics)
 ai_safety_filters: db/schema/ai-chatbot-schema.ts(aiSafetyFilters) | db/schema/domains/ml/chatbot.ts(aiSafetyFilters)
 ai_usage_metrics: db/schema/ai-chatbot-schema.ts(aiUsageMetrics) | db/schema/domains/ml/chatbot.ts(aiUsageMetrics)
-ai_rate_limits: db/schema/ai-chatbot-schema.ts(aiRateLimits) | db/schema/domains/ml/chatbot.ts(aiRateLimits)
 ai_budgets: db/schema/ai-chatbot-schema.ts(aiBudgets) | db/schema/domains/ml/chatbot.ts(aiBudgets)
 alert_rules: db/schema/alerting-automation-schema.ts(alertRules) | db/schema/domains/infrastructure/alerting.ts(alertRules)
-alert_conditions: db/schema/alerting-automation-schema.ts(alertConditions) | db/schema/domains/infrastructure/alerting.ts(alertConditions)
-alert_actions: db/schema/alerting-automation-schema.ts(alertActions) | db/schema/domains/infrastructure/alerting.ts(alertActions)
-alert_escalations: db/schema/alerting-automation-schema.ts(alertEscalations) | db/schema/domains/infrastructure/alerting.ts(alertEscalations)
 alert_executions: db/schema/alerting-automation-schema.ts(alertExecutions) | db/schema/domains/infrastructure/alerting.ts(alertExecutions)
-workflow_definitions: db/schema/alerting-automation-schema.ts(workflowDefinitions) | db/schema/domains/infrastructure/alerting.ts(workflowDefinitions)
-workflow_executions: db/schema/alerting-automation-schema.ts(workflowExecutions) | db/schema/domains/infrastructure/alerting.ts(workflowExecutions)
 alert_recipients: db/schema/alerting-automation-schema.ts(alertRecipients) | db/schema/domains/infrastructure/alerting.ts(alertRecipients)
-analytics_scheduled_reports: db/schema/analytics-reporting-schema.ts(analyticsScheduledReports) | db/schema/domains/analytics/reporting.ts(analyticsScheduledReports)
-report_delivery_history: db/schema/analytics-reporting-schema.ts(reportDeliveryHistory) | db/schema/domains/analytics/reporting.ts(reportDeliveryHistory)
 benchmark_categories: db/schema/analytics-reporting-schema.ts(benchmarkCategories) | db/schema/domains/analytics/reporting.ts(benchmarkCategories)
-benchmark_data: db/schema/analytics-reporting-schema.ts(benchmarkData) | db/schema/domains/analytics/reporting.ts(benchmarkData)
-organization_benchmark_snapshots: db/schema/analytics-reporting-schema.ts(organizationBenchmarkSnapshots) | db/schema/domains/analytics/reporting.ts(organizationBenchmarkSnapshots)
 analytics_metrics: db/schema/analytics.ts(analyticsMetrics) | db/schema/domains/analytics/analytics.ts(analyticsMetrics)
 kpi_configurations: db/schema/analytics.ts(kpiConfigurations) | db/schema/domains/analytics/analytics.ts(kpiConfigurations)
 trend_analyses: db/schema/analytics.ts(trendAnalyses) | db/schema/domains/analytics/analytics.ts(trendAnalyses)
-comparative_analyses: db/schema/analytics.ts(comparativeAnalyses) | db/schema/domains/analytics/analytics.ts(comparativeAnalyses)
 arbitration_precedents: db/schema/arbitration-precedents-schema.ts(arbitrationPrecedents) | db/schema/domains/data/precedents.ts(arbitrationPrecedents)
 precedent_tags: db/schema/arbitration-precedents-schema.ts(precedentTags) | db/schema/domains/data/precedents.ts(precedentTags)
 precedent_citations: db/schema/arbitration-precedents-schema.ts(precedentCitations) | db/schema/domains/data/precedents.ts(precedentCitations)
@@ -86,19 +60,12 @@ audit_logs (schema: audit_security): db/schema/audit-security-schema.ts(auditLog
 security_events (schema: audit_security): db/schema/audit-security-schema.ts(securityEvents) | db/schema/domains/infrastructure/audit.ts(securityEvents)
 failed_login_attempts (schema: audit_security): db/schema/audit-security-schema.ts(failedLoginAttempts) | db/schema/domains/infrastructure/audit.ts(failedLoginAttempts)
 rate_limit_events (schema: audit_security): db/schema/audit-security-schema.ts(rateLimitEvents) | db/schema/domains/infrastructure/audit.ts(rateLimitEvents)
-automation_execution_log: db/schema/automation-rules-schema.ts(automationExecutionLog) | db/schema/domains/infrastructure/automation.ts(automationExecutionLog)
-automation_schedules: db/schema/automation-rules-schema.ts(automationSchedules) | db/schema/domains/infrastructure/automation.ts(automationSchedules)
 autopay_settings: db/schema/autopay-settings-schema.ts(autoPaySettings) | db/schema/domains/finance/autopay.ts(autoPaySettings)
-award_templates: db/schema/award-templates-schema.ts(awardTemplates) | db/schema/domains/infrastructure/awards.ts(awardTemplates)
-award_history: db/schema/award-templates-schema.ts(awardHistory) | db/schema/domains/infrastructure/awards.ts(awardHistory)
-budget_pool: db/schema/award-templates-schema.ts(budgetPool) | db/schema/domains/infrastructure/awards.ts(budgetPool)
-budget_reservations: db/schema/award-templates-schema.ts(budgetReservations) | db/schema/domains/infrastructure/awards.ts(budgetReservations)
 calendars: db/schema/calendar-schema.ts(calendars) | db/schema/domains/scheduling/calendar.ts(calendars)
 calendar_events: db/schema/calendar-schema.ts(calendarEvents) | db/schema/domains/scheduling/calendar.ts(calendarEvents)
 event_attendees: db/schema/calendar-schema.ts(eventAttendees) | db/schema/domains/scheduling/calendar.ts(eventAttendees)
 meeting_rooms: db/schema/calendar-schema.ts(meetingRooms) | db/schema/domains/scheduling/calendar.ts(meetingRooms)
 room_bookings: db/schema/calendar-schema.ts(roomBookings) | db/schema/domains/scheduling/calendar.ts(roomBookings)
-calendar_sharing: db/schema/calendar-schema.ts(calendarSharing) | db/schema/domains/scheduling/calendar.ts(calendarSharing)
 external_calendar_connections: db/schema/calendar-schema.ts(externalCalendarConnections) | db/schema/domains/scheduling/calendar.ts(externalCalendarConnections)
 event_reminders: db/schema/calendar-schema.ts(eventReminders) | db/schema/domains/scheduling/calendar.ts(eventReminders)
 cba_clauses: db/schema/cba-clauses-schema.ts(cbaClause) | db/schema/domains/agreements/clauses.ts(cbaClause)
@@ -126,24 +93,11 @@ remittance_approvals: db/schema/clc-per-capita-schema.ts(remittanceApprovals) | 
 organization_contacts: db/schema/clc-per-capita-schema.ts(organizationContacts) | db/schema/domains/infrastructure/clc-per-capita.ts(organizationContacts)
 notification_log: db/schema/clc-per-capita-schema.ts(notificationLog) | db/schema/domains/infrastructure/clc-per-capita.ts(notificationLog)
 clc_organization_sync_log: db/schema/clc-sync-audit-schema.ts(clcOrganizationSyncLog) | db/schema/domains/infrastructure/clc-audit.ts(clcOrganizationSyncLog)
-clc_remittance_mapping: db/schema/clc-sync-schema.ts(clcRemittanceMapping) | db/schema/domains/infrastructure/clc-sync.ts(clcRemittanceMapping)
-clc_api_config: db/schema/clc-sync-schema.ts(clcApiConfig) | db/schema/domains/infrastructure/clc-sync.ts(clcApiConfig)
-cms_templates: db/schema/cms-website-schema.ts(cmsTemplates) | db/schema/domains/infrastructure/cms.ts(cmsTemplates)
 cms_pages: db/schema/cms-website-schema.ts(cmsPages) | db/schema/domains/infrastructure/cms.ts(cmsPages)
-cms_blocks: db/schema/cms-website-schema.ts(cmsBlocks) | db/schema/domains/infrastructure/cms.ts(cmsBlocks)
-cms_navigation_menus: db/schema/cms-website-schema.ts(cmsNavigationMenus) | db/schema/domains/infrastructure/cms.ts(cmsNavigationMenus)
 cms_media_library: db/schema/cms-website-schema.ts(cmsMediaLibrary) | db/schema/domains/infrastructure/cms.ts(cmsMediaLibrary)
 donation_campaigns: db/schema/cms-website-schema.ts(donationCampaigns) | db/schema/domains/infrastructure/cms.ts(donationCampaigns)
 donations: db/schema/cms-website-schema.ts(donations) | db/schema/domains/infrastructure/cms.ts(donations)
 donation_receipts: db/schema/cms-website-schema.ts(donationReceipts) | db/schema/domains/infrastructure/cms.ts(donationReceipts)
-public_events: db/schema/cms-website-schema.ts(publicEvents) | db/schema/domains/infrastructure/cms.ts(publicEvents)
-event_registrations: db/schema/cms-website-schema.ts(eventRegistrations) | db/schema/domains/infrastructure/cms.ts(eventRegistrations)
-event_check_ins: db/schema/cms-website-schema.ts(eventCheckIns) | db/schema/domains/infrastructure/cms.ts(eventCheckIns)
-job_postings: db/schema/cms-website-schema.ts(jobPostings) | db/schema/domains/infrastructure/cms.ts(jobPostings)
-job_applications: db/schema/cms-website-schema.ts(jobApplications) | db/schema/domains/infrastructure/cms.ts(jobApplications)
-job_saved: db/schema/cms-website-schema.ts(jobSaved) | db/schema/domains/infrastructure/cms.ts(jobSaved)
-website_settings: db/schema/cms-website-schema.ts(websiteSettings) | db/schema/domains/infrastructure/cms.ts(websiteSettings)
-page_analytics: db/schema/cms-website-schema.ts(pageAnalytics) | db/schema/domains/infrastructure/cms.ts(pageAnalytics)
 collective_agreements: db/schema/collective-agreements-schema.ts(collectiveAgreements) | db/schema/domains/agreements/collective-agreements.ts(collectiveAgreements)
 cba_version_history: db/schema/collective-agreements-schema.ts(cbaVersionHistory) | db/schema/domains/agreements/collective-agreements.ts(cbaVersionHistory)
 cba_contacts: db/schema/collective-agreements-schema.ts(cbaContacts) | db/schema/domains/agreements/collective-agreements.ts(cbaContacts)
@@ -152,22 +106,12 @@ user_engagement_scores: db/schema/communication-analytics-schema.ts(userEngageme
 congress_memberships: db/schema/congress-memberships-schema.ts(congressMemberships) | db/schema/domains/data/congress.ts(congressMemberships)
 deadline_rules: db/schema/deadlines-schema.ts(deadlineRules) | db/schema/domains/claims/deadlines.ts(deadlineRules)
 claim_deadlines: db/schema/deadlines-schema.ts(deadlines) | db/schema/domains/claims/deadlines.ts(deadlines)
-deadline_extensions: db/schema/deadlines-schema.ts(deadlineExtensions) | db/schema/domains/claims/deadlines.ts(deadlineExtensions)
-deadline_alerts: db/schema/deadlines-schema.ts(deadlineAlerts) | db/schema/domains/claims/deadlines.ts(deadlineAlerts)
 holidays: db/schema/deadlines-schema.ts(holidays) | db/schema/domains/claims/deadlines.ts(holidays)
-pack_verification_log: db/schema/defensibility-packs-schema.ts(packVerificationLog) | db/schema/domains/infrastructure/defensibility.ts(packVerificationLog)
 shared_clause_library: db/schema/domains/agreements/shared-library.ts(sharedClauseLibrary) | db/schema/shared-clause-library-schema.ts(sharedClauseLibrary)
 clause_library_tags: db/schema/domains/agreements/shared-library.ts(clauseLibraryTags) | db/schema/shared-clause-library-schema.ts(clauseLibraryTags)
-clause_comparisons_history: db/schema/domains/agreements/shared-library.ts(clauseComparisonsHistory) | db/schema/shared-clause-library-schema.ts(clauseComparisonsHistory)
 reports: db/schema/domains/analytics/reports.ts(reports) | db/schema/reports-schema.ts(reports)
-report_templates: db/schema/domains/analytics/reports.ts(reportTemplates) | db/schema/reports-schema.ts(reportTemplates)
-report_executions: db/schema/domains/analytics/reports.ts(reportExecutions) | db/schema/reports-schema.ts(reportExecutions)
-scheduled_reports: db/schema/domains/analytics/reports.ts(scheduledReports) | db/schema/reports-schema.ts(scheduledReports)
-report_shares: db/schema/domains/analytics/reports.ts(reportShares) | db/schema/reports-schema.ts(reportShares)
-grievance_responses: db/schema/domains/claims/grievances.ts(grievanceResponses) | db/schema/grievance-schema.ts(grievanceResponses)
 arbitrations: db/schema/domains/claims/grievances.ts(arbitrations) | db/schema/grievance-schema.ts(arbitrations)
 settlements: db/schema/domains/claims/grievances.ts(settlements) | db/schema/grievance-schema.ts(settlements)
-grievance_timeline: db/schema/domains/claims/grievances.ts(grievanceTimeline) | db/schema/grievance-schema.ts(grievanceTimeline)
 grievance_deadlines: db/schema/domains/claims/grievances.ts(grievanceDeadlines) | db/schema/domains/claims/workflows.ts(grievanceDeadlines) | db/schema/grievance-schema.ts(grievanceDeadlines) | db/schema/grievance-workflow-schema.ts(grievanceDeadlines)
 grievance_workflows: db/schema/domains/claims/workflows.ts(grievanceWorkflows) | db/schema/grievance-workflow-schema.ts(grievanceWorkflows)
 grievance_stages: db/schema/domains/claims/workflows.ts(grievanceStages) | db/schema/grievance-workflow-schema.ts(grievanceStages)
@@ -179,24 +123,19 @@ grievance_approvals: db/schema/domains/claims/workflows.ts(grievanceApprovals) |
 message_threads: db/schema/domains/communications/messages.ts(messageThreads) | db/schema/messages-schema.ts(messageThreads)
 messages: db/schema/domains/communications/messages.ts(messages) | db/schema/messages-schema.ts(messages)
 message_read_receipts: db/schema/domains/communications/messages.ts(messageReadReceipts) | db/schema/messages-schema.ts(messageReadReceipts)
-message_participants: db/schema/domains/communications/messages.ts(messageParticipants) | db/schema/messages-schema.ts(messageParticipants)
-message_notifications: db/schema/domains/communications/messages.ts(messageNotifications) | db/schema/messages-schema.ts(messageNotifications)
-newsletter_templates: db/schema/domains/communications/newsletters.ts(newsletterTemplates) | db/schema/newsletter-schema.ts(newsletterTemplates)
 newsletter_distribution_lists: db/schema/domains/communications/newsletters.ts(newsletterDistributionLists) | db/schema/newsletter-schema.ts(newsletterDistributionLists)
+newsletter_list_subscribers: db/schema/domains/communications/newsletters.ts(newsletterListSubscribers) | db/schema/newsletter-schema.ts(newsletterListSubscribers)
 newsletter_campaigns: db/schema/domains/communications/newsletters.ts(newsletterCampaigns) | db/schema/newsletter-schema.ts(newsletterCampaigns)
 newsletter_recipients: db/schema/domains/communications/newsletters.ts(newsletterRecipients) | db/schema/newsletter-schema.ts(newsletterRecipients)
 newsletter_engagement: db/schema/domains/communications/newsletters.ts(newsletterEngagement) | db/schema/newsletter-schema.ts(newsletterEngagement)
 user_notification_preferences: db/schema/domains/communications/notifications.ts(userNotificationPreferences) | db/schema/notifications-schema.ts(userNotificationPreferences)
 notification_tracking: db/schema/domains/communications/notifications.ts(notificationTracking) | db/schema/notifications-schema.ts(notificationTracking)
 in_app_notifications: db/schema/domains/communications/notifications.ts(inAppNotifications) | db/schema/notifications-schema.ts(inAppNotifications)
-notification_history: db/schema/domains/communications/notifications.ts(notificationHistory) | db/schema/notifications-schema.ts(notificationHistory)
 notifications: db/schema/domains/communications/notifications.ts(notifications) | db/schema/notifications-schema.ts(notifications)
 notification_templates: db/schema/domains/communications/notifications.ts(notificationTemplates) | db/schema/notifications-schema.ts(notificationTemplates)
 notification_queue: db/schema/domains/communications/notifications.ts(notificationQueue) | db/schema/notifications-schema.ts(notificationQueue)
 notification_delivery_log: db/schema/domains/communications/notifications.ts(notificationDeliveryLog) | db/schema/notifications-schema.ts(notificationDeliveryLog)
-notification_bounces: db/schema/domains/communications/notifications.ts(notificationBounces) | db/schema/notifications-schema.ts(notificationBounces)
 push_devices: db/schema/domains/communications/push-notifications.ts(pushDevices) | db/schema/push-notifications.ts(pushDevices)
-push_notification_templates: db/schema/domains/communications/push-notifications.ts(pushNotificationTemplates) | db/schema/push-notifications.ts(pushNotificationTemplates)
 push_notifications: db/schema/domains/communications/push-notifications.ts(pushNotifications) | db/schema/push-notifications.ts(pushNotifications)
 push_deliveries: db/schema/domains/communications/push-notifications.ts(pushDeliveries) | db/schema/push-notifications.ts(pushDeliveries)
 sms_templates: db/schema/domains/communications/sms.ts(smsTemplates) | db/schema/sms-communications-schema.ts(smsTemplates)
@@ -205,13 +144,6 @@ sms_messages: db/schema/domains/communications/sms.ts(smsMessages) | db/schema/s
 sms_conversations: db/schema/domains/communications/sms.ts(smsConversations) | db/schema/sms-communications-schema.ts(smsConversations)
 sms_campaign_recipients: db/schema/domains/communications/sms.ts(smsCampaignRecipients) | db/schema/sms-communications-schema.ts(smsCampaignRecipients)
 sms_opt_outs: db/schema/domains/communications/sms.ts(smsOptOuts) | db/schema/sms-communications-schema.ts(smsOptOuts)
-sms_rate_limits: db/schema/domains/communications/sms.ts(smsRateLimits) | db/schema/sms-communications-schema.ts(smsRateLimits)
-surveys: db/schema/domains/communications/surveys.ts(surveys) | db/schema/survey-polling-schema.ts(surveys)
-survey_questions: db/schema/domains/communications/surveys.ts(surveyQuestions) | db/schema/survey-polling-schema.ts(surveyQuestions)
-survey_responses: db/schema/domains/communications/surveys.ts(surveyResponses) | db/schema/survey-polling-schema.ts(surveyResponses)
-survey_answers: db/schema/domains/communications/surveys.ts(surveyAnswers) | db/schema/survey-polling-schema.ts(surveyAnswers)
-polls: db/schema/domains/communications/surveys.ts(polls) | db/schema/survey-polling-schema.ts(polls)
-poll_votes: db/schema/domains/communications/surveys.ts(pollVotes) | db/schema/survey-polling-schema.ts(pollVotes)
 data_classification_policy: db/schema/domains/compliance/employer-interference.ts(dataClassificationPolicy) | db/schema/employer-non-interference-schema.ts(dataClassificationPolicy)
 data_classification_registry: db/schema/domains/compliance/employer-interference.ts(dataClassificationRegistry) | db/schema/employer-non-interference-schema.ts(dataClassificationRegistry)
 firewall_access_rules: db/schema/domains/compliance/employer-interference.ts(firewallAccessRules) | db/schema/employer-non-interference-schema.ts(firewallAccessRules)
@@ -230,8 +162,6 @@ break_glass_activations: db/schema/domains/compliance/force-majeure.ts(breakGlas
 user_consents: db/schema/domains/compliance/gdpr.ts(userConsents) | db/schema/gdpr-compliance-schema.ts(userConsents)
 cookie_consents: db/schema/domains/compliance/gdpr.ts(cookieConsents) | db/schema/gdpr-compliance-schema.ts(cookieConsents)
 gdpr_data_requests: db/schema/domains/compliance/gdpr.ts(gdprDataRequests) | db/schema/gdpr-compliance-schema.ts(gdprDataRequests)
-data_processing_records: db/schema/domains/compliance/gdpr.ts(dataProcessingRecords) | db/schema/gdpr-compliance-schema.ts(dataProcessingRecords)
-data_retention_policies: db/schema/domains/compliance/gdpr.ts(dataRetentionPolicies) | db/schema/gdpr-compliance-schema.ts(dataRetentionPolicies)
 data_anonymization_log: db/schema/domains/compliance/gdpr.ts(dataAnonymizationLog) | db/schema/gdpr-compliance-schema.ts(dataAnonymizationLog)
 member_location_consent: db/schema/domains/compliance/geofence.ts(memberLocationConsent) | db/schema/geofence-privacy-schema.ts(memberLocationConsent)
 location_tracking: db/schema/domains/compliance/geofence.ts(locationTracking) | db/schema/geofence-privacy-schema.ts(locationTracking)
@@ -240,18 +170,6 @@ geofence_events: db/schema/domains/compliance/geofence.ts(geofenceEvents) | db/s
 location_tracking_audit: db/schema/domains/compliance/geofence.ts(locationTrackingAudit) | db/schema/geofence-privacy-schema.ts(locationTrackingAudit)
 location_deletion_log: db/schema/domains/compliance/geofence.ts(locationDeletionLog) | db/schema/geofence-privacy-schema.ts(locationDeletionLog)
 location_tracking_config: db/schema/domains/compliance/geofence.ts(locationTrackingConfig) | db/schema/geofence-privacy-schema.ts(locationTrackingConfig)
-foreign_workers: db/schema/domains/compliance/immigration.ts(foreignWorkers) | db/schema/lmbp-immigration-schema.ts(foreignWorkers)
-lmbp_letters: db/schema/domains/compliance/immigration.ts(lmbpLetters) | db/schema/lmbp-immigration-schema.ts(lmbpLetters)
-gss_applications: db/schema/domains/compliance/immigration.ts(gssApplications) | db/schema/lmbp-immigration-schema.ts(gssApplications)
-mentorships: db/schema/domains/compliance/immigration.ts(mentorships) | db/schema/lmbp-immigration-schema.ts(mentorships)
-lmbp_compliance_alerts: db/schema/domains/compliance/immigration.ts(lmbpComplianceAlerts) | db/schema/lmbp-immigration-schema.ts(lmbpComplianceAlerts)
-lmbp_compliance_reports: db/schema/domains/compliance/immigration.ts(lmbpComplianceReports) | db/schema/lmbp-immigration-schema.ts(lmbpComplianceReports)
-band_councils: db/schema/domains/compliance/indigenous-data.ts(bandCouncils) | db/schema/indigenous-data-schema.ts(bandCouncils)
-band_council_consent: db/schema/domains/compliance/indigenous-data.ts(bandCouncilConsent) | db/schema/indigenous-data-schema.ts(bandCouncilConsent)
-indigenous_member_data: db/schema/domains/compliance/indigenous-data.ts(indigenousMemberData) | db/schema/indigenous-data-schema.ts(indigenousMemberData)
-indigenous_data_access_log: db/schema/domains/compliance/indigenous-data.ts(indigenousDataAccessLog) | db/schema/indigenous-data-schema.ts(indigenousDataAccessLog)
-indigenous_data_sharing_agreements: db/schema/domains/compliance/indigenous-data.ts(indigenousDataSharingAgreements) | db/schema/indigenous-data-schema.ts(indigenousDataSharingAgreements)
-traditional_knowledge_registry: db/schema/domains/compliance/indigenous-data.ts(traditionalKnowledgeRegistry) | db/schema/indigenous-data-schema.ts(traditionalKnowledgeRegistry)
 provincial_privacy_config: db/schema/domains/compliance/provincial-privacy.ts(provincialPrivacyConfig) | db/schema/provincial-privacy-schema.ts(provincialPrivacyConfig)
 provincial_consent: db/schema/domains/compliance/provincial-privacy.ts(provincialConsent) | db/schema/provincial-privacy-schema.ts(provincialConsent)
 privacy_breaches: db/schema/domains/compliance/provincial-privacy.ts(privacyBreaches) | db/schema/provincial-privacy-schema.ts(privacyBreaches)
@@ -271,14 +189,10 @@ cost_of_living_data: db/schema/domains/data/benchmarks.ts(costOfLivingData) | db
 contribution_rates: db/schema/domains/data/benchmarks.ts(contributionRates) | db/schema/wage-benchmarks-schema.ts(contributionRates)
 external_data_sync_log: db/schema/domains/data/benchmarks.ts(externalDataSyncLog) | db/schema/wage-benchmarks-schema.ts(externalDataSyncLog)
 lrb_agreements: db/schema/domains/data/lrb.ts(lrbAgreements) | db/schema/lrb-agreements-schema.ts(lrbAgreements)
-lrb_employers: db/schema/domains/data/lrb.ts(lrbEmployers) | db/schema/lrb-agreements-schema.ts(lrbEmployers)
-lrb_unions: db/schema/domains/data/lrb.ts(lrbUnions) | db/schema/lrb-agreements-schema.ts(lrbUnions)
 lrb_sync_log: db/schema/domains/data/lrb.ts(lrbSyncLog) | db/schema/lrb-agreements-schema.ts(lrbSyncLog)
 signature_documents: db/schema/domains/documents/signatures.ts(signatureDocuments) | db/schema/e-signature-schema.ts(signatureDocuments)
 document_signers: db/schema/domains/documents/signatures.ts(documentSigners) | db/schema/e-signature-schema.ts(documentSigners)
 signature_audit_trail: db/schema/domains/documents/signatures.ts(signatureAuditTrail) | db/schema/e-signature-schema.ts(signatureAuditTrail)
-signature_templates: db/schema/domains/documents/signatures.ts(signatureTemplates) | db/schema/e-signature-schema.ts(signatureTemplates)
-signature_webhooks_log: db/schema/domains/documents/signatures.ts(signatureWebhooksLog) | db/schema/e-signature-schema.ts(signatureWebhooksLog)
 signature_workflows: db/schema/domains/documents/workflows.ts(signatureWorkflows) | db/schema/signature-workflows-schema.ts(signatureWorkflows)
 signers: db/schema/domains/documents/workflows.ts(signers) | db/schema/signature-workflows-schema.ts(signers)
 signature_audit_log: db/schema/domains/documents/workflows.ts(signatureAuditLog) | db/schema/signature-workflows-schema.ts(signatureAuditLog)
@@ -286,8 +200,6 @@ signature_verification: db/schema/domains/documents/workflows.ts(signatureVerifi
 payment_cycles: db/schema/domains/finance/payments.ts(paymentCycles) | db/schema/financial-payments-schema.ts(paymentCycles)
 bank_reconciliation: db/schema/domains/finance/payments.ts(bankReconciliation) | db/schema/financial-payments-schema.ts(bankReconciliation)
 payment_disputes: db/schema/domains/finance/payments.ts(paymentDisputes) | db/schema/financial-payments-schema.ts(paymentDisputes)
-stripe_webhook_events: db/schema/domains/finance/payments.ts(stripeWebhookEvents) | db/schema/financial-payments-schema.ts(stripeWebhookEvents)
-strike_fund_disbursements: db/schema/domains/finance/taxes.ts(strikeFundDisbursements) | db/schema/strike-fund-tax-schema.ts(strikeFundDisbursements)
 t4a_tax_slips: db/schema/domains/finance/taxes.ts(t4aTaxSlips) | db/schema/strike-fund-tax-schema.ts(t4aTaxSlips)
 rl1_tax_slips: db/schema/domains/finance/taxes.ts(rl1TaxSlips) | db/schema/strike-fund-tax-schema.ts(rl1TaxSlips)
 tax_year_end_processing: db/schema/domains/finance/taxes.ts(taxYearEndProcessing) | db/schema/strike-fund-tax-schema.ts(taxYearEndProcessing)
@@ -307,8 +219,6 @@ blind_trust_registry: db/schema/domains/governance/conflicts.ts(blindTrustRegist
 conflict_disclosures: db/schema/domains/governance/conflicts.ts(conflictDisclosures) | db/schema/founder-conflict-schema.ts(conflictDisclosures)
 arms_length_verification: db/schema/domains/governance/conflicts.ts(armsLengthVerification) | db/schema/founder-conflict-schema.ts(armsLengthVerification)
 recusal_tracking: db/schema/domains/governance/conflicts.ts(recusalTracking) | db/schema/founder-conflict-schema.ts(recusalTracking)
-conflict_review_committee: db/schema/domains/governance/conflicts.ts(conflictReviewCommittee) | db/schema/founder-conflict-schema.ts(conflictReviewCommittee)
-conflict_training: db/schema/domains/governance/conflicts.ts(conflictTraining) | db/schema/founder-conflict-schema.ts(conflictTraining)
 conflict_audit_log: db/schema/domains/governance/conflicts.ts(conflictAuditLog) | db/schema/founder-conflict-schema.ts(conflictAuditLog)
 golden_shares: db/schema/domains/governance/governance.ts(goldenShares) | db/schema/governance-schema.ts(goldenShares)
 reserved_matter_votes: db/schema/domains/governance/governance.ts(reservedMatterVotes) | db/schema/governance-schema.ts(reservedMatterVotes)
@@ -326,13 +236,6 @@ country_address_formats: db/schema/domains/infrastructure/addresses.ts(countryAd
 address_validation_cache: db/schema/domains/infrastructure/addresses.ts(addressValidationCache) | db/schema/international-address-schema.ts(addressValidationCache)
 address_change_history: db/schema/domains/infrastructure/addresses.ts(addressChangeHistory) | db/schema/international-address-schema.ts(addressChangeHistory)
 organizing_campaigns: db/schema/domains/infrastructure/organizing.ts(organizingCampaigns) | db/schema/organizing-tools-schema.ts(organizingCampaigns)
-organizing_contacts: db/schema/domains/infrastructure/organizing.ts(organizingContacts) | db/schema/organizing-tools-schema.ts(organizingContacts)
-card_signing_events: db/schema/domains/infrastructure/organizing.ts(cardSigningEvents) | db/schema/organizing-tools-schema.ts(cardSigningEvents)
-nlrb_clrb_filings: db/schema/domains/infrastructure/organizing.ts(nlrbClrbFilings) | db/schema/organizing-tools-schema.ts(nlrbClrbFilings)
-union_representation_votes: db/schema/domains/infrastructure/organizing.ts(unionRepresentationVotes) | db/schema/organizing-tools-schema.ts(unionRepresentationVotes)
-field_organizer_activities: db/schema/domains/infrastructure/organizing.ts(fieldOrganizerActivities) | db/schema/organizing-tools-schema.ts(fieldOrganizerActivities)
-employer_responses: db/schema/domains/infrastructure/organizing.ts(employerResponses) | db/schema/organizing-tools-schema.ts(employerResponses)
-organizing_campaign_milestones: db/schema/domains/infrastructure/organizing.ts(organizingCampaignMilestones) | db/schema/organizing-tools-schema.ts(organizingCampaignMilestones)
 recognition_programs: db/schema/domains/infrastructure/rewards.ts(recognitionPrograms) | db/schema/recognition-rewards-schema.ts(recognitionPrograms)
 recognition_award_types: db/schema/domains/infrastructure/rewards.ts(recognitionAwardTypes) | db/schema/recognition-rewards-schema.ts(recognitionAwardTypes)
 recognition_awards: db/schema/domains/infrastructure/rewards.ts(recognitionAwards) | db/schema/recognition-rewards-schema.ts(recognitionAwards)
@@ -342,13 +245,10 @@ shopify_config: db/schema/domains/infrastructure/rewards.ts(shopifyConfig) | db/
 webhook_receipts: db/schema/domains/infrastructure/rewards.ts(webhookReceipts) | db/schema/recognition-rewards-schema.ts(webhookReceipts)
 organization_sharing_settings: db/schema/domains/infrastructure/sharing.ts(organizationSharingSettings) | db/schema/sharing-permissions-schema.ts(organizationSharingSettings)
 cross_org_access_log: db/schema/domains/infrastructure/sharing.ts(crossOrgAccessLog) | db/schema/sharing-permissions-schema.ts(crossOrgAccessLog)
-organization_sharing_grants: db/schema/domains/infrastructure/sharing.ts(organizationSharingGrants) | db/schema/sharing-permissions-schema.ts(organizationSharingGrants)
 social_accounts: db/schema/domains/infrastructure/social-media.ts(socialAccounts) | db/schema/social-media-schema.ts(socialAccounts)
 social_posts: db/schema/domains/infrastructure/social-media.ts(socialPosts) | db/schema/social-media-schema.ts(socialPosts)
 social_campaigns: db/schema/domains/infrastructure/social-media.ts(socialCampaigns) | db/schema/social-media-schema.ts(socialCampaigns)
 social_analytics: db/schema/domains/infrastructure/social-media.ts(socialAnalytics) | db/schema/social-media-schema.ts(socialAnalytics)
-social_feeds: db/schema/domains/infrastructure/social-media.ts(socialFeeds) | db/schema/social-media-schema.ts(socialFeeds)
-social_engagement: db/schema/domains/infrastructure/social-media.ts(socialEngagement) | db/schema/social-media-schema.ts(socialEngagement)
 fmv_policy: db/schema/domains/infrastructure/trust-fmv.ts(fmvPolicy) | db/schema/joint-trust-fmv-schema.ts(fmvPolicy)
 cpi_data: db/schema/domains/infrastructure/trust-fmv.ts(cpiData) | db/schema/joint-trust-fmv-schema.ts(cpiData)
 fmv_benchmarks: db/schema/domains/infrastructure/trust-fmv.ts(fmvBenchmarks) | db/schema/joint-trust-fmv-schema.ts(fmvBenchmarks)
@@ -359,7 +259,6 @@ cpi_adjusted_pricing: db/schema/domains/infrastructure/trust-fmv.ts(cpiAdjustedP
 fmv_violations: db/schema/domains/infrastructure/trust-fmv.ts(fmvViolations) | db/schema/joint-trust-fmv-schema.ts(fmvViolations)
 fmv_audit_log: db/schema/domains/infrastructure/trust-fmv.ts(fmvAuditLog) | db/schema/joint-trust-fmv-schema.ts(fmvAuditLog)
 user_uuid_mapping: db/schema/domains/infrastructure/uuid-mapping.ts(userUuidMapping) | db/schema/user-uuid-mapping-schema.ts(userUuidMapping)
-pending_profiles: db/schema/domains/member/pending-profiles.ts(pendingProfilesTable) | db/schema/pending-profiles-schema.ts(pendingProfilesTable)
 profiles: db/schema/domains/member/profiles.ts(profilesTable) | db/schema/profiles-schema.ts(profilesTable)
 users (schema: user_management): db/schema/domains/member/user-management.ts(users) | db/schema/user-management-schema.ts(users)
 organization_users (schema: user_management): db/schema/domains/member/user-management.ts(organizationUsers) | db/schema/user-management-schema.ts(organizationUsers)
@@ -370,4 +269,3 @@ course_sessions: db/schema/domains/scheduling/training.ts(courseSessions) | db/s
 course_registrations: db/schema/domains/scheduling/training.ts(courseRegistrations) | db/schema/education-training-schema.ts(courseRegistrations)
 member_certifications: db/schema/domains/scheduling/training.ts(memberCertifications) | db/schema/education-training-schema.ts(memberCertifications)
 training_programs: db/schema/domains/scheduling/training.ts(trainingPrograms) | db/schema/education-training-schema.ts(trainingPrograms)
-program_enrollments: db/schema/domains/scheduling/training.ts(programEnrollments) | db/schema/education-training-schema.ts(programEnrollments)

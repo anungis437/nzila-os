@@ -92,8 +92,9 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
       user_id: string
       details: Record<string, unknown>
     }>
-  const readDirectory = (input: { search?: string; organizationId?: string }) =>
-    inRole('union_eyes_system', {}, (tx) => modules!.directory.listPlatformUsers(tx as never, input))
+  // The directory is always scoped to named organizations (the caller's directly-administered ones); these tests name both seeded ones.
+  const readDirectory = (input: { search?: string; organizationId?: string; organizationIds?: string[] }) =>
+    inRole('union_eyes_system', {}, (tx) => modules!.directory.listPlatformUsers(tx as never, { organizationIds: [ORG_A, ORG_B], ...input }))
 
   async function org(id: string, label: string) {
     await admin.query(
@@ -192,7 +193,9 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
   })
 
   it('a tenant runtime session sees only its own organization, so a platform-wide figure cannot come out of one by accident', async () => {
-    const rows = await inRole('union_eyes_runtime', { organizationId: ORG_A, userId: STAFF }, (tx) => modules!.directory.listPlatformUsers(tx as never, {}))
+    const rows = await inRole('union_eyes_runtime', { organizationId: ORG_A, userId: STAFF }, (tx) =>
+      modules!.directory.listPlatformUsers(tx as never, { organizationIds: [ORG_A] }),
+    )
     expect(new Set(rows.map((row) => row.organizationId))).toEqual(new Set([ORG_A]))
     expect(rows.map((row) => row.id)).toEqual(expect.arrayContaining([seeded.pat, seeded.lee]))
     expect(rows.map((row) => row.id)).not.toContain(seeded.sam)
@@ -218,16 +221,20 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
     expect((await readDirectory({ search: 'Morgan' })).map((row) => row.id)).toContain(seeded.pat)
   })
 
-  it('the activity feed gives an abbreviated name and no address, and no removed member', async () => {
-    const feed = await inRole('union_eyes_system', {}, (tx) => modules!.directory.recentMemberActivity(tx as never, 50))
-    const mine = feed.filter((row) => seededIds().includes(row.id))
-    expect(mine.map((row) => row.id).sort()).toEqual([seeded.pat, seeded.lee, seeded.sam, seeded.pct].sort())
-    const text = JSON.stringify(mine)
-    expect(text).not.toContain('@')
-    expect(text).not.toContain('Morgan')
-    expect(text).not.toContain('Removed')
-    expect(text).toContain('Pat M.')
-    expect(feed.length).toBeLessThanOrEqual(50)
+  it('even as the system role, the directory reads only the organizations it is scoped to, and nothing when it is not scoped', async () => {
+    // Scoped to ORG_A: a search matching an ORG_B member's name still never returns that member.
+    const onlyA = await readDirectory({ organizationIds: [ORG_A] })
+    expect(onlyA.length).toBeGreaterThan(0)
+    expect(onlyA.every((row) => row.organizationId === ORG_A)).toBe(true)
+    expect(onlyA.map((row) => row.id)).not.toContain(seeded.sam)
+    expect((await readDirectory({ organizationIds: [ORG_A], search: 'Rivera' })).map((row) => row.id)).not.toContain(seeded.sam)
+    // No scope reads nothing: there is no call shape that lists every organization's people.
+    expect(await inRole('union_eyes_system', {}, (tx) => modules!.directory.listPlatformUsers(tx as never, {} as never))).toEqual([])
+    expect(await readDirectory({ organizationIds: [] })).toEqual([])
+  })
+
+  it('no cross-organization activity reader exists any more', () => {
+    expect(Object.keys(modules!.directory)).not.toContain('recentMemberActivity')
   })
 
   it('the read and its audit record commit together, and the record holds the count and nothing about who was read', async () => {
@@ -239,7 +246,7 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
         details: { searched: false, scopedToOrganization: false, limit: 100 },
         resultDetails: (value) => ({ returned: value.length }),
       },
-      (tx) => modules!.directory.listPlatformUsers(tx, {}),
+      (tx) => modules!.directory.listPlatformUsers(tx, { organizationIds: [ORG_A] }),
     )
     const recorded = await audits('platform.user_directory.read', STAFF)
     expect(recorded).toHaveLength(1)
@@ -253,7 +260,7 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
       modules!.read.performAtomicPlatformRead(
         { organizationId: ORG_A, userId: STAFF },
         { action: 'platform.f03a_fault.read', resourceType: 'organization_members' },
-        (tx) => modules!.directory.listPlatformUsers(tx, {}),
+        (tx) => modules!.directory.listPlatformUsers(tx, { organizationIds: [ORG_A] }),
       ),
     ).rejects.toMatchObject({ status: 409 })
     expect(await audits('platform.f03a_fault.read', STAFF)).toHaveLength(0)
@@ -264,9 +271,12 @@ describe.skipIf(!URL)('platform-wide reads on the combined schema, as the system
     const denial = await audits('platform.user_directory.read.denied', OUTSIDER)
     expect(denial).toHaveLength(1)
     expect(denial[0]).toMatchObject({ organization_id: ORG_B, user_id: OUTSIDER })
-    expect(denial[0].details).toMatchObject({ reason: 'no_platform_staff_authority' })
+    expect(denial[0].details).toMatchObject({ reason: 'not_platform_staff_eligible' })
 
-    await expect(modules!.staff.requirePlatformStaffAuthority({ userId: STAFF, organizationId: ORG_A }, 'platform.user_directory.read')).resolves.toEqual({ userId: STAFF, organizationId: ORG_A })
-    expect(await audits('platform.user_directory.read.denied', STAFF)).toHaveLength(0)
+    // Platform identity is eligibility only. Without a live, accepted, action-specific mandate it confers no cross-tenant authority.
+    await expect(modules!.staff.requirePlatformStaffAuthority({ userId: STAFF, organizationId: ORG_A }, 'platform.user_directory.read')).rejects.toMatchObject({ status: 403 })
+    const staffDenial = await audits('platform.user_directory.read.denied', STAFF)
+    expect(staffDenial).toHaveLength(1)
+    expect(staffDenial[0].details).toMatchObject({ reason: 'no_live_scoped_platform_staff_mandate' })
   })
 })

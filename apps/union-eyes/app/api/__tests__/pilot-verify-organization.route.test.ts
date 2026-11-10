@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  hasMinRole: vi.fn(),
+  hasPilotPlatformAuthority: vi.fn(),
   getCurrentUser: vi.fn(),
   bindPilotOrganization: vi.fn(),
 }));
@@ -11,14 +11,13 @@ vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api-auth-guard')>();
   return {
     ...actual,
-    hasMinRole: m.hasMinRole,
     getCurrentUser: m.getCurrentUser,
     withApiAuth: (
       handler: (req: NextRequest, ctx?: { params?: Promise<{ id: string }> | { id: string } }) => Promise<Response>,
     ) => handler,
   };
 });
-vi.mock('@/lib/pilot/pilot-ownership', () => ({ bindPilotOrganization: m.bindPilotOrganization }));
+vi.mock('@/lib/pilot/pilot-ownership', () => ({ bindPilotOrganization: m.bindPilotOrganization, hasPilotPlatformAuthority: m.hasPilotPlatformAuthority }));
 
 async function loadRoute() {
   return import('../pilot/apply/[id]/verify-organization/route');
@@ -29,13 +28,13 @@ const VALID_ORG_ID = '11111111-1111-1111-1111-111111111111';
 describe('pilot/apply/[id]/verify-organization route (PR #752 round 20)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.hasMinRole.mockResolvedValue(true);
+    m.hasPilotPlatformAuthority.mockResolvedValue(true);
     m.getCurrentUser.mockResolvedValue({ id: 'u-sysadmin' });
     m.bindPilotOrganization.mockResolvedValue({ ok: true, organizationId: VALID_ORG_ID });
   });
 
-  it('rejects a caller without system_admin BEFORE any body/DB access', async () => {
-    m.hasMinRole.mockResolvedValue(false);
+  it('rejects a caller without platform-staff authority (a role title is not enough) BEFORE any body/DB access', async () => {
+    m.hasPilotPlatformAuthority.mockResolvedValue(false);
     const { POST } = await loadRoute();
 
     const response = await POST(

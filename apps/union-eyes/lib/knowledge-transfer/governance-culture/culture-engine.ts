@@ -11,6 +11,7 @@
 import { randomUUID } from 'crypto';
 import { loadCognitionMemory } from '@/lib/knowledge-transfer/cognition-memory/memory-store';
 import { listReasoningSessions } from '@/lib/knowledge-transfer/reasoning-sessions/session-manager';
+import { meetsMinimumCohort, evidenceCoverageScoreFromSampleSize } from '@/lib/knowledge-transfer/governance/evidence-basis';
 import type {
   GovernanceCultureProfile,
   ContinuityCulturePosture,
@@ -71,13 +72,20 @@ function cultureHealthSignal(trend: string, entries: number): CultureHealthSigna
   return 'insufficient_history';
 }
 
+/**
+ * Returns null below the minimum cohort: with too few recorded interactions, the discipline/mitigation maps' own
+ * default branches (e.g. "irregular", "unverified") would otherwise sum to a specific, non-zero number (an
+ * organization with literally nothing recorded previously scored a nonzero figure from those defaults alone),
+ * which reads as a measured composite when nothing has actually been assessed.
+ */
 function computeCultureScore(
   trend: string,
   disciplineConsistency: string,
   mitFollowThrough: string,
   totalEntries: number,
   sessionCount: number,
-): number {
+): number | null {
+  if (!meetsMinimumCohort(totalEntries + sessionCount)) return null;
   let score = 0;
   // Engagement density (max 25)
   score += Math.min((totalEntries + sessionCount) * 3, 25);
@@ -100,6 +108,7 @@ function buildIndicators(
   govCount: number,
   totalEntries: number,
   avgDays: number | null,
+  timelineLength: number,
 ): CultureIndicator[] {
   const indicators: CultureIndicator[] = [];
 
@@ -109,7 +118,7 @@ function buildIndicators(
       observation: `${totalEntries} continuity memory entries recorded across the analysis window.`,
       evidence: `${totalEntries} cognition memory events captured.`,
       valence: totalEntries >= 10 ? 'positive' : 'neutral',
-      confidence: 85,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(totalEntries),
     });
   }
 
@@ -119,7 +128,7 @@ function buildIndicators(
       observation: `${sessionCount} reasoning sessions initiated — organizational inquiry is active.`,
       evidence: `${sessionCount} reasoning sessions in the analysis window.`,
       valence: 'positive',
-      confidence: 80,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(sessionCount),
     });
   }
 
@@ -129,7 +138,7 @@ function buildIndicators(
       observation: `${mitCount} mitigation comparisons recorded — governance responds to continuity risks.`,
       evidence: `${mitCount} mitigation_comparison memory entries.`,
       valence: 'positive',
-      confidence: 75,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(mitCount),
     });
   }
 
@@ -139,7 +148,7 @@ function buildIndicators(
       observation: `${govCount} governance decisions captured in organizational memory.`,
       evidence: `${govCount} governance_reasoning or decision_brief entries.`,
       valence: 'positive',
-      confidence: 78,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(govCount),
     });
   }
 
@@ -150,7 +159,8 @@ function buildIndicators(
       observation: `Average ${avgDays} days between governance activities.`,
       evidence: `Derived from chronological memory timestamps.`,
       valence,
-      confidence: 70,
+      // Cadence itself is derived from the same entries/sessions whose timestamps were averaged.
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(totalEntries + sessionCount),
     });
   }
 
@@ -160,7 +170,7 @@ function buildIndicators(
       observation: 'Organizational resilience is trending upward — governance culture is producing measurable improvement.',
       evidence: 'Resilience timeline shows consistent upward movement.',
       valence: 'positive',
-      confidence: 88,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(timelineLength),
     });
   } else if (trend === 'declining') {
     indicators.push({
@@ -168,7 +178,7 @@ function buildIndicators(
       observation: 'Resilience is trending downward — governance culture may need reinforcement.',
       evidence: 'Resilience timeline shows consistent downward movement.',
       valence: 'negative',
-      confidence: 82,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(timelineLength),
     });
   } else if (trend === 'volatile') {
     indicators.push({
@@ -176,7 +186,7 @@ function buildIndicators(
       observation: 'Resilience scores show volatility — governance practices may be inconsistently applied.',
       evidence: 'High variance in resilience timeline scores.',
       valence: 'negative',
-      confidence: 75,
+      evidenceCoverage: evidenceCoverageScoreFromSampleSize(timelineLength),
     });
   }
 
@@ -229,7 +239,7 @@ function buildEvolutionPhases(
   return phases;
 }
 
-function cultureSummary(posture: ContinuityCulturePosture, health: CultureHealthSignal, score: number): string {
+function cultureSummary(posture: ContinuityCulturePosture, health: CultureHealthSignal, score: number | null): string {
   const postureDesc: Record<ContinuityCulturePosture, string> = {
     proactive_governance: 'proactively governs organizational continuity',
     responsive_governance: 'responds to continuity challenges with governance action',
@@ -245,7 +255,12 @@ function cultureSummary(posture: ContinuityCulturePosture, health: CultureHealth
     recovering: 'Culture is recovering with volatile but engagement-positive signals.',
     insufficient_history: 'Insufficient history to characterize culture evolution — continue building organizational memory.',
   };
-  return `This organization ${postureDesc[posture]}. ${healthDesc[health]} Governance culture score: ${score}/100.`;
+  // A score is only stated when one was computed: below the minimum cohort, stating a number here would contradict
+  // the "insufficient history" health description in the same sentence.
+  const scoreClause = score === null
+    ? 'Too few recorded interactions to compute a governance culture score.'
+    : `Governance culture score: ${score}/100.`;
+  return `This organization ${postureDesc[posture]}. ${healthDesc[health]} ${scoreClause}`;
 }
 
 /** Analyze organizational governance culture from organizational cognition history. */
@@ -298,7 +313,7 @@ export async function analyzeGovernanceCulture(orgId: string): Promise<Governanc
   const posture = dominantPosture(sessionCount, mitCount, govCount, totalEntries, trend);
   const health = cultureHealthSignal(trend, totalEntries + sessionCount);
   const cultureScore = computeCultureScore(trend, engagementConsistency, mitFollowThrough, totalEntries, sessionCount);
-  const indicators = buildIndicators(trend, sessionCount, mitCount, govCount, totalEntries, avgDays);
+  const indicators = buildIndicators(trend, sessionCount, mitCount, govCount, totalEntries, avgDays, scores.length);
   const evolutionPhases = buildEvolutionPhases(timeline, posture);
 
   return {

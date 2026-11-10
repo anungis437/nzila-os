@@ -12,6 +12,7 @@ import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import { getRelatedDocuments } from '@/lib/services/case-related-documents-service';
 import { buildCaseGraph } from '@/lib/services/case-knowledge-graph-service';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 const querySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional(),
@@ -45,7 +46,7 @@ export const GET = withApi(
         createdBy: grievances.createdBy,
       })
       .from(grievances)
-      .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, organizationId)))
+      .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, organizationId), productionGrievanceCondition()))
       .limit(1);
 
     if (!grievance) {

@@ -2,6 +2,7 @@ import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/db/db';
 import { documents, documentLinks } from '@/db/schema/documents-schema';
 import { logger } from '@/lib/logger';
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 import {
   filterAuthorizedDocumentsForActor,
   type DocumentAuthorizationActor,
@@ -28,7 +29,7 @@ async function getCaseSnapshot(caseId: string, orgId: string) {
       organizationId: grievances.organizationId,
     })
     .from(grievances)
-    .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, orgId)))
+    .where(and(eq(grievances.id, caseId), eq(grievances.organizationId, orgId), productionGrievanceCondition()))
     .limit(1);
 
   return (caseRow ?? null) as CaseSnapshot | null;

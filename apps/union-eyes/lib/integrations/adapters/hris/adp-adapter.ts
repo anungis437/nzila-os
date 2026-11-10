@@ -114,6 +114,8 @@ export class ADPAdapter extends BaseIntegration {
   // ==========================================================================
 
   async sync(options: SyncOptions): Promise<SyncResult> {
+    this.beginSync(options);
+    this.throwIfAborted(options);
     this.ensureConnected();
 
     const startTime = Date.now();
@@ -129,6 +131,7 @@ export class ADPAdapter extends BaseIntegration {
         .filter(e => e !== 'payroll');
 
       for (const entity of orgs) {
+        this.throwIfAborted(options);
         try {
           this.logOperation('sync', { entity, action: 'start' });
 
@@ -206,6 +209,7 @@ export class ADPAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getWorkers({
         limit: this.BATCH_SIZE,
         skip,
@@ -214,6 +218,7 @@ export class ADPAdapter extends BaseIntegration {
       const workers = response.workers || [];
 
       for (const adpWorker of workers) {
+        this.throwIfAborted();
         try {
           const employee = this.client!.mapWorkerToEmployee(adpWorker);
 
@@ -300,6 +305,7 @@ export class ADPAdapter extends BaseIntegration {
     let hasMore = true;
 
     while (hasMore) {
+      this.throwIfAborted();
       const response = await this.client!.getOrganizationalUnits({
         limit: this.BATCH_SIZE,
         skip,
@@ -308,6 +314,7 @@ export class ADPAdapter extends BaseIntegration {
       const units = response.workers || []; // ADP API structure
 
       for (const unit of units) {
+        this.throwIfAborted();
         try {
           const existing = await db.query.externalDepartments.findFirst({
             where: and(

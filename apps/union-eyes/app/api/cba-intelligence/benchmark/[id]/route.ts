@@ -6,7 +6,7 @@ import {
 } from "@/lib/services/cba-intelligence/benchmark-service";
 import { getAgreementById } from "@/lib/services/cba-intelligence/extraction-service";
 import { canReadUnreviewed } from "@/lib/services/cba-intelligence/review-visibility";
-import { requireSystemAdmin } from "@/lib/api-auth-guard";
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { performAtomicAuditedOperation, operationAuditResponse } from "@/lib/audit/operation-audit";
 
 // ---------------------------------------------------------------------------
@@ -39,12 +39,12 @@ export const GET = withApi(
       summary: "Compute or retrieve benchmark for an agreement",
     },
   },
-  async ({ params, query, userId }) => {
+  async ({ params, query, userId, organizationId }) => {
     const agreementId = params.id;
 
     // The benchmark of an agreement no reviewer has approved, and its saved history, are the curators' to read: to anyone else it does not exist.
     const agreement = await getAgreementById(agreementId);
-    if (!agreement || (agreement.reviewStatus !== "approved" && !(await canReadUnreviewed(userId)))) throw ApiError.notFound("Agreement not found");
+    if (!agreement || (agreement.reviewStatus !== "approved" && !(await canReadUnreviewed(userId, organizationId)))) throw ApiError.notFound("Agreement not found");
 
     // Return saved snapshots if requested
     if (query.history) {
@@ -86,7 +86,7 @@ export const POST = withApi(
     openapi: { tags: ["CBA Intelligence"], summary: "Compute and save a benchmark snapshot" },
   },
   async ({ params, body, userId, organizationId }) => {
-    await requireSystemAdmin();
+    await requirePlatformStaffAuthority({ userId, organizationId }, 'platform.cba_dataset.curate');
     if (!userId) throw ApiError.unauthorized("User context required");
     const agreement = await getAgreementById(params.id);
     if (!agreement) throw ApiError.notFound("Agreement not found");

@@ -26,6 +26,7 @@ vi.mock('@/lib/db/with-rls-context', () => ({
 }))
 
 import { DuesInitiationError, initiateDuesPayment } from '../dues-payment-service'
+import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 
 const base = { organizationId: 'org-1', userId: 'user-1' }
 
@@ -35,6 +36,7 @@ describe('initiateDuesPayment', () => {
     balance = '25.00'
     openPayments = []
     linkAccepted = true
+    vi.mocked(persistAtomicAudit).mockClear()
   })
 
   it('creates a pending payment and a provider intent whose amount and identity the server owns', async () => {
@@ -64,6 +66,19 @@ describe('initiateDuesPayment', () => {
       { idempotencyKey: 'ue-dues-pay-1' },
     )
     expect(statements.some((s) => /INSERT INTO member_dues_ledger/.test(s.sql))).toBe(false)
+    expect(persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        action: 'external_disclosure.stripe',
+        organizationId: 'org-1',
+        userId: 'user-1',
+        details: expect.objectContaining({
+          processor: 'stripe',
+          dataClasses: ['organization_id', 'member_user_id'],
+          merchantOfRecord: 'platform',
+        }),
+      }),
+    )
   })
 
   it('refuses when nothing is due', async () => {

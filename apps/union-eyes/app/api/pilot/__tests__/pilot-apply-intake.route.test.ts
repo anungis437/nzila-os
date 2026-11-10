@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
   upsertContact: vi.fn(),
   createDeal: vi.fn(),
+  recordExternalDisclosure: vi.fn(),
   inserted: [] as Array<Record<string, unknown>>,
   open: 0,
   openedDuringCrm: [] as number[],
@@ -13,25 +14,26 @@ const m = vi.hoisted(() => ({
 }));
 
 const pilotApplicationsTable = { __table: 'pilot_applications' };
+const pilotContactVerificationsTable = { __table: 'pilot_contact_verifications' };
 
 const tx = {
   insert: vi.fn((table: unknown) => {
-    expect(table).toBe(pilotApplicationsTable);
+    expect([pilotApplicationsTable, pilotContactVerificationsTable]).toContain(table);
     return {
-      values: (values: Record<string, unknown>) => ({
+      values: (values: Record<string, unknown>) => table === pilotApplicationsTable ? ({
         returning: async () => {
           if (m.failInsert) throw new Error('connection reset');
           m.inserted.push(values);
           return [{ id: 'app-1', ...values }];
         },
-      }),
+      }) : Promise.resolve(undefined),
     };
   }),
 };
 
 // The intake row has no organization: it is written by the system role, and the ambient handle must never be used.
 vi.mock('@/db', () => ({ db: new Proxy({}, { get() { throw new Error('ambient db used outside a context'); } }) }));
-vi.mock('@/db/schema', () => ({ pilotApplications: pilotApplicationsTable }));
+vi.mock('@/db/schema', () => ({ pilotApplications: pilotApplicationsTable, pilotContactVerifications: pilotContactVerificationsTable }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: vi.fn(async (operation: (t: typeof tx) => Promise<unknown>) => {
     m.contexts += 1;
@@ -55,6 +57,7 @@ vi.mock('@/lib/services/crm-service', () => ({
   upsertContact: (...args: unknown[]) => { m.openedDuringCrm.push(m.open); return m.upsertContact(...args); },
   createDeal: (...args: unknown[]) => { m.openedDuringCrm.push(m.open); return m.createDeal(...args); },
 }));
+vi.mock('@/lib/audit/external-disclosure', () => ({ recordExternalDisclosure: m.recordExternalDisclosure }));
 
 const valid = {
   organizationName: 'Local 42',
@@ -63,6 +66,7 @@ const valid = {
   memberCount: 120,
   responses: { organizationId: '11111111-1111-4111-8111-111111111111', commercialState: 'approved', note: 'hello' },
   assessment: { score: 7, extra: 'dropped' },
+  crmConsent: { granted: false, noticeVersion: 'pilot-contact-v1' },
 };
 
 const request = (body: string) =>
@@ -86,15 +90,31 @@ describe('POST /api/pilot/apply (public intake)', () => {
     m.createDeal.mockResolvedValue('deal-1');
   });
 
-  it('writes the application as the system role in one transaction, and syncs the CRM only after it is closed', async () => {
+  it('writes the application and pending contact verification in one system transaction without CRM disclosure', async () => {
     const response = await post(valid);
 
     expect(response.status).toBe(201);
-    expect(await response.json()).toEqual({ ok: true, id: 'app-1' });
-    expect(m.contexts).toBe(1);
+    expect(await response.json()).toEqual({ ok: true, id: 'app-1', contactVerification: 'pending_provider_activation', crmDisclosure: 'not_queued' });
     expect(m.inserted).toHaveLength(1);
     expect(m.inserted[0]).toMatchObject({ organizationName: 'Local 42', contactEmail: 'pat@example.org', memberCount: 120, readinessScore: '7' });
-    expect(m.openedDuringCrm).toEqual([0, 0]);
+    expect(m.openedDuringCrm).toEqual([]);
+  });
+
+  it('does not disclose unverified applicant contact data to HubSpot', async () => {
+    await post(valid);
+
+    expect(m.recordExternalDisclosure).not.toHaveBeenCalled();
+    expect(m.upsertContact).not.toHaveBeenCalled();
+    expect(m.contexts).toBe(1);
+  });
+
+  it('does not record a disclosure when the HubSpot contact sync is skipped or fails', async () => {
+    m.upsertContact.mockResolvedValue(null);
+
+    await post(valid);
+
+    expect(m.recordExternalDisclosure).not.toHaveBeenCalled();
+    expect(m.contexts).toBe(1);
   });
 
   it('never stores a reserved key an anonymous applicant seeded in the free-form responses', async () => {

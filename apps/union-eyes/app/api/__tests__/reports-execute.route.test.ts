@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
   logApiAuditEvent: vi.fn(),
   hasMinRole: vi.fn(),
   audit: vi.fn(),
+  grantRows: [] as Array<Record<string, unknown>>,
 }));
 
 vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
@@ -15,7 +16,21 @@ vi.mock('@/lib/api-auth-guard', () => ({
 }));
 
 // The execution is recorded durably (B95); the writer has its own coverage.
-vi.mock('@/lib/db/with-rls-context', () => ({ withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => unknown) => fn({}) }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withRLSContext: async (_ctx: unknown, fn: (tx: unknown) => unknown) => fn({
+    select: () => ({ from: () => ({ where: async () => m.grantRows }) }),
+    insert: () => ({ values: () => ({ returning: async () => [{ id: 'receipt-1' }] }) }),
+  }),
+}));
+const LIVE_GRANT = {
+      id: 'grant-1',
+      allowedFields: [
+        'id', 'status', 'claim_number', 'created_at', 'email', 'member_id', 'organization_id', 'priority',
+        'claims.id', 'claims.status', 'claims.claim_number', 'claims.created_at', 'claims.member_id', 'claims.organization_id', 'claims.priority',
+        'organization_members.id', 'organization_members.status', 'organization_members.email', 'organization_members.created_at',
+      ],
+      allowedClasses: ['identifier', 'financial', 'matter', 'member_attribute', 'operational'],
+};
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: (...args: unknown[]) => m.audit(...args) }));
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: m.checkRateLimit,
@@ -40,6 +55,7 @@ async function loadRoute() {
 }
 
 const { caller, declared, resetCaller } = await import('./support/with-api-stub');
+const reportBody = (value: Record<string, unknown>) => JSON.stringify({ purpose: 'case oversight', ...value });
 
 describe('reports/execute route', () => {
   beforeEach(() => {
@@ -50,6 +66,7 @@ describe('reports/execute route', () => {
     // Existing cases exercise execution mechanics as an administrator; the officer cases below set it false.
     m.hasMinRole.mockResolvedValue(true);
     m.audit.mockReset().mockResolvedValue(undefined);
+    m.grantRows = [LIVE_GRANT];
     m.execute.mockResolvedValue({ success: true, data: [{ id: 1 }], rowCount: 1, executionTimeMs: 12 });
   });
 
@@ -69,7 +86,7 @@ describe('reports/execute route', () => {
     const response = await POST(new NextRequest('http://localhost/api/reports/execute', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'id' }] } }),
+      body: reportBody({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'id' }] } }),
     }));
 
     expect(response.status).toBe(403);
@@ -84,7 +101,7 @@ describe('reports/execute route', () => {
     const response = await POST(new NextRequest('http://localhost/api/reports/execute', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'id' }] } }),
+      body: reportBody({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'id' }] } }),
     }));
 
     expect(response.status).toBe(403);
@@ -111,7 +128,7 @@ describe('reports/execute route', () => {
       new NextRequest('http://localhost/api/reports/execute', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ config: {} }),
+        body: reportBody({ config: {} }),
       }),
     );
 
@@ -125,7 +142,7 @@ describe('reports/execute route', () => {
       new NextRequest('http://localhost/api/reports/execute', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ config: { dataSourceId: 'claims', fields: [] } }),
+        body: reportBody({ config: { dataSourceId: 'claims', fields: [] } }),
       }),
     );
 
@@ -139,7 +156,7 @@ describe('reports/execute route', () => {
       new NextRequest('http://localhost/api/reports/execute', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
+        body: reportBody({
           config: {
             dataSourceId: 'forbidden_table',
             fields: [{ fieldId: 'id' }],
@@ -158,7 +175,7 @@ describe('reports/execute route', () => {
       new NextRequest('http://localhost/api/reports/execute', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
+        body: reportBody({
           config: {
             dataSourceId: 'claims',
             fields: [{ fieldId: 'id' }, { fieldId: 'status' }],
@@ -182,7 +199,7 @@ describe('reports/execute route', () => {
       new NextRequest('http://localhost/api/reports/execute', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
+        body: reportBody({
           config: {
             dataSourceId: 'claims',
             fields: [{ fieldId: 'id' }],
@@ -202,7 +219,7 @@ describe('reports/execute route', () => {
         new NextRequest('http://localhost/api/reports/execute', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'status' }] } }),
+          body: reportBody({ config: { dataSourceId: 'claims', fields: [{ fieldId: 'status' }] } }),
         }),
       );
     };
@@ -232,7 +249,7 @@ describe('reports/execute field authority (F06 A5)', () => {
       new NextRequest('http://localhost/api/reports/execute', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ config }),
+        body: reportBody({ config }),
       }),
     );
   };
@@ -248,16 +265,18 @@ describe('reports/execute field authority (F06 A5)', () => {
     m.execute.mockResolvedValue({ success: true, data: [{ n: 3 }], rowCount: 1, executionTimeMs: 4 });
     m.audit.mockReset().mockResolvedValue(undefined);
     m.hasMinRole.mockResolvedValue(false);
+    m.grantRows = [LIVE_GRANT];
   });
 
-  it('refuses an officer a listing of claim rows, records the refusal, and runs nothing', async () => {
+  it('refuses a listing without a direct field grant, records the refusal, and runs nothing', async () => {
+    m.grantRows = [];
     const response = await run(claimRows);
 
     expect(response.status).toBe(403);
     expect(m.execute).not.toHaveBeenCalled();
     expect(m.audit).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ action: 'report.execute.denied', details: { dataSource: 'claims', restricted: ['claims.claim_number'] } }),
+      expect.objectContaining({ action: 'report.execute.denied', details: expect.objectContaining({ dataSource: 'claims', requestedFields: ['claims.claim_number'] }) }),
       'failure',
     );
   });
@@ -266,7 +285,8 @@ describe('reports/execute field authority (F06 A5)', () => {
     ['selecting', memberEmail],
     ['filtering on', { ...memberEmail, fields: [{ fieldId: 'id', fieldName: 'Id' , aggregation: 'count' }], filters: [{ fieldId: 'email', operator: 'ilike', value: '%a%' }] }],
     ['sorting by', { ...memberEmail, sortBy: [{ fieldId: 'email', direction: 'asc' }] }],
-  ])('refuses an officer %s member e-mail, which would otherwise be a search oracle over addresses', async (_label, config) => {
+  ])('refuses %s member e-mail without a direct field grant', async (_label, config) => {
+    m.grantRows = [];
     const response = await run(config);
 
     expect(response.status).toBe(403);
@@ -278,7 +298,7 @@ describe('reports/execute field authority (F06 A5)', () => {
 
     expect(response.status).toBe(200);
     expect(m.execute).toHaveBeenCalledWith(expect.objectContaining({ limit: 500 }));
-    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ adminOnlySelections: [], limit: 500 }) }));
+    expect(m.audit).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ authority: 'institution_field_grant', restrictedSelections: [], limit: 500 }) }));
   });
 
   it('lets an administrator list claim rows and member e-mail, recording that restricted data was selected', async () => {
@@ -291,7 +311,7 @@ describe('reports/execute field authority (F06 A5)', () => {
     expect(email.status).toBe(200);
     expect(m.audit).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ adminOnlySelections: ['organization_members.email'] }) }),
+      expect.objectContaining({ action: 'report.execute', details: expect.objectContaining({ restrictedSelections: ['organization_members.email'], grantId: 'grant-1' }) }),
     );
   });
 
@@ -308,7 +328,7 @@ describe('reports/execute field authority (F06 A5)', () => {
 
     const entry = m.audit.mock.calls.map((call) => call[1]).find((e) => e.action === 'report.execute');
     expect(entry.details).toMatchObject({
-      authority: 'officer',
+      authority: 'institution_field_grant',
       classesReturned: ['matter'],
       filteredBy: ['claims.priority'],
       groupedBy: ['claims.status'],
@@ -355,8 +375,9 @@ describe('reports/execute field authority (F06 A5)', () => {
   it.each([
     ['a day', '2026-03-14'],
     ['a single instant', '2026-03-01T09:30:00Z'],
-  ])('refuses an officer a date filter that cuts at %s, records it, and runs nothing', async (_name, value) => {
+  ])('refuses a date-filtered report at %s without a direct field grant', async (_name, value) => {
     m.hasMinRole.mockResolvedValue(false);
+    m.grantRows = [];
 
     const response = await run({ ...claimCount, filters: [{ fieldId: 'created_at', operator: 'gte', value }] });
 
@@ -364,7 +385,7 @@ describe('reports/execute field authority (F06 A5)', () => {
     expect(m.execute).not.toHaveBeenCalled();
     expect(m.audit).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ action: 'report.execute.denied', details: expect.objectContaining({ restricted: expect.arrayContaining(['claims.created_at (date filter finer than a month)']) }) }),
+      expect.objectContaining({ action: 'report.execute.denied', details: expect.objectContaining({ requestedFields: expect.arrayContaining(['claims.created_at']) }) }),
       'failure',
     );
     expect(JSON.stringify(m.audit.mock.calls)).not.toContain(value);
@@ -377,13 +398,13 @@ describe('reports/execute field authority (F06 A5)', () => {
     m.hasMinRole.mockResolvedValue(true);
     expect((await run({ ...claimCount, filters: [{ fieldId: 'created_at', operator: 'eq', value: '2026-03-14' }] })).status).toBe(200);
   });
-  it('does not spend the question budget on an administrator or on a row listing an officer may run', async () => {
+  it('applies the question budget to a cell report regardless of role title once a direct grant exists', async () => {
     m.hasMinRole.mockResolvedValue(true);
     await run(claimCount);
     m.hasMinRole.mockResolvedValue(false);
     await run({ dataSourceId: 'organization_members', fields: [{ fieldId: 'status', fieldName: 'Status' }] });
 
-    expect(m.checkRateLimit.mock.calls.some((call) => String(call[0]).startsWith('report-shape:'))).toBe(false);
+    expect(m.checkRateLimit.mock.calls.some((call) => String(call[0]).startsWith('report-shape:'))).toBe(true);
   });
 
   it('runs every report inside the caller\'s own organization whatever the body names, and refuses a filter on the organization column', async () => {
@@ -403,7 +424,7 @@ describe('reports/execute small-group suppression (F06 A5)', () => {
   const run = async (config: unknown) => {
     const { POST } = await import('../reports/execute/route');
     return POST(
-      new NextRequest('http://localhost/api/reports/execute', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ config }) }),
+      new NextRequest('http://localhost/api/reports/execute', { method: 'POST', headers: { 'content-type': 'application/json' }, body: reportBody({ config }) }),
     );
   };
   const rows = [
@@ -419,6 +440,7 @@ describe('reports/execute small-group suppression (F06 A5)', () => {
     caller.role = 'officer';
     m.checkRateLimit.mockResolvedValue({ allowed: true, resetIn: 0 });
     m.audit.mockReset().mockResolvedValue(undefined);
+    m.grantRows = [LIVE_GRANT];
     m.execute.mockResolvedValue({ success: true, data: rows.map((r) => ({ ...r })), rowCount: 4, executionTimeMs: 3 });
   });
 
@@ -451,15 +473,15 @@ describe('reports/execute small-group suppression (F06 A5)', () => {
     expect(body.data.map((r: { status: string }) => r.status)).toEqual(['closed']);
   });
 
-  it('does not suppress for an administrator or add a column', async () => {
+  it('suppresses small cells even when the grant holder also has an administrator title', async () => {
     m.hasMinRole.mockResolvedValue(true);
     m.execute.mockResolvedValue({ success: true, data: [{ status: 'rare', id_count: 2 }], rowCount: 1, executionTimeMs: 1 });
 
     const body = await (await run(grouped)).json();
 
-    expect(m.execute.mock.calls[0][0].fields).toHaveLength(2);
-    expect(body.data).toEqual([{ status: 'rare', id_count: 2 }]);
-    expect(body).not.toHaveProperty('suppressedGroups');
+    expect(m.execute.mock.calls[0][0].fields).toHaveLength(4);
+    expect(body.data).toEqual([]);
+    expect(body).toMatchObject({ suppressedGroups: 1 });
   });
 
   it('withholds an ungrouped officer aggregate over fewer than five people and releases one over enough', async () => {

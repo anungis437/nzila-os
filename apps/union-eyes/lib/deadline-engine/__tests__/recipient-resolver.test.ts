@@ -47,6 +47,8 @@ vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   isNull: vi.fn(),
   isNotNull: vi.fn(),
+  sql: vi.fn(),
+  relations: vi.fn(() => ({})),
 }));
 vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },

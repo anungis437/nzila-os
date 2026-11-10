@@ -12,7 +12,10 @@ vi.mock('@/lib/organizations/read-authority', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/organizations/read-authority')>()),
   resolveOrganizationAccess: async () => ({ direct: m.direct, affiliated: new Set() }),
 }));
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: m.withSystemContext }));
+vi.mock('@/lib/db/with-rls-context', () => ({
+  withSystemContext: m.withSystemContext,
+  withRLSContext: (_context: unknown, fn: (tx: unknown) => unknown) => m.withSystemContext(fn),
+}));
 vi.mock('@/db/db', () => {
   const chain: any = {
     from: vi.fn(function() { return this; }),
@@ -38,7 +41,14 @@ describe('pilot/current route', () => {
     vi.clearAllMocks();
     m.withOrganizationAuth.mockImplementation((fn: any) => async (_req: NextRequest, context: any = { organizationId: 'org_1', userId: 'u1' }) => fn(_req, context));
     m.direct = new Map([['org_1', 'officer']]);
-    m.withSystemContext.mockImplementation(async (fn: any) => fn());
+    m.withSystemContext.mockImplementation(async (fn: any) => {
+      const chain: any = {
+        from() { return this; },
+        where() { return this; },
+        limit: async () => [],
+      };
+      return fn({ select: () => chain, execute: async () => [] });
+    });
   });
 
   it('returns 403 when lacks role', async () => {

@@ -112,6 +112,28 @@ export const usageAggregates = pgTable('usage_aggregates', {
   statusIdx: index('usage_aggregates_status_idx').on(t.status),
 }));
 
+export const voiceUsageReservations = pgTable('voice_usage_reservations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizations.id, { onDelete: 'restrict' }),
+  userId: varchar('user_id', { length: 255 }).notNull(),
+  intentKeyHash: varchar('intent_key_hash', { length: 64 }).notNull(),
+  status: varchar('status', { length: 16 }).notNull().default('reserved'),
+  reservedCredits: integer('reserved_credits').notNull(),
+  settledCredits: integer('settled_credits'),
+  providerReference: varchar('provider_reference', { length: 255 }),
+  outcomeReason: varchar('outcome_reason', { length: 255 }),
+  reservedAt: timestamp('reserved_at', { withTimezone: true }).defaultNow().notNull(),
+  settledAt: timestamp('settled_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  orgIntentUniq: uniqueIndex('voice_usage_reservations_org_intent_uniq')
+    .on(t.organizationId, t.intentKeyHash),
+  orgStatusIdx: index('voice_usage_reservations_org_status_idx')
+    .on(t.organizationId, t.status, t.reservedAt),
+}));
+
 // ============================================================================
 // TYPE EXPORTS
 // ============================================================================

@@ -4,6 +4,7 @@
  * Every function takes the service's own result type, so a field the screen reads that the service does not return is a type error here, not a panel that is quietly
  * empty. Where the service says nothing the screen says nothing either: a value the answer lacks is left out, never filled in with a plausible default.
  */
+import type { VerifiedEdgeCoverage } from '@/lib/knowledge-transfer/propagation/graph-evidence-service';
 import type { GovernanceCascadeAnalysis } from '@/lib/knowledge-transfer/cascade-analysis/cascade-analyzer';
 import type { MitigationComparison, MitigationScenario, MitigationType } from '@/lib/knowledge-transfer/mitigation-comparison/mitigation-models';
 import type { PropagationMap } from '@/lib/knowledge-transfer/propagation/propagation-models';
@@ -70,6 +71,8 @@ export function toPlayback(result: ContinuitySimulationResult, label: string): P
     recoveryWeek: null,
     twelveWeekProjection: result.twelveWeekProjection,
     autonomousRecoveryProbability: result.autonomousRecoveryProbability,
+    methodologyNote: result.methodologyNote,
+    verifiedDependencyContext: result.verifiedDependencyContext,
   };
 }
 
@@ -77,6 +80,18 @@ export function toPlayback(result: ContinuitySimulationResult, label: string): P
 export function toGovernanceImpact(cascade: GovernanceCascadeAnalysis, map: PropagationMap): GovernanceImpactData {
   const nodeById = new Map(map.nodes.map((node) => [node.id, node]));
   const labelOf = (id: string): string => nodeById.get(id)?.label ?? id;
+  const toCascadeView = (risk: GovernanceCascadeAnalysis['cascadeRisks'][number]): GovernanceImpactData['cascadeRisks'][number] => ({
+    triggerNode: risk.governanceGap,
+    cascadedProcesses: risk.impactedAreas.map(labelOf),
+    severity: risk.severity,
+    cascadeDepth: risk.cascadeDepth,
+    evidenceBasis: risk.evidenceBasis,
+    confirmedCascadedProcesses: risk.confirmedImpactedAreas.map((area) => ({
+      name: labelOf(area.nodeId),
+      chain: area.chain.map(labelOf),
+      evidenceTier: area.evidenceTier,
+    })),
+  });
   const nodes = cascade.governanceNodes.map((governance): GovernanceImpactData['nodes'][number] => {
     const node = nodeById.get(governance.id);
     return {
@@ -87,19 +102,22 @@ export function toGovernanceImpact(cascade: GovernanceCascadeAnalysis, map: Prop
       dependsOn: map.edges.filter((edge) => edge.dependentId === governance.id).map((edge) => labelOf(edge.dependsOnId)),
       downstreamProcesses: (map.downstreamImpacts.find((impact) => impact.nodeId === governance.id)?.allAffectedNodes ?? []).map(labelOf),
       riskLevel: governance.criticality,
+      evidenceBasis: governance.evidenceBasis,
     };
   });
   return {
     totalGovernanceProcesses: nodes.length,
     singleSourceProcesses: nodes.filter((node) => node.isSingleSource).length,
     criticalGovernanceGaps: cascade.cascadeRisks.filter((risk) => risk.severity === 'critical').map((risk) => risk.governanceGap),
+    governanceGapsWithVerifiedCascade: cascade.confirmedCascadeRisks.map((risk) => risk.governanceGap),
     nodes,
-    cascadeRisks: cascade.cascadeRisks.map((risk) => ({
-      triggerNode: risk.governanceGap,
-      cascadedProcesses: risk.impactedAreas.map(labelOf),
-      severity: risk.severity,
-      cascadeDepth: risk.cascadeDepth,
-    })),
+    cascadeRisks: cascade.cascadeRisks.map(toCascadeView),
+    confirmedCascadeRisks: cascade.confirmedCascadeRisks.map(toCascadeView),
+    methodologyNote: cascade.methodologyNote,
+    verifiedEvidenceCoverage: {
+      cascadesWithVerifiedChain: cascade.confirmedCascadeRisks.length,
+      totalCascades: cascade.cascadeRisks.length,
+    },
   };
 }
 
@@ -150,6 +168,10 @@ export interface MitigationView {
   /** The figures are the result of these assumptions, not of a calibrated model. */
   assumptions: string[];
   noNodesEvaluated: boolean;
+  /** How many of the underlying dependency nodes have at least one currently-verified relationship on file. */
+  /** Directed inferred dependencies whose exact direction is currently verified (verifiedEdgeCoverage). Never a
+   *  count of nodes that merely appear in some verified record. */
+  verifiedEvidenceCoverage: VerifiedEdgeCoverage;
 }
 
 /** `requested` is what was sent: the answer lists its scenarios in the order they were asked for. */
@@ -172,5 +194,6 @@ export function toMitigationView(comparison: MitigationComparison, requested: Mi
     residualRisks: comparison.residualRisks,
     assumptions: comparison.assumptions,
     noNodesEvaluated: comparison.noNodesEvaluated,
+    verifiedEvidenceCoverage: comparison.verifiedEvidenceCoverage,
   };
 }

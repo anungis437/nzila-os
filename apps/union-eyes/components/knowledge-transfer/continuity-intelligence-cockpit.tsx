@@ -27,12 +27,16 @@ import { ContinuityHeatmapContainer } from './heatmaps/continuity-heatmap';
 import { TopicGraphContainer } from './topic-graph/topic-graph-viz';
 
 interface SuccessionFragilityReport {
-  transitionReadinessScore: number;
+  /** Always null: there is no successor or handover record to assess readiness from. */
+  transitionReadinessScore: null;
+  transitionReadinessBasis: 'not_assessed_no_successor_records';
+  departureDocumentationCoverage: { rolesWithInterviews: number; totalRoles: number };
   roleSuccessionStatus: Array<{
     role: string;
     interviewCount: number;
-    successorReadiness: 'none' | 'minimal' | 'partial' | 'adequate';
-    averageContinuityRiskScore: number;
+    departureDocumentation: 'no_interview' | 'single_interview' | 'multiple_interviews';
+    averageContinuityRiskScore: number | null;
+    smallCellSuppressed?: boolean;
   }>;
   criticalOperationalGaps: string[];
   documentationPriorities: string[];
@@ -40,11 +44,11 @@ interface SuccessionFragilityReport {
   executiveSummary: string;
 }
 
-const READINESS_STYLE = {
-  none: { bar: 'bg-red-400', text: 'text-red-600' },
-  minimal: { bar: 'bg-orange-400', text: 'text-orange-600' },
-  partial: { bar: 'bg-yellow-400', text: 'text-yellow-600' },
-  adequate: { bar: 'bg-green-400', text: 'text-green-600' },
+/** How documented a role's departures are. Neutral colours: more departures are not better or worse readiness. */
+const DOCUMENTATION_STYLE = {
+  no_interview: { text: 'text-slate-500', label: 'no exit interview' },
+  single_interview: { text: 'text-slate-700', label: 'one exit interview' },
+  multiple_interviews: { text: 'text-slate-700', label: 'several exit interviews' },
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -55,36 +59,15 @@ const ROLE_LABELS: Record<string, string> = {
   admin: 'Admin',
 };
 
-function ReadinessScore({ score }: { score: number }) {
-  const color =
-    score >= 75 ? 'text-green-600' : score >= 50 ? 'text-yellow-600' : 'text-red-600';
-  const label =
-    score >= 75 ? 'Transition Ready' : score >= 50 ? 'Partial Readiness' : 'Fragile';
+/** Successor readiness is not assessed: the data model holds no successor, handover or documentation record, and
+ *  counting exit interviews as readiness made more departures read as more readiness
+ *  (DEF-0B7-COGB-SUCCESSION-READINESS-SCORE-COUNTS-EXIT-INTERVIEWS-AS-SUCCESSOR-READINESS). */
+function ReadinessNotAssessed({ coverage }: { coverage: SuccessionFragilityReport['departureDocumentationCoverage'] }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="relative w-16 h-16">
-        <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f1f5f9" strokeWidth="3" />
-          <circle
-            cx="18"
-            cy="18"
-            r="15.9"
-            fill="none"
-            stroke={score >= 75 ? '#22c55e' : score >= 50 ? '#eab308' : '#ef4444'}
-            strokeWidth="3"
-            strokeDasharray={`${score} ${100 - score}`}
-            strokeLinecap="round"
-          />
-        </svg>
-        <span
-          className={`absolute inset-0 flex items-center justify-center text-sm font-bold tabular-nums ${color}`}
-        >
-          {score}
-        </span>
-      </div>
-      <div>
-        <p className={`font-semibold ${color}`}>{label}</p>
-        <p className="text-xs text-muted-foreground">Transition readiness</p>
+    <div className="min-w-[11rem] space-y-1">
+      <div className="text-sm font-medium text-muted-foreground">Successor readiness: not assessed</div>
+      <div className="text-xs text-muted-foreground">
+        No successor or handover record exists. {coverage.rolesWithInterviews} of {coverage.totalRoles} roles have a documented departure.
       </div>
     </div>
   );
@@ -150,7 +133,7 @@ function SuccessionPanel() {
   return (
     <div className="space-y-4 pt-4">
       <div className="flex items-center gap-4">
-        <ReadinessScore score={report.transitionReadinessScore} />
+        <ReadinessNotAssessed coverage={report.departureDocumentationCoverage} />
         {report.executiveSummary && (
           <p className="text-sm text-muted-foreground leading-relaxed border-l-2 border-primary/20 pl-3">
             {report.executiveSummary}
@@ -161,31 +144,18 @@ function SuccessionPanel() {
       {/* Role succession grid */}
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {report.roleSuccessionStatus.map((role) => {
-          const style = READINESS_STYLE[role.successorReadiness];
+          const style = DOCUMENTATION_STYLE[role.departureDocumentation];
           return (
             <div key={role.role} className="rounded-md border bg-card p-3 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">{ROLE_LABELS[role.role] ?? role.role}</span>
-                <span className={`text-xs font-medium ${style.text}`}>
-                  {role.successorReadiness.replace('_', ' ')}
-                </span>
-              </div>
-              <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${style.bar}`}
-                  style={{
-                    width: `${
-                      role.successorReadiness === 'adequate' ? 100 :
-                      role.successorReadiness === 'partial' ? 60 :
-                      role.successorReadiness === 'minimal' ? 25 : 0
-                    }%`,
-                  }}
-                />
+                <span className={`text-xs font-medium ${style.text}`}>{style.label}</span>
               </div>
               <p className="text-xs text-muted-foreground">
                 {role.interviewCount} interview{role.interviewCount !== 1 ? 's' : ''}
-                {role.averageContinuityRiskScore > 0 &&
+                {role.averageContinuityRiskScore != null && role.averageContinuityRiskScore > 0 &&
                   ` · avg risk ${role.averageContinuityRiskScore}/100`}
+                {role.smallCellSuppressed && ' · figures withheld (small sample)'}
               </p>
             </div>
           );

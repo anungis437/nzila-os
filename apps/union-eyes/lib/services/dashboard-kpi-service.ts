@@ -9,6 +9,7 @@ import {
 import { and, eq, gte, lt } from "drizzle-orm";
 import { cacheGet, cacheSet } from "@/lib/services/cache-service";
 import { ApiError } from "@/lib/api/errors";
+import { productionGrievanceCondition } from '@/lib/pilot/demo-provenance';
 
 export type DashboardTimeframe = "weekly" | "monthly" | "quarterly";
 
@@ -198,7 +199,7 @@ export async function getLeadershipDashboardMetrics(args: {
   // Read inside the organization's own transaction: the module-level handle has no organization set, and row-level security then shows no rows.
   const { grievanceRows, alertRows } = await withRLSContext({ organizationId }, async (tx) => ({
     grievanceRows: assertWithinReadBound("grievances",
-      await tx.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(DASHBOARD_READ_BOUNDS.grievances + 1)),
+      await tx.select().from(grievances).where(and(eq(grievances.organizationId, organizationId), productionGrievanceCondition())).limit(DASHBOARD_READ_BOUNDS.grievances + 1)),
     alertRows: assertWithinReadBound("compliance_alerts",
       await tx.select().from(complianceAlerts).where(eq(complianceAlerts.orgId, organizationId)).limit(DASHBOARD_READ_BOUNDS.compliance_alerts + 1)),
   }));
@@ -247,7 +248,7 @@ export async function getExecutiveMetrics(args: {
 
   const { grievanceRows, memberRows, goalRows, remittanceRows } = await withRLSContext({ organizationId }, async (tx) => ({
     grievanceRows: assertWithinReadBound("grievances",
-      await tx.select().from(grievances).where(eq(grievances.organizationId, organizationId)).limit(DASHBOARD_READ_BOUNDS.grievances + 1)),
+      await tx.select().from(grievances).where(and(eq(grievances.organizationId, organizationId), productionGrievanceCondition())).limit(DASHBOARD_READ_BOUNDS.grievances + 1)),
     memberRows: assertWithinReadBound("organization_members",
       await tx.select().from(organizationMembers).where(eq(organizationMembers.organizationId, organizationId)).limit(DASHBOARD_READ_BOUNDS.organization_members + 1)),
     goalRows: assertWithinReadBound("strategic_goals",

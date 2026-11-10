@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, requireSystemAdmin } from '@/lib/api-auth-guard';
+import { auth } from '@/lib/api-auth-guard';
+import { getOrganizationIdForUser } from '@/lib/organization-utils';
+import { requirePlatformStaffAuthority } from '@/lib/platform/platform-staff';
 import { organizations } from '@/db/schema';
 import { eq, and, sql, inArray, asc, type SQL } from 'drizzle-orm';
 import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context';
@@ -177,7 +179,8 @@ export async function POST(req: NextRequest) {
   // was set for a system-admin session, throw "Organization context required")
   // for any genuinely new organization.
   try {
-    await requireSystemAdmin();
+    const actingOrganizationId = await getOrganizationIdForUser(userId);
+    await requirePlatformStaffAuthority({ userId, organizationId: actingOrganizationId }, 'platform.organization.manage');
   } catch {
     return NextResponse.json({ error: 'Forbidden: system administrator privileges required' }, { status: 403 });
   }

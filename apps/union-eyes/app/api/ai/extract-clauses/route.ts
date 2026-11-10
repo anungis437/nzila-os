@@ -81,7 +81,7 @@ export const POST = withApi(
     // OWASP AI: Feature flag + AI safety gate
     const blocked = await guardAiFeature(AI_FEATURES.AI_EXTRACT_CLAUSES, { userId, organizationId });
     if (blocked) return blocked;
-    enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId, userId, userRole: user?.role ?? 'steward', dataClass: 'internal' });
+    enforceAISafety({ origin: 'extract-clauses', action: 'POST', organizationId, userId, userRole: user?.role ?? 'steward', dataClass: 'confidential' });
 
     try {
       const { pdfUrl, cbaId, organizationId: requestedOrganizationId, autoSave = true, batch = false, cbas = [] } = body;

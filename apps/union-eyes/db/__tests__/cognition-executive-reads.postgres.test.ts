@@ -75,7 +75,13 @@ describe.skipIf(!URL)('the cognition and executive dashboard reads on the combin
       (await admin.query(`INSERT INTO employers (organization_id, name, employer_type) VALUES ($1, $2, 'private') RETURNING id::text AS id`, [organizationId, `Employer ${tag}`])).rows[0].id as string
     const employerA = await employer(ORG_A)
     const employerB = await employer(ORG_B)
-    await admin.query(`INSERT INTO compliance_alerts (org_id, employer_id, alert_type, severity) VALUES ($1, $2, 'reporting_overdue', 'high'), ($1, $2, 'grievance_spike', 'low'), ($3, $4, 'reporting_overdue', 'critical')`, [ORG_A, employerA, ORG_B, employerB])
+    await admin.query(
+      `INSERT INTO compliance_alerts (org_id, employer_id, alert_type, severity, source_event_type, source_event_id, source_revision, evaluator_version)
+       VALUES ($1, $2, 'reporting_overdue', 'high', 'native_fixture', gen_random_uuid(), $5, 'native-v1'),
+              ($1, $2, 'grievance_spike', 'low', 'native_fixture', gen_random_uuid(), $5, 'native-v1'),
+              ($3, $4, 'reporting_overdue', 'critical', 'native_fixture', gen_random_uuid(), $5, 'native-v1')`,
+      [ORG_A, employerA, ORG_B, employerB, `revision-${tag}`],
+    )
   }, 120_000)
 
   afterAll(async () => {

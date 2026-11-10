@@ -14,7 +14,6 @@ import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority';
 import { validateSsoProviderInput } from '@/lib/sso/provider-input';
 import { isUniqueViolation } from '@/lib/db/unique-violation';
 import { SSO_SIGN_IN_EFFECT, ssoReadiness, withConfigurationEffect } from '@/lib/reality/configuration-effect';
-import { refuseUnavailableActivation, requestedActivation } from '@/lib/reality/activation-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,20 +96,14 @@ export const POST = withApi(
       throw ApiError.badRequest('name, providerType, and attributeMapping are required');
     }
 
-    // Nothing reads a provider at sign-in, so a provider cannot be created already enabled or auto-provisioning: that would be a claim the
-    // platform cannot keep. It is stored staged, and the attempt to turn it on is recorded as a blocked operation.
-    await refuseUnavailableActivation({
-      effect: SSO_SIGN_IN_EFFECT,
-      asked: requestedActivation({ enabled, autoProvision }, ['enabled', 'autoProvision']),
-      organizationId,
-      userId,
-      action: 'sso.provider.activate_blocked',
-      resourceType: 'sso_providers',
-    });
+    // Creation and activation are deliberately separate: activation requires a
+    // second tenant administrator and an institutional evidence reference.
+    if (enabled === true) throw ApiError.forbidden('Create the provider as a draft; a distinct administrator must activate it');
+    if (autoProvision === true) throw ApiError.notImplemented('SSO just-in-time provisioning is not implemented');
 
-    // A provider is created disabled and without auto-provisioning unless the administrator asks otherwise, and one that is enabled
-    // must be complete for its type.
-    const validated = validateSsoProviderInput(body as Record<string, unknown>, enabled === true);
+    // Providers are created disabled and without auto-provisioning. Activation is
+    // a separate, dual-control operation that validates the complete provider.
+    const validated = validateSsoProviderInput(body as Record<string, unknown>, false);
 
     // An identity provider may only map its groups to roles a tenant administrator can already assign; a mapping to a
     // platform or federation role would otherwise let an external directory mint authority the tenant cannot grant.
@@ -157,9 +150,9 @@ export const POST = withApi(
         oidcClientSecret: encryptedOidcClientSecret,
         attributeMapping,
         roleMapping,
-        autoProvision: autoProvision ?? false,
+        autoProvision: false,
         requireGroups: requireGroups ? requireGroups.map((group) => group.trim()) : undefined,
-        enabled: enabled ?? false,
+        enabled: false,
       })
       .returning();
     await persistAtomicAudit(tx, {
@@ -168,7 +161,7 @@ export const POST = withApi(
       action: 'sso.provider.create',
       resourceType: 'sso_providers',
       resourceId: row.id,
-      details: { providerType, autoProvision: autoProvision ?? false, enabled: enabled ?? false, roleMapping: roleMapping ?? null, inEffect: SSO_SIGN_IN_EFFECT.inEffect },
+      details: { providerType, autoProvision: false, enabled: false, roleMapping: roleMapping ?? null, inEffect: SSO_SIGN_IN_EFFECT.inEffect },
     });
     return row;
     }).catch((error) => {

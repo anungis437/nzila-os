@@ -3,7 +3,7 @@ import {
   verifyShopifySignature,
   parseShopifyHeaders,
   processWebhookIdempotent,
-  resolveShopOrganization,
+  resolveShopWebhookAuthority,
   type WebhookOutcome,
 } from '@/lib/services/rewards/webhook-service';
 import {
@@ -15,7 +15,6 @@ import {
   getAwaitingRedemptionByIdPrefix,
 } from '@/lib/services/rewards/redemption-service';
 import {
-  clientAddress,
   minimalOrderFacts,
   parseDiscountReference,
   receiptSummary,
@@ -57,18 +56,6 @@ const WEBHOOK_ACTOR = 'system:shopify-webhook';
  */
 export async function POST(request: NextRequest) {
   try {
-    // The limit is keyed on one normalised address, not the whole forwarded-for string, so lengthening the header mints no new allowance.
-    const address = clientAddress(request.headers.get('x-forwarded-for'), request.headers.get('x-real-ip'));
-    const rateLimitResult = await checkRateLimit(`webhook-shopify:${address}`, RATE_LIMITS.WEBHOOK_CALLS);
-
-    if (!rateLimitResult.allowed) {
-      logger.warn('Shopify webhook rate limit exceeded', { address });
-      return NextResponse.json(
-        { error: 'Rate limit exceeded', resetIn: rateLimitResult.resetIn },
-        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
-      );
-    }
-
     // 1. Raw body for signature verification
     const rawBody = await request.text();
 
@@ -80,15 +67,27 @@ export async function POST(request: NextRequest) {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Missing required Shopify headers');
     }
 
-    // 3. HMAC signature
-    const webhookSecret = process.env.SHOPIFY_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+    // 3. Resolve the exact shop and its current/retiring tenant secret versions.
+    // The shop header remains untrusted until one of those versions verifies.
+    const authority = await resolveShopWebhookAuthority(shopDomain);
+    if (!authority) {
+      logger.error('[Webhook] Shopify shop or tenant secret is not configured', { shopDomain, topic, webhookId });
+      return NextResponse.json({ error: 'Shop is not configured' }, { status: 403 });
     }
-
-    if (!verifyShopifySignature(rawBody, hmac, webhookSecret)) {
+    if (!authority.verificationSecrets.some((secret) => verifyShopifySignature(rawBody, hmac, secret))) {
       logger.warn('Invalid Shopify webhook signature', { topic, webhookId });
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid signature');
+    }
+    const organizationId = authority.organizationId;
+
+    // Only a verified tenant/shop identity receives a rate-limit bucket. No
+    // attacker-controlled forwarding header can mint or exhaust that identity.
+    const shopLimit = await checkRateLimit(`webhook-shopify-shop:${authority.shopDomain}`, RATE_LIMITS.WEBHOOK_CALLS);
+    if (!shopLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded', resetIn: shopLimit.resetIn },
+        { status: 429, headers: createRateLimitHeaders(shopLimit) }
+      );
     }
 
     // 4. Payload
@@ -100,24 +99,7 @@ export async function POST(request: NextRequest) {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, 'Invalid payload format');
     }
 
-    // 5. The shop must belong to one organization. A signed event from a shop nobody has configured is refused rather than
-    // acknowledged, so a misconfigured integration is visible instead of silently losing paid orders.
-    const organizationId = await resolveShopOrganization(shopDomain);
-    if (!organizationId) {
-      logger.error('[Webhook] Shopify shop is not configured for exactly one organization', { shopDomain, topic, webhookId });
-      return NextResponse.json({ error: 'Shop is not configured' }, { status: 403 });
-    }
-
-    // The signed shop is allowed its own allowance, independent of the address it arrives from.
-    const shopLimit = await checkRateLimit(`webhook-shopify-shop:${shopDomain.toLowerCase()}`, RATE_LIMITS.WEBHOOK_CALLS);
-    if (!shopLimit.allowed) {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded', resetIn: shopLimit.resetIn },
-        { status: 429, headers: createRateLimitHeaders(shopLimit) }
-      );
-    }
-
-    // 6. Route by topic with idempotency, inside the organization's context (reward_redemptions is fail-closed without one).
+    // 5. Route by topic with idempotency, inside the organization's context (reward_redemptions is fail-closed without one).
     const result = await withRLSContext({ organizationId, userId: WEBHOOK_ACTOR }, async () =>
       processWebhookIdempotent(
         'shopify',

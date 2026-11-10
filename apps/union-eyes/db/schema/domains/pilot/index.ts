@@ -5,3 +5,5 @@ export * from "./pilot-enrollments";
 export * from "./pilot-milestones";
 export * from "./pilot-events";
 export * from "./pilot-feedback";
+export * from './pilot-contact-lifecycle';
+export * from './pilot-commercial-governance';

@@ -50,7 +50,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
               count(*) FILTER (WHERE created_at >= date_trunc('month', now()))::int AS new_this_month,
               count(*) FILTER (WHERE created_at < date_trunc('month', now()))::int AS prev
             FROM organization_members
-            WHERE organization_id = ${id}`,
+            WHERE organization_id = ${id} AND demo_seed_id IS NULL`,
       ),
     )
     const mem = memberRows[0] ?? { total: 0, active: 0, new_this_month: 0, prev: 0 }
@@ -74,6 +74,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         sql`SELECT avg(EXTRACT(EPOCH FROM (coalesce(resolved_at, closed_at) - created_at)) / 86400)::int AS avg_days
             FROM grievances
             WHERE organization_id = ${id}
+              AND demo_seed_id IS NULL
               AND (resolved_at IS NOT NULL OR closed_at IS NOT NULL)`,
       ),
     )
@@ -82,7 +83,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const statusRows = rowsOf<{ status: string; cnt: number }>(
       await q.execute(
         sql`SELECT status::text AS status, count(*)::int AS cnt
-            FROM grievances WHERE organization_id = ${id}
+            FROM grievances WHERE organization_id = ${id} AND demo_seed_id IS NULL
             GROUP BY status`,
       ),
     )

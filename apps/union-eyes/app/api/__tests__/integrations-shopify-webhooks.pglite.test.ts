@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import crypto from 'crypto';
 import { NextRequest } from 'next/server';
 import type { PGlite } from '@electric-sql/pglite';
-import { rewardRedemptions, rewardWalletLedger, shopifyConfig, webhookReceipts } from '@/db/schema';
+import { rewardRedemptions, rewardWalletLedger, shopifyConfig, shopifyWebhookSecretVersions, webhookReceipts } from '@/db/schema';
 import { drizzle } from 'drizzle-orm/pglite';
 import { createTableDatabase } from './support/pglite-tables';
 
@@ -87,14 +87,16 @@ async function deliver(topic: string, body: Record<string, unknown>, opts: { web
 }
 
 beforeAll(async () => {
-  const created = await createTableDatabase([rewardRedemptions, rewardWalletLedger, shopifyConfig, webhookReceipts]);
+  const created = await createTableDatabase([rewardRedemptions, rewardWalletLedger, shopifyConfig, shopifyWebhookSecretVersions, webhookReceipts]);
   pg = created.pg;
   // the services use the relational query API, so the handle carries the schema
-  state.db = drizzle(created.pg, { schema: { rewardRedemptions, rewardWalletLedger, shopifyConfig, webhookReceipts } });
-  process.env.SHOPIFY_WEBHOOK_SECRET = SECRET;
+  state.db = drizzle(created.pg, { schema: { rewardRedemptions, rewardWalletLedger, shopifyConfig, shopifyWebhookSecretVersions, webhookReceipts } });
+  process.env.UE_SHOPIFY_SECRET_A = SECRET;
+  process.env.UE_SHOPIFY_SECRET_B = SECRET;
 });
 afterAll(async () => {
-  delete process.env.SHOPIFY_WEBHOOK_SECRET;
+  delete process.env.UE_SHOPIFY_SECRET_A;
+  delete process.env.UE_SHOPIFY_SECRET_B;
   await pg.close();
 });
 beforeEach(async () => {
@@ -106,6 +108,9 @@ beforeEach(async () => {
   for (const [org, shop] of [[ORG_A, SHOP_A], [ORG_B, SHOP_B]]) {
     await pg.query(`INSERT INTO shopify_config (org_id, shop_domain, storefront_token_secret_ref, webhook_secret_ref) VALUES ($1, $2, 'ref', 'ref')`, [org, shop]);
   }
+  await pg.query(`INSERT INTO shopify_webhook_secret_versions (org_id, version, secret_ref, status, valid_from, created_by) VALUES
+    ($1, 1, 'env://UE_SHOPIFY_SECRET_A', 'active', now() - interval '1 hour', 'test'),
+    ($2, 1, 'env://UE_SHOPIFY_SECRET_B', 'active', now() - interval '1 hour', 'test')`, [ORG_A, ORG_B]);
 });
 
 const { discountCodeFor } = await import('@/lib/services/rewards/shopify-redemption-rules');
@@ -232,13 +237,14 @@ describe('shopify webhook — what is kept', () => {
 });
 
 describe('shopify webhook — which shop sent it', () => {
-  it('answers 500 when the webhook secret is not configured, before reading anything', async () => {
-    const saved = process.env.SHOPIFY_WEBHOOK_SECRET;
-    delete process.env.SHOPIFY_WEBHOOK_SECRET;
+  it('refuses an otherwise configured shop when its managed webhook secret is unavailable', async () => {
+    const saved = process.env.UE_SHOPIFY_SECRET_A;
+    delete process.env.UE_SHOPIFY_SECRET_A;
     try {
-      expect((await deliver('orders/paid', paidOrder(1, 'X'))).status).toBe(500);
+      expect((await deliver('orders/paid', paidOrder(1, 'X'))).status).toBe(403);
     } finally {
-      process.env.SHOPIFY_WEBHOOK_SECRET = saved;
+      if (saved === undefined) delete process.env.UE_SHOPIFY_SECRET_A;
+      else process.env.UE_SHOPIFY_SECRET_A = saved;
     }
   });
 
@@ -268,10 +274,10 @@ describe('shopify webhook — which shop sent it', () => {
     expect((await redemption(id)).status).toBe('pending_payment');
   });
 
-  it('limits by one normalised address and by shop, not by the whole forwarded-for string', async () => {
+  it('limits by the verified shop and does not trust forwarded addresses as rate-limit identities', async () => {
     await deliver('orders/paid', paidOrder(903, 'NOPE'), { forwardedFor: '203.0.113.7, 10.0.0.1' });
     await deliver('orders/paid', paidOrder(904, 'NOPE'), { forwardedFor: '203.0.113.7, 10.0.0.99, 10.0.0.2' });
-    expect(new Set(state.limitKeys.filter((k) => k.startsWith('webhook-shopify:')))).toEqual(new Set(['webhook-shopify:203.0.113.7']));
+    expect(state.limitKeys.filter((k) => k.startsWith('webhook-shopify:'))).toEqual([]);
     expect(state.limitKeys).toContain(`webhook-shopify-shop:${SHOP_A}`);
   });
 });

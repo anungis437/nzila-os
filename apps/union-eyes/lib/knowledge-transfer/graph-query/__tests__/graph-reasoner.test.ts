@@ -8,13 +8,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { GraphQuery, QueryType } from '../query-models';
 
-const mocks = vi.hoisted(() => ({ buildMap: vi.fn() }));
+const mocks = vi.hoisted(() => ({ buildMap: vi.fn(), listVerifiedDependencies: vi.fn(), listActiveNodeAliases: vi.fn(async () => []) }));
 
 vi.mock('@/lib/knowledge-transfer/propagation/dependency-propagator', () => ({
   buildDependencyPropagationMap: mocks.buildMap,
 }));
+vi.mock('@/lib/knowledge-transfer/propagation/verified-dependency-store', () => ({
+  listVerifiedDependencies: mocks.listVerifiedDependencies,
+}));
+vi.mock('@/lib/knowledge-transfer/propagation/node-alias-store', () => ({
+  listActiveNodeAliases: mocks.listActiveNodeAliases,
+}));
 
 import { executeGraphQuery } from '../graph-reasoner';
+import { currentVerifiedRecord } from '@/lib/knowledge-transfer/propagation/__tests__/verified-record-fixture';
 
 function richMap() {
   return {
@@ -92,6 +99,7 @@ describe('executeGraphQuery', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.buildMap.mockResolvedValue(richMap());
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
   });
 
   const types: QueryType[] = [
@@ -115,8 +123,8 @@ describe('executeGraphQuery', () => {
       expect(typeof result.significance).toBe('string');
       expect(Array.isArray(result.findings)).toBe(true);
       expect(result.recommendations.length).toBeGreaterThan(0);
-      expect(result.confidenceScore).toBeGreaterThanOrEqual(0);
-      expect(result.confidenceScore).toBeLessThanOrEqual(100);
+      expect(result.evidenceCoverageScore).toBeGreaterThanOrEqual(0);
+      expect(result.evidenceCoverageScore).toBeLessThanOrEqual(100);
       expect(typeof result.executedAt).toBe('string');
     });
   }
@@ -194,7 +202,7 @@ describe('executeGraphQuery', () => {
     expect(result.findings[0].entityId).toBe('redundancy_summary');
   });
 
-  it('confidence score reflects empty findings/bottlenecks', async () => {
+  it('evidence coverage score is derived from interview volume alone, not from how many findings or bottlenecks were surfaced', async () => {
     mocks.buildMap.mockResolvedValue({
       ...richMap(),
       nodes: [{
@@ -204,7 +212,98 @@ describe('executeGraphQuery', () => {
       bottlenecks: [],
       downstreamImpacts: [],
     });
-    const result = await executeGraphQuery('org-1', q('knowledge_redundancy'));
-    expect(result.confidenceScore).toBeGreaterThanOrEqual(0);
+    const sparse = await executeGraphQuery('org-1', q('knowledge_redundancy'));
+    // One interview total (frequency: 1) is below MIN_COHORT_SIZE, so coverage is the lowest non-zero tier (40),
+    // regardless of how many findings or bottlenecks this particular query surfaced.
+    expect(sparse.evidenceCoverageScore).toBe(40);
+
+    mocks.buildMap.mockResolvedValue({
+      ...richMap(),
+      nodes: [{
+        id: 'x', label: 'X', nodeType: 'expertise', category: 'general', frequency: 1,
+        associatedRoles: [], isSingleSource: false, continuitySensitivity: 'low', sensitivityReason: '',
+      }],
+      // Many bottlenecks must NOT inflate the evidence-coverage score - interview volume is unchanged.
+      bottlenecks: [
+        { nodeId: 'x', reason: 'single_source', riskLevel: 'critical', affectedRoles: [] },
+        { nodeId: 'x', reason: 'high_dependents', riskLevel: 'critical', affectedRoles: [] },
+      ],
+    });
+    const manyBottlenecks = await executeGraphQuery('org-1', q('knowledge_redundancy'));
+    expect(manyBottlenecks.evidenceCoverageScore).toBe(sparse.evidenceCoverageScore);
+  });
+
+  function richNode(id: string) {
+    return richMap().nodes.find((n) => n.id === id)!;
+  }
+  /** A current verified record: `dependent` depends on `dependsOn`, fingerprinted over richMap()'s nodes. */
+  function verified(dependent: string, dependsOn: string) {
+    return currentVerifiedRecord(richNode(dependent), richNode(dependsOn));
+  }
+
+  it('tags every node finding exploratory, even when a current verified record names its node', async () => {
+    mocks.listVerifiedDependencies.mockResolvedValue([]);
+    const exploratoryOnly = await executeGraphQuery('org-1', q('isolated_knowledge'));
+    expect(exploratoryOnly.findings.length).toBeGreaterThan(0);
+    expect(exploratoryOnly.findings.every((f) => f.evidenceBasis === 'exploratory')).toBe(true);
+    expect(exploratoryOnly.confirmedFindings).toEqual([]);
+
+    // gov_sole participates in a current verified dependency (in both directions). A node finding about gov_sole
+    // asserts no directed dependency, so the record confirms nothing about it.
+    mocks.listVerifiedDependencies.mockResolvedValue([verified('compliance_x', 'gov_sole'), verified('gov_sole', 'vendor_a')]);
+    const withVerified = await executeGraphQuery('org-1', q('isolated_knowledge'));
+    const govFinding = withVerified.findings.find((f) => f.entityId === 'gov_sole');
+    expect(govFinding).toBeDefined();
+    expect(govFinding?.evidenceBasis).toBe('exploratory');
+    expect(govFinding).not.toHaveProperty('verifiedBy');
+    expect(withVerified.findings.every((f) => f.evidenceBasis === 'exploratory')).toBe(true);
+    expect(withVerified.confirmedFindings).toEqual([]);
+  });
+
+  it('confirms a propagation_paths finding only when every edge of its chain is verified in the impact direction', async () => {
+    // Paths: gov_sole -> compliance_x (2 nodes), and gov_sole -> compliance_x -> system_b -> common_c (4 nodes).
+    // Only the first edge is verified: compliance_x depends on gov_sole.
+    mocks.listVerifiedDependencies.mockResolvedValue([verified('compliance_x', 'gov_sole')]);
+    const result = await executeGraphQuery('org-1', q('propagation_paths'));
+    const short = result.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x')!;
+    const long = result.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x_system_b_common_c')!;
+    expect(short.evidenceBasis).toBe('verified');
+    expect(short.verifiedBy?.map((e) => e.record.id)).toEqual(['vd-compliance_x-gov_sole']);
+    expect(short.verifiedBy?.[0].evidenceTier).toBe('human_attested_external');
+    // Partially verified chain stays a hypothesis.
+    expect(long.evidenceBasis).toBe('exploratory');
+    expect(long).not.toHaveProperty('verifiedBy');
+    expect(result.confirmedFindings.map((f) => f.entityId)).toEqual(['path_gov_sole_compliance_x']);
+
+    // Verify the rest of the long chain: now it is confirmed too, with every edge's record in chain order.
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      verified('compliance_x', 'gov_sole'),
+      verified('system_b', 'compliance_x'),
+      verified('common_c', 'system_b'),
+    ]);
+    const full = await executeGraphQuery('org-1', q('propagation_paths'));
+    const fullLong = full.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x_system_b_common_c')!;
+    expect(fullLong.evidenceBasis).toBe('verified');
+    expect(fullLong.verifiedBy?.map((e) => e.record.id)).toEqual(['vd-compliance_x-gov_sole', 'vd-system_b-compliance_x', 'vd-common_c-system_b']);
+  });
+
+  it('keeps a propagation_paths finding exploratory when its edge is verified only in the reverse direction', async () => {
+    // gov_sole depends on compliance_x is verified - the reverse of the chain's claim (compliance_x depends on gov_sole).
+    mocks.listVerifiedDependencies.mockResolvedValue([verified('gov_sole', 'compliance_x')]);
+    const result = await executeGraphQuery('org-1', q('propagation_paths'));
+    const short = result.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x')!;
+    expect(short.evidenceBasis).toBe('exploratory');
+    expect(short).not.toHaveProperty('verifiedBy');
+    expect(result.confirmedFindings).toEqual([]);
+  });
+
+  it('keeps a propagation_paths finding exploratory when its verified record is no longer current', async () => {
+    // Verified while compliance_x was classified 'operational'; it is 'compliance' now, so the fingerprint is stale.
+    mocks.listVerifiedDependencies.mockResolvedValue([
+      currentVerifiedRecord({ ...richNode('compliance_x'), category: 'operational' }, richNode('gov_sole')),
+    ]);
+    const result = await executeGraphQuery('org-1', q('propagation_paths'));
+    expect(result.findings.find((f) => f.entityId === 'path_gov_sole_compliance_x')?.evidenceBasis).toBe('exploratory');
+    expect(result.confirmedFindings).toEqual([]);
   });
 });

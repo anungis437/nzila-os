@@ -42,8 +42,8 @@ describe('F12 responses that state only what was stored or may be shared', () =>
   // DEF-0B12-PLT-QUEUE-STATUS-GIVES-ANY-SIGNED-IN-SESSION-THE-QUEUE-COUNTS
   it('queue status is for the control-plane key or a platform administrator, not a signed-in member', () => {
     const source = read('app/api/union-eyes/queue-status/route.ts')
-    expect(source).toContain('requireSystemAdmin()')
-    expect(source.indexOf('requireSystemAdmin()')).toBeLessThan(source.indexOf('getAllQueueStats()'))
+    expect(source).toContain("requirePlatformStaffAuthority({ userId: actor?.id, organizationId: actor?.organizationId }, 'platform.queue.read')")
+    expect(source.indexOf('requirePlatformStaffAuthority(')).toBeLessThan(source.indexOf('getAllQueueStats()'))
   })
 
   // DEF-0B8-JUR-BC-TERMINATION-SCHEDULE-HAS-NO-TIER-ABOVE-EIGHT-YEARS, DEF-0B6-EDU-CRON-QUERIES-REFERENCE-COLUMNS-ABSENT-FROM-SCHEMA

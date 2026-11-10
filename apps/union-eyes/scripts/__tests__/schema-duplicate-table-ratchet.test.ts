@@ -67,6 +67,21 @@ import { scanSchemaDeclarations, classifyGroup } from '../schema-duplicate-table
 // steward-to-member relationship in production.
 // Only remove keys as conflicts are resolved; never add a key to
 // accommodate a newly-introduced conflict.
+// Gate 0 corrective convergence: db/schema/award-templates-schema.ts (the
+// pre-V2 points-based reward_wallet_ledger shape: pointsChange/
+// transactionType/awardId/referenceType/referenceId/description) had zero
+// production consumers (confirmed via git grep for the module path and
+// every exported symbol; db/schema/index.ts's barrel never re-exported
+// it) and was deleted — all 5 tables it declared have identical canonical
+// counterparts under db/schema/domains/infrastructure/. 'public.
+// reward_wallet_ledger' stays in this baseline: db/schema/
+// recognition-rewards-schema.ts still declares its own, separate
+// 10-column reward_wallet_ledger (missing expiresAt/updatedAt against the
+// canonical 12-column domains/infrastructure/rewards.ts shape) — a
+// pre-existing, already-acknowledged duplication of most of that file's
+// recognition/rewards tables (see db/rls-storage-authority/
+// integrations-workers.ts's webhook_receipts finding), out of this
+// mandate's scope to consolidate.
 const BASELINE_CONFLICTING_TABLE_KEYS = new Set<string>([
   'public.ml_predictions',
   'public.insight_recommendations',
