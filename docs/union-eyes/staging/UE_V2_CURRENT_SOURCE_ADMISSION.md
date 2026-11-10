@@ -75,3 +75,16 @@ before a staging restore. The time-column verifier normalizes SQL `time` to
 PostgreSQL's `time without time zone` while preserving timezone/precision
 differences. The current plan has no vector extension and the restore transform
 explicitly verifies its absence.
+
+The final native check also restored the emitted SQL into a third fresh database
+through the protocol-only adapter, then verified the catalog, native privilege
+contract and receipt-backed repeat NOOP again. Client commands other than one
+matched pg_dump guard pair are refused; SQL before/after guards is refused.
+
+The versioned catalog digest normalizes only lossless PG16 dump representations:
+ACL entry order, implicit versus explicit owner-only table defaults, and a
+specific varchar-array-to-text-array cast distribution in constraints, indexes
+and policies. It preserves grantors, grant options, ownership, RLS flags,
+function bodies and every policy literal/operator. Negative regressions prove
+that public grants, BYPASSRLS, tenant-predicate changes and role-literal changes
+remain different. No object was missing or extra in the measured round trip.

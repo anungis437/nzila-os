@@ -1,25 +1,28 @@
 {
-  "applicationSourceSha": "341e808c4fcd7c30f6379509fc3113610e42bee5",
-  "exporterSourceDigest": "e0ea7378e9d6d9d88ae6b732c176ffd3ff4135e527d0e8965768ba5ea19597a2",
-  "sourcePlanDigest": "792fa5b043a3d4cfc8e9f5e077822364b31b98b71ef93f943d757ea227979316",
+  "applicationSourceSha": "018690b1e9b9a0baa8ceecafb1feb7b71d79f652",
+  "exporterSourceDigest": "a659f354275e29e906e4b02efd1d5769ae73d3ce746194827731fb7058ca95ad",
+  "sourcePlanDigest": "d32be7dfb97665420bc63ddb69e8de4e1d9e4418add1dba822575a28d9cc500a",
+  "catalogNormalization": "PG16_DUMP_EQUIVALENCE_V1",
   "extensions": [],
   "image": "pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337",
   "tables": 771,
   "statements": 6255,
   "catalogObjects": 23849,
-  "catalogDigest": "8bad1a6ac4e3c624803661ff281bf0d5c709fee04f0c74b9e73e817572bce79f",
+  "catalogDigest": "f42fdab7ad9ff4ad032de0692fe51527228e6703708adc9595cb267b73805e30",
   "installation": "CREATED",
   "repeat": "NOOP",
+  "restoredDump": "PASS",
+  "restoredRepeat": "NOOP",
   "privilegeStatus": "PASS_PUBLIC_AND_AUTH_NATIVE_PRIVILEGES",
   "privilegeMismatches": [],
   "files": {
     "schema.sql": {
       "bytes": 2696125,
-      "sha256": "82b0800b12f4e9cd2673851970f046e92ca0ee1e63d5dc5f5e8d4be847cd7563"
+      "sha256": "943537b87c4b6b82bfbeaa7da51152c3c8657a589055191243e54bfb7a544b3a"
     },
     "receipt.sql": {
       "bytes": 1000,
-      "sha256": "dbc6ecfe5267e59fbf691d936848f2ea959a51c3bd45e584704aeb19276e4a49"
+      "sha256": "c9e6287b19d18fe1bd359924052c9fe829e07f1d85fe305a3e77da7683128bd6"
     },
     "roles.sql": {
       "bytes": 3395,
@@ -27,11 +30,11 @@
     },
     "schema-restore.sql": {
       "bytes": 2696767,
-      "sha256": "897aee15fd4f4d0f381eb4d11b78182e97bf03dd45866a99904d3dc99a5eec05"
+      "sha256": "3298b4bcf4df72b010123aef6182096d7e957ff84a4592712313300eba135ed2"
     },
     "receipt-restore.sql": {
       "bytes": 1022,
-      "sha256": "e448aaeb6ec8e9e291a023c88a00456d239cd397d1787932b076600dcbfa73be"
+      "sha256": "6d4f46fe43576ff4384138c91c01c1c688f219619578b00aecb821bb799748da"
     }
   },
   "localOnly": true,

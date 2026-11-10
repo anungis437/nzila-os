@@ -72,6 +72,7 @@ jobs:
           apps/union-eyes/scripts/bootstrap-v2/system-mutation-contracts.test.ts
           apps/union-eyes/scripts/bootstrap-v2/system-component-integration.test.ts
           apps/union-eyes/scripts/bootstrap-v2/bootstrap-v2.test.ts
+          apps/union-eyes/scripts/bootstrap-v2/catalog-normalization.test.ts
           apps/union-eyes/scripts/bootstrap-v2/enum-types.test.ts
 
       # audit-chain-native verifies the chain with the backend's own rule (stdlib only) through `python`.
