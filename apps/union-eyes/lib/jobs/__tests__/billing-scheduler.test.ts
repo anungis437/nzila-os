@@ -159,6 +159,45 @@ describe('BillingScheduler — full SYSTEM execution boundary (organization_bill
     expect(m.generateBillingCycle).not.toHaveBeenCalled();
   });
 
+  it('does not misreport successful financial writes when completion email fails', async () => {
+    m.queue.push([{ organizationId: 'org-1', organizationName: 'Org One', frequency: 'monthly', enabled: true }]);
+    m.queue.push([{ email: 'org1@example.com' }]);
+    m.queue.push([]);
+    m.notificationServiceSend.mockRejectedValueOnce(new Error('provider unavailable'));
+
+    const { BillingScheduler } = await loadModule();
+    const result = await BillingScheduler.runScheduledBilling('monthly');
+
+    expect(result.successful).toBe(1);
+    expect(result.failed).toBe(0);
+    expect(result.results[0].success).toBe(true);
+    expect(m.generateBillingCycle).toHaveBeenCalledTimes(1);
+  });
+
+  it('continues to the next organization when failure notification delivery also fails', async () => {
+    m.queue.push([
+      { organizationId: 'org-1', organizationName: 'Org One', frequency: 'monthly', enabled: true },
+      { organizationId: 'org-2', organizationName: 'Org Two', frequency: 'monthly', enabled: true },
+    ]);
+    // Failure recipient lookup for org-1.
+    m.queue.push([{ email: 'org1@example.com' }]);
+    m.queue.push([]);
+    // Completion recipient lookup for org-2.
+    m.queue.push([{ email: 'org2@example.com' }]);
+    m.queue.push([]);
+    m.generateBillingCycle.mockRejectedValueOnce(new Error('mandate refused'))
+      .mockResolvedValueOnce({ transactionsCreated: 1, totalAmount: 10 });
+    m.notificationServiceSend.mockRejectedValueOnce(new Error('mail offline'));
+
+    const { BillingScheduler } = await loadModule();
+    const result = await BillingScheduler.runScheduledBilling('monthly');
+
+    expect(result.failed).toBe(1);
+    expect(result.successful).toBe(1);
+    expect(result.results.map((entry) => entry.success)).toEqual([false, true]);
+    expect(m.generateBillingCycle).toHaveBeenCalledTimes(2);
+  });
+
   it('manualTrigger delegates to the same SYSTEM-context-wrapped runScheduledBilling', async () => {
     m.queue.push([]);
     const { BillingScheduler } = await loadModule();
