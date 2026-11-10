@@ -272,38 +272,14 @@ export class BillingScheduler {
           )
         );
 
-      if (configured.length > 0) {
-        return configured as BillingScheduleConfig[];
+      // Only explicitly configured, enabled organizations may be billed. Never
+      // infer a monthly mandate from an organization's active status: doing so
+      // can create unauthorized charges for quarterly/annual or unconfigured
+      // organizations, especially when the configured set is empty.
+      if (configured.length === 0) {
+        logger.warn('billing-scheduler: no explicitly enabled billing configurations; no charges generated', { frequency });
       }
-
-      // Fallback: get all active organizations and assume monthly billing
-      const orgs = await db
-        .select({
-          id: organizations.id,
-          name: organizations.name,
-          status: organizations.status,
-        })
-        .from(organizations)
-        .where(eq(organizations.status, 'active'));
-
-      return orgs
-        .filter((org) => org.status === 'active')
-        .map((org) => {
-          // Per-org billing frequency is not yet persisted on the organizations
-          // table. Hardcoding 'monthly' here means quarterly/annual contracts
-          // would be over-billed by this scheduler. Surface loudly until we
-          // either add a column or a billing_subscription table.
-          logger.warn(
-            'billing-scheduler: org billing frequency is hardcoded to monthly; per-org frequency is not persisted',
-            { organizationId: org.id }
-          );
-          return {
-            organizationId: org.id,
-            organizationName: org.name,
-            frequency: 'monthly' as BillingFrequency,
-            enabled: true,
-          };
-        });
+      return configured as BillingScheduleConfig[];
     } catch (error) {
       logger.error('Error fetching organizations for billing', { error });
       throw error;
