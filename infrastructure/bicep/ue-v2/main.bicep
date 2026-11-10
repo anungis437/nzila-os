@@ -24,6 +24,9 @@ targetScope = 'resourceGroup'
 @description('Required explicit deployment target; never inferred as production. Every environment-dependent default below is derived from it.')
 @allowed(['staging', 'prod'])
 param env string
+@description('Staging only: provision infrastructure before the qualified database restore and role/secret bootstrap. Production always deploys workloads. Use incremental mode; existing workloads are never deleted by this switch.')
+param bootstrapInfrastructureOnly bool = false
+var deployApplications = env == 'prod' || !bootstrapInfrastructureOnly
 param location string = resourceGroup().location
 param prefix string = 'nzila-ue-v2-${env}'
 
@@ -428,7 +431,7 @@ resource acaEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
   dependsOn: [logAnalytics]
 }
 
-module apps 'modules/apps.bicep' = {
+module apps 'modules/apps.bicep' = if (deployApplications) {
   name: 'apps'
   params: {
     location: location
@@ -461,15 +464,15 @@ module apps 'modules/apps.bicep' = {
 }
 
 // ── Alerts ──────────────────────────────────────────────────────────────────
-module alerts 'modules/alerts.bicep' = {
+module alerts 'modules/alerts.bicep' = if (deployApplications) {
   name: 'alerts'
   params: {
     location: location
     logAnalyticsId: law.id
     actionGroupId: effectiveActionGroupId
-    appName: apps.outputs.appName
-    appId: apps.outputs.appId
-    clamavAppId: apps.outputs.clamavAppId
+    appName: apps!.outputs.appName
+    appId: apps!.outputs.appId
+    clamavAppId: apps!.outputs.clamavAppId
     pgServerId: database.outputs.serverId
     // A scale-to-zero workload legitimately has no replica; only alert when a minimum is configured.
     appReplicaAlert: appMinReplicas > 0
@@ -498,6 +501,7 @@ output keyVaultUri string = kv.properties.vaultUri
 output storageAccountName string = storageName
 output redisName string = redisName
 output postgresFqdn string = database.outputs.serverFqdn
-output appInternalFqdn string = apps.outputs.appFqdn
+output appInternalFqdn string = deployApplications ? apps!.outputs.appFqdn : ''
+output bootstrapInfrastructureOnly bool = env == 'staging' && bootstrapInfrastructureOnly
 output appIdentityClientId string = appIdentity.properties.clientId
 output environmentId string = acaEnv.id

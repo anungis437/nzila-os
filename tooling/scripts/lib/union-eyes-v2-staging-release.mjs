@@ -167,6 +167,9 @@ export function deploymentParameterDefects(parameters, manifest) {
   const value = (name) => values?.[name]?.value
   const defects = []
   if (value('env') !== 'staging') defects.push('PARAMETERS_ENV_NOT_STAGING')
+  if (Object.prototype.hasOwnProperty.call(values, 'bootstrapInfrastructureOnly') && typeof value('bootstrapInfrastructureOnly') !== 'boolean') {
+    defects.push('PARAMETERS_BOOTSTRAP_MODE_NOT_BOOLEAN')
+  }
   if (value('acrName') !== REGISTRY_NAME) defects.push('PARAMETERS_WRONG_REGISTRY')
   if (Object.prototype.hasOwnProperty.call(values, 'dbAdminPassword')) defects.push('PARAMETERS_FILE_CARRIES_SECRET')
   for (const image of V2_IMAGES) {
