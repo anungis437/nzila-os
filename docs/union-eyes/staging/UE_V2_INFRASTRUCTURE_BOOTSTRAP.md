@@ -32,6 +32,15 @@ export and role SQL, verify catalog and plan digests, and preserve the restore
 and verification receipts. Operate from the private staging network. Do not
 open PostgreSQL or vault public access.
 
+The older runbook's export-helper paths are absent from the current checkout,
+and its 694-table baseline differs from the current committed 771-table,
+6,255-statement source plan. Those historical commands and digests are not
+current restore authority. Reproduce and qualify the current source-bound
+export using the pinned interpreter, hash-locked wheelhouse and pinned local
+PostgreSQL image before any remote restore. A successful infrastructure pass
+does not remove this qualification requirement. Do not replay frozen migration
+lineage or substitute the historical export to get past it.
+
 Generate the three login passwords, create the actual runtime/system/auth
 roles with their specified restrictions, then publish `database-url`,
 `system-database-url` and `auth-database-url` to the private V2 vault. Never
