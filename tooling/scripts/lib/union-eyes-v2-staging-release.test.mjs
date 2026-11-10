@@ -102,6 +102,18 @@ test('deployment parameters must be staging, digest-bound and free of test bypas
   }
 })
 
+test('infrastructure bootstrap requires an explicit boolean and retains staging and digest gates', () => {
+  const m = manifest()
+  for (const value of [true, false]) {
+    assert.deepEqual(deploymentParameterDefects(parameters({ bootstrapInfrastructureOnly: { value } }), m), [])
+  }
+  for (const value of ['false', 'true', 0, null]) {
+    assert.ok(deploymentParameterDefects(parameters({ bootstrapInfrastructureOnly: { value } }), m).includes('PARAMETERS_BOOTSTRAP_MODE_NOT_BOOLEAN'))
+  }
+  assert.ok(deploymentParameterDefects(parameters({ bootstrapInfrastructureOnly: { value: true }, env: { value: 'prod' } }), m).includes('PARAMETERS_ENV_NOT_STAGING'))
+  assert.ok(deploymentParameterDefects(parameters({ bootstrapInfrastructureOnly: { value: true }, appImageDigest: { value: D('9') } }), m).includes('PARAMETERS_DIGEST_MISMATCH:app'))
+})
+
 test('change record must be a named, approved, in-window UE staging record linking the SHA', () => {
   const now = Date.parse('2026-11-04T12:00:00Z')
   assert.deepEqual(changeRecordDefects(record(), { changeId: 'CHG-2026-0200', sourceSha: SHA, nowMs: now }), [])
