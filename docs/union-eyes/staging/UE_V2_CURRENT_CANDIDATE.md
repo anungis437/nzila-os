@@ -1,6 +1,6 @@
 # Exact-source staging prerequisite receipt
 
-Candidate: `d7d14ccff9a1934e28b8484e46d671f67c62daaf`.
+Candidate: `d093936d06209cc6321464dd85caded6f945166e`.
 
 The [measured local export receipt](evidence/ue-v2-candidate-export-20261110.json)
 records the current dependency-bound plan and emitted restore file hashes.
@@ -23,3 +23,10 @@ The [private credential receipt](evidence/ue-v2-private-password-policy-20261110
 records policy-compliant staging credentials prepared before server creation,
 protected GitHub admin-secret synchronization, and the measured runtime/admin
 vault read boundary. It contains no credential values.
+
+Export privacy now strips credential-bearing URL data from spans, events and
+links before either OTLP transport serializes them. Real local HTTP/JSON and
+gRPC/protobuf collector receipts preserve trace/correlation identity and show
+no synthetic callback code, signed URL signature, cookie or URL password.
+The tracing helper also propagates business failures without repeating work.
+See [the measured privacy receipt](evidence/ue-v2-telemetry-privacy-local-20261110.json).

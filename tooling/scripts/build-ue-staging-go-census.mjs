@@ -10,8 +10,8 @@ const readJson = relative => JSON.parse(fs.readFileSync(path.join(root, relative
 
 const ENGINEERING_BASELINE_SHA = 'e87e3799f3cd9a2408f75d846bc5ec676dae3847'
 const GENERATED_ON = '2026-11-10'
-const STAGING_CANDIDATE_SHA = 'd7d14ccff9a1934e28b8484e46d671f67c62daaf'
-const STAGING_WORKFLOW_SHA = 'd7d14ccff9a1934e28b8484e46d671f67c62daaf'
+const STAGING_CANDIDATE_SHA = 'd093936d06209cc6321464dd85caded6f945166e'
+const STAGING_WORKFLOW_SHA = 'd093936d06209cc6321464dd85caded6f945166e'
 const outputDirectory = path.join(root, 'docs/union-eyes/staging')
 
 const register = readJson('docs/union-eyes/convergence/remediation/ue-all-777-remediation-register.json')
@@ -163,7 +163,7 @@ const contract = {
   acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
   stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
   verdict: 'STAGING_NO_GO',
-  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source prerequisite #1167 is merged; the final candidate in #1168 and managed-role qualification in #1170 are completing full CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.`,
+  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source prerequisite #1167 is merged; source snapshot #1168 and the combined authorization/managed-role integration #1169 are completing full CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.`,
   decisionAuthority: {
     role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
