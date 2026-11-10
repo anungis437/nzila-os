@@ -29,13 +29,31 @@ The deployment artifact is `ue-v2-staging-deployment-42774059371`.
   `ForbiddenByConnection`: the vault has public network access disabled and this
   host does not use its approved private endpoint. No secret values were read.
 
+## Private-network follow-up
+
+On 2026-11-10, a temporary replica of the existing staging scanner was used for
+metadata-only diagnosis. Its minimum replica count was raised from zero to one,
+then restored to zero after the session; no vault network rules were changed.
+From that replica:
+
+- The vault hostname resolved to private endpoint `10.40.5.4`.
+- The staging user-assigned identity token endpoint returned HTTP 200.
+- `GET /secrets?api-version=7.4` returned HTTP 200 with an empty `value` array
+  and no next page. The vault contains no provisioned secrets.
+
+The identity already has Key Vault Secrets User and Key Vault Crypto User.
+This confirms the missing secret bootstrap, while demonstrating working private
+DNS, network access and metadata authorization at the time of the check. No
+secret values or access tokens were printed or persisted. Provider-issued Entra
+and Resend credentials still require a verified staging source before bootstrap.
+
 ## Required next steps
 
 1. Merge and build the corrected infrastructure candidate through normal CI;
    bind its exact SHA through the existing staging authorization process.
 2. Complete and verify secret bootstrap from an approved private network path,
    following `docs/union-eyes/production/UE_NEW_SUBSCRIPTION_STAGING_PLAN.md` S3
-   and the V2 README. Verify secret names/versions, managed identity access and
+   and `docs/union-eyes/production/README.md` section 4. Verify secret names/versions, managed identity access and
    private DNS/connectivity. Preserve vault privacy and use actual staging
    credentials; do not substitute production secrets or placeholder receipts.
 3. Run a new reviewed what-if and controlled apply. A successful preview does
