@@ -38,3 +38,31 @@ stable HTTPS Entra callback was added without removing any existing callback:
 No production registration, secret, resource or deployment was changed.
 Production's optional identifier defaults remain empty. Real deployed Entra
 sessions and all remaining Phase 3A proofs are still required for `STAGING_GO`.
+
+## Operator credential boundary
+
+Staging workload deployment grants the application identity read access only to
+the named runtime secrets, not the whole vault. `pg-admin-password` and generated
+operator/login bootstrap password secrets are excluded. Production retains its
+existing vault role scope. The infrastructure-only pass does not add workload
+secret grants before the database bootstrap completes.
+
+When adopting this change on a partially provisioned staging stack, first create
+the named runtime-secret grants and remove the old vault-wide Secrets User
+assignment for the staging app identity. Incremental deployment does not remove
+that old assignment automatically. Verify that required runtime secret reads
+succeed and operator-password reads are denied before storing operator
+credentials. Temporary operator grants remain vault-scoped and are removed after
+bootstrap; no permanent write access is given to the application identity.
+
+## Native export evidence
+
+`evidence/ue-v2-current-export-20261110.json` records the measured local export:
+23,849 catalog objects, equal reference/installed catalogs, a receipt-backed
+repeat NOOP and zero native privilege mismatches. This is local qualification
+only. The export's application-source SHA, pinned image, source-plan/catalog
+digests and file hashes must be recorded again against the accepted candidate
+before a staging restore. The time-column verifier normalizes SQL `time` to
+PostgreSQL's `time without time zone` while preserving timezone/precision
+differences. The current plan has no vector extension and the restore transform
+explicitly verifies its absence.

@@ -387,7 +387,9 @@ resource pgExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@
 // ── Role assignments for the application identity ───────────────────────────
 var roleKvSecretsUser = '4633458b-17de-408a-b874-0445c86b69e6'
 var roleKvCryptoUser = '12338af0-0e69-4776-bea7-57ae8d297424'
-resource kvSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+// Production retains its existing scope. Staging uses named runtime-secret
+// scopes so its app identity cannot retrieve operator/bootstrap passwords.
+resource kvSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (env == 'prod') {
   name: guid(kv.id, appIdentity.id, roleKvSecretsUser)
   scope: kv
   properties: {
@@ -396,6 +398,31 @@ resource kvSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleKvSecretsUser)
   }
 }
+var stagingRuntimeSecretNames = concat([
+  'database-url'
+  'system-database-url'
+  'auth-database-url'
+  'auth-secret'
+  'mfa-encryption-key'
+  'voting-secret'
+  'cron-secret'
+  'redis-url'
+  'resend-api-key'
+  'storage-account-key'
+], !empty(entraClientId) && !empty(entraTenantId) ? ['azure-ad-client-secret'] : [], enableStripe ? ['stripe-secret-key', 'stripe-webhook-secret'] : [])
+resource stagingRuntimeSecrets 'Microsoft.KeyVault/vaults/secrets@2023-07-01' existing = [for secretName in stagingRuntimeSecretNames: {
+  parent: kv
+  name: secretName
+}]
+resource stagingKvSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (secretName, i) in stagingRuntimeSecretNames: if (env == 'staging' && deployApplications) {
+  name: guid(stagingRuntimeSecrets[i].id, appIdentity.id, roleKvSecretsUser)
+  scope: stagingRuntimeSecrets[i]
+  properties: {
+    principalId: appIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleKvSecretsUser)
+  }
+}]
 resource kvCryptoUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, appIdentity.id, roleKvCryptoUser)
   scope: kv
@@ -465,7 +492,7 @@ module apps 'modules/apps.bicep' = if (deployApplications) {
     enableStripe: enableStripe
     tags: tags
   }
-  dependsOn: [kvSecretsUser, kvCryptoUser, acrPull, kvPe]
+  dependsOn: [kvSecretsUser, stagingKvSecretsUser, kvCryptoUser, acrPull, kvPe]
 }
 
 // ── Alerts ──────────────────────────────────────────────────────────────────
