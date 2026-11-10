@@ -185,8 +185,39 @@ export function changeRecordDefects(record, { changeId, sourceSha, nowMs }) {
   if (!Number.isFinite(start) || !Number.isFinite(end) || !Number.isFinite(nowMs) || nowMs < start || nowMs > end) {
     defects.push('CHANGE_RECORD_OUTSIDE_WINDOW')
   }
+  // Founder authorization is operationally sufficient for this narrowly scoped
+  // staging change, not independent human review or technical release proof.
+  const founder = record.founder_staging_authorization
+  if (founder) {
+    const valid =
+      record.change_id === 'CHG-2026-0114' &&
+      record.service === 'union-eyes' &&
+      record.environment === 'STAGING' &&
+      record.change_type === 'NORMAL' &&
+      record.risk_level === 'HIGH' &&
+      record.requested_by === 'anungis437' &&
+      founder.mission === 'UE_V2_ISOLATED_STAGING_QUALIFICATION' &&
+      founder.operating_mode === 'SOLO_FOUNDER' &&
+      founder.owner_github_login === 'anungis437' &&
+      founder.alternate_github_login === 'anungis' &&
+      founder.owner_authorization_ref === 'ops/change-records/CHG-2026-0114.founder-authorization.md' &&
+      founder.authority_origin === 'OWNER_DIRECTIVE_IN_CONVERSATION' &&
+      founder.subscription_id === NEW_SUBSCRIPTION_ID &&
+      founder.candidate_sha === '2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9' &&
+      founder.staging_only === true &&
+      founder.production_authorized === false &&
+      founder.technical_gates_required === true &&
+      required.length === 1 && required[0] === 'anungis437' &&
+      approved.length === 1 && approved[0] === 'anungis437' &&
+      Array.isArray(record.test_evidence_refs) &&
+      record.test_evidence_refs.includes(founder.owner_authorization_ref) &&
+      record.approval_status === 'APPROVED' &&
+      record.status === 'APPROVED'
+    if (!valid) defects.push('FOUNDER_STAGING_AUTHORIZATION_INVALID')
+  }
   const commits = Array.isArray(record.linked_commits) ? record.linked_commits : []
   if (!SHA_RE.test(String(sourceSha ?? '')) || !commits.includes(sourceSha)) defects.push('CHANGE_RECORD_SOURCE_SHA_NOT_LINKED')
+  if (founder && founder.candidate_sha !== sourceSha) defects.push('FOUNDER_STAGING_CANDIDATE_MISMATCH')
   return defects
 }
 
