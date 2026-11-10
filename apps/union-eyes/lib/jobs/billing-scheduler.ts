@@ -182,8 +182,17 @@ export class BillingScheduler {
             totalAmount: result.totalAmount,
           });
 
-          // Optional: Send notification to org admins
-          await this.notifyBillingCompleted(org.organizationId, result);
+          // Notification delivery is ancillary to a committed billing result.
+          // A mail-provider failure must never reclassify successful financial
+          // writes as failed (which could invite unsafe operator retries).
+          try {
+            await this.notifyBillingCompleted(org.organizationId, result);
+          } catch (notificationError) {
+            logger.error('Billing completed but completion notification failed', {
+              organizationId: org.organizationId,
+              error: notificationError instanceof Error ? notificationError.message : 'Unknown notification error',
+            });
+          }
         } catch (error) {
           failed++;
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -200,8 +209,15 @@ export class BillingScheduler {
             error: errorMessage,
           });
 
-          // Optional: Send failure notification
-          await this.notifyBillingFailed(org.organizationId, errorMessage);
+          // A failed notification must not abort the remaining organizations.
+          try {
+            await this.notifyBillingFailed(org.organizationId, errorMessage);
+          } catch (notificationError) {
+            logger.error('Billing failure notification could not be delivered', {
+              organizationId: org.organizationId,
+              error: notificationError instanceof Error ? notificationError.message : 'Unknown notification error',
+            });
+          }
         }
       }
 
