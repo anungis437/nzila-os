@@ -1,6 +1,6 @@
 # Exact-source staging prerequisite receipt
 
-Candidate: `8580adb9e0a8aede979f99a85121b020ed333728`.
+Candidate: `d7d14ccff9a1934e28b8484e46d671f67c62daaf`.
 
 The [measured local export receipt](evidence/ue-v2-candidate-export-20261110.json)
 records the current dependency-bound plan and emitted restore file hashes.
