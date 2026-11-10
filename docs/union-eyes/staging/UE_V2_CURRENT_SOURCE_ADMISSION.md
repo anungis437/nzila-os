@@ -55,6 +55,15 @@ succeed and operator-password reads are denied before storing operator
 credentials. Temporary operator grants remain vault-scoped and are removed after
 bootstrap; no permanent write access is given to the application identity.
 
+The private check in `evidence/ue-v2-private-db-bootstrap-20261110.json` recorded
+runtime-secret HTTP 200 and operator-password HTTP 403 after replacing the old
+vault-wide app read grant with named secret scopes. Four generated password
+secrets were created without logging their values, and the protected
+`UE_V2_STAGING_DB_ADMIN_PASSWORD` workflow secret was synchronized through an
+ephemeral encrypted transport. Temporary operator access was removed and the
+scanner's prior scale was restored. These are password-preparation receipts;
+they do not claim that the PostgreSQL server or its login roles already exist.
+
 ## Native export evidence
 
 `evidence/ue-v2-current-export-20261110.json` records the measured local export:

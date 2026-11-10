@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "name": "pg-admin-password",
+      "id": "https://nzila-ue-v2-staging-kv.vault.azure.net/secrets/pg-admin-password/a9e9c23be24c4274a0fb2bdc2be78284",
+      "status": "created"
+    },
+    {
+      "name": "ue-v2-runtime-login-password",
+      "id": "https://nzila-ue-v2-staging-kv.vault.azure.net/secrets/ue-v2-runtime-login-password/e69805198eb14e8b9cd0eb91a5587415",
+      "status": "created"
+    },
+    {
+      "name": "ue-v2-system-login-password",
+      "id": "https://nzila-ue-v2-staging-kv.vault.azure.net/secrets/ue-v2-system-login-password/39f5310bb4cb417a92d5606dbddf0ba3",
+      "status": "created"
+    },
+    {
+      "name": "ue-v2-auth-login-password",
+      "id": "https://nzila-ue-v2-staging-kv.vault.azure.net/secrets/ue-v2-auth-login-password/dbe059a5e5db4fbab603e89a73fe4f6c",
+      "status": "created"
+    }
+  ],
+  "runtimeRead": 200,
+  "adminRead": 403,
+  "githubAdminCredentialSynchronized": true,
+  "scriptSha256": "fce9cb4d46129cb4e238e37362b7956568cebb7dfff80bfb948ff1cd5c05bf0a"
+}
