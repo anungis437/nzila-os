@@ -28,3 +28,29 @@ transport and endpoint checks), and the scoped dependency lock passes frozen
 lockfile validation. These are source checks. Actual candidate-bound traces,
 request/audit correlation, and Azure Monitor queries remain required before
 `STAGING_GO`.
+
+
+## Export privacy and single execution
+
+Next and the HTTP instrumentation attach complete request URLs, including
+callback query strings. The exporter now strips query/fragment values and URL
+credentials before either transport serializes a span. Sensitive credential
+attributes are redacted across spans, events and links; error URLs are cleaned.
+Trace/span identity, route, status, correlation and token-usage counts remain.
+Completed SDK spans are not mutated. Initialization diagnostics also strip URL
+credentials. This applies to Next-owned spans as well as the application's.
+
+A real dependency inspection reproduced a synthetic callback code in `http.url`
+and `http.target`. The [local transport receipt](evidence/ue-v2-telemetry-privacy-local-20261110.json)
+records actual HTTP/JSON and gRPC/protobuf collector bytes: synthetic callback,
+SAS, cookie and URL-password values were absent while the span, trace ID and
+correlation survived. The receipt pins the measured source bytes; it is not
+Azure acceptance. Thirteen telemetry tests and the isolated package typecheck
+passed, including long/malformed URLs, both exporter lifecycles and immutable
+SDK spans.
+
+The span helper's business callback also executes outside the instrumentation
+fallback catch. A failed business operation is propagated once rather than
+being retried as though instrumentation initialization had failed. Its existing
+failure regression now asserts exactly one invocation. No production resource
+or deployment was changed.

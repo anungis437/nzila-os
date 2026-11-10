@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "localOnly": true,
+  "stagingAcceptance": false,
+  "purpose": "MEASURED_TRACE_PRIVACY_BEFORE_OTLP_SERIALIZATION",
+  "receipts": [
+    {
+      "status": "PASS",
+      "localOnly": true,
+      "stagingAcceptance": false,
+      "protocol": "grpc",
+      "transport": "REAL_LOOPBACK_GRPC_PROTOBUF",
+      "receivedBytes": 1356,
+      "rawSyntheticCredentialsAbsent": true,
+      "spanAndCorrelationPresent": true,
+      "traceIdPreserved": true,
+      "sourceBytesSha256": "3dbf67a2e04f9461e2d43d15b69ce36c38ce527e21748da5428d97c3c87ba401",
+      "at": "2026-11-10T19:33:48.849Z"
+    },
+    {
+      "status": "PASS",
+      "localOnly": true,
+      "stagingAcceptance": false,
+      "protocol": "http/json",
+      "transport": "REAL_LOOPBACK_HTTP_JSON",
+      "receivedBytes": 2513,
+      "rawSyntheticCredentialsAbsent": true,
+      "spanAndCorrelationPresent": true,
+      "traceIdPreserved": true,
+      "sourceBytesSha256": "3dbf67a2e04f9461e2d43d15b69ce36c38ce527e21748da5428d97c3c87ba401",
+      "at": "2026-11-10T19:33:48.849Z"
+    }
+  ]
+}
