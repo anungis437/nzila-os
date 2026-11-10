@@ -150,7 +150,7 @@ right-sized. Measured baseline, Azure Cost Management, 2026-10-05..2026-11-03 (a
 
 **Production sizing:** README §2 applies (zone-redundant HA, 35-day PITR, geo backup, Front Door
 Premium), but start at the smallest General Purpose PostgreSQL SKU that passes the load and restore
-drill rather than the template default `GP_Standard_D4ds_v5`, and keep app `minReplicas 2` only if
+drill rather than the template default `Standard_D4ds_v5`, and keep app `minReplicas 2` only if
 availability targets require it. Revisit after 30 days of measured usage.
 
 **Old-subscription spend to decide on (not authorized by the directive, listed for decision):**

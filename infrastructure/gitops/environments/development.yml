@@ -42,7 +42,7 @@ apps:
         value: development
 
 database:
-  sku: B_Standard_B1ms
+  sku: Standard_B1ms
   storage_gb: 32
   backup_retention_days: 7
 

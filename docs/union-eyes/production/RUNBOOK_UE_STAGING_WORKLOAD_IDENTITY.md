@@ -185,6 +185,7 @@ cat > ue-staging-deployer-role.json <<JSON
     "Microsoft.DBforPostgreSQL/flexibleServers/*",
     "Microsoft.DBforPostgreSQL/locations/*",
     "Microsoft.Insights/metricAlerts/*",
+    "Microsoft.Insights/actionGroups/*",
     "Microsoft.Insights/scheduledQueryRules/*",
     "Microsoft.Insights/diagnosticSettings/*",
     "Microsoft.OperationalInsights/workspaces/read"
@@ -207,6 +208,7 @@ cat > ue-monitoring-consumer-role.json <<JSON
   "Actions": [
     "Microsoft.OperationalInsights/workspaces/read",
     "Microsoft.OperationalInsights/workspaces/sharedKeys/action",
+    "Microsoft.OperationalInsights/workspaces/listKeys/action",
     "Microsoft.Insights/actionGroups/read"
   ],
   "NotActions": [],

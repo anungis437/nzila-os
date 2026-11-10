@@ -128,7 +128,7 @@ apps:
   # Pilot promotion requires explicit override through deploy-production workflow.
 
 database:
-  sku: GP_Standard_E8ds_v5      # 8 vCores, 64 GiB (upgrade path: E16 → E32)
+  sku: Standard_E8ds_v5      # 8 vCores, 64 GiB (upgrade path: E16 → E32)
   storage_gb: 1024              # 1 TB with auto-grow
   backup_retention_days: 35
   high_availability: true

@@ -1,7 +1,7 @@
 param acrName string
 param principalId string
 
-var roleAcrPull = '7f951dda-4ed3-4680-a7ca-43fe172d0f3b'
+var roleAcrPull = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' existing = {
   name: acrName

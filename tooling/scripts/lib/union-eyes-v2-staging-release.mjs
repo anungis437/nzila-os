@@ -24,7 +24,7 @@ export const REGISTRY_NAME = 'nzilaventuresacr'
 export const MANIFEST_SCHEMA = 'ue-v2-staging-release-manifest/v1'
 
 const STAGING_APP_IDENTITY_NAME = 'nzila-ue-v2-staging-id'
-const ACR_PULL_ROLE_ID = '7f951dda-4ed3-4680-a7ca-43fe172d0f3b'
+const ACR_PULL_ROLE_ID = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 
 /** Images the V2 template consumes; `revisionLabel` marks images built from this repository. */
 export const V2_IMAGES = Object.freeze([

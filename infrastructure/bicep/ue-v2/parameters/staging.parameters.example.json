@@ -21,7 +21,7 @@
     "cronImageDigest": { "value": "sha256:<curl image digest imported into the registry>" },
 
     "appDatabaseName": { "value": "ue_v2_staging" },
-    "dbSku": { "value": "B_Standard_B1ms" },
+    "dbSku": { "value": "Standard_B1ms" },
     "dbStorageGb": { "value": 32 },
     "dbBackupRetentionDays": { "value": 7 },
     "dbHighAvailability": { "value": false },
