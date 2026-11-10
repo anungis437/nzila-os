@@ -2,10 +2,12 @@
   "schemaVersion": 1,
   "record": "UE_STAGING_GO_CONTRACT",
   "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
-  "generatedOn": "2026-11-09",
+  "generatedOn": "2026-11-10",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+  "acceptedStagingCandidateSha": "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
+  "stagingWorkflowDefinitionSha": "d43a640e5a2a2e88b7e61986360aa5b6f87cedc4",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "The source baseline is complete, but no approved deployment of that candidate and no real deployed Phase 3A evidence exist in the authorized staging environment.",
+  "verdictReason": "The source baseline and staging foundation are complete, but Azure currently limits Canada Central to the existing production Container Apps environment. The isolated staging environment cannot be previewed or deployed until Microsoft raises ManagedEnvironmentCount from 1 to 2; the staging change record also still requires independent approval. No real deployed Phase 3A evidence exists.",
   "decisionAuthority": {
     "role": "NZILA_OWNER_OR_AUTHORIZED_PLATFORM_REVIEWER",
     "acceptanceRecorded": false
@@ -42,7 +44,7 @@
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PASS",
-      "evidence": "Engineering baseline SHA and draft PR #1137 are unambiguous."
+      "evidence": "Engineering baseline e87e3799f3cd9a2408f75d846bc5ec676dae3847, staging image/source 2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9, and workflow definition d43a640e5a2a2e88b7e61986360aa5b6f87cedc4 are unambiguous and contained on main."
     },
     {
       "id": "SOURCE_ENGINEERING",
@@ -59,14 +61,14 @@
     {
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "The additive census/reconciliation commit has not yet been pushed and validated by exact-SHA CI."
+      "status": "PASS",
+      "evidence": "PR #1155 validated the staging candidate with 103 passing and 11 intentionally skipped checks; PR #1157 validated the final read-only what-if workflow correction with 102 passing and 11 intentionally skipped checks."
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
       "status": "EXTERNAL_HOLD",
-      "evidence": "Approved V2 workflows require the candidate on main plus an approved SHA-bound staging change record and protected environments; those prerequisites do not exist."
+      "evidence": "The candidate, protected GitHub environments, OIDC identities, least-privilege roles, and digest-pinned images exist. Azure what-if run 42745600190 passed all repository, identity, subscription, and registry attestations, then failed provider preflight because Canada Central ManagedEnvironmentCount is limit 1 / usage 1. CHG-2026-0114 also remains pending independent approval."
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
@@ -143,21 +145,15 @@
   ],
   "externalBlockers": [
     {
-      "id": "EXT-01-CANDIDATE-NOT-MAIN",
-      "dependency": "The approved V2 staging build/deploy workflows accept only a source SHA on origin/main; PR #1137 is draft and unmerged.",
-      "requiredAction": "Authorized merge/release integration decision after the final exact-SHA checks pass.",
+      "id": "EXT-01-CONTAINER-APPS-ENVIRONMENT-QUOTA",
+      "dependency": "Canada Central ManagedEnvironmentCount is limit 1 / usage 1. The existing environment is production and the approved topology expressly forbids sharing it. Azure what-if run 42745600190 failed with MaxNumberOfRegionalEnvironmentsInSubExceeded after identity and digest attestations passed.",
+      "requiredAction": "Microsoft must raise the subscription's Canada Central ManagedEnvironmentCount from 1 to 2 through the Azure quota portal or support channel. CLI quota update returned ResourceNotAvailableForOffer and the support API returned InvalidSupportPlan.",
       "engineeringBypassPermitted": false
     },
     {
       "id": "EXT-02-NO-APPROVED-STAGING-CHANGE-RECORD",
-      "dependency": "No independently approved, merged, candidate-SHA-bound STAGING change record exists.",
+      "dependency": "CHG-2026-0114 is prepared and candidate-bound to 2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9, but remains PENDING with no independent approver recorded.",
       "requiredAction": "A designated approver must approve the prepared staging change instrument; the implementer must not self-approve.",
-      "engineeringBypassPermitted": false
-    },
-    {
-      "id": "EXT-03-STAGING-FOUNDATION-ABSENT",
-      "dependency": "The current Azure subscription lacks the documented staging and CI resource groups and workload identities, and GitHub lacks the required ue-staging-plan and ue-staging environments.",
-      "requiredAction": "Authorized platform setup following the workload-identity runbook and protected-environment reviewer assignment.",
       "engineeringBypassPermitted": false
     },
     {
