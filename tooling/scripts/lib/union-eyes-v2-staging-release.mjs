@@ -23,6 +23,9 @@ export const STAGING_RESOURCE_GROUP = 'nzila-canada-staging-rg'
 export const REGISTRY_NAME = 'nzilaventuresacr'
 export const MANIFEST_SCHEMA = 'ue-v2-staging-release-manifest/v1'
 
+const STAGING_APP_IDENTITY_NAME = 'nzila-ue-v2-staging-id'
+const ACR_PULL_ROLE_ID = '7f951dda-4ed3-4680-a7ca-43fe172d0f3b'
+
 /** Images the V2 template consumes; `revisionLabel` marks images built from this repository. */
 export const V2_IMAGES = Object.freeze([
   { key: 'app', parameter: 'appImageDigest', repositoryParameter: 'appImageRepository', defaultRepository: 'nzila-os-union-eyes-v2', revisionLabel: true },
@@ -43,6 +46,26 @@ const ALLOWED_CHANGE_TYPES = new Set(['Create', 'Modify', 'NoChange', 'Ignore', 
 const SHA_RE = /^[0-9a-f]{40}$/
 const DIGEST_RE = /^sha256:[0-9a-f]{64}$/
 const CHANGE_ID_RE = /^CHG-\d{4}-\d{4}$/
+
+function isExactSymbolicRegistryPull(change, registryResourceGroup) {
+  if (!registryResourceGroup || change?.changeType !== 'Unsupported') return false
+  const registryId = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/${registryResourceGroup}/providers/Microsoft.ContainerRegistry/registries/${REGISTRY_NAME}`
+  const identityId = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/${STAGING_RESOURCE_GROUP}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${STAGING_APP_IDENTITY_NAME}`
+  const principalReference = `reference('${identityId}', '2023-01-31').principalId`
+  const expectedResourceId = `[extensionResourceId('${registryId}', 'Microsoft.Authorization/roleAssignments', guid('${registryId}', ${principalReference}, '${ACR_PULL_ROLE_ID}'))]`
+  const after = change?.after
+  const properties = after?.properties
+  return (
+    String(change?.resourceId ?? '').toLowerCase() === expectedResourceId.toLowerCase()
+    && String(after?.id ?? '').toLowerCase() === expectedResourceId.toLowerCase()
+    && String(after?.apiVersion ?? '').toLowerCase() === '2022-04-01'
+    && String(after?.resourceGroup ?? '').toLowerCase() === registryResourceGroup.toLowerCase()
+    && String(after?.type ?? '').toLowerCase() === 'microsoft.authorization/roleassignments'
+    && String(properties?.principalId ?? '').toLowerCase() === `[${principalReference}]`.toLowerCase()
+    && properties?.principalType === 'ServicePrincipal'
+    && String(properties?.roleDefinitionId ?? '').toLowerCase() === `/subscriptions/${NEW_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/${ACR_PULL_ROLE_ID}`.toLowerCase()
+  )
+}
 
 export function sha256Hex(text) {
   return crypto.createHash('sha256').update(text).digest('hex')
@@ -247,6 +270,7 @@ export function whatIfDefects(whatIf, { registryResourceGroup } = {}) {
     const id = String(change?.resourceId ?? '').toLowerCase()
     const type = change?.changeType
     if (!ALLOWED_CHANGE_TYPES.has(type)) defects.push(`WHAT_IF_CHANGE_TYPE_REFUSED:${type}:${change?.resourceId}`)
+    if (isExactSymbolicRegistryPull(change, registryResourceGroup)) continue
     if (!id.startsWith(subPrefix)) {
       defects.push(`WHAT_IF_OUTSIDE_SUBSCRIPTION:${change?.resourceId}`)
       continue
