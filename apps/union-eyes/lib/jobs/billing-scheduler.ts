@@ -110,6 +110,11 @@ export class BillingScheduler {
    * RLS policy left to catch it.
    */
   static async runScheduledBilling(frequency: BillingFrequency): Promise<BillingSchedulerResult> {
+    // TypeScript types do not validate runtime cron/manual inputs. Refuse an
+    // unsupported frequency before entering the privileged system context.
+    if (!(['monthly', 'bi_weekly', 'weekly', 'quarterly', 'annual'] as const).includes(frequency)) {
+      throw new Error('Unsupported billing frequency');
+    }
     // A caller that already runs as the system role (the platform route) lends this run its transaction; a second one would be an unrelated
     // transaction on another connection, left idle for the length of the run.
     if (getActiveSystemDb()) return this.runScheduledBillingInSystemContext(frequency);
