@@ -7,8 +7,11 @@
 > 2026-11-04 product-owner directive.
 
 Template: [infrastructure/bicep/ue-v2/main.bicep](../../../infrastructure/bicep/ue-v2/main.bicep).
-Example parameters: [staging.parameters.example.json](../../../infrastructure/bicep/ue-v2/parameters/staging.parameters.example.json)
-(placeholders only; copy it outside the repository and fill it in there).
+Example parameters: [staging.parameters.example.json](../../../infrastructure/bicep/ue-v2/parameters/staging.parameters.example.json).
+The deploy workflow uses the committed, non-secret
+[main.staging.parameters.json](../../../infrastructure/bicep/ue-v2/main.staging.parameters.json);
+image digests are replaced from the release manifest and the database password is supplied only from
+the protected `ue-staging` GitHub environment.
 
 ## 1. How `env` works
 
