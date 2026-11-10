@@ -18,6 +18,8 @@ param publicHostName string
 param siteUrl string
 param emailFrom string
 param emailReplyTo string
+param entraClientId string = ''
+param entraTenantId string = ''
 param minReplicas int = 2
 param maxReplicas int = 6
 param clamavMinReplicas int = 1
@@ -47,7 +49,17 @@ var secretNames = [
   'storage-account-key'
 ]
 var stripeSecretNames = enableStripe ? ['stripe-secret-key', 'stripe-webhook-secret'] : []
-var secrets = [for n in concat(secretNames, stripeSecretNames): {
+var entraConfigured = !empty(entraClientId) && !empty(entraTenantId)
+var entraSecretNames = entraConfigured ? ['azure-ad-client-secret'] : []
+var entraEnv = entraConfigured ? concat([
+  { name: 'AZURE_AD_CLIENT_ID', value: entraClientId }
+  { name: 'AZURE_AD_TENANT_ID', value: entraTenantId }
+  { name: 'AZURE_AD_CLIENT_SECRET', secretRef: 'azure-ad-client-secret' }
+], deploymentEnvironment == 'staging' ? [
+  { name: 'AZURE_AD_STAGING_SINGLE_TENANT', value: 'true' }
+  { name: 'AZURE_AD_STAGING_SESSION_MAX_AGE_SECONDS', value: '900' }
+] : []) : []
+var secrets = [for n in concat(secretNames, stripeSecretNames, entraSecretNames): {
   name: n
   keyVaultUrl: '${kvBase}secrets/${n}'
   identity: identityId
@@ -169,7 +181,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'REDIS_URL', secretRef: 'redis-url' }
             { name: 'RESEND_API_KEY', secretRef: 'resend-api-key' }
             { name: 'AZURE_STORAGE_ACCOUNT_KEY', secretRef: 'storage-account-key' }
-          ], stripeEnv)
+          ], stripeEnv, entraEnv)
         }
       ]
       scale: {

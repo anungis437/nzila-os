@@ -24,6 +24,14 @@ export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const folder = path.join(root, 'docs', 'union-eyes', 'bootstrap-v2')
 export const hash = (value: string) => createHash('sha256').update(value).digest('hex')
 export const quote = (value: string) => `"${value.replaceAll('"', '""')}"`
+/** Python module commitments are verified by the hash-locked collector/plan check. */
+export function assertCurrentSourceCommitments(plan: Pick<V2Plan, 'sourceCommitments'>): void {
+  for (const [source, digest] of Object.entries(plan.sourceCommitments)) {
+    if (source.startsWith('python:')) continue
+    const current = hash(readFileSync(path.join(root, ...source.split('/')), 'utf8'))
+    if (current !== digest) throw new Error(`UE_V2_SOURCE_COMMITMENT_DRIFT:${source}`)
+  }
+}
 export const V2_EXPLICIT_OPERAND_TABLES = [
   'integration_configs',
   'social_accounts',
@@ -420,11 +428,23 @@ interface DrizzleSnapshotJson {
   tables: Record<
     string,
     {
-      columns: Record<string, { name: string; type: string; typeSchema?: string; default?: unknown }>
-      indexes: Record<string, { name: string; columns: Array<{ expression: string; isExpression?: boolean }> } & Record<string, unknown>>
+      columns: Record<
+        string,
+        { name: string; type: string; typeSchema?: string; default?: unknown }
+      >
+      indexes: Record<
+        string,
+        { name: string; columns: Array<{ expression: string; isExpression?: boolean }> } & Record<
+          string,
+          unknown
+        >
+      >
       foreignKeys: Record<
         string,
-        { columnsFrom: string[]; columnsTo: string[]; tableTo: string; schemaTo?: string } & Record<string, unknown>
+        { columnsFrom: string[]; columnsTo: string[]; tableTo: string; schemaTo?: string } & Record<
+          string,
+          unknown
+        >
       >
       uniqueConstraints: Record<string, unknown>
       checkConstraints: Record<string, { name: string; value: string }>
@@ -561,11 +581,11 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'packages/db/src/client.ts',
   ])
     commitments[file] = hash(readFileSync(path.join(root, ...file.split('/')), 'utf8'))
-  // The switch route moved after its source commitment was frozen. Regeneration
-  // keeps that digest so the plan does not treat the current file as the
-  // qualified source. system-mutation-contracts.test.ts requires the mismatch.
-  commitments['apps/union-eyes/app/api/organizations/switch/route.ts'] =
-    'be3455b601960375c1363ec51bcc9aac0f2b0470e7e1c594da9ca8a3ab3db767'
+  // Bind the admitted source bytes. A later route change must fail the source
+  // commitment check rather than leaving a deliberately stale qualification.
+  commitments['apps/union-eyes/app/api/organizations/switch/route.ts'] = hash(
+    readFileSync(path.join(root, 'apps/union-eyes/app/api/organizations/switch/route.ts'), 'utf8'),
+  )
   for (const contract of SYSTEM_COLUMN_READ_CONTRACTS)
     commitments[contract.caller] = hash(
       readFileSync(path.join(root, ...contract.caller.split('/')), 'utf8'),

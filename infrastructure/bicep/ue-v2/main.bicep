@@ -99,6 +99,9 @@ param siteUrl string = env == 'prod' ? 'https://unioneyes.app' : ''
 @description('Sender and reply-to addresses. Required for staging (no production default); use a staging-verified sender.')
 param emailFrom string = env == 'prod' ? 'noreply@unioneyes.app' : ''
 param emailReplyTo string = env == 'prod' ? 'support@unioneyes.app' : ''
+@description('Entra application registration identifiers. The secret stays in Key Vault as azure-ad-client-secret. Empty defaults preserve existing production configuration.')
+param entraClientId string = ''
+param entraTenantId string = ''
 @description('Azure Managed Redis SKU. Balanced_B0 is the smallest SKU.')
 param redisSkuName string = env == 'prod' ? 'Balanced_B1' : 'Balanced_B0'
 @description('Azure Managed Redis high availability (replica). Disabling it roughly halves the cost; not for production.')
@@ -451,6 +454,8 @@ module apps 'modules/apps.bicep' = if (deployApplications) {
     siteUrl: siteUrl
     emailFrom: emailFrom
     emailReplyTo: emailReplyTo
+    entraClientId: entraClientId
+    entraTenantId: entraTenantId
     minReplicas: appMinReplicas
     maxReplicas: appMaxReplicas
     clamavMinReplicas: clamavMinReplicas

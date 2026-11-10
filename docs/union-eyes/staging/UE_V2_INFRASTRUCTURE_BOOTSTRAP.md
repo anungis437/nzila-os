@@ -32,23 +32,27 @@ export and role SQL, verify catalog and plan digests, and preserve the restore
 and verification receipts. Operate from the private staging network. Do not
 open PostgreSQL or vault public access.
 
-The older runbook's export-helper paths are absent from the current checkout,
-and its 694-table baseline differs from the current committed 771-table,
-6,255-statement source plan. Those historical commands and digests are not
-current restore authority. Reproduce and qualify the current source-bound
-export using the pinned interpreter, hash-locked wheelhouse and pinned local
-PostgreSQL image before any remote restore. A successful infrastructure pass
-does not remove this qualification requirement. Do not replay frozen migration
-lineage or substitute the historical export to get past it.
+The older runbook's removed helper commands and 694-table baseline are historical.
+Use the current local-only exporter from a clean, committed checkout:
 
-The current generator also deliberately retains an older source commitment for
-`apps/union-eyes/app/api/organizations/switch/route.ts`; its regression test
-asserts that the current file differs. Consequently, successful plan regeneration
-and provenance CI do not establish that every current application source byte
-matches its committed hash. A strict local export attempt rejected that mismatch
-before starting a database container. Qualify and admit the current switch-route
-binding through a scoped change before admitting a current-source restore export;
-do not skip the mismatch or relabel the existing CI result as export qualification.
+```sh
+UE_V2_WHEELHOUSE=/absolute/hash-locked/wheelhouse pnpm exec tsx tooling/scripts/export-ue-v2-staging-schema.cts --out /absolute/empty/export-directory
+```
+
+The exporter regenerates the current plan twice, checks it against the committed
+plan and every current repository source commitment, and refuses source drift.
+It uses the pinned PostgreSQL image on loopback only, installs the reference
+schema and a second database through the existing installer, checks the native
+privilege contract, verifies catalog equality and the receipt-backed repeat
+NOOP, and emits schema/receipt/role SQL plus measured catalog and file hashes.
+It removes only its own disposable container. It never reads customer data,
+connects to Azure, replays frozen migrations or writes login credentials.
+
+The previous deliberate frozen hash for the organization-switch route is now
+bound to the current source bytes; a stale or tampered commitment fails both
+the source-plan CLI and its regression test. This is source admission, not
+runtime acceptance. Use the new export qualification receipt's measured digest
+and counts, never copy the historical runbook's catalog or schema digests.
 
 Generate the three login passwords, create the actual runtime/system/auth
 roles with their specified restrictions, then publish `database-url`,

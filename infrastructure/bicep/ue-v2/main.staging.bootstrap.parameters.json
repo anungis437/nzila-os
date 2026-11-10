@@ -2,6 +2,8 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "entraClientId": { "value": "c0a29862-9432-4b54-bb25-796ff987091f" },
+    "entraTenantId": { "value": "5082b8be-b04d-4a13-b61c-b6397670177b" },
     "env": {
       "value": "staging"
     },
