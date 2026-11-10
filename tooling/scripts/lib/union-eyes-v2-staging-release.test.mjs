@@ -135,6 +135,41 @@ test('what-if stays in the staging group; only the registry AcrPull assignment m
   assert.deepEqual(whatIfDefects({ status: 'Failed', changes: [] }, {}), ['WHAT_IF_NOT_SUCCEEDED'])
 })
 
+test('what-if accepts only the exact symbolic AcrPull assignment Azure emits for a new identity', () => {
+  const registryId = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.ContainerRegistry/registries/nzilaventuresacr`
+  const identityId = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/nzila-ue-v2-staging-id`
+  const principalReference = `reference('${identityId}', '2023-01-31').principalId`
+  const roleId = '7f951dda-4ed3-4680-a7ca-43fe172d0f3b'
+  const resourceId = `[extensionResourceId('${registryId}', 'Microsoft.Authorization/roleAssignments', guid('${registryId}', ${principalReference}, '${roleId}'))]`
+  const symbolic = {
+    status: 'Succeeded',
+    changes: [{
+      resourceId,
+      changeType: 'Unsupported',
+      after: {
+        apiVersion: '2022-04-01',
+        id: resourceId,
+        resourceGroup: 'nzila-canada-prod-rg',
+        type: 'Microsoft.Authorization/roleAssignments',
+        properties: {
+          principalId: `[${principalReference}]`,
+          principalType: 'ServicePrincipal',
+          roleDefinitionId: `/subscriptions/${NEW_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/${roleId}`,
+        },
+      },
+    }],
+  }
+  assert.deepEqual(whatIfDefects(symbolic, { registryResourceGroup: 'nzila-canada-prod-rg' }), [])
+
+  const wrongRole = structuredClone(symbolic)
+  wrongRole.changes[0].after.properties.roleDefinitionId = `/subscriptions/${NEW_SUBSCRIPTION_ID}/providers/Microsoft.Authorization/roleDefinitions/owner`
+  assert.ok(whatIfDefects(wrongRole, { registryResourceGroup: 'nzila-canada-prod-rg' }).some(defect => defect.startsWith('WHAT_IF_OUTSIDE_SUBSCRIPTION')))
+
+  const wrongIdentity = structuredClone(symbolic)
+  wrongIdentity.changes[0].after.properties.principalId = "[reference('/subscriptions/other/resourceGroups/other/providers/Microsoft.ManagedIdentity/userAssignedIdentities/other', '2023-01-31').principalId]"
+  assert.ok(whatIfDefects(wrongIdentity, { registryResourceGroup: 'nzila-canada-prod-rg' }).some(defect => defect.startsWith('WHAT_IF_OUTSIDE_SUBSCRIPTION')))
+})
+
 test('what-if fingerprint ignores order and case but not change type', () => {
   const a = { changes: [{ resourceId: `${STAGING}/A`, changeType: 'Create' }, { resourceId: `${STAGING}/B`, changeType: 'NoChange' }] }
   const b = { changes: [{ resourceId: `${STAGING}/b`, changeType: 'NoChange' }, { resourceId: `${STAGING}/a`, changeType: 'Create' }] }
@@ -169,4 +204,18 @@ test('CLI fails closed on a missing change record and a tag manifest', () => {
   const result = run('--gate', 'manifest', '--manifest', path.join(dir, 'manifest.json'))
   assert.equal(result.status, 1)
   assert.ok(JSON.parse(result.stdout).defects.includes('DIGEST_INVALID:app'))
+})
+
+test('CHG-2026-0114 founder direction accepts only the exact candidate and preserves staging boundaries', () => {
+  const approved = JSON.parse(fs.readFileSync(path.join(REPO, 'ops/change-records/CHG-2026-0114.json'), 'utf8'))
+  const sha = '2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9'
+  const opts = { changeId: 'CHG-2026-0114', sourceSha: sha, nowMs: Date.parse('2026-11-10T12:00:00Z') }
+  assert.deepEqual(changeRecordDefects(approved, opts), [])
+  assert.ok(changeRecordDefects({ ...approved, environment: 'PROD' }, opts).includes('CHANGE_RECORD_WRONG_ENVIRONMENT'))
+  assert.ok(changeRecordDefects({ ...approved, environment: 'PROD' }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
+  assert.ok(changeRecordDefects({ ...approved, approved_by: [] }, opts).includes('CHANGE_RECORD_APPROVALS_MISSING'))
+  assert.ok(changeRecordDefects({ ...approved, approved_by: [] }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
+  assert.ok(changeRecordDefects(approved, { ...opts, sourceSha: 'f'.repeat(40) }).includes('FOUNDER_STAGING_CANDIDATE_MISMATCH'))
+  assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, technical_gates_required: false } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
+  assert.ok(changeRecordDefects(approved, { ...opts, nowMs: Date.parse('2028-01-01T00:00:00Z') }).includes('CHANGE_RECORD_OUTSIDE_WINDOW'))
 })

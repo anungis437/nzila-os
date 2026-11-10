@@ -41,6 +41,43 @@ export function hasStagingMissionAuthorization(change: ChangeRecord): boolean {
 }
 
 /**
+ * Bounded solo-founder approval for Union Eyes V2 staging. The same person
+ * controls `anungis` and `anungis437`; no fictional second human or CAB.
+ * All technical deployment, resource-scope and production gates remain.
+ */
+export function hasFounderOperatedStagingApproval(change: ChangeRecord): boolean {
+  const a = change.founder_staging_authorization
+  return Boolean(
+    a &&
+    change.change_id === 'CHG-2026-0114' &&
+    change.service === 'union-eyes' &&
+    change.environment === 'STAGING' &&
+    change.change_type === 'NORMAL' &&
+    change.risk_level === 'HIGH' &&
+    change.status === 'APPROVED' &&
+    change.approval_status === 'APPROVED' &&
+    change.requested_by === 'anungis437' &&
+    a.mission === 'UE_V2_ISOLATED_STAGING_QUALIFICATION' &&
+    a.operating_mode === 'SOLO_FOUNDER' &&
+    a.owner_github_login === 'anungis437' &&
+    a.alternate_github_login === 'anungis' &&
+    a.owner_authorization_ref === 'ops/change-records/CHG-2026-0114.founder-authorization.md' &&
+    a.authority_origin === 'OWNER_DIRECTIVE_IN_CONVERSATION' &&
+    a.subscription_id === 'd562ba7f-d891-4504-a489-10917c0ebaaf' &&
+    a.candidate_sha === '2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9' &&
+    a.staging_only === true &&
+    a.production_authorized === false &&
+    a.technical_gates_required === true &&
+    change.approvers_required.length === 1 &&
+    change.approvers_required[0] === a.owner_github_login &&
+    change.approved_by.length === 1 &&
+    change.approved_by[0] === a.owner_github_login &&
+    change.linked_commits.includes(a.candidate_sha) &&
+    change.test_evidence_refs.includes(a.owner_authorization_ref)
+  )
+}
+
+/**
  * Determine required approval roles for a given change record.
  */
 function getRequiredRoles(change: ChangeRecord): ApprovalRole[] {
@@ -76,7 +113,7 @@ function getRequiredRoles(change: ChangeRecord): ApprovalRole[] {
  * and whether the current approvals satisfy the requirements.
  */
 export function evaluateChangeRequirements(change: ChangeRecord): ApprovalRequirements {
-  if (hasStagingMissionAuthorization(change)) {
+  if (hasFounderOperatedStagingApproval(change) || hasStagingMissionAuthorization(change)) {
     return { requiredApprovals: ['staging_mission_owner'], missingApprovals: [], cabRequired: false, approvalSatisfied: true }
   }
   const requiredApprovals = getRequiredRoles(change)

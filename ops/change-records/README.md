@@ -30,3 +30,9 @@ CI/CD pipelines validate change records before deployment:
 ```bash
 pnpm change:validate --env=STAGING --service=web
 ```
+
+## Internal staging during solo-founder operation
+
+For an internal synthetic-data staging change, the accountable Nzila founder may approve the bounded deployment directly. `anungis` and `anungis437` belong to one person: two accounts must not be counted as two independent human reviewers. A fictitious change board, security department or employee is not required for this operational decision.
+
+The authorization must identify its exact non-production scope, candidate, technical gates and provenance. OIDC, image digest attestations, Azure what-if drift, tenant isolation, rollback, real runtime qualification and production boundaries remain mandatory. Client, employee, contractual or legal requirements may justify later segregation. The current targeted exception is `CHG-2026-0114` with its founder authorization record.
