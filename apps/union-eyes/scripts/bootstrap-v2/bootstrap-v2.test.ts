@@ -503,6 +503,9 @@ describe('exact native catalog commitment', () => {
   it('normalizes only PostgreSQL spelling and typemod whitespace', () => {
     expect(canonicalType('numeric(19, 2)')).toBe('numeric(19,2)')
     expect(canonicalType('varchar(255)')).toBe('character varying(255)')
+    expect(canonicalType('time')).toBe(canonicalType('time without time zone'))
+    expect(canonicalType('time')).not.toBe(canonicalType('time with time zone'))
+    expect(canonicalType('time(3)')).not.toBe(canonicalType('time'))
     expect(canonicalType('numeric(19, 3)')).not.toBe(canonicalType('numeric(19, 2)'))
     expect(canonicalType('text')).not.toBe(canonicalType('uuid'))
   })

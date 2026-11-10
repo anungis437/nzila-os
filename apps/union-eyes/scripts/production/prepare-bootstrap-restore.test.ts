@@ -68,4 +68,10 @@ describe('bootstrap restore transform', () => {
       'SET ROLE ue_v2_owner;',
     )
   })
+  it('accepts a no-vector plan only when it explicitly expects no extension and rejects unexpected provisioning', () => {
+    const withoutVector = dump.replace('CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;', '')
+    expect(transformSchemaDump(withoutVector, { vectorExtensionExpected: false })).toContain('SET ROLE ue_v2_owner;')
+    expect(() => transformSchemaDump(dump, { vectorExtensionExpected: false })).toThrow(/EXTENSION_COUNT/)
+    expect(() => transformSchemaDump(withoutVector)).toThrow(/EXTENSION_COUNT/)
+  })
 })

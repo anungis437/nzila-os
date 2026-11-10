@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { folder, hash, root, type V2Plan } from './source'
+import { assertCurrentSourceCommitments, folder, hash, root, type V2Plan } from './source'
 import { systemMutationContracts, systemMutationRules } from './system-mutation-contracts'
 
 const plan: V2Plan = JSON.parse(
@@ -25,15 +25,16 @@ describe('current source-bound SYSTEM mutation contracts', () => {
       hash(readFileSync(path.join(root, ...file.split('/')), 'utf8')),
     )
   })
-  it('keeps the frozen switch-route commitment while the current file has moved', () => {
+  it('binds the current switch route and rejects a stale commitment without implying runtime acceptance', () => {
     const file = 'apps/union-eyes/app/api/organizations/switch/route.ts'
-    const frozen = 'be3455b601960375c1363ec51bcc9aac0f2b0470e7e1c594da9ca8a3ab3db767'
     const current = hash(readFileSync(path.join(root, ...file.split('/')), 'utf8'))
-    expect(plan.sourceCommitments[file]).toBe(frozen)
-    expect(current).not.toBe(frozen)
-    expect(
-      readFileSync(path.join(root, 'apps/union-eyes/scripts/bootstrap-v2/source.ts'), 'utf8'),
-    ).toContain(frozen)
+    expect(plan.sourceCommitments[file]).toBe(current)
+    expect(() => assertCurrentSourceCommitments(plan)).not.toThrow()
+    const changed = structuredClone(plan)
+    changed.sourceCommitments[file] = '0'.repeat(64)
+    expect(() => assertCurrentSourceCommitments(changed)).toThrow(
+      `UE_V2_SOURCE_COMMITMENT_DRIFT:${file}`,
+    )
   })
   it('binds the exact 89 authorized relations, source callers and real selector columns', () => {
     const contracts = systemMutationContracts(plan)

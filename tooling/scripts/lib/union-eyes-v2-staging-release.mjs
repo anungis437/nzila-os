@@ -167,6 +167,17 @@ export function deploymentParameterDefects(parameters, manifest) {
   const value = (name) => values?.[name]?.value
   const defects = []
   if (value('env') !== 'staging') defects.push('PARAMETERS_ENV_NOT_STAGING')
+  const entraClient = value('entraClientId') ?? ''
+  const entraTenant = value('entraTenantId') ?? ''
+  const guid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (
+    (entraClient !== '' || entraTenant !== '') &&
+    (!guid.test(entraClient) || !guid.test(entraTenant))
+  ) {
+    defects.push('PARAMETERS_ENTRA_IDENTIFIERS_INVALID')
+  }
+  if (Object.prototype.hasOwnProperty.call(values, 'entraClientSecret'))
+    defects.push('PARAMETERS_FILE_CARRIES_SECRET')
   if (Object.prototype.hasOwnProperty.call(values, 'bootstrapInfrastructureOnly') && typeof value('bootstrapInfrastructureOnly') !== 'boolean') {
     defects.push('PARAMETERS_BOOTSTRAP_MODE_NOT_BOOLEAN')
   }
