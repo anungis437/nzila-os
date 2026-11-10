@@ -192,7 +192,19 @@ async function main() {
   // pg_dump changes session search_path/role/settings. Inspect with the same
   // normal session context as the reference, so regprocedure/type names agree.
   await roundtrip.query('RESET ROLE; RESET ALL;')
-  assert.equal(catalogDigest(await inspectCatalog(roundtrip)), catalogDigest(expected), 'RESTORE_CATALOG_MISMATCH')
+  const restoredCatalog = await inspectCatalog(roundtrip)
+  if (catalogDigest(restoredCatalog) !== catalogDigest(expected)) {
+    const expectedById = new Map(expected.map((o: any) => [`${o.kind}:${o.id}`, o]))
+    const actualById = new Map(restoredCatalog.map((o: any) => [`${o.kind}:${o.id}`, o]))
+    const differences = [...new Set([...expectedById.keys(), ...actualById.keys()])].flatMap(id => {
+      const a: any = expectedById.get(id), b: any = actualById.get(id)
+      if (JSON.stringify(a) === JSON.stringify(b)) return []
+      return [{ id, expected: a, actual: b }]
+    })
+    fs.writeFileSync(out + '.catalog-differences.json', JSON.stringify(differences, null, 2) + '\n')
+    console.error(JSON.stringify({ restoreCatalogDifferences: differences.length, examples: differences.slice(0, 12).map(d => ({ id: d.id, expected: JSON.stringify(d.expected?.definition).slice(0, 450), actual: JSON.stringify(d.actual?.definition).slice(0, 450) })) }))
+    throw new Error('RESTORE_CATALOG_MISMATCH')
+  }
   const restorePrivileges = await qualifyNativePrivileges(roundtrip, plan)
   assert.deepEqual(restorePrivileges.mismatches, [], 'RESTORE_PRIVILEGE_MISMATCH')
   await roundtrip.query('COMMIT')
