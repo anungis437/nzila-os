@@ -198,6 +198,28 @@ describe('BillingScheduler — full SYSTEM execution boundary (organization_bill
     expect(m.generateBillingCycle).toHaveBeenCalledTimes(2);
   });
 
+  it.each(['daily', '', 'MONTHLY', null, undefined])(
+    'rejects unsupported scheduler frequency %s before privileged context or financial work',
+    async (invalidFrequency) => {
+      const { BillingScheduler } = await loadModule();
+      await expect(BillingScheduler.runScheduledBilling(invalidFrequency as never))
+        .rejects.toThrow('Unsupported billing frequency');
+      expect(m.withSystemContext).not.toHaveBeenCalled();
+      expect(m.calls).toEqual([]);
+      expect(m.generateBillingCycle).not.toHaveBeenCalled();
+      expect(m.notificationServiceSend).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects an unsupported manual frequency without enumerating organizations', async () => {
+    const { BillingScheduler } = await loadModule();
+    await expect(BillingScheduler.manualTrigger('daily' as never))
+      .rejects.toThrow('Unsupported billing frequency');
+    expect(m.withSystemContext).not.toHaveBeenCalled();
+    expect(m.calls).toEqual([]);
+    expect(m.generateBillingCycle).not.toHaveBeenCalled();
+  });
+
   it('manualTrigger delegates to the same SYSTEM-context-wrapped runScheduledBilling', async () => {
     m.queue.push([]);
     const { BillingScheduler } = await loadModule();
