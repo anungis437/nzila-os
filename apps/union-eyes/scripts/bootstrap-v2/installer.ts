@@ -10,6 +10,7 @@ import { compileCaseAssigneePredicateSql } from '../../db/auth/case-assignee-pre
 import { compileConversationAssigneePredicateSql } from '../../db/auth/conversation-assignee-predicate'
 import { canonicalRoleSqlList } from './execution-roles'
 import { compileFrameworkSql } from './framework-sql'
+import { canonicalCatalogObject } from './catalog-normalization'
 import {
   assertMinimumInstaller,
   inspectVectorObjectIds,
@@ -108,7 +109,7 @@ export async function inspectNativeDependencies(client: pg.Client): Promise<Nati
   `)
   return result.rows
 }
-export const catalogDigest = (objects: CatalogObject[]) => hash(JSON.stringify(objects))
+export const catalogDigest = (objects: CatalogObject[]) => hash(JSON.stringify(objects.map(canonicalCatalogObject)))
 export const canonicalType = (type: string) =>
   type
     .replace(/^varchar/, 'character varying')

@@ -545,6 +545,7 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'apps/union-eyes/services/platform-economics/transaction-fee-engine.ts',
     'apps/union-eyes/services/platform-economics/fee-adjustment-insert.ts',
     'apps/union-eyes/scripts/bootstrap-v2/installer.ts',
+    'apps/union-eyes/scripts/bootstrap-v2/catalog-normalization.ts',
     'apps/union-eyes/lib/db/with-rls-context.ts',
     'apps/union-eyes/db/db.ts',
     'apps/union-eyes/db/system-db.ts',

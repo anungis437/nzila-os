@@ -217,6 +217,7 @@ async function main() {
     applicationSourceSha,
     exporterSourceDigest: hash(fs.readFileSync(__filename)),
     sourcePlanDigest: hash(JSON.stringify(plan)),
+    catalogNormalization: 'PG16_DUMP_EQUIVALENCE_V1',
     extensions: plan.statements.filter((s: { canonicalId: string }) => s.canonicalId.startsWith('CURRENT_EXTENSION:')).map((s: { canonicalId: string }) => s.canonicalId),
     image,
     tables: plan.tables.length,
