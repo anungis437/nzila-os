@@ -326,3 +326,7 @@ The legacy Union Eyes workflows (`deploy-union-eyes.yml`, `union-eyes-authority-
 `canary-deploy.yml` when `app=nzila-os-union-eyes`) now assert the legacy subscription
 `5d819f33-d16f-429c-a3c0-5b0e94740ba3` right after `azure/login` and stop otherwise. They are kept,
 not deleted: decommissioning is not authorized.
+
+## 2026-11-10 qualification update
+
+Azure what-if run [42753019682](https://github.com/anungis437/nzila-os/actions/runs/42753019682) completed the provider what-if step, superseding the earlier Canada Central ManagedEnvironmentCount rejection. Its downstream policy gate rejected an Azure symbolic AcrPull role assignment; PR [#1159](https://github.com/anungis437/nzila-os/pull/1159) restricts acceptance to the exact intended staging identity and built-in AcrPull role. The founder-operated change approval is recorded in CHG-2026-0114. A new complete what-if and staging apply are still required; this is not deployed-runtime evidence.
