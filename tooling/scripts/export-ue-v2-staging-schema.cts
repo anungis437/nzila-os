@@ -189,6 +189,9 @@ async function main() {
   await roundtrip.query('BEGIN')
   await roundtrip.query(sqlFromGuardedDump(files['schema-restore.sql']))
   await roundtrip.query(sqlFromGuardedDump(files['receipt-restore.sql']))
+  // pg_dump changes session search_path/role/settings. Inspect with the same
+  // normal session context as the reference, so regprocedure/type names agree.
+  await roundtrip.query('RESET ROLE; RESET ALL;')
   assert.equal(catalogDigest(await inspectCatalog(roundtrip)), catalogDigest(expected), 'RESTORE_CATALOG_MISMATCH')
   const restorePrivileges = await qualifyNativePrivileges(roundtrip, plan)
   assert.deepEqual(restorePrivileges.mismatches, [], 'RESTORE_PRIVILEGE_MISMATCH')
