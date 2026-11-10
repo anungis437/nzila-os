@@ -115,6 +115,12 @@ export class BillingCycleService {
       throw new Error('Invalid billing cycle period');
     }
 
+    // Runtime callers (including scheduled jobs) are not protected by TypeScript types.
+    // Refuse an unsupported frequency before acquiring a financial transaction.
+    if (!(['monthly', 'bi_weekly', 'weekly', 'quarterly', 'annual'] as const).includes(frequency)) {
+      throw new Error('Unsupported billing frequency');
+    }
+
     logger.info('Starting billing cycle generation', {
       organizationId,
       periodStart,
