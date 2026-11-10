@@ -163,7 +163,7 @@ const contract = {
   acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
   stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
   verdict: 'STAGING_NO_GO',
-  verdictReason: 'The source baseline and staging foundation are complete, but Azure currently limits Canada Central to the existing production Container Apps environment. The isolated staging environment cannot be previewed or deployed until Microsoft raises ManagedEnvironmentCount from 1 to 2. CHG-2026-0114 is approved under the scoped founder-operated staging authority; a separate human reviewer is not required for this solo-founder operation. Real deployed Phase 3A evidence does not yet exist.',
+  verdictReason: 'The source baseline and founder-operated staging authorization are ready. Azure what-if run 42753019682 completed its provider preflight successfully, so the previous Canada Central environment quota hold is no longer evidenced. That run's post-what-if gate failed on an exact symbolic AcrPull assignment; its narrowly scoped fix is in PR #1159 and combined here. Fresh integrated what-if, controlled staging apply and deployed Phase 3A evidence are still required. No staging deployment has occurred.',
   decisionAuthority: {
     role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
@@ -200,7 +200,7 @@ const contract = {
     ['SOURCE_ENGINEERING', 'PASS', 'Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries.'],
     ['LOCAL_HOLISTIC_REGRESSION', 'NON_BLOCKING_HOST_LIMITATION', 'Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.'],
     ['FINAL_CANDIDATE_CI', 'PASS', 'PR #1155 validated the staging candidate with 103 passing and 11 intentionally skipped checks; PR #1157 validated the final read-only what-if workflow correction with 102 passing and 11 intentionally skipped checks.'],
-    ['AUTHORIZED_STAGING_DEPLOYMENT', 'EXTERNAL_HOLD', 'The candidate, protected GitHub environments, OIDC identities, least-privilege roles and digest-pinned images exist. Azure what-if run 42745600190 passed repository, identity, subscription and registry attestations, then failed provider preflight: Canada Central ManagedEnvironmentCount limit 1 / usage 1. CHG-2026-0114 is now founder-authorized; Azure capacity remains the only demonstrated external deployment block.'],
+    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'The source candidate, protected GitHub environments, OIDC identities, least-privilege roles, and digest-pinned images are configured. On 2026-11-10, Azure what-if in run 42753019682 completed successfully, superseding the previous capacity preflight. The post-what-if gate rejected a symbolic registry AcrPull role assignment; the bounded fix from PR #1159 is combined with founder approval and must pass CI and a new what-if before apply. No staging deployment has occurred.'],
     ['DEPLOYED_REVISION_IDENTITY', 'NOT_PROVEN', 'No staging revision running this candidate is identified.'],
     ['DATABASE_MIGRATIONS', 'NOT_PROVEN', 'No real candidate-bound staging migration receipt exists.'],
     ['ENTRA_AUTHENTICATED_SESSIONS', 'NOT_PROVEN', 'No real staging Entra/session acceptance exists for this candidate.'],
@@ -214,14 +214,7 @@ const contract = {
     ['INSTITUTIONAL_BOUNDARIES', 'PASS', 'Platform-staff mandate remains decision-ready but not decided; restricted cross-tenant and financial powers remain deny-by-default.'],
     ['STAGING_DECISION_ACCEPTANCE', 'NOT_PROVEN', 'The sole founder is the staging decision authority. STAGING GO cannot yet be accepted because real deployed qualification has not happened; no second independent human is required for this internal operation.'],
   ].map(([id, status, evidence]) => ({ id, requirement: id === 'LOCAL_HOLISTIC_REGRESSION' ? 'ADVISORY' : 'REQUIRED', status, evidence })),
-  externalBlockers: [
-    {
-      id: 'EXT-01-CONTAINER-APPS-ENVIRONMENT-QUOTA',
-      dependency: 'Canada Central ManagedEnvironmentCount is limit 1 / usage 1. The existing environment is production and the approved topology expressly forbids sharing it. Azure what-if run 42745600190 failed with MaxNumberOfRegionalEnvironmentsInSubExceeded after identity and digest attestations passed.',
-      requiredAction: 'Microsoft must raise the subscription\'s Canada Central ManagedEnvironmentCount from 1 to 2 through the Azure quota portal or support channel. CLI quota update returned ResourceNotAvailableForOffer and the support API returned InvalidSupportPlan.',
-      engineeringBypassPermitted: false,
-    },
-  ],
+  externalBlockers: [],
 }
 
 if (census.frozenPopulation !== 777) throw new Error(`Frozen population changed: ${census.frozenPopulation}`)
