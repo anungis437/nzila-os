@@ -66,7 +66,9 @@ export async function initOtel(config: OtelConfig): Promise<void> {
         url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ?? baseEndpoint,
       })
     } else if (protocol === 'http/json') {
-      const { OTLPTraceExporter } = await import('@opentelemetry/exporter-trace-otlp-http')
+      const { OTLPTraceExporter } = (await import('@opentelemetry/exporter-trace-otlp-http')) as {
+        OTLPTraceExporter: new (config: { url: string }) => unknown
+      }
       traceExporter = new OTLPTraceExporter({
         url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ?? `${baseEndpoint}/v1/traces`,
       })
