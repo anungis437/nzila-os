@@ -134,6 +134,23 @@ describe('BillingCycleService', () => {
     expect(mockRequireMandate).not.toHaveBeenCalled();
   });
 
+  it('refuses unsupported runtime billing frequencies before opening a transaction or checking a mandate', async () => {
+    const base = {
+      organizationId: '11111111-1111-4111-8111-111111111111',
+      periodStart: new Date('2026-03-01T00:00:00Z'),
+      periodEnd: new Date('2026-03-31T23:59:59Z'),
+      executedBy: 'user-1',
+    };
+    for (const frequency of ['daily', '', 'MONTHLY', null]) {
+      await expect(BillingCycleService.generateBillingCycle({
+        ...base,
+        frequency: frequency as BillingCycleParams['frequency'],
+      })).rejects.toThrow('Unsupported billing frequency');
+    }
+    expect(mockWithRLS).not.toHaveBeenCalled();
+    expect(mockRequireMandate).not.toHaveBeenCalled();
+  });
+
   it('BillingCycleParams has expected structure', () => {
     const params: BillingCycleParams = {
       organizationId: 'org-1',
