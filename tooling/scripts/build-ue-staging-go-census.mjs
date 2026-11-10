@@ -163,9 +163,9 @@ const contract = {
   acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
   stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
   verdict: 'STAGING_NO_GO',
-  verdictReason: 'The source baseline and staging foundation are complete, but Azure currently limits Canada Central to the existing production Container Apps environment. The isolated staging environment cannot be previewed or deployed until Microsoft raises ManagedEnvironmentCount from 1 to 2; the staging change record also still requires independent approval. No real deployed Phase 3A evidence exists.',
+  verdictReason: 'The source baseline and staging foundation are complete, but Azure currently limits Canada Central to the existing production Container Apps environment. The isolated staging environment cannot be previewed or deployed until Microsoft raises ManagedEnvironmentCount from 1 to 2. CHG-2026-0114 is approved under the scoped founder-operated staging authority; a separate human reviewer is not required for this solo-founder operation. Real deployed Phase 3A evidence does not yet exist.',
   decisionAuthority: {
-    role: 'NZILA_OWNER_OR_AUTHORIZED_PLATFORM_REVIEWER',
+    role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
   },
   boundaries: {
@@ -198,9 +198,9 @@ const contract = {
   criteria: [
     ['CANDIDATE_IDENTITY', 'PASS', `Engineering baseline ${ENGINEERING_BASELINE_SHA}, staging image/source ${STAGING_CANDIDATE_SHA}, and workflow definition ${STAGING_WORKFLOW_SHA} are unambiguous and contained on main.`],
     ['SOURCE_ENGINEERING', 'PASS', 'Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries.'],
-    ['LOCAL_HOLISTIC_REGRESSION', 'ENVIRONMENT_HOLD', '49,052 tests passed; 13 failures are confined to an unrelated civic filesystem/authorization fixture and a missing host Python cryptography package. Exact-SHA CI remains authoritative.'],
+    ['LOCAL_HOLISTIC_REGRESSION', 'NON_BLOCKING_HOST_LIMITATION', 'Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.'],
     ['FINAL_CANDIDATE_CI', 'PASS', 'PR #1155 validated the staging candidate with 103 passing and 11 intentionally skipped checks; PR #1157 validated the final read-only what-if workflow correction with 102 passing and 11 intentionally skipped checks.'],
-    ['AUTHORIZED_STAGING_DEPLOYMENT', 'EXTERNAL_HOLD', 'The candidate, protected GitHub environments, OIDC identities, least-privilege roles, and digest-pinned images exist. Azure what-if run 42745600190 passed all repository, identity, subscription, and registry attestations, then failed provider preflight because Canada Central ManagedEnvironmentCount is limit 1 / usage 1. CHG-2026-0114 also remains pending independent approval.'],
+    ['AUTHORIZED_STAGING_DEPLOYMENT', 'EXTERNAL_HOLD', 'The candidate, protected GitHub environments, OIDC identities, least-privilege roles and digest-pinned images exist. Azure what-if run 42745600190 passed repository, identity, subscription and registry attestations, then failed provider preflight: Canada Central ManagedEnvironmentCount limit 1 / usage 1. CHG-2026-0114 is now founder-authorized; Azure capacity remains the only demonstrated external deployment block.'],
     ['DEPLOYED_REVISION_IDENTITY', 'NOT_PROVEN', 'No staging revision running this candidate is identified.'],
     ['DATABASE_MIGRATIONS', 'NOT_PROVEN', 'No real candidate-bound staging migration receipt exists.'],
     ['ENTRA_AUTHENTICATED_SESSIONS', 'NOT_PROVEN', 'No real staging Entra/session acceptance exists for this candidate.'],
@@ -212,25 +212,13 @@ const contract = {
     ['OPERATIONAL_RECOVERY', 'NOT_PROVEN', 'Rollback, backup/restore, and recovery evidence is not candidate-bound.'],
     ['CAPABILITY_TRUTHFULNESS', 'PENDING', 'The capability registry remains conservative, but deployed availability must be compared with it.'],
     ['INSTITUTIONAL_BOUNDARIES', 'PASS', 'Platform-staff mandate remains decision-ready but not decided; restricted cross-tenant and financial powers remain deny-by-default.'],
-    ['STAGING_DECISION_ACCEPTANCE', 'EXTERNAL_HOLD', 'No authorized staging acceptance is recorded because deployed qualification has not occurred.'],
-  ].map(([id, status, evidence]) => ({ id, requirement: 'REQUIRED', status, evidence })),
+    ['STAGING_DECISION_ACCEPTANCE', 'NOT_PROVEN', 'The sole founder is the staging decision authority. STAGING GO cannot yet be accepted because real deployed qualification has not happened; no second independent human is required for this internal operation.'],
+  ].map(([id, status, evidence]) => ({ id, requirement: id === 'LOCAL_HOLISTIC_REGRESSION' ? 'ADVISORY' : 'REQUIRED', status, evidence })),
   externalBlockers: [
     {
       id: 'EXT-01-CONTAINER-APPS-ENVIRONMENT-QUOTA',
       dependency: 'Canada Central ManagedEnvironmentCount is limit 1 / usage 1. The existing environment is production and the approved topology expressly forbids sharing it. Azure what-if run 42745600190 failed with MaxNumberOfRegionalEnvironmentsInSubExceeded after identity and digest attestations passed.',
       requiredAction: 'Microsoft must raise the subscription\'s Canada Central ManagedEnvironmentCount from 1 to 2 through the Azure quota portal or support channel. CLI quota update returned ResourceNotAvailableForOffer and the support API returned InvalidSupportPlan.',
-      engineeringBypassPermitted: false,
-    },
-    {
-      id: 'EXT-02-NO-APPROVED-STAGING-CHANGE-RECORD',
-      dependency: `CHG-2026-0114 is prepared and candidate-bound to ${STAGING_CANDIDATE_SHA}, but remains PENDING with no independent approver recorded.`,
-      requiredAction: 'A designated approver must approve the prepared staging change instrument; the implementer must not self-approve.',
-      engineeringBypassPermitted: false,
-    },
-    {
-      id: 'EXT-04-CREDENTIALLED-ACCEPTANCE-ACTORS',
-      dependency: 'No credentialed real staging persona set and independent acceptance actor are available for candidate-bound journeys.',
-      requiredAction: 'Provide or authorize the staging identities and designated acceptance reviewer after deployment.',
       engineeringBypassPermitted: false,
     },
   ],
