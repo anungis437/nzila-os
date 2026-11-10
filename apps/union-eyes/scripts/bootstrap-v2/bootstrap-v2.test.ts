@@ -1,4 +1,6 @@
 import pg from 'pg'
+import currentSourcePlan from '../../../../docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json'
+import admissionDecisions from '../../lib/operations/catalog-v2-decisions.json'
 import { describe, expect, it } from 'vitest'
 import { storageAuthorityManifest } from '../../db/rls-storage-authority'
 import {
@@ -125,6 +127,18 @@ describe('prospective bootstrap local authority boundaries', () => {
     expect(compiled.statements.join('\n')).not.toMatch(
       new RegExp(`GRANT SELECT \\([^)]*\\) ON TABLE public\\."${name}"`),
     )
+  })
+  it('pins the packaged admission denials to unresolved current-source ownership geometry', () => {
+    const compiled = compileSecurity(currentSourcePlan as unknown as V2Plan)
+    for (const name of ['arbitration_decisions', 'signature_audit_trail']) {
+      const rule = compiled.rules.find(entry => entry.table === name)
+      expect(rule).toMatchObject({ status: 'DENY_UNRESOLVED', runtimePrivileges: [], systemPrivileges: [] })
+      expect(admissionDecisions.entries.find(entry => entry.table === name)).toMatchObject({
+        classification: 'CONTAINED_NO_AUTHORITY', runtime: [], system: [],
+      })
+      expect(compiled.blockers.some(entry => entry.table === name)).toBe(true)
+      expect(compiled.statements.filter(sql => sql.startsWith('GRANT ') && sql.includes(`public."${name}"`))).toEqual([])
+    }
   })
   it('honors a recorded user-parent override when a child also references a sibling table', () => {
     const workbooks = table('workbooks', ['id', 'claimed_by_user_id'])
