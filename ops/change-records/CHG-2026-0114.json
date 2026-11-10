@@ -16,7 +16,7 @@
   ],
   "approval_status": "APPROVED",
   "implementation_window_start": "2026-11-10T00:00:00Z",
-  "implementation_window_end": "2027-12-31T23:59:59Z",
+  "implementation_window_end": "2026-11-13T23:59:59Z",
   "rollback_plan": "Use the ue-v2-staging-deploy workflow's captured prior digest and revision to restore the previous staging revision. If migration or runtime qualification fails, stop acceptance, preserve evidence, and execute the separately reviewed staging rollback path. Do not touch production or delete the staging stack under this change.",
   "test_evidence_refs": [
     "https://github.com/anungis437/nzila-os/pull/1137",
@@ -39,7 +39,7 @@
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-09T22:31:00-05:00",
+  "updated_at": "2026-11-10T00:18:53-05:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
