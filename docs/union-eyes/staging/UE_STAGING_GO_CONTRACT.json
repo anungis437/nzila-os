@@ -4,10 +4,10 @@
   "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
   "generatedOn": "2026-11-10",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
-  "acceptedStagingCandidateSha": "3f9af6b11622952963179f4d305cc0c1319df845",
-  "stagingWorkflowDefinitionSha": "3f9af6b11622952963179f4d305cc0c1319df845",
+  "acceptedStagingCandidateSha": "8580adb9e0a8aede979f99a85121b020ed333728",
+  "stagingWorkflowDefinitionSha": "8580adb9e0a8aede979f99a85121b020ed333728",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Candidate 3f9af6b11622952963179f4d305cc0c1319df845 contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source PRs #1167 and #1168 are still completing final CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.",
+  "verdictReason": "Candidate 8580adb9e0a8aede979f99a85121b020ed333728 contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source prerequisite #1167 is merged; the final candidate in #1168 and managed-role qualification in #1170 are completing full CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -44,7 +44,7 @@
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Engineering baseline e87e3799f3cd9a2408f75d846bc5ec676dae3847 and exact proposed source/workflow 3f9af6b11622952963179f4d305cc0c1319df845 are identified; main ancestry and built image identity remain to be verified."
+      "evidence": "Engineering baseline e87e3799f3cd9a2408f75d846bc5ec676dae3847 and exact proposed source/workflow 8580adb9e0a8aede979f99a85121b020ed333728 are identified; main ancestry and built image identity remain to be verified."
     },
     {
       "id": "SOURCE_ENGINEERING",
@@ -62,7 +62,7 @@
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "The fixed source head is completing full CI in PR #1168, following PR #1167. No successful final result or image attestation is inferred."
+      "evidence": "The fixed source head is completing full CI in PR #1168; prerequisite #1167 is merged. No successful final result or image attestation is inferred."
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",

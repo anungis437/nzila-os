@@ -1,5 +1,5 @@
 {
-  "applicationSourceSha": "3f9af6b11622952963179f4d305cc0c1319df845",
+  "applicationSourceSha": "8580adb9e0a8aede979f99a85121b020ed333728",
   "exporterSourceDigest": "a659f354275e29e906e4b02efd1d5769ae73d3ce746194827731fb7058ca95ad",
   "sourcePlanDigest": "dbf14018c47ed87408da3182de22e487856aa0cf49a2863eae691442cd452f08",
   "catalogNormalization": "PG16_DUMP_EQUIVALENCE_V1",
@@ -18,11 +18,11 @@
   "files": {
     "schema.sql": {
       "bytes": 2696125,
-      "sha256": "fa17b9f08ed9a8ceb01f575e39b6a1d7132a8b0c2c2458c17e8588b09c95ebce"
+      "sha256": "e23f7934f5fd418fa3015a61d07dc5a2fe67ccac9253ee6de81e3216355b06be"
     },
     "receipt.sql": {
       "bytes": 1000,
-      "sha256": "94733958c956af02d28924f3af8d6f425fd9007add6ac98576273f49be4b14df"
+      "sha256": "6c393877328077cf2cea06c014fd9f5d8ff3fe5b44bf4ad26a888ea38664e32a"
     },
     "roles.sql": {
       "bytes": 3395,
@@ -30,11 +30,11 @@
     },
     "schema-restore.sql": {
       "bytes": 2696767,
-      "sha256": "41ed44b5f5fb20e26bf6f96a4e0985292fb184d77798c719ae4b72ee62d8a50e"
+      "sha256": "83942c9824356a43a371a6af91b17066f99e83c692f1e59abe0d1019c7206b2d"
     },
     "receipt-restore.sql": {
       "bytes": 1022,
-      "sha256": "9a341b7ad9e3eff02214fbc58ff86496dadf801c530ba568322328efd68eaae4"
+      "sha256": "4559fa84bd121a833457c2cc3979baf93a1d0913235b04f813687bd33799dc42"
     }
   },
   "localOnly": true,

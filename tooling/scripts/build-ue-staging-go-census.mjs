@@ -10,8 +10,8 @@ const readJson = relative => JSON.parse(fs.readFileSync(path.join(root, relative
 
 const ENGINEERING_BASELINE_SHA = 'e87e3799f3cd9a2408f75d846bc5ec676dae3847'
 const GENERATED_ON = '2026-11-10'
-const STAGING_CANDIDATE_SHA = '3f9af6b11622952963179f4d305cc0c1319df845'
-const STAGING_WORKFLOW_SHA = '3f9af6b11622952963179f4d305cc0c1319df845'
+const STAGING_CANDIDATE_SHA = '8580adb9e0a8aede979f99a85121b020ed333728'
+const STAGING_WORKFLOW_SHA = '8580adb9e0a8aede979f99a85121b020ed333728'
 const outputDirectory = path.join(root, 'docs/union-eyes/staging')
 
 const register = readJson('docs/union-eyes/convergence/remediation/ue-all-777-remediation-register.json')
@@ -163,7 +163,7 @@ const contract = {
   acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
   stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
   verdict: 'STAGING_NO_GO',
-  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source PRs #1167 and #1168 are still completing final CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.`,
+  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source prerequisite #1167 is merged; the final candidate in #1168 and managed-role qualification in #1170 are completing full CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.`,
   decisionAuthority: {
     role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
@@ -199,7 +199,7 @@ const contract = {
     ['CANDIDATE_IDENTITY', 'PENDING', `Engineering baseline ${ENGINEERING_BASELINE_SHA} and exact proposed source/workflow ${STAGING_CANDIDATE_SHA} are identified; main ancestry and built image identity remain to be verified.`],
     ['SOURCE_ENGINEERING', 'PASS', 'Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries.'],
     ['LOCAL_HOLISTIC_REGRESSION', 'NON_BLOCKING_HOST_LIMITATION', 'Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.'],
-    ['FINAL_CANDIDATE_CI', 'PENDING', 'The fixed source head is completing full CI in PR #1168, following PR #1167. No successful final result or image attestation is inferred.'],
+    ['FINAL_CANDIDATE_CI', 'PENDING', 'The fixed source head is completing full CI in PR #1168; prerequisite #1167 is merged. No successful final result or image attestation is inferred.'],
     ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'Controlled apply 42774059371 passed plan, reviewed what-if, change-window, environment and drift gates, then failed on the PostgreSQL tier selector and an empty vault. The tier selector, infrastructure-only bootstrap path, verified application credentials and private operator passwords are prepared; no successful current-candidate deployment or database role bootstrap exists.'],
     ['DEPLOYED_REVISION_IDENTITY', 'NOT_PROVEN', 'No staging revision running this candidate is identified.'],
     ['DATABASE_MIGRATIONS', 'NOT_PROVEN', 'No real candidate-bound staging migration receipt exists.'],
