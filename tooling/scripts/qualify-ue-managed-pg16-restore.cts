@@ -268,7 +268,9 @@ async function main() {
   await runtime.query('COMMIT')
   phase = 'real-application-credential-contexts'
   function loginUrl(login: string, initialRole?: string) {
-    const u = new URL(`postgresql://${login}:${loginPasswords[login]}@127.0.0.1:${port}/${db}`)
+    const u = new URL(`postgresql://127.0.0.1:${port}/${db}`)
+    u.username = login
+    u.password = loginPasswords[login]
     u.searchParams.set('sslmode', 'disable')
     if (initialRole) u.searchParams.set('options', `-c role=${initialRole}`)
     return u.toString()
