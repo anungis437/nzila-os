@@ -173,7 +173,9 @@ async function main() {
     'schema.sql': schema,
     'receipt.sql': receipt,
     'roles.sql': roles + '\n',
-    'schema-restore.sql': transformSchemaDump(schema),
+    'schema-restore.sql': transformSchemaDump(schema, {
+      vectorExtensionExpected: plan.statements.some((s: { canonicalId: string }) => s.canonicalId === 'CURRENT_EXTENSION:vector'),
+    }),
     'receipt-restore.sql': transformReceiptDump(receipt),
   }
   fs.mkdirSync(out, { recursive: true })
@@ -183,6 +185,7 @@ async function main() {
     applicationSourceSha,
     exporterSourceDigest: hash(fs.readFileSync(__filename)),
     sourcePlanDigest: hash(JSON.stringify(plan)),
+    extensions: plan.statements.filter((s: { canonicalId: string }) => s.canonicalId.startsWith('CURRENT_EXTENSION:')).map((s: { canonicalId: string }) => s.canonicalId),
     image,
     tables: plan.tables.length,
     statements: plan.statements.length,

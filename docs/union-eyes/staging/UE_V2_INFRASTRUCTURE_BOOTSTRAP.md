@@ -53,6 +53,11 @@ bound to the current source bytes; a stale or tampered commitment fails both
 the source-plan CLI and its regression test. This is source admission, not
 runtime acceptance. Use the new export qualification receipt's measured digest
 and counts, never copy the historical runbook's catalog or schema digests.
+Provision extensions only when declared in the current export receipt. The
+current plan declares no vector columns or vector extension: the historical
+runbook's unconditional `CREATE EXTENSION vector` must not be applied to it.
+The transform explicitly validates either the declared vector line or its
+declared absence; it does not silently tolerate an unexpected extension.
 
 Generate the three login passwords, create the actual runtime/system/auth
 roles with their specified restrictions, then publish `database-url`,
