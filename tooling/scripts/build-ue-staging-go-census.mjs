@@ -10,8 +10,8 @@ const readJson = relative => JSON.parse(fs.readFileSync(path.join(root, relative
 
 const ENGINEERING_BASELINE_SHA = 'e87e3799f3cd9a2408f75d846bc5ec676dae3847'
 const GENERATED_ON = '2026-11-10'
-const STAGING_CANDIDATE_SHA = '884391997bb797637615361f2782697604d6d973'
-const STAGING_WORKFLOW_SHA = '884391997bb797637615361f2782697604d6d973'
+const STAGING_CANDIDATE_SHA = 'd2621ab63b605751e86f4cd0893aa6fd7e806351'
+const STAGING_WORKFLOW_SHA = 'd2621ab63b605751e86f4cd0893aa6fd7e806351'
 const outputDirectory = path.join(root, 'docs/union-eyes/staging')
 
 const register = readJson('docs/union-eyes/convergence/remediation/ue-all-777-remediation-register.json')
@@ -163,7 +163,7 @@ const contract = {
   acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
   stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
   verdict: 'STAGING_NO_GO',
-  verdictReason: `The source baseline and founder-operated staging authorization are ready. PR #1162 corrected the PostgreSQL SKU contract, AcrPull role GUID and least-privilege provider actions proven by controlled apply run 42765284956. Exact-SHA build run 42769631537 produced replacement candidate ${STAGING_CANDIDATE_SHA}. A fresh reviewed what-if, controlled staging apply and deployed Phase 3A evidence are still required; successful partial resources from the failed apply are not runtime acceptance.`,
+  verdictReason: `Controlled apply 42774059371 failed on a PostgreSQL tier mismatch and an empty private vault. PR #1164 corrected the tier selector in candidate ${STAGING_CANDIDATE_SHA}; verified staging secret bootstrap is complete except database role credentials. Exact-SHA build 42821859056, a fresh reviewed what-if, successful apply, database bootstrap and deployed Phase 3A evidence remain required. Partial resources are not runtime acceptance.`,
   decisionAuthority: {
     role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
@@ -199,8 +199,8 @@ const contract = {
     ['CANDIDATE_IDENTITY', 'PASS', `Engineering baseline ${ENGINEERING_BASELINE_SHA}, staging image/source ${STAGING_CANDIDATE_SHA}, and workflow definition ${STAGING_WORKFLOW_SHA} are unambiguous and contained on main.`],
     ['SOURCE_ENGINEERING', 'PASS', 'Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries.'],
     ['LOCAL_HOLISTIC_REGRESSION', 'NON_BLOCKING_HOST_LIMITATION', 'Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.'],
-    ['FINAL_CANDIDATE_CI', 'PASS', 'PR #1162 validated the Azure provider-contract correction with 104 passing checks and 9 intentional skips. Exact-SHA build run 42769631537 built and attested the replacement app image and mirrored utility images.'],
-    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'Protected GitHub environments, OIDC identities, least-privilege roles and digest-pinned images are configured. Controlled apply run 42765284956 passed plan, reviewed what-if, change-window and founder environment gates, then failed closed on provider-contract defects before complete deployment. The corrected replacement candidate still requires a fresh reviewed what-if and successful apply.'],
+    ['FINAL_CANDIDATE_CI', 'PASS', 'PR #1164 passed 105 checks with ten skips. Exact-SHA image build 42821859056 is separately required before deployment; source CI is not image attestation.'],
+    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'Controlled apply 42774059371 passed plan, reviewed what-if, change-window, environment and drift gates, then failed on the PostgreSQL tier selector and an empty vault. The tier correction and partial private secret bootstrap are complete; no successful candidate-bound deployment or database role bootstrap exists.'],
     ['DEPLOYED_REVISION_IDENTITY', 'NOT_PROVEN', 'No staging revision running this candidate is identified.'],
     ['DATABASE_MIGRATIONS', 'NOT_PROVEN', 'No real candidate-bound staging migration receipt exists.'],
     ['ENTRA_AUTHENTICATED_SESSIONS', 'NOT_PROVEN', 'No real staging Entra/session acceptance exists for this candidate.'],

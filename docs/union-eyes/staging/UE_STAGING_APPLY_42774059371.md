@@ -47,6 +47,30 @@ DNS, network access and metadata authorization at the time of the check. No
 secret values or access tokens were printed or persisted. Provider-issued Entra
 and Resend credentials still require a verified staging source before bootstrap.
 
+### Subsequent authorized bootstrap
+
+The owner then directed reuse of the verified existing staging credentials and
+continued execution. The active legacy staging app references confirmed the
+source names in `nzila-staging-kv`. Entra accepted the staging client credential
+(HTTP 200); Resend returned `restricted_api_key` (HTTP 401) for key management,
+confirming its send-only restriction without sending email.
+
+From the private staging network, the V2 vault was populated with eight secrets:
+`resend-api-key`, `azure-ad-client-secret`, `auth-secret`, `mfa-encryption-key`,
+`voting-secret`, `cron-secret`, `storage-account-key` and `redis-url`. The two
+provider credentials came from the verified staging source, application signing
+secrets were freshly generated, and storage/Redis credentials came from the
+dedicated V2 staging resources. An RSA-2048 `pii-encryption-key` was also created.
+No old database connection strings were copied. No secret values or tokens were
+logged or persisted to files. Existing versions are preserved on repeat runs.
+
+Temporary operator Secrets Officer and Crypto Officer grants, scoped only to
+the V2 vault, were removed after bootstrap. The scanner minimum replica count
+was restored to zero and its provisioning state was verified `Succeeded`.
+Vault networking and the app identity's read-only roles were unchanged.
+Database login roles and their three connection secrets remain unprovisioned;
+the corrected PostgreSQL server and qualified schema restore must come first.
+
 ## Required next steps
 
 1. Merge and build the corrected infrastructure candidate through normal CI;
