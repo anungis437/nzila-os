@@ -18,6 +18,7 @@ const {
 } = require(path.join(base, 'installer.ts'))
 const { compileMinimumRoleProvisioningSql } = require(path.join(base, 'minimum-installer.ts'))
 const { qualifyNativePrivileges } = require(path.join(base, 'manifest-security.ts'))
+const { sqlFromGuardedDump } = require('./lib/ue-guarded-postgres-dump.mjs')
 const { transformSchemaDump, transformReceiptDump } = require(
   path.join(root, 'apps/union-eyes/scripts/production/prepare-bootstrap-restore.ts'),
 )
@@ -69,19 +70,21 @@ async function main() {
       'SOURCE_COMMITMENT_MISMATCH:' + source,
     )
   }
-  execFileSync(
+  const dirty = execFileSync(
     'git',
     [
-      'diff',
-      '--exit-code',
-      'HEAD',
+      'status',
+      '--porcelain',
       '--',
       'apps/union-eyes',
       'packages/db',
       'docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json',
+      'tooling/scripts/export-ue-v2-staging-schema.cts',
+      'tooling/scripts/lib/ue-guarded-postgres-dump.mjs',
     ],
-    { cwd: root, stdio: 'pipe' },
+    { cwd: root, encoding: 'utf8', stdio: 'pipe' },
   )
+  assert.equal(dirty.trim(), '', 'UE_V2_EXPORT_CLEAN_COMMITTED_SOURCE_REQUIRED')
   container = docker([
     'run',
     '-d',
@@ -178,6 +181,20 @@ async function main() {
     }),
     'receipt-restore.sql': transformReceiptDump(receipt),
   }
+  // Verify the actual transformed dump, not only the installer that produced it.
+  // The protocol driver rejects client commands instead of interpreting them.
+  await admin.query('CREATE DATABASE ue_v2_clean_export_roundtrip OWNER ue_v2_owner')
+  const roundtrip = await connectLocalV2({ ...config, database: 'ue_v2_clean_export_roundtrip' })
+  clients.push(roundtrip)
+  await roundtrip.query('BEGIN')
+  await roundtrip.query(sqlFromGuardedDump(files['schema-restore.sql']))
+  await roundtrip.query(sqlFromGuardedDump(files['receipt-restore.sql']))
+  assert.equal(catalogDigest(await inspectCatalog(roundtrip)), catalogDigest(expected), 'RESTORE_CATALOG_MISMATCH')
+  const restorePrivileges = await qualifyNativePrivileges(roundtrip, plan)
+  assert.deepEqual(restorePrivileges.mismatches, [], 'RESTORE_PRIVILEGE_MISMATCH')
+  await roundtrip.query('COMMIT')
+  const restoredRepeat = await applyV2(roundtrip, plan, expected)
+  assert.equal(restoredRepeat.result, 'NOOP', 'RESTORED_RECEIPT_NOT_ACCEPTED')
   fs.mkdirSync(out, { recursive: true })
   for (const [file, bytes] of Object.entries(files)) fs.writeFileSync(path.join(out, file), bytes)
   fs.writeFileSync(path.join(out, 'expected-catalog.json'), JSON.stringify(catalog, null, 2) + '\n')
@@ -193,6 +210,8 @@ async function main() {
     catalogDigest: catalogDigest(catalog),
     installation: installed.result,
     repeat: repeated.result,
+    restoredDump: 'PASS',
+    restoredRepeat: restoredRepeat.result,
     privilegeStatus: privileges.status,
     privilegeMismatches: privileges.mismatches,
     files: Object.fromEntries(
