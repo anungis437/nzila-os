@@ -41,6 +41,15 @@ PostgreSQL image before any remote restore. A successful infrastructure pass
 does not remove this qualification requirement. Do not replay frozen migration
 lineage or substitute the historical export to get past it.
 
+The current generator also deliberately retains an older source commitment for
+`apps/union-eyes/app/api/organizations/switch/route.ts`; its regression test
+asserts that the current file differs. Consequently, successful plan regeneration
+and provenance CI do not establish that every current application source byte
+matches its committed hash. A strict local export attempt rejected that mismatch
+before starting a database container. Qualify and admit the current switch-route
+binding through a scoped change before admitting a current-source restore export;
+do not skip the mismatch or relabel the existing CI result as export qualification.
+
 Generate the three login passwords, create the actual runtime/system/auth
 roles with their specified restrictions, then publish `database-url`,
 `system-database-url` and `auth-database-url` to the private V2 vault. Never
