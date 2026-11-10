@@ -263,7 +263,7 @@ assign "$DEPLOY_PID" "Nzila UE Shared Monitoring Consumer" "$LAW_ID"            
 # Conditioned RBAC administration (role definition GUIDs are built-in and fixed)
 KV_SECRETS_USER=4633458b-17de-408a-b874-0445c86b69e6
 KV_CRYPTO_USER=12338af0-0e69-4776-bea7-57ae8d297424
-ACR_PULL=7f951dda-4ed3-4680-a7ca-43fe172d0f3b
+ACR_PULL=7f951dda-4ed3-4680-a7ca-43fe172d538d
 cond() {
   printf '%s' "((!(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})) OR (@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {$1} AND @Request[Microsoft.Authorization/roleAssignments:PrincipalType] StringEqualsIgnoreCase 'ServicePrincipal')) AND ((!(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})) OR (@Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {$1}))"
 }

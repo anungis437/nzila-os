@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "env": { "value": "staging" },
+    "logAnalyticsName": { "value": "nzila-canada-prod-law" },
+    "logAnalyticsResourceGroup": { "value": "nzila-canada-prod-rg" },
+    "createLogAnalytics": { "value": false },
+    "logAnalyticsDailyCapGb": { "value": -1 },
+    "createActionGroup": { "value": true },
+    "actionGroupEmailReceivers": {
+      "value": [
+        { "name": "staging-owner", "emailAddress": "a_nungisa@yahoo.ca" }
+      ]
+    },
+    "acrName": { "value": "nzilaventuresacr" },
+    "acrResourceGroup": { "value": "nzila-canada-prod-rg" },
+    "appImageDigest": {
+      "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "clamavImageDigest": {
+      "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "cronImageDigest": {
+      "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "appDatabaseName": { "value": "ue_v2_staging" },
+    "dbSku": { "value": "B_Standard_B1ms" },
+    "dbStorageGb": { "value": 32 },
+    "dbBackupRetentionDays": { "value": 7 },
+    "dbHighAvailability": { "value": false },
+    "dbGeoRedundantBackup": { "value": false },
+    "dbUseDefaultStorageTier": { "value": true },
+    "dbMaxConnections": { "value": 50 },
+    "appMinReplicas": { "value": 0 },
+    "appMaxReplicas": { "value": 2 },
+    "clamavMinReplicas": { "value": 0 },
+    "clamavMaxReplicas": { "value": 2 },
+    "acaInternal": { "value": false },
+    "ingressAllowedIpRanges": { "value": [] },
+    "publicHostName": { "value": "" },
+    "siteUrl": { "value": "https://staging.unioneyes.app" },
+    "emailFrom": { "value": "noreply@unioneyes.app" },
+    "emailReplyTo": { "value": "support@unioneyes.app" },
+    "redisSkuName": { "value": "Balanced_B0" },
+    "redisHighAvailability": { "value": false },
+    "storageSkuName": { "value": "Standard_LRS" },
+    "keyVaultSoftDeleteRetentionDays": { "value": 7 },
+    "enableStripe": { "value": false },
+    "owner": { "value": "anungis437" },
+    "costCenter": { "value": "union-eyes-staging" },
+    "budgetAmount": { "value": 0 },
+    "budgetStartDate": { "value": "" },
+    "budgetThresholds": { "value": [50, 80, 100] },
+    "budgetContactEmails": { "value": ["a_nungisa@yahoo.ca"] }
+  }
+}
