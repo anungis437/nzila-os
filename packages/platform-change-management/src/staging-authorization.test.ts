@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import { evaluateChangeRequirements, hasFounderOperatedStagingApproval, hasStagingMissionAuthorization } from './approvals'
+import { isInFreezePeriod, loadCalendarPolicy } from './calendar'
 import { changeRecordSchema } from './schemas'
 import type { ChangeRecord } from './types'
 
@@ -88,6 +89,16 @@ describe('solo-founder Union Eyes V2 staging (CHG-2026-0114)', () => {
       cabRequired: false,
       approvalSatisfied: true,
     })
+  })
+  it('uses a bounded implementation window that does not overlap a staging freeze', () => {
+    const change = founderStaging()
+    expect(new Date(change.implementation_window_end).getTime()).toBeLessThan(
+      new Date('2026-12-20T00:00:00.000Z').getTime(),
+    )
+    expect(isInFreezePeriod('STAGING', {
+      start: change.implementation_window_start,
+      end: change.implementation_window_end,
+    }, loadCalendarPolicy())).toBeNull()
   })
   it.each([
     ['production', (c: ChangeRecord) => ({ ...c, environment: 'PROD' as const })],
