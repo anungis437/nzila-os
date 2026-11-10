@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "localOnly": true,
+  "stagingAcceptance": false,
+  "image": "pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337",
+  "exportApplicationSourceSha": "018690b1e9b9a0baa8ceecafb1feb7b71d79f652",
+  "sourcePlanDigest": "d32be7dfb97665420bc63ddb69e8de4e1d9e4418add1dba822575a28d9cc500a",
+  "canonicalCatalogDigest": "f42fdab7ad9ff4ad032de0692fe51527228e6703708adc9595cb267b73805e30",
+  "finalRawCatalogDigest": "40eb9c14a3691e3399f0f7a5e52b04de66a7f40e0b0a3882aa6b8886eb855821",
+  "profile": "UE_STAGING_MANAGED_PG16_V1",
+  "canonicalObjects": 23849,
+  "managedObjects": 23877,
+  "openPrivilege": {
+    "status": "PASS_NATIVE_EFFECTIVE_PRIVILEGES_WITH_DECLARED_MANAGED_GRAPH",
+    "fixtureProbeStatus": "FAIL",
+    "fixtureGraphDifference": [
+      "INSTALLER_FUNCTION_OWNER_DELEGATION_DRIFT"
+    ]
+  },
+  "finalPrivilege": {
+    "status": "PASS_NATIVE_EFFECTIVE_PRIVILEGES_WITH_DECLARED_MANAGED_GRAPH",
+    "fixtureProbeStatus": "FAIL",
+    "fixtureGraphDifference": [
+      "INSTALLER_FUNCTION_OWNER_DELEGATION_DRIFT"
+    ]
+  },
+  "loginBoundaryDenials": 13,
+  "receiptReadDeniedToRuntime": true,
+  "extraOwnerMembershipRejected": true,
+  "directLoginTableGrantRejected": true,
+  "temporaryOperatorSetGrantRemoved": true,
+  "qualifierSourceDigest": "06a044db226fc09b946de22014e5d1f1a11bcdbf31b75646f3443661a9aae2db",
+  "profileSourceDigest": "491898d005dd8f34367cac690926ce550af37cbb9b67907485cccceffe92ad13",
+  "at": "2026-11-10T17:05:19.244Z"
+}
