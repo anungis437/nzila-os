@@ -56,7 +56,9 @@ export async function initOtel(config: OtelConfig): Promise<void> {
       process.env.OTEL_EXPORTER_OTLP_TRACES_PROTOCOL ??
       process.env.OTEL_EXPORTER_OTLP_PROTOCOL ??
       'http/json'
-    const baseEndpoint = endpoint.replace(/\/+$/, '')
+    let endpointEnd = endpoint.length
+    while (endpointEnd > 0 && endpoint.charCodeAt(endpointEnd - 1) === 47) endpointEnd--
+    const baseEndpoint = endpoint.slice(0, endpointEnd)
     let traceExporter: unknown
     if (protocol === 'grpc') {
       const { OTLPTraceExporter } = await import('@opentelemetry/exporter-trace-otlp-grpc')

@@ -62,6 +62,11 @@ describe('otel', () => {
     it.each([
       ['grpc', 'http://otel.service.k8se-apps:4317/', 'http://otel.service.k8se-apps:4317'],
       ['http/json', 'http://collector:4318/', 'http://collector:4318/v1/traces'],
+      [
+        'http/json',
+        `http://collector:4318/${'/'.repeat(100_000)}x`,
+        `http://collector:4318/${'/'.repeat(100_000)}x/v1/traces`,
+      ],
     ])(
       'sends %s spans to its matching collector transport',
       async (protocol, endpoint, expectedUrl) => {
