@@ -59,6 +59,21 @@ export interface StagingAuthorization {
   readonly signed_release_required: true
 }
 
+/** Operational founder staging approval, scoped to one candidate and without production authority. */
+export interface FounderStagingAuthorization {
+  readonly mission: 'UE_V2_ISOLATED_STAGING_QUALIFICATION'
+  readonly operating_mode: 'SOLO_FOUNDER'
+  readonly owner_github_login: 'anungis437'
+  readonly alternate_github_login: 'anungis'
+  readonly owner_authorization_ref: string
+  readonly authority_origin: 'OWNER_DIRECTIVE_IN_CONVERSATION'
+  readonly subscription_id: string
+  readonly candidate_sha: string
+  readonly staging_only: true
+  readonly production_authorized: false
+  readonly technical_gates_required: true
+}
+
 export type PIROutcome = 'SUCCESS' | 'PARTIAL_SUCCESS' | 'FAILED' | 'ROLLED_BACK'
 
 // ── Post Implementation Review ──────────────────────────────────────────────
@@ -86,6 +101,7 @@ export interface ChangeRecord {
   readonly approved_by: readonly string[]
   readonly approval_status: ApprovalStatus
   readonly staging_authorization?: StagingAuthorization
+  readonly founder_staging_authorization?: FounderStagingAuthorization
   readonly implementation_window_start: string
   readonly implementation_window_end: string
   readonly rollback_plan: string
