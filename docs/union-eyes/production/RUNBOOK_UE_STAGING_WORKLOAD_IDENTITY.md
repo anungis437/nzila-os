@@ -24,7 +24,7 @@ client secret. No registry admin user is used anywhere.
 | --- | --- | --- | --- |
 | `build` (exists) | `nzila-os-build` (exists, CHG-2026-0113) | build and push | push images to `nzilaventuresacr` |
 | `ue-staging-plan` (new) | `nzila-os-ue-staging-plan` (new) | registry attestation and `what-if` | read only, plus `what-if` |
-| `ue-staging` (new, required reviewers) | `nzila-os-ue-staging-deploy` (new) | apply | deploy the V2 template into `nzila-canada-staging-rg` |
+| `ue-staging` (new, founder-operated manual checkpoint) | `nzila-os-ue-staging-deploy` (new) | apply | deploy the V2 template into `nzila-canada-staging-rg` |
 
 The identities are user-assigned managed identities kept in a separate resource group,
 `nzila-canada-cicd-rg`. They must **not** live in `nzila-canada-staging-rg`: the deployer manages
@@ -91,7 +91,7 @@ this runbook.
 | Environment | Protection | Secrets (names only) | Variables |
 | --- | --- | --- | --- |
 | `ue-staging-plan` | deployment branches: `main` only; no reviewers | `AZURE_CLIENT_ID` (plan identity client ID), `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` | none |
-| `ue-staging` | deployment branches: `main` only; **required reviewers** (at least one, not the dispatcher; enable "Prevent self-review") | `AZURE_CLIENT_ID` (deploy identity client ID), `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `UE_V2_STAGING_DB_ADMIN_PASSWORD` (generated, stored only here) | none |
+| `ue-staging` | deployment branches: `main` only; **founder-operated manual approval** (both GitHub accounts are the same owner; do not assert independent review; configure a legitimate owner approval path) | `AZURE_CLIENT_ID` (deploy identity client ID), `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `UE_V2_STAGING_DB_ADMIN_PASSWORD` (generated, stored only here) | none |
 | `build` (exists) | unchanged | unchanged | `AZURE_AD_CLIENT_ID_STAGING`, `AZURE_AD_TENANT_ID_STAGING` (public Entra identifiers baked into the staging app image) |
 
 Do not create `PLAYWRIGHT_TEST_AUTH`, `UE_E2E_RISK_BYPASS` or `UNION_EYES_ACCEPTANCE_AUTH_ENABLED` in any
