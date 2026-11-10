@@ -127,13 +127,36 @@ describe('BillingScheduler — full SYSTEM execution boundary (organization_bill
 
   it('getOrganizationsForBilling does not open a second, nested withSystemContext of its own', async () => {
     m.queue.push([]); // enumeration: no configured orgs
-    m.queue.push([]); // fallback: no active orgs either
 
     const { BillingScheduler } = await loadModule();
     await BillingScheduler.runScheduledBilling('monthly');
 
     // Only the ONE outer withSystemContext call from runScheduledBilling.
     expect(m.withSystemContext).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not infer monthly charges for active organizations without an enabled billing configuration', async () => {
+    // An empty configured set must not trigger a second organization-wide
+    // enumeration or any financial write, even for the monthly frequency.
+    m.queue.push([]);
+    const { BillingScheduler } = await loadModule();
+    const result = await BillingScheduler.runScheduledBilling('monthly');
+
+    expect(result.totalOrganizations).toBe(0);
+    expect(result.successful).toBe(0);
+    expect(m.calls).toEqual(['select:SYSTEM']);
+    expect(m.generateBillingCycle).not.toHaveBeenCalled();
+    expect(m.notificationServiceSend).not.toHaveBeenCalled();
+  });
+
+  it('does not infer charges for a non-monthly frequency without explicit configuration', async () => {
+    m.queue.push([]);
+    const { BillingScheduler } = await loadModule();
+    const result = await BillingScheduler.runScheduledBilling('quarterly');
+
+    expect(result.totalOrganizations).toBe(0);
+    expect(m.calls).toEqual(['select:SYSTEM']);
+    expect(m.generateBillingCycle).not.toHaveBeenCalled();
   });
 
   it('manualTrigger delegates to the same SYSTEM-context-wrapped runScheduledBilling', async () => {
@@ -147,7 +170,6 @@ describe('BillingScheduler — full SYSTEM execution boundary (organization_bill
   it('lends the run the transaction of a caller that already runs as the system role: no second one is opened on another connection', async () => {
     m.activeSystemDb.mockReturnValue({});
     m.queue.push([]); // enumeration: no configured orgs
-    m.queue.push([]); // fallback: no active orgs either
 
     const { BillingScheduler } = await loadModule();
     const result = await BillingScheduler.manualTrigger('monthly');
