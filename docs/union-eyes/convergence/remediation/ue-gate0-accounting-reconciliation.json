@@ -4,11 +4,11 @@
   "rule": "Each corrected defect is counted once. The overlay total equals the elimination-ledger credits plus the credits earlier runs recorded with cited source; any other difference fails this check.",
   "totals": {
     "overlayImplemented": 777,
-    "ledgerImplemented": 702,
-    "creditedByEarlierRuns": 75,
-    "earlierRunCreditsWithIndependentRegressionEvidence": 51,
+    "ledgerImplemented": 730,
+    "creditedByEarlierRuns": 47,
+    "earlierRunCreditsWithIndependentRegressionEvidence": 47,
     "overlayPartial": 0,
-    "ledgerPartial": 3,
+    "ledgerPartial": 0,
     "unresolvedByOverlay": 0,
     "untouchedByOverlay": 0,
     "qualificationVerified": 0,
@@ -24,9 +24,9 @@
     "untouchedIds": []
   },
   "agreement": {
-    "creditedByBoth": 702,
+    "creditedByBoth": 730,
     "sameBatchLabel": 674,
-    "differentBatchLabel": 28
+    "differentBatchLabel": 56
   },
   "familyClassifications": {
     "populationAgrees": true,
@@ -36,9 +36,74 @@
   },
   "batchLabelDifferences": [
     {
+      "defectId": "DEF-0B1-CLC-ANALYTICS-WRITABLE",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
+      "overlayBatch": "B11-FINANCIAL-TARGET-MANDATE",
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B1-AI-USAGE-LEGACY-CROSS-TENANT",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B2-AI-CLASSIFY-UNGUARDED",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B2-AI-PUBLIC-KNOWLEDGE-CROSS-TENANT",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B2-AI-SEMANTIC-STATS-UNSCOPED",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B2-AI-FEEDBACK-READ-OTHER-USERS",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B3-BREAKS-OWNER-IDENTITY-MISMATCH",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B3-BREAKS-CREATE-FOR-OTHER-MEMBER",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
       "defectId": "DEF-0B3-KPI-ALERT-RECIPIENTS-MEMBER-READ",
       "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B3-BILLING-SEND-BATCH-CROSS-TENANT-MUTATION",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B3-AUDIT-ROW-FULL-DISCLOSURE",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
     },
     {
       "defectId": "DEF-0B3-BARGAINING-NEGOTIATION-RECORDS-MEMBER-READ",
@@ -46,9 +111,24 @@
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
     },
     {
+      "defectId": "DEF-0B3-METRICS-CLAIM-IDS-IN-MEMBER-READ",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B3-BREAK-COMPLIANCE-STEWARD-PER-MEMBER",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
       "defectId": "DEF-0B3-ALERT-INBOX-MEMBER-FLOOR-NO-REDACTION",
       "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
     },
     {
       "defectId": "DEF-0B4-CLAUSE-LIBRARY-ANONYMIZATION-NOT-ENFORCED-ON-READ",
@@ -96,9 +176,19 @@
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
     },
     {
+      "defectId": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
+      "overlayBatch": "GATE0-PHASE2-PAYROLL-IDENTITY-RESOLUTION",
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
       "defectId": "DEF-0B6-CMP-COPE-FUNDRAISING-TOTALS-WRITABLE-BY-STEWARD",
       "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B6-CMP-CRUD-ORG-SCOPE-NO-OP-ON-TABLE-WITHOUT-ORG-COLUMN",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
     },
     {
       "defectId": "DEF-0B7-EXC-READS-IGNORE-SENSITIVITY-LEVEL",
@@ -121,6 +211,16 @@
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
     },
     {
+      "defectId": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
+      "overlayBatch": "B168-FAMILY1-NINE-FINDING-ACCEPTANCE",
+      "ledgerBatch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",
+      "overlayBatch": "B151-GATE3-COGNITION-ANALYTICS-ENVELOPE-CONFIDENCE",
+      "ledgerBatch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION"
+    },
+    {
       "defectId": "DEF-0B7-COGB-SUCCESSION-SENDS-EVERY-PUBLISHED-INTERVIEW-TO-MODEL-IGNORING-SENSITIVITY",
       "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
@@ -129,6 +229,11 @@
       "defectId": "DEF-0B7-COGB-DERIVED-GRAPHS-IGNORE-INTERVIEW-SENSITIVITY",
       "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B7-COGB-DYNAMICS-ENGINES-EMBED-LITERAL-NUMBERS-AND-CLAIMS-AS-MEASUREMENTS",
+      "overlayBatch": "B150-GATE3-COGNITION-ANALYTICS-DYNAMICS-ENGINES",
+      "ledgerBatch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION"
     },
     {
       "defectId": "DEF-0B7-PLT-SSO-LIST-DISCLOSES-PROVIDER-CONFIGURATION-AT-MEMBER-FLOOR",
@@ -146,9 +251,39 @@
       "ledgerBatch": "B14-F03-OWN-ORGANIZATION-SCOPE"
     },
     {
+      "defectId": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
+      "overlayBatch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
+      "ledgerBatch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION"
+    },
+    {
       "defectId": "DEF-0B8-FED-FLAGS-ANY-SIGNED-IN-USER-CAN-PROBE-ANY-FLAG-NAME",
       "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
+    },
+    {
+      "defectId": "DEF-0B9-ML-MONITORING-METRICS-QUERY-ABSENT-COLUMNS-AND-JOIN-MODEL-METADATA-WITHOUT-AN-ORGANIZATION-PREDICATE",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B9-ML-MONITORING-METRICS-SUBSTITUTE-LITERAL-FIGURES-AND-REPORT-HEALTHY-WHEN-NOTHING-IS-MEASURED",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
+      "overlayBatch": "GATE0-PHASE2-ML-PREDICTIONS-SCHEMA-CONVERGENCE",
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B9-ORG-ANCESTORS-ANY-SIGNED-IN-USER-READS-ANCESTRY-OF-ANY-ORGANIZATION-AS-SYSTEM",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
+      "defectId": "DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
     },
     {
       "defectId": "DEF-0B11-RPT-DEFINITION-READS-RETURN-EVERY-REPORT-OF-THE-ORGANIZATION-TO-ANY-MEMBER-AND-NO-ROUTE-READS-IS-PUBLIC",
@@ -171,22 +306,17 @@
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
     },
     {
+      "defectId": "DEF-0B12-PLT-KPI-SUMMARY-GIVES-EVERY-MEMBER-THE-CALCULATION-ALERT-RECIPIENTS-AND-CREATOR-OF-EVERY-TARGET",
+      "overlayBatch": null,
+      "ledgerBatch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION"
+    },
+    {
       "defectId": "DEF-0B12-PLT-TEST-AUTH-FORWARDS-THE-SESSION-TOKEN-AND-RETURNS-THE-BACKEND-BODY-TO-EVERY-SIGNED-IN-USER",
       "overlayBatch": "B19-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR",
       "ledgerBatch": "B20-F07-READ-AUTHORITY-BEYOND-A-ROLE-FLOOR"
     }
   ],
   "earlierRunCredits": [
-    {
-      "defectId": "DEF-0B1-CLC-ANALYTICS-WRITABLE",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/lib/api/crud-governance.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
     {
       "defectId": "DEF-0B1-BILLING-HISTORY-FAKE-EMPTY",
       "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
@@ -196,19 +326,6 @@
         "apps/union-eyes/app/api/admin/billing-cycles/route.ts"
       ],
       "hasIndependentRegressionEvidence": true
-    },
-    {
-      "defectId": "DEF-0B1-BILLING-TARGET-ORG-UNBOUND",
-      "batch": "B11-FINANCIAL-TARGET-MANDATE",
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/lib/finance/billing-cycle-authority.ts",
-        "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
-        "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
-        "apps/union-eyes/lib/services/billing-cycle-service.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
     },
     {
       "defectId": "DEF-0B1-CLC-CROSS-TENANT-READ",
@@ -231,16 +348,6 @@
         "apps/union-eyes/app/api/compliance/audit-logs/route.ts"
       ],
       "hasIndependentRegressionEvidence": true
-    },
-    {
-      "defectId": "DEF-0B1-AI-USAGE-LEGACY-CROSS-TENANT",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/admin/ai-usage/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
     },
     {
       "defectId": "DEF-0B1-ORGANIZATIONS-CROSS-ORG-CONTACTS",
@@ -290,58 +397,6 @@
       "hasIndependentRegressionEvidence": true
     },
     {
-      "defectId": "DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/lib/ai/grievance-triage.ts",
-        "apps/union-eyes/lib/ai/clause-reasoning.ts",
-        "apps/union-eyes/lib/ai/steward-copilot.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B2-AI-CLASSIFY-UNGUARDED",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/ai/classify/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B2-AI-PUBLIC-KNOWLEDGE-CROSS-TENANT",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/ai/search/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B2-AI-SEMANTIC-STATS-UNSCOPED",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/ai/semantic-search/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B2-AI-FEEDBACK-READ-OTHER-USERS",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/ai/feedback/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
       "defectId": "DEF-0B2-PKI-ATTESTATION-NOT-CRYPTOGRAPHIC",
       "batch": null,
       "sourceCommit": "a1fcacf29",
@@ -353,26 +408,6 @@
       "hasIndependentRegressionEvidence": true
     },
     {
-      "defectId": "DEF-0B3-BREAKS-OWNER-IDENTITY-MISMATCH",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/breaks/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B3-BREAKS-CREATE-FOR-OTHER-MEMBER",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/breaks/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
       "defectId": "DEF-0B3-EXTERNAL-INVOICES-MEMBER-FLOOR",
       "batch": "GATE0-RECONCILE-FINANCE-AUDIT-CLC",
       "sourceCommit": "a78ad4ea2c878b8ae2878b717438b0db6a70bd28",
@@ -381,56 +416,6 @@
         "apps/union-eyes/app/api/billing/invoices/route.ts"
       ],
       "hasIndependentRegressionEvidence": true
-    },
-    {
-      "defectId": "DEF-0B3-BILLING-SEND-BATCH-CROSS-TENANT-MUTATION",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/billing/send-batch/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/billing/replay-invoice/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B3-AUDIT-ROW-FULL-DISCLOSURE",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/audits/[id]/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B3-METRICS-CLAIM-IDS-IN-MEMBER-READ",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/actions/analytics-actions.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B3-BREAK-COMPLIANCE-STEWARD-PER-MEMBER",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/breaks/compliance/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
     },
     {
       "defectId": "DEF-0B4-CALENDAR-CALLBACK-GET-WRITES-TOKENS-NO-AUDIT",
@@ -488,16 +473,6 @@
       "hasIndependentRegressionEvidence": true
     },
     {
-      "defectId": "DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/lib/api/crud-factory.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
       "defectId": "DEF-0B4-CALENDAR-EVENTS-PERSONAL-CALENDAR-LEAK",
       "batch": "GATE0-HS-CALENDAR-PRIVACY-RECONCILIATION",
       "sourceCommit": "5fa80b00ac12611834db0915c7ba19bf48b4e001",
@@ -532,18 +507,6 @@
       "hasIndependentRegressionEvidence": true
     },
     {
-      "defectId": "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE",
-      "batch": "GATE0-PHASE2-PAYROLL-IDENTITY-RESOLUTION",
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/lib/employer-execution/resolve-employment-mapping.ts",
-        "apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
-        "apps/union-eyes/lib/employer-execution/__tests__/resolve-employment-mapping.pglite.test.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
       "defectId": "DEF-0B6-EMP-EVIDENCE-SEAL-UNKEYED-HASH",
       "batch": "GATE0-DIRECTIVE-GATE2C-EVIDENCE-CHAIN-CONTENT-VERIFICATION",
       "sourceCommit": null,
@@ -553,16 +516,6 @@
         "apps/union-eyes/app/api/employer-execution/payroll-runs/[id]/route.ts"
       ],
       "hasIndependentRegressionEvidence": true
-    },
-    {
-      "defectId": "DEF-0B6-CMP-CRUD-ORG-SCOPE-NO-OP-ON-TABLE-WITHOUT-ORG-COLUMN",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/lib/api/crud-factory.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
     },
     {
       "defectId": "DEF-0B7-EXC-CONSENT-IS-ADMIN-ASSERTED-AND-RECLASSIFICATION-HAS-NO-REVIEW",
@@ -592,19 +545,6 @@
       "hasIndependentRegressionEvidence": true
     },
     {
-      "defectId": "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR",
-      "batch": "B168-FAMILY1-NINE-FINDING-ACCEPTANCE",
-      "sourceCommit": null,
-      "regressionTest": "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
-      "files": [
-        "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
-        "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts",
-        "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
-        "apps/union-eyes/app/api/exit-interviews/cognition-memory/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": true
-    },
-    {
       "defectId": "DEF-0B7-COGA-PROFILES-MEASURE-ENTERED-MEMORY-ROWS-NOT-GOVERNANCE",
       "batch": "B162-FAMILY1-COGNITION-EVIDENCE-ATOMIC",
       "sourceCommit": null,
@@ -617,17 +557,6 @@
         "apps/union-eyes/lib/knowledge-transfer/learning-archetypes/archetype-classifier.ts",
         "apps/union-eyes/lib/knowledge-transfer/behavior-patterns/__tests__/behavior-engine.test.ts",
         "apps/union-eyes/lib/knowledge-transfer/governance-culture/__tests__/culture-engine.test.ts"
-      ],
-      "hasIndependentRegressionEvidence": true
-    },
-    {
-      "defectId": "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY",
-      "batch": "B151-GATE3-COGNITION-ANALYTICS-ENVELOPE-CONFIDENCE",
-      "sourceCommit": null,
-      "regressionTest": "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts",
-      "files": [
-        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
-        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },
@@ -739,17 +668,6 @@
       "files": [
         "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
         "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/kernel-bridge-foundational.memory-honesty.test.ts"
-      ],
-      "hasIndependentRegressionEvidence": true
-    },
-    {
-      "defectId": "DEF-0B7-COGB-DYNAMICS-ENGINES-EMBED-LITERAL-NUMBERS-AND-CLAIMS-AS-MEASUREMENTS",
-      "batch": "B150-GATE3-COGNITION-ANALYTICS-DYNAMICS-ENGINES",
-      "sourceCommit": null,
-      "regressionTest": "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts;apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts",
-      "files": [
-        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts"
       ],
       "hasIndependentRegressionEvidence": true
     },
@@ -898,50 +816,6 @@
       "hasIndependentRegressionEvidence": true
     },
     {
-      "defectId": "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT",
-      "batch": "B143-GATE0-P2-PUBLIC-ROUTE-ALLOWLIST-CONVERGENCE",
-      "sourceCommit": null,
-      "regressionTest": "lib/services/__tests__/s38-targets-external-audit-profile.test.ts (4/4 passed, including a new test asserting the precheck is unconditional (no currentStateContextEnabled reference remains); app/api/external/__tests__/external-routes.test.ts, app/api/external/documents/[id]/download/projection.test.ts, app/api/external/documents/[id]/download/route.pglite.test.ts (37/37 passed). Verified as a genuine regression test by temporarily reintroducing the conditional, confirming the new test fails, then restoring the clean source with zero diff from HEAD.",
-      "files": [
-        "apps/union-eyes/lib/external-resource-middleware.ts",
-        "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
-        "apps/union-eyes/lib/services/__tests__/s38-targets-external-audit-profile.test.ts"
-      ],
-      "hasIndependentRegressionEvidence": true
-    },
-    {
-      "defectId": "DEF-0B9-ML-MONITORING-METRICS-QUERY-ABSENT-COLUMNS-AND-JOIN-MODEL-METADATA-WITHOUT-AN-ORGANIZATION-PREDICATE",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B9-ML-MONITORING-METRICS-SUBSTITUTE-LITERAL-FIGURES-AND-REPORT-HEALTHY-WHEN-NOTHING-IS-MEASURED",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE",
-      "batch": "GATE0-PHASE2-ML-PREDICTIONS-SCHEMA-CONVERGENCE",
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.sql",
-        "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.rollback.sql",
-        "apps/union-eyes/db/migrations-platform/__tests__/0084-ml-predictions-relax-legacy-not-null.pglite.test.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
       "defectId": "DEF-0B9-ORG-ITEM-GET-ANY-SIGNED-IN-USER-READS-ANY-ORGANIZATION-RECORD-AS-SYSTEM",
       "batch": null,
       "sourceCommit": null,
@@ -1000,36 +874,6 @@
         "apps/union-eyes/app/api/organizations/[id]/descendants/route.ts"
       ],
       "hasIndependentRegressionEvidence": true
-    },
-    {
-      "defectId": "DEF-0B9-ORG-ANCESTORS-ANY-SIGNED-IN-USER-READS-ANCESTRY-OF-ANY-ORGANIZATION-AS-SYSTEM",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/organizations/[id]/ancestors/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/organizations/[id]/path/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
-    },
-    {
-      "defectId": "DEF-0B12-PLT-KPI-SUMMARY-GIVES-EVERY-MEMBER-THE-CALCULATION-ALERT-RECIPIENTS-AND-CREATOR-OF-EVERY-TARGET",
-      "batch": null,
-      "sourceCommit": null,
-      "regressionTest": null,
-      "files": [
-        "apps/union-eyes/app/api/targets/summary/route.ts"
-      ],
-      "hasIndependentRegressionEvidence": false
     },
     {
       "defectId": "DEF-0B12-PLT-VOICE-ROUTES-SEND-THE-RECORDING-TO-AN-EXTERNAL-SERVICE-WITH-NO-CONSENT-OR-RECORD",

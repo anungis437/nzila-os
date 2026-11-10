@@ -10,10 +10,10 @@
   },
   "totals": {
     "original": 777,
-    "implementedPendingQualification": 702,
-    "partial": 3,
+    "implementedPendingQualification": 730,
+    "partial": 0,
     "qualificationVerified": 0,
-    "unresolved": 75,
+    "unresolved": 47,
     "externalBlockers": 0
   },
   "batches": [
@@ -1375,6 +1375,24 @@
       "outstandingAfter": 75,
       "partial": 0,
       "evidenceCommit": "a6ed0264e"
+    },
+    {
+      "id": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION",
+      "family": "Reconcile four stale auxiliary-ledger partials against the canonical final-convergence source and exact-SHA regression evidence",
+      "outstandingBefore": 75,
+      "newlyImplemented": 4,
+      "outstandingAfter": 71,
+      "partial": 0,
+      "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847"
+    },
+    {
+      "id": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "family": "Replace the 24 earlier-run source credits that lacked independently referenced regressions with current focused regression evidence",
+      "outstandingBefore": 71,
+      "newlyImplemented": 24,
+      "outstandingAfter": 47,
+      "partial": 0,
+      "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847"
     }
   ],
   "entries": {
@@ -3489,14 +3507,14 @@
       ]
     },
     "DEF-0B7-COGB-DYNAMICS-ENGINES-EMBED-LITERAL-NUMBERS-AND-CLAIMS-AS-MEASUREMENTS": {
-      "status": "PARTIAL",
-      "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION",
       "files": [
         "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs"
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts",
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts"
       ],
-      "explanation": "The systems-dynamics, governance-coherence, operational-coordination, operating-rhythm, multi-domain and operational-trust engines embedded fixed frequencies, response times, integration scores and narrative claims (for example \"Consistent governance behavior\") and presented them as measurements. They now fail with 501 through the same refusal as the correlation engine.",
-      "remaining": "The response-elasticity and governance-momentum engines remain: they derive scores from counts of cognition-memory entries with arbitrary scaling. They hold no fixed claim, but the scaling is not a validated measure.",
+      "explanation": "The two engines named by the earlier partial's remaining text (response-elasticity and governance-momentum), the title-named dynamics engines, and their sibling fixed-profile engines all fail honestly with HTTP 501 through notImplementedCompute. No reachable engine returns the arbitrary scaling, fixed frequency, response-time, integration-score or narrative measurements the defect described. Exact-SHA full regression and the dedicated refusal tests pass.",
       "history": [
         {
           "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
@@ -3506,18 +3524,27 @@
             "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
             "apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs"
           ]
+        },
+        {
+          "batch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
+            "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/constant-engines-not-implemented.test.ts",
+            "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/unmeasured-engines.test.ts"
+          ]
         }
       ]
     },
     "DEF-0B7-COGA-ENVELOPE-CONFIDENCE-IS-A-CONSTANT-AND-EXPLAINABILITY-IS-EMPTY": {
-      "status": "PARTIAL",
-      "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION",
       "files": [
-        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
-        "apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs"
+        "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+        "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
       ],
-      "explanation": "The default confidence of 60 is gone: an engine states a confidence only when it supplies one (otherwise 0), and the two remaining engines state evidence volume (cognition-memory entries analysed, capped at 100).",
-      "remaining": "The explainability envelope's evidence and reasoning lists are still not populated by these engines.",
+      "explanation": "The constant confidence is gone. An engine reports confidence only when it computes one; otherwise the envelope is explicitly insufficient_data. Evidence contains only the stored cognition-memory entries actually cited by the result, and the implementation does not fabricate reasoning, assumptions or governance implications. The dedicated regression and exact-SHA full regression pass.",
       "history": [
         {
           "batch": "B10-F02-ML-AND-COGNITION-HONESTY",
@@ -3526,6 +3553,15 @@
           "files": [
             "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge.ts",
             "apps/union-eyes/scripts/codemods/f02-dynamics-engines-501.cjs"
+          ]
+        },
+        {
+          "batch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/organizational-operating-intelligence/kernel-bridge-foundational.ts",
+            "apps/union-eyes/lib/organizational-operating-intelligence/__tests__/foundational-envelope-evidence.test.ts"
           ]
         }
       ]
@@ -15721,16 +15757,15 @@
       ]
     },
     "DEF-0B7-EXC-COGNITION-MEMORY-STORES-CALLER-ASSERTED-SNAPSHOTS-WITH-NO-AUTHOR": {
-      "status": "PARTIAL",
-      "batch": "B77-COGNITION-HONESTY",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION",
       "files": [
         "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
         "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts",
-        "apps/union-eyes/app/api/exit-interviews/cognition-memory/route.ts",
-        "apps/union-eyes/lib/services/__tests__/s21-cognition-honesty.test.ts"
+        "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
+        "apps/union-eyes/app/api/exit-interviews/cognition-memory/route.ts"
       ],
-      "explanation": "Each saved entry carries its author (kept under a payload key the server reserves and a caller cannot supply) and is labelled officer_asserted on the entry and on every resilience timeline point; the payload (16 KB), tags (20 of 64 characters), insights (20 of 500) and session id are bounded.",
-      "remaining": "Nothing checks a snapshot or score against a real simulation or index (the entry is still the officer's statement, now labelled as such), and entries saved before this change have no recorded author.",
+      "explanation": "Every new entry records its author and a discriminated officer_asserted or system_generated provenance. Scenario-backed snapshots run the real simulation server-side and persist its result and evidence provenance; caller-asserted snapshots remain explicitly labelled as assertions. Historical rows report whether they predate provenance or cannot be replayed, rather than being represented as verified. Save/reload and dual-provenance regressions pass on the exact-SHA candidate.",
       "history": [
         {
           "batch": "B77-COGNITION-HONESTY",
@@ -15741,6 +15776,17 @@
             "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts",
             "apps/union-eyes/app/api/exit-interviews/cognition-memory/route.ts",
             "apps/union-eyes/lib/services/__tests__/s21-cognition-honesty.test.ts"
+          ]
+        },
+        {
+          "batch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-store.ts",
+            "apps/union-eyes/lib/knowledge-transfer/cognition-memory/memory-models.ts",
+            "apps/union-eyes/lib/knowledge-transfer/cognition-memory/__tests__/memory-store.test.ts",
+            "apps/union-eyes/app/api/exit-interviews/cognition-memory/route.ts"
           ]
         }
       ]
@@ -17333,13 +17379,14 @@
       ]
     },
     "DEF-0B8-FED-EXTERNAL-ORGANIZATION-FROM-QUERY-OPENS-TENANT-CONTEXT-AND-AUDIT-BEFORE-GRANT": {
-      "status": "PARTIAL_SOURCE_REMAINING_WORK",
-      "batch": "B135-WAVE1-LEDGER-CREDITS-NON-FINANCIAL-ENGINES-AND-ROUTES",
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION",
       "files": [
         "apps/union-eyes/lib/external-resource-middleware.ts",
-        "apps/union-eyes/lib/services/external-resource-authorization-service.ts"
+        "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+        "apps/union-eyes/lib/services/__tests__/s38-targets-external-audit-profile.test.ts"
       ],
-      "explanation": "New holdsExternalAuthority check (asked via withPrincipalOnlyContext, before any tenant transaction or audit write) now gates legacy-mode requests; confirmed via direct diff read of both files. The fix is explicitly guarded by `if (!currentStateContextEnabled())`, so the canonical V2 path still needs its own separate check, matching Wave 1's own PARTIAL characterization exactly.",
+      "explanation": "The principal-only holdsExternalAuthority precheck now runs unconditionally before any caller-selected organization context or audit write in both legacy and canonical V2 modes. The regression forbids restoration of the former currentStateContextEnabled conditional, and the external route and native projection suites pass on the exact-SHA candidate.",
       "history": [
         {
           "batch": "B94-TARGETS-EXTERNAL-AUDIT-PROFILE",
@@ -17358,6 +17405,16 @@
           "files": [
             "apps/union-eyes/lib/external-resource-middleware.ts",
             "apps/union-eyes/lib/services/external-resource-authorization-service.ts"
+          ]
+        },
+        {
+          "batch": "B171-STAGING-CENSUS-AUXILIARY-LEDGER-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/external-resource-middleware.ts",
+            "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+            "apps/union-eyes/lib/services/__tests__/s38-targets-external-audit-profile.test.ts"
           ]
         }
       ]
@@ -19844,6 +19901,508 @@
           "files": [
             "apps/union-eyes/lib/workbook/consent.ts",
             "apps/union-eyes/app/api/workbook/[id]/consent/route.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B1-CLC-ANALYTICS-WRITABLE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/lib/api/crud-governance.ts",
+        "apps/union-eyes/lib/api/__tests__/crud-governance.test.ts"
+      ],
+      "explanation": "Generic CRUD classifies the CLC analytics backing relation as non-writable; the governance regression pins the denied write surface.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/api/crud-governance.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-governance.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B1-BILLING-TARGET-ORG-UNBOUND": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/lib/finance/billing-cycle-authority.ts",
+        "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
+        "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
+        "apps/union-eyes/lib/finance/__tests__/billing-cycle-authority.test.ts",
+        "apps/union-eyes/app/api/__tests__/admin-billing-cycles.route.test.ts",
+        "apps/union-eyes/app/api/__tests__/admin-billing-cycles-preview.route.test.ts"
+      ],
+      "explanation": "Billing-cycle reads, previews and execution bind the target organization to direct scoped authority; focused authority and route regressions cover refusal and permitted paths.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/finance/billing-cycle-authority.ts",
+            "apps/union-eyes/app/api/admin/billing-cycles/route.ts",
+            "apps/union-eyes/app/api/admin/billing-cycles/preview/route.ts",
+            "apps/union-eyes/lib/finance/__tests__/billing-cycle-authority.test.ts",
+            "apps/union-eyes/app/api/__tests__/admin-billing-cycles.route.test.ts",
+            "apps/union-eyes/app/api/__tests__/admin-billing-cycles-preview.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B1-AI-USAGE-LEGACY-CROSS-TENANT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/admin/ai-usage/route.ts",
+        "apps/union-eyes/app/api/__tests__/admin-ai-usage.route.test.ts"
+      ],
+      "explanation": "The legacy AI-usage route no longer provides an unscoped cross-tenant view; the route regression pins organization scoping and denial.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/admin/ai-usage/route.ts",
+            "apps/union-eyes/app/api/__tests__/admin-ai-usage.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B2-AI-GRIEVANCE-NO-CASE-AUTHORITY": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/lib/ai/grievance-triage.ts",
+        "apps/union-eyes/lib/ai/clause-reasoning.ts",
+        "apps/union-eyes/lib/ai/steward-copilot.ts",
+        "apps/union-eyes/lib/ai/__tests__/grievance-triage.test.ts",
+        "apps/union-eyes/lib/ai/__tests__/clause-reasoning.test.ts",
+        "apps/union-eyes/lib/ai/__tests__/steward-copilot.test.ts"
+      ],
+      "explanation": "AI grievance helpers require case-scoped authority instead of accepting organization presence alone; the three service regressions cover the governed entry points.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/ai/grievance-triage.ts",
+            "apps/union-eyes/lib/ai/clause-reasoning.ts",
+            "apps/union-eyes/lib/ai/steward-copilot.ts",
+            "apps/union-eyes/lib/ai/__tests__/grievance-triage.test.ts",
+            "apps/union-eyes/lib/ai/__tests__/clause-reasoning.test.ts",
+            "apps/union-eyes/lib/ai/__tests__/steward-copilot.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B2-AI-CLASSIFY-UNGUARDED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/ai/classify/route.ts",
+        "apps/union-eyes/app/api/__tests__/ai-classify.route.test.ts"
+      ],
+      "explanation": "Classification is protected by authenticated tenant authority and input validation; the route regression exercises the boundary.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/ai/classify/route.ts",
+            "apps/union-eyes/app/api/__tests__/ai-classify.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B2-AI-PUBLIC-KNOWLEDGE-CROSS-TENANT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/ai/search/route.ts",
+        "apps/union-eyes/app/api/__tests__/ai-search.route.test.ts"
+      ],
+      "explanation": "AI knowledge search is no longer a public cross-tenant read; the route regression pins authentication and scoped behavior.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/ai/search/route.ts",
+            "apps/union-eyes/app/api/__tests__/ai-search.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B2-AI-SEMANTIC-STATS-UNSCOPED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/ai/semantic-search/route.ts",
+        "apps/union-eyes/app/api/__tests__/ai-semantic-search.route.test.ts"
+      ],
+      "explanation": "Semantic search refuses tenantless access and does not expose unscoped statistics; focused route coverage passes.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/ai/semantic-search/route.ts",
+            "apps/union-eyes/app/api/__tests__/ai-semantic-search.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B2-AI-FEEDBACK-READ-OTHER-USERS": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/ai/feedback/route.ts",
+        "apps/union-eyes/app/api/__tests__/ai-feedback.route.test.ts"
+      ],
+      "explanation": "AI feedback reads are limited to the authenticated subject and tenant authority; the route regression covers the isolation rule.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/ai/feedback/route.ts",
+            "apps/union-eyes/app/api/__tests__/ai-feedback.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B3-BREAKS-OWNER-IDENTITY-MISMATCH": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/breaks/route.ts",
+        "apps/union-eyes/app/api/__tests__/breaks.route.test.ts"
+      ],
+      "explanation": "Break ownership is derived from the authenticated principal rather than a mismatched caller assertion; route tests cover the corrected identity binding.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/breaks/route.ts",
+            "apps/union-eyes/app/api/__tests__/breaks.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B3-BREAKS-CREATE-FOR-OTHER-MEMBER": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/breaks/route.ts",
+        "apps/union-eyes/app/api/__tests__/breaks.route.test.ts"
+      ],
+      "explanation": "An ordinary caller cannot create a break for another member; the same route suite covers the negative and permitted owner paths.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/breaks/route.ts",
+            "apps/union-eyes/app/api/__tests__/breaks.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B3-BILLING-SEND-BATCH-CROSS-TENANT-MUTATION": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/billing/send-batch/route.ts",
+        "apps/union-eyes/app/api/__tests__/billing-send-batch.route.test.ts"
+      ],
+      "explanation": "Batch send mutation requires direct scoped billing authority for the target organization; the route regression pins cross-tenant refusal.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/billing/send-batch/route.ts",
+            "apps/union-eyes/app/api/__tests__/billing-send-batch.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B3-BILLING-REPLAY-INVOICE-CROSS-TENANT-READ": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/billing/replay-invoice/route.ts",
+        "apps/union-eyes/app/api/__tests__/billing-replay-invoice.route.test.ts"
+      ],
+      "explanation": "Invoice replay reads are target-organization scoped and deny cross-tenant access; focused route coverage passes.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/billing/replay-invoice/route.ts",
+            "apps/union-eyes/app/api/__tests__/billing-replay-invoice.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B3-AUDIT-ROW-FULL-DISCLOSURE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/audits/[id]/route.ts",
+        "apps/union-eyes/app/api/__tests__/audits-id.route.test.ts"
+      ],
+      "explanation": "Audit item responses apply governed projection and authority rather than returning the full stored row; the item-route regression passes.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/audits/[id]/route.ts",
+            "apps/union-eyes/app/api/__tests__/audits-id.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B3-METRICS-CLAIM-IDS-IN-MEMBER-READ": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/actions/analytics-actions.ts",
+        "apps/union-eyes/actions/__tests__/analytics-actions.test.ts"
+      ],
+      "explanation": "Member analytics no longer exposes claim identifiers through an ordinary member read; the action regression pins the minimized projection.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/actions/analytics-actions.ts",
+            "apps/union-eyes/actions/__tests__/analytics-actions.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B3-BREAK-COMPLIANCE-STEWARD-PER-MEMBER": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/breaks/compliance/route.ts",
+        "apps/union-eyes/app/api/__tests__/breaks-compliance-privacy.route.test.ts"
+      ],
+      "explanation": "Break-compliance detail is privacy-minimized and protected by the required authority instead of exposing every member to a steward; the privacy regression passes.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/breaks/compliance/route.ts",
+            "apps/union-eyes/app/api/__tests__/breaks-compliance-privacy.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B4-CALENDAR-ITEM-LOCKED-CHECK-INERT": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts",
+        "apps/union-eyes/lib/api/__tests__/crud-factory-locked-auth.test.ts"
+      ],
+      "explanation": "Generic PATCH and DELETE execute the locked authorization callback against the locked row before mutation; adversarial locked-auth regressions pass.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/api/crud-factory.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-factory-locked-auth.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B6-EMP-OFFICIAL-APPROVAL-UNREACHABLE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/lib/employer-execution/resolve-employment-mapping.ts",
+        "apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
+        "apps/union-eyes/lib/employer-execution/__tests__/resolve-employment-mapping.pglite.test.ts"
+      ],
+      "explanation": "The official employment mapping approval path is reachable and persists through the governed resolver; the PGlite regression passes.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/employer-execution/resolve-employment-mapping.ts",
+            "apps/union-eyes/app/api/employer-execution/timesheets/[batchId]/mapping/route.ts",
+            "apps/union-eyes/lib/employer-execution/__tests__/resolve-employment-mapping.pglite.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B6-CMP-CRUD-ORG-SCOPE-NO-OP-ON-TABLE-WITHOUT-ORG-COLUMN": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/lib/api/crud-factory.ts",
+        "apps/union-eyes/lib/api/__tests__/crud-factory-scope.test.ts"
+      ],
+      "explanation": "The CRUD factory refuses an organization-scoped route over a table with no organization column unless an explicit reasoned exemption exists; scope regressions pass.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/lib/api/crud-factory.ts",
+            "apps/union-eyes/lib/api/__tests__/crud-factory-scope.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B9-ML-MONITORING-METRICS-QUERY-ABSENT-COLUMNS-AND-JOIN-MODEL-METADATA-WITHOUT-AN-ORGANIZATION-PREDICATE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts",
+        "apps/union-eyes/app/api/__tests__/ml-monitoring-metrics.route.test.ts"
+      ],
+      "explanation": "ML monitoring uses the physical schema and tenant predicate instead of absent columns and an unscoped metadata join; the route regression passes.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts",
+            "apps/union-eyes/app/api/__tests__/ml-monitoring-metrics.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B9-ML-MONITORING-METRICS-SUBSTITUTE-LITERAL-FIGURES-AND-REPORT-HEALTHY-WHEN-NOTHING-IS-MEASURED": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts",
+        "apps/union-eyes/app/api/__tests__/ml-monitoring-metrics.route.test.ts"
+      ],
+      "explanation": "The monitoring route reports measured values or an honest unavailable state and no longer substitutes healthy literal figures; focused coverage passes.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/ml/monitoring/metrics/route.ts",
+            "apps/union-eyes/app/api/__tests__/ml-monitoring-metrics.route.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B9-ML-DECLARED-PREDICTION-SHAPE-CONFLICTS-WITH-THE-SQL-THAT-CREATES-THE-TABLE": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.sql",
+        "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.rollback.sql",
+        "apps/union-eyes/db/migrations-platform/__tests__/0084-ml-predictions-relax-legacy-not-null.pglite.test.ts"
+      ],
+      "explanation": "Platform migration 0084 reconciles the physical ML prediction table with the declared shape and retains a rollback; the PGlite migration regression passes.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.sql",
+            "apps/union-eyes/db/migrations-platform/0084_ml_predictions_relax_legacy_not_null.rollback.sql",
+            "apps/union-eyes/db/migrations-platform/__tests__/0084-ml-predictions-relax-legacy-not-null.pglite.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B9-ORG-ANCESTORS-ANY-SIGNED-IN-USER-READS-ANCESTRY-OF-ANY-ORGANIZATION-AS-SYSTEM": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/ancestors/route.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+      ],
+      "explanation": "The ancestors route authorizes the requested organization and minimizes ancestor projection under issue #1116; the native regression is catalogued and remains environment-gated in this focused replay.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/organizations/[id]/ancestors/route.ts",
+            "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B9-ORG-PATH-LEGACY-BRANCH-READS-ORGANIZATIONS-ON-BARE-DB-WITHOUT-CONTEXT-OR-MEMBERSHIP-CHECK": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/organizations/[id]/path/route.ts",
+        "apps/union-eyes/app/api/__tests__/organizations-path.route.test.ts",
+        "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+      ],
+      "explanation": "The path route checks direct organization read authority and filters inaccessible ancestors instead of querying through a bare client; route coverage passes and the native companion remains environment-gated.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/organizations/[id]/path/route.ts",
+            "apps/union-eyes/app/api/__tests__/organizations-path.route.test.ts",
+            "apps/union-eyes/db/__tests__/organizations-read-authority.postgres.test.ts"
+          ]
+        }
+      ]
+    },
+    "DEF-0B12-PLT-KPI-SUMMARY-GIVES-EVERY-MEMBER-THE-CALCULATION-ALERT-RECIPIENTS-AND-CREATOR-OF-EVERY-TARGET": {
+      "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+      "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+      "files": [
+        "apps/union-eyes/app/api/targets/summary/route.ts",
+        "apps/union-eyes/app/api/__tests__/targets-summary-authority.route.test.ts"
+      ],
+      "explanation": "KPI target summaries apply authority-specific projections and withhold calculation, recipient and creator detail from ordinary members; the route regression passes.",
+      "history": [
+        {
+          "batch": "B172-STAGING-CENSUS-EARLIER-RUN-EVIDENCE-RECONCILIATION",
+          "status": "IMPLEMENTED_PENDING_QUALIFICATION",
+          "evidenceCommit": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+          "files": [
+            "apps/union-eyes/app/api/targets/summary/route.ts",
+            "apps/union-eyes/app/api/__tests__/targets-summary-authority.route.test.ts"
           ]
         }
       ]
