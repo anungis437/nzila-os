@@ -10,8 +10,8 @@ const readJson = relative => JSON.parse(fs.readFileSync(path.join(root, relative
 
 const ENGINEERING_BASELINE_SHA = 'e87e3799f3cd9a2408f75d846bc5ec676dae3847'
 const GENERATED_ON = '2026-11-10'
-const STAGING_CANDIDATE_SHA = 'd2621ab63b605751e86f4cd0893aa6fd7e806351'
-const STAGING_WORKFLOW_SHA = 'd2621ab63b605751e86f4cd0893aa6fd7e806351'
+const STAGING_CANDIDATE_SHA = 'd093936d06209cc6321464dd85caded6f945166e'
+const STAGING_WORKFLOW_SHA = 'd093936d06209cc6321464dd85caded6f945166e'
 const outputDirectory = path.join(root, 'docs/union-eyes/staging')
 
 const register = readJson('docs/union-eyes/convergence/remediation/ue-all-777-remediation-register.json')
@@ -163,7 +163,7 @@ const contract = {
   acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
   stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
   verdict: 'STAGING_NO_GO',
-  verdictReason: `Controlled apply 42774059371 failed on a PostgreSQL tier mismatch and an empty private vault. PR #1164 corrected the tier selector in candidate ${STAGING_CANDIDATE_SHA}; verified staging secret bootstrap is complete except database role credentials. Exact-SHA build 42821859056, a fresh reviewed what-if, successful apply, database bootstrap and deployed Phase 3A evidence remain required. Partial resources are not runtime acceptance.`,
+  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source prerequisite #1167 is merged; source snapshot #1168 and the combined authorization/managed-role integration #1169 are completing full CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.`,
   decisionAuthority: {
     role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
@@ -196,11 +196,11 @@ const contract = {
   },
   passRule: 'Every REQUIRED criterion must be PASS from real deployed evidence on the accepted staging revision; synthetic, local, source-only, or historical evidence cannot satisfy a runtime criterion.',
   criteria: [
-    ['CANDIDATE_IDENTITY', 'PASS', `Engineering baseline ${ENGINEERING_BASELINE_SHA}, staging image/source ${STAGING_CANDIDATE_SHA}, and workflow definition ${STAGING_WORKFLOW_SHA} are unambiguous and contained on main.`],
+    ['CANDIDATE_IDENTITY', 'PENDING', `Engineering baseline ${ENGINEERING_BASELINE_SHA} and exact proposed source/workflow ${STAGING_CANDIDATE_SHA} are identified; main ancestry and built image identity remain to be verified.`],
     ['SOURCE_ENGINEERING', 'PASS', 'Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries.'],
     ['LOCAL_HOLISTIC_REGRESSION', 'NON_BLOCKING_HOST_LIMITATION', 'Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.'],
-    ['FINAL_CANDIDATE_CI', 'PASS', 'PR #1164 passed 105 checks with ten skips. Exact-SHA image build 42821859056 is separately required before deployment; source CI is not image attestation.'],
-    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'Controlled apply 42774059371 passed plan, reviewed what-if, change-window, environment and drift gates, then failed on the PostgreSQL tier selector and an empty vault. The tier correction and partial private secret bootstrap are complete; no successful candidate-bound deployment or database role bootstrap exists.'],
+    ['FINAL_CANDIDATE_CI', 'PENDING', 'The fixed source head is completing full CI in PR #1168; prerequisite #1167 is merged. No successful final result or image attestation is inferred.'],
+    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'Controlled apply 42774059371 passed plan, reviewed what-if, change-window, environment and drift gates, then failed on the PostgreSQL tier selector and an empty vault. The tier selector, infrastructure-only bootstrap path, verified application credentials and private operator passwords are prepared; no successful current-candidate deployment or database role bootstrap exists.'],
     ['DEPLOYED_REVISION_IDENTITY', 'NOT_PROVEN', 'No staging revision running this candidate is identified.'],
     ['DATABASE_MIGRATIONS', 'NOT_PROVEN', 'No real candidate-bound staging migration receipt exists.'],
     ['ENTRA_AUTHENTICATED_SESSIONS', 'NOT_PROVEN', 'No real staging Entra/session acceptance exists for this candidate.'],

@@ -20,9 +20,9 @@ const approvedFunction = {
 }
 
 describe('canonical catalog admission', () => {
-  it('preserves every public manifest privilege and the original legacy contract, except two documented V2 decisions', () => {
+  it('preserves every public manifest privilege and the original legacy contract, except documented V2 decisions', () => {
     const inherited = canonical.payload.entries.slice(0, base.payload.entries.length)
-    const decided = new Set(['donations', 'evidence_packs'])
+    const decided = new Set(['donations', 'evidence_packs', 'arbitration_decisions', 'signature_audit_trail'])
     expect(inherited.filter(entry => !decided.has(entry.table))).toEqual(base.payload.entries.filter(entry => !decided.has(entry.table)))
     // Pinned exactly so that any other change to the inherited manifest still fails this test.
     expect(inherited.find(entry => entry.table === 'donations')).toMatchObject({
@@ -37,6 +37,26 @@ describe('canonical catalog admission', () => {
     expect(canonical.payload.nonPublic.filter(row => row.schema === 'user_management')
       .every(row => row.runtime.length === 0 && row.system.length === 0)).toBe(true)
     expect(base.payload.nonPublic.find(row => row.table === 'users')?.runtime).toEqual(['SELECT'])
+  })
+
+  it('preserves fail-closed current-source geometry and rejects grants to unresolved features', () => {
+    for (const table of ['arbitration_decisions', 'signature_audit_trail']) {
+      expect(canonical.payload.entries.find(entry => entry.table === table)).toMatchObject({
+        classification: 'CONTAINED_NO_AUTHORITY', runtime: [], system: [],
+      })
+      expect(base.payload.entries.find(entry => entry.table === table)?.runtime.length).toBeGreaterThan(0)
+      const relation = { schema_name: 'public', table_name: table, relkind: 'r', relrowsecurity: true, relforcerowsecurity: true }
+      expect(assessCatalogAdmission(canonical, { ...snapshots(), relations: [{ ...relation, runtime: [], system: [] }] }).ok).toBe(true)
+      expect(assessCatalogAdmission(canonical, { ...snapshots(), relations: [{ ...relation, runtime: ['SELECT'], system: [] }] }).ok).toBe(false)
+    }
+  })
+
+  it('uses table-level system SELECT without requiring redundant service column ACLs', () => {
+    for (const table of ['commercial_contracts', 'external_data_sync_log']) {
+      const entry = canonical.payload.entries.find(entry => entry.table === table)!
+      expect(entry.system).toContain('SELECT')
+      expect(canonical.payload.approvedColumnGrants.some(grant => grant.table === table)).toBe(false)
+    }
   })
 
   it('does not repair or re-sign a corrupt packaged contract', () => {
