@@ -174,7 +174,26 @@ async function main() {
            foreignDownloadDenied: true, publicClientStatus, expiresAt,
            signedUrlSha256: crypto.createHash('sha256').update(link.href).digest('hex'), encryptedPrivateLease: envelope,
            privateBytesAndExpiryNotYetProven: true });
-  report.status = 'PASS';
   report.claims = cases;
+  if (process.env.VERIFY_MEMBERSHIP_REVOCATION === 'true') {
+    stage = 'await-real-membership-revocation';
+    report.status = 'CHECKPOINT_READY';
+    fs.writeFileSync(OUT + '/checkpoint.json', JSON.stringify(report, null, 2) + '\n');
+    // The protected checkpoint lets the private operator revoke only the owned
+    // synthetic membership. Existing provider cookies stay exclusively in RAM.
+    await new Promise(resolve => setTimeout(resolve, 360000));
+    const activeSession = await contexts.get('A').request.get(BASE + '/api/auth/session');
+    assert.equal(activeSession.status(), 200);
+    const session = await activeSession.json();
+    assert.equal(session.entraObjectId, PEOPLE.A.oid);
+    assert(Date.parse(session.expires) > Date.now(), 'Session must remain unexpired');
+    stage = 'existing-cookie-after-membership-revocation';
+    await request('A', '/api/cases/' + cases.A, 'GET', undefined, [403, 404]);
+    await request('A', '/api/documents/' + documentId + '/download', 'GET', undefined, [403, 404]);
+    record({ kind: 'EXISTING_REAL_SESSION_DENIED_AFTER_MEMBERSHIP_REVOCATION',
+      persona: 'A', claimId: cases.A, documentId, sessionStillUnexpired: true,
+      previouslyIssuedLeaseRequiresSeparateActualExpiryProof: true });
+  }
+  report.status = 'PASS';
 }
 main().catch(error => { report.status = 'FAIL'; report.failure = { stage, error: error.name }; process.exitCode = 1; }).finally(async () => { if (browser) await browser.close().catch(() => {}); fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(OUT + '/receipt.json', JSON.stringify(report, null, 2) + '\n'); console.log(JSON.stringify({ status: report.status, stage, observations: report.observations.length })); });

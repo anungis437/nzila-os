@@ -8,6 +8,12 @@ on:
         required: true
         type: string
 
+      verify_membership_revocation:
+        description: Hold real session after checkpoint for owned synthetic membership revocation
+        required: false
+        type: boolean
+        default: false
+
 permissions:
   contents: read
 
@@ -61,12 +67,54 @@ jobs:
         run: node --check tooling/scripts/qualify-ue-v2-real-entra.cjs
 
       - name: Authenticate verified synthetic principals and exercise the live candidate
+        if: ${{ !inputs.verify_membership_revocation }}
         env:
           SOURCE_SHA: ${{ inputs.source_sha }}
           EVIDENCE_PUBLIC_KEY_B64: ${{ vars.UE_V2_STAGING_EVIDENCE_PUBLIC_KEY_B64 }}
           UE_V2_STAGING_PERSONA_A_PASSWORD: ${{ secrets.UE_V2_STAGING_PERSONA_A_PASSWORD }}
           UE_V2_STAGING_PERSONA_B_PASSWORD: ${{ secrets.UE_V2_STAGING_PERSONA_B_PASSWORD }}
         run: node tooling/scripts/qualify-ue-v2-real-entra.cjs
+
+      - name: Start real session and await revocation checkpoint
+        if: ${{ inputs.verify_membership_revocation }}
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          VERIFY_MEMBERSHIP_REVOCATION: 'true'
+          EVIDENCE_PUBLIC_KEY_B64: ${{ vars.UE_V2_STAGING_EVIDENCE_PUBLIC_KEY_B64 }}
+          UE_V2_STAGING_PERSONA_A_PASSWORD: ${{ secrets.UE_V2_STAGING_PERSONA_A_PASSWORD }}
+          UE_V2_STAGING_PERSONA_B_PASSWORD: ${{ secrets.UE_V2_STAGING_PERSONA_B_PASSWORD }}
+        shell: bash
+        run: |
+          mkdir -p artifacts/ue-v2-real-entra
+          (set +e; node tooling/scripts/qualify-ue-v2-real-entra.cjs; result=$?; echo "$result" > artifacts/ue-v2-real-entra/process-exit) &
+          for attempt in $(seq 1 120); do
+            if test -f artifacts/ue-v2-real-entra/checkpoint.json; then exit 0; fi
+            if test -f artifacts/ue-v2-real-entra/process-exit; then exit 1; fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Publish protected redacted checkpoint for synthetic membership revocation
+        if: ${{ inputs.verify_membership_revocation }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-revocation-checkpoint-${{ github.run_id }}
+          path: artifacts/ue-v2-real-entra/checkpoint.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Require actual existing-session denial after revocation
+        if: ${{ inputs.verify_membership_revocation }}
+        shell: bash
+        run: |
+          for attempt in $(seq 1 144); do
+            if test -f artifacts/ue-v2-real-entra/process-exit; then
+              test "$(cat artifacts/ue-v2-real-entra/process-exit)" = 0
+              exit $?
+            fi
+            sleep 5
+          done
+          exit 1
 
       - name: Preserve only redacted acceptance metadata
         if: always()

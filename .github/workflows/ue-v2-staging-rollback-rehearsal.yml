@@ -1,0 +1,76 @@
+name: Union Eyes V2 staging rollback rehearsal
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact admitted and deployed CHG-2026-0114 source
+        required: true
+        type: string
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: ue-v2-staging-deploy
+  cancel-in-progress: false
+jobs:
+  plan:
+    if: github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ue-staging-plan
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify rollback restoration and fail-closed contracts
+        run: node --test tooling/scripts/qualify-ue-v2-staging-rollback.test.cjs
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Capture healthy staging revision and bounded rehearsal plan
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          OPERATION: plan
+        run: node tooling/scripts/qualify-ue-v2-staging-rollback.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-rollback-plan-${{ github.run_id }}
+          path: artifacts/ue-v2-rollback/receipt.json
+          if-no-files-found: error
+  rehearse:
+    needs: plan
+    if: github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ue-staging
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify rollback restoration and fail-closed contracts
+        run: node --test tooling/scripts/qualify-ue-v2-staging-rollback.test.cjs
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: ue-v2-rollback-plan-${{ github.run_id }}
+          path: reviewed-plan
+      - name: Prove failed-revision protection and restore captured healthy template
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          OPERATION: rehearse
+        run: node tooling/scripts/qualify-ue-v2-staging-rollback.cjs
+      - name: Preserve redacted actual rehearsal receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-rollback-rehearsal-${{ github.run_id }}
+          path: artifacts/ue-v2-rollback/receipt.json
+          if-no-files-found: warn

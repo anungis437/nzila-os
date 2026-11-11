@@ -1,43 +1,9 @@
 # Exact-source staging prerequisite receipt
 
-Candidate: `8438da0bffd2e5e90084bf9d965533ffe94c5a8a`.
+Candidate: `7d67bcd59ee3f2441d41cde5adbd8769bda85a96`.
 
-The [measured local export receipt](evidence/ue-v2-candidate-export-8438da0b-20261111.json)
-records the current dependency-bound plan and emitted restore file hashes.
-Pinned PostgreSQL 16 installed the plan, verified 23,849 catalog objects and the
-native privilege boundary, returned receipt-backed NOOP, then restored the
-actual emitted dump into another empty database and repeated those checks.
-Both restore and privilege checks passed, with no privilege mismatches.
+The [measured local export receipt](evidence/ue-v2-candidate-export-7d67bcd5-20261111.json) records the exact committed source, dependency-bound plan and emitted file hashes. Pinned PostgreSQL 16 installed all 6,255 statements for 771 tables, verified 23,849 catalog objects and native privilege boundaries, returned receipt-backed NOOP, restored the emitted dump into another empty local database and repeated those checks. Both restore and privilege checks passed without mismatches.
 
-This is a local export prerequisite. It does not establish Azure database
-installation, application sessions, deployed tenant isolation, delivery,
-telemetry, recovery or STAGING_GO. Use only these exact hashed artifacts for
-the source-bound private restore after main admission and governed foundation
-deployment. Preserve an unexpected target state rather than overwriting it.
+The canonical catalog digest remains `f42fdab7ad9ff4ad032de0692fe51527228e6703708adc9595cb267b73805e30`. SQL statements are byte-identical to the installed preceding plan; source commitment metadata changed because private API error handling changed. Preserve the actual Azure database and its original installation receipt. Requalify its native catalog and restricted credentials against this candidate; do not repeat empty-target restore, reseed fixtures or relabel the historical receipt.
 
-The candidate keeps unresolved precedent and signature-audit ownership denied;
-these capabilities remain unavailable. Packaged admission recognizes the exact
-compiled denial and rejects added runtime access. Ordinary and system auth use
-distinct restricted logins; shared health inspection uses an explicit startup role.
-The [private credential receipt](evidence/ue-v2-private-password-policy-20261110.json)
-records policy-compliant staging credentials prepared before server creation,
-protected GitHub admin-secret synchronization, and the measured runtime/admin
-vault read boundary. It contains no credential values.
-
-Export privacy now strips credential-bearing URL data from spans, events and
-links before either OTLP transport serializes them. Real local HTTP/JSON and
-gRPC/protobuf collector receipts preserve trace/correlation identity and show
-no synthetic callback code, signed URL signature, cookie or URL password.
-The tracing helper also propagates business failures without repeating work.
-See [the measured privacy receipt](evidence/ue-v2-telemetry-privacy-local-20261110.json).
-
-The current source also corrects the two actual provider rejections in foundation
-run `43028242463`: staging uses the supported managed-telemetry API and PostgreSQL
-name `nzila-ue-v2-staging-db-d562ba7f`. Its typed compilation and Azure read-only
-validation passed; production retains the previous API, properties and database
-name. The [failed foundation receipt](evidence/ue-v2-foundation-provider-contracts-20261111.json)
-is preserved. A new exact-source image, fresh reviewed apply and real database
-qualification remain required; the earlier candidate's build is not reused as
-an image attestation for this source.
-
-Browser CI also required a runner dependency repair after two Azure Ubuntu mirror DNS failures. The official HTTPS archive transport and bounded validated public DNS fallback are restricted to disposable hosted runners; package signatures, dependencies and all browser assertions remain unchanged. See [the measured runner repair](UE_V2_CI_BROWSER_DEPENDENCIES.md).
+[Real staging diagnostics and source repairs](UE_V2_REAL_ENTRA_RUNTIME_REPAIR.md) explain the failed case write after two real provider sessions. [The job-name correction](UE_V2_JOB_NAME_PROVIDER_REPAIR.md) fixes the observed deployment rejection. These are source prerequisites, not current-candidate runtime acceptance. Full CI, main admission, a new source-attested image, fresh reviewed normal rollout and deployed qualification remain required. Staging remains NO_GO; production and institutional authority are outside scope.

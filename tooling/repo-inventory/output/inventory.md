@@ -9,7 +9,7 @@
 | Apps | 28 |
 | Packages (packages/*) | 225 |
 | Workspace Packages (apps|packages|services|tooling) | 260 |
-| GitHub Workflows | 70 |
+| GitHub Workflows | 71 |
 | Contract Test Files | 306 |
 | TS/JS Test Files | 3676 |
 | Python Test Files | 52 |
@@ -117,5 +117,6 @@
 - ue-v2-staging-build.yml
 - ue-v2-staging-deploy.yml
 - ue-v2-staging-real-session.yml
+- ue-v2-staging-rollback-rehearsal.yml
 - union-eyes-authority-rollout.yml
 - zonga-check.yml

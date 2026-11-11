@@ -10,8 +10,8 @@ const readJson = relative => JSON.parse(fs.readFileSync(path.join(root, relative
 
 const ENGINEERING_BASELINE_SHA = 'e87e3799f3cd9a2408f75d846bc5ec676dae3847'
 const GENERATED_ON = '2026-11-11'
-const STAGING_CANDIDATE_SHA = '8438da0bffd2e5e90084bf9d965533ffe94c5a8a'
-const STAGING_WORKFLOW_SHA = '8438da0bffd2e5e90084bf9d965533ffe94c5a8a'
+const STAGING_CANDIDATE_SHA = '7d67bcd59ee3f2441d41cde5adbd8769bda85a96'
+const STAGING_WORKFLOW_SHA = '7d67bcd59ee3f2441d41cde5adbd8769bda85a96'
 const outputDirectory = path.join(root, 'docs/union-eyes/staging')
 
 const register = readJson('docs/union-eyes/convergence/remediation/ue-all-777-remediation-register.json')
@@ -163,7 +163,7 @@ const contract = {
   acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
   stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
   verdict: 'STAGING_NO_GO',
-  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} corrects the two observed provider failures in controlled foundation apply 43028242463: unsupported managed-telemetry properties on the legacy API and a globally unavailable PostgreSQL name. It also repairs the reproducible Ubuntu mirror dependency failure in browser CI without changing test assertions. The corrective source is in PR #1171; final CI, main admission, a new digest-attested build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. No successful current-candidate apply or runtime acceptance is inferred.`,
+  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} repairs the overlong scheduled job name observed in workload apply 43057378878 and the case-write SQL failure observed after two real Entra sessions in diagnostic 43061328389. PR #1174 also protects private error telemetry and corrects native Redis diagnostics and localized labels. Foundation apply 43051696667, the actual private database restore and verified fixture seed succeeded on the preceding candidate and are preserved. This replacement requires final CI, main admission, a fresh source-attested image, reviewed normal rollout and new candidate-bound runtime qualification.`,
   decisionAuthority: {
     role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
@@ -199,11 +199,11 @@ const contract = {
     ['CANDIDATE_IDENTITY', 'PENDING', `Engineering baseline ${ENGINEERING_BASELINE_SHA} and corrective source ${STAGING_CANDIDATE_SHA} are identified; admitted workflow, main ancestry and built image identity remain to be verified.`],
     ['SOURCE_ENGINEERING', 'PASS', 'Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries.'],
     ['LOCAL_HOLISTIC_REGRESSION', 'NON_BLOCKING_HOST_LIMITATION', 'Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.'],
-    ['FINAL_CANDIDATE_CI', 'PENDING', 'The provider-corrected source head is completing CI in PR #1171. Earlier candidate d093936d passed 123 checks with nine skips and its immutable build succeeded, but its foundation apply failed. Those results do not qualify this replacement.'],
-    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'Controlled foundation apply 43028242463 passed its technical and protected review gates, then failed on the managed environment API and PostgreSQL global name. The corrected candidate requires a new successful reviewed apply; no database role bootstrap or application rollout exists.'],
+    ['FINAL_CANDIDATE_CI', 'PENDING', 'The corrected runtime source is completing full CI in PR #1174. Prior candidate CI and build successes do not qualify this replacement.'],
+    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'Foundation apply 43051696667 succeeded. Normal rollout 43057378878 updated the prior application but failed on one job name. The replacement requires a fresh reviewed successful normal rollout.'],
     ['DEPLOYED_REVISION_IDENTITY', 'NOT_PROVEN', 'No staging revision running this candidate is identified.'],
-    ['DATABASE_MIGRATIONS', 'NOT_PROVEN', 'No real candidate-bound staging migration receipt exists.'],
-    ['ENTRA_AUTHENTICATED_SESSIONS', 'NOT_PROVEN', 'No real staging Entra/session acceptance exists for this candidate.'],
+    ['DATABASE_MIGRATIONS', 'NOT_PROVEN', 'The prior candidate has an actual private PostgreSQL restore and native privilege receipt. Preserve that installation and verify compatibility against this replacement export; no replacement-bound receipt is yet recorded.'],
+    ['ENTRA_AUTHENTICATED_SESSIONS', 'NOT_PROVEN', 'Protected diagnostic 43061328389 proved both real Entra authorization-code sessions on the prior source, then failed case creation. Repeat acceptance against this replacement.'],
     ['API_AND_POSTGRES_TENANT_ISOLATION', 'NOT_PROVEN', 'No candidate-bound real staging API plus native PostgreSQL isolation proof exists.'],
     ['BUSINESS_WORKFLOWS_AND_PERSONAS', 'NOT_PROVEN', 'Credentialed staging persona journeys are not recorded.'],
     ['WORKERS_RETRIES_AND_DELIVERY', 'NOT_PROVEN', 'No real worker lease/recovery and successor reminder delivery receipts exist.'],

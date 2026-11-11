@@ -3,7 +3,7 @@
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
-  "workflowCount": 70,
+  "workflowCount": 71,
   "contractTestCount": 306,
   "tsTestFileCount": 3676,
   "pythonTestFileCount": 52,
@@ -920,6 +920,7 @@
     "ue-v2-staging-build.yml",
     "ue-v2-staging-deploy.yml",
     "ue-v2-staging-real-session.yml",
+    "ue-v2-staging-rollback-rehearsal.yml",
     "union-eyes-authority-rollout.yml",
     "zonga-check.yml"
   ]
