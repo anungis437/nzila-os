@@ -64,8 +64,11 @@ jobs:
           console.log(JSON.stringify({ head, tree: git('rev-parse', 'HEAD^{tree}') }))
           NODE
 
+      - name: Verify Ubuntu archive bootstrap contracts
+        run: python3 -m unittest discover -s tooling/ci -p test_configure_ubuntu_archives.py -v
+
       - name: Select official Ubuntu archives for browser dependencies
-        run: sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" RUNNER_OS="$RUNNER_OS" python3 tooling/ci/configure-ubuntu-archives.py
+        run: sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" RUNNER_OS="$RUNNER_OS" RUNNER_ENVIRONMENT="$RUNNER_ENVIRONMENT" python3 tooling/ci/configure-ubuntu-archives.py
 
       # Run the dependency timeout as root so it owns the privileged apt process
       # group. Timing out an unprivileged pnpm parent can leave sudo/apt alive.
@@ -402,8 +405,11 @@ jobs:
           console.log(JSON.stringify({ head, tree: git('rev-parse', 'HEAD^{tree}') }))
           NODE
 
+      - name: Verify Ubuntu archive bootstrap contracts
+        run: python3 -m unittest discover -s tooling/ci -p test_configure_ubuntu_archives.py -v
+
       - name: Select official Ubuntu archives for browser dependencies
-        run: sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" RUNNER_OS="$RUNNER_OS" python3 tooling/ci/configure-ubuntu-archives.py
+        run: sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" RUNNER_OS="$RUNNER_OS" RUNNER_ENVIRONMENT="$RUNNER_ENVIRONMENT" python3 tooling/ci/configure-ubuntu-archives.py
 
       - name: Install Playwright operating system dependencies
         run: sudo env "PATH=$PATH" timeout --kill-after=20s 15m pnpm -C apps/union-eyes exec playwright install-deps chromium
