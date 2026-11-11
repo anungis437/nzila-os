@@ -9,9 +9,11 @@ import json
 import ipaddress
 import os
 import re
+import time
 from pathlib import Path
 from urllib.parse import urlencode
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
+from urllib.error import URLError
 
 
 def rewrite_source_text(text: str) -> str:
@@ -39,20 +41,41 @@ def configure_archive_resolution() -> list[dict]:
     for hostname in ('archive.ubuntu.com', 'security.ubuntu.com'):
         query = urlencode({'name': hostname, 'type': 'A', 'cd': 'false',
                            'edns_client_subnet': '0.0.0.0/0'})
-        # Default urllib HTTPS validation is deliberately retained. The public
-        # query contains only these fixed package-host names, never job data.
-        with urlopen('https://dns.google/resolve?' + query, timeout=30) as response:
-            data = json.loads(response.read(65536))
-        if data.get('Status') != 0 or data.get('CD') is not False or data.get('TC'):
-            raise SystemExit('Validated public DNS did not return a complete answer')
-        answers = [answer for answer in data.get('Answer', [])
-                   if answer.get('type') == 1 and answer.get('name', '').rstrip('.') == hostname]
-        addresses = sorted({str(ipaddress.ip_address(answer['data'])) for answer in answers})
-        if not addresses or any(not ipaddress.ip_address(address).is_global
-                                or ipaddress.ip_address(address).version != 4 for address in addresses):
-            raise SystemExit('Only public IPv4 archive addresses are accepted')
-        if any(int(answer.get('TTL', 0)) <= 0 for answer in answers):
-            raise SystemExit('A current public DNS answer is required')
+        # Default HTTPS validation remains enabled for both public resolvers.
+        # A transient upstream SERVFAIL never becomes an accepted DNS answer.
+        addresses = []
+        last_status = 'no response'
+        for attempt in range(3):
+            for endpoint in ('https://dns.google/resolve?',
+                             'https://cloudflare-dns.com/dns-query?'):
+                try:
+                    request = Request(endpoint + query, headers={'Accept': 'application/dns-json'})
+                    with urlopen(request, timeout=30) as response:
+                        data = json.loads(response.read(65536))
+                except (URLError, TimeoutError):
+                    last_status = 'transport failure'
+                    continue
+                last_status = str({key: data.get(key) for key in ('Status', 'CD', 'TC')})
+                if data.get('Status') != 0 or data.get('CD') is not False or data.get('TC'):
+                    continue
+                answers = [answer for answer in data.get('Answer', [])
+                           if answer.get('type') == 1 and answer.get('name', '').rstrip('.') == hostname]
+                addresses = sorted({str(ipaddress.ip_address(answer['data'])) for answer in answers})
+                if not addresses:
+                    continue
+                if any(not ipaddress.ip_address(address).is_global
+                       or ipaddress.ip_address(address).version != 4 for address in addresses):
+                    raise SystemExit('Only public IPv4 archive addresses are accepted')
+                if any(int(answer.get('TTL', 0)) <= 0 for answer in answers):
+                    addresses = []
+                    continue
+                break
+            if addresses:
+                break
+            if attempt < 2:
+                time.sleep(2 ** attempt)
+        if not addresses:
+            raise SystemExit('Validated public DNS unavailable for ' + hostname + ': ' + last_status)
         resolutions.append({'hostname': hostname, 'addresses': addresses,
                             'minimumTtl': min(int(answer['TTL']) for answer in answers)})
 

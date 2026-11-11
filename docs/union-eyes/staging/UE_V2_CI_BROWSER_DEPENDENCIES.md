@@ -23,8 +23,10 @@ neither a fixture check nor a vendor DNS failure qualifies staging acceptance.
 The direct-archive candidate `762a28d7782c825c93e3c80b240fcf24ada5e550`
 still failed in [run 43040090860](https://github.com/anungis437/nzila-os/actions/runs/43040090860):
 the runner resolver also failed for `archive.ubuntu.com`. The helper now obtains
-fresh public IPv4 answers for only the two fixed Ubuntu hosts from Google's
-[validated HTTPS DNS API](https://developers.google.com/speed/public-dns/docs/doh/json).
+fresh public IPv4 answers for only the two fixed Ubuntu hosts through Google's
+[validated HTTPS DNS API](https://developers.google.com/speed/public-dns/docs/doh/json)
+and [Cloudflare's compatible API](https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/make-api-requests/),
+with bounded retries for observed upstream SERVFAIL responses.
 It retains default certificate verification, requests DNS validation, rejects
 private addresses, truncated responses and expired answers, and changes only
 its marked entries in the disposable runner's hosts file. Other host entries,
@@ -33,7 +35,11 @@ unowned Ubuntu overrides cause a failure for review. Self-hosted runners are
 refused.
 
 The URI rewrite matches complete transport tokens, addressing the security
-scan's substring-matching finding without suppressing the alert. Six offline
+scan's substring-matching finding without suppressing the alert. Eight offline
 regression checks run before either privileged bootstrap step. The latest
 [source-only receipt](evidence/ue-v2-browser-runner-dns-20261111.json) records
 these checks; complete hosted CI and real staging qualification remain pending.
+
+Run `43043604591` demonstrated that a single public resolver can itself return
+SERVFAIL. The fallback accepts only a fresh validated answer; exhaustion fails
+the job and leaves the hosts file unchanged. This is covered by regression tests.
