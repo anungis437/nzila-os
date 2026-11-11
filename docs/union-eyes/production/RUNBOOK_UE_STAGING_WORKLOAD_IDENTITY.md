@@ -72,7 +72,7 @@ subject `repo:anungis437/nzila-os:environment:ue-staging-plan`, audience `api://
 | `Role Based Access Control Administrator`, **conditioned** to assign or delete only `AcrPull` for service principals | registry `nzilaventuresacr` | the template grants the app identity `AcrPull` |
 | `Nzila UE Deployment What-If` and `Nzila UE Cross-RG Deployment Writer` (custom, below) | resource group `nzila-canada-prod-rg` | nested `acr-pull` deployment record and its what-if. Grants no write on any resource in that group |
 | `Reader` and `AcrPull` | registry `nzilaventuresacr` | digest re-attestation at apply time |
-| `Nzila UE Shared Monitoring Consumer` (custom, below) | workspace `nzila-canada-prod-law` and the action group, **only if** the staging parameters reference them | the Container Apps environment reads the workspace key; alerts reference the action group |
+| `Nzila UE Shared Monitoring Consumer` (custom, below) | workspace `nzila-canada-prod-law` and the action group, **only if** the staging parameters reference them | the Container Apps environment reads the workspace key; the log-query alert rules are scoped to the workspace, so Azure Monitor also requires `scheduledQueryRules/write` and workspace query-data access on the workspace itself, not only on the resource group where the rules are created |
 
 Federated credential: name `gh-ue-staging`, issuer `https://token.actions.githubusercontent.com`,
 subject `repo:anungis437/nzila-os:environment:ue-staging`, audience `api://AzureADTokenExchange`.
@@ -211,9 +211,14 @@ cat > ue-monitoring-consumer-role.json <<JSON
     "Microsoft.OperationalInsights/workspaces/read",
     "Microsoft.OperationalInsights/workspaces/sharedKeys/action",
     "Microsoft.OperationalInsights/workspaces/listKeys/action",
-    "Microsoft.Insights/actionGroups/read"
+    "Microsoft.Insights/actionGroups/read",
+    "Microsoft.Insights/scheduledQueryRules/read",
+    "Microsoft.Insights/scheduledQueryRules/write"
   ],
   "NotActions": [],
+  "DataActions": [
+    "Microsoft.OperationalInsights/workspaces/tables/data/read"
+  ],
   "AssignableScopes": ["$PROD_RG_ID"]
 }
 JSON
@@ -224,6 +229,24 @@ If the first `what-if` run of the deploy identity reports `AuthorizationFailed` 
 from `Nzila UE V2 Staging Deployer`, add that single action to the custom role. Do not replace it with
 built-in Contributor; if that is ever unavoidable, scope Contributor to `nzila-canada-staging-rg` only
 and record the reason in the change record.
+
+Log-query alert rules (`Microsoft.Insights/scheduledQueryRules` with `scopes: [logAnalyticsId]`) are
+validated by Azure Monitor against **every** resource listed in their `scopes` array, not only the
+resource group where the rule itself lives. A deploy identity that can create the rule in the staging
+resource group but only has `workspaces/read` on the referenced Log Analytics workspace still fails
+`az deployment group create` with a generic `BadRequest: insufficient access` (one failure per rule,
+no further detail in the deployment operations or activity log). Discovered during the `CHG-2026-0114`
+apply of candidate `7d67bcd59e`: adding `Microsoft.Insights/scheduledQueryRules/{read,write}` plus the
+data action `Microsoft.OperationalInsights/workspaces/tables/data/read` to the custom
+`Nzila UE Shared Monitoring Consumer` role did **not** unblock the retry (same 7 failures, same
+generic message, over an hour after the role definition update — longer than normal RBAC propagation).
+The retry only succeeded after additionally assigning the **built-in** `Monitoring Contributor` role at
+the same single-workspace scope. Whether this is a genuine Azure Monitor limitation for cross-scope
+`scheduledQueryRules` validation against custom roles, or the custom-role update simply needed more
+propagation time than observed, is not conclusively isolated — both role assignments are currently in
+place on `nzila-ue-v2-staging-id`. Before removing either one, re-test with only the custom role after a
+longer propagation window; do not assume the custom-role actions above are sufficient on their own until
+that is independently confirmed.
 
 ### Step 3: identities and federated credentials
 
