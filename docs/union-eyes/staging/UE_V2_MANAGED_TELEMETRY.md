@@ -39,7 +39,10 @@ failed before application rollout: Azure rejected the telemetry properties on
 `2026-07-01`, whose [resource contract](https://learn.microsoft.com/en-us/azure/templates/microsoft.app/2026-07-01/managedenvironments)
 includes both `appInsightsConfiguration` and `openTelemetryConfiguration`.
 Production retains its existing `2024-03-01` resource and properties. The
-subscription's registered provider explicitly advertises the staging API.
+reference to the staging Insights resource is itself conditional, as required
+by [ARM's runtime-function rules](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/conditional-resource-deployment#runtime-functions);
+a false resource condition alone is insufficient. The subscription's registered
+provider explicitly advertises the staging API.
 Compilation and what-if did not detect the older provider rejection; only a
 successful controlled apply and actual Azure Monitor evidence can qualify it.
 
