@@ -115,13 +115,21 @@ def configure() -> None:
             continue
         original = path.read_text()
         updated = rewrite_source_text(original)
-        active_lines = [line for line in updated.splitlines() if not line.lstrip().startswith('#')]
-        if any('azure.archive.ubuntu.com' in line or 'mirror+file:/etc/apt/apt-' in line for line in active_lines):
+        active_tokens = {token for line in updated.splitlines()
+                         if not line.lstrip().startswith('#') for token in line.split()}
+        obsolete_transports = {
+            'mirror+file:/etc/apt/apt-mirrors.txt',
+            'mirror+file:/etc/apt/apt-security-mirrors.txt',
+            'http://azure.archive.ubuntu.com/ubuntu',
+            'https://azure.archive.ubuntu.com/ubuntu',
+        }
+        obsolete_transports |= {uri + '/' for uri in list(obsolete_transports)}
+        if active_tokens.intersection(obsolete_transports):
             raise SystemExit('An unconverted Ubuntu mirror remains; refusing partial configuration')
-        official_found |= any(
-            'https://archive.ubuntu.com/ubuntu' in line or 'https://security.ubuntu.com/ubuntu' in line
-            for line in active_lines
-        )
+        official_transports = {'https://archive.ubuntu.com/ubuntu',
+                               'https://security.ubuntu.com/ubuntu'}
+        official_transports |= {uri + '/' for uri in list(official_transports)}
+        official_found |= bool(active_tokens.intersection(official_transports))
         if updated != original:
             path.write_text(updated)
             changed.append(str(path))

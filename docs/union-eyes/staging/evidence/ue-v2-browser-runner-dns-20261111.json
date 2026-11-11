@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-11T15:00:40.705295+00:00",
+  "at": "2026-11-11T15:04:15.535995+00:00",
   "evidenceClass": "CI_RUNNER_DEPENDENCY_RECOVERY_SOURCE_ONLY",
   "failedSourceSha": "762a28d7782c825c93e3c80b240fcf24ada5e550",
   "failedSourceRun": 43040090860,
@@ -23,7 +23,7 @@
   "testSelectionChanged": false,
   "hostedCi": "PENDING",
   "runtimeAcceptance": false,
-  "sourceSha256": "36ec78732748c24de13e6920f53963f3e82c26f657f55c9c4d0692ee33380bdd",
+  "sourceSha256": "adfe6f05b39d0be3b32d8f0d53308167f163934d121deb5b07328e1714e508cb",
   "dnsProviders": [
     "https://dns.google/resolve",
     "https://cloudflare-dns.com/dns-query"
@@ -34,5 +34,6 @@
     "CD": false,
     "TC": false
   },
-  "boundedRetriesPerProvider": 3
+  "boundedRetriesPerProvider": 3,
+  "sourceValidationMatch": "EXACT_TRANSPORT_TOKEN_SET"
 }
