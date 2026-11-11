@@ -10,8 +10,8 @@ const readJson = relative => JSON.parse(fs.readFileSync(path.join(root, relative
 
 const ENGINEERING_BASELINE_SHA = 'e87e3799f3cd9a2408f75d846bc5ec676dae3847'
 const GENERATED_ON = '2026-11-11'
-const STAGING_CANDIDATE_SHA = 'f78bdeaf5a6c7f92d792776774eaffe3c15da4f1'
-const STAGING_WORKFLOW_SHA = 'f78bdeaf5a6c7f92d792776774eaffe3c15da4f1'
+const STAGING_CANDIDATE_SHA = '8438da0bffd2e5e90084bf9d965533ffe94c5a8a'
+const STAGING_WORKFLOW_SHA = '8438da0bffd2e5e90084bf9d965533ffe94c5a8a'
 const outputDirectory = path.join(root, 'docs/union-eyes/staging')
 
 const register = readJson('docs/union-eyes/convergence/remediation/ue-all-777-remediation-register.json')
