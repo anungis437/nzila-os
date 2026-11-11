@@ -85,6 +85,19 @@ describe('frozen executive navigation (UE-OFFICER-EXECUTIVE-CANONICAL-2.1)', () 
     }
   });
 
+  it('localizes rendered group headings and items for every experience', () => {
+    for (const locale of ['en', 'en-CA', 'fr', 'fr-CA', 'it', 'pt']) {
+      const copy = JSON.parse(readFileSync(path.resolve(__dirname, `../../../messages/${locale}.json`), 'utf8')).experienceNavigation;
+      for (const experience of ['member', 'staff', 'executive', 'governance', 'admin'] as const) {
+        for (const item of getNavigationForExperience(experience)) {
+          for (const label of [item.label, item.group].filter(Boolean) as string[]) {
+            expect(typeof copy[navigationCopyKey(label)], `${locale}: ${experience}: ${label}`).toBe('string');
+          }
+        }
+      }
+    }
+  });
+
   it('does not give an elected officer or board role finance visibility by seniority', () => {
     const visible = (role: string) => getVisibleNavigationForExperience('executive', false, role).map((i) => i.href);
     expect(visible('officer')).not.toContain('/dashboard/finance');

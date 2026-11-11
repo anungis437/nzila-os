@@ -87,6 +87,24 @@ describe('rate-limiter', () => {
     process.env = { ...savedEnv };
   });
 
+  describe('startup store verification', () => {
+    it('probes native Redis when Upstash is absent and accepts a real policy denial as healthy', async () => {
+      delete process.env.UPSTASH_REDIS_REST_URL;
+      delete process.env.UPSTASH_REDIS_REST_TOKEN;
+      process.env.REDIS_URL = 'redis://localhost:6379';
+      mocks.mockPipeline.exec.mockResolvedValue([[null, 0], [null, 2], [null, 1], [null, 1]]);
+      const { verifyRateLimitStore } = await import('../rate-limiter');
+      await expect(verifyRateLimitStore()).resolves.toBeUndefined();
+      expect(mocks.mockConstructed).toHaveBeenCalledTimes(1);
+      expect(mocks.mockPipeline.exec).toHaveBeenCalledTimes(1);
+    });
+    it('reports an unavailable configured store without weakening request policy', async () => {
+      mocks.mockPipeline.exec.mockRejectedValue(new Error('Synthetic transport failure'));
+      const { verifyRateLimitStore } = await import('../rate-limiter');
+      await expect(verifyRateLimitStore()).rejects.toThrow('Configured rate limit store is unavailable');
+    });
+  });
+
   // ── checkRateLimit ──────────────────────────────────────────────────────
   describe('checkRateLimit', () => {
     it('allows requests under the limit', async () => {

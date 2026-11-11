@@ -58,6 +58,9 @@ function traceUrl(value: string): string {
 }
 
 function traceText(value: string): string {
+  // Drizzle includes bind values in its error message and stack. They may be
+  // private case narratives; transport redaction must happen before encoding.
+  if (/\bFailed query:/i.test(value)) return 'Database query failed [REDACTED]'
   return value.replace(/https?:\/\/[^\s"'<>]+/gi, traceUrl)
     .replace(/Bearer\s+\S+/gi, 'Bearer [REDACTED]')
     .split(/(\s+)/).map(part => part.startsWith('/') ? traceUrl(part) : part).join('')
@@ -66,7 +69,8 @@ function traceText(value: string): string {
 function traceAttributes(attributes: TraceAttributes = {}): TraceAttributes {
   return Object.fromEntries(Object.entries(attributes).map(([key, value]) => {
     const normalized = key.toLowerCase()
-    if (sensitiveAttribute.test(key) || normalized === 'url.query' || normalized === 'url.fragment')
+    if (sensitiveAttribute.test(key) || normalized === 'url.query' || normalized === 'url.fragment'
+      || normalized === 'db.statement' || normalized === 'db.query.text' || (normalized === 'db.query.parameters' || normalized.startsWith('db.query.parameter.')))
       return [key, '[REDACTED]']
     if (['http.url', 'http.target', 'url.full', 'url.original'].includes(normalized))
       return [key, typeof value === 'string' ? traceUrl(value) : '[REDACTED]']

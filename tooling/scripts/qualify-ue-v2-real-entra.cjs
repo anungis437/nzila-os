@@ -20,8 +20,8 @@ async function request(key, path, method = 'GET', data, expected = [200]) {
   assert(path.startsWith('/api/') && !path.includes('://'));
   const traceId = crypto.randomBytes(16).toString('hex');
   const correlationId = crypto.randomUUID();
-  const response = await contexts.get(key).request.fetch(BASE + path, { method, data, headers: { traceparent: '00-' + traceId + '-' + crypto.randomBytes(8).toString('hex') + '-01', 'x-correlation-id': correlationId } });
-  record({ kind: 'API', persona: key, method, path, status: response.status(), traceId, correlationId });
+  const response = await contexts.get(key).request.fetch(BASE + path, { method, data, headers: { traceparent: '00-' + traceId + '-' + crypto.randomBytes(8).toString('hex') + '-01', 'x-correlation-id': correlationId, 'x-trace-id': traceId } });
+  record({ kind: 'API', persona: key, method, path, status: response.status(), traceId, correlationId, responseTraceId: response.headers()['x-trace-id'] });
   assert(expected.includes(response.status()), 'Required API status mismatch');
   return response;
 }
@@ -97,8 +97,9 @@ async function main() {
     assert(!list.some(row => row.claimId === cases[other]));
     record({ kind: 'OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED', persona: key, ownCase: cases[key], foreignCase: cases[other] });
   }
+  // The verified officer's visible menu excludes Finance; this fixture has no financial mandate.
   stage = 'localized-executive-navigation';
-  const pages = ['/dashboard/executive', '/dashboard/leadership', '/dashboard/governance', '/dashboard/bargaining', '/dashboard/finance', '/dashboard/correspondence', '/dashboard/continuity-intelligence', '/dashboard/settings'];
+  const pages = ['/dashboard/executive', '/dashboard/leadership', '/dashboard/governance', '/dashboard/bargaining', '/dashboard/correspondence', '/dashboard/continuity-intelligence', '/dashboard/settings'];
   for (const locale of ['en-CA', 'fr-CA']) {
     for (const path of pages) {
       const page = await contexts.get('A').newPage();
@@ -173,7 +174,26 @@ async function main() {
            foreignDownloadDenied: true, publicClientStatus, expiresAt,
            signedUrlSha256: crypto.createHash('sha256').update(link.href).digest('hex'), encryptedPrivateLease: envelope,
            privateBytesAndExpiryNotYetProven: true });
-  report.status = 'PASS';
   report.claims = cases;
+  if (process.env.VERIFY_MEMBERSHIP_REVOCATION === 'true') {
+    stage = 'await-real-membership-revocation';
+    report.status = 'CHECKPOINT_READY';
+    fs.writeFileSync(OUT + '/checkpoint.json', JSON.stringify(report, null, 2) + '\n');
+    // The protected checkpoint lets the private operator revoke only the owned
+    // synthetic membership. Existing provider cookies stay exclusively in RAM.
+    await new Promise(resolve => setTimeout(resolve, 360000));
+    const activeSession = await contexts.get('A').request.get(BASE + '/api/auth/session');
+    assert.equal(activeSession.status(), 200);
+    const session = await activeSession.json();
+    assert.equal(session.entraObjectId, PEOPLE.A.oid);
+    assert(Date.parse(session.expires) > Date.now(), 'Session must remain unexpired');
+    stage = 'existing-cookie-after-membership-revocation';
+    await request('A', '/api/cases/' + cases.A, 'GET', undefined, [403, 404]);
+    await request('A', '/api/documents/' + documentId + '/download', 'GET', undefined, [403, 404]);
+    record({ kind: 'EXISTING_REAL_SESSION_DENIED_AFTER_MEMBERSHIP_REVOCATION',
+      persona: 'A', claimId: cases.A, documentId, sessionStillUnexpired: true,
+      previouslyIssuedLeaseRequiresSeparateActualExpiryProof: true });
+  }
+  report.status = 'PASS';
 }
 main().catch(error => { report.status = 'FAIL'; report.failure = { stage, error: error.name }; process.exitCode = 1; }).finally(async () => { if (browser) await browser.close().catch(() => {}); fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(OUT + '/receipt.json', JSON.stringify(report, null, 2) + '\n'); console.log(JSON.stringify({ status: report.status, stage, observations: report.observations.length })); });

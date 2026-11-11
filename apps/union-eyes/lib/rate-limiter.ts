@@ -124,6 +124,16 @@ const redis = createRedisClient();
 // Initialize circuit breaker for Redis
 const redisCircuitBreaker = circuitBreakers.get('redis-rate-limiter', CIRCUIT_BREAKERS.REDIS);
 
+/** Probe the same configured transport and timeout policy used by requests. */
+export async function verifyRateLimitStore(): Promise<void> {
+  const result = await checkRateLimit('startup', {
+    identifier: 'startup-health', limit: 1, window: 1,
+  });
+  // A legitimate limit denial still proves the backend answered. Only a store
+  // error means the configured Redis service is unavailable.
+  if (result.error) throw new Error('Configured rate limit store is unavailable');
+}
+
 /**
  * Rate limit configuration
  */

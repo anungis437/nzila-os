@@ -12252,7 +12252,10 @@
     "collapse_sidebar": "Réduire la navigation",
     "expand_sidebar": "Développer la navigation",
     "profile": "Profil",
-    "viewing": "Organisation affichée"
+    "viewing": "Organisation affichée",
+    "executive": "Direction",
+    "governance": "Gouvernance",
+    "administration": "Administration"
   },
   "experiencePrivacy": {
     "close": "Fermer",

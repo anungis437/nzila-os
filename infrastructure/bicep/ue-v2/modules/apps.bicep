@@ -213,8 +213,8 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
 var scheduledJobs = loadJsonContent('../../../../apps/union-eyes/lib/operations/scheduled-jobs.json').jobs
 
 resource cronJobs 'Microsoft.App/jobs@2024-03-01' = [for job in scheduledJobs: {
-  // Job names are limited to 32 characters, so the environment prefix is truncated. The deadline job keeps its original name.
-  name: contains(job, 'legacyJobSuffix') ? '${prefix}-${job.legacyJobSuffix}' : '${take(prefix, 18)}-${job.code}'
+  // Keep existing names when they fit. A legacy suffix must also budget the prefix against the 32-character limit.
+  name: contains(job, 'legacyJobSuffix') ? '${take(prefix, 32 - length(job.legacyJobSuffix) - 1)}-${job.legacyJobSuffix}' : '${take(prefix, 18)}-${job.code}'
   location: location
   tags: tags
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${identityId}': {} } }

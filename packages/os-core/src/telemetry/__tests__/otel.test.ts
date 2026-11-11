@@ -64,6 +64,27 @@ describe('otel', () => {
     expect(span.events[0].attributes['exception.message']).toContain('synthetic-code')
   })
 
+  it('redacts SQL statements and driver bind values while retaining diagnostic identity', async () => {
+    const { redactSpanForExport } = await loadModule()
+    const privateValue = 'SYNTHETIC_PRIVATE_CASE_NARRATIVE'
+    const failure = `Failed query: INSERT INTO claims VALUES ($1)\nparams: ${privateValue}`
+    const context = { traceId: '5'.repeat(32), spanId: '6'.repeat(16), traceFlags: 1 }
+    const span = {
+      name: 'POST /api/cases',
+      attributes: { 'db.statement': `SELECT '${privateValue}'`, 'db.query.text': `SELECT '${privateValue}'`,
+        'db.query.parameter.description': privateValue, 'db.query.parameter_count': 1, 'db.operation.name': 'INSERT', correlationId: 'keep-correlation' },
+      events: [{ attributes: { 'exception.type': 'DrizzleQueryError', 'exception.message': failure, 'exception.stacktrace': 'Error: ' + failure } }],
+      links: [], status: { code: 2, message: failure }, spanContext: () => context,
+    }
+    const actual = redactSpanForExport(span)
+    expect(JSON.stringify([actual.attributes, actual.events, actual.status])).not.toContain(privateValue)
+    expect(actual.attributes).toMatchObject({ 'db.statement': '[REDACTED]', 'db.query.text': '[REDACTED]',
+      'db.query.parameter.description': '[REDACTED]', 'db.query.parameter_count': 1, 'db.operation.name': 'INSERT', correlationId: 'keep-correlation' })
+    expect(actual.events[0].attributes?.['exception.type']).toBe('DrizzleQueryError')
+    expect(actual.spanContext()).toBe(context)
+    expect(span.events[0].attributes['exception.message']).toContain(privateValue)
+  })
+
   it('keeps long and malformed URL attributes bounded and fails closed on unparseable URLs', async () => {
     const { redactSpanForExport } = await loadModule()
     const span = { name: 'test', attributes: { 'http.url': 'https://[invalid?code=synthetic-code', 'http.target': '/'.repeat(100_000) + '?token=synthetic-code' }, events: [], links: [], status: { code: 1 }, spanContext: () => ({}) }
@@ -102,11 +123,13 @@ describe('otel', () => {
     await initOtel({ appName: 'union-eyes' })
     expect(configured).toBeDefined()
     const context = { traceId: '3'.repeat(32), spanId: '4'.repeat(16), traceFlags: 1 }
-    const span = { name: 'GET', attributes: { 'http.target': '/callback?code=synthetic-code' }, events: [], links: [], status: { code: 1 }, spanContext: () => context }
+    const span = { name: 'GET', attributes: { 'http.target': '/callback?code=synthetic-code', 'db.statement': 'SELECT synthetic-private-value' }, events: [{ attributes: { 'exception.message': 'Failed query: SELECT $1\nparams: synthetic-private-value' } }], links: [], status: { code: 1 }, spanContext: () => context }
     const callback = vi.fn()
     configured!.export([span], callback)
     const exported = delivered.mock.calls[0][0][0] as typeof span
     expect(exported.attributes['http.target']).toBe('/callback')
+    expect(exported.attributes['db.statement']).toBe('[REDACTED]')
+    expect(exported.events[0].attributes['exception.message']).not.toContain('synthetic-private-value')
     expect(exported.spanContext()).toBe(context)
     expect(span.attributes['http.target']).toContain('synthetic-code')
     expect(callback).toHaveBeenCalledWith({ code: 0 })

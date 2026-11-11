@@ -220,24 +220,16 @@ export async function register() {
         }
       }
 
-      // SECURITY FIX: Validate Redis is available for rate limiting
-      // Rate limiter fails-closed if Redis unavailable (prevents DoS)
-      if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      // Probe the request limiter's actual backend, including Azure/native Redis.
+      if (process.env.REDIS_URL || (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)) {
         try {
-          const { Redis } = await import('@upstash/redis');
-          const redis = new Redis({
-            url: process.env.UPSTASH_REDIS_REST_URL,
-            token: process.env.UPSTASH_REDIS_REST_TOKEN,
-          });
-          
-          // Test Redis connection with ping
-          await redis.ping();
+          const { verifyRateLimitStore } = await import('./lib/rate-limiter');
+          await verifyRateLimitStore();
           logger.info('Redis connection verified - rate limiting enabled');
         } catch (error) {
-          logger.error('Redis connection failed - rate limiting will fail-closed', error as Error);
-          if (process.env.NODE_ENV === 'production') {
-            logger.error('CRITICAL: All rate-limited endpoints will reject requests until Redis is available');
-          }
+          logger.error('Redis startup probe failed - explicit limits remain fail-closed', {
+            errorType: error instanceof Error ? error.name : 'UnknownError',
+          });
         }
       } else if (process.env.NODE_ENV === 'production') {
         // The contract (lib/rate-limiter.ts): an explicit per-route limit REJECTS when Redis is missing or down; only the

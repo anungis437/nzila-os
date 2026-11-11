@@ -45,6 +45,12 @@ jobs:
       - name: Install locked Django dependencies
         run: python -m pip install --require-hashes -r apps/union-eyes/backend/requirements.lock
 
+      - name: Verify Ubuntu archive bootstrap contracts
+        run: python3 -m unittest discover -s tooling/ci -p test_configure_ubuntu_archives.py -v
+
+      - name: Select official Ubuntu archives for browser dependencies
+        run: sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" RUNNER_OS="$RUNNER_OS" RUNNER_ENVIRONMENT="$RUNNER_ENVIRONMENT" python3 tooling/ci/configure-ubuntu-archives.py
+
       - name: Install browser binaries and system dependencies
         run: pnpm --filter @nzila/union-eyes exec playwright install --with-deps chromium
 

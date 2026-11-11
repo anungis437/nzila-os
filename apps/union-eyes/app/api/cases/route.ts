@@ -176,13 +176,13 @@ export const POST = withApi(
           ${claimType as string},
           ${description as string},
           ${incidentDate ? new Date(incidentDate as string).toISOString() : null}::timestamptz,
-          ${location as string | null},
-          ${desiredOutcome as string | null},
+          ${location ?? null},
+          ${desiredOutcome ?? null},
           ${typeof witnessesPresent === 'boolean' ? witnessesPresent : false},
-          ${witnessDetails as string | null},
+          ${witnessDetails ?? null},
           ${priority as string},
           ${isAnonymous as boolean},
-          ${claimAmount != null ? String(claimAmount) : null},
+          ${claimAmount != null ? String(claimAmount) : '0'},
           'submitted',
           NOW()
         )
