@@ -487,7 +487,9 @@ resource stagingAcaEnv 'Microsoft.App/managedEnvironments@2026-07-01' = if (env 
   name: '${prefix}-env'
   location: location
   tags: tags
-  properties: union(acaEnvironmentProperties, {
+  // ARM evaluates reference() even on conditional resources. Keep the
+  // reference itself conditional so production never reads stagingInsights.
+  properties: union(acaEnvironmentProperties, env == 'staging' ? {
     appInsightsConfiguration: {
       connectionString: stagingInsights!.properties.ConnectionString
     }
@@ -495,7 +497,7 @@ resource stagingAcaEnv 'Microsoft.App/managedEnvironments@2026-07-01' = if (env 
       tracesConfiguration: { destinations: ['appInsights'] }
       logsConfiguration: { destinations: ['appInsights'] }
     }
-  })
+  } : {})
   dependsOn: [logAnalytics]
 }
 

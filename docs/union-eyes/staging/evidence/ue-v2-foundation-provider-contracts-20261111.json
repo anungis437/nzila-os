@@ -40,7 +40,8 @@
       "2026-07-01": "env == 'staging'"
     },
     "existingReleaseAndDeploymentSafetyTests": 38,
-    "mainBicepSha256": "f6cf6a87be33a5e701af8ff1d2e5507e1047f0e9a47510c1948450ac35280e85",
-    "runtimeAcceptance": false
+    "mainBicepSha256": "eed06c8baf206c5e3783e12b00233a9beab31d4891e3a6d22d0abd7e9bf09fd7",
+    "runtimeAcceptance": false,
+    "compiledStagingReferenceExplicitlyGuarded": true
   }
 }
