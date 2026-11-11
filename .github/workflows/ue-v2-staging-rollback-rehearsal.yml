@@ -14,6 +14,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   plan:
+    name: UE V2 rollback rehearsal — reviewed plan
     if: github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: ue-staging-plan
@@ -41,6 +42,7 @@ jobs:
           path: artifacts/ue-v2-rollback/receipt.json
           if-no-files-found: error
   rehearse:
+    name: UE V2 rollback rehearsal — failed revision and recovery
     needs: plan
     if: github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
