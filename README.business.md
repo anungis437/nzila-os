@@ -14,10 +14,12 @@ Nzila OS is **not a SaaS product we sell**. It is the internal operating fabric 
 | **17 production apps** | Customer-facing products + internal control surfaces |
 | **215 shared packages** | Platform, domain, and infrastructure libraries across the monorepo |
 | **8,000+ contract tests** | Architectural invariants enforced on every commit |
-| **66 CI/CD workflows** | Governance, security, deployment, compliance |
+| **72 CI/CD workflows** | Governance, security, deployment, compliance |
 | **5 governance gates** | Dependency audit, secret scan, CodeQL, Trivy, AI red-team |
 | **One auth authority** | `@nzila/platform-auth` (Argon2id passwords + optional Entra SSO) |
 | **One audit substrate** | Hash-chained, evidence-sealed, residency-scoped |
+
+_Counts above are a point-in-time summary; the canonical generated source is [tooling/repo-inventory/output/repo-inventory.md](tooling/repo-inventory/output/repo-inventory.md)._
 
 ---
 

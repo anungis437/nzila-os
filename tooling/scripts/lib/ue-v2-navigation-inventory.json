@@ -1,0 +1,453 @@
+{
+  "applicationSourceSha": "7d67bcd59ee3f2441d41cde5adbd8769bda85a96",
+  "sourceDigests": {
+    "apps/union-eyes/lib/dashboard/role-experience.ts": "fcb6ea6f8724279ddc5385570a401a568b2c34b56a42f07ae1defcc426dfc2bf",
+    "apps/union-eyes/lib/executive/executive-navigation.ts": "1c85199c05fadb90cf5e3bb2dbea949c5c275c2ebd4e676ced40fde373c6a187",
+    "apps/union-eyes/lib/auth/roles.ts": "fb554f61106e309292f054e7a36348de5045ebb45e250bfb37d6af25446e1ace"
+  },
+  "canonicalEntryCount": 42,
+  "uniquePaths": [
+    "/dashboard",
+    "/dashboard/claims",
+    "/dashboard/messages",
+    "/dashboard/documents",
+    "/dashboard/union",
+    "/dashboard/help",
+    "/dashboard/profile",
+    "/dashboard/preferences",
+    "/dashboard/privacy",
+    "/dashboard/inbox",
+    "/dashboard/workbench",
+    "/dashboard/members",
+    "/dashboard/correspondence",
+    "/dashboard/priorities",
+    "/dashboard/clause-library",
+    "/dashboard/settings",
+    "/dashboard/executive",
+    "/dashboard/leadership",
+    "/dashboard/governance",
+    "/dashboard/bargaining",
+    "/dashboard/finance",
+    "/dashboard/continuity-intelligence",
+    "/dashboard/workspace",
+    "/dashboard/trust",
+    "/dashboard/intelligence",
+    "/dashboard/audits",
+    "/dashboard/admin/organizations",
+    "/dashboard/admin/members",
+    "/dashboard/admin/onboarding",
+    "/dashboard/security",
+    "/dashboard/integrations",
+    "/dashboard/operations"
+  ],
+  "canonical": [
+    {
+      "experience": "member",
+      "label": "Home",
+      "href": "/dashboard"
+    },
+    {
+      "experience": "member",
+      "label": "My Representation",
+      "href": "/dashboard/claims"
+    },
+    {
+      "experience": "member",
+      "label": "Messages",
+      "href": "/dashboard/messages"
+    },
+    {
+      "experience": "member",
+      "label": "My Documents",
+      "href": "/dashboard/documents"
+    },
+    {
+      "experience": "member",
+      "label": "My Union",
+      "href": "/dashboard/union"
+    },
+    {
+      "experience": "member",
+      "label": "Help & Resources",
+      "href": "/dashboard/help"
+    },
+    {
+      "experience": "member",
+      "label": "Profile",
+      "href": "/dashboard/profile",
+      "group": "Account"
+    },
+    {
+      "experience": "member",
+      "label": "Preferences",
+      "href": "/dashboard/preferences",
+      "group": "Account"
+    },
+    {
+      "experience": "member",
+      "label": "Privacy",
+      "href": "/dashboard/privacy",
+      "group": "Account"
+    },
+    {
+      "experience": "staff",
+      "label": "Today",
+      "href": "/dashboard/inbox",
+      "group": "Operations"
+    },
+    {
+      "experience": "staff",
+      "label": "Representation",
+      "href": "/dashboard/workbench",
+      "group": "Operations"
+    },
+    {
+      "experience": "staff",
+      "label": "Members & Workplaces",
+      "href": "/dashboard/members",
+      "group": "Operations"
+    },
+    {
+      "experience": "staff",
+      "label": "Communications",
+      "href": "/dashboard/correspondence",
+      "group": "Operations"
+    },
+    {
+      "experience": "staff",
+      "label": "Documents & Evidence",
+      "href": "/dashboard/documents",
+      "group": "Operations"
+    },
+    {
+      "experience": "staff",
+      "label": "Tasks & Deadlines",
+      "href": "/dashboard/priorities",
+      "group": "Operations"
+    },
+    {
+      "experience": "staff",
+      "label": "Knowledge & Guidance",
+      "href": "/dashboard/clause-library",
+      "group": "Operations"
+    },
+    {
+      "experience": "staff",
+      "label": "Profile & Settings",
+      "href": "/dashboard/settings",
+      "group": "Settings"
+    },
+    {
+      "experience": "executive",
+      "label": "Today",
+      "href": "/dashboard/executive",
+      "group": "Executive"
+    },
+    {
+      "experience": "executive",
+      "label": "Members & Service",
+      "href": "/dashboard/leadership",
+      "group": "Executive"
+    },
+    {
+      "experience": "executive",
+      "label": "Governance & Organization",
+      "href": "/dashboard/governance",
+      "group": "Executive"
+    },
+    {
+      "experience": "executive",
+      "label": "Bargaining & Collective Action",
+      "href": "/dashboard/bargaining",
+      "group": "Executive"
+    },
+    {
+      "experience": "executive",
+      "label": "Finance & Resources",
+      "href": "/dashboard/finance",
+      "group": "Executive"
+    },
+    {
+      "experience": "executive",
+      "label": "Communications & Relations",
+      "href": "/dashboard/correspondence",
+      "group": "Executive"
+    },
+    {
+      "experience": "executive",
+      "label": "Continuity & Intelligence",
+      "href": "/dashboard/continuity-intelligence",
+      "group": "Executive"
+    },
+    {
+      "experience": "executive",
+      "label": "Profile & Settings",
+      "href": "/dashboard/settings",
+      "group": "Settings"
+    },
+    {
+      "experience": "governance",
+      "label": "Workspace",
+      "href": "/dashboard/workspace",
+      "icon": "dashboard",
+      "group": "Workspace"
+    },
+    {
+      "experience": "governance",
+      "label": "Governance Continuity Overview",
+      "href": "/dashboard/governance",
+      "group": "Governance Continuity"
+    },
+    {
+      "experience": "governance",
+      "label": "Governance Trust & Explainability",
+      "href": "/dashboard/trust",
+      "group": "Governance Continuity"
+    },
+    {
+      "experience": "governance",
+      "label": "Governance Continuity Review",
+      "href": "/dashboard/workbench",
+      "group": "Governance Continuity"
+    },
+    {
+      "experience": "governance",
+      "label": "OCRA Continuity Signals",
+      "href": "/dashboard/continuity-intelligence",
+      "group": "OCRA"
+    },
+    {
+      "experience": "governance",
+      "label": "Institutional Intelligence Reports",
+      "href": "/dashboard/intelligence",
+      "group": "Operations"
+    },
+    {
+      "experience": "governance",
+      "label": "Governance Audit & Evidence",
+      "href": "/dashboard/audits",
+      "group": "Governance Continuity"
+    },
+    {
+      "experience": "governance",
+      "label": "Profile & Settings",
+      "href": "/dashboard/settings",
+      "group": "Settings"
+    },
+    {
+      "experience": "admin",
+      "label": "Workspace",
+      "href": "/dashboard/workspace",
+      "icon": "dashboard"
+    },
+    {
+      "experience": "admin",
+      "label": "Organization",
+      "href": "/dashboard/admin/organizations"
+    },
+    {
+      "experience": "admin",
+      "label": "Users & Roles",
+      "href": "/dashboard/admin/members"
+    },
+    {
+      "experience": "admin",
+      "label": "Pilot Configuration",
+      "href": "/dashboard/admin/onboarding"
+    },
+    {
+      "experience": "admin",
+      "label": "Policies",
+      "href": "/dashboard/governance"
+    },
+    {
+      "experience": "admin",
+      "label": "Audit",
+      "href": "/dashboard/audits"
+    },
+    {
+      "experience": "admin",
+      "label": "Security",
+      "href": "/dashboard/security"
+    },
+    {
+      "experience": "admin",
+      "label": "Integrations",
+      "href": "/dashboard/integrations"
+    },
+    {
+      "experience": "admin",
+      "label": "System Status",
+      "href": "/dashboard/operations"
+    }
+  ],
+  "profiles": {
+    "member": {
+      "experience": "member",
+      "landing": "/dashboard",
+      "visible": [
+        {
+          "label": "Home",
+          "href": "/dashboard"
+        },
+        {
+          "label": "My Representation",
+          "href": "/dashboard/claims"
+        },
+        {
+          "label": "Messages",
+          "href": "/dashboard/messages"
+        },
+        {
+          "label": "My Documents",
+          "href": "/dashboard/documents"
+        },
+        {
+          "label": "My Union",
+          "href": "/dashboard/union"
+        },
+        {
+          "label": "Help & Resources",
+          "href": "/dashboard/help"
+        },
+        {
+          "label": "Profile",
+          "href": "/dashboard/profile",
+          "group": "Account"
+        },
+        {
+          "label": "Preferences",
+          "href": "/dashboard/preferences",
+          "group": "Account"
+        },
+        {
+          "label": "Privacy",
+          "href": "/dashboard/privacy",
+          "group": "Account"
+        }
+      ],
+      "deepGovernance": []
+    },
+    "steward": {
+      "experience": "staff",
+      "landing": "/dashboard/workbench",
+      "visible": [
+        {
+          "label": "Today",
+          "href": "/dashboard/inbox",
+          "group": "Operations"
+        },
+        {
+          "label": "Representation",
+          "href": "/dashboard/workbench",
+          "group": "Operations"
+        },
+        {
+          "label": "Members & Workplaces",
+          "href": "/dashboard/members",
+          "group": "Operations"
+        },
+        {
+          "label": "Communications",
+          "href": "/dashboard/correspondence",
+          "group": "Operations"
+        },
+        {
+          "label": "Documents & Evidence",
+          "href": "/dashboard/documents",
+          "group": "Operations"
+        },
+        {
+          "label": "Tasks & Deadlines",
+          "href": "/dashboard/priorities",
+          "group": "Operations"
+        },
+        {
+          "label": "Knowledge & Guidance",
+          "href": "/dashboard/clause-library",
+          "group": "Operations"
+        },
+        {
+          "label": "Profile & Settings",
+          "href": "/dashboard/settings",
+          "group": "Settings"
+        }
+      ],
+      "deepGovernance": []
+    },
+    "officer": {
+      "experience": "executive",
+      "landing": "/dashboard/executive",
+      "visible": [
+        {
+          "label": "Today",
+          "href": "/dashboard/executive",
+          "group": "Executive"
+        },
+        {
+          "label": "Members & Service",
+          "href": "/dashboard/leadership",
+          "group": "Executive"
+        },
+        {
+          "label": "Governance & Organization",
+          "href": "/dashboard/governance",
+          "group": "Executive"
+        },
+        {
+          "label": "Bargaining & Collective Action",
+          "href": "/dashboard/bargaining",
+          "group": "Executive"
+        },
+        {
+          "label": "Communications & Relations",
+          "href": "/dashboard/correspondence",
+          "group": "Executive"
+        },
+        {
+          "label": "Continuity & Intelligence",
+          "href": "/dashboard/continuity-intelligence",
+          "group": "Executive"
+        },
+        {
+          "label": "Profile & Settings",
+          "href": "/dashboard/settings",
+          "group": "Settings"
+        }
+      ],
+      "deepGovernance": [
+        "/dashboard/trust",
+        "/dashboard/intelligence"
+      ]
+    },
+    "admin": {
+      "experience": "admin",
+      "landing": "/dashboard/admin/organizations",
+      "visible": [
+        {
+          "label": "Workspace",
+          "href": "/dashboard/workspace",
+          "icon": "dashboard"
+        },
+        {
+          "label": "Organization",
+          "href": "/dashboard/admin/organizations"
+        },
+        {
+          "label": "Pilot Configuration",
+          "href": "/dashboard/admin/onboarding"
+        },
+        {
+          "label": "Policies",
+          "href": "/dashboard/governance"
+        },
+        {
+          "label": "Audit",
+          "href": "/dashboard/audits"
+        }
+      ],
+      "deepGovernance": []
+    }
+  },
+  "limitation": "No platform, financial or institutional mandate is provisioned. Privileged entries not visible to an eligible verified fixture require explicit denial, never fabricated authority."
+}

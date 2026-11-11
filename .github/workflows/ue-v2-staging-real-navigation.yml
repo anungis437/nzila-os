@@ -1,0 +1,57 @@
+name: Union Eyes V2 real staging navigation acceptance
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact admitted and deployed CHG-2026-0114 source
+        required: true
+        type: string
+      membership_role:
+        description: Owned synthetic membership role already qualified by private operator
+        required: true
+        type: choice
+        options:
+          - member
+          - steward
+          - officer
+          - admin
+permissions:
+  contents: read
+concurrency:
+  group: ue-v2-staging-real-entra
+  cancel-in-progress: false
+jobs:
+  real-navigation:
+    name: UE V2 real provider navigation and scope boundaries
+    if: github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ue-staging
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup-monorepo
+      - name: Verify official Ubuntu archive contracts
+        run: python3 -m unittest discover -s tooling/ci -p test_configure_ubuntu_archives.py -v
+      - name: Configure official Ubuntu browser dependencies
+        run: sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" RUNNER_OS="$RUNNER_OS" RUNNER_ENVIRONMENT="$RUNNER_ENVIRONMENT" python3 tooling/ci/configure-ubuntu-archives.py
+      - name: Install browser and operating system dependencies
+        run: pnpm -C apps/union-eyes exec playwright install --with-deps chromium
+      - name: Verify acceptance script syntax
+        run: node --check tooling/scripts/qualify-ue-v2-real-navigation.cjs
+      - name: Verify actual provider session and source-defined visible navigation
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          SYNTHETIC_MEMBERSHIP_ROLE: ${{ inputs.membership_role }}
+          UE_V2_STAGING_PERSONA_A_PASSWORD: ${{ secrets.UE_V2_STAGING_PERSONA_A_PASSWORD }}
+        run: node tooling/scripts/qualify-ue-v2-real-navigation.cjs
+      - name: Preserve redacted navigation and denial metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-real-navigation-${{ inputs.membership_role }}-${{ github.run_id }}
+          path: artifacts/ue-v2-navigation/receipt.json
+          if-no-files-found: warn
+          retention-days: 7
