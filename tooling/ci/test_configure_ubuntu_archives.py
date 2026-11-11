@@ -48,7 +48,7 @@ class ArchiveConfigurationTests(unittest.TestCase):
 
     @staticmethod
     def dns_response(url, timeout):
-        query = parse_qs(urlsplit(url).query)
+        query = parse_qs(urlsplit(url.full_url).query)
         hostname = query['name'][0]
         if query.get('cd') != ['false'] or query.get('edns_client_subnet') != ['0.0.0.0/0']:
             raise AssertionError('DNS validation and privacy parameters must remain enabled')
@@ -90,6 +90,35 @@ class ArchiveConfigurationTests(unittest.TestCase):
                     archives, 'urlopen', return_value=io.BytesIO(json.dumps(response).encode())):
                 with self.assertRaises(SystemExit):
                     archives.configure()
+            self.assertEqual((root / 'etc/hosts').read_bytes(), before)
+
+    def test_retries_upstream_servfail_without_disabling_validation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.make_fixture(directory)
+            calls = []
+            def transient(request, timeout):
+                calls.append(request.full_url)
+                if request.full_url.startswith('https://dns.google/'):
+                    return io.BytesIO(json.dumps({'Status': 2, 'CD': False, 'TC': False}).encode())
+                return self.dns_response(request, timeout)
+            with self.fixture_patches(root), patch.object(archives, 'urlopen', side_effect=transient):
+                archives.configure()
+            self.assertEqual(len(calls), 4)
+            self.assertIn('cloudflare-dns.com', calls[1])
+            self.assertIn('185.125.190.81 security.ubuntu.com', (root / 'etc/hosts').read_text())
+
+    def test_exhausted_resolvers_fail_without_changing_hosts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.make_fixture(directory)
+            before = (root / 'etc/hosts').read_bytes()
+            def unavailable(request, timeout):
+                return io.BytesIO(json.dumps({'Status': 2, 'CD': False, 'TC': False}).encode())
+            with self.fixture_patches(root), patch.object(archives, 'time') as clock, patch.object(
+                    archives, 'urlopen', side_effect=unavailable) as resolver:
+                with self.assertRaises(SystemExit):
+                    archives.configure()
+                self.assertEqual(resolver.call_count, 6)
+                self.assertEqual(clock.sleep.call_count, 2)
             self.assertEqual((root / 'etc/hosts').read_bytes(), before)
 
     def test_refuses_existing_unowned_archive_host_entries(self):

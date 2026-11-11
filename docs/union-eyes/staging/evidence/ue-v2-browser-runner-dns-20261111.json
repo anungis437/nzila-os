@@ -1,15 +1,14 @@
 {
-  "at": "2026-11-11T14:57:44.015755+00:00",
+  "at": "2026-11-11T15:00:40.705295+00:00",
   "evidenceClass": "CI_RUNNER_DEPENDENCY_RECOVERY_SOURCE_ONLY",
   "failedSourceSha": "762a28d7782c825c93e3c80b240fcf24ada5e550",
   "failedSourceRun": 43040090860,
   "failedIntegrationRun": 43040764927,
   "failurePhase": "APT dependencies before browser tests",
   "failure": "Temporary failure resolving archive.ubuntu.com",
-  "correctiveRegressionTests": 6,
+  "correctiveRegressionTests": 8,
   "regressionResult": "PASS",
   "uriMatch": "EXACT_WHITESPACE_DELIMITED_TOKEN",
-  "dnsProvider": "https://dns.google/resolve",
   "dnsValidationDisabled": false,
   "fixedDomains": [
     "archive.ubuntu.com",
@@ -24,5 +23,16 @@
   "testSelectionChanged": false,
   "hostedCi": "PENDING",
   "runtimeAcceptance": false,
-  "sourceSha256": "c1b50d5a6755328724ba5c1736542d556ecdb6e42ca7c347007ac3d8e3243585"
+  "sourceSha256": "36ec78732748c24de13e6920f53963f3e82c26f657f55c9c4d0692ee33380bdd",
+  "dnsProviders": [
+    "https://dns.google/resolve",
+    "https://cloudflare-dns.com/dns-query"
+  ],
+  "transientServfailRun": 43043604591,
+  "measuredPublicResolverResponse": {
+    "Status": 2,
+    "CD": false,
+    "TC": false
+  },
+  "boundedRetriesPerProvider": 3
 }
