@@ -1,0 +1,32 @@
+{
+  "purpose": "DISPOSABLE_APT_SOURCE_CONFIGURATION_PROBE",
+  "status": "PASS",
+  "signatureDirectivesPreserved": true,
+  "suitesAndComponentsPreserved": true,
+  "unrelatedRepositoriesUnchanged": true,
+  "idempotent": true,
+  "nonRunnerRefused": true,
+  "sourceSha256": "563a0b0d81ac106c7c3fada57a172b46602729f137077764d4d64aed8f00d620",
+  "testAssertionsChanged": false,
+  "runtimeAcceptance": false,
+  "at": "2026-11-11T14:36:15.519956+00:00",
+  "evidenceClass": "CI_RUNNER_DEPENDENCY_RECOVERY_SOURCE_ONLY",
+  "failedSourceSha": "597efd5f13579b1bd84fbfac114926d920fb2cfa",
+  "failedIntegrationSha": "f17f7e4301a2a3c47392c6c8aa42d298a825ad54",
+  "failedSourceRun": 43034636742,
+  "failedIntegrationRun": 43035010937,
+  "failedAttempts": [
+    1,
+    2
+  ],
+  "failurePhase": "Install Playwright operating system dependencies; no browser assertion executed",
+  "failure": "Temporary failure resolving azure.archive.ubuntu.com",
+  "directHttpsEndpoints": {
+    "https://archive.ubuntu.com/ubuntu/dists/noble/InRelease": 200,
+    "https://security.ubuntu.com/ubuntu/dists/noble-security/InRelease": 200
+  },
+  "fixtureOnly": true,
+  "correctiveRunnerCi": "PENDING",
+  "stagingAcceptance": false,
+  "sourceLogSha256": "43b7def8744e5b7ce202d441ff9fe4650bd43e0e713ad9418b16b11124a5fc88"
+}
