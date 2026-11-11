@@ -30,6 +30,33 @@ request/audit correlation, and Azure Monitor queries remain required before
 `STAGING_GO`.
 
 
+
+## Managed environment provider contract
+
+Controlled foundation apply [43028242463](https://github.com/anungis437/nzila-os/actions/runs/43028242463)
+failed before application rollout: Azure rejected the telemetry properties on
+`Microsoft.App/managedEnvironments@2024-03-01`. The staging environment now uses
+`2026-07-01`, whose [resource contract](https://learn.microsoft.com/en-us/azure/templates/microsoft.app/2026-07-01/managedenvironments)
+includes both `appInsightsConfiguration` and `openTelemetryConfiguration`.
+Production retains its existing `2024-03-01` resource and properties. The
+reference to the staging Insights resource is itself conditional, as required
+by [ARM's runtime-function rules](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/conditional-resource-deployment#runtime-functions);
+a false resource condition alone is insufficient. The subscription's registered
+provider explicitly advertises the staging API.
+Compilation and what-if did not detect the older provider rejection; only a
+successful controlled apply and actual Azure Monitor evidence can qualify it.
+
+The same failed apply returned `ServerNameAlreadyExists` for the unqualified
+PostgreSQL name. Staging now appends the subscription's first eight characters:
+`nzila-ue-v2-staging-db-d562ba7f`. Azure's global name-availability API confirmed
+that name available on 2026-11-11. Production keeps its existing server name.
+The global check must be repeated before the fresh apply; resource absence
+inside one resource group is insufficient evidence of global availability.
+
+The [provider failure receipt](evidence/ue-v2-foundation-provider-contracts-20261111.json)
+preserves the failed attempt and the measured name check. It confers no runtime
+acceptance, application deployment or production authorization.
+
 ## Export privacy and single execution
 
 Next and the HTTP instrumentation attach complete request URLs, including

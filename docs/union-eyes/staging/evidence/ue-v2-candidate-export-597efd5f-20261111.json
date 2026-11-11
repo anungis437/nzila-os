@@ -1,0 +1,42 @@
+{
+  "applicationSourceSha": "597efd5f13579b1bd84fbfac114926d920fb2cfa",
+  "exporterSourceDigest": "a659f354275e29e906e4b02efd1d5769ae73d3ce746194827731fb7058ca95ad",
+  "sourcePlanDigest": "dbf14018c47ed87408da3182de22e487856aa0cf49a2863eae691442cd452f08",
+  "catalogNormalization": "PG16_DUMP_EQUIVALENCE_V1",
+  "extensions": [],
+  "image": "pgvector/pgvector:0.8.1-pg16@sha256:33198da2828a14c30348d2ccb4750833d5ed9a44c88d840a0e523d7417120337",
+  "tables": 771,
+  "statements": 6255,
+  "catalogObjects": 23849,
+  "catalogDigest": "f42fdab7ad9ff4ad032de0692fe51527228e6703708adc9595cb267b73805e30",
+  "installation": "CREATED",
+  "repeat": "NOOP",
+  "restoredDump": "PASS",
+  "restoredRepeat": "NOOP",
+  "privilegeStatus": "PASS_PUBLIC_AND_AUTH_NATIVE_PRIVILEGES",
+  "privilegeMismatches": [],
+  "files": {
+    "schema.sql": {
+      "bytes": 2696125,
+      "sha256": "594876b351b67d51736a6d9a6df072cc752dab8067464636b3d2c92eff392713"
+    },
+    "receipt.sql": {
+      "bytes": 1000,
+      "sha256": "e2e65e89af93697ec7db81f23c5aa722dc45cfbecd869ff07e3719e6a54f0f7a"
+    },
+    "roles.sql": {
+      "bytes": 3395,
+      "sha256": "fb605a1d72a7f958beddb9a946b4132824eaeaec9a867cf2cef9ecc62e97742e"
+    },
+    "schema-restore.sql": {
+      "bytes": 2696767,
+      "sha256": "69aa9bf8f963df99763cfa324fe5b133b7f474dfa72083ff14b77e78a110fcf2"
+    },
+    "receipt-restore.sql": {
+      "bytes": 1022,
+      "sha256": "d1894569f838e402b3a0f2303da5442863813169afcfb3fdf9c2eaa316f895ab"
+    }
+  },
+  "localOnly": true,
+  "stagingAcceptance": false
+}

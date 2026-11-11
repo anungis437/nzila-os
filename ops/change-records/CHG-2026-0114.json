@@ -1,6 +1,6 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 staging qualification deployment for candidate b6fe501d",
+  "title": "Union Eyes V2 staging qualification deployment for candidate 8438da0b",
   "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. Owner-directed founder-operated staging authorization is recorded; no production release, institutional mandate, financial activation, or STAGING GO without runtime proof is authorized.",
   "service": "union-eyes",
   "environment": "STAGING",
@@ -34,7 +34,12 @@
     "https://github.com/anungis437/nzila-os/pull/1165",
     "https://github.com/anungis437/nzila-os/pull/1166",
     "https://github.com/anungis437/nzila-os/pull/1167",
-    "https://github.com/anungis437/nzila-os/pull/1168"
+    "https://github.com/anungis437/nzila-os/pull/1168",
+    "https://github.com/anungis437/nzila-os/actions/runs/43028242463",
+    "https://github.com/anungis437/nzila-os/pull/1171",
+    "docs/union-eyes/staging/evidence/ue-v2-foundation-provider-contracts-20261111.json",
+    "docs/union-eyes/staging/evidence/ue-v2-browser-runner-mirror-20261111.json",
+    "docs/union-eyes/staging/evidence/ue-v2-browser-runner-dns-20261111.json"
   ],
   "linked_prs": [
     "1137",
@@ -48,17 +53,27 @@
     "1165",
     "1166",
     "1167",
-    "1168"
+    "1168",
+    "1169",
+    "1170",
+    "1171",
+    "1172"
   ],
   "linked_commits": [
     "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
     "884391997bb797637615361f2782697604d6d973",
     "d2621ab63b605751e86f4cd0893aa6fd7e806351",
-    "d093936d06209cc6321464dd85caded6f945166e"
+    "d093936d06209cc6321464dd85caded6f945166e",
+    "6e1460faa34e2ddf4af8ff23817f4861ae03ad64",
+    "597efd5f13579b1bd84fbfac114926d920fb2cfa",
+    "762a28d7782c825c93e3c80b240fcf24ada5e550",
+    "1c401900cf3f9c619eb512da8cdb00c521ece3f7",
+    "f78bdeaf5a6c7f92d792776774eaffe3c15da4f1",
+    "8438da0bffd2e5e90084bf9d965533ffe94c5a8a"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-10T19:37:33.750473+00:00",
+  "updated_at": "2026-11-11T15:05:01.601758+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -67,7 +82,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "d093936d06209cc6321464dd85caded6f945166e",
+    "candidate_sha": "8438da0bffd2e5e90084bf9d965533ffe94c5a8a",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true

@@ -1,0 +1,47 @@
+{
+  "at": "2026-11-11T13:35:44.905507+00:00",
+  "status": "FAILED_FOUNDATION_REQUIRES_SOURCE_CORRECTION",
+  "runId": 43028242463,
+  "sourceSha": "d093936d06209cc6321464dd85caded6f945166e",
+  "workflowSha": "b1e11fd0e99f0c08c0c00c2496784d3f5a1783c6",
+  "reviewedFingerprint": "3ff26cd5e5cd06cff13c64f207890caebeac5df57d3995be6dcfa646a0381353",
+  "planWhatIfChangeWindowAndFreshDriftGates": "PASS",
+  "providerErrors": [
+    {
+      "resource": "nzila-ue-v2-staging-db",
+      "code": "ServerNameAlreadyExists"
+    },
+    {
+      "resource": "nzila-ue-v2-staging-env",
+      "code": "BadRequest",
+      "message": "Unknown properties appInsightsConfiguration, openTelemetryConfiguration in ManagedEnvironmentView are not supported",
+      "apiVersion": "2024-03-01"
+    }
+  ],
+  "newPostgresNameAvailability": {
+    "name": "nzila-ue-v2-staging-db-d562ba7f",
+    "nameAvailable": true,
+    "apiVersion": "2024-08-01",
+    "source": "actual Azure checkNameAvailability response; recheck before apply"
+  },
+  "stagingApiRegisteredBySubscription": "2026-07-01",
+  "partialInfrastructureApply": true,
+  "databaseCreated": false,
+  "applicationDeployed": false,
+  "runtimeAcceptance": false,
+  "productionDeployment": false,
+  "correctiveSourceValidation": {
+    "bicepVersion": "0.49.2",
+    "compile": "PASS_WITHOUT_WARNINGS",
+    "azureProviderNoRbacValidation": "Succeeded",
+    "legacyProductionEnvironmentPropertyBlockUnchanged": true,
+    "compiledApiConditions": {
+      "2024-03-01": "env == 'prod'",
+      "2026-07-01": "env == 'staging'"
+    },
+    "existingReleaseAndDeploymentSafetyTests": 38,
+    "mainBicepSha256": "eed06c8baf206c5e3783e12b00233a9beab31d4891e3a6d22d0abd7e9bf09fd7",
+    "runtimeAcceptance": false,
+    "compiledStagingReferenceExplicitlyGuarded": true
+  }
+}
