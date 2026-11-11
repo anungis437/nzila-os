@@ -1,8 +1,8 @@
 # Exact-source staging prerequisite receipt
 
-Candidate: `d093936d06209cc6321464dd85caded6f945166e`.
+Candidate: `6e1460faa34e2ddf4af8ff23817f4861ae03ad64`.
 
-The [measured local export receipt](evidence/ue-v2-candidate-export-20261110.json)
+The [measured local export receipt](evidence/ue-v2-candidate-export-20261111.json)
 records the current dependency-bound plan and emitted restore file hashes.
 Pinned PostgreSQL 16 installed the plan, verified 23,849 catalog objects and the
 native privilege boundary, returned receipt-backed NOOP, then restored the
@@ -30,3 +30,12 @@ gRPC/protobuf collector receipts preserve trace/correlation identity and show
 no synthetic callback code, signed URL signature, cookie or URL password.
 The tracing helper also propagates business failures without repeating work.
 See [the measured privacy receipt](evidence/ue-v2-telemetry-privacy-local-20261110.json).
+
+The current source also corrects the two actual provider rejections in foundation
+run `43028242463`: staging uses the supported managed-telemetry API and PostgreSQL
+name `nzila-ue-v2-staging-db-d562ba7f`. Its typed compilation and Azure read-only
+validation passed; production retains the previous API, properties and database
+name. The [failed foundation receipt](evidence/ue-v2-foundation-provider-contracts-20261111.json)
+is preserved. A new exact-source image, fresh reviewed apply and real database
+qualification remain required; the earlier candidate's build is not reused as
+an image attestation for this source.

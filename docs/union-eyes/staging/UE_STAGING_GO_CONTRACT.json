@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "record": "UE_STAGING_GO_CONTRACT",
   "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
-  "generatedOn": "2026-11-10",
+  "generatedOn": "2026-11-11",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
-  "acceptedStagingCandidateSha": "d093936d06209cc6321464dd85caded6f945166e",
-  "stagingWorkflowDefinitionSha": "d093936d06209cc6321464dd85caded6f945166e",
+  "acceptedStagingCandidateSha": "6e1460faa34e2ddf4af8ff23817f4861ae03ad64",
+  "stagingWorkflowDefinitionSha": "6e1460faa34e2ddf4af8ff23817f4861ae03ad64",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Candidate d093936d06209cc6321464dd85caded6f945166e contains current-source schema restore qualification, verified Entra alignment, a private operator/runtime secret boundary, and managed telemetry configuration. Source prerequisite #1167 is merged; source snapshot #1168 and the combined authorization/managed-role integration #1169 are completing full CI and main admission. A successful exact-source image build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. Source checks and prepared credentials do not establish runtime acceptance.",
+  "verdictReason": "Candidate 6e1460faa34e2ddf4af8ff23817f4861ae03ad64 corrects the two observed provider failures in controlled foundation apply 43028242463: unsupported managed-telemetry properties on the legacy API and a globally unavailable PostgreSQL name. The corrective source is in PR #1171; final CI, main admission, a new digest-attested build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. No successful current-candidate apply or runtime acceptance is inferred.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -44,7 +44,7 @@
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Engineering baseline e87e3799f3cd9a2408f75d846bc5ec676dae3847 and exact proposed source/workflow d093936d06209cc6321464dd85caded6f945166e are identified; main ancestry and built image identity remain to be verified."
+      "evidence": "Engineering baseline e87e3799f3cd9a2408f75d846bc5ec676dae3847 and corrective source 6e1460faa34e2ddf4af8ff23817f4861ae03ad64 are identified; admitted workflow, main ancestry and built image identity remain to be verified."
     },
     {
       "id": "SOURCE_ENGINEERING",
@@ -62,13 +62,13 @@
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "The fixed source head is completing full CI in PR #1168; prerequisite #1167 is merged. No successful final result or image attestation is inferred."
+      "evidence": "The provider-corrected source head is completing CI in PR #1171. Earlier candidate d093936d passed 123 checks with nine skips and its immutable build succeeded, but its foundation apply failed. Those results do not qualify this replacement."
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
       "status": "NOT_PROVEN",
-      "evidence": "Controlled apply 42774059371 passed plan, reviewed what-if, change-window, environment and drift gates, then failed on the PostgreSQL tier selector and an empty vault. The tier selector, infrastructure-only bootstrap path, verified application credentials and private operator passwords are prepared; no successful current-candidate deployment or database role bootstrap exists."
+      "evidence": "Controlled foundation apply 43028242463 passed its technical and protected review gates, then failed on the managed environment API and PostgreSQL global name. The corrected candidate requires a new successful reviewed apply; no database role bootstrap or application rollout exists."
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",

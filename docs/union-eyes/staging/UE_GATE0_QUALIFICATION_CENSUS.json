@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "record": "UE_GATE0_QUALIFICATION_CENSUS",
   "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
-  "generatedOn": "2026-11-10",
+  "generatedOn": "2026-11-11",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
   "frozenPopulation": 777,
   "authorityRule": {
