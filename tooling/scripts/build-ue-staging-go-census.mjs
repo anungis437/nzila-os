@@ -10,8 +10,8 @@ const readJson = relative => JSON.parse(fs.readFileSync(path.join(root, relative
 
 const ENGINEERING_BASELINE_SHA = 'e87e3799f3cd9a2408f75d846bc5ec676dae3847'
 const GENERATED_ON = '2026-11-11'
-const STAGING_CANDIDATE_SHA = '597efd5f13579b1bd84fbfac114926d920fb2cfa'
-const STAGING_WORKFLOW_SHA = '597efd5f13579b1bd84fbfac114926d920fb2cfa'
+const STAGING_CANDIDATE_SHA = '762a28d7782c825c93e3c80b240fcf24ada5e550'
+const STAGING_WORKFLOW_SHA = '762a28d7782c825c93e3c80b240fcf24ada5e550'
 const outputDirectory = path.join(root, 'docs/union-eyes/staging')
 
 const register = readJson('docs/union-eyes/convergence/remediation/ue-all-777-remediation-register.json')
@@ -163,7 +163,7 @@ const contract = {
   acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
   stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
   verdict: 'STAGING_NO_GO',
-  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} corrects the two observed provider failures in controlled foundation apply 43028242463: unsupported managed-telemetry properties on the legacy API and a globally unavailable PostgreSQL name. The corrective source is in PR #1171; final CI, main admission, a new digest-attested build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. No successful current-candidate apply or runtime acceptance is inferred.`,
+  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} corrects the two observed provider failures in controlled foundation apply 43028242463: unsupported managed-telemetry properties on the legacy API and a globally unavailable PostgreSQL name. It also repairs the reproducible Ubuntu mirror dependency failure in browser CI without changing test assertions. The corrective source is in PR #1171; final CI, main admission, a new digest-attested build, fresh reviewed what-if/apply, private database bootstrap and all deployed Phase 3A evidence remain required. No successful current-candidate apply or runtime acceptance is inferred.`,
   decisionAuthority: {
     role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
