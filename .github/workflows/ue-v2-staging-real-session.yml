@@ -1,0 +1,78 @@
+name: Union Eyes V2 real staging Entra acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact admitted and deployed candidate from CHG-2026-0114
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ue-v2-staging-real-entra
+  cancel-in-progress: false
+
+jobs:
+  real-entra-baseline:
+    if: github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ue-staging
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Require exact staging authorization and source ancestry
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          node <<'NODE'
+          const assert = require('node:assert/strict')
+          const fs = require('node:fs')
+          const cp = require('node:child_process')
+          const change = JSON.parse(fs.readFileSync('ops/change-records/CHG-2026-0114.json', 'utf8'))
+          const auth = change.founder_staging_authorization
+          assert.match(process.env.SOURCE_SHA, /^[a-f0-9]{40}$/)
+          assert.equal(auth.candidate_sha, process.env.SOURCE_SHA)
+          assert.equal(auth.subscription_id, 'd562ba7f-d891-4504-a489-10917c0ebaaf')
+          assert.equal(auth.staging_only, true)
+          assert.equal(auth.production_authorized, false)
+          cp.execFileSync('git', ['merge-base', '--is-ancestor', process.env.SOURCE_SHA, process.env.GITHUB_SHA])
+          NODE
+
+      - uses: ./.github/actions/setup-monorepo
+
+      - name: Verify Ubuntu archive bootstrap contracts
+        run: python3 -m unittest discover -s tooling/ci -p test_configure_ubuntu_archives.py -v
+
+      - name: Configure official Ubuntu dependency sources
+        run: sudo env GITHUB_ACTIONS="$GITHUB_ACTIONS" RUNNER_OS="$RUNNER_OS" RUNNER_ENVIRONMENT="$RUNNER_ENVIRONMENT" python3 tooling/ci/configure-ubuntu-archives.py
+
+      - name: Install required browser and operating system dependencies
+        run: pnpm -C apps/union-eyes exec playwright install --with-deps chromium
+
+      - name: Verify acceptance script syntax
+        run: node --check tooling/scripts/qualify-ue-v2-real-entra.cjs
+
+      - name: Authenticate verified synthetic principals and exercise the live candidate
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          EVIDENCE_PUBLIC_KEY_B64: ${{ vars.UE_V2_STAGING_EVIDENCE_PUBLIC_KEY_B64 }}
+          UE_V2_STAGING_PERSONA_A_PASSWORD: ${{ secrets.UE_V2_STAGING_PERSONA_A_PASSWORD }}
+          UE_V2_STAGING_PERSONA_B_PASSWORD: ${{ secrets.UE_V2_STAGING_PERSONA_B_PASSWORD }}
+        run: node tooling/scripts/qualify-ue-v2-real-entra.cjs
+
+      - name: Preserve only redacted acceptance metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ue-v2-real-entra-${{ inputs.source_sha }}-${{ github.run_id }}
+          path: artifacts/ue-v2-real-entra/receipt.json
+          if-no-files-found: warn
+          retention-days: 7
