@@ -11319,7 +11319,10 @@
     "collapse_sidebar": "Collapse sidebar",
     "expand_sidebar": "Expand sidebar",
     "profile": "Profile",
-    "viewing": "Viewing"
+    "viewing": "Viewing",
+    "executive": "Executive",
+    "governance": "Governance",
+    "administration": "Administration"
   },
   "experiencePrivacy": {
     "close": "Close",

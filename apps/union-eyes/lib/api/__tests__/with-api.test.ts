@@ -47,6 +47,7 @@ vi.mock('@/lib/logger', () => ({
 // ── Imports ──────────────────────────────────────────────────────────────────
 
 import { withApi } from '../with-api';
+import { logger } from '@/lib/logger';
 import { ApiError } from '../errors';
 import { ErrorCode } from '../standardized-responses';
 
@@ -283,6 +284,30 @@ describe('withApi()', () => {
     });
     const res = await handler(makeRequest());
     expect(res.status).toBe(500);
+  });
+
+  it('keeps SQL bind values and stacks out of production responses and logs', async () => {
+    const previous = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      const privateValue = 'SYNTHETIC_PRIVATE_CASE_NARRATIVE';
+      const failure = new Error(`Failed query: INSERT INTO claims VALUES ($1)\nparams: ${privateValue}`, {
+        cause: Object.assign(new Error(`syntax error: ${privateValue}`), { code: '42601' }),
+      });
+      const handler = withApi({}, async () => { throw failure; });
+      const response = await handler(makeRequest());
+      expect(response.status).toBe(500);
+      const body = JSON.stringify(await response.json());
+      const logs = JSON.stringify(vi.mocked(logger.error).mock.calls);
+      expect(body).not.toContain(privateValue);
+      expect(body).not.toContain('Failed query');
+      expect(logs).not.toContain(privateValue);
+      expect(logs).not.toContain('INSERT INTO claims');
+      expect(logger.error).toHaveBeenCalledWith('Unhandled error in API route', expect.objectContaining({ sqlstate: '42601', path: '/api/test' }));
+    } finally {
+      if (previous === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previous;
+    }
   });
 
   // ── Cache control ─────────────────────────────────────────────────────

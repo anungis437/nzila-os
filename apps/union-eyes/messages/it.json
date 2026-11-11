@@ -11416,7 +11416,10 @@
     "collapse_sidebar": "Collapse sidebar",
     "expand_sidebar": "Expand sidebar",
     "profile": "Profile",
-    "viewing": "Viewing"
+    "viewing": "Viewing",
+    "executive": "Direzione",
+    "governance": "Governance",
+    "administration": "Amministrazione"
   },
   "experiencePrivacy": {
     "close": "Close",

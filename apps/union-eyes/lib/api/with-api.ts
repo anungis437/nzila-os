@@ -841,10 +841,14 @@ export function withApi<
       // ── Unexpected errors → 500 ───────────────────────────────────────
       const cause = (error as { cause?: { message?: string; code?: string } } | null)?.cause;
       logger.error('Unhandled error in API route', {
-        error: error instanceof Error ? error.message : String(error),
-        cause: cause?.message,
-        sqlstate: cause?.code,
-        stack: error instanceof Error ? error.stack : undefined,
+        // Driver messages and stacks can contain SQL bind values, including
+        // private case narratives. Keep diagnostic types/codes, never payloads.
+        error: error instanceof Error && /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(error.name)
+          ? error.name : 'UnknownError',
+        cause: cause instanceof Error && /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(cause.name)
+          ? cause.name : undefined,
+        sqlstate: typeof cause?.code === 'string' && /^[0-9A-Z]{5}$/.test(cause.code)
+          ? cause.code : undefined,
         path: request.nextUrl.pathname,
         traceId,
       });
@@ -854,7 +858,7 @@ export function withApi<
         process.env.NODE_ENV === 'development' && error instanceof Error
           ? error.message
           : 'An internal error occurred',
-        error instanceof Error ? { stack: error.stack } : undefined,
+        process.env.NODE_ENV === 'development' && error instanceof Error ? { stack: error.stack } : undefined,
         traceId,
       );
     }

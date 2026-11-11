@@ -20,8 +20,8 @@ async function request(key, path, method = 'GET', data, expected = [200]) {
   assert(path.startsWith('/api/') && !path.includes('://'));
   const traceId = crypto.randomBytes(16).toString('hex');
   const correlationId = crypto.randomUUID();
-  const response = await contexts.get(key).request.fetch(BASE + path, { method, data, headers: { traceparent: '00-' + traceId + '-' + crypto.randomBytes(8).toString('hex') + '-01', 'x-correlation-id': correlationId } });
-  record({ kind: 'API', persona: key, method, path, status: response.status(), traceId, correlationId });
+  const response = await contexts.get(key).request.fetch(BASE + path, { method, data, headers: { traceparent: '00-' + traceId + '-' + crypto.randomBytes(8).toString('hex') + '-01', 'x-correlation-id': correlationId, 'x-trace-id': traceId } });
+  record({ kind: 'API', persona: key, method, path, status: response.status(), traceId, correlationId, responseTraceId: response.headers()['x-trace-id'] });
   assert(expected.includes(response.status()), 'Required API status mismatch');
   return response;
 }
@@ -97,8 +97,9 @@ async function main() {
     assert(!list.some(row => row.claimId === cases[other]));
     record({ kind: 'OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED', persona: key, ownCase: cases[key], foreignCase: cases[other] });
   }
+  // The verified officer's visible menu excludes Finance; this fixture has no financial mandate.
   stage = 'localized-executive-navigation';
-  const pages = ['/dashboard/executive', '/dashboard/leadership', '/dashboard/governance', '/dashboard/bargaining', '/dashboard/finance', '/dashboard/correspondence', '/dashboard/continuity-intelligence', '/dashboard/settings'];
+  const pages = ['/dashboard/executive', '/dashboard/leadership', '/dashboard/governance', '/dashboard/bargaining', '/dashboard/correspondence', '/dashboard/continuity-intelligence', '/dashboard/settings'];
   for (const locale of ['en-CA', 'fr-CA']) {
     for (const path of pages) {
       const page = await contexts.get('A').newPage();
