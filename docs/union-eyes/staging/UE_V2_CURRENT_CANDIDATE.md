@@ -1,8 +1,8 @@
 # Exact-source staging prerequisite receipt
 
-Candidate: `6e1460faa34e2ddf4af8ff23817f4861ae03ad64`.
+Candidate: `597efd5f13579b1bd84fbfac114926d920fb2cfa`.
 
-The [measured local export receipt](evidence/ue-v2-candidate-export-20261111.json)
+The [measured local export receipt](evidence/ue-v2-candidate-export-597efd5f-20261111.json)
 records the current dependency-bound plan and emitted restore file hashes.
 Pinned PostgreSQL 16 installed the plan, verified 23,849 catalog objects and the
 native privilege boundary, returned receipt-backed NOOP, then restored the
