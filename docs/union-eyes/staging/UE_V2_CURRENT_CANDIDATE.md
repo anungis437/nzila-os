@@ -1,8 +1,8 @@
 # Exact-source staging prerequisite receipt
 
-Candidate: `762a28d7782c825c93e3c80b240fcf24ada5e550`.
+Candidate: `f78bdeaf5a6c7f92d792776774eaffe3c15da4f1`.
 
-The [measured local export receipt](evidence/ue-v2-candidate-export-762a28d7-20261111.json)
+The [measured local export receipt](evidence/ue-v2-candidate-export-f78bdeaf-20261111.json)
 records the current dependency-bound plan and emitted restore file hashes.
 Pinned PostgreSQL 16 installed the plan, verified 23,849 catalog objects and the
 native privilege boundary, returned receipt-backed NOOP, then restored the
@@ -40,4 +40,4 @@ is preserved. A new exact-source image, fresh reviewed apply and real database
 qualification remain required; the earlier candidate's build is not reused as
 an image attestation for this source.
 
-Browser CI also required a runner dependency repair after two Azure Ubuntu mirror DNS failures. The official HTTPS archive transport is selected directly; package signatures, dependencies and all browser assertions remain unchanged. See [the measured runner repair](UE_V2_CI_BROWSER_DEPENDENCIES.md).
+Browser CI also required a runner dependency repair after two Azure Ubuntu mirror DNS failures. The official HTTPS archive transport and bounded validated public DNS fallback are restricted to disposable hosted runners; package signatures, dependencies and all browser assertions remain unchanged. See [the measured runner repair](UE_V2_CI_BROWSER_DEPENDENCIES.md).

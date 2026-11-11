@@ -1,6 +1,6 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 staging qualification deployment for candidate 762a28d7",
+  "title": "Union Eyes V2 staging qualification deployment for candidate f78bdeaf",
   "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. Owner-directed founder-operated staging authorization is recorded; no production release, institutional mandate, financial activation, or STAGING GO without runtime proof is authorized.",
   "service": "union-eyes",
   "environment": "STAGING",
@@ -38,7 +38,8 @@
     "https://github.com/anungis437/nzila-os/actions/runs/43028242463",
     "https://github.com/anungis437/nzila-os/pull/1171",
     "docs/union-eyes/staging/evidence/ue-v2-foundation-provider-contracts-20261111.json",
-    "docs/union-eyes/staging/evidence/ue-v2-browser-runner-mirror-20261111.json"
+    "docs/union-eyes/staging/evidence/ue-v2-browser-runner-mirror-20261111.json",
+    "docs/union-eyes/staging/evidence/ue-v2-browser-runner-dns-20261111.json"
   ],
   "linked_prs": [
     "1137",
@@ -65,11 +66,13 @@
     "d093936d06209cc6321464dd85caded6f945166e",
     "6e1460faa34e2ddf4af8ff23817f4861ae03ad64",
     "597efd5f13579b1bd84fbfac114926d920fb2cfa",
-    "762a28d7782c825c93e3c80b240fcf24ada5e550"
+    "762a28d7782c825c93e3c80b240fcf24ada5e550",
+    "1c401900cf3f9c619eb512da8cdb00c521ece3f7",
+    "f78bdeaf5a6c7f92d792776774eaffe3c15da4f1"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-11T14:37:54.676417+00:00",
+  "updated_at": "2026-11-11T15:01:56.244515+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -78,7 +81,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "762a28d7782c825c93e3c80b240fcf24ada5e550",
+    "candidate_sha": "f78bdeaf5a6c7f92d792776774eaffe3c15da4f1",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true
