@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-10T00:00:00.000Z",
+  "generatedAt": "2026-11-11T00:00:00.000Z",
   "appCount": 28,
   "packageCount": 225,
   "workspacePackageCount": 260,
-  "workflowCount": 69,
+  "workflowCount": 70,
   "contractTestCount": 306,
   "tsTestFileCount": 3675,
   "pythonTestFileCount": 52,
@@ -919,6 +919,7 @@
     "ue-staging-discovery.yml",
     "ue-v2-staging-build.yml",
     "ue-v2-staging-deploy.yml",
+    "ue-v2-staging-real-session.yml",
     "union-eyes-authority-rollout.yml",
     "zonga-check.yml"
   ]
