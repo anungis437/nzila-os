@@ -236,10 +236,17 @@ resource group where the rule itself lives. A deploy identity that can create th
 resource group but only has `workspaces/read` on the referenced Log Analytics workspace still fails
 `az deployment group create` with a generic `BadRequest: insufficient access` (one failure per rule,
 no further detail in the deployment operations or activity log). Discovered during the `CHG-2026-0114`
-apply of candidate `7d67bcd59e`: the fix was adding `Microsoft.Insights/scheduledQueryRules/{read,write}`
-plus the data action `Microsoft.OperationalInsights/workspaces/tables/data/read` to
-`Nzila UE Shared Monitoring Consumer`, scoped at the workspace/action-group level exactly as this
-runbook already documents — no broader role was needed.
+apply of candidate `7d67bcd59e`: adding `Microsoft.Insights/scheduledQueryRules/{read,write}` plus the
+data action `Microsoft.OperationalInsights/workspaces/tables/data/read` to the custom
+`Nzila UE Shared Monitoring Consumer` role did **not** unblock the retry (same 7 failures, same
+generic message, over an hour after the role definition update — longer than normal RBAC propagation).
+The retry only succeeded after additionally assigning the **built-in** `Monitoring Contributor` role at
+the same single-workspace scope. Whether this is a genuine Azure Monitor limitation for cross-scope
+`scheduledQueryRules` validation against custom roles, or the custom-role update simply needed more
+propagation time than observed, is not conclusively isolated — both role assignments are currently in
+place on `nzila-ue-v2-staging-id`. Before removing either one, re-test with only the custom role after a
+longer propagation window; do not assume the custom-role actions above are sufficient on their own until
+that is independently confirmed.
 
 ### Step 3: identities and federated credentials
 
