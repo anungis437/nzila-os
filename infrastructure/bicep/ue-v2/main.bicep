@@ -146,7 +146,9 @@ var childTags = env == 'prod' ? null : tags
 var kvName = take('${prefix}-kv', 24)
 var storageName = take(replace('${prefix}st', '-', ''), 24)
 var redisName = '${prefix}-redis'
-var pgName = '${prefix}-db'
+// PostgreSQL names are global. Keep the established production name while
+// binding the isolated staging server name to this subscription.
+var pgName = env == 'prod' ? '${prefix}-db' : '${prefix}-db-${take(subscription().subscriptionId, 8)}'
 
 // Optional: create the workspace (with a daily cap). An existing workspace is only referenced.
 module logAnalytics 'modules/log-analytics.bicep' = if (createLogAnalytics) {
@@ -458,22 +460,34 @@ resource stagingInsights 'Microsoft.Insights/components@2020-02-02' = if (env ==
 }
 
 // ── Container Apps environment (VNet-integrated; internal in prod) and workloads ─
-resource acaEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
+// The production API contract stays unchanged. Managed telemetry is supported
+// by the staging API below, not by the legacy 2024-03-01 contract.
+var acaEnvironmentProperties = {
+  appLogsConfiguration: {
+    destination: 'log-analytics'
+    logAnalyticsConfiguration: {
+      customerId: law.properties.customerId
+      sharedKey: law.listKeys().primarySharedKey
+    }
+  }
+  vnetConfiguration: { infrastructureSubnetId: acaSubnetId, internal: acaInternal }
+  workloadProfiles: [{ name: 'Consumption', workloadProfileType: 'Consumption' }]
+  zoneRedundant: true
+}
+
+resource acaEnv 'Microsoft.App/managedEnvironments@2024-03-01' = if (env == 'prod') {
   name: '${prefix}-env'
   location: location
   tags: tags
-  properties: union({
-    appLogsConfiguration: {
-      destination: 'log-analytics'
-      logAnalyticsConfiguration: {
-        customerId: law.properties.customerId
-        sharedKey: law.listKeys().primarySharedKey
-      }
-    }
-    vnetConfiguration: { infrastructureSubnetId: acaSubnetId, internal: acaInternal }
-    workloadProfiles: [{ name: 'Consumption', workloadProfileType: 'Consumption' }]
-    zoneRedundant: true
-  }, env == 'staging' ? {
+  properties: acaEnvironmentProperties
+  dependsOn: [logAnalytics]
+}
+
+resource stagingAcaEnv 'Microsoft.App/managedEnvironments@2026-07-01' = if (env == 'staging') {
+  name: '${prefix}-env'
+  location: location
+  tags: tags
+  properties: union(acaEnvironmentProperties, {
     appInsightsConfiguration: {
       connectionString: stagingInsights!.properties.ConnectionString
     }
@@ -481,17 +495,20 @@ resource acaEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
       tracesConfiguration: { destinations: ['appInsights'] }
       logsConfiguration: { destinations: ['appInsights'] }
     }
-  } : {})
+  })
   dependsOn: [logAnalytics]
 }
+
+var acaEnvironmentId = env == 'staging' ? stagingAcaEnv!.id : acaEnv!.id
+var acaEnvironmentDefaultDomain = env == 'staging' ? stagingAcaEnv!.properties.defaultDomain : acaEnv!.properties.defaultDomain
 
 module apps 'modules/apps.bicep' = if (deployApplications) {
   name: 'apps'
   params: {
     location: location
     deploymentEnvironment: env
-    environmentId: acaEnv.id
-    environmentDefaultDomain: acaEnv.properties.defaultDomain
+    environmentId: acaEnvironmentId
+    environmentDefaultDomain: acaEnvironmentDefaultDomain
     identityId: appIdentity.id
     identityClientId: appIdentity.properties.clientId
     acrLoginServer: '${acrName}.azurecr.io'
@@ -560,4 +577,4 @@ output postgresFqdn string = database.outputs.serverFqdn
 output appInternalFqdn string = deployApplications ? apps!.outputs.appFqdn : ''
 output bootstrapInfrastructureOnly bool = env == 'staging' && bootstrapInfrastructureOnly
 output appIdentityClientId string = appIdentity.properties.clientId
-output environmentId string = acaEnv.id
+output environmentId string = acaEnvironmentId
