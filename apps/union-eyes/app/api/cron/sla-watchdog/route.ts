@@ -7,13 +7,14 @@
  *
  * Protected by withApi cron auth.
  *
- * The claims are read across organizations by SYSTEM authority (a cross-organization SELECT on claims only). The alerts are
- * tenant rows, so each organization's alerts are written inside that organization's own context. A claim with no assignee has no
- * one to alert; it is counted in the result so the gap is visible instead of silent.
+ * The claims are read across organizations by SYSTEM authority (a cross-organization SELECT on claims only). A cron run has no
+ * real authenticated session to bind a tenant RLS context to, so the alerts are also written via SYSTEM authority; each inserted
+ * row still names its own organizationId explicitly, so a write can only ever land in the organization it was tallied for. A
+ * claim with no assignee has no one to alert; it is counted in the result so the gap is visible instead of silent.
  */
 import { and, asc, gt, sql } from 'drizzle-orm'
 import { db } from '@/db/db'
-import { withRLSContext, withSystemContext } from '@/lib/db/with-rls-context'
+import { withSystemContext, withSystemRLSContext } from '@/lib/db/with-rls-context'
 import { claims } from '@/db/schema'
 import { logger } from '@/lib/logger'
 import { withApi } from '@/lib/api/framework'
@@ -32,8 +33,6 @@ import {
 } from '@/lib/workflow/sla-alerts'
 
 export const dynamic = 'force-dynamic'
-
-const WATCHDOG_ACTOR = 'system:sla-watchdog'
 
 export const POST = withApi(
   {
@@ -104,7 +103,10 @@ export const POST = withApi(
       const batch = counts.alerts.slice(0, MAX_ALERTS_PER_ORGANIZATION)
       alertsDeferred += counts.alerts.length - batch.length
       try {
-        alertsWritten += await withRLSContext({ organizationId, userId: WATCHDOG_ACTOR }, (tx) => writeSlaAlerts(tx, organizationId, batch))
+        // A cron run has no real authenticated session, so withRLSContext (which always resolves
+        // the acting user via auth()) is not usable here; writeSlaAlerts sets organizationId
+        // explicitly on every inserted row regardless of which role performs the write.
+        alertsWritten += await withSystemRLSContext('sla-watchdog: write SLA alerts', (tx) => writeSlaAlerts(tx, organizationId, batch))
       } catch (error) {
         logger.error('SLA alerts were not written', { organizationId, error: String(error) })
         failures.push({ scope: `alerts:${organizationId}`, reason: 'alert write failed' })
