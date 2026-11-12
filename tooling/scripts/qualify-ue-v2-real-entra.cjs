@@ -148,7 +148,8 @@ async function main() {
   record({ kind: 'CANONICAL_DOCUMENT_UPLOAD', persona: 'A', status: upload.status(), checksum, bytes: content.length });
   assert.equal(upload.status(), 201);
   const intake = payload(await upload.json());
-  const intakeId = guid(intake.id);
+  // The canonical intake route returns IntakeView, whose id field is named intakeId, not id.
+  const intakeId = guid(intake.intakeId);
   await request('B', '/api/documents/intakes/' + intakeId, 'GET', undefined, [403, 404]);
   const documentPayload = { title: 'Synthetic V2 staging document', filename: 'ue-v2-synthetic-document.txt',
                             intakeId, contentHash: checksum, documentType: 'staging-qualification', privacyLabel: 'public_internal',
