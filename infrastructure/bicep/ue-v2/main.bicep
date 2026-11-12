@@ -91,8 +91,8 @@ param appRevisionMode string = 'Single'
 param appPinnedRevisionName string = ''
 @description('Deterministic suffix for the revision this deployment creates (e.g. a short source SHA), so a controlled-promotion step knows the new revision\'s exact name without discovery. Empty lets Azure generate one.')
 param appRevisionSuffix string = ''
-@description('Malware scanner replica bounds. Uploads fail closed while no scanner replica is running (cold start included).')
-param clamavMinReplicas int = env == 'prod' ? 1 : 0
+@description('Malware scanner replica bounds. The scanner now actually becomes healthy and usable once warm (it previously never did); scaling to zero in staging meant the FIRST upload after idle had to cold-start both the container and clamd itself (~20-25s measured locally) before it could answer, which exceeded real client/test request timeouts as a slow hang rather than the fast, clean fail-closed response scaling-to-zero was originally meant to produce. Keep it warm in both environments, matching the bound production already used.')
+param clamavMinReplicas int = 1
 param clamavMaxReplicas int = 2
 @description('Internal Container Apps environment (reachable only through Private Link, e.g. Front Door). Staging has no Front Door, so its environment is external.')
 param acaInternal bool = env == 'prod'
