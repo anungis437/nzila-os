@@ -84,6 +84,13 @@ param dbMaxConnections int = startsWith(dbSku, 'Standard_B') ? 50 : 0
 @description('Application replica bounds. Staging scales to zero; raise them for an acceptance run.')
 param appMinReplicas int = env == 'prod' ? 2 : 0
 param appMaxReplicas int = env == 'prod' ? 6 : 2
+@description('Container Apps revision mode for the application. Multiple enables a pinned-traffic, health-gated rollout (a new revision is created at 0% traffic until explicitly promoted); Single (the default) keeps the immediate-cutover behavior unchanged for any caller that does not opt in.')
+@allowed(['Single', 'Multiple'])
+param appRevisionMode string = 'Single'
+@description('When appRevisionMode is Multiple, pins ingress traffic to this existing revision name while a new revision is created at 0% traffic for a controlled, health-gated promotion. Empty means traffic follows the latest revision (today\'s behavior) -- used for the first deployment under Multiple mode or whenever Single mode is in effect.')
+param appPinnedRevisionName string = ''
+@description('Deterministic suffix for the revision this deployment creates (e.g. a short source SHA), so a controlled-promotion step knows the new revision\'s exact name without discovery. Empty lets Azure generate one.')
+param appRevisionSuffix string = ''
 @description('Malware scanner replica bounds. Uploads fail closed while no scanner replica is running (cold start included).')
 param clamavMinReplicas int = env == 'prod' ? 1 : 0
 param clamavMaxReplicas int = 2
@@ -530,6 +537,9 @@ module apps 'modules/apps.bicep' = if (deployApplications) {
     maxReplicas: appMaxReplicas
     clamavMinReplicas: clamavMinReplicas
     clamavMaxReplicas: clamavMaxReplicas
+    appRevisionMode: appRevisionMode
+    appPinnedRevisionName: appPinnedRevisionName
+    appRevisionSuffix: appRevisionSuffix
     ingressAllowedIpRanges: ingressAllowedIpRanges
     prefix: prefix
     enableStripe: enableStripe

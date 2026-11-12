@@ -10,8 +10,15 @@ import { describe, expect, it } from 'vitest'
 describe('Union Eyes V2 Container Apps health probes', () => {
   const source = readFileSync(join(__dirname, '..', '..', 'infrastructure', 'bicep', 'ue-v2', 'modules', 'apps.bicep'), 'utf8')
   const main = readFileSync(join(__dirname, '..', '..', 'infrastructure', 'bicep', 'ue-v2', 'main.bicep'), 'utf8')
+  // Scoped to the `app` resource specifically: apps.bicep also declares a `clamav` resource with its
+  // own Readiness probe (a different container, a different port), which a whole-file regex would
+  // otherwise match first.
+  const appBlock = source.slice(
+    source.indexOf("resource app 'Microsoft.App/containerApps@2024-03-01' = {"),
+    source.indexOf('dependsOn: [clamav]'),
+  )
   const probe = (kind: string) => {
-    const match = source.match(new RegExp("type: '" + kind + "'[\\s\\S]*?httpGet: \\{ path: '([^']+)', port: 3000 \\}"))
+    const match = appBlock.match(new RegExp("type: '" + kind + "'[\\s\\S]*?httpGet: \\{ path: '([^']+)', port: 3000 \\}"))
     return match?.[1]
   }
 
