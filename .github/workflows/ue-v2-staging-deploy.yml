@@ -81,6 +81,7 @@ concurrency:
 
 env:
   STAGING_RG: nzila-canada-staging-rg
+  APP_NAME: nzila-ue-v2-staging-app
   REGISTRY_NAME: nzilaventuresacr
   REGISTRY_RG: nzila-canada-prod-rg
   TEMPLATE: infrastructure/bicep/ue-v2/main.bicep
@@ -281,6 +282,30 @@ jobs:
             exit 1
           fi
 
+      - name: Resolve controlled-rollout parameters (pinned revision + suffix)
+        # Pins ingress traffic to whatever revision is currently serving 100% (empty on a first-ever
+        # deploy) so the new revision this deployment creates starts at 0% traffic instead of an
+        # immediate cutover, and gives it a deterministic name so the apply job's promotion step can
+        # find it without discovery. Mutating deploy-parameters.json here, before what-if runs, is what
+        # makes the reviewed what-if and the later applied deployment agree on these values.
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          PINNED=""
+          if az containerapp show -g "$STAGING_RG" -n "$APP_NAME" >/dev/null 2>&1; then
+            PINNED=$(az containerapp revision list -g "$STAGING_RG" -n "$APP_NAME" \
+              --query "[?properties.trafficWeight==\`100\`].name | [0]" -o tsv)
+          fi
+          SUFFIX="rel${SOURCE_SHA:0:10}"
+          P="$RUNNER_TEMP/plan/deploy-parameters.json"
+          jq --arg pinned "${PINNED:-}" --arg suffix "$SUFFIX" \
+            '.parameters.appRevisionMode = {value:"Multiple"} | .parameters.appPinnedRevisionName = {value:$pinned} | .parameters.appRevisionSuffix = {value:$suffix}' \
+            "$P" > "$P.tmp" && mv "$P.tmp" "$P"
+          mkdir -p "$RUNNER_TEMP/evidence"
+          cp "$P" "$RUNNER_TEMP/evidence/deploy-parameters.json"
+          echo "Resolved pinned revision: ${PINNED:-<none, first deploy>}; new revision suffix: $SUFFIX"
+
       - name: Re-attest image digests in the registry
         run: |
           set -euo pipefail
@@ -434,13 +459,13 @@ jobs:
           DB_ADMIN_PASSWORD: ${{ secrets.UE_V2_STAGING_DB_ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
-          PLAN="$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}"
-          REVIEWED="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}/what-if.json"
+          WHATIF_ARTIFACTS="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}"
+          REVIEWED="$WHATIF_ARTIFACTS/what-if.json"
           az deployment group what-if \
             --resource-group "$STAGING_RG" \
             --name "ue-v2-staging-whatif-apply-${GITHUB_RUN_ID}" \
             --template-file "source/$TEMPLATE" \
-            --parameters "@$PLAN/deploy-parameters.json" \
+            --parameters "@$WHATIF_ARTIFACTS/deploy-parameters.json" \
             --parameters dbAdminPassword="$DB_ADMIN_PASSWORD" \
             --result-format FullResourcePayloads \
             --no-pretty-print -o json > "$RUNNER_TEMP/evidence/what-if-apply.json"
@@ -453,16 +478,55 @@ jobs:
           SOURCE_SHA: ${{ needs.plan.outputs.sha }}
         run: |
           set -euo pipefail
-          PLAN="$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}"
+          WHATIF_ARTIFACTS="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}"
           az deployment group create \
             --resource-group "$STAGING_RG" \
             --name "ue-v2-staging-${SOURCE_SHA:0:12}-${GITHUB_RUN_ID}" \
             --template-file "source/$TEMPLATE" \
-            --parameters "@$PLAN/deploy-parameters.json" \
+            --parameters "@$WHATIF_ARTIFACTS/deploy-parameters.json" \
             --parameters dbAdminPassword="$DB_ADMIN_PASSWORD" \
             --query '{name:name, provisioningState:properties.provisioningState, outputs:properties.outputs}' \
             -o json > "$RUNNER_TEMP/evidence/deployment.json"
           test "$(jq -r .provisioningState "$RUNNER_TEMP/evidence/deployment.json")" = "Succeeded"
+
+      - name: Promote traffic to the new revision after it passes readiness
+        # The Bicep deployment above pinned traffic to the previously-live revision, so the new
+        # revision it created (named by appRevisionSuffix) is live at 0% traffic. Only now, after
+        # confirming the new revision is actually healthy, do we shift traffic to it. If it never
+        # becomes healthy, this step fails and traffic is simply left on the known-good revision --
+        # there is nothing to roll back because the known-good revision never lost traffic.
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          NEW_REVISION="${APP_NAME}--rel${SOURCE_SHA:0:10}"
+          echo "Waiting for $NEW_REVISION to become healthy..."
+          HEALTHY="false"
+          for _ in $(seq 1 30); do
+            STATE=$(az containerapp revision show -g "$STAGING_RG" -n "$APP_NAME" --revision "$NEW_REVISION" \
+              --query '{health:properties.healthState, running:properties.runningState}' -o json 2>/dev/null || echo '{}')
+            HEALTH=$(echo "$STATE" | jq -r '.health // empty')
+            RUNNING=$(echo "$STATE" | jq -r '.running // empty')
+            echo "  health=$HEALTH running=$RUNNING"
+            if [ "$HEALTH" = "Healthy" ] && [ "$RUNNING" = "Running" ]; then
+              HEALTHY="true"
+              break
+            fi
+            sleep 10
+          done
+          if [ "$HEALTHY" != "true" ]; then
+            echo "::error::$NEW_REVISION never became healthy; leaving traffic on the previously-live revision. Nothing to roll back."
+            exit 1
+          fi
+          FQDN=$(az containerapp show -g "$STAGING_RG" -n "$APP_NAME" --query 'properties.configuration.ingress.fqdn' -o tsv)
+          REVISION_FQDN="${NEW_REVISION}.${FQDN#*.}"
+          VERSION_SHA=$(curl -fsS "https://${REVISION_FQDN}/api/version" | jq -r '.gitSha // empty')
+          if [ "$VERSION_SHA" != "$SOURCE_SHA" ]; then
+            echo "::error::New revision reports gitSha=$VERSION_SHA, expected $SOURCE_SHA. Leaving traffic on the previously-live revision."
+            exit 1
+          fi
+          echo "$NEW_REVISION is healthy and confirmed running $SOURCE_SHA; promoting to 100% traffic."
+          az containerapp ingress traffic set -g "$STAGING_RG" -n "$APP_NAME" --revision-weight "${NEW_REVISION}=100"
 
       - name: Record deployment (no secrets)
         if: always()

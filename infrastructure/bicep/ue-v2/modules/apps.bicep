@@ -24,6 +24,10 @@ param minReplicas int = 2
 param maxReplicas int = 6
 param clamavMinReplicas int = 1
 param clamavMaxReplicas int = 2
+@allowed(['Single', 'Multiple'])
+param appRevisionMode string = 'Single'
+param appPinnedRevisionName string = ''
+param appRevisionSuffix string = ''
 @description('Optional ingress IP allow-list for the app (CIDR strings). Empty = no restriction.')
 param ingressAllowedIpRanges array = []
 param prefix string
@@ -92,7 +96,8 @@ var ipRestrictions = [
   }
 ]
 // ipSecurityRestrictions is only written when an allow-list is given, so production ingress is unchanged.
-var appIngress = union({ external: true, targetPort: 3000, transport: 'auto', allowInsecure: false }, empty(ingressAllowedIpRanges) ? {} : { ipSecurityRestrictions: ipRestrictions })
+var appTraffic = empty(appPinnedRevisionName) ? [{ latestRevision: true, weight: 100 }] : [{ revisionName: appPinnedRevisionName, weight: 100 }]
+var appIngress = union({ external: true, targetPort: 3000, transport: 'auto', allowInsecure: false, traffic: appTraffic }, empty(ingressAllowedIpRanges) ? {} : { ipSecurityRestrictions: ipRestrictions })
 var clamavUrl = 'https://${prefix}-clamav.internal.${environmentDefaultDomain}'
 
 resource clamav 'Microsoft.App/containerApps@2024-03-01' = {
@@ -114,6 +119,18 @@ resource clamav 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'clamav'
           image: clamavImage
           resources: { cpu: json('1.75'), memory: '3.5Gi' }
+          probes: [
+            {
+              // The scanner's own clamd daemon can be reachable-but-unready (e.g. loading signatures, or
+              // its process not actually up despite the HTTP wrapper responding); this hits the wrapper's
+              // real clamd PING round-trip so Container Apps only routes scan requests to a replica that
+              // can actually reach clamd, instead of one whose HTTP server is merely listening.
+              type: 'Readiness'
+              httpGet: { path: '/health', port: 8080 }
+              initialDelaySeconds: 15
+              periodSeconds: 15
+            }
+          ]
         }
       ]
       // The scanner is a launch dependency: production never scales it to zero, and uploads fail
@@ -132,12 +149,13 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
     environmentId: environmentId
     workloadProfileName: 'Consumption'
     configuration: {
-      activeRevisionsMode: 'Single'
+      activeRevisionsMode: appRevisionMode
       ingress: appIngress
       registries: [{ server: acrLoginServer, identity: identityId }]
       secrets: secrets
     }
     template: {
+      revisionSuffix: empty(appRevisionSuffix) ? null : appRevisionSuffix
       containers: [
         {
           name: 'union-eyes'
