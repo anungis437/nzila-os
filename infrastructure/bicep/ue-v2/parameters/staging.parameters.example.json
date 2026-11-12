@@ -31,7 +31,6 @@
 
     "appMinReplicas": { "value": 0 },
     "appMaxReplicas": { "value": 2 },
-    "clamavMinReplicas": { "value": 0 },
     "clamavMaxReplicas": { "value": 2 },
     "acaInternal": { "value": false },
     "ingressAllowedIpRanges": { "value": ["<operator egress CIDR, e.g. 203.0.113.10/32>"] },
