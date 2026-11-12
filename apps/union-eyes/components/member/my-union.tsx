@@ -94,9 +94,9 @@ export function MyUnion() {
     return value && t.has(key) ? t(key) : value ?? t('notRecorded');
   };
   const field = (label: string, value: string | null | undefined) => (
-    <div>
+    <div className="min-w-0">
       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</dt>
-      <dd className="text-sm">{value || t('notRecorded')}</dd>
+      <dd className="break-words text-sm">{value || t('notRecorded')}</dd>
     </div>
   );
 
@@ -130,7 +130,7 @@ export function MyUnion() {
           <>
             <dl className="grid gap-4 sm:grid-cols-2" data-testid="membership-details">
               {field(t('union'), membership.organizationName)}
-              <div>
+              <div className="min-w-0">
                 <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('statusLabel')}</dt>
                 <dd><Badge variant="secondary">{statusLabel(membership.status)}</Badge></dd>
               </div>
