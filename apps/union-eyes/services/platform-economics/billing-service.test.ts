@@ -43,7 +43,7 @@ const dbMock = vi.hoisted(() => {
         orderBy() { return c; },
         limit() { return c; },
         for() { return c; },
-        onConflictDoNothing() { return c; }
+        onConflictDoNothing() { return c; },
         offset() { return c; },
         groupBy() { return c; },
         values(v: any) { c._values = v; return c; },
