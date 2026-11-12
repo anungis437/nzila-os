@@ -146,25 +146,28 @@ export async function getOrCreateBillingPeriod(
   periodStart: Date,
   periodEnd: Date,
 ) {
-  const [existing] = await db
-    .select()
-    .from(billingPeriods)
-    .where(
-      and(
-        eq(billingPeriods.organizationId, organizationId),
-        eq(billingPeriods.label, label),
-      ),
-    )
-    .limit(1);
-
-  if (existing) return existing;
-
+  // The unique (organization_id, label) index arbitrates concurrent creators.
+  // Never return a period with different dates for the same label.
   const [created] = await db
     .insert(billingPeriods)
     .values({ organizationId, label, periodStart, periodEnd })
+    .onConflictDoNothing({ target: [billingPeriods.organizationId, billingPeriods.label] })
     .returning();
 
-  return created;
+  if (created) return created;
+
+  const [existing] = await db
+    .select()
+    .from(billingPeriods)
+    .where(and(eq(billingPeriods.organizationId, organizationId), eq(billingPeriods.label, label)))
+    .limit(1);
+
+  if (!existing) throw new Error('Billing period conflict could not be resolved');
+  if (existing.periodStart.getTime() !== periodStart.getTime() ||
+      existing.periodEnd.getTime() !== periodEnd.getTime()) {
+    throw new Error('Billing period label conflicts with existing dates');
+  }
+  return existing;
 }
 
 export async function closeBillingPeriod(
