@@ -18,6 +18,16 @@ function az(args) {
 function get(path = '') { return az(['rest', '--method', 'get', '--url', 'https://management.azure.com' + ID + path + '?api-version=2024-03-01']); }
 function templateHash(template) {
   const copy = structuredClone(template); delete copy.revisionSuffix;
+  // The app-level template echo and the per-revision snapshot differ in two cosmetic,
+  // ARM-API-filled ways that carry no configuration meaning: a secretRef-bound env var gets an
+  // empty "value" echoed back only at the app level, and ephemeralStorage is a default the app
+  // level fills in that the revision snapshot omits. Strip both before comparing.
+  for (const container of copy.containers ?? []) {
+    for (const envVar of container.env ?? []) {
+      if (envVar.secretRef) delete envVar.value;
+    }
+    if (container.resources) delete container.resources.ephemeralStorage;
+  }
   const stable = x => Array.isArray(x) ? x.map(stable) : x && typeof x === 'object' ? Object.fromEntries(Object.keys(x).sort().map(k => [k, stable(x[k])])) : x;
   return crypto.createHash('sha256').update(JSON.stringify(stable(copy))).digest('hex');
 }
@@ -45,7 +55,7 @@ async function main() {
   assert.equal(account.id, SUB);
   assert.equal(account.tenantId, 'cc15259a-d2bf-421f-8e44-dccf8dc6232a');
   const before = get(), known = before.properties.latestReadyRevisionName;
-  assert.equal(before.location.toLowerCase(), 'canadacentral');
+  assert.equal(before.location.toLowerCase().replace(/\s+/g, ''), 'canadacentral');
   assert.equal(before.properties.configuration.activeRevisionsMode, 'Single');
   assert.equal(before.properties.latestRevisionName, known);
   const revision = get('/revisions/' + known);
