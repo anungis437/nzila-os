@@ -42,6 +42,8 @@ const dbMock = vi.hoisted(() => {
         where() { return c; },
         orderBy() { return c; },
         limit() { return c; },
+        for() { return c; },
+        onConflictDoNothing() { return c; }
         offset() { return c; },
         groupBy() { return c; },
         values(v: any) { c._values = v; return c; },
@@ -207,9 +209,19 @@ describe('updateBillingAccount', () => {
 // ===========================================================================
 describe('getOrCreateBillingPeriod', () => {
   it('returns the existing period when present', async () => {
-    state.selects.billingPeriods = [{ id: 'bp-1', label: '2025-01' }];
-    const r = await getOrCreateBillingPeriod('org-1', '2025-01', new Date(), new Date());
+    const start = new Date('2025-01-01T00:00:00Z');
+    const end = new Date('2025-01-31T00:00:00Z');
+    state.inserts.billingPeriods = [];
+    state.selects.billingPeriods = [{ id: 'bp-1', label: '2025-01', periodStart: start, periodEnd: end }];
+    const r = await getOrCreateBillingPeriod('org-1', '2025-01', start, end);
     expect(r.id).toBe('bp-1');
+  });
+
+  it('rejects an existing billing period label with conflicting dates', async () => {
+    state.inserts.billingPeriods = [];
+    state.selects.billingPeriods = [{ id: 'bp-1', periodStart: new Date('2025-01-01'), periodEnd: new Date('2025-01-31') }];
+    await expect(getOrCreateBillingPeriod('org-1', '2025-01', new Date('2025-02-01'), new Date('2025-02-28')))
+      .rejects.toThrow(/conflicts with existing dates/);
   });
 
   it('creates a new period when none exists', async () => {
@@ -369,7 +381,7 @@ describe('recordPayment', () => {
   it('throws when the invoice belongs to a different org', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1' }];
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'other-org', amountPaid: '0.00', totalAmount: '100.00' }];
-    await expect(recordPayment(base)).rejects.toThrow(/does not belong/);
+    await expect(recordPayment(base)).rejects.toThrow(/not found for organization/);
   });
 
   it('throws when the payment amount is not positive', async () => {
@@ -397,10 +409,13 @@ describe('recordPayment', () => {
     expect(r.id).toBe('pay-1');
     expect(appendLedgerEntry).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: 'payment_received', amountCad: '-100.00' }),
+      expect.anything(),
     );
-    expect(auditLog).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'payment_recorded' }),
+    expect(persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'payment_recorded', resourceId: 'pay-1' }),
     );
+    expect(auditLog).not.toHaveBeenCalledWith(expect.objectContaining({ action: 'payment_recorded' }));
   });
 
   it('records a partial payment (partially_paid status)', async () => {
