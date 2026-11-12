@@ -5,6 +5,7 @@ const m = vi.hoisted(() => ({
   pageCalls: 0,
   writeSlaAlerts: vi.fn(),
   rlsContexts: [] as unknown[],
+  systemRLSReasons: [] as unknown[],
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
   recordUnionEyesSlaCompliance: vi.fn(),
   recordUnionEyesSlaWatchdog: vi.fn(),
@@ -22,6 +23,7 @@ vi.mock('@/db/db', () => ({ db: { select: () => chain() } }));
 vi.mock('@/lib/db/with-rls-context', () => ({
   withSystemContext: async (op: () => Promise<unknown>) => op(),
   withRLSContext: async (ctx: unknown, op: (tx: unknown) => Promise<unknown>) => { m.rlsContexts.push(ctx); return op({}); },
+  withSystemRLSContext: async (reason: string, op: (tx: unknown) => Promise<unknown>) => { m.systemRLSReasons.push(reason); return op({}); },
 }));
 vi.mock('@/lib/logger', () => ({ logger: m.logger }));
 vi.mock('@/lib/workflow/case-lifecycle', () => ({ getSLADeadlineHours: () => 10 }));
@@ -54,6 +56,7 @@ describe('cron/sla-watchdog route', () => {
     m.pages = [];
     m.pageCalls = 0;
     m.rlsContexts = [];
+    m.systemRLSReasons = [];
     m.writeSlaAlerts.mockImplementation(async (_tx: unknown, _org: string, alerts: unknown[]) => alerts.length);
     m.recordUnionEyesSlaCompliance.mockResolvedValue(undefined);
     m.recordUnionEyesSlaWatchdog.mockResolvedValue(undefined);
@@ -65,14 +68,11 @@ describe('cron/sla-watchdog route', () => {
     expect(await response.json()).toMatchObject({ success: true, scanned: 0, alerts_written: 0 });
   });
 
-  it('writes the alerts inside each organization\'s own context and reports the counts', async () => {
+  it('writes the alerts via system authority (a cron run has no real session to bind a tenant context to) and reports the counts', async () => {
     m.pages = [[row('a', ORG_A, 9), row('b', ORG_A, 12), row('c', ORG_A, 1), row('d', ORG_B, 12), row('e', ORG_B, 12, null), row('f', null, 12)]];
     const body = await (await run()).json();
     expect(body).toMatchObject({ success: true, scanned: 6, at_risk: 1, breached: 3, alerts_written: 3, unassigned_claims: 1, claims_without_organization: 1 });
-    expect(m.rlsContexts).toEqual([
-      { organizationId: ORG_A, userId: 'system:sla-watchdog' },
-      { organizationId: ORG_B, userId: 'system:sla-watchdog' },
-    ]);
+    expect(m.systemRLSReasons).toEqual(['sla-watchdog: write SLA alerts', 'sla-watchdog: write SLA alerts']);
     expect(m.writeSlaAlerts.mock.calls.map((c) => [c[1], c[2].map((a: any) => a.claimId)])).toEqual([[ORG_A, ['a', 'b']], [ORG_B, ['d']]]);
   });
 
