@@ -15,6 +15,18 @@ let stage = 'guard', browser;
 const contexts = new Map();
 function record(value) { report.observations.push({ at: new Date().toISOString(), ...value }); }
 function payload(body) { return body.data ?? body; }
+// Some routes in this codebase (crud-factory item/list routes; see
+// apps/union-eyes/lib/client/api-envelope.ts envelopeRows/envelopeRow) deliberately
+// return `{ data: ... }` from the handler on TOP of withApi's own `{ success, data, timestamp }`
+// wrap, so the real body is `{ data: { data: ... } }`. A single payload() unwrap is correct for
+// hand-written routes (e.g. the single-case GET) but leaves an object (not an array) for those
+// double-wrapped list routes. listPayload() unwraps one further level only when needed.
+function listPayload(body) {
+  const once = payload(body);
+  if (Array.isArray(once)) return once;
+  if (once && typeof once === 'object' && Array.isArray(once.data)) return once.data;
+  return once;
+}
 function guid(value) { assert.match(value, /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i); return value; }
 async function request(key, path, method = 'GET', data, expected = [200]) {
   assert(path.startsWith('/api/') && !path.includes('://'));
@@ -92,9 +104,10 @@ async function main() {
     assert.equal(own.claimId, cases[key]);
     assert.equal(own.organizationId, PEOPLE[key].org);
     await request(key, '/api/cases/' + cases[other], 'GET', undefined, [403, 404]);
-    const list = payload(await (await request(key, '/api/cases')).json());
-    assert(Array.isArray(list) && list.some(row => row.claimId === cases[key]));
-    assert(!list.some(row => row.claimId === cases[other]));
+    const list = listPayload(await (await request(key, '/api/cases')).json());
+    assert(Array.isArray(list), 'case list response was not an array even after the known envelope unwrap');
+    assert(list.some(row => row.claimId === cases[key]), 'own just-created case missing from case list');
+    assert(!list.some(row => row.claimId === cases[other]), 'foreign-tenant case leaked into case list');
     record({ kind: 'OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED', persona: key, ownCase: cases[key], foreignCase: cases[other] });
   }
   // The verified officer's visible menu excludes Finance; this fixture has no financial mandate.
@@ -196,4 +209,4 @@ async function main() {
   }
   report.status = 'PASS';
 }
-main().catch(error => { report.status = 'FAIL'; report.failure = { stage, error: error.name }; process.exitCode = 1; }).finally(async () => { if (browser) await browser.close().catch(() => {}); fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(OUT + '/receipt.json', JSON.stringify(report, null, 2) + '\n'); console.log(JSON.stringify({ status: report.status, stage, observations: report.observations.length })); });
+main().catch(error => { report.status = 'FAIL'; report.failure = { stage, error: error.name, message: error.message }; process.exitCode = 1; }).finally(async () => { if (browser) await browser.close().catch(() => {}); fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(OUT + '/receipt.json', JSON.stringify(report, null, 2) + '\n'); console.log(JSON.stringify({ status: report.status, stage, observations: report.observations.length })); });
