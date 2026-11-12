@@ -150,7 +150,8 @@ beforeEach(() => {
   state.inserts = {};
   state.updates = {};
   auditLog.mockClear();
-  appendLedgerEntry.mockClear();
+  appendLedgerEntry.mockReset().mockResolvedValue(undefined);
+  persistAtomicAudit.mockReset().mockResolvedValue(undefined);
   requireReconciliation.mockClear();
   getActiveContract.mockClear().mockResolvedValue({ id: 'contract-1' });
 });
@@ -416,6 +417,34 @@ describe('recordPayment', () => {
       expect.objectContaining({ action: 'payment_recorded', resourceId: 'pay-1' }),
     );
     expect(auditLog).not.toHaveBeenCalledWith(expect.objectContaining({ action: 'payment_recorded' }));
+  });
+
+  it('refuses to report payment success if the immutable ledger write fails', async () => {
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
+    state.inserts.platformPayments = [{ id: 'pay-ledger-failure' }];
+    appendLedgerEntry.mockRejectedValueOnce(new Error('ledger unavailable'));
+
+    await expect(recordPayment(base)).rejects.toThrow('ledger unavailable');
+    expect(appendLedgerEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceId: 'pay-ledger-failure' }),
+      expect.anything(),
+    );
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('refuses to report payment success if the atomic audit write fails', async () => {
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
+    state.inserts.platformPayments = [{ id: 'pay-audit-failure' }];
+    persistAtomicAudit.mockRejectedValueOnce(new Error('audit unavailable'));
+
+    await expect(recordPayment(base)).rejects.toThrow('audit unavailable');
+    expect(appendLedgerEntry).toHaveBeenCalled();
+    expect(persistAtomicAudit).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'payment_recorded', resourceId: 'pay-audit-failure' }),
+    );
   });
 
   it('records a partial payment (partially_paid status)', async () => {
