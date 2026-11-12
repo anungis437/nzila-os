@@ -477,17 +477,6 @@ export async function recordPayment(input: RecordPaymentInput) {
     throw new Error('Keyed payment recording unavailable until transactional idempotency is enforced');
   }
 
-  // Get invoice
-  const [invoice] = await db
-    .select()
-    .from(platformInvoices)
-    .where(eq(platformInvoices.id, input.invoiceId))
-    .limit(1);
-  if (!invoice) throw new Error(`Invoice ${input.invoiceId} not found`);
-  if (invoice.organizationId !== input.organizationId) {
-    throw new Error('Invoice does not belong to this organization');
-  }
-
   // Reject malformed CAD amounts before financial writes; centsSafe alone can round precision.
   if (!/^\d+(?:\.\d{1,2})?$/.test(input.amount)) {
     throw new Error('Payment amount must be a valid CAD amount with at most two decimals');
@@ -498,6 +487,24 @@ export async function recordPayment(input: RecordPaymentInput) {
   }
 
   const result = await db.transaction(async (tx) => {
+    // Lock the invoice before reading its balance. Concurrent payments for this
+    // invoice serialize on the same row, preventing stale amountPaid writes.
+    const [invoice] = await tx
+      .select()
+      .from(platformInvoices)
+      .where(and(eq(platformInvoices.id, input.invoiceId), eq(platformInvoices.organizationId, input.organizationId)))
+      .for('update')
+      .limit(1);
+    if (!invoice) throw new Error('Invoice not found for organization');
+    if (invoice.status === 'void' || invoice.status === 'written_off') {
+      throw new Error('Cannot record payment against a void or written-off invoice');
+    }
+    const newAmountPaidCents = centsSafe(invoice.amountPaid) + paymentAmountCents;
+    const totalDueCents = centsSafe(invoice.totalAmount);
+    if (newAmountPaidCents > totalDueCents) {
+      throw new Error('Payment exceeds remaining invoice balance');
+    }
+
     // Insert payment
     const [payment] = await tx
       .insert(platformPayments)
@@ -523,9 +530,7 @@ export async function recordPayment(input: RecordPaymentInput) {
     });
 
     // Update invoice paid amount + status (cents-safe)
-    const newAmountPaidCents = centsSafe(invoice.amountPaid) + paymentAmountCents;
-    const totalDueCents = centsSafe(invoice.totalAmount);
-    const newStatus = newAmountPaidCents >= totalDueCents ? 'paid' : 'partially_paid';
+    const newStatus = newAmountPaidCents === totalDueCents ? 'paid' : 'partially_paid';
 
     await tx
       .update(platformInvoices)
@@ -536,32 +541,30 @@ export async function recordPayment(input: RecordPaymentInput) {
       })
       .where(and(eq(platformInvoices.id, input.invoiceId), eq(platformInvoices.organizationId, input.organizationId)));
 
+    // Payment, allocation, balance, immutable ledger and audit are one commit.
+    // A failed ledger/audit write rolls back every financial mutation.
+    await appendLedgerEntry({
+      organizationId: input.organizationId,
+      billingPeriodId: invoice.billingPeriodId ?? undefined,
+      costType: 'credit',
+      eventType: 'payment_received',
+      sourceType: 'payment',
+      sourceId: payment.id,
+      unitPriceCad: `-${input.amount}`,
+      amountCad: `-${input.amount}`,
+      description: `Payment received — ${input.method}`,
+      createdBy: input.createdBy,
+    }, tx);
+    await persistAtomicAudit(tx as unknown as RLSTx, {
+      organizationId: input.organizationId,
+      userId: input.createdBy,
+      action: 'payment_recorded',
+      resourceType: 'platform_payment',
+      resourceId: payment.id,
+      details: { amount: input.amount, method: input.method, invoiceId: input.invoiceId },
+    });
+
     return payment;
-  });
-
-  // Ledger entry for payment
-  await appendLedgerEntry({
-    organizationId: input.organizationId,
-    billingPeriodId: invoice.billingPeriodId ?? undefined,
-    costType: 'credit',
-    eventType: 'payment_received',
-    sourceType: 'payment',
-    sourceId: result.id,
-    unitPriceCad: `-${input.amount}`,
-    amountCad: `-${input.amount}`,
-    description: `Payment received — ${input.method}`,
-    createdBy: input.createdBy,
-  });
-
-  await auditLog({
-    eventType: AuditEventType.PAYMENT_PROCESSED,
-    severity: AuditSeverity.HIGH,
-    organizationId: input.organizationId,
-    resource: 'platform_payment',
-    resourceId: result.id,
-    action: 'payment_recorded',
-    userId: input.createdBy,
-    details: { amount: input.amount, method: input.method, invoiceId: input.invoiceId },
   });
 
   return result;
