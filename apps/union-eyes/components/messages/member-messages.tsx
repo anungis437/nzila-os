@@ -65,7 +65,7 @@ export function MemberMessages({ initialThreadId, compose }: { initialThreadId?:
       <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">{t('privacyNote')}</p>
 
       <div className="grid gap-6 md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
-        <section aria-label={t('listLabel')} className={activeId || composing ? 'hidden md:block' : ''}>
+        <section aria-label={t('listLabel')} className={`min-w-0 ${activeId || composing ? 'hidden md:block' : ''}`}>
           {listState === 'loading' && (
             <div className="space-y-3" role="status" aria-busy="true">
               {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}
@@ -104,7 +104,7 @@ export function MemberMessages({ initialThreadId, compose }: { initialThreadId?:
                       aria-current={thread.id === activeId ? 'true' : undefined}
                       className={`w-full rounded-lg border p-3 text-left hover:bg-muted/50 ${thread.id === activeId ? 'bg-muted' : ''}`}
                     >
-                      <span className="line-clamp-1 font-medium">{thread.subject}</span>
+                      <span className="line-clamp-1 break-words font-medium">{thread.subject}</span>
                       <span className="text-xs text-muted-foreground">
                         {dateFormat.format(new Date(thread.lastMessageAt ?? thread.createdAt))}
                         {thread.status !== 'open' ? ` · ${t(`status.${thread.status}` as never)}` : ''}
@@ -118,7 +118,7 @@ export function MemberMessages({ initialThreadId, compose }: { initialThreadId?:
           )}
         </section>
 
-        <section aria-live="polite">
+        <section aria-live="polite" className="min-w-0">
           {composing && (
             <NewConversation
               initialSubject={compose === 'privacy' ? t('privacySubject') : ''}
