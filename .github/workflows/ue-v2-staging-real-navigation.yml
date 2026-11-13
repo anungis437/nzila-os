@@ -13,8 +13,11 @@ on:
         options:
           - member
           - steward
+          - chief_steward
           - officer
+          - secretary_treasurer
           - admin
+          - app_owner
 permissions:
   contents: read
 concurrency:
@@ -44,11 +47,17 @@ jobs:
           node --check tooling/scripts/qualify-ue-v2-real-navigation.cjs
           node --check tooling/scripts/lib/ue-staging-navigation-settlement.cjs
           node --test tooling/scripts/lib/ue-staging-navigation-settlement.test.cjs
+          pnpm exec tsx tooling/scripts/generate-ue-v2-navigation-inventory.cts --check
       - name: Verify actual provider session and source-defined visible navigation
         env:
           SOURCE_SHA: ${{ inputs.source_sha }}
           SYNTHETIC_MEMBERSHIP_ROLE: ${{ inputs.membership_role }}
           UE_V2_STAGING_PERSONA_A_PASSWORD: ${{ secrets.UE_V2_STAGING_PERSONA_A_PASSWORD }}
+          UE_V2_STAGING_MEMBER_PASSWORD: ${{ secrets.UE_V2_STAGING_MEMBER_PASSWORD }}
+          UE_V2_STAGING_STEWARD_PASSWORD: ${{ secrets.UE_V2_STAGING_STEWARD_PASSWORD }}
+          UE_V2_STAGING_EXECUTIVE_PASSWORD: ${{ secrets.UE_V2_STAGING_EXECUTIVE_PASSWORD }}
+          UE_V2_STAGING_ADMINGOV_PASSWORD: ${{ secrets.UE_V2_STAGING_ADMINGOV_PASSWORD }}
+          UE_V2_STAGING_PLATFORMOPS_PASSWORD: ${{ secrets.UE_V2_STAGING_PLATFORMOPS_PASSWORD }}
         run: node tooling/scripts/qualify-ue-v2-real-navigation.cjs
       - name: Preserve redacted navigation and denial metadata
         if: always()
