@@ -86,7 +86,10 @@
     "1184",
     "1185",
     "1187",
-    "1189"
+    "1189",
+    "1193",
+    "1194",
+    "1195"
   ],
   "linked_commits": [
     "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
@@ -102,11 +105,12 @@
     "7d67bcd59ee3f2441d41cde5adbd8769bda85a96",
     "3a664497c85919b6d396fbd321f526a29a8469d4",
     "09835ead3b762ba262b643f6740e81f4eb8c4027",
-    "b3dfa4436285e89fdaed79848f669c85675af525"
+    "b3dfa4436285e89fdaed79848f669c85675af525",
+    "e2d2e031dd6e09e9bb4c257dbe82fa326f49bcc5"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-12T20:49:08.715895+00:00",
+  "updated_at": "2026-11-13T05:36:35.631609+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -115,7 +119,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "b3dfa4436285e89fdaed79848f669c85675af525",
+    "candidate_sha": "e2d2e031dd6e09e9bb4c257dbe82fa326f49bcc5",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true
