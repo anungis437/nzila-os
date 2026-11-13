@@ -604,7 +604,7 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
   if (input.status !== undefined && input.status !== 'completed' && input.status !== 'failed') {
     throw new Error('Unsupported external payment status');
   }
-  if (!/^\\d+(?:\\.\\d{1,2})?$/.test(input.amount)) {
+  if (!/^\d+(?:\.\d{1,2})?$/.test(input.amount)) {
     throw new Error('External payment amount must be a non-negative CAD amount with at most two decimals');
   }
   const paymentAmountCents = centsSafe(input.amount);
