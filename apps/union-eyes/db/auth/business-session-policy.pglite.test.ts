@@ -63,7 +63,7 @@ describe('mandatory session gate against additive permissive RLS drift', () => {
     const rows = (await db.query<Record<string, unknown>>(BUSINESS_SESSION_POLICY_QUERY)).rows
     expect(businessSessionPolicyViolations(rows)).toEqual([])
     expect(businessSessionPolicyViolations([])).not.toEqual([])
-    for (const change of [{polname: null}, {polpermissive: true}, {roles: ['union_eyes_runtime','union_eyes_system']}, {qual: 'true'}, {with_check: null}, {relforcerowsecurity: false}]) {
+    for (const change of [{polname: null}, {polpermissive: true}, {public_role: true}, {owner_name: 'union_eyes_runtime'}, {roles: ['union_eyes_runtime','union_eyes_system']}, {qual: 'true'}, {with_check: null}, {relforcerowsecurity: false}]) {
       expect(businessSessionPolicyViolations(rows.map(row => ({...row,...change})))).not.toEqual([])
     }
     await db.exec(`DROP POLICY ${BUSINESS_SESSION_POLICY} ON public.policy_probe`)

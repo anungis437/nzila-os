@@ -13,7 +13,7 @@ export function compileBusinessSessionPolicy(table: string): string {
 
 export const BUSINESS_SESSION_POLICY_QUERY = `SELECT c.relname AS table_name,c.oid::text AS table_oid,
   pg_get_userbyid(c.relowner) AS owner_name,c.relacl::text AS table_acl,c.relrowsecurity,c.relforcerowsecurity,
-  p.polname,p.polcmd,p.polpermissive,
+  p.polname,p.polcmd,p.polpermissive,0=ANY(p.polroles) AS public_role,
   ARRAY(SELECT r.rolname::text FROM pg_roles r WHERE r.oid=ANY(p.polroles) ORDER BY r.rolname) AS roles,
   pg_get_expr(p.polqual,p.polrelid) AS qual,pg_get_expr(p.polwithcheck,p.polrelid) AS with_check
   FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
@@ -29,6 +29,7 @@ const normalized = (value: unknown) => typeof value === 'string' ? value.replace
 export function businessSessionPolicyViolations(rows: readonly Record<string, unknown>[]): string[] {
   if (!rows.length) return ['business session policy: no runtime relations inspected']
   return rows.flatMap(row => row.relrowsecurity === true && row.relforcerowsecurity === true
+    && row.owner_name === 'ue_v2_owner' && row.public_role === false
     && row.polname === BUSINESS_SESSION_POLICY && row.polcmd === '*' && row.polpermissive === false
     && JSON.stringify(row.roles) === JSON.stringify(['union_eyes_runtime'])
     && normalized(row.qual) === catalogPredicate && normalized(row.with_check) === catalogPredicate
