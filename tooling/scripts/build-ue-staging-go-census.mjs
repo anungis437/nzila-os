@@ -9,10 +9,15 @@ const root = path.resolve(here, '../..')
 const readJson = relative => JSON.parse(fs.readFileSync(path.join(root, relative), 'utf8'))
 
 const ENGINEERING_BASELINE_SHA = 'e87e3799f3cd9a2408f75d846bc5ec676dae3847'
-const GENERATED_ON = '2026-11-11'
-const STAGING_CANDIDATE_SHA = '7d67bcd59ee3f2441d41cde5adbd8769bda85a96'
-const STAGING_WORKFLOW_SHA = '7d67bcd59ee3f2441d41cde5adbd8769bda85a96'
-const outputDirectory = path.join(root, 'docs/union-eyes/staging')
+const GENERATED_ON = '2026-11-13'
+const STAGING_CANDIDATE_SHA = readJson('ops/change-records/CHG-2026-0114.json').founder_staging_authorization.candidate_sha
+const args = process.argv.slice(2)
+const outputIndex = args.indexOf('--output-directory')
+if (outputIndex >= 0 && !args[outputIndex + 1]) throw new Error('Output directory is required')
+const outputDirectory = outputIndex >= 0 ? path.resolve(args[outputIndex + 1]) : path.join(root, 'docs/union-eyes/staging')
+const initializeContract = args.includes('--initialize-contract')
+const contractPath = path.join(outputDirectory, 'UE_STAGING_GO_CONTRACT.json')
+if (initializeContract && fs.existsSync(contractPath)) throw new Error('Refusing to overwrite an existing staging evidence contract')
 
 const register = readJson('docs/union-eyes/convergence/remediation/ue-all-777-remediation-register.json')
 const elimination = readJson('docs/union-eyes/convergence/remediation/ue-gate0-defect-elimination.json')
@@ -160,10 +165,11 @@ const contract = {
   mandateId: 'UE-GATE0-TO-STAGING-GO-20261109',
   generatedOn: GENERATED_ON,
   engineeringBaselineSha: ENGINEERING_BASELINE_SHA,
-  acceptedStagingCandidateSha: STAGING_CANDIDATE_SHA,
-  stagingWorkflowDefinitionSha: STAGING_WORKFLOW_SHA,
+  acceptedStagingCandidateSha: null,
+  authorizedCandidateSha: STAGING_CANDIDATE_SHA,
+  stagingWorkflowDefinitionSha: null,
   verdict: 'STAGING_NO_GO',
-  verdictReason: `Candidate ${STAGING_CANDIDATE_SHA} repairs the overlong scheduled job name observed in workload apply 43057378878 and the case-write SQL failure observed after two real Entra sessions in diagnostic 43061328389. PR #1174 also protects private error telemetry and corrects native Redis diagnostics and localized labels. Foundation apply 43051696667, the actual private database restore and verified fixture seed succeeded on the preceding candidate and are preserved. This replacement requires final CI, main admission, a fresh source-attested image, reviewed normal rollout and new candidate-bound runtime qualification.`,
+  verdictReason: `Empty evidence contract initialized for authorized candidate ${STAGING_CANDIDATE_SHA}. CI, main admission, source-attested images, reviewed protected deployment and candidate-bound runtime qualification must be recorded before acceptance. Initialization establishes no deployed identity or runtime PASS.`,
   decisionAuthority: {
     role: 'NZILA_SOLO_FOUNDER',
     acceptanceRecorded: false,
@@ -174,7 +180,7 @@ const contract = {
     mergeAuthorizedByThisContract: false,
     institutionalPowersInferred: false,
   },
-  localValidation: {
+  historicalLocalValidation: {
     focusedRemediation: 'PASS — 7 files, 65 tests',
     earlierRunEvidenceReplay: 'PASS — 25 files, 238 tests; 1 native-only file and 13 environment-gated cases skipped',
     accountingAndProvenance: 'PASS — 2 files, 10 tests',
@@ -199,8 +205,8 @@ const contract = {
     ['CANDIDATE_IDENTITY', 'PENDING', `Engineering baseline ${ENGINEERING_BASELINE_SHA} and corrective source ${STAGING_CANDIDATE_SHA} are identified; admitted workflow, main ancestry and built image identity remain to be verified.`],
     ['SOURCE_ENGINEERING', 'PASS', 'Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries.'],
     ['LOCAL_HOLISTIC_REGRESSION', 'NON_BLOCKING_HOST_LIMITATION', 'Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.'],
-    ['FINAL_CANDIDATE_CI', 'PENDING', 'The corrected runtime source is completing full CI in PR #1174. Prior candidate CI and build successes do not qualify this replacement.'],
-    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'Foundation apply 43051696667 succeeded. Normal rollout 43057378878 updated the prior application but failed on one job name. The replacement requires a fresh reviewed successful normal rollout.'],
+    ['FINAL_CANDIDATE_CI', 'PENDING', 'Exact-candidate CI must be recorded. Prior candidate CI and build successes do not qualify this replacement.'],
+    ['AUTHORIZED_STAGING_DEPLOYMENT', 'NOT_PROVEN', 'No protected deployment receipt has been recorded in this newly initialized contract.'],
     ['DEPLOYED_REVISION_IDENTITY', 'NOT_PROVEN', 'No staging revision running this candidate is identified.'],
     ['DATABASE_MIGRATIONS', 'NOT_PROVEN', 'The prior candidate has an actual private PostgreSQL restore and native privilege receipt. Preserve that installation and verify compatibility against this replacement export; no replacement-bound receipt is yet recorded.'],
     ['ENTRA_AUTHENTICATED_SESSIONS', 'NOT_PROVEN', 'Protected diagnostic 43061328389 proved both real Entra authorization-code sessions on the prior source, then failed case creation. Repeat acceptance against this replacement.'],
@@ -208,10 +214,11 @@ const contract = {
     ['BUSINESS_WORKFLOWS_AND_PERSONAS', 'NOT_PROVEN', 'Credentialed staging persona journeys are not recorded.'],
     ['WORKERS_RETRIES_AND_DELIVERY', 'NOT_PROVEN', 'No real worker lease/recovery and successor reminder delivery receipts exist.'],
     ['AUDIT_AND_TELEMETRY', 'NOT_PROVEN', 'No candidate-bound live audit persistence and Azure Monitor/OpenTelemetry evidence exists.'],
-    ['DOCUMENT_REVOCATION_PRIVACY_FINANCE', 'NOT_PROVEN', 'Deployed revocation, privacy/legal, and financial safety scenarios are not recorded.'],
+    ['DOCUMENT_REVOCATION_AND_PRIVACY', 'NOT_PROVEN', 'Deployed document lifecycle, actual private bytes/expiry, revocation and privacy/legal scenarios are not recorded.'],
+    ['SENSITIVE_FINANCE_BOUNDARIES', 'NOT_PROVEN', 'Required sensitive finance denials are not recorded. Finance/dues persistence and Financial Officer 2.1 are excluded from this base release.'],
     ['OPERATIONAL_RECOVERY', 'NOT_PROVEN', 'Rollback, backup/restore, and recovery evidence is not candidate-bound.'],
     ['CAPABILITY_TRUTHFULNESS', 'PENDING', 'The capability registry remains conservative, but deployed availability must be compared with it.'],
-    ['INSTITUTIONAL_BOUNDARIES', 'PASS', 'Platform-staff mandate remains decision-ready but not decided; restricted cross-tenant and financial powers remain deny-by-default.'],
+    ['INSTITUTIONAL_BOUNDARIES', 'NOT_PROVEN', 'Direct-scoped institutional refusal must be qualified without issuing or inferring institutional authority.'],
     ['STAGING_DECISION_ACCEPTANCE', 'NOT_PROVEN', 'The sole founder is the staging decision authority. STAGING GO cannot yet be accepted because real deployed qualification has not happened; no second independent human is required for this internal operation.'],
   ].map(([id, status, evidence]) => ({ id, requirement: id === 'LOCAL_HOLISTIC_REGRESSION' ? 'ADVISORY' : 'REQUIRED', status, evidence })),
   externalBlockers: [],
@@ -226,5 +233,5 @@ if (reconciliation.batchLabelDifferences.length !== 56) throw new Error(`Expecte
 
 fs.mkdirSync(outputDirectory, { recursive: true })
 fs.writeFileSync(path.join(outputDirectory, 'UE_GATE0_QUALIFICATION_CENSUS.json'), `${JSON.stringify(census, null, 2)}\n`)
-fs.writeFileSync(path.join(outputDirectory, 'UE_STAGING_GO_CONTRACT.json'), `${JSON.stringify(contract, null, 2)}\n`)
-process.stdout.write(`${JSON.stringify({ frozenPopulation: census.frozenPopulation, summary: census.summary, verdict: contract.verdict })}\n`)
+if (initializeContract) fs.writeFileSync(contractPath, `${JSON.stringify(contract, null, 2)}\n`)
+process.stdout.write(`${JSON.stringify({ frozenPopulation: census.frozenPopulation, summary: census.summary, contractInitialized: initializeContract, existingEvidenceContractPreserved: !initializeContract })}\n`)

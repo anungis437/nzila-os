@@ -1,0 +1,37 @@
+[
+  {
+    "job": "nzila-ue-v2-stagi-cron-deadlines",
+    "execution": "nzila-ue-v2-stagi-cron-deadlines-8zhxidn",
+    "end": "2026-11-13T21:08:40+00:00",
+    "start": "2026-11-13T21:08:10+00:00",
+    "status": "Succeeded"
+  },
+  {
+    "job": "ue-role-probe2",
+    "execution": "ue-role-probe2-n0xbyv8",
+    "end": "2026-11-13T21:09:32+00:00",
+    "start": "2026-11-13T21:08:36+00:00",
+    "status": "Succeeded"
+  },
+  {
+    "job": "ue-role-probe2",
+    "execution": "ue-role-probe2-c64a7nx",
+    "end": "2026-11-13T21:04:34+00:00",
+    "start": "2026-11-13T21:03:59+00:00",
+    "status": "Succeeded"
+  },
+  {
+    "job": "nzila-ue-v2-stagin-sla",
+    "execution": "nzila-ue-v2-stagin-sla-bko07xu",
+    "end": "2026-11-13T21:08:40+00:00",
+    "start": "2026-11-13T21:08:07+00:00",
+    "status": "Succeeded"
+  },
+  {
+    "job": "nzila-ue-v2-stagin-reap",
+    "execution": "nzila-ue-v2-stagin-reap-m64st7m",
+    "end": "2026-11-13T21:08:40+00:00",
+    "start": "2026-11-13T21:08:08+00:00",
+    "status": "Succeeded"
+  }
+]

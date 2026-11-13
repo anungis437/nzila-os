@@ -1,0 +1,59 @@
+{
+  "at": "2026-11-13T21:08:03.127676+00:00",
+  "stagingOnly": true,
+  "sourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "/api/version": {
+    "status": 200,
+    "body": {
+      "app": "union-eyes",
+      "gitSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+      "buildTimestamp": "2026-11-13T11:03:47Z",
+      "appVersion": "0.0.0",
+      "releaseId": "UE-V2-STAGING-8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+      "artifactId": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896"
+    }
+  },
+  "/api/ready": {
+    "status": 200,
+    "body": {
+      "ready": true,
+      "status": "ready",
+      "app": "union-eyes",
+      "environment": "staging",
+      "gitSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+      "buildTimestamp": "2026-11-13T11:03:47Z",
+      "artifactId": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+      "releaseId": "UE-V2-STAGING-8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+      "appVersion": "0.0.0",
+      "timestamp": "2026-11-13T21:08:03.660Z",
+      "checks": {
+        "process": "ok",
+        "noTestBypass": "ok",
+        "database": "ok",
+        "catalogAuthority": "ok",
+        "storage": "unknown",
+        "thirdParty": "unknown"
+      }
+    }
+  },
+  "/api/health/liveness": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "timestamp": "2026-11-13T21:08:03.738Z",
+      "uptime": 14966.141978323
+    }
+  },
+  "resource": {
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:133c63e0e8abef77a4ad46aee76fa6a337fa01f9f9e38ada26bc75941f308340",
+    "latestReady": "nzila-ue-v2-staging-app--0000010",
+    "mode": "Multiple",
+    "provisioning": "Succeeded",
+    "traffic": [
+      {
+        "revisionName": "nzila-ue-v2-staging-app--0000010",
+        "weight": 100
+      }
+    ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "evidenceClass": "REAL_REMOTE_ENTRA_SESSION_AND_API",
+  "sourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "workflowSha": "d37d0903a29c9913b9128017680b87f41e4828c4",
+  "runId": "43506734799",
+  "observations": [
+    {
+      "at": "2026-11-13T21:02:30.228Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "A",
+      "principal": "ecb4f1d7-b0ae-44f8-bf56-832bc173fc49",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-13T21:17:30.211Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-13T21:02:31.526Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/profile/roles",
+      "status": 200,
+      "traceId": "a7ea5ac4833353e14c8bcd058927ab7f",
+      "correlationId": "9a3cd4f8-2178-4c88-89c5-9b2ad00c74c7"
+    },
+    {
+      "at": "2026-11-13T21:02:31.527Z",
+      "kind": "LIVE_CANONICAL_MEMBERSHIP_ROLE",
+      "requestedOwnedSyntheticRole": "officer",
+      "observedCanonicalRole": "member"
+    }
+  ],
+  "runtimeAcceptance": false,
+  "requestedOwnedSyntheticRole": "officer",
+  "canonicalEntryCount": 42,
+  "status": "FAIL",
+  "failure": {
+    "stage": "live-canonical-membership-role",
+    "error": "AssertionError",
+    "message": "Dispatch membership_role does not match the authenticated synthetic principal; select the actual role, not a fictional fixture\n+ actual - expected\n\n+ 'member'\n- 'officer'\n"
+  },
+  "sourceReceiptSha256": "e1d4f1413f91ee89ade79760394ab19dddfa00d1e8b9137f1ba953dcac1fe1d7"
+}

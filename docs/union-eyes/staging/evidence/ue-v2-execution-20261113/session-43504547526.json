@@ -1,0 +1,386 @@
+{
+  "evidenceClass": "REAL_REMOTE_ENTRA_SESSION_AND_API",
+  "sourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "workflowSha": "d37d0903a29c9913b9128017680b87f41e4828c4",
+  "runId": "43504547526",
+  "observations": [
+    {
+      "at": "2026-11-13T20:47:29.620Z",
+      "kind": "LIVE_SOURCE_IDENTITY",
+      "gitSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+      "app": "union-eyes"
+    },
+    {
+      "at": "2026-11-13T20:47:36.897Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "A",
+      "principal": "ecb4f1d7-b0ae-44f8-bf56-832bc173fc49",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-13T21:02:36.856Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-13T20:47:41.958Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "B",
+      "principal": "59d4c24e-acb6-4a0e-898a-ed20016c642c",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-13T21:02:41.920Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-13T20:47:43.886Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases",
+      "status": 201,
+      "traceId": "6e44c475e9b360db5fd7b9430dfed6c2",
+      "correlationId": "cdf1b04c-59b5-4367-8a6f-4a64e46ed1ea",
+      "responseTraceId": "mwfg7imc-e9a923bd"
+    },
+    {
+      "at": "2026-11-13T20:47:43.887Z",
+      "kind": "API_CREATED_CASE",
+      "persona": "A",
+      "claimId": "33a3b941-8379-4300-a69d-39c24c1cb664",
+      "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0"
+    },
+    {
+      "at": "2026-11-13T20:47:45.375Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "POST",
+      "path": "/api/cases",
+      "status": 201,
+      "traceId": "8a70ff84d86565769213690e1e3c5e70",
+      "correlationId": "c1d8fec6-b308-447c-9861-e9b66dd6f49e",
+      "responseTraceId": "mwfg7k1q-bc74c9d2"
+    },
+    {
+      "at": "2026-11-13T20:47:45.376Z",
+      "kind": "API_CREATED_CASE",
+      "persona": "B",
+      "claimId": "480cc691-b41a-4fcc-82e3-f89d6a4d36d8",
+      "organizationId": "f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab"
+    },
+    {
+      "at": "2026-11-13T20:47:47.977Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases/33a3b941-8379-4300-a69d-39c24c1cb664",
+      "status": 200,
+      "traceId": "52d75d4df4a5c0a05f738ad70b75dfb9",
+      "correlationId": "2869a2bb-a36c-4742-8a60-aa46ee5f7ad0",
+      "responseTraceId": "mwfg7l73-dd76dc9a"
+    },
+    {
+      "at": "2026-11-13T20:47:50.245Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases/480cc691-b41a-4fcc-82e3-f89d6a4d36d8",
+      "status": 404,
+      "traceId": "35620cb9afccbf069a86f8efda471e74",
+      "correlationId": "1835ada3-013d-49e5-801c-34effe47c1cd",
+      "responseTraceId": "mwfg7n79-f789ea46"
+    },
+    {
+      "at": "2026-11-13T20:47:52.937Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases",
+      "status": 200,
+      "traceId": "2fc47260caa4d770bd2e67c3fc0526e7",
+      "correlationId": "00d75f38-55d1-44bd-a0a9-2759cb6a2fbc",
+      "responseTraceId": "mwfg7oy8-0fa04b39"
+    },
+    {
+      "at": "2026-11-13T20:47:52.938Z",
+      "kind": "OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED",
+      "persona": "A",
+      "ownCase": "33a3b941-8379-4300-a69d-39c24c1cb664",
+      "foreignCase": "480cc691-b41a-4fcc-82e3-f89d6a4d36d8"
+    },
+    {
+      "at": "2026-11-13T20:47:55.309Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/cases/480cc691-b41a-4fcc-82e3-f89d6a4d36d8",
+      "status": 200,
+      "traceId": "95699a652e363f05af6322d7977ab3f2",
+      "correlationId": "8ff56eea-b380-4c5d-bbb7-123dfad0f935",
+      "responseTraceId": "mwfg7r10-93b33958"
+    },
+    {
+      "at": "2026-11-13T20:47:58.578Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/cases/33a3b941-8379-4300-a69d-39c24c1cb664",
+      "status": 404,
+      "traceId": "cb7eb6600e2c36aba2d7c32a6ae62a74",
+      "correlationId": "66429213-465b-42b7-aa77-3baf6508a4c8",
+      "responseTraceId": "mwfg7sux-c7851c74"
+    },
+    {
+      "at": "2026-11-13T20:48:01.326Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/cases",
+      "status": 200,
+      "traceId": "2ea87215ebad445f149bc0c29dad9224",
+      "correlationId": "1c817f0a-1bdd-43fb-89ad-e35c28003977",
+      "responseTraceId": "mwfg7vdq-f6c94e50"
+    },
+    {
+      "at": "2026-11-13T20:48:01.327Z",
+      "kind": "OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED",
+      "persona": "B",
+      "ownCase": "480cc691-b41a-4fcc-82e3-f89d6a4d36d8",
+      "foreignCase": "33a3b941-8379-4300-a69d-39c24c1cb664"
+    },
+    {
+      "at": "2026-11-13T20:48:04.128Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/executive",
+      "finalPath": "/en-CA/dashboard/executive",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:05.582Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/leadership",
+      "finalPath": "/en-CA/dashboard/leadership",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:07.207Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/governance",
+      "finalPath": "/en-CA/dashboard/governance",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:08.844Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/bargaining",
+      "finalPath": "/en-CA/dashboard/bargaining",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:10.643Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/correspondence",
+      "finalPath": "/en-CA/dashboard/correspondence",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:12.067Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/continuity-intelligence",
+      "finalPath": "/en-CA/dashboard/continuity-intelligence",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:13.524Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/settings",
+      "finalPath": "/en-CA/dashboard/settings",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:16.487Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/executive",
+      "finalPath": "/fr-CA/dashboard/executive",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:18.175Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/leadership",
+      "finalPath": "/fr-CA/dashboard/leadership",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:19.631Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/governance",
+      "finalPath": "/fr-CA/dashboard/governance",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:21.212Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/bargaining",
+      "finalPath": "/fr-CA/dashboard/bargaining",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:23.357Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/correspondence",
+      "finalPath": "/fr-CA/dashboard/correspondence",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:24.918Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/continuity-intelligence",
+      "finalPath": "/fr-CA/dashboard/continuity-intelligence",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:26.360Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/settings",
+      "finalPath": "/fr-CA/dashboard/settings",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-13T20:48:28.867Z",
+      "kind": "MOBILE_LOCALIZED_PAGE",
+      "path": "/en-CA/dashboard/executive",
+      "status": 200,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "at": "2026-11-13T20:48:31.038Z",
+      "kind": "MOBILE_LOCALIZED_PAGE",
+      "path": "/fr-CA/dashboard/executive",
+      "status": 200,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "at": "2026-11-13T20:48:33.124Z",
+      "kind": "CANONICAL_DOCUMENT_UPLOAD",
+      "persona": "A",
+      "status": 201,
+      "checksum": "7d1c6f656c08aca6f9de89121ab0f40626274fe53ecb0d0d9644de5917f465e6",
+      "bytes": 69
+    },
+    {
+      "at": "2026-11-13T20:48:35.453Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/documents/intakes/9bc11429-b49d-4b97-99af-47bdc94bc0d0",
+      "status": 404,
+      "traceId": "048a70a17f9da3ec605c3ef1000b8b4c",
+      "correlationId": "4223a55e-68dc-4bb1-a05f-9ee0b6fb5d44",
+      "responseTraceId": "mwfg8npm-8d95547a"
+    },
+    {
+      "at": "2026-11-13T20:48:38.576Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/documents/repository",
+      "status": 200,
+      "traceId": "c16ed403c3ca9a7f9d2def4c593d5062",
+      "correlationId": "d9a9948f-74ee-4459-85ee-c9c9cd004d4d",
+      "responseTraceId": "mwfg8nu6-51923410"
+    },
+    {
+      "at": "2026-11-13T20:48:40.821Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/documents/repository",
+      "status": 200,
+      "traceId": "502605b07ab67d144059682d8d9f7ba9",
+      "correlationId": "39002c9e-dc15-4ffa-bb23-6ebf66a1b310",
+      "responseTraceId": "mwfg8q8r-9217aa57"
+    },
+    {
+      "at": "2026-11-13T20:48:42.289Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/documents/44ef147c-1c35-4bdc-b56e-052ca63102df/download",
+      "status": 403,
+      "traceId": "01e88b5a563ad74f8e37a006b8dfd315",
+      "correlationId": "c1bc7ac6-8ffa-4cb1-86c2-cec33c775041",
+      "responseTraceId": "mwfg8rzb-00b56be0"
+    },
+    {
+      "at": "2026-11-13T20:48:44.617Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/documents/44ef147c-1c35-4bdc-b56e-052ca63102df/download",
+      "status": 200,
+      "traceId": "96129241f741707f28cea42562b42fd0",
+      "correlationId": "8f39ffc5-2a5f-4f95-a96a-e14e187b4918",
+      "responseTraceId": "mwfg8t3w-ec998f94"
+    },
+    {
+      "at": "2026-11-13T20:48:44.943Z",
+      "kind": "API_DOCUMENT_AND_ONE_USE_INTAKE",
+      "intakeId": "9bc11429-b49d-4b97-99af-47bdc94bc0d0",
+      "documentId": "44ef147c-1c35-4bdc-b56e-052ca63102df",
+      "checksum": "7d1c6f656c08aca6f9de89121ab0f40626274fe53ecb0d0d9644de5917f465e6",
+      "replaySameDocument": true,
+      "foreignDownloadDenied": true,
+      "publicClientStatus": 403,
+      "expiresAt": "2026-11-13T21:48:44Z",
+      "signedUrlSha256": "40d3764d5be3bd083475091c494435e61140221c39bcd4e13b70621554464738",
+      "privateBytesAndExpiryNotYetProven": true,
+      "privateLeaseOmittedFromCommittedMetadata": true
+    }
+  ],
+  "runtimeAcceptance": false,
+  "claims": {
+    "A": "33a3b941-8379-4300-a69d-39c24c1cb664",
+    "B": "480cc691-b41a-4fcc-82e3-f89d6a4d36d8"
+  },
+  "status": "PASS",
+  "sourceReceiptSha256": "a1e0c089e239fe12395d099453af844b5470a93ff332b0e96ee078baa4e84ffa"
+}
