@@ -353,7 +353,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
 
   // Subscription module data is persisted JSON; a TypeScript cast does not validate it.
   // Reject malformed or duplicated modules rather than issuing an incorrect invoice.
-  const modules = subscription.moduleList;
+  const modules = subscription.moduleList as string[] | null;
   if (modules != null && (!Array.isArray(modules) ||
       modules.some((moduleId) => typeof moduleId !== 'string' || moduleId.trim().length === 0) ||
       new Set(modules).size !== modules.length)) {
