@@ -351,7 +351,14 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     });
   }
 
-  const modules = subscription.moduleList as string[] | null;
+  // Subscription module data is persisted JSON; a TypeScript cast does not validate it.
+  // Reject malformed or duplicated modules rather than issuing an incorrect invoice.
+  const modules = subscription.moduleList;
+  if (modules != null && (!Array.isArray(modules) ||
+      modules.some((moduleId) => typeof moduleId !== 'string' || moduleId.trim().length === 0) ||
+      new Set(modules).size !== modules.length)) {
+    throw new Error('Invoice subscription modules are invalid');
+  }
   const perModuleFeeCents = centsSafe(plan.perModuleFee ?? '0');
   if (perModuleFeeCents > 0 && modules && modules.length > 0) {
     lineItems.push({
