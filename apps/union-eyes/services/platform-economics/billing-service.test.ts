@@ -244,6 +244,14 @@ describe('closeBillingPeriod', () => {
     await expect(closeBillingPeriod('bp-1', 'admin-1')).rejects.toThrow(/already closed/);
   });
 
+  it('refuses to report closure when the conditional update loses a concurrent race', async () => {
+    state.selects.billingPeriods = [{ id: 'bp-1', label: '2025-01', isClosed: false, organizationId: 'org-1' }];
+    state.updates.billingPeriods = [];
+    await expect(closeBillingPeriod('bp-1', 'admin-1')).rejects.toThrow(/already closed or changed concurrently/);
+    expect(requireReconciliation).toHaveBeenCalledWith('bp-1');
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
   it('closes the period after reconciliation guard and audits', async () => {
     state.selects.billingPeriods = [{ id: 'bp-1', label: '2025-01', isClosed: false, organizationId: 'org-1' }];
     state.updates.billingPeriods = [{ id: 'bp-1' }];
