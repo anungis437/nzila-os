@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { requireUser, hasMinRole, isCongressOrg } from '@/lib/api-auth-guard';
+import { logger } from '@/lib/logger';
 
 /**
  * Finance routes layout — blocks congress-type organizations.
@@ -22,7 +23,7 @@ export default async function FinanceLayout({
   // officer (level 80) being below the secretary_treasurer floor (110) in
   // ROLE_HIERARCHY. Logging the actual resolved values to find the real cause
   // before changing any guard logic -- remove once root-caused.
-  console.error('[finance-layout-diagnostic]', JSON.stringify({ userId: user.userId, organizationId: user.organizationId, roles: user.roles, minRoleMet }));
+  logger.error('[finance-layout-diagnostic]', { userId: user.userId, organizationId: user.organizationId, roles: user.roles, minRoleMet });
   if (await isCongressOrg(user.organizationId)) {
     redirect('/dashboard/clc');
   }
