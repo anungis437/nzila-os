@@ -1,4 +1,72 @@
 {
+  "onboardingTour": {
+    "title": "Getting started",
+    "dismiss": "Dismiss onboarding",
+    "done": "Got it",
+    "next": "Next",
+    "steps": {
+      "member": {
+        "0": {
+          "context": "This is My Cases — the cases you have opened are tracked here.",
+          "action": "Open a case to see its progress, or open a new representation case to get started."
+        },
+        "1": {
+          "context": "Each case moves through the process step by step.",
+          "action": "Status updates appear on the case as your representative takes action."
+        }
+      },
+      "steward": {
+        "0": {
+          "context": "Priorities shows what needs your attention right now.",
+          "action": "Start with the top item — it's ranked by urgency and deadline."
+        },
+        "1": {
+          "context": "This is where decisions start. Your actions drive the workflow.",
+          "action": "Open the first priority to begin."
+        }
+      },
+      "officer": {
+        "0": {
+          "context": "Team priorities — your team's most urgent items are ranked here.",
+          "action": "Review the top item or switch to your personal priorities."
+        },
+        "1": {
+          "context": "Your oversight drives team execution and accountability.",
+          "action": "Check the team queue, then review Intelligence for deeper context."
+        }
+      },
+      "federation": {
+        "0": {
+          "context": "Federation intelligence — what's happening across your locals.",
+          "action": "Focus on the top signals and recommended actions."
+        },
+        "1": {
+          "context": "Patterns and trends surface here as activity grows across the federation.",
+          "action": "Review key signals, then check Knowledge for supporting references."
+        }
+      },
+      "clc": {
+        "0": {
+          "context": "This is your executive view — leadership priorities at a glance.",
+          "action": "Read the executive summary and review the top 3 priorities."
+        },
+        "1": {
+          "context": "Strategic decisions are guided by the data on this page.",
+          "action": "Focus on the briefing, then explore intelligence trends below."
+        }
+      },
+      "admin": {
+        "0": {
+          "context": "Platform administration — manage organizations, users, and system configuration.",
+          "action": "Start by reviewing the organization overview and user status."
+        },
+        "1": {
+          "context": "Changes here affect all tenants. Review audit logs regularly.",
+          "action": "Check system health, then review pending access requests."
+        }
+      }
+    }
+  },
   "memberDocuments": {
     "title": "My Documents",
     "description": "Documents you have uploaded and documents your union shares with members.",

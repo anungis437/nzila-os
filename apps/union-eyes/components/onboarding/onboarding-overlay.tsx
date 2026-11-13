@@ -13,6 +13,7 @@
  */
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { X, ArrowRight, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -27,62 +28,62 @@ export interface OnboardingStep {
 export const ONBOARDING_STEPS: Record<string, OnboardingStep[]> = {
   member: [
     {
-      context: "This is My Cases — the cases you have opened are tracked here.",
-      action: "Open a case to see its progress, or open a new representation case to get started.",
+      context: "steps.member.0.context",
+      action: "steps.member.0.action",
     },
     {
-      context: "Each case moves through the process step by step.",
-      action: "Status updates appear on the case as your representative takes action.",
+      context: "steps.member.1.context",
+      action: "steps.member.1.action",
     },
   ],
   steward: [
     {
-      context: "Priorities shows what needs your attention right now.",
-      action: "Start with the top item — it's ranked by urgency and deadline.",
+      context: "steps.steward.0.context",
+      action: "steps.steward.0.action",
     },
     {
-      context: "This is where decisions start. Your actions drive the workflow.",
-      action: "Open the first priority to begin.",
+      context: "steps.steward.1.context",
+      action: "steps.steward.1.action",
     },
   ],
   officer: [
     {
-      context: "Team priorities — your team's most urgent items are ranked here.",
-      action: "Review the top item or switch to your personal priorities.",
+      context: "steps.officer.0.context",
+      action: "steps.officer.0.action",
     },
     {
-      context: "Your oversight drives team execution and accountability.",
-      action: "Check the team queue, then review Intelligence for deeper context.",
+      context: "steps.officer.1.context",
+      action: "steps.officer.1.action",
     },
   ],
   federation: [
     {
-      context: "Federation intelligence — what's happening across your locals.",
-      action: "Focus on the top signals and recommended actions.",
+      context: "steps.federation.0.context",
+      action: "steps.federation.0.action",
     },
     {
-      context: "Patterns and trends surface here as activity grows across the federation.",
-      action: "Review key signals, then check Knowledge for supporting references.",
+      context: "steps.federation.1.context",
+      action: "steps.federation.1.action",
     },
   ],
   clc: [
     {
-      context: "This is your executive view — leadership priorities at a glance.",
-      action: "Read the executive summary and review the top 3 priorities.",
+      context: "steps.clc.0.context",
+      action: "steps.clc.0.action",
     },
     {
-      context: "Strategic decisions are guided by the data on this page.",
-      action: "Focus on the briefing, then explore intelligence trends below.",
+      context: "steps.clc.1.context",
+      action: "steps.clc.1.action",
     },
   ],
   admin: [
     {
-      context: "Platform administration — manage organizations, users, and system configuration.",
-      action: "Start by reviewing the organization overview and user status.",
+      context: "steps.admin.0.context",
+      action: "steps.admin.0.action",
     },
     {
-      context: "Changes here affect all tenants. Review audit logs regularly.",
-      action: "Check system health, then review pending access requests.",
+      context: "steps.admin.1.context",
+      action: "steps.admin.1.action",
     },
   ],
 };
@@ -133,6 +134,7 @@ export function OnboardingOverlay({
   onNext,
   onDismiss,
 }: OnboardingOverlayProps) {
+  const t = useTranslations("onboardingTour");
   const steps = ONBOARDING_STEPS[onboardingRole] || ONBOARDING_STEPS.member;
   const [visible, setVisible] = useState(true);
 
@@ -163,7 +165,7 @@ export function OnboardingOverlay({
           <div className="flex items-center gap-1.5">
             <Zap size={14} className="text-blue-600" />
             <span className="text-[11px] font-medium text-blue-600 uppercase tracking-wide">
-              Getting started
+              {t("title")}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -180,7 +182,7 @@ export function OnboardingOverlay({
             <button
               onClick={handleDismiss}
               className="text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Dismiss onboarding"
+              aria-label={t("dismiss")}
             >
               <X size={14} />
             </button>
@@ -189,10 +191,10 @@ export function OnboardingOverlay({
 
         <div className="px-4 pb-2">
           <p className="text-sm font-medium text-gray-900 leading-snug">
-            {step.context}
+            {t(step.context)}
           </p>
           <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-            {step.action}
+            {t(step.action)}
           </p>
         </div>
 
@@ -203,7 +205,7 @@ export function OnboardingOverlay({
             className="text-xs h-7"
             onClick={handleNext}
           >
-            {isLast ? "Got it" : "Next"}{" "}
+            {isLast ? t("done") : t("next")}{" "}
             {!isLast && <ArrowRight size={12} className="ml-1" />}
           </Button>
         </div>
