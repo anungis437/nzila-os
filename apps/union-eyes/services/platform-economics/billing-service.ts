@@ -596,6 +596,13 @@ interface ReconcileExternalInvoicePaymentInput {
 }
 
 export async function reconcileExternalInvoicePayment(input: ReconcileExternalInvoicePaymentInput) {
+  // Reject ambiguous provider events before any database read or financial write.
+  if (!input.externalReference?.trim()) {
+    throw new Error('External payment reference is required');
+  }
+  if (input.status !== undefined && input.status !== 'completed' && input.status !== 'failed') {
+    throw new Error('Unsupported external payment status');
+  }
   const [invoice] = await db
     .select()
     .from(platformInvoices)
