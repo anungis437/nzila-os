@@ -245,6 +245,11 @@ describe('platform-economics/billing-service', () => {
     });
 
     it.each([
+      ['malformed base fee', subscription, { ...plan, baseFee: 'invalid' }, /Invoice plan baseFee is invalid/],
+      ['negative base fee', subscription, { ...plan, baseFee: '-1.00' }, /Invoice plan baseFee is invalid/],
+      ['fractional-cent local fee', subscription, { ...plan, perLocalFee: '1.001' }, /Invoice plan perLocalFee is invalid/],
+      ['malformed seat fee', subscription, { ...plan, perSeatFee: 'garbage' }, /Invoice plan perSeatFee is invalid/],
+      ['negative module fee', subscription, { ...plan, perModuleFee: '-5.00' }, /Invoice plan perModuleFee is invalid/],
       ['negative local count', { ...subscription, localCount: -1 }, plan, /Invoice local count is invalid/],
       ['fractional local count', { ...subscription, localCount: 1.5 }, plan, /Invoice local count is invalid/],
       ['negative seat count', { ...subscription, seatCount: -1 }, plan, /Invoice seat count is invalid/],
