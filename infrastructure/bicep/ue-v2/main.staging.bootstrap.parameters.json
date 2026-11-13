@@ -2,12 +2,8 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "entraClientId": {
-      "value": "5470c759-3dde-4009-9fd6-3eee46ab7b72"
-    },
-    "entraTenantId": {
-      "value": "cc15259a-d2bf-421f-8e44-dccf8dc6232a"
-    },
+    "entraClientId": { "value": "5470c759-3dde-4009-9fd6-3eee46ab7b72" },
+    "entraTenantId": { "value": "cc15259a-d2bf-421f-8e44-dccf8dc6232a" },
     "env": {
       "value": "staging"
     },
