@@ -926,7 +926,7 @@ export async function replayInvoiceDeterministically(invoiceId: string, organiza
     // centsSafe intentionally rounds and cannot validate corrupted stored amounts.
     const rawAmount = String(item.amount);
     const isAdjustment = item.costType === 'credit' || item.costType === 'subsidy';
-    if (!/^-?\\d+(?:\\.\\d{1,2})?$/.test(rawAmount) ||
+    if (!/^-?[0-9]+(?:[.][0-9]{1,2})?$/.test(rawAmount) ||
         (!isAdjustment && rawAmount.startsWith('-')) ||
         (isAdjustment && !rawAmount.startsWith('-'))) {
       throw new Error('Invoice replay contains invalid or overflowing line-item amounts');
