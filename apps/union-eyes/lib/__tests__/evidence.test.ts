@@ -1,11 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   buildEvidencePackFromAction: vi.fn(),
   processEvidencePack: vi.fn(),
   generateSeal: vi.fn(),
   verifySeal: vi.fn(),
+  canonical: vi.fn(),
 }));
+vi.mock('../canonical-evidence', () => ({buildCanonicalUnionEvidencePack: mocks.canonical}));
 
 vi.mock('@nzila/os-core/evidence', () => ({
   buildEvidencePackFromAction: mocks.buildEvidencePackFromAction,
@@ -19,6 +21,19 @@ import { buildUnionEvidencePack, generateSeal, verifySeal } from '../evidence';
 describe('evidence', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0');
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('routes V2 evidence to admitted tenant storage without invoking the shared platform exporter', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+    const action = {actionType: 'CASE_CREATED', orgId: '11111111-1111-4111-8111-111111111111', actorId: 'actor', artifacts: [{type: 'case', data: {id: 'case-1'}}]};
+    const saved = {packId: 'pack', status: 'sealed', storage: 'canonical-postgres'};
+    mocks.canonical.mockResolvedValue(saved);
+    await expect(buildUnionEvidencePack(action)).resolves.toBe(saved);
+    expect(mocks.canonical).toHaveBeenCalledWith(action);
+    expect(mocks.buildEvidencePackFromAction).not.toHaveBeenCalled();
+    expect(mocks.processEvidencePack).not.toHaveBeenCalled();
   });
 
   it('re-exports generateSeal from os-core', () => {

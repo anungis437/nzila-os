@@ -93,6 +93,11 @@ async function baseJourneys(role) {
     const repeat=payload(await(await request('A','/api/messages/threads/'+thread.id+'/messages','POST',reply)).json());assert.equal(repeat.duplicate,true);
     const saved=payload(await(await request('A','/api/messages/threads/'+thread.id+'/messages')).json());
     assert.equal(saved.messages.filter(row=>row.content===reply.body).length,1);
+    const concurrent={body:'Synthetic concurrent retry '+crypto.randomUUID(),clientRequestId:crypto.randomUUID()};
+    const raced=await Promise.all([request('A','/api/messages/threads/'+thread.id+'/messages','POST',concurrent,[200,201]),request('A','/api/messages/threads/'+thread.id+'/messages','POST',concurrent,[200,201])]);
+    assert.deepEqual(raced.map(response=>response.status()).sort(),[200,201]);
+    const afterRace=payload(await(await request('A','/api/messages/threads/'+thread.id+'/messages')).json());
+    assert.equal(afterRace.messages.filter(row=>row.content===concurrent.body).length,1,'Concurrent retries must persist only one message');
     record({kind:'MEMBER_CONVERSATION_AND_REPLY_PERSISTED_IDEMPOTENT',threadId:thread.id});
     stage='same-organization-unassigned-representative-privacy';
     PEOPLE.S=OWNED_PERSONAS.steward;await auth('S');

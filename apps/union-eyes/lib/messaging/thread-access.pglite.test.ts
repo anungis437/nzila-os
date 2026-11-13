@@ -178,4 +178,23 @@ describe('conversation participation against PostgreSQL', () => {
     expect((await listThreads(tx, member1))[0].id).toBe(thread.id)
   })
 
+  it('replays conversation creation without duplicating the initial message or audit', async () => {
+    const input = {subject: 'Retry-safe conversation', body: 'Only one initial message', clientRequestId: randomUUID()}
+    const first = await createMemberThread(tx, member1, input)
+    const second = await createMemberThread(tx, member1, input)
+    expect(second.id).toBe(first.id)
+    expect((await pg.query('SELECT id FROM messages WHERE thread_id=$1', [first.id])).rows).toHaveLength(1)
+    expect((await pg.query("SELECT audit_id FROM audit_security.audit_logs WHERE resource_id=$1 AND action='messages.thread.create'", [first.id])).rows).toHaveLength(1)
+  })
+
+  it('scopes a creation request id to the actual member and organization', async () => {
+    const input = {subject: 'Scoped replay', body: 'Same opaque request id', clientRequestId: randomUUID()}
+    const own = await createMemberThread(tx, member1, input)
+    const other = await createMemberThread(tx, actor('member-2', 'member'), input)
+    const foreign = await createMemberThread(tx, actor('member-1', 'member', foreignOrg), input)
+    expect(new Set([own.id, other.id, foreign.id]).size).toBe(3)
+    expect(other.memberId).toBe('member-2')
+    expect(foreign.organizationId).toBe(foreignOrg)
+  })
+
 })
