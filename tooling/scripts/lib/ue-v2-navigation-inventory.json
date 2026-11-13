@@ -375,6 +375,53 @@
       ],
       "deepGovernance": []
     },
+    "chief_steward": {
+      "experience": "staff",
+      "landing": "/dashboard/workbench",
+      "visible": [
+        {
+          "label": "Today",
+          "href": "/dashboard/inbox",
+          "group": "Operations"
+        },
+        {
+          "label": "Representation",
+          "href": "/dashboard/workbench",
+          "group": "Operations"
+        },
+        {
+          "label": "Members & Workplaces",
+          "href": "/dashboard/members",
+          "group": "Operations"
+        },
+        {
+          "label": "Communications",
+          "href": "/dashboard/correspondence",
+          "group": "Operations"
+        },
+        {
+          "label": "Documents & Evidence",
+          "href": "/dashboard/documents",
+          "group": "Operations"
+        },
+        {
+          "label": "Tasks & Deadlines",
+          "href": "/dashboard/priorities",
+          "group": "Operations"
+        },
+        {
+          "label": "Knowledge & Guidance",
+          "href": "/dashboard/clause-library",
+          "group": "Operations"
+        },
+        {
+          "label": "Profile & Settings",
+          "href": "/dashboard/settings",
+          "group": "Settings"
+        }
+      ],
+      "deepGovernance": []
+    },
     "officer": {
       "experience": "executive",
       "landing": "/dashboard/executive",
@@ -397,6 +444,56 @@
         {
           "label": "Bargaining & Collective Action",
           "href": "/dashboard/bargaining",
+          "group": "Executive"
+        },
+        {
+          "label": "Communications & Relations",
+          "href": "/dashboard/correspondence",
+          "group": "Executive"
+        },
+        {
+          "label": "Continuity & Intelligence",
+          "href": "/dashboard/continuity-intelligence",
+          "group": "Executive"
+        },
+        {
+          "label": "Profile & Settings",
+          "href": "/dashboard/settings",
+          "group": "Settings"
+        }
+      ],
+      "deepGovernance": [
+        "/dashboard/trust",
+        "/dashboard/intelligence"
+      ]
+    },
+    "secretary_treasurer": {
+      "experience": "executive",
+      "landing": "/dashboard/executive",
+      "visible": [
+        {
+          "label": "Today",
+          "href": "/dashboard/executive",
+          "group": "Executive"
+        },
+        {
+          "label": "Members & Service",
+          "href": "/dashboard/leadership",
+          "group": "Executive"
+        },
+        {
+          "label": "Governance & Organization",
+          "href": "/dashboard/governance",
+          "group": "Executive"
+        },
+        {
+          "label": "Bargaining & Collective Action",
+          "href": "/dashboard/bargaining",
+          "group": "Executive"
+        },
+        {
+          "label": "Finance & Resources",
+          "href": "/dashboard/finance",
           "group": "Executive"
         },
         {
@@ -447,7 +544,50 @@
         }
       ],
       "deepGovernance": []
+    },
+    "app_owner": {
+      "experience": "admin",
+      "landing": "/dashboard/admin/organizations",
+      "visible": [
+        {
+          "label": "Workspace",
+          "href": "/dashboard/workspace",
+          "icon": "dashboard"
+        },
+        {
+          "label": "Organization",
+          "href": "/dashboard/admin/organizations"
+        },
+        {
+          "label": "Users & Roles",
+          "href": "/dashboard/admin/members"
+        },
+        {
+          "label": "Pilot Configuration",
+          "href": "/dashboard/admin/onboarding"
+        },
+        {
+          "label": "Policies",
+          "href": "/dashboard/governance"
+        },
+        {
+          "label": "Audit",
+          "href": "/dashboard/audits"
+        },
+        {
+          "label": "Security",
+          "href": "/dashboard/security"
+        },
+        {
+          "label": "Integrations",
+          "href": "/dashboard/integrations"
+        },
+        {
+          "label": "System Status",
+          "href": "/dashboard/operations"
+        }
+      ],
+      "deepGovernance": []
     }
-  },
-  "limitation": "No platform, financial or institutional mandate is provisioned. Privileged entries not visible to an eligible verified fixture require explicit denial, never fabricated authority."
+  }
 }
