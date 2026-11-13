@@ -7,7 +7,7 @@
   "acceptedStagingCandidateSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
   "stagingWorkflowDefinitionSha": "646ed858a1fc60257e18af40875e632d01c3ab3c",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Observed staging source 8a0faf64 is healthy and has fresh new-tenant session, case isolation, document byte, member-navigation and scheduled-job evidence. The shared platform evidence exporter still fails on real requests. PR #1210 repairs its canonical storage mismatch and prevents the next rollout from restoring retired authentication settings. Replacement 4e0df1f1 is authorized prospectively but is not deployed. Complete affected persona and business journeys, sensitive finance API boundaries, native isolation/audit, actual document expiry/revocation, recovery and capability reconciliation on the qualified replacement before any STAGING GO decision.",
+  "verdictReason": "Observed staging source 8a0faf64 is healthy and has fresh new-tenant session, case isolation, document byte, member-navigation and scheduled-job evidence. The shared platform evidence exporter still fails on real requests, and named member run 43511258681 reproduces duplicate conversation creation on request replay. PR #1210 repairs its canonical storage mismatch and prevents the next rollout from restoring retired authentication settings. Replacement 2786943a is authorized prospectively but is not deployed. Complete affected persona and business journeys, sensitive finance API boundaries, native isolation/audit, actual document expiry/revocation, recovery and capability reconciliation on the qualified replacement before any STAGING GO decision.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -24,7 +24,7 @@
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PASS",
-      "evidence": "Current-runtime receipt observes exact source 8a0faf64, immutable digest 133c63e0..., explicitly pinned revision --0000010 and new tenant cc15259a. Replacement 4e0df1f1 has no built/deployed identity yet.",
+      "evidence": "Current-runtime receipt observes exact source 8a0faf64, immutable digest 133c63e0..., explicitly pinned revision --0000010 and new tenant cc15259a. Replacement 2786943a has no built/deployed identity yet.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
       "requalificationRequiredForProposedCandidate": true
     },
@@ -44,7 +44,7 @@
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Replacement source 4e0df1f1 requires full exact-head CI in #1210 and main admission. #1208 tooling admission does not qualify that application source.",
+      "evidence": "Replacement source 2786943a requires full exact-head CI in #1210 and main admission. #1208 tooling admission does not qualify that application source.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
       "requalificationRequiredForProposedCandidate": true
     },
@@ -92,7 +92,7 @@
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
       "status": "PARTIALLY_PROVEN",
-      "evidence": "Member role verified live in 43507405235; all 18 EN/FR desktop and 18 390px mobile route checks and five restricted-page denials pass. Corrected #1208 named-persona persisted journeys are now running. No positive assignment, complete bilingual UX or all-persona acceptance is implied by route health.",
+      "evidence": "Member role verified live in 43507405235; all 18 EN/FR desktop and 18 390px mobile route checks and five restricted-page denials pass. Corrected #1208 named-persona persisted journeys are now running. No positive assignment, complete bilingual UX or all-persona acceptance is implied by route health. Named member intake create/read and official-case refusal pass, but conversation creation replay FAILS with two different thread IDs in 43511258681. Named organization-admin navigation and scope checks PASS in 43511272077. Positive assignment, complete bilingual UX and full persona acceptance remain unproven.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
       "requalificationRequiredForProposedCandidate": true
     },
@@ -123,8 +123,8 @@
     {
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
       "requirement": "REQUIRED",
-      "status": "NOT_PROVEN",
-      "evidence": "Old-tenant officer restricted-page denial is historical. #1208 requires sensitive read APIs to return 403 for actual named roles without a financial mandate. Finance/dues feature acceptance is explicitly excluded.",
+      "status": "PARTIALLY_PROVEN",
+      "evidence": "Named member and organization-admin receipts require and observe HTTP 403 for /api/finance/summary and /api/finance/per-capita/inbound. Remaining roles and the replacement require requalification. Finance/dues persistence and Financial Officer 2.1 remain excluded.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
       "requalificationRequiredForProposedCandidate": true
     },
@@ -160,7 +160,7 @@
     }
   ],
   "externalBlockers": [],
-  "proposedCandidateSha": "4e0df1f148ff19ed9b32b947170577a5c96448e9",
+  "proposedCandidateSha": "2786943ac51f42b24edc808031015b539ae091f1",
   "proposedCandidateState": "CI_AND_MAIN_ADMISSION_PENDING_NOT_DEPLOYED",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",

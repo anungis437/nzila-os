@@ -1,0 +1,65 @@
+{
+  "capturedOn": "2026-11-13",
+  "observedApplicationSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "proposedReplacementSourceSha": "2786943ac51f42b24edc808031015b539ae091f1",
+  "productionChanged": false,
+  "runtimeAcceptanceClaimed": false,
+  "files": [
+    {
+      "path": "current-job-logs.json",
+      "sha256": "084ca77496a19c364f4ffc7cc44c7c826ad54e5c465576c8026762e1ba499dc0"
+    },
+    {
+      "path": "current-private-document-bytes.json",
+      "sha256": "a3c5a4b42be55166f4b7ef82f20b69e5694fe2229682ae58240dba090828a846"
+    },
+    {
+      "path": "current-runtime.json",
+      "sha256": "4e758cd140a23a61453645d1d684acbf30b6f7b697e1a1d0bbd7c74f3eab3680"
+    },
+    {
+      "path": "historical-contract-7d67bcd5-20261112.json",
+      "sha256": "0b2c73cc57921e687c3839d930208a0ec966b18f383c8d4e50c4bee61e1d3df2"
+    },
+    {
+      "path": "job-execution-status.json",
+      "sha256": "4cd166813dca2c258e50076cddbad27224a17d96641c8882150d104f21f41615"
+    },
+    {
+      "path": "named-directory-identities.json",
+      "sha256": "f7e758b8320a1eb9611049e48655bd8a7a67c15c13ba41b754771d6a633d24f0"
+    },
+    {
+      "path": "navigation-43464146290.json",
+      "sha256": "9f2a8cfdf44158675e775889d11fa5aff098da1199a7c5017a02176092c0cd62"
+    },
+    {
+      "path": "navigation-43506734799.json",
+      "sha256": "8a34b13a8818750e476ca64d2cc89e1fd4d4f4d47b64ea8413ef519b51a94bd5"
+    },
+    {
+      "path": "navigation-43507405235.json",
+      "sha256": "c12e8164e625a48696f7bf76045f6b4ef9dd7122584f47c4a46def52e599f05e"
+    },
+    {
+      "path": "navigation-43511258681.json",
+      "sha256": "1af6f8b0682a863a465287c1ae3855f4c6d57cc9f8d533d0835ce815ab39e31c"
+    },
+    {
+      "path": "navigation-43511272077.json",
+      "sha256": "a9d44dad1f5cf87689cfb365313a5d17486d76aa508d770e435d2a512e4c0bfe"
+    },
+    {
+      "path": "pr-1208-checks.json",
+      "sha256": "cce6b3acdb077747ddb5a57687c84a276faf0bb8c41f34aceb982a2f7196ad33"
+    },
+    {
+      "path": "session-43504547526.json",
+      "sha256": "ddb9ac1b3150e25b6c8b10ea828122022d6cddc428a564bab4681f78880a0edb"
+    },
+    {
+      "path": "session-43508297526.json",
+      "sha256": "c1c5eefd6a186a503e8ae8a270e547364a505819eb036acd79cee36a595b85c1"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 staging qualification deployment for candidate 4e0df1f1",
+  "title": "Union Eyes V2 staging qualification deployment for candidate 2786943a",
   "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. Owner-directed founder-operated staging authorization is recorded; no production release, institutional mandate, financial activation, or STAGING GO without runtime proof is authorized.",
   "service": "union-eyes",
   "environment": "STAGING",
@@ -136,7 +136,7 @@
     "e2d2e031dd6e09e9bb4c257dbe82fa326f49bcc5",
     "2515a76afba0766c9ec1ccde0e66b0ef6c288a66",
     "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-    "4e0df1f148ff19ed9b32b947170577a5c96448e9"
+    "2786943ac51f42b24edc808031015b539ae091f1"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
@@ -149,7 +149,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "4e0df1f148ff19ed9b32b947170577a5c96448e9",
+    "candidate_sha": "2786943ac51f42b24edc808031015b539ae091f1",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true

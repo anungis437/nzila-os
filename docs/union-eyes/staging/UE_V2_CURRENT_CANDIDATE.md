@@ -1,9 +1,36 @@
-# Exact-source staging prerequisite receipt
+# Observed staging candidate and pending replacement
 
-Candidate: `7d67bcd59ee3f2441d41cde5adbd8769bda85a96`.
+Observed on November 13, 2026: `8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896`,
+image `sha256:133c63e0e8abef77a4ad46aee76fa6a337fa01f9f9e38ada26bc75941f308340`,
+revision `nzila-ue-v2-staging-app--0000010`, explicitly pinned to 100% traffic
+in Multiple revision mode. The live registration uses Entra tenant `cc15259a`
+and client `5470c759`. Current health, session, document and job observations
+are preserved in [the execution evidence](evidence/ue-v2-execution-20261113/index.json).
 
-The [measured local export receipt](evidence/ue-v2-candidate-export-7d67bcd5-20261111.json) records the exact committed source, dependency-bound plan and emitted file hashes. Pinned PostgreSQL 16 installed all 6,255 statements for 771 tables, verified 23,849 catalog objects and native privilege boundaries, returned receipt-backed NOOP, restored the emitted dump into another empty local database and repeated those checks. Both restore and privilege checks passed without mismatches.
+Proposed replacement: `2786943ac51f42b24edc808031015b539ae091f1` in PR #1210.
+CHG-2026-0114 renews the staging-only binding for the observed evidence-storage,
+conversation retry and rollout identity defects. It also includes the current
+pinned-traffic recovery qualification harness. Final exact-head CI, main
+admission, attested images, a fresh reviewed no-delete what-if, protected
+staging apply and deployed requalification remain mandatory. This source is
+not yet deployed or accepted.
 
-The canonical catalog digest remains `f42fdab7ad9ff4ad032de0692fe51527228e6703708adc9595cb267b73805e30`. SQL statements are byte-identical to the installed preceding plan; source commitment metadata changed because private API error handling changed. Preserve the actual Azure database and its original installation receipt. Requalify its native catalog and restricted credentials against this candidate; do not repeat empty-target restore, reseed fixtures or relabel the historical receipt.
+Preserve the existing database, original installation receipt and all staging
+data. The regenerated source plan retains 771 tables and 6,255 unchanged SQL
+statements; source commitment metadata changes do not justify a new restore,
+fresh bootstrap or reseed. The [earlier local export receipt](evidence/ue-v2-candidate-export-7d67bcd5-20261111.json)
+remains historical; do not relabel it as replacement acceptance.
 
-[Real staging diagnostics and source repairs](UE_V2_REAL_ENTRA_RUNTIME_REPAIR.md) explain the failed case write after two real provider sessions. [The job-name correction](UE_V2_JOB_NAME_PROVIDER_REPAIR.md) fixes the observed deployment rejection. These are source prerequisites, not current-candidate runtime acceptance. Full CI, main admission, a new source-attested image, fresh reviewed normal rollout and deployed qualification remain required. Staging remains NO_GO; production and institutional authority are outside scope.
+The [current contract](UE_STAGING_GO_CONTRACT.json) separates observed 8a0faf64
+receipts from pending replacement qualification. The old contract is preserved
+as a historical receipt. Census regeneration now preserves the evidence
+contract; explicit initialization can only create a new one. Tests generate
+into disposable directories instead of rewriting live acceptance evidence.
+
+Base release includes operational casework, intake, assignment, member and
+representative journeys, leadership/governance access, documents/evidence,
+deadlines, messaging, English/French/mobile, audit, security and recovery.
+Finance/dues persistence and Financial Officer 2.1 are excluded. Sensitive
+finance denials remain a separate mandatory security criterion. No production
+release or institutional mandate is authorized. Staging remains NO_GO while
+actual defects or required proof gaps remain.
