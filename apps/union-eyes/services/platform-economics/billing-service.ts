@@ -383,7 +383,14 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     }
     return sum + amount;
   }, 0);
-  const discountPct = centsSafe(subscription.discountPercent ?? '0');
+  // Persisted decimal fields are untrusted: centsSafe maps malformed values to zero.
+  // A corrupt discount or subsidy must not silently become an undiscounted invoice.
+  const rawDiscount = String(subscription.discountPercent ?? '0');
+  if (!/^[0-9]+(?:\\.[0-9]{1,2})?$/.test(rawDiscount) ||
+      !Number.isSafeInteger(Number(rawDiscount) * 100)) {
+    throw new Error('Invoice discount is invalid');
+  }
+  const discountPct = centsSafe(rawDiscount);
   if (discountPct > 10000) {
     throw new Error('Invoice discount exceeds 100 percent');
   }
@@ -402,7 +409,12 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
   }
 
   // Apply subsidy
-  const subsidyCents = centsSafe(subscription.subsidyAmount ?? '0');
+  const rawSubsidy = String(subscription.subsidyAmount ?? '0');
+  if (!/^[0-9]+(?:\\.[0-9]{1,2})?$/.test(rawSubsidy) ||
+      !Number.isSafeInteger(Number(rawSubsidy) * 100)) {
+    throw new Error('Invoice subsidy is invalid');
+  }
+  const subsidyCents = centsSafe(rawSubsidy);
   if (subsidyCents > subtotalCents) {
     throw new Error('Invoice subsidy exceeds remaining charges');
   }
