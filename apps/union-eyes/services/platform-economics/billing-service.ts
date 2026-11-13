@@ -507,8 +507,16 @@ export async function recordPayment(input: RecordPaymentInput) {
     if (invoice.status === 'void' || invoice.status === 'written_off') {
       throw new Error('Cannot record payment against a void or written-off invoice');
     }
-    const newAmountPaidCents = centsSafe(invoice.amountPaid) + paymentAmountCents;
+    const alreadyPaidCents = centsSafe(invoice.amountPaid);
     const totalDueCents = centsSafe(invoice.totalAmount);
+    const newAmountPaidCents = alreadyPaidCents + paymentAmountCents;
+    // Financial state must be nonnegative, internally consistent and exactly
+    // representable in integer cents before any payment or allocation insert.
+    if (!Number.isSafeInteger(alreadyPaidCents) || alreadyPaidCents < 0 ||
+        !Number.isSafeInteger(totalDueCents) || totalDueCents < 0 ||
+        alreadyPaidCents > totalDueCents || !Number.isSafeInteger(newAmountPaidCents)) {
+      throw new Error('Invoice balance is invalid or exceeds safe CAD limits');
+    }
     if (newAmountPaidCents > totalDueCents) {
       throw new Error('Payment exceeds remaining invoice balance');
     }
