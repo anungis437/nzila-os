@@ -426,6 +426,23 @@ describe('recordPayment', () => {
     expect(persistAtomicAudit).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['90071992547409.90', '90071992547409.91'],
+    ['-1.00', '100.00'],
+    ['101.00', '100.00'],
+    ['0.00', '90071992547410.00'],
+  ])('rejects unsafe or inconsistent invoice balance %s / %s before financial writes', async (amountPaid, totalAmount) => {
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    state.selects.platformInvoices = [{
+      id: 'inv-1', organizationId: 'org-1', status: 'partially_paid',
+      amountPaid, totalAmount,
+    }];
+    await expect(recordPayment({ ...base, amount: '1.00' }))
+      .rejects.toThrow(/Invoice balance is invalid or exceeds safe CAD limits/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
   it('refuses an unprotected new idempotency key before financial writes', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1' }];
     state.selects.platformPayments = [];
