@@ -341,6 +341,28 @@ describe('generateInvoice', () => {
     );
   });
 
+  it.each([
+    ['localCount', 'perLocalFee'],
+    ['seatCount', 'perSeatFee'],
+  ] as const)('refuses unsafe %s invoice multiplication before financial writes', async (countField, feeField) => {
+    happyState();
+    (state.selects.orgSubscriptions as any[])[0][countField] = Number.MAX_SAFE_INTEGER;
+    (state.selects.subscriptionPlans as any[])[0][feeField] = '100.00';
+    await expect(generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1' }))
+      .rejects.toThrow(/Invoice fee multiplication exceeds safe CAD limits/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('refuses a noninteger module count only through the validated fee multiplier', async () => {
+    happyState();
+    (state.selects.orgSubscriptions as any[])[0].moduleList = new Array(100).fill('module');
+    (state.selects.subscriptionPlans as any[])[0].perModuleFee = '900719925474.00';
+    await expect(generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1' }))
+      .rejects.toThrow(/Invoice fee multiplication exceeds safe CAD limits/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+  });
+
   it('generates an invoice with base/local/seat/module lines, discount and subsidy, and reads no metering table (metering is not implemented)', async () => {
     happyState();
     const r = await generateInvoice({ organizationId: 'org-1', billingPeriodId: 'bp-1', createdBy: 'admin-1' });
