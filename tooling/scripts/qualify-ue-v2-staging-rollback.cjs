@@ -1,4 +1,5 @@
-// Protected main-only staging rehearsal. Never changes configuration, secrets or data.
+// Protected main-only staging rehearsal. Only revision templates are changed;
+// ingress stays pinned to the known-good revision. No secrets or data are changed.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const cp = require('node:child_process');
@@ -16,6 +17,16 @@ function az(args) {
   return r.stdout.trim() ? JSON.parse(r.stdout) : null;
 }
 function get(path = '') { return az(['rest', '--method', 'get', '--url', 'https://management.azure.com' + ID + path + '?api-version=2024-03-01']); }
+function requirePinnedTraffic(app, known) {
+  assert.equal(app.properties.configuration.activeRevisionsMode, 'Multiple');
+  const traffic = app.properties.configuration.ingress.traffic;
+  assert(Array.isArray(traffic) && traffic.length > 0, 'Explicit pinned traffic is required');
+  assert(!traffic.some(route => route.latestRevision === true), 'Traffic must not follow latest revision');
+  const serving = traffic.filter(route => route.weight > 0);
+  assert.equal(serving.length, 1, 'One known-good revision must hold all traffic');
+  assert.equal(serving[0].revisionName, known, 'Known-good traffic changed during rehearsal');
+  assert.equal(serving[0].weight, 100);
+}
 function templateHash(template) {
   const copy = structuredClone(template); delete copy.revisionSuffix;
   // The app-level template echo and the per-revision snapshot differ in two cosmetic,
@@ -54,10 +65,14 @@ async function main() {
   const account = az(['account', 'show']);
   assert.equal(account.id, SUB);
   assert.equal(account.tenantId, 'cc15259a-d2bf-421f-8e44-dccf8dc6232a');
-  const before = get(), known = before.properties.latestReadyRevisionName;
+  const before = get();
+  const serving = before.properties.configuration.ingress?.traffic?.filter(route => route.weight > 0);
+  assert.equal(serving?.length, 1, 'One explicitly pinned healthy revision is required');
+  const known = serving[0].revisionName;
+  assert.equal(typeof known, 'string');
+  requirePinnedTraffic(before, known);
   assert.equal(before.location.toLowerCase().replace(/\s+/g, ''), 'canadacentral');
-  assert.equal(before.properties.configuration.activeRevisionsMode, 'Single');
-  assert.equal(before.properties.latestRevisionName, known);
+  assert.equal(before.properties.latestReadyRevisionName, before.properties.latestRevisionName, 'The latest template must also have recovered before another rehearsal');
   const revision = get('/revisions/' + known);
   const original = structuredClone(revision.properties.template);
   assert.equal(templateHash(original), templateHash(before.properties.template));
@@ -68,26 +83,27 @@ async function main() {
     const reviewed = JSON.parse(fs.readFileSync('reviewed-plan/receipt.json', 'utf8'));
     assert.equal(reviewed.status, 'PLAN_PASS'); assert.equal(reviewed.sourceSha, report.sourceSha);
     assert.equal(reviewed.runId, report.runId); assert.equal(reviewed.before.revision, known);
+    assert.equal(reviewed.before.latestRevision, before.properties.latestRevisionName);
     assert.equal(reviewed.before.image, image); assert.equal(reviewed.before.templateHash, templateHash(original));
   }
   assert(!original.containers[0].env.some(x => x.name === 'NODE_OPTIONS'), 'Unexpected existing Node options');
   await healthy();
-  report.before = { revision: known, image, templateHash: templateHash(original), mode: 'Single' };
+  report.before = { revision: known, latestRevision: before.properties.latestRevisionName, image, templateHash: templateHash(original), mode: 'Multiple', trafficWeight: 100 };
   if (process.env.OPERATION === 'plan') { report.status = 'PLAN_PASS'; return; }
   assert.equal(process.env.OPERATION, 'rehearse');
   const suffix = String(process.env.GITHUB_RUN_ID); assert.match(suffix, /^\d+$/);
   const badName = APP + '--qa-fail-' + suffix, recoveredName = APP + '--qa-recover-' + suffix;
   let attempted = false, faultObserved = false;
   try {
-    const latest = get(); assert.equal(latest.properties.latestRevisionName, known); assert.equal(templateHash(latest.properties.template), report.before.templateHash);
+    const latest = get(); requirePinnedTraffic(latest, known); assert.equal(latest.properties.latestRevisionName, report.before.latestRevision); assert.equal(templateHash(latest.properties.template), report.before.templateHash);
     const bad = structuredClone(original); bad.revisionSuffix = 'qa-fail-' + suffix;
     bad.containers[0].env.push({ name: 'NODE_OPTIONS', value: '--require=/ue-staging-intentionally-absent-' + suffix + '.cjs' });
     attempted = true; patch(bad, before.location);
     for (let i = 0; i < 36; i++) {
       const app = get(); assert.equal(app.properties.latestRevisionName, badName);
-      assert.equal(app.properties.latestReadyRevisionName, known); await healthy();
+      requirePinnedTraffic(app, known); await healthy();
       const failed = get('/revisions/' + badName).properties;
-      report.observations.push({ at: new Date().toISOString(), latestReady: app.properties.latestReadyRevisionName, failedRevision: badName, provisioningState: failed.provisioningState, runningState: failed.runningState, healthState: failed.healthState });
+      report.observations.push({ at: new Date().toISOString(), servingRevision: known, servingWeight: 100, failedRevision: badName, failedRevisionWeight: 0, provisioningState: failed.provisioningState, runningState: failed.runningState, healthState: failed.healthState });
       if (['Failed', 'Degraded'].includes(failed.runningState) || failed.provisioningState === 'Failed') { faultObserved = true; break; }
       await pause(10000);
     }
@@ -101,16 +117,19 @@ async function main() {
       let ready = false;
       for (let i = 0; i < 48; i++) {
         const app = get();
+        requirePinnedTraffic(app, known);
         assert.equal(app.properties.latestRevisionName, recoveredName);
         if (app.properties.latestReadyRevisionName === recoveredName) {
           const actual = get('/revisions/' + recoveredName).properties.template;
           assert.equal(templateHash(actual), report.before.templateHash);
           assert.equal(actual.containers[0].image, image); await healthy(); ready = true;
-          report.recovered = { revision: recoveredName, image, templateHash: templateHash(actual), health: 'PASS', sourceIdentity: 'PASS' }; break;
+          report.recovered = { revision: recoveredName, image, templateHash: templateHash(actual), health: 'PASS', sourceIdentity: 'PASS', servingRevision: known, servingWeight: 100, recoveredRevisionWeight: 0 }; break;
         }
         await pause(10000);
       }
       assert(ready, 'Known-good recovery did not become ready');
+      az(['containerapp', 'revision', 'deactivate', '--subscription', SUB, '-g', RG, '-n', APP, '--revision', badName]);
+      report.failedRevisionDeactivated = true;
     }
   }
   assert(faultObserved); report.status = 'PASS';
