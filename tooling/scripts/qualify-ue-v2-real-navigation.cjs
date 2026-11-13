@@ -4,13 +4,10 @@ const fs = require('node:fs');
 const crypto = require('node:crypto');
 const { chromium } = require(require.resolve('playwright', { paths: [process.cwd() + '/apps/union-eyes'] }));
 const { settleRoleLanding, settleRestrictedDestination } = require('./lib/ue-staging-navigation-settlement.cjs');
+const OWNED_PERSONAS = require('./lib/ue-v2-owned-personas.cjs');
 const BASE = 'https://nzila-ue-v2-staging-app.whitemoss-055b7430.canadacentral.azurecontainerapps.io';
 const TENANT = 'cc15259a-d2bf-421f-8e44-dccf8dc6232a';
-const PEOPLE = {
-  // Role-flexible fixture: its organization_users.role is swapped by the private operator before
-  // dispatch to match the membership_role input under test (see workflow description).
-  A: { oid: 'ecb4f1d7-b0ae-44f8-bf56-832bc173fc49', upn: 'ue-v2-staging-seniorrep-20261113@anungisayahoo.onmicrosoft.com', org: 'b96359c3-a8de-458c-8469-afc084b7fbc0' },
-};
+const PEOPLE = {};
 const OUT = 'artifacts/ue-v2-navigation';
 const report = { evidenceClass: 'REAL_REMOTE_ENTRA_SESSION_AND_API', sourceSha: process.env.SOURCE_SHA, workflowSha: process.env.GITHUB_SHA, runId: process.env.GITHUB_RUN_ID, observations: [], runtimeAcceptance: false };
 let stage = 'guard', browser;
@@ -53,7 +50,7 @@ async function auth(key) {
   await page.goto(redirect.url);
   await page.locator('input[type=email]').fill(PEOPLE[key].upn);
   await page.locator('input[type=submit]').click();
-  const password = process.env['UE_V2_STAGING_PERSONA_' + key + '_PASSWORD'];
+  const password = process.env[PEOPLE[key].passwordEnv];
   assert(password && password.length > 10, 'Verified staging password required');
   await page.locator('input[type=password]').fill(password);
   await page.locator('input[type=submit]').click();
@@ -77,6 +74,50 @@ async function auth(key) {
   record({ kind: 'REAL_ENTRA_AUTHORIZATION_CODE_SESSION', persona: key, principal: PEOPLE[key].oid, tenant: TENANT, expires: session.expires, events, secureHttpOnlyCookie: true });
   await page.close();
 }
+async function baseJourneys(role) {
+  if(role==='member') {
+    stage='member-intake-persistence';
+    const intake={type:'other',title:'Synthetic staging intake '+report.runId,description:'Synthetic base-release intake. No real member facts.',createOfficialCase:false};
+    const created=payload(await(await request('A','/api/grievances','POST',intake,[200,201])).json());
+    guid(created.id);
+    const own=payload(await(await request('A','/api/grievances/'+created.id)).json());
+    assert.equal(own.grievance?.id??own.id,created.id,'Own intake must persist and remain readable');
+    await request('A','/api/grievances','POST',{...intake,createOfficialCase:true},[403]);
+    record({kind:'MEMBER_INTAKE_PERSISTED_OFFICIAL_CASE_REFUSED',intakeId:created.id});
+    stage='member-message-persistence-and-idempotency';
+    const message={subject:'Synthetic staging conversation '+report.runId,body:'Synthetic initial message. No real member information.',clientRequestId:crypto.randomUUID()};
+    const thread=payload(await(await request('A','/api/messages/threads','POST',message,[201])).json());guid(thread.id);
+    const replay=payload(await(await request('A','/api/messages/threads','POST',message,[201])).json());assert.equal(replay.id,thread.id);
+    const reply={body:'Synthetic follow-up message for persisted bilingual casework qualification.',clientRequestId:crypto.randomUUID()};
+    await request('A','/api/messages/threads/'+thread.id+'/messages','POST',reply,[201]);
+    const repeat=payload(await(await request('A','/api/messages/threads/'+thread.id+'/messages','POST',reply)).json());assert.equal(repeat.duplicate,true);
+    const saved=payload(await(await request('A','/api/messages/threads/'+thread.id+'/messages')).json());
+    assert.equal(saved.messages.filter(row=>row.content===reply.body).length,1);
+    record({kind:'MEMBER_CONVERSATION_AND_REPLY_PERSISTED_IDEMPOTENT',threadId:thread.id});
+    stage='same-organization-unassigned-representative-privacy';
+    PEOPLE.S=OWNED_PERSONAS.steward;await auth('S');
+    const staffRole=await(await request('S','/api/profile/roles')).json();assert.equal(staffRole.role,'steward');
+    await request('S','/api/messages/threads/'+thread.id+'/messages','GET',undefined,[404]);
+    await request('S','/api/grievances/'+created.id,'GET',undefined,[403,404]);
+    record({kind:'SAME_TENANT_UNASSIGNED_STEWARD_DENIED_PRIVATE_INTAKE_AND_MESSAGES',threadId:thread.id,intakeId:created.id});
+  }
+  if(['steward','chief_steward','officer'].includes(role)) {
+    stage='representative-case-filing-and-member-visible-note';
+    const filed=payload(await(await request('A','/api/cases','POST',{claimType:'other',description:'Synthetic representative case '+report.runId+'. No real member facts.'},[201])).json());guid(filed.claimId);
+    const own=payload(await(await request('A','/api/cases/'+filed.claimId)).json());assert.equal(own.claimId,filed.claimId);
+    for(const field of ['aiScore','aiAnalysis','meritConfidence','precedentMatch','complexityScore','legalCosts','courtCosts'])assert(!Object.hasOwn(own,field),'Filing a matter must not expose internal assessment');
+    const note='Synthetic member-visible note '+crypto.randomUUID();
+    await request('A','/api/cases/'+filed.claimId+'/notes','POST',{text:note,isInternal:false},[200,201]);
+    const saved=await(await request('A','/api/cases/'+filed.claimId+'/notes')).json();assert(saved.notes.some(row=>row.message===note));
+    // A filer is a party to their own matter. Neither rank nor filing confers assignment authority.
+    await request('A','/api/cases/'+filed.claimId+'/assign','POST',{assigneeId:OWNED_PERSONAS.steward.oid,reason:'Synthetic unauthorized self-matter routing probe'},[403]);
+    record({kind:'REPRESENTATIVE_FILING_NOTE_PERSISTENCE_AND_SELF_MATTER_ASSIGNMENT_DENIAL',claimId:filed.claimId,internalAssessmentRedacted:true});
+    stage='member-directory-scope';
+    await request('A','/api/members');
+    await request('A','/api/members?organizationId=f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab','GET',undefined,[403]);
+    record({kind:'MEMBER_DIRECTORY_OWN_SCOPE_AND_FOREIGN_ORGANIZATION_DENIAL',role});
+  }
+}
 async function main() {
   assert.equal(process.env.GITHUB_ACTIONS,'true');assert.equal(process.env.GITHUB_REF,'refs/heads/main');assert.equal(process.env.RUNNER_ENVIRONMENT,'github-hosted');
   const change=JSON.parse(fs.readFileSync('ops/change-records/CHG-2026-0114.json','utf8'));
@@ -85,9 +126,11 @@ async function main() {
   const inventory=JSON.parse(fs.readFileSync('tooling/scripts/lib/ue-v2-navigation-inventory.json','utf8'));
   assert.equal(inventory.applicationSourceSha,report.sourceSha);
   for(const [path,digest] of Object.entries(inventory.sourceDigests))assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path)).digest('hex'),digest,'Navigation source changed');
-  const role=process.env.SYNTHETIC_MEMBERSHIP_ROLE;assert(['member','steward','officer','admin'].includes(role));
+  const role=process.env.SYNTHETIC_MEMBERSHIP_ROLE;assert(Object.hasOwn(OWNED_PERSONAS,role));
+  PEOPLE.A=OWNED_PERSONAS[role];
   const profile=inventory.profiles[role];report.requestedOwnedSyntheticRole=role;report.canonicalEntryCount=inventory.canonicalEntryCount;
   const identity=await fetch(BASE+'/api/version');assert.equal(identity.status,200);assert.equal((await identity.json()).gitSha,report.sourceSha);
+  record({kind:'LIVE_SOURCE_IDENTITY',gitSha:report.sourceSha,tenant:TENANT,principal:PEOPLE.A.oid});
   fs.mkdirSync(OUT,{recursive:true});browser=await chromium.launch({headless:true});await auth('A');
   // The dispatch input is a request, not proof of an actual membership role.
   // Use the signed-in person's own live membership API to refuse stale labels.
@@ -110,10 +153,17 @@ async function main() {
   }
   record({kind:'OBSERVED_ROLE_EXECUTION_HOME',requestedOwnedSyntheticRole:role,initialPath:landing.initialPath,path:landing.finalPath,redirectedAfterDOMContentLoaded:landing.redirectedAfterDOMContentLoaded,initialHttpStatus:homeResponse.status()});await home.close();
   for(const locale of ['en-CA','fr-CA'])for(const path of [...new Set([...profile.visible.map(x=>x.href),...profile.deepGovernance])]){
+    // Finance 2.1 and dues are outside the base release. The sensitive APIs below
+    // must deny a fixture without a live financial mandate, even when its rank
+    // permits a finance navigation shell. No positive finance feature claim.
+    if(path==='/dashboard/finance') {
+      record({kind:'OUT_OF_BASE_RELEASE_FINANCE_FEATURE',role,path,featureAcceptanceClaimed:false});
+      continue;
+    }
     stage='visible-navigation:'+role+':'+locale+':'+path;
     const page=await contexts.get('A').newPage();const route='/'+locale+path;
     const response=await page.goto(BASE+route,{waitUntil:'domcontentloaded'});assert(response);assert.equal(response.status(),200);
-    assert.equal(new URL(page.url()).pathname.replace(/\/$/,''),route.split('?')[0]);
+    await settleRoleLanding(page,route.split('?')[0]);
     assert.equal(await page.getByText('This page could not be found',{exact:true}).count(),0);
     assert.equal(await page.getByText('Application error: a server-side exception has occurred',{exact:false}).count(),0);
     record({kind:'REAL_VISIBLE_NAVIGATION',role,experience:profile.experience,path:route,status:response.status(),sourceVisible:profile.visible.some(x=>x.href===path)});
@@ -124,7 +174,7 @@ async function main() {
   }
   stage='direct-scoped-administration-boundaries';
   // Financial and platform operations remain unavailable to these exact fixtures.
-  for(const path of ['/dashboard/finance','/dashboard/operations','/dashboard/admin/members','/dashboard/security','/dashboard/integrations']){
+  for(const path of ['/dashboard/finance','/dashboard/operations','/dashboard/admin/members','/dashboard/security','/dashboard/integrations'].filter(path=>!profile.visible.some(x=>x.href===path))){
     stage='direct-scoped-administration-boundaries:'+path;
     assert(!profile.visible.some(x=>x.href===path));const page=await contexts.get('A').newPage();
     const route='/en-CA'+path,response=await page.goto(BASE+route,{waitUntil:'domcontentloaded'});assert(response);assert(response.status()<500);
@@ -137,9 +187,16 @@ async function main() {
     }
     record({kind:'RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE',role,path:route,status:response.status(),denialMode:denied.denialMode,initialPath:denied.initialPath,finalPath:denied.finalPath});await page.close();
   }
+  stage='sensitive-finance-api-boundaries';
+  for(const path of ['/api/finance/summary','/api/finance/per-capita/inbound']) {
+    await request('A',path,'GET',undefined,[403]);
+    record({kind:'SENSITIVE_FINANCE_API_DENIED_WITHOUT_MANDATE',role,path});
+  }
   stage='filing-capacity-is-not-administrator-rank';
   if(['member','admin'].includes(role))await request('A','/api/cases','POST',{claimType:'other',description:'Synthetic denied filing capacity probe. No real facts.'},[403]);
-  record({kind:'NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED',role,platformAdministrator:false});
+  await baseJourneys(role);
+  const finalIdentity=await fetch(BASE+'/api/version');assert.equal(finalIdentity.status,200);assert.equal((await finalIdentity.json()).gitSha,report.sourceSha);
+  record({kind:'NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED',role,platformAdministrator:role==='app_owner',tenantContentBypassClaimed:false});
   report.status='PASS';
 }
 main().catch(error=>{report.status='FAIL';report.failure={stage,error:error.name,message:error.message};process.exitCode=1;}).finally(async()=>{if(browser)await browser.close().catch(()=>{});fs.mkdirSync(OUT,{recursive:true});fs.writeFileSync(OUT+'/receipt.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,stage,observations:report.observations.length}));});
