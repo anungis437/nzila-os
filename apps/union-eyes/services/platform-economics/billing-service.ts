@@ -596,109 +596,100 @@ interface ReconcileExternalInvoicePaymentInput {
 }
 
 export async function reconcileExternalInvoicePayment(input: ReconcileExternalInvoicePaymentInput) {
-  // Reject ambiguous provider events before any database read or financial write.
-  if (!input.externalReference?.trim()) {
-    throw new Error('External payment reference is required');
-  }
+  if (!input.externalReference?.trim()) throw new Error('External payment reference is required');
   if (input.status !== undefined && input.status !== 'completed' && input.status !== 'failed') {
     throw new Error('Unsupported external payment status');
   }
-  const [invoice] = await db
-    .select()
-    .from(platformInvoices)
-    .where(
-      and(
-        eq(platformInvoices.id, input.invoiceId),
-        eq(platformInvoices.organizationId, input.organizationId),
-      ),
-    )
-    .limit(1);
-
-  if (!invoice) {
-    throw new Error(`Invoice ${input.invoiceId} not found for org ${input.organizationId}`);
-  }
-
-  const [existingPayment] = await db
-    .select()
-    .from(platformPayments)
-    .where(and(eq(platformPayments.organizationId, input.organizationId), eq(platformPayments.externalReference, input.externalReference)))
-    .limit(1);
-
-  if (existingPayment) {
-    if (existingPayment.organizationId !== input.organizationId || existingPayment.amount !== input.amount) {
-      throw new Error('External payment reference conflicts with the requested organization or amount');
-    }
-    throw new Error('External payment replay requires verified invoice allocation');
-  }
-
-  const account = await getBillingAccount(input.organizationId);
-  if (!account) throw new Error(`No billing account for org ${input.organizationId}`);
-
-  const normalizedStatus = input.status ?? 'completed';
-  // Refuse invalid settlement amounts before persisting a payment or mutating an invoice.
-  // A failed attempt may report zero, but can never represent a negative transfer.
-  if (!/^\d+(?:\.\d{1,2})?$/.test(input.amount)) {
+  if (!/^\\d+(?:\\.\\d{1,2})?$/.test(input.amount)) {
     throw new Error('External payment amount must be a non-negative CAD amount with at most two decimals');
   }
   const paymentAmountCents = centsSafe(input.amount);
-  // Reject overflow before persisting an external settlement; rounded or unsafe
-  // integer cents cannot be reconciled reliably against an invoice balance.
   if (!Number.isSafeInteger(paymentAmountCents) || paymentAmountCents < 0) {
     throw new Error('External payment amount exceeds safe CAD limits');
   }
+  const normalizedStatus = input.status ?? 'completed';
   if (normalizedStatus === 'completed' && paymentAmountCents <= 0) {
     throw new Error('Completed external payment amount must be positive');
   }
 
-  const [payment] = await db
-    .insert(platformPayments)
-    .values({
-      billingAccountId: account.id,
-      organizationId: input.organizationId,
-      amount: input.amount,
-      currency: 'CAD',
-      status: normalizedStatus,
-      method: input.method,
-      externalReference: input.externalReference,
-      paidAt: input.paidAt ?? new Date(),
-      failureReason: input.failureReason,
-      metadata: input.metadata,
-      createdBy: input.createdBy,
-    })
-    .returning();
+  // Payment insertion, allocation and invoice mutation share one rollback boundary.
+  // Lock the invoice before reading its balance to serialize competing settlements.
+  return db.transaction(async (tx) => {
+    const [invoice] = await tx
+      .select()
+      .from(platformInvoices)
+      .where(and(eq(platformInvoices.id, input.invoiceId), eq(platformInvoices.organizationId, input.organizationId)))
+      .for('update')
+      .limit(1);
+    if (!invoice) throw new Error('Invoice not found for organization');
 
-  if (normalizedStatus === 'completed' && paymentAmountCents > 0) {
-    const newAmountPaidCents = centsSafe(invoice.amountPaid) + paymentAmountCents;
-    const totalDueCents = centsSafe(invoice.totalAmount);
-    const newStatus = newAmountPaidCents >= totalDueCents ? 'paid' : 'partially_paid';
+    const [existingPayment] = await tx
+      .select()
+      .from(platformPayments)
+      .where(and(eq(platformPayments.organizationId, input.organizationId), eq(platformPayments.externalReference, input.externalReference)))
+      .limit(1);
+    if (existingPayment) throw new Error('External payment replay requires verified invoice allocation');
 
-    await db.transaction(async (tx) => {
+    const [account] = await tx
+      .select()
+      .from(billingAccounts)
+      .where(eq(billingAccounts.organizationId, input.organizationId))
+      .limit(1);
+    if (!account) throw new Error('No billing account for organization');
+
+    let newAmountPaidCents = 0;
+    if (normalizedStatus === 'completed') {
+      if (invoice.status === 'void' || invoice.status === 'written_off') {
+        throw new Error('Cannot settle a void or written-off invoice');
+      }
+      const alreadyPaidCents = centsSafe(invoice.amountPaid);
+      const totalDueCents = centsSafe(invoice.totalAmount);
+      newAmountPaidCents = alreadyPaidCents + paymentAmountCents;
+      if (!Number.isSafeInteger(newAmountPaidCents) || newAmountPaidCents > totalDueCents) {
+        throw new Error('External settlement exceeds invoice balance');
+      }
+    }
+
+    const [payment] = await tx
+      .insert(platformPayments)
+      .values({
+        billingAccountId: account.id,
+        organizationId: input.organizationId,
+        amount: input.amount,
+        currency: 'CAD',
+        status: normalizedStatus,
+        method: input.method,
+        externalReference: input.externalReference,
+        paidAt: input.paidAt ?? new Date(),
+        failureReason: input.failureReason,
+        metadata: input.metadata,
+        createdBy: input.createdBy,
+      })
+      .returning();
+    if (!payment) throw new Error('External payment insert returned no record');
+
+    if (normalizedStatus === 'completed') {
       await tx.insert(paymentAllocations).values({
         paymentId: payment.id,
         invoiceId: invoice.id,
         amount: input.amount,
         createdBy: input.createdBy,
       });
-
-      await tx
-        .update(platformInvoices)
-        .set({
-          amountPaid: centsToDecimal(newAmountPaidCents),
-          status: newStatus,
-          updatedAt: new Date(),
-          metadata: {
-            ...((invoice.metadata as Record<string, unknown> | null) ?? {}),
-            lifecycleState: newStatus === 'paid' ? 'paid' : 'finalized',
-            lastReconciledPaymentId: payment.id,
-          },
-        })
-        .where(and(eq(platformInvoices.id, invoice.id), eq(platformInvoices.organizationId, input.organizationId)));
-    });
-  } else if (normalizedStatus === 'failed') {
-    await db
-      .update(platformInvoices)
-      .set({
-        status: invoice.status === 'paid' ? invoice.status : 'overdue',
+      const newStatus = newAmountPaidCents === centsSafe(invoice.totalAmount) ? 'paid' : 'partially_paid';
+      const [updated] = await tx.update(platformInvoices).set({
+        amountPaid: centsToDecimal(newAmountPaidCents),
+        status: newStatus,
+        updatedAt: new Date(),
+        metadata: {
+          ...((invoice.metadata as Record<string, unknown> | null) ?? {}),
+          lifecycleState: newStatus === 'paid' ? 'paid' : 'finalized',
+          lastReconciledPaymentId: payment.id,
+        },
+      }).where(and(eq(platformInvoices.id, invoice.id), eq(platformInvoices.organizationId, input.organizationId))).returning();
+      if (!updated) throw new Error('External payment invoice update failed');
+    } else if (invoice.status !== 'paid' && invoice.status !== 'void' && invoice.status !== 'written_off') {
+      const [updated] = await tx.update(platformInvoices).set({
+        status: 'overdue',
         updatedAt: new Date(),
         metadata: {
           ...((invoice.metadata as Record<string, unknown> | null) ?? {}),
@@ -706,11 +697,11 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
           lastFailedPaymentRef: input.externalReference,
           lastFailureReason: input.failureReason ?? null,
         },
-      })
-      .where(and(eq(platformInvoices.id, invoice.id), eq(platformInvoices.organizationId, input.organizationId)));
-  }
-
-  return payment;
+      }).where(and(eq(platformInvoices.id, invoice.id), eq(platformInvoices.organizationId, input.organizationId))).returning();
+      if (!updated) throw new Error('External payment failure update failed');
+    }
+    return payment;
+  });
 }
 
 export async function runBillingLifecycleAutomation(runAt = new Date(), actor = 'system:billing-cron') {
