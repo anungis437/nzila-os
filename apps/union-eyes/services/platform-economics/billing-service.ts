@@ -540,14 +540,18 @@ export async function recordPayment(input: RecordPaymentInput) {
     // Update invoice paid amount + status (cents-safe)
     const newStatus = newAmountPaidCents === totalDueCents ? 'paid' : 'partially_paid';
 
-    await tx
+    const [updatedInvoice] = await tx
       .update(platformInvoices)
       .set({
         amountPaid: centsToDecimal(newAmountPaidCents),
         status: newStatus,
         updatedAt: new Date(),
       })
-      .where(and(eq(platformInvoices.id, input.invoiceId), eq(platformInvoices.organizationId, input.organizationId)));
+      .where(and(eq(platformInvoices.id, input.invoiceId), eq(platformInvoices.organizationId, input.organizationId)))
+      .returning({ id: platformInvoices.id });
+
+    // Never commit an orphaned payment or claim success if the invoice disappeared.
+    if (!updatedInvoice) throw new Error('Invoice payment balance update failed');
 
     // Payment, allocation, balance, immutable ledger and audit are one commit.
     // A failed ledger/audit write rolls back every financial mutation.
