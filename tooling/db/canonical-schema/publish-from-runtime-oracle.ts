@@ -71,7 +71,12 @@ function resolveSource(record: OracleRecord): string | null {
   }
   for (const rel of candidates) {
     const abs = join(REPO_ROOT, rel.replace(/\\/g, '/'))
-    if (existsSync(abs)) return rel.replace(/\\/g, '/')
+    if (!existsSync(abs)) continue
+    const content = readFileSync(abs, 'utf8')
+    // An oracle projection may now be a barrel re-export. Bind the actual declaration,
+    // matching the verifier's table evidence, instead of accepting an existing path alone.
+    if (content.includes(`'${record.table}'`) || content.includes(`"${record.table}"`))
+      return rel.replace(/\\/g, '/')
   }
   return null
 }
