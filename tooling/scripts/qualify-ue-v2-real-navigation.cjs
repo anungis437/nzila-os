@@ -74,6 +74,50 @@ async function auth(key) {
   record({ kind: 'REAL_ENTRA_AUTHORIZATION_CODE_SESSION', persona: key, principal: PEOPLE[key].oid, tenant: TENANT, expires: session.expires, events, secureHttpOnlyCookie: true });
   await page.close();
 }
+async function baseJourneys(role) {
+  if(role==='member') {
+    stage='member-intake-persistence';
+    const intake={type:'other',title:'Synthetic staging intake '+report.runId,description:'Synthetic base-release intake. No real member facts.',createOfficialCase:false};
+    const created=payload(await(await request('A','/api/grievances','POST',intake,[200,201])).json());
+    guid(created.id);
+    const own=payload(await(await request('A','/api/grievances/'+created.id)).json());
+    assert.equal(own.grievance?.id??own.id,created.id,'Own intake must persist and remain readable');
+    await request('A','/api/grievances','POST',{...intake,createOfficialCase:true},[403]);
+    record({kind:'MEMBER_INTAKE_PERSISTED_OFFICIAL_CASE_REFUSED',intakeId:created.id});
+    stage='member-message-persistence-and-idempotency';
+    const message={subject:'Synthetic staging conversation '+report.runId,body:'Synthetic initial message. No real member information.',clientRequestId:crypto.randomUUID()};
+    const thread=payload(await(await request('A','/api/messages/threads','POST',message,[201])).json());guid(thread.id);
+    const replay=payload(await(await request('A','/api/messages/threads','POST',message,[201])).json());assert.equal(replay.id,thread.id);
+    const reply={body:'Synthetic follow-up message for persisted bilingual casework qualification.',clientRequestId:crypto.randomUUID()};
+    await request('A','/api/messages/threads/'+thread.id+'/messages','POST',reply,[201]);
+    const repeat=payload(await(await request('A','/api/messages/threads/'+thread.id+'/messages','POST',reply)).json());assert.equal(repeat.duplicate,true);
+    const saved=payload(await(await request('A','/api/messages/threads/'+thread.id+'/messages')).json());
+    assert.equal(saved.messages.filter(row=>row.content===reply.body).length,1);
+    record({kind:'MEMBER_CONVERSATION_AND_REPLY_PERSISTED_IDEMPOTENT',threadId:thread.id});
+    stage='same-organization-unassigned-representative-privacy';
+    PEOPLE.S=OWNED_PERSONAS.steward;await auth('S');
+    const staffRole=await(await request('S','/api/profile/roles')).json();assert.equal(staffRole.role,'steward');
+    await request('S','/api/messages/threads/'+thread.id+'/messages','GET',undefined,[404]);
+    await request('S','/api/grievances/'+created.id,'GET',undefined,[403,404]);
+    record({kind:'SAME_TENANT_UNASSIGNED_STEWARD_DENIED_PRIVATE_INTAKE_AND_MESSAGES',threadId:thread.id,intakeId:created.id});
+  }
+  if(['steward','chief_steward','officer'].includes(role)) {
+    stage='representative-case-filing-and-member-visible-note';
+    const filed=payload(await(await request('A','/api/cases','POST',{claimType:'other',description:'Synthetic representative case '+report.runId+'. No real member facts.'},[201])).json());guid(filed.claimId);
+    const own=payload(await(await request('A','/api/cases/'+filed.claimId)).json());assert.equal(own.claimId,filed.claimId);
+    for(const field of ['aiScore','aiAnalysis','meritConfidence','precedentMatch','complexityScore','legalCosts','courtCosts'])assert(!Object.hasOwn(own,field),'Filing a matter must not expose internal assessment');
+    const note='Synthetic member-visible note '+crypto.randomUUID();
+    await request('A','/api/cases/'+filed.claimId+'/notes','POST',{text:note,isInternal:false},[200,201]);
+    const saved=await(await request('A','/api/cases/'+filed.claimId+'/notes')).json();assert(saved.notes.some(row=>row.message===note));
+    // A filer is a party to their own matter. Neither rank nor filing confers assignment authority.
+    await request('A','/api/cases/'+filed.claimId+'/assign','POST',{assigneeId:OWNED_PERSONAS.steward.oid,reason:'Synthetic unauthorized self-matter routing probe'},[403]);
+    record({kind:'REPRESENTATIVE_FILING_NOTE_PERSISTENCE_AND_SELF_MATTER_ASSIGNMENT_DENIAL',claimId:filed.claimId,internalAssessmentRedacted:true});
+    stage='member-directory-scope';
+    await request('A','/api/members');
+    await request('A','/api/members?organizationId=f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab','GET',undefined,[403]);
+    record({kind:'MEMBER_DIRECTORY_OWN_SCOPE_AND_FOREIGN_ORGANIZATION_DENIAL',role});
+  }
+}
 async function main() {
   assert.equal(process.env.GITHUB_ACTIONS,'true');assert.equal(process.env.GITHUB_REF,'refs/heads/main');assert.equal(process.env.RUNNER_ENVIRONMENT,'github-hosted');
   const change=JSON.parse(fs.readFileSync('ops/change-records/CHG-2026-0114.json','utf8'));
@@ -150,6 +194,7 @@ async function main() {
   }
   stage='filing-capacity-is-not-administrator-rank';
   if(['member','admin'].includes(role))await request('A','/api/cases','POST',{claimType:'other',description:'Synthetic denied filing capacity probe. No real facts.'},[403]);
+  await baseJourneys(role);
   const finalIdentity=await fetch(BASE+'/api/version');assert.equal(finalIdentity.status,200);assert.equal((await finalIdentity.json()).gitSha,report.sourceSha);
   record({kind:'NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED',role,platformAdministrator:role==='app_owner',tenantContentBypassClaimed:false});
   report.status='PASS';
