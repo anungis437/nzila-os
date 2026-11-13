@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const { chromium } = require(require.resolve('playwright', { paths: [process.cwd() + '/apps/union-eyes'] }));
+const { settleRoleLanding, settleRestrictedDestination } = require('./lib/ue-staging-navigation-settlement.cjs');
 const BASE = 'https://nzila-ue-v2-staging-app.whitemoss-055b7430.canadacentral.azurecontainerapps.io';
 const TENANT = '5082b8be-b04d-4a13-b61c-b6397670177b';
 const PEOPLE = {
@@ -87,10 +88,26 @@ async function main() {
   const profile=inventory.profiles[role];report.requestedOwnedSyntheticRole=role;report.canonicalEntryCount=inventory.canonicalEntryCount;
   const identity=await fetch(BASE+'/api/version');assert.equal(identity.status,200);assert.equal((await identity.json()).gitSha,report.sourceSha);
   fs.mkdirSync(OUT,{recursive:true});browser=await chromium.launch({headless:true});await auth('A');
+  // The dispatch input is a request, not proof of an actual membership role.
+  // Use the signed-in person's own live membership API to refuse stale labels.
+  stage='live-canonical-membership-role';
+  const ownedRoleResponse=await request('A','/api/profile/roles');
+  const ownedRole=await ownedRoleResponse.json();
+  assert.equal(typeof ownedRole.role,'string','Live role endpoint must return a concrete canonical role');
+  assert(Array.isArray(ownedRole.roles),'Live role endpoint must return its own role set');
+  record({kind:'LIVE_CANONICAL_MEMBERSHIP_ROLE',requestedOwnedSyntheticRole:role,observedCanonicalRole:ownedRole.role});
+  assert.equal(ownedRole.role,role,'Dispatch membership_role does not match the authenticated synthetic principal; select the actual role, not a fictional fixture');
   stage='observed-canonical-role-landing';
-  const home=await contexts.get('A').newPage();await home.goto(BASE+'/en-CA/dashboard',{waitUntil:'domcontentloaded'});
-  assert.equal(new URL(home.url()).pathname.replace(/\/$/,''),'/en-CA'+profile.landing);
-  record({kind:'OBSERVED_ROLE_EXECUTION_HOME',requestedOwnedSyntheticRole:role,path:new URL(home.url()).pathname});await home.close();
+  const home=await contexts.get('A').newPage();
+  const homeResponse=await home.goto(BASE+'/en-CA/dashboard',{waitUntil:'domcontentloaded'});assert(homeResponse);
+  let landing;
+  try {
+    landing=await settleRoleLanding(home,'/en-CA'+profile.landing);
+  } catch(error) {
+    record({kind:'ROLE_LANDING_SETTLEMENT_FAILED',expectedPath:'/en-CA'+profile.landing,observedPath:new URL(home.url()).pathname,initialHttpStatus:homeResponse.status()});
+    throw error;
+  }
+  record({kind:'OBSERVED_ROLE_EXECUTION_HOME',requestedOwnedSyntheticRole:role,initialPath:landing.initialPath,path:landing.finalPath,redirectedAfterDOMContentLoaded:landing.redirectedAfterDOMContentLoaded,initialHttpStatus:homeResponse.status()});await home.close();
   for(const locale of ['en-CA','fr-CA'])for(const path of [...new Set([...profile.visible.map(x=>x.href),...profile.deepGovernance])]){
     stage='visible-navigation:'+role+':'+locale+':'+path;
     const page=await contexts.get('A').newPage();const route='/'+locale+path;
@@ -110,8 +127,14 @@ async function main() {
     stage='direct-scoped-administration-boundaries:'+path;
     assert(!profile.visible.some(x=>x.href===path));const page=await contexts.get('A').newPage();
     const route='/en-CA'+path,response=await page.goto(BASE+route,{waitUntil:'domcontentloaded'});assert(response);assert(response.status()<500);
-    assert(response.status()===403||new URL(page.url()).pathname.replace(/\/$/,'')!==route,'Restricted destination must remain denied: status='+response.status()+' finalPath='+new URL(page.url()).pathname);
-    record({kind:'RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE',role,path:route,status:response.status(),redirected:new URL(page.url()).pathname!==route});await page.close();
+    let denied;
+    try {
+      denied=await settleRestrictedDestination(page,route,response.status());
+    } catch(error) {
+      record({kind:'RESTRICTED_DESTINATION_SETTLEMENT_FAILED',role,path:route,status:response.status(),observedPath:new URL(page.url()).pathname});
+      throw error;
+    }
+    record({kind:'RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE',role,path:route,status:response.status(),denialMode:denied.denialMode,initialPath:denied.initialPath,finalPath:denied.finalPath});await page.close();
   }
   stage='filing-capacity-is-not-administrator-rank';
   if(['member','admin'].includes(role))await request('A','/api/cases','POST',{claimType:'other',description:'Synthetic denied filing capacity probe. No real facts.'},[403]);
