@@ -8,6 +8,7 @@ import { inspectFrameworkPrivileges } from './framework-privileges'
 import { INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
 import { CASE_ASSIGNEE_PREDICATE, CASE_ASSIGNEE_PREDICATE_OWNER } from '../../db/auth/case-assignee-predicate'
 import { CONVERSATION_ASSIGNEE_PREDICATE } from '../../db/auth/conversation-assignee-predicate'
+import { BUSINESS_SESSION_POLICY_QUERY, businessSessionPolicyViolations } from '../../db/auth/business-session-policy'
 
 const ASSIGNEE_COMPANION_SIGNATURES: string[] = [CASE_ASSIGNEE_PREDICATE, CONVERSATION_ASSIGNEE_PREDICATE].map(
   (name) => `${name.replace(/^public\./, '')}(text,uuid)`,
@@ -53,6 +54,8 @@ export function inspectInstallerDelegations(
 export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan) {
   const rules = compileSecurity(plan).rules
   const mismatches: string[] = []
+  if (plan.authExecution)
+    mismatches.push(...businessSessionPolicyViolations((await client.query(BUSINESS_SESSION_POLICY_QUERY)).rows))
   const authPrivileges = plan.authExecution ? await inspectAuthPrivilegeExpectations(client) : null
   if (authPrivileges) mismatches.push(...authPrivileges.failures)
   const frameworkPrivileges = plan.frameworkExecution

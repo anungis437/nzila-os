@@ -10,6 +10,7 @@ import v2Decisions from './catalog-v2-decisions.json'
 import { catalogContractDigest, type CatalogRow } from './catalog-admission-core.mjs'
 import { CASE_ASSIGNEE_CATALOG_QUERY, CASE_ASSIGNEE_PREDICATE_OWNER, caseAssigneePredicateViolations } from '@/db/auth/case-assignee-predicate'
 import { CONVERSATION_ASSIGNEE_CATALOG_QUERY, CONVERSATION_ASSIGNEE_PREDICATE_OWNER, conversationAssigneePredicateViolations } from '@/db/auth/conversation-assignee-predicate'
+import { BUSINESS_SESSION_POLICY_QUERY, businessSessionPolicyViolations } from '@/db/auth/business-session-policy'
 
 type Execute = (statement: string) => Promise<CatalogRow[]>
 const roles = [...Object.values(AUTH_EXECUTION_ROLES), 'union_eyes_runtime', 'union_eyes_system']
@@ -147,5 +148,6 @@ export async function inspectCanonicalAuthCatalog(execute: Execute): Promise<str
   }
   violations.push(...caseAssigneePredicateViolations(await execute(CASE_ASSIGNEE_CATALOG_QUERY)))
   violations.push(...conversationAssigneePredicateViolations(await execute(CONVERSATION_ASSIGNEE_CATALOG_QUERY)))
+  violations.push(...businessSessionPolicyViolations(await execute(BUSINESS_SESSION_POLICY_QUERY)))
   return violations
 }

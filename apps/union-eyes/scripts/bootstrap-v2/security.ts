@@ -11,6 +11,7 @@ import {
   PLATFORM_METADATA_MODEL_OWNERS,
 } from './framework-contract'
 import { SYSTEM_COLUMN_READ_CONTRACTS } from './service-column-contracts'
+import { compileBusinessSessionPolicy } from '../../db/auth/business-session-policy'
 
 const ref = (table: string) => `public.${quote(table)}`
 const org = "nullif(current_setting('app.current_org_id', true), '')"
@@ -361,6 +362,7 @@ export function compileSecurity(plan: V2Plan) {
             `CREATE POLICY ue_v2_system_predicate_select ON ${ref(table.name)} FOR SELECT TO union_eyes_system USING (true);`,
           )
       }
+      if (plan.authExecution && complete && runtimePrivileges.length) statements.push(compileBusinessSessionPolicy(table.name))
     }
     rules.push({
       table: table.name,

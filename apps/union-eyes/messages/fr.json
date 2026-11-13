@@ -1,4 +1,72 @@
 {
+  "onboardingTour": {
+    "title": "Pour commencer",
+    "dismiss": "Fermer le guide de démarrage",
+    "done": "Compris",
+    "next": "Suivant",
+    "steps": {
+      "member": {
+        "0": {
+          "context": "Voici Ma représentation : vous y suivez les dossiers que vous avez ouverts.",
+          "action": "Ouvrez un dossier pour consulter sa progression ou créez un dossier de représentation pour commencer."
+        },
+        "1": {
+          "context": "Chaque dossier progresse étape par étape.",
+          "action": "Les mises à jour apparaissent dans le dossier lorsque votre représentant intervient."
+        }
+      },
+      "steward": {
+        "0": {
+          "context": "Les priorités présentent ce qui nécessite votre attention.",
+          "action": "Commencez par le premier élément, classé selon son urgence et son échéance."
+        },
+        "1": {
+          "context": "Les décisions commencent ici. Vos actions font avancer le travail.",
+          "action": "Ouvrez la première priorité pour commencer."
+        }
+      },
+      "officer": {
+        "0": {
+          "context": "Les priorités de votre équipe sont classées ici selon leur urgence.",
+          "action": "Examinez le premier élément ou consultez vos priorités personnelles."
+        },
+        "1": {
+          "context": "Votre supervision soutient le travail et la responsabilité de l’équipe.",
+          "action": "Consultez la file de l’équipe, puis les renseignements pour approfondir le contexte."
+        }
+      },
+      "federation": {
+        "0": {
+          "context": "Les renseignements de la fédération présentent la situation dans vos sections locales.",
+          "action": "Concentrez-vous sur les principaux signaux et les actions recommandées."
+        },
+        "1": {
+          "context": "Les tendances se précisent à mesure que l’activité augmente dans la fédération.",
+          "action": "Examinez les principaux signaux, puis consultez les connaissances et les références utiles."
+        }
+      },
+      "clc": {
+        "0": {
+          "context": "Votre vue de direction présente les priorités en un coup d’œil.",
+          "action": "Lisez le résumé de direction et examinez les trois premières priorités."
+        },
+        "1": {
+          "context": "Les données de cette page éclairent les décisions stratégiques.",
+          "action": "Consultez le compte rendu, puis explorez les tendances ci-dessous."
+        }
+      },
+      "admin": {
+        "0": {
+          "context": "L’administration de la plateforme permet de gérer les organisations, les utilisateurs et la configuration du système.",
+          "action": "Commencez par la vue d’ensemble des organisations et l’état des utilisateurs."
+        },
+        "1": {
+          "context": "Les changements apportés ici touchent toutes les organisations. Consultez régulièrement le journal d’audit.",
+          "action": "Vérifiez l’état du système, puis les demandes d’accès en attente."
+        }
+      }
+    }
+  },
   "memberDocuments": {
     "title": "Mes documents",
     "description": "Les documents que vous avez téléversés et ceux que votre syndicat partage avec les membres.",
