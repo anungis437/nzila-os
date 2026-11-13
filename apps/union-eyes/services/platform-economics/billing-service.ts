@@ -906,6 +906,10 @@ export async function replayInvoiceDeterministically(invoiceId: string, organiza
 
   for (const item of invoiceData.lineItems) {
     const amountCents = centsSafe(item.amount);
+    if (!Number.isSafeInteger(amountCents) || amountCents < 0 ||
+        !Number.isSafeInteger(recomputedSubtotalCents + amountCents)) {
+      throw new Error('Invoice replay contains invalid or overflowing line-item amounts');
+    }
     recomputedSubtotalCents += amountCents;
 
     const metadata = (item.metadata ?? {}) as Record<string, unknown>;
