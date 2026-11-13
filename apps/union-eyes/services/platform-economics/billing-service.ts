@@ -72,6 +72,19 @@ function safeFeeProduct(unitCents: number, count: number): number {
   return unitCents * count;
 }
 
+// Persisted invoice balances are untrusted even when database columns are decimal.
+// Reject malformed or over-precision values rather than interpreting them as zero.
+function persistedInvoiceCents(value: string | null | undefined): number {
+  if (typeof value !== 'string' || !/^\\d+(?:\\.\\d{1,2})?$/.test(value)) {
+    throw new Error('Persisted invoice balance is not valid CAD');
+  }
+  const cents = centsSafe(value);
+  if (!Number.isSafeInteger(cents) || cents < 0) {
+    throw new Error('Persisted invoice balance exceeds safe CAD limits');
+  }
+  return cents;
+}
+
 // ============================================================================
 // Billing Account Management
 // ============================================================================
@@ -571,8 +584,8 @@ export async function recordPayment(input: RecordPaymentInput) {
     if (invoice.status === 'void' || invoice.status === 'written_off') {
       throw new Error('Cannot record payment against a void or written-off invoice');
     }
-    const alreadyPaidCents = centsSafe(invoice.amountPaid);
-    const totalDueCents = centsSafe(invoice.totalAmount);
+    const alreadyPaidCents = persistedInvoiceCents(invoice.amountPaid);
+    const totalDueCents = persistedInvoiceCents(invoice.totalAmount);
     const newAmountPaidCents = alreadyPaidCents + paymentAmountCents;
     // Financial state must be nonnegative, internally consistent and exactly
     // representable in integer cents before any payment or allocation insert.
@@ -723,8 +736,8 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
       if (invoice.status === 'void' || invoice.status === 'written_off') {
         throw new Error('Cannot settle a void or written-off invoice');
       }
-      const alreadyPaidCents = centsSafe(invoice.amountPaid);
-      const totalDueCents = centsSafe(invoice.totalAmount);
+      const alreadyPaidCents = persistedInvoiceCents(invoice.amountPaid);
+      const totalDueCents = persistedInvoiceCents(invoice.totalAmount);
       // Reject corrupt persisted balances before settlement, including negative
       // paid/total values and paid amounts already exceeding the invoice total.
       // A failed settlement must not repair corruption by silently rewriting it.
@@ -764,7 +777,7 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
         amount: input.amount,
         createdBy: input.createdBy,
       });
-      const newStatus = newAmountPaidCents === centsSafe(invoice.totalAmount) ? 'paid' : 'partially_paid';
+      const newStatus = newAmountPaidCents === persistedInvoiceCents(invoice.totalAmount) ? 'paid' : 'partially_paid';
       const [updated] = await tx.update(platformInvoices).set({
         amountPaid: centsToDecimal(newAmountPaidCents),
         status: newStatus,
