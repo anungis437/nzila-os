@@ -310,6 +310,21 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     metadata?: Record<string, unknown>;
   }> = [];
 
+  // Plan prices are persisted decimals. Reject malformed or negative values before
+  // any invoice write; centsSafe alone treats invalid amounts as zero.
+  for (const [feeName, rawFee] of [
+    ['baseFee', plan.baseFee],
+    ['perLocalFee', plan.perLocalFee ?? '0'],
+    ['perSeatFee', plan.perSeatFee ?? '0'],
+    ['perModuleFee', plan.perModuleFee ?? '0'],
+  ] as const) {
+    const decimal = String(rawFee);
+    if (!/^[0-9]+(?:\\.[0-9]{1,2})?$/.test(decimal) ||
+        !Number.isSafeInteger(Number(decimal) * 100)) {
+      throw new Error(`Invoice plan ${feeName} is invalid`);
+    }
+  }
+
   const baseFee = centsSafe(plan.baseFee);
   if (baseFee > 0) {
     lineItems.push({
