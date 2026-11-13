@@ -682,6 +682,14 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
       }
       const alreadyPaidCents = centsSafe(invoice.amountPaid);
       const totalDueCents = centsSafe(invoice.totalAmount);
+      // Reject corrupt persisted balances before settlement, including negative
+      // paid/total values and paid amounts already exceeding the invoice total.
+      // A failed settlement must not repair corruption by silently rewriting it.
+      if (!Number.isSafeInteger(alreadyPaidCents) || alreadyPaidCents < 0 ||
+          !Number.isSafeInteger(totalDueCents) || totalDueCents < 0 ||
+          alreadyPaidCents > totalDueCents) {
+        throw new Error('External settlement invoice balance is invalid');
+      }
       newAmountPaidCents = alreadyPaidCents + paymentAmountCents;
       if (!Number.isSafeInteger(newAmountPaidCents) || newAmountPaidCents > totalDueCents) {
         throw new Error('External settlement exceeds invoice balance');
