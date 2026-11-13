@@ -96,9 +96,10 @@ async function main() {
   stage='direct-scoped-administration-boundaries';
   // Financial and platform operations remain unavailable to these exact fixtures.
   for(const path of ['/dashboard/finance','/dashboard/operations','/dashboard/admin/members','/dashboard/security','/dashboard/integrations']){
+    stage='direct-scoped-administration-boundaries:'+path;
     assert(!profile.visible.some(x=>x.href===path));const page=await contexts.get('A').newPage();
     const route='/en-CA'+path,response=await page.goto(BASE+route,{waitUntil:'domcontentloaded'});assert(response);assert(response.status()<500);
-    assert(response.status()===403||new URL(page.url()).pathname.replace(/\/$/,'')!==route,'Restricted destination must remain denied');
+    assert(response.status()===403||new URL(page.url()).pathname.replace(/\/$/,'')!==route,'Restricted destination must remain denied: status='+response.status()+' finalPath='+new URL(page.url()).pathname);
     record({kind:'RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE',role,path:route,status:response.status(),redirected:new URL(page.url()).pathname!==route});await page.close();
   }
   stage='filing-capacity-is-not-administrator-rank';
@@ -106,4 +107,4 @@ async function main() {
   record({kind:'NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED',role,platformAdministrator:false});
   report.status='PASS';
 }
-main().catch(error=>{report.status='FAIL';report.failure={stage,error:error.name};process.exitCode=1;}).finally(async()=>{if(browser)await browser.close().catch(()=>{});fs.mkdirSync(OUT,{recursive:true});fs.writeFileSync(OUT+'/receipt.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,stage,observations:report.observations.length}));});
+main().catch(error=>{report.status='FAIL';report.failure={stage,error:error.name,message:error.message};process.exitCode=1;}).finally(async()=>{if(browser)await browser.close().catch(()=>{});fs.mkdirSync(OUT,{recursive:true});fs.writeFileSync(OUT+'/receipt.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,stage,observations:report.observations.length}));});
