@@ -578,6 +578,33 @@ describe('platform-economics/billing-service', () => {
   });
 
   describe('replayInvoiceDeterministically', () => {
+    it('replays valid discount and subsidy lines without rejecting negative adjustments', async () => {
+      pushSel([{ id: 'inv-1', organizationId: 'o1', subtotal: '75.00', totalAmount: '75.00', metadata: null }]);
+      pushSel([
+        { id: 'base', costType: 'base_subscription', amount: '100.00', metadata: {} },
+        { id: 'discount', costType: 'credit', amount: '-20.00', metadata: {} },
+        { id: 'subsidy', costType: 'subsidy', amount: '-5.00', metadata: {} },
+      ]);
+      const result = await replayInvoiceDeterministically('inv-1', 'o1');
+      expect(result?.recomputed).toMatchObject({ subtotal: '75.00', isMatch: true });
+    });
+
+    it.each([
+      ['negative charge', [{ costType: 'base_subscription', amount: '-1.00' }]],
+      ['positive credit', [{ costType: 'credit', amount: '1.00' }]],
+      ['fractional cent', [{ costType: 'base_subscription', amount: '1.001' }]],
+      ['non-numeric amount', [{ costType: 'base_subscription', amount: 'NaN' }]],
+      ['adjustments exceeding charges', [
+        { costType: 'base_subscription', amount: '1.00' },
+        { costType: 'subsidy', amount: '-2.00' },
+      ]],
+    ])('refuses %s in invoice replay', async (_name, lines) => {
+      pushSel([{ id: 'inv-1', organizationId: 'o1', subtotal: '0.00', totalAmount: '0.00', metadata: null }]);
+      pushSel(lines.map((line, i) => ({ id: String(i), metadata: {}, ...line })));
+      await expect(replayInvoiceDeterministically('inv-1', 'o1'))
+        .rejects.toThrow('Invoice replay contains invalid or overflowing line-item amounts');
+    });
+
     it('refuses a foreign invoice before reading its line items', async () => {
       pushSel([{ id: 'inv-1', organizationId: 'foreign-org' }]);
       expect(await replayInvoiceDeterministically('inv-1', 'o1')).toBeNull();
