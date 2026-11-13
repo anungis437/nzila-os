@@ -386,7 +386,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
   // Persisted decimal fields are untrusted: centsSafe maps malformed values to zero.
   // A corrupt discount or subsidy must not silently become an undiscounted invoice.
   const rawDiscount = String(subscription.discountPercent ?? '0');
-  if (!/^[0-9]+(?:\\.[0-9]{1,2})?$/.test(rawDiscount) ||
+  if (!/^[0-9]+(?:\.[0-9]{1,2})?$/.test(rawDiscount) ||
       !Number.isSafeInteger(Number(rawDiscount) * 100)) {
     throw new Error('Invoice discount is invalid');
   }
@@ -410,7 +410,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
 
   // Apply subsidy
   const rawSubsidy = String(subscription.subsidyAmount ?? '0');
-  if (!/^[0-9]+(?:\\.[0-9]{1,2})?$/.test(rawSubsidy) ||
+  if (!/^[0-9]+(?:\.[0-9]{1,2})?$/.test(rawSubsidy) ||
       !Number.isSafeInteger(Number(rawSubsidy) * 100)) {
     throw new Error('Invoice subsidy is invalid');
   }
