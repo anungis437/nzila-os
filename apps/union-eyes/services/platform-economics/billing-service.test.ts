@@ -575,6 +575,30 @@ describe('reconcileExternalInvoicePayment', () => {
     expect(auditLog).not.toHaveBeenCalled();
   });
 
+  it('refuses a settlement exceeding the remaining invoice balance', async () => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '75.00', totalAmount: '100.00', status: 'partially_paid' }];
+    state.selects.platformPayments = [];
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    await expect(reconcileExternalInvoicePayment(base)).rejects.toThrow(/exceeds invoice balance/);
+    expect(state.inserts.platformPayments).toBeUndefined();
+  });
+
+  it.each(['void', 'written_off'])('refuses settlement against %s invoice', async (status) => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00', status }];
+    state.selects.platformPayments = [];
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    await expect(reconcileExternalInvoicePayment(base)).rejects.toThrow(/void or written-off/);
+  });
+
+  it('rejects invoice update failure rather than reporting a completed settlement', async () => {
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00', status: 'issued' }];
+    state.selects.platformPayments = [];
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    state.inserts.platformPayments = [{ id: 'pay-1' }];
+    state.updates.platformInvoices = [];
+    await expect(reconcileExternalInvoicePayment(base)).rejects.toThrow(/invoice update failed/);
+  });
+
   it('records a completed external payment and allocates it', async () => {
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00', metadata: null }];
     state.selects.platformPayments = [];
