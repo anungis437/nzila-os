@@ -16,6 +16,17 @@ const contexts = new Map();
 function record(value) { report.observations.push({ at: new Date().toISOString(), ...value }); }
 function payload(body) { return body.data ?? body; }
 function guid(value) { assert.match(value, /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i); return value; }
+// Documented Chromium/Playwright race (microsoft/playwright#34889 and related): a reload immediately
+// following a goto can abort with ERR_ABORTED/"frame was detached" while the prior navigation's frame
+// lifecycle is still settling. Retry once; any other error (a real app/test failure) still propagates.
+async function reloadWithRetry(page, options) {
+  try {
+    return await page.reload(options);
+  } catch (error) {
+    if (!/ERR_ABORTED|frame was detached/.test(error.message)) throw error;
+    return page.reload(options);
+  }
+}
 async function request(key, path, method = 'GET', data, expected = [200]) {
   assert(path.startsWith('/api/') && !path.includes('://'));
   const traceId = crypto.randomBytes(16).toString('hex');
@@ -88,7 +99,7 @@ async function main() {
     assert.equal(await page.getByText('This page could not be found',{exact:true}).count(),0);
     assert.equal(await page.getByText('Application error: a server-side exception has occurred',{exact:false}).count(),0);
     record({kind:'REAL_VISIBLE_NAVIGATION',role,experience:profile.experience,path:route,status:response.status(),sourceVisible:profile.visible.some(x=>x.href===path)});
-    await page.setViewportSize({width:390,height:844});await page.reload({waitUntil:'domcontentloaded'});
+    await page.setViewportSize({width:390,height:844});await reloadWithRetry(page,{waitUntil:'domcontentloaded'});
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
     assert.equal(overflow,false,'Required mobile route must not overflow');
     record({kind:'REAL_MOBILE_NAVIGATION',role,path:route,width:390,height:844,horizontalOverflow:overflow});await page.close();
