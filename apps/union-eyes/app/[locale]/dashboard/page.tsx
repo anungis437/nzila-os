@@ -68,6 +68,18 @@ export default async function DashboardRootPage({ params }: DashboardRootPagePro
     });
   }
 
+  // TEMPORARY DIAGNOSTIC (CHG-2026-0114): unconditional, fires on every request regardless
+  // of which branch below is taken. Needed to distinguish "userRole resolved cleanly to a
+  // non-executive value" from "an exception was thrown and swallowed" for a reproducible,
+  // intermittent landing-page mismatch under investigation. Remove once root-caused.
+  logger.info("[dashboard:root] userRole resolved before experience check", {
+    stage: "role-resolved",
+    userId,
+    organizationId,
+    userRole,
+    experience: getDashboardExperience(userRole),
+  });
+
   // Members are not redirected: Home is their landing page, built from their own records only.
   if (getDashboardExperience(userRole) === "member") return <MemberHome />;
 
