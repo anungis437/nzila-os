@@ -43,3 +43,13 @@ review a fresh no-delete what-if, use the protected staging rollout, and verify
 real sealed packs/artifacts, checksums, audit and tenant denial on that candidate.
 Preserve the current database and its installation receipt. No production or
 financial feature implementation is authorized by this repair.
+
+The same pre-deployment inspection found a configuration-drift defect: both
+staging parameter files and the shared staging build variables still named the
+retired tenant/client, although the live revision had migrated. The parameter
+files now preserve tenant `cc15259a-d2bf-421f-8e44-dccf8dc6232a` and registration
+`5470c759-3dde-4009-9fd6-3eee46ab7b72`. The V2 build uses dedicated
+`UE_V2_ENTRA_CLIENT_ID` / `UE_V2_ENTRA_TENANT_ID` variables in the existing build
+environment and refuses any mismatch with its source-bound staging parameters.
+Shared build settings for other applications are preserved. The existing vault
+secret and identity bindings remain in place; no credential is published.
