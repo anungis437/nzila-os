@@ -921,12 +921,25 @@ export async function replayInvoiceDeterministically(invoiceId: string, organiza
   const lineage: Array<Record<string, unknown>> = [];
 
   for (const item of invoiceData.lineItems) {
-    const amountCents = centsSafe(item.amount);
-    if (!Number.isSafeInteger(amountCents) || amountCents < 0 ||
-        !Number.isSafeInteger(recomputedSubtotalCents + amountCents)) {
+    // Discounts and subsidies are legitimate negative invoice lines. Validate the
+    // persisted decimal exactly and restrict negative values to those cost types.
+    // centsSafe intentionally rounds and cannot validate corrupted stored amounts.
+    const rawAmount = String(item.amount);
+    const isAdjustment = item.costType === 'credit' || item.costType === 'subsidy';
+    if (!/^-?\\d+(?:\\.\\d{1,2})?$/.test(rawAmount) ||
+        (!isAdjustment && rawAmount.startsWith('-')) ||
+        (isAdjustment && !rawAmount.startsWith('-'))) {
       throw new Error('Invoice replay contains invalid or overflowing line-item amounts');
     }
-    recomputedSubtotalCents += amountCents;
+    const amountCents = Number(rawAmount) * 100;
+    const roundedCents = Math.round(amountCents);
+    if (!Number.isSafeInteger(roundedCents) ||
+        Math.abs(amountCents - roundedCents) > 0.000001 ||
+        !Number.isSafeInteger(recomputedSubtotalCents + roundedCents) ||
+        recomputedSubtotalCents + roundedCents < 0) {
+      throw new Error('Invoice replay contains invalid or overflowing line-item amounts');
+    }
+    recomputedSubtotalCents += roundedCents;
 
     const metadata = (item.metadata ?? {}) as Record<string, unknown>;
     const usageEventIds = Array.isArray(metadata.usageEventIds)
