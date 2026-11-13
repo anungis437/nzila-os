@@ -319,7 +319,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
     ['perModuleFee', plan.perModuleFee ?? '0'],
   ] as const) {
     const decimal = String(rawFee);
-    if (!/^[0-9]+(?:\\.[0-9]{1,2})?$/.test(decimal) ||
+    if (!/^[0-9]+(?:\.[0-9]{1,2})?$/.test(decimal) ||
         !Number.isSafeInteger(Number(decimal) * 100)) {
       throw new Error(`Invoice plan ${feeName} is invalid`);
     }
