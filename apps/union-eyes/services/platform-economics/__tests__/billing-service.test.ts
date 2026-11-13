@@ -228,6 +228,8 @@ describe('platform-economics/billing-service', () => {
 
     it.each([
       ['discount over 100 percent', { ...subscription, discountPercent: '101.00' }, plan, /Invoice discount exceeds 100 percent/],
+      ['subsidy exceeding charges', { ...subscription, discountPercent: '0.00', subsidyAmount: '156.00' }, plan, /Invoice subsidy exceeds remaining charges/],
+      ['subsidy exceeding discounted charges', { ...subscription, discountPercent: '100.00', subsidyAmount: '0.01' }, plan, /Invoice subsidy exceeds remaining charges/],
       ['aggregate subtotal overflow', { ...subscription, discountPercent: '0.00' }, { ...plan, baseFee: '90071992547409.00', perLocalFee: '10.00' }, /Invoice subtotal exceeds safe CAD limits/],
     ])('refuses %s before financial writes', async (_name, badSubscription, badPlan, error) => {
       pushSel([account]);
