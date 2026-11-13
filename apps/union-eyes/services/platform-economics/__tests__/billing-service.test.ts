@@ -213,6 +213,21 @@ describe('platform-economics/billing-service', () => {
       updatedAt: new Date('2025-01-01'),
     };
 
+    it.each([
+      ['discount over 100 percent', { ...subscription, discountPercent: '101.00' }, plan, /Invoice discount exceeds 100 percent/],
+      ['aggregate subtotal overflow', { ...subscription, discountPercent: '0.00' }, { ...plan, baseFee: '90071992547409.00', perLocalFee: '10.00' }, /Invoice subtotal exceeds safe CAD limits/],
+    ])('refuses %s before financial writes', async (_name, badSubscription, badPlan, error) => {
+      pushSel([account]);
+      pushSel([period]);
+      pushSel([]);
+      h.getActiveContract.mockResolvedValueOnce({ id: 'ctr-1' });
+      pushSel([badSubscription]);
+      pushSel([badPlan]);
+      await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1' })).rejects.toThrow(error);
+      expect(h.committed).toHaveLength(0);
+      expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
     it('generates the subscription lines, discount and subsidy, bills no usage, and writes the invoice, its lines, its ledger entries and its audit record in one transaction', async () => {
       pushSel([account]); // getBillingAccount
       pushSel([period]); // billing period
