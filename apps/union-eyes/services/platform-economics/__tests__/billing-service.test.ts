@@ -227,6 +227,24 @@ describe('platform-economics/billing-service', () => {
     };
 
     it.each([
+      ['non-array modules', { ...subscription, moduleList: 'm1' }],
+      ['duplicate modules', { ...subscription, moduleList: ['m1', 'm1'] }],
+      ['empty module id', { ...subscription, moduleList: [''] }],
+      ['non-string module id', { ...subscription, moduleList: [7] }],
+    ])('refuses %s before financial writes', async (_name, badSubscription) => {
+      pushSel([account]);
+      pushSel([period]);
+      pushSel([]);
+      h.getActiveContract.mockResolvedValueOnce({ id: 'ctr-1' });
+      pushSel([badSubscription]);
+      pushSel([plan]);
+      await expect(generateInvoice({ organizationId: 'o1', billingPeriodId: 'bp-1' }))
+        .rejects.toThrow('Invoice subscription modules are invalid');
+      expect(h.committed).toHaveLength(0);
+      expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+    });
+
+    it.each([
       ['negative local count', { ...subscription, localCount: -1 }, plan, /Invoice local count is invalid/],
       ['fractional local count', { ...subscription, localCount: 1.5 }, plan, /Invoice local count is invalid/],
       ['negative seat count', { ...subscription, seatCount: -1 }, plan, /Invoice seat count is invalid/],
