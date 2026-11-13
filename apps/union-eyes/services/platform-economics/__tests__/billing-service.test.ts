@@ -227,6 +227,10 @@ describe('platform-economics/billing-service', () => {
     };
 
     it.each([
+      ['negative local count', { ...subscription, localCount: -1 }, plan, /Invoice local count is invalid/],
+      ['fractional local count', { ...subscription, localCount: 1.5 }, plan, /Invoice local count is invalid/],
+      ['negative seat count', { ...subscription, seatCount: -1 }, plan, /Invoice seat count is invalid/],
+      ['unsafe seat count', { ...subscription, seatCount: Number.MAX_SAFE_INTEGER + 1 }, plan, /Invoice seat count is invalid/],
       ['discount over 100 percent', { ...subscription, discountPercent: '101.00' }, plan, /Invoice discount exceeds 100 percent/],
       ['subsidy exceeding charges', { ...subscription, discountPercent: '0.00', subsidyAmount: '156.00' }, plan, /Invoice subsidy exceeds remaining charges/],
       ['subsidy exceeding discounted charges', { ...subscription, discountPercent: '100.00', subsidyAmount: '0.01' }, plan, /Invoice subsidy exceeds remaining charges/],
