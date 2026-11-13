@@ -535,6 +535,19 @@ describe('reconcileExternalInvoicePayment', () => {
     expect(auditLog).not.toHaveBeenCalled();
   });
 
+  it.each(['999999999999999999999', '90071992547410.00'])(
+    'refuses unsafe external settlement amount %s before payment insertion',
+    async (amount) => {
+      state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
+      state.selects.platformPayments = [];
+      state.selects.billingAccounts = [{ id: 'acct-1' }];
+      await expect(reconcileExternalInvoicePayment({ ...base, amount }))
+        .rejects.toThrow(/safe CAD limits/);
+      expect(appendLedgerEntry).not.toHaveBeenCalled();
+      expect(persistAtomicAudit).not.toHaveBeenCalled();
+    },
+  );
+
   it('refuses negative failed external payments without writes', async () => {
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1' }];
     state.selects.platformPayments = [];
@@ -599,7 +612,7 @@ describe('queries', () => {
 
   it('getInvoiceWithLineItems returns null when invoice missing', async () => {
     state.selects.platformInvoices = [];
-    expect(await getInvoiceWithLineItems('inv-x')).toBeNull();
+    expect(await getInvoiceWithLineItems('inv-x', 'org-1')).toBeNull();
   });
 
   it('getInvoiceWithLineItems returns the invoice with line items', async () => {
