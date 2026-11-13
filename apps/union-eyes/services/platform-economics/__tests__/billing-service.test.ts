@@ -119,6 +119,19 @@ beforeEach(() => {
 });
 
 describe('platform-economics/billing-service', () => {
+  describe('replayInvoiceDeterministically integrity', () => {
+    it.each([
+      ['negative line amount', '-1.00', '0.00'],
+      ['unsafe line amount', '90071992547410.00', '0.00'],
+      ['aggregate overflow', '1.00', '90071992547409.00'],
+    ])('rejects %s rather than returning a misleading replay', async (_name, amount, subtotal) => {
+      pushSel([{ id: 'inv-1', organizationId: 'o1', subtotal, totalAmount: subtotal }]);
+      pushSel([{ id: 'line-1', amount, costType: 'base', metadata: {} }]);
+      await expect(replayInvoiceDeterministically('inv-1', 'o1'))
+        .rejects.toThrow('Invoice replay contains invalid or overflowing line-item amounts');
+    });
+  });
+
   describe('createBillingAccount', () => {
     it('creates an account and audits', async () => {
       pushSel([{ id: 'acct-1' }]);
