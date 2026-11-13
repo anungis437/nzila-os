@@ -16,10 +16,17 @@ export default async function FinanceLayout({
   children: React.ReactNode;
 }) {
   const user = await requireUser();
+  const minRoleMet = await hasMinRole('secretary_treasurer');
+  // TEMPORARY DIAGNOSTIC (CHG-2026-0114): run 43358192998 showed an officer-role
+  // persona reaching /dashboard/finance with status 200 and no redirect, despite
+  // officer (level 80) being below the secretary_treasurer floor (110) in
+  // ROLE_HIERARCHY. Logging the actual resolved values to find the real cause
+  // before changing any guard logic -- remove once root-caused.
+  console.error('[finance-layout-diagnostic]', JSON.stringify({ userId: user.userId, organizationId: user.organizationId, roles: user.roles, minRoleMet }));
   if (await isCongressOrg(user.organizationId)) {
     redirect('/dashboard/clc');
   }
-  if (!(await hasMinRole('secretary_treasurer'))) {
+  if (!minRoleMet) {
     redirect('/dashboard');
   }
   return <>{children}</>;
