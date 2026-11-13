@@ -390,6 +390,9 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
 
   // Apply subsidy
   const subsidyCents = centsSafe(subscription.subsidyAmount ?? '0');
+  if (subsidyCents > subtotalCents) {
+    throw new Error('Invoice subsidy exceeds remaining charges');
+  }
   if (subsidyCents > 0) {
     const subsidyStr = centsToDecimal(subsidyCents);
     lineItems.push({
