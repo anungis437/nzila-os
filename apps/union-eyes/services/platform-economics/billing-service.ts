@@ -634,6 +634,11 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
     throw new Error('External payment amount must be a non-negative CAD amount with at most two decimals');
   }
   const paymentAmountCents = centsSafe(input.amount);
+  // Reject overflow before persisting an external settlement; rounded or unsafe
+  // integer cents cannot be reconciled reliably against an invoice balance.
+  if (!Number.isSafeInteger(paymentAmountCents) || paymentAmountCents < 0) {
+    throw new Error('External payment amount exceeds safe CAD limits');
+  }
   if (normalizedStatus === 'completed' && paymentAmountCents <= 0) {
     throw new Error('Completed external payment amount must be positive');
   }
