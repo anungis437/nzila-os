@@ -503,7 +503,7 @@ export async function recordPayment(input: RecordPaymentInput) {
       .where(and(eq(platformInvoices.id, input.invoiceId), eq(platformInvoices.organizationId, input.organizationId)))
       .for('update')
       .limit(1);
-    if (!invoice) throw new Error('Invoice not found for organization');
+    if (!invoice || invoice.organizationId !== input.organizationId) throw new Error('Invoice not found for organization');
     if (invoice.status === 'void' || invoice.status === 'written_off') {
       throw new Error('Cannot record payment against a void or written-off invoice');
     }
@@ -628,7 +628,12 @@ export async function reconcileExternalInvoicePayment(input: ReconcileExternalIn
       .from(platformPayments)
       .where(and(eq(platformPayments.organizationId, input.organizationId), eq(platformPayments.externalReference, input.externalReference)))
       .limit(1);
-    if (existingPayment) throw new Error('External payment replay requires verified invoice allocation');
+    if (existingPayment) {
+      if (existingPayment.organizationId !== input.organizationId || existingPayment.amount !== input.amount) {
+        throw new Error('External payment reference conflicts with the requested organization or amount');
+      }
+      throw new Error('External payment replay requires verified invoice allocation');
+    }
 
     const [account] = await tx
       .select()
