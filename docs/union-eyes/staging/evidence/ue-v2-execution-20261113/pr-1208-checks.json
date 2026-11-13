@@ -1,0 +1,701 @@
+{
+  "pr": 1208,
+  "headSha": "5f388d88c5951a0036b5491b80828b07e6e56d72",
+  "checkedAt": "2026-11-13T21:29:40.060922+00:00",
+  "state": "open",
+  "merged": false,
+  "mergeable": true,
+  "mergeableState": "clean",
+  "requiredChecks": 16,
+  "missingTrustedRequiredSuccess": [],
+  "failed": [],
+  "pending": [],
+  "unresolvedReviews": [],
+  "checks": [
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181328768",
+      "name": "Merge Authority / IaC Security",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181332125",
+      "name": "Merge Authority / Ops Documentation",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181318509",
+      "name": "Merge Authority / Governance Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181321573",
+      "name": "Merge Authority / Hash Chain Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181325165",
+      "name": "Merge Authority / Operating Layer",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181315287",
+      "name": "Merge Authority / Repository Inventory",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181312052",
+      "name": "Merge Authority / Architectural Contracts",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181308660",
+      "name": "Merge Authority / Affected Build",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181305069",
+      "name": "Merge Authority / Migration Chain",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181301567",
+      "name": "Merge Authority / PostgreSQL RLS",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181294643",
+      "name": "Merge Authority / Unit Tests",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181298382",
+      "name": "Merge Authority / Schema Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132181291036",
+      "name": "Merge Authority / Lint & Typecheck",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132181081039",
+      "name": "Reconcile CI frozen head",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338279/job/132180715549",
+      "name": "E2E \u00b7 union-eyes",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132180063074",
+      "name": "Enterprise Hardening Gate",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132180062721",
+      "name": "Governance Gates",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132179991003",
+      "name": "Unit Tests",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132174711016",
+      "name": "Report CI contract owner",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173660517",
+      "name": "Hash Chain Drift",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173660538",
+      "name": "AI Eval Gate",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173660490",
+      "name": "Red-Team Adversarial",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173660553",
+      "name": "Operating Layer Gate",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173660440",
+      "name": "Contract Tests (Architectural Invariants)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173324543",
+      "name": "Performance Harness Check (synthetic stub)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173664302",
+      "name": "IaC SARIF Reporting",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173662129",
+      "name": "IaC Security Validation",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173209462",
+      "name": "Lint & Typecheck",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173327205",
+      "name": "Performance Regression Gate (canonical)",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132173197862",
+      "name": "Build All",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132172915297",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132172908173",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132172911745",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132172772579",
+      "name": "GA Truth Hardening",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338509/job/132172771157",
+      "name": "Reconcile Secret Scan frozen head",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172751779",
+      "name": "Report CI inventory owner",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132172730258",
+      "name": "Governance Baseline / Governance Gate",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132172630747",
+      "name": "Governance Gate",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338509/job/132172525751",
+      "name": "Report Secret Scan owners",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262940",
+      "name": "Governance Integrity",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262391",
+      "name": "Workspace Typecheck (3/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262250",
+      "name": "SAGE PostgreSQL Concurrency and RLS",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262535",
+      "name": "Unit coverage (union-eyes)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262605",
+      "name": "Active Build (4/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262351",
+      "name": "Unit coverage (shared)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262751",
+      "name": "SAGE Live PostgreSQL (records lifecycle)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262617",
+      "name": "ML Tooling Gates",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262397",
+      "name": "Workspace Lint",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262381",
+      "name": "Workspace Typecheck (2/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262506",
+      "name": "Workspace Typecheck (4/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262426",
+      "name": "Active Build (1/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262453",
+      "name": "Active Build (3/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262285",
+      "name": "Repository Inventory",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262393",
+      "name": "Schema Drift Detection",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262375",
+      "name": "Workspace Typecheck (1/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132172295084",
+      "name": "CodeQL",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132172229288",
+      "name": "Governance Baseline / Evidence Seal Verification",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172262468",
+      "name": "Active Build (2/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338503/job/132171730103",
+      "name": "Publish required checks",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132172264760",
+      "name": "Ops Documentation Pack",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338666/job/132171731457",
+      "name": "Doc Hygiene Check",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338550/job/132171729826",
+      "name": "Anti-theatre scanner + inventory + demo guard",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338518/job/132171733744",
+      "name": "Portfolio Governance",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132172189438",
+      "name": "Evidence Seal Verification",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338509/job/132171730012",
+      "name": "Docker Secret Policy",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338553/job/132171730078",
+      "name": "Trivy \u2014 orchestrator",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338553/job/132171730020",
+      "name": "Trivy \u2014 filesystem (repo secrets + misconfig) [BLOCKING]",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338509/job/132171730137",
+      "name": "Gitleaks",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338553/job/132171729727",
+      "name": "Trivy \u2014 monorepo",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338509/job/132171729478",
+      "name": "TruffleHog OSS",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338624/job/132171730270",
+      "name": "reliability-validation",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338991/job/132171731921",
+      "name": "Classify pull request",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338708/job/132171730404",
+      "name": "Access Review Attestation",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338469/job/132171729091",
+      "name": "Aggregate merge authority",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/runs/132172098559",
+      "name": "Trivy",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171731894",
+      "name": "Governance Baseline / SBOM Generation",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338425/job/132171729431",
+      "name": "Capital Discipline",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338279/job/132171730428",
+      "name": "E2E \u00b7 web",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338279/job/132171730195",
+      "name": "E2E \u00b7 console",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338279/job/132171730217",
+      "name": "E2E \u00b7 control-plane",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171729027",
+      "name": "SBOM Generation",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338637/job/132171730225",
+      "name": "branch-policy",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171731181",
+      "name": "Governance Baseline / UE Evidence Pack + Verify",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338279/job/132171730121",
+      "name": "UE PR E2E worker (1/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171731012",
+      "name": "Governance Baseline / ABR Security Gates + Evidence",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171730865",
+      "name": "Governance Baseline / Gate Authority",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338515/job/132171729218",
+      "name": "Inventory Drift Check",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171730591",
+      "name": "Governance Baseline / Dependency Audit",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171728935",
+      "name": "Evidence Pack Generation",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171731167",
+      "name": "Governance Baseline / Evidence Pack Generation",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171728784",
+      "name": "Supply Chain Waiver Expiry",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171731041",
+      "name": "Governance Baseline / Supply Chain Waiver Expiry",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171728725",
+      "name": "Dependency Audit",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://coderabbit.ai?utm_source=cr_app&utm_medium=github",
+      "name": "CodeRabbit",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171731148",
+      "name": "Governance Baseline / Trivy Container Scan",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171728311",
+      "name": "UE Evidence Pack + Verify",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171728991",
+      "name": "Decision and policy tests",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171731082",
+      "name": "Governance Baseline / Decision and policy tests",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171728709",
+      "name": "Gate Authority",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338279/job/132171730150",
+      "name": "UE PR E2E worker (4/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338279/job/132171729927",
+      "name": "UE PR E2E worker (3/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338279/job/132171730336",
+      "name": "UE PR E2E worker (2/4)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171728766",
+      "name": "ABR Security Gates + Evidence",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508333545/job/132171719511",
+      "name": "Analyze (javascript-typescript)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508333545/job/132171719393",
+      "name": "Analyze (python)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508333545/job/132171718924",
+      "name": "Analyze (actions)",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338279/job/132171732070",
+      "name": "UE E2E worker (${{ matrix.shard }}/4)",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338637/job/132171732080",
+      "name": "tag-policy",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171730760",
+      "name": "Trivy Container Scan",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338299/job/132171731587",
+      "name": "auto-merge",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338718/job/132171733507",
+      "name": "Governance Baseline / Red-Team Adversarial",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "skipping",
+      "link": "https://github.com/anungis437/nzila-os/actions/runs/43508338219/job/132171730678",
+      "name": "Red-Team Adversarial",
+      "state": "SKIPPED"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://dashboard.gitguardian.com",
+      "name": "GitGuardian Security Checks",
+      "state": "SUCCESS"
+    },
+    {
+      "bucket": "pass",
+      "link": "https://app.snyk.io/org/anungis437/pr-checks/221272b4-7835-4ed3-be87-caeed7ba91e9",
+      "name": "security/snyk (NZILA Ventures)",
+      "state": "SUCCESS"
+    }
+  ],
+  "eligible": true
+}

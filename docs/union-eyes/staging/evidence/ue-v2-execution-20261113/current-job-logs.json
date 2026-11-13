@@ -1,0 +1,26 @@
+[
+  {
+    "ContainerJobName_s": "nzila-ue-v2-stagi-cron-deadlines",
+    "Log_s": "{\"runId\":\"8638a817-efd0-41bf-89db-41256c8fe670\",\"workerInstance\":\"deadline-worker-8638a817\",\"correlationId\":\"8638a817-efd0-41bf-89db-41256c8fe670\",\"startedAt\":\"2026-11-13T21:08:32.983Z\",\"finishedAt\":\"2026-11-13T21:08:33.014Z\",\"durationMs\":31,\"examined\":0,\"claimed\":0,\"sent\":0,\"transientFailures\":0,\"permanentFailures\":0,\"deadLettered\":0,\"leasesRecovered\":0,\"cancelledSkipped\":0}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-11-13T21:08:34.2354148Z"
+  },
+  {
+    "ContainerJobName_s": "nzila-ue-v2-stagin-sla",
+    "Log_s": "{\"success\":true,\"job\":\"sla-watchdog\",\"timestamp\":\"2026-11-13T21:08:33.207Z\",\"attempted\":3,\"succeeded\":3,\"failed\":0,\"scanned\":18,\"at_risk\":2,\"breached\":0,\"alerts_written\":0,\"alerts_deferred\":0,\"unassigned_claims\":2,\"claims_without_organization\":0}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-11-13T21:08:34.9957701Z"
+  },
+  {
+    "ContainerJobName_s": "nzila-ue-v2-stagin-reap",
+    "Log_s": "{\"success\":true,\"job\":\"document-intake-reaper\",\"timestamp\":\"2026-11-13T21:08:34.343Z\",\"attempted\":0,\"succeeded\":0,\"failed\":0,\"expired\":0,\"objectsDeleted\":0,\"deletionFailed\":0,\"skipped\":0,\"abandoned\":0}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-11-13T21:08:35.9588951Z"
+  },
+  {
+    "ContainerJobName_s": "ue-role-probe2",
+    "Log_s": "QUALIFICATION_RESULT={\"ok\":true,\"purpose\":\"OWNED_SYNTHETIC_ROLE_RESTORED\",\"sourceSha\":\"8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896\",\"userId\":\"ecb4f1d7-b0ae-44f8-bf56-832bc173fc49\",\"organizationId\":\"b96359c3-a8de-458c-8469-afc084b7fbc0\",\"previousRole\":\"member\",\"role\":\"officer\",\"canonicalRowsUpdated\":1,\"legacyProjectionRows\":0,\"platformFlagChanged\":false,\"at\":\"2026-11-13T21:09:22.989Z\"}",
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-11-13T21:09:24.0345814Z"
+  }
+]

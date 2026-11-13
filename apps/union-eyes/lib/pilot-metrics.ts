@@ -2,6 +2,7 @@ import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { recordPilotMetricEvent } from '@nzila/platform-pilot-metrics'
 import { logger } from '@/lib/logger'
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 
 const LEGACY_SUBJECT_REF_KEY = ['entity', 'Id'].join('')
 
@@ -15,6 +16,10 @@ function withPilotMetricSubject(subjectId?: string, subjectType?: string): Parti
 }
 
 async function resolveActivePilotId(orgId: string): Promise<string | null> {
+  // V2 deliberately excludes cross-application platform tables from its
+  // admitted tenant catalog. An unconfigured optional platform integration
+  // cannot fall back to querying that tenant database or invent metrics.
+  if (currentStateContextEnabled() && !process.env.PLATFORM_DATABASE_URL) return null
   const rows = (await platformDb.execute(sql`
     SELECT id
     FROM pilot_definitions

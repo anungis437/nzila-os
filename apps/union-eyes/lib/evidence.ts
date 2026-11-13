@@ -5,6 +5,8 @@
  * tamper-proof audit trails on grievances, elections, dues, and compliance.
  */
 import { randomUUID } from 'node:crypto'
+import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
+import type { CanonicalEvidencePackResult } from './canonical-evidence'
 import {
   buildEvidencePackFromAction,
   processEvidencePack,
@@ -40,7 +42,7 @@ interface UnionEvidenceAction {
  */
 export async function buildUnionEvidencePack(
   action: UnionEvidenceAction,
-): Promise<EvidencePackResult> {
+): Promise<EvidencePackResult | CanonicalEvidencePackResult> {
   // A caller-supplied artifact must actually reach the durable evidence processor.
   // Never let the os-core metadata fallback seal an apparently complete pack when
   // Union Eyes supplied no evidence. Validate before any upload or DB side effect.
@@ -74,6 +76,10 @@ export async function buildUnionEvidencePack(
       classification: 'CONFIDENTIAL' as const,
     }
   })
+  if (currentStateContextEnabled()) {
+    const { buildCanonicalUnionEvidencePack } = await import('./canonical-evidence')
+    return buildCanonicalUnionEvidencePack(action)
+  }
   const ctx: GovernanceActionContext = {
     actionId,
     actionType: action.actionType,

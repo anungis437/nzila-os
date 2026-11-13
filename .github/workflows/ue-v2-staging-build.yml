@@ -157,10 +157,17 @@ jobs:
         id: app
         env:
           SHA: ${{ needs.plan.outputs.sha }}
-          AAD_CLIENT_ID: ${{ vars.AZURE_AD_CLIENT_ID_STAGING }}
-          AAD_TENANT_ID: ${{ vars.AZURE_AD_TENANT_ID_STAGING }}
+          AAD_CLIENT_ID: ${{ vars.UE_V2_ENTRA_CLIENT_ID }}
+          AAD_TENANT_ID: ${{ vars.UE_V2_ENTRA_TENANT_ID }}
         run: |
           set -euo pipefail
+          node <<'NODE'
+          const assert = require('node:assert/strict')
+          const fs = require('node:fs')
+          const { parameters } = JSON.parse(fs.readFileSync('infrastructure/bicep/ue-v2/main.staging.parameters.json', 'utf8'))
+          assert.equal(process.env.AAD_CLIENT_ID, parameters.entraClientId.value, 'V2 build client must match the source-bound staging registration')
+          assert.equal(process.env.AAD_TENANT_ID, parameters.entraTenantId.value, 'V2 build tenant must match the source-bound staging registration')
+          NODE
           TAG="staging-${SHA}"
           if az acr repository show --name "$ACR_NAME" --image "${APP_REPOSITORY}:${TAG}" >/dev/null 2>&1; then
             echo "::error::${APP_REPOSITORY}:${TAG} already exists. Tags are immutable; reuse its digest instead of rebuilding."

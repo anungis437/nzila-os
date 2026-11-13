@@ -34,6 +34,10 @@ function pythonJson(value: unknown): string {
   throw new Error('UE_AUDIT_UNSERIALIZABLE_VALUE')
 }
 
+// Canonical Django evidence models use the same Python JSON encoding for their
+// checksum manifests. Reuse the established encoder rather than a second format.
+export { pythonJson as canonicalPythonJson }
+
 function compareCodePoints(left: string, right: string): number {
   const a = Array.from(left)
   const b = Array.from(right)

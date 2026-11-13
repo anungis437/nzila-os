@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STAGING_GO_CONTRACT",
+  "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
+  "generatedOn": "2026-11-12",
+  "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
+  "acceptedStagingCandidateSha": "7d67bcd59ee3f2441d41cde5adbd8769bda85a96",
+  "stagingWorkflowDefinitionSha": "7d67bcd59ee3f2441d41cde5adbd8769bda85a96",
+  "verdict": "STAGING_NO_GO",
+  "verdictReason": "Candidate 7d67bcd59ee3f2441d41cde5adbd8769bda85a96 is deployed, healthy and confirmed live (image digest sha256:8bea53608a4db1222e9b97fd81da39d10505c96fee5db8a5857efd4e4b1da867; /api/ready and /api/version report this exact gitSha repeatedly, across multiple independent checks this session). Database migrations, Entra-authenticated sessions, API+Postgres tenant isolation (dual-sourced: a raw-SQL RLS probe and a live API-level proof), candidate-bound audit persistence (cryptographic hash-chain verified) and Azure Monitor/OpenTelemetry evidence, and the rollback plan stage all now PASS from real deployed evidence gathered this session. Three concrete, precisely-diagnosed issues remain and keep this STAGING_NO_GO rather than fabricating a pass: (1) two dashboard pages (/dashboard/union, /dashboard/messages) were found failing the required mobile no-horizontal-overflow check for the member persona, confirmed via two independent real-navigation runs -- a real frontend defect (a CSS Grid min-width:auto default preventing long data-driven values from shrinking/wrapping on mobile) and FIXED in source (merged to main, commit feaaf27eb, PR #1182; verified via 24/24 passing component tests), but that fix has not been deployed to this authorized candidate -- deploying it requires the same separate, deliberate redeploy decision as (2) below, so the live candidate still exhibits the defect; (2) the sla-watchdog worker was found genuinely broken live (HTTP 500, root-caused to a misuse of withRLSContext for a cron actor with no real session) and FIXED in source (merged to main), but that fix has not been deployed to this authorized candidate -- deploying it requires a separate, deliberate redeploy decision outside this mandate's current authorization, so the live candidate still exhibits the defect; (3) the malware-scanning dependency for document uploads (ClamAV) has its daemon refusing connections internally despite its HTTP wrapper responding -- a real, external infrastructure gap, not an application bug, and the application correctly fails closed per policy rather than silently accepting unscanned uploads. The rollback rehearsal's automated fault-injection stage also revealed that Azure Single-revision-mode does not, on its own, prevent a bad revision from briefly receiving 100% live traffic before health verification completes -- manual recovery via a same-image redeploy is proven reliable (used successfully three times this session) but the specific zero-touch automatic protection the rehearsal set out to prove is not confirmed. See per-criterion evidence below and externalBlockers for exact remediation paths.",
+  "decisionAuthority": {
+    "role": "NZILA_SOLO_FOUNDER",
+    "acceptanceRecorded": false
+  },
+  "boundaries": {
+    "stagingOnly": true,
+    "productionAuthorized": false,
+    "mergeAuthorizedByThisContract": false,
+    "institutionalPowersInferred": false
+  },
+  "localValidation": {
+    "focusedRemediation": "PASS — 7 files, 65 tests",
+    "earlierRunEvidenceReplay": "PASS — 25 files, 238 tests; 1 native-only file and 13 environment-gated cases skipped",
+    "accountingAndProvenance": "PASS — 2 files, 10 tests",
+    "censusContract": "PASS — 3 tests",
+    "holisticRegression": {
+      "status": "ENVIRONMENT_HOLD",
+      "passedFiles": 3273,
+      "passedTests": 49052,
+      "skippedFiles": 116,
+      "skippedTests": 1682,
+      "failedFiles": 2,
+      "failedTests": 13,
+      "failures": [
+        "contract-tests/civic-oci-doctrine-integrity.test.ts — 10 unrelated civic authorization/filesystem-context fixture failures",
+        "scripts/bootstrap-v2/local-vault-fixture.test.ts — 3 fixtures could not import the host Python cryptography package"
+      ],
+      "unionEyesAccountingAuthorityOrCensusFailure": false
+    }
+  },
+  "passRule": "Every REQUIRED criterion must be PASS from real deployed evidence on the accepted staging revision; synthetic, local, source-only, or historical evidence cannot satisfy a runtime criterion.",
+  "criteria": [
+    {
+      "id": "CANDIDATE_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Engineering baseline e87e3799f3cd9a2408f75d846bc5ec676dae3847 and corrective source 7d67bcd59ee3f2441d41cde5adbd8769bda85a96 confirmed admitted to main (PR #1176 merged). Image identity sha256:8bea53608a4db1222e9b97fd81da39d10505c96fee5db8a5857efd4e4b1da867 confirmed identical across the live Container App template, every revision created this session, and repeated direct ARM queries. Main ancestry (git merge-base --is-ancestor) verified by every one of the many workflow dispatches this session (real-session, real-navigation, rollback-rehearsal) which independently assert it as a precondition and all reached that point successfully."
+    },
+    {
+      "id": "SOURCE_ENGINEERING",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Frozen 777 population is source implemented with zero partial, untouched, or engineering-outstanding entries."
+    },
+    {
+      "id": "LOCAL_HOLISTIC_REGRESSION",
+      "requirement": "ADVISORY",
+      "status": "NON_BLOCKING_HOST_LIMITATION",
+      "evidence": "Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline."
+    },
+    {
+      "id": "FINAL_CANDIDATE_CI",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "PR #1176 (the corrected runtime source) completed full CI and was merged to main. This candidate's lineage has since been exercised by three further fully-green required-check CI runs this session (PR #1178 sha 335560877, PR #1179 sha e09b0689, PR #1180 sha 132b6a1d), each requiring all Merge Authority checks, Gitleaks, TruffleHog OSS and Docker Secret Policy to pass before merge."
+    },
+    {
+      "id": "AUTHORIZED_STAGING_DEPLOYMENT",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "The candidate is live and healthy on nzila-ue-v2-staging-app (nzila-canada-staging-rg), repeatedly confirmed via direct HTTP checks and ARM queries throughout this session, including after two operational revision refreshes (both same-image, zero candidate drift, confirmed via identical image digest and /api/version gitSha before and after each)."
+    },
+    {
+      "id": "DEPLOYED_REVISION_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Live /api/ready and /api/version repeatedly report gitSha=7d67bcd59ee3f2441d41cde5adbd8769bda85a96 (exact match to acceptedStagingCandidateSha), most recently confirmed 2026-11-12T13:10:19Z on revision nzila-ue-v2-staging-app--incidentrestore1794485813, with all checks ok except storage/thirdParty which report unknown (not failing) throughout the session."
+    },
+    {
+      "id": "DATABASE_MIGRATIONS",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Real governed migrations executed this session against the live private PostgreSQL database via the repo's own migration executors: platform migrations 0001-0014 (0014 creating triage_designations + message_thread_assignments, resolving the live GET /api/cases 500 SQLSTATE 42P01 defect) and migrations-cache 0000-0021 (closing RLS on the new tables, relrowsecurity=true and relforcerowsecurity=true confirmed directly). A full-schema grants outage caused mid-fix by an unrelated pre-existing bootstrap mismatch was fully diagnosed and recovered using the repo's own committed authority-contract JSON as the source of truth. Post-recovery state independently reconfirmed via the tenant-isolation RLS probe below, which exercises these exact migrated schemas/policies successfully."
+    },
+    {
+      "id": "ENTRA_AUTHENTICATED_SESSIONS",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Real Microsoft Entra authorization-code sessions repeatedly established against the live candidate this session for both synthetic personas (tenant 5082b8be-b04d-4a13-b61c-b6397670177b), most recently in runs 43222123316/43223496266/43221043194: /api/auth/callback/microsoft-entra-id 302, /api/auth/session returns the correct entraObjectId/tenantId and an unexpired session, and a secure httpOnly session-token cookie is confirmed present."
+    },
+    {
+      "id": "API_AND_POSTGRES_TENANT_ISOLATION",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Dual-sourced real proof. (1) Raw-SQL probe connected as the live union_eyes_runtime role against two synthetic organizations/claims: same-tenant read succeeds (n=1), cross-tenant read returns zero rows by id and by org filter for both tenants, a forged cross-tenant INSERT is refused with Postgres 42501 'new row violates row-level security policy for table claims', a forged cross-tenant UPDATE affects zero rows, and no app.current_org_id set returns zero rows (fails closed). (2) Live API-level proof via the real-Entra workflow: OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED confirmed for both real personas (runs 43222123316, 43223496266), foreign-case GET correctly denied 403/404, and the case list correctly includes only the caller's own case."
+    },
+    {
+      "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "Partial real evidence. PASS: real-Entra member-persona navigation of /dashboard (home), /dashboard/claims, both en-CA and fr-CA locales, desktop and mobile (390x844, no overflow), plus real case creation and read via POST/GET /api/cases. FOUND BROKEN: /dashboard/union and /dashboard/messages both failed the required mobile no-horizontal-overflow check for the member persona, confirmed independently in runs 43221043194 (messages) and an earlier run (union) -- a real frontend defect (a CSS Grid min-width:auto default preventing long data-driven values, such as an organization name or thread subject, from shrinking/wrapping on mobile), not a test artifact. FIXED in source and merged to main (commit feaaf27eb, PR #1182; min-w-0 and break-words added to the affected grid items, verified via 24/24 passing component tests), but NOT deployed to this authorized candidate -- deploying it requires a separate, deliberate redeploy decision outside this mandate's current authorization, so full persona/workflow sign-off against the live candidate remains blocked until that redeploy happens."
+    },
+    {
+      "id": "WORKERS_RETRIES_AND_DELIVERY",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "Partial real evidence from manually triggering the live cron worker Container Apps Jobs. PASS live: document-intake-reaper (worker lease/recovery) and deadline-reminders (successor reminder delivery) both completed successfully end to end against the deployed candidate. FOUND BROKEN live: sla-watchdog returned HTTP 500 (root-caused via live logs to withRLSContext being called with an explicit userId override it silently ignores, always requiring a real auth() session that a cron job never has). FIXED in source and merged to main (commit e09b0689, PR #1179) using the correct withSystemRLSContext pattern -- but NOT deployed to this authorized candidate; the live deployed candidate still exhibits the defect until a deliberate redeploy decision is made."
+    },
+    {
+      "id": "AUDIT_AND_TELEMETRY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Real, candidate-bound evidence for both halves. Audit: public.audit_logs (the canonical hash-chained append-only log) contains real claim.create entries tied to the exact claimIds created by this session's real-Entra test runs, with content_hash/previous_hash cryptographically verified to link correctly within each organization's chain (confirmed by direct comparison, not merely presence). Telemetry: Azure Monitor/Application Insights (nzila-ue-v2-staging-insights) shows real, rich OpenTelemetry-instrumented request telemetry (1713 requests in a 2-hour window, full resource attributes including service.version/host.name tied to the exact deployed revision), plus real exception/result-code breakdowns (200 and 500 both genuinely observed, matching live-tested behavior)."
+    },
+    {
+      "id": "DOCUMENT_REVOCATION_PRIVACY_FINANCE",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "Blocked by a confirmed real infrastructure defect, not an application bug. POST /api/documents/upload returns HTTP 503 'Malware scanner unavailable; upload blocked by policy'. Root-caused via a dedicated connectivity probe inside the same Container Apps environment: the ClamAV scanner's HTTP wrapper responds, but the actual clamd daemon inside that same container refuses connections on its internal port (connect ECONNREFUSED 127.0.0.1:3310) -- clamd itself is not running/listening, most likely because freshclam cannot complete a virus-definition update in this network-restricted environment. The application correctly fails closed (CLAMAV_FAIL_OPEN=false, enforced unconditionally on deployed runtimes) rather than accepting an unscanned upload -- a positive, confirmed security finding -- but this blocks completing the full document lifecycle proof (repository idempotency, foreign-org download denial, signed-URL expiry and public-access-blocked were all previously verified by code/test inspection but not re-exercised live this round because the flow cannot get past upload). See externalBlockers."
+    },
+    {
+      "id": "OPERATIONAL_RECOVERY",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "Nuanced real evidence. The rollback PLAN stage (tooling/scripts/qualify-ue-v2-staging-rollback.cjs, fixed in PR #1180/commit 132b6a1d for two Azure-API representational-format false positives) now PASSES cleanly, capturing the live healthy revision/image/templateHash. Manual recovery via a same-candidate-image az containerapp update is PROVEN reliable -- used successfully three times this session (an ActivationFailed bookkeeping fix, the rehearsal incident below, and the original Priority-1 recovery pattern), each restoring full healthy service within under a minute with zero candidate drift (identical image digest and /api/version gitSha before and after every time). The automated REHEARSE stage (deliberate fault injection: a bad revision with a broken NODE_OPTIONS) revealed that this Container App's Single-revision-mode does NOT, on its own, keep live traffic on the known-good revision while the new one is unverified -- the bad revision reached 100% traffic weight while reporting healthState None, causing a real (brief) service disruption that required the manual recovery above. This is genuine operational-recovery evidence but does not support the specific zero-touch automatic-protection claim the rehearsal set out to prove. Follow-up diagnosis: the app DOES have a correctly configured Kubernetes-style readiness probe (httpGet /api/ready, port 3000, initialDelaySeconds 10, periodSeconds 10) -- this is not a missing-health-check oversight. The root cause is architectural: ingress.traffic is configured as [{latestRevision: true, weight: 100}], so traffic always follows 'whichever revision is newest' rather than being pinned to a known-good revision name during cutover; Single-revision-mode does not gate that cutover on the readiness probe passing first the way a manually-orchestrated blue/green promotion in Multiple-revision-mode would. Changing this would mean switching the app's revision mode and deployment model, a significant, standing operational change well beyond this rehearsal's scope -- not attempted unilaterally."
+    },
+    {
+      "id": "CAPABILITY_TRUTHFULNESS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "The capability registry remains conservative, but deployed availability must be compared with it."
+    },
+    {
+      "id": "INSTITUTIONAL_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Platform-staff mandate remains decision-ready but not decided; restricted cross-tenant and financial powers remain deny-by-default."
+    },
+    {
+      "id": "STAGING_DECISION_ACCEPTANCE",
+      "requirement": "REQUIRED",
+      "status": "NOT_PROVEN",
+      "evidence": "The sole founder is the staging decision authority. STAGING GO cannot yet be accepted because real deployed qualification has not happened; no second independent human is required for this internal operation."
+    }
+  ],
+  "externalBlockers": [
+    {
+      "id": "CLAMAV_SCANNER_DAEMON_DOWN",
+      "blocks": ["DOCUMENT_REVOCATION_PRIVACY_FINANCE"],
+      "description": "The nzila-ue-v2-staging-clamav Container App's HTTP wrapper responds but its internal clamd daemon refuses connections on port 3310 (connect ECONNREFUSED 127.0.0.1:3310), confirmed via a direct in-environment connectivity probe. Likely cause: freshclam cannot complete a virus-definition download in this network-restricted environment, or a container startup/entrypoint issue. The container emits no console logs to the shared Log Analytics workspace, preventing further diagnosis without direct container exec access. Follow-up re-confirmation: forced a fresh replica (scaled from zero) and checked it directly -- restartCount is 0 and runningState is Running (not crash-looping; the process stays up), and a live, direct console-log stream to that replica (not just the Log Analytics forwarder) also shows zero application output, ruling out a crash loop and narrowing the cause to either a silently swallowed clamd startup failure or stdout not being surfaced by this image at all. No Dockerfile or build source for this image (nzilaventuresacr.azurecr.io/ue-clamav-http-adapter) exists in this repository, so its startup sequence cannot be inspected from source either.",
+      "remediation": "Needs an operator with exec/shell access to the nzila-ue-v2-staging-clamav container (or its image/entrypoint source) to check clamd's own startup logs and confirm whether outbound egress to ClamAV's definition-update servers is allowed from this environment's VNet; do not work around by setting CLAMAV_FAIL_OPEN=true, which would defeat an intentional security control."
+    },
+    {
+      "id": "DASHBOARD_MOBILE_OVERFLOW",
+      "blocks": ["BUSINESS_WORKFLOWS_AND_PERSONAS"],
+      "description": "/dashboard/union and /dashboard/messages both overflowed horizontally at a 390px mobile viewport for the member persona, confirmed via two independent real-navigation runs. All other tested pages (dashboard home, claims) passed the same check cleanly including mobile. Root cause: a CSS Grid min-width:auto default prevented long data-driven values (an organization name, a thread subject) from shrinking or wrapping on mobile.",
+      "remediation": "Fixed in source and merged to main (commit feaaf27eb, PR #1182) -- min-w-0 added to the affected grid items so they can shrink, break-words added so long values wrap instead of overflowing; 24/24 component tests still pass. Requires a deliberate decision to cut a new candidate_sha and redeploy -- outside this mandate's current staging-only authorization scope for a single already-approved candidate. Re-run ue-v2-staging-real-navigation.yml after any future redeploy to confirm live."
+    },
+    {
+      "id": "SLA_WATCHDOG_FIX_NOT_DEPLOYED",
+      "blocks": ["WORKERS_RETRIES_AND_DELIVERY"],
+      "description": "The sla-watchdog cron worker fix (commit e09b0689, PR #1179) is merged to main but the live authorized candidate (7d67bcd59ee3f2441d41cde5adbd8769bda85a96) predates it, so the deployed app still 500s when SLA alerts need writing.",
+      "remediation": "Requires a deliberate decision to cut a new candidate_sha and redeploy -- outside this mandate's current staging-only authorization scope for a single already-approved candidate. Re-trigger nzila-ue-v2-stagin-sla manually after any future redeploy to confirm."
+    }
+  ]
+}

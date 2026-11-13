@@ -1,0 +1,433 @@
+{
+  "evidenceClass": "REAL_REMOTE_ENTRA_SESSION_AND_API",
+  "sourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "workflowSha": "21d777712deabce79355751d1403d609b860fe1e",
+  "runId": "43464146290",
+  "observations": [
+    {
+      "at": "2026-11-13T16:36:46.290Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "A",
+      "principal": "e07cbf07-fee5-45e3-934c-de5966dabae5",
+      "tenant": "5082b8be-b04d-4a13-b61c-b6397670177b",
+      "expires": "2026-11-13T16:51:46.269Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-13T16:36:46.700Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/profile/roles",
+      "status": 200,
+      "traceId": "23c34554ff2f4323a404af8a6d9a3670",
+      "correlationId": "d4576fc2-20d8-489f-bd55-412f2a9a6eba"
+    },
+    {
+      "at": "2026-11-13T16:36:46.700Z",
+      "kind": "LIVE_CANONICAL_MEMBERSHIP_ROLE",
+      "requestedOwnedSyntheticRole": "officer",
+      "observedCanonicalRole": "officer"
+    },
+    {
+      "at": "2026-11-13T16:36:50.935Z",
+      "kind": "OBSERVED_ROLE_EXECUTION_HOME",
+      "requestedOwnedSyntheticRole": "officer",
+      "initialPath": "/en-CA/dashboard",
+      "path": "/en-CA/dashboard/executive",
+      "redirectedAfterDOMContentLoaded": true,
+      "initialHttpStatus": 200
+    },
+    {
+      "at": "2026-11-13T16:36:52.831Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/en-CA/dashboard/executive",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:36:55.027Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/en-CA/dashboard/executive",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:36:56.233Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/en-CA/dashboard/leadership",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:36:57.734Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/en-CA/dashboard/leadership",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:36:59.055Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/en-CA/dashboard/governance",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:00.442Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/en-CA/dashboard/governance",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:01.568Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/en-CA/dashboard/bargaining",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:02.896Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/en-CA/dashboard/bargaining",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:04.376Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/en-CA/dashboard/correspondence",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:05.714Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/en-CA/dashboard/correspondence",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:06.978Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/en-CA/dashboard/continuity-intelligence",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:08.507Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/en-CA/dashboard/continuity-intelligence",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:09.822Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/en-CA/dashboard/settings",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:11.060Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/en-CA/dashboard/settings",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:12.422Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/en-CA/dashboard/trust",
+      "status": 200,
+      "sourceVisible": false
+    },
+    {
+      "at": "2026-11-13T16:37:13.595Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/en-CA/dashboard/trust",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:15.155Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/en-CA/dashboard/intelligence",
+      "status": 200,
+      "sourceVisible": false
+    },
+    {
+      "at": "2026-11-13T16:37:16.389Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/en-CA/dashboard/intelligence",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:18.605Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/fr-CA/dashboard/executive",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:20.297Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/fr-CA/dashboard/executive",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:21.383Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/fr-CA/dashboard/leadership",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:22.621Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/fr-CA/dashboard/leadership",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:23.879Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/fr-CA/dashboard/governance",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:25.142Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/fr-CA/dashboard/governance",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:26.285Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/fr-CA/dashboard/bargaining",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:27.589Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/fr-CA/dashboard/bargaining",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:28.908Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/fr-CA/dashboard/correspondence",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:30.961Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/fr-CA/dashboard/correspondence",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:32.051Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/fr-CA/dashboard/continuity-intelligence",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:33.384Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/fr-CA/dashboard/continuity-intelligence",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:34.623Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/fr-CA/dashboard/settings",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T16:37:35.998Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/fr-CA/dashboard/settings",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:37.357Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/fr-CA/dashboard/trust",
+      "status": 200,
+      "sourceVisible": false
+    },
+    {
+      "at": "2026-11-13T16:37:38.668Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/fr-CA/dashboard/trust",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:39.737Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "officer",
+      "experience": "executive",
+      "path": "/fr-CA/dashboard/intelligence",
+      "status": 200,
+      "sourceVisible": false
+    },
+    {
+      "at": "2026-11-13T16:37:40.921Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "officer",
+      "path": "/fr-CA/dashboard/intelligence",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T16:37:43.220Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "officer",
+      "path": "/en-CA/dashboard/finance",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/finance",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-13T16:37:48.358Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "officer",
+      "path": "/en-CA/dashboard/operations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/operations",
+      "finalPath": "/en-CA/dashboard/executive"
+    },
+    {
+      "at": "2026-11-13T16:37:50.590Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "officer",
+      "path": "/en-CA/dashboard/admin/members",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/admin/members",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-13T16:37:52.894Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "officer",
+      "path": "/en-CA/dashboard/security",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/security",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-13T16:37:55.058Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "officer",
+      "path": "/en-CA/dashboard/integrations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/integrations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-13T16:37:55.063Z",
+      "kind": "NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED",
+      "role": "officer",
+      "platformAdministrator": false
+    }
+  ],
+  "runtimeAcceptance": false,
+  "requestedOwnedSyntheticRole": "officer",
+  "canonicalEntryCount": 42,
+  "status": "PASS",
+  "sourceReceiptSha256": "7b6ce25d994cd483ef13d9bd34daac6eb342b3218e7606dc03bef3b90a3094fd"
+}

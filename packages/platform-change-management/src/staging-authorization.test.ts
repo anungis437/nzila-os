@@ -105,6 +105,7 @@ describe('solo-founder Union Eyes V2 staging (CHG-2026-0114)', () => {
     ['other change', (c: ChangeRecord) => ({ ...c, change_id: 'CHG-2026-0199' })],
     ['other service', (c: ChangeRecord) => ({ ...c, service: 'web' })],
     ['other candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: 'f'.repeat(40) } })],
+    ['superseded staging candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: '8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896' } })],
     ['other subscription', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, subscription_id: '00000000-0000-0000-0000-000000000000' } })],
     ['missing owner approval', (c: ChangeRecord) => ({ ...c, approved_by: [] })],
     ['two accounts falsely treated as separate humans', (c: ChangeRecord) => ({ ...c, approved_by: ['anungis', 'anungis437'] })],

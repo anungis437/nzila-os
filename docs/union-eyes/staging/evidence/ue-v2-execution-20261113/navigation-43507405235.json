@@ -1,0 +1,444 @@
+{
+  "evidenceClass": "REAL_REMOTE_ENTRA_SESSION_AND_API",
+  "sourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "workflowSha": "d37d0903a29c9913b9128017680b87f41e4828c4",
+  "runId": "43507405235",
+  "observations": [
+    {
+      "at": "2026-11-13T21:06:29.770Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "A",
+      "principal": "ecb4f1d7-b0ae-44f8-bf56-832bc173fc49",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-13T21:21:29.730Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-13T21:06:30.296Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/profile/roles",
+      "status": 200,
+      "traceId": "84c00dd90455409bbe412afc11831cdc",
+      "correlationId": "d5d25127-26c0-48e2-851a-17e9bdabee90"
+    },
+    {
+      "at": "2026-11-13T21:06:30.296Z",
+      "kind": "LIVE_CANONICAL_MEMBERSHIP_ROLE",
+      "requestedOwnedSyntheticRole": "member",
+      "observedCanonicalRole": "member"
+    },
+    {
+      "at": "2026-11-13T21:06:31.501Z",
+      "kind": "OBSERVED_ROLE_EXECUTION_HOME",
+      "requestedOwnedSyntheticRole": "member",
+      "initialPath": "/en-CA/dashboard",
+      "path": "/en-CA/dashboard",
+      "redirectedAfterDOMContentLoaded": false,
+      "initialHttpStatus": 200
+    },
+    {
+      "at": "2026-11-13T21:06:32.632Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:06:34.311Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:06:36.010Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/claims",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:06:37.932Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/claims",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:06:39.795Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/messages",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:06:42.140Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/messages",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:06:43.851Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/documents",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:06:45.737Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/documents",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:06:47.485Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/union",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:06:49.509Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/union",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:06:51.174Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/help",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:06:53.281Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/help",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:06:54.968Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/profile",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:06:56.403Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/profile",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:06:58.118Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/preferences",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:06:59.916Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/preferences",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:01.361Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/privacy",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:02.957Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/privacy",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:04.466Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:06.416Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:07.950Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/claims",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:09.484Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/claims",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:11.760Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/messages",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:13.532Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/messages",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:15.211Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/documents",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:17.020Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/documents",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:19.096Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/union",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:20.722Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/union",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:22.348Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/help",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:23.845Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/help",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:25.288Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/profile",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:26.727Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/profile",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:28.389Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/preferences",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:30.463Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/preferences",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:31.918Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/privacy",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-13T21:07:33.376Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/privacy",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-13T21:07:36.439Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/finance",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/finance",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-13T21:07:40.048Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/operations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/operations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-13T21:07:43.562Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/admin/members",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/admin/members",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-13T21:07:47.682Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/security",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/security",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-13T21:07:51.034Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/integrations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/integrations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-13T21:07:51.648Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases",
+      "status": 403,
+      "traceId": "1f4933f15c5cd817568bf38e6a9599d6",
+      "correlationId": "1c21cec5-603b-45fe-a3ca-ad8760d6aa44",
+      "responseTraceId": "mwfgxfhw-e0e0f597"
+    },
+    {
+      "at": "2026-11-13T21:07:51.648Z",
+      "kind": "NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED",
+      "role": "member",
+      "platformAdministrator": false
+    }
+  ],
+  "runtimeAcceptance": false,
+  "requestedOwnedSyntheticRole": "member",
+  "canonicalEntryCount": 42,
+  "status": "PASS",
+  "sourceReceiptSha256": "478b2d17e624721cf9faec031cea2cf004925cf758b347477fbcc47fc65e8deb"
+}
