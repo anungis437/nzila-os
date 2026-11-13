@@ -363,10 +363,20 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
   // metering exists, its line items come back with the metering tables' authority declared.
 
   // Apply discount — cents-safe arithmetic
-  let subtotalCents = lineItems.reduce((s, li) => s + centsSafe(li.amount), 0);
+  let subtotalCents = lineItems.reduce((sum, li) => {
+    const amount = centsSafe(li.amount);
+    if (amount > Number.MAX_SAFE_INTEGER - sum) {
+      throw new Error('Invoice subtotal exceeds safe CAD limits');
+    }
+    return sum + amount;
+  }, 0);
   const discountPct = centsSafe(subscription.discountPercent ?? '0');
+  if (discountPct > 10000) {
+    throw new Error('Invoice discount exceeds 100 percent');
+  }
   if (discountPct > 0) {
-    const discountCents = Math.round(subtotalCents * discountPct / 10000);
+    // Multiplication in floating point can lose integer-cent precision.
+    const discountCents = Number((BigInt(subtotalCents) * BigInt(discountPct) + 5000n) / 10000n);
     const discountStr = centsToDecimal(discountCents);
     lineItems.push({
       description: `Discount (${centsToDecimal(discountPct)}%)`,
