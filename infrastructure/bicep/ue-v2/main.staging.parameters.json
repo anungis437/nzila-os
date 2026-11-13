@@ -34,7 +34,7 @@
     "dbGeoRedundantBackup": { "value": false },
     "dbUseDefaultStorageTier": { "value": true },
     "dbMaxConnections": { "value": 50 },
-    "appMinReplicas": { "value": 0 },
+    "appMinReplicas": { "value": 1 },
     "appMaxReplicas": { "value": 2 },
     "clamavMaxReplicas": { "value": 2 },
     "acaInternal": { "value": false },
