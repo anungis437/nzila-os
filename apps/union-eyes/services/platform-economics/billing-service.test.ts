@@ -452,6 +452,17 @@ describe('recordPayment', () => {
     expect(auditLog).not.toHaveBeenCalledWith(expect.objectContaining({ action: 'payment_recorded' }));
   });
 
+  it('refuses direct payment success when invoice update affects no row', async () => {
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
+    state.inserts.platformPayments = [{ id: 'pay-unapplied' }];
+    state.updates.platformInvoices = [];
+
+    await expect(recordPayment(base)).rejects.toThrow('Invoice payment balance update failed');
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
   it('refuses to report payment success if the immutable ledger write fails', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1' }];
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00' }];
