@@ -48,12 +48,19 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "cf689b7064037019bcdcf7c903732989be2eb827",
-    "localNativeExport": "local-native-export-cf689b70.json",
-    "sourceProvenance": "repair-cf689b70-provenance.json",
+    "sourceSha": "84239d33dbfbb9a57827fcb91a3ef32a26c2fe8f",
+    "localNativeExport": "local-native-export-84239d33.json",
+    "sourceProvenance": "repair-84239d33-provenance.json",
     "localFocusedTests": 105,
     "liveApplied": false,
     "deployed": false
   },
-  "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json"
+  "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
+  "privateCloneRepair": {
+    "plan": "clone-combined-plan-cf689b70.json",
+    "apply": "clone-combined-apply-cf689b70.json",
+    "appliedSourceSha": "cf689b7064037019bcdcf7c903732989be2eb827",
+    "sameRepairBundleAndPlanAsCandidate": true,
+    "nativeSignedProof": "PENDING"
+  }
 }

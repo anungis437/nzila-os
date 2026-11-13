@@ -1,0 +1,172 @@
+{
+  "sourceSha": "84239d33dbfbb9a57827fcb91a3ef32a26c2fe8f",
+  "bundleSha256": "cdf2446aa2de9e4d981a231bcef87c7da848a537b63232a75071b2fd253e260c",
+  "planSha256": "f7d3c3356cbac61a274fdcf8cbcda0c0e87158a9b1e7abc75823a76666182322",
+  "trackedSourceModules": [
+    {
+      "path": "apps/union-eyes/scripts/rls-enforcement/enforcement-geometry-overrides.ts",
+      "sha256": "70288b39173efcd67d34bcc53dbec5588684b77ece83525ba32a3f09af499c45"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/analytics-ai.ts",
+      "sha256": "1a921ff705daaf4b632d2fe065b389a79d08e33497774a72eb8e35fa9d020c7e"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/authority-kernel.ts",
+      "sha256": "296319d396b2276b007c2a0437e986965ff205259247346db64cb143201c799f"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/baseline-0108.ts",
+      "sha256": "056b6a127eb3713f1c042f762c04019718bdf70383691d68e8ad11265df6218b"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/claims-continuity.ts",
+      "sha256": "f940a049af2539540925c9bf9099299adf172f4d5e323c9a562397cfcc315178"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/communications-notifications.ts",
+      "sha256": "4b575b905113352c6f25a6fc2352fefefe2f8c2236da99f3aa744f19a1f01de7"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/documents-evidence.ts",
+      "sha256": "ebaeb6ff10d4cfbcea3c9ddaccf56e81a3fc5945f7c956919952aab5ac4e8f3e"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/finance.ts",
+      "sha256": "f9c719c694580c7790f92a384c7f8ab72a9c63ba2774472910326bd07eccaf6d"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/financial-service-latent.ts",
+      "sha256": "23e69abce3b858342e6c55a9d6789dbe3fc7d642e1517611c970015b7dc06286"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/framework-contract.ts",
+      "sha256": "ae0c6d79dc7399f00824749243b7cb84f1b1d66ad6ae963dc0ebf11914fac3f7"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/framework-dedicated.ts",
+      "sha256": "b0e2102dcb5a065f6c653604bca1ef6cb10b7ddc5e83c0033abb31a20493e5df"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/gate0-residual.ts",
+      "sha256": "da9e63ebb3dc1611e24ae554d605caf86bd240751432522f03810047e63acaec"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/governance.ts",
+      "sha256": "c3b94c8bad73c1172b4159e99aa6d99e30ee1eab5040829b3ebba085b16eb487"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/health-safety.ts",
+      "sha256": "e4d09b97795532aec787f0086a7fbc4e100f93df7f63c9658d73e51cfe6989b7"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/integrations-workers.ts",
+      "sha256": "9e0cd6fa43ab81f6d34627d3007556f87c533df3d73642018311ca033e8a806c"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/organizations-membership.ts",
+      "sha256": "644e3f6e9f0b0b0d9b11cee6857de0fd5033048a74ece50d0bda3e200c4343b8"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/reference-latent.ts",
+      "sha256": "97a4f4df591e0092cb8c3d9cf3a729809ffff6140e30bc68951cfadc674e9928"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/types.ts",
+      "sha256": "879b652ef9db74d625369135e84f9f6c69c5a4a5340228ac887469d81943ce28"
+    },
+    {
+      "path": "apps/union-eyes/db/rls-storage-authority/index.ts",
+      "sha256": "740f0f3fd98ea0fc275bbfbc1f9663c1fdb42b1504bf522ec38d0de32939eea6"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/types.ts",
+      "sha256": "a6214c1fdc5db850acf0f7deae8575cd46e543cba79e580ac79566b127f793d9"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/entries.ts",
+      "sha256": "79fc5aa02df0e7a0d67d783e38322b4eeee93b857e2e5b02cb39874449353983"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/execution-boundary.ts",
+      "sha256": "d47966544ca0e9cde7598ca6af57bf65644f976f4d28a866603d52bb7ec398f8"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/privilege-expectations.ts",
+      "sha256": "210c313c933678833cde69723c99e9c5472c495fb35ad55ba216569f860e29b1"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/org-session-authority.ts",
+      "sha256": "2b3716ca2dce7858ffc76982de6bd7ed79c4aa8fe8773c359f9344f4f5c4bc45"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/role-prerequisites.ts",
+      "sha256": "8dc88f5a2c1239fcfd88492eceee5b3193dd36a09662e36ba8ab2652468cb0f3"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "sha256": "8f176f72c0471b84b22c2bbd53fead07e6675b4616071cbfb2e3cd7d9a1d430a"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/index.ts",
+      "sha256": "a7f50c84a8ff795344314a26838237a46901b311a56370934172094e12c95810"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-sql.ts",
+      "sha256": "99ef7d6714b59606fa03f5285209b974beffe0f0b428d957dacb762b46d38a4c"
+    },
+    {
+      "path": "packages/db/src/schema/auth.ts",
+      "sha256": "d6edf0617679b8b487f4b5a7765f8bc2d030b1e410f79a028901f7a80577e0fe"
+    },
+    {
+      "path": "packages/db/src/schema/orgs.ts",
+      "sha256": "1ff125a6d59bd9a840c9d4094c9c4a9667a7fbcc8f038e8b6a818e9ee84d9570"
+    },
+    {
+      "path": "packages/db/src/schema/platform-authorization.ts",
+      "sha256": "a0767c3ad85c33c5a1273cefba6b14e8e89f44206ce6bde755cde96dcf95060c"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/current-authority.ts",
+      "sha256": "ee3b1df73a6f540bc25ed9cf236100e9c145a53449971b270ab6a8571ae4406d"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/execution-roles.ts",
+      "sha256": "3e22a9c09d5bd9be1553434834e32b87c95ade23ce644a9d35279f9322d446ad"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/service-column-contracts.ts",
+      "sha256": "0e37c6d74e513095c9650f038de06aec2dfa6bbf149b7fa60c1f0e262c65f7c7"
+    },
+    {
+      "path": "apps/union-eyes/scripts/lib/protected-physical-constraints.ts",
+      "sha256": "ccab5f5335d0ff86d23c1066242ef5e42ee7bfbcb897d31fd61e6c8c69db325e"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/source.ts",
+      "sha256": "2ab430c061a1d10ecc93b92f81305f50561c8317d846195cfc6dab696089876e"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/business-session-event-guard.ts",
+      "sha256": "f48fad3ada7363cff32aec9fd6e27fff9422fc6189afa344c406f393d8a44b83"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/business-session-policy.ts",
+      "sha256": "130155caa6bb40783770101efa6501f7d83ccba1c4a5c111f8da66c8b8ced1b1"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/security.ts",
+      "sha256": "e2256dbb86208d22a3016a87343d1973c885fcc9c0a2b4f0c91cd518da5e1f8c"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/messaging-physical-guards.ts",
+      "sha256": "70c9bee0193bb5b25b2f3e0837c5b5b8cdeb346d24e5eef54a2b4357b1f6d10b"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/messaging-schema-companion.ts",
+      "sha256": "e65f8c25d8707dba4bcdd8c572734afb64f514f18133508db031192dc549c5b7"
+    }
+  ],
+  "trackedSourceInputsVerified": 41
+}
