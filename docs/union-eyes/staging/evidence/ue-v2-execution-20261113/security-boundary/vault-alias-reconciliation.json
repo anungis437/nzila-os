@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "purpose": "STAGING_VAULT_ALIASES_RECONCILED_TO_ALREADY_VERIFIED_DEPLOYED_CREDENTIALS",
+  "at": "2026-11-13T22:46:21.253Z",
+  "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "results": [
+    {
+      "secretName": "pg-admin-password",
+      "alreadyMatched": false,
+      "aliasReconciled": true
+    },
+    {
+      "secretName": "azure-ad-client-secret",
+      "alreadyMatched": false,
+      "aliasReconciled": true
+    }
+  ],
+  "actualPrincipalPasswordsRotated": false,
+  "liveApplicationSecretChanged": false,
+  "databaseRowsChanged": false,
+  "credentialValuesPublished": false,
+  "transport": {
+    "bytes": 2632,
+    "programSha256": "9551cad905e0aea8deaf025340e8728f6fe0177795678cbe194924e156c9f5ea",
+    "fileSha256": {}
+  }
+}

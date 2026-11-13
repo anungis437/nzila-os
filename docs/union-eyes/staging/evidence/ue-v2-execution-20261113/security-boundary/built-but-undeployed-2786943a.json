@@ -1,0 +1,31 @@
+{
+  "schema": "ue-v2-staging-release-manifest/v1",
+  "environment": "staging",
+  "subscriptionId": "d562ba7f-d891-4504-a489-10917c0ebaaf",
+  "resourceGroup": "nzila-canada-staging-rg",
+  "registry": "nzilaventuresacr",
+  "sourceSha": "2786943ac51f42b24edc808031015b539ae091f1",
+  "workflowSha": "923858df7068afa3f03210aa4c38686ea3519765",
+  "workflowRunId": "43520878953",
+  "createdAt": "2026-11-13T22:55:08.511Z",
+  "images": {
+    "app": {
+      "repository": "nzila-os-union-eyes-v2",
+      "digest": "sha256:a3e8cb35d2b718627be3ce8301cab3bddaf129f2cb519140098743af9e2cbe69",
+      "reference": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:a3e8cb35d2b718627be3ce8301cab3bddaf129f2cb519140098743af9e2cbe69"
+    },
+    "clamav": {
+      "repository": "ue-clamav-http-adapter",
+      "digest": "sha256:cac7f883245e591b842780b809674385c7300402c88ba05dba343ae19544446b",
+      "reference": "nzilaventuresacr.azurecr.io/ue-clamav-http-adapter@sha256:cac7f883245e591b842780b809674385c7300402c88ba05dba343ae19544446b"
+    },
+    "cron": {
+      "repository": "ue-cron-curl",
+      "digest": "sha256:b39f6512276aba14fa55991a9d79ecb9aac8d46c409ff4824d797640d270ef4b",
+      "reference": "nzilaventuresacr.azurecr.io/ue-cron-curl@sha256:b39f6512276aba14fa55991a9d79ecb9aac8d46c409ff4824d797640d270ef4b"
+    }
+  },
+  "upstream": {
+    "cron": "docker.io/curlimages/curl@sha256:5a91ea0c9c3ee27b4abe657b68cf6bf0676afa13b236b3bda34283cb3924d4f6"
+  }
+}
