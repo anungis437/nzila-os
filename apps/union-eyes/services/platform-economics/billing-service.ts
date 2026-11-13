@@ -189,8 +189,16 @@ export async function closeBillingPeriod(
   const [updated] = await db
     .update(billingPeriods)
     .set({ isClosed: true, closedAt: new Date(), closedBy })
-    .where(and(eq(billingPeriods.id, billingPeriodId), eq(billingPeriods.organizationId, period.organizationId)))
+    .where(and(
+      eq(billingPeriods.id, billingPeriodId),
+      eq(billingPeriods.organizationId, period.organizationId),
+      eq(billingPeriods.isClosed, false),
+    ))
     .returning();
+
+  // Reconciliation and the initial read do not serialize concurrent closers.
+  // Only the caller that actually transitions the period may claim closure.
+  if (!updated) throw new Error('Billing period was already closed or changed concurrently');
 
   await auditLog({
     eventType: AuditEventType.DATA_UPDATE,
