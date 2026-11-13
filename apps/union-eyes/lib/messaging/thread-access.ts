@@ -136,6 +136,21 @@ export async function listThreadMessages(tx: RLSTx, actor: CaseActor, threadId: 
 
 
 export async function createMemberThread(tx: RLSTx, actor: CaseActor, input: { subject: string; body: string; clientRequestId?: string }) {
+  const metadata = input.clientRequestId
+    ? JSON.stringify({clientRequestId: input.clientRequestId, operation: 'create_member_thread'})
+    : null
+  if (metadata) {
+    // Serialize only this actor's exact submission. No thread UPDATE privilege
+    // or row lock is required, and a concurrent retry sees the committed first
+    // transaction before deciding whether to insert.
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`messages:create:${actor.organizationId}:${actor.userId}:${input.clientRequestId}`}, 0))`)
+    const [existing] = await tx.select({thread: messageThreads}).from(messages)
+      .innerJoin(messageThreads, eq(messageThreads.id, messages.threadId))
+      .where(and(eq(messageThreads.organizationId, actor.organizationId), eq(messageThreads.memberId, actor.userId),
+        eq(messages.senderId, actor.userId), eq(messages.metadata, metadata)))
+      .limit(1)
+    if (existing) return existing.thread
+  }
   const [thread] = await tx
     .insert(messageThreads)
     .values({ subject: input.subject, memberId: actor.userId, organizationId: actor.organizationId, category: 'general' })
@@ -145,7 +160,7 @@ export async function createMemberThread(tx: RLSTx, actor: CaseActor, input: { s
     senderId: actor.userId,
     senderRole: 'member',
     content: input.body,
-    metadata: input.clientRequestId ? JSON.stringify({ clientRequestId: input.clientRequestId }) : null,
+    metadata,
   })
   // The new conversation reaches the authorized queue: every live triager is told, without content.
   await notifyTriagers(tx, actor.organizationId, thread.id, actor.userId)
@@ -179,6 +194,7 @@ export async function postThreadMessage(
 
   const metadata = input.clientRequestId ? JSON.stringify({ clientRequestId: input.clientRequestId }) : null
   if (metadata) {
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`messages:reply:${actor.organizationId}:${actor.userId}:${thread.id}:${input.clientRequestId}`}, 0))`)
     const [existing] = await tx
       .select()
       .from(messages)
