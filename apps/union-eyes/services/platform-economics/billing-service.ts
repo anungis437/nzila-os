@@ -323,6 +323,9 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
 
   const perLocalFeeCents = centsSafe(plan.perLocalFee ?? '0');
   const localCount = subscription.localCount ?? 0;
+  if (!Number.isSafeInteger(localCount) || localCount < 0) {
+    throw new Error('Invoice local count is invalid');
+  }
   if (perLocalFeeCents > 0 && localCount > 0) {
     lineItems.push({
       description: `Local Fee × ${localCount}`,
@@ -335,6 +338,9 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
 
   const perSeatFeeCents = centsSafe(plan.perSeatFee ?? '0');
   const seatCount = subscription.seatCount ?? 0;
+  if (!Number.isSafeInteger(seatCount) || seatCount < 0) {
+    throw new Error('Invoice seat count is invalid');
+  }
   if (perSeatFeeCents > 0 && seatCount > 0) {
     lineItems.push({
       description: `Seat Fee × ${seatCount}`,
