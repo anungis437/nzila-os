@@ -466,6 +466,27 @@ describe('platform-economics/billing-service', () => {
       })).rejects.toThrow('requires verified invoice allocation');
     });
 
+    it.each([
+      ['negative paid balance', '-1.00', '100.00'],
+      ['negative invoice total', '0.00', '-1.00'],
+      ['paid amount greater than total', '101.00', '100.00'],
+      ['unsafe invoice total', '0.00', '90071992547410.00'],
+    ])('rejects %s before external financial writes', async (_label, amountPaid, totalAmount) => {
+      pushSel([{ ...invoice, amountPaid, totalAmount }]);
+      pushSel([]); // external reference lookup
+      pushSel([{ id: 'acct-1' }]); // account
+      await expect(reconcileExternalInvoicePayment({
+        organizationId: 'o1',
+        invoiceId: 'inv-1',
+        amount: '1.00',
+        method: 'eft',
+        externalReference: 'ext-corrupt',
+      })).rejects.toThrow('External settlement invoice balance is invalid');
+      expect(h.appendLedgerEntry).not.toHaveBeenCalled();
+      expect(h.persistAtomicAudit).not.toHaveBeenCalled();
+      expect(h.committed).toEqual([]);
+    });
+
     it('throws when the invoice is missing', async () => {
       pushSel([]);
       await expect(
