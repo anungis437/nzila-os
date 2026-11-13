@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   execute: vi.fn(),
@@ -40,8 +40,26 @@ const lastEvent = () => mocks.recordPilotMetricEvent.mock.calls.at(-1)?.[0];
 describe('lib/pilot-metrics', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0');
     mocks.execute.mockResolvedValue([{ id: 'pilot-1' }]);
     mocks.recordPilotMetricEvent.mockResolvedValue(undefined);
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('does not query the V2 tenant catalog when the optional platform database is unconfigured', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+    vi.stubEnv('PLATFORM_DATABASE_URL', '');
+    await recordUnionEyesCaseCreated(ORG, 'claim-1', 'actor-1', 'trace-1');
+    expect(mocks.execute).not.toHaveBeenCalled();
+    expect(mocks.recordPilotMetricEvent).not.toHaveBeenCalled();
+  });
+
+  it('retains real metric emission when the separate platform integration is configured', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+    vi.stubEnv('PLATFORM_DATABASE_URL', 'postgresql://platform-fixture');
+    await recordUnionEyesCaseCreated(ORG, 'claim-1', 'actor-1', 'trace-1');
+    expect(mocks.execute).toHaveBeenCalledOnce();
+    expect(mocks.recordPilotMetricEvent).toHaveBeenCalledOnce();
   });
 
   it('records a case-created event with operations metric type and subject', async () => {
