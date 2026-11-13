@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import pg from 'pg'
 import { hash, quote, type V2Plan } from './source'
 import { compileSecurity } from './security'
+import { compileMessagingPhysicalGuards } from '../../db/auth/messaging-physical-guards'
 import { producerBytes, type ExecutionHook, type Producer } from './manifest-trace'
 import { compileAuthBootstrapSql } from './auth-sql'
 import { compileAuthorityMembershipReaderSql } from '../../lib/authority/store/platform-identity'
@@ -109,7 +110,8 @@ export async function inspectNativeDependencies(client: pg.Client): Promise<Nati
   `)
   return result.rows
 }
-export const catalogDigest = (objects: CatalogObject[]) => hash(JSON.stringify(objects.map(canonicalCatalogObject)))
+export const catalogDigest = (objects: CatalogObject[]) =>
+  hash(JSON.stringify(objects.map(canonicalCatalogObject)))
 export const canonicalType = (type: string) =>
   type
     .replace(/^varchar/, 'character varying')
@@ -180,7 +182,9 @@ export async function createCurrentState(
       // The kernel's membership reader is part of the auth-owned execution surface: under this topology the runtime role has no
       // grant on the identity relations, so the kernel can only read membership through it.
       sql: [
-        compileAuthBootstrapSql({ rolesPreprovisioned: options.profile === 'PREPROVISIONED_NON_SUPERUSER' }),
+        compileAuthBootstrapSql({
+          rolesPreprovisioned: options.profile === 'PREPROVISIONED_NON_SUPERUSER',
+        }),
         compileAuthorityMembershipReaderSql(),
       ].join('\n'),
       source: plan.authExecution.compilerSource,
@@ -207,6 +211,13 @@ export async function createCurrentState(
       sql,
       source: 'apps/union-eyes/scripts/bootstrap-v2/security.ts',
       sourceDigest: producerBytes('apps/union-eyes/scripts/bootstrap-v2/security.ts'),
+    })
+  for (const [index, sql] of compileMessagingPhysicalGuards(plan.tables).entries())
+    await execute({
+      canonicalId: `CURRENT_MESSAGING_GUARD:${index}`,
+      sql,
+      source: 'apps/union-eyes/db/auth/messaging-physical-guards.ts',
+      sourceDigest: producerBytes('apps/union-eyes/db/auth/messaging-physical-guards.ts'),
     })
   if (plan.authExecution) {
     if (options.profile !== 'PREPROVISIONED_NON_SUPERUSER') await client.query('RESET ROLE')

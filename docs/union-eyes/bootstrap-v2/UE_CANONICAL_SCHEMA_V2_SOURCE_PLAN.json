@@ -126304,1513 +126304,1513 @@
       "canonicalId": "CURRENT_ENUM:public.movement_trend_category",
       "sql": "CREATE TYPE \"public\".\"movement_trend_category\" AS ENUM ('grievance-type', 'resolution-pattern', 'systemic-issue', 'sector-trend', 'jurisdiction-pattern');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.notification_channel",
       "sql": "CREATE TYPE \"public\".\"notification_channel\" AS ENUM ('email', 'sms', 'push', 'in-app', 'multi');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_account_category_10abbc06dd84",
       "sql": "CREATE TYPE \"public\".\"ue_v2_account_category_10abbc06dd84\" AS ENUM ('dues_revenue', 'per_capita_revenue', 'other_revenue', 'salaries_wages', 'administrative', 'legal_professional', 'strike_fund', 'education_training', 'organizing', 'political_action', 'assets', 'liabilities', 'equity');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_account_type_b3e1835be393",
       "sql": "CREATE TYPE \"public\".\"ue_v2_account_type_b3e1835be393\" AS ENUM ('revenue', 'expense', 'asset', 'liability', 'equity');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ai_complexity_8db5824a5013",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ai_complexity_8db5824a5013\" AS ENUM ('routine', 'moderate', 'complex', 'unprecedented');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ai_provider_80d182ea3b8a",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ai_provider_80d182ea3b8a\" AS ENUM ('openai', 'anthropic', 'google', 'internal');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ai_triage_status_3fef5e4b86c6",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ai_triage_status_3fef5e4b86c6\" AS ENUM ('pending', 'accepted', 'rejected', 'superseded');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_alert_execution_status_e5bc4e17518c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_alert_execution_status_e5bc4e17518c\" AS ENUM ('pending', 'running', 'success', 'failed', 'skipped', 'rate_limited');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_alert_frequency_d8752e2809e9",
       "sql": "CREATE TYPE \"public\".\"ue_v2_alert_frequency_d8752e2809e9\" AS ENUM ('once', 'every_occurrence', 'daily_digest', 'hourly_digest', 'rate_limited');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_alert_severity_7e4f13b01ee9",
       "sql": "CREATE TYPE \"public\".\"ue_v2_alert_severity_7e4f13b01ee9\" AS ENUM ('critical', 'high', 'medium', 'low', 'info');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_alert_trigger_type_6b534e64543f",
       "sql": "CREATE TYPE \"public\".\"ue_v2_alert_trigger_type_6b534e64543f\" AS ENUM ('schedule', 'event', 'threshold', 'manual');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_allocation_method_082ba44f02c5",
       "sql": "CREATE TYPE \"public\".\"ue_v2_allocation_method_082ba44f02c5\" AS ENUM ('per_member_count', 'per_active_user', 'per_case_volume', 'per_local_flat', 'weighted_hybrid', 'manual_override', 'subsidized');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_allocation_run_status_fd1ccd114187",
       "sql": "CREATE TYPE \"public\".\"ue_v2_allocation_run_status_fd1ccd114187\" AS ENUM ('draft', 'simulated', 'pending_approval', 'approved', 'posted', 'reversed', 'failed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_allocation_status_7698762f95da",
       "sql": "CREATE TYPE \"public\".\"ue_v2_allocation_status_7698762f95da\" AS ENUM ('unallocated', 'pending', 'allocated', 'partially_allocated', 'reversed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_anti_scab_violation_type_989b096f4ea7",
       "sql": "CREATE TYPE \"public\".\"ue_v2_anti_scab_violation_type_989b096f4ea7\" AS ENUM ('replacement_workers', 'other_establishment', 'subcontractors', 'post_notice_hires');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_arbitration_status_f5dc35f72a6d",
       "sql": "CREATE TYPE \"public\".\"ue_v2_arbitration_status_f5dc35f72a6d\" AS ENUM ('pending', 'scheduled', 'in_progress', 'adjourned', 'reserved', 'award_rendered', 'settled', 'withdrawn');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_authentication_method_371288b6b6ed",
       "sql": "CREATE TYPE \"public\".\"ue_v2_authentication_method_371288b6b6ed\" AS ENUM ('email', 'sms', 'phone_call', 'knowledge_based', 'id_verification', 'multi_factor', 'none');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_award_kind_12b4655822cf",
       "sql": "CREATE TYPE \"public\".\"ue_v2_award_kind_12b4655822cf\" AS ENUM ('milestone', 'peer', 'admin', 'automated');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_award_status_8fcd6a03ad63",
       "sql": "CREATE TYPE \"public\".\"ue_v2_award_status_8fcd6a03ad63\" AS ENUM ('pending', 'approved', 'issued', 'rejected', 'revoked');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_billing_account_status_fcc421660787",
       "sql": "CREATE TYPE \"public\".\"ue_v2_billing_account_status_fcc421660787\" AS ENUM ('active', 'suspended', 'closed', 'pending');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_body_part_521e958a6e7e",
       "sql": "CREATE TYPE \"public\".\"ue_v2_body_part_521e958a6e7e\" AS ENUM ('head', 'eyes', 'face', 'neck', 'shoulder', 'arm', 'elbow', 'wrist', 'hand', 'fingers', 'chest', 'back', 'abdomen', 'hip', 'leg', 'knee', 'ankle', 'foot', 'toes', 'multiple', 'internal', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_break_compensation_f1e6adb40421",
       "sql": "CREATE TYPE \"public\".\"ue_v2_break_compensation_f1e6adb40421\" AS ENUM ('paid', 'unpaid');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_break_status_8901a274a071",
       "sql": "CREATE TYPE \"public\".\"ue_v2_break_status_8901a274a071\" AS ENUM ('scheduled', 'taken', 'shortened', 'missed', 'denied', 'deferred');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_break_type_7348ca854fef",
       "sql": "CREATE TYPE \"public\".\"ue_v2_break_type_7348ca854fef\" AS ENUM ('meal', 'rest', 'union', 'nursing', 'prayer', 'health', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_budget_period_ed61472caae9",
       "sql": "CREATE TYPE \"public\".\"ue_v2_budget_period_ed61472caae9\" AS ENUM ('monthly', 'quarterly', 'annual');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_budget_scope_type_bc5653c447bf",
       "sql": "CREATE TYPE \"public\".\"ue_v2_budget_scope_type_bc5653c447bf\" AS ENUM ('org', 'local', 'department', 'manager');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_campaign_channel_39fa9c9a57f7",
       "sql": "CREATE TYPE \"public\".\"ue_v2_campaign_channel_39fa9c9a57f7\" AS ENUM ('email', 'sms', 'push', 'multi_channel');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_campaign_status_0a717f5c80af",
       "sql": "CREATE TYPE \"public\".\"ue_v2_campaign_status_0a717f5c80af\" AS ENUM ('draft', 'scheduled', 'sending', 'sent', 'paused', 'cancelled', 'failed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_campaign_status_cc74fa12f9e2",
       "sql": "CREATE TYPE \"public\".\"ue_v2_campaign_status_cc74fa12f9e2\" AS ENUM ('planning', 'active', 'paused', 'completed', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_campaign_type_f6b372e82830",
       "sql": "CREATE TYPE \"public\".\"ue_v2_campaign_type_f6b372e82830\" AS ENUM ('broadcast', 'sequence', 'triggered', 'transactional');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_case_access_role_ac2e6865cebd",
       "sql": "CREATE TYPE \"public\".\"ue_v2_case_access_role_ac2e6865cebd\" AS ENUM ('secondary_lro', 'reviewer', 'read_only');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_case_access_status_5fa55ab136cf",
       "sql": "CREATE TYPE \"public\".\"ue_v2_case_access_status_5fa55ab136cf\" AS ENUM ('active', 'revoked', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_case_study_category_da623f528929",
       "sql": "CREATE TYPE \"public\".\"ue_v2_case_study_category_da623f528929\" AS ENUM ('pilot', 'success-story', 'before-after', 'transformation');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_clause_family_779de639dc10",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_clause_family_779de639dc10\" AS ENUM ('wages', 'premiums', 'hours_of_work', 'overtime', 'scheduling', 'leave_general', 'vacation', 'sick_leave', 'health_benefits', 'pension', 'mileage_travel', 'remote_hybrid', 'grievance', 'arbitration', 'seniority', 'job_posting_bidding', 'health_safety', 'training', 'discipline_discharge', 'contracting_out', 'union_rights', 'management_rights', 'layoffs_recall', 'technological_change', 'equity_harassment', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_collection_method_e22475105978",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_collection_method_e22475105978\" AS ENUM ('manual_upload', 'scheduled_fetch', 'api_sync', 'rss_feed', 'email_ingest');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_doc_processing_status_6b44af108afd",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_doc_processing_status_6b44af108afd\" AS ENUM ('fetched', 'normalized', 'parsed', 'extracted', 'reviewed', 'failed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_doc_type_cc63ee2fa8d8",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_doc_type_cc63ee2fa8d8\" AS ENUM ('full_agreement', 'settlement_summary', 'wage_reopener', 'memorandum_of_agreement', 'arbitration_decision', 'bulletin', 'news_article', 'statistical_report', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_extraction_method_56a54a179391",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_extraction_method_56a54a179391\" AS ENUM ('deterministic', 'llm_gpt4', 'llm_gpt4_vision', 'hybrid', 'manual');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_extraction_status_a14e73c7250b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_extraction_status_a14e73c7250b\" AS ENUM ('pending', 'running', 'completed', 'completed_with_errors', 'failed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_failure_class_b3cc31fa75dd",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_failure_class_b3cc31fa75dd\" AS ENUM ('network', 'auth', 'parse', 'rate_limit', 'schema_mismatch', 'timeout', 'unknown');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_ingestion_status_4062dd384f86",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_ingestion_status_4062dd384f86\" AS ENUM ('queued', 'running', 'completed', 'completed_with_errors', 'failed', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_review_status_d0f27c34b9a1",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_review_status_d0f27c34b9a1\" AS ENUM ('pending_review', 'approved', 'rejected', 'superseded', 'needs_followup');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_review_target_type_e6f17f4f4a6c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_review_target_type_e6f17f4f4a6c\" AS ENUM ('finding', 'agreement', 'wage_adjustment', 'clause');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_source_health_07387a36a13c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_source_health_07387a36a13c\" AS ENUM ('healthy', 'degraded', 'unreachable', 'unknown');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_source_type_5778a4a1300d",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_source_type_5778a4a1300d\" AS ENUM ('federal_labour', 'provincial_labour_board', 'provincial_ministry', 'quebec_labour', 'legal_arbitration', 'union_bulletin', 'stats_benchmark', 'academic', 'news');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_intel_trust_tier_fc8be5515eb3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_intel_trust_tier_fc8be5515eb3\" AS ENUM ('official', 'authoritative', 'curated', 'unverified');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_jurisdiction_72e57544ae7d",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_jurisdiction_72e57544ae7d\" AS ENUM ('federal', 'ontario', 'bc', 'alberta', 'quebec', 'manitoba', 'saskatchewan', 'nova_scotia', 'new_brunswick', 'pei', 'newfoundland', 'northwest_territories', 'yukon', 'nunavut');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_language_91041f955495",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_language_91041f955495\" AS ENUM ('en', 'fr', 'bilingual');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_rule_set_item_type_a1d7e30122a2",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_rule_set_item_type_a1d7e30122a2\" AS ENUM ('base_rate', 'overtime', 'doubletime', 'premium', 'travel', 'dues', 'benefit', 'pension', 'compliance');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_rule_version_status_6d6e95b3a264",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_rule_version_status_6d6e95b3a264\" AS ENUM ('draft', 'active', 'retired', 'superseded');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cba_status_1312975aea0e",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cba_status_1312975aea0e\" AS ENUM ('active', 'expired', 'under_negotiation', 'ratified_pending', 'archived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_chargeback_status_1aa432b0a3c4",
       "sql": "CREATE TYPE \"public\".\"ue_v2_chargeback_status_1aa432b0a3c4\" AS ENUM ('draft', 'issued', 'acknowledged', 'disputed', 'resolved');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_chat_session_status_ca6426ab16c5",
       "sql": "CREATE TYPE \"public\".\"ue_v2_chat_session_status_ca6426ab16c5\" AS ENUM ('active', 'archived', 'deleted');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_claim_priority_f9093edb8079",
       "sql": "CREATE TYPE \"public\".\"ue_v2_claim_priority_f9093edb8079\" AS ENUM ('low', 'medium', 'high', 'critical');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_claim_status_506af2f25928",
       "sql": "CREATE TYPE \"public\".\"ue_v2_claim_status_506af2f25928\" AS ENUM ('submitted', 'under_review', 'assigned', 'investigation', 'pending_documentation', 'resolved', 'rejected', 'closed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_claim_type_702304fd5269",
       "sql": "CREATE TYPE \"public\".\"ue_v2_claim_type_702304fd5269\" AS ENUM ('grievance_discipline', 'grievance_schedule', 'grievance_pay', 'grievance_benefits', 'grievance_leave', 'workplace_safety', 'discrimination_age', 'discrimination_gender', 'discrimination_race', 'discrimination_disability', 'discrimination_other', 'harassment_sexual', 'harassment_workplace', 'wage_dispute', 'contract_dispute', 'retaliation', 'wrongful_termination', 'other', 'harassment_verbal', 'harassment_physical');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_clause_reasoning_status_149d055ef4a8",
       "sql": "CREATE TYPE \"public\".\"ue_v2_clause_reasoning_status_149d055ef4a8\" AS ENUM ('suggested', 'accepted', 'rejected', 'superseded');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_clause_type_7a7e83d31914",
       "sql": "CREATE TYPE \"public\".\"ue_v2_clause_type_7a7e83d31914\" AS ENUM ('wages_compensation', 'benefits_insurance', 'working_conditions', 'grievance_arbitration', 'seniority_promotion', 'health_safety', 'union_rights', 'management_rights', 'duration_renewal', 'vacation_leave', 'hours_scheduling', 'disciplinary_procedures', 'training_development', 'pension_retirement', 'overtime', 'job_security', 'technological_change', 'workplace_rights', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_clc_sync_status_8b8ec26e76a7",
       "sql": "CREATE TYPE \"public\".\"ue_v2_clc_sync_status_8b8ec26e76a7\" AS ENUM ('pending', 'in_progress', 'completed', 'failed', 'partial', 'manual_review_required');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_clc_sync_type_f7a4c303f223",
       "sql": "CREATE TYPE \"public\".\"ue_v2_clc_sync_type_f7a4c303f223\" AS ENUM ('full_sync', 'incremental_sync', 'remittance_sync', 'member_update', 'wage_update', 'dispute_update');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cnesst_filing_status_b8c24e135e35",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cnesst_filing_status_b8c24e135e35\" AS ENUM ('draft', 'submitted', 'acknowledged', 'under_investigation', 'mediation', 'awaiting_decision', 'accepted', 'denied', 'appealed_tat', 'settled', 'closed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cnesst_filing_type_9b4420354dac",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cnesst_filing_type_9b4420354dac\" AS ENUM ('workplace_accident', 'occupational_disease', 'preventive_withdrawal', 'right_of_refusal', 'harassment_complaint', 'standards_complaint', 'pay_equity', 'dangerous_conditions');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_commercial_contract_status_64413a8f6b9d",
       "sql": "CREATE TYPE \"public\".\"ue_v2_commercial_contract_status_64413a8f6b9d\" AS ENUM ('draft', 'pending_approval', 'active', 'expired', 'terminated', 'superseded');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_committee_action_item_priority_138cbe6f34c3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_committee_action_item_priority_138cbe6f34c3\" AS ENUM ('low', 'medium', 'high', 'urgent');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_committee_action_item_status_9b769923ed95",
       "sql": "CREATE TYPE \"public\".\"ue_v2_committee_action_item_status_9b769923ed95\" AS ENUM ('pending', 'in_progress', 'completed', 'deferred', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_committee_meeting_status_6b3acfb86e95",
       "sql": "CREATE TYPE \"public\".\"ue_v2_committee_meeting_status_6b3acfb86e95\" AS ENUM ('scheduled', 'in_progress', 'completed', 'cancelled', 'postponed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_committee_member_role_7b444911baa7",
       "sql": "CREATE TYPE \"public\".\"ue_v2_committee_member_role_7b444911baa7\" AS ENUM ('chair', 'vice_chair', 'secretary', 'treasurer', 'member', 'alternate', 'advisor', 'ex_officio');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_committee_type_16edba474391",
       "sql": "CREATE TYPE \"public\".\"ue_v2_committee_type_16edba474391\" AS ENUM ('bargaining', 'grievance', 'health_safety', 'political_action', 'equity', 'education', 'organizing', 'steward', 'executive', 'finance', 'communications', 'social', 'pension_benefits', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_compliance_alert_severity_f9093edb8079",
       "sql": "CREATE TYPE \"public\".\"ue_v2_compliance_alert_severity_f9093edb8079\" AS ENUM ('low', 'medium', 'high', 'critical');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_compliance_alert_type_719ad5777f64",
       "sql": "CREATE TYPE \"public\".\"ue_v2_compliance_alert_type_719ad5777f64\" AS ENUM ('contract_violation', 'safety_violation', 'dispatch_non_compliance', 'reporting_overdue', 'grievance_spike', 'dues_non_remittance');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_compliance_report_type_c886edc3ad2c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_compliance_report_type_c886edc3ad2c\" AS ENUM ('quarterly_review', 'annual_audit', 'incident_report', 'dispatch_fulfillment', 'grievance_summary', 'safety_inspection');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_congress_membership_status_bb77ef6fab57",
       "sql": "CREATE TYPE \"public\".\"ue_v2_congress_membership_status_bb77ef6fab57\" AS ENUM ('active', 'suspended', 'expired', 'pending');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_consent_channel_342e8041f7cc",
       "sql": "CREATE TYPE \"public\".\"ue_v2_consent_channel_342e8041f7cc\" AS ENUM ('email', 'sms', 'push', 'phone', 'mail');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_consent_status_6b8078fc4f2a",
       "sql": "CREATE TYPE \"public\".\"ue_v2_consent_status_6b8078fc4f2a\" AS ENUM ('granted', 'denied', 'withdrawn', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_consent_status_f412b4f38976",
       "sql": "CREATE TYPE \"public\".\"ue_v2_consent_status_f412b4f38976\" AS ENUM ('granted', 'denied', 'pending', 'revoked', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_consent_type_70aaa7d5b9b6",
       "sql": "CREATE TYPE \"public\".\"ue_v2_consent_type_70aaa7d5b9b6\" AS ENUM ('essential', 'functional', 'analytics', 'marketing', 'personalization', 'third_party');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_contract_line_type_689516895b09",
       "sql": "CREATE TYPE \"public\".\"ue_v2_contract_line_type_689516895b09\" AS ENUM ('module_license', 'feature_access', 'usage_quota', 'seat_allocation', 'support_level', 'sla_commitment', 'custom');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_copilot_action_type_6308f8837abd",
       "sql": "CREATE TYPE \"public\".\"ue_v2_copilot_action_type_6308f8837abd\" AS ENUM ('timeline_summary', 'suggest_action', 'draft_response', 'explain_clause', 'risk_brief', 'custom_query');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_copilot_outcome_896be88d57c7",
       "sql": "CREATE TYPE \"public\".\"ue_v2_copilot_outcome_896be88d57c7\" AS ENUM ('accepted', 'edited', 'rejected', 'pending');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_correspondence_audit_event_6cba3cb2d002",
       "sql": "CREATE TYPE \"public\".\"ue_v2_correspondence_audit_event_6cba3cb2d002\" AS ENUM ('created', 'edited', 'submitted_for_review', 'review_requested', 'approved', 'revision_requested', 'signed', 'signature_affixed', 'dispatched', 'delivered', 'returned', 'cancelled', 'recipient_added', 'recipient_removed', 'attachment_added', 'attachment_removed', 'template_applied', 'reassigned', 'viewed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_correspondence_priority_809451d43ca4",
       "sql": "CREATE TYPE \"public\".\"ue_v2_correspondence_priority_809451d43ca4\" AS ENUM ('low', 'normal', 'high', 'urgent');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_correspondence_status_0cbda4135726",
       "sql": "CREATE TYPE \"public\".\"ue_v2_correspondence_status_0cbda4135726\" AS ENUM ('draft', 'pending_review', 'approved', 'signed', 'dispatched', 'delivered', 'returned', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_correspondence_type_299096570069",
       "sql": "CREATE TYPE \"public\".\"ue_v2_correspondence_type_299096570069\" AS ENUM ('letter', 'notice', 'memo', 'demand', 'response', 'proposal', 'agreement', 'report', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_cost_center_type_40378e409df2",
       "sql": "CREATE TYPE \"public\".\"ue_v2_cost_center_type_40378e409df2\" AS ENUM ('department', 'project', 'location', 'program', 'fund', 'grant', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_covered_org_role_751ca97bd538",
       "sql": "CREATE TYPE \"public\".\"ue_v2_covered_org_role_751ca97bd538\" AS ENUM ('local', 'division', 'region', 'employer');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_deadline_priority_f9093edb8079",
       "sql": "CREATE TYPE \"public\".\"ue_v2_deadline_priority_f9093edb8079\" AS ENUM ('low', 'medium', 'high', 'critical');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_deadline_status_6506f1252be3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_deadline_status_6506f1252be3\" AS ENUM ('pending', 'completed', 'missed', 'extended', 'waived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_decision_type_4146ee6f0e34",
       "sql": "CREATE TYPE \"public\".\"ue_v2_decision_type_4146ee6f0e34\" AS ENUM ('grievance', 'unfair_practice', 'certification', 'judicial_review', 'interpretation', 'scope_bargaining', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_digest_frequency_84c5cbe24b86",
       "sql": "CREATE TYPE \"public\".\"ue_v2_digest_frequency_84c5cbe24b86\" AS ENUM ('immediate', 'daily', 'weekly', 'never');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_dispatch_assignment_status_ee52a1dc846a",
       "sql": "CREATE TYPE \"public\".\"ue_v2_dispatch_assignment_status_ee52a1dc846a\" AS ENUM ('offered', 'accepted', 'declined', 'confirmed', 'completed', 'no_show');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_dispatch_request_status_fe72cb9ae174",
       "sql": "CREATE TYPE \"public\".\"ue_v2_dispatch_request_status_fe72cb9ae174\" AS ENUM ('open', 'partially_filled', 'filled', 'cancelled', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_dispatch_rule_type_d0a8be4d9216",
       "sql": "CREATE TYPE \"public\".\"ue_v2_dispatch_rule_type_d0a8be4d9216\" AS ENUM ('seniority', 'availability', 'skills_match', 'rotation', 'geographic_proximity');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_document_grant_status_5fa55ab136cf",
       "sql": "CREATE TYPE \"public\".\"ue_v2_document_grant_status_5fa55ab136cf\" AS ENUM ('active', 'revoked', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_document_linked_entity_type_66e4af9265dd",
       "sql": "CREATE TYPE \"public\".\"ue_v2_document_linked_entity_type_66e4af9265dd\" AS ENUM ('case', 'grievance', 'member', 'policy_library', 'template_library', 'collective_agreement', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_document_privacy_label_4576fed27fe8",
       "sql": "CREATE TYPE \"public\".\"ue_v2_document_privacy_label_4576fed27fe8\" AS ENUM ('public_internal', 'team_confidential', 'lro_confidential', 'privileged', 'case_restricted', 'highly_sensitive');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_document_record_status_ca6426ab16c5",
       "sql": "CREATE TYPE \"public\".\"ue_v2_document_record_status_ca6426ab16c5\" AS ENUM ('active', 'archived', 'deleted');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_document_version_status_322ea8e3270a",
       "sql": "CREATE TYPE \"public\".\"ue_v2_document_version_status_322ea8e3270a\" AS ENUM ('draft', 'pending_review', 'approved', 'rejected', 'superseded');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_communication_status_52af62da404f",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_communication_status_52af62da404f\" AS ENUM ('draft', 'sent', 'received', 'acknowledged');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_communication_type_4583a7650bb5",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_communication_type_4583a7650bb5\" AS ENUM ('email', 'phone', 'meeting', 'letter', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_contact_role_30431899a8b6",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_contact_role_30431899a8b6\" AS ENUM ('main', 'hr', 'labour_relations', 'legal', 'supervisor', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_execution_artifact_type_b3bb04d8967f",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_execution_artifact_type_b3bb04d8967f\" AS ENUM ('payroll_snapshot', 'payroll_trace', 'remittance_csv', 'remittance_json', 'summary', 'evidence_manifest', 'evidence_seal', 'replay_diff');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_execution_compliance_blocking_5e31c5409a71",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_execution_compliance_blocking_5e31c5409a71\" AS ENUM ('yes', 'no');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_execution_compliance_severity_5200e1183003",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_execution_compliance_severity_5200e1183003\" AS ENUM ('info', 'warning', 'error', 'critical');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_execution_compliance_status_f04bc0efbb33",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_execution_compliance_status_f04bc0efbb33\" AS ENUM ('open', 'acknowledged', 'resolved', 'waived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_execution_evidence_entity_typ_64b9b4905936",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_execution_evidence_entity_typ_64b9b4905936\" AS ENUM ('payroll_run', 'remittance_run', 'replay', 'approval', 'adjustment_run');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_execution_profile_status_d1ea69199b47",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_execution_profile_status_d1ea69199b47\" AS ENUM ('draft', 'active', 'suspended', 'archived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_execution_replay_mode_18c5ac01c25c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_execution_replay_mode_18c5ac01c25c\" AS ENUM ('exact', 'simulated', 'new_engine');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_payroll_run_status_edaec222594d",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_payroll_run_status_edaec222594d\" AS ENUM ('draft', 'calculated', 'approved', 'posted', 'replayed', 'failed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_payroll_run_type_1e4b74dda277",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_payroll_run_type_1e4b74dda277\" AS ENUM ('preview', 'official');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_remittance_run_status_ab301f4cc9c5",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_remittance_run_status_ab301f4cc9c5\" AS ENUM ('draft', 'generated', 'sealed', 'submitted', 'failed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_risk_band_27a3c5279304",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_risk_band_27a3c5279304\" AS ENUM ('low', 'moderate', 'elevated', 'high', 'critical');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_status_e0bc58538a24",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_status_e0bc58538a24\" AS ENUM ('active', 'inactive', 'contract_expired', 'in_bargaining', 'dispute', 'archived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_timesheet_batch_status_b6e708037aa4",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_timesheet_batch_status_b6e708037aa4\" AS ENUM ('uploaded', 'normalizing', 'validated', 'rejected', 'processed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_timesheet_entry_status_f161be08f8b9",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_timesheet_entry_status_f161be08f8b9\" AS ENUM ('pending', 'valid', 'invalid', 'duplicate');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employer_type_97bd2b1ba15b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employer_type_97bd2b1ba15b\" AS ENUM ('private', 'public', 'non_profit', 'crown_corporation', 'municipal', 'provincial', 'federal', 'educational', 'healthcare');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employment_status_1bf563582133",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employment_status_1bf563582133\" AS ENUM ('active', 'on_leave', 'layoff', 'suspended', 'terminated', 'retired', 'deceased');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employment_status_6532f7f9c34d",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employment_status_6532f7f9c34d\" AS ENUM ('active', 'inactive', 'on_leave', 'terminated', 'suspended');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_employment_type_0b9c35be6eec",
       "sql": "CREATE TYPE \"public\".\"ue_v2_employment_type_0b9c35be6eec\" AS ENUM ('full_time', 'part_time', 'casual', 'seasonal', 'temporary', 'contract', 'probationary');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_event_status_c259908811ef",
       "sql": "CREATE TYPE \"public\".\"ue_v2_event_status_c259908811ef\" AS ENUM ('scheduled', 'confirmed', 'cancelled', 'completed', 'no_show', 'rescheduled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_event_type_c46aa7b157c9",
       "sql": "CREATE TYPE \"public\".\"ue_v2_event_type_c46aa7b157c9\" AS ENUM ('meeting', 'appointment', 'deadline', 'reminder', 'task', 'hearing', 'mediation', 'negotiation', 'training', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_exit_interview_complexity_tier_d51ac2494e0b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_exit_interview_complexity_tier_d51ac2494e0b\" AS ENUM ('high', 'medium', 'low');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_exit_interview_event_type_eeb18e651b47",
       "sql": "CREATE TYPE \"public\".\"ue_v2_exit_interview_event_type_eeb18e651b47\" AS ENUM ('created', 'updated', 'submitted', 'reviewed', 'published', 'archived', 'viewed', 'searched', 'indexed', 'summarized', 'governance_updated', 'session_scheduled', 'session_completed', 'successor_assigned', 'successor_accepted', 'followup_scheduled', 'followup_completed', 'followup_overdue', 'manager_signed_off', 'rotation_triggered');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_exit_interview_indexing_status_7970023dfd5d",
       "sql": "CREATE TYPE \"public\".\"ue_v2_exit_interview_indexing_status_7970023dfd5d\" AS ENUM ('pending', 'indexing', 'indexed', 'failed', 'skipped');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_exit_interview_retirement_reason_06c6ed888ae7",
       "sql": "CREATE TYPE \"public\".\"ue_v2_exit_interview_retirement_reason_06c6ed888ae7\" AS ENUM ('retirement', 'career_change', 'health', 'relocation', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_exit_interview_role_467035ff83ae",
       "sql": "CREATE TYPE \"public\".\"ue_v2_exit_interview_role_467035ff83ae\" AS ENUM ('member', 'steward', 'chief_steward', 'officer', 'admin');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_exit_interview_sensitivity_0522f7b5ac56",
       "sql": "CREATE TYPE \"public\".\"ue_v2_exit_interview_sensitivity_0522f7b5ac56\" AS ENUM ('public_internal', 'restricted', 'privileged', 'legal_sensitive', 'executive_confidential');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_exit_interview_status_c1df80cba193",
       "sql": "CREATE TYPE \"public\".\"ue_v2_exit_interview_status_c1df80cba193\" AS ENUM ('draft', 'submitted', 'reviewed', 'published', 'handover_complete', 'archived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_external_document_grant_status_5fa55ab136cf",
       "sql": "CREATE TYPE \"public\".\"ue_v2_external_document_grant_status_5fa55ab136cf\" AS ENUM ('active', 'revoked', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_external_hris_provider_15ebf3035545",
       "sql": "CREATE TYPE \"public\".\"ue_v2_external_hris_provider_15ebf3035545\" AS ENUM ('WORKDAY', 'BAMBOOHR', 'ADP', 'CERIDIAN', 'UKG');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_external_matter_grant_status_5fa55ab136cf",
       "sql": "CREATE TYPE \"public\".\"ue_v2_external_matter_grant_status_5fa55ab136cf\" AS ENUM ('active', 'revoked', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_federation_type_a10ff57c0351",
       "sql": "CREATE TYPE \"public\".\"ue_v2_federation_type_a10ff57c0351\" AS ENUM ('provincial', 'regional', 'sectoral', 'international');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_fee_adjustment_type_2b3928e21636",
       "sql": "CREATE TYPE \"public\".\"ue_v2_fee_adjustment_type_2b3928e21636\" AS ENUM ('reversal', 'partial_reversal', 'waiver', 'correction', 'dispute_credit');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_fee_event_status_1019564f6920",
       "sql": "CREATE TYPE \"public\".\"ue_v2_fee_event_status_1019564f6920\" AS ENUM ('captured', 'reversed', 'settled', 'disputed', 'waived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_fee_model_b4232edac3e4",
       "sql": "CREATE TYPE \"public\".\"ue_v2_fee_model_b4232edac3e4\" AS ENUM ('percentage', 'flat', 'hybrid', 'waived', 'subsidized');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_fee_rule_status_bc55bcc1e989",
       "sql": "CREATE TYPE \"public\".\"ue_v2_fee_rule_status_bc55bcc1e989\" AS ENUM ('active', 'inactive', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_gdpr_request_status_febccf522cde",
       "sql": "CREATE TYPE \"public\".\"ue_v2_gdpr_request_status_febccf522cde\" AS ENUM ('pending', 'in_progress', 'completed', 'rejected', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_gdpr_request_type_3a7367f01d35",
       "sql": "CREATE TYPE \"public\".\"ue_v2_gdpr_request_type_3a7367f01d35\" AS ENUM ('access', 'rectification', 'erasure', 'restriction', 'portability', 'objection');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_grievance_event_type_9c0132be3387",
       "sql": "CREATE TYPE \"public\".\"ue_v2_grievance_event_type_9c0132be3387\" AS ENUM ('created', 'status_changed', 'assigned', 'reassigned', 'note_added', 'document_uploaded', 'escalated', 'deadline_set', 'deadline_extended', 'meeting_scheduled', 'response_received', 'closed', 'converted_to_case', 'priority_overridden', 'intake_submitted');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_grievance_priority_138cbe6f34c3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_grievance_priority_138cbe6f34c3\" AS ENUM ('low', 'medium', 'high', 'urgent');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_grievance_status_7543242f567f",
       "sql": "CREATE TYPE \"public\".\"ue_v2_grievance_status_7543242f567f\" AS ENUM ('draft', 'new', 'filed', 'acknowledged', 'investigating', 'response_due', 'response_received', 'escalated', 'mediation', 'arbitration', 'settled', 'withdrawn', 'denied', 'closed', 'converted', 'closed_no_case');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_grievance_step_39bd5c2d9f57",
       "sql": "CREATE TYPE \"public\".\"ue_v2_grievance_step_39bd5c2d9f57\" AS ENUM ('step_1', 'step_2', 'step_3', 'final', 'arbitration');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_grievance_type_c1f9848dd3c1",
       "sql": "CREATE TYPE \"public\".\"ue_v2_grievance_type_c1f9848dd3c1\" AS ENUM ('individual', 'group', 'policy', 'contract', 'harassment', 'discrimination', 'safety', 'seniority', 'discipline', 'termination', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_hazard_category_19ac84a14590",
       "sql": "CREATE TYPE \"public\".\"ue_v2_hazard_category_19ac84a14590\" AS ENUM ('biological', 'chemical', 'ergonomic', 'physical', 'psychosocial', 'safety', 'environmental', 'electrical', 'fire', 'confined_space', 'working_at_heights', 'machinery', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_hazard_level_033157f99111",
       "sql": "CREATE TYPE \"public\".\"ue_v2_hazard_level_033157f99111\" AS ENUM ('low', 'moderate', 'high', 'critical', 'extreme');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_incident_severity_f914f94e8626",
       "sql": "CREATE TYPE \"public\".\"ue_v2_incident_severity_f914f94e8626\" AS ENUM ('near_miss', 'minor', 'moderate', 'serious', 'critical', 'fatal');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_incident_type_8bd843236ae2",
       "sql": "CREATE TYPE \"public\".\"ue_v2_incident_type_8bd843236ae2\" AS ENUM ('injury', 'near_miss', 'property_damage', 'environmental', 'vehicle', 'ergonomic', 'exposure', 'occupational_illness', 'fire', 'electrical', 'fall', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_injury_nature_96e3c724d826",
       "sql": "CREATE TYPE \"public\".\"ue_v2_injury_nature_96e3c724d826\" AS ENUM ('cut', 'laceration', 'puncture', 'bruise', 'contusion', 'fracture', 'sprain', 'strain', 'dislocation', 'amputation', 'burn', 'chemical_burn', 'concussion', 'crushing', 'electric_shock', 'exposure', 'hearing_loss', 'infection', 'inflammation', 'poisoning', 'respiratory', 'multiple', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_insight_report_type_019cbc9e1abf",
       "sql": "CREATE TYPE \"public\".\"ue_v2_insight_report_type_019cbc9e1abf\" AS ENUM ('trend_forecast', 'employer_hotspots', 'steward_capacity', 'arbitration_escalation', 'executive_summary');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_insight_timeframe_7eee714b3dda",
       "sql": "CREATE TYPE \"public\".\"ue_v2_insight_timeframe_7eee714b3dda\" AS ENUM ('30d', '60d', '90d', '6m', '12m');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_inspection_status_bb7b02553845",
       "sql": "CREATE TYPE \"public\".\"ue_v2_inspection_status_bb7b02553845\" AS ENUM ('scheduled', 'in_progress', 'completed', 'requires_followup', 'followup_complete', 'cancelled', 'overdue');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_inspection_type_d24753054bae",
       "sql": "CREATE TYPE \"public\".\"ue_v2_inspection_type_d24753054bae\" AS ENUM ('routine', 'comprehensive', 'targeted', 'post_incident', 'regulatory', 'pre_operational', 'contractor', 'joint_committee', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_integration_provider_897a0106735a",
       "sql": "CREATE TYPE \"public\".\"ue_v2_integration_provider_897a0106735a\" AS ENUM ('workday', 'bamboohr', 'adp', 'ceridian_dayforce', 'ukg_pro', 'quickbooks', 'xero', 'sage_intacct', 'freshbooks', 'wave', 'sunlife', 'manulife', 'blue_cross', 'green_shield', 'canada_life', 'otpp', 'cpp_qpp', 'provincial_pension', 'linkedin_learning', 'udemy', 'coursera', 'slack', 'microsoft_teams', 'sharepoint', 'google_drive', 'dropbox', 'custom');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_integration_type_2edff81af3c2",
       "sql": "CREATE TYPE \"public\".\"ue_v2_integration_type_2edff81af3c2\" AS ENUM ('hris', 'accounting', 'insurance', 'pension', 'lms', 'communication', 'document_management', 'calendar', 'social_media', 'payment');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_knowledge_document_type_359ea09eb0fe",
       "sql": "CREATE TYPE \"public\".\"ue_v2_knowledge_document_type_359ea09eb0fe\" AS ENUM ('collective_agreement', 'union_policy', 'labor_law', 'precedent', 'faq', 'guide', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_labour_sector_25a51f478752",
       "sql": "CREATE TYPE \"public\".\"ue_v2_labour_sector_25a51f478752\" AS ENUM ('healthcare', 'education', 'public_service', 'trades', 'manufacturing', 'transportation', 'retail', 'hospitality', 'technology', 'construction', 'utilities', 'telecommunications', 'financial_services', 'agriculture', 'arts_culture', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ledger_event_type_d46f352c3593",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ledger_event_type_d46f352c3593\" AS ENUM ('invoice_generated', 'payment_received', 'allocation_run', 'adjustment_posted', 'credit_applied', 'subsidy_applied', 'writeoff_posted', 'period_closed', 'reversal', 'fee_captured', 'settlement_closed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ledger_source_type_c704a5e44bc3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ledger_source_type_c704a5e44bc3\" AS ENUM ('subscription', 'invoice', 'payment', 'adjustment', 'allocation', 'manual', 'system', 'transaction_fee', 'settlement_batch');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_membership_7dc0125f479f",
       "sql": "CREATE TYPE \"public\".\"ue_v2_membership_7dc0125f479f\" AS ENUM ('free', 'pro');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_message_delivery_status_45a4a7b2385b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_message_delivery_status_45a4a7b2385b\" AS ENUM ('queued', 'sent', 'delivered', 'bounced', 'failed', 'opened', 'clicked', 'unsubscribed', 'complained');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_message_role_689b0e1e049a",
       "sql": "CREATE TYPE \"public\".\"ue_v2_message_role_689b0e1e049a\" AS ENUM ('user', 'assistant', 'system', 'function');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_message_status_4eb4f8e85339",
       "sql": "CREATE TYPE \"public\".\"ue_v2_message_status_4eb4f8e85339\" AS ENUM ('sent', 'delivered', 'read');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_message_type_6d2983d1bad5",
       "sql": "CREATE TYPE \"public\".\"ue_v2_message_type_6d2983d1bad5\" AS ENUM ('text', 'file', 'system');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_movement_trend_category_6141a9b229c5",
       "sql": "CREATE TYPE \"public\".\"ue_v2_movement_trend_category_6141a9b229c5\" AS ENUM ('grievance-type', 'resolution-pattern', 'systemic-issue', 'sector-trend', 'jurisdiction-pattern');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_negotiation_status_0dc5c41df14c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_negotiation_status_0dc5c41df14c\" AS ENUM ('scheduled', 'active', 'impasse', 'conciliation', 'tentative', 'ratified', 'rejected', 'strike_lockout', 'completed', 'abandoned');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_notification_channel_08ad10609930",
       "sql": "CREATE TYPE \"public\".\"ue_v2_notification_channel_08ad10609930\" AS ENUM ('email', 'sms', 'push', 'in-app', 'multi');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_notification_priority_809451d43ca4",
       "sql": "CREATE TYPE \"public\".\"ue_v2_notification_priority_809451d43ca4\" AS ENUM ('low', 'normal', 'high', 'urgent');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_notification_queue_status_1e82395d057e",
       "sql": "CREATE TYPE \"public\".\"ue_v2_notification_queue_status_1e82395d057e\" AS ENUM ('pending', 'processing', 'completed', 'failed', 'retrying');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_notification_schedule_status_77a89f61ef31",
       "sql": "CREATE TYPE \"public\".\"ue_v2_notification_schedule_status_77a89f61ef31\" AS ENUM ('scheduled', 'sent', 'cancelled', 'failed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_notification_status_8e912ec1fd5b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_notification_status_8e912ec1fd5b\" AS ENUM ('sent', 'failed', 'partial', 'pending');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_notification_template_status_b3924e20b4fa",
       "sql": "CREATE TYPE \"public\".\"ue_v2_notification_template_status_b3924e20b4fa\" AS ENUM ('active', 'inactive', 'draft', 'archived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_notification_template_type_d0df483282ac",
       "sql": "CREATE TYPE \"public\".\"ue_v2_notification_template_type_d0df483282ac\" AS ENUM ('payment', 'dues', 'strike', 'voting', 'certification', 'general', 'system');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_notification_type_3a0adf3d7ffe",
       "sql": "CREATE TYPE \"public\".\"ue_v2_notification_type_3a0adf3d7ffe\" AS ENUM ('payment_confirmation', 'payment_failed', 'payment_reminder', 'donation_received', 'stipend_approved', 'stipend_disbursed', 'low_balance_alert', 'arrears_warning', 'strike_announcement', 'picket_reminder', 'claim_update', 'document_update', 'deadline_alert', 'system_announcement', 'security_alert', 'general');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_org_entitlement_status_500c7df412e8",
       "sql": "CREATE TYPE \"public\".\"ue_v2_org_entitlement_status_500c7df412e8\" AS ENUM ('active', 'suspended', 'expired', 'revoked');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_organization_relationship_type_3fdb4bea1aeb",
       "sql": "CREATE TYPE \"public\".\"ue_v2_organization_relationship_type_3fdb4bea1aeb\" AS ENUM ('affiliate', 'federation', 'local', 'chapter', 'region', 'district', 'joint_council', 'merged_from', 'split_from');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_organization_type_d525ceac41fc",
       "sql": "CREATE TYPE \"public\".\"ue_v2_organization_type_d525ceac41fc\" AS ENUM ('platform', 'congress', 'federation', 'union', 'local', 'region', 'district');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_outcome_c250a5260b4b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_outcome_c250a5260b4b\" AS ENUM ('grievance_upheld', 'grievance_denied', 'partial_success', 'dismissed', 'withdrawn', 'settled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_pay_equity_status_7c83c0dd4e4b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_pay_equity_status_7c83c0dd4e4b\" AS ENUM ('not_started', 'committee_formed', 'evaluation_in_progress', 'adjustments_calculated', 'results_posted', 'adjustments_paid', 'maintenance_due', 'maintenance_completed', 'contested');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_pay_frequency_5b5b218cbdf2",
       "sql": "CREATE TYPE \"public\".\"ue_v2_pay_frequency_5b5b218cbdf2\" AS ENUM ('hourly', 'weekly', 'bi_weekly', 'semi_monthly', 'monthly', 'annual', 'per_diem');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_payment_method_b6c08aa4216c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_payment_method_b6c08aa4216c\" AS ENUM ('stripe', 'bank_transfer', 'check', 'cash', 'direct_debit', 'payroll_deduction', 'ewallet');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_payment_processor_1f16a2b916c6",
       "sql": "CREATE TYPE \"public\".\"ue_v2_payment_processor_1f16a2b916c6\" AS ENUM ('stripe', 'whop', 'paypal', 'square', 'manual');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_payment_provider_5a9d086f37c3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_payment_provider_5a9d086f37c3\" AS ENUM ('stripe', 'whop');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_payment_status_4c4f3a1674a3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_payment_status_4c4f3a1674a3\" AS ENUM ('pending', 'processing', 'completed', 'failed', 'refunded', 'disputed', 'unmatched', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_payment_type_4a260b0f3401",
       "sql": "CREATE TYPE \"public\".\"ue_v2_payment_type_4a260b0f3401\" AS ENUM ('dues', 'strike_fund', 'subscription', 'stipend', 'honorarium', 'rebate', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_pilot_status_8064b3be372b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_pilot_status_8064b3be372b\" AS ENUM ('submitted', 'review', 'approved', 'active', 'completed', 'declined');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_platform_cost_type_c60e561bf055",
       "sql": "CREATE TYPE \"public\".\"ue_v2_platform_cost_type_c60e561bf055\" AS ENUM ('base_subscription', 'local_fee', 'seat_fee', 'module_fee', 'usage_fee', 'onboarding_fee', 'support_fee', 'transaction_fee', 'settlement', 'adjustment', 'credit', 'subsidy', 'writeoff');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_platform_invoice_status_0ce4d40e5c1f",
       "sql": "CREATE TYPE \"public\".\"ue_v2_platform_invoice_status_0ce4d40e5c1f\" AS ENUM ('draft', 'issued', 'paid', 'partially_paid', 'overdue', 'void', 'written_off');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_platform_payment_status_2aa2c951e19b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_platform_payment_status_2aa2c951e19b\" AS ENUM ('pending', 'processing', 'completed', 'failed', 'refunded');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ppe_status_c248de498ae3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ppe_status_c248de498ae3\" AS ENUM ('in_stock', 'issued', 'in_use', 'returned', 'damaged', 'expired', 'disposed', 'under_inspection');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ppe_type_22a90e2cd86b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ppe_type_22a90e2cd86b\" AS ENUM ('hard_hat', 'safety_glasses', 'face_shield', 'hearing_protection', 'respirator', 'dust_mask', 'safety_gloves', 'chemical_gloves', 'safety_boots', 'high_vis_vest', 'fall_protection', 'welding_helmet', 'protective_clothing', 'coveralls', 'apron', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_precedent_value_d51ac2494e0b",
       "sql": "CREATE TYPE \"public\".\"ue_v2_precedent_value_d51ac2494e0b\" AS ENUM ('high', 'medium', 'low');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_preventive_withdrawal_reason_83afedd7b2c2",
       "sql": "CREATE TYPE \"public\".\"ue_v2_preventive_withdrawal_reason_83afedd7b2c2\" AS ENUM ('pregnancy', 'breastfeeding', 'hazardous_exposure');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_pricing_model_f851fedcccd7",
       "sql": "CREATE TYPE \"public\".\"ue_v2_pricing_model_f851fedcccd7\" AS ENUM ('flat', 'per_local', 'per_seat', 'per_module', 'tiered', 'hybrid');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_processing_purpose_fa2d46d047f3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_processing_purpose_fa2d46d047f3\" AS ENUM ('service_delivery', 'legal_compliance', 'contract_performance', 'legitimate_interest', 'consent', 'vital_interest');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_program_status_256f173b02ea",
       "sql": "CREATE TYPE \"public\".\"ue_v2_program_status_256f173b02ea\" AS ENUM ('draft', 'active', 'archived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_proposal_status_e5d557412372",
       "sql": "CREATE TYPE \"public\".\"ue_v2_proposal_status_e5d557412372\" AS ENUM ('draft', 'submitted', 'under_review', 'accepted', 'rejected', 'counter_offered', 'withdrawn', 'superseded');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_proposal_type_db574f013a9f",
       "sql": "CREATE TYPE \"public\".\"ue_v2_proposal_type_db574f013a9f\" AS ENUM ('union_demand', 'management_offer', 'joint_proposal', 'mediator_proposal');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_push_notification_status_d5ab9b3d5230",
       "sql": "CREATE TYPE \"public\".\"ue_v2_push_notification_status_d5ab9b3d5230\" AS ENUM ('draft', 'scheduled', 'sending', 'sent', 'failed', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_push_platform_404fc7341420",
       "sql": "CREATE TYPE \"public\".\"ue_v2_push_platform_404fc7341420\" AS ENUM ('ios', 'android', 'web');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_push_priority_809451d43ca4",
       "sql": "CREATE TYPE \"public\".\"ue_v2_push_priority_809451d43ca4\" AS ENUM ('low', 'normal', 'high', 'urgent');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_reconciliation_exception_status_394951fa91d7",
       "sql": "CREATE TYPE \"public\".\"ue_v2_reconciliation_exception_status_394951fa91d7\" AS ENUM ('open', 'under_review', 'resolved', 'written_off');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_reconciliation_exception_type_1b83ebac9de4",
       "sql": "CREATE TYPE \"public\".\"ue_v2_reconciliation_exception_type_1b83ebac9de4\" AS ENUM ('unmatched_payment', 'unmatched_invoice', 'amount_discrepancy', 'duplicate_payment', 'missing_fee_event', 'orphaned_refund');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_reconciliation_match_type_e77a5388bb32",
       "sql": "CREATE TYPE \"public\".\"ue_v2_reconciliation_match_type_e77a5388bb32\" AS ENUM ('invoice_payment', 'fee_settlement', 'refund_reversal', 'adjustment_credit');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_reconciliation_run_status_7205d73f455c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_reconciliation_run_status_7205d73f455c\" AS ENUM ('running', 'completed', 'failed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_reconciliation_status_ba49b56ac40f",
       "sql": "CREATE TYPE \"public\".\"ue_v2_reconciliation_status_ba49b56ac40f\" AS ENUM ('unreconciled', 'pending_review', 'reconciled', 'orphaned', 'disputed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_redemption_provider_fb8769fe2792",
       "sql": "CREATE TYPE \"public\".\"ue_v2_redemption_provider_fb8769fe2792\" AS ENUM ('shopify');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_redemption_status_2e1fa0206416",
       "sql": "CREATE TYPE \"public\".\"ue_v2_redemption_status_2e1fa0206416\" AS ENUM ('initiated', 'pending_payment', 'ordered', 'fulfilled', 'cancelled', 'refunded');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_report_category_d92716af1be3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_report_category_d92716af1be3\" AS ENUM ('claims', 'members', 'financial', 'compliance', 'performance', 'custom');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_report_type_34d0f3dacbee",
       "sql": "CREATE TYPE \"public\".\"ue_v2_report_type_34d0f3dacbee\" AS ENUM ('custom', 'template', 'system', 'scheduled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_representation_authority_scope_0a9385c57d5e",
       "sql": "CREATE TYPE \"public\".\"ue_v2_representation_authority_scope_0a9385c57d5e\" AS ENUM ('grievance', 'wcb_claim');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_representation_authority_status_85fb00acbd0c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_representation_authority_status_85fb00acbd0c\" AS ENUM ('pending', 'active', 'revoked', 'expired', 'superseded');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_right_of_refusal_outcome_276f5ea7bb4f",
       "sql": "CREATE TYPE \"public\".\"ue_v2_right_of_refusal_outcome_276f5ea7bb4f\" AS ENUM ('danger_confirmed', 'danger_not_confirmed', 'partial_correction', 'referred_to_cnesst', 'pending');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_room_status_307855c1027d",
       "sql": "CREATE TYPE \"public\".\"ue_v2_room_status_307855c1027d\" AS ENUM ('available', 'booked', 'maintenance', 'unavailable');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_settlement_batch_status_34597c753aaf",
       "sql": "CREATE TYPE \"public\".\"ue_v2_settlement_batch_status_34597c753aaf\" AS ENUM ('open', 'closed', 'reconciled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_settlement_status_cb587a4c2400",
       "sql": "CREATE TYPE \"public\".\"ue_v2_settlement_status_cb587a4c2400\" AS ENUM ('proposed', 'under_review', 'accepted', 'rejected', 'finalized');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_settlement_type_5625c95c1599",
       "sql": "CREATE TYPE \"public\".\"ue_v2_settlement_type_5625c95c1599\" AS ENUM ('monetary', 'non_monetary', 'policy_change', ' reinstatement', 'apology', 'training', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_shift_type_4b76bfd332ee",
       "sql": "CREATE TYPE \"public\".\"ue_v2_shift_type_4b76bfd332ee\" AS ENUM ('day', 'evening', 'night', 'rotating', 'split', 'on_call');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_signature_document_status_5bd936826ed3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_signature_document_status_5bd936826ed3\" AS ENUM ('draft', 'sent', 'delivered', 'viewed', 'signed', 'completed', 'declined', 'voided', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_signature_provider_a870c1dbbfb9",
       "sql": "CREATE TYPE \"public\".\"ue_v2_signature_provider_a870c1dbbfb9\" AS ENUM ('docusign', 'hellosign', 'adobe_sign', 'pandadoc', 'internal');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_signature_source_da3528f627c9",
       "sql": "CREATE TYPE \"public\".\"ue_v2_signature_source_da3528f627c9\" AS ENUM ('drawn', 'uploaded', 'typed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_signature_type_5a9d45985417",
       "sql": "CREATE TYPE \"public\".\"ue_v2_signature_type_5a9d45985417\" AS ENUM ('electronic', 'digital', 'wet', 'clickwrap');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_signer_status_52af48997015",
       "sql": "CREATE TYPE \"public\".\"ue_v2_signer_status_52af48997015\" AS ENUM ('pending', 'sent', 'delivered', 'viewed', 'signed', 'declined', 'authentication_failed', 'expired');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_social_account_status_e7568b7effcb",
       "sql": "CREATE TYPE \"public\".\"ue_v2_social_account_status_e7568b7effcb\" AS ENUM ('active', 'expired', 'disconnected', 'rate_limited', 'suspended');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_social_platform_d7c4c11cc182",
       "sql": "CREATE TYPE \"public\".\"ue_v2_social_platform_d7c4c11cc182\" AS ENUM ('facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'tiktok');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_social_post_status_a114048b0045",
       "sql": "CREATE TYPE \"public\".\"ue_v2_social_post_status_a114048b0045\" AS ENUM ('draft', 'scheduled', 'published', 'failed', 'deleted');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_social_post_type_8679e6f10396",
       "sql": "CREATE TYPE \"public\".\"ue_v2_social_post_type_8679e6f10396\" AS ENUM ('text', 'image', 'video', 'link', 'carousel', 'story', 'reel');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_steward_type_00be12ffa910",
       "sql": "CREATE TYPE \"public\".\"ue_v2_steward_type_00be12ffa910\" AS ENUM ('chief_steward', 'steward', 'alternate_steward', 'health_safety_rep');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_strategic_goal_category_baa188972b13",
       "sql": "CREATE TYPE \"public\".\"ue_v2_strategic_goal_category_baa188972b13\" AS ENUM ('membership', 'financial', 'advocacy', 'operations', 'education', 'organizing');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_strategic_goal_status_e31ad2cbe6de",
       "sql": "CREATE TYPE \"public\".\"ue_v2_strategic_goal_status_e31ad2cbe6de\" AS ENUM ('on-track', 'at-risk', 'delayed', 'completed', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_subscription_lifecycle_event_f304dcb57c4a",
       "sql": "CREATE TYPE \"public\".\"ue_v2_subscription_lifecycle_event_f304dcb57c4a\" AS ENUM ('created', 'activated', 'trial_started', 'trial_ending_soon', 'trial_expired', 'trial_converted', 'upgraded', 'downgraded', 'paused', 'resumed', 'payment_failed', 'payment_retried', 'payment_recovered', 'dunning_started', 'dunning_escalated', 'dunning_resolved', 'cancelled', 'expired', 'reactivated', 'renewed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_subscription_status_848ffca23c13",
       "sql": "CREATE TYPE \"public\".\"ue_v2_subscription_status_848ffca23c13\" AS ENUM ('active', 'trialing', 'past_due', 'cancelled', 'paused');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_sync_status_4296504652a0",
       "sql": "CREATE TYPE \"public\".\"ue_v2_sync_status_4296504652a0\" AS ENUM ('idle', 'pending', 'running', 'success', 'failed', 'partial', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_sync_status_5d53d9c5196c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_sync_status_5d53d9c5196c\" AS ENUM ('synced', 'pending', 'failed', 'disconnected');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_sync_type_3ce4ec8d7983",
       "sql": "CREATE TYPE \"public\".\"ue_v2_sync_type_3ce4ec8d7983\" AS ENUM ('full', 'incremental', 'real_time');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_task_priority_138cbe6f34c3",
       "sql": "CREATE TYPE \"public\".\"ue_v2_task_priority_138cbe6f34c3\" AS ENUM ('low', 'medium', 'high', 'urgent');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_task_status_c7d3b3058a04",
       "sql": "CREATE TYPE \"public\".\"ue_v2_task_status_c7d3b3058a04\" AS ENUM ('pending', 'in_progress', 'completed', 'cancelled', 'blocked');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_testimonial_type_456f2c68695c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_testimonial_type_456f2c68695c\" AS ENUM ('organizer', 'member', 'executive', 'partner');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ticket_category_3eb432a37d48",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ticket_category_3eb432a37d48\" AS ENUM ('bug_report', 'feature_request', 'technical_support', 'account_issue', 'billing_question', 'data_issue', 'performance', 'security_concern', 'training_request', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ticket_priority_0a0ddc5980f6",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ticket_priority_0a0ddc5980f6\" AS ENUM ('low', 'medium', 'high', 'urgent', 'critical');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ticket_source_1b2ad7a93510",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ticket_source_1b2ad7a93510\" AS ENUM ('email', 'web_form', 'phone', 'chat', 'internal', 'api');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_ticket_status_114e1ff20b6c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_ticket_status_114e1ff20b6c\" AS ENUM ('open', 'in_progress', 'waiting_customer', 'waiting_internal', 'resolved', 'closed', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_training_status_99ca853ce050",
       "sql": "CREATE TYPE \"public\".\"ue_v2_training_status_99ca853ce050\" AS ENUM ('scheduled', 'in_progress', 'completed', 'failed', 'expired', 'renewed', 'cancelled');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_transition_trigger_type_762b7b25c1b1",
       "sql": "CREATE TYPE \"public\".\"ue_v2_transition_trigger_type_762b7b25c1b1\" AS ENUM ('manual', 'automatic', 'deadline', 'approval', 'rejection');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_tribunal_type_2806b91a01a4",
       "sql": "CREATE TYPE \"public\".\"ue_v2_tribunal_type_2806b91a01a4\" AS ENUM ('fpslreb', 'provincial_labour_board', 'private_arbitrator', 'court_federal', 'court_provincial', 'other');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_unit_status_587bb8eefa14",
       "sql": "CREATE TYPE \"public\".\"ue_v2_unit_status_587bb8eefa14\" AS ENUM ('active', 'under_certification', 'decertified', 'merged', 'inactive', 'archived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_unit_type_6f50b85c0e9a",
       "sql": "CREATE TYPE \"public\".\"ue_v2_unit_type_6f50b85c0e9a\" AS ENUM ('full_time', 'part_time', 'casual', 'mixed', 'craft', 'industrial', 'professional');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_visibility_scope_433e9030198c",
       "sql": "CREATE TYPE \"public\".\"ue_v2_visibility_scope_433e9030198c\" AS ENUM ('member', 'staff', 'admin', 'system');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_wcb_claim_status_acfaac412bea",
       "sql": "CREATE TYPE \"public\".\"ue_v2_wcb_claim_status_acfaac412bea\" AS ENUM ('draft', 'submitted', 'accepted', 'denied', 'under_review', 'appealed', 'closed');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_wcb_claim_type_2ca6fca1ee38",
       "sql": "CREATE TYPE \"public\".\"ue_v2_wcb_claim_type_2ca6fca1ee38\" AS ENUM ('workplace_injury', 'occupational_disease', 'mental_health', 'repetitive_strain', 'fatality');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_wcb_jurisdiction_832a7aa77ba9",
       "sql": "CREATE TYPE \"public\".\"ue_v2_wcb_jurisdiction_832a7aa77ba9\" AS ENUM ('federal', 'ON', 'BC', 'AB', 'SK', 'MB', 'NB', 'NS', 'PE', 'NL', 'QC', 'YT', 'NT', 'NU');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_wcb_return_to_work_status_cca383e9f4c6",
       "sql": "CREATE TYPE \"public\".\"ue_v2_wcb_return_to_work_status_cca383e9f4c6\" AS ENUM ('not_applicable', 'modified_duties', 'gradual_return', 'full_return', 'permanent_disability');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_webhook_provider_a28c2615a916",
       "sql": "CREATE TYPE \"public\".\"ue_v2_webhook_provider_a28c2615a916\" AS ENUM ('shopify', 'paypal');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "CURRENT_ENUM:public.ue_v2_worksite_status_0d0d424d2ff5",
       "sql": "CREATE TYPE \"public\".\"ue_v2_worksite_status_0d0d424d2ff5\" AS ENUM ('active', 'temporarily_closed', 'permanently_closed', 'seasonal', 'archived');",
       "source": "current-application-schema",
-      "sourceDigest": "ae73b2f4080ac4b71e68a92fd7ddc06166ed226b28c8968695c2a2858ebc10bf"
+      "sourceDigest": "631cc2010eaa566c8f3842c40add2df5746e4f33411d6b1991a462cc1d612753"
     },
     {
       "canonicalId": "DJANGO_CURRENT:ab_test_assignments:0",
@@ -155337,56 +155337,68 @@
     {
       "canonicalId": "CURRENT_DECLARATION:public.message_read_receipts:0",
       "sql": "ALTER TABLE \"message_read_receipts\" ALTER COLUMN \"id\" SET DEFAULT gen_random_uuid();",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.message_read_receipts:1",
       "sql": "ALTER TABLE \"message_read_receipts\" ALTER COLUMN \"read_at\" SET DEFAULT now();",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.message_read_receipts:2",
       "sql": "ALTER TABLE \"message_read_receipts\" ALTER COLUMN \"created_at\" SET DEFAULT now();",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.message_retention_policies:0",
+      "sql": "CREATE TABLE \"message_retention_policies\" (\n\t\"id\" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,\n\t\"organization_id\" uuid NOT NULL,\n\t\"policy_reference\" text NOT NULL,\n\t\"authority_reference\" text NOT NULL,\n\t\"retention_days\" integer NOT NULL,\n\t\"adopted_by\" text NOT NULL,\n\t\"adopted_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"superseded_at\" timestamp with time zone,\n\t\"superseded_by\" text,\n\tCONSTRAINT \"message_retention_days_ck\" CHECK (\"message_retention_policies\".\"retention_days\" BETWEEN 1 AND 36500),\n\tCONSTRAINT \"message_retention_reference_ck\" CHECK (length(btrim(\"message_retention_policies\".\"policy_reference\")) > 0 AND length(btrim(\"message_retention_policies\".\"authority_reference\")) > 0),\n\tCONSTRAINT \"message_retention_supersession_pair\" CHECK ((\"message_retention_policies\".\"superseded_at\" IS NULL) = (\"message_retention_policies\".\"superseded_by\" IS NULL))\n);\n",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.message_retention_policies:1",
+      "sql": "CREATE UNIQUE INDEX \"ue_v2_message_retention_po_message_retenti_3692159c2ccf\" ON \"message_retention_policies\" USING btree (\"organization_id\") WHERE \"message_retention_policies\".\"superseded_at\" IS NULL;",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.messages:0",
       "sql": "ALTER TABLE \"messages\" ALTER COLUMN \"id\" SET DEFAULT gen_random_uuid();",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.messages:1",
       "sql": "ALTER TABLE \"messages\" ALTER COLUMN \"message_type\" SET DEFAULT 'text';",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.messages:2",
       "sql": "ALTER TABLE \"messages\" ALTER COLUMN \"status\" SET DEFAULT 'sent';",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.messages:3",
       "sql": "ALTER TABLE \"messages\" ALTER COLUMN \"is_edited\" SET DEFAULT false;",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.messages:4",
       "sql": "ALTER TABLE \"messages\" ALTER COLUMN \"created_at\" SET DEFAULT now();",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.messages:5",
       "sql": "ALTER TABLE \"messages\" ALTER COLUMN \"updated_at\" SET DEFAULT now();",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.message_templates:0",
@@ -155461,40 +155473,88 @@
       "sourceDigest": "020d49cf088aaaf21d20145dde40d4079f0384b557bbafc2debd3dc657e03edf"
     },
     {
+      "canonicalId": "CURRENT_DECLARATION:public.message_thread_assignments:0",
+      "sql": "CREATE TABLE \"message_thread_assignments\" (\n\t\"id\" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,\n\t\"organization_id\" uuid NOT NULL,\n\t\"thread_id\" uuid NOT NULL,\n\t\"action\" text NOT NULL,\n\t\"from_staff_id\" text,\n\t\"to_staff_id\" text,\n\t\"acted_by\" text NOT NULL,\n\t\"acted_via\" text NOT NULL,\n\t\"reason\" text,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"message_assignment_action_valid\" CHECK (\"message_thread_assignments\".\"action\" IN ('assign','reassign','release')),\n\tCONSTRAINT \"message_assignment_via_valid\" CHECK (\"message_thread_assignments\".\"acted_via\" IN ('triage_designation','current_assignee')),\n\tCONSTRAINT \"message_assignment_target_shape\" CHECK ((\"message_thread_assignments\".\"action\" = 'release') = (\"message_thread_assignments\".\"to_staff_id\" IS NULL)),\n\tCONSTRAINT \"message_assignment_source_shape\" CHECK ((\"message_thread_assignments\".\"action\" = 'assign') = (\"message_thread_assignments\".\"from_staff_id\" IS NULL))\n);\n",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.message_thread_assignments:1",
+      "sql": "ALTER TABLE \"message_thread_assignments\" ADD CONSTRAINT \"message_thread_assignments_thread_id_message_threads_id_fk\" FOREIGN KEY (\"thread_id\") REFERENCES \"public\".\"message_threads\"(\"id\") ON DELETE restrict ON UPDATE no action;",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.message_thread_assignments:2",
+      "sql": "CREATE INDEX \"ue_v2_message_thread_assig_message_thread__260eba99579c\" ON \"message_thread_assignments\" USING btree (\"organization_id\",\"thread_id\",\"created_at\");",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.message_thread_lifecycle:0",
+      "sql": "CREATE TABLE \"message_thread_lifecycle\" (\n\t\"id\" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,\n\t\"seq\" bigint GENERATED ALWAYS AS IDENTITY (sequence name \"message_thread_lifecycle_seq_seq\" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1),\n\t\"organization_id\" uuid NOT NULL,\n\t\"thread_id\" uuid NOT NULL,\n\t\"action\" text NOT NULL,\n\t\"acted_by\" text NOT NULL,\n\t\"acted_via\" text NOT NULL,\n\t\"reference\" text,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"message_lifecycle_action_valid\" CHECK (\"message_thread_lifecycle\".\"action\" IN ('close','archive','hold_place','hold_release')),\n\tCONSTRAINT \"message_lifecycle_via_valid\" CHECK (\"message_thread_lifecycle\".\"acted_via\" IN ('thread_member','current_assignee','organization_administrator')),\n\tCONSTRAINT \"message_lifecycle_hold_by_administrator\" CHECK ((\"message_thread_lifecycle\".\"action\" IN ('hold_place','hold_release')) = (\"message_thread_lifecycle\".\"acted_via\" = 'organization_administrator')),\n\tCONSTRAINT \"message_lifecycle_hold_reference\" CHECK ((\"message_thread_lifecycle\".\"action\" IN ('hold_place','hold_release')) = (\"message_thread_lifecycle\".\"reference\" IS NOT NULL AND length(btrim(\"message_thread_lifecycle\".\"reference\")) > 0))\n);\n",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.message_thread_lifecycle:1",
+      "sql": "ALTER TABLE \"message_thread_lifecycle\" ADD CONSTRAINT \"message_thread_lifecycle_thread_id_message_threads_id_fk\" FOREIGN KEY (\"thread_id\") REFERENCES \"public\".\"message_threads\"(\"id\") ON DELETE restrict ON UPDATE no action;",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.message_thread_lifecycle:2",
+      "sql": "CREATE INDEX \"ue_v2_message_thread_lifec_message_thread__b33ff5e76388\" ON \"message_thread_lifecycle\" USING btree (\"organization_id\",\"thread_id\",\"seq\");",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.message_thread_reads:0",
+      "sql": "CREATE TABLE \"message_thread_reads\" (\n\t\"thread_id\" uuid NOT NULL,\n\t\"user_id\" text NOT NULL,\n\t\"organization_id\" uuid NOT NULL,\n\t\"last_read_at\" timestamp with time zone NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"message_thread_reads_thread_id_user_id_pk\" PRIMARY KEY(\"thread_id\",\"user_id\")\n);\n",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.message_thread_reads:1",
+      "sql": "ALTER TABLE \"message_thread_reads\" ADD CONSTRAINT \"message_thread_reads_thread_id_message_threads_id_fk\" FOREIGN KEY (\"thread_id\") REFERENCES \"public\".\"message_threads\"(\"id\") ON DELETE restrict ON UPDATE no action;",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
       "canonicalId": "CURRENT_DECLARATION:public.message_threads:0",
       "sql": "ALTER TABLE \"message_threads\" ALTER COLUMN \"id\" SET DEFAULT gen_random_uuid();",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.message_threads:1",
       "sql": "ALTER TABLE \"message_threads\" ALTER COLUMN \"status\" SET DEFAULT 'open';",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.message_threads:2",
       "sql": "ALTER TABLE \"message_threads\" ALTER COLUMN \"priority\" SET DEFAULT 'normal';",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.message_threads:3",
       "sql": "ALTER TABLE \"message_threads\" ALTER COLUMN \"is_archived\" SET DEFAULT false;",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.message_threads:4",
       "sql": "ALTER TABLE \"message_threads\" ALTER COLUMN \"created_at\" SET DEFAULT now();",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.message_threads:5",
       "sql": "ALTER TABLE \"message_threads\" ALTER COLUMN \"updated_at\" SET DEFAULT now();",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3"
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.mission_audits:0",
@@ -162293,6 +162353,18 @@
       "sql": "CREATE INDEX \"ue_v2_trend_analyses_trend_analyses__e4347e95f5bb\" ON \"trend_analyses\" USING btree (\"created_at\");",
       "source": "apps/union-eyes/db/schema/analytics.ts",
       "sourceDigest": "fda31de21b9150958846cc73ac21de7edc519e1253343bd988269881f0db4140"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.triage_designations:0",
+      "sql": "CREATE TABLE \"triage_designations\" (\n\t\"id\" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,\n\t\"organization_id\" uuid NOT NULL,\n\t\"scope\" text NOT NULL,\n\t\"user_id\" text NOT NULL,\n\t\"granted_by\" text NOT NULL,\n\t\"granted_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"expires_at\" timestamp with time zone NOT NULL,\n\t\"revoked_at\" timestamp with time zone,\n\t\"revoked_by\" text,\n\tCONSTRAINT \"triage_scope_valid\" CHECK (\"triage_designations\".\"scope\" IN ('messages','cases')),\n\tCONSTRAINT \"triage_no_self_grant\" CHECK (\"triage_designations\".\"granted_by\" <> \"triage_designations\".\"user_id\"),\n\tCONSTRAINT \"triage_expiry_after_grant\" CHECK (\"triage_designations\".\"expires_at\" > \"triage_designations\".\"granted_at\"),\n\tCONSTRAINT \"triage_revocation_pair\" CHECK ((\"triage_designations\".\"revoked_at\" IS NULL) = (\"triage_designations\".\"revoked_by\" IS NULL))\n);\n",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "canonicalId": "CURRENT_DECLARATION:public.triage_designations:1",
+      "sql": "CREATE UNIQUE INDEX \"ue_v2_triage_designations_triage_designat_46215c0576e9\" ON \"triage_designations\" USING btree (\"organization_id\",\"scope\",\"user_id\") WHERE \"triage_designations\".\"revoked_at\" IS NULL;",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
     },
     {
       "canonicalId": "CURRENT_DECLARATION:public.ue_authority_acceptances:0",
@@ -204174,6 +204246,178 @@
       ]
     },
     {
+      "name": "message_retention_policies",
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "organization_id", "type": "uuid", "notNull": true },
+        { "name": "policy_reference", "type": "text", "notNull": true },
+        { "name": "authority_reference", "type": "text", "notNull": true },
+        { "name": "retention_days", "type": "integer", "notNull": true },
+        { "name": "adopted_by", "type": "text", "notNull": true },
+        {
+          "name": "adopted_at",
+          "type": "timestamp with time zone",
+          "notNull": true
+        },
+        {
+          "name": "superseded_at",
+          "type": "timestamp with time zone",
+          "notNull": false
+        },
+        { "name": "superseded_by", "type": "text", "notNull": false }
+      ],
+      "authority": {
+        "table": "message_retention_policies",
+        "classification": "TENANT_RLS_REQUIRED",
+        "reason": "An organization's adopted retention period for closed member conversations, recorded with the authority that adopted it (platform 0025, RLS 0024). Read to state a conversation's retention position and written by an organization administrator through app/api/messages/retention-policy/route.ts. UPDATE is limited by trigger to recording supersession; rows are never deleted. No row means no policy is adopted. Nothing in the application deletes message content.",
+        "supportingCapability": [
+          "app/api/messages/retention-policy/route.ts",
+          "lib/messaging/thread-lifecycle.ts",
+          "db/migrations-platform/0025_message_thread_lifecycle_and_retention.sql",
+          "db/migrations-cache/0024_message_thread_lifecycle_and_retention_rls_closure.sql"
+        ],
+        "requiredRuntimePrivileges": ["SELECT", "INSERT", "UPDATE"],
+        "requiredSystemPrivileges": [],
+        "invocationAuthority": "TENANT_USER",
+        "dbExecutionPrincipal": "TENANT_RUNTIME",
+        "reviewPriority": "NONE"
+      },
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01",
+      "foreignKeys": []
+    },
+    {
+      "name": "message_thread_assignments",
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "organization_id", "type": "uuid", "notNull": true },
+        { "name": "thread_id", "type": "uuid", "notNull": true },
+        { "name": "action", "type": "text", "notNull": true },
+        { "name": "from_staff_id", "type": "text", "notNull": false },
+        { "name": "to_staff_id", "type": "text", "notNull": false },
+        { "name": "acted_by", "type": "text", "notNull": true },
+        { "name": "acted_via", "type": "text", "notNull": true },
+        { "name": "reason", "type": "text", "notNull": false },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true
+        }
+      ],
+      "authority": {
+        "table": "message_thread_assignments",
+        "classification": "TENANT_RLS_REQUIRED",
+        "reason": "Append-only history of every assignment, reassignment and release of a member conversation (platform 0014, RLS 0021). Written in the same transaction as the thread change by lib/messaging/thread-assignment.ts through app/api/messages/threads/[threadId]/assignment/route.ts. Triggers refuse UPDATE and DELETE and verify tenant and resulting assignee against the thread.",
+        "supportingCapability": [
+          "app/api/messages/threads/[threadId]/assignment/route.ts",
+          "lib/messaging/thread-assignment.ts",
+          "db/migrations-platform/0014_message_thread_triage.sql",
+          "db/migrations-cache/0021_message_thread_triage_rls_closure.sql"
+        ],
+        "requiredRuntimePrivileges": ["SELECT", "INSERT"],
+        "requiredSystemPrivileges": [],
+        "invocationAuthority": "TENANT_USER",
+        "dbExecutionPrincipal": "TENANT_RUNTIME",
+        "reviewPriority": "NONE"
+      },
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01",
+      "foreignKeys": [
+        {
+          "column": "thread_id",
+          "table": "message_threads",
+          "referencedColumn": "id"
+        }
+      ]
+    },
+    {
+      "name": "message_thread_lifecycle",
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "seq", "type": "bigint", "notNull": true },
+        { "name": "organization_id", "type": "uuid", "notNull": true },
+        { "name": "thread_id", "type": "uuid", "notNull": true },
+        { "name": "action", "type": "text", "notNull": true },
+        { "name": "acted_by", "type": "text", "notNull": true },
+        { "name": "acted_via", "type": "text", "notNull": true },
+        { "name": "reference", "type": "text", "notNull": false },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "notNull": true
+        }
+      ],
+      "authority": {
+        "table": "message_thread_lifecycle",
+        "classification": "TENANT_RLS_REQUIRED",
+        "reason": "Append-only history of every close, archive and legal-hold decision on a member conversation and how it was authorized (platform 0025, RLS 0024). Written in the same transaction as the thread change and its audit by lib/messaging/thread-lifecycle.ts through app/api/messages/threads/[threadId]/lifecycle/route.ts and app/api/messages/threads/[threadId]/legal-hold/route.ts. It never holds message text. Triggers refuse UPDATE and DELETE, verify tenant and the resulting thread state, and message_threads refuses a status or archive change that has no matching record. UPDATE of message_threads is therefore also used for close and archive.",
+        "supportingCapability": [
+          "app/api/messages/threads/[threadId]/lifecycle/route.ts",
+          "app/api/messages/threads/[threadId]/legal-hold/route.ts",
+          "lib/messaging/thread-lifecycle.ts",
+          "db/migrations-platform/0025_message_thread_lifecycle_and_retention.sql",
+          "db/migrations-cache/0024_message_thread_lifecycle_and_retention_rls_closure.sql"
+        ],
+        "requiredRuntimePrivileges": ["SELECT", "INSERT"],
+        "requiredSystemPrivileges": [],
+        "invocationAuthority": "TENANT_USER",
+        "dbExecutionPrincipal": "TENANT_RUNTIME",
+        "reviewPriority": "NONE"
+      },
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01",
+      "foreignKeys": [
+        {
+          "column": "thread_id",
+          "table": "message_threads",
+          "referencedColumn": "id"
+        }
+      ]
+    },
+    {
+      "name": "message_thread_reads",
+      "columns": [
+        { "name": "thread_id", "type": "uuid", "notNull": true },
+        { "name": "user_id", "type": "text", "notNull": true },
+        { "name": "organization_id", "type": "uuid", "notNull": true },
+        {
+          "name": "last_read_at",
+          "type": "timestamp with time zone",
+          "notNull": true
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "notNull": true
+        }
+      ],
+      "authority": {
+        "table": "message_thread_reads",
+        "classification": "TENANT_RLS_REQUIRED",
+        "reason": "Last time each participant read a member conversation (platform 0025, RLS 0024), so the member can see whether the union has read their message without learning who. Upserted by lib/messaging/thread-read-state.ts through app/api/messages/threads/[threadId]/read/route.ts; triggers make identity immutable, verify tenant, never let a marker move backwards and refuse DELETE.",
+        "supportingCapability": [
+          "app/api/messages/threads/[threadId]/read/route.ts",
+          "lib/messaging/thread-read-state.ts",
+          "db/migrations-platform/0025_message_thread_lifecycle_and_retention.sql",
+          "db/migrations-cache/0024_message_thread_lifecycle_and_retention_rls_closure.sql"
+        ],
+        "requiredRuntimePrivileges": ["SELECT", "INSERT", "UPDATE"],
+        "requiredSystemPrivileges": [],
+        "invocationAuthority": "TENANT_USER",
+        "dbExecutionPrincipal": "TENANT_RUNTIME",
+        "reviewPriority": "NONE"
+      },
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01",
+      "foreignKeys": [
+        {
+          "column": "thread_id",
+          "table": "message_threads",
+          "referencedColumn": "id"
+        }
+      ]
+    },
+    {
       "name": "ml_prediction_feedback",
       "columns": [
         { "name": "id", "type": "uuid", "notNull": true },
@@ -208080,6 +208324,53 @@
           "referencedColumn": "id"
         }
       ]
+    },
+    {
+      "name": "triage_designations",
+      "columns": [
+        { "name": "id", "type": "uuid", "notNull": true },
+        { "name": "organization_id", "type": "uuid", "notNull": true },
+        { "name": "scope", "type": "text", "notNull": true },
+        { "name": "user_id", "type": "text", "notNull": true },
+        { "name": "granted_by", "type": "text", "notNull": true },
+        {
+          "name": "granted_at",
+          "type": "timestamp with time zone",
+          "notNull": true
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "notNull": true
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "notNull": false
+        },
+        { "name": "revoked_by", "type": "text", "notNull": false }
+      ],
+      "authority": {
+        "table": "triage_designations",
+        "classification": "TENANT_RLS_REQUIRED",
+        "reason": "Explicit, expiring, revocable authority to triage the unassigned queue of one scope, messages or cases (platform 0014, RLS 0021). Granted and revoked by an organization administrator through app/api/triage-designations/route.ts; read by lib/triage/designations.ts, lib/messaging/thread-assignment.ts and, as a predicate, by lib/cases/case-authorization.ts to decide queue visibility. UPDATE is limited by trigger to recording revocation; rows are never deleted.",
+        "supportingCapability": [
+          "app/api/triage-designations/route.ts",
+          "lib/triage/designations.ts",
+          "lib/messaging/thread-assignment.ts",
+          "lib/cases/case-authorization.ts",
+          "db/migrations-platform/0014_message_thread_triage.sql",
+          "db/migrations-cache/0021_message_thread_triage_rls_closure.sql"
+        ],
+        "requiredRuntimePrivileges": ["SELECT", "INSERT", "UPDATE"],
+        "requiredSystemPrivileges": [],
+        "invocationAuthority": "TENANT_USER",
+        "dbExecutionPrincipal": "TENANT_RUNTIME",
+        "reviewPriority": "NONE"
+      },
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01",
+      "foreignKeys": []
     },
     {
       "name": "ue_authority_acceptances",
@@ -216368,8 +216659,8 @@
     {
       "relation": "message_read_receipts",
       "disposition": "PROSPECTIVE_CANONICAL",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01",
       "rationale": "Current Django identity/FK fields retain precedence; approved current operational fields have source-bound prospective producers. Explicit rejected/stale/security-sensitive field dispositions remain excluded. This is not historical replay or physical-drift reverse generation.",
       "addedColumns": [],
       "materializedCallerDefaults": [
@@ -216383,8 +216674,8 @@
     {
       "relation": "messages",
       "disposition": "PROSPECTIVE_CANONICAL",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01",
       "rationale": "Current Django identity/FK fields retain precedence; approved current operational fields have source-bound prospective producers. Explicit rejected/stale/security-sensitive field dispositions remain excluded. This is not historical replay or physical-drift reverse generation.",
       "addedColumns": [],
       "materializedCallerDefaults": [
@@ -216420,8 +216711,8 @@
     {
       "relation": "message_threads",
       "disposition": "PROSPECTIVE_CANONICAL",
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
-      "sourceDigest": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sourceDigest": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01",
       "rationale": "Current Django identity/FK fields retain precedence; approved current operational fields have source-bound prospective producers. Explicit rejected/stale/security-sensitive field dispositions remain excluded. This is not historical replay or physical-drift reverse generation.",
       "addedColumns": [],
       "materializedCallerDefaults": [
@@ -218550,7 +218841,7 @@
     "apps/union-eyes/db/schema/domains/communications/email-address-suppressions.ts": "b5806510a8142439451f8bf0273c8f017ab004c36dc8be4a1efc2d6f0c1d0657",
     "apps/union-eyes/db/schema/domains/communications/employer-communications.ts": "8461f13ceb577b067660dcbc238eb82540cdb83b3843b3b62221a5b3b9bad397",
     "apps/union-eyes/db/schema/domains/communications/index.ts": "da01cf110c42fed85d8c221cfbe9cc9452212fdcbb73a01cbc8f9cd9b0aa87f6",
-    "apps/union-eyes/db/schema/domains/communications/messages.ts": "1c4f9217c1a51dc59a7bfd8732e71d94af6711949b3e497b42751e4dd2d8ccf3",
+    "apps/union-eyes/db/schema/domains/communications/messages.ts": "59cd3be6eeb00c0cbc9884ac10ec7f3cdb38b909d557486bf80140bf779faf51",
     "apps/union-eyes/db/schema/domains/communications/newsletters.ts": "8d5b5dfc83f8ac25fdb5d777580796fadd6590f9203574b3241f73a3ce9dda4d",
     "apps/union-eyes/db/schema/domains/communications/notifications.ts": "e3053cc56779dc157577cdd78b9c3eeb6165cb63392e3207b77d4dd8aebe7aa7",
     "apps/union-eyes/db/schema/domains/communications/organizer-workflows.ts": "6219ae8f006ef4975d9ac2ea908ed0692e733eaee3ca0654d5a2e2baccd9c840",
@@ -218722,7 +219013,7 @@
     "apps/union-eyes/db/schema/lrb-agreements-schema.ts": "7216b426c86ad8da25553f766915a8c6f450df0c37ec56586599d9aa88a418de",
     "apps/union-eyes/db/schema/member-documents-schema.ts": "15fe77838479fc394606a09877e96d6cf6090781b774ce2f92945c387e9dd9d7",
     "apps/union-eyes/db/schema/member-profile-v2-schema.ts": "282c49a9f1c073d1483484e1ca43b1e811afe3f5a3664ae3b9742e6aff8377c6",
-    "apps/union-eyes/db/schema/messages-schema.ts": "e686575f9936687569ddba061870bdee43087f4374e05760e5d586e7a23f08d6",
+    "apps/union-eyes/db/schema/messages-schema.ts": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01",
     "apps/union-eyes/db/schema/ml-predictions-schema.ts": "361a4eed68c1267e13ecf2066cfd923eb661200e553610da1bd20486cb3d3afe",
     "apps/union-eyes/db/schema/mobile-devices-schema.ts": "0d917caf7a3845269ee1cda79011190eb97987eff75fe6ed3c591503dbd0215e",
     "apps/union-eyes/db/schema/newsletter-schema.ts": "d27d465139c7c528d32c287eb0069cb8b0b3289be64a4adb4e2bd34329aa06aa",
@@ -218769,9 +219060,15 @@
     "apps/union-eyes/scripts/bootstrap-v2/framework_application.py": "61a6180f6d03057d8f68245abfb37e5331395987f7c80155e4f17b8615aff0a1",
     "apps/union-eyes/scripts/bootstrap-v2/backend-application.ts": "0f6d44517f74ab76e770d2dc4c4de27486f8751272db60c3012a5e16821a0347",
     "apps/union-eyes/scripts/bootstrap-v2/manifest-application.ts": "8ce868fdbffeb97080968ba12eb2db9fbf64364351394e50ea90ead7f15925cf",
-    "apps/union-eyes/scripts/bootstrap-v2/source.ts": "5dd8c9616fa72ade90abd6e3c5c1706e80bfa7887a719cee9435f379420ac36b",
+    "apps/union-eyes/scripts/bootstrap-v2/source.ts": "2ab430c061a1d10ecc93b92f81305f50561c8317d846195cfc6dab696089876e",
     "apps/union-eyes/scripts/bootstrap-v2/security.ts": "e2256dbb86208d22a3016a87343d1973c885fcc9c0a2b4f0c91cd518da5e1f8c",
-    "apps/union-eyes/db/auth/business-session-policy.ts": "d0f192ed856b1ce508e182adf61eec3728f8cf097d376290e98fbbbd19e7fcdc",
+    "apps/union-eyes/db/auth/business-session-policy.ts": "130155caa6bb40783770101efa6501f7d83ccba1c4a5c111f8da66c8b8ced1b1",
+    "apps/union-eyes/db/auth/business-session-event-guard.ts": "f48fad3ada7363cff32aec9fd6e27fff9422fc6189afa344c406f393d8a44b83",
+    "apps/union-eyes/db/auth/messaging-physical-guards.ts": "70c9bee0193bb5b25b2f3e0837c5b5b8cdeb346d24e5eef54a2b4357b1f6d10b",
+    "apps/union-eyes/scripts/bootstrap-v2/messaging-schema-companion.ts": "e65f8c25d8707dba4bcdd8c572734afb64f514f18133508db031192dc549c5b7",
+    "apps/union-eyes/db/migrations-platform/0014_message_thread_triage.sql": "e0ce68952b193b373a65072455c6897941969fce79b244462e96d22f46521d6a",
+    "apps/union-eyes/db/migrations-platform/0025_message_thread_lifecycle_and_retention.sql": "57cac000beedd6841095f5975a01a3c0ad300799b9794f7c4893e7e4a56f6b1c",
+    "apps/union-eyes/db/migrations-cache/0019_deadline_reassignment_convergence.sql": "173cf69bc7d481b7e1b1971a2b678d7a2ff6c29f752d986bcdbc4700b99af964",
     "apps/union-eyes/scripts/bootstrap-v2/clean-room.ts": "98b9f588f2c196a4617869f56193ee7a21eb43294780c85cf92f1b9fad225d15",
     "apps/union-eyes/scripts/bootstrap-v2/runtime-security.ts": "791ddfe51d9c5d209a3d7c0cb0b63d73edf46155f252c684c802f7378b8add9c",
     "apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture.ts": "c7cdbc7650756de6f2df8cfdb9d8d34f0f69970a1e8fa8f651a1f65bc43fcb3e",
@@ -218780,7 +219077,7 @@
     "apps/union-eyes/scripts/bootstrap-v2/service-column-contracts.ts": "0e37c6d74e513095c9650f038de06aec2dfa6bbf149b7fa60c1f0e262c65f7c7",
     "apps/union-eyes/services/platform-economics/transaction-fee-engine.ts": "6c22838f93b2cc295495d7abd37b34e7c0c51c22ed579064da8b7a6403aa9513",
     "apps/union-eyes/services/platform-economics/fee-adjustment-insert.ts": "10a68765f11ba1c764a5e11b3adbf76ce43a4c28d13dbca08871f750a0a60b74",
-    "apps/union-eyes/scripts/bootstrap-v2/installer.ts": "9cf7b9e9e9a9203477fb4a0b7421fe205120f448479d6863ca95b95dad2022ff",
+    "apps/union-eyes/scripts/bootstrap-v2/installer.ts": "d0613116750d358684fbf33f3016ef671b136eb5cf16ec3523811c7107b94fad",
     "apps/union-eyes/scripts/bootstrap-v2/catalog-normalization.ts": "99f60c9262c43ce2fca17b9453f9c5b2f475b13ee227483de8f239cf7c980c10",
     "apps/union-eyes/lib/db/with-rls-context.ts": "2dbb40ed5b01b4f37887445fc7708e85c1d12dbaaedfd9c0bb24cc40acb2d322",
     "apps/union-eyes/db/db.ts": "d68eecc543585b170ddfeb47614f796d972db49524b39fbd2f8c98891edd6e0c",
@@ -218911,7 +219208,7 @@
     "apps/union-eyes/scripts/bootstrap-v2/live-declarations.ts": "b2452df86fa071973a2b5b082d37df52071c29fc875ce37eed84b1f4a1edb0fd",
     "apps/union-eyes/scripts/bootstrap-v2/local-vault-fixture.ts": "eb6203468fb79bb59e0c28128ea8db59627f2cb66f9f7b1b75d293fccf708a64",
     "apps/union-eyes/scripts/bootstrap-v2/manifest-defaults.ts": "df2b56b4a96def4c46987cb3e6b03f2cd4f0d60d164941b6d33b746df090af82",
-    "apps/union-eyes/scripts/bootstrap-v2/manifest-security.ts": "397c5bdb9a8041cdd25be4f7b4e455049c55fd30df2a4679f0759670c2f9aa5a",
+    "apps/union-eyes/scripts/bootstrap-v2/manifest-security.ts": "b100ac042856ef3be3eceb9868675b972c2c9542ecf7eec979573605fbbae426",
     "apps/union-eyes/scripts/bootstrap-v2/manifest-trace.ts": "5fe4ffcd87524df3f89dfd7667ee80d1b9b03befecec89e9bbef7a37330b2fd0",
     "apps/union-eyes/scripts/bootstrap-v2/manifest.ts": "95782310e59fdade40d795862607db6266649f78da25d14b0ba43f1446e35127",
     "apps/union-eyes/scripts/bootstrap-v2/minimum-installer.ts": "44b9d713bb1815a26873528125381593176892e9e3c567a94e6fb46cdda1e8a3",
