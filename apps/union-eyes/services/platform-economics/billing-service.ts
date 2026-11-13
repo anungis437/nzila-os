@@ -61,6 +61,17 @@ export interface RecordPaymentInput {
   createdBy?: string;
 }
 
+// Validate invoice multipliers before converting to CAD or issuing an invoice.
+// Number arithmetic beyond MAX_SAFE_INTEGER cents can silently alter charges.
+function safeFeeProduct(unitCents: number, count: number): number {
+  if (!Number.isSafeInteger(unitCents) || unitCents < 0 ||
+      !Number.isSafeInteger(count) || count < 0 ||
+      (unitCents !== 0 && count > Math.floor(Number.MAX_SAFE_INTEGER / unitCents))) {
+    throw new Error('Invoice fee multiplication exceeds safe CAD limits');
+  }
+  return unitCents * count;
+}
+
 // ============================================================================
 // Billing Account Management
 // ============================================================================
@@ -318,7 +329,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
       costType: 'local_fee',
       quantity: String(localCount),
       unitPrice: plan.perLocalFee!,
-      amount: centsToDecimal(perLocalFeeCents * localCount),
+      amount: centsToDecimal(safeFeeProduct(perLocalFeeCents, localCount)),
     });
   }
 
@@ -330,7 +341,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
       costType: 'seat_fee',
       quantity: String(seatCount),
       unitPrice: plan.perSeatFee!,
-      amount: centsToDecimal(perSeatFeeCents * seatCount),
+      amount: centsToDecimal(safeFeeProduct(perSeatFeeCents, seatCount)),
     });
   }
 
@@ -342,7 +353,7 @@ export async function generateInvoice(input: GenerateInvoiceInput) {
       costType: 'module_fee',
       quantity: String(modules.length),
       unitPrice: plan.perModuleFee!,
-      amount: centsToDecimal(perModuleFeeCents * modules.length),
+      amount: centsToDecimal(safeFeeProduct(perModuleFeeCents, modules.length)),
     });
   }
 
