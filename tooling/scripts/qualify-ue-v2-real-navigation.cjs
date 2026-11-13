@@ -5,10 +5,11 @@ const crypto = require('node:crypto');
 const { chromium } = require(require.resolve('playwright', { paths: [process.cwd() + '/apps/union-eyes'] }));
 const { settleRoleLanding, settleRestrictedDestination } = require('./lib/ue-staging-navigation-settlement.cjs');
 const BASE = 'https://nzila-ue-v2-staging-app.whitemoss-055b7430.canadacentral.azurecontainerapps.io';
-const TENANT = '5082b8be-b04d-4a13-b61c-b6397670177b';
+const TENANT = 'cc15259a-d2bf-421f-8e44-dccf8dc6232a';
 const PEOPLE = {
-  A: { oid: 'e07cbf07-fee5-45e3-934c-de5966dabae5', upn: 'ue-staging-recovery-a-20261022@onelabtech.onmicrosoft.com', org: 'b96359c3-a8de-458c-8469-afc084b7fbc0' },
-  B: { oid: '3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015', upn: 'ue-staging-recovery-b-20261022@onelabtech.onmicrosoft.com', org: '82e9921a-16ac-486a-b8f4-b28029cc2cbd' },
+  // Role-flexible fixture: its organization_users.role is swapped by the private operator before
+  // dispatch to match the membership_role input under test (see workflow description).
+  A: { oid: 'ecb4f1d7-b0ae-44f8-bf56-832bc173fc49', upn: 'ue-v2-staging-seniorrep-20261113@anungisayahoo.onmicrosoft.com', org: 'b96359c3-a8de-458c-8469-afc084b7fbc0' },
 };
 const OUT = 'artifacts/ue-v2-navigation';
 const report = { evidenceClass: 'REAL_REMOTE_ENTRA_SESSION_AND_API', sourceSha: process.env.SOURCE_SHA, workflowSha: process.env.GITHUB_SHA, runId: process.env.GITHUB_RUN_ID, observations: [], runtimeAcceptance: false };
