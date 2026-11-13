@@ -493,6 +493,24 @@ describe('recordPayment', () => {
 // External payment reconciliation
 // ===========================================================================
 describe('reconcileExternalInvoicePayment', () => {
+  it.each(['', '   '])('refuses missing external reference %j before any financial writes', async (externalReference) => {
+    await expect(reconcileExternalInvoicePayment({
+      organizationId: 'org-1', invoiceId: 'inv-1', amount: '100.00',
+      method: 'stripe', externalReference,
+    })).rejects.toThrow(/reference is required/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('refuses unsupported provider payment states before financial writes', async () => {
+    await expect(reconcileExternalInvoicePayment({
+      organizationId: 'org-1', invoiceId: 'inv-1', amount: '100.00',
+      method: 'stripe', externalReference: 'pi_pending', status: 'pending' as 'completed',
+    })).rejects.toThrow(/Unsupported external payment status/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
   const base = {
     organizationId: 'org-1',
     invoiceId: 'inv-1',
