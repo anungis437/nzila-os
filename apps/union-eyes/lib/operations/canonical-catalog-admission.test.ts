@@ -100,5 +100,6 @@ describe('canonical catalog admission', () => {
     expect(violations).toContain('nzila_auth_gateway: unsafe or missing canonical role/schema authority')
     expect(violations).toContain('users: canonical auth relation is absent')
     expect(violations).toContain('auth_provider_binding: missing or overloaded canonical function')
+    expect(violations).toContain('business session policy: no runtime relations inspected')
   })
 })

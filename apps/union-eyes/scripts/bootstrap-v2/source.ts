@@ -536,6 +536,7 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'apps/union-eyes/scripts/bootstrap-v2/manifest-application.ts',
     'apps/union-eyes/scripts/bootstrap-v2/source.ts',
     'apps/union-eyes/scripts/bootstrap-v2/security.ts',
+    'apps/union-eyes/db/auth/business-session-policy.ts',
     'apps/union-eyes/scripts/bootstrap-v2/clean-room.ts',
     'apps/union-eyes/scripts/bootstrap-v2/runtime-security.ts',
     'apps/union-eyes/scripts/bootstrap-v2/native-runtime-fixture.ts',
