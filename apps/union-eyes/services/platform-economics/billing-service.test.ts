@@ -402,6 +402,31 @@ describe('recordPayment', () => {
     },
   );
 
+  it.each(['void', 'written_off'])('refuses payment on %s invoices before financial writes', async (status) => {
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', status, amountPaid: '0.00', totalAmount: '100.00' }];
+    await expect(recordPayment(base)).rejects.toThrow(/void or written-off/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('refuses an overpayment against an existing partial balance', async () => {
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', status: 'partially_paid', amountPaid: '60.00', totalAmount: '100.00' }];
+    await expect(recordPayment({ ...base, amount: '40.01' })).rejects.toThrow(/exceeds remaining invoice balance/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
+  it('refuses an unprotected new idempotency key before financial writes', async () => {
+    state.selects.billingAccounts = [{ id: 'acct-1' }];
+    state.selects.platformPayments = [];
+    await expect(recordPayment({ ...base, idempotencyKey: 'new-key' }))
+      .rejects.toThrow(/until transactional idempotency is enforced/);
+    expect(appendLedgerEntry).not.toHaveBeenCalled();
+    expect(persistAtomicAudit).not.toHaveBeenCalled();
+  });
+
   it('records a full payment, marks invoice paid, bridges ledger and audits', async () => {
     state.selects.billingAccounts = [{ id: 'acct-1' }];
     state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', amountPaid: '0.00', totalAmount: '100.00', billingPeriodId: 'bp-1' }];
