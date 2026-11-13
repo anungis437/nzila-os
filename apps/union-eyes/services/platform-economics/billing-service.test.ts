@@ -381,6 +381,34 @@ describe('generateInvoice', () => {
 // Payment recording
 // ===========================================================================
 describe('recordPayment', () => {
+  it.each(['NaN', 'oops', '-1.00', '1.001', '', '90071992547410.00'])(
+    'refuses corrupt persisted paid balance %j before settlement writes', async (amountPaid) => {
+      state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', status: 'issued', amountPaid, totalAmount: '100.00' }];
+      state.selects.platformPayments = [];
+      state.selects.billingAccounts = [{ id: 'acct-1' }];
+      await expect(reconcileExternalInvoicePayment({
+        organizationId: 'org-1', invoiceId: 'inv-1', amount: '10.00',
+        method: 'stripe', externalReference: 'pi_corrupt_paid',
+      })).rejects.toThrow(/Persisted invoice balance/);
+      expect(appendLedgerEntry).not.toHaveBeenCalled();
+      expect(auditLog).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['NaN', '-1.00', '1.001', '', '90071992547410.00'])(
+    'refuses corrupt persisted invoice total %j before settlement writes', async (totalAmount) => {
+      state.selects.platformInvoices = [{ id: 'inv-1', organizationId: 'org-1', status: 'issued', amountPaid: '0.00', totalAmount }];
+      state.selects.platformPayments = [];
+      state.selects.billingAccounts = [{ id: 'acct-1' }];
+      await expect(reconcileExternalInvoicePayment({
+        organizationId: 'org-1', invoiceId: 'inv-1', amount: '10.00',
+        method: 'stripe', externalReference: 'pi_corrupt_total',
+      })).rejects.toThrow(/Persisted invoice balance/);
+      expect(appendLedgerEntry).not.toHaveBeenCalled();
+      expect(auditLog).not.toHaveBeenCalled();
+    },
+  );
+
   const base = {
     organizationId: 'org-1',
     invoiceId: 'inv-1',
