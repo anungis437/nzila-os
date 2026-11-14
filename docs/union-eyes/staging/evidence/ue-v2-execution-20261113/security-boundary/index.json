@@ -169,15 +169,25 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7",
+    "sourceSha": "b6c6a938d8c52e80a5844f11ed1bc8ec1a19f14c",
     "sourcePR": 1218,
     "integrationPR": 1219,
-    "localNativeExport": "local-native-export-f4f03cd1.json",
+    "localNativeExport": "local-native-export-b6c6a938.json",
     "deployed": false,
     "ciAndRuntimeStillRequired": true,
     "repairSummary": "Capacity, signing/atomic intake, dedicated telemetry, process liveness, individual grievance reachability, bounded member tools and revoked-author note privacy",
-    "restoredRehearsal": "candidate-restored-rehearsal-f4f03cd1.json",
-    "primaryGuardReadOnlyNoop": "primary-current-source-noop-f4f03cd1.json"
+    "restoredRehearsal": "candidate-restored-rehearsal-b6c6a938.json",
+    "primaryGuardReadOnlyNoop": "primary-current-source-noop-b6c6a938.json",
+    "priorCandidateCi": {
+      "sourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7",
+      "status": "FAIL",
+      "failedSuites": [
+        "environment census",
+        "notification links"
+      ],
+      "correctedLocalChecks": 111,
+      "runtimePassInferred": false
+    }
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
