@@ -5,9 +5,9 @@
   "generatedOn": "2026-11-14",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
   "acceptedStagingCandidateSha": null,
-  "stagingWorkflowDefinitionSha": "1bfbe779ba89aa41bcd141b435b9dea09176f954",
+  "stagingWorkflowDefinitionSha": "8ce043dd393f6e119d82558d28e6ec4a49905236",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Deployed cbf2bc93 passed real A/B case/document isolation, signed native tenant denials, complete audit chains and actual sealed packs, messaging and six worker scenarios. Real acceptance then exposed PostgreSQL53300, an intake500 caused by the missing signing key, officer French Trust503 and telemetry OverQuota. Candidate b6c6a938 bounds pools/retained revisions, wires signing/readiness, makes intake evidence atomic and isolates staging telemetry. Source/integration CI, main admission, immutable build, reviewed authorized rollout and complete final base-runtime evidence remain required. No production, reset, finance expansion or fictional reviewer. Actual follow-up confirms one-second dependency-based liveness restarts, denied individual grievance navigation and revoked-author private-note visibility; the candidate repairs them and adds a bounded member UI. The cbf actual issued lease expiry passed after05:28:45Z; final replacement evidence is still required. Prior b6c6a938 passed complete source/integration CI and immutable build43568101291, but deployment43569312473 stopped before apply because the new LAW lacked deployer write authority. Candidate9a7ee373 adds the omitted named signing-secret grant and scoped telemetry permission recipe. Actual staging-only role/workspace repair is recorded; no repaired-app runtime pass is inferred. Source9a7ee373 and integration#1221 passed every registered CI check and immutable build43572581712. Deployment43573741953 passed fresh what-if/drift but stopped before apply at a shallow-checkout ancestry failure. Full-history workflow correction and fresh qualified rollout remain pending; application image/source and live data are unchanged. Deployment43602545438 passed the history/drift gates and applied most infrastructure, but Azure rejected the seven existing log-alert scope changes as immutable. New9a revision is healthy at0%; CBF remains100%. A bounded reviewed workflow migration and fresh complete rollout/acceptance are required; no failed run is relabeled.",
+  "verdictReason": "Current 9a7ee373 deployment succeeded, but actual nested system pool deadlock and stylesheet-as-script errors prevent base acceptance. Proposed a8442373 has focused and exact native qualification; exact source/integration CI, build, fresh reviewed staging deployment and full persona/base/security/recovery evidence remain required. Finance persistence and Financial Officer 2.1 remain excluded.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -20,6 +20,238 @@
   },
   "passRule": "Every REQUIRED criterion must be PASS from real deployed evidence on the accepted staging revision; synthetic, local, source-only, or historical evidence cannot satisfy a runtime criterion.",
   "criteria": [
+    {
+      "id": "CANDIDATE_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "SOURCE_ENGINEERING",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Two confirmed product defects have proposed source fixes with 79 focused tests, four asset-gate tests, reproduced CSS failure/correction and actual primary one-connection regression. Exact CI/main/build and deployed acceptance remain required.",
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+      "requalificationRequiredForProposedCandidate": true
+    },
+    {
+      "id": "LOCAL_HOLISTIC_REGRESSION",
+      "requirement": "ADVISORY",
+      "status": "NON_BLOCKING_HOST_LIMITATION",
+      "evidence": "Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.",
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+      "requalificationRequiredForProposedCandidate": true
+    },
+    {
+      "id": "FINAL_CANDIDATE_CI",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "AUTHORIZED_STAGING_DEPLOYMENT",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "DEPLOYED_REVISION_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "DATABASE_MIGRATIONS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "ENTRA_AUTHENTICATED_SESSIONS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "API_AND_POSTGRES_TENANT_ISOLATION",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
+      "requirement": "REQUIRED",
+      "status": "FAIL",
+      "evidence": "Current 9a7ee373 has actual nested system pool deadlock and CSS-as-script browser errors. Proposed source repair is not yet deployed; remaining roles/base journeys and actual worker recovery require final-source evidence.",
+      "observedSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "WORKERS_RETRIES_AND_DELIVERY",
+      "requirement": "REQUIRED",
+      "status": "FAIL",
+      "evidence": "Current 9a7ee373 has actual nested system pool deadlock and CSS-as-script browser errors. Proposed source repair is not yet deployed; remaining roles/base journeys and actual worker recovery require final-source evidence.",
+      "observedSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "AUDIT_AND_TELEMETRY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "SENSITIVE_FINANCE_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "OPERATIONAL_RECOVERY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "CAPABILITY_TRUTHFULNESS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "INSTITUTIONAL_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84"
+    },
+    {
+      "id": "STAGING_DECISION_ACCEPTANCE",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "proposedSourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+      "requalificationRequiredForProposedCandidate": true
+    }
+  ],
+  "externalBlockers": [],
+  "proposedCandidateSha": "a844237335542bcac0f4690f1f17832b68371a84",
+  "proposedCandidateState": "EXACT_SOURCE_CI_ADMISSION_BUILD_DEPLOYMENT_AND_REAL_ACCEPTANCE_PENDING",
+  "baseReleaseScope": {
+    "ownerDecisionDate": "2026-11-13",
+    "included": [
+      "cases/grievances",
+      "intake",
+      "assignment",
+      "members",
+      "representatives/stewards",
+      "senior representatives",
+      "officer/executive and governance access",
+      "documents/evidence",
+      "deadlines",
+      "messaging",
+      "English/French and mobile",
+      "audit/security/recovery"
+    ],
+    "excluded": [
+      "finance/dues persistence",
+      "Financial Officer 2.1"
+    ],
+    "financeRequirement": "Fail-closed sensitive boundaries only; financial feature implementation is not a release prerequisite."
+  },
+  "historicalLocalValidation": {
+    "focusedRemediation": "PASS \u2014 7 files, 65 tests",
+    "earlierRunEvidenceReplay": "PASS \u2014 25 files, 238 tests; 1 native-only file and 13 environment-gated cases skipped",
+    "accountingAndProvenance": "PASS \u2014 2 files, 10 tests",
+    "censusContract": "PASS \u2014 3 tests",
+    "holisticRegression": {
+      "status": "ENVIRONMENT_HOLD",
+      "passedFiles": 3273,
+      "passedTests": 49052,
+      "skippedFiles": 116,
+      "skippedTests": 1682,
+      "failedFiles": 2,
+      "failedTests": 13,
+      "failures": [
+        "contract-tests/civic-oci-doctrine-integrity.test.ts \u2014 10 unrelated civic authorization/filesystem-context fixture failures",
+        "scripts/bootstrap-v2/local-vault-fixture.test.ts \u2014 3 fixtures could not import the host Python cryptography package"
+      ],
+      "unionEyesAccountingAuthorityOrCensusFailure": false
+    }
+  },
+  "localValidation": {
+    "candidateRepair": "30 focused tests; independent Python checksum vector; identity contract and Bicep compilation pass. Exact-head CI is pending in #1210.",
+    "navigationHarness": "Nine settlement contracts and source-derived inventory checks passed; #1208 admitted after all registered checks and 16 trusted required successes.",
+    "recoveryHarness": "Six fault/recovery contracts passed locally; #1209 CI/main admission and protected runtime rehearsal pending.",
+    "baseAuthorityPhysicalGuards": "108 focused checks and exact source-ed13cf0a native export/restore/repeat/privileges PASS (24576 catalog objects); not staging acceptance.",
+    "baseCaseworkRepair": "215 member-policy/evidence/request/RLS checks +108 authority/messaging/security checks +25 steward identity checks PASS. Exact cbf2bc93 native export/restore/repeat/privileges PASS,24576 catalog objects. Local/source evidence is not runtime acceptance.",
+    "operationalRepair": "44 release/budget,13auth/runtime and28readiness/intake/evidence local checks PASS; Bicep, inventory, ops validation, source-plan and exact native export PASS. No runtime acceptance inferred. Seven corrected probe-contract checks also pass, including actual process-only liveness without database connectivity.",
+    "grievanceAccess": "144 local route/model/console/navigation/catalog checks PASS, including revoked-author notes and English/French bounded controls. Exact source native installation/restore/repeat/privileges PASS. Actual runtime remains required.",
+    "ciCorrection": "Prior f4f03cd1 full CI failed environment census and notification link expectations; corrected declarations/documentation and expectations pass strict census and111local checks. No ceiling changed; exact CI and runtime acceptance remain required.",
+    "stagingAuthorityCorrection": "Eight identity/connection contracts, Bicep compilation and inventory PASS. Exact9a7ee373 fresh/restore/repeat/native privileges and current-primary read-only guard NOOP PASS. Actual scoped staging telemetry authority repair PASS; app deployment and runtime qualification still pending.",
+    "workflowHistoryCorrection": "Seven budget/history checks pass, including actual shallow/full local Git ancestry reproduction. The existing fail-closed source/serving ancestry guards remain intact. Workflow-only CI/main admission and fresh reviewed rollout are still required.",
+    "stagingLogAlertScopeMigration": "34 focused release/history/identity/migration checks pass, including immutable-provider failure reproduction, complete pre-delete snapshots, unreviewed-setting refusal and restoration after failed recreation. Protected exact-workflow CI/main/reviewed apply and runtime remain pending. Partial-apply retry also verifies the retained candidate image before bounded reactivation; promotion still requires actual healthy state/source. New infrastructure provenance binds the entire admitted IaC Git tree and template hash separately from image source; the cron-rule query excludes actual normal-zero exits and passes Azure-executed controlled failure vectors. Current deployed alert correction/complete rollout still required.",
+    "nestedSystemAndClientAssets": "79 focused tests, four script-asset gate tests, actual before/after production CSS build reproduction, exact-source 776-table fresh/restore/repeat/privileges and actual source-bound primary one-connection regression PASS. SQL bytes/order unchanged; no deployed acceptance inferred."
+  },
+  "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
+  "previousUndeployedBuild": {
+    "sourceSha": "2786943ac51f42b24edc808031015b539ae091f1",
+    "workflowDefinitionSha": "923858df7068afa3f03210aa4c38686ea3519765",
+    "runId": "43520878953",
+    "status": "SUCCESS",
+    "deployed": false,
+    "supersededForQualificationBy": "167f95034fbdaa163cd67e79c4bca622284e0d77"
+  },
+  "securityFindingEvidence": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json",
+  "observedStagingCandidateSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+  "currentSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-restored-rehearsal-a8442373.json",
+  "historicalCriteriaBeforeNestedSystemRepair": [
     {
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
@@ -173,75 +405,5 @@
       "status": "NOT_PROVEN",
       "evidence": "The solo founder authorized this continuing engineering/staging execution and technical reconciliation. Technical evidence is unfinished; no acceptance event, independent reviewer or production authority is invented."
     }
-  ],
-  "externalBlockers": [],
-  "proposedCandidateSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
-  "proposedCandidateState": "WORKFLOW_ALERT_SCOPE_MIGRATION_AND_FRESH_REVIEWED_DEPLOYMENT_PENDING",
-  "baseReleaseScope": {
-    "ownerDecisionDate": "2026-11-13",
-    "included": [
-      "cases/grievances",
-      "intake",
-      "assignment",
-      "members",
-      "representatives/stewards",
-      "senior representatives",
-      "officer/executive and governance access",
-      "documents/evidence",
-      "deadlines",
-      "messaging",
-      "English/French and mobile",
-      "audit/security/recovery"
-    ],
-    "excluded": [
-      "finance/dues persistence",
-      "Financial Officer 2.1"
-    ],
-    "financeRequirement": "Fail-closed sensitive boundaries only; financial feature implementation is not a release prerequisite."
-  },
-  "historicalLocalValidation": {
-    "focusedRemediation": "PASS \u2014 7 files, 65 tests",
-    "earlierRunEvidenceReplay": "PASS \u2014 25 files, 238 tests; 1 native-only file and 13 environment-gated cases skipped",
-    "accountingAndProvenance": "PASS \u2014 2 files, 10 tests",
-    "censusContract": "PASS \u2014 3 tests",
-    "holisticRegression": {
-      "status": "ENVIRONMENT_HOLD",
-      "passedFiles": 3273,
-      "passedTests": 49052,
-      "skippedFiles": 116,
-      "skippedTests": 1682,
-      "failedFiles": 2,
-      "failedTests": 13,
-      "failures": [
-        "contract-tests/civic-oci-doctrine-integrity.test.ts \u2014 10 unrelated civic authorization/filesystem-context fixture failures",
-        "scripts/bootstrap-v2/local-vault-fixture.test.ts \u2014 3 fixtures could not import the host Python cryptography package"
-      ],
-      "unionEyesAccountingAuthorityOrCensusFailure": false
-    }
-  },
-  "localValidation": {
-    "candidateRepair": "30 focused tests; independent Python checksum vector; identity contract and Bicep compilation pass. Exact-head CI is pending in #1210.",
-    "navigationHarness": "Nine settlement contracts and source-derived inventory checks passed; #1208 admitted after all registered checks and 16 trusted required successes.",
-    "recoveryHarness": "Six fault/recovery contracts passed locally; #1209 CI/main admission and protected runtime rehearsal pending.",
-    "baseAuthorityPhysicalGuards": "108 focused checks and exact source-ed13cf0a native export/restore/repeat/privileges PASS (24576 catalog objects); not staging acceptance.",
-    "baseCaseworkRepair": "215 member-policy/evidence/request/RLS checks +108 authority/messaging/security checks +25 steward identity checks PASS. Exact cbf2bc93 native export/restore/repeat/privileges PASS,24576 catalog objects. Local/source evidence is not runtime acceptance.",
-    "operationalRepair": "44 release/budget,13auth/runtime and28readiness/intake/evidence local checks PASS; Bicep, inventory, ops validation, source-plan and exact native export PASS. No runtime acceptance inferred. Seven corrected probe-contract checks also pass, including actual process-only liveness without database connectivity.",
-    "grievanceAccess": "144 local route/model/console/navigation/catalog checks PASS, including revoked-author notes and English/French bounded controls. Exact source native installation/restore/repeat/privileges PASS. Actual runtime remains required.",
-    "ciCorrection": "Prior f4f03cd1 full CI failed environment census and notification link expectations; corrected declarations/documentation and expectations pass strict census and111local checks. No ceiling changed; exact CI and runtime acceptance remain required.",
-    "stagingAuthorityCorrection": "Eight identity/connection contracts, Bicep compilation and inventory PASS. Exact9a7ee373 fresh/restore/repeat/native privileges and current-primary read-only guard NOOP PASS. Actual scoped staging telemetry authority repair PASS; app deployment and runtime qualification still pending.",
-    "workflowHistoryCorrection": "Seven budget/history checks pass, including actual shallow/full local Git ancestry reproduction. The existing fail-closed source/serving ancestry guards remain intact. Workflow-only CI/main admission and fresh reviewed rollout are still required.",
-    "stagingLogAlertScopeMigration": "34 focused release/history/identity/migration checks pass, including immutable-provider failure reproduction, complete pre-delete snapshots, unreviewed-setting refusal and restoration after failed recreation. Protected exact-workflow CI/main/reviewed apply and runtime remain pending. Partial-apply retry also verifies the retained candidate image before bounded reactivation; promotion still requires actual healthy state/source. New infrastructure provenance binds the entire admitted IaC Git tree and template hash separately from image source; the cron-rule query excludes actual normal-zero exits and passes Azure-executed controlled failure vectors. Current deployed alert correction/complete rollout still required."
-  },
-  "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
-  "previousUndeployedBuild": {
-    "sourceSha": "2786943ac51f42b24edc808031015b539ae091f1",
-    "workflowDefinitionSha": "923858df7068afa3f03210aa4c38686ea3519765",
-    "runId": "43520878953",
-    "status": "SUCCESS",
-    "deployed": false,
-    "supersededForQualificationBy": "167f95034fbdaa163cd67e79c4bca622284e0d77"
-  },
-  "securityFindingEvidence": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json",
-  "observedStagingCandidateSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
-  "currentSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-restored-rehearsal-9a7ee373.json"
+  ]
 }

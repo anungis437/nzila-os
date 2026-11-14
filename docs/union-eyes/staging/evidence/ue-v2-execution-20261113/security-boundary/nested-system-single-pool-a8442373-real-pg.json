@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "purpose": "EXACT_SOURCE_BINDING_TO_ACTUAL_PRIMARY_SINGLE_POOL_REGRESSION",
+  "evidenceClass": "SOURCE_BYTE_EQUIVALENCE_TO_ACTUAL_NATIVE_EXECUTION_NOT_DEPLOYED_APP_ACCEPTANCE",
+  "candidateSourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+  "originalActualExecutionSourceSha": "d135cf4ea834d981901376fc76198df253a51515",
+  "originalActualExecutionAt": "2026-11-14T16:28:43.324Z",
+  "originalActualExecutionReceiptSha256": "e58c58fbd13b232466d697ef5d4676d0fb79969169dd0dabc25ee34209d0fba1",
+  "originalActualExecutionReceipt": "nested-system-single-pool-d135cf4e-real-pg.json",
+  "verifiedCurrentSourceInputs": 208,
+  "allSourceModuleBytesIdentical": true,
+  "compiledBundleSha256": "c4bba7eb3168ba2df1e21abd2e03811bfa97e423ab1b1103f35fed4218af8ee3",
+  "checks": [
+    "nested-system-savepoint-uses-the-same-physical-connection-and-cleared-audit-context",
+    "actual-deadline-email-suppression-read-completes-with-system-pool-one",
+    "failed-inner-query-rolls-back-to-savepoint-and-outer-transaction-remains-usable",
+    "parent-database-role-and-audit-context-restored"
+  ],
+  "verifiedAt": "2026-11-14T16:34:55.240946+00:00",
+  "stagingGo": false
+}
