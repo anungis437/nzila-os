@@ -57,6 +57,7 @@ describe('nextStatuses: what the server’s lifecycle rules allow', () => {
 
 describe('maySetStatus: the authority the status route requires', () => {
   const access = (overrides: Record<string, unknown> = {}) => ({
+    canViewInternal: true,
     isPrimaryOwner: false,
     isSecondaryCollaborator: false,
     accessRole: null,
@@ -129,7 +130,7 @@ describe('readGrievanceDetail', () => {
       events: [],
       governedDocuments: [],
       collaborators: [],
-      effectiveAccess: { isPrimaryOwner: true, isSecondaryCollaborator: false, accessRole: 'primary_owner', canManageAssignments: true, canUploadDocuments: true },
+      effectiveAccess: { canViewInternal: true, isPrimaryOwner: true, isSecondaryCollaborator: false, accessRole: 'primary_owner', canManageAssignments: true, canUploadDocuments: true },
       ...overrides,
     },
   });
@@ -150,6 +151,6 @@ describe('readGrievanceDetail', () => {
     expect(() => readGrievanceDetail(body({ events: [{ eventType: 'x' }] }))).toThrow('an event id');
     expect(() => readGrievanceDetail(body({ governedDocuments: ['nope'] }))).toThrow('not a record');
     expect(() => readGrievanceDetail({ id: 'g-1' })).toThrow('no data');
-    expect(() => readGrievanceDetail(body({ effectiveAccess: { isPrimaryOwner: 'yes' } }))).toThrow('the caller’s access');
+    expect(() => readGrievanceDetail(body({ effectiveAccess: { canViewInternal: true, isPrimaryOwner: 'yes' } }))).toThrow('the caller’s access');
   });
 });

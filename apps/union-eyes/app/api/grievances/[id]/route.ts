@@ -149,7 +149,7 @@ export const GET = withApi(
 
     return standardSuccessResponse({
       ...(internal ? grievance : memberGrievanceView(grievance)),
-      events: internal ? events : memberGrievanceEvents(events, userId),
+      events: internal ? events : memberGrievanceEvents(events),
       documents: governedDocuments,
       governedDocuments,
       primaryLroId,

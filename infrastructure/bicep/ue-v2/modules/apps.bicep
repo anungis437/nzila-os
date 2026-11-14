@@ -38,6 +38,15 @@ param featureProfile string = 'internal'
 param enableStripe bool = false
 param tags object = {}
 
+var stagingConnectionBudget = loadJsonContent('../staging-connection-budget.json')
+var runtimePoolLimits = deploymentEnvironment == 'prod' ? {
+  DB_POOL_MAX: 10
+  DATABASE_POOL_SIZE: 20
+  SYSTEM_DB_POOL_MAX: 5
+  AUTH_DB_POOL_MAX: 5
+  AUTH_SYSTEM_DB_POOL_MAX: 5
+} : stagingConnectionBudget.poolCaps
+
 var kvBase = endsWith(keyVaultUri, '/') ? keyVaultUri : '${keyVaultUri}/'
 // Secret names are Key Vault secret names; values are resolved at revision start by the identity.
 var secretNames = [
@@ -52,7 +61,7 @@ var secretNames = [
   'resend-api-key'
   'storage-account-key'
 ]
-var stagingAuthSystemSecretNames = deploymentEnvironment == 'staging' ? ['auth-system-database-url'] : []
+var stagingAuthSystemSecretNames = deploymentEnvironment == 'staging' ? ['auth-system-database-url', 'nar-signing-secret'] : []
 var authSystemEnvironment = deploymentEnvironment == 'staging' ? [
   { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: 'auth-system-database-url' }
 ] : [
@@ -63,6 +72,9 @@ var stagingEnvironment = deploymentEnvironment == 'staging' ? [
   { name: 'UE_APP_URL', value: appUrl }
   { name: 'UE_MARKETING_URL', value: effectiveSiteUrl }
   { name: 'UE_FRONTEND_IMAGE_DIGEST', value: last(split(appImage, '@')) }
+  { name: 'NAR_SIGNING_SECRET', secretRef: 'nar-signing-secret' }
+  { name: 'NAR_SIGNING_KEY_ID', value: 'ue-v2-staging-nar-v1' }
+  { name: 'READY_REQUIRE_DECISION_PROOF', value: 'true' }
 ] : []
 var stripeSecretNames = enableStripe ? ['stripe-secret-key', 'stripe-webhook-secret'] : []
 var entraConfigured = !empty(entraClientId) && !empty(entraTenantId)
@@ -164,17 +176,20 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
           probes: [
             {
               type: 'Liveness'
-              httpGet: { path: '/api/health', port: 3000 }
+              // Staging restarts only an unresponsive process, not a slow dependency census.
+              httpGet: { path: deploymentEnvironment == 'staging' ? '/api/health/liveness' : '/api/health', port: 3000 }
               initialDelaySeconds: 20
               periodSeconds: 20
+              timeoutSeconds: deploymentEnvironment == 'staging' ? 5 : 1
             }
             {
               type: 'Readiness'
               // Readiness must fail closed when the database, identity or required services are unavailable.
-              // Liveness remains /api/health so a temporary dependency outage does not cause restart loops.
+              // Catalog, signing and service checks control traffic admission, not process restarts.
               httpGet: { path: '/api/ready', port: 3000 }
               initialDelaySeconds: 10
               periodSeconds: 10
+              timeoutSeconds: deploymentEnvironment == 'staging' ? 10 : 1
             }
           ]
           env: concat([
@@ -190,7 +205,14 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'NEXT_PUBLIC_SITE_URL', value: effectiveSiteUrl }
             { name: 'AUTH_URL', value: appUrl }
             { name: 'AUTH_TRUST_HOST', value: 'true' }
-            { name: 'DB_POOL_MAX', value: '10' }
+            // At most two revisions x two replicas during rollout. Seven distinct
+            // pools per process x one connection = 28, leaving seven ordinary
+            // slots on staging's 50-connection server after 15 reserved slots.
+            { name: 'DB_POOL_MAX', value: string(runtimePoolLimits.DB_POOL_MAX) }
+            { name: 'DATABASE_POOL_SIZE', value: string(runtimePoolLimits.DATABASE_POOL_SIZE) }
+            { name: 'SYSTEM_DB_POOL_MAX', value: string(runtimePoolLimits.SYSTEM_DB_POOL_MAX) }
+            { name: 'AUTH_DB_POOL_MAX', value: string(runtimePoolLimits.AUTH_DB_POOL_MAX) }
+            { name: 'AUTH_SYSTEM_DB_POOL_MAX', value: string(runtimePoolLimits.AUTH_SYSTEM_DB_POOL_MAX) }
             { name: 'AZURE_KEY_VAULT_URL', value: keyVaultUri }
             { name: 'AZURE_STORAGE_ACCOUNT_NAME', value: storageAccountName }
             { name: 'AZURE_BLOB_CONTAINER', value: documentsContainerName }

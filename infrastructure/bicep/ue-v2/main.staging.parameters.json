@@ -5,10 +5,10 @@
     "entraClientId": { "value": "5470c759-3dde-4009-9fd6-3eee46ab7b72" },
     "entraTenantId": { "value": "cc15259a-d2bf-421f-8e44-dccf8dc6232a" },
     "env": { "value": "staging" },
-    "logAnalyticsName": { "value": "nzila-canada-prod-law" },
-    "logAnalyticsResourceGroup": { "value": "nzila-canada-prod-rg" },
-    "createLogAnalytics": { "value": false },
-    "logAnalyticsDailyCapGb": { "value": -1 },
+    "logAnalyticsName": { "value": "nzila-ue-v2-staging-law" },
+    "logAnalyticsResourceGroup": { "value": "nzila-canada-staging-rg" },
+    "createLogAnalytics": { "value": true },
+    "logAnalyticsDailyCapGb": { "value": 1 },
     "createActionGroup": { "value": true },
     "actionGroupEmailReceivers": {
       "value": [

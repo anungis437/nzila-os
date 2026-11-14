@@ -33,11 +33,13 @@ export function memberGrievanceEvents<
     actorUserId: string
     notes: string | null
   },
->(events: T[], userId: string) {
+>(events: T[]) {
   return events.map((event) => ({
     id: event.id,
     eventType: event.eventType,
     createdAt: event.createdAt,
-    notes: event.actorUserId === userId ? event.notes : null,
+    // Journal notes have no public-visibility classification. Authorship is not
+    // continuing internal authority after a representative assignment is revoked.
+    notes: null,
   }))
 }

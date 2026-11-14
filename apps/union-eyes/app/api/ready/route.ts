@@ -6,6 +6,15 @@ import { evaluateTestBypassGuard, readTestBypassGuardEnv } from '@/lib/reality/t
 
 const APP = 'union-eyes'
 
+async function checkDecisionProofReady(): Promise<boolean> {
+  try {
+    const { getNarSigningSecret } = await import('@nzila/nar')
+    return (await getNarSigningSecret()).trim().length >= 32
+  } catch {
+    return false
+  }
+}
+
 function parseBoolEnv(value: string | undefined, defaultValue: boolean): boolean {
   if (!value) return defaultValue
   return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase())
@@ -83,6 +92,7 @@ function checkCalendarTokenEncryptionReady(): boolean {
 }
 
 export async function GET() {
+  const requireDecisionProof = parseBoolEnv(process.env.READY_REQUIRE_DECISION_PROOF, false)
   const requireQueue = parseBoolEnv(process.env.READY_REQUIRE_QUEUE, false)
   const requireStorage = parseBoolEnv(process.env.READY_REQUIRE_STORAGE, false)
   const [database, queue, storage, catalogAuthority] = await Promise.all([
@@ -111,6 +121,10 @@ export async function GET() {
     thirdParty: 'unknown',
   }
 
+  if (requireDecisionProof) {
+    checksInput.decisionProof = await checkDecisionProofReady()
+  }
+
   if (requireQueue) {
     checksInput.queue = queue
   }
@@ -134,6 +148,7 @@ export async function GET() {
     'noTestBypass',
     'database',
     'catalogAuthority',
+    ...(requireDecisionProof ? ['decisionProof'] : []),
     ...(requireStorage ? ['storage'] : []),
     ...(requireQueue ? ['queue'] : []),
     ...(requireCalendarIntegrations ? ['calendarIntegrations'] : []),

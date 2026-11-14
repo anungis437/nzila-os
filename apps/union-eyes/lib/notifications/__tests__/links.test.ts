@@ -126,8 +126,16 @@ describe('every builder leads to a page the person it is written for may open', 
     expect(canAccessDashboardPath(pathname, experience, true)).toBe(true);
   });
 
-  it('is checked against the policy as it stands: the grievance pages are open to no role, so no builder points at them', () => {
-    for (const experience of EXPERIENCES) expect(canAccessDashboardPath(`/dashboard/grievances/${CLAIM}`, experience, false), experience).toBe(false);
+  it('keeps individual grievance links reachable through case authority without admitting collection or creation routes', () => {
+    const detail = `/dashboard/grievances/${CLAIM}`;
+    expect(judgeLink(`/en-CA${detail}`, pages, locales)).toBe('OK');
+    for (const experience of EXPERIENCES) {
+      for (const pilot of [false, true]) {
+        expect(canAccessDashboardPath(detail, experience, pilot), experience).toBe(true);
+        expect(canAccessDashboardPath('/dashboard/grievances', experience, pilot)).toBe(false);
+        expect(canAccessDashboardPath('/dashboard/grievances/new', experience, pilot)).toBe(false);
+      }
+    }
   });
 });
 

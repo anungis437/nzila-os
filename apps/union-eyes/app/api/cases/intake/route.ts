@@ -243,6 +243,13 @@ export async function POST(request: Request) {
           isAnonymous: data.isAnonymous,
         },
       });
+      // Canonical sealing shares the live claim transaction; failures roll back the
+      // case, decision proof and audit instead of leaving a successful orphan intake.
+      if (canonical) await buildUnionEvidencePack({
+        actionType: 'CASE_INTAKE_SUBMITTED', orgId, actorId: userId,
+        artifacts: [{ type: 'case_intake', data: { claimId: newClaim.claimId,
+          claimNumber: newClaim.claimNumber, caseType: data.caseType, severity } }],
+      });
       return { claim: newClaim, canonicalDecision };
     });
 
@@ -254,7 +261,7 @@ export async function POST(request: Request) {
     });
 
     // Evidence: tamper-proof case intake trail
-    buildUnionEvidencePack({
+    if (!canonical) buildUnionEvidencePack({
       actionType: 'CASE_INTAKE_SUBMITTED',
       orgId: orgId,
       actorId: userId,

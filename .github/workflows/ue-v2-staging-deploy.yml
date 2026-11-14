@@ -342,6 +342,14 @@ jobs:
           jq -r '"| Change | Resource |", "|---|---|", (.changes[] | "| \(.changeType) | `\(.resourceId)` |")' \
             "$RUNNER_TEMP/evidence/what-if.json" > "$RUNNER_TEMP/evidence/what-if-summary.md"
 
+      - name: Bound every staging pool against actual PostgreSQL reserved slots
+        run: |
+          set -euo pipefail
+          node tooling/scripts/check-ue-v2-staging-connection-budget.mjs \
+            --policy source/infrastructure/bicep/ue-v2/staging-connection-budget.json \
+            --parameters "$RUNNER_TEMP/plan/deploy-parameters.json" \
+            > "$RUNNER_TEMP/evidence/connection-budget.json"
+
       - name: What-if gate (no deletes, staging group only)
         id: gate
         run: |
@@ -472,6 +480,19 @@ jobs:
           node "$GATE" --gate what-if --what-if "$RUNNER_TEMP/evidence/what-if-apply.json" --registry-resource-group "$REGISTRY_RG"
           node "$GATE" --gate drift --reviewed "$REVIEWED" --fresh "$RUNNER_TEMP/evidence/what-if-apply.json"
 
+      - name: Drain non-serving history before creating another revision
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          WHATIF_ARTIFACTS="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}"
+          PINNED=$(jq -r '.parameters.appPinnedRevisionName.value // empty' "$WHATIF_ARTIFACTS/deploy-parameters.json")
+          if [ -n "$PINNED" ]; then
+            EXPECTED_SERVING_REVISION="$PINNED" \
+            RETIREMENT_RECEIPT="$RUNNER_TEMP/evidence/pre-rollout-revision-retirement.json" \
+              node tooling/scripts/retire-ue-v2-staging-revisions.cjs
+          fi
+
       - name: az deployment group create
         env:
           DB_ADMIN_PASSWORD: ${{ secrets.UE_V2_STAGING_DB_ADMIN_PASSWORD }}
@@ -488,6 +509,15 @@ jobs:
             --query '{name:name, provisioningState:properties.provisioningState, outputs:properties.outputs}' \
             -o json > "$RUNNER_TEMP/evidence/deployment.json"
           test "$(jq -r .provisioningState "$RUNNER_TEMP/evidence/deployment.json")" = "Succeeded"
+
+      - name: Recheck the actual PostgreSQL connection budget before promotion
+        run: |
+          set -euo pipefail
+          WHATIF_ARTIFACTS="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}"
+          node tooling/scripts/check-ue-v2-staging-connection-budget.mjs \
+            --policy source/infrastructure/bicep/ue-v2/staging-connection-budget.json \
+            --parameters "$WHATIF_ARTIFACTS/deploy-parameters.json" \
+            > "$RUNNER_TEMP/evidence/connection-budget-after-apply.json"
 
       - name: Promote traffic to the new revision after it passes readiness
         # The Bicep deployment above pinned traffic to the previously-live revision, so the new
@@ -527,6 +557,16 @@ jobs:
           fi
           echo "$NEW_REVISION is healthy and confirmed running $SOURCE_SHA; promoting to 100% traffic."
           az containerapp ingress traffic set -g "$STAGING_RG" -n "$APP_NAME" --revision-weight "${NEW_REVISION}=100"
+
+      - name: Drain the prior revision after confirmed healthy promotion
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+          REQUIRE_CANDIDATE_SOURCE: 'true'
+        run: |
+          set -euo pipefail
+          EXPECTED_SERVING_REVISION="${APP_NAME}--rel${SOURCE_SHA:0:10}" \
+          RETIREMENT_RECEIPT="$RUNNER_TEMP/evidence/post-rollout-revision-retirement.json" \
+            node tooling/scripts/retire-ue-v2-staging-revisions.cjs
 
       - name: Record deployment (no secrets)
         if: always()

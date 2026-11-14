@@ -1,0 +1,12 @@
+{
+  "schema": "ue-v2-staging-connection-budget/v1",
+  "maximumActiveRevisionsDuringRollout": 2,
+  "ordinaryConnectionHeadroom": 7,
+  "poolCaps": {
+    "DB_POOL_MAX": 1,
+    "DATABASE_POOL_SIZE": 1,
+    "SYSTEM_DB_POOL_MAX": 1,
+    "AUTH_DB_POOL_MAX": 1,
+    "AUTH_SYSTEM_DB_POOL_MAX": 1
+  }
+}

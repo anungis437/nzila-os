@@ -155,6 +155,22 @@ describe('grievances/[id] route', () => {
     expect(m.requireKernelCaseAction).toHaveBeenCalledWith(expect.anything(),{userId:'u1',organizationId:'org_1'},G,'case:read');
   });
 
+  it('withholds even self-authored internal notes after a converter loses case authority', async () => {
+    const { GET } = await loadRoute();
+    m.getEffectiveCaseAccess.mockResolvedValueOnce({ canViewCase: false, isPrimaryOwner: false, canViewPrivateDocuments: false });
+    m.selectQueue = [
+      [{ id: G, createdBy: 'u1', grievantId: 'represented-member', organizationId: 'org_1', title: 'Converted case' }],
+      [{ id: 'private-event', eventType: 'status_changed', actorUserId: 'u1', notes: 'INTERNAL prior representative strategy', createdAt: '2026-11-14' }], [], [],
+    ];
+    const response = await GET(new Request(`http://localhost/api/grievances/${G}`));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.data.effectiveAccess.canViewInternal).toBe(false);
+    expect(body.data.events).toEqual([{ id: 'private-event', eventType: 'status_changed', createdAt: '2026-11-14', notes: null }]);
+    expect(JSON.stringify(body)).not.toContain('INTERNAL prior representative strategy');
+    expect(m.requireKernelCaseAction).toHaveBeenCalled();
+  });
+
   it('returns governed documents and tracks pilot access event', async () => {
     const { GET } = await loadRoute();
     m.getEffectiveCaseAccess.mockResolvedValueOnce({
