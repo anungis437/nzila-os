@@ -100,15 +100,26 @@ FROM payment_allocations
 GROUP BY payment_id, invoice_id
 HAVING COUNT(*) > 1
 ORDER BY allocation_count DESC, payment_id, invoice_id;
--- Invoice allocation overrun: compare allocations with the invoice's
--- authoritative total only after confirming tax and adjustment semantics.
--- Report totals without assuming whether credits are already reflected.
-SELECT i.id AS invoice_id, i.organization_id, i.subtotal, i.tax_amount,
+-- Invoice allocation overrun: use the persisted authoritative total_amount,
+-- rather than recomputing subtotal + tax, which can omit adjustments.
+-- Review credit/refund semantics before classifying a returned row as a defect.
+SELECT i.id AS invoice_id, i.organization_id, i.total_amount,
+       i.amount_paid AS recorded_amount_paid,
        COALESCE(SUM(pa.amount), 0) AS allocated_amount
 FROM platform_invoices i
 JOIN payment_allocations pa ON pa.invoice_id = i.id
-GROUP BY i.id, i.organization_id, i.subtotal, i.tax_amount
-HAVING COALESCE(SUM(pa.amount), 0) > (i.subtotal + i.tax_amount)
+GROUP BY i.id, i.organization_id, i.total_amount, i.amount_paid
+HAVING COALESCE(SUM(pa.amount), 0) > i.total_amount
+ORDER BY i.organization_id, i.id;
+-- Persisted paid totals and allocation sums may diverge; list discrepancies
+-- for reconciliation without assuming pending/refunded allocations count as paid.
+SELECT i.id AS invoice_id, i.organization_id, i.status,
+       i.amount_paid AS recorded_amount_paid,
+       COALESCE(SUM(pa.amount), 0) AS allocated_amount
+FROM platform_invoices i
+LEFT JOIN payment_allocations pa ON pa.invoice_id = i.id
+GROUP BY i.id, i.organization_id, i.status, i.amount_paid
+HAVING COALESCE(SUM(pa.amount), 0) <> i.amount_paid
 ORDER BY i.organization_id, i.id;
 -- Inspect existing uniqueness and partial-index predicates.
 SELECT indexname, indexdef
