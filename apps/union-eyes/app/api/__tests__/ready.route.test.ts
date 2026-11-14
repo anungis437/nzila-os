@@ -5,7 +5,10 @@ const m = vi.hoisted(() => ({
   dbExecute: vi.fn(),
   containerExists: vi.fn(),
   catalogAdmission: vi.fn(),
+  getNarSigningSecret: vi.fn(),
 }));
+
+vi.mock('@nzila/nar', () => ({ getNarSigningSecret: m.getNarSigningSecret }));
 
 vi.mock('@nzila/db', () => ({ db: { execute: m.dbExecute } }));
 vi.mock('@/lib/operations/catalog-admission', () => ({ evaluateCatalogAdmission: m.catalogAdmission }));
@@ -29,6 +32,8 @@ async function loadRoute() {
 describe('ready route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    delete process.env.READY_REQUIRE_DECISION_PROOF;
+    m.getNarSigningSecret.mockResolvedValue('owned-test-proof-signing-material-32-characters');
     delete process.env.READY_REQUIRE_QUEUE;
     delete process.env.READY_REQUIRE_STORAGE;
     delete process.env.DJANGO_API_URL;
@@ -51,6 +56,21 @@ describe('ready route', () => {
     const json = await response.json();
     expect(json.ready).toBe(true);
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('requires the actual decision signing key when staging enables the proof gate', async () => {
+    process.env.READY_REQUIRE_DECISION_PROOF = 'true';
+    const { GET } = await loadRoute();
+    expect((await GET()).status).toBe(200);
+    expect(m.getNarSigningSecret).toHaveBeenCalledOnce();
+    for (const key of ['', 'short']) {
+      m.getNarSigningSecret.mockResolvedValue(key);
+      const response = await GET();
+      expect(response.status).toBe(503);
+      expect(await response.json()).toMatchObject({ checks: { decisionProof: false } });
+    }
+    m.getNarSigningSecret.mockRejectedValue(new Error('key unavailable'));
+    expect((await GET()).status).toBe(503);
   });
 
   it('returns 503 when connectivity passes but catalog authority is rejected', async () => {

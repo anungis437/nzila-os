@@ -21,6 +21,7 @@ const m = vi.hoisted(() => ({
     debug: vi.fn(),
   },
   eventEmit: vi.fn(),
+  buildUnionEvidencePack: vi.fn(),
   requireCaseFilingCapacity: vi.fn(),
   selectClaimRows: [] as unknown[][],
 }));
@@ -47,7 +48,7 @@ vi.mock('@/db/queries/claims-queries', () => ({
 }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 vi.mock('@/services/platform-economics/entitlement-guard', () => ({ requireEntitlement: m.requireEntitlement }));
-vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: vi.fn(() => Promise.resolve()) }));
+vi.mock('@/lib/evidence', () => ({ buildUnionEvidencePack: m.buildUnionEvidencePack }));
 vi.mock('@/lib/events', () => ({
   AppEvents: { CLAIM_CREATED: 'claim.created' },
   eventBus: { emit: m.eventEmit },
@@ -84,6 +85,7 @@ describe('cases/intake route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.canonical.mockReturnValue(false);
+    m.buildUnionEvidencePack.mockResolvedValue(undefined);
     m.selectClaimRows.length = 0;
     m.auth.mockResolvedValue({ userId: 'user_1' });
     m.getOrganizationIdForUser.mockResolvedValue('org_1');
@@ -284,6 +286,30 @@ describe('cases/intake route', () => {
     expect(m.requireCaseFilingCapacity).toHaveBeenCalledWith(expect.anything(), { userId: 'user_1', organizationId: 'org_1' }, 'member');
     expect(m.createClaim).not.toHaveBeenCalled();
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
+    expect(m.eventEmit).not.toHaveBeenCalled();
+  });
+
+  it('holds the canonical transaction until evidence settles and propagates a sealing failure', async () => {
+    m.canonical.mockReturnValue(true);
+    let rejectSeal!: (error: Error) => void;
+    const seal = new Promise((_, reject) => { rejectSeal = reject; });
+    m.buildUnionEvidencePack.mockReturnValue(seal);
+    let committed = 0;
+    const previous = m.withRLSContext.getMockImplementation()!;
+    m.withRLSContext.mockImplementation(async (...args) => {
+      const result = await previous(...args);
+      committed++;
+      return result;
+    });
+    const { POST } = await loadRoute();
+    const pending = POST(new Request('http://localhost/api/cases/intake', { method: 'POST', body: '{}' }));
+    await vi.waitFor(() => expect(m.buildUnionEvidencePack).toHaveBeenCalledOnce());
+    // Only the read-only duplicate lookup completed; the mutation transaction is open.
+    expect(committed).toBe(1);
+    expect(m.eventEmit).not.toHaveBeenCalled();
+    rejectSeal(new Error('actual evidence storage unavailable'));
+    expect((await pending).status).toBe(500);
+    expect(committed).toBe(1);
     expect(m.eventEmit).not.toHaveBeenCalled();
   });
 

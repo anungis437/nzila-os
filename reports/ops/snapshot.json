@@ -1,36 +1,37 @@
 {
   "_meta": {
     "schema_version": "2.0.0",
-    "generated_at": "2026-11-04T21:49:51.380Z",
+    "generated_at": "2026-11-14T05:14:37.426Z",
     "generator": "tooling/scripts/generate-ops-evidence.mjs",
     "freshness_days": 7,
-    "window_days": 30
+    "window_days": 30,
+    "source_qualification": "GitHub build metrics were queried now. August DORA and cost exports are historical and excluded from current values."
   },
   "metrics": {
     "deploy_frequency_30d": {
-      "value": 0.47,
+      "value": null,
       "source": "ops/outputs/dora-metrics.json: metrics.deployment_frequency.value (deploys/week)",
-      "source_needed": null
+      "source_needed": "Committed input was collected 2026-08-25 and does not measure the current reporting window; collect a current export."
     },
     "build_success_rate_30d": {
-      "value": null,
-      "source": "GitHub Actions API (not available in current execution context)",
-      "source_needed": "Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history."
+      "value": 6.06,
+      "source": "GitHub Actions API ci.yml runs on main (30d window, completed runs: 66)",
+      "source_needed": null
     },
     "median_build_minutes": {
-      "value": null,
-      "source": "GitHub Actions API (not available in current execution context)",
-      "source_needed": "Set GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY to query GitHub Actions build history."
+      "value": 20.65,
+      "source": "GitHub Actions API ci.yml runs on main (30d window, completed runs: 66)",
+      "source_needed": null
     },
     "change_failure_rate_30d": {
-      "value": 0,
+      "value": null,
       "source": "ops/outputs/dora-metrics.json: metrics.change_failure_rate.value",
-      "source_needed": null
+      "source_needed": "Committed input was collected 2026-08-25 and does not measure the current reporting window; collect a current export."
     },
     "mttr_minutes": {
-      "value": 0,
+      "value": null,
       "source": "ops/outputs/dora-metrics.json: metrics.mttr.value (hours -> minutes)",
-      "source_needed": null
+      "source_needed": "Committed input was collected 2026-08-25 and does not measure the current reporting window; collect a current export."
     },
     "uptime_30d": {
       "value": null,
@@ -58,9 +59,9 @@
       "source_needed": "No error-rate rollup artifact found. Add monthly app error export to ops/outputs/error-rate.json."
     },
     "monthly_infra_cost_estimate": {
-      "value": 4241.2,
+      "value": null,
       "source": "ops/outputs/cost-allocation.json: total_monthly_cost_usd",
-      "source_needed": null
+      "source_needed": "Committed input was collected 2026-08-25 and does not measure the current reporting window; collect a current export."
     },
     "incidents_last_30d": {
       "value": null,
