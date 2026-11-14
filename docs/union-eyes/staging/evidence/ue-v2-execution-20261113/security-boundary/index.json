@@ -169,14 +169,15 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "4687a4ed84935cedb2b436738373b13b7cda2158",
+    "sourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
     "sourcePR": 1228,
+    "integrationPR": 1229,
     "deployed": false,
-    "localNativeExport": "local-native-export-4687a4ed.json",
-    "nativeSourceAdmission": "candidate-restored-rehearsal-4687a4ed.json",
+    "localNativeExport": "local-native-export-5bee2347.json",
+    "nativeSourceAdmission": "candidate-restored-rehearsal-5bee2347.json",
+    "primaryReadOnlyNoop": "primary-source-noop-5bee2347-qualification.json",
     "ciAndRuntimeStillRequired": true,
-    "repairSummary": "Use real case id for nullable workbench references; exact staff grievance collection entry in English/French",
-    "primaryReadOnlyNoop": "primary-source-noop-4687a4ed-qualification.json"
+    "repairSummary": "Nullable workbench case reference fallback and exact staff grievance collection entry; dependent tests enforce creation/management denials"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -252,5 +253,11 @@
     "revision": "nzila-ue-v2-staging-app--rel9a7ee373e1",
     "trafficPercent": 100,
     "stagingGo": false
+  },
+  "supersededWorkbenchCandidate": {
+    "sourceSha": "4687a4ed84935cedb2b436738373b13b7cda2158",
+    "sourcePR": 1228,
+    "wholeApplicationCI": "source-4687a4ed-whole-application-ci-failure.json",
+    "deployed": false
   }
 }
