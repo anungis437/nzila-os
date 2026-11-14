@@ -169,15 +169,15 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "b6c6a938d8c52e80a5844f11ed1bc8ec1a19f14c",
-    "sourcePR": 1218,
+    "sourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+    "sourcePR": 1220,
     "integrationPR": 1219,
-    "localNativeExport": "local-native-export-b6c6a938.json",
+    "localNativeExport": "local-native-export-9a7ee373.json",
     "deployed": false,
     "ciAndRuntimeStillRequired": true,
     "repairSummary": "Capacity, signing/atomic intake, dedicated telemetry, process liveness, individual grievance reachability, bounded member tools and revoked-author note privacy",
-    "restoredRehearsal": "candidate-restored-rehearsal-b6c6a938.json",
-    "primaryGuardReadOnlyNoop": "primary-current-source-noop-b6c6a938.json",
+    "restoredRehearsal": "candidate-restored-rehearsal-9a7ee373.json",
+    "primaryGuardReadOnlyNoop": "primary-current-source-noop-9a7ee373.json",
     "priorCandidateCi": {
       "sourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7",
       "status": "FAIL",
@@ -187,7 +187,10 @@
       ],
       "correctedLocalChecks": 111,
       "runtimePassInferred": false
-    }
+    },
+    "precedingQualifiedBuild": "43568101291",
+    "precedingDeploymentFailure": "deployment-43569312473-authority-failure.json",
+    "actualScopedPermissionRepair": "staging-telemetry-authority-repair-20261114.json"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {

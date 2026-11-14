@@ -190,7 +190,10 @@ cat > ue-staging-deployer-role.json <<JSON
     "Microsoft.Insights/actionGroups/*",
     "Microsoft.Insights/scheduledQueryRules/*",
     "Microsoft.Insights/diagnosticSettings/*",
-    "Microsoft.OperationalInsights/workspaces/read"
+    "Microsoft.OperationalInsights/workspaces/read",
+    "Microsoft.OperationalInsights/workspaces/write",
+    "Microsoft.OperationalInsights/workspaces/sharedKeys/action",
+    "Microsoft.OperationalInsights/workspaces/listKeys/action"
   ],
   "NotActions": [
     "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/*",
@@ -357,3 +360,12 @@ not deleted: decommissioning is not authorized.
 ## 2026-11-10 qualification update
 
 Azure what-if run [42753019682](https://github.com/anungis437/nzila-os/actions/runs/42753019682) completed the provider what-if step, superseding the earlier Canada Central ManagedEnvironmentCount rejection. Its downstream policy gate rejected an Azure symbolic AcrPull role assignment; PR [#1159](https://github.com/anungis437/nzila-os/pull/1159) restricts acceptance to the exact intended staging identity and built-in AcrPull role. The founder-operated change approval is recorded in CHG-2026-0114. A new complete what-if and staging apply are still required; this is not deployed-runtime evidence.
+
+
+## Dedicated staging telemetry workspace authority (November14)
+
+The November14 rollout selects `nzila-ue-v2-staging-law` in the staging group (Canada Central,30day retention,1GB/day cap). The first protected apply run43569312473 stopped during its fresh what-if because the deploy principal49397d18-40f0-4cca-8a82-cd753da08768 lacked `Microsoft.OperationalInsights/workspaces/write`. No infrastructure apply, traffic promotion or data reset occurred.
+
+The existing staging-only custom deployer role needs workspace write and shared/list-key control-plane actions as shown above. Preserve its staging-group-only assignable scope and empty DataActions. For alert/query validation, reproduce the already qualified monitoring consumer and built-in Monitoring Contributor permissions at the single dedicated staging workspace. Do not expand any production assignment or change the shared production workspace. Record the actual role-definition/assignment hashes and scope after execution; a permission recipe is not an actual deployment or runtime pass.
+
+The application's signing-key access is separately declared in `stagingRuntimeSecretNames`: `nar-signing-secret` receives the same named-secret Key Vault Secrets User grant as other staging runtime secrets. The application identity must never receive operator/bootstrap credential access. The source contract checks references against this allow-list.

@@ -193,6 +193,7 @@ jobs:
           node --test tooling/scripts/lib/union-eyes-deployment-safety.test.mjs
           node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs
           node --test tooling/scripts/lib/ue-v2-connection-budget.test.mjs
+          node --test tooling/scripts/lib/ue-v2-staging-identity-contract.test.cjs
           node --test tooling/scripts/lib/ue-guarded-postgres-dump.test.mjs
           node --test tooling/scripts/lib/ue-managed-pg16-catalog.test.mjs
           POSTGRES_BIN="$(pg_config --bindir)"
