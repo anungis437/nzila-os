@@ -61,6 +61,7 @@
     "apply": "clone-combined-apply-cf689b70.json",
     "appliedSourceSha": "cf689b7064037019bcdcf7c903732989be2eb827",
     "sameRepairBundleAndPlanAsCandidate": true,
-    "nativeSignedProof": "PENDING"
+    "nativeSignedProof": "clone-real-signed-native-audit-84239d33.json",
+    "signedSourceProvenance": "clone-signed-source-84239d33.json"
   }
 }

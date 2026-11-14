@@ -1,0 +1,77 @@
+{
+  "ok": true,
+  "status": "PASS",
+  "purpose": "PRIVATE_PITR_SOURCE_BOUND_NATIVE_SESSION_ISOLATION_AND_AUDIT",
+  "observedApplicationSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "compiledFromApplicationSourceSha": "84239d33dbfbb9a57827fcb91a3ef32a26c2fe8f",
+  "diagnosticOnly": true,
+  "at": "2026-11-14T00:00:32.789Z",
+  "identity": {
+    "principal": "ue_staging_runtime",
+    "role": "union_eyes_runtime",
+    "database": "ue_v2_staging",
+    "address": "10.40.4.5"
+  },
+  "addresses": [
+    {
+      "address": "10.40.4.5",
+      "family": 4
+    }
+  ],
+  "apiCreatedCases": [
+    "e951ac6a-71b8-41d6-82ef-511e0e1e5f53",
+    "62a76937-9342-4185-87cf-b1cf66d806c8"
+  ],
+  "checks": [
+    "6a0fe972-ed1c-49ca-83c8-00b9b214f96f:unbound-context-denied",
+    "59d4c24e-acb6-4a0e-898a-ed20016c642c:unbound-context-denied",
+    "A:real-signature-issuer-audience-subject",
+    "A:own-organization-api-case-visible-foreign-hidden",
+    "A:forged-organization-denied",
+    "A:forged-actor-denied",
+    "A:missing-bearer-denied",
+    "A:hash-is-not-bearer-denied",
+    "A:cross-tenant-update-denied",
+    "A:current-case-audit-and-complete-hash-chain",
+    "A:cross-tenant-insert-refused-42501",
+    "A:bridge-revoked-after-callback",
+    "A:foreign-membership-binding-refused",
+    "B:real-signature-issuer-audience-subject",
+    "B:own-organization-api-case-visible-foreign-hidden",
+    "B:forged-organization-denied",
+    "B:forged-actor-denied",
+    "B:missing-bearer-denied",
+    "B:hash-is-not-bearer-denied",
+    "B:cross-tenant-update-denied",
+    "B:current-case-audit-and-complete-hash-chain",
+    "B:cross-tenant-insert-refused-42501",
+    "B:bridge-revoked-after-callback",
+    "B:foreign-membership-binding-refused"
+  ],
+  "audit": [
+    {
+      "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0",
+      "records": 235,
+      "headHash": "6abe4d453a7660ec3155b22f806a1f5bf7d3e6639519b0cd10d0fb1686732441"
+    },
+    {
+      "organizationId": "f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab",
+      "records": 5,
+      "headHash": "41b7e60e8aa7ac3cbe13a615561829a40e61237792f431d80065c1f28d7cf2c2"
+    }
+  ],
+  "sealedEvidence": [],
+  "databaseTarget": "nzila-ue-v2-recovery-20261113.postgres.database.azure.com",
+  "restorePoint": "2026-11-13T22:30:00Z",
+  "actorARole": "member; raw SQL proves tenant isolation, API case authority remains separately tested",
+  "signedTokensOrCookiesSerialized": false,
+  "noSessionManufactured": true,
+  "transactionalProbeWritesRolledBack": true,
+  "transport": {
+    "bytes": 585300,
+    "programSha256": "5127c410c95fbe0ed91705821b609d9b2fe38f9305ff64963e372b1e3070c57e",
+    "fileSha256": {
+      "bearer.cjs": "d11ce408722e36094c32ca32fabbb2743d5ed01a0c9ed0b57472199326f056ec"
+    }
+  }
+}
