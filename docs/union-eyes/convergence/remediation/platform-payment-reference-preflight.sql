@@ -74,6 +74,27 @@ LEFT JOIN payment_allocations pa ON pa.payment_id = p.id
 GROUP BY p.id, p.organization_id, p.amount
 HAVING COALESCE(SUM(pa.amount), 0) > p.amount
 ORDER BY p.organization_id, p.id;
+-- Orphaned allocation links can be missed by inner-join ownership checks.
+-- Distinguish absent payment/invoice rows from nullable account semantics.
+SELECT pa.id AS allocation_id, pa.payment_id, pa.invoice_id,
+       (p.id IS NULL) AS payment_missing,
+       (i.id IS NULL) AS invoice_missing
+FROM payment_allocations pa
+LEFT JOIN platform_payments p ON p.id = pa.payment_id
+LEFT JOIN platform_invoices i ON i.id = pa.invoice_id
+WHERE p.id IS NULL OR i.id IS NULL
+ORDER BY pa.id;
+-- A payment's declared billing account and an allocated invoice's account
+-- must agree, including cases where only one side is NULL. Both NULL requires
+-- institutional review rather than an assumed authorization.
+SELECT pa.id AS allocation_id, p.id AS payment_id, i.id AS invoice_id,
+       p.billing_account_id AS payment_account_id,
+       i.billing_account_id AS invoice_account_id
+FROM payment_allocations pa
+JOIN platform_payments p ON p.id = pa.payment_id
+JOIN platform_invoices i ON i.id = pa.invoice_id
+WHERE p.billing_account_id IS DISTINCT FROM i.billing_account_id
+ORDER BY pa.id;
 -- Negative allocation amounts require explicit refund/reversal semantics.
 SELECT pa.id AS allocation_id, pa.payment_id, pa.invoice_id, pa.amount
 FROM payment_allocations pa
