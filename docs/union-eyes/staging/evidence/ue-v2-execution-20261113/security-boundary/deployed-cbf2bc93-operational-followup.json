@@ -1,0 +1,150 @@
+{
+  "at": "2026-11-14T05:20:31.019688+00:00",
+  "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+  "workflowSha": "1bfbe779ba89aa41bcd141b435b9dea09176f954",
+  "buildRunId": "43554091036",
+  "deployRunId": "43555575505",
+  "applicationDigest": "sha256:dfc73c0da809ac4ceda628d191b4b63e0232800093e12dad15dc6501fef4fd4d",
+  "nativeTenantAuditEvidence": {
+    "status": "PASS",
+    "checks": 30,
+    "audit": [
+      {
+        "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0",
+        "records": 336,
+        "headHash": "5aa8431cfe66f58546a13eb5fc8aae416ecaff10019e557710c5229bb08c7c50"
+      },
+      {
+        "organizationId": "f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab",
+        "records": 10,
+        "headHash": "755c60d64f2475703448fb918e39b06a50b023ecb8569ec4f0dcb5da3cd62dbf"
+      }
+    ],
+    "sealedEvidence": [
+      {
+        "packId": "afaba9a9-f1f1-43f3-8a11-cd6b5acd3b3a",
+        "status": "sealed",
+        "artifactId": "a62e4be6-6452-4d7e-a32d-f9dab6c6ab3f",
+        "contentHash": "498c16e1781108450e64bfe8bc11d2cdaef06c3d1ef46872eb689bf385f1c218",
+        "packHash": "2aa736a4f2f6bc1a7347cad58d1d17ffba00120c9a9d41050d4215c38f5671d4",
+        "sizeBytes": 178
+      },
+      {
+        "packId": "537467c5-72a5-42a2-8f08-d04856f010ea",
+        "status": "sealed",
+        "artifactId": "f9e8fec1-9233-434d-9854-273330193237",
+        "contentHash": "ed06704a049a6e6073a5a46108ca14518b34e105cd847e6a207955d307782551",
+        "packHash": "01fcca39e6e30331685ed8ce15f1a30940a3b8d3af374b3f6e21501ca6734115",
+        "sizeBytes": 178
+      }
+    ]
+  },
+  "memberForm": {
+    "status": "FAIL",
+    "httpStatus": 500,
+    "at": "2026-11-14T05:09:43.169Z",
+    "verifiedRootCause": "Missing NAR signing secret",
+    "browserHarnessRaces": "Hydration and actual first-visit privacy dialog; fixed test synchronization, no UI pass inferred"
+  },
+  "connectionCapacity": {
+    "status": "FAIL",
+    "postgresCode": "53300",
+    "maxConnections": 50,
+    "reserved": 15,
+    "ordinarySlots": 35,
+    "ownedFixtureRetirementPassedAfterOldRevisionDrain": true
+  },
+  "telemetry": {
+    "status": "FAIL",
+    "sharedWorkspace": "nzila-canada-prod-law",
+    "observedQuotaStatus": "OverQuota",
+    "dailyQuotaGb": 0.5,
+    "nextResetTime": "2026-11-14T12:00:00Z",
+    "sharedWorkspaceModified": false
+  },
+  "normalPersonaNavigation": {
+    "member": {
+      "runId": "43556857426",
+      "status": "PASS",
+      "observations": 70
+    },
+    "steward": {
+      "runId": "43557167008",
+      "status": "PASS",
+      "observations": 56
+    },
+    "officer": {
+      "runId": "43557448707",
+      "status": "FAIL",
+      "httpStatus": 503,
+      "path": "/fr-CA/dashboard/trust",
+      "connectionCauseNotInferred": true
+    },
+    "remainingRoles": "NOT_YET_PROVEN"
+  },
+  "originals": [
+    {
+      "protectedOriginalFile": "observed-runtime-cbf2bc93.json",
+      "sha256": "4812debc0a2f9103271a081340dd5c20f3a022c71ab290e9d6c8c711b129a397",
+      "status": "RECORDED",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    },
+    {
+      "protectedOriginalFile": "primary-native-isolation-audit-sealed-evidence-cbf2bc93.json",
+      "sha256": "66734dfdd90cfe5b1a3c56e100c56265b10cc05093d9ada5fa72b3b44b4a2762",
+      "status": "PASS",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    },
+    {
+      "protectedOriginalFile": "real-messaging-cbf2bc93.json",
+      "sha256": "d2baa410f931833ac00b97163557c452b42d5531ae0b37df0331b08dff83dfc7",
+      "status": "PASS",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    },
+    {
+      "protectedOriginalFile": "worker-recovery-cbf2bc93.json",
+      "sha256": "ff982a3a2bb72f9b9eff7e6735bbeaed268593f8e9d5fadbb34fec34224b366d",
+      "status": "PASS",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    },
+    {
+      "protectedOriginalFile": "worker-fixture-retirement-cbf2bc93-53300.json",
+      "sha256": "ef908de5f71309e5abad8db3ef711afac3dbf8acca59c0348a8041508d9e97d6",
+      "status": "RECORDED",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    },
+    {
+      "protectedOriginalFile": "worker-fixture-retirement-cbf2bc93.json",
+      "sha256": "c70c3a044e88b794c5b45524d1a4a49eba88e456f0d7e3f8567b6eaf3a352c23",
+      "status": "PASS",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    },
+    {
+      "protectedOriginalFile": "primary-connection-census-cbf2bc93.json",
+      "sha256": "39292e53a3370fb401d59074adf4ff54fe818227ac1ff15a3edba3c1245fe019",
+      "status": "PASS",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    },
+    {
+      "protectedOriginalFile": "zero-traffic-revision-retirement-cbf2bc93.json",
+      "sha256": "30d5712a0ca6d607cbb6488185e43cbdaf64cb63062f1dfd60e548b1cfa50801",
+      "status": "PASS",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    },
+    {
+      "protectedOriginalFile": "base-authority-repair-primary-apply.json",
+      "sha256": "e70c1743f14457a7ce659eefeaeeadb626029a649953978dd7b2855e9930ab34",
+      "status": "APPLY_PASS",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    },
+    {
+      "protectedOriginalFile": "staging-nar-secret-provision.json",
+      "sha256": "9c19ce74dec96b9691f85d9158c1eb425894d72ac14990012765586babf154a2",
+      "status": "PASS",
+      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+    }
+  ],
+  "stagingGo": false,
+  "productionAuthorized": false,
+  "secretValuesAndSignedLeasesOmitted": true
+}
