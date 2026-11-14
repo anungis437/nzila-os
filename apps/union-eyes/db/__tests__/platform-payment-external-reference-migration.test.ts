@@ -47,8 +47,10 @@ describe('20260921 platform payment external-reference uniqueness — forward', 
     expect(Ff).not.toMatch(/UPDATE\s+platform_payments/i);
   });
 
-  it('guards table existence (forward-only, environment-safe)', () => {
-    expect(Ff).toContain("to_regclass('platform_payments')");
+  it('fails closed when the required payment ledger table is absent', () => {
+    expect(Ff).toContain("to_regclass('platform_payments') IS NULL");
+    expect(Ff).toMatch(/IF to_regclass\('platform_payments'\) IS NULL THEN RAISE EXCEPTION/i);
+    expect(Ff).not.toMatch(/IF to_regclass\('platform_payments'\) IS NULL THEN RETURN/i);
   });
 });
 
