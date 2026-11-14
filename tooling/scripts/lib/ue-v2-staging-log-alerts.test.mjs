@@ -1,12 +1,17 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { migrationPlan, replaceReviewedAlerts, previousWorkspace, workspace, names, ruleId } from './ue-v2-staging-log-alerts.mjs'
+import { migrationPlan, replaceReviewedAlerts, previousWorkspace, workspace, names, ruleId, legacyCronFailureQuery, cronFailureQuery } from './ue-v2-staging-log-alerts.mjs'
 
 const source = '9a7ee373e1205209f864e63f37877c8919bb6738'
 function fixture() {
   const before = { location: 'canadacentral', tags: { env: 'staging', managedBy: 'bicep' }, properties: { scopes: [previousWorkspace], enabled: true, criteria: { allOf: [{ query: 'Synthetic static source declaration', threshold: 0 }] }, actions: { actionGroups: [workspace.replace('Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law', 'Microsoft.Insights/actionGroups/nzila-ue-v2-staging-ops')] } } }
-  return { status: 'Succeeded', error: null, changes: names.map(name => ({ resourceId: ruleId(name), changeType: 'Modify', before: structuredClone(before), after: { ...structuredClone(before), properties: { ...structuredClone(before.properties), scopes: [workspace] } } })) }
+  const changes = names.map(name => ({ resourceId: ruleId(name), changeType: 'Modify', before: structuredClone(before), after: { ...structuredClone(before), properties: { ...structuredClone(before.properties), scopes: [workspace] } } }))
+  const cron = changes.find(x => x.resourceId.endsWith('cron-job-failed'))
+  cron.before.properties.criteria.allOf[0].query = legacyCronFailureQuery
+  cron.after.properties.criteria.allOf[0].query = cronFailureQuery
+  cron.after.properties.description = 'The scheduled deadline-reminder job failed or exited non-zero. Successful exit code zero is excluded.'
+  return { status: 'Succeeded', error: null, changes }
 }
 function provider(plan, failPut = false) {
   const resources = new Map(plan.replacements.map(rule => [rule.id, { id: rule.id, ...structuredClone(rule.before), properties: { ...structuredClone(rule.before.properties), createdWithApiVersion: '2023-12-01' } }]))
@@ -82,4 +87,15 @@ test('protected workflow publishes the replacement plan before approval and appl
   assert(apply.indexOf('Fresh what-if and drift gate') < apply.indexOf('Replace only reviewed immutable'))
   assert(apply.indexOf('Replace only reviewed immutable') < apply.indexOf('      - name: az deployment group create'))
   assert.match(apply, /--reviewed-plan "\$WHATIF_ARTIFACTS\/log-alert-scope-plan.json"/)
+})
+
+test('scope replacement allows only the exact canonical non-zero-exit correction for the cron rule', () => {
+  const x = fixture(), cron = x.changes.find(c => c.resourceId.endsWith('cron-job-failed'))
+  cron.after.properties.criteria.allOf[0].query = legacyCronFailureQuery
+  assert.throws(() => migrationPlan(x, source))
+  cron.after.properties.criteria.allOf[0].query = cronFailureQuery
+  cron.after.properties.criteria.allOf[0].threshold = 10
+  assert.throws(() => migrationPlan(x, source))
+  const bicep = readFileSync(new URL('../../../infrastructure/bicep/ue-v2/modules/alerts.bicep', import.meta.url), 'utf8')
+  assert(bicep.includes("query: '" + cronFailureQuery.replaceAll("'", "\\'") + "'"))
 })

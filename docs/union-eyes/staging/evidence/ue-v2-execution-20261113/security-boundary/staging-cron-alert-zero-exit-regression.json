@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "at": "2026-11-14T14:39:18.134Z",
+  "workspaceCustomerId": "ce2ff61f-0059-46eb-b18b-a9be8162d009",
+  "actualHistoricalStagingLogEvidence": {
+    "correctedQuery": [
+      {
+        "Matches": "0",
+        "TableName": "PrimaryResult"
+      }
+    ],
+    "legacyQuery": [
+      {
+        "Matches": "6",
+        "TableName": "PrimaryResult"
+      }
+    ],
+    "queryResultsAreAggregatesOnly": true
+  },
+  "azureExecutedControlledExpressionVectors": {
+    "evidenceClass": "KQL_EXPRESSION_CONTROL_VECTORS_NOT_ACTUAL_FAILED_JOBS",
+    "vectorCount": 6,
+    "result": [
+      {
+        "ExpectedFailuresDetected": "3",
+        "FalsePositives": "0",
+        "TableName": "PrimaryResult",
+        "Total": "3"
+      }
+    ]
+  },
+  "sourceQuery": "ContainerAppSystemLogs_CL | where ContainerAppName_s has \"cron-deadlines\" or JobName_s has \"cron-deadlines\" | extend exitCode = toint(extract(\"exit code '(-?[0-9]+)'\", 1, Log_s)) | where Reason_s == \"JobExecutionFailed\" or (Reason_s == \"ContainerTerminated\" and isnotnull(exitCode) and exitCode != 0)",
+  "alertResourceMutated": false,
+  "applicationSourceUnchanged": "9a7ee373e1205209f864e63f37877c8919bb6738"
+}

@@ -120,7 +120,7 @@
   "stagingGo": false,
   "remediation": "Protected workflow plans exactly seven existing staging alert replacements from the reviewed source payload, saves verified restorable snapshots before deletion, recreates at the same staging IDs, verifies all settings and target scope, and restores the saved current rule on recreation failure. Application image/source are unchanged.",
   "localChecks": {
-    "passed": 31,
+    "passed": 34,
     "failed": 0
   },
   "providerReference": "https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-manage-alert-rules#manage-alert-rules-in-the-azure-portal",
@@ -132,5 +132,12 @@
     "test:fast": "HOST_DEPENDENCY_FAILURE: @vitejs/plugin-react missing",
     "governance:audit": "HOST_DEPENDENCY_FAILURE: next-auth/argon2 and other absent dependencies in existing temporary tooling environment; no finance change attempted",
     "inventory:generate": "PASS"
+  },
+  "monitoringFollowup": {
+    "actualJobFailure": false,
+    "knownFalsePositive": "Old query matches every normal exit code zero; actual scheduled jobs succeeded. New canonical query excludes exit zero and matches genuine failed/nonzero cases.",
+    "evidence": "staging-cron-alert-zero-exit-regression.json",
+    "controlledExpressionVectorsAreNotActualFailedJobs": true,
+    "infraSource": "Exact CI-admitted main workflow commit, recorded separately from immutable application/image source9a and build workflowfb14."
   }
 }

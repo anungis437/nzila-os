@@ -51,7 +51,7 @@ test('the deployment checkout retains the source and serving history required by
   const workflow = readFileSync(new URL('../../../.github/workflows/ue-v2-staging-deploy.yml', import.meta.url), 'utf8');
   const apply = workflow.split('\n  apply:\n')[1];
   assert(apply, 'Apply job must exist');
-  const definitionCheckout = apply.split('      - name: Checkout workflow definition\n')[1]?.split('      - name: Checkout source_sha')[0];
+  const definitionCheckout = apply.split('      - name: Checkout workflow definition\n')[1]?.split('      - name: Download plan')[0];
   assert.match(definitionCheckout, /fetch-depth: 0/);
   assert.match(definitionCheckout, /persist-credentials: false/);
   const directory = mkdtempSync(join(tmpdir(), 'ue-ancestry-'));

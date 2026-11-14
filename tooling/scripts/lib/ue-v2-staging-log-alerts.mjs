@@ -8,6 +8,8 @@ export const workspace = `${root}${resourceGroup}/providers/Microsoft.Operationa
 export const previousWorkspace = `${root}nzila-canada-prod-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-canada-prod-law`
 export const names = ['unexpected-5xx', 'redis-unavailable', 'stripe-webhook-failure', 'resend-failure', 'database-errors', 'audit-persistence-failure', 'cron-job-failed'].map(name => `nzila-ue-v2-staging-${name}`)
 export const ruleId = name => `${root}${resourceGroup}/providers/Microsoft.Insights/scheduledQueryRules/${name}`
+export const legacyCronFailureQuery = 'ContainerAppSystemLogs_CL | where ContainerAppName_s has "cron-deadlines" or JobName_s has "cron-deadlines" | where Reason_s in ("ContainerTerminated", "JobExecutionFailed") | where Log_s has_any ("exit code", "ExitCode", "Failed")'
+export const cronFailureQuery = 'ContainerAppSystemLogs_CL | where ContainerAppName_s has "cron-deadlines" or JobName_s has "cron-deadlines" | extend exitCode = toint(extract("exit code \'(-?[0-9]+)\'", 1, Log_s)) | where Reason_s == "JobExecutionFailed" or (Reason_s == "ContainerTerminated" and isnotnull(exitCode) and exitCode != 0)'
 const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(key => [key, stable(value[key])])) : value
 export const hash = value => createHash('sha256').update(JSON.stringify(stable(value))).digest('hex')
 const equalId = (a, b) => typeof a === 'string' && typeof b === 'string' && a.toLowerCase() === b.toLowerCase()
@@ -28,6 +30,13 @@ export function migrationPlan(whatIf, sourceSha) {
     if (hash(before.properties.scopes) === hash(after.properties.scopes)) continue
     assert.deepEqual(before.properties.scopes, [previousWorkspace], 'Only the recorded legacy workspace may be replaced')
     const comparison = structuredClone(after); comparison.properties.scopes = before.properties.scopes
+    if (name === 'nzila-ue-v2-staging-cron-job-failed') {
+      assert.equal(before.properties.criteria.allOf[0].query, legacyCronFailureQuery)
+      assert.equal(after.properties.criteria.allOf[0].query, cronFailureQuery)
+      assert.equal(after.properties.description, 'The scheduled deadline-reminder job failed or exited non-zero. Successful exit code zero is excluded.')
+      comparison.properties.criteria.allOf[0].query = before.properties.criteria.allOf[0].query
+      comparison.properties.description = before.properties.description
+    }
     assert.equal(hash(before), hash(comparison), 'Scope migration must not change query, actions, tags, thresholds or other settings')
     assert.equal(after.location, 'canadacentral')
     assert.equal(after.tags.env, 'staging'); assert.equal(after.tags.managedBy, 'bicep')
