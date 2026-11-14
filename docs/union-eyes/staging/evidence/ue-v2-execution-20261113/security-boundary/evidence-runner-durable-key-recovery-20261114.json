@@ -1,0 +1,16 @@
+{
+  "status": "PASS_PUBLIC_EVIDENCE_ENCRYPTION_KEY_REPLACEMENT",
+  "at": "2026-11-14T20:05:51.119820+00:00",
+  "reason": "Original temporary evidence private key and reader environment/config were removed; original encrypted leases cannot be decrypted. No matching private key backup found in bounded task/workspace searches.",
+  "privateKeySavedOutsideTemporaryDirectories": true,
+  "privateKeyMode": "0600",
+  "newPublicKeySha256": "3f445ecd095fdeffc12745b9c39415bd1d7afefbb0bb85587a3c3dd51eabea45",
+  "previousPublicKeySha256": "248b169c290afc70562e15f4be41444b0f2462f233b336b3d47e03b4301c2741",
+  "githubEnvironment": "ue-staging",
+  "githubVariable": "UE_V2_STAGING_EVIDENCE_PUBLIC_KEY_B64",
+  "newFreshReceiptAndFullActualLeaseExpiryRequired": true,
+  "oldLeaseExpiryPassInferred": false,
+  "applicationSigningAuthenticationOrStorageKeysChanged": false,
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "productionAuthorized": false
+}

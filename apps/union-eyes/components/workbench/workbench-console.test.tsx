@@ -25,12 +25,12 @@ describe('workbench inline case access', () => {
     memberName: 'Synthetic member', memberEmail: 'owned@example.test', assignedTo: 'owned-officer',
   };
   /** The queue and the case's own notes route, as the application answers them: the case's history comes newest first, and only its entries of type "note" are notes. */
-  const serve = (routes: { notes?: () => { ok: boolean; body?: unknown }; addNote?: () => { ok: boolean } } = {}) => {
+  const serve = (routes: { claims?: Array<Omit<typeof ownedClaim, 'claimNumber'> & { claimNumber: string | null }>; notes?: () => { ok: boolean; body?: unknown }; addNote?: () => { ok: boolean } } = {}) => {
     const calls: Array<{ url: string; method: string }> = [];
     vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
       const method = init?.method ?? 'GET';
       calls.push({ url, method });
-      if (url.startsWith('/api/workbench/assigned')) return { ok: true, json: async () => ({ data: { claims: [ownedClaim] } }) };
+      if (url.startsWith('/api/workbench/assigned')) return { ok: true, json: async () => ({ data: { claims: routes.claims ?? [ownedClaim] } }) };
       if (url === '/api/cases/owned-case/notes' && method === 'POST') return { ok: routes.addNote?.().ok ?? true, json: async () => ({}) };
       if (url === '/api/cases/owned-case/notes') {
         const answer = routes.notes?.() ?? { ok: true, body: { caseId: 'owned-case', notes: [
@@ -60,6 +60,32 @@ describe('workbench inline case access', () => {
     await userEvent.keyboard(' ');
     expect(expand).toHaveAttribute('aria-expanded', 'false');
     await waitFor(() => expect(screen.queryByText('Synthetic authorized note')).not.toBeInTheDocument());
+  });
+
+  it('keeps unnumbered cases collapsed and opens their notes using the actual case id', async () => {
+    const calls = serve({ claims: [{ ...ownedClaim, claimNumber: null }] });
+    render(<WorkbenchConsole />);
+    const expand = await screen.findByRole('button', { name: 'workbench.expand owned-case' });
+    expect(expand).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('workbench.caseNotesLoading')).not.toBeInTheDocument();
+    expect(calls.some(call => call.url === '/api/cases/owned-case/notes')).toBe(false);
+    await userEvent.type(screen.getByRole('textbox', { name: 'workbench.searchPlaceholder' }), 'owned-case');
+    await userEvent.click(expand);
+    await waitFor(() => expect(screen.getByText('Synthetic authorized note')).toBeVisible());
+    expect(calls.filter(call => call.url === '/api/cases/owned-case/notes')).toHaveLength(1);
+  });
+
+  it('selects distinct unnumbered cases independently instead of sharing the null selection', async () => {
+    serve({ claims: [{ ...ownedClaim, claimNumber: null }, { ...ownedClaim, claimId: 'second-case', claimNumber: null }] });
+    render(<WorkbenchConsole />);
+    const first = await screen.findByRole('button', { name: 'workbench.expand owned-case' });
+    const second = screen.getByRole('button', { name: 'workbench.expand second-case' });
+    expect(first).toHaveAttribute('aria-expanded', 'false');
+    expect(second).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(first);
+    await waitFor(() => expect(screen.getByText('Synthetic authorized note')).toBeVisible());
+    expect(second).toHaveAttribute('aria-expanded', 'false');
+    expect(document.getElementById('case-details-second-case')).toBeNull();
   });
 
   it('reads the notes from the case, oldest first, and leaves the rest of its history out', async () => {

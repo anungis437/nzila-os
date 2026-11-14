@@ -7,7 +7,7 @@
   "acceptedStagingCandidateSha": null,
   "stagingWorkflowDefinitionSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Deployed ea073528 repairs the confirmed nested-system pool deadlock and CSS-as-script defects. Exact source/integration CI, immutable build, reviewed staging deployment, real paired sessions, member EN/FR intake, messaging and six worker recovery scenarios pass. Remaining persona/journey, revocation, actual document expiry, recovery rehearsal and final evidence reconciliation remain required. Failed verification runs are retained; finance persistence and Financial Officer 2.1 remain excluded.",
+  "verdictReason": "Deployed ea073528 passes five normal persona profiles, real member intake/messaging/worker and security checks, but real representative-case acceptance exposed a nullable case reference used as the workbench selection key. The source fix passes9 local tests; exact source/integration qualification, reviewed deployment and complete final-source runtime acceptance remain required. Finance persistence and Financial Officer2.1 remain excluded.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -32,10 +32,10 @@
     {
       "id": "SOURCE_ENGINEERING",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Confirmed nested SYSTEM one-connection deadlock and CSS-as-script defects repaired in admitted source. Focused/native source evidence plus actual deployed member browser and six worker scenarios verify both corrections. This does not formally close every frozen ledger item.",
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": false,
+      "status": "FAIL",
+      "evidence": "Actual source ea073528 workbench uses nullable claimNumber as a selection key; existing officer API case has no number. Source correction and9 local tests pass, but repaired candidate is not yet admitted/deployed. Native fixture and wrong member-URL test failures remain separately preserved.",
+      "proposedSourceSha": null,
+      "requalificationRequiredForProposedCandidate": true,
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
@@ -103,11 +103,11 @@
     {
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
-      "status": "PARTIALLY_PROVEN",
-      "evidence": "All five normal actual-provider persona profiles pass274 observations on ea073528 (member70/steward56/officer60/executive52/admin36). EN/FR member intake and30 messaging checks pass. Chief/platform profiles and positive assignment/grievance continuity remain in progress.",
+      "status": "FAIL",
+      "evidence": "Actual source ea073528 workbench uses nullable claimNumber as a selection key; existing officer API case has no number. Source correction and9 local tests pass, but repaired candidate is not yet admitted/deployed. Native fixture and wrong member-URL test failures remain separately preserved.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "proposedSourceSha": null
     },
     {
       "id": "WORKERS_RETRIES_AND_DELIVERY",
@@ -131,7 +131,7 @@
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
       "status": "PARTIALLY_PROVEN",
-      "evidence": "Real canonical intake/replay/cross-tenant denial and private69bytes/checksum pass. Actual issued lease expires20:07:13Z and needs same-URL post-expiry denial. Revocation run43630453485 FAIL retained: valid unexpired provider session remained, case401 denied, but runner allowed only403/404 and stopped before document check. Owned membership restored in both projections; corrected protected rerun required.",
+      "evidence": "Fresh real full paired/revocation43635785268 passes own/foreign APIs, both401 refusals under the same unexpired provider session, membership restoration and actual private69bytes/checksum. Its unchanged issued URL expires21:10:11Z; actual expiry remains required. Earlier encrypted lease expiry checks are uncollected after temporary evidence private-key loss and are not marked passed. Verification key/helper now use durable private storage; no application signing/authentication/storage key changed.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
@@ -182,8 +182,8 @@
     }
   ],
   "externalBlockers": [],
-  "proposedCandidateSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-  "proposedCandidateState": "DEPLOYED_EXACT_SOURCE_CI_AND_REVIEWED_STAGING_APPLY_PASS_REAL_ACCEPTANCE_IN_PROGRESS",
+  "proposedCandidateSha": null,
+  "proposedCandidateState": "WORKBENCH_NULL_REFERENCE_SOURCE_REPAIR_NOT_YET_FROZEN",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
     "included": [
@@ -240,7 +240,8 @@
     "stagingLogAlertScopeMigration": "34 focused release/history/identity/migration checks pass, including immutable-provider failure reproduction, complete pre-delete snapshots, unreviewed-setting refusal and restoration after failed recreation. Protected exact-workflow CI/main/reviewed apply and runtime remain pending. Partial-apply retry also verifies the retained candidate image before bounded reactivation; promotion still requires actual healthy state/source. New infrastructure provenance binds the entire admitted IaC Git tree and template hash separately from image source; the cron-rule query excludes actual normal-zero exits and passes Azure-executed controlled failure vectors. Current deployed alert correction/complete rollout still required.",
     "nestedSystemAndClientAssets": "99 focused tests, four script-asset gate tests, actual before/after production CSS build reproduction, exact-source 776-table fresh/restore/repeat/privileges and actual source-bound primary one-connection regression PASS. SQL bytes/order unchanged; no deployed acceptance inferred.",
     "verificationRunnerCorrection": "14 focused contracts pass, including verified unexpired-session401/403/404 resource denials, late Azure visibility, transient expected revision404, bounded busy recovery, concurrent-change refusal and original failure preservation. Protected runtime reruns remain required.",
-    "providerRevisionContract": "Actual read-only Azure response reproduces RevisionNotFound.15 focused contracts now cover that exact CLI JSON shape and require an absent initial known-good revision to fail before mutation. New exact CI/main admission and protected recovery rerun remain required. Application source/image and deployment provenance remain unchanged."
+    "providerRevisionContract": "Actual read-only Azure response reproduces RevisionNotFound.15 focused contracts now cover that exact CLI JSON shape and require an absent initial known-good revision to fail before mutation. New exact CI/main admission and protected recovery rerun remain required. Application source/image and deployment provenance remain unchanged.",
+    "workbenchNullableReference": "Read-only primary proves a real owned officer case has nullable claimNumber. Both new UI regressions fail before the fix; all9 workbench tests pass after selecting by the actual case id when the number is absent. Canonical plan/self-test and navigation inventory check pass unchanged; no SQL/data/authority mutation. New source CI and deployed qualification remain required."
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -410,5 +411,5 @@
     }
   ],
   "priorSourceCompositionSuiteFailure": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/source-a8442373-whole-application-ci-failure.json",
-  "latestAdmittedVerificationWorkflowSha": "37477074b622109395f88a02821fda39b9c2e46c"
+  "latestAdmittedVerificationWorkflowSha": "ecdff4111bf694df54c497bf8a77ee6a1bdcd284"
 }

@@ -1,0 +1,19 @@
+{
+  "status": "PASS_LOCAL_REGRESSION_AFTER_FIX",
+  "at": "2026-11-14T21:05:08.859810+00:00",
+  "deployedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "deployedAcceptanceClaimed": false,
+  "sourceTest": "apps/union-eyes/components/workbench/workbench-console.test.tsx",
+  "before": {
+    "newRegressionsFailed": 2,
+    "existingTestsPassed": 7,
+    "actualFailure": "Null ids collide with collapsed state and duplicate selection keys"
+  },
+  "after": {
+    "testsPassed": 9,
+    "failed": 0
+  },
+  "beforeLogSha256": "65cabb84ce8d27385bde40f6996743beb2789b9b3c32b505321e7d45634cfc09",
+  "afterLogSha256": "9ed6baaf66a3fd64e6e10815c8105e068ea03ef652df63b4edb36a2bb6503541",
+  "fix": "Use the actual case id when the nullable business reference is absent. No business number is generated and no data or authority policy changes."
+}

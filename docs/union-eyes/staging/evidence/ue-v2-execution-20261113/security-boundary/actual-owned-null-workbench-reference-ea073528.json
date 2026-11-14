@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "status": "PASS_DIAGNOSTIC_ACTUAL_NULLABLE_CASE_REFERENCE",
+  "purpose": "READ_ONLY_ROOT_CAUSE_ON_OWNED_SYNTHETIC_OFFICER_API_CASE",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "at": "2026-11-14T20:47:14.774Z",
+  "caseId": "8d278e54-1fe8-4b27-bc92-48a67375bb4d",
+  "claimNumber": null,
+  "schemaAllowsNullClaimNumber": true,
+  "sourceWorkbenchUsedNullableReferenceAsSelectionKey": true,
+  "noBusinessOrPrivilegeMutation": true,
+  "transport": {
+    "bytes": 106740,
+    "programSha256": "272c1f629fbf275eeaf9c76214cb4559a21590b8834b01e3ba187ac512839a50",
+    "fileSha256": {
+      "repair.cjs": "92f667ce83a7168ae229d89afdff90eb67e31c3fa598a06c2723526b2060b733"
+    }
+  }
+}

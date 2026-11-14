@@ -47,7 +47,7 @@ type SortOrder = "asc" | "desc";
 // The queue carries no notes: a case's notes are read from the case itself (see loadNotes).
 interface DbClaim {
   claimId: string;
-  claimNumber: string;
+  claimNumber: string | null;
   organizationId: string;
   access?: 'case' | 'triage';
   claimType: string;
@@ -142,7 +142,10 @@ const calculateDaysOpen = (createdAt: string): number => {
 
 // Convert database claim to UI case (now with member details from API)
 const mapDbClaimToCase = (claim: DbClaim, t: (key: string) => string): Case => ({
-  id: claim.claimNumber,
+  // Representative filing and retained records can have no business reference.
+  // Use the actual case id so null never collides with the collapsed selection;
+  // the nullable business number remains unchanged in storage and the API.
+  id: claim.claimNumber || claim.claimId,
   claimId: claim.claimId,
   triage: claim.access === 'triage',
   title: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.untitledCase'),
