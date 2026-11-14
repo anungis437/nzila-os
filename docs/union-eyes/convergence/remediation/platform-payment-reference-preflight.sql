@@ -3,7 +3,10 @@
 -- This is diagnostic evidence only: it does not repair data, install an index,
 -- prove concurrent-write safety, or authorize financial collection.
 -- Preserve output with database version, schema revision, role and timestamp.
-BEGIN READ ONLY;
+BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;
+-- Bound lock waits and statement duration; all queries share one snapshot.
+SET LOCAL lock_timeout = '3s';
+SET LOCAL statement_timeout = '30s';
 SELECT current_setting('server_version') AS pg_version,
        current_database() AS database_name,
        current_user AS inspection_role,
@@ -53,8 +56,8 @@ FROM platform_payments p
 LEFT JOIN billing_accounts a ON a.id = p.billing_account_id
 LEFT JOIN payment_allocations pa ON pa.payment_id = p.id
 LEFT JOIN platform_invoices i ON i.id = pa.invoice_id
-WHERE (a.id IS NOT NULL AND a.organization_id <> p.organization_id)
-   OR (i.id IS NOT NULL AND i.organization_id <> p.organization_id)
+WHERE (a.id IS NOT NULL AND a.organization_id IS DISTINCT FROM p.organization_id)
+   OR (i.id IS NOT NULL AND i.organization_id IS DISTINCT FROM p.organization_id)
 ORDER BY p.id;
 -- Allocation ownership and arithmetic: a payment allocation must belong to the
 -- same billing account as its invoice, and aggregate allocations must not
