@@ -79,6 +79,37 @@ SELECT pa.id AS allocation_id, pa.payment_id, pa.invoice_id, pa.amount
 FROM payment_allocations pa
 WHERE pa.amount < 0
 ORDER BY pa.id;
+-- Financial arithmetic and currency invariants. Amounts are decimal(14,2);
+-- these diagnostics intentionally do not reinterpret negative values as refunds.
+SELECT id AS payment_id, organization_id, amount, currency, status
+FROM platform_payments
+WHERE amount <= 0 OR currency IS NULL OR btrim(currency) = ''
+ORDER BY organization_id, id;
+-- An allocation must use the same currency as both its payment and invoice.
+SELECT pa.id AS allocation_id, p.id AS payment_id, i.id AS invoice_id,
+       p.currency AS payment_currency, i.currency AS invoice_currency
+FROM payment_allocations pa
+JOIN platform_payments p ON p.id = pa.payment_id
+JOIN platform_invoices i ON i.id = pa.invoice_id
+WHERE p.currency IS DISTINCT FROM i.currency
+ORDER BY pa.id;
+-- Multiple allocations for the same payment/invoice pair can conceal replay.
+SELECT payment_id, invoice_id, COUNT(*) AS allocation_count,
+       SUM(amount) AS total_allocated
+FROM payment_allocations
+GROUP BY payment_id, invoice_id
+HAVING COUNT(*) > 1
+ORDER BY allocation_count DESC, payment_id, invoice_id;
+-- Invoice allocation overrun: compare allocations with the invoice's
+-- authoritative total only after confirming tax and adjustment semantics.
+-- Report totals without assuming whether credits are already reflected.
+SELECT i.id AS invoice_id, i.organization_id, i.subtotal, i.tax_amount,
+       COALESCE(SUM(pa.amount), 0) AS allocated_amount
+FROM platform_invoices i
+JOIN payment_allocations pa ON pa.invoice_id = i.id
+GROUP BY i.id, i.organization_id, i.subtotal, i.tax_amount
+HAVING COALESCE(SUM(pa.amount), 0) > (i.subtotal + i.tax_amount)
+ORDER BY i.organization_id, i.id;
 -- Inspect existing uniqueness and partial-index predicates.
 SELECT indexname, indexdef
 FROM pg_indexes
