@@ -185,13 +185,23 @@ export async function assignSteward(
   stewardId: string,
   tx: RLSTx,
 ) {
+  // Recommendations and the UI identify a steward PROFILE. Authority, mirrors and
+  // reminder recipients identify the canonical PERSON; these UUIDs are distinct.
+  const [profile] = await tx
+    .select({ userId: stewards.userId })
+    .from(stewards)
+    .where(and(eq(stewards.id, stewardId), eq(stewards.orgId, organizationId), eq(stewards.active, true)))
+    .limit(1)
+    .for('update');
+  if (!profile) throw ApiError.notFound('Steward');
+
   // Insert assignment
   const [assignment] = await tx
     .insert(stewardAssignments)
     .values({
       organizationId,
       grievanceId,
-      stewardId,
+      stewardId: profile.userId,
       stewardType: 'steward',
       startDate: new Date().toISOString().slice(0, 10),
     })

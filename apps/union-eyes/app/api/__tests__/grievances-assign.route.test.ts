@@ -38,6 +38,7 @@ async function loadRoute() {
 
 const GRIEVANCE = '22222222-2222-4222-8222-222222222222';
 const NEW_STEWARD = '11111111-1111-1111-1111-111111111111';
+const NEW_STEWARD_PROFILE = '33333333-3333-4333-8333-333333333333';
 
 describe('grievances/[id]/assign route', () => {
   beforeEach(() => {
@@ -75,7 +76,7 @@ describe('grievances/[id]/assign route', () => {
     m.tx.insert = vi.fn(() => ({ values: vi.fn(async () => null) }));
   });
 
-  function assignRequest(body: Record<string, unknown> = { stewardId: NEW_STEWARD }) {
+  function assignRequest(body: Record<string, unknown> = { stewardId: NEW_STEWARD_PROFILE }) {
     return new Request(`http://localhost/api/grievances/${GRIEVANCE}/assign`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
@@ -141,7 +142,7 @@ describe('grievances/[id]/assign route', () => {
     expect(response.status).toBe(200);
 
     expect(m.withRLSContext).toHaveBeenCalledWith({ organizationId: 'org_1' }, expect.any(Function));
-    expect(m.assignSteward).toHaveBeenCalledWith('org_1', GRIEVANCE, NEW_STEWARD, m.tx);
+    expect(m.assignSteward).toHaveBeenCalledWith('org_1', GRIEVANCE, NEW_STEWARD_PROFILE, m.tx);
     expect(m.tx.update).toHaveBeenCalled();
     expect(m.requestAssignmentConvergence).toHaveBeenCalledTimes(1);
     expect(m.requestAssignmentConvergence).toHaveBeenCalledWith(

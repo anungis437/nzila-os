@@ -1,0 +1,9 @@
+# Steward profile identity in grievance assignment
+
+The recommendation API and UI send `stewards.id`, the selected profile identifier. That profile separately stores `stewards.user_id`, the canonical person. The previous assignment service stored the profile UUID as the legacy assignee; the route also passed that UUID to the authority kernel, grievance representative mirror and deadline-convergence recipient. Profiles created normally have distinct UUIDs, so the chosen representative could not receive the intended authority and reminders.
+
+The service now resolves and locks an active profile in the caller's organization before any assignment write. It persists the canonical person in the compatibility assignment. The route takes that resolved person into the unchanged authority decision, representative mirror, audit and reminder convergence. Workload still updates the selected profile. An unknown, inactive or foreign profile is refused. Existing kernel, mandate, conflict, tenant and transaction checks remain mandatory; selecting a profile never grants authority by itself.
+
+The regression uses distinct real PostgreSQL profile/person UUIDs and actual current model DDL. It verifies the stored person and selected-profile workload, foreign/inactive refusal without writes, and transaction rollback on authority refusal. Route tests use different profile and person identifiers and verify the authority/convergence use the person. These local checks are not staging acceptance; exact-candidate CI and real deployed assignment remain required.
+
+Codex reviewed this bounded identity mapping under the founder's explicit continuing CHG-2026-0114 delegation. This is attributed agent engineering/security review, not an independent human approval. No institutional mandate, office, finance feature, production authority or database reset is introduced.

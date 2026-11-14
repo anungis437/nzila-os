@@ -67,6 +67,7 @@ export const PATCH = withApi(
         if (!grievance) return null;
 
         const assignment = await assignSteward(organizationId, grievanceId, stewardId, tx);
+        const assigneeUserId = assignment.stewardId;
 
         // The kernel decides: the officer needs case:assign authority under an adopted rule and the assignee must be an
         // eligible, conflict-free representative. A refusal throws before anything below is written.
@@ -74,21 +75,21 @@ export const PATCH = withApi(
           organizationId,
           grievanceId,
           issuerUserId: userId,
-          assigneeUserId: stewardId,
+          assigneeUserId,
         });
 
         // The legacy primary-representative column is kept as a compatibility mirror for readers not yet migrated to the
         // kernel. It is never an authority source.
         await tx
           .update(grievances)
-          .set({ unionRepId: stewardId, updatedAt: new Date() })
+          .set({ unionRepId: assigneeUserId, updatedAt: new Date() })
           .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)));
 
         await tx.insert(grievanceEvents).values({
           grievanceId,
           eventType: "assigned",
           actorUserId: userId,
-          notes: `Steward ${stewardId} assigned`,
+          notes: `Steward ${assigneeUserId} assigned`,
         });
 
         await persistAtomicAudit(tx, {
@@ -97,7 +98,7 @@ export const PATCH = withApi(
           action: 'grievance.assign_steward',
           resourceType: 'grievances',
           resourceId: grievanceId,
-          details: { stewardId, previousUnionRepId },
+          details: { stewardProfileId: stewardId, stewardId: assigneeUserId, previousUnionRepId },
         });
 
         const { taskId } = await requestAssignmentConvergence(tx, {
@@ -105,7 +106,7 @@ export const PATCH = withApi(
           grievanceId,
           correlationId: continuityCorrelationId,
           previousAssigneeId: previousUnionRepId,
-          newAssigneeId: stewardId,
+          newAssigneeId: assigneeUserId,
         });
         return { assignment, convergenceTaskId: taskId };
       });
