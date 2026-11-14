@@ -127,6 +127,34 @@ FROM pg_indexes
 WHERE schemaname = current_schema()
   AND tablename = 'platform_payments'
 ORDER BY indexname;
+-- Payment lifecycle anomalies requiring writer-specific adjudication. These
+-- are signals for reconciliation, not proof of a defective transaction:
+-- manual methods may have no provider reference, and paid_at can be optional.
+SELECT id AS payment_id, organization_id, method, status,
+       external_reference, paid_at, created_at
+FROM platform_payments
+WHERE (status IN ('completed', 'refunded')
+       AND (external_reference IS NULL OR btrim(external_reference) = ''))
+   OR (status IN ('pending', 'processing', 'failed') AND paid_at IS NOT NULL)
+   OR (status = 'refunded' AND paid_at IS NULL)
+ORDER BY organization_id, created_at, id;
+-- Distinguish same-method collisions from cross-method reuse. Neither query
+-- assumes a provider-wide reference namespace or silently normalizes case.
+SELECT organization_id, method, external_reference,
+       COUNT(*) AS reference_count, array_agg(id ORDER BY created_at, id) AS payment_ids
+FROM platform_payments
+WHERE external_reference IS NOT NULL AND btrim(external_reference) <> ''
+GROUP BY organization_id, method, external_reference
+HAVING COUNT(*) > 1
+ORDER BY reference_count DESC, organization_id, method, external_reference;
+SELECT organization_id, external_reference,
+       COUNT(DISTINCT method) AS method_count,
+       array_agg(DISTINCT method ORDER BY method) AS methods
+FROM platform_payments
+WHERE external_reference IS NOT NULL AND btrim(external_reference) <> ''
+GROUP BY organization_id, external_reference
+HAVING COUNT(DISTINCT method) > 1
+ORDER BY organization_id, external_reference;
 -- Review reference distribution by writer/method and status.
 SELECT method, status, COUNT(*) AS payment_count,
        COUNT(*) FILTER (WHERE external_reference IS NULL) AS null_reference_count
