@@ -169,12 +169,15 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438",
+    "sourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7",
     "sourcePR": 1218,
-    "localNativeExport": "local-native-export-a8195afb.json",
+    "integrationPR": 1219,
+    "localNativeExport": "local-native-export-f4f03cd1.json",
     "deployed": false,
     "ciAndRuntimeStillRequired": true,
-    "repairSummary": "Bound pools, intake signing and atomic evidence, dedicated staging telemetry; preserve prior base repairs"
+    "repairSummary": "Capacity, signing/atomic intake, dedicated telemetry, process liveness, individual grievance reachability, bounded member tools and revoked-author note privacy",
+    "restoredRehearsal": "candidate-restored-rehearsal-f4f03cd1.json",
+    "primaryGuardReadOnlyNoop": "primary-current-source-noop-f4f03cd1.json"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -197,5 +200,6 @@
     "verifiedRuntimeRelations": 423,
     "persistedOwnerDelegations": 0
   },
-  "currentOperationalFollowup": "deployed-cbf2bc93-operational-followup.json"
+  "currentOperationalFollowup": "deployed-cbf2bc93-operational-followup.json",
+  "subsequentObservedFindings": "grievance-probe-and-expiry-followup-cbf2bc93.json"
 }

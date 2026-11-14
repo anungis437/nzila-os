@@ -7,7 +7,7 @@
   "acceptedStagingCandidateSha": null,
   "stagingWorkflowDefinitionSha": "1bfbe779ba89aa41bcd141b435b9dea09176f954",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Deployed cbf2bc93 passed real A/B case/document isolation, signed native tenant denials, complete audit chains and actual sealed packs, messaging and six worker scenarios. Real acceptance then exposed PostgreSQL53300, an intake500 caused by the missing signing key, officer French Trust503 and telemetry OverQuota. Candidate a8195afb bounds pools/retained revisions, wires signing/readiness, makes intake evidence atomic and isolates staging telemetry. Source/integration CI, main admission, immutable build, reviewed authorized rollout and complete final base-runtime evidence remain required. No production, reset, finance expansion or fictional reviewer.",
+  "verdictReason": "Deployed cbf2bc93 passed real A/B case/document isolation, signed native tenant denials, complete audit chains and actual sealed packs, messaging and six worker scenarios. Real acceptance then exposed PostgreSQL53300, an intake500 caused by the missing signing key, officer French Trust503 and telemetry OverQuota. Candidate f4f03cd1 bounds pools/retained revisions, wires signing/readiness, makes intake evidence atomic and isolates staging telemetry. Source/integration CI, main admission, immutable build, reviewed authorized rollout and complete final base-runtime evidence remain required. No production, reset, finance expansion or fictional reviewer. Actual follow-up confirms one-second dependency-based liveness restarts, denied individual grievance navigation and revoked-author private-note visibility; the candidate repairs them and adds a bounded member UI. The cbf actual issued lease expiry passed after05:28:45Z; final replacement evidence is still required.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -27,7 +27,7 @@
       "evidence": "Azure version/readiness observe deployed cbf2bc93, digest dfc73c0d, revision --relcbf2bc9339 at100%; next candidate is not deployed.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "SOURCE_ENGINEERING",
@@ -45,10 +45,10 @@
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Prior cbf2bc93 source#1216/integration#1217 completed all registered checks and16 trusted required contexts before merge1bfbe779. Candidate a8195afb#1218 and this authorization integration must independently finish exact checks and main admission.",
+      "evidence": "Prior cbf2bc93 source#1216/integration#1217 completed all registered checks and16 trusted required contexts before merge1bfbe779. Candidate f4f03cd1#1218 and this authorization integration must independently finish exact checks and main admission.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
@@ -57,7 +57,7 @@
       "evidence": "Source cbf2bc93 build43554091036/deploy43555575505 passed under CHG-2026-0114 after concrete what-if review and delegated protected approval. Replacement is not deployed.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
@@ -66,16 +66,16 @@
       "evidence": "Observed revision --relcbf2bc9339 is explicitly pinned100% in Multiple mode. Historical zero-traffic revisions were deactivated with metadata retained.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "DATABASE_MIGRATIONS",
       "requirement": "REQUIRED",
       "status": "PASS",
-      "evidence": "All40 immutable migration hashes remain intact. Prior source167 repair protects423 runtime relations. Qualified cbf base guards installed181 additive statements:13 invoker functions,99constraints,60triggers,0violations and0persisted owner delegations, preserving physical data/ACL/RLS. Strict fresh-only whole-catalog equality still fails for the retained known overlay and is never relabeled; retained-profile runtime qualification remains explicit.",
+      "evidence": "All40 immutable migration hashes remain intact. Prior source167 repair protects423 runtime relations. Qualified cbf base guards installed181 additive statements:13 invoker functions,99constraints,60triggers,0violations and0persisted owner delegations, preserving physical data/ACL/RLS. Strict fresh-only whole-catalog equality still fails for the retained known overlay and is never relabeled; retained-profile runtime qualification remains explicit. Read-only primary f4f03cd1 guard admission at05:46:56Z independently matches13/99/60 with0planned statements; no reapplication or business mutation occurred.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "ENTRA_AUTHENTICATED_SESSIONS",
@@ -84,7 +84,7 @@
       "evidence": "Real authorization-code A/B run43556504571 passed on cbf2bc93; normal member/steward navigation also passed. No identity substitution or serialized cookies.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "API_AND_POSTGRES_TENANT_ISOLATION",
@@ -93,16 +93,16 @@
       "evidence": "Real cbf paired APIs plus30 signed native checks pass own/foreign/forged/missing/hash-token refusals, cross-tenant update0 and insert42501, bridge cleanup and retained previous cases/document. Next candidate requires requalification.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
       "status": "FAIL",
-      "evidence": "Real cbf messaging passes30 checks and member/steward navigation passes70/56 observations. Officer FR Trust503 and actual rendered member intake500 remain retained failures. Intake log identifies missing decision signing key; no connection cause is inferred for Trust503. Remaining roles, positive assignment/grievance continuity and final repaired UI require actual qualification.",
+      "evidence": "Real cbf messaging passes30 checks and member/steward navigation passes70/56 observations. Officer FR Trust503 and actual rendered member intake500 remain retained failures. Intake log identifies missing decision signing key; no connection cause is inferred for Trust503. Remaining roles, positive assignment/grievance continuity and final repaired UI require actual qualification. Actual governed grievance intake/person mapping/assignment/conversion/status/document API steps pass, but assigned detail is redirected away and a revoked converter can still read a self-authored internal note. Candidate repairs direct-link presentation, bounded member controls and journal projection; real final-source acceptance remains required.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "WORKERS_RETRIES_AND_DELIVERY",
@@ -111,7 +111,7 @@
       "evidence": "Cbf worker batch passed six real scenarios and18operations, including provider acceptance, controlled retry, actual lease expiry, concurrency and stale-recipient cancellation. Initial fixture retirement hit53300; after non-serving revisions drained, owned cleanup passed with0pending/claimed. Failure remains retained; next candidate requires budget/load requalification.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "AUDIT_AND_TELEMETRY",
@@ -120,16 +120,16 @@
       "evidence": "Cbf primary native proof recomputed complete336/10-record chains and actual two CASE_CREATED pack/artifact/checksum/manifest/seal-audit records. Recent telemetry stopped because shared workspace is OverQuota at0.5GB/day; direct revision logs identified intake missing signing key. Dedicated staging telemetry recovery and intake atomic seal remain to prove.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
       "status": "PARTIALLY_PROVEN",
-      "evidence": "Cbf paired run43556504571 passes canonical upload/intake/replay/isolation/lease. Private69bytes/checksum pass; real EICAR canonical upload refused400. Actual lease expiry05:28:45Z and existing-session membership revocation are still required; final replacement also needs requalification.",
+      "evidence": "Cbf real upload/intake/replay/isolation/lease and private69bytes/checksum pass; canonical EICAR upload refused400. Its exact issued lease expired05:28:45Z and actual private storage returned403 AuthenticationFailed at05:32:07.939Z with unchanged signed-URL hash. Existing-session membership revocation and complete replacement-source qualification remain required.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
@@ -138,7 +138,7 @@
       "evidence": "Cbf member/steward navigation passes sensitive finance refusals. Remaining final-source roles still require qualification. Finance/dues persistence and Financial Officer2.1 remain excluded.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "OPERATIONAL_RECOVERY",
@@ -147,7 +147,7 @@
       "evidence": "Actual Azure private PITR at10.40.4.5 from2026-11-13T22:30:00Z remains separate from primary routing. Both additive repairs passed on the copy; signed current-source protocol casts distinct owned votes, resolves approval, issues/accepts scoped mandate, cleans up and restores original roles. Current source guard/protocol bytes are verified. Signed tenant/token denials and complete restored audit chains pass (301/5). Final protected failed-revision rehearsal and owned-clone stop remain required.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "CAPABILITY_TRUTHFULNESS",
@@ -156,7 +156,7 @@
       "evidence": "Reconcile actual supported base journeys and registry limitations after final runtime qualification. No global SaaS completion or finance implementation claim.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "INSTITUTIONAL_BOUNDARIES",
@@ -165,7 +165,7 @@
       "evidence": "The private signed protocol uses explicitly synthetic owned accounts operated by one founder; no union ratification or independent human approval is claimed. Source guards enforce actor binding, distinct votes, immutable records and canonical audit. Final deployed sensitive-boundary refusals and scoped positive assignment remain required.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+      "proposedSourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7"
     },
     {
       "id": "STAGING_DECISION_ACCEPTANCE",
@@ -175,7 +175,7 @@
     }
   ],
   "externalBlockers": [],
-  "proposedCandidateSha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438",
+  "proposedCandidateSha": "f4f03cd11a788a3a4df7e3045c622405915801f7",
   "proposedCandidateState": "EXACT_CI_MAIN_ADMISSION_AND_DEPLOYED_REQUALIFICATION_PENDING",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
@@ -225,7 +225,8 @@
     "recoveryHarness": "Six fault/recovery contracts passed locally; #1209 CI/main admission and protected runtime rehearsal pending.",
     "baseAuthorityPhysicalGuards": "108 focused checks and exact source-ed13cf0a native export/restore/repeat/privileges PASS (24576 catalog objects); not staging acceptance.",
     "baseCaseworkRepair": "215 member-policy/evidence/request/RLS checks +108 authority/messaging/security checks +25 steward identity checks PASS. Exact cbf2bc93 native export/restore/repeat/privileges PASS,24576 catalog objects. Local/source evidence is not runtime acceptance.",
-    "operationalRepair": "44 release/budget,13auth/runtime and28readiness/intake/evidence local checks PASS; Bicep, inventory, ops validation, source-plan and exact native export PASS. No runtime acceptance inferred."
+    "operationalRepair": "44 release/budget,13auth/runtime and28readiness/intake/evidence local checks PASS; Bicep, inventory, ops validation, source-plan and exact native export PASS. No runtime acceptance inferred. Seven corrected probe-contract checks also pass, including actual process-only liveness without database connectivity.",
+    "grievanceAccess": "144 local route/model/console/navigation/catalog checks PASS, including revoked-author notes and English/French bounded controls. Exact source native installation/restore/repeat/privileges PASS. Actual runtime remains required."
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -237,5 +238,6 @@
     "supersededForQualificationBy": "167f95034fbdaa163cd67e79c4bca622284e0d77"
   },
   "securityFindingEvidence": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json",
-  "observedStagingCandidateSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
+  "observedStagingCandidateSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+  "currentSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-restored-rehearsal-f4f03cd1.json"
 }

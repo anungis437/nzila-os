@@ -1,0 +1,40 @@
+{
+  "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+  "caseId": "2fcfccb5-4380-426a-8211-52c26cabe02d",
+  "httpStatus": 200,
+  "creator": "c01e5647-8506-4101-bb52-2547000a9e02",
+  "representedMember": "6a0fe972-ed1c-49ca-83c8-00b9b214f96f",
+  "canViewInternal": false,
+  "collaborators": 0,
+  "internalOwnAuthoredNoteStillVisible": true,
+  "additionalBrowserFinding": {
+    "realSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+    "requestedPath": "/en-CA/dashboard/grievances/2fcfccb5-4380-426a-8211-52c26cabe02d",
+    "finalPath": "/en-CA/dashboard/workbench",
+    "detailApiRequested": false,
+    "browserReceiptSha256": "8052473bf23fcff1c7eb8837a33efba54ef094e07fda3cf3e59320366ac575b0"
+  },
+  "officerPostDrain": {
+    "runId": "43561119640",
+    "status": "FAIL",
+    "failure": "page.reload ERR_ABORTED at English settings",
+    "actualSystemEvents": [
+      "05:21:42Z liveness timeout1s and restart",
+      "05:23:13Z liveness timeout1s and restart"
+    ],
+    "priorFrenchTrust503CauseNotInferred": true
+  },
+  "actualIssuedDocumentExpiry": {
+    "status": "PASS",
+    "sourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+    "runId": "43556504571",
+    "expiresAt": "2026-11-14T05:28:45Z",
+    "observedAt": "2026-11-14T05:32:07.939Z",
+    "httpStatus": 403,
+    "providerError": "AuthenticationFailed",
+    "sameSignedUrlSha256": "6a64b0954b2e537919e11b3be10a27a9fb4195b86c33ba1fb9292ed008e115d5",
+    "signedQuerySerialized": false
+  },
+  "replacementSourceSha": "bebebdf0987d85d8529aafdb2cc049401defb847",
+  "replacementDeployed": false
+}

@@ -1,6 +1,6 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 base staging: connection budget, intake signing/atomicity and isolated telemetry",
+  "title": "Union Eyes V2 staging: capacity, atomic intake, telemetry and governed grievance privacy",
   "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. Owner-directed founder-operated staging authorization is recorded; no production release, institutional mandate, financial activation, or STAGING GO without runtime proof is authorized.",
   "service": "union-eyes",
   "environment": "STAGING",
@@ -158,11 +158,13 @@
     "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
     "b89da813a7a2343a2459586969d3b9c7ead94754",
     "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
-    "a8195afb5d5cbd85ed23601bfa0d611a88b63438"
+    "a8195afb5d5cbd85ed23601bfa0d611a88b63438",
+    "bebebdf0987d85d8529aafdb2cc049401defb847",
+    "f4f03cd11a788a3a4df7e3045c622405915801f7"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-14T05:23:15.039146+00:00",
+  "updated_at": "2026-11-14T05:47:42.060969+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -171,7 +173,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "a8195afb5d5cbd85ed23601bfa0d611a88b63438",
+    "candidate_sha": "f4f03cd11a788a3a4df7e3045c622405915801f7",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true
