@@ -51,7 +51,8 @@ SELECT p.id AS payment_id, p.organization_id AS payment_organization,
        i.organization_id AS invoice_organization
 FROM platform_payments p
 LEFT JOIN billing_accounts a ON a.id = p.billing_account_id
-LEFT JOIN platform_invoices i ON i.id = p.invoice_id
+LEFT JOIN payment_allocations pa ON pa.payment_id = p.id
+LEFT JOIN platform_invoices i ON i.id = pa.invoice_id
 WHERE (a.id IS NOT NULL AND a.organization_id <> p.organization_id)
    OR (i.id IS NOT NULL AND i.organization_id <> p.organization_id)
 ORDER BY p.id;
