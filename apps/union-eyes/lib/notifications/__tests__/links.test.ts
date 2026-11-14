@@ -126,14 +126,15 @@ describe('every builder leads to a page the person it is written for may open', 
     expect(canAccessDashboardPath(pathname, experience, true)).toBe(true);
   });
 
-  it('keeps individual grievance links reachable through case authority without admitting collection or creation routes', () => {
+  it('keeps case-authorized detail links reachable and admits only the exact staff collection', () => {
     const detail = `/dashboard/grievances/${CLAIM}`;
     expect(judgeLink(`/en-CA${detail}`, pages, locales)).toBe('OK');
     for (const experience of EXPERIENCES) {
       for (const pilot of [false, true]) {
         expect(canAccessDashboardPath(detail, experience, pilot), experience).toBe(true);
-        expect(canAccessDashboardPath('/dashboard/grievances', experience, pilot)).toBe(false);
+        expect(canAccessDashboardPath('/dashboard/grievances', experience, pilot)).toBe(experience === 'staff');
         expect(canAccessDashboardPath('/dashboard/grievances/new', experience, pilot)).toBe(false);
+        expect(canAccessDashboardPath('/dashboard/grievances/management', experience, pilot)).toBe(false);
       }
     }
   });

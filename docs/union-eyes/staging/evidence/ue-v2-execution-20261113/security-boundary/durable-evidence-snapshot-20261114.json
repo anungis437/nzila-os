@@ -1,0 +1,9 @@
+{
+  "status": "PASS_DURABLE_PRIVATE_EVIDENCE_SNAPSHOT",
+  "at": "2026-11-14T20:13:18.639644+00:00",
+  "rootProofAndHelperFilesCopied": 942,
+  "privateDirectoryMode": "0700",
+  "privateFilesMode": "0600",
+  "existingSourcePathsKeptForActiveProcesses": true,
+  "credentialOrEncryptedLeaseContentsPrinted": false
+}

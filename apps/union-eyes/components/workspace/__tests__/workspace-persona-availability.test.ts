@@ -272,7 +272,13 @@ describe("workspace deep-work path coherence", () => {
           resolveWorkspaceDeepWork(role, "case-operations", "/dashboard/inbox?type=intake", pilot),
         ).toEqual({ kind: "reachable" });
 
-        for (const href of ["/dashboard/claims", "/dashboard/grievances"]) {
+        expect(
+          resolveWorkspaceDeepWork(role, "case-operations", "/dashboard/grievances", pilot),
+        ).toEqual({ kind: "reachable" });
+        expect(gateWorkspaceDeepWork(role, "case-operations", "/dashboard/grievances", pilot))
+          .toEqual({ allowed: true });
+
+        for (const href of ["/dashboard/claims", "/dashboard/grievances/new", "/dashboard/grievances/management"]) {
           const blocked = resolveWorkspaceDeepWork(role, "case-operations", href, pilot);
           expect(blocked.kind).toBe("blocked");
           if (blocked.kind !== "blocked") continue;
@@ -378,9 +384,13 @@ describe("workspace deep-work path coherence", () => {
     const deniedDoctrine = [
       "/dashboard/cases",
       "/dashboard/claims",
-      "/dashboard/grievances",
+      "/dashboard/grievances/new",
+      "/dashboard/grievances/management",
     ];
     for (const pilot of [true, false]) {
+      expect(canAccessDashboardPath("/dashboard/grievances", "staff", pilot)).toBe(true);
+      expect(gateWorkspaceDeepWork("steward", "case-operations", "/dashboard/grievances", pilot))
+        .toEqual({ allowed: true });
       for (const href of deniedDoctrine) {
         expect(gateWorkspaceDeepWork("steward", "case-operations", href, pilot)).toEqual({
           allowed: false,

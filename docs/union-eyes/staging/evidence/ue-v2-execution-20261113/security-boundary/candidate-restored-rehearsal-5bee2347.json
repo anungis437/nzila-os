@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "purpose": "PREDEPLOY_NATIVE_SOURCE_ADMISSION_ONLY",
+  "candidateSourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+  "originalActualCloneExecutionSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "originalActualCloneExecutionAt": "2026-11-14T19:30:49.069Z",
+  "originalActualCloneExecutionReceiptSha256": "a8de7c52d8b3b70b5f0fb6ff02c5a638f8b3b3e97d18463ca4de55d7491723f1",
+  "originalActualCloneExecutionReceipt": "clone-current-source-ea073528-actual-runtime-protocol.json",
+  "sourceBindings": [
+    {
+      "kind": "authority",
+      "candidateSourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+      "originalSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "trackedSourceInputsVerified": 125,
+      "allSourceModuleBytesIdentical": true,
+      "compiledBundleSha256": "296bee35f796fd32d5529bbf784a834655a8b08f5c73bf65046eb066504f2da6"
+    },
+    {
+      "kind": "bearer",
+      "candidateSourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+      "originalSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "trackedSourceInputsVerified": 103,
+      "allSourceModuleBytesIdentical": true,
+      "compiledBundleSha256": "c8059af98dd19ffe09f80f60c93489bbd3915a87b8c9d09b23459a3719d6d2b6"
+    },
+    {
+      "kind": "nested",
+      "candidateSourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+      "originalSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "trackedSourceInputsVerified": 106,
+      "allSourceModuleBytesIdentical": true,
+      "compiledBundleSha256": "026ee053c981e60d2f2f30ef2bc0808aece816f1d0043c5d4e24025947f9d5b1"
+    },
+    {
+      "kind": "worker",
+      "candidateSourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+      "originalSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "trackedSourceInputsVerified": 56,
+      "allSourceModuleBytesIdentical": true,
+      "compiledBundleSha256": "3748c6536bb94b7a87876b1d9f93564c8895b507b1f842499dba9758d3de68cf"
+    },
+    {
+      "kind": "nar",
+      "candidateSourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+      "originalSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "trackedSourceInputsVerified": 108,
+      "allSourceModuleBytesIdentical": true,
+      "compiledBundleSha256": "bdb86f4697102812149d2625bbe333cc393387eebe8eea83a6054adca9192470"
+    },
+    {
+      "kind": "system",
+      "candidateSourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+      "originalSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "trackedSourceInputsVerified": 208,
+      "allSourceModuleBytesIdentical": true,
+      "compiledBundleSha256": "c4bba7eb3168ba2df1e21abd2e03811bfa97e423ab1b1103f35fed4218af8ee3"
+    }
+  ],
+  "restoredCopyRuntimeReceiptRetained": true,
+  "applicationRuntimeAcceptance": false,
+  "replacementRuntimeRequalificationRequired": true,
+  "productionAuthorized": false,
+  "verifiedAt": "2026-11-14T21:51:21.767765+00:00"
+}

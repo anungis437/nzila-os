@@ -1,0 +1,27 @@
+{
+  "status": "FAIL",
+  "sourceSha": "e70027e8687dcaaa533f931d18d2da45582cc3d0",
+  "runId": "43646291898",
+  "jobId": "132605455064",
+  "url": "https://github.com/anungis437/nzila-os/actions/runs/43646291898/job/132605455064",
+  "check": "Repository Inventory",
+  "at": "2026-11-14T22:09:35Z",
+  "rootCause": "The new page audience test adds one TypeScript test and one Union Eyes code file; the four committed generated inventories still had previous counts.",
+  "exactDeltas": {
+    "tsTestFileCount": {
+      "before": 3685,
+      "after": 3686
+    },
+    "unionEyesCodeFileCount": {
+      "before": 6462,
+      "after": 6463
+    }
+  },
+  "correction": "Run the existing pnpm inventory:generate and commit all four generated outputs, without changing application code or test assertions.",
+  "originalJobLogSha256": "263a8876ab7ea20c581d3cfc38cce6463705e5db0244afaaa2972fc69a756821",
+  "localGenerationPassed": true,
+  "originalFailureRetained": true,
+  "mergeBuildAndDeploymentNotAttempted": true,
+  "replacementExactCIRequired": true,
+  "stagingGo": false
+}

@@ -169,16 +169,15 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-    "sourcePR": 1224,
-    "localNativeExport": "local-native-export-ea073528.json",
-    "restoredRehearsal": "candidate-restored-rehearsal-ea073528.json",
-    "primaryGuardReadOnlyNoop": "primary-current-source-noop-ea073528.json",
-    "actualReadOnlyNestedSystemRegression": "nested-system-single-pool-ea073528-real-pg.json",
+    "sourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+    "sourcePR": 1228,
+    "integrationPR": 1229,
     "deployed": false,
+    "localNativeExport": "local-native-export-dd5baaa6.json",
+    "nativeSourceAdmission": "candidate-restored-rehearsal-dd5baaa6.json",
+    "primaryReadOnlyNoop": "primary-source-noop-dd5baaa6-qualification.json",
     "ciAndRuntimeStillRequired": true,
-    "repairSummary": "Nested system savepoints and authority/context restoration; correct App Router asset graph and MIME security; actual-image gate and navigation inventory CI",
-    "priorTestBoundaryCorrection": "source-a8442373-whole-application-ci-failure.json"
+    "repairSummary": "Nullable workbench case reference fallback and exact staff grievance collection entry; dependent tests enforce creation/management denials"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -254,5 +253,25 @@
     "revision": "nzila-ue-v2-staging-app--rel9a7ee373e1",
     "trafficPercent": 100,
     "stagingGo": false
-  }
+  },
+  "supersededWorkbenchCandidate": {
+    "sourceSha": "4687a4ed84935cedb2b436738373b13b7cda2158",
+    "sourcePR": 1228,
+    "wholeApplicationCI": "source-4687a4ed-whole-application-ci-failure.json",
+    "deployed": false
+  },
+  "supersededWorkbenchCandidates": [
+    {
+      "sourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+      "sourcePR": 1228,
+      "review": "workbench-collection-entry-audience-review.json",
+      "deployed": false
+    },
+    {
+      "sourceSha": "e70027e8687dcaaa533f931d18d2da45582cc3d0",
+      "sourcePR": 1228,
+      "wholeApplicationInventoryCI": "source-e70027e8-repository-inventory-ci-failure.json",
+      "deployed": false
+    }
+  ]
 }

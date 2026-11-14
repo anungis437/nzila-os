@@ -7,7 +7,7 @@
   "acceptedStagingCandidateSha": null,
   "stagingWorkflowDefinitionSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Deployed ea073528 repairs the confirmed nested-system pool deadlock and CSS-as-script defects. Exact source/integration CI, immutable build, reviewed staging deployment, real paired sessions, member EN/FR intake, messaging and six worker recovery scenarios pass. Remaining persona/journey, revocation, actual document expiry, recovery rehearsal and final evidence reconciliation remain required. Failed verification runs are retained; finance persistence and Financial Officer 2.1 remain excluded.",
+  "verdictReason": "Deployed ea073528 passes five normal profiles,39 grievance business/privacy checks and fresh real revocation/document expiry, but actual workbench acceptance exposes nullable case selection and a missing staff grievance-list entry. Both presentation repairs pass94 local UI/role/catalog tests; final exact source/integration qualification, reviewed staging deployment and complete replacement-source runtime acceptance remain required. Finance persistence and Financial Officer2.1 remain excluded.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -23,167 +23,205 @@
     {
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Source ea073528, immutable app digest af4e021f19f68297dc661ef6b396eb4a9f78f4b817d711e85583d6367abaae24, actual /api/version and Azure named serving revision agree. observed-runtime-ea073528.json.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "Source ea073528, immutable app digest af4e021f19f68297dc661ef6b396eb4a9f78f4b817d711e85583d6367abaae24, actual /api/version and Azure named serving revision agree. observed-runtime-ea073528.json."
     },
     {
       "id": "SOURCE_ENGINEERING",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Confirmed nested SYSTEM one-connection deadlock and CSS-as-script defects repaired in admitted source. Focused/native source evidence plus actual deployed member browser and six worker scenarios verify both corrections. This does not formally close every frozen ledger item.",
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": false,
-      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "requalificationRequiredForProposedCandidate": true,
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "historicalObservedStatus": "FAIL",
+      "historicalObservedEvidence": "Actual source ea073528 workbench uses nullable claimNumber as a selection key; existing officer API case has no number. Source correction and9 local tests pass, but repaired candidate is not yet admitted/deployed. Native fixture and wrong member-URL test failures remain separately preserved."
     },
     {
       "id": "LOCAL_HOLISTIC_REGRESSION",
       "requirement": "ADVISORY",
-      "status": "NON_BLOCKING_HOST_LIMITATION",
-      "evidence": "Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.",
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": true
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "requalificationRequiredForProposedCandidate": true,
+      "historicalObservedStatus": "NON_BLOCKING_HOST_LIMITATION",
+      "historicalObservedEvidence": "Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Source PR1224 and integration PR1225 completed all registered checks with no failures/pending and all16 trusted required contexts before normal main admission bc6d96d8. Exact source whole-app CI43617951771 and HTTP isolation43617951709 succeeded. admitted-ea073528-merge.json.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "Source PR1224 and integration PR1225 completed all registered checks with no failures/pending and all16 trusted required contexts before normal main admission bc6d96d8. Exact source whole-app CI43617951771 and HTTP isolation43617951709 succeeded. admitted-ea073528-merge.json."
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Immutable build43620798141 and deployment43622244265 succeeded under CHG-2026-0114 following fresh concrete what-if review and protected delegated founder approval. App source ea073528 and workflow/IaC bc6d96d8 remain independently recorded.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "Immutable build43620798141 and deployment43622244265 succeeded under CHG-2026-0114 following fresh concrete what-if review and protected delegated founder approval. App source ea073528 and workflow/IaC bc6d96d8 remain independently recorded."
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Observed named revision --relea07352887 pinned100% in Multiple mode, exact manifest image and real liveness/readiness/source verified. Rehearsal revisions remain zero traffic; owned cleanup preserved metadata.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "Observed named revision --relea07352887 pinned100% in Multiple mode, exact manifest image and real liveness/readiness/source verified. Rehearsal revisions remain zero traffic; owned cleanup preserved metadata."
     },
     {
       "id": "DATABASE_MIGRATIONS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PENDING",
+      "historicalObservedEvidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof."
     },
     {
       "id": "ENTRA_AUTHENTICATED_SESSIONS",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Actual remote provider authorization-code A/B sessions43629425230 pass correct identity/tenant, unexpired secureHttpOnly provider cookies and API workflows. No manufactured or serialized session. real-paired-ea073528-43629425230.json.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "Actual remote provider authorization-code A/B sessions43629425230 pass correct identity/tenant, unexpired secureHttpOnly provider cookies and API workflows. No manufactured or serialized session. real-paired-ea073528-43629425230.json."
     },
     {
       "id": "API_AND_POSTGRES_TENANT_ISOLATION",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Real paired own/foreign case and document API refusals plus30 real-signed retained-primary native checks pass. Native tenant proof uses separately identified member SQL identity; it does not infer direct case authority. Complete initial audit/seal proof retained.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "Real paired own/foreign case and document API refusals plus30 real-signed retained-primary native checks pass. Native tenant proof uses separately identified member SQL identity; it does not infer direct case authority. Complete initial audit/seal proof retained."
     },
     {
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
-      "status": "PARTIALLY_PROVEN",
-      "evidence": "All five normal actual-provider persona profiles pass274 observations on ea073528 (member70/steward56/officer60/executive52/admin36). EN/FR member intake and30 messaging checks pass. Chief/platform profiles and positive assignment/grievance continuity remain in progress.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "FAIL",
+      "historicalObservedEvidence": "Actual ea073528 nullable workbench selection fails. Real grievance semantic/privacy flow passes39 checks, but discovery flags show no workbench entry to the authorized formal grievance collection. Both local presentation corrections pass94 UI/role/catalog checks; qualified deployed replacement evidence remains required."
     },
     {
       "id": "WORKERS_RETRIES_AND_DELIVERY",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Actual deployed ea073528 six-scenario worker acceptance passes provider acceptance/idempotency, controlled retry, real lease expiry/concurrency, stale-recipient suppression, successor scheduling and durable assignment convergence. Owned fixture retirement passes with no pending/claimed work, physical catalog unchanged and temporary operator delegation removed. Provider acceptance does not prove inbox delivery. worker-recovery-ea073528.json and worker-fixture-retirement-ea073528.json.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "Actual deployed ea073528 six-scenario worker acceptance passes provider acceptance/idempotency, controlled retry, real lease expiry/concurrency, stale-recipient suppression, successor scheduling and durable assignment convergence. Owned fixture retirement passes with no pending/claimed work, physical catalog unchanged and temporary operator delegation removed. Provider acceptance does not prove inbox delivery. worker-recovery-ea073528.json and worker-fixture-retirement-ea073528.json."
     },
     {
       "id": "AUDIT_AND_TELEMETRY",
       "requirement": "REQUIRED",
-      "status": "PARTIALLY_PROVEN",
-      "evidence": "Dedicated staging workspace and all7 actual alert configurations verified; initial actual complete primary audit chains479/18 and sealed case packs pass. Final post-mutation audit reconciliation remains required.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "Dedicated staging workspace and all7 actual alert configurations verified; initial actual complete primary audit chains479/18 and sealed case packs pass. Final post-mutation audit reconciliation remains required."
     },
     {
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
-      "status": "PARTIALLY_PROVEN",
-      "evidence": "Real canonical intake/replay/cross-tenant denial and private69bytes/checksum pass. Actual issued lease expires20:07:13Z and needs same-URL post-expiry denial. Revocation run43630453485 FAIL retained: valid unexpired provider session remained, case401 denied, but runner allowed only403/404 and stopped before document check. Owned membership restored in both projections; corrected protected rerun required.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "Fresh complete paired/revocation43635785268 passes both401 refusals under the same unexpired provider session and actual membership restoration. Actual private69bytes/checksum pass before expiry; the same issued URL/hash returns403 AuthenticationFailed at21:17:54Z after21:10:11Z. Older lost-key examples remain uncollected, never relabeled. This qualifies deployed ea073528 only; replacement-source evidence is still required."
     },
     {
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "All final-source persona finance boundary checks remain in progress; finance/dues persistence and Financial Officer2.1 are outside base release.",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PENDING",
+      "historicalObservedEvidence": "All final-source persona finance boundary checks remain in progress; finance/dues persistence and Financial Officer2.1 are outside base release."
     },
     {
       "id": "OPERATIONAL_RECOVERY",
       "requirement": "REQUIRED",
-      "status": "PARTIALLY_PROVEN",
-      "evidence": "Recovery run43630465718 FAIL retained because Azure write had not settled and recoveryPATCH encountered ContainerAppOperationInProgress. Reviewed owner-assisted completion restored exact immutable healthy template at0traffic and deactivated both owned drill revisions, preserving serving source100%. Activating alone is not a proven failed state; corrected protected failure/recovery drill and actual current-source restored-copy protocol remain required. Corrected protected43634316698 also FAIL retained: actual provider pending-revision error is RevisionNotFound, reproduced with a read-only absent revision GET. Narrow provider-contract correction and owned cleanup are in progress; no failed workflow is relabeled.",
+      "status": "PENDING",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "Recovery run43630465718 FAIL retained because Azure write had not settled and recoveryPATCH encountered ContainerAppOperationInProgress. Reviewed owner-assisted completion restored exact immutable healthy template at0traffic and deactivated both owned drill revisions, preserving serving source100%. Activating alone is not a proven failed state; corrected protected failure/recovery drill and actual current-source restored-copy protocol remain required. Corrected protected43634316698 also FAIL retained: actual provider pending-revision error is RevisionNotFound, reproduced with a read-only absent revision GET. Narrow provider-contract correction and owned cleanup are in progress; no failed workflow is relabeled."
     },
     {
       "id": "CAPABILITY_TRUTHFULNESS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PENDING",
+      "historicalObservedEvidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof."
     },
     {
       "id": "INSTITUTIONAL_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "historicalObservedStatus": "PENDING",
+      "historicalObservedEvidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof."
     },
     {
       "id": "STAGING_DECISION_ACCEPTANCE",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
-      "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": true
+      "evidence": "Replacement source dd5baaa614ad12dfb1876e59adf73b82bad6df87 requires exact qualification and fresh deployed evidence. Historical source ea073528 results and actual failures are retained in observed-ea073528-contract-before-workbench-replacement.json.",
+      "proposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "requalificationRequiredForProposedCandidate": true,
+      "historicalObservedStatus": "PENDING",
+      "historicalObservedEvidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     }
   ],
   "externalBlockers": [],
-  "proposedCandidateSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-  "proposedCandidateState": "DEPLOYED_EXACT_SOURCE_CI_AND_REVIEWED_STAGING_APPLY_PASS_REAL_ACCEPTANCE_IN_PROGRESS",
+  "proposedCandidateSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+  "proposedCandidateState": "EXACT_CI_MAIN_ADMISSION_BUILD_AND_REPLACEMENT_RUNTIME_PENDING",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
     "included": [
@@ -240,7 +278,9 @@
     "stagingLogAlertScopeMigration": "34 focused release/history/identity/migration checks pass, including immutable-provider failure reproduction, complete pre-delete snapshots, unreviewed-setting refusal and restoration after failed recreation. Protected exact-workflow CI/main/reviewed apply and runtime remain pending. Partial-apply retry also verifies the retained candidate image before bounded reactivation; promotion still requires actual healthy state/source. New infrastructure provenance binds the entire admitted IaC Git tree and template hash separately from image source; the cron-rule query excludes actual normal-zero exits and passes Azure-executed controlled failure vectors. Current deployed alert correction/complete rollout still required.",
     "nestedSystemAndClientAssets": "99 focused tests, four script-asset gate tests, actual before/after production CSS build reproduction, exact-source 776-table fresh/restore/repeat/privileges and actual source-bound primary one-connection regression PASS. SQL bytes/order unchanged; no deployed acceptance inferred.",
     "verificationRunnerCorrection": "14 focused contracts pass, including verified unexpired-session401/403/404 resource denials, late Azure visibility, transient expected revision404, bounded busy recovery, concurrent-change refusal and original failure preservation. Protected runtime reruns remain required.",
-    "providerRevisionContract": "Actual read-only Azure response reproduces RevisionNotFound.15 focused contracts now cover that exact CLI JSON shape and require an absent initial known-good revision to fail before mutation. New exact CI/main admission and protected recovery rerun remain required. Application source/image and deployment provenance remain unchanged."
+    "providerRevisionContract": "Actual read-only Azure response reproduces RevisionNotFound.15 focused contracts now cover that exact CLI JSON shape and require an absent initial known-good revision to fail before mutation. New exact CI/main admission and protected recovery rerun remain required. Application source/image and deployment provenance remain unchanged.",
+    "workbenchNullableReference": "Read-only primary proves a real owned officer case has nullable claimNumber. Both new UI regressions fail before the fix; all9 workbench tests pass after selecting by the actual case id when the number is absent. Canonical plan/self-test and navigation inventory check pass unchanged; no SQL/data/authority mutation. New source CI and deployed qualification remain required. Additional scoped grievance entry and EN/FR catalog/role tests pass94 checks. No new primary destination, API authority or SQL is introduced.",
+    "workbenchAndGrievanceEntry": "216 tests across six affected page/UI/role/catalog/workspace/notification suites PASS. The server resolves the canonical current role and the link defaults hidden unless the exact destination policy admits it. Exact native fresh/restore/repeat/privileges PASS; all six backend source graphs/bundles match deployed ea073528. Current primary inspection requires0guardSQL. Local broad host failures and original whole-app CI failure remain retained; final exact CI and replacement runtime evidence are required."
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -410,5 +450,5 @@
     }
   ],
   "priorSourceCompositionSuiteFailure": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/source-a8442373-whole-application-ci-failure.json",
-  "latestAdmittedVerificationWorkflowSha": "37477074b622109395f88a02821fda39b9c2e46c"
+  "latestAdmittedVerificationWorkflowSha": "ecdff4111bf694df54c497bf8a77ee6a1bdcd284"
 }

@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "workflowSha": "ecdff4111bf694df54c497bf8a77ee6a1bdcd284",
+  "verificationPr": 1227,
+  "verificationHeadSha": "b46e45b3790760b99fb9245af90d54ffb4e97859",
+  "allRegisteredChecksFinishedWithoutFailure": true,
+  "allRequiredChecksPassed": true,
+  "requiredTrustedContexts": 16,
+  "unresolvedReviews": 0,
+  "mergedAt": "2026-11-14T20:44:29Z",
+  "deploymentWorkflowSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+  "previousVerificationWorkflowSha": "37477074b622109395f88a02821fda39b9c2e46c",
+  "appDeploymentPerformed": false,
+  "productionAuthorized": false,
+  "stagingGo": false,
+  "runtimeAcceptanceStillUnfinished": true,
+  "pendingRoleDispatchDriversStoppedBeforeMerge": true,
+  "at": "2026-11-14T20:44:32.474091+00:00"
+}

@@ -304,6 +304,9 @@ export function canAccessDashboardPath(pathname: string, experience: DashboardEx
   // decides actual case standing and returns only the caller's bounded view.
   // This does not admit the grievance collection, creation or management routes.
   if (/^\/dashboard\/grievances\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(pathname)) return true;
+  // Representation links staff to the existing caller-scoped grievance list.
+  // This exact collection path admits no creation or management subroutes.
+  if (pathname === '/dashboard/grievances' && experience === 'staff') return true;
   const allowedPrefixes = ALLOWED_PREFIXES_BY_EXPERIENCE[experience];
   const isAllowed = allowedPrefixes.some((prefix) => {
     if (prefix === '/dashboard') {
