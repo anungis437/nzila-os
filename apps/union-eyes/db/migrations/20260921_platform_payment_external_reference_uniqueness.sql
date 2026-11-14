@@ -31,8 +31,11 @@ DO $$
 DECLARE
   dup_groups integer;
 BEGIN
+  -- A missing payment table means the required ledger migration has not run.
+  -- Refuse success rather than recording an unapplied idempotency guarantee.
   IF to_regclass('platform_payments') IS NULL THEN
-    RETURN;
+    RAISE EXCEPTION
+      'platform_payments is missing; apply the platform ledger migration before payment-reference uniqueness';
   END IF;
 
   SELECT count(*) INTO dup_groups
