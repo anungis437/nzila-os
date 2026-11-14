@@ -75,7 +75,7 @@ function safeFeeProduct(unitCents: number, count: number): number {
 // Persisted invoice balances are untrusted even when database columns are decimal.
 // Reject malformed or over-precision values rather than interpreting them as zero.
 function persistedInvoiceCents(value: string | null | undefined): number {
-  if (typeof value !== 'string' || !/^\\d+(?:\\.\\d{1,2})?$/.test(value)) {
+  if (typeof value !== 'string' || !/^\d+(?:\.\d{1,2})?$/.test(value)) {
     throw new Error('Persisted invoice balance is not valid CAD');
   }
   const cents = centsSafe(value);
