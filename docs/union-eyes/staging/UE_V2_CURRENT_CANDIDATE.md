@@ -75,3 +75,6 @@ Whole-application CI43643427818 on source4687a4ed failed three old collection-de
 
 
 Premerge review also found that executives/governance can open the workbench while the new grievance collection is intentionally staff-only. The server now resolves the canonical current role and advertises the entry only when the destination policy admits it; the client defaults hidden. Existing login/minimum-role gates and API authority remain unchanged. All six affected suites,216 tests, pass locally. The previous candidate was stopped before merge/build/deployment; final exact source qualification and replacement runtime checks are still required.
+
+
+Repository Inventory CI43646291898 on e70027e8 stopped before merge/build/deployment because the new server page test increased TypeScript test files3685→3686 and Union Eyes code files6462→6463. Regenerated and committed all four existing inventory outputs; application behavior and216 passing focused tests are unchanged. The original failure remains retained and final exact qualification is required.
