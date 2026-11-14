@@ -560,6 +560,7 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
     'apps/union-eyes/scripts/bootstrap-v2/installer.ts',
     'apps/union-eyes/scripts/bootstrap-v2/catalog-normalization.ts',
     'apps/union-eyes/lib/db/with-rls-context.ts',
+    'apps/union-eyes/lib/db/system-transaction-scope.ts',
     'apps/union-eyes/lib/db/canonical-transaction-scope.ts',
     'apps/union-eyes/lib/evidence.ts',
     'apps/union-eyes/lib/canonical-evidence.ts',
