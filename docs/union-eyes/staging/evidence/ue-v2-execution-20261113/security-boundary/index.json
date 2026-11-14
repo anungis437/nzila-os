@@ -48,10 +48,11 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "84239d33dbfbb9a57827fcb91a3ef32a26c2fe8f",
-    "localNativeExport": "local-native-export-84239d33.json",
-    "sourceProvenance": "repair-84239d33-provenance.json",
+    "sourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+    "localNativeExport": "local-native-export-167f9503.json",
+    "sourceProvenance": "repair-167f9503-provenance.json",
     "localFocusedTests": 105,
+    "utcDateBoundaryTests": 69,
     "liveApplied": false,
     "deployed": false
   },
@@ -61,7 +62,7 @@
     "apply": "clone-combined-apply-cf689b70.json",
     "appliedSourceSha": "cf689b7064037019bcdcf7c903732989be2eb827",
     "sameRepairBundleAndPlanAsCandidate": true,
-    "nativeSignedProof": "clone-real-signed-native-audit-84239d33.json",
-    "signedSourceProvenance": "clone-signed-source-84239d33.json"
+    "nativeSignedProof": "clone-real-signed-native-audit-167f9503.json",
+    "signedSourceProvenance": "clone-signed-source-167f9503.json"
   }
 }
