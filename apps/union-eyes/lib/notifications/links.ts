@@ -7,8 +7,8 @@
  * from every page its experience does not include (lib/dashboard/role-experience.ts), and a link that lands on someone else's landing page is a link that
  * pretends.
  *
- * What is deliberately not here, because no role may open the page: the grievance pages (/dashboard/grievances/...), a signing page (none exists) and an
- * alerts page (none exists). A notification about those carries no link.
+ * Signing and alerts pages do not exist, so notifications about them carry no link. Individual grievance detail links are now reachable under the
+ * detail API's case authority; the existing grievance lifecycle writers currently omit actionUrl.
  */
 
 export class NotificationLinkError extends Error {
