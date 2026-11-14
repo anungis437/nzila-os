@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({ send: vi.fn(), systemRows: vi.fn() }));
 vi.mock('resend', () => ({ Resend: class { emails = { send: mocks.send }; } }));
 vi.mock('@/lib/logger', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 // The suppression ledger is read through the system context; only that boundary is replaced, so the real lookup, digesting and screening run.
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: () => mocks.systemRows() }));
+vi.mock('@/lib/db/system-transaction-scope', () => ({ withSystemContext: () => mocks.systemRows() }));
 
 // Real canonical service + real deadline adapter. Only the provider SDK and the database boundary are mocked.
 import { deliverDeadlineReminderEmail } from '../email-adapter';
