@@ -36,3 +36,13 @@ export function retirementTargets({ mode, traffic, revisions, expectedServingRev
   if (!known?.active || known.trafficWeight !== 100) throw new Error('HEALTHY_SERVING_REVISION_REQUIRED')
   return revisions.filter(row => row.active && row.name !== expectedServingRevision && row.trafficWeight === 0).map(row => row.name)
 }
+
+/** A partial apply can leave the exact candidate retained but inactive on retry. */
+export function candidateNeedsActivation({ sourceSha, expectedImage, revision }) {
+  if (!/^[a-f0-9]{40}$/.test(sourceSha) || !/^nzilaventuresacr\.azurecr\.io\/nzila-os-union-eyes-v2@sha256:[a-f0-9]{64}$/.test(expectedImage)) throw new Error('EXACT_CANDIDATE_IDENTITY_REQUIRED')
+  if (revision?.name !== 'nzila-ue-v2-staging-app--rel' + sourceSha.slice(0, 10)) throw new Error('WRONG_CANDIDATE_REVISION')
+  const containers = revision.properties?.template?.containers
+  if (containers?.length !== 1 || containers[0].image !== expectedImage) throw new Error('WRONG_CANDIDATE_IMAGE')
+  if (typeof revision.properties.active !== 'boolean') throw new Error('CANDIDATE_ACTIVE_STATE_REQUIRED')
+  return !revision.properties.active
+}

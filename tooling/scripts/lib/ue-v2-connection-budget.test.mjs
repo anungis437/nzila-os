@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import test from 'node:test'
-import { evaluateStagingConnectionBudget, retirementTargets } from './ue-v2-connection-budget.mjs'
+import { evaluateStagingConnectionBudget, retirementTargets, candidateNeedsActivation } from './ue-v2-connection-budget.mjs'
 
 const policy = JSON.parse(readFileSync(new URL('../../../infrastructure/bicep/ue-v2/staging-connection-budget.json', import.meta.url)))
 const baseline = { policy, maxConnections: 50, reservedConnections: 5, superuserReservedConnections: 10, maximumReplicas: 2 }
@@ -33,12 +33,25 @@ test('retirement refuses changed, split, latest-based or inactive serving traffi
   for (const change of [{ expectedServingRevision: old }, { traffic: [{ latestRevision: true, weight: 100 }] }, { traffic: [{ revisionName: current, weight: 90 }, { revisionName: old, weight: 10 }] }, { revisions: [{ name: current, active: false, trafficWeight: 100 }] }]) assert.throws(() => retirementTargets({ ...retirement, ...change }))
 })
 
+test('a partial-apply retry can reactivate only its retained exact-source exact-image candidate', () => {
+  const sourceSha = '9a7ee373e1205209f864e63f37877c8919bb6738'
+  const expectedImage = 'nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:' + 'a'.repeat(64)
+  const revision = { name: 'nzila-ue-v2-staging-app--rel9a7ee373e1', properties: { active: false, template: { containers: [{ image: expectedImage }] } } }
+  assert.equal(candidateNeedsActivation({ sourceSha, expectedImage, revision }), true)
+  assert.equal(candidateNeedsActivation({ sourceSha, expectedImage, revision: { ...revision, properties: { ...revision.properties, active: true } } }), false)
+  assert.throws(() => candidateNeedsActivation({ sourceSha, expectedImage, revision: { ...revision, name: old } }), /WRONG_CANDIDATE_REVISION/)
+  assert.throws(() => candidateNeedsActivation({ sourceSha, expectedImage: expectedImage.replace(/a{64}$/, 'b'.repeat(64)), revision }), /WRONG_CANDIDATE_IMAGE/)
+  const workflow = readFileSync(new URL('../../../.github/workflows/ue-v2-staging-deploy.yml', import.meta.url), 'utf8').split('\n  apply:\n')[1]
+  assert(workflow.indexOf('Recheck the actual PostgreSQL connection budget') < workflow.indexOf('Reactivate the exact retained candidate'))
+  assert(workflow.indexOf('Reactivate the exact retained candidate') < workflow.indexOf('Promote traffic to the new revision'))
+})
+
 
 test('the deployment checkout retains the source and serving history required by retirement ancestry guards', () => {
   const workflow = readFileSync(new URL('../../../.github/workflows/ue-v2-staging-deploy.yml', import.meta.url), 'utf8');
   const apply = workflow.split('\n  apply:\n')[1];
   assert(apply, 'Apply job must exist');
-  const definitionCheckout = apply.split('      - name: Checkout workflow definition\n')[1]?.split('      - name: Checkout source_sha')[0];
+  const definitionCheckout = apply.split('      - name: Checkout workflow definition\n')[1]?.split('      - name: Download plan')[0];
   assert.match(definitionCheckout, /fetch-depth: 0/);
   assert.match(definitionCheckout, /persist-credentials: false/);
   const directory = mkdtempSync(join(tmpdir(), 'ue-ancestry-'));

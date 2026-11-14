@@ -114,6 +114,13 @@ export function manifestFingerprint(manifest) {
   return sha256Hex(canonicalJson(manifest))
 }
 
+/** Image source and admitted deployment infrastructure are separate immutable inputs. */
+export function infrastructureProvenance({ applicationSourceSha, workflowSha, infrastructureTreeSha, templateSha256 }) {
+  for (const value of [applicationSourceSha, workflowSha, infrastructureTreeSha]) if (!/^[a-f0-9]{40}$/.test(value ?? '')) throw new Error('EXACT_INFRASTRUCTURE_PROVENANCE_REQUIRED')
+  if (!/^[a-f0-9]{64}$/.test(templateSha256 ?? '')) throw new Error('EXACT_TEMPLATE_HASH_REQUIRED')
+  return { schema: 'ue-v2-staging-infrastructure/v1', applicationSourceSha, infrastructureSha: workflowSha, workflowSha, parametersSourceSha: workflowSha, infrastructureTreeSha, templateSha256 }
+}
+
 export function releaseManifestDefects(manifest) {
   if (!manifest || typeof manifest !== 'object') return ['RELEASE_MANIFEST_MISSING']
   const defects = []

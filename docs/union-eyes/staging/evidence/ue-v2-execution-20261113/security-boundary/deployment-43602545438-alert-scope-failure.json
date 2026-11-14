@@ -1,0 +1,143 @@
+{
+  "status": "FAIL",
+  "sourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+  "buildWorkflowSha": "fb14c9c2793dc8c72a2ecd448178ed3036f111af",
+  "deploymentWorkflowSha": "51f93bda4c3f9d3834e0f6cba753c79ed8f5793b",
+  "buildRunId": "43572581712",
+  "deploymentRunId": "43602545438",
+  "failureClass": "AZURE_LOG_SEARCH_ALERT_SCOPE_IMMUTABLE",
+  "failedResources": [
+    {
+      "message": {
+        "error": {
+          "additionalInfo": null,
+          "code": "BadRequest",
+          "details": null,
+          "message": "Scope can not be updated Activity ID: 5473509c-8c37-4aac-8a50-062e316d3cca.",
+          "target": null
+        },
+        "status": "Failed"
+      },
+      "resource": "nzila-ue-v2-staging-unexpected-5xx",
+      "state": "Failed"
+    },
+    {
+      "message": {
+        "error": {
+          "additionalInfo": null,
+          "code": "BadRequest",
+          "details": null,
+          "message": "Scope can not be updated Activity ID: abffae9b-ea4b-497b-8827-83d6cca9db91.",
+          "target": null
+        },
+        "status": "Failed"
+      },
+      "resource": "nzila-ue-v2-staging-stripe-webhook-failure",
+      "state": "Failed"
+    },
+    {
+      "message": {
+        "error": {
+          "additionalInfo": null,
+          "code": "BadRequest",
+          "details": null,
+          "message": "Scope can not be updated Activity ID: 406b966b-70db-44f4-ab97-639e390619b9.",
+          "target": null
+        },
+        "status": "Failed"
+      },
+      "resource": "nzila-ue-v2-staging-audit-persistence-failure",
+      "state": "Failed"
+    },
+    {
+      "message": {
+        "error": {
+          "additionalInfo": null,
+          "code": "BadRequest",
+          "details": null,
+          "message": "Scope can not be updated Activity ID: bb2c3522-4819-486a-80f5-f1fea6748916.",
+          "target": null
+        },
+        "status": "Failed"
+      },
+      "resource": "nzila-ue-v2-staging-cron-job-failed",
+      "state": "Failed"
+    },
+    {
+      "message": {
+        "error": {
+          "additionalInfo": null,
+          "code": "BadRequest",
+          "details": null,
+          "message": "Scope can not be updated Activity ID: f86aab65-80d2-4dbd-8040-12eb1fb52b71.",
+          "target": null
+        },
+        "status": "Failed"
+      },
+      "resource": "nzila-ue-v2-staging-database-errors",
+      "state": "Failed"
+    },
+    {
+      "message": {
+        "error": {
+          "additionalInfo": null,
+          "code": "BadRequest",
+          "details": null,
+          "message": "Scope can not be updated Activity ID: 009dd7db-ad94-48c8-9a1d-4bd0c77dbdea.",
+          "target": null
+        },
+        "status": "Failed"
+      },
+      "resource": "nzila-ue-v2-staging-redis-unavailable",
+      "state": "Failed"
+    },
+    {
+      "message": {
+        "error": {
+          "additionalInfo": null,
+          "code": "BadRequest",
+          "details": null,
+          "message": "Scope can not be updated Activity ID: fa7adc7b-0857-4825-a1a5-351162c9ceeb.",
+          "target": null
+        },
+        "status": "Failed"
+      },
+      "resource": "nzila-ue-v2-staging-resend-failure",
+      "state": "Failed"
+    }
+  ],
+  "sourceHistoryGuardPassed": true,
+  "freshWhatIfAndDriftPassed": true,
+  "armApplyAttempted": true,
+  "applicationRevisionCreated": "nzila-ue-v2-staging-app--rel9a7ee373e1",
+  "applicationRevisionHealthyButNotPromoted": true,
+  "servingRevision": "nzila-ue-v2-staging-app--relcbf2bc9339",
+  "servingWeight": 100,
+  "positiveDedicatedWorkspaceIngestionObserved": true,
+  "applicationRuntimeAcceptanceClaimed": false,
+  "primaryDataReset": false,
+  "productionMutation": false,
+  "stagingGo": false,
+  "remediation": "Protected workflow plans exactly seven existing staging alert replacements from the reviewed source payload, saves verified restorable snapshots before deletion, recreates at the same staging IDs, verifies all settings and target scope, and restores the saved current rule on recreation failure. Application image/source are unchanged.",
+  "localChecks": {
+    "passed": 34,
+    "failed": 0
+  },
+  "providerReference": "https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-manage-alert-rules#manage-alert-rules-in-the-azure-portal",
+  "partialApplyRetry": "After successful ARM apply and connection-budget validation, reactivate only the retained exact candidate revision whose immutable image equals the qualified release manifest. Keep traffic pinned until actual health and source verification; do not infer that idempotent ARM writes reactivate a drained revision.",
+  "localHostRequiredCommands": {
+    "validate:docs": "PASS (0 errors)",
+    "lint": "HOST_DEPENDENCY_FAILURE: turbo missing",
+    "typecheck": "HOST_DEPENDENCY_FAILURE: turbo missing",
+    "test:fast": "HOST_DEPENDENCY_FAILURE: @vitejs/plugin-react missing",
+    "governance:audit": "HOST_DEPENDENCY_FAILURE: next-auth/argon2 and other absent dependencies in existing temporary tooling environment; no finance change attempted",
+    "inventory:generate": "PASS"
+  },
+  "monitoringFollowup": {
+    "actualJobFailure": false,
+    "knownFalsePositive": "Old query matches every normal exit code zero; actual scheduled jobs succeeded. New canonical query excludes exit zero and matches genuine failed/nonzero cases.",
+    "evidence": "staging-cron-alert-zero-exit-regression.json",
+    "controlledExpressionVectorsAreNotActualFailedJobs": true,
+    "infraSource": "Exact CI-admitted main workflow commit, recorded separately from immutable application/image source9a and build workflowfb14."
+  }
+}

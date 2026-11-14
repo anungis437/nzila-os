@@ -45,7 +45,7 @@ on:
           - apply
         default: what-if
       source_sha:
-        description: Full 40-character commit SHA on main (the images' source and the Bicep revision deployed)
+        description: Full 40-character admitted application/image source SHA; infrastructure comes from this exact main workflow commit
         required: true
         type: string
       app_image_digest:
@@ -66,7 +66,7 @@ on:
         type: string
         default: ''
       parameters_file:
-        description: Staging parameters file at source_sha (no secrets; digests are injected from the inputs above)
+        description: Staging parameters file at the admitted workflow/infrastructure commit (no secrets; digests are injected from the inputs above)
         required: false
         type: string
         default: infrastructure/bicep/ue-v2/main.staging.parameters.json
@@ -170,16 +170,16 @@ jobs:
           SOURCE_SHA: ${{ inputs.source_sha }}
         run: node "$GATE" --gate change-record --change-id "$CHANGE_ID" --source-sha "$SOURCE_SHA" --change-dir ops/change-records
 
-      - name: Render and gate deployment parameters from source_sha
+      - name: Render and gate deployment parameters from admitted infrastructure
         env:
           SOURCE_SHA: ${{ inputs.source_sha }}
           PARAMETERS_FILE: ${{ inputs.parameters_file }}
         run: |
           set -euo pipefail
-          SRC="$RUNNER_TEMP/source"
-          git worktree add --detach "$SRC" "$SOURCE_SHA"
+          SRC="$RUNNER_TEMP/infrastructure"
+          git worktree add --detach "$SRC" "$GITHUB_SHA"
           if [ ! -f "$SRC/$PARAMETERS_FILE" ]; then
-            echo "::error::$PARAMETERS_FILE does not exist at $SOURCE_SHA."
+            echo "::error::$PARAMETERS_FILE does not exist at admitted infrastructure $GITHUB_SHA."
             exit 1
           fi
           node --input-type=module -e "
@@ -187,7 +187,7 @@ jobs:
             const lib = await import(process.cwd() + '/tooling/scripts/lib/union-eyes-v2-staging-release.mjs')
             const e = process.env
             const manifest = JSON.parse(fs.readFileSync(e.RUNNER_TEMP + '/plan/release-manifest.json', 'utf8'))
-            const file = JSON.parse(fs.readFileSync(e.RUNNER_TEMP + '/source/' + e.PARAMETERS_FILE, 'utf8'))
+            const file = JSON.parse(fs.readFileSync(e.RUNNER_TEMP + '/infrastructure/' + e.PARAMETERS_FILE, 'utf8'))
             const parameters = { ...(file.parameters ?? {}) }
             for (const image of lib.V2_IMAGES) {
               parameters[image.parameter] = { value: manifest.images[image.key].digest }
@@ -197,6 +197,7 @@ jobs:
             fs.writeFileSync(e.RUNNER_TEMP + '/plan/deploy-parameters.json', JSON.stringify(out, null, 2) + '\n')
           "
           node "$GATE" --gate parameters --manifest "$RUNNER_TEMP/plan/release-manifest.json" --parameters "$RUNNER_TEMP/plan/deploy-parameters.json"
+          node tooling/scripts/verify-ue-v2-staging-infrastructure.mjs --record "$RUNNER_TEMP/plan/infrastructure-provenance.json"
           cp "$SRC/$TEMPLATE" "$RUNNER_TEMP/plan/template-main.bicep.snapshot"
           sha256sum "$SRC/$TEMPLATE" | awk '{print $1}' > "$RUNNER_TEMP/plan/template.sha256"
 
@@ -217,7 +218,8 @@ jobs:
           {
             echo "### UE V2 staging plan"
             echo "- Operation: \`$OPERATION\`"
-            echo "- Source SHA: \`$SOURCE_SHA\`"
+            echo "- Application/image source SHA: \`$SOURCE_SHA\`"
+            echo "- Deployment infrastructure/workflow SHA: \`$GITHUB_SHA\`"
             echo "- Target: \`$STAGING_RG\` in subscription d562ba7f-… (new), registry \`$REGISTRY_NAME\`"
             echo "- Change record: \`${CHANGE_ID:-none (what-if only)}\`"
             echo '```json'
@@ -235,12 +237,9 @@ jobs:
     steps:
       - name: Checkout workflow definition
         uses: actions/checkout@v5
-
-      - name: Checkout source_sha (Bicep template)
-        uses: actions/checkout@v5
         with:
-          ref: ${{ needs.plan.outputs.sha }}
-          path: source
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Download plan
         uses: actions/download-artifact@v4
@@ -249,9 +248,12 @@ jobs:
           path: ${{ runner.temp }}/plan
 
       - name: Template unchanged since plan
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
         run: |
           set -euo pipefail
-          test "$(sha256sum "source/$TEMPLATE" | awk '{print $1}')" = "$(cat "$RUNNER_TEMP/plan/template.sha256")"
+          node tooling/scripts/verify-ue-v2-staging-infrastructure.mjs --verify "$RUNNER_TEMP/plan/infrastructure-provenance.json"
+          test "$(sha256sum "$TEMPLATE" | awk '{print $1}')" = "$(cat "$RUNNER_TEMP/plan/template.sha256")"
 
       - name: Assert plan identity is configured (fail-closed)
         env:
@@ -304,6 +306,7 @@ jobs:
             "$P" > "$P.tmp" && mv "$P.tmp" "$P"
           mkdir -p "$RUNNER_TEMP/evidence"
           cp "$P" "$RUNNER_TEMP/evidence/deploy-parameters.json"
+          cp "$RUNNER_TEMP/plan/infrastructure-provenance.json" "$RUNNER_TEMP/evidence/infrastructure-provenance.json"
           echo "Resolved pinned revision: ${PINNED:-<none, first deploy>}; new revision suffix: $SUFFIX"
 
       - name: Re-attest image digests in the registry
@@ -333,7 +336,7 @@ jobs:
           az deployment group what-if \
             --resource-group "$STAGING_RG" \
             --name "ue-v2-staging-whatif-${GITHUB_RUN_ID}" \
-            --template-file "source/$TEMPLATE" \
+            --template-file "$TEMPLATE" \
             --parameters "@$RUNNER_TEMP/plan/deploy-parameters.json" \
             --parameters dbAdminPassword="$THROWAWAY" \
             --validation-level ProviderNoRbac \
@@ -346,7 +349,7 @@ jobs:
         run: |
           set -euo pipefail
           node tooling/scripts/check-ue-v2-staging-connection-budget.mjs \
-            --policy source/infrastructure/bicep/ue-v2/staging-connection-budget.json \
+            --policy infrastructure/bicep/ue-v2/staging-connection-budget.json \
             --parameters "$RUNNER_TEMP/plan/deploy-parameters.json" \
             > "$RUNNER_TEMP/evidence/connection-budget.json"
 
@@ -363,6 +366,14 @@ jobs:
             echo
             cat "$RUNNER_TEMP/evidence/what-if-summary.md"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Plan immutable staging log-alert scope replacements
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          node tooling/scripts/migrate-ue-v2-staging-log-alerts.mjs \
+            --operation plan --what-if "$RUNNER_TEMP/evidence/what-if.json" \
+            --output "$RUNNER_TEMP/evidence/log-alert-scope-plan.json"
 
       - name: Upload what-if
         if: always()
@@ -401,12 +412,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Checkout source_sha (Bicep template)
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.plan.outputs.sha }}
-          path: source
-
       - name: Download plan and reviewed what-if
         uses: actions/download-artifact@v4
         with:
@@ -420,7 +425,8 @@ jobs:
         run: |
           set -euo pipefail
           node "$GATE" --gate change-record --change-id "$CHANGE_ID" --source-sha "$SOURCE_SHA" --change-dir ops/change-records
-          test "$(sha256sum "source/$TEMPLATE" | awk '{print $1}')" = "$(cat "$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}/template.sha256")"
+          node tooling/scripts/verify-ue-v2-staging-infrastructure.mjs --verify "$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}/infrastructure-provenance.json"
+          test "$(sha256sum "$TEMPLATE" | awk '{print $1}')" = "$(cat "$RUNNER_TEMP/artifacts/ue-v2-staging-plan-${GITHUB_RUN_ID}/template.sha256")"
 
       - name: Assert deploy identity and database secret are configured (fail-closed)
         env:
@@ -476,13 +482,26 @@ jobs:
           az deployment group what-if \
             --resource-group "$STAGING_RG" \
             --name "ue-v2-staging-whatif-apply-${GITHUB_RUN_ID}" \
-            --template-file "source/$TEMPLATE" \
+            --template-file "$TEMPLATE" \
             --parameters "@$WHATIF_ARTIFACTS/deploy-parameters.json" \
             --parameters dbAdminPassword="$DB_ADMIN_PASSWORD" \
             --result-format FullResourcePayloads \
             --no-pretty-print -o json > "$RUNNER_TEMP/evidence/what-if-apply.json"
           node "$GATE" --gate what-if --what-if "$RUNNER_TEMP/evidence/what-if-apply.json" --registry-resource-group "$REGISTRY_RG"
           node "$GATE" --gate drift --reviewed "$REVIEWED" --fresh "$RUNNER_TEMP/evidence/what-if-apply.json"
+
+      - name: Replace only reviewed immutable staging log-alert scopes
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          WHATIF_ARTIFACTS="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}"
+          EXPECTED_SERVING_REVISION=$(jq -r '.parameters.appPinnedRevisionName.value // empty' "$WHATIF_ARTIFACTS/deploy-parameters.json")
+          export EXPECTED_SERVING_REVISION
+          node tooling/scripts/migrate-ue-v2-staging-log-alerts.mjs \
+            --operation apply --what-if "$RUNNER_TEMP/evidence/what-if-apply.json" \
+            --reviewed-plan "$WHATIF_ARTIFACTS/log-alert-scope-plan.json" \
+            --output "$RUNNER_TEMP/evidence/log-alert-scope-migration.json"
 
       - name: Drain non-serving history before creating another revision
         env:
@@ -507,7 +526,7 @@ jobs:
           az deployment group create \
             --resource-group "$STAGING_RG" \
             --name "ue-v2-staging-${SOURCE_SHA:0:12}-${GITHUB_RUN_ID}" \
-            --template-file "source/$TEMPLATE" \
+            --template-file "$TEMPLATE" \
             --parameters "@$WHATIF_ARTIFACTS/deploy-parameters.json" \
             --parameters dbAdminPassword="$DB_ADMIN_PASSWORD" \
             --query '{name:name, provisioningState:properties.provisioningState, outputs:properties.outputs}' \
@@ -519,9 +538,16 @@ jobs:
           set -euo pipefail
           WHATIF_ARTIFACTS="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}"
           node tooling/scripts/check-ue-v2-staging-connection-budget.mjs \
-            --policy source/infrastructure/bicep/ue-v2/staging-connection-budget.json \
+            --policy infrastructure/bicep/ue-v2/staging-connection-budget.json \
             --parameters "$WHATIF_ARTIFACTS/deploy-parameters.json" \
             > "$RUNNER_TEMP/evidence/connection-budget-after-apply.json"
+
+      - name: Reactivate the exact retained candidate after a partial-apply retry
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+          RELEASE_MANIFEST: ${{ runner.temp }}/artifacts/ue-v2-staging-plan-${{ github.run_id }}/release-manifest.json
+          ACTIVATION_RECEIPT: ${{ runner.temp }}/evidence/candidate-reactivation.json
+        run: node tooling/scripts/reactivate-ue-v2-staging-candidate.mjs
 
       - name: Promote traffic to the new revision after it passes readiness
         # The Bicep deployment above pinned traffic to the previously-live revision, so the new
@@ -583,13 +609,14 @@ jobs:
           DEPLOYMENT=$(cat "$RUNNER_TEMP/evidence/deployment.json" 2>/dev/null || true)
           if ! echo "${DEPLOYMENT:-x}" | jq -e . >/dev/null 2>&1; then DEPLOYMENT=null; fi
           jq -n \
+            --slurpfile infrastructure "$PLAN/infrastructure-provenance.json" \
             --slurpfile manifest "$PLAN/release-manifest.json" \
             --arg changeRecordId "$CHANGE_ID" \
             --arg whatIfFingerprint "$REVIEWED_FINGERPRINT" \
             --arg runId "$GITHUB_RUN_ID" \
             --arg actor "$GITHUB_ACTOR" \
             --argjson deployment "$DEPLOYMENT" \
-            '{manifest:$manifest[0], changeRecordId:$changeRecordId, whatIfFingerprint:$whatIfFingerprint, runId:$runId, actor:$actor, deployment:$deployment}' \
+            '{manifest:$manifest[0], infrastructure:$infrastructure[0], changeRecordId:$changeRecordId, whatIfFingerprint:$whatIfFingerprint, runId:$runId, actor:$actor, deployment:$deployment}' \
             > "$RUNNER_TEMP/evidence/deployment-record.json"
 
       - name: Upload deployment record

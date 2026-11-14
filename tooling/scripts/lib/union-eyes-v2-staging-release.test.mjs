@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { spawnSync } from 'node:child_process'
+import { spawnSync, execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -10,6 +10,7 @@ import {
   NEW_TENANT_ID,
   LEGACY_SUBSCRIPTION_ID,
   buildReleaseManifest,
+  infrastructureProvenance,
   changeRecordDefects,
   deploymentParameterDefects,
   digestDefects,
@@ -25,6 +26,44 @@ const SHA = 'a'.repeat(40)
 const D = (c) => `sha256:${c.repeat(64)}`
 const STAGING = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-staging-rg`
 const REGISTRY = `/subscriptions/${NEW_SUBSCRIPTION_ID}/resourceGroups/nzila-canada-prod-rg/providers/Microsoft.ContainerRegistry/registries/nzilaventuresacr`
+
+test('deployment provenance separately binds immutable image source and every admitted infrastructure module', () => {
+  const input = { applicationSourceSha: SHA, workflowSha: 'b'.repeat(40), infrastructureTreeSha: 'c'.repeat(40), templateSha256: 'd'.repeat(64) }
+  const result = infrastructureProvenance(input)
+  assert.equal(result.applicationSourceSha, SHA)
+  assert.equal(result.infrastructureSha, input.workflowSha)
+  assert.equal(result.parametersSourceSha, input.workflowSha)
+  assert.equal(result.infrastructureTreeSha, input.infrastructureTreeSha)
+  for (const field of Object.keys(input)) assert.throws(() => infrastructureProvenance({ ...input, [field]: 'main' }))
+  const workflow = fs.readFileSync(path.join(REPO, '.github/workflows/ue-v2-staging-deploy.yml'), 'utf8')
+  assert.match(workflow, /git worktree add --detach "\$SRC" "\$GITHUB_SHA"/)
+  assert.equal((workflow.match(/verify-ue-v2-staging-infrastructure.mjs --verify/g) ?? []).length, 2)
+  assert(!workflow.includes('source/$TEMPLATE'))
+})
+
+test('real Git provenance admits a separate infrastructure commit and refuses a changed module even when main template is unchanged', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'ue-infrastructure-provenance-'))
+  const git = (...args) => execFileSync('git', args, { cwd: directory, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
+  try {
+    git('init', '-q'); git('config', 'user.name', 'Synthetic provenance fixture'); git('config', 'user.email', 'synthetic@example.invalid')
+    fs.writeFileSync(path.join(directory, 'application.txt'), 'qualified immutable application')
+    git('add', '.'); git('commit', '-qm', 'application source')
+    const source = git('rev-parse', 'HEAD')
+    const infra = path.join(directory, 'infrastructure/bicep/ue-v2')
+    fs.mkdirSync(path.join(infra, 'modules'), { recursive: true })
+    fs.writeFileSync(path.join(infra, 'main.bicep'), '// immutable main template')
+    const module = path.join(infra, 'modules/alerts.bicep'); fs.writeFileSync(module, '// admitted alert correction')
+    git('add', '.'); git('commit', '-qm', 'separate infrastructure correction')
+    const workflow = git('rev-parse', 'HEAD'), receipt = path.join(directory, 'provenance.json')
+    const run = (operation, changes = {}) => spawnSync(process.execPath, [path.join(REPO, 'tooling/scripts/verify-ue-v2-staging-infrastructure.mjs'), operation, receipt], { cwd: directory, encoding: 'utf8', env: { ...process.env, GITHUB_ACTIONS: 'true', GITHUB_REF: 'refs/heads/main', SOURCE_SHA: source, GITHUB_SHA: workflow, TEMPLATE: 'infrastructure/bicep/ue-v2/main.bicep', ...changes } })
+    assert.equal(run('--record').status, 0); assert.equal(run('--verify').status, 0)
+    assert.notEqual(run('--verify', { GITHUB_SHA: source }).status, 0)
+    fs.writeFileSync(module, '// unreviewed module mutation; unchanged main template')
+    assert.notEqual(run('--verify').status, 0)
+    const actual = JSON.parse(fs.readFileSync(receipt, 'utf8'))
+    assert.equal(actual.applicationSourceSha, source); assert.equal(actual.infrastructureSha, workflow)
+  } finally { fs.rmSync(directory, { recursive: true, force: true }) }
+})
 
 function manifest() {
   return buildReleaseManifest({ sourceSha: SHA, images: { app: { digest: D('1') }, clamav: { digest: D('2') }, cron: { digest: D('3') } } })

@@ -70,8 +70,8 @@ var logAlerts = [
   {
     name: 'cron-job-failed'
     severity: 2
-    description: 'The scheduled deadline-reminder job exited non-zero (UNVALIDATED pattern: validate after first production run).'
-    query: 'ContainerAppSystemLogs_CL | where ContainerAppName_s has "cron-deadlines" or JobName_s has "cron-deadlines" | where Reason_s in ("ContainerTerminated", "JobExecutionFailed") | where Log_s has_any ("exit code", "ExitCode", "Failed")'
+    description: 'The scheduled deadline-reminder job failed or exited non-zero. Successful exit code zero is excluded.'
+    query: 'ContainerAppSystemLogs_CL | where ContainerAppName_s has "cron-deadlines" or JobName_s has "cron-deadlines" | extend exitCode = toint(extract("exit code \'(-?[0-9]+)\'", 1, Log_s)) | where Reason_s == "JobExecutionFailed" or (Reason_s == "ContainerTerminated" and isnotnull(exitCode) and exitCode != 0)'
     window: 'PT15M'
     threshold: 0
   }
