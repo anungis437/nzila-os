@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "status": "APPLY_PASS",
+  "purpose": "SOURCE_OWNED_BASE_AUTHORITY_PHYSICAL_REPAIR",
+  "at": "2026-11-14T01:36:56.454Z",
+  "target": "clone",
+  "host": "nzila-ue-v2-recovery-20261113.postgres.database.azure.com",
+  "identity": {
+    "principal": "uev2admin",
+    "database": "ue_v2_staging",
+    "address": "10.40.4.5"
+  },
+  "sourceSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+  "bundleSha256": "92f667ce83a7168ae229d89afdff90eb67e31c3fa598a06c2723526b2060b733",
+  "result": {
+    "executedStatements": 181,
+    "verifiedFunctions": 13,
+    "verifiedConstraints": 99,
+    "verifiedTriggers": 60,
+    "businessDmlIssued": false,
+    "remainingGuardViolations": 0,
+    "persistedOwnerDelegations": 0
+  },
+  "existingPhysicalTablesPreserved": true,
+  "businessDmlIssued": false,
+  "releasedMigrationsReplayed": false,
+  "existingProtectionsRemoved": false,
+  "eventTriggerDisabled": false,
+  "applicationRerouted": false,
+  "productionDeployment": false,
+  "transport": {
+    "bytes": 107044,
+    "programSha256": "7f4f8d026023bc4d8655272815d408f7ca8fca5745f2444ff5b26b129cc59ea5",
+    "fileSha256": {
+      "repair.cjs": "92f667ce83a7168ae229d89afdff90eb67e31c3fa598a06c2723526b2060b733"
+    }
+  }
+}

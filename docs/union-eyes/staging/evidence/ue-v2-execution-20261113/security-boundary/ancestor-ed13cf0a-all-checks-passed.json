@@ -1,0 +1,15 @@
+{
+  "pr": 1216,
+  "headSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+  "checkedAt": "2026-11-14T02:01:36.622243+00:00",
+  "state": "open",
+  "merged": false,
+  "mergeable": true,
+  "mergeableState": "clean",
+  "requiredChecks": 16,
+  "missingTrustedRequiredSuccess": [],
+  "failed": [],
+  "pending": [],
+  "unresolvedReviews": [],
+  "eligible": true
+}

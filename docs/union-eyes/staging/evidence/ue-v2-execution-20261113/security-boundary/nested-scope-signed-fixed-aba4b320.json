@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "purpose": "ACTUAL_SIGNED_CURRENT_SOURCE_NESTED_SCOPE_DEFERRED_GUARD_QUALIFICATION",
+  "compiledSourceSha": "aba4b32046708f145d8488fb85c8e8fc18959df7",
+  "diagnosticOnly": true,
+  "applicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "at": "2026-11-14T02:03:37.558Z",
+  "threadId": "6a494f54-280f-42b9-877b-fc3957e1e871",
+  "steps": [
+    "owned-synthetic-unassigned-thread-preimage",
+    "thread-update",
+    "assignment-history-insert",
+    "nested-current-source-preserves-outer-verified-bridge",
+    "deferred-constraints"
+  ],
+  "failure": null,
+  "businessMutationCommitted": false,
+  "actualHttp500ObservedSeparately": true,
+  "remediatedSourceNotYetDeployed": true,
+  "tokensSerialized": false,
+  "transport": {
+    "bytes": 585832,
+    "programSha256": "c75547729dc772954ac1c56111b78f57d92a154cdb535f245c6e1f6c4284109f",
+    "fileSha256": {
+      "bearer.cjs": "583f80e3e031e8cb4254f9b4e4e389009455ba347866e9cc1568af511e887014"
+    }
+  }
+}
