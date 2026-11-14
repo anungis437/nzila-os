@@ -4,7 +4,7 @@ import { grievances } from '@/db/schema/domains/claims/grievances';
 import { kernelCaseRelationshipScope } from '@/lib/authority/store/route-adapter';
 
 /**
- * Pre-filter for list queries: matters a user authored or holds a LIVE, non-recused authority-kernel relationship to.
+ * Pre-filter for list queries: matters a user authored, is the stored represented member of, or holds a LIVE, non-recused authority-kernel relationship to.
  * Organization role seniority is deliberately not an input, and neither is the legacy primary-representative column.
  * This only narrows what a list may enumerate; reading or changing any one matter still needs a full kernel decision.
  * Callers must add the organization predicate themselves.
@@ -12,6 +12,7 @@ import { kernelCaseRelationshipScope } from '@/lib/authority/store/route-adapter
 export function grievanceRelationshipScope(userId: string): SQL {
   return sql`(
     ${grievances.createdBy}::text = ${userId}
+    OR ${grievances.grievantId}::text = ${userId}
     OR ${kernelCaseRelationshipScope(userId, dsql`${grievances.id}`, dsql`${grievances.organizationId}`)}
   )`;
 }

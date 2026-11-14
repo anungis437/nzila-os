@@ -127,6 +127,11 @@ export const POST = withApi(
             cbaId: intake.cbaId ?? null,
             organizationId,
             createdBy: userId,
+            // Retain the originating member separately from the staff converter's actual authorship.
+            grievantId: zUUID.safeParse(intake.grievantId ?? intake.createdBy).success
+              ? (intake.grievantId ?? intake.createdBy) : null,
+            grievantName: intake.grievantName ?? null,
+            grievantEmail: intake.grievantEmail ?? null,
             filedDate: new Date(),
             relatedGrievanceIds: [intakeId],
           })

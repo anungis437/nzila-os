@@ -149,6 +149,8 @@ export const POST = withOrganizationAuth(async (request, context) => {
           filedDate: isOfficialCase ? new Date() : null,
 
           // Member details
+          // The authenticated intake submitter is the represented member; never infer this identity from supplied contact details.
+          grievantId: !isOfficialCase && z.guid().safeParse(userId).success ? userId : null,
           grievantName: data.grievantName ?? null,
           grievantEmail: data.grievantEmail ?? null,
 

@@ -142,6 +142,14 @@ describe('grievances route', () => {
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'grievance.submit_intake', organizationId: 'org_1', userId: 'user_1', resourceId: 'grv_1' }));
   });
 
+  it('binds the represented intake member to authentication rather than submitted contact or identity fields', async () => {
+    const {POST}=await loadRoute();
+    const actor='33333333-3333-4333-8333-333333333333';
+    const response=await POST(new NextRequest('http://localhost/api/grievances',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'individual',title:'Synthetic intake',description:'Synthetic represented member regression',grievantId:'44444444-4444-4444-8444-444444444444',grievantEmail:'different-owned-fixture@resend.dev'})}),{organizationId:'org_1',userId:actor});
+    expect(response.status).toBe(200);
+    expect(m.dbInsertValues.mock.calls[0][0]).toMatchObject({createdBy:actor,grievantId:actor});
+  });
+
   it('POST fails when the in-transaction audit record cannot be written', async () => {
     m.persistAtomicAudit.mockRejectedValue(new Error('audit write failed'));
     const { POST } = await loadRoute();
