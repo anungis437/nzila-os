@@ -1,6 +1,6 @@
 {
   "Name": "Nzila UE Dedicated Staging Monitoring Consumer",
-  "Id": "87c4b974-c4d5-5cc2-93b9-9970da4aa5d3",
+  "Id": "4cb8d888-1d86-4106-98e7-f2e086292722",
   "IsCustom": true,
   "Description": "Read and attach only the dedicated staging telemetry workspace; assign this role only at that workspace. No production assignment.",
   "Actions": [
