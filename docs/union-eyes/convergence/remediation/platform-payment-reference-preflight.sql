@@ -32,6 +32,29 @@ WHERE external_reference IS NOT NULL
 GROUP BY external_reference
 HAVING COUNT(DISTINCT organization_id) > 1
 ORDER BY payment_count DESC, external_reference;
+-- Normalized collisions: leading/trailing whitespace or case differences can
+-- defeat an application-level equality check. Review provider-specific case
+-- sensitivity before choosing a canonical reference representation.
+SELECT organization_id, lower(btrim(external_reference)) AS normalized_reference,
+       COUNT(*) AS collision_count,
+       array_agg(id ORDER BY created_at, id) AS payment_ids
+FROM platform_payments
+WHERE external_reference IS NOT NULL AND btrim(external_reference) <> ''
+GROUP BY organization_id, lower(btrim(external_reference))
+HAVING COUNT(*) > 1
+ORDER BY collision_count DESC, organization_id, normalized_reference;
+-- Financial ownership consistency: a payment must not link an account or
+-- invoice belonging to a different organization. Such rows must be triaged
+-- before any constraint or idempotency migration.
+SELECT p.id AS payment_id, p.organization_id AS payment_organization,
+       a.organization_id AS account_organization,
+       i.organization_id AS invoice_organization
+FROM platform_payments p
+LEFT JOIN billing_accounts a ON a.id = p.billing_account_id
+LEFT JOIN platform_invoices i ON i.id = p.invoice_id
+WHERE (a.id IS NOT NULL AND a.organization_id <> p.organization_id)
+   OR (i.id IS NOT NULL AND i.organization_id <> p.organization_id)
+ORDER BY p.id;
 -- Inspect existing uniqueness and partial-index predicates.
 SELECT indexname, indexdef
 FROM pg_indexes
