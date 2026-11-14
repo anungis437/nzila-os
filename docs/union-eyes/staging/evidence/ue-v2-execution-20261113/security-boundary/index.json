@@ -169,16 +169,14 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-    "sourcePR": 1224,
-    "localNativeExport": "local-native-export-ea073528.json",
-    "restoredRehearsal": "candidate-restored-rehearsal-ea073528.json",
-    "primaryGuardReadOnlyNoop": "primary-current-source-noop-ea073528.json",
-    "actualReadOnlyNestedSystemRegression": "nested-system-single-pool-ea073528-real-pg.json",
+    "sourceSha": "4687a4ed84935cedb2b436738373b13b7cda2158",
+    "sourcePR": 1228,
     "deployed": false,
+    "localNativeExport": "local-native-export-4687a4ed.json",
+    "nativeSourceAdmission": "candidate-restored-rehearsal-4687a4ed.json",
     "ciAndRuntimeStillRequired": true,
-    "repairSummary": "Nested system savepoints and authority/context restoration; correct App Router asset graph and MIME security; actual-image gate and navigation inventory CI",
-    "priorTestBoundaryCorrection": "source-a8442373-whole-application-ci-failure.json"
+    "repairSummary": "Use real case id for nullable workbench references; exact staff grievance collection entry in English/French",
+    "primaryReadOnlyNoop": "primary-source-noop-4687a4ed-qualification.json"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
