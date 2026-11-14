@@ -396,6 +396,10 @@ jobs:
     steps:
       - name: Checkout workflow definition
         uses: actions/checkout@v5
+        with:
+          # Retirement verifies both candidate and serving-source ancestry in this checkout.
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Checkout source_sha (Bicep template)
         uses: actions/checkout@v5

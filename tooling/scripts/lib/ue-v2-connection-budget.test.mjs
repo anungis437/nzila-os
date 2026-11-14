@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
+import { execFileSync, spawnSync } from 'node:child_process'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import test from 'node:test'
 import { evaluateStagingConnectionBudget, retirementTargets } from './ue-v2-connection-budget.mjs'
 
@@ -28,3 +32,36 @@ test('retirement selects only active zero-traffic history and retains inactive m
 test('retirement refuses changed, split, latest-based or inactive serving traffic', () => {
   for (const change of [{ expectedServingRevision: old }, { traffic: [{ latestRevision: true, weight: 100 }] }, { traffic: [{ revisionName: current, weight: 90 }, { revisionName: old, weight: 10 }] }, { revisions: [{ name: current, active: false, trafficWeight: 100 }] }]) assert.throws(() => retirementTargets({ ...retirement, ...change }))
 })
+
+
+test('the deployment checkout retains the source and serving history required by retirement ancestry guards', () => {
+  const workflow = readFileSync(new URL('../../../.github/workflows/ue-v2-staging-deploy.yml', import.meta.url), 'utf8');
+  const apply = workflow.split('\n  apply:\n')[1];
+  assert(apply, 'Apply job must exist');
+  const definitionCheckout = apply.split('      - name: Checkout workflow definition\n')[1]?.split('      - name: Checkout source_sha')[0];
+  assert.match(definitionCheckout, /fetch-depth: 0/);
+  assert.match(definitionCheckout, /persist-credentials: false/);
+  const directory = mkdtempSync(join(tmpdir(), 'ue-ancestry-'));
+  const git = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  try {
+    const origin = join(directory, 'origin');
+    git(directory, 'init', origin);
+    git(origin, 'config', 'user.name', 'Synthetic ancestry fixture');
+    git(origin, 'config', 'user.email', 'synthetic@example.invalid');
+    writeFileSync(join(origin, 'source.txt'), 'serving');
+    git(origin, 'add', 'source.txt'); git(origin, 'commit', '-m', 'serving source');
+    const serving = git(origin, 'rev-parse', 'HEAD');
+    writeFileSync(join(origin, 'source.txt'), 'candidate');
+    git(origin, 'commit', '-am', 'candidate source');
+    const candidate = git(origin, 'rev-parse', 'HEAD');
+    writeFileSync(join(origin, 'source.txt'), 'admission');
+    git(origin, 'commit', '-am', 'admitted workflow definition');
+    const admitted = git(origin, 'rev-parse', 'HEAD');
+    const url = pathToFileURL(origin).href;
+    git(directory, 'clone', '--depth', '1', url, 'shallow');
+    const refused = spawnSync('git', ['merge-base', '--is-ancestor', candidate, admitted], { cwd: join(directory, 'shallow'), encoding: 'utf8' });
+    assert.notEqual(refused.status, 0, 'A shallow checkout must not fabricate ancestry');
+    git(directory, 'clone', url, 'full');
+    for (const source of [candidate, serving]) assert.equal(git(join(directory, 'full'), 'merge-base', '--is-ancestor', source, admitted), '');
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});

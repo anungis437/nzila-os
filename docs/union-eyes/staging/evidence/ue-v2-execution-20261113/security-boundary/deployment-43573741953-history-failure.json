@@ -1,0 +1,23 @@
+{
+  "status": "FAIL",
+  "evidenceClass": "ACTUAL_DEPLOYMENT_CHECKOUT_HISTORY_FAILURE",
+  "applicationSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+  "buildRunId": "43572581712",
+  "buildWorkflowSha": "fb14c9c2793dc8c72a2ecd448178ed3036f111af",
+  "deploymentRunId": "43573741953",
+  "deploymentWorkflowSha": "fb14c9c2793dc8c72a2ecd448178ed3036f111af",
+  "reviewedWhatIfFingerprint": "911dcde5c8a715f272c385f5590d28952bbc5a3758e6df4181e0e6650bdab149",
+  "freshWhatIfAndDriftPassed": true,
+  "failureStep": "Drain non-serving history before creating another revision",
+  "actualError": "git merge-base --is-ancestor refused because the shallow workflow checkout did not contain the qualified source commit",
+  "infrastructureApplyExecuted": false,
+  "trafficPromoted": false,
+  "applicationSourceChanged": false,
+  "observedServingRevision": "nzila-ue-v2-staging-app--relcbf2bc9339",
+  "observedServingTrafficPercent": 100,
+  "originalFailureLogSha256": "1319131f5416206f04d198933b6e3c8c6cd71ab4051a803610b8fd416ff3e107",
+  "correction": "Fetch full workflow-definition history before the existing fail-closed retirement ancestry guards; retain guards and immutable image",
+  "qualifiedApplicationImageUnchanged": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

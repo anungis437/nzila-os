@@ -190,7 +190,10 @@
     },
     "precedingQualifiedBuild": "43568101291",
     "precedingDeploymentFailure": "deployment-43569312473-authority-failure.json",
-    "actualScopedPermissionRepair": "staging-telemetry-authority-repair-20261114.json"
+    "actualScopedPermissionRepair": "staging-telemetry-authority-repair-20261114.json",
+    "latestDeploymentFailure": "deployment-43573741953-history-failure.json",
+    "applicationImageQualified": true,
+    "workflowHistoryCorrectionPending": true
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
