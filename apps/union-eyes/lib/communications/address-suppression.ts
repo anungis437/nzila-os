@@ -23,7 +23,7 @@ import { createHash, createHmac } from 'node:crypto'
 import { domainToASCII } from 'node:url'
 import { and, inArray, isNull } from 'drizzle-orm'
 import { emailAddressSuppressions } from '@/db/schema/domains/communications/email-address-suppressions'
-import { withSystemContext } from '@/lib/db/with-rls-context'
+import { withSystemContext } from '@/lib/db/system-transaction-scope'
 import { logger } from '@/lib/logger'
 
 export type SuppressionReason = 'complaint' | 'provider_suppressed'

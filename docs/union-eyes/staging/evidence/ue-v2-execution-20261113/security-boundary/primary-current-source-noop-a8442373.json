@@ -1,0 +1,110 @@
+{
+  "ok": true,
+  "status": "PASS",
+  "purpose": "READ_ONLY_CURRENT_SOURCE_PRIMARY_GUARD_ADMISSION_AND_OBSERVED_CONNECTIONS",
+  "candidateSourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+  "observedApplicationSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+  "at": "2026-11-14T16:34:35.300Z",
+  "primaryCurrentSourceGuardNoop": {
+    "ok": true,
+    "status": "PLAN_PASS",
+    "purpose": "SOURCE_OWNED_BASE_AUTHORITY_PHYSICAL_REPAIR",
+    "at": "2026-11-14T16:34:35.217Z",
+    "target": "primary",
+    "host": "nzila-ue-v2-staging-db-d562ba7f.postgres.database.azure.com",
+    "identity": {
+      "principal": "uev2admin",
+      "database": "ue_v2_staging",
+      "address": "10.40.4.4"
+    },
+    "sourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+    "bundleSha256": "92f667ce83a7168ae229d89afdff90eb67e31c3fa598a06c2723526b2060b733",
+    "result": {
+      "fingerprint": "d6a3832dac2f04edf4dadb67891bb362936cffc63811d987b96c3677c0a04366",
+      "statements": 0,
+      "managedTables": [
+        "ue_authority_acceptances",
+        "ue_authority_approval_decisions",
+        "ue_authority_approval_requests",
+        "ue_authority_delegations",
+        "ue_authority_disclosure_consents",
+        "ue_authority_events",
+        "ue_authority_issuance_rules",
+        "ue_authority_mandates",
+        "ue_authority_recusals",
+        "ue_authority_resource_relationships",
+        "ue_authority_reviews"
+      ],
+      "sourceFunctions": 13,
+      "sourceConstraints": 99,
+      "sourceTriggers": 60,
+      "observedFunctions": 13,
+      "observedConstraints": 99,
+      "observedTriggers": 60,
+      "statementsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "reviewedStatements": []
+    },
+    "existingPhysicalTablesPreserved": true,
+    "businessDmlIssued": false,
+    "releasedMigrationsReplayed": false,
+    "existingProtectionsRemoved": false,
+    "eventTriggerDisabled": false,
+    "applicationRerouted": false,
+    "productionDeployment": false
+  },
+  "connections": {
+    "ok": true,
+    "purpose": "READ_ONLY_ACTUAL_STAGING_CONNECTION_CENSUS",
+    "at": "2026-11-14T16:34:35.288Z",
+    "identity": {
+      "principal": "uev2admin",
+      "database": "ue_v2_staging",
+      "address": "10.40.4.4"
+    },
+    "settings": {
+      "max_connections": "50",
+      "reserved_connections": "5",
+      "superuser_reserved_connections": "10"
+    },
+    "sessions": [
+      {
+        "usename": "ue_staging_runtime",
+        "application_name": "postgres.js",
+        "state": "idle",
+        "client_addr": "10.40.0.235/32",
+        "connections": 1,
+        "oldest_backend": "2026-11-14T16:31:45.483Z",
+        "oldest_state": "2026-11-14T16:34:25.827Z",
+        "oldest_transaction": null
+      },
+      {
+        "usename": "uev2admin",
+        "application_name": "",
+        "state": "active",
+        "client_addr": "10.40.0.235/32",
+        "connections": 1,
+        "oldest_backend": "2026-11-14T16:34:35.231Z",
+        "oldest_state": "2026-11-14T16:34:35.281Z",
+        "oldest_transaction": "2026-11-14T16:34:35.281Z"
+      }
+    ],
+    "operatorPrivileges": {
+      "monitor": true,
+      "reserved_connections": true
+    },
+    "queryTextAndCredentialValuesOmitted": true,
+    "noBusinessOrPrivilegeMutation": true
+  },
+  "noBusinessMutation": true,
+  "noPrimaryGuardReapplication": true,
+  "productionAuthorized": false,
+  "transport": {
+    "bytes": 111824,
+    "programSha256": "55b7ab6f3140c643de0167b56c758f89b1e0acd1f422b569e3b3ec0790233f87",
+    "fileSha256": {
+      "guard.js": "7f4f8d026023bc4d8655272815d408f7ca8fca5745f2444ff5b26b129cc59ea5",
+      "census.js": "0ccead22510c8a3f9d175542420ab2faf5fbf2356845d9b06ab78cfb0fae2d58",
+      "repair.cjs": "92f667ce83a7168ae229d89afdff90eb67e31c3fa598a06c2723526b2060b733"
+    }
+  }
+}

@@ -92,6 +92,8 @@ import {
 } from '../with-rls-context'
 import { tenantContextStorage } from '@/db/tenant-context-storage'
 import { db } from '@/db/db'
+import { systemDb } from '@/db/system-db'
+import { systemContextStorage, getActiveSystemDb } from '@/db/system-context-storage'
 
 /* ── tests ──────────────────────────────────────────────────────────── */
 
@@ -486,6 +488,63 @@ describe('with-rls-context', () => {
       expect(result).toBe('sys')
       expect(mocks.mockSystemTxExecute).toHaveBeenCalledTimes(2)
       expect(mocks.mockTxExecute).not.toHaveBeenCalled()
+    })
+
+    it('uses a savepoint for nested suppression work without borrowing a second system connection', async () => {
+      const inner = { execute: mocks.mockSystemTxExecute }
+      const savepoint = vi.fn(async (operation) => operation(inner))
+      const outer = { execute: mocks.mockSystemTxExecute, transaction: savepoint }
+      vi.mocked(systemDb.transaction).mockImplementationOnce(async (operation) => operation(outer as never))
+      mocks.mockSystemTxExecute.mockImplementation(async (query) =>
+        query.strings.join('').includes("current_setting('role')")
+          ? [{ database_role: 'union_eyes_system', user_id: '', org_id: '' }] : [],
+      )
+      const result = await withSystemContext(async () => {
+        expect(getActiveSystemDb()).toBe(outer)
+        const value = await withSystemContext(async (tx) => {
+          expect(tx).toBe(inner)
+          expect(getActiveSystemDb()).toBe(inner)
+          return 'suppression checked'
+        })
+        expect(getActiveSystemDb()).toBe(outer)
+        return value
+      })
+      expect(result).toBe('suppression checked')
+      expect(systemDb.transaction).toHaveBeenCalledTimes(1)
+      expect(savepoint).toHaveBeenCalledTimes(1)
+      expect(getActiveSystemDb()).toBeUndefined()
+    })
+
+    it('restores a parent system role and audit context after a successful nested operation', async () => {
+      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+      const inner = { execute: mocks.mockSystemTxExecute }
+      const outer = { transaction: vi.fn(async (operation) => operation(inner)) }
+      mocks.mockSystemTxExecute.mockImplementation(async (query) =>
+        query.strings.join('').includes("current_setting('role')")
+          ? [{ database_role: 'parent_system_role', user_id: 'owned-actor', org_id: 'org-A' }] : [],
+      )
+      await systemContextStorage.run(outer as never, () => withSystemContext(async () => 'nested'))
+      expect(systemDb.transaction).not.toHaveBeenCalled()
+      const calls = mocks.mockSystemTxExecute.mock.calls.map(([query]) => query)
+      expect(calls.some(query => query.strings.join('').includes('SET LOCAL ROLE union_eyes_system'))).toBe(true)
+      expect(calls.at(-1).values).toEqual(['owned-actor', 'org-A', 'parent_system_role'])
+    })
+
+    it('returns the outer ambient transaction after an inner failure so the worker can record its retry', async () => {
+      const inner = { execute: mocks.mockSystemTxExecute }
+      const outer = { execute: mocks.mockSystemTxExecute, transaction: vi.fn(async (operation) => operation(inner)) }
+      vi.mocked(systemDb.transaction).mockImplementationOnce(async (operation) => operation(outer as never))
+      mocks.mockSystemTxExecute.mockImplementation(async (query) =>
+        query.strings.join('').includes("current_setting('role')")
+          ? [{ database_role: 'union_eyes_system', user_id: '', org_id: '' }] : [],
+      )
+      await withSystemContext(async () => {
+        await expect(withSystemContext(async () => { throw new Error('suppression unavailable') })).rejects.toThrow('suppression unavailable')
+        expect(getActiveSystemDb()).toBe(outer)
+        await outer.execute({ strings: ['controlled retry record'], values: [] })
+      })
+      expect(systemDb.transaction).toHaveBeenCalledTimes(1)
+      expect(getActiveSystemDb()).toBeUndefined()
     })
   })
 

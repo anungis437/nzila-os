@@ -1,4 +1,20 @@
-# Current staging and observed operational repair
+# Current staging and acceptance delta
+
+Staging now serves source `9a7ee373e1205209f864e63f37877c8919bb6738`, image `sha256:2768451ac639c7f0fa64ef29819c6d364cf11da2523f5df44b58ed645f0d16b3`, revision `--rel9a7ee373e1` at 100%. Build 43572581712 used workflow fb14c9c2793dc8c72a2ecd448178ed3036f111af. Deployment 43609080128 succeeded under CHG-2026-0114 using admitted workflow/IaC 8ce043dd393f6e119d82558d28e6ec4a49905236. All seven staging alerts were verified in the dedicated staging workspace. This is staging only; STAGING remains **NO_GO**.
+
+Real paired provider sessions 43610258404 pass case/document isolation, and actual private document bytes/checksum plus retained-primary native isolation, audit chains and sealed evidence pass for this deployed source. English member intake creates a real case and opens its detail/timeline. These observations do not establish complete persona or journey acceptance.
+
+Two actual product defects prevent acceptance: nested system email-suppression work deadlocks the single-connection pool, blocking deadline processing and some sign-in role lookups; the custom webpack chunk graph puts CSS in App Router's root script list, producing browser syntax errors. The owned blocked worker fixture was quiesced and the exact staging revision restarted, restoring sign-in without deleting data. The permanent source repairs and proposed regressions are described in [the repair record](UE_V2_NESTED_SYSTEM_AND_CLIENT_ASSETS_REPAIR.md). Neither proposed repair has deployed acceptance yet.
+
+The first navigation run stopped before authentication because the generated inventory held a stale source digest; regeneration and a required CI inventory check correct that verification setup defect. The initial member-list selector was also wrong: the real API and rendered list contain the submitted case number. The whole bilingual intake/browser run remains failed because the browser error is real; no failed check is relabeled.
+
+Remaining acceptance includes qualified source CI/build/deployment, all seven real persona profiles, complete base journeys including bilingual/mobile, deadline delivery/retry/recovery, messaging, private evidence/security/revocation, actual issued lease expiry, rollback/recovery and final audit reconciliation. Finance/dues persistence and Financial Officer 2.1 remain outside the base release; sensitive finance denials remain required. The legacy Wave 99 deadline surface is not automatically promoted into new base-release scope. Anungis/anungis437 are one founder; Codex continues the authorized staging execution without an invented independent reviewer. No production authority or deployment is implied.
+
+Proposed replacement source `ea073528873c4e5ef33f84e5f7ff5d1fe785499a` (#1224) repairs both confirmed defects. Its canonical source-plan SQL bytes/order are unchanged, fresh/restore/repeat/native privileges pass, and source-bound primary guard inspection finds 0 statements (13 functions, 99 constraints, 60 triggers already present). The actual one-connection regression is bound to identical compiled helper and all 208 current source modules; it remains native regression evidence, not deployed app acceptance. The current 9a document's exact issued URL returned actual private 403 AuthenticationFailed after 16:30:42Z expiry. Source/integration admission, immutable build, fresh reviewed staging deployment and final real acceptance remain required.
+
+The preceding a8442373 CI passed 26,077 application tests but failed 18 assertions in one composition suite because its mock still targeted the old database module. The correction moves that mock only; all 99 tests across six focused suites now pass, with the same runtime implementation and canonical source plan. The failed run is retained; new exact-source CI remains required.
+
+## Historical execution record
 
 Staging runs `cbf2bc9339f766ce4b5d8500a53e4481644f8680`, immutable image `sha256:dfc73c0da809ac4ceda628d191b4b63e0232800093e12dad15dc6501fef4fd4d`, revision `--relcbf2bc9339` at100% in Multiple mode. Build43554091036 and reviewed CHG-2026-0114 apply43555575505 succeeded after source#1216/integration#1217 completed every registered check and all16trusted required contexts, admitted at1bfbe779. STAGING remains **NO_GO**.
 

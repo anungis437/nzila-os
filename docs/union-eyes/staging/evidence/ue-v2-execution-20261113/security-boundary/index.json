@@ -169,31 +169,16 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
-    "sourcePR": 1220,
-    "integrationPR": 1219,
-    "localNativeExport": "local-native-export-9a7ee373.json",
+    "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+    "sourcePR": 1224,
+    "localNativeExport": "local-native-export-ea073528.json",
+    "restoredRehearsal": "candidate-restored-rehearsal-ea073528.json",
+    "primaryGuardReadOnlyNoop": "primary-current-source-noop-ea073528.json",
+    "actualReadOnlyNestedSystemRegression": "nested-system-single-pool-ea073528-real-pg.json",
     "deployed": false,
     "ciAndRuntimeStillRequired": true,
-    "repairSummary": "Capacity, signing/atomic intake, dedicated telemetry, process liveness, individual grievance reachability, bounded member tools and revoked-author note privacy",
-    "restoredRehearsal": "candidate-restored-rehearsal-9a7ee373.json",
-    "primaryGuardReadOnlyNoop": "primary-current-source-noop-9a7ee373.json",
-    "priorCandidateCi": {
-      "sourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7",
-      "status": "FAIL",
-      "failedSuites": [
-        "environment census",
-        "notification links"
-      ],
-      "correctedLocalChecks": 111,
-      "runtimePassInferred": false
-    },
-    "precedingQualifiedBuild": "43568101291",
-    "precedingDeploymentFailure": "deployment-43569312473-authority-failure.json",
-    "actualScopedPermissionRepair": "staging-telemetry-authority-repair-20261114.json",
-    "latestDeploymentFailure": "deployment-43573741953-history-failure.json",
-    "applicationImageQualified": true,
-    "workflowHistoryCorrectionPending": true
+    "repairSummary": "Nested system savepoints and authority/context restoration; correct App Router asset graph and MIME security; actual-image gate and navigation inventory CI",
+    "priorTestBoundaryCorrection": "source-a8442373-whole-application-ci-failure.json"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -219,5 +204,55 @@
   "currentOperationalFollowup": "deployed-cbf2bc93-operational-followup.json",
   "subsequentObservedFindings": "grievance-probe-and-expiry-followup-cbf2bc93.json",
   "deploymentAlertScopeFailure": "deployment-43602545438-alert-scope-failure.json",
-  "stagingCronAlertZeroExitRegression": "staging-cron-alert-zero-exit-regression.json"
+  "stagingCronAlertZeroExitRegression": "staging-cron-alert-zero-exit-regression.json",
+  "previousCandidateRecords": [
+    {
+      "sourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+      "sourcePR": 1220,
+      "integrationPR": 1219,
+      "localNativeExport": "local-native-export-9a7ee373.json",
+      "deployed": false,
+      "ciAndRuntimeStillRequired": true,
+      "repairSummary": "Capacity, signing/atomic intake, dedicated telemetry, process liveness, individual grievance reachability, bounded member tools and revoked-author note privacy",
+      "restoredRehearsal": "candidate-restored-rehearsal-9a7ee373.json",
+      "primaryGuardReadOnlyNoop": "primary-current-source-noop-9a7ee373.json",
+      "priorCandidateCi": {
+        "sourceSha": "f4f03cd11a788a3a4df7e3045c622405915801f7",
+        "status": "FAIL",
+        "failedSuites": [
+          "environment census",
+          "notification links"
+        ],
+        "correctedLocalChecks": 111,
+        "runtimePassInferred": false
+      },
+      "precedingQualifiedBuild": "43568101291",
+      "precedingDeploymentFailure": "deployment-43569312473-authority-failure.json",
+      "actualScopedPermissionRepair": "staging-telemetry-authority-repair-20261114.json",
+      "latestDeploymentFailure": "deployment-43573741953-history-failure.json",
+      "applicationImageQualified": true,
+      "workflowHistoryCorrectionPending": true
+    },
+    {
+      "sourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+      "sourcePR": 1224,
+      "localNativeExport": "local-native-export-a8442373.json",
+      "restoredRehearsal": "candidate-restored-rehearsal-a8442373.json",
+      "primaryGuardReadOnlyNoop": "primary-current-source-noop-a8442373.json",
+      "actualReadOnlyNestedSystemRegression": "nested-system-single-pool-a8442373-real-pg.json",
+      "deployed": false,
+      "ciAndRuntimeStillRequired": true,
+      "repairSummary": "Nested system savepoints and authority/context restoration; correct App Router asset graph and MIME security; actual-image gate and navigation inventory CI",
+      "ciFailure": "source-a8442373-whole-application-ci-failure.json"
+    }
+  ],
+  "currentObservedRuntime": {
+    "sourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+    "workflowAndInfrastructureSha": "8ce043dd393f6e119d82558d28e6ec4a49905236",
+    "buildRunId": "43572581712",
+    "deployRunId": "43609080128",
+    "revision": "nzila-ue-v2-staging-app--rel9a7ee373e1",
+    "trafficPercent": 100,
+    "stagingGo": false
+  }
 }

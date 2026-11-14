@@ -1,0 +1,120 @@
+{
+  "ok": true,
+  "status": "PASS",
+  "purpose": "ACTUAL_OWNED_TERMINAL_FIXTURE_CANCELLATION_ONLY",
+  "applicationSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+  "result": {
+    "ok": true,
+    "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+    "at": "2026-11-14T16:32:50.401Z",
+    "applicationSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+    "operation": "worker",
+    "scenario": "basic",
+    "identity": {
+      "principal": "uev2admin",
+      "database": "ue_v2_staging",
+      "address": "10.40.4.4"
+    },
+    "result": {
+      "clientTraceId": "c7495e33ab5df2151beb9f9af8274fcf",
+      "clientCorrelationId": "2b02b4fa-a632-460e-a79c-b1109e2a98f3",
+      "httpStatus": 200,
+      "runId": "c27cc5f5-dfcf-4839-866f-aa06dd0590dd",
+      "workerInstance": "deadline-worker-c27cc5f5",
+      "correlationId": "c27cc5f5-dfcf-4839-866f-aa06dd0590dd",
+      "startedAt": "2026-11-14T16:32:49.510Z",
+      "finishedAt": "2026-11-14T16:32:49.521Z",
+      "durationMs": 11,
+      "examined": 0,
+      "claimed": 0,
+      "sent": 0,
+      "transientFailures": 0,
+      "permanentFailures": 0,
+      "deadLettered": 0,
+      "leasesRecovered": 0,
+      "cancelledSkipped": 0
+    },
+    "snapshot": {
+      "reminders": [
+        {
+          "id": "f1553961-46c4-46b0-992d-b1dfeed59803",
+          "source_deadline_id": "54f7a1d2-7f3a-4d76-b521-279fa221f2e4",
+          "status": "cancelled",
+          "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+          "recipient_role": "assigned_officer",
+          "scheduled_for": "2026-11-14T15:32:37.938Z",
+          "attempt_count": 1,
+          "max_attempts": 5,
+          "lease_owner": null,
+          "lease_expires_at": null,
+          "provider": null,
+          "provider_message_id": null,
+          "last_error_code": null,
+          "cancelled_reason": "deadline_completed"
+        }
+      ],
+      "executions": [
+        {
+          "reminder_id": "f1553961-46c4-46b0-992d-b1dfeed59803",
+          "attempt_number": 1,
+          "outcome": "skipped_cancelled",
+          "provider": null,
+          "provider_message_id": null,
+          "provider_status_code": null,
+          "error_code": "deadline_completed",
+          "worker_instance": "deadline-worker-c50db4af",
+          "correlation_id": "c50db4af-0450-4a39-9e7c-f82f16c48c73"
+        }
+      ],
+      "audit": [
+        {
+          "event_type": "reminder.scheduled",
+          "reminder_id": "f1553961-46c4-46b0-992d-b1dfeed59803",
+          "correlation_id": "1c1140ff-c7d4-46e1-9b48-c5d398c77e63",
+          "occurred_at": "2026-11-14T15:32:37.767Z"
+        },
+        {
+          "event_type": "deadline.created",
+          "reminder_id": null,
+          "correlation_id": "1c1140ff-c7d4-46e1-9b48-c5d398c77e63",
+          "occurred_at": "2026-11-14T15:32:37.767Z"
+        },
+        {
+          "event_type": "overdue.detected",
+          "reminder_id": null,
+          "correlation_id": "1c1140ff-c7d4-46e1-9b48-c5d398c77e63",
+          "occurred_at": "2026-11-14T15:32:37.767Z"
+        },
+        {
+          "event_type": "reminder.claimed",
+          "reminder_id": "f1553961-46c4-46b0-992d-b1dfeed59803",
+          "correlation_id": "c50db4af-0450-4a39-9e7c-f82f16c48c73",
+          "occurred_at": "2026-11-14T16:00:33.730Z"
+        },
+        {
+          "event_type": "reminder.superseded_at_dispatch",
+          "reminder_id": "f1553961-46c4-46b0-992d-b1dfeed59803",
+          "correlation_id": "c50db4af-0450-4a39-9e7c-f82f16c48c73",
+          "occurred_at": "2026-11-14T16:00:33.730Z"
+        }
+      ],
+      "convergence": []
+    },
+    "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+    "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+    "forceRlsRetained": true,
+    "operatorOwnerGrantRemoved": true,
+    "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+    "institutionalAssignmentAuthorityCreated": false,
+    "credentialValuesSerialized": false
+  },
+  "noSixScenarioPassClaimed": true,
+  "transport": {
+    "bytes": 577480,
+    "programSha256": "4a79fd121885db3fc25856097e89acdd2864acb42adf367fb61c196bb85549a1",
+    "fileSha256": {
+      "worker.js": "605b9a4b8f719f827c2b9cf0f60736b05a5208c7a50c7a736ba63a9a76e2e15a",
+      "native.cjs": "3748c6536bb94b7a87876b1d9f93564c8895b507b1f842499dba9758d3de68cf"
+    }
+  }
+}

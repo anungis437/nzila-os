@@ -198,6 +198,12 @@ jobs:
             --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             -t "${REGISTRY}/${APP_REPOSITORY}:${TAG}" \
             .
+          # Inspect the actual image before publication. App Router treats every
+          # rootMainFiles entry as JavaScript; a CSS entry breaks all navigation.
+          docker run --rm --entrypoint node \
+            --mount "type=bind,src=${RUNNER_TEMP}/gate/scripts,dst=/ue-asset-gate,readonly" \
+            "${REGISTRY}/${APP_REPOSITORY}:${TAG}" \
+            /ue-asset-gate/verify-ue-v2-client-assets.mjs /app/apps/union-eyes/.next
           docker push "${REGISTRY}/${APP_REPOSITORY}:${TAG}"
           DIGEST=$(az acr repository show --name "$ACR_NAME" --image "${APP_REPOSITORY}:${TAG}" --query digest -o tsv)
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"

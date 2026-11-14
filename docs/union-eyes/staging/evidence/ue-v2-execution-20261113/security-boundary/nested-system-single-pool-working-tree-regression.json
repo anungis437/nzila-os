@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "status": "PASS",
+  "purpose": "ACTUAL_RETAINED_PRIMARY_READ_ONLY_SINGLE_SYSTEM_CONNECTION_REGRESSION",
+  "evidenceClass": "WORKING_TREE_NATIVE_PROTOTYPE_NOT_DEPLOYED_APPLICATION_ACCEPTANCE",
+  "at": "2026-11-14T16:11:15.759Z",
+  "helperSourceSha256": "8b36115e47d9ed05a671b233a8a984cdcccb55af636600be788a985a3e39eea6",
+  "checks": [
+    "nested-system-savepoint-uses-the-same-physical-connection-and-cleared-audit-context",
+    "actual-deadline-email-suppression-read-completes-with-system-pool-one",
+    "failed-inner-query-rolls-back-to-savepoint-and-outer-transaction-remains-usable",
+    "parent-database-role-and-audit-context-restored"
+  ],
+  "result": {
+    "identity": {
+      "pid": 176442,
+      "principal": "union_eyes_system",
+      "login": "ue_staging_system",
+      "address": "10.40.4.4",
+      "read_only": "on",
+      "database_role": "union_eyes_system"
+    },
+    "sameBackendPid": 176442,
+    "systemPoolMaximum": 1
+  },
+  "syntheticAuditContextOnly": true,
+  "noBusinessOrSchemaMutation": true,
+  "noPrivilegeGrantOrPolicyReplacement": true,
+  "credentialsSerialized": false,
+  "transport": {
+    "bytes": 1661084,
+    "programSha256": "e8a2d447dac901a7ebbfe91737a7ddaaa21e8d7601ba8c946990555cce2ca324",
+    "fileSha256": {
+      "system.cjs": "c4bba7eb3168ba2df1e21abd2e03811bfa97e423ab1b1103f35fed4218af8ee3"
+    }
+  }
+}

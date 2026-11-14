@@ -35,6 +35,8 @@ import { withCanonicalOrganizationBinding } from '@/lib/auth/canonical-organizat
 import { sanitizedBindingError } from '@/lib/db/binding-error'
 import { nestedCanonicalTenantScope, withCanonicalTenantScope } from './canonical-transaction-scope'
 import { AuthOrgBindingError, authenticatedOrgBindingSql } from '@nzila/platform-auth/org-binding'
+import { withSystemContext } from './system-transaction-scope'
+export { withSystemContext } from './system-transaction-scope'
 
 /** Convenience alias for the typed transaction/db handle passed to withRLSContext callbacks */
 export type RLSTx = typeof db
@@ -298,59 +300,6 @@ export async function withExplicitUserContext<T>(
     // Scope the module-level `db` import to this transaction — see
     // db/tenant-context-storage.ts.
     const result = await tenantContextStorage.run(tx, () => operation())
-    return result
-  })
-}
-
-/**
- * Execute database operation without RLS context (system operations)
- *
- * WARNING: Only use for system-level operations that should bypass RLS.
- * Common use cases:
- * - auth provider webhooks creating/updating users
- * - System maintenance scripts
- * - Background jobs that operate on all data
- *
- * @param operation - Async function containing database queries
- * @returns Promise with operation result
- *
- * @example
- * // auth provider webhook creating a new user
- * export async function POST(req: Request) {
- *   const event = await verifyAuthWebhook(req);
- *
- *   return withSystemContext(async () => {
- *     await db.insert(users).values({
- *       userId: event.data.id,
- *       email: event.data.email_addresses[0].email_address,
- *     });
- *     return NextResponse.json({ success: true });
- *   });
- * }
- */
-export async function withSystemContext<T>(operation: (tx: RLSTx) => Promise<T>): Promise<T>
-export async function withSystemContext<T>(operation: () => Promise<T>): Promise<T>
-export async function withSystemContext<T>(
-  operation: (() => Promise<T>) | ((tx: RLSTx) => Promise<T>),
-): Promise<T> {
-  // System operations run on a SEPARATE connection, authenticated as the
-  // union_eyes_system role. Authority comes from that role's explicit,
-  // named RLS policies (`TO union_eyes_system`) — not from clearing context
-  // variables on the tenant runtime connection. See
-  // db/migrations/0108_rls_tenant_isolation_foundation.sql.
-  return await systemDb.transaction(async (tx) => {
-    if (currentStateContextEnabled()) await tx.execute(sql`SET LOCAL ROLE union_eyes_system`)
-    // Context vars are still cleared for audit/logging consistency, but no
-    // policy on this connection depends on them being empty.
-    await tx.execute(sql`SELECT set_config('app.current_user_id', '', true)`)
-    await tx.execute(sql`SELECT set_config('app.current_org_id', '', true)`)
-    // Scope the module-level `db` import (from @/db/db) to this transaction
-    // for the duration of the callback. Dozens of existing callers use the
-    // no-argument form and query through `db` directly rather than the
-    // supplied `tx` — without this, those queries would silently run on the
-    // tenant connection (union_eyes_runtime) despite appearing
-    // system-authorized. See db/system-context-storage.ts.
-    const result = await systemContextStorage.run(tx, () => operation(tx))
     return result
   })
 }

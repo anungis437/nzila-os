@@ -1,0 +1,20 @@
+{
+  "status": "FAIL",
+  "purpose": "ACTUAL_PRIOR_SOURCE_WHOLE_APPLICATION_CI_FAILURE",
+  "sourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+  "sourcePR": 1224,
+  "workflowRunId": "43616274405",
+  "jobId": "132511984894",
+  "failedTests": 18,
+  "passedTests": 26077,
+  "failedTestFiles": 1,
+  "passedTestFiles": 1997,
+  "file": "apps/union-eyes/lib/deadline-engine/__tests__/email-delivery-composition.test.ts",
+  "rootCause": "The composition suite still mocked with-rls-context after suppression moved to system-transaction-scope; provider assertions encountered an unmocked suppression boundary.",
+  "correctionSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "productionImplementationChangedByCorrection": false,
+  "deliveryAssertionsWeakened": false,
+  "localCorrectedSixSuites": 99,
+  "originalLogSha256": "f913bf3adae4b718a3d83d37255b53010b29283ef0a46f5be4d11f9032bcc7b2",
+  "stagingGo": false
+}

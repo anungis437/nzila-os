@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "purpose": "SYSTEM_MODULE_SOURCE_RECORD_REFRESH_WITH_IDENTICAL_SQL",
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "changedPlanFields": [
+    "statements",
+    "decisions",
+    "sourceCommitments"
+  ],
+  "statements": 6267,
+  "tables": 776,
+  "sqlBytesAndOrderIdentical": true,
+  "sourceDigestMetadataChanged": true,
+  "sqlSha256": "7e0857239a56e8d180280a02653d163559f6ccde0049ba0d0d308c6371a26796",
+  "stagingGo": false,
+  "originalPlanRegenerationSourceSha": "d135cf4ea834d981901376fc76198df253a51515",
+  "sourcePlanBytesUnchangedByTestOnlyCorrection": true
+}

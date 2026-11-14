@@ -1,7 +1,7 @@
 {
-  "applicationSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
   "sourceDigests": {
-    "apps/union-eyes/lib/dashboard/role-experience.ts": "fcb6ea6f8724279ddc5385570a401a568b2c34b56a42f07ae1defcc426dfc2bf",
+    "apps/union-eyes/lib/dashboard/role-experience.ts": "d252052ded9d7fdf67410d45e7c53c9d126acd0abf711b32afec0e1afc403c70",
     "apps/union-eyes/lib/executive/executive-navigation.ts": "1c85199c05fadb90cf5e3bb2dbea949c5c275c2ebd4e676ced40fde373c6a187",
     "apps/union-eyes/lib/auth/roles.ts": "fb554f61106e309292f054e7a36348de5045ebb45e250bfb37d6af25446e1ace"
   },
