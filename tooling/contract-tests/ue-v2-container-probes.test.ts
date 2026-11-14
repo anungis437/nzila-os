@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 /**
  * The Container Apps liveness probe must not restart healthy processes during a
@@ -17,13 +17,35 @@ describe('Union Eyes V2 Container Apps health probes', () => {
     source.indexOf("resource app 'Microsoft.App/containerApps@2024-03-01' = {"),
     source.indexOf('dependsOn: [clamav]'),
   )
-  const probe = (kind: string) => {
-    const match = appBlock.match(new RegExp("type: '" + kind + "'[\\s\\S]*?httpGet: \\{ path: '([^']+)', port: 3000 \\}"))
-    return match?.[1]
+  const probe = (kind: string, environment: 'staging' | 'prod' = 'staging') => {
+    const start = appBlock.indexOf("type: '" + kind + "'")
+    expect(start).toBeGreaterThanOrEqual(0)
+    // Bound parsing to this probe. A conditional path must never make the parser
+    // silently consume the next probe's path (the previous regex did that).
+    const end = appBlock.indexOf("\n            }", start)
+    const block = appBlock.slice(start, end)
+    const expression = block.match(/httpGet: \{ path: (.*), port: 3000 \}/)?.[1]
+    const literal = expression?.match(/^'([^']+)'$/)
+    if (literal) return literal[1]
+    const conditional = expression?.match(/^deploymentEnvironment == 'staging' \? '([^']+)' : '([^']+)'$/)
+    expect(conditional, 'Known, explicitly evaluated probe path required').toBeTruthy()
+    return conditional?.[environment === 'staging' ? 1 : 2]
   }
 
-  it('uses shallow health for liveness, not dependency readiness', () => {
-    expect(probe('Liveness')).toBe('/api/health')
+  it('uses process-only staging liveness and retains the existing production selection', () => {
+    expect(probe('Liveness', 'staging')).toBe('/api/health/liveness')
+    expect(probe('Liveness', 'prod')).toBe('/api/health')
+  })
+
+  it('the selected staging liveness endpoint stays alive without database connectivity', async () => {
+    vi.stubEnv('DATABASE_URL', 'postgres://unavailable:unavailable@database.invalid/unavailable')
+    try {
+      const { GET } = await import('../../apps/union-eyes/app/api/health/liveness/route')
+      const response = await GET()
+      expect(response.status).toBe(200)
+      expect(await response.json()).toMatchObject({ status: 'ok', uptime: expect.any(Number) })
+      expect(response.headers.get('cache-control')).toContain('no-store')
+    } finally { vi.unstubAllEnvs() }
   })
 
   it('uses dependency-aware readiness to fail closed when the app cannot serve traffic', () => {
