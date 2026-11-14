@@ -1,0 +1,21 @@
+{
+  "status": "FAIL",
+  "evidenceClass": "ACTUAL_PROTECTED_STAGING_DEPLOYMENT_AUTHORIZATION_FAILURE",
+  "sourceSha": "b6c6a938d8c52e80a5844f11ed1bc8ec1a19f14c",
+  "workflowSha": "6f22c672528efe2b25185800b03d5a1498cdb066",
+  "buildRunId": "43568101291",
+  "deploymentRunId": "43569312473",
+  "at": "2026-11-14T07:09:59.9146835Z",
+  "failureStep": "Fresh what-if and drift gate against the reviewed what-if",
+  "actualError": "AuthorizationFailed: staging deploy principal lacks Microsoft.OperationalInsights/workspaces/write at dedicated staging LAW",
+  "driftFingerprintMismatchClaimed": false,
+  "infrastructureApplyExecuted": false,
+  "trafficPromoted": false,
+  "applicationDeployed": false,
+  "observedServingSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+  "reviewedFingerprint": "15c66a47796fc141db91c3938c98f4221c649131897c0bcb6a01c2ebbb35b701",
+  "preservedOriginalLogSha256": "eba8fc73ff2dab69a0fcb7b871a9de2066d4d046c863e5006e7b23129905fc58",
+  "subsequentScopedAuthorityRepair": "staging-telemetry-authority-repair-20261114.json",
+  "stagingGo": false,
+  "productionAuthorized": false
+}

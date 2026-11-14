@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "purpose": "QUALIFIED_STAGING_TELEMETRY_COMPONENT_AND_MINIMUM_DEPLOYMENT_AUTHORITY_REPAIR",
+  "at": "2026-11-14T07:17:07.240050+00:00",
+  "changeRecordId": "CHG-2026-0114",
+  "qualifiedLawTemplateSourceSha": "b6c6a938d8c52e80a5844f11ed1bc8ec1a19f14c",
+  "reviewedWhatIfRunId": "43569312473",
+  "reviewedWhatIfFingerprint": "15c66a47796fc141db91c3938c98f4221c649131897c0bcb6a01c2ebbb35b701",
+  "applicationDeploymentAttemptFailedBeforeApply": true,
+  "applicationTrafficChanged": false,
+  "productionAuthorized": false,
+  "sharedProductionWorkspaceOrAssignmentsModified": false,
+  "operations": [
+    {
+      "operation": "UPDATE_EXISTING_STAGING_ONLY_DEPLOYER_ROLE",
+      "roleId": "ec673f50-7e39-499c-b389-c0dd7c9335ac",
+      "addedActions": [
+        "Microsoft.OperationalInsights/workspaces/write",
+        "Microsoft.OperationalInsights/workspaces/sharedKeys/action",
+        "Microsoft.OperationalInsights/workspaces/listKeys/action"
+      ],
+      "beforeDefinitionSha256": "6edc3b13bc9f1cf22e2ef5112019699693bcea4b4a5eab5616c888186f1219b3",
+      "afterDefinitionSha256": "70e9dd942af8571e989cddd1bb69f7cfe011bcaa0e3fa6cccdc2df725c449d34",
+      "assignableScopesUnchanged": [
+        "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg"
+      ],
+      "dataActionsAdded": []
+    },
+    {
+      "operation": "CREATE_EXACT_ALREADY_QUALIFIED_STAGING_LAW_COMPONENT",
+      "resourceId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law",
+      "customerId": "ce2ff61f-0059-46eb-b18b-a9be8162d009",
+      "dailyCapGb": 1,
+      "retentionDays": 30,
+      "applicationTelemetryRerouted": false
+    },
+    {
+      "operation": "CREATE_STAGING_ONLY_MONITORING_CONSUMER_DEFINITION",
+      "roleId": "4cb8d888-1d86-4106-98e7-f2e086292722",
+      "definitionSha256": "426ffc1eaa4c9c08568970361915d66cbbc13be2f96ba2949b99e4e268fef7f2",
+      "assignableScope": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg",
+      "actualAzureAssignedRoleIdObserved": true
+    },
+    {
+      "operation": "ASSIGN_MONITORING_ONLY_AT_DEDICATED_STAGING_WORKSPACE",
+      "roleId": "4cb8d888-1d86-4106-98e7-f2e086292722",
+      "principalId": "49397d18-40f0-4cca-8a82-cd753da08768",
+      "scope": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law",
+      "assignmentId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law/providers/Microsoft.Authorization/roleAssignments/90dd3d6b-1f0d-5102-8a91-c9259b252371"
+    },
+    {
+      "operation": "ASSIGN_MONITORING_ONLY_AT_DEDICATED_STAGING_WORKSPACE",
+      "roleId": "749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+      "principalId": "49397d18-40f0-4cca-8a82-cd753da08768",
+      "scope": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law",
+      "assignmentId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law/providers/Microsoft.Authorization/roleAssignments/e2b61d37-493d-527f-adb0-ede5a5300957"
+    }
+  ],
+  "finishedAt": "2026-11-14T07:19:40.517706+00:00",
+  "newApplicationSourceDeployed": false,
+  "businessDataOrPrimaryGuardMutation": false,
+  "stagingGo": false
+}
