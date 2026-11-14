@@ -1,0 +1,91 @@
+/**
+ * SQL-engine regression for the exact deployed payment-reference migration.
+ * PGlite is not native PG15/16, RLS, or deployed runtime qualification.
+ */
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { PGlite } from '@electric-sql/pglite';
+
+const migration = readFileSync(
+  resolve(__dirname, '..', 'migrations', '20260921_platform_payment_external_reference_uniqueness.sql'),
+  'utf8',
+);
+const orgA = '00000000-0000-0000-0000-00000000000a';
+const orgB = '00000000-0000-0000-0000-00000000000b';
+
+async function withDb(run: (db: PGlite) => Promise<void>) {
+  const db = new PGlite();
+  try {
+    await run(db);
+  } finally {
+    await db.close();
+  }
+}
+
+const createLedger = `
+  CREATE TABLE platform_payments (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id uuid NOT NULL,
+    external_reference varchar(255),
+    amount numeric(14,2) NOT NULL
+  );
+`;
+
+describe('payment-reference migration — actual SQL engine execution', () => {
+  it('refuses to install when the ledger table is absent', async () => {
+    await withDb(async (db) => {
+      await expect(db.exec(migration)).rejects.toThrow(/platform_payments is missing/);
+      const result = await db.query<{ exists: string | null }>(
+        "SELECT to_regclass('platform_payments_org_external_reference_uq')::text AS exists",
+      );
+      expect(result.rows[0]?.exists).toBeNull();
+    });
+  });
+
+  it('refuses duplicate legacy references without deleting financial rows', async () => {
+    await withDb(async (db) => {
+      await db.exec(createLedger);
+      await db.query(
+        'INSERT INTO platform_payments (organization_id, external_reference, amount) VALUES ($1,$2,10),($1,$2,20)',
+        [orgA, 'duplicate'],
+      );
+      await expect(db.exec(migration)).rejects.toThrow(/duplicate.*group/i);
+      const count = await db.query<{ n: number }>(
+        'SELECT count(*)::int AS n FROM platform_payments',
+      );
+      expect(count.rows[0]?.n).toBe(2);
+      const index = await db.query<{ exists: string | null }>(
+        "SELECT to_regclass('platform_payments_org_external_reference_uq')::text AS exists",
+      );
+      expect(index.rows[0]?.exists).toBeNull();
+    });
+  });
+
+  it('installs the scoped index and rejects replay while permitting cross-org and NULL references', async () => {
+    await withDb(async (db) => {
+      await db.exec(createLedger);
+      await db.exec(migration);
+      await db.query(
+        'INSERT INTO platform_payments (organization_id, external_reference, amount) VALUES ($1,$2,10)',
+        [orgA, 'evt_1'],
+      );
+      await expect(
+        db.query(
+          'INSERT INTO platform_payments (organization_id, external_reference, amount) VALUES ($1,$2,10)',
+          [orgA, 'evt_1'],
+        ),
+      ).rejects.toThrow();
+      await db.query(
+        'INSERT INTO platform_payments (organization_id, external_reference, amount) VALUES ($1,$2,10)',
+        [orgB, 'evt_1'],
+      );
+      await db.query(
+        'INSERT INTO platform_payments (organization_id, external_reference, amount) VALUES ($1,NULL,10),($1,NULL,20)',
+        [orgA],
+      );
+      const count = await db.query<{ n: number }>('SELECT count(*)::int AS n FROM platform_payments');
+      expect(count.rows[0]?.n).toBe(4);
+    });
+  });
+});
