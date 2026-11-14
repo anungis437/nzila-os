@@ -77,7 +77,11 @@
     "https://github.com/anungis437/nzila-os/actions/runs/43537986948",
     "https://github.com/anungis437/nzila-os/actions/runs/43540064035",
     "docs/union-eyes/staging/UE_V2_NESTED_SESSION_LIFETIME_REPAIR.md",
-    "docs/union-eyes/staging/UE_V2_REPRESENTED_MEMBER_CONTINUITY.md"
+    "docs/union-eyes/staging/UE_V2_REPRESENTED_MEMBER_CONTINUITY.md",
+    "docs/union-eyes/staging/UE_V2_CONNECTION_BUDGET_REPAIR.md",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-a8195afb.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/deployed-cbf2bc93-operational-followup.json",
+    "https://github.com/anungis437/nzila-os/actions/runs/43555575505"
   ],
   "linked_prs": [
     "1137",
@@ -127,7 +131,9 @@
     "1210",
     "https://github.com/anungis437/nzila-os/pull/1211",
     "https://github.com/anungis437/nzila-os/pull/1212",
-    "https://github.com/anungis437/nzila-os/pull/1214"
+    "https://github.com/anungis437/nzila-os/pull/1214",
+    "https://github.com/anungis437/nzila-os/pull/1218",
+    "https://github.com/anungis437/nzila-os/pull/1219"
   ],
   "linked_commits": [
     "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
@@ -156,7 +162,7 @@
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-14T05:20:31.019688+00:00",
+  "updated_at": "2026-11-14T05:23:15.039146+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
