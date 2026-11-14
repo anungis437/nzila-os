@@ -56,7 +56,7 @@ const IDENTITY_FIXTURE_SQL = `
 
 const BUSINESS_FIXTURE_SQL = `
   CREATE TABLE public.grievances (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, created_by text,
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, created_by text, grievant_id uuid,
     created_at timestamptz NOT NULL DEFAULT now(), is_confidential boolean DEFAULT false, has_legal_implications boolean DEFAULT false,
     union_rep_id uuid);
   CREATE TABLE public.claims (
