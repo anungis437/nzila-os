@@ -585,7 +585,9 @@ def _attempt_payment_retry(txn: dict) -> dict:
     try:
         import stripe
 
-        stripe.api_key = stripe_key
+        # Current Stripe Python 16.x: use a scoped client instead of the
+        # deprecated module-level API key and static PaymentIntent.create.
+        client = stripe.StripeClient(stripe_key, max_network_retries=3)
         amount_cents = int(float(txn.get("amount", 0)) * 100)
         currency = txn.get("currency", "cad").lower()
         payment_method = txn.get("payment_method_id") or txn.get(
@@ -603,18 +605,20 @@ def _attempt_payment_retry(txn: dict) -> dict:
         # The same logical attempt reuses one key, so a redelivered task cannot charge the
         # member twice: Stripe returns the first result for a repeated key.
         attempt = int((txn.get("metadata") or {}).get("failure_count", 0)) + 1
-        intent = stripe.PaymentIntent.create(
-            idempotency_key=f"dues-retry:{txn.get('id', '')}:{attempt}",
-            amount=amount_cents,
-            currency=currency,
-            customer=customer_id,
-            payment_method=payment_method,
-            confirm=True,
-            off_session=True,
-            metadata={
-                "transaction_id": str(txn.get("id", "")),
-                "retry": "true",
+        intent = client.v1.payment_intents.create(
+            {
+                "amount": amount_cents,
+                "currency": currency,
+                "customer": customer_id,
+                "payment_method": payment_method,
+                "confirm": True,
+                "off_session": True,
+                "metadata": {
+                    "transaction_id": str(txn.get("id", "")),
+                    "retry": "true",
+                },
             },
+            options={"idempotency_key": f"dues-retry:{txn.get('id', '')}:{attempt}"},
         )
 
         if intent.status in ("succeeded", "requires_capture"):

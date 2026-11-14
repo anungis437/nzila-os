@@ -48,7 +48,8 @@ export async function POST(request: Request) {
 
   const db = await getDb()
   if (!db) {
-    return NextResponse.json({ ok: true, skipped: true })
+    // Do not acknowledge a signed payment event without durable persistence.
+    return NextResponse.json({ ok: false, error: 'Webhook persistence unavailable' }, { status: 503 })
   }
 
   const classification = classifyBillingWebhook(event.type)

@@ -21,6 +21,9 @@ django-celery-results>=2.5.1
 # r1-pilot-django-sidecar-binding-log.md (2026-05-10T02:05Z entry).
 upstash-redis>=1.1.0
 
+# Stripe payments — matches the current Endive API across Node and Python
+stripe==16.1.0
+
 # Azure integrations
 azure-identity>=1.16.1
 azure-storage-blob>=12.19.0

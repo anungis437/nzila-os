@@ -124,25 +124,26 @@ class PaymentRetryRedeliveryTests(SimpleTestCase):
         with _stripe(fake_stripe), mock.patch.dict("os.environ", {"STRIPE_SECRET_KEY": "k"}):
             result = tasks._attempt_payment_retry(self._txn())
         self.assertEqual(result["reason"], "missing_payment_method")
-        fake_stripe.PaymentIntent.create.assert_not_called()
+        fake_stripe.StripeClient.return_value.v1.payment_intents.create.assert_not_called()
 
     def test_a_repeated_attempt_reuses_one_idempotency_key(self):
         fake_stripe = mock.MagicMock()
-        fake_stripe.PaymentIntent.create.return_value = mock.MagicMock(status="succeeded", id="pi_1")
+        fake_stripe.StripeClient.return_value.v1.payment_intents.create.return_value = mock.MagicMock(status="succeeded", id="pi_1")
         txn = self._txn(payment_method_id="pm_1", stripe_customer_id="cus_1")
         with _stripe(fake_stripe), mock.patch.dict("os.environ", {"STRIPE_SECRET_KEY": "k"}):
             tasks._attempt_payment_retry(txn)
             tasks._attempt_payment_retry(txn)
-        keys = [call.kwargs["idempotency_key"] for call in fake_stripe.PaymentIntent.create.call_args_list]
+        keys = [call.kwargs["options"]["idempotency_key"] for call in fake_stripe.StripeClient.return_value.v1.payment_intents.create.call_args_list]
         self.assertEqual(keys, ["dues-retry:txn-9:2", "dues-retry:txn-9:2"])
+        fake_stripe.StripeClient.assert_called_with("k", max_network_retries=3)
 
     def test_the_next_attempt_uses_a_new_key(self):
         fake_stripe = mock.MagicMock()
-        fake_stripe.PaymentIntent.create.return_value = mock.MagicMock(status="succeeded", id="pi_1")
+        fake_stripe.StripeClient.return_value.v1.payment_intents.create.return_value = mock.MagicMock(status="succeeded", id="pi_1")
         with _stripe(fake_stripe), mock.patch.dict("os.environ", {"STRIPE_SECRET_KEY": "k"}):
             tasks._attempt_payment_retry(self._txn(payment_method_id="pm", stripe_customer_id="c", metadata={"failure_count": 1}))
             tasks._attempt_payment_retry(self._txn(payment_method_id="pm", stripe_customer_id="c", metadata={"failure_count": 2}))
-        keys = [call.kwargs["idempotency_key"] for call in fake_stripe.PaymentIntent.create.call_args_list]
+        keys = [call.kwargs["idempotency_key"] for call in fake_stripe.StripeClient.return_value.v1.payment_intents.create.call_args_list]
         self.assertEqual(len(set(keys)), 2)
 
 
