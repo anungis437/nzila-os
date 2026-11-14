@@ -25,6 +25,7 @@ import { eq, desc, inArray, and, type SQL } from "drizzle-orm";
 import { grievanceRelationshipScope, unassignedIntakeTriageScope } from '@/lib/services/grievance-read-scope';
 import { requireEntitlement } from '@/services/platform-economics/entitlement-guard';
 import { buildUnionEvidencePack } from '@/lib/evidence';
+import { settleUnionEvidencePack } from '@/lib/evidence-settlement';
 import { logger } from '@/lib/logger';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import { randomBytes } from 'crypto';
@@ -199,6 +200,14 @@ export const POST = withOrganizationAuth(async (request, context) => {
         },
       });
 
+      // Evidence failure rolls this mutation back even though the handler translates errors into HTTP responses.
+      await settleUnionEvidencePack(buildUnionEvidencePack({
+        actionType: isOfficialCase ? 'GRIEVANCE_FILED' : 'INTAKE_SUBMITTED',
+        orgId: organizationId,
+        actorId: userId,
+        artifacts: [{ type: 'grievance', data: { grievanceId: g.id, grievanceNumber: g.grievanceNumber, type: data.type } }],
+      }), isOfficialCase ? 'GRIEVANCE_FILED' : 'INTAKE_SUBMITTED');
+
       return g;
     });
 
@@ -212,13 +221,7 @@ export const POST = withOrganizationAuth(async (request, context) => {
       details: { grievanceNumber: grievance.grievanceNumber, type: data.type },
     });
 
-    // Evidence: tamper-proof filing trail
-    buildUnionEvidencePack({
-      actionType: isOfficialCase ? 'GRIEVANCE_FILED' : 'INTAKE_SUBMITTED',
-      orgId: organizationId,
-      actorId: userId,
-      artifacts: [{ type: 'grievance', data: { grievanceId: grievance.id, grievanceNumber: grievance.grievanceNumber, type: data.type } }],
-    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: isOfficialCase ? 'GRIEVANCE_FILED' : 'INTAKE_SUBMITTED' }))
+
 
     if (isOfficialCase) {
       await trackPilotEvent({

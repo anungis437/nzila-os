@@ -17,7 +17,7 @@ import {
 import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
-import { logger } from '@/lib/logger';
+import { settleUnionEvidencePack } from '@/lib/evidence-settlement';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import { getEffectiveCaseAccess } from '@/lib/services/case-access-service';
 import {
@@ -177,12 +177,12 @@ export const POST = withApi(
       return { governedDoc };
     });
 
-    buildUnionEvidencePack({
+    await settleUnionEvidencePack(buildUnionEvidencePack({
       actionType: 'GRIEVANCE_DOCUMENT_UPLOADED',
       orgId: organizationId,
       actorId: userId,
       artifacts: [{ type: 'grievance_document', data: { grievanceId, documentId: result.governedDoc.id, documentType: parsed.data.documentType, privacyLabel: parsed.data.privacyLabel } }],
-    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_DOCUMENT_UPLOADED' }));
+    }), 'GRIEVANCE_DOCUMENT_UPLOADED');
 
     await trackPilotEvent({
       userId,

@@ -16,7 +16,7 @@ import { getEffectiveCaseAccess } from "@/lib/services/case-access-service";
 import { auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
-import { logger } from '@/lib/logger';
+import { settleUnionEvidencePack } from '@/lib/evidence-settlement';
 import { trackPilotEvent } from '@/lib/services/pilot-tracking';
 import {
   validateTransition,
@@ -180,12 +180,12 @@ export const PATCH = withApi(
       return rows;
     });
 
-    buildUnionEvidencePack({
+    await settleUnionEvidencePack(buildUnionEvidencePack({
       actionType: 'GRIEVANCE_STATUS_CHANGED',
       orgId: organizationId,
       actorId: userId,
       artifacts: [{ type: 'grievance', data: { grievanceId, from: currentStatus, to: newStatus } }],
-    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_STATUS_CHANGED' }));
+    }), 'GRIEVANCE_STATUS_CHANGED');
 
     await trackPilotEvent({
       userId,

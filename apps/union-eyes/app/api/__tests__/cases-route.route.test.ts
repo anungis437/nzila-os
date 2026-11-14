@@ -34,6 +34,7 @@ async function loadRoute() {
 
 describe('cases route', () => {
   beforeEach(() => {
+    vi.unstubAllEnvs();
     vi.clearAllMocks();
     m.withApi.mockImplementation((_cfg: unknown, handler: any) => (ctx: any = {}) => handler(ctx));
     m.badRequest.mockImplementation((msg: string) => {
@@ -133,6 +134,26 @@ describe('cases route', () => {
     expect(m.buildUnionEvidencePack).toHaveBeenCalled();
     expect(m.recordUnionEyesCaseCreated).toHaveBeenCalled();
     expect(m.requireCaseFilingCapacity).toHaveBeenCalledWith(expect.anything(), { userId: 'u1', organizationId: 'org_1' }, 'handler');
+  });
+
+  it('does not return canonical creation success before evidence seals', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+    const { POST } = await loadRoute();
+    let finish!: () => void;
+    let returned = false;
+    m.buildUnionEvidencePack.mockReturnValueOnce(new Promise<void>(resolve => { finish = resolve; }));
+    const response = POST({ request: { headers: { get: () => null }, json: async () => ({ claimType: 'other', description: 'Synthetic evidence settlement regression' }) }, organizationId: 'org_1', userId: 'u1' }).then((value: unknown) => { returned = true; return value; });
+    await vi.waitFor(() => expect(m.buildUnionEvidencePack).toHaveBeenCalledTimes(1));
+    expect(returned).toBe(false);
+    finish();
+    expect((await response).status).toBe(201);
+  });
+
+  it('refuses canonical creation success when evidence persistence fails', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1');
+    const { POST } = await loadRoute();
+    m.buildUnionEvidencePack.mockRejectedValueOnce(new Error('SEAL_UNAVAILABLE'));
+    await expect(POST({ request: { headers: { get: () => null }, json: async () => ({ claimType: 'other', description: 'Synthetic evidence failure regression' }) }, organizationId: 'org_1', userId: 'u1' })).rejects.toThrow('SEAL_UNAVAILABLE');
   });
 
   it('POST answers 403 and writes nothing when the canonical membership lacks handler filing capacity', async () => {
