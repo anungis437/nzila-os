@@ -127,6 +127,8 @@ export const POST = withApi(
             cbaId: intake.cbaId ?? null,
             organizationId,
             createdBy: userId,
+            isConfidential: intake.isConfidential === true,
+            hasLegalImplications: intake.hasLegalImplications === true,
             // Retain the originating member separately from the staff converter's actual authorship.
             grievantId: zUUID.safeParse(intake.grievantId ?? intake.createdBy).success
               ? (intake.grievantId ?? intake.createdBy) : null,
