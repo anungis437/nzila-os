@@ -91,6 +91,7 @@ import {
   withPlatformAdminRLSContext,
 } from '../with-rls-context'
 import { tenantContextStorage } from '@/db/tenant-context-storage'
+import { db } from '@/db/db'
 
 /* ── tests ──────────────────────────────────────────────────────────── */
 
@@ -129,6 +130,64 @@ describe('with-rls-context', () => {
   })
 
   describe('prospective current-state V2 context', () => {
+    it('reuses the verified outer bridge in a savepoint without rebinding or leaking the transaction', async () => {
+      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+      const binding = { userId: 'user-1', organizationId: 'org-A', sessionToken: 'synthetic-only' }
+      mocks.mockOrgBinding.mockImplementationOnce(async (_options, callback) => callback(binding))
+      const inner = { execute: mocks.mockTxExecute }
+      const savepoint = vi.fn(async (callback) => callback(inner))
+      const outer = { execute: mocks.mockTxExecute, transaction: savepoint }
+      vi.mocked(db.transaction).mockImplementationOnce(async (callback) => callback(outer as never))
+      const value = await withRLSContext({ organizationId: 'org-A' }, () =>
+        withRLSContext({ organizationId: 'ORG-A' }, async (tx) => {
+          expect(tx).toBe(inner)
+          expect(tenantContextStorage.getStore()).toBe(inner)
+          return 'nested'
+        }),
+      )
+      expect(value).toBe('nested')
+      expect(mocks.mockOrgBinding).toHaveBeenCalledTimes(1)
+      expect(mocks.mockTxExecute).toHaveBeenCalledTimes(2)
+      expect(savepoint).toHaveBeenCalledTimes(1)
+      expect(tenantContextStorage.getStore()).toBeUndefined()
+    })
+
+    it('refuses nested actor or organization changes before opening a savepoint', async () => {
+      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+      const binding = { userId: 'user-1', organizationId: 'org-A', sessionToken: 'synthetic-only' }
+      mocks.mockOrgBinding.mockImplementationOnce(async (_options, callback) => callback(binding))
+      const savepoint = vi.fn()
+      vi.mocked(db.transaction).mockImplementationOnce(async (callback) =>
+        callback({ execute: mocks.mockTxExecute, transaction: savepoint } as never),
+      )
+      await withRLSContext({ organizationId: 'org-A' }, async () => {
+        await expect(
+          withRLSContext({ organizationId: 'org-B' }, async () => 'no'),
+        ).rejects.toMatchObject({ code: 'MEMBERSHIP_REQUIRED' })
+        mocks.mockAuth.mockResolvedValueOnce({ userId: 'other-user' })
+        await expect(withRLSContext(async () => 'no')).rejects.toMatchObject({
+          code: 'ACTOR_MISMATCH',
+        })
+      })
+      expect(savepoint).not.toHaveBeenCalled()
+      expect(mocks.mockOrgBinding).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not reuse a tenant scope through a privileged system override', async () => {
+      vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+      mocks.mockOrgBinding.mockImplementationOnce(async (_options, callback) =>
+        callback({ userId: 'user-1', organizationId: 'org-A', sessionToken: 'synthetic-only' }),
+      )
+      const operation = vi.fn()
+      await withRLSContext({ organizationId: 'org-A' }, async () => {
+        await expect(withSystemContext(() => withRLSContext(operation))).rejects.toMatchObject({
+          code: 'ROLE_REQUIRED',
+        })
+      })
+      expect(operation).not.toHaveBeenCalled()
+      expect(mocks.mockOrgBinding).toHaveBeenCalledTimes(1)
+    })
+
     it('denies platform context before database work unless the canonical actor is an administrator', async () => {
       vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
       mocks.mockCanonicalContext.mockResolvedValueOnce({ isSystemAdmin: false })
