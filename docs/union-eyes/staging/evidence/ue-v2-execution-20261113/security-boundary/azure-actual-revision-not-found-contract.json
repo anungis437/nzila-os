@@ -1,0 +1,13 @@
+{
+  "status": "REPRODUCED_PROVIDER_CONTRACT",
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "failedRun": "43634316698",
+  "operation": "READ_ONLY_GET_OF_DELIBERATELY_ABSENT_NAMED_STAGING_REVISION",
+  "observedAzureCliExitCode": 1,
+  "observedErrorCode": "RevisionNotFound",
+  "observedErrorShape": "ERROR: Not Found({\"error\":{\"code\":\"RevisionNotFound\",\"message\":\"Revision <owned-absent-name> was not found under container app <staging-app>.\"}})",
+  "originalWorkflowFailureRetained": true,
+  "retryAllowedOnlyForExpectedPendingDrillRevisionRead": true,
+  "knownGoodReadOrOtherAzureErrorRetried": false,
+  "applicationSourceImageOrDataChanged": false
+}

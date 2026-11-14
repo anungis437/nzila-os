@@ -104,7 +104,7 @@
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
       "status": "PARTIALLY_PROVEN",
-      "evidence": "Actual EN desktop/FR mobile member intake, persisted list/detail/timeline and30 messaging checks pass on ea073528; all remaining persona profiles and assignment/grievance continuity are in progress.",
+      "evidence": "All five normal actual-provider persona profiles pass274 observations on ea073528 (member70/steward56/officer60/executive52/admin36). EN/FR member intake and30 messaging checks pass. Chief/platform profiles and positive assignment/grievance continuity remain in progress.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
@@ -149,7 +149,7 @@
       "id": "OPERATIONAL_RECOVERY",
       "requirement": "REQUIRED",
       "status": "PARTIALLY_PROVEN",
-      "evidence": "Recovery run43630465718 FAIL retained because Azure write had not settled and recoveryPATCH encountered ContainerAppOperationInProgress. Reviewed owner-assisted completion restored exact immutable healthy template at0traffic and deactivated both owned drill revisions, preserving serving source100%. Activating alone is not a proven failed state; corrected protected failure/recovery drill and actual current-source restored-copy protocol remain required.",
+      "evidence": "Recovery run43630465718 FAIL retained because Azure write had not settled and recoveryPATCH encountered ContainerAppOperationInProgress. Reviewed owner-assisted completion restored exact immutable healthy template at0traffic and deactivated both owned drill revisions, preserving serving source100%. Activating alone is not a proven failed state; corrected protected failure/recovery drill and actual current-source restored-copy protocol remain required. Corrected protected43634316698 also FAIL retained: actual provider pending-revision error is RevisionNotFound, reproduced with a read-only absent revision GET. Narrow provider-contract correction and owned cleanup are in progress; no failed workflow is relabeled.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
@@ -239,7 +239,8 @@
     "workflowHistoryCorrection": "Seven budget/history checks pass, including actual shallow/full local Git ancestry reproduction. The existing fail-closed source/serving ancestry guards remain intact. Workflow-only CI/main admission and fresh reviewed rollout are still required.",
     "stagingLogAlertScopeMigration": "34 focused release/history/identity/migration checks pass, including immutable-provider failure reproduction, complete pre-delete snapshots, unreviewed-setting refusal and restoration after failed recreation. Protected exact-workflow CI/main/reviewed apply and runtime remain pending. Partial-apply retry also verifies the retained candidate image before bounded reactivation; promotion still requires actual healthy state/source. New infrastructure provenance binds the entire admitted IaC Git tree and template hash separately from image source; the cron-rule query excludes actual normal-zero exits and passes Azure-executed controlled failure vectors. Current deployed alert correction/complete rollout still required.",
     "nestedSystemAndClientAssets": "99 focused tests, four script-asset gate tests, actual before/after production CSS build reproduction, exact-source 776-table fresh/restore/repeat/privileges and actual source-bound primary one-connection regression PASS. SQL bytes/order unchanged; no deployed acceptance inferred.",
-    "verificationRunnerCorrection": "14 focused contracts pass, including verified unexpired-session401/403/404 resource denials, late Azure visibility, transient expected revision404, bounded busy recovery, concurrent-change refusal and original failure preservation. Protected runtime reruns remain required."
+    "verificationRunnerCorrection": "14 focused contracts pass, including verified unexpired-session401/403/404 resource denials, late Azure visibility, transient expected revision404, bounded busy recovery, concurrent-change refusal and original failure preservation. Protected runtime reruns remain required.",
+    "providerRevisionContract": "Actual read-only Azure response reproduces RevisionNotFound.15 focused contracts now cover that exact CLI JSON shape and require an absent initial known-good revision to fail before mutation. New exact CI/main admission and protected recovery rerun remain required. Application source/image and deployment provenance remain unchanged."
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -408,5 +409,6 @@
       "evidence": "The solo founder authorized this continuing engineering/staging execution and technical reconciliation. Technical evidence is unfinished; no acceptance event, independent reviewer or production authority is invented."
     }
   ],
-  "priorSourceCompositionSuiteFailure": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/source-a8442373-whole-application-ci-failure.json"
+  "priorSourceCompositionSuiteFailure": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/source-a8442373-whole-application-ci-failure.json",
+  "latestAdmittedVerificationWorkflowSha": "37477074b622109395f88a02821fda39b9c2e46c"
 }

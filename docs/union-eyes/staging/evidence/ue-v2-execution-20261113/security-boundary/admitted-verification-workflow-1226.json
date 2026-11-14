@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "workflowSha": "37477074b622109395f88a02821fda39b9c2e46c",
+  "verificationPr": 1226,
+  "verificationHeadSha": "972881898b5d2102b3cccad71bf35a9d5acdaf81",
+  "allRegisteredChecksFinishedWithoutFailure": true,
+  "allRequiredChecksPassed": true,
+  "requiredTrustedContexts": 16,
+  "unresolvedReviews": 0,
+  "mergedAt": "2026-11-14T19:50:52Z",
+  "deploymentWorkflowSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+  "immutableAppImageUnchanged": true,
+  "appDeploymentPerformed": false,
+  "productionAuthorized": false,
+  "at": "2026-11-14T19:50:56.283090+00:00"
+}

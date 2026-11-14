@@ -1,0 +1,34 @@
+{
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "workflowSha": "37477074b622109395f88a02821fda39b9c2e46c",
+  "runId": "43634316698",
+  "evidenceClass": "ACTUAL_STAGING_FAILED_REVISION_AND_KNOWN_GOOD_RECOVERY",
+  "observations": [
+    {
+      "at": "2026-11-14T19:53:58.506Z",
+      "kind": "RECOVERY_CONTROL_PLANE_BUSY",
+      "attempt": 0
+    }
+  ],
+  "before": {
+    "revision": "nzila-ue-v2-staging-app--relea07352887",
+    "latestRevision": "nzila-ue-v2-staging-app--qa-recover-43630465718",
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af4e021f19f68297dc661ef6b396eb4a9f78f4b817d711e85583d6367abaae24",
+    "templateHash": "aebdee9a0ecc6fe0ee70de9002efe99f94bf8e6f37170b7b36b48621ec41452c",
+    "mode": "Multiple",
+    "trafficWeight": 100
+  },
+  "primaryFailure": {
+    "error": "Error",
+    "assertion": "Azure operation failed: UnclassifiedAzureError"
+  },
+  "cleanupFailure": {
+    "error": "Error",
+    "assertion": "Azure operation failed: UnclassifiedAzureError"
+  },
+  "status": "FAIL",
+  "failure": {
+    "error": "Error",
+    "assertion": "Azure operation failed: UnclassifiedAzureError"
+  }
+}

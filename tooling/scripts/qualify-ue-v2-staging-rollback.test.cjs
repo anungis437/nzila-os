@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const SOURCE = 'a'.repeat(40), APP = 'nzila-ue-v2-staging-app';
 const SUB = 'd562ba7f-d891-4504-a489-10917c0ebaaf';
 const code = fs.readFileSync(__dirname + '/qualify-ue-v2-staging-rollback.cjs', 'utf8');
-async function simulate({ operation = 'rehearse', source = SOURCE, failHealthAfterPatch = false, concurrentRevision = false, unsafeLatestTraffic = false, trafficMovesToFailed = false, delayedVisibility = false, busyRecovery = 0, recoveryError, concurrentDuringRecovery = false, revisionReadError, noFaultObserved = false } = {}) {
+async function simulate({ operation = 'rehearse', source = SOURCE, failHealthAfterPatch = false, concurrentRevision = false, unsafeLatestTraffic = false, trafficMovesToFailed = false, delayedVisibility = false, busyRecovery = 0, recoveryError, concurrentDuringRecovery = false, revisionReadError, noFaultObserved = false, knownRevisionMissing = false } = {}) {
   const original = { revisionSuffix: 'good', containers: [{ name: 'app', image: 'nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:' + 'b'.repeat(64), env: [{ name: 'AUTH_SECRET', secretRef: 'auth-secret' }] }], scale: { minReplicas: 1 } };
   let app = { location: 'canadacentral', properties: { latestRevisionName: APP + '--good', latestReadyRevisionName: APP + '--good', configuration: { activeRevisionsMode: 'Multiple', ingress: {traffic: [{revisionName: APP + '--good', weight: 100, ...(unsafeLatestTraffic ? {latestRevision: true} : {})}]} }, template: structuredClone(original) } };
   const patches = [], receipts = {};
@@ -36,8 +36,9 @@ async function simulate({ operation = 'rehearse', source = SOURCE, failHealthAft
         if (body.properties.template.revisionSuffix.startsWith('qa-recover-')) app.properties.latestReadyRevisionName = app.properties.latestRevisionName;
         result = app;
       } else if (args[args.indexOf('--url') + 1].includes('/revisions/')) {
+        if (knownRevisionMissing && !patches.length) return {status: 1, stderr: 'ERROR: Not Found(' + JSON.stringify({error: {code: 'RevisionNotFound'}}) + ')'};
         if (revisionReadError && patches.length) return {status: 1, stderr: '(' + revisionReadError + ') PRIVATE_SECRET_MUST_NOT_LEAK'};
-        if (delayedVisibility && patches.length && revisionMisses++ < 2) return {status: 1, stderr: JSON.stringify({code: 'ResourceNotFound', message: 'PRIVATE_SECRET_MUST_NOT_LEAK'})};
+        if (delayedVisibility && patches.length && revisionMisses++ < 2) return {status: 1, stderr: 'ERROR: Not Found(' + JSON.stringify({error: {code: 'RevisionNotFound', message: 'PRIVATE_SECRET_MUST_NOT_LEAK'}}) + ')'};
         result = { properties: { template: structuredClone(app.properties.template), runningState: patches.length === 1 ? (noFaultObserved ? 'Activating' : 'Failed') : 'Running', provisioningState: patches.length === 1 && !noFaultObserved ? 'Failed' : 'Provisioned' } };
       } else {
         if (pendingTemplate && --pendingReads <= 0) {
@@ -100,7 +101,7 @@ test('wrong candidate and stale reviewed revision fail before any mutation', asy
   }
 });
 
-test('Azure accepted writes can settle late, revision GET can be transiently absent, and busy recovery is retried', async () => {
+test('Azure accepted writes settle late with the actual RevisionNotFound response and bounded busy recovery', async () => {
   const {report, patches} = await simulate({delayedVisibility: true, busyRecovery: 2});
   assert.equal(report.status, 'PASS'); assert.equal(patches.length, 2);
   assert.equal(report.observations.filter(x => x.kind === 'RECOVERY_CONTROL_PLANE_BUSY').length, 2);
@@ -129,4 +130,10 @@ test('a merely activating revision never counts as a proven failure, even if cle
   assert.equal(report.status, 'FAIL'); assert.equal(patches.length, 2);
   assert.match(report.primaryFailure.assertion, /Actual failed revision was not observed/);
   assert(report.recovered); assert(report.recoveredRevisionDeactivated);
+});
+
+test('RevisionNotFound for the initial known-good revision is fatal before any mutation', async () => {
+  const {report, patches} = await simulate({knownRevisionMissing: true});
+  assert.equal(report.status, 'FAIL'); assert.equal(patches.length, 0);
+  assert.equal(report.failure.assertion, 'Azure operation failed: RevisionNotFound');
 });
