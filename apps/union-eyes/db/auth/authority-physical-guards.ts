@@ -1,0 +1,1482 @@
+/** Current source-owned institutional protections; reference SQL is never replayed on live databases. */
+import type { PhysicalGuardContract } from './physical-guard-catalog'
+export const AUTHORITY_PHYSICAL_GUARDS = {
+  source: 'apps/union-eyes/db/auth/authority-physical-guards.ts',
+  references: [
+    {
+      path: 'apps/union-eyes/db/migrations-platform/0013_authority_kernel_storage.sql',
+      sha256: '906ea28fb67b0f30b44ee7f7c3cfe6a7fdb1dd820c895259a0e093d580da045a',
+    },
+    {
+      path: 'apps/union-eyes/db/migrations-platform/0029_message_thread_authority_scope.sql',
+      sha256: 'c3edaa1ed46d700eb5ccb44a90e7c80fbc5b2e1b62e0d7f769901b0fe9289c01',
+    },
+    {
+      path: 'apps/union-eyes/db/migrations-platform/0030_message_retention_authority_scope.sql',
+      sha256: 'b88ac020e35afeed4222ce9e1eecc2fcb910beff812a7c6125ea247545979b6a',
+    },
+    {
+      path: 'apps/union-eyes/db/migrations-platform/0035_election_supersession_authority_scope.sql',
+      sha256: 'e16d811997ee4f571ef1fd25ab499d696c131e77469831fa69eefb29100c47b7',
+    },
+  ],
+  tables: [
+    'ue_authority_acceptances',
+    'ue_authority_approval_decisions',
+    'ue_authority_approval_requests',
+    'ue_authority_delegations',
+    'ue_authority_disclosure_consents',
+    'ue_authority_events',
+    'ue_authority_issuance_rules',
+    'ue_authority_mandates',
+    'ue_authority_recusals',
+    'ue_authority_resource_relationships',
+    'ue_authority_reviews',
+  ],
+  functions: [
+    {
+      name: 'ue_authority_block_mutation',
+      body: "\nBEGIN\n  RAISE EXCEPTION 'authority records are append-only: % on % is not permitted', TG_OP, TG_TABLE_NAME USING ERRCODE = '42501';\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_distinct_text',
+      body: "\n  SELECT COALESCE(array_agg(DISTINCT i), '{}'::text[]) FROM unnest(items) AS i\n",
+      returns: 'text[]',
+      args: 'items text[]',
+      volatility: 'i',
+      language: 'sql',
+      path: 'pg_catalog,pg_temp',
+      callable: true,
+    },
+    {
+      name: 'ue_authority_guard_acceptance',
+      body: "\nDECLARE\n  holder text; st text; exp timestamptz; eff timestamptz; req boolean;\nBEGIN\n  IF NEW.instrument_type = 'mandate' THEN\n    SELECT principal_user_id, status, expires_at, effective_at, requires_acceptance INTO holder, st, exp, eff, req\n      FROM ue_authority_mandates WHERE id = NEW.instrument_id AND organization_id = NEW.organization_id;\n  ELSE\n    SELECT delegate_user_id, status, expires_at, effective_at, requires_acceptance INTO holder, st, exp, eff, req\n      FROM ue_authority_delegations WHERE id = NEW.instrument_id AND organization_id = NEW.organization_id;\n  END IF;\n  IF NOT FOUND THEN RAISE EXCEPTION 'instrument not found in this organization' USING ERRCODE = '42501'; END IF;\n  IF NOT req THEN RAISE EXCEPTION 'ACCEPTANCE_NOT_REQUIRED: this instrument does not require acceptance' USING ERRCODE = '42501'; END IF;\n  IF NEW.accepted_by <> holder THEN RAISE EXCEPTION 'ONLY_THE_HOLDER_MAY_ACCEPT' USING ERRCODE = '42501'; END IF;\n  IF st <> 'active' OR exp <= now() THEN RAISE EXCEPTION 'INSTRUMENT_NOT_LIVE: cannot accept a revoked, suspended or expired instrument' USING ERRCODE = '42501'; END IF;\n  RETURN NEW;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_guard_actor',
+      body: "\nDECLARE\n  actor text := nullif(current_setting('app.current_user_id', true), '');\n  cols text;\n  col text;\n  new_j jsonb := to_jsonb(NEW);\n  old_j jsonb;\nBEGIN\n  IF TG_OP = 'INSERT' THEN\n    cols := TG_ARGV[0];\n  ELSE\n    cols := TG_ARGV[1];\n    old_j := to_jsonb(OLD);\n  END IF;\n  IF cols IS NULL OR cols = '' THEN\n    RETURN NEW;\n  END IF;\n  FOREACH col IN ARRAY string_to_array(cols, ',') LOOP\n    IF (new_j ->> col) IS NULL THEN\n      CONTINUE;\n    END IF;\n    IF TG_OP = 'UPDATE' AND (new_j ->> col) IS NOT DISTINCT FROM (old_j ->> col) THEN\n      CONTINUE;\n    END IF;\n    IF actor IS NULL OR (new_j ->> col) <> actor THEN\n      RAISE EXCEPTION 'ACTOR_NOT_SESSION: % on % must be the authenticated principal of this transaction', col, TG_TABLE_NAME USING ERRCODE = '42501';\n    END IF;\n  END LOOP;\n  RETURN NEW;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_guard_decision',
+      body: "\nDECLARE\n  r ue_authority_approval_requests%ROWTYPE;\n  approvals integer;\nBEGIN\n  SELECT * INTO r FROM ue_authority_approval_requests WHERE id = NEW.approval_request_id FOR UPDATE;\n  IF NOT FOUND OR r.organization_id <> NEW.organization_id THEN\n    RAISE EXCEPTION 'approval request not found in this organization' USING ERRCODE = '42501';\n  END IF;\n  IF r.status <> 'open' THEN\n    RAISE EXCEPTION 'ALREADY_DECIDED: approval request is %', r.status USING ERRCODE = '42501';\n  END IF;\n  IF NEW.authority_line_user_id = ANY (r.adverse_user_ids) OR NEW.approver_user_id = ANY (r.adverse_user_ids) THEN\n    RAISE EXCEPTION 'ADVERSE_PARTY: approver is a party to the matter' USING ERRCODE = '42501';\n  END IF;\n  IF EXISTS (\n    SELECT 1 FROM ue_authority_recusals rc\n    WHERE rc.organization_id = NEW.organization_id\n      AND rc.resource_type = 'approval_request'\n      AND rc.resource_id = r.id\n      AND rc.lifted_at IS NULL\n      AND rc.principal_user_id IN (NEW.approver_user_id, NEW.authority_line_user_id)\n  ) THEN\n    RAISE EXCEPTION 'RECUSED: approver is recused from this request' USING ERRCODE = '42501';\n  END IF;\n  IF NEW.decision = 'approved' AND (NEW.authority_line_user_id = r.proposed_by OR NEW.approver_user_id = r.proposed_by\n       OR NEW.authority_line_user_id = r.subject_author_id OR NEW.approver_user_id = r.subject_author_id) THEN\n    RAISE EXCEPTION 'SELF_APPROVAL: the proposer or author of the subject cannot approve it' USING ERRCODE = '42501';\n  END IF;\n  IF cardinality(r.named_approver_ids) > 0 AND NOT (NEW.authority_line_user_id = ANY (r.named_approver_ids)) THEN\n    RAISE EXCEPTION 'NOT_ELIGIBLE_APPROVER: approver is not named for this request' USING ERRCODE = '42501';\n  END IF;\n  IF NEW.delegation_id IS NOT NULL THEN\n    IF r.risk_class IN ('high', 'critical') THEN\n      RAISE EXCEPTION 'DELEGATION_INVALID: high-risk approvals cannot be delegated' USING ERRCODE = '42501';\n    END IF;\n    IF NOT EXISTS (\n      SELECT 1 FROM ue_authority_delegations d\n      WHERE d.id = NEW.delegation_id\n        AND d.organization_id = NEW.organization_id\n        AND d.delegate_user_id = NEW.approver_user_id\n        AND d.delegator_user_id = NEW.authority_line_user_id\n        AND d.status = 'active'\n        AND d.revoked_at IS NULL\n        AND d.effective_at <= now()\n        AND d.expires_at > now()\n        AND 'governance:approve' = ANY (d.actions)\n        AND 'approval_request' = ANY (d.resource_types)\n    ) THEN\n      RAISE EXCEPTION 'DELEGATION_INVALID: delegation is not live or does not cover this approval' USING ERRCODE = '42501';\n    END IF;\n  END IF;\n\n  IF NEW.decision = 'rejected' THEN\n    UPDATE ue_authority_approval_requests SET status = 'rejected', decided_at = now() WHERE id = r.id;\n  ELSE\n    SELECT count(*) INTO approvals FROM ue_authority_approval_decisions\n      WHERE approval_request_id = r.id AND decision = 'approved';\n    IF approvals + 1 >= r.required_approvals THEN\n      UPDATE ue_authority_approval_requests SET status = 'satisfied', decided_at = now() WHERE id = r.id;\n    END IF;\n  END IF;\n  RETURN NEW;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_guard_event_insert',
+      body: "\nBEGIN\n  IF pg_trigger_depth() < 2 THEN\n    RAISE EXCEPTION 'ue_authority_events can only be written by the authority recording trigger' USING ERRCODE = '42501';\n  END IF;\n  RETURN NEW;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_guard_issuance',
+      body: "\nDECLARE\n  dom text;\n  holder text;\n  issuer text;\n  items text[];\n  req_id uuid;\n  r ue_authority_issuance_rules%ROWTYPE;\n  ar ue_authority_approval_requests%ROWTYPE;\n  approving integer;\nBEGIN\n  IF TG_TABLE_NAME = 'ue_authority_mandates' THEN\n    dom := NEW.kind; holder := NEW.principal_user_id; issuer := NEW.granted_by; items := NEW.powers; req_id := NEW.approval_request_id;\n  ELSIF TG_TABLE_NAME = 'ue_authority_delegations' THEN\n    dom := 'delegation'; holder := NEW.delegate_user_id; issuer := NEW.delegator_user_id; items := NEW.actions; req_id := NEW.approval_request_id;\n  ELSE\n    -- Derived relationships are projections of source records; only explicit grants are issued authority.\n    IF NEW.origin <> 'explicit' THEN RETURN NEW; END IF;\n    dom := 'case_assignment'; holder := NEW.principal_user_id; issuer := NEW.granted_by; items := NEW.permissions; req_id := NULL;\n  END IF;\n\n  IF NEW.issuance_rule_id IS NULL THEN\n    RAISE EXCEPTION 'NO_ACTIVE_ISSUANCE_RULE: % requires an active institutional issuance rule', dom USING ERRCODE = '42501';\n  END IF;\n  SELECT * INTO r FROM ue_authority_issuance_rules\n    WHERE id = NEW.issuance_rule_id AND organization_id = NEW.organization_id FOR SHARE;\n  IF NOT FOUND OR r.status <> 'active' OR r.operation <> 'issue' OR r.domain <> dom THEN\n    RAISE EXCEPTION 'NO_ACTIVE_ISSUANCE_RULE: rule is absent, inactive or for another domain (%)', dom USING ERRCODE = '42501';\n  END IF;\n  IF r.max_term_days IS NOT NULL AND (NEW.expires_at IS NULL OR NEW.expires_at - NEW.effective_at > make_interval(days => r.max_term_days)) THEN\n    RAISE EXCEPTION 'TERM_EXCEEDS_RULE: term exceeds % day(s)', r.max_term_days USING ERRCODE = '42501';\n  END IF;\n  IF (dom <> 'case_assignment' OR cardinality(items) > 0) AND NOT (items <@ r.allowed_powers) THEN\n    RAISE EXCEPTION 'POWERS_EXCEED_RULE: requested powers exceed the rule ceiling' USING ERRCODE = '42501';\n  END IF;\n  IF TG_TABLE_NAME <> 'ue_authority_resource_relationships' THEN\n    NEW.requires_acceptance := r.requires_acceptance;\n  END IF;\n\n  IF r.required_independent_approvals > 0 THEN\n    SELECT * INTO ar FROM ue_authority_approval_requests WHERE id = req_id AND organization_id = NEW.organization_id;\n    IF NOT FOUND OR ar.status <> 'satisfied' OR ar.subject_type <> 'issuance:' || dom OR ar.subject_id <> NEW.id\n       OR ar.proposed_by <> issuer OR ar.subject_author_id IS DISTINCT FROM holder\n       OR ar.required_approvals < r.required_independent_approvals THEN\n      RAISE EXCEPTION 'APPROVAL_NOT_SATISFIED: a satisfied approval request bound to this exact issuance is required' USING ERRCODE = '42501';\n    END IF;\n    SELECT count(DISTINCT d.authority_line_user_id) INTO approving FROM ue_authority_approval_decisions d\n      WHERE d.approval_request_id = ar.id AND d.decision = 'approved'\n        AND d.authority_line_user_id NOT IN (issuer, holder) AND d.approver_user_id NOT IN (issuer, holder);\n    IF approving < r.required_independent_approvals THEN\n      RAISE EXCEPTION 'APPROVAL_NOT_SATISFIED: % independent approval(s) required, % found', r.required_independent_approvals, approving USING ERRCODE = '42501';\n    END IF;\n  END IF;\n\n  IF TG_TABLE_NAME = 'ue_authority_mandates' THEN\n    IF NEW.supersedes_id IS NOT NULL AND NOT EXISTS (\n      SELECT 1 FROM ue_authority_mandates o\n      WHERE o.id = NEW.supersedes_id AND o.organization_id = NEW.organization_id\n        AND o.principal_user_id = NEW.principal_user_id AND o.kind = NEW.kind AND o.status = 'revoked'\n    ) THEN\n      RAISE EXCEPTION 'SUPERSEDES_INVALID: an amendment must supersede a revoked mandate of the same holder and kind' USING ERRCODE = '42501';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_guard_request_update',
+      body: "\nBEGIN\n  IF pg_trigger_depth() < 2 AND NEW.status IS DISTINCT FROM OLD.status AND NEW.status IN ('satisfied', 'rejected') THEN\n    RAISE EXCEPTION 'approval request status can only be resolved by recording a decision' USING ERRCODE = '42501';\n  END IF;\n  IF OLD.status <> 'open' THEN\n    RAISE EXCEPTION 'approval request % is already %', OLD.id, OLD.status USING ERRCODE = '42501';\n  END IF;\n  IF NEW.status NOT IN ('satisfied', 'rejected', 'withdrawn') OR (to_jsonb(OLD) - ARRAY['status', 'decided_at']) IS DISTINCT FROM (to_jsonb(NEW) - ARRAY['status', 'decided_at']) THEN\n    RAISE EXCEPTION 'approval request % may only be resolved', OLD.id USING ERRCODE = '42501';\n  END IF;\n  RETURN NEW;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_guard_rule_update',
+      body: "\nBEGIN\n  IF OLD.status = 'retired' THEN\n    RAISE EXCEPTION 'issuance rule % is retired: create a new version instead', OLD.id USING ERRCODE = '42501';\n  END IF;\n  IF (to_jsonb(OLD) - ARRAY['status', 'approved_by', 'activated_at', 'retired_at', 'source_instrument']) IS DISTINCT FROM (to_jsonb(NEW) - ARRAY['status', 'approved_by', 'activated_at', 'retired_at', 'source_instrument']) THEN\n    RAISE EXCEPTION 'issuance rule content is immutable: create a new version instead' USING ERRCODE = '42501';\n  END IF;\n  IF OLD.status <> 'draft' AND NEW.source_instrument IS DISTINCT FROM OLD.source_instrument THEN\n    RAISE EXCEPTION 'the source instrument of a non-draft issuance rule is immutable' USING ERRCODE = '42501';\n  END IF;\n  IF OLD.status = 'active' AND (NEW.status <> 'retired' OR NEW.approved_by IS DISTINCT FROM OLD.approved_by OR NEW.activated_at IS DISTINCT FROM OLD.activated_at) THEN\n    RAISE EXCEPTION 'an active issuance rule may only be retired' USING ERRCODE = '42501';\n  END IF;\n  -- Adoption is the approvers' act, not the activator's claim: approved_by must be exactly the\n  -- authority lines that APPROVED a satisfied rule_adoption request bound to this rule.\n  IF OLD.status = 'draft' AND NEW.status = 'active' THEN\n    IF NOT EXISTS (\n      SELECT 1 FROM ue_authority_approval_requests r\n      WHERE r.organization_id = NEW.organization_id AND r.subject_type = 'rule_adoption' AND r.subject_id = NEW.id\n        AND r.status = 'satisfied' AND r.required_approvals >= 2\n    ) THEN\n      RAISE EXCEPTION 'RULE_ADOPTION_NOT_APPROVED: activation needs a satisfied rule_adoption approval bound to this rule' USING ERRCODE = '42501';\n    END IF;\n    IF (\n      SELECT coalesce(array_agg(d.authority_line_user_id::text ORDER BY d.authority_line_user_id::text), ARRAY[]::text[])\n        FROM ue_authority_approval_decisions d\n        JOIN ue_authority_approval_requests r ON r.id = d.approval_request_id\n       WHERE r.organization_id = NEW.organization_id AND r.subject_type = 'rule_adoption' AND r.subject_id = NEW.id\n         AND r.status = 'satisfied' AND d.decision = 'approved'\n    ) IS DISTINCT FROM (SELECT coalesce(array_agg(a ORDER BY a), ARRAY[]::text[]) FROM unnest(NEW.approved_by::text[]) a) THEN\n      RAISE EXCEPTION 'RULE_ADOPTION_NOT_APPROVED: approved_by must equal the recorded approvers' USING ERRCODE = '42501';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_guard_update',
+      body: "\nDECLARE\n  mutable_cols text[] := string_to_array(TG_ARGV[1], ',');\nBEGIN\n  IF (to_jsonb(OLD) ->> TG_ARGV[0]) IS NOT NULL THEN\n    RAISE EXCEPTION '% row % is terminal (%): create a new record instead', TG_TABLE_NAME, OLD.id, TG_ARGV[0] USING ERRCODE = '42501';\n  END IF;\n  IF (to_jsonb(OLD) - mutable_cols) IS DISTINCT FROM (to_jsonb(NEW) - mutable_cols) THEN\n    RAISE EXCEPTION '% row % may only change: %', TG_TABLE_NAME, OLD.id, TG_ARGV[1] USING ERRCODE = '42501';\n  END IF;\n  RETURN NEW;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_record_event',
+      body: "\nBEGIN\n  INSERT INTO ue_authority_events (organization_id, source_table, source_id, operation, actor_user_id, row_before, row_after)\n  VALUES (\n    NEW.organization_id,\n    TG_TABLE_NAME,\n    NEW.id,\n    TG_OP,\n    nullif(current_setting('app.current_user_id', true), ''),\n    CASE WHEN TG_OP = 'UPDATE' THEN to_jsonb(OLD) END,\n    to_jsonb(NEW)\n  );\n  RETURN NULL;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_require_canonical_audit',
+      body: "\nBEGIN\n  IF NOT EXISTS (\n    SELECT 1 FROM public.audit_logs a\n    WHERE a.organization_id = NEW.organization_id\n      AND a.created_at >= NEW.occurred_at\n      AND a.action LIKE 'authority.%'\n      AND (a.details -> 'authorityEventIds') ? NEW.id::text\n  ) THEN\n    RAISE EXCEPTION 'AUDIT_LINK_MISSING: authority event % has no canonical audit record', NEW.id USING ERRCODE = '23514';\n  END IF;\n  RETURN NULL;\nEND;\n",
+      returns: 'trigger',
+      args: '',
+      volatility: 'v',
+      language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp',
+      callable: false,
+    },
+    {
+      name: 'ue_authority_principals_valid',
+      body: "\n SELECT items IS NOT NULL AND array_position(items,NULL) IS NULL AND COALESCE(bool_and(length(i) BETWEEN 1 AND 255 AND i=btrim(i) AND i !~ '[[:cntrl:]]'),true) FROM unnest(items) i\n",
+      returns: 'boolean',
+      args: 'items text[]',
+      volatility: 'i',
+      language: 'sql',
+      path: 'pg_catalog,pg_temp',
+      callable: true,
+    },
+  ],
+  constraints: [
+    {
+      table_name: 'ue_authority_acceptances',
+      name: 'ue_authority_accept_once_uq',
+      type: 'u',
+      definition: 'UNIQUE (organization_id, instrument_type, instrument_id)',
+    },
+    {
+      table_name: 'ue_authority_acceptances',
+      name: 'ue_authority_accept_type_chk',
+      type: 'c',
+      definition: "CHECK ((instrument_type = ANY (ARRAY['mandate'::text, 'delegation'::text])))",
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_approval_decisions_approval_request_id_fkey',
+      type: 'f',
+      definition: 'FOREIGN KEY (approval_request_id) REFERENCES ue_authority_approval_requests(id)',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_approval_decisions_delegation_id_fkey',
+      type: 'f',
+      definition: 'FOREIGN KEY (delegation_id) REFERENCES ue_authority_delegations(id)',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_dec_decision_chk',
+      type: 'c',
+      definition: "CHECK ((decision = ANY (ARRAY['approved'::text, 'rejected'::text])))",
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_dec_line_chk',
+      type: 'c',
+      definition:
+        'CHECK ((((delegation_id IS NULL) AND ((authority_line_user_id)::text = (approver_user_id)::text)) OR ((delegation_id IS NOT NULL) AND ((authority_line_user_id)::text <> (approver_user_id)::text))))',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_dec_one_approver_uq',
+      type: 'u',
+      definition: 'UNIQUE (organization_id, approval_request_id, approver_user_id)',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_dec_one_vote_uq',
+      type: 'u',
+      definition: 'UNIQUE (organization_id, approval_request_id, authority_line_user_id)',
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_req_decided_chk',
+      type: 'c',
+      definition: "CHECK (((status = 'open'::text) = (decided_at IS NULL)))",
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_req_required_chk',
+      type: 'c',
+      definition:
+        "CHECK (((required_approvals >= 1) AND ((risk_class = ANY (ARRAY['low'::text, 'medium'::text])) OR (required_approvals >= 2))))",
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_req_risk_chk',
+      type: 'c',
+      definition:
+        "CHECK ((risk_class = ANY (ARRAY['low'::text, 'medium'::text, 'high'::text, 'critical'::text])))",
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_req_status_chk',
+      type: 'c',
+      definition:
+        "CHECK ((status = ANY (ARRAY['open'::text, 'satisfied'::text, 'rejected'::text, 'withdrawn'::text])))",
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_deleg_actions_chk',
+      type: 'c',
+      definition: 'CHECK (((cardinality(actions) > 0) AND (cardinality(resource_types) > 0)))',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_deleg_nondelegable_chk',
+      type: 'c',
+      definition:
+        "CHECK ((NOT (actions && ARRAY['finance:view'::text, 'finance:prepare'::text, 'finance:approve'::text, 'finance:execute'::text, 'finance:reconcile'::text, 'finance:audit'::text, 'case:read_privileged'::text, 'case:disclose_to_member'::text, 'case:export_sealed_evidence'::text, 'case:close'::text, 'review:monitor'::text, 'review:access_evidence'::text, 'review:issue_finding'::text, 'review:request_corrective_action'::text, 'review:enforce'::text, 'review:verify_remediation'::text, 'workaid:refer'::text, 'workaid:receive_disclosure'::text, 'workaid:read_counsel_material'::text, 'message:place_legal_hold'::text, 'message:release_legal_hold'::text, 'message:adopt_retention'::text, 'message:read_retention_policy'::text, 'governance:supersede_certified_result'::text])))",
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_deleg_office_chk',
+      type: 'c',
+      definition: 'CHECK ((length(btrim(office)) > 0))',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_deleg_request_fk',
+      type: 'f',
+      definition: 'FOREIGN KEY (approval_request_id) REFERENCES ue_authority_approval_requests(id)',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_deleg_revocation_chk',
+      type: 'c',
+      definition:
+        "CHECK ((((status = 'revoked'::text) = (revoked_at IS NOT NULL)) AND ((revoked_at IS NULL) OR (revoked_by IS NOT NULL))))",
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_deleg_rule_fk',
+      type: 'f',
+      definition: 'FOREIGN KEY (issuance_rule_id) REFERENCES ue_authority_issuance_rules(id)',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_deleg_self_chk',
+      type: 'c',
+      definition: 'CHECK (((delegator_user_id)::text <> (delegate_user_id)::text))',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_deleg_status_chk',
+      type: 'c',
+      definition: "CHECK ((status = ANY (ARRAY['active'::text, 'revoked'::text])))",
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_deleg_term_chk',
+      type: 'c',
+      definition: 'CHECK ((expires_at > effective_at))',
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_consent_categories_chk',
+      type: 'c',
+      definition: 'CHECK ((cardinality(categories) > 0))',
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_consent_direction_chk',
+      type: 'c',
+      definition:
+        "CHECK ((direction = ANY (ARRAY['union_to_workaid'::text, 'workaid_to_union'::text])))",
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_consent_issuer_chk',
+      type: 'c',
+      definition: "CHECK ((issuer = ANY (ARRAY['member'::text, 'counsel'::text])))",
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_consent_purpose_chk',
+      type: 'c',
+      definition: 'CHECK ((length(btrim(purpose)) > 0))',
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_consent_revocation_chk',
+      type: 'c',
+      definition: 'CHECK (((revoked_at IS NULL) = (revoked_by IS NULL)))',
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_consent_shape_chk',
+      type: 'c',
+      definition:
+        "CHECK ((((direction = 'union_to_workaid'::text) AND (issuer = 'member'::text) AND ((issued_by)::text = (member_user_id)::text)) OR ((direction = 'workaid_to_union'::text) AND (issuer = 'counsel'::text) AND (recipient_user_id IS NOT NULL) AND ((issued_by)::text <> (member_user_id)::text))))",
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_consent_term_chk',
+      type: 'c',
+      definition: 'CHECK ((expires_at > granted_at))',
+    },
+    {
+      table_name: 'ue_authority_events',
+      name: 'ue_authority_events_op_chk',
+      type: 'c',
+      definition: "CHECK ((operation = ANY (ARRAY['INSERT'::text, 'UPDATE'::text])))",
+    },
+    {
+      table_name: 'ue_authority_events',
+      name: 'ue_authority_events_table_chk',
+      type: 'c',
+      definition:
+        "CHECK (((source_table ~~ 'ue_authority\\_%'::text) AND (source_table <> 'ue_authority_events'::text)))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_activation_chk',
+      type: 'c',
+      definition:
+        "CHECK (((status <> 'active'::text) OR ((activated_at IS NOT NULL) AND (length(btrim(source_instrument)) > 0) AND (source_instrument <> 'PENDING_INSTITUTIONAL_SOURCE'::text) AND (cardinality(approved_by) >= 2) AND (NOT ((drafted_by)::text = ANY ((approved_by)::text[]))))))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_approvals_chk',
+      type: 'c',
+      definition: 'CHECK ((required_independent_approvals >= 0))',
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_approvers_chk',
+      type: 'c',
+      definition:
+        'CHECK ((cardinality(approved_by) = cardinality(ue_authority_distinct_text((approved_by)::text[]))))',
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_domain_chk',
+      type: 'c',
+      definition:
+        "CHECK ((domain = ANY (ARRAY['supervisory'::text, 'financial'::text, 'governance_review'::text, 'executive_office'::text, 'emergency_access'::text, 'delegation'::text, 'case_assignment'::text, 'recusal'::text])))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_emergency_chk',
+      type: 'c',
+      definition:
+        "CHECK (((domain <> 'emergency_access'::text) OR (operation <> 'issue'::text) OR ((required_independent_approvals >= 1) AND (max_term_days <= 1) AND (allowed_powers <@ ARRAY['read'::text]))))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_financial_chk',
+      type: 'c',
+      definition:
+        "CHECK (((NOT ((operation = 'issue'::text) AND (domain = 'financial'::text))) OR (required_independent_approvals >= 1)))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_issue_term_chk',
+      type: 'c',
+      definition:
+        "CHECK (((operation <> 'issue'::text) OR (domain = ANY (ARRAY['case_assignment'::text, 'recusal'::text])) OR (max_term_days IS NOT NULL)))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_issuer_chk',
+      type: 'c',
+      definition:
+        'CHECK ((((issuer_mandate_kind IS NULL) = (issuer_mandate_power IS NULL)) AND ((cardinality(issuer_capacities) > 0) OR (issuer_mandate_kind IS NOT NULL))))',
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_operation_chk',
+      type: 'c',
+      definition:
+        "CHECK ((operation = ANY (ARRAY['issue'::text, 'amend'::text, 'suspend'::text, 'revoke'::text, 'lift'::text])))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_retired_chk',
+      type: 'c',
+      definition: "CHECK (((status = 'retired'::text) = (retired_at IS NOT NULL)))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_status_chk',
+      type: 'c',
+      definition: "CHECK ((status = ANY (ARRAY['draft'::text, 'active'::text, 'retired'::text])))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_term_chk',
+      type: 'c',
+      definition: 'CHECK (((max_term_days IS NULL) OR (max_term_days > 0)))',
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_unapproved_domains_chk',
+      type: 'c',
+      definition:
+        "CHECK (((domain <> ALL (ARRAY['case_assignment'::text, 'recusal'::text])) OR (required_independent_approvals = 0)))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_rule_version_uq',
+      type: 'u',
+      definition: 'UNIQUE (organization_id, domain, operation, version)',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_emergency_chk',
+      type: 'c',
+      definition:
+        "CHECK (((kind <> 'emergency_access'::text) OR ((approved_by IS NOT NULL) AND ((approved_by)::text <> (principal_user_id)::text) AND (justification IS NOT NULL) AND (length(btrim(justification)) >= 20) AND (expires_at <= (effective_at + '24:00:00'::interval)) AND (powers <@ ARRAY['read'::text]))))",
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_grantor_chk',
+      type: 'c',
+      definition: 'CHECK (((granted_by)::text <> (principal_user_id)::text))',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_instrument_chk',
+      type: 'c',
+      definition: 'CHECK ((length(btrim(source_instrument)) > 0))',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_kind_chk',
+      type: 'c',
+      definition:
+        "CHECK ((kind = ANY (ARRAY['supervisory'::text, 'financial'::text, 'governance_review'::text, 'executive_office'::text, 'emergency_access'::text])))",
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_limit_chk',
+      type: 'c',
+      definition:
+        'CHECK (((monetary_limit_minor IS NULL) OR ((monetary_limit_minor >= 0) AND (currency IS NOT NULL) AND (length(currency) = 3))))',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_powers_chk',
+      type: 'c',
+      definition: 'CHECK ((cardinality(powers) > 0))',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_request_fk',
+      type: 'f',
+      definition: 'FOREIGN KEY (approval_request_id) REFERENCES ue_authority_approval_requests(id)',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_revocation_chk',
+      type: 'c',
+      definition:
+        "CHECK ((((status = 'revoked'::text) = (revoked_at IS NOT NULL)) AND ((revoked_at IS NULL) OR (revoked_by IS NOT NULL))))",
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_rule_fk',
+      type: 'f',
+      definition: 'FOREIGN KEY (issuance_rule_id) REFERENCES ue_authority_issuance_rules(id)',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_status_chk',
+      type: 'c',
+      definition:
+        "CHECK ((status = ANY (ARRAY['active'::text, 'suspended'::text, 'revoked'::text])))",
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_supersedes_fk',
+      type: 'f',
+      definition: 'FOREIGN KEY (supersedes_id) REFERENCES ue_authority_mandates(id)',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_mandates_term_chk',
+      type: 'c',
+      definition: 'CHECK ((expires_at > effective_at))',
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_recusal_lift_chk',
+      type: 'c',
+      definition:
+        'CHECK ((((lifted_at IS NULL) AND (lifted_by IS NULL)) OR ((lifted_at IS NOT NULL) AND (lifted_by IS NOT NULL) AND ((lifted_by)::text <> (principal_user_id)::text))))',
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_recusal_reason_chk',
+      type: 'c',
+      definition: 'CHECK ((length(btrim(reason)) > 0))',
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_recusal_resource_chk',
+      type: 'c',
+      definition:
+        "CHECK ((resource_type = ANY (ARRAY['case'::text, 'financial_transaction'::text, 'member_financial_record'::text, 'approval_request'::text, 'governance_review'::text, 'workaid_matter'::text, 'message_thread'::text, 'message_retention'::text, 'council_election'::text])))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_rel_explicit_chk',
+      type: 'c',
+      definition:
+        "CHECK ((((relation <> 'collaborator'::text) AND (NOT privileged_access)) OR ((origin = 'explicit'::text) AND (granted_by IS NOT NULL) AND ((granted_by)::text <> (principal_user_id)::text))))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_rel_origin_chk',
+      type: 'c',
+      definition: "CHECK ((origin = ANY (ARRAY['derived'::text, 'explicit'::text])))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_rel_relation_chk',
+      type: 'c',
+      definition:
+        "CHECK ((relation = ANY (ARRAY['creator'::text, 'owner'::text, 'assignee'::text, 'collaborator'::text, 'represented_member'::text])))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_rel_resource_chk',
+      type: 'c',
+      definition:
+        "CHECK ((resource_type = ANY (ARRAY['case'::text, 'financial_transaction'::text, 'member_financial_record'::text, 'approval_request'::text, 'governance_review'::text, 'workaid_matter'::text])))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_rel_revocation_chk',
+      type: 'c',
+      definition:
+        "CHECK ((((status = 'revoked'::text) = (revoked_at IS NOT NULL)) AND ((revoked_at IS NULL) OR (revoked_by IS NOT NULL))))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_rel_rule_fk',
+      type: 'f',
+      definition: 'FOREIGN KEY (issuance_rule_id) REFERENCES ue_authority_issuance_rules(id)',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_rel_status_chk',
+      type: 'c',
+      definition: "CHECK ((status = ANY (ARRAY['active'::text, 'revoked'::text])))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_rel_term_chk',
+      type: 'c',
+      definition: 'CHECK (((expires_at IS NULL) OR (expires_at > effective_at)))',
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_review_class_chk',
+      type: 'c',
+      definition: "CHECK ((classification = ANY (ARRAY['standard'::text, 'privileged'::text])))",
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_review_status_chk',
+      type: 'c',
+      definition:
+        "CHECK (((status = ANY (ARRAY['open'::text, 'closed'::text])) AND ((status = 'closed'::text) = (closed_at IS NOT NULL))))",
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_review_type_chk',
+      type: 'c',
+      definition: 'CHECK ((length(btrim(review_type)) > 0))',
+    },
+    {
+      table_name: 'ue_authority_acceptances',
+      name: 'ue_authority_principal_5895fda48060845a',
+      type: 'c',
+      definition:
+        "CHECK (((accepted_by IS NULL) OR ((length((accepted_by)::text) >= 1) AND (length((accepted_by)::text) <= 255) AND ((accepted_by)::text = btrim((accepted_by)::text)) AND ((accepted_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_principal_dec942ce0c322bcc',
+      type: 'c',
+      definition:
+        "CHECK (((approver_user_id IS NULL) OR ((length((approver_user_id)::text) >= 1) AND (length((approver_user_id)::text) <= 255) AND ((approver_user_id)::text = btrim((approver_user_id)::text)) AND ((approver_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_principal_de73231e24acb3bb',
+      type: 'c',
+      definition:
+        "CHECK (((authority_line_user_id IS NULL) OR ((length((authority_line_user_id)::text) >= 1) AND (length((authority_line_user_id)::text) <= 255) AND ((authority_line_user_id)::text = btrim((authority_line_user_id)::text)) AND ((authority_line_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_principal_fa0d467e579258ee',
+      type: 'c',
+      definition:
+        "CHECK (((proposed_by IS NULL) OR ((length((proposed_by)::text) >= 1) AND (length((proposed_by)::text) <= 255) AND ((proposed_by)::text = btrim((proposed_by)::text)) AND ((proposed_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_principal_6922502f5912d0b0',
+      type: 'c',
+      definition:
+        "CHECK (((subject_author_id IS NULL) OR ((length((subject_author_id)::text) >= 1) AND (length((subject_author_id)::text) <= 255) AND ((subject_author_id)::text = btrim((subject_author_id)::text)) AND ((subject_author_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_principal_aba631f392abdb60',
+      type: 'c',
+      definition: 'CHECK (ue_authority_principals_valid((named_approver_ids)::text[]))',
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_principal_75bdf1cbca0638d0',
+      type: 'c',
+      definition: 'CHECK (ue_authority_principals_valid((adverse_user_ids)::text[]))',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_principal_5088ecc0a899e123',
+      type: 'c',
+      definition:
+        "CHECK (((delegator_user_id IS NULL) OR ((length((delegator_user_id)::text) >= 1) AND (length((delegator_user_id)::text) <= 255) AND ((delegator_user_id)::text = btrim((delegator_user_id)::text)) AND ((delegator_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_principal_fd64edd1dd1a786a',
+      type: 'c',
+      definition:
+        "CHECK (((delegate_user_id IS NULL) OR ((length((delegate_user_id)::text) >= 1) AND (length((delegate_user_id)::text) <= 255) AND ((delegate_user_id)::text = btrim((delegate_user_id)::text)) AND ((delegate_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_principal_caea602211176f3e',
+      type: 'c',
+      definition:
+        "CHECK (((revoked_by IS NULL) OR ((length((revoked_by)::text) >= 1) AND (length((revoked_by)::text) <= 255) AND ((revoked_by)::text = btrim((revoked_by)::text)) AND ((revoked_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_principal_3205d7ad604e0d2e',
+      type: 'c',
+      definition:
+        "CHECK (((member_user_id IS NULL) OR ((length((member_user_id)::text) >= 1) AND (length((member_user_id)::text) <= 255) AND ((member_user_id)::text = btrim((member_user_id)::text)) AND ((member_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_principal_0d94cab530ec24a5',
+      type: 'c',
+      definition:
+        "CHECK (((issued_by IS NULL) OR ((length((issued_by)::text) >= 1) AND (length((issued_by)::text) <= 255) AND ((issued_by)::text = btrim((issued_by)::text)) AND ((issued_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_principal_093522097bf31746',
+      type: 'c',
+      definition:
+        "CHECK (((recipient_user_id IS NULL) OR ((length((recipient_user_id)::text) >= 1) AND (length((recipient_user_id)::text) <= 255) AND ((recipient_user_id)::text = btrim((recipient_user_id)::text)) AND ((recipient_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_principal_c00a7dbb9023af05',
+      type: 'c',
+      definition:
+        "CHECK (((revoked_by IS NULL) OR ((length((revoked_by)::text) >= 1) AND (length((revoked_by)::text) <= 255) AND ((revoked_by)::text = btrim((revoked_by)::text)) AND ((revoked_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_principal_930aa41eecd79d01',
+      type: 'c',
+      definition:
+        "CHECK (((drafted_by IS NULL) OR ((length((drafted_by)::text) >= 1) AND (length((drafted_by)::text) <= 255) AND ((drafted_by)::text = btrim((drafted_by)::text)) AND ((drafted_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_principal_f25788a7c8577f99',
+      type: 'c',
+      definition: 'CHECK (ue_authority_principals_valid((approved_by)::text[]))',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_principal_a2cc1731e27d17d9',
+      type: 'c',
+      definition:
+        "CHECK (((principal_user_id IS NULL) OR ((length((principal_user_id)::text) >= 1) AND (length((principal_user_id)::text) <= 255) AND ((principal_user_id)::text = btrim((principal_user_id)::text)) AND ((principal_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_principal_8a0d3bdd02abd7fb',
+      type: 'c',
+      definition:
+        "CHECK (((granted_by IS NULL) OR ((length((granted_by)::text) >= 1) AND (length((granted_by)::text) <= 255) AND ((granted_by)::text = btrim((granted_by)::text)) AND ((granted_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_principal_1ed697935a5d6c8c',
+      type: 'c',
+      definition:
+        "CHECK (((approved_by IS NULL) OR ((length((approved_by)::text) >= 1) AND (length((approved_by)::text) <= 255) AND ((approved_by)::text = btrim((approved_by)::text)) AND ((approved_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_principal_aa49e45d75b441e9',
+      type: 'c',
+      definition:
+        "CHECK (((revoked_by IS NULL) OR ((length((revoked_by)::text) >= 1) AND (length((revoked_by)::text) <= 255) AND ((revoked_by)::text = btrim((revoked_by)::text)) AND ((revoked_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_principal_1c7f18379106201e',
+      type: 'c',
+      definition:
+        "CHECK (((principal_user_id IS NULL) OR ((length((principal_user_id)::text) >= 1) AND (length((principal_user_id)::text) <= 255) AND ((principal_user_id)::text = btrim((principal_user_id)::text)) AND ((principal_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_principal_381004691c73673e',
+      type: 'c',
+      definition:
+        "CHECK (((lifted_by IS NULL) OR ((length((lifted_by)::text) >= 1) AND (length((lifted_by)::text) <= 255) AND ((lifted_by)::text = btrim((lifted_by)::text)) AND ((lifted_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_principal_f51eb5d6c2f28834',
+      type: 'c',
+      definition:
+        "CHECK (((principal_user_id IS NULL) OR ((length((principal_user_id)::text) >= 1) AND (length((principal_user_id)::text) <= 255) AND ((principal_user_id)::text = btrim((principal_user_id)::text)) AND ((principal_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_principal_3fd20d66e5c7435d',
+      type: 'c',
+      definition:
+        "CHECK (((granted_by IS NULL) OR ((length((granted_by)::text) >= 1) AND (length((granted_by)::text) <= 255) AND ((granted_by)::text = btrim((granted_by)::text)) AND ((granted_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_principal_491a506e3af47ac0',
+      type: 'c',
+      definition:
+        "CHECK (((revoked_by IS NULL) OR ((length((revoked_by)::text) >= 1) AND (length((revoked_by)::text) <= 255) AND ((revoked_by)::text = btrim((revoked_by)::text)) AND ((revoked_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_principal_abdf19795e513f4e',
+      type: 'c',
+      definition:
+        "CHECK (((complainant_user_id IS NULL) OR ((length((complainant_user_id)::text) >= 1) AND (length((complainant_user_id)::text) <= 255) AND ((complainant_user_id)::text = btrim((complainant_user_id)::text)) AND ((complainant_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_principal_77d7f7ec3bfce7c4',
+      type: 'c',
+      definition: 'CHECK (ue_authority_principals_valid((adverse_user_ids)::text[]))',
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_principal_efbcdfd1e0dd0931',
+      type: 'c',
+      definition:
+        "CHECK (((remediation_owner_user_id IS NULL) OR ((length((remediation_owner_user_id)::text) >= 1) AND (length((remediation_owner_user_id)::text) <= 255) AND ((remediation_owner_user_id)::text = btrim((remediation_owner_user_id)::text)) AND ((remediation_owner_user_id)::text !~ '[[:cntrl:]]'::text))))",
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_principal_e5696492e5e2a41b',
+      type: 'c',
+      definition:
+        "CHECK (((opened_by IS NULL) OR ((length((opened_by)::text) >= 1) AND (length((opened_by)::text) <= 255) AND ((opened_by)::text = btrim((opened_by)::text)) AND ((opened_by)::text !~ '[[:cntrl:]]'::text))))",
+    },
+  ],
+  triggers: [
+    {
+      table_name: 'ue_authority_acceptances',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_acceptances FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('accepted_by', '')",
+      args_hex: '61636365707465645f62790000',
+    },
+    {
+      table_name: 'ue_authority_acceptances',
+      name: 'ue_authority_guard_insert',
+      function_name: 'ue_authority_guard_acceptance',
+      tgtype: 7,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_insert BEFORE INSERT ON public.ue_authority_acceptances FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_acceptance()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_acceptances',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_acceptances FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_acceptances',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_acceptances FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_acceptances',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_acceptances FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_acceptances',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_acceptances FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_approval_decisions FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('approver_user_id', '')",
+      args_hex: '617070726f7665725f757365725f69640000',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_guard_decision',
+      function_name: 'ue_authority_guard_decision',
+      tgtype: 7,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_decision BEFORE INSERT ON public.ue_authority_approval_decisions FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_decision()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_approval_decisions FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_approval_decisions FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_approval_decisions FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_approval_decisions',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_approval_decisions FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_approval_requests FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('proposed_by', '')",
+      args_hex: '70726f706f7365645f62790000',
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_guard_request_update',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_approval_requests FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_request_update()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_approval_requests FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_approval_requests FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_approval_requests',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_approval_requests FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_delegations FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('delegator_user_id', 'revoked_by')",
+      args_hex: '64656c656761746f725f757365725f6964007265766f6b65645f627900',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_guard_issuance',
+      function_name: 'ue_authority_guard_issuance',
+      tgtype: 7,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_issuance BEFORE INSERT ON public.ue_authority_delegations FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_issuance()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_guard_update',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_delegations FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('revoked_at', 'status,revoked_at,revoked_by')",
+      args_hex: '7265766f6b65645f6174007374617475732c7265766f6b65645f61742c7265766f6b65645f627900',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_delegations FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_delegations FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_delegations',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_delegations FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_disclosure_consents FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('issued_by', 'revoked_by')",
+      args_hex: '6973737565645f6279007265766f6b65645f627900',
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_guard_update',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_disclosure_consents FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('revoked_at', 'revoked_at,revoked_by')",
+      args_hex: '7265766f6b65645f6174007265766f6b65645f61742c7265766f6b65645f627900',
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_disclosure_consents FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_disclosure_consents FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_disclosure_consents FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_events',
+      name: 'ue_authority_audit_link',
+      function_name: 'ue_authority_require_canonical_audit',
+      tgtype: 5,
+      tgdeferrable: true,
+      tginitdeferred: true,
+      definition:
+        'CREATE CONSTRAINT TRIGGER ue_authority_audit_link AFTER INSERT ON public.ue_authority_events DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION ue_authority_require_canonical_audit()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_events',
+      name: 'ue_authority_guard_insert',
+      function_name: 'ue_authority_guard_event_insert',
+      tgtype: 7,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_insert BEFORE INSERT ON public.ue_authority_events FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_event_insert()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_events',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_events FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_events',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_events FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_events',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_events FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_issuance_rules FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('drafted_by', '')",
+      args_hex: '647261667465645f62790000',
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_guard_rule_update',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_issuance_rules FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_rule_update()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_issuance_rules FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_issuance_rules FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_issuance_rules',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_issuance_rules FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_mandates FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('granted_by', 'revoked_by')",
+      args_hex: '6772616e7465645f6279007265766f6b65645f627900',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_guard_issuance',
+      function_name: 'ue_authority_guard_issuance',
+      tgtype: 7,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_issuance BEFORE INSERT ON public.ue_authority_mandates FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_issuance()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_guard_update',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_mandates FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('revoked_at', 'status,revoked_at,revoked_by')",
+      args_hex: '7265766f6b65645f6174007374617475732c7265766f6b65645f61742c7265766f6b65645f627900',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_mandates FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_mandates FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_mandates',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_mandates FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_recusals FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('principal_user_id', 'lifted_by')",
+      args_hex: '7072696e636970616c5f757365725f6964006c69667465645f627900',
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_guard_update',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_recusals FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('lifted_at', 'lifted_at,lifted_by')",
+      args_hex: '6c69667465645f6174006c69667465645f61742c6c69667465645f627900',
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_recusals FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_recusals FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_recusals',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_recusals FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_resource_relationships FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('granted_by', 'revoked_by')",
+      args_hex: '6772616e7465645f6279007265766f6b65645f627900',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_guard_issuance',
+      function_name: 'ue_authority_guard_issuance',
+      tgtype: 7,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_guard_issuance BEFORE INSERT ON public.ue_authority_resource_relationships FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_issuance()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_guard_update',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_resource_relationships FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('revoked_at', 'status,revoked_at,revoked_by')",
+      args_hex: '7265766f6b65645f6174007374617475732c7265766f6b65645f61742c7265766f6b65645f627900',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_resource_relationships FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_resource_relationships FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_resource_relationships FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_guard_actor',
+      function_name: 'ue_authority_guard_actor',
+      tgtype: 23,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_actor BEFORE INSERT OR UPDATE ON public.ue_authority_reviews FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_actor('opened_by', '')",
+      args_hex: '6f70656e65645f62790000',
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_guard_update',
+      function_name: 'ue_authority_guard_update',
+      tgtype: 19,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        "CREATE TRIGGER ue_authority_guard_update BEFORE UPDATE ON public.ue_authority_reviews FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_update('closed_at', 'status,closed_at,remediation_owner_user_id')",
+      args_hex:
+        '636c6f7365645f6174007374617475732c636c6f7365645f61742c72656d6564696174696f6e5f6f776e65725f757365725f696400',
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_no_delete',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 11,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_delete BEFORE DELETE ON public.ue_authority_reviews FOR EACH ROW EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_no_truncate',
+      function_name: 'ue_authority_block_mutation',
+      tgtype: 34,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_no_truncate BEFORE TRUNCATE ON public.ue_authority_reviews FOR EACH STATEMENT EXECUTE FUNCTION ue_authority_block_mutation()',
+      args_hex: '',
+    },
+    {
+      table_name: 'ue_authority_reviews',
+      name: 'ue_authority_record_event',
+      function_name: 'ue_authority_record_event',
+      tgtype: 21,
+      tgdeferrable: false,
+      tginitdeferred: false,
+      definition:
+        'CREATE TRIGGER ue_authority_record_event AFTER INSERT OR UPDATE ON public.ue_authority_reviews FOR EACH ROW EXECUTE FUNCTION ue_authority_record_event()',
+      args_hex: '',
+    },
+  ],
+} as const satisfies PhysicalGuardContract
