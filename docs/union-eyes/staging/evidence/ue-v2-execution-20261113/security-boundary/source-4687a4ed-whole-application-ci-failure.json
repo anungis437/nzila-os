@@ -1,0 +1,41 @@
+{
+  "status": "FAIL",
+  "sourceSha": "4687a4ed84935cedb2b436738373b13b7cda2158",
+  "runId": "43643427818",
+  "url": "https://github.com/anungis437/nzila-os/actions/runs/43643427818",
+  "suite": "UE Whole Application Test Suite",
+  "at": "2026-11-14T21:46:16Z",
+  "testFiles": {
+    "passed": 1996,
+    "failed": 2,
+    "skipped": 5
+  },
+  "tests": {
+    "passed": 26094,
+    "failed": 3,
+    "skipped": 34
+  },
+  "failures": [
+    {
+      "path": "apps/union-eyes/components/workspace/__tests__/workspace-persona-availability.test.ts",
+      "assertions": 2,
+      "oldExpectation": "Staff grievance collection remains out of role"
+    },
+    {
+      "path": "apps/union-eyes/lib/notifications/__tests__/links.test.ts",
+      "assertions": 1,
+      "oldExpectation": "All personas are blocked from grievance collection"
+    }
+  ],
+  "correction": "Update dependent expectations for exact staff collection entry. Assert creation/management remain refused, other experiences remain refused and primary navigation remains unchanged. No production code change in the follow-up.",
+  "localFollowup": {
+    "status": "PASS",
+    "suites": 5,
+    "tests": 205,
+    "logSha256": "a7228d76d873b2db5b95bd2abad921cc6b320dfa7105a2ba3441597df2dde5be"
+  },
+  "originalFailureRetained": true,
+  "replacementExactCIRequired": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}
