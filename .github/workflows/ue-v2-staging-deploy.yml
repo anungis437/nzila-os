@@ -498,7 +498,8 @@ jobs:
         run: |
           set -euo pipefail
           WHATIF_ARTIFACTS="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}"
-          export EXPECTED_SERVING_REVISION=$(jq -r '.parameters.appPinnedRevisionName.value // empty' "$WHATIF_ARTIFACTS/deploy-parameters.json")
+          EXPECTED_SERVING_REVISION=$(jq -r '.parameters.appPinnedRevisionName.value // empty' "$WHATIF_ARTIFACTS/deploy-parameters.json")
+          export EXPECTED_SERVING_REVISION
           node tooling/scripts/migrate-ue-v2-staging-log-alerts.mjs \
             --operation apply --what-if "$RUNNER_TEMP/evidence/what-if-apply.json" \
             --reviewed-plan "$WHATIF_ARTIFACTS/log-alert-scope-plan.json" \
