@@ -1,6 +1,6 @@
 {
   "purpose": "PRE_REPAIR_SECURITY_FINDING_AND_QUALIFICATION_PROVENANCE",
-  "proposedSourceSha": "b89da813a7a2343a2459586969d3b9c7ead94754",
+  "proposedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
   "productionAuthorized": false,
   "stagingGo": false,
   "entries": [
@@ -87,6 +87,18 @@
       "file": "candidate-restored-rehearsal-b89da813.json",
       "sha256": "9c4fefef46af8c36028417561a4b0e13dc4ca9f321e2663f5b7f60a71031f6cd",
       "observedOrProposedSourceSha": "b89da813a7a2343a2459586969d3b9c7ead94754",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-cbf2bc93.json",
+      "sha256": "b2e7f2c69582fdac918ebd04946b606473dbb651e3514044c08d86e32985c134",
+      "observedOrProposedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "candidate-restored-rehearsal-cbf2bc93.json",
+      "sha256": "cbed0a80b3ac2dd472e2f12cb3f7827c3120308a61dc61db80d4a0c516976167",
+      "observedOrProposedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "runtimePassInferred": false
     },
     {

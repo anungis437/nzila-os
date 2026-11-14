@@ -1,0 +1,228 @@
+{
+  "purpose": "CANDIDATE_SOURCE_BOUND_RESTORED_DATA_AND_TRANSACTION_REHEARSAL",
+  "status": "PASS",
+  "candidateSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+  "productionAuthorized": false,
+  "stagingGo": false,
+  "observedPrimaryApplicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "historicalRepairSourceSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+  "guardBundleSha256": "92f667ce83a7168ae229d89afdff90eb67e31c3fa598a06c2723526b2060b733",
+  "protocolBundleSha256": "aa0a1d82000c88f3f00ee5987a4981f6235ff709b1bb2ba2d72477bbc2abcd06",
+  "protocolSourceInputsVerified": 125,
+  "nestedScopeSourceInputsVerified": 106,
+  "historicalExecutedProtocolSourceSha": "58f1c242383955c0c950a95eb2afd7a23ad874c2",
+  "protocolCodeBytesEqualCandidate": true,
+  "historicalExecutedNestedScopeSourceSha": "aba4b32046708f145d8488fb85c8e8fc18959df7",
+  "nestedScopeCodeBytesEqualCandidate": true,
+  "repair": {
+    "ok": true,
+    "status": "APPLY_PASS",
+    "purpose": "SOURCE_OWNED_BASE_AUTHORITY_PHYSICAL_REPAIR",
+    "at": "2026-11-14T01:36:56.454Z",
+    "target": "clone",
+    "host": "nzila-ue-v2-recovery-20261113.postgres.database.azure.com",
+    "identity": {
+      "principal": "uev2admin",
+      "database": "ue_v2_staging",
+      "address": "10.40.4.5"
+    },
+    "sourceSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+    "bundleSha256": "92f667ce83a7168ae229d89afdff90eb67e31c3fa598a06c2723526b2060b733",
+    "result": {
+      "executedStatements": 181,
+      "verifiedFunctions": 13,
+      "verifiedConstraints": 99,
+      "verifiedTriggers": 60,
+      "businessDmlIssued": false,
+      "remainingGuardViolations": 0,
+      "persistedOwnerDelegations": 0
+    },
+    "existingPhysicalTablesPreserved": true,
+    "businessDmlIssued": false,
+    "releasedMigrationsReplayed": false,
+    "existingProtectionsRemoved": false,
+    "eventTriggerDisabled": false,
+    "applicationRerouted": false,
+    "productionDeployment": false,
+    "transport": {
+      "bytes": 107044,
+      "programSha256": "7f4f8d026023bc4d8655272815d408f7ca8fca5745f2444ff5b26b129cc59ea5",
+      "fileSha256": {
+        "repair.cjs": "92f667ce83a7168ae229d89afdff90eb67e31c3fa598a06c2723526b2060b733"
+      }
+    }
+  },
+  "signedProtocol": {
+    "ok": true,
+    "status": "PASS",
+    "purpose": "PRIVATE_CLONE_EXPLICIT_SYNTHETIC_CASE_AUTHORITY_FIXTURE_REHEARSAL",
+    "setup": {
+      "ok": true,
+      "status": "PASS",
+      "purpose": "EXPLICIT_SYNTHETIC_CASE_ASSIGNMENT_QA_PRECONDITIONS",
+      "applicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "at": "2026-11-14T02:44:36.941Z",
+      "fixtureId": "eaead20c-e291-4e4b-a751-e8d13de55626",
+      "caseId": "e951ac6a-71b8-41d6-82ef-511e0e1e5f53",
+      "mandateId": "1145919e-fbda-46e4-b7bc-fe07181157f4",
+      "ruleIds": [
+        "2850ca14-3b4e-4d2b-b4c8-99374e6b9f38",
+        "bb378336-59f2-4dfe-923f-7df197971e2d",
+        "f4848074-7f5e-4ace-be57-60aadf7a5b07",
+        "3743f752-c468-4c3e-b9a5-a4c20bdf10f9"
+      ],
+      "expiresAt": "2026-11-14T03:14:35.343Z",
+      "events": [
+        "two-owned-test-roles-temporarily-elevated-for-explicit-QA-fixture",
+        "original-member-and-admin-roles-restored-in-both-projections",
+        "real-actor-source-kernel-fixture-rules-and-case-scoped-mandate-created-and-accepted"
+      ],
+      "originalRolesRestored": true,
+      "institutionalRatificationClaimed": false,
+      "independentHumansClaimed": false,
+      "tokensSerialized": false
+    },
+    "cleanup": {
+      "ok": true,
+      "status": "PASS",
+      "purpose": "SYNTHETIC_QA_AUTHORITY_CLEANUP",
+      "applicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "at": "2026-11-14T02:44:38.983Z",
+      "caseId": "e951ac6a-71b8-41d6-82ef-511e0e1e5f53",
+      "fixtureId": "eaead20c-e291-4e4b-a751-e8d13de55626",
+      "events": [
+        "original-member-and-admin-roles-restored-in-both-projections"
+      ],
+      "institutionalRatificationClaimed": false,
+      "independentHumansClaimed": false
+    },
+    "realUnionAdoptionClaimed": false,
+    "independentHumanApprovalsClaimed": false,
+    "transport": {
+      "bytes": 654324,
+      "programSha256": "3c7161bc313c3ae959f2ee13e82b669e5da2daf0c4c0b05be438e938a8bdbcbf",
+      "fileSha256": {
+        "fixture.js": "c8fbdc3c44632040565add6484f0308cc514ad0017eb351a9cb5d96568753693",
+        "authority.cjs": "aa0a1d82000c88f3f00ee5987a4981f6235ff709b1bb2ba2d72477bbc2abcd06"
+      }
+    }
+  },
+  "restoredDataAuditAndTenantProof": {
+    "ok": true,
+    "status": "PASS",
+    "purpose": "PRIVATE_PITR_SOURCE_BOUND_NATIVE_SESSION_ISOLATION_AND_AUDIT",
+    "observedApplicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+    "compiledFromApplicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+    "diagnosticOnly": true,
+    "at": "2026-11-14T02:50:21.988Z",
+    "identity": {
+      "principal": "ue_staging_runtime",
+      "role": "union_eyes_runtime",
+      "database": "ue_v2_staging",
+      "address": "10.40.4.5"
+    },
+    "addresses": [
+      {
+        "address": "10.40.4.5",
+        "family": 4
+      }
+    ],
+    "apiCreatedCases": [
+      "e951ac6a-71b8-41d6-82ef-511e0e1e5f53",
+      "62a76937-9342-4185-87cf-b1cf66d806c8"
+    ],
+    "checks": [
+      "6a0fe972-ed1c-49ca-83c8-00b9b214f96f:unbound-context-denied",
+      "59d4c24e-acb6-4a0e-898a-ed20016c642c:unbound-context-denied",
+      "A:real-signature-issuer-audience-subject",
+      "A:own-organization-api-case-visible-foreign-hidden",
+      "A:forged-organization-denied",
+      "A:forged-actor-denied",
+      "A:missing-bearer-denied",
+      "A:hash-is-not-bearer-denied",
+      "A:cross-tenant-update-denied",
+      "A:current-case-audit-and-complete-hash-chain",
+      "A:cross-tenant-insert-refused-42501",
+      "A:bridge-revoked-after-callback",
+      "A:foreign-membership-binding-refused",
+      "B:real-signature-issuer-audience-subject",
+      "B:own-organization-api-case-visible-foreign-hidden",
+      "B:forged-organization-denied",
+      "B:forged-actor-denied",
+      "B:missing-bearer-denied",
+      "B:hash-is-not-bearer-denied",
+      "B:cross-tenant-update-denied",
+      "B:current-case-audit-and-complete-hash-chain",
+      "B:cross-tenant-insert-refused-42501",
+      "B:bridge-revoked-after-callback",
+      "B:foreign-membership-binding-refused"
+    ],
+    "audit": [
+      {
+        "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0",
+        "records": 301,
+        "headHash": "ba3047bb8a65eeea5e6c5e61303dd88a6cd6d1f3fc1d0452d88ea1c2a010fb5d"
+      },
+      {
+        "organizationId": "f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab",
+        "records": 5,
+        "headHash": "41b7e60e8aa7ac3cbe13a615561829a40e61237792f431d80065c1f28d7cf2c2"
+      }
+    ],
+    "sealedEvidence": [],
+    "databaseTarget": "nzila-ue-v2-recovery-20261113.postgres.database.azure.com",
+    "restorePoint": "2026-11-13T22:30:00Z",
+    "actorARole": "member; raw SQL proves tenant isolation, API case authority remains separately tested",
+    "signedTokensOrCookiesSerialized": false,
+    "noSessionManufactured": true,
+    "transactionalProbeWritesRolledBack": true,
+    "transport": {
+      "bytes": 585312,
+      "programSha256": "bbc82ff8c832b5c21aecab0d6445fc218b86feb384392c7d3aa1334c9d80d15d",
+      "fileSha256": {
+        "bearer.cjs": "d11ce408722e36094c32ca32fabbb2743d5ed01a0c9ed0b57472199326f056ec"
+      }
+    }
+  },
+  "signedNestedDeferredGuardProof": {
+    "ok": true,
+    "purpose": "ACTUAL_SIGNED_CURRENT_SOURCE_NESTED_SCOPE_DEFERRED_GUARD_QUALIFICATION",
+    "compiledSourceSha": "aba4b32046708f145d8488fb85c8e8fc18959df7",
+    "diagnosticOnly": true,
+    "applicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+    "at": "2026-11-14T02:03:37.558Z",
+    "threadId": "6a494f54-280f-42b9-877b-fc3957e1e871",
+    "steps": [
+      "owned-synthetic-unassigned-thread-preimage",
+      "thread-update",
+      "assignment-history-insert",
+      "nested-current-source-preserves-outer-verified-bridge",
+      "deferred-constraints"
+    ],
+    "failure": null,
+    "businessMutationCommitted": false,
+    "actualHttp500ObservedSeparately": true,
+    "remediatedSourceNotYetDeployed": true,
+    "tokensSerialized": false,
+    "transport": {
+      "bytes": 585832,
+      "programSha256": "c75547729dc772954ac1c56111b78f57d92a154cdb535f245c6e1f6c4284109f",
+      "fileSha256": {
+        "bearer.cjs": "583f80e3e031e8cb4254f9b4e4e389009455ba347866e9cc1568af511e887014"
+      }
+    }
+  },
+  "independentHumansClaimed": false,
+  "realUnionRatificationClaimed": false,
+  "applicationCandidateNotYetDeployed": true,
+  "restoredAuditSourceInputsVerified": 103,
+  "restoredAuditSourceCodeEqualCandidate": true,
+  "previousCandidateSourceSha": "b89da813a7a2343a2459586969d3b9c7ead94754",
+  "candidateChange": "Only the shared authority test fixture gains the already-existing nullable grievant_id column; runtime inputs verified byte-for-byte.",
+  "localFixtureRegression": {
+    "pgliteTestsPassed": 560,
+    "postgres15TestsPassed": 10,
+    "postgres16TestsPassed": 10,
+    "runtimeSourceChanged": false
+  }
+}

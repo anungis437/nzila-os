@@ -150,11 +150,12 @@
     "2786943ac51f42b24edc808031015b539ae091f1",
     "96b7ebca84552c289df2ea4439e0c6218eab4494",
     "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
-    "b89da813a7a2343a2459586969d3b9c7ead94754"
+    "b89da813a7a2343a2459586969d3b9c7ead94754",
+    "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-14T03:02:27.262128+00:00",
+  "updated_at": "2026-11-14T03:21:17.480163+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -163,7 +164,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "b89da813a7a2343a2459586969d3b9c7ead94754",
+    "candidate_sha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true
