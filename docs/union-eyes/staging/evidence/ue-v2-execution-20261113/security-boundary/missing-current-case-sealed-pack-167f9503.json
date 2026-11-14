@@ -1,0 +1,13 @@
+{
+  "ok": false,
+  "errorType": "AssertionError",
+  "errorCode": "ERR_ASSERTION",
+  "message": "ACTUAL_CURRENT_CASE_SEALED_PACK_REQUIRED\n\n0 !== 1\n",
+  "transport": {
+    "bytes": 585252,
+    "programSha256": "ddc7d4c9bef8ac9b10d941df0e5351dfd19d6647544fd322af91bb2ed12f5fc0",
+    "fileSha256": {
+      "bearer.cjs": "d11ce408722e36094c32ca32fabbb2743d5ed01a0c9ed0b57472199326f056ec"
+    }
+  }
+}

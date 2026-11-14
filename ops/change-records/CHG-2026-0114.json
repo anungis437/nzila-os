@@ -1,6 +1,6 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 staging qualification deployment for candidate 453c50df",
+  "title": "Union Eyes V2 base casework: verified transaction lifetime, member continuity and authority guards",
   "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. Owner-directed founder-operated staging authorization is recorded; no production release, institutional mandate, financial activation, or STAGING GO without runtime proof is authorized.",
   "service": "union-eyes",
   "environment": "STAGING",
@@ -72,7 +72,12 @@
     "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/current-runtime.json",
     "docs/union-eyes/staging/UE_V2_BUSINESS_SESSION_POLICY_REPAIR.md",
     "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json",
-    "https://github.com/anungis437/nzila-os/actions/runs/43520878953"
+    "https://github.com/anungis437/nzila-os/actions/runs/43520878953",
+    "docs/union-eyes/staging/UE_V2_AUTHORITY_PHYSICAL_GUARDS.md",
+    "https://github.com/anungis437/nzila-os/actions/runs/43537986948",
+    "https://github.com/anungis437/nzila-os/actions/runs/43540064035",
+    "docs/union-eyes/staging/UE_V2_NESTED_SESSION_LIFETIME_REPAIR.md",
+    "docs/union-eyes/staging/UE_V2_REPRESENTED_MEMBER_CONTINUITY.md"
   ],
   "linked_prs": [
     "1137",
@@ -143,11 +148,14 @@
     "2515a76afba0766c9ec1ccde0e66b0ef6c288a66",
     "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
     "2786943ac51f42b24edc808031015b539ae091f1",
-    "167f95034fbdaa163cd67e79c4bca622284e0d77"
+    "96b7ebca84552c289df2ea4439e0c6218eab4494",
+    "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+    "b89da813a7a2343a2459586969d3b9c7ead94754",
+    "cbf2bc9339f766ce4b5d8500a53e4481644f8680"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-13T23:00:00Z",
+  "updated_at": "2026-11-14T03:21:17.480163+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -156,7 +164,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+    "candidate_sha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true

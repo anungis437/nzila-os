@@ -1,0 +1,714 @@
+{
+  "ok": true,
+  "purpose": "READ_ONLY_RESTORED_RUNTIME_CALLABLE_FUNCTION_CENSUS",
+  "at": "2026-11-14T00:26:21.700Z",
+  "databaseTarget": "PRIVATE_PITR_CLONE",
+  "sourceCandidate": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "functions": [
+    {
+      "signature": "message_assignment_guard()",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "2032ba56785345aaab56335161e5620eedc613711628bfe14454d6bef301a559"
+    },
+    {
+      "signature": "message_lifecycle_guard()",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "1812510a3002819b81f87d98b60c92443a97ecdf4b73960db0eb3f011573abf7"
+    },
+    {
+      "signature": "message_reads_guard()",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "00c042ed2021637714a49966f664552168f4168fcd969b5b156a647ee7e25c73"
+    },
+    {
+      "signature": "message_retention_guard()",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "aef5577106adb329d1b4b73f960d352bb54fef20d5984236afa5e504f4ce9d5f"
+    },
+    {
+      "signature": "message_threads_assignment_requires_history()",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "37af9805020d52f60c34b3cb196d8c0a1b27ef6a6c434eba34687d943d22a3b1"
+    },
+    {
+      "signature": "message_threads_guard_update()",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "4ebf8793bb1b2b59bc8ab4584af1ccb34fd4b59cedb7079d9754d44b87786cf0"
+    },
+    {
+      "signature": "message_threads_lifecycle_guard()",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "22fac8450e53d0226830d3769a4a5766c0f2dd6668a788109bd2e60464101f8a"
+    },
+    {
+      "signature": "message_threads_lifecycle_requires_history()",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "2a6f7dd7f72db16ecc61c2a34ef951ca8e57acc9aaf112fa440bbc017b7e40ec"
+    },
+    {
+      "signature": "triage_guard()",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, public"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "eecbf52753ffd511adee57e75e07d1d84266a8440aef8af14a0f2ffea3d01400"
+    },
+    {
+      "signature": "ue_case_assignee_authorized(text,uuid)",
+      "schema": "public",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "bdda1db89edbd5448e09e2ea42be72b10676414ad1a45983b54df44caae553c7"
+    },
+    {
+      "signature": "ue_conversation_assignee_authorized(text,uuid)",
+      "schema": "public",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "eb9387f5c1884fec11e9117dac8fcb9341299077bedc2d0ae8190b35cf1820a3"
+    },
+    {
+      "signature": "ue_create_direct_org_rls_policy(text,text,boolean)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "14da88bf11a1ba4cb394627463380f2739ef80675de57b7db18f21ce8be59790"
+    },
+    {
+      "signature": "ue_create_mixed_global_tenant_rls_policy(text,text)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "858b020501b3ea5b29bdace1cc21d49153634301bef1cbaa6e2bcbb5ab4d6fca"
+    },
+    {
+      "signature": "ue_create_multi_party_rls_policy(text,text,text)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "bae115aa67d8b5f537a91cb8d1d2daae6518def3d9b149c79f8d55f2d2730f2f"
+    },
+    {
+      "signature": "ue_create_parent_owned_rls_policy(text,text)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "0fea0cd5abb0fa2941f8e7db43cf14a4aaa72d5037075fea15e1f13b5b15b165"
+    },
+    {
+      "signature": "ue_create_parent_owned_rls_policy_v2(text,text,text,text,boolean)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "ecbb5512406dae4a535c459f3cfac3fa1a53e45f734fc4d923fa7158ad3481f2"
+    },
+    {
+      "signature": "ue_create_parent_owned_via_user_rls_policy_v2(text,text,text,text)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "56f50a68c854217f51a984f8d37a948e0592ad35121b4d4e626762341982e262"
+    },
+    {
+      "signature": "ue_create_shared_library_child_rls_policy(text,text)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "8388d061a656dbbc42ad69fae653d98bed7fd50a19f078b6a8c2c2d51ec1ec90"
+    },
+    {
+      "signature": "ue_create_shared_library_rls_policy(text,text,text,text)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "3a24a368851a70f267ae254cfddd7919005304177ba288dec39d5bcecf4a3100"
+    },
+    {
+      "signature": "ue_create_user_rls_policy(text,text)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "777726906b607166259199ef76e3fdede9d1752006756229ad92fea902876342"
+    },
+    {
+      "signature": "ue_create_user_self_rls_policy(text,text,text)",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "9640791dbf5f7502c8d5b8f97a1b9d2b94f2124915723f80316efe9df3636332"
+    },
+    {
+      "signature": "ue_enforce_workbook_credential_authority()",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "fe9b3b8e2c21dcd3427bdd4e353cbf0aaaaf6b1cf3badebb05aa8332664a8276"
+    },
+    {
+      "signature": "ue_guard_deadline_reassignment_convergence_policy()",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "plpgsql",
+      "return_type": "event_trigger",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "33b9746036dc3333c1b1a65c28e4a5ea5f05019288331d640c69dd42a2f118ba"
+    },
+    {
+      "signature": "ue_is_workbook_system_principal()",
+      "schema": "public",
+      "owner_name": "uev2admin",
+      "owner_bypasses_rls": true,
+      "prosecdef": false,
+      "proconfig": null,
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": true,
+      "runtime_execute": true,
+      "system_execute": true,
+      "bodySha256": "c3f94a67fdd319cb01caba7cb2a477143a9fe6c555376a74fd0a60a73ee08480"
+    },
+    {
+      "signature": "ue_v2_visible_parent_1485fe67d00e5f8c(uuid)",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, pg_temp"
+      ],
+      "language": "plpgsql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "866256ed57c458c4d55ca1e8bc5bd1e28887cb853d8f9feb6bb97f28854129ec"
+    },
+    {
+      "signature": "ue_v2_visible_parent_4a4a395ba3af35c2(uuid)",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, pg_temp"
+      ],
+      "language": "plpgsql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "9366780ad19172b1bb2550043fd3c2bf768a9a1cc07c621d44af60bab707ad87"
+    },
+    {
+      "signature": "ue_v2_visible_parent_507d78b0af77e04f(uuid)",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, pg_temp"
+      ],
+      "language": "plpgsql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "6b18ec8e872cbf2bf18977254bd552108567d22543384dcd38249425c630d8d8"
+    },
+    {
+      "signature": "ue_v2_visible_parent_5f56aa46bfde721f(uuid)",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, pg_temp"
+      ],
+      "language": "plpgsql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "87aca2511237ef594b55b30d35e9429306b743c97f3c21b869d13075556cc1d0"
+    },
+    {
+      "signature": "ue_v2_visible_parent_abf314c360205afd(uuid)",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, pg_temp"
+      ],
+      "language": "plpgsql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "13c179812ce6d124098527d8caddaee2b5a8b47c39aba313ba47ba4c6b9ab016"
+    },
+    {
+      "signature": "ue_v2_visible_parent_c0a0cb0d527dcf1f(uuid)",
+      "schema": "public",
+      "owner_name": "ue_v2_owner",
+      "owner_bypasses_rls": false,
+      "prosecdef": false,
+      "proconfig": [
+        "search_path=pg_catalog, pg_temp"
+      ],
+      "language": "plpgsql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "961fe066a8367622aeff401b33a672b35d28c80159ddaab3df892ecae8662291"
+    },
+    {
+      "signature": "user_management.auth_business_member_parent_authorized(text,uuid)",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "58a6bcebcfa514c6ef35f378e00ef9015ef8a1ddf0d9aaf6673213093aafa6fc"
+    },
+    {
+      "signature": "user_management.auth_business_org_authorized(uuid,text[])",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "02d3aa10744e79fb43dcfb0026be2ba0ebd237cc346729aa370cc0b0a06dd13d"
+    },
+    {
+      "signature": "user_management.auth_business_user_parent_authorized(text,uuid)",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "e47363819ef24657d5c9cb01168e7f360025b8707cdaab00157b13a1a3fd9f34"
+    },
+    {
+      "signature": "user_management.auth_failed_login_count(text,timestamp with time zone)",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_risk_aggregate",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "integer",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "cb1cba7c9738b9c5a8a76644cf1df67654204ce4bc3553c800cc5026b2725aba"
+    },
+    {
+      "signature": "user_management.auth_invite_inviter_live()",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "a8d957f052b343bdfc21a46734f707aa13ac62c19244a467ed2e5e09460c9c37"
+    },
+    {
+      "signature": "user_management.auth_lifecycle_actor()",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_provider_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "39e4cb77a6cb860c3b8469358905a9425bf5d22b37baf54fd2a26b4702393c69"
+    },
+    {
+      "signature": "user_management.auth_provider_binding()",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_provider_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "jsonb",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "8adc28c55e105bfd8697df21949cc8c289faef0d40abfe5fb6ef150e4f9c04ed"
+    },
+    {
+      "signature": "user_management.auth_provider_user()",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_provider_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "text",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "763c02d0b9e5143a4235032be50bd4852a3b34888c36ce5b515c1434f9bf3145"
+    },
+    {
+      "signature": "user_management.auth_request_count(text,text)",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_risk_aggregate",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "integer",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "e7a4e3e0dcb8daf265682842d32ad4d52f458d21860bbd75ad6668f5b2031719"
+    },
+    {
+      "signature": "user_management.auth_revoke_invites_on_membership_change()",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "10b3f8aba961fbdd3b47189f9dbaf6ccb52b2c5219b945c07746e85c91d65474"
+    },
+    {
+      "signature": "user_management.auth_revoke_invites_on_user_change()",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "plpgsql",
+      "return_type": "trigger",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "f5e3c7cf8f71509c186827e0f1e22037708114cafe8b9f8c88c2f2082351a6de"
+    },
+    {
+      "signature": "user_management.auth_revoke_pending_invites(text,uuid)",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "plpgsql",
+      "return_type": "void",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "f54c61a63ab93a7cd27f9723e1b3d1f1b926049d54ceebd808c72e30be85bd11"
+    },
+    {
+      "signature": "user_management.ue_authority_membership_rows(uuid,text[])",
+      "schema": "user_management",
+      "owner_name": "nzila_auth_org_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "record",
+      "public_execute": false,
+      "runtime_execute": true,
+      "system_execute": false,
+      "bodySha256": "f7343c94d02090e677c46e5911adf1a157aa6e8e1b44f6387d543efd0bd51ce4"
+    },
+    {
+      "signature": "user_management.ue_framework_actor_authorized()",
+      "schema": "user_management",
+      "owner_name": "ue_framework_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "33453e108a18b4b8929c2d24d470d25648d350416c0188a284af0f973622369d"
+    },
+    {
+      "signature": "user_management.ue_framework_admin_authorized()",
+      "schema": "user_management",
+      "owner_name": "ue_framework_authority_reader",
+      "owner_bypasses_rls": false,
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog"
+      ],
+      "language": "sql",
+      "return_type": "boolean",
+      "public_execute": false,
+      "runtime_execute": false,
+      "system_execute": false,
+      "bodySha256": "cb3522c37db52b1ceb9c6adff331c25cb486aa74527835d183c2312228419000"
+    }
+  ],
+  "callableByRuntime": 29,
+  "callableDefiners": 6,
+  "callableBypassDefiners": [],
+  "noBusinessDml": true,
+  "transport": {
+    "bytes": 582860,
+    "programSha256": "4b6ef1b2136971985317c96ba1dc772db936c726e7b84bbcd9bb7cea62744b06",
+    "fileSha256": {
+      "bearer.cjs": "d11ce408722e36094c32ca32fabbb2743d5ed01a0c9ed0b57472199326f056ec"
+    }
+  }
+}

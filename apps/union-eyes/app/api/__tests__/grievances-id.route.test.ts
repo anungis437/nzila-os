@@ -8,6 +8,7 @@ const m = vi.hoisted(() => ({
   isDocumentVisibleByPolicy: vi.fn(),
   toGovernanceLabel: vi.fn(),
   trackPilotEvent: vi.fn(),
+  requireKernelCaseAction: vi.fn(),
 }));
 
 vi.mock('@/lib/api/framework', async () => (await import('./support/with-api-stub')).frameworkModule);
@@ -29,6 +30,7 @@ vi.mock('@/lib/services/document-governance-service', () => ({
   toGovernanceLabel: m.toGovernanceLabel,
 }));
 vi.mock('@/lib/services/pilot-tracking', () => ({ trackPilotEvent: m.trackPilotEvent }));
+vi.mock('@/lib/cases/case-authorization',()=>({requireKernelCaseAction:m.requireKernelCaseAction}));
 
 const { caller, declared, resetCaller } = await import('./support/with-api-stub');
 
@@ -49,6 +51,7 @@ describe('grievances/[id] route', () => {
     m.isDocumentVisibleByPolicy.mockReturnValue(true);
     m.toGovernanceLabel.mockReturnValue('internal');
     m.trackPilotEvent.mockResolvedValue(undefined);
+    m.requireKernelCaseAction.mockResolvedValue(undefined);
 
     const createSelectChain = () => {
       const chain: any = {
@@ -137,6 +140,19 @@ describe('grievances/[id] route', () => {
     expect(response.status).toBe(403);
     expect(m.selectQueue).toHaveLength(0);
     expect(m.trackPilotEvent).not.toHaveBeenCalled();
+  });
+
+  it('returns represented-member progress after a kernel allow without staff notes, working documents or strategy',async()=>{
+    const {GET}=await loadRoute();
+    m.getEffectiveCaseAccess.mockResolvedValueOnce({canViewCase:false,isPrimaryOwner:false,canViewPrivateDocuments:false});
+    m.selectQueue=[[{id:G,createdBy:'staff-converter',grievantId:'u1',organizationId:'org_1',title:'Synthetic case',description:'Own submission',background:'Internal strategy'}],[{id:'event-1',eventType:'note_added',actorUserId:'staff',notes:'Internal staff note',createdAt:'2026-11-14'}],[],[]];
+    const response=await GET(new Request(`http://localhost/api/grievances/${G}`));
+    expect(response.status).toBe(200);
+    const body=await response.json();
+    expect(body.data).toMatchObject({title:'Synthetic case',events:[{notes:null}],documents:[],collaborators:[],effectiveAccess:{canViewCase:true,canViewInternal:false}});
+    expect(body.data).not.toHaveProperty('background');
+    expect(JSON.stringify(body)).not.toContain('Internal staff note');
+    expect(m.requireKernelCaseAction).toHaveBeenCalledWith(expect.anything(),{userId:'u1',organizationId:'org_1'},G,'case:read');
   });
 
   it('returns governed documents and tracks pilot access event', async () => {

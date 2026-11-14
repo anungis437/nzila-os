@@ -19,6 +19,8 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { withRLSContext } from '@/lib/db/with-rls-context';
+import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
+import { memberGrievanceView, memberGrievanceEvents } from '@/lib/cases/member-grievance-view';
 
 export const GET = withApi(
   {
@@ -59,9 +61,12 @@ export const GET = withApi(
       userId,
     });
 
-    if (grievance.createdBy !== userId && !effectiveAccess.canViewCase) {
+    const internal = effectiveAccess.canViewCase;
+    if (!internal && grievance.createdBy !== userId && grievance.grievantId !== userId) {
       return standardErrorResponse(ErrorCode.FORBIDDEN, "You do not have access to this grievance.");
     }
+    if (!internal) await withRLSContext({ organizationId }, tx =>
+      requireKernelCaseAction(tx, {userId,organizationId}, grievanceId, 'case:read'));
 
     // Fetch related events
     const events = await db
@@ -113,15 +118,17 @@ export const GET = withApi(
       ).map((g) => g.documentId),
     );
 
-    const governedDocuments = linkedDocuments.filter((doc) =>
-      isDocumentVisibleByPolicy(toGovernanceLabel({ privacyLabel: doc.privacyLabel ?? undefined }), {
+    const governedDocuments = linkedDocuments.filter((doc) => {
+      const label = toGovernanceLabel({ privacyLabel: doc.privacyLabel ?? undefined });
+      if (!internal && label !== 'public_internal') return false;
+      return isDocumentVisibleByPolicy(label, {
         isOrgMember: true,
         isPrimaryOwner: effectiveAccess.isPrimaryOwner,
-        hasCaseAccess: grievance.createdBy === userId || effectiveAccess.canViewCase,
+        hasCaseAccess: internal || label === 'public_internal',
         canViewPrivateDocuments: effectiveAccess.canViewPrivateDocuments,
         hasExplicitDocumentGrant: explicitGrantIds.has(doc.id),
-      }),
-    );
+      });
+    });
 
     if (governedDocuments.length > 0) {
       await trackPilotEvent({
@@ -137,19 +144,17 @@ export const GET = withApi(
     }
 
     // The roster shows who holds live kernel relationships to this case; expiry is evaluated by the kernel.
-    const collaborators = effectiveAccess.canViewCase
-      ? await withRLSContext({ organizationId }, (tx) => listCaseCollaborators(tx, organizationId, grievanceId))
-      : [];
+    const collaborators = await withRLSContext({ organizationId }, (tx) => listCaseCollaborators(tx, organizationId, grievanceId));
     const primaryLroId = collaborators.find((c) => c.relation !== 'collaborator')?.userId ?? null;
 
     return standardSuccessResponse({
-      ...grievance,
-      events,
+      ...(internal ? grievance : memberGrievanceView(grievance)),
+      events: internal ? events : memberGrievanceEvents(events, userId),
       documents: governedDocuments,
       governedDocuments,
       primaryLroId,
-      collaborators,
-      effectiveAccess,
+      collaborators: internal ? collaborators : [],
+      effectiveAccess: {...effectiveAccess, canViewCase: true, canViewInternal: internal},
     });
   },
 );

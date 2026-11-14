@@ -413,19 +413,21 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
     it('assigns in the caller\'s organization, commits before the system role converges the reminders, and bumps the caseload in one statement', async () => {
       const grievance = await newGrievance(ORG_A, memberA)
       const stewardId = await steward(ORG_A, 'Quebec')
+      const stewardUserId = (await admin.query('SELECT user_id::text FROM stewards WHERE id=$1', [stewardId])).rows[0].user_id
+      expect(stewardUserId).not.toBe(stewardId)
       const before = harness.audits.length
       const response = await run(assign!.PATCH, asOfficerA, { params: { id: grievance }, request: request(`/api/grievances/${grievance}/assign`, 'PATCH', { stewardId }) })
       expect(response.status).toBe(200)
 
-      expect(await grievanceRow(grievance)).toMatchObject({ union_rep_id: stewardId })
+      expect(await grievanceRow(grievance)).toMatchObject({ union_rep_id: stewardUserId })
       expect(await eventsOf(grievance)).toEqual(['assigned'])
-      expect((await admin.query(`SELECT organization_id::text, steward_id FROM steward_assignments WHERE grievance_id = $1`, [grievance])).rows).toEqual([{ organization_id: ORG_A, steward_id: stewardId }])
+      expect((await admin.query(`SELECT organization_id::text, steward_id FROM steward_assignments WHERE grievance_id = $1`, [grievance])).rows).toEqual([{ organization_id: ORG_A, steward_id: stewardUserId }])
       expect((await admin.query(`SELECT current_caseload FROM stewards WHERE id = $1`, [stewardId])).rows[0].current_caseload).toBe(1)
       // The convergence task was recorded in the assignment transaction and processed by the system role afterwards: it can only have been
       // processed if the system connection could see it, that is, if the assignment had committed.
       const tasks = (await admin.query(`SELECT organization_id::text, status FROM deadline_reassignment_convergence WHERE grievance_id = $1`, [grievance])).rows
       expect(tasks).toEqual([{ organization_id: ORG_A, status: 'converged' }])
-      expect(state.assigned.at(-1)?.params).toMatchObject({ organizationId: ORG_A, grievanceId: grievance, issuerUserId: officerA, assigneeUserId: stewardId })
+      expect(state.assigned.at(-1)?.params).toMatchObject({ organizationId: ORG_A, grievanceId: grievance, issuerUserId: officerA, assigneeUserId: stewardUserId })
       expect(harness.audits.slice(before).filter((entry) => entry.resourceId === grievance)).toEqual([expect.objectContaining({ action: 'grievance.assign_steward', organizationId: ORG_A, userId: officerA })])
     })
 

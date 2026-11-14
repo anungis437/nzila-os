@@ -8,7 +8,7 @@
  * enforcement wrapper turns into a denial.
  *
  * Source coverage (see docs/union-eyes/convergence for the full matrix):
- *   case          public.grievances, else public.claims (creator, classification) + ue_authority_resource_relationships
+ *   case          public.grievances, else public.claims (creator, represented member, classification) + ue_authority_resource_relationships
  *                 (governed assignments) + ue_authority_workaid_matters (counsel control)
  *   document      public.documents + public.document_links (grievance links only)
  *   financial     public.payments (amount, currency) + ue_authority_financial_steps
@@ -73,7 +73,7 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
   if (!isUuid(org) || !isUuid(req.resource.id)) return null
   let row = (
     await exec.query<Row>(
-      `SELECT id::text AS id, organization_id::text AS organization_id, created_by, created_at,
+      `SELECT id::text AS id, organization_id::text AS organization_id, created_by, grievant_id::text AS represented_member_id, created_at,
               COALESCE(is_confidential, false) AS is_confidential,
               COALESCE(has_legal_implications, false) AS has_legal_implications
          FROM public.grievances WHERE organization_id = $1::uuid AND id = $2::uuid`,
@@ -146,7 +146,21 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
     })
   }
 
-  // Only the creator relationship is derived from the case row. Every assignment, ownership and collaborator
+  const representedMember = row.represented_member_id as string | null
+  if (isPrincipalId(representedMember) && representedMember !== creator) {
+    relationships.push({
+      id: derivedId('represented_member', facts.id, representedMember),
+      organizationId: org,
+      principalUserId: representedMember,
+      resource: { type: 'case', id: facts.id, organizationId: org },
+      relation: 'represented_member', permissions: [], privilegedAccess: false,
+      origin: 'derived', grantedBy: null, status: 'active',
+      effectiveAt: toDate(row.created_at), expiresAt: null, revokedAt: null,
+    })
+  }
+
+  // Authorship and represented-member identity come from their explicit case fields, never generic related-case links or contact details.
+  // Every assignment, ownership and collaborator
   // relationship is an explicit, governed kernel record loaded with the principal's facts (ue_authority_resource_relationships).
   // The pre-kernel collaborator table is deliberately not read: it carried flags, not governed grants.
   return { resource: facts, relationships }

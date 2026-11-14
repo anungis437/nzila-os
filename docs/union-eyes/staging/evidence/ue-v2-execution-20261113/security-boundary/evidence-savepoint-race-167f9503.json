@@ -1,0 +1,18 @@
+[
+  {
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-11-14T01:23:31.3300446Z",
+    "aborted": "False",
+    "outsideTransaction": "True",
+    "savepoint": "True",
+    "transactionEnded": "False"
+  },
+  {
+    "TableName": "PrimaryResult",
+    "TimeGenerated": "2026-11-14T01:23:30.2054952Z",
+    "aborted": "False",
+    "outsideTransaction": "True",
+    "savepoint": "True",
+    "transactionEnded": "False"
+  }
+]

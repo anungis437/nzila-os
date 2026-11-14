@@ -36,7 +36,7 @@ vi.mock('@/db/db', () => ({
 }));
 
 vi.mock('@/db/schema/domains/member/stewards', () => ({
-  stewards: { id: 'id', orgId: 'orgId', active: 'active', region: 'region' },
+  stewards: { id: 'id', orgId: 'orgId', userId: 'userId', active: 'active', region: 'region', currentCaseload: 'currentCaseload' },
   stewardAssignments: {},
 }));
 
@@ -161,17 +161,18 @@ describe('assignSteward', () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
   it('stores the assignment for the organization and bumps the caseload in the statement itself', async () => {
-    const row = { id: 'a1', organizationId: 'org-1', grievanceId: 'g-1', stewardId: 's-1' };
+    const row = { id: 'a1', organizationId: 'org-1', grievanceId: 'g-1', stewardId: 'person-1' };
+    mockSelectFrom.mockReturnValue({ where: vi.fn(() => ({ limit: vi.fn(() => ({ for: vi.fn(async () => [{ userId: 'person-1' }]) })) })) });
     mockReturning.mockResolvedValue([row]);
 
     const result = await assignSteward('org-1', 'g-1', 's-1', tx);
 
     expect(result).toEqual(row);
-    expect(mockInsertValues).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org-1', grievanceId: 'g-1', stewardId: 's-1', stewardType: 'steward' }));
+    expect(mockInsertValues).toHaveBeenCalledWith(expect.objectContaining({ organizationId: 'org-1', grievanceId: 'g-1', stewardId: 'person-1', stewardType: 'steward' }));
     // A read-then-write increment would lose a concurrent assignment: the new value is an expression, not a number read earlier.
     expect(mockUpdateSet).toHaveBeenCalledTimes(1);
     const [set] = mockUpdateSet.mock.calls[0] as unknown as [{ currentCaseload: unknown }];
     expect(typeof set.currentCaseload).not.toBe('number');
-    expect(db.select).not.toHaveBeenCalled();
+    expect(db.select).toHaveBeenCalled();
   });
 });

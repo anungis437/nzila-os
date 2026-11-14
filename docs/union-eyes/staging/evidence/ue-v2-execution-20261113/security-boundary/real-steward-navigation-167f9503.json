@@ -1,0 +1,551 @@
+{
+  "evidenceClass": "REAL_REMOTE_ENTRA_SESSION_AND_API",
+  "sourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "workflowSha": "b3396380a69bbf3202f8973fa22771a3d0928ca2",
+  "runId": "43542038200",
+  "observations": [
+    {
+      "at": "2026-11-14T01:42:51.407Z",
+      "kind": "LIVE_SOURCE_IDENTITY",
+      "gitSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "principal": "c01e5647-8506-4101-bb52-2547000a9e02"
+    },
+    {
+      "at": "2026-11-14T01:42:59.896Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "A",
+      "principal": "c01e5647-8506-4101-bb52-2547000a9e02",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-14T01:57:59.882Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-14T01:43:00.630Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/profile/roles",
+      "status": 200,
+      "traceId": "3d42068922c88c17e63f2ce2269b6012",
+      "correlationId": "9e9f67ec-6aef-4c7c-be78-95a0b127da64"
+    },
+    {
+      "at": "2026-11-14T01:43:00.631Z",
+      "kind": "LIVE_CANONICAL_MEMBERSHIP_ROLE",
+      "requestedOwnedSyntheticRole": "steward",
+      "observedCanonicalRole": "steward"
+    },
+    {
+      "at": "2026-11-14T01:43:03.509Z",
+      "kind": "OBSERVED_ROLE_EXECUTION_HOME",
+      "requestedOwnedSyntheticRole": "steward",
+      "initialPath": "/en-CA/dashboard",
+      "path": "/en-CA/dashboard/workbench",
+      "redirectedAfterDOMContentLoaded": true,
+      "initialHttpStatus": 200
+    },
+    {
+      "at": "2026-11-14T01:43:04.944Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/inbox",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:06.867Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/en-CA/dashboard/inbox",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:08.346Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/workbench",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:09.980Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/en-CA/dashboard/workbench",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:11.694Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/members",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:13.007Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/en-CA/dashboard/members",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:15.886Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/correspondence",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:18.082Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/en-CA/dashboard/correspondence",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:19.483Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/documents",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:21.050Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/en-CA/dashboard/documents",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:22.347Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/priorities",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:24.300Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/en-CA/dashboard/priorities",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:25.739Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/clause-library",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:27.348Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/en-CA/dashboard/clause-library",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:28.701Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/settings",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:30.204Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/en-CA/dashboard/settings",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:31.402Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/inbox",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:33.269Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/fr-CA/dashboard/inbox",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:34.838Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/workbench",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:36.382Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/fr-CA/dashboard/workbench",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:38.443Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/members",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:39.810Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/fr-CA/dashboard/members",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:41.882Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/correspondence",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:43.722Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/fr-CA/dashboard/correspondence",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:45.169Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/documents",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:46.663Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/fr-CA/dashboard/documents",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:48.283Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/priorities",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:50.185Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/fr-CA/dashboard/priorities",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:52.030Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/clause-library",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:53.694Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/fr-CA/dashboard/clause-library",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:55.010Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/settings",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-14T01:43:56.162Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "steward",
+      "path": "/fr-CA/dashboard/settings",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-14T01:43:59.277Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "steward",
+      "path": "/en-CA/dashboard/finance",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/finance",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-14T01:44:01.981Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "steward",
+      "path": "/en-CA/dashboard/operations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/operations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-14T01:44:04.788Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "steward",
+      "path": "/en-CA/dashboard/admin/members",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/admin/members",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-14T01:44:07.394Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "steward",
+      "path": "/en-CA/dashboard/security",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/security",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-14T01:44:10.353Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "steward",
+      "path": "/en-CA/dashboard/integrations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/integrations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-14T01:44:10.908Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/finance/summary",
+      "status": 403,
+      "traceId": "0edda108931ab64c39743263a81e6fd2",
+      "correlationId": "02a33199-ee49-44da-8f07-9ed65db07d85",
+      "responseTraceId": "mwfqss5u-c1ccee4e"
+    },
+    {
+      "at": "2026-11-14T01:44:10.908Z",
+      "kind": "SENSITIVE_FINANCE_API_DENIED_WITHOUT_MANDATE",
+      "role": "steward",
+      "path": "/api/finance/summary"
+    },
+    {
+      "at": "2026-11-14T01:44:11.399Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/finance/per-capita/inbound",
+      "status": 403,
+      "traceId": "519b25a9922cc479fa70e56b587f76bc",
+      "correlationId": "bf875f53-8238-403d-bb59-8582fbcaccc4",
+      "responseTraceId": "mwfqssky-f7ebdf5b"
+    },
+    {
+      "at": "2026-11-14T01:44:11.399Z",
+      "kind": "SENSITIVE_FINANCE_API_DENIED_WITHOUT_MANDATE",
+      "role": "steward",
+      "path": "/api/finance/per-capita/inbound"
+    },
+    {
+      "at": "2026-11-14T01:44:12.750Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases",
+      "status": 201,
+      "traceId": "0b897d39bc732e4e0e5e57e09916fff3",
+      "correlationId": "b0f755f8-5b32-4377-8be1-9dd6700d91d3",
+      "responseTraceId": "mwfqssyk-0629d1e1"
+    },
+    {
+      "at": "2026-11-14T01:44:15.228Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases/52912f65-c54f-4ddf-9bab-64687e18440b",
+      "status": 200,
+      "traceId": "df91c5f205d63b5e5d63d42068f2a166",
+      "correlationId": "2be110a0-900c-4e22-94e4-d4ac276990f1",
+      "responseTraceId": "mwfqsu03-5068dfee"
+    },
+    {
+      "at": "2026-11-14T01:44:17.535Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases/52912f65-c54f-4ddf-9bab-64687e18440b/notes",
+      "status": 201,
+      "traceId": "8296e1184dd94b38d3ea462187bc5d06",
+      "correlationId": "1dee507d-49d5-40ec-99f2-b32f3cedb04a"
+    },
+    {
+      "at": "2026-11-14T01:44:19.635Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases/52912f65-c54f-4ddf-9bab-64687e18440b/notes",
+      "status": 200,
+      "traceId": "378217610c827668898b8082dc0f8cc5",
+      "correlationId": "d84eca22-980e-4908-ac37-e3295e6d6020"
+    },
+    {
+      "at": "2026-11-14T01:44:21.789Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases/52912f65-c54f-4ddf-9bab-64687e18440b/assign",
+      "status": 403,
+      "traceId": "0c4278adf99ce7f75a680f75479d133c",
+      "correlationId": "0b5b6eb5-e31b-4bd4-bf9a-b41698eced87"
+    },
+    {
+      "at": "2026-11-14T01:44:21.789Z",
+      "kind": "REPRESENTATIVE_FILING_NOTE_PERSISTENCE_AND_SELF_MATTER_ASSIGNMENT_DENIAL",
+      "claimId": "52912f65-c54f-4ddf-9bab-64687e18440b",
+      "internalAssessmentRedacted": true
+    },
+    {
+      "at": "2026-11-14T01:44:23.131Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/members",
+      "status": 200,
+      "traceId": "42132425bdce2b9a3ef0732e083dadb4",
+      "correlationId": "7b41530e-513b-4044-b3be-c0e5df167e30",
+      "responseTraceId": "mwfqt0z3-e48bcd62"
+    },
+    {
+      "at": "2026-11-14T01:44:24.124Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/members?organizationId=f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab",
+      "status": 403,
+      "traceId": "eabae5ebdbf9e3248c45d20856050fcf",
+      "correlationId": "124ad578-b7e0-42e1-8289-420b9d2dbb9e",
+      "responseTraceId": "mwfqt20e-4359c445"
+    },
+    {
+      "at": "2026-11-14T01:44:24.124Z",
+      "kind": "MEMBER_DIRECTORY_OWN_SCOPE_AND_FOREIGN_ORGANIZATION_DENIAL",
+      "role": "steward"
+    },
+    {
+      "at": "2026-11-14T01:44:24.210Z",
+      "kind": "NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED",
+      "role": "steward",
+      "platformAdministrator": false,
+      "tenantContentBypassClaimed": false
+    }
+  ],
+  "runtimeAcceptance": false,
+  "requestedOwnedSyntheticRole": "steward",
+  "canonicalEntryCount": 42,
+  "status": "PASS"
+}

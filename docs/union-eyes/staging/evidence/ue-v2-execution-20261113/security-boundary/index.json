@@ -1,6 +1,6 @@
 {
   "purpose": "PRE_REPAIR_SECURITY_FINDING_AND_QUALIFICATION_PROVENANCE",
-  "proposedSourceSha": "453c50df40d5c896710a4631e901ed8b5d44e8e4",
+  "proposedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
   "productionAuthorized": false,
   "stagingGo": false,
   "entries": [
@@ -45,15 +45,135 @@
       "sha256": "272251cf83674a7788b642f5e0de25a935d8b52ce92192d22d0aa66d757d0ec3",
       "observedOrProposedSourceSha": "2786943ac51f42b24edc808031015b539ae091f1",
       "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-ed13cf0a.json",
+      "sha256": "ccd979dc7d5127bb978e51eae62fc3e4f9471885b8c443d9e48ab06ec8043a56",
+      "observedOrProposedSourceSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "runtime-167f9503-azure.json",
+      "sha256": "334b4306d8d4aee59ac75b0cb1479413a89a3686dfbfee05fa25fae53f5965a7",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "private-document-bytes-167f9503.json",
+      "sha256": "11c937e3907c27ee5c9ba42c0311a21a3933af0111643d4d5923109725a79d7b",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "real-session-43540064035-167f9503.json",
+      "sha256": "1d24d7c3b227baacd7f0d7a56b3e72c239222d40c4090311fe1e63ef9367d321",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false,
+      "encryptedLeaseEnvelopeOmitted": true
+    },
+    {
+      "file": "ui-review-167f9503.json",
+      "sha256": "5b8261ac904d344052164b4a59b1c0f7eabc1146b319d3c8b09f03d3794f2310",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-b89da813.json",
+      "sha256": "9a2d7b23b819abc315acc4037d59d913783f6539f729cf5e07a64ed35e43be97",
+      "observedOrProposedSourceSha": "b89da813a7a2343a2459586969d3b9c7ead94754",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "candidate-restored-rehearsal-b89da813.json",
+      "sha256": "9c4fefef46af8c36028417561a4b0e13dc4ca9f321e2663f5b7f60a71031f6cd",
+      "observedOrProposedSourceSha": "b89da813a7a2343a2459586969d3b9c7ead94754",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-cbf2bc93.json",
+      "sha256": "b2e7f2c69582fdac918ebd04946b606473dbb651e3514044c08d86e32985c134",
+      "observedOrProposedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "candidate-restored-rehearsal-cbf2bc93.json",
+      "sha256": "cbed0a80b3ac2dd472e2f12cb3f7827c3120308a61dc61db80d4a0c516976167",
+      "observedOrProposedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "base-authority-clone-apply-ed13cf0a.json",
+      "sha256": "e8fd41679b6e84da2183edf9e9963d870460bfa3a7d4ffa50723d2929fa5fc70",
+      "observedOrProposedSourceSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "base-authority-initial-clone-plan-ed13cf0a.json",
+      "sha256": "5ca6ec98fe3fbe712f5f7c9492eb55be784898133aa9261b0e5ce07de6af6802",
+      "observedOrProposedSourceSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "base-authority-current-clone-noop-58f1c242.json",
+      "sha256": "19069158a16f9eda8d6356cb6bad1da13cb01150e0380b78a92731b6b4a89d1f",
+      "observedOrProposedSourceSha": "58f1c242383955c0c950a95eb2afd7a23ad874c2",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nested-bridge-original-deferred-refusal-167f9503.json",
+      "sha256": "8252ac1d7b7bd8d51808a29b4b50575ef368015a2159517dcb3a0c66e04ee4e1",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nested-scope-signed-fixed-aba4b320.json",
+      "sha256": "a824d0f39a93dfdc173c210d19d3c23bc760a39e410229309459ba7a2e43e2b5",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "missing-current-case-sealed-pack-167f9503.json",
+      "sha256": "32d065d0950b2ae0e847ff1f7cef76ebfccfc1108a95965da100d14d2cd29e0a",
+      "observedOrProposedSourceSha": null,
+      "runtimePassInferred": false
+    },
+    {
+      "file": "evidence-savepoint-race-167f9503.json",
+      "sha256": "87444df7b337e7b03a971976830eb03748aa79d2a4183d07e3685f572c6ef292",
+      "observedOrProposedSourceSha": null,
+      "runtimePassInferred": false
+    },
+    {
+      "file": "private-document-expiry-167f9503.json",
+      "sha256": "189bfdad83e141594fef8d2da220b336423f115cfa66809734a8362b8772c719",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "ancestor-ed13cf0a-all-checks-passed.json",
+      "sha256": "e9f7fa8d9bb94182a9bdea3bf96fd39b4276070f7a936ab235d17a4bf613e3d3",
+      "observedOrProposedSourceSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "real-steward-navigation-167f9503.json",
+      "sha256": "7adb8477500c1cfe7fb968a70177ae41e33cdb2d4f4d0fddc8d250ac21a0e56a",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "real-officer-navigation-167f9503.json",
+      "sha256": "0e2ee6ac6018f8e94ef4c629bdc987a6fb3568e0c5523430f7556f87c8e5cc4e",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
     }
   ],
   "nextCandidate": {
-    "sourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
-    "localNativeExport": "local-native-export-167f9503.json",
-    "sourceProvenance": "repair-167f9503-provenance.json",
-    "localFocusedTests": 105,
-    "utcDateBoundaryTests": 69,
-    "liveApplied": false,
+    "sourceSha": "96b7ebca84552c289df2ea4439e0c6218eab4494",
+    "localNativeExport": "local-native-export-96b7ebca.json",
+    "stewardIdentityFocusedTests": 25,
+    "schemaPlanChanged": false,
+    "databaseRepairCodeChanged": false,
     "deployed": false
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
@@ -64,5 +184,17 @@
     "sameRepairBundleAndPlanAsCandidate": true,
     "nativeSignedProof": "clone-real-signed-native-audit-167f9503.json",
     "signedSourceProvenance": "clone-signed-source-167f9503.json"
+  },
+  "primaryDatabaseRepair": {
+    "sourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+    "qualifiedAuthority": "primary-repair-qualified-authority-167f9503.json",
+    "plan": "primary-combined-plan-167f9503.json",
+    "apply": "primary-combined-apply-167f9503.json",
+    "actualUnboundDenial": "primary-unbound-denial-after-repair-167f9503.json",
+    "realMemberMessages": "primary-real-member-messages-after-schema-repair-167f9503.json",
+    "observedApplicationSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+    "businessDmlIssued": false,
+    "verifiedRuntimeRelations": 423,
+    "persistedOwnerDelegations": 0
   }
 }

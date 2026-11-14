@@ -1,0 +1,31 @@
+{
+  "evidenceClass": "REAL_ENTRA_MEMBER_BASE_MESSAGE_DETAIL_DIAGNOSTIC",
+  "applicationSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "at": "2026-11-14T00:42:25.997Z",
+  "threadId": "9bc3a374-25b2-4433-962a-9d2ac7a07481",
+  "observations": [
+    {
+      "method": "GET",
+      "path": "/api/messages/threads/9bc3a374-25b2-4433-962a-9d2ac7a07481",
+      "status": 200,
+      "traceId": "85869edff7fe76ef034bdff09c1b5c20",
+      "errorCode": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/messages/threads/9bc3a374-25b2-4433-962a-9d2ac7a07481/messages",
+      "status": 200,
+      "traceId": "49cc9766249fe462ade07cbbe929cce7",
+      "errorCode": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/messages/threads/9bc3a374-25b2-4433-962a-9d2ac7a07481/read",
+      "status": 200,
+      "traceId": "bdedda38b0e2d25c6894bd4331337877",
+      "errorCode": null
+    }
+  ],
+  "status": "PASS",
+  "credentialsOrCookiesPublished": false
+}

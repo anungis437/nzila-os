@@ -32,7 +32,7 @@ let db: ReturnType<typeof drizzle>;
 beforeAll(async () => {
   pg = new PGlite();
   await pg.exec(`
-    CREATE TABLE grievances (
+    CREATE TABLE grievances (grievant_id uuid,
       id uuid PRIMARY KEY, organization_id uuid NOT NULL, grievance_number text,
       status text NOT NULL DEFAULT 'draft', created_by text, union_rep_id uuid, is_confidential boolean DEFAULT false
     );

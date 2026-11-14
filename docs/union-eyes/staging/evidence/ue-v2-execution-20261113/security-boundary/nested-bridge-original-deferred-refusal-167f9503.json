@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "purpose": "ACTUAL_SIGNED_NESTED_BRIDGE_DEFERRED_GUARD_REPRODUCTION",
+  "applicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "at": "2026-11-14T01:58:42.879Z",
+  "threadId": "6a494f54-280f-42b9-877b-fc3957e1e871",
+  "steps": [
+    "owned-synthetic-unassigned-thread-preimage",
+    "thread-update",
+    "assignment-history-insert",
+    "inner-verified-bridge-revoked-before-outer-commit"
+  ],
+  "failure": {
+    "code": "23001",
+    "message": "message_threads: an assignment change requires its history record",
+    "routine": "exec_stmt_raise",
+    "where": "PL/pgSQL function message_threads_assignment_requires_history() line 12 at RAISE"
+  },
+  "businessMutationCommitted": false,
+  "actualHttp500ObservedSeparately": true,
+  "tokensSerialized": false,
+  "transport": {
+    "bytes": 585148,
+    "programSha256": "74707a9ac697be718fa16a5b73cd2b5050703809e4231cfa8c0244109ae8deab",
+    "fileSha256": {
+      "bearer.cjs": "d11ce408722e36094c32ca32fabbb2743d5ed01a0c9ed0b57472199326f056ec"
+    }
+  }
+}

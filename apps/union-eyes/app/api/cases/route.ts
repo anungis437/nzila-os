@@ -11,6 +11,7 @@ import { withRLSContext } from '@/lib/db/with-rls-context';
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
 import { NextResponse } from 'next/server';
 import { buildUnionEvidencePack } from '@/lib/evidence';
+import { settleUnionEvidencePack } from '@/lib/evidence-settlement';
 import { logger } from '@/lib/logger';
 import { recordUnionEyesCaseCreated } from '@/lib/pilot-metrics';
 import { z } from 'zod';
@@ -207,19 +208,18 @@ export const POST = withApi(
           sourceIntakeId: sourceIntakeId ?? null,
         },
       });
+      // Seal before this mutation transaction can commit.
+      await settleUnionEvidencePack(buildUnionEvidencePack({
+        actionType: 'CASE_CREATED',
+        orgId: organizationId,
+        actorId: userId ?? 'unknown',
+        artifacts: [{ type: 'case', data: { claimId: created?.claimId, claimType, priority } }],
+      }), 'CASE_CREATED');
+
       return result;
     });
 
     const inserted = rows[0];
-
-    // Evidence: tamper-proof audit trail for case creation
-    buildUnionEvidencePack({
-      actionType: 'CASE_CREATED',
-      orgId: organizationId,
-      actorId: userId ?? 'unknown',
-      artifacts: [{ type: 'case', data: { claimId: (inserted as Record<string, unknown>)?.claimId, claimType, priority } }],
-    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'CASE_CREATED' }))
-
     const createdClaimId = (inserted as Record<string, unknown>)?.claimId as string | undefined;
     const traceId = request.headers.get('x-trace-id') ?? crypto.randomUUID();
     if (createdClaimId) {

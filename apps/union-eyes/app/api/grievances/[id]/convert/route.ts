@@ -13,8 +13,8 @@ import { withApi, ApiError, zUUID } from '@/lib/api/framework';
 import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
 import { auditLog, AuditEventType, AuditSeverity } from "@/lib/audit-logger";
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit';
-import { logger } from '@/lib/logger';
 import { buildUnionEvidencePack } from '@/lib/evidence';
+import { settleUnionEvidencePack } from '@/lib/evidence-settlement';
 import {
   validateTransition,
   type LifecycleState,
@@ -127,6 +127,13 @@ export const POST = withApi(
             cbaId: intake.cbaId ?? null,
             organizationId,
             createdBy: userId,
+            isConfidential: intake.isConfidential === true,
+            hasLegalImplications: intake.hasLegalImplications === true,
+            // Retain the originating member separately from the staff converter's actual authorship.
+            grievantId: zUUID.safeParse(intake.grievantId ?? intake.createdBy).success
+              ? (intake.grievantId ?? intake.createdBy) : null,
+            grievantName: intake.grievantName ?? null,
+            grievantEmail: intake.grievantEmail ?? null,
             filedDate: new Date(),
             relatedGrievanceIds: [intakeId],
           })
@@ -182,14 +189,14 @@ export const POST = withApi(
     }
 
     // Evidence pack
-    buildUnionEvidencePack({
+    await settleUnionEvidencePack(buildUnionEvidencePack({
       actionType: 'INTAKE_CONVERTED',
       orgId: organizationId,
       actorId: userId,
       artifacts: [
         { type: 'grievance', data: { intakeId, caseId: result.id, caseNumber: result.grievanceNumber } },
       ],
-    }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'INTAKE_CONVERTED' }));
+    }), 'INTAKE_CONVERTED');
 
     return standardSuccessResponse(result);
   },
