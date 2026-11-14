@@ -169,13 +169,13 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+    "sourceSha": "e70027e8687dcaaa533f931d18d2da45582cc3d0",
     "sourcePR": 1228,
     "integrationPR": 1229,
     "deployed": false,
-    "localNativeExport": "local-native-export-5bee2347.json",
-    "nativeSourceAdmission": "candidate-restored-rehearsal-5bee2347.json",
-    "primaryReadOnlyNoop": "primary-source-noop-5bee2347-qualification.json",
+    "localNativeExport": "local-native-export-e70027e8.json",
+    "nativeSourceAdmission": "candidate-restored-rehearsal-e70027e8.json",
+    "primaryReadOnlyNoop": "primary-source-noop-e70027e8-qualification.json",
     "ciAndRuntimeStillRequired": true,
     "repairSummary": "Nullable workbench case reference fallback and exact staff grievance collection entry; dependent tests enforce creation/management denials"
   },
@@ -259,5 +259,13 @@
     "sourcePR": 1228,
     "wholeApplicationCI": "source-4687a4ed-whole-application-ci-failure.json",
     "deployed": false
-  }
+  },
+  "supersededWorkbenchCandidates": [
+    {
+      "sourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+      "sourcePR": 1228,
+      "review": "workbench-collection-entry-audience-review.json",
+      "deployed": false
+    }
+  ]
 }
