@@ -13,6 +13,7 @@ import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import {
   loadExceptions,
+  isExceptionExpired,
   isExcepted,
   formatViolations,
   type Violation,
@@ -192,5 +193,20 @@ describe('formatViolations', () => {
     const output = formatViolations(violations)
     expect(output).toContain('[TEST_002]')
     expect(output).toContain('apps/web/tsconfig.json')
+  })
+})
+
+
+describe('date-only governance expiry boundaries', () => {
+  it.each([
+    ['2026-11-13T23:59:59.999Z', false],
+    ['2026-11-14T00:00:00.000Z', false],
+    ['2026-11-14T23:59:59.999Z', false],
+    ['2026-11-15T00:00:00.000Z', true],
+  ])('keeps November 14 valid through that UTC date: %s', (at, expired) => {
+    expect(isExceptionExpired('2026-11-14', new Date(at))).toBe(expired)
+  })
+  it.each(['2026-02-30', '2026-13-01', '2026-11-14T12:00Z', 'invalid'])('fails closed for invalid date %s', expiresOn => {
+    expect(isExceptionExpired(expiresOn, new Date('2026-11-14T00:00Z'))).toBe(true)
   })
 })
