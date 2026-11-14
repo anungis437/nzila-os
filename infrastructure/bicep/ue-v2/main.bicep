@@ -451,7 +451,7 @@ module acrPull 'modules/acr-pull.bicep' = {
   }
 }
 
-// Staging traces remain in Canada Central and use the environment's existing workspace.
+// Staging traces remain in Canada Central and use the staging-selected workspace.
 resource stagingInsights 'Microsoft.Insights/components@2020-02-02' = if (env == 'staging') {
   name: '${prefix}-insights'
   location: location
@@ -464,6 +464,7 @@ resource stagingInsights 'Microsoft.Insights/components@2020-02-02' = if (env ==
     RetentionInDays: 30
     DisableLocalAuth: false
   }
+  dependsOn: [logAnalytics]
 }
 
 // ── Container Apps environment (VNet-integrated; internal in prod) and workloads ─
