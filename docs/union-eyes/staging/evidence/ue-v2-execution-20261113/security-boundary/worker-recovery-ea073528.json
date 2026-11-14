@@ -1,0 +1,1554 @@
+{
+  "ok": true,
+  "status": "PASS",
+  "purpose": "ACTUAL_STAGING_WORKER_RECOVERY_DELIVERY_ACCEPTANCE",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "at": "2026-11-14T19:27:09.212Z",
+  "checks": [
+    "real-overdue-scheduling-provider-acceptance-and-idempotent-repeat",
+    "restrictive-read-fault-fails-closed-and-real-next-run-retries-successfully",
+    "unexpired-lease-exclusive-actual-expiry-recovery-and-concurrent-single-delivery",
+    "outgoing-recipient-suppressed-before-provider-dispatch",
+    "current-successor-rescheduled-and-provider-accepted",
+    "durable-pending-assignment-convergence-retried-by-actual-worker"
+  ],
+  "completed": [
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:15.861Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "seed",
+      "scenario": "basic",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "fixtureCreated": true,
+        "dueDate": "2026-11-14T19:24:14.980Z",
+        "provenance": "Explicit synthetic persisted preconditions; not an authorized assignment API request or fabricated office"
+      },
+      "snapshot": {
+        "reminders": [],
+        "executions": [],
+        "audit": [],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:18.275Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "overdue",
+      "scenario": "basic",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "6ceb97d7d59af8cc13a86c7d56ef259f",
+        "clientCorrelationId": "55b3bb1c-6728-49f4-83da-cbb8c816bcf5",
+        "httpStatus": 200,
+        "runId": "2580a84d-25c6-4878-9287-9692295cc5cd",
+        "startedAt": "2026-11-14T19:25:17.185Z",
+        "finishedAt": "2026-11-14T19:25:17.444Z",
+        "durationMs": 259,
+        "overdueCount": 1,
+        "remindersScheduled": 1,
+        "failed": 0
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "source_deadline_id": "cae5a0e4-6ca0-4c18-aa79-9990316b4dd1",
+            "status": "pending",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:25:17.396Z",
+            "attempt_count": 0,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [],
+        "audit": [
+          {
+            "event_type": "reminder.scheduled",
+            "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+            "occurred_at": "2026-11-14T19:25:17.199Z"
+          },
+          {
+            "event_type": "deadline.created",
+            "reminder_id": null,
+            "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+            "occurred_at": "2026-11-14T19:25:17.199Z"
+          },
+          {
+            "event_type": "overdue.detected",
+            "reminder_id": null,
+            "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+            "occurred_at": "2026-11-14T19:25:17.199Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:20.857Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "worker",
+      "scenario": "basic",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "fab158e4c9fe174c417fb17f7083881d",
+        "clientCorrelationId": "b6a1dd8a-886d-4b73-98ea-4ab47a8bce36",
+        "httpStatus": 200,
+        "runId": "870d438c-e647-4dd5-91ff-40638e0ac731",
+        "workerInstance": "deadline-worker-870d438c",
+        "correlationId": "870d438c-e647-4dd5-91ff-40638e0ac731",
+        "startedAt": "2026-11-14T19:25:19.595Z",
+        "finishedAt": "2026-11-14T19:25:19.801Z",
+        "durationMs": 206,
+        "examined": 1,
+        "claimed": 1,
+        "sent": 1,
+        "transientFailures": 0,
+        "permanentFailures": 0,
+        "deadLettered": 0,
+        "leasesRecovered": 0,
+        "cancelledSkipped": 0
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "source_deadline_id": "cae5a0e4-6ca0-4c18-aa79-9990316b4dd1",
+            "status": "sent",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:25:17.396Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": "resend",
+            "provider_message_id": "01a1db85-77d7-744c-b312-ef3b26fb0593",
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [
+          {
+            "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "attempt_number": 1,
+            "outcome": "sent",
+            "provider": "resend",
+            "provider_message_id": "01a1db85-77d7-744c-b312-ef3b26fb0593",
+            "provider_status_code": null,
+            "error_code": null,
+            "worker_instance": "deadline-worker-870d438c",
+            "correlation_id": "870d438c-e647-4dd5-91ff-40638e0ac731"
+          }
+        ],
+        "audit": [
+          {
+            "event_type": "reminder.scheduled",
+            "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+            "occurred_at": "2026-11-14T19:25:17.199Z"
+          },
+          {
+            "event_type": "deadline.created",
+            "reminder_id": null,
+            "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+            "occurred_at": "2026-11-14T19:25:17.199Z"
+          },
+          {
+            "event_type": "overdue.detected",
+            "reminder_id": null,
+            "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+            "occurred_at": "2026-11-14T19:25:17.199Z"
+          },
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "correlation_id": "870d438c-e647-4dd5-91ff-40638e0ac731",
+            "occurred_at": "2026-11-14T19:25:19.587Z"
+          },
+          {
+            "event_type": "reminder.sent",
+            "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "correlation_id": "870d438c-e647-4dd5-91ff-40638e0ac731",
+            "occurred_at": "2026-11-14T19:25:19.587Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:23.468Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "concurrent",
+      "scenario": "basic",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": [
+        {
+          "clientTraceId": "06808d8452ceeab43aca8cc24e366975",
+          "clientCorrelationId": "08ec79ba-85e1-4393-9597-96f55acb9aa5",
+          "httpStatus": 200,
+          "runId": "95901a8a-85db-4850-82a8-7a5d5835ad15",
+          "workerInstance": "deadline-worker-95901a8a",
+          "correlationId": "95901a8a-85db-4850-82a8-7a5d5835ad15",
+          "startedAt": "2026-11-14T19:25:22.312Z",
+          "finishedAt": "2026-11-14T19:25:22.321Z",
+          "durationMs": 9,
+          "examined": 0,
+          "claimed": 0,
+          "sent": 0,
+          "transientFailures": 0,
+          "permanentFailures": 0,
+          "deadLettered": 0,
+          "leasesRecovered": 0,
+          "cancelledSkipped": 0
+        },
+        {
+          "clientTraceId": "e70cfaa76fa4b1b09683bb8e1d415742",
+          "clientCorrelationId": "c0e247a8-558f-4d10-83b4-2f3d794d604a",
+          "httpStatus": 200,
+          "runId": "418ce3dc-f0c5-4f8f-a501-71d400025ae7",
+          "workerInstance": "deadline-worker-418ce3dc",
+          "correlationId": "418ce3dc-f0c5-4f8f-a501-71d400025ae7",
+          "startedAt": "2026-11-14T19:25:22.272Z",
+          "finishedAt": "2026-11-14T19:25:22.278Z",
+          "durationMs": 6,
+          "examined": 0,
+          "claimed": 0,
+          "sent": 0,
+          "transientFailures": 0,
+          "permanentFailures": 0,
+          "deadLettered": 0,
+          "leasesRecovered": 0,
+          "cancelledSkipped": 0
+        }
+      ],
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "source_deadline_id": "cae5a0e4-6ca0-4c18-aa79-9990316b4dd1",
+            "status": "sent",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:25:17.396Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": "resend",
+            "provider_message_id": "01a1db85-77d7-744c-b312-ef3b26fb0593",
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [
+          {
+            "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "attempt_number": 1,
+            "outcome": "sent",
+            "provider": "resend",
+            "provider_message_id": "01a1db85-77d7-744c-b312-ef3b26fb0593",
+            "provider_status_code": null,
+            "error_code": null,
+            "worker_instance": "deadline-worker-870d438c",
+            "correlation_id": "870d438c-e647-4dd5-91ff-40638e0ac731"
+          }
+        ],
+        "audit": [
+          {
+            "event_type": "reminder.scheduled",
+            "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+            "occurred_at": "2026-11-14T19:25:17.199Z"
+          },
+          {
+            "event_type": "deadline.created",
+            "reminder_id": null,
+            "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+            "occurred_at": "2026-11-14T19:25:17.199Z"
+          },
+          {
+            "event_type": "overdue.detected",
+            "reminder_id": null,
+            "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+            "occurred_at": "2026-11-14T19:25:17.199Z"
+          },
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "correlation_id": "870d438c-e647-4dd5-91ff-40638e0ac731",
+            "occurred_at": "2026-11-14T19:25:19.587Z"
+          },
+          {
+            "event_type": "reminder.sent",
+            "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+            "correlation_id": "870d438c-e647-4dd5-91ff-40638e0ac731",
+            "occurred_at": "2026-11-14T19:25:19.587Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:25.529Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "seed",
+      "scenario": "retry",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "fixtureCreated": true,
+        "dueDate": "2026-11-14T19:24:24.681Z",
+        "provenance": "Explicit synthetic persisted preconditions; not an authorized assignment API request or fabricated office"
+      },
+      "snapshot": {
+        "reminders": [],
+        "executions": [],
+        "audit": [],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:27.738Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "overdue",
+      "scenario": "retry",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "2fe503042890537520a5850b511337cb",
+        "clientCorrelationId": "96cd39fa-9796-4d8e-941b-a1618aca3e57",
+        "httpStatus": 200,
+        "runId": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+        "startedAt": "2026-11-14T19:25:26.791Z",
+        "finishedAt": "2026-11-14T19:25:26.928Z",
+        "durationMs": 137,
+        "overdueCount": 1,
+        "remindersScheduled": 1,
+        "failed": 0
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "source_deadline_id": "bb0bb993-6da2-4b74-b787-45e9c214f3a2",
+            "status": "pending",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:25:26.885Z",
+            "attempt_count": 0,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [],
+        "audit": [
+          {
+            "event_type": "reminder.scheduled",
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "correlation_id": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+            "occurred_at": "2026-11-14T19:25:26.802Z"
+          },
+          {
+            "event_type": "deadline.created",
+            "reminder_id": null,
+            "correlation_id": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+            "occurred_at": "2026-11-14T19:25:26.802Z"
+          },
+          {
+            "event_type": "overdue.detected",
+            "reminder_id": null,
+            "correlation_id": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+            "occurred_at": "2026-11-14T19:25:26.802Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:29.898Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "transient-read-fault",
+      "scenario": "retry",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "0b6974f9f1247480a48ccab574bb5dc8",
+        "clientCorrelationId": "2e807a8c-7570-4b9f-94b9-c1f99149518f",
+        "httpStatus": 200,
+        "runId": "d595e34c-b794-4656-9ace-29f756a69297",
+        "workerInstance": "deadline-worker-d595e34c",
+        "correlationId": "d595e34c-b794-4656-9ace-29f756a69297",
+        "startedAt": "2026-11-14T19:25:29.018Z",
+        "finishedAt": "2026-11-14T19:25:29.071Z",
+        "durationMs": 53,
+        "examined": 1,
+        "claimed": 1,
+        "sent": 0,
+        "transientFailures": 1,
+        "permanentFailures": 0,
+        "deadLettered": 0,
+        "leasesRecovered": 0,
+        "cancelledSkipped": 0
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "source_deadline_id": "bb0bb993-6da2-4b74-b787-45e9c214f3a2",
+            "status": "pending",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:25:26.885Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": "SUPPRESSION_CHECK_UNAVAILABLE",
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [
+          {
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "attempt_number": 1,
+            "outcome": "transient_failure",
+            "provider": "resend",
+            "provider_message_id": null,
+            "provider_status_code": null,
+            "error_code": "SUPPRESSION_CHECK_UNAVAILABLE",
+            "worker_instance": "deadline-worker-d595e34c",
+            "correlation_id": "d595e34c-b794-4656-9ace-29f756a69297"
+          }
+        ],
+        "audit": [
+          {
+            "event_type": "reminder.scheduled",
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "correlation_id": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+            "occurred_at": "2026-11-14T19:25:26.802Z"
+          },
+          {
+            "event_type": "deadline.created",
+            "reminder_id": null,
+            "correlation_id": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+            "occurred_at": "2026-11-14T19:25:26.802Z"
+          },
+          {
+            "event_type": "overdue.detected",
+            "reminder_id": null,
+            "correlation_id": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+            "occurred_at": "2026-11-14T19:25:26.802Z"
+          },
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "correlation_id": "d595e34c-b794-4656-9ace-29f756a69297",
+            "occurred_at": "2026-11-14T19:25:29.005Z"
+          },
+          {
+            "event_type": "reminder.failed_transient",
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "correlation_id": "d595e34c-b794-4656-9ace-29f756a69297",
+            "occurred_at": "2026-11-14T19:25:29.005Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:32.489Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "worker",
+      "scenario": "retry",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "809dfeb6e40ec4de72b3e9d00bb1fd69",
+        "clientCorrelationId": "cfce33cc-3fdb-461b-af44-dc143ab966d2",
+        "httpStatus": 200,
+        "runId": "48d073aa-128a-4d15-94af-b31044ac78ed",
+        "workerInstance": "deadline-worker-48d073aa",
+        "correlationId": "48d073aa-128a-4d15-94af-b31044ac78ed",
+        "startedAt": "2026-11-14T19:25:31.548Z",
+        "finishedAt": "2026-11-14T19:25:31.666Z",
+        "durationMs": 118,
+        "examined": 1,
+        "claimed": 1,
+        "sent": 1,
+        "transientFailures": 0,
+        "permanentFailures": 0,
+        "deadLettered": 0,
+        "leasesRecovered": 0,
+        "cancelledSkipped": 0
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "source_deadline_id": "bb0bb993-6da2-4b74-b787-45e9c214f3a2",
+            "status": "sent",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:25:26.885Z",
+            "attempt_count": 2,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": "resend",
+            "provider_message_id": "01a1db85-a662-7c51-afc6-bcb287db55a7",
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [
+          {
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "attempt_number": 1,
+            "outcome": "transient_failure",
+            "provider": "resend",
+            "provider_message_id": null,
+            "provider_status_code": null,
+            "error_code": "SUPPRESSION_CHECK_UNAVAILABLE",
+            "worker_instance": "deadline-worker-d595e34c",
+            "correlation_id": "d595e34c-b794-4656-9ace-29f756a69297"
+          },
+          {
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "attempt_number": 2,
+            "outcome": "sent",
+            "provider": "resend",
+            "provider_message_id": "01a1db85-a662-7c51-afc6-bcb287db55a7",
+            "provider_status_code": null,
+            "error_code": null,
+            "worker_instance": "deadline-worker-48d073aa",
+            "correlation_id": "48d073aa-128a-4d15-94af-b31044ac78ed"
+          }
+        ],
+        "audit": [
+          {
+            "event_type": "reminder.scheduled",
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "correlation_id": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+            "occurred_at": "2026-11-14T19:25:26.802Z"
+          },
+          {
+            "event_type": "deadline.created",
+            "reminder_id": null,
+            "correlation_id": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+            "occurred_at": "2026-11-14T19:25:26.802Z"
+          },
+          {
+            "event_type": "overdue.detected",
+            "reminder_id": null,
+            "correlation_id": "b786a521-f35c-408f-bc23-4aef5945c4e7",
+            "occurred_at": "2026-11-14T19:25:26.802Z"
+          },
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "correlation_id": "d595e34c-b794-4656-9ace-29f756a69297",
+            "occurred_at": "2026-11-14T19:25:29.005Z"
+          },
+          {
+            "event_type": "reminder.failed_transient",
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "correlation_id": "d595e34c-b794-4656-9ace-29f756a69297",
+            "occurred_at": "2026-11-14T19:25:29.005Z"
+          },
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "correlation_id": "48d073aa-128a-4d15-94af-b31044ac78ed",
+            "occurred_at": "2026-11-14T19:25:31.540Z"
+          },
+          {
+            "event_type": "reminder.sent",
+            "reminder_id": "e110bf20-e622-431d-a302-1537fdfa7ea1",
+            "correlation_id": "48d073aa-128a-4d15-94af-b31044ac78ed",
+            "occurred_at": "2026-11-14T19:25:31.540Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:34.607Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "seed",
+      "scenario": "lease",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "fixtureCreated": true,
+        "dueDate": "2026-11-15T19:25:33.755Z",
+        "provenance": "Explicit synthetic persisted preconditions; not an authorized assignment API request or fabricated office"
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "d7f9594e-3ff3-44d1-9a2f-f04600a2314e",
+            "source_deadline_id": "a3bf04e0-ab81-4af9-a00e-630986ccdca2",
+            "status": "claimed",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:25:32.759Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": "controlled-abandoned-before-provider",
+            "lease_expires_at": "2026-11-14T19:26:48.759Z",
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [],
+        "audit": [],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:25:36.672Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "worker",
+      "scenario": "lease",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "aa410d4124faca602efe28354d366eab",
+        "clientCorrelationId": "50893968-7f29-4c6c-91d0-dc738a4ffcb2",
+        "httpStatus": 200,
+        "runId": "1ab5c62a-92a2-4cf9-8794-0b4f5c70ae28",
+        "workerInstance": "deadline-worker-1ab5c62a",
+        "correlationId": "1ab5c62a-92a2-4cf9-8794-0b4f5c70ae28",
+        "startedAt": "2026-11-14T19:25:35.860Z",
+        "finishedAt": "2026-11-14T19:25:35.866Z",
+        "durationMs": 6,
+        "examined": 0,
+        "claimed": 0,
+        "sent": 0,
+        "transientFailures": 0,
+        "permanentFailures": 0,
+        "deadLettered": 0,
+        "leasesRecovered": 0,
+        "cancelledSkipped": 0
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "d7f9594e-3ff3-44d1-9a2f-f04600a2314e",
+            "source_deadline_id": "a3bf04e0-ab81-4af9-a00e-630986ccdca2",
+            "status": "claimed",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:25:32.759Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": "controlled-abandoned-before-provider",
+            "lease_expires_at": "2026-11-14T19:26:48.759Z",
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [],
+        "audit": [],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:26:52.471Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "concurrent",
+      "scenario": "lease",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": [
+        {
+          "clientTraceId": "96d454486d4ada4b216115f1bba9a5c1",
+          "clientCorrelationId": "9aeeb5b6-5de9-4ab5-b351-b519c88569f0",
+          "httpStatus": 200,
+          "runId": "8ea911fd-d0b9-4c0d-8cb0-a78cbef78394",
+          "workerInstance": "deadline-worker-8ea911fd",
+          "correlationId": "8ea911fd-d0b9-4c0d-8cb0-a78cbef78394",
+          "startedAt": "2026-11-14T19:26:51.422Z",
+          "finishedAt": "2026-11-14T19:26:51.576Z",
+          "durationMs": 154,
+          "examined": 1,
+          "claimed": 1,
+          "sent": 1,
+          "transientFailures": 0,
+          "permanentFailures": 0,
+          "deadLettered": 0,
+          "leasesRecovered": 1,
+          "cancelledSkipped": 0
+        },
+        {
+          "clientTraceId": "788ee6efc6ebd5f88f2ede56e707270b",
+          "clientCorrelationId": "bc638a2d-54f8-435e-b9a5-3ff75a905394",
+          "httpStatus": 200,
+          "runId": "d17dee2c-111c-413c-b322-e4d4c9223476",
+          "workerInstance": "deadline-worker-d17dee2c",
+          "correlationId": "d17dee2c-111c-413c-b322-e4d4c9223476",
+          "startedAt": "2026-11-14T19:26:51.588Z",
+          "finishedAt": "2026-11-14T19:26:51.594Z",
+          "durationMs": 6,
+          "examined": 0,
+          "claimed": 0,
+          "sent": 0,
+          "transientFailures": 0,
+          "permanentFailures": 0,
+          "deadLettered": 0,
+          "leasesRecovered": 0,
+          "cancelledSkipped": 0
+        }
+      ],
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "d7f9594e-3ff3-44d1-9a2f-f04600a2314e",
+            "source_deadline_id": "a3bf04e0-ab81-4af9-a00e-630986ccdca2",
+            "status": "sent",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:25:32.759Z",
+            "attempt_count": 2,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": "resend",
+            "provider_message_id": "01a1db86-de84-75f9-8e60-c807b1065c25",
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [
+          {
+            "reminder_id": "d7f9594e-3ff3-44d1-9a2f-f04600a2314e",
+            "attempt_number": 2,
+            "outcome": "sent",
+            "provider": "resend",
+            "provider_message_id": "01a1db86-de84-75f9-8e60-c807b1065c25",
+            "provider_status_code": null,
+            "error_code": null,
+            "worker_instance": "deadline-worker-8ea911fd",
+            "correlation_id": "8ea911fd-d0b9-4c0d-8cb0-a78cbef78394"
+          }
+        ],
+        "audit": [
+          {
+            "event_type": "reminder.lease_recovered",
+            "reminder_id": "d7f9594e-3ff3-44d1-9a2f-f04600a2314e",
+            "correlation_id": "8ea911fd-d0b9-4c0d-8cb0-a78cbef78394",
+            "occurred_at": "2026-11-14T19:26:51.416Z"
+          },
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "d7f9594e-3ff3-44d1-9a2f-f04600a2314e",
+            "correlation_id": "8ea911fd-d0b9-4c0d-8cb0-a78cbef78394",
+            "occurred_at": "2026-11-14T19:26:51.416Z"
+          },
+          {
+            "event_type": "reminder.sent",
+            "reminder_id": "d7f9594e-3ff3-44d1-9a2f-f04600a2314e",
+            "correlation_id": "8ea911fd-d0b9-4c0d-8cb0-a78cbef78394",
+            "occurred_at": "2026-11-14T19:26:51.416Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:26:54.757Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "seed",
+      "scenario": "stale",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "fixtureCreated": true,
+        "dueDate": "2026-11-15T19:26:53.859Z",
+        "provenance": "Explicit synthetic persisted preconditions; not an authorized assignment API request or fabricated office"
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "source_deadline_id": "fc006da9-5b9e-46da-a0c2-11d9d965c22b",
+            "status": "pending",
+            "recipient_user_id": "e07cbf07-fee5-45e3-934c-de5966dabae5",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:26:52.865Z",
+            "attempt_count": 0,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [],
+        "audit": [],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:26:56.962Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "worker",
+      "scenario": "stale",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "ac60c0d51c6e93110522da3ab23b9513",
+        "clientCorrelationId": "2c8035ca-cc3a-4df1-b646-956911a72066",
+        "httpStatus": 200,
+        "runId": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+        "workerInstance": "deadline-worker-f0c58bec",
+        "correlationId": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+        "startedAt": "2026-11-14T19:26:56.037Z",
+        "finishedAt": "2026-11-14T19:26:56.084Z",
+        "durationMs": 47,
+        "examined": 1,
+        "claimed": 1,
+        "sent": 0,
+        "transientFailures": 0,
+        "permanentFailures": 0,
+        "deadLettered": 0,
+        "leasesRecovered": 0,
+        "cancelledSkipped": 1
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "source_deadline_id": "fc006da9-5b9e-46da-a0c2-11d9d965c22b",
+            "status": "cancelled",
+            "recipient_user_id": "e07cbf07-fee5-45e3-934c-de5966dabae5",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:26:52.865Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": "recipient_reassigned"
+          }
+        ],
+        "executions": [
+          {
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "attempt_number": 1,
+            "outcome": "skipped_cancelled",
+            "provider": null,
+            "provider_message_id": null,
+            "provider_status_code": null,
+            "error_code": "recipient_reassigned",
+            "worker_instance": "deadline-worker-f0c58bec",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892"
+          }
+        ],
+        "audit": [
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+            "occurred_at": "2026-11-14T19:26:56.030Z"
+          },
+          {
+            "event_type": "reminder.superseded_at_dispatch",
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+            "occurred_at": "2026-11-14T19:26:56.030Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:26:59.051Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "release-successor",
+      "scenario": "stale",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "controlledDuePreconditionChanged": true
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "source_deadline_id": "fc006da9-5b9e-46da-a0c2-11d9d965c22b",
+            "status": "cancelled",
+            "recipient_user_id": "e07cbf07-fee5-45e3-934c-de5966dabae5",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:26:52.865Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": "recipient_reassigned"
+          }
+        ],
+        "executions": [
+          {
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "attempt_number": 1,
+            "outcome": "skipped_cancelled",
+            "provider": null,
+            "provider_message_id": null,
+            "provider_status_code": null,
+            "error_code": "recipient_reassigned",
+            "worker_instance": "deadline-worker-f0c58bec",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892"
+          }
+        ],
+        "audit": [
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+            "occurred_at": "2026-11-14T19:26:56.030Z"
+          },
+          {
+            "event_type": "reminder.superseded_at_dispatch",
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+            "occurred_at": "2026-11-14T19:26:56.030Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:27:01.709Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "overdue",
+      "scenario": "stale",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "42e22d4c6473cee04bd85a0626201cbb",
+        "clientCorrelationId": "89632d65-1f33-482c-8fdf-7378f35eeedd",
+        "httpStatus": 200,
+        "runId": "96074e18-30bf-4c04-806e-73dbce0c7df2",
+        "startedAt": "2026-11-14T19:27:00.341Z",
+        "finishedAt": "2026-11-14T19:27:00.856Z",
+        "durationMs": 515,
+        "overdueCount": 1,
+        "remindersScheduled": 1,
+        "failed": 0
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "source_deadline_id": "fc006da9-5b9e-46da-a0c2-11d9d965c22b",
+            "status": "cancelled",
+            "recipient_user_id": "e07cbf07-fee5-45e3-934c-de5966dabae5",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:26:52.865Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": "recipient_reassigned"
+          },
+          {
+            "id": "966738f2-4084-444c-a491-38f810d3f02c",
+            "source_deadline_id": "fc006da9-5b9e-46da-a0c2-11d9d965c22b",
+            "status": "pending",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:27:00.809Z",
+            "attempt_count": 0,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [
+          {
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "attempt_number": 1,
+            "outcome": "skipped_cancelled",
+            "provider": null,
+            "provider_message_id": null,
+            "provider_status_code": null,
+            "error_code": "recipient_reassigned",
+            "worker_instance": "deadline-worker-f0c58bec",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892"
+          }
+        ],
+        "audit": [
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+            "occurred_at": "2026-11-14T19:26:56.030Z"
+          },
+          {
+            "event_type": "reminder.superseded_at_dispatch",
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+            "occurred_at": "2026-11-14T19:26:56.030Z"
+          },
+          {
+            "event_type": "reminder.scheduled",
+            "reminder_id": "966738f2-4084-444c-a491-38f810d3f02c",
+            "correlation_id": "96074e18-30bf-4c04-806e-73dbce0c7df2",
+            "occurred_at": "2026-11-14T19:27:00.349Z"
+          },
+          {
+            "event_type": "deadline.created",
+            "reminder_id": null,
+            "correlation_id": "96074e18-30bf-4c04-806e-73dbce0c7df2",
+            "occurred_at": "2026-11-14T19:27:00.349Z"
+          },
+          {
+            "event_type": "overdue.detected",
+            "reminder_id": null,
+            "correlation_id": "96074e18-30bf-4c04-806e-73dbce0c7df2",
+            "occurred_at": "2026-11-14T19:27:00.349Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:27:04.419Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "worker",
+      "scenario": "stale",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "b2ec84c6175097588036db5cae78e3d2",
+        "clientCorrelationId": "430115cd-04dc-48c9-a658-f0b6c58e4cc2",
+        "httpStatus": 200,
+        "runId": "1503d892-f104-4ca2-ab33-026c0a36be1c",
+        "workerInstance": "deadline-worker-1503d892",
+        "correlationId": "1503d892-f104-4ca2-ab33-026c0a36be1c",
+        "startedAt": "2026-11-14T19:27:03.366Z",
+        "finishedAt": "2026-11-14T19:27:03.494Z",
+        "durationMs": 128,
+        "examined": 1,
+        "claimed": 1,
+        "sent": 1,
+        "transientFailures": 0,
+        "permanentFailures": 0,
+        "deadLettered": 0,
+        "leasesRecovered": 0,
+        "cancelledSkipped": 0
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "source_deadline_id": "fc006da9-5b9e-46da-a0c2-11d9d965c22b",
+            "status": "cancelled",
+            "recipient_user_id": "e07cbf07-fee5-45e3-934c-de5966dabae5",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:26:52.865Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": "recipient_reassigned"
+          },
+          {
+            "id": "966738f2-4084-444c-a491-38f810d3f02c",
+            "source_deadline_id": "fc006da9-5b9e-46da-a0c2-11d9d965c22b",
+            "status": "sent",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:27:00.809Z",
+            "attempt_count": 1,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": "resend",
+            "provider_message_id": "01a1db87-0d12-7481-a53c-2995b309f55d",
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [
+          {
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "attempt_number": 1,
+            "outcome": "skipped_cancelled",
+            "provider": null,
+            "provider_message_id": null,
+            "provider_status_code": null,
+            "error_code": "recipient_reassigned",
+            "worker_instance": "deadline-worker-f0c58bec",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892"
+          },
+          {
+            "reminder_id": "966738f2-4084-444c-a491-38f810d3f02c",
+            "attempt_number": 1,
+            "outcome": "sent",
+            "provider": "resend",
+            "provider_message_id": "01a1db87-0d12-7481-a53c-2995b309f55d",
+            "provider_status_code": null,
+            "error_code": null,
+            "worker_instance": "deadline-worker-1503d892",
+            "correlation_id": "1503d892-f104-4ca2-ab33-026c0a36be1c"
+          }
+        ],
+        "audit": [
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+            "occurred_at": "2026-11-14T19:26:56.030Z"
+          },
+          {
+            "event_type": "reminder.superseded_at_dispatch",
+            "reminder_id": "34b9562c-e50a-41d1-a35c-7b208ceea3ef",
+            "correlation_id": "f0c58bec-1756-4e5a-9fc4-c97371cc6892",
+            "occurred_at": "2026-11-14T19:26:56.030Z"
+          },
+          {
+            "event_type": "reminder.scheduled",
+            "reminder_id": "966738f2-4084-444c-a491-38f810d3f02c",
+            "correlation_id": "96074e18-30bf-4c04-806e-73dbce0c7df2",
+            "occurred_at": "2026-11-14T19:27:00.349Z"
+          },
+          {
+            "event_type": "deadline.created",
+            "reminder_id": null,
+            "correlation_id": "96074e18-30bf-4c04-806e-73dbce0c7df2",
+            "occurred_at": "2026-11-14T19:27:00.349Z"
+          },
+          {
+            "event_type": "overdue.detected",
+            "reminder_id": null,
+            "correlation_id": "96074e18-30bf-4c04-806e-73dbce0c7df2",
+            "occurred_at": "2026-11-14T19:27:00.349Z"
+          },
+          {
+            "event_type": "reminder.claimed",
+            "reminder_id": "966738f2-4084-444c-a491-38f810d3f02c",
+            "correlation_id": "1503d892-f104-4ca2-ab33-026c0a36be1c",
+            "occurred_at": "2026-11-14T19:27:03.358Z"
+          },
+          {
+            "event_type": "reminder.sent",
+            "reminder_id": "966738f2-4084-444c-a491-38f810d3f02c",
+            "correlation_id": "1503d892-f104-4ca2-ab33-026c0a36be1c",
+            "occurred_at": "2026-11-14T19:27:03.358Z"
+          }
+        ],
+        "convergence": []
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:27:06.576Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "seed",
+      "scenario": "convergence",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "fixtureCreated": true,
+        "dueDate": "2026-11-14T19:29:35.711Z",
+        "provenance": "Explicit synthetic persisted preconditions; not an authorized assignment API request or fabricated office"
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "f1e9ac3a-c897-4659-812d-07e0b55b9189",
+            "source_deadline_id": "86f4f65d-f0f9-48e2-853a-0ccc36b25b78",
+            "status": "pending",
+            "recipient_user_id": "e07cbf07-fee5-45e3-934c-de5966dabae5",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:29:35.711Z",
+            "attempt_count": 0,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [],
+        "audit": [],
+        "convergence": [
+          {
+            "id": "b45e5a3a-5291-4c70-879b-c7acf90e2b9a",
+            "status": "pending",
+            "attempt_count": 0,
+            "converged_at": null
+          }
+        ]
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    },
+    {
+      "ok": true,
+      "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+      "at": "2026-11-14T19:27:09.202Z",
+      "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "operation": "worker",
+      "scenario": "convergence",
+      "identity": {
+        "principal": "uev2admin",
+        "database": "ue_v2_staging",
+        "address": "10.40.4.4"
+      },
+      "result": {
+        "clientTraceId": "02aeec42d6bdc83815710b14d7f8f59e",
+        "clientCorrelationId": "6afda485-10c1-45bd-a244-d234aa50ef45",
+        "httpStatus": 200,
+        "runId": "6a7127fd-e8c4-41f5-8659-364cf8b2e93d",
+        "workerInstance": "deadline-worker-6a7127fd",
+        "correlationId": "6a7127fd-e8c4-41f5-8659-364cf8b2e93d",
+        "startedAt": "2026-11-14T19:27:07.833Z",
+        "finishedAt": "2026-11-14T19:27:08.351Z",
+        "durationMs": 518,
+        "examined": 0,
+        "claimed": 0,
+        "sent": 0,
+        "transientFailures": 0,
+        "permanentFailures": 0,
+        "deadLettered": 0,
+        "leasesRecovered": 0,
+        "cancelledSkipped": 0
+      },
+      "snapshot": {
+        "reminders": [
+          {
+            "id": "f1e9ac3a-c897-4659-812d-07e0b55b9189",
+            "source_deadline_id": "86f4f65d-f0f9-48e2-853a-0ccc36b25b78",
+            "status": "cancelled",
+            "recipient_user_id": "e07cbf07-fee5-45e3-934c-de5966dabae5",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:29:35.711Z",
+            "attempt_count": 0,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": "rescheduled"
+          },
+          {
+            "id": "08580fa6-d944-43fd-a357-7d84fe88fbed",
+            "source_deadline_id": "86f4f65d-f0f9-48e2-853a-0ccc36b25b78",
+            "status": "pending",
+            "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+            "recipient_role": "assigned_officer",
+            "scheduled_for": "2026-11-14T19:29:35.711Z",
+            "attempt_count": 0,
+            "max_attempts": 5,
+            "lease_owner": null,
+            "lease_expires_at": null,
+            "provider": null,
+            "provider_message_id": null,
+            "last_error_code": null,
+            "cancelled_reason": null
+          }
+        ],
+        "executions": [],
+        "audit": [
+          {
+            "event_type": "reminder.cancelled_reschedule",
+            "reminder_id": "f1e9ac3a-c897-4659-812d-07e0b55b9189",
+            "correlation_id": "6da7f761-6aa7-45ee-8fa5-7921717f5f83",
+            "occurred_at": "2026-11-14T19:27:07.827Z"
+          },
+          {
+            "event_type": "reminder.scheduled",
+            "reminder_id": "08580fa6-d944-43fd-a357-7d84fe88fbed",
+            "correlation_id": "6da7f761-6aa7-45ee-8fa5-7921717f5f83",
+            "occurred_at": "2026-11-14T19:27:07.827Z"
+          },
+          {
+            "event_type": "deadline.rescheduled",
+            "reminder_id": null,
+            "correlation_id": "6da7f761-6aa7-45ee-8fa5-7921717f5f83",
+            "occurred_at": "2026-11-14T19:27:07.827Z"
+          },
+          {
+            "event_type": "reminder.recipients_refreshed",
+            "reminder_id": null,
+            "correlation_id": "6da7f761-6aa7-45ee-8fa5-7921717f5f83",
+            "occurred_at": "2026-11-14T19:27:07.827Z"
+          }
+        ],
+        "convergence": [
+          {
+            "id": "b45e5a3a-5291-4c70-879b-c7acf90e2b9a",
+            "status": "converged",
+            "attempt_count": 1,
+            "converged_at": "2026-11-14T19:27:08.341Z"
+          }
+        ]
+      },
+      "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+      "forceRlsRetained": true,
+      "operatorOwnerGrantRemoved": true,
+      "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+      "institutionalAssignmentAuthorityCreated": false,
+      "credentialValuesSerialized": false
+    }
+  ],
+  "providerAcceptanceIsNotInboxDelivery": true,
+  "institutionalOfficeOrAssignmentApiAuthorityCreated": false,
+  "transport": {
+    "bytes": 577448,
+    "programSha256": "5bfa1199067a3187e3eacdc3b6469cdeb2613937555e90d3b787627a4c51bf89",
+    "fileSha256": {
+      "worker.js": "381586931e4c9ef18b7f8efeec54ddb6ec55ec742ced5628fec4cc8a99b9e2ab",
+      "native.cjs": "3748c6536bb94b7a87876b1d9f93564c8895b507b1f842499dba9758d3de68cf"
+    }
+  }
+}

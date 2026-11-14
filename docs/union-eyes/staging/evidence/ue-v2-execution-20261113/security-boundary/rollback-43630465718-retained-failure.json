@@ -1,0 +1,20 @@
+{
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "workflowSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+  "runId": "43630465718",
+  "evidenceClass": "ACTUAL_STAGING_FAILED_REVISION_AND_KNOWN_GOOD_RECOVERY",
+  "observations": [],
+  "before": {
+    "revision": "nzila-ue-v2-staging-app--relea07352887",
+    "latestRevision": "nzila-ue-v2-staging-app--relea07352887",
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af4e021f19f68297dc661ef6b396eb4a9f78f4b817d711e85583d6367abaae24",
+    "templateHash": "aebdee9a0ecc6fe0ee70de9002efe99f94bf8e6f37170b7b36b48621ec41452c",
+    "mode": "Multiple",
+    "trafficWeight": 100
+  },
+  "status": "FAIL",
+  "failure": {
+    "error": "AssertionError",
+    "assertion": "Azure operation failed: rest --method"
+  }
+}

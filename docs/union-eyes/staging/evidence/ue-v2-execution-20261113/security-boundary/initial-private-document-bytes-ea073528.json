@@ -1,0 +1,33 @@
+{
+  "purpose": "CANDIDATE_BOUND_REAL_DOCUMENT_BYTES",
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "realSessionCiRun": "43629425230",
+  "documentId": "e077d463-d9d0-44f5-991f-1beb54872be8",
+  "receiptSha256": "dcbab4e68074fda6d307fc26571e025bdef207643bee14a68649b0ed6be77736",
+  "privateProof": {
+    "ok": true,
+    "purpose": "REAL_PRIVATE_STAGING_DOCUMENT_BYTES",
+    "at": "2026-11-14T19:07:43.192Z",
+    "host": "nzilauev2stagingst.blob.core.windows.net",
+    "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0",
+    "addresses": [
+      {
+        "address": "10.40.5.5",
+        "family": 4
+      }
+    ],
+    "status": 200,
+    "bytes": 69,
+    "sha256": "7d1c6f656c08aca6f9de89121ab0f40626274fe53ecb0d0d9644de5917f465e6",
+    "leaseExpiresAt": "2026-11-14T20:07:13Z",
+    "signedUrlSha256": "771886368022452bee5d76b29b12a10bbe8712efefa362150adf046b5eb90888",
+    "signedQuerySerialized": false,
+    "networkBoundary": "PRIVATE_ENDPOINT_REQUIRED",
+    "transport": {
+      "bytes": 556,
+      "programSha256": "222ace19c915bbffa976a0f4c6174c518a13eb278bf34d4be7132e3964874406",
+      "fileSha256": {}
+    }
+  },
+  "signedQuerySerialized": false
+}

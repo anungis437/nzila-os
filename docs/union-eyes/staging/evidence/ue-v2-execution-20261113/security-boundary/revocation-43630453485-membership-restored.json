@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "executionName": "ue-role-probe2-y7beios",
+  "collectedAt": "2026-11-14T19:21:13.116081+00:00",
+  "proof": {
+    "ok": true,
+    "purpose": "EXPLICIT_TEMPORARY_OWNED_SYNTHETIC_STATE_TRANSITION",
+    "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+    "operation": "membership-restore",
+    "at": "2026-11-14T19:19:23.377Z",
+    "userId": "ecb4f1d7-b0ae-44f8-bf56-832bc173fc49",
+    "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0",
+    "updatedRows": 2,
+    "productionAuthorized": false,
+    "institutionalInstrumentCreated": false,
+    "schemaOrPersistentPrivilegesChanged": false,
+    "originalTableAclsRestored": true,
+    "temporaryOperatorOwnerDelegationRemoved": true
+  }
+}

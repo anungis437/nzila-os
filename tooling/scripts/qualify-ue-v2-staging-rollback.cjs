@@ -13,7 +13,13 @@ const report = { sourceSha: process.env.SOURCE_SHA, workflowSha: process.env.GIT
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 function az(args) {
   const r = cp.spawnSync('az', args.concat(['--only-show-errors', '-o', 'json']), { encoding: 'utf8', timeout: 90000, maxBuffer: 4 * 1024 * 1024 });
-  assert.equal(r.status, 0, 'Azure operation failed: ' + args.slice(0, 2).join(' '));
+  if (r.status !== 0) {
+    // Only an allowlisted service error code enters evidence, never stderr,
+    // command bodies, environment values or secret references.
+    const code = [...(r.stderr ?? '').matchAll(/(?:\(|"code"\s*:\s*")(ContainerAppOperationInProgress|ResourceNotFound|NotFound)(?:\)|")/g)][0]?.[1];
+    const error = new Error('Azure operation failed: ' + (code ?? 'UnclassifiedAzureError'));
+    error.azureCode = code ?? 'UnclassifiedAzureError'; throw error;
+  }
   return r.stdout.trim() ? JSON.parse(r.stdout) : null;
 }
 function get(path = '') { return az(['rest', '--method', 'get', '--url', 'https://management.azure.com' + ID + path + '?api-version=2024-03-01']); }
@@ -26,6 +32,35 @@ function requirePinnedTraffic(app, known) {
   assert.equal(serving.length, 1, 'One known-good revision must hold all traffic');
   assert.equal(serving[0].revisionName, known, 'Known-good traffic changed during rehearsal');
   assert.equal(serving[0].weight, 100);
+}
+function requireExpectedLatest(app, expected) {
+  assert(expected.includes(app.properties.latestRevisionName), 'Concurrent revision change; preserve external work');
+}
+function pendingRevision(name) {
+  try { return get('/revisions/' + name); }
+  catch (error) {
+    if (['ResourceNotFound', 'NotFound'].includes(error.azureCode)) return null;
+    throw error;
+  }
+}
+async function restoreTemplate(original, location, known, badName, recoveredName) {
+  const restored = structuredClone(original); restored.revisionSuffix = recoveredName.slice(APP.length + 2);
+  for (let attempt = 0; attempt < 48; attempt++) {
+    const current = get(); requirePinnedTraffic(current, known);
+    requireExpectedLatest(current, [report.before.latestRevision, badName, recoveredName]);
+    // A previous accepted PATCH may have become visible after a busy response.
+    if (current.properties.latestRevisionName === recoveredName) return;
+    try { patch(restored, location); return; }
+    catch (error) {
+      if (error.azureCode !== 'ContainerAppOperationInProgress') throw error;
+      report.observations.push({ at: new Date().toISOString(), kind: 'RECOVERY_CONTROL_PLANE_BUSY', attempt });
+    }
+    await pause(10000);
+  }
+  throw new Error('Azure recovery operation remained busy');
+}
+function failureSummary(error) {
+  return { error: error.name, assertion: error.code === 'ERR_ASSERTION' || error.azureCode ? error.message.split('\n')[0] : 'Operation failed' };
 }
 function templateHash(template) {
   const copy = structuredClone(template); delete copy.revisionSuffix;
@@ -93,48 +128,60 @@ async function main() {
   assert.equal(process.env.OPERATION, 'rehearse');
   const suffix = String(process.env.GITHUB_RUN_ID); assert.match(suffix, /^\d+$/);
   const badName = APP + '--qa-fail-' + suffix, recoveredName = APP + '--qa-recover-' + suffix;
-  let attempted = false, faultObserved = false;
+  let attempted = false, faultObserved = false, primaryFailure;
   try {
     const latest = get(); requirePinnedTraffic(latest, known); assert.equal(latest.properties.latestRevisionName, report.before.latestRevision); assert.equal(templateHash(latest.properties.template), report.before.templateHash);
     const bad = structuredClone(original); bad.revisionSuffix = 'qa-fail-' + suffix;
     bad.containers[0].env.push({ name: 'NODE_OPTIONS', value: '--require=/ue-staging-intentionally-absent-' + suffix + '.cjs' });
     attempted = true; patch(bad, before.location);
-    for (let i = 0; i < 36; i++) {
-      const app = get(); assert.equal(app.properties.latestRevisionName, badName);
+    for (let i = 0; i < 60; i++) {
+      const app = get(); requireExpectedLatest(app, [report.before.latestRevision, badName]);
       requirePinnedTraffic(app, known); await healthy();
-      const failed = get('/revisions/' + badName).properties;
+      const pending = pendingRevision(badName);
+      if (!pending || app.properties.latestRevisionName !== badName) { await pause(10000); continue; }
+      const failed = pending.properties;
       report.observations.push({ at: new Date().toISOString(), servingRevision: known, servingWeight: 100, failedRevision: badName, failedRevisionWeight: 0, provisioningState: failed.provisioningState, runningState: failed.runningState, healthState: failed.healthState });
-      if (['Failed', 'Degraded'].includes(failed.runningState) || failed.provisioningState === 'Failed') { faultObserved = true; break; }
+      if (['Failed', 'Degraded'].includes(failed.runningState) || failed.provisioningState === 'Failed' || failed.healthState === 'Unhealthy') { faultObserved = true; break; }
       await pause(10000);
     }
     assert(faultObserved, 'Actual failed revision was not observed');
+  } catch (error) {
+    primaryFailure = error; report.primaryFailure = failureSummary(error);
   } finally {
     if (attempted) {
-      const current = get();
-      assert([known, badName].includes(current.properties.latestRevisionName), 'Concurrent revision change; preserve external work');
-      const restored = structuredClone(original); restored.revisionSuffix = 'qa-recover-' + suffix;
-      patch(restored, before.location);
-      let ready = false;
-      for (let i = 0; i < 48; i++) {
-        const app = get();
-        requirePinnedTraffic(app, known);
-        assert.equal(app.properties.latestRevisionName, recoveredName);
-        if (app.properties.latestReadyRevisionName === recoveredName) {
-          const actual = get('/revisions/' + recoveredName).properties.template;
-          assert.equal(templateHash(actual), report.before.templateHash);
-          assert.equal(actual.containers[0].image, image); await healthy(); ready = true;
-          report.recovered = { revision: recoveredName, image, templateHash: templateHash(actual), health: 'PASS', sourceIdentity: 'PASS', servingRevision: known, servingWeight: 100, recoveredRevisionWeight: 0 }; break;
+      try {
+        await restoreTemplate(original, before.location, known, badName, recoveredName);
+        let ready = false;
+        for (let i = 0; i < 48; i++) {
+          const app = get();
+          requirePinnedTraffic(app, known);
+          requireExpectedLatest(app, [report.before.latestRevision, badName, recoveredName]);
+          const recovered = pendingRevision(recoveredName);
+          if (app.properties.latestRevisionName === recoveredName && app.properties.latestReadyRevisionName === recoveredName && recovered) {
+            const actual = recovered.properties.template;
+            assert.equal(templateHash(actual), report.before.templateHash);
+            assert.equal(actual.containers[0].image, image); await healthy(); ready = true;
+            report.recovered = { revision: recoveredName, image, templateHash: templateHash(actual), health: 'PASS', sourceIdentity: 'PASS', servingRevision: known, servingWeight: 100, recoveredRevisionWeight: 0 }; break;
+          }
+          await pause(10000);
         }
-        await pause(10000);
+        assert(ready, 'Known-good recovery did not become ready');
+        const cleanup = get(); requirePinnedTraffic(cleanup, known); requireExpectedLatest(cleanup, [recoveredName]);
+        az(['containerapp', 'revision', 'deactivate', '--subscription', SUB, '-g', RG, '-n', APP, '--revision', badName]);
+        report.failedRevisionDeactivated = true;
+        const drained = get(); requirePinnedTraffic(drained, known); requireExpectedLatest(drained, [recoveredName]);
+        az(['containerapp', 'revision', 'deactivate', '--subscription', SUB, '-g', RG, '-n', APP, '--revision', recoveredName]);
+        report.recoveredRevisionDeactivated = true;
+      } catch (error) {
+        report.cleanupFailure = failureSummary(error);
+        if (!primaryFailure) throw error;
       }
-      assert(ready, 'Known-good recovery did not become ready');
-      az(['containerapp', 'revision', 'deactivate', '--subscription', SUB, '-g', RG, '-n', APP, '--revision', badName]);
-      report.failedRevisionDeactivated = true;
     }
   }
+  if (primaryFailure) throw primaryFailure;
   assert(faultObserved); report.status = 'PASS';
 }
-main().catch(error => { report.status = 'FAIL'; report.failure = { error: error.name, assertion: error.code === 'ERR_ASSERTION' ? error.message.split('\n')[0] : 'Operation failed' }; process.exitCode = 1; }).finally(() => {
+main().catch(error => { report.status = 'FAIL'; report.failure = failureSummary(error); process.exitCode = 1; }).finally(() => {
   fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(OUT + '/receipt.json', JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify({ status: report.status, sourceSha: report.sourceSha, recovered: !!report.recovered }));
 });

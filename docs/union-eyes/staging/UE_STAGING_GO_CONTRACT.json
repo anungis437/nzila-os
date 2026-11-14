@@ -5,9 +5,9 @@
   "generatedOn": "2026-11-14",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
   "acceptedStagingCandidateSha": null,
-  "stagingWorkflowDefinitionSha": "8ce043dd393f6e119d82558d28e6ec4a49905236",
+  "stagingWorkflowDefinitionSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Current 9a7ee373 deployment succeeded, but actual nested system pool deadlock and stylesheet-as-script errors prevent base acceptance. Proposed ea073528 has focused and exact native qualification; exact source/integration CI, build, fresh reviewed staging deployment and full persona/base/security/recovery evidence remain required. Finance persistence and Financial Officer 2.1 remain excluded.",
+  "verdictReason": "Deployed ea073528 repairs the confirmed nested-system pool deadlock and CSS-as-script defects. Exact source/integration CI, immutable build, reviewed staging deployment, real paired sessions, member EN/FR intake, messaging and six worker recovery scenarios pass. Remaining persona/journey, revocation, actual document expiry, recovery rehearsal and final evidence reconciliation remain required. Failed verification runs are retained; finance persistence and Financial Officer 2.1 remain excluded.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -23,19 +23,20 @@
     {
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Source ea073528, immutable app digest af4e021f19f68297dc661ef6b396eb4a9f78f4b817d711e85583d6367abaae24, actual /api/version and Azure named serving revision agree. observed-runtime-ea073528.json.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "SOURCE_ENGINEERING",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Two confirmed product defects have proposed source fixes with 99 focused tests, four asset-gate tests, reproduced CSS failure/correction and actual primary one-connection regression. Exact CI/main/build and deployed acceptance remain required.",
+      "status": "PASS",
+      "evidence": "Confirmed nested SYSTEM one-connection deadlock and CSS-as-script defects repaired in admitted source. Focused/native source evidence plus actual deployed member browser and six worker scenarios verify both corrections. This does not formally close every frozen ledger item.",
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": false,
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "LOCAL_HOLISTIC_REGRESSION",
@@ -48,35 +49,35 @@
     {
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Source PR1224 and integration PR1225 completed all registered checks with no failures/pending and all16 trusted required contexts before normal main admission bc6d96d8. Exact source whole-app CI43617951771 and HTTP isolation43617951709 succeeded. admitted-ea073528-merge.json.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Immutable build43620798141 and deployment43622244265 succeeded under CHG-2026-0114 following fresh concrete what-if review and protected delegated founder approval. App source ea073528 and workflow/IaC bc6d96d8 remain independently recorded.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Observed named revision --relea07352887 pinned100% in Multiple mode, exact manifest image and real liveness/readiness/source verified. Rehearsal revisions remain zero traffic; owned cleanup preserved metadata.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "DATABASE_MIGRATIONS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "evidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
@@ -84,54 +85,54 @@
     {
       "id": "ENTRA_AUTHENTICATED_SESSIONS",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Actual remote provider authorization-code A/B sessions43629425230 pass correct identity/tenant, unexpired secureHttpOnly provider cookies and API workflows. No manufactured or serialized session. real-paired-ea073528-43629425230.json.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "API_AND_POSTGRES_TENANT_ISOLATION",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Real paired own/foreign case and document API refusals plus30 real-signed retained-primary native checks pass. Native tenant proof uses separately identified member SQL identity; it does not infer direct case authority. Complete initial audit/seal proof retained.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
-      "status": "FAIL",
-      "evidence": "Current 9a7ee373 has actual nested system pool deadlock and CSS-as-script browser errors. Proposed source repair is not yet deployed; remaining roles/base journeys and actual worker recovery require final-source evidence.",
-      "observedSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+      "status": "PARTIALLY_PROVEN",
+      "evidence": "Actual EN desktop/FR mobile member intake, persisted list/detail/timeline and30 messaging checks pass on ea073528; all remaining persona profiles and assignment/grievance continuity are in progress.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "WORKERS_RETRIES_AND_DELIVERY",
       "requirement": "REQUIRED",
-      "status": "FAIL",
-      "evidence": "Current 9a7ee373 has actual nested system pool deadlock and CSS-as-script browser errors. Proposed source repair is not yet deployed; remaining roles/base journeys and actual worker recovery require final-source evidence.",
-      "observedSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Actual deployed ea073528 six-scenario worker acceptance passes provider acceptance/idempotency, controlled retry, real lease expiry/concurrency, stale-recipient suppression, successor scheduling and durable assignment convergence. Owned fixture retirement passes with no pending/claimed work, physical catalog unchanged and temporary operator delegation removed. Provider acceptance does not prove inbox delivery. worker-recovery-ea073528.json and worker-fixture-retirement-ea073528.json.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "AUDIT_AND_TELEMETRY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "status": "PARTIALLY_PROVEN",
+      "evidence": "Dedicated staging workspace and all7 actual alert configurations verified; initial actual complete primary audit chains479/18 and sealed case packs pass. Final post-mutation audit reconciliation remains required.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "status": "PARTIALLY_PROVEN",
+      "evidence": "Real canonical intake/replay/cross-tenant denial and private69bytes/checksum pass. Actual issued lease expires20:07:13Z and needs same-URL post-expiry denial. Revocation run43630453485 FAIL retained: valid unexpired provider session remained, case401 denied, but runner allowed only403/404 and stopped before document check. Owned membership restored in both projections; corrected protected rerun required.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
@@ -139,17 +140,17 @@
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "evidence": "All final-source persona finance boundary checks remain in progress; finance/dues persistence and Financial Officer2.1 are outside base release.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
     {
       "id": "OPERATIONAL_RECOVERY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
-      "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+      "status": "PARTIALLY_PROVEN",
+      "evidence": "Recovery run43630465718 FAIL retained because Azure write had not settled and recoveryPATCH encountered ContainerAppOperationInProgress. Reviewed owner-assisted completion restored exact immutable healthy template at0traffic and deactivated both owned drill revisions, preserving serving source100%. Activating alone is not a proven failed state; corrected protected failure/recovery drill and actual current-source restored-copy protocol remain required.",
+      "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
     },
@@ -157,7 +158,7 @@
       "id": "CAPABILITY_TRUTHFULNESS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "evidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
@@ -166,7 +167,7 @@
       "id": "INSTITUTIONAL_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "evidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
       "observedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
@@ -175,14 +176,14 @@
       "id": "STAGING_DECISION_ACCEPTANCE",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Final a8442373 candidate acceptance pending. Prior-source evidence is preserved in historicalCriteriaBeforeNestedSystemRepair; no prior pass qualifies the new deployment.",
+      "evidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true
     }
   ],
   "externalBlockers": [],
   "proposedCandidateSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
-  "proposedCandidateState": "EXACT_SOURCE_CI_ADMISSION_BUILD_DEPLOYMENT_AND_REAL_ACCEPTANCE_PENDING",
+  "proposedCandidateState": "DEPLOYED_EXACT_SOURCE_CI_AND_REVIEWED_STAGING_APPLY_PASS_REAL_ACCEPTANCE_IN_PROGRESS",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
     "included": [
@@ -237,7 +238,8 @@
     "stagingAuthorityCorrection": "Eight identity/connection contracts, Bicep compilation and inventory PASS. Exact9a7ee373 fresh/restore/repeat/native privileges and current-primary read-only guard NOOP PASS. Actual scoped staging telemetry authority repair PASS; app deployment and runtime qualification still pending.",
     "workflowHistoryCorrection": "Seven budget/history checks pass, including actual shallow/full local Git ancestry reproduction. The existing fail-closed source/serving ancestry guards remain intact. Workflow-only CI/main admission and fresh reviewed rollout are still required.",
     "stagingLogAlertScopeMigration": "34 focused release/history/identity/migration checks pass, including immutable-provider failure reproduction, complete pre-delete snapshots, unreviewed-setting refusal and restoration after failed recreation. Protected exact-workflow CI/main/reviewed apply and runtime remain pending. Partial-apply retry also verifies the retained candidate image before bounded reactivation; promotion still requires actual healthy state/source. New infrastructure provenance binds the entire admitted IaC Git tree and template hash separately from image source; the cron-rule query excludes actual normal-zero exits and passes Azure-executed controlled failure vectors. Current deployed alert correction/complete rollout still required.",
-    "nestedSystemAndClientAssets": "99 focused tests, four script-asset gate tests, actual before/after production CSS build reproduction, exact-source 776-table fresh/restore/repeat/privileges and actual source-bound primary one-connection regression PASS. SQL bytes/order unchanged; no deployed acceptance inferred."
+    "nestedSystemAndClientAssets": "99 focused tests, four script-asset gate tests, actual before/after production CSS build reproduction, exact-source 776-table fresh/restore/repeat/privileges and actual source-bound primary one-connection regression PASS. SQL bytes/order unchanged; no deployed acceptance inferred.",
+    "verificationRunnerCorrection": "14 focused contracts pass, including verified unexpired-session401/403/404 resource denials, late Azure visibility, transient expected revision404, bounded busy recovery, concurrent-change refusal and original failure preservation. Protected runtime reruns remain required."
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -249,7 +251,7 @@
     "supersededForQualificationBy": "167f95034fbdaa163cd67e79c4bca622284e0d77"
   },
   "securityFindingEvidence": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json",
-  "observedStagingCandidateSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+  "observedStagingCandidateSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
   "currentSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-restored-rehearsal-ea073528.json",
   "historicalCriteriaBeforeNestedSystemRepair": [
     {

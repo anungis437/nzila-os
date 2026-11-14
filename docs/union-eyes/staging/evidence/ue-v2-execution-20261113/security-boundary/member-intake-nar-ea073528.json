@@ -1,0 +1,54 @@
+{
+  "ok": true,
+  "status": "PASS",
+  "purpose": "REAL_RENDERED_MEMBER_INTAKES_WITH_ACTUAL_PERSISTED_NAR_SIGNATURES_AND_SEALED_EVIDENCE",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "at": "2026-11-14T19:29:19.274Z",
+  "identity": {
+    "principal": "ue_staging_runtime",
+    "role": "union_eyes_runtime",
+    "address": "10.40.4.4",
+    "database": "ue_v2_staging"
+  },
+  "checks": [
+    "real-rendered-intake-f4274596-6fef-43ff-89a5-c32a6bfbbf6a-committed-claim-final-signed-proof-audit-and-sealed-evidence",
+    "real-rendered-intake-a2da56e8-ce11-49c4-844a-bf4f78c90eaa-committed-claim-final-signed-proof-audit-and-sealed-evidence"
+  ],
+  "packs": [
+    {
+      "claimId": "f4274596-6fef-43ff-89a5-c32a6bfbbf6a",
+      "packId": "90c2e79c-171a-4168-9789-d8730d4d5599",
+      "artifactId": "65113d38-294f-419a-a64a-a59c97cc4fc7",
+      "contentHash": "b9c28b61fd518d88d021afeac199fe466ff5e963e1f39f8947a2caa11976fa92",
+      "packHash": "d3f7d980b7011eac398c39c7f207a46de1eaf24bc2e85896f60617a8f7c05388",
+      "decisionRecordId": "125978d2-00ac-4e18-adf3-c2118e489bbe",
+      "signatureVerified": true,
+      "keyId": "ue-v2-staging-nar-v1"
+    },
+    {
+      "claimId": "a2da56e8-ce11-49c4-844a-bf4f78c90eaa",
+      "packId": "81dc01e6-e725-4479-bb2e-7218d698ab6c",
+      "artifactId": "e6ed7c55-f118-4586-a5df-eebbdc0bd430",
+      "contentHash": "7b365342fa3de5a63bf2ef1f9404d83b5fca97da5fedcee2c908c5369333dbf4",
+      "packHash": "567f36001d3ed5631305b4108f6ada4f9b944ca1e730efc0e0c7a7e6012de356",
+      "decisionRecordId": "119f5ffb-01f8-47a6-8b2c-160dd56fb55c",
+      "signatureVerified": true,
+      "keyId": "ue-v2-staging-nar-v1"
+    }
+  ],
+  "decisionChain": {
+    "valid": true,
+    "totalRecords": 10,
+    "rootHash": "c8e67c220864eeba451d641f9c9a354081dcf217d551b17290637328540762f1",
+    "anomalies": []
+  },
+  "noBusinessMutation": true,
+  "secretValuesTokensAndCookiesSerialized": false,
+  "transport": {
+    "bytes": 373012,
+    "programSha256": "38050fd4f68145ebd77d6c12e087a37505fcdd00b36f4d7b02dae711dbb66339",
+    "fileSha256": {
+      "nar.cjs": "bdb86f4697102812149d2625bbe333cc393387eebe8eea83a6054adca9192470"
+    }
+  }
+}
