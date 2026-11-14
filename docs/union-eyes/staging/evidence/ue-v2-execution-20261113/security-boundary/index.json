@@ -169,15 +169,16 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+    "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
     "sourcePR": 1224,
-    "localNativeExport": "local-native-export-a8442373.json",
-    "restoredRehearsal": "candidate-restored-rehearsal-a8442373.json",
-    "primaryGuardReadOnlyNoop": "primary-current-source-noop-a8442373.json",
-    "actualReadOnlyNestedSystemRegression": "nested-system-single-pool-a8442373-real-pg.json",
+    "localNativeExport": "local-native-export-ea073528.json",
+    "restoredRehearsal": "candidate-restored-rehearsal-ea073528.json",
+    "primaryGuardReadOnlyNoop": "primary-current-source-noop-ea073528.json",
+    "actualReadOnlyNestedSystemRegression": "nested-system-single-pool-ea073528-real-pg.json",
     "deployed": false,
     "ciAndRuntimeStillRequired": true,
-    "repairSummary": "Nested system savepoints and authority/context restoration; correct App Router asset graph and MIME security; actual-image gate and navigation inventory CI"
+    "repairSummary": "Nested system savepoints and authority/context restoration; correct App Router asset graph and MIME security; actual-image gate and navigation inventory CI",
+    "priorTestBoundaryCorrection": "source-a8442373-whole-application-ci-failure.json"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -231,6 +232,18 @@
       "latestDeploymentFailure": "deployment-43573741953-history-failure.json",
       "applicationImageQualified": true,
       "workflowHistoryCorrectionPending": true
+    },
+    {
+      "sourceSha": "a844237335542bcac0f4690f1f17832b68371a84",
+      "sourcePR": 1224,
+      "localNativeExport": "local-native-export-a8442373.json",
+      "restoredRehearsal": "candidate-restored-rehearsal-a8442373.json",
+      "primaryGuardReadOnlyNoop": "primary-current-source-noop-a8442373.json",
+      "actualReadOnlyNestedSystemRegression": "nested-system-single-pool-a8442373-real-pg.json",
+      "deployed": false,
+      "ciAndRuntimeStillRequired": true,
+      "repairSummary": "Nested system savepoints and authority/context restoration; correct App Router asset graph and MIME security; actual-image gate and navigation inventory CI",
+      "ciFailure": "source-a8442373-whole-application-ci-failure.json"
     }
   ],
   "currentObservedRuntime": {
