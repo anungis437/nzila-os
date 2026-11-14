@@ -23,6 +23,18 @@ describe('lib/dashboard/role-experience', () => {
     });
   });
 
+  it('keeps an individual grievance link reachable without admitting collection or management paths', () => {
+    const detail = '/dashboard/grievances/33333333-3333-4333-8333-333333333333';
+    for (const experience of ['member', 'staff', 'executive', 'governance', 'admin'] as const) {
+      for (const pilot of [false, true]) {
+        expect(canAccessDashboardPath(detail, experience, pilot)).toBe(true);
+        for (const path of ['/dashboard/grievances', '/dashboard/grievances/new', detail + '/assign', '/dashboard/grievances/not-a-case']) {
+          expect(canAccessDashboardPath(path, experience, pilot)).toBe(false);
+        }
+      }
+    }
+  });
+
   describe('getRoleLandingPath', () => {
     it('routes by experience', () => {
       expect(getRoleLandingPath('member')).toBe('/dashboard');
