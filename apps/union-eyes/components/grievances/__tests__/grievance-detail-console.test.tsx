@@ -11,8 +11,8 @@ const GRIEVANCE = '33333333-3333-4333-8333-333333333333';
 const back = vi.hoisted(() => vi.fn());
 
 vi.mock('next/navigation', () => ({ useParams: () => ({ id: '33333333-3333-4333-8333-333333333333' }), useRouter: () => ({ back }) }));
-vi.mock('@/components/grievances/case-intelligence-panel', () => ({ CaseIntelligencePanel: () => null }));
-vi.mock('@/components/clause-suggestions', () => ({ ClauseSuggestions: () => null }));
+vi.mock('@/components/grievances/case-intelligence-panel', () => ({ CaseIntelligencePanel: () => <div>Internal case intelligence</div> }));
+vi.mock('@/components/clause-suggestions', () => ({ ClauseSuggestions: () => <div>Internal clause suggestions</div> }));
 vi.mock('@/components/steward-recommendations', () => ({
   StewardRecommendations: ({ onAssign }: { onAssign?: (stewardId: string) => void }) => (
     <button type="button" onClick={() => onAssign?.('steward-1')}>
@@ -41,7 +41,7 @@ const detail = (overrides: Record<string, unknown> = {}) => ({
   documents: [],
   governedDocuments: [],
   collaborators: [],
-  effectiveAccess: { isPrimaryOwner: true, isSecondaryCollaborator: false, accessRole: 'primary_owner', canManageAssignments: true, canUploadDocuments: true },
+  effectiveAccess: { canViewInternal: true, isPrimaryOwner: true, isSecondaryCollaborator: false, accessRole: 'primary_owner', canManageAssignments: true, canUploadDocuments: true },
   ...overrides,
 });
 
@@ -107,6 +107,21 @@ describe('GrievanceDetailConsole: loading', () => {
     expect(screen.getByText('The member was suspended without notice.')).toBeInTheDocument();
     expect(screen.getByText('status changed')).toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/undefined|NaN|Invalid/);
+  });
+
+  it.each(['en-CA', 'fr-CA'] as const)('shows represented-member progress without staff tools in %s', async (locale) => {
+    current = detail({ status: 'draft', primaryLroId: null, collaborators: [],
+      effectiveAccess: { canViewInternal: false, isPrimaryOwner: false,
+        isSecondaryCollaborator: false, accessRole: null,
+        canManageAssignments: false, canUploadDocuments: false } });
+    renderConsole(locale);
+    expect(await loaded()).toBeInTheDocument();
+    expect(document.querySelector('form')).toBeNull();
+    expect(document.querySelector('input')).toBeNull();
+    expect(screen.queryByText('Internal case intelligence')).toBeNull();
+    expect(screen.queryByText('Internal clause suggestions')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'assign steward' })).toBeNull();
+    expect(fetchMock.mock.calls.every(([, init]) => !init?.method || init.method === 'GET')).toBe(true);
   });
 
   it('says why a grievance could not be loaded, with the route’s own reason and a retry, and never that it was not found unless the route says so', async () => {
@@ -218,7 +233,7 @@ describe('GrievanceDetailConsole: the status', () => {
   });
 
   it('offers nothing to someone with no authority over the matter, and says why', async () => {
-    current = detail({ effectiveAccess: { isPrimaryOwner: false, isSecondaryCollaborator: true, accessRole: 'reviewer', canManageAssignments: false, canUploadDocuments: false } });
+    current = detail({ effectiveAccess: { canViewInternal: true, isPrimaryOwner: false, isSecondaryCollaborator: true, accessRole: 'reviewer', canManageAssignments: false, canUploadDocuments: false } });
     renderConsole();
     await loaded();
 
@@ -455,7 +470,7 @@ describe('GrievanceDetailConsole: access for other representatives', () => {
   it('offers neither the grant form nor a revoke to someone who may not manage access', async () => {
     current = detail({
       collaborators: [withCollaborator()],
-      effectiveAccess: { isPrimaryOwner: false, isSecondaryCollaborator: true, accessRole: 'secondary_lro', canManageAssignments: false, canUploadDocuments: true },
+      effectiveAccess: { canViewInternal: true, isPrimaryOwner: false, isSecondaryCollaborator: true, accessRole: 'secondary_lro', canManageAssignments: false, canUploadDocuments: true },
     });
     renderConsole();
     await loaded();

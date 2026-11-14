@@ -263,11 +263,12 @@ export function GrievanceDetailConsole() {
 
   const statusLabel = (status: string) => labelOf("statuses", STATUSES, status);
   const followingStatuses = nextStatuses(grievance.status, grievance.primaryLroId);
-  const mayChangeStatus = maySetStatus(grievance);
+  const internal = grievance.effectiveAccess.canViewInternal;
+  const mayChangeStatus = internal && maySetStatus(grievance);
   const owner = grievance.primaryLroId ?? t("assignedRepresentative");
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="min-w-0 space-y-6 p-4 sm:p-6">
       {refreshError !== null && (
         <div role="alert" className="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
@@ -283,16 +284,16 @@ export function GrievanceDetailConsole() {
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-start gap-4">
         <button type="button" onClick={() => router.back()} aria-label={t("back")} className="text-gray-500 hover:text-gray-800">
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
-        <div>
-          <h1 className="text-2xl font-bold">{grievance.title || grievance.grievanceNumber}</h1>
+        <div className="min-w-0 flex-1">
+          <h1 className="break-words text-2xl font-bold">{grievance.title || grievance.grievanceNumber}</h1>
           <p className="text-sm text-gray-500">{grievance.grievanceNumber}</p>
         </div>
         <span
-          className={`ml-auto rounded-full px-3 py-1 text-xs font-semibold ${isKnownStatus(grievance.status) ? STATUS_COLORS[grievance.status] : "bg-gray-100"}`}
+          className={`ml-auto shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${isKnownStatus(grievance.status) ? STATUS_COLORS[grievance.status] : "bg-gray-100"}`}
         >
           {statusLabel(grievance.status)}
         </span>
@@ -457,7 +458,7 @@ export function GrievanceDetailConsole() {
             </ul>
           )}
 
-          <form className="grid grid-cols-1 gap-2 rounded-md border p-3 md:grid-cols-2" onSubmit={uploadGovernedDocument}>
+          {internal && grievance.effectiveAccess.canUploadDocuments && <form className="grid grid-cols-1 gap-2 rounded-md border p-3 md:grid-cols-2" onSubmit={uploadGovernedDocument}>
             <p className="text-xs text-gray-600 md:col-span-2">{t("uploadNote")}</p>
             <input
               value={uploadPayload.title}
@@ -526,10 +527,11 @@ export function GrievanceDetailConsole() {
             >
               {uploadingDoc ? t("uploading") : t("upload")}
             </button>
-          </form>
+          </form>}
         </CardContent>
       </Card>
 
+      {internal && <>
       {/* Case Intelligence */}
       <CaseIntelligencePanel caseId={id} />
 
@@ -621,10 +623,11 @@ export function GrievanceDetailConsole() {
       </Card>
 
       {/* Steward Recommendations */}
-      <StewardRecommendations grievanceId={id} onAssign={() => void refresh()} />
+      {grievance.effectiveAccess.canManageAssignments && <StewardRecommendations grievanceId={id} onAssign={() => void refresh()} />}
 
       {/* Contract Clause Intelligence */}
       <ClauseSuggestions grievanceId={id} description={grievance.description ?? ""} />
+      </>}
     </div>
   );
 }

@@ -44,6 +44,7 @@ export interface CollaboratorAccess {
 }
 
 export interface EffectiveAccess {
+  canViewInternal: boolean;
   isPrimaryOwner: boolean;
   isSecondaryCollaborator: boolean;
   accessRole: string | null;
@@ -225,6 +226,8 @@ export function readGrievanceDetail(body: unknown): GrievanceDetail {
       expiresAt: text(assignment.expiresAt),
     })),
     effectiveAccess: {
+      // Missing authority never enables internal tools.
+      canViewInternal: access.canViewInternal === true,
       isPrimaryOwner: access.isPrimaryOwner,
       isSecondaryCollaborator: access.isSecondaryCollaborator === true,
       accessRole: text(access.accessRole),

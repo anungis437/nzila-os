@@ -300,6 +300,10 @@ export function getAllowedPrefixesByExperience(): Record<DashboardExperience, st
 }
 
 export function canAccessDashboardPath(pathname: string, experience: DashboardExperience, isPilotMode: boolean): boolean {
+  // A link to one matter is presented to any authenticated experience. Its API
+  // decides actual case standing and returns only the caller's bounded view.
+  // This does not admit the grievance collection, creation or management routes.
+  if (/^\/dashboard\/grievances\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(pathname)) return true;
   const allowedPrefixes = ALLOWED_PREFIXES_BY_EXPERIENCE[experience];
   const isAllowed = allowedPrefixes.some((prefix) => {
     if (prefix === '/dashboard') {

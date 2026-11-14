@@ -176,17 +176,20 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
           probes: [
             {
               type: 'Liveness'
-              httpGet: { path: '/api/health', port: 3000 }
+              // Staging restarts only an unresponsive process, not a slow dependency census.
+              httpGet: { path: deploymentEnvironment == 'staging' ? '/api/health/liveness' : '/api/health', port: 3000 }
               initialDelaySeconds: 20
               periodSeconds: 20
+              timeoutSeconds: deploymentEnvironment == 'staging' ? 5 : 1
             }
             {
               type: 'Readiness'
               // Readiness must fail closed when the database, identity or required services are unavailable.
-              // Liveness remains /api/health so a temporary dependency outage does not cause restart loops.
+              // Catalog, signing and service checks control traffic admission, not process restarts.
               httpGet: { path: '/api/ready', port: 3000 }
               initialDelaySeconds: 10
               periodSeconds: 10
+              timeoutSeconds: deploymentEnvironment == 'staging' ? 10 : 1
             }
           ]
           env: concat([
