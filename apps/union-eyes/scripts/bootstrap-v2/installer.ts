@@ -1,3 +1,5 @@
+import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guards'
+import { inspectPhysicalGuards, planPhysicalGuards } from '../../db/auth/physical-guard-catalog'
 import assert from 'node:assert/strict'
 import pg from 'pg'
 import { hash, quote, type V2Plan } from './source'
@@ -219,6 +221,22 @@ export async function createCurrentState(
       source: 'apps/union-eyes/db/auth/messaging-physical-guards.ts',
       sourceDigest: producerBytes('apps/union-eyes/db/auth/messaging-physical-guards.ts'),
     })
+  if (plan.tables.some((table) => table.name === 'ue_authority_approval_requests')) {
+    const guards = planPhysicalGuards(
+      AUTHORITY_PHYSICAL_GUARDS,
+      await inspectPhysicalGuards(
+        AUTHORITY_PHYSICAL_GUARDS,
+        async (sql) => (await client.query(sql)).rows,
+      ),
+    )
+    for (const [index, sql] of guards.statements.entries())
+      await execute({
+        canonicalId: `CURRENT_AUTHORITY_GUARD:${index}`,
+        sql,
+        source: AUTHORITY_PHYSICAL_GUARDS.source,
+        sourceDigest: producerBytes(AUTHORITY_PHYSICAL_GUARDS.source),
+      })
+  }
   if (plan.authExecution) {
     if (options.profile !== 'PREPROVISIONED_NON_SUPERUSER') await client.query('RESET ROLE')
     await execute(

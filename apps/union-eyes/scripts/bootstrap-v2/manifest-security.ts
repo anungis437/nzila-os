@@ -1,3 +1,5 @@
+import { AUTHORITY_PHYSICAL_GUARDS } from '../../db/auth/authority-physical-guards'
+import { physicalGuardViolations } from '../../db/auth/physical-guard-catalog'
 import {
   inspectMessagingPhysicalCatalog,
   messagingPhysicalGuardViolations,
@@ -88,6 +90,13 @@ export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan) {
       ...messagingPhysicalGuardViolations(
         await inspectMessagingPhysicalCatalog(async (sql) => (await client.query(sql)).rows),
       ),
+    )
+  if (plan.tables.some((table) => table.name === 'ue_authority_approval_requests'))
+    mismatches.push(
+      ...(await physicalGuardViolations(
+        AUTHORITY_PHYSICAL_GUARDS,
+        async (sql) => (await client.query(sql)).rows,
+      )),
     )
   const authPrivileges = plan.authExecution ? await inspectAuthPrivilegeExpectations(client) : null
   if (authPrivileges) mismatches.push(...authPrivileges.failures)

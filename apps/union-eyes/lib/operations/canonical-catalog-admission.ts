@@ -1,3 +1,5 @@
+import { AUTHORITY_PHYSICAL_GUARDS } from '@/db/auth/authority-physical-guards'
+import { physicalGuardViolations } from '@/db/auth/physical-guard-catalog'
 import {
   inspectMessagingPhysicalCatalog,
   messagingPhysicalGuardViolations,
@@ -292,5 +294,6 @@ export async function inspectCanonicalAuthCatalog(execute: Execute): Promise<str
   violations.push(
     ...messagingPhysicalGuardViolations(await inspectMessagingPhysicalCatalog(execute)),
   )
+  violations.push(...(await physicalGuardViolations(AUTHORITY_PHYSICAL_GUARDS, execute)))
   return violations
 }
