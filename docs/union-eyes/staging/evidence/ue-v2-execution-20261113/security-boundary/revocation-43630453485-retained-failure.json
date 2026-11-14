@@ -1,0 +1,464 @@
+{
+  "evidenceClass": "REAL_REMOTE_ENTRA_SESSION_AND_API",
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "workflowSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+  "runId": "43630453485",
+  "observations": [
+    {
+      "at": "2026-11-14T19:09:37.664Z",
+      "kind": "LIVE_SOURCE_IDENTITY",
+      "gitSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+      "app": "union-eyes"
+    },
+    {
+      "at": "2026-11-14T19:09:48.543Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "A",
+      "principal": "ecb4f1d7-b0ae-44f8-bf56-832bc173fc49",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-14T19:24:48.531Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-14T19:09:56.393Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "B",
+      "principal": "59d4c24e-acb6-4a0e-898a-ed20016c642c",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-14T19:24:56.381Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-14T19:10:04.015Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases",
+      "status": 201,
+      "traceId": "f96ff52131f1426fb8b8cb491da01a20",
+      "correlationId": "6fc68057-5364-4f08-a94e-6806859e76cd",
+      "responseTraceId": "mwgs5nb4-f0ace4ea"
+    },
+    {
+      "at": "2026-11-14T19:10:04.015Z",
+      "kind": "API_CREATED_CASE",
+      "persona": "A",
+      "claimId": "e80897d9-7c03-42f2-aeed-00220f67e182",
+      "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0"
+    },
+    {
+      "at": "2026-11-14T19:10:07.704Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "POST",
+      "path": "/api/cases",
+      "status": 201,
+      "traceId": "6d45e2b44eab88bc36e600d9c2b1797f",
+      "correlationId": "9b8233ea-d083-4551-9dd1-0f8da0c4db93",
+      "responseTraceId": "mwgs5t6s-a5dfa5ae"
+    },
+    {
+      "at": "2026-11-14T19:10:07.704Z",
+      "kind": "API_CREATED_CASE",
+      "persona": "B",
+      "claimId": "72254591-6b55-4eb6-8c98-26de052007e9",
+      "organizationId": "f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab"
+    },
+    {
+      "at": "2026-11-14T19:10:11.647Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases/e80897d9-7c03-42f2-aeed-00220f67e182",
+      "status": 200,
+      "traceId": "cd726e004a024bdcfc306d46e7d8be17",
+      "correlationId": "4a29fe97-c4a4-4c20-8142-9ff460743f5e",
+      "responseTraceId": "mwgs5w18-755f9e58"
+    },
+    {
+      "at": "2026-11-14T19:10:15.508Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases/72254591-6b55-4eb6-8c98-26de052007e9",
+      "status": 404,
+      "traceId": "22aaeee5c2879674f698b0c7f7054167",
+      "correlationId": "3196343d-1009-4836-858e-c9053a3d44c0",
+      "responseTraceId": "mwgs5z2r-b0a722ed"
+    },
+    {
+      "at": "2026-11-14T19:10:19.388Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases",
+      "status": 200,
+      "traceId": "05811ca0863a7fb64eb9661b442782dc",
+      "correlationId": "0a71f409-cca2-460a-bbdb-aa00a3fcf939",
+      "responseTraceId": "mwgs621z-eff6bd6f"
+    },
+    {
+      "at": "2026-11-14T19:10:19.388Z",
+      "kind": "OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED",
+      "persona": "A",
+      "ownCase": "e80897d9-7c03-42f2-aeed-00220f67e182",
+      "foreignCase": "72254591-6b55-4eb6-8c98-26de052007e9"
+    },
+    {
+      "at": "2026-11-14T19:10:23.174Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/cases/72254591-6b55-4eb6-8c98-26de052007e9",
+      "status": 200,
+      "traceId": "c760071b1764dbde57e34a1cb505c635",
+      "correlationId": "c3b0aba9-4cad-46b7-b0a4-1f38a386de21",
+      "responseTraceId": "mwgs651t-9bccb50a"
+    },
+    {
+      "at": "2026-11-14T19:10:27.897Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/cases/e80897d9-7c03-42f2-aeed-00220f67e182",
+      "status": 404,
+      "traceId": "f6f045036ffcf1e2213be0386ff187db",
+      "correlationId": "c0266d48-008e-4841-ba4d-70a765837b12",
+      "responseTraceId": "mwgs67z3-4b6151f1"
+    },
+    {
+      "at": "2026-11-14T19:10:32.244Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/cases",
+      "status": 200,
+      "traceId": "bdab8cf5ed1c4a91d5d00124277320ed",
+      "correlationId": "fa3ccd4d-5db3-4b4b-a6e1-e19b3defd46c",
+      "responseTraceId": "mwgs6bm5-68f0debe"
+    },
+    {
+      "at": "2026-11-14T19:10:32.244Z",
+      "kind": "OWN_CASE_VISIBLE_FOREIGN_CASE_DENIED",
+      "persona": "B",
+      "ownCase": "72254591-6b55-4eb6-8c98-26de052007e9",
+      "foreignCase": "e80897d9-7c03-42f2-aeed-00220f67e182"
+    },
+    {
+      "at": "2026-11-14T19:10:39.054Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/executive",
+      "finalPath": "/en-CA/dashboard/executive",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:10:44.219Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/leadership",
+      "finalPath": "/en-CA/dashboard/leadership",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:10:48.934Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/governance",
+      "finalPath": "/en-CA/dashboard/governance",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:10:54.533Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/bargaining",
+      "finalPath": "/en-CA/dashboard/bargaining",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:10:59.252Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/correspondence",
+      "finalPath": "/en-CA/dashboard/correspondence",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:02.906Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/continuity-intelligence",
+      "finalPath": "/en-CA/dashboard/continuity-intelligence",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:07.016Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/en-CA/dashboard/settings",
+      "finalPath": "/en-CA/dashboard/settings",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:13.900Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/executive",
+      "finalPath": "/fr-CA/dashboard/executive",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:18.488Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/leadership",
+      "finalPath": "/fr-CA/dashboard/leadership",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:24.310Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/governance",
+      "finalPath": "/fr-CA/dashboard/governance",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:28.270Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/bargaining",
+      "finalPath": "/fr-CA/dashboard/bargaining",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:34.104Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/correspondence",
+      "finalPath": "/fr-CA/dashboard/correspondence",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:38.352Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/continuity-intelligence",
+      "finalPath": "/fr-CA/dashboard/continuity-intelligence",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:42.248Z",
+      "kind": "LOCALIZED_EXECUTIVE_NAVIGATION",
+      "path": "/fr-CA/dashboard/settings",
+      "finalPath": "/fr-CA/dashboard/settings",
+      "status": 200,
+      "viewport": "desktop",
+      "noInstitutionalAuthorityInferred": true
+    },
+    {
+      "at": "2026-11-14T19:11:48.897Z",
+      "kind": "MOBILE_LOCALIZED_PAGE",
+      "path": "/en-CA/dashboard/executive",
+      "status": 200,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "at": "2026-11-14T19:11:58.276Z",
+      "kind": "MOBILE_LOCALIZED_PAGE",
+      "path": "/fr-CA/dashboard/executive",
+      "status": 200,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "at": "2026-11-14T19:12:07.155Z",
+      "kind": "CANONICAL_DOCUMENT_UPLOAD",
+      "persona": "A",
+      "status": 201,
+      "checksum": "7d1c6f656c08aca6f9de89121ab0f40626274fe53ecb0d0d9644de5917f465e6",
+      "bytes": 69
+    },
+    {
+      "at": "2026-11-14T19:12:18.083Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/documents/intakes/d0a44a63-db01-4a42-b237-1326bce80ec0",
+      "status": 404,
+      "traceId": "7900fecfbcded2d161004d5a74ad0d70",
+      "correlationId": "447032bd-f842-4ee2-895e-43791d6f4a8c",
+      "responseTraceId": "mwgs8ok6-142527c6"
+    },
+    {
+      "at": "2026-11-14T19:12:24.551Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/documents/repository",
+      "status": 200,
+      "traceId": "3ad2c745bf430ccd10bb72ae4cbbd53d",
+      "correlationId": "cbef5e33-b364-4eff-bd70-17d8623e7328",
+      "responseTraceId": "mwgs8omw-a34e0238"
+    },
+    {
+      "at": "2026-11-14T19:12:33.226Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/documents/repository",
+      "status": 200,
+      "traceId": "edb170b9e541cb7af400f5c27f8f99b5",
+      "correlationId": "a5056061-8315-40f8-8fac-8b6df7acbee8",
+      "responseTraceId": "mwgs8tmj-13964552"
+    },
+    {
+      "at": "2026-11-14T19:12:43.163Z",
+      "kind": "API",
+      "persona": "B",
+      "method": "GET",
+      "path": "/api/documents/e8908f4f-5d65-4e75-917c-553701f9b041/download",
+      "status": 404,
+      "traceId": "3768a3672c2bfabdf769d4329f6db31d",
+      "correlationId": "aa516f59-604b-49ce-b2e4-3b7e39504aa3",
+      "responseTraceId": "mwgs90bi-488fef35"
+    },
+    {
+      "at": "2026-11-14T19:12:53.552Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/documents/e8908f4f-5d65-4e75-917c-553701f9b041/download",
+      "status": 200,
+      "traceId": "50fd0ca380f1a2128186db4111989146",
+      "correlationId": "3859bce8-c12e-4fed-95c4-1c922da98438",
+      "responseTraceId": "mwgs97zj-ef82e06d"
+    },
+    {
+      "at": "2026-11-14T19:12:53.657Z",
+      "kind": "API_DOCUMENT_AND_ONE_USE_INTAKE",
+      "intakeId": "d0a44a63-db01-4a42-b237-1326bce80ec0",
+      "documentId": "e8908f4f-5d65-4e75-917c-553701f9b041",
+      "checksum": "7d1c6f656c08aca6f9de89121ab0f40626274fe53ecb0d0d9644de5917f465e6",
+      "replaySameDocument": true,
+      "foreignDownloadDenied": true,
+      "publicClientStatus": 403,
+      "expiresAt": "2026-11-14T20:12:52Z",
+      "signedUrlSha256": "03f149efb954d9e046e9a3ffe5e3e2a9249f2fc8192a92066af35bac8f24fbbd",
+      "privateBytesAndExpiryNotYetProven": true
+    },
+    {
+      "at": "2026-11-14T19:18:54.135Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases/e80897d9-7c03-42f2-aeed-00220f67e182",
+      "status": 401,
+      "traceId": "ca53291c6817a7d635af1c42c4f31843",
+      "correlationId": "c08f73cf-3d37-49d7-b698-2deb116e83f4",
+      "responseTraceId": "mwgsh614-a6d2bb2e"
+    }
+  ],
+  "runtimeAcceptance": false,
+  "claims": {
+    "A": "e80897d9-7c03-42f2-aeed-00220f67e182",
+    "B": "72254591-6b55-4eb6-8c98-26de052007e9"
+  },
+  "status": "FAIL",
+  "failure": {
+    "stage": "existing-cookie-after-membership-revocation",
+    "error": "AssertionError",
+    "message": "Required API status mismatch"
+  }
+}

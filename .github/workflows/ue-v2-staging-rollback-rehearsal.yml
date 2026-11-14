@@ -47,7 +47,7 @@ jobs:
     if: github.repository == 'anungis437/nzila-os' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: ue-staging
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5
         with:

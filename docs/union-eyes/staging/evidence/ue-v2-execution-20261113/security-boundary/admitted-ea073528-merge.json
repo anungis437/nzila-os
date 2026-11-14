@@ -1,0 +1,15 @@
+{
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "integrationHeadSha": "842c54f6e47e0f3a6f8c346a16d951361e88edc5",
+  "mainAdmissionMergeSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+  "mergedAt": "2026-11-14T17:22:51Z",
+  "at": "2026-11-14T17:22:54.992423+00:00",
+  "allRegisteredChecksFinishedWithoutFailure": true,
+  "allRequiredChecksPassed": true,
+  "requiredTrustedContexts": 16,
+  "sourcePr": 1224,
+  "integrationPr": 1225,
+  "reviewActor": "Codex under continuing solo-founder CHG-2026-0114 delegation; anungis/anungis437 are one founder",
+  "productionAuthorized": false,
+  "stagingGo": false
+}

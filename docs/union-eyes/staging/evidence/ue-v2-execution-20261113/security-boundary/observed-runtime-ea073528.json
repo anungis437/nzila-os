@@ -1,0 +1,200 @@
+{
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "workflowSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+  "buildRunId": "43620798141",
+  "deploymentRunId": "43622244265",
+  "at": "2026-11-14T18:56:53.515913+00:00",
+  "productionDeployment": false,
+  "stagingGo": false,
+  "version": {
+    "app": "union-eyes",
+    "gitSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+    "buildTimestamp": "2026-11-14T17:25:18Z",
+    "appVersion": "0.0.0",
+    "releaseId": "UE-V2-STAGING-ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+    "artifactId": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
+  },
+  "readiness": {
+    "ready": true,
+    "status": "ready",
+    "app": "union-eyes",
+    "environment": "staging",
+    "gitSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+    "buildTimestamp": "2026-11-14T17:25:18Z",
+    "artifactId": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+    "releaseId": "UE-V2-STAGING-ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+    "appVersion": "0.0.0",
+    "timestamp": "2026-11-14T18:56:54.343Z",
+    "checks": {
+      "process": "ok",
+      "noTestBypass": "ok",
+      "database": "ok",
+      "catalogAuthority": "ok",
+      "storage": "unknown",
+      "thirdParty": "unknown",
+      "decisionProof": "ok"
+    }
+  },
+  "liveness": {
+    "status": "ok",
+    "timestamp": "2026-11-14T18:56:54.413Z",
+    "uptime": 3772.045898124
+  },
+  "buildWorkflowSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+  "azure": {
+    "name": "nzila-ue-v2-staging-app",
+    "revision": "nzila-ue-v2-staging-app--relea07352887",
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af4e021f19f68297dc661ef6b396eb4a9f78f4b817d711e85583d6367abaae24",
+    "minReplicas": 1,
+    "maxReplicas": 2,
+    "traffic": [
+      {
+        "revisionName": "nzila-ue-v2-staging-app--relea07352887",
+        "weight": 100
+      }
+    ],
+    "probes": [
+      {
+        "httpGet": {
+          "path": "/api/health/liveness",
+          "port": 3000
+        },
+        "initialDelaySeconds": 20,
+        "periodSeconds": 20,
+        "timeoutSeconds": 5,
+        "type": "Liveness"
+      },
+      {
+        "httpGet": {
+          "path": "/api/ready",
+          "port": 3000
+        },
+        "initialDelaySeconds": 10,
+        "periodSeconds": 10,
+        "timeoutSeconds": 10,
+        "type": "Readiness"
+      }
+    ],
+    "verifiedConfiguration": {
+      "DB_POOL_MAX": {
+        "name": "DB_POOL_MAX",
+        "value": "1"
+      },
+      "DATABASE_POOL_SIZE": {
+        "name": "DATABASE_POOL_SIZE",
+        "value": "1"
+      },
+      "SYSTEM_DB_POOL_MAX": {
+        "name": "SYSTEM_DB_POOL_MAX",
+        "value": "1"
+      },
+      "AUTH_DB_POOL_MAX": {
+        "name": "AUTH_DB_POOL_MAX",
+        "value": "1"
+      },
+      "AUTH_SYSTEM_DB_POOL_MAX": {
+        "name": "AUTH_SYSTEM_DB_POOL_MAX",
+        "value": "1"
+      },
+      "NAR_SIGNING_SECRET": {
+        "name": "NAR_SIGNING_SECRET",
+        "secretRef": "nar-signing-secret"
+      },
+      "NAR_SIGNING_KEY_ID": {
+        "name": "NAR_SIGNING_KEY_ID",
+        "value": "ue-v2-staging-nar-v1"
+      },
+      "READY_REQUIRE_DECISION_PROOF": {
+        "name": "READY_REQUIRE_DECISION_PROOF",
+        "value": "true"
+      }
+    },
+    "workspaceId": "ce2ff61f-0059-46eb-b18b-a9be8162d009",
+    "workspaceResourceId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law",
+    "workspaceRetentionDays": 30,
+    "workspaceDailyCapGb": 1
+  },
+  "infrastructureProvenance": {
+    "schema": "ue-v2-staging-infrastructure/v1",
+    "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+    "infrastructureSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+    "workflowSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+    "parametersSourceSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+    "infrastructureTreeSha": "a3911f56bf832a45bf0eddce39959bb69a1eca0f",
+    "templateSha256": "898134f80ac86db92eacd88e70c29d6c83210a067de9c88a6815c372937d1350"
+  },
+  "alertScopeMigration": {
+    "status": "PASS",
+    "planFingerprint": "5309e5efb006e11bd44e28234d5b3414663d96a8eeb06c17367e633a8a66f9a7",
+    "snapshotsPreserved": 0,
+    "replacementsVerified": [
+      {
+        "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/microsoft.insights/scheduledqueryrules/nzila-ue-v2-staging-audit-persistence-failure",
+        "scopes": [
+          "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law"
+        ],
+        "enabled": true,
+        "reviewedSettingsVerified": true
+      },
+      {
+        "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/microsoft.insights/scheduledqueryrules/nzila-ue-v2-staging-cron-job-failed",
+        "scopes": [
+          "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law"
+        ],
+        "enabled": true,
+        "reviewedSettingsVerified": true
+      },
+      {
+        "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/microsoft.insights/scheduledqueryrules/nzila-ue-v2-staging-database-errors",
+        "scopes": [
+          "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law"
+        ],
+        "enabled": true,
+        "reviewedSettingsVerified": true
+      },
+      {
+        "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/microsoft.insights/scheduledqueryrules/nzila-ue-v2-staging-redis-unavailable",
+        "scopes": [
+          "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law"
+        ],
+        "enabled": true,
+        "reviewedSettingsVerified": true
+      },
+      {
+        "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/microsoft.insights/scheduledqueryrules/nzila-ue-v2-staging-resend-failure",
+        "scopes": [
+          "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law"
+        ],
+        "enabled": true,
+        "reviewedSettingsVerified": true
+      },
+      {
+        "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/microsoft.insights/scheduledqueryrules/nzila-ue-v2-staging-stripe-webhook-failure",
+        "scopes": [
+          "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law"
+        ],
+        "enabled": true,
+        "reviewedSettingsVerified": true
+      },
+      {
+        "id": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/microsoft.insights/scheduledqueryrules/nzila-ue-v2-staging-unexpected-5xx",
+        "scopes": [
+          "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law"
+        ],
+        "enabled": true,
+        "reviewedSettingsVerified": true
+      }
+    ],
+    "databaseOrApplicationMutation": false,
+    "productionResourceMutation": false
+  },
+  "candidateActivation": {
+    "status": "PASS",
+    "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+    "workflowSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
+    "revisionName": "nzila-ue-v2-staging-app--relea07352887",
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af4e021f19f68297dc661ef6b396eb4a9f78f4b817d711e85583d6367abaae24",
+    "reactivated": false,
+    "trafficChanged": false
+  }
+}

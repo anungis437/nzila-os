@@ -39,3 +39,24 @@ test('every staging app secret reference has a scoped runtime grant and excludes
   assert.match(main, /scope: stagingRuntimeSecrets\[i\]/);
   assert.match(main, /resource kvSecretsUser[^\n]+if \(env == 'prod'\)/);
 });
+
+const vm = require('node:vm');
+async function revokedSession({caseStatus = 401, documentStatus = 401, expired = false, wrongIdentity = false, wrongTenant = false} = {}) {
+  const source = fs.readFileSync(path.join(root, 'tooling/scripts/qualify-ue-v2-real-entra.cjs'), 'utf8');
+  const functionSource = source.slice(source.indexOf('async function verifyRevokedExistingSession('), source.indexOf('async function main()'));
+  const calls = [], records = [];
+  const ctx = vm.createContext({assert, Date, BASE: 'https://staging.invalid', TENANT: tenant, PEOPLE: {A: {oid: 'owned-officer'}},
+    contexts: new Map([['A', {request: {get: async () => ({status: () => 200, json: async () => ({entraObjectId: wrongIdentity ? 'other' : 'owned-officer', tenantId: wrongTenant ? 'other' : tenant, expires: new Date(Date.now() + (expired ? -1000 : 60000)).toISOString()})})}}]]),
+    request: async (key, route, method, data, expected) => {const status = route.includes('/documents/') ? documentStatus : caseStatus; calls.push({key, route}); assert(expected.includes(status)); return {status: () => status};},
+    record: value => records.push(value)});
+  await vm.runInContext(functionSource + '; verifyRevokedExistingSession("owned-case", "owned-document")', ctx);
+  return {calls, records};
+}
+test('revocation requires an unexpired verified provider session and independent case and document denials', async () => {
+  for (const status of [401, 403, 404]) {
+    const {calls, records} = await revokedSession({caseStatus: status, documentStatus: status});
+    assert.equal(calls.length, 2); assert(calls.every(x => x.key === 'A'));
+    assert.equal(records[0].caseStatus, status); assert.equal(records[0].documentStatus, status);
+  }
+  for (const options of [{caseStatus: 200}, {documentStatus: 200}, {caseStatus: 500}, {documentStatus: 500}, {expired: true}, {wrongIdentity: true}, {wrongTenant: true}]) await assert.rejects(revokedSession(options));
+});

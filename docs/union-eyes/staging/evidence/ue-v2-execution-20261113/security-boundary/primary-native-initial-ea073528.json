@@ -1,0 +1,98 @@
+{
+  "ok": true,
+  "status": "PASS",
+  "purpose": "CURRENT_CANDIDATE_REAL_ENTRA_NATIVE_TENANT_ISOLATION_AND_AUDIT",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "at": "2026-11-14T19:08:25.110Z",
+  "identity": {
+    "principal": "ue_staging_runtime",
+    "role": "union_eyes_runtime",
+    "database": "ue_v2_staging",
+    "address": "10.40.4.4"
+  },
+  "addresses": [
+    {
+      "address": "10.40.4.4",
+      "family": 4
+    }
+  ],
+  "apiCreatedCases": [
+    "459f8e1b-03e1-4cc4-b1d5-0574f52c00a9",
+    "8e348772-6b5a-4851-995c-6ad2518d83b9"
+  ],
+  "checks": [
+    "6a0fe972-ed1c-49ca-83c8-00b9b214f96f:unbound-context-denied",
+    "59d4c24e-acb6-4a0e-898a-ed20016c642c:unbound-context-denied",
+    "A:real-signature-issuer-audience-subject",
+    "A:own-organization-api-case-visible-foreign-hidden",
+    "A:prior-qualified-case-and-document-data-retained-across-rollout-and-recovery",
+    "A:forged-organization-denied",
+    "A:forged-actor-denied",
+    "A:missing-bearer-denied",
+    "A:hash-is-not-bearer-denied",
+    "A:cross-tenant-update-denied",
+    "A:current-case-audit-and-complete-hash-chain",
+    "A:actual-case-evidence-artifact-checksum-manifest-seal-and-audit",
+    "A:foreign-evidence-pack-denied",
+    "A:cross-tenant-insert-refused-42501",
+    "A:bridge-revoked-after-callback",
+    "A:foreign-membership-binding-refused",
+    "B:real-signature-issuer-audience-subject",
+    "B:own-organization-api-case-visible-foreign-hidden",
+    "B:prior-qualified-case-and-document-data-retained-across-rollout-and-recovery",
+    "B:forged-organization-denied",
+    "B:forged-actor-denied",
+    "B:missing-bearer-denied",
+    "B:hash-is-not-bearer-denied",
+    "B:cross-tenant-update-denied",
+    "B:current-case-audit-and-complete-hash-chain",
+    "B:actual-case-evidence-artifact-checksum-manifest-seal-and-audit",
+    "B:foreign-evidence-pack-denied",
+    "B:cross-tenant-insert-refused-42501",
+    "B:bridge-revoked-after-callback",
+    "B:foreign-membership-binding-refused"
+  ],
+  "audit": [
+    {
+      "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0",
+      "records": 479,
+      "headHash": "15e272b0a4acc02acb2189dbf54b1bba254237aaaba73a43061041e4f6978a7c"
+    },
+    {
+      "organizationId": "f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab",
+      "records": 18,
+      "headHash": "2f95d3f52bc8ac6486a639a912f996a915a6ac29fceef7510f2c8051a15db193"
+    }
+  ],
+  "sealedEvidence": [
+    {
+      "packId": "e08068a9-ea83-45fc-8182-61a40dad4a4e",
+      "status": "sealed",
+      "artifactId": "9235c79f-1b5a-4ff5-a923-a2ae38505f16",
+      "contentHash": "47c844936692f8ead06841ab64f1b524f7f2a7c14fec04813b9b63c9be8172c9",
+      "packHash": "789ef8b3a29c10aaf5f04b4fd4f11f84ad55cd0943b04fedd311ce745b1d5510",
+      "sizeBytes": 178
+    },
+    {
+      "packId": "cdf5fdbc-9d59-4333-8a6c-8da37f54a7d7",
+      "status": "sealed",
+      "artifactId": "73de72ac-e554-415d-b7f5-1927d2588b50",
+      "contentHash": "26b61bcdbb9dbdd8135e0edb58647607c1118375fe7a2a30297b3052c8e76461",
+      "packHash": "b6e0d8ce9ef447b0df28e786ff28aad51abbf4a0dfd3e266077aa2241c6f14fc",
+      "sizeBytes": 178
+    }
+  ],
+  "probeCompiledSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "candidateSourceInputsIndependentlyByteVerified": 103,
+  "actorARole": "member; raw SQL proves tenant isolation, API case authority remains separately tested",
+  "signedTokensOrCookiesSerialized": false,
+  "noSessionManufactured": true,
+  "transactionalProbeWritesRolledBack": true,
+  "transport": {
+    "bytes": 370580,
+    "programSha256": "d7d4ea285991ad2c39184b9c2cb2648860a5ad1f4c2afb3fd2020f6ebf1a816c",
+    "fileSha256": {
+      "bearer.cjs": "c8059af98dd19ffe09f80f60c93489bbd3915a87b8c9d09b23459a3719d6d2b6"
+    }
+  }
+}

@@ -1,0 +1,241 @@
+{
+  "status": "PASS",
+  "evidenceClass": "REAL_ENTRA_FOUR_PERSONA_BASE_MESSAGING_API",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "at": "2026-11-14T19:11:47.141Z",
+  "threadId": "8c652a71-cb98-4ffb-aa04-58ada3c73ae4",
+  "checks": [
+    {
+      "person": "member",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "steward",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "executive",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "admingov",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "member",
+      "path": "/api/messages/threads",
+      "method": "post",
+      "status": 201,
+      "expectedStatus": 201,
+      "requestId": "346e6598-9eac-46fd-91a0-d8ac6a61fd9b"
+    },
+    {
+      "person": "member",
+      "path": "/api/messages/threads",
+      "method": "post",
+      "status": 201,
+      "expectedStatus": 201,
+      "requestId": "0402d95d-4bab-4c84-8104-6bd6eae91a2c"
+    },
+    {
+      "person": "member",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "adfc89f2-6251-4961-9912-7fefa6fe6336"
+    },
+    {
+      "person": "member",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/messages",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "09c13b57-76d0-4d8b-9b2a-04f5b9212d73"
+    },
+    {
+      "person": "member",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/read",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "ff85d991-1a0e-4158-8b6b-965e90c29c68"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "7fe0da24-bd51-414c-a53e-6c51af818c13"
+    },
+    {
+      "person": "executive",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "06314af0-7ea5-45d5-976a-170068a48c53"
+    },
+    {
+      "person": "admingov",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "2877be0e-b005-4bb1-a434-fb0828f165c5"
+    },
+    {
+      "person": "member",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/assignment",
+      "method": "post",
+      "status": 403,
+      "expectedStatus": 403,
+      "requestId": "40a82707-c0a6-4f4e-8134-c4b38a91a491"
+    },
+    {
+      "person": "admingov",
+      "path": "/api/triage-designations",
+      "method": "post",
+      "status": 201,
+      "expectedStatus": 201,
+      "requestId": "56a8502d-e2fe-4b7a-8d89-3bc11b863ce5"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "ddda5d27-6cc3-4ed9-b383-b8973a9d7417"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/queue",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "99eddb8a-9fa9-403d-b821-1aed8eb2d08c"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/assignment",
+      "method": "post",
+      "status": 422,
+      "expectedStatus": 422,
+      "requestId": "ddc2ad53-f44e-47ec-a021-82a2674f032d"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/assignment",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "e272a8f9-9511-4979-839c-abbd064b02c1"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/read",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "f38aa768-d883-41e7-9a50-9ad3fb29238c"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/messages",
+      "method": "post",
+      "status": 201,
+      "expectedStatus": 201,
+      "requestId": "87c7eb80-cce5-4513-bb2f-15736df74d80"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/messages",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "52ed4dd0-7b18-4fdc-9f82-0e85b51b8886"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/assignment",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "ddfee501-3777-4597-81c7-a3509130b89d"
+    },
+    {
+      "person": "steward",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "4d1099e8-5dab-41ab-9772-468151aa7279"
+    },
+    {
+      "person": "executive",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "32381474-1b52-442f-868e-e736e416648f"
+    },
+    {
+      "person": "executive",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/messages",
+      "method": "post",
+      "status": 201,
+      "expectedStatus": 201,
+      "requestId": "040457a2-dadb-4ec5-9e26-09da3bc03861"
+    },
+    {
+      "person": "member",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/messages",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "80c76d23-bd37-47cc-b433-cea104d94e40"
+    },
+    {
+      "person": "member",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/lifecycle",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "22b1b927-0590-4236-bf1f-eab0dbe54d44"
+    },
+    {
+      "person": "executive",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4/messages",
+      "method": "post",
+      "status": 409,
+      "expectedStatus": 409,
+      "requestId": "50b5a69c-6ee2-4c31-956b-8507b84f1d98"
+    },
+    {
+      "person": "member",
+      "path": "/api/messages/threads/8c652a71-cb98-4ffb-aa04-58ada3c73ae4",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "aa21953b-9a6d-4a96-9607-3cc5362718ec"
+    },
+    {
+      "person": "admingov",
+      "path": "/api/triage-designations?designationId=bf98e5e3-5fd3-4eb6-8298-8bf6bc42d993",
+      "method": "delete",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "c3887881-11b6-404f-80f4-7b1686e85ccd"
+    }
+  ],
+  "syntheticOwnedFixturesOnly": true,
+  "designationRevoked": true,
+  "realAuthorizationCodeSessions": true,
+  "tokensAndCookiesSerialized": false
+}

@@ -78,6 +78,24 @@ async function auth(key) {
   record({ kind: 'REAL_ENTRA_AUTHORIZATION_CODE_SESSION', persona: key, principal: PEOPLE[key].oid, tenant: TENANT, expires: session.expires, events, secureHttpOnlyCookie: true });
   await page.close();
 }
+async function verifyRevokedExistingSession(claimId, documentId) {
+  const activeSession = await contexts.get('A').request.get(BASE + '/api/auth/session');
+  assert.equal(activeSession.status(), 200);
+  const session = await activeSession.json();
+  assert.equal(session.entraObjectId, PEOPLE.A.oid);
+  assert.equal(session.tenantId, TENANT);
+  assert(Date.parse(session.expires) > Date.now(), 'Session must remain unexpired');
+  // withApi can reject a missing active membership as 401 even while the
+  // provider session is still valid. Prove that identity first, then require
+  // independent refusals from both protected resources using the same context.
+  const caseResponse = await request('A', '/api/cases/' + claimId, 'GET', undefined, [401, 403, 404]);
+  const documentResponse = await request('A', '/api/documents/' + documentId + '/download', 'GET', undefined, [401, 403, 404]);
+  record({ kind: 'EXISTING_REAL_SESSION_DENIED_AFTER_MEMBERSHIP_REVOCATION',
+    persona: 'A', claimId, documentId, sessionStillUnexpired: true,
+    verifiedPrincipal: session.entraObjectId, verifiedTenant: session.tenantId,
+    caseStatus: caseResponse.status(), documentStatus: documentResponse.status(),
+    previouslyIssuedLeaseRequiresSeparateActualExpiryProof: true });
+}
 async function main() {
   assert.equal(process.env.GITHUB_ACTIONS, 'true');
   assert.equal(process.env.RUNNER_ENVIRONMENT, 'github-hosted');
@@ -198,17 +216,8 @@ async function main() {
     // The protected checkpoint lets the private operator revoke only the owned
     // synthetic membership. Existing provider cookies stay exclusively in RAM.
     await new Promise(resolve => setTimeout(resolve, 360000));
-    const activeSession = await contexts.get('A').request.get(BASE + '/api/auth/session');
-    assert.equal(activeSession.status(), 200);
-    const session = await activeSession.json();
-    assert.equal(session.entraObjectId, PEOPLE.A.oid);
-    assert(Date.parse(session.expires) > Date.now(), 'Session must remain unexpired');
     stage = 'existing-cookie-after-membership-revocation';
-    await request('A', '/api/cases/' + cases.A, 'GET', undefined, [403, 404]);
-    await request('A', '/api/documents/' + documentId + '/download', 'GET', undefined, [403, 404]);
-    record({ kind: 'EXISTING_REAL_SESSION_DENIED_AFTER_MEMBERSHIP_REVOCATION',
-      persona: 'A', claimId: cases.A, documentId, sessionStillUnexpired: true,
-      previouslyIssuedLeaseRequiresSeparateActualExpiryProof: true });
+    await verifyRevokedExistingSession(cases.A, documentId);
   }
   report.status = 'PASS';
 }

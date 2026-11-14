@@ -1,0 +1,117 @@
+{
+  "ok": true,
+  "purpose": "ACTUAL_STAGING_WORKER_PROBE",
+  "at": "2026-11-14T19:28:36.096Z",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "operation": "retire-owned-fixtures",
+  "scenario": "basic",
+  "identity": {
+    "principal": "uev2admin",
+    "database": "ue_v2_staging",
+    "address": "10.40.4.4"
+  },
+  "result": {
+    "explicitOwnedFixtureRetirement": true,
+    "fixtureDeadlinesCompleted": 5,
+    "remainingPendingOrClaimedReminders": 0,
+    "actualWorkerCancellation": {
+      "clientTraceId": "e4dad558a965d4cf2f719ab73549d053",
+      "clientCorrelationId": "b0d78d29-9022-4299-9e16-f6424d9f9f9a",
+      "httpStatus": 200,
+      "runId": "773e66d6-c006-43db-acd9-073223d8dc28",
+      "workerInstance": "deadline-worker-773e66d6",
+      "correlationId": "773e66d6-c006-43db-acd9-073223d8dc28",
+      "startedAt": "2026-11-14T19:28:35.064Z",
+      "finishedAt": "2026-11-14T19:28:35.103Z",
+      "durationMs": 39,
+      "examined": 1,
+      "claimed": 1,
+      "sent": 0,
+      "transientFailures": 0,
+      "permanentFailures": 0,
+      "deadLettered": 0,
+      "leasesRecovered": 0,
+      "cancelledSkipped": 1
+    }
+  },
+  "snapshot": {
+    "reminders": [
+      {
+        "id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+        "source_deadline_id": "cae5a0e4-6ca0-4c18-aa79-9990316b4dd1",
+        "status": "sent",
+        "recipient_user_id": "3fca6b06-17aa-4dc7-85a1-f4fa5f8cc015",
+        "recipient_role": "assigned_officer",
+        "scheduled_for": "2026-11-14T19:25:17.396Z",
+        "attempt_count": 1,
+        "max_attempts": 5,
+        "lease_owner": null,
+        "lease_expires_at": null,
+        "provider": "resend",
+        "provider_message_id": "01a1db85-77d7-744c-b312-ef3b26fb0593",
+        "last_error_code": null,
+        "cancelled_reason": null
+      }
+    ],
+    "executions": [
+      {
+        "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+        "attempt_number": 1,
+        "outcome": "sent",
+        "provider": "resend",
+        "provider_message_id": "01a1db85-77d7-744c-b312-ef3b26fb0593",
+        "provider_status_code": null,
+        "error_code": null,
+        "worker_instance": "deadline-worker-870d438c",
+        "correlation_id": "870d438c-e647-4dd5-91ff-40638e0ac731"
+      }
+    ],
+    "audit": [
+      {
+        "event_type": "reminder.scheduled",
+        "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+        "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+        "occurred_at": "2026-11-14T19:25:17.199Z"
+      },
+      {
+        "event_type": "deadline.created",
+        "reminder_id": null,
+        "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+        "occurred_at": "2026-11-14T19:25:17.199Z"
+      },
+      {
+        "event_type": "overdue.detected",
+        "reminder_id": null,
+        "correlation_id": "2580a84d-25c6-4878-9287-9692295cc5cd",
+        "occurred_at": "2026-11-14T19:25:17.199Z"
+      },
+      {
+        "event_type": "reminder.claimed",
+        "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+        "correlation_id": "870d438c-e647-4dd5-91ff-40638e0ac731",
+        "occurred_at": "2026-11-14T19:25:19.587Z"
+      },
+      {
+        "event_type": "reminder.sent",
+        "reminder_id": "0ac3cfac-4183-4a08-8758-d3fe211bbef5",
+        "correlation_id": "870d438c-e647-4dd5-91ff-40638e0ac731",
+        "occurred_at": "2026-11-14T19:25:19.587Z"
+      }
+    ],
+    "convergence": []
+  },
+  "beforeCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+  "afterCatalogDigest": "149eb9d7ec4ec2c1a53abc58b1d954642b375b94fcc889aca18f2c2189bd3498",
+  "forceRlsRetained": true,
+  "operatorOwnerGrantRemoved": true,
+  "recipientBoundary": "Resend reserved machine test addresses only; provider acceptance is distinct from delivered inbox evidence",
+  "institutionalAssignmentAuthorityCreated": false,
+  "credentialValuesSerialized": false,
+  "transport": {
+    "bytes": 566084,
+    "programSha256": "381586931e4c9ef18b7f8efeec54ddb6ec55ec742ced5628fec4cc8a99b9e2ab",
+    "fileSha256": {
+      "native.cjs": "3748c6536bb94b7a87876b1d9f93564c8895b507b1f842499dba9758d3de68cf"
+    }
+  }
+}

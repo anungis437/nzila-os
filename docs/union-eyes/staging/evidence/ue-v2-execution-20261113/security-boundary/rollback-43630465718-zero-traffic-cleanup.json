@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "revision": "nzila-ue-v2-staging-app--qa-recover-43630465718",
+  "operation": "DEACTIVATE_OWNED_ZERO_TRAFFIC_HEALTHY_REHEARSAL_REPLICA",
+  "metadataRetained": true,
+  "servingRevision": "nzila-ue-v2-staging-app--relea07352887",
+  "servingWeight": 100,
+  "at": "2026-11-14T19:26:55.190756+00:00"
+}

@@ -1,0 +1,58 @@
+{
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "evidenceClass": "LOCAL_BROWSER_REAL_ENTRA_AUTHORIZATION_CODE_UI_REVIEW",
+  "at": "2026-11-14T19:07:31.634Z",
+  "observations": [],
+  "pageErrors": [],
+  "checks": [
+    {
+      "locale": "en-CA",
+      "check": "REAL_RENDERED_MEMBER_INTAKE_REDIRECT_DETAIL_TIMELINE",
+      "status": "PASS",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "missingTranslations": false,
+      "screenshot": "en-CA-member-submitted-case.png"
+    },
+    {
+      "locale": "en-CA",
+      "check": "PERSISTED_MEMBER_CASE_VISIBLE_IN_MY_CASES",
+      "status": "PASS",
+      "caseId": "f4274596-6fef-43ff-89a5-c32a6bfbbf6a",
+      "caseNumber": "CASE-20261114-0011"
+    },
+    {
+      "locale": "fr-CA",
+      "check": "REAL_RENDERED_MEMBER_INTAKE_REDIRECT_DETAIL_TIMELINE",
+      "status": "PASS",
+      "width": 390,
+      "scrollWidth": 390,
+      "missingTranslations": false,
+      "screenshot": "fr-CA-member-submitted-case.png"
+    },
+    {
+      "locale": "fr-CA",
+      "check": "PERSISTED_MEMBER_CASE_VISIBLE_IN_MY_CASES",
+      "status": "PASS",
+      "caseId": "a2da56e8-ce11-49c4-844a-bf4f78c90eaa",
+      "caseNumber": "CASE-20261114-0012"
+    }
+  ],
+  "createdCases": [
+    {
+      "locale": "en-CA",
+      "id": "f4274596-6fef-43ff-89a5-c32a6bfbbf6a",
+      "number": "CASE-20261114-0011",
+      "marker": "Synthetic member UI ea073528 en-CA 2a4c97d4-07c1-4d0d-a2d4-8e73ca93bd9f"
+    },
+    {
+      "locale": "fr-CA",
+      "id": "a2da56e8-ce11-49c4-844a-bf4f78c90eaa",
+      "number": "CASE-20261114-0012",
+      "marker": "Synthetic member UI ea073528 fr-CA 80a2c5dc-1aeb-4bd1-80fe-212a53fb695f"
+    }
+  ],
+  "status": "PASS",
+  "realAuthorizationCodeSession": true,
+  "tokensAndCookiesSerialized": false
+}
