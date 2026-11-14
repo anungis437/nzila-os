@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createHash } from 'node:crypto'
 
-vi.mock('@/lib/db/with-rls-context', () => ({ withSystemContext: vi.fn() }))
+vi.mock('@/lib/db/system-transaction-scope', () => ({ withSystemContext: vi.fn() }))
 
 import { addressDigests, addressSha256, extractAddress, isAddressSuppressed, normalizeAddress } from '../address-suppression'
 

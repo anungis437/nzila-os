@@ -364,24 +364,14 @@ const nextConfig: NextConfig = {
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }],
       },
       {
-        // Apply all security headers to non-CSS-static paths
-        source: '/((?!_next/static/css).*)',
+        source: '/:path*',
         headers: securityHeaders,
-      },
-      {
-        // Next.js RSC streaming generates <script async> preloads for CSS modules.
-        // X-Content-Type-Options: nosniff causes browsers to reject text/css in a
-        // <script> context (console error). CSS still loads via <link> tags.
-        // Build-generated static CSS with content-addressed hashes is not at risk
-        // from MIME-sniffing, so omitting nosniff here is safe.
-        source: '/_next/static/css/:path*',
-        headers: securityHeaders.filter(h => h.key !== 'X-Content-Type-Options'),
       },
     ];
   },
   
   // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { isServer }) => {
     // swagger-ui-react imports `immutable` with a default import, but immutable v5
     // ESM build has no default export. Force CJS build for webpack compatibility.
     // swagger-client / swagger-ui-react also import `js-yaml` with a default import,
@@ -447,48 +437,10 @@ const nextConfig: NextConfig = {
       );
     }
     
-    // Optimize build performance
-    if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: 'deterministic',
-        // Only apply splitChunks to client builds.
-        // Server builds use Node.js require() and don't benefit from code-splitting.
-        // Applying splitChunks to server creates chunks with `self.webpackChunk_N_E`
-        // wrapper which throws "ReferenceError: self is not defined" in Node.js.
-        ...(!isServer && {
-          splitChunks: {
-            chunks: 'all',
-            cacheGroups: {
-              default: false,
-              vendors: false,
-              framework: {
-                chunks: 'all',
-                name: 'framework',
-                test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
-                priority: 40,
-                enforce: true,
-              },
-              lib: {
-                test(module: { size: () => number; identifier: () => string }) {
-                  return module.size() > 160000 && /node_modules[\\/]/.test(module.identifier());
-                },
-                name: 'lib',
-                priority: 30,
-                minChunks: 1,
-                reuseExistingChunk: true,
-              },
-              commons: {
-                name: 'commons',
-                minChunks: 2,
-                priority: 20,
-              },
-            },
-          },
-        }),
-      };
-    }
-    
+    // Preserve Next.js's chunk graph, including CSS module exclusions and
+    // App Router layer boundaries. A generic commons group can put stylesheet
+    // assets into client script references.
+
     // Ignore optional peer deps that are not installed
     config.plugins.push(
       new webpack.IgnorePlugin({

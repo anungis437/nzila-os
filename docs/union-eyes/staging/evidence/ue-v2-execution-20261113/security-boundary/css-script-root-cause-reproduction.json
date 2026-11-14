@@ -1,0 +1,43 @@
+{
+  "purpose": "CSS_SCRIPT_ROOT_CAUSE_REPRODUCTION",
+  "deployedSourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
+  "deployedRevision": "nzila-ue-v2-staging-app--rel9a7ee373e1",
+  "observedRootMainFiles": [
+    "static/chunks/webpack-0d499b3e983d83c9.js",
+    "static/css/1a2f07b5e81ac0f7.css",
+    "static/chunks/lib-86951adf2886836a.js",
+    "static/chunks/94468-6c16db8a9a03ca43.js",
+    "static/chunks/main-app-2ed69f27a05c4fe4.js"
+  ],
+  "actualBrowserStylesheetAsScript": true,
+  "sameNextVersion": "16.4.2",
+  "reproduction": "Production webpack build of two App Router routes sharing a client component and large stylesheet; prior splitChunks object extracted from actual config; repeat with default Next.js chunking",
+  "before": {
+    "mode": "before",
+    "code": 0,
+    "manifests": [
+      {
+        "file": "build-manifest.json",
+        "css": [
+          "static/css/c5d6e66636559b3b.css"
+        ]
+      }
+    ],
+    "cssScriptTags": [
+      "<script src=\"/_next/static/css/c5d6e66636559b3b.css\" async=\"\">"
+    ]
+  },
+  "after": {
+    "mode": "after",
+    "code": 0,
+    "manifests": [
+      {
+        "file": "build-manifest.json",
+        "css": []
+      }
+    ],
+    "cssScriptTags": []
+  },
+  "deployedFixVerified": false,
+  "stagingGo": false
+}
