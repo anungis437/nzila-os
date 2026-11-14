@@ -1,0 +1,18 @@
+{
+  "purpose": "DATA_PRESERVING_STAGING_PITR_AND_REPAIR_QUALIFICATION_CLONE",
+  "at": "2026-11-13T22:35:09.107940+00:00",
+  "sourceServerId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-ue-v2-staging-db-d562ba7f",
+  "recoveryName": "nzila-ue-v2-recovery-20261113",
+  "resourceGroup": "nzila-canada-staging-rg",
+  "subscription": "d562ba7f-d891-4504-a489-10917c0ebaaf",
+  "restorePoint": "2026-11-13T22:30:00Z",
+  "privateNetwork": {
+    "delegatedSubnetResourceId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Network/virtualNetworks/nzila-ue-v2-staging-vnet/subnets/pg",
+    "privateDnsZoneArmResourceId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.Network/privateDnsZones/nzila-ue-v2-staging.private.postgres.database.azure.com",
+    "publicNetworkAccess": "Disabled"
+  },
+  "applicationRerouted": false,
+  "primaryDataResetOrDeleted": false,
+  "stagingOnly": true,
+  "authority": "CHG-2026-0114"
+}

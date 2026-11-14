@@ -3,7 +3,7 @@
   "description": "Published from Union Eyes runtime-schema authority oracle (disposition-adjusted REQUIRED). Not an independent table list.",
   "authoritySource": "reports/union-eyes-runtime-schema-authority-oracle.json",
   "publisherSecondSchemaAuthority": false,
-  "generatedAt": "2026-11-08T04:46:52.948Z",
+  "generatedAt": "2026-11-13T23:53:06.519Z",
   "tables": {
     "account_mappings": {
       "source": "apps/union-eyes/db/schema/domains/financial/chart-of-accounts.ts",
@@ -2085,7 +2085,7 @@
       "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
     "message_read_receipts": {
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
       "requiredColumns": [
         "id",
         "organization_id",
@@ -2145,7 +2145,7 @@
       "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
     "message_threads": {
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
       "requiredColumns": [
         "id",
         "organization_id",
@@ -2155,7 +2155,7 @@
       "authority": "RUNTIME_SCHEMA_AUTHORITY_ORACLE"
     },
     "messages": {
-      "source": "apps/union-eyes/db/schema/domains/communications/messages.ts",
+      "source": "apps/union-eyes/db/schema/messages-schema.ts",
       "requiredColumns": [
         "id",
         "organization_id",

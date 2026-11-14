@@ -1,0 +1,68 @@
+{
+  "purpose": "PRE_REPAIR_SECURITY_FINDING_AND_QUALIFICATION_PROVENANCE",
+  "proposedSourceSha": "453c50df40d5c896710a4631e901ed8b5d44e8e4",
+  "productionAuthorized": false,
+  "stagingGo": false,
+  "entries": [
+    {
+      "file": "unbound-context-before-repair.json",
+      "sha256": "85faf1e316df9767b2d2923112c2504a7c929c00af8d45e10940db5833195f9a",
+      "observedOrProposedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "vault-alias-reconciliation.json",
+      "sha256": "f65c8c3baeccee87c1dded66dd1ab1369d49184f90baaf3ca3711078ff68610e",
+      "observedOrProposedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "installed-migration-source-mapping.json",
+      "sha256": "93533570890f9af84a33ec1912730c935f85cfba5674c03f8a85e2699ad22fbb",
+      "observedOrProposedSourceSha": null,
+      "runtimePassInferred": false
+    },
+    {
+      "file": "installed-migration-metadata.json",
+      "sha256": "6d402600ffb882eb83222b436f20d8e9d6a0a070cc60b8b4b0a8846f959ad531",
+      "observedOrProposedSourceSha": null,
+      "runtimePassInferred": false
+    },
+    {
+      "file": "private-recovery-clone-plan.json",
+      "sha256": "596aaba17ad8db2ee72d64ad76b4a9fc9de19a33b735e3d0cbbe1b5192eba681",
+      "observedOrProposedSourceSha": null,
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-453c50df.json",
+      "sha256": "f7ca6f2da00d22d0d8945e12387c21288853c7567516508d62d15257d42c9648",
+      "observedOrProposedSourceSha": "453c50df40d5c896710a4631e901ed8b5d44e8e4",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "built-but-undeployed-2786943a.json",
+      "sha256": "272251cf83674a7788b642f5e0de25a935d8b52ce92192d22d0aa66d757d0ec3",
+      "observedOrProposedSourceSha": "2786943ac51f42b24edc808031015b539ae091f1",
+      "runtimePassInferred": false
+    }
+  ],
+  "nextCandidate": {
+    "sourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+    "localNativeExport": "local-native-export-167f9503.json",
+    "sourceProvenance": "repair-167f9503-provenance.json",
+    "localFocusedTests": 105,
+    "utcDateBoundaryTests": 69,
+    "liveApplied": false,
+    "deployed": false
+  },
+  "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
+  "privateCloneRepair": {
+    "plan": "clone-combined-plan-cf689b70.json",
+    "apply": "clone-combined-apply-cf689b70.json",
+    "appliedSourceSha": "cf689b7064037019bcdcf7c903732989be2eb827",
+    "sameRepairBundleAndPlanAsCandidate": true,
+    "nativeSignedProof": "clone-real-signed-native-audit-167f9503.json",
+    "signedSourceProvenance": "clone-signed-source-167f9503.json"
+  }
+}

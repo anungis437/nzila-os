@@ -1,0 +1,421 @@
+{
+  "compiledFromApplicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "bundleSha256": "d11ce408722e36094c32ca32fabbb2743d5ed01a0c9ed0b57472199326f056ec",
+  "planSha256": "f7d3c3356cbac61a274fdcf8cbcda0c0e87158a9b1e7abc75823a76666182322",
+  "trackedSourceModules": [
+    {
+      "path": "packages/db/src/schema/orgs.ts",
+      "sha256": "1ff125a6d59bd9a840c9d4094c9c4a9667a7fbcc8f038e8b6a818e9ee84d9570"
+    },
+    {
+      "path": "packages/db/src/schema/governance.ts",
+      "sha256": "bb8a212287eaba316edd07dad1f580416848b94126c4e0997338d6f505cee4d7"
+    },
+    {
+      "path": "packages/db/src/schema/equity.ts",
+      "sha256": "0fd6a70ac3ffbd6857b9edd13a145a3abfbc8333dac18e802078fcb16b5e5f7b"
+    },
+    {
+      "path": "packages/db/src/schema/finance.ts",
+      "sha256": "29436abc580bf1d71b1ee6ae6cc2e55cd39b656a82b47ee6d4a47e3b72f28118"
+    },
+    {
+      "path": "packages/db/src/schema/operations.ts",
+      "sha256": "f2edb70082b824c10e100425f812e0df94f7f935c6902e83a521af845ed367af"
+    },
+    {
+      "path": "packages/db/src/schema/payments.ts",
+      "sha256": "88a272b16aa5c75c8581370c68c887950002498655a9319835fd29f8d17eb5ef"
+    },
+    {
+      "path": "packages/db/src/schema/commerce.ts",
+      "sha256": "753d237ab94893599c0ce1b2d97ca903bceee94a8f49c4f428daf9f7e3cddf67"
+    },
+    {
+      "path": "packages/db/src/schema/ai.ts",
+      "sha256": "c603a283acbf601e9399a16e29b5f505c049ef926cc980affa3ca48c48403609"
+    },
+    {
+      "path": "packages/db/src/schema/ai-governance.ts",
+      "sha256": "829cdc7c6830486527e0d15c822fdd103b96bc430d1d64d2753deec9dd6fbea5"
+    },
+    {
+      "path": "packages/db/src/schema/ml.ts",
+      "sha256": "b42ea0a14e68bedc08ccbe2582a0288c18ae3f2b08d42cd592a89f48b77d1304"
+    },
+    {
+      "path": "packages/db/src/schema/ue.ts",
+      "sha256": "5a60940451bd67f8b81c0e271619f029f0b7e335690804418e2296821d1b339a"
+    },
+    {
+      "path": "packages/db/src/schema/partners.ts",
+      "sha256": "5070f531075f36fb2cc37bde4f6564c590bcd8b03f70b5261dbc8c0555fdd223"
+    },
+    {
+      "path": "packages/db/src/schema/automation.ts",
+      "sha256": "f14281bc11c6ea28cbd906e689cbf5d6e25bdeb236f6f5ac07805cea6f4b36e3"
+    },
+    {
+      "path": "packages/db/src/schema/tax.ts",
+      "sha256": "9ffab36dffdc66b2b633d4fcd6dd75e880f06f67e4c6f0aee1bb7055dcec010d"
+    },
+    {
+      "path": "packages/db/src/schema/nacp.ts",
+      "sha256": "af16ca8c0fbf3931517828dbd17e86e98c89ee6bd4405b62d28be0e8a636854c"
+    },
+    {
+      "path": "packages/db/src/schema/zonga.ts",
+      "sha256": "70ae97c61f4254e26a85138ee8e5adb557e5236ab324ef4914a0737a8784e910"
+    },
+    {
+      "path": "packages/db/src/schema/platform.ts",
+      "sha256": "e0b4e30cdafb7dcca9cbcbe49c3e71d7eeca4b0a8039dc1b4fe7487cefc795e3"
+    },
+    {
+      "path": "packages/db/src/schema/integrations.ts",
+      "sha256": "eb14da7e696b470fcc94eff69b3e3630820ca584acc5d5a0f216fe0f43e85d65"
+    },
+    {
+      "path": "packages/db/src/schema/trade.ts",
+      "sha256": "915aaec78f7b90b575225719957b7a4634495021defd603762ab8c093fa3fcc7"
+    },
+    {
+      "path": "packages/db/src/schema/agri.ts",
+      "sha256": "a617b9eb709f225d6242eafc7c5aebe5f65147ac3e279a75658fca9693a639fb"
+    },
+    {
+      "path": "packages/db/src/schema/methodology.ts",
+      "sha256": "0c92c251f1e5a216a9d5eaec8dbc2563d010c257f9c63c20ddcaaa4a5c3b045a"
+    },
+    {
+      "path": "packages/db/src/schema/cora-evidence.ts",
+      "sha256": "a1b710beb8010df8e7629755b19367ced12aad1d26a9d371c11c0839ebf7e6f6"
+    },
+    {
+      "path": "packages/db/src/schema/cora-farmer360.ts",
+      "sha256": "eda327959536477fc03e36cbda05b26d817f3f98add5c671cad6f330d17febc7"
+    },
+    {
+      "path": "packages/db/src/schema/auth.ts",
+      "sha256": "d6edf0617679b8b487f4b5a7765f8bc2d030b1e410f79a028901f7a80577e0fe"
+    },
+    {
+      "path": "packages/db/src/schema/platform-authorization.ts",
+      "sha256": "a0767c3ad85c33c5a1273cefba6b14e8e89f44206ce6bde755cde96dcf95060c"
+    },
+    {
+      "path": "packages/db/src/schema/mobility.ts",
+      "sha256": "66e6794ee5dd77a50e29ae5fbbe0cbae4b10d2a1ac6259429c8210c12dd7198e"
+    },
+    {
+      "path": "packages/db/src/schema/flow/enums.ts",
+      "sha256": "4317d20bef6453d21f945f11454d4a0e8c038b9bc3108761bf98ce72b0f366f4"
+    },
+    {
+      "path": "packages/db/src/schema/flow/customers.ts",
+      "sha256": "283cc10976f0de51a8d0c78986be3fcc479410c84c4717314540a29cc277331d"
+    },
+    {
+      "path": "packages/db/src/schema/flow/products.ts",
+      "sha256": "800e9ca1e7a297071af67b7295dff175fcab1e1c78e232dc6d0aad441352276f"
+    },
+    {
+      "path": "packages/db/src/schema/flow/quotes.ts",
+      "sha256": "ae9bcae276481739eaf9388aa2bab59d2e1770aa98cecb79501da0f42383f853"
+    },
+    {
+      "path": "packages/db/src/schema/flow/orders.ts",
+      "sha256": "31e0ee4ecb75358402c87fe739e7775776c3e536968c68a54043a2db81f7e1c6"
+    },
+    {
+      "path": "packages/db/src/schema/flow/vendors.ts",
+      "sha256": "401949c9c57c9e9ba466a0e80b66ed33fcd249da2e1ef0f7357d9a5b252e4b51"
+    },
+    {
+      "path": "packages/db/src/schema/flow/purchase-orders.ts",
+      "sha256": "2084df476a991ccb4909a3e237dd1e2fb1c265ea36b2429378402b3602f49b71"
+    },
+    {
+      "path": "packages/db/src/schema/flow/production.ts",
+      "sha256": "9d2be49a898a1f026504ae507e44fb69e3955c6083e81dce0c6ac01e5f4edbb5"
+    },
+    {
+      "path": "packages/db/src/schema/flow/shipments.ts",
+      "sha256": "372538204c2415e64011fc9b3116c9b1a3aba3cae3d5130a6ee404dc333a40ac"
+    },
+    {
+      "path": "packages/db/src/schema/flow/payments.ts",
+      "sha256": "81b9bf319d74f371711bc31f4d570177af263688fac847c28d39607ca458efd5"
+    },
+    {
+      "path": "packages/db/src/schema/flow/invoices.ts",
+      "sha256": "8b6e0f5c005221a871823f45472ba69e6ab33b9d4fb4a52156c9be95c1eaa459"
+    },
+    {
+      "path": "packages/db/src/schema/flow/events.ts",
+      "sha256": "6fd8db52636c1400713f90ed8a39e93676fdacf7e824c42e7ce527556f5a4d72"
+    },
+    {
+      "path": "packages/db/src/schema/flow/audit.ts",
+      "sha256": "ae0c01e642a3b758bdd79e89170af22f428fcd3df9d39b7a66f321f77cb42b37"
+    },
+    {
+      "path": "packages/db/src/schema/flow/relations.ts",
+      "sha256": "e6bf685c6e2b81204c68c926826dcb93e31e90f62be634ca7d9d700ecbdf0e3a"
+    },
+    {
+      "path": "packages/db/src/schema/flow/index.ts",
+      "sha256": "b21fb04c5f64cdb35cb769824732c0250ed13767ccd85d59bbbf760bc4bbfea8"
+    },
+    {
+      "path": "packages/db/src/schema/pilot-metrics.ts",
+      "sha256": "ac0e96763baad286410dc00a682605560912a2cea4533984ac7aaabc0047dfd9"
+    },
+    {
+      "path": "packages/db/src/schema/executive.ts",
+      "sha256": "8bd922e7b7654941ace0000a6e4a500d74f3b561373f37c8b5f1a0a816ef8d23"
+    },
+    {
+      "path": "packages/db/src/schema/itsm.ts",
+      "sha256": "4ed7378199511c1e2a2198a04b3a4d71a607a591986c4d5d2a09b96a45769720"
+    },
+    {
+      "path": "packages/db/src/schema/exec-data.ts",
+      "sha256": "ec11560dd47a7bc7cba0b650454a6842ab61ec55a9117c3a8af3edd894791311"
+    },
+    {
+      "path": "packages/db/src/schema/governed-policies.ts",
+      "sha256": "922a2a771f9abdf4cc5e6e91930c54e498412c18202cde1ad6d8010424c5f23f"
+    },
+    {
+      "path": "packages/db/src/schema/policy-governance-events.ts",
+      "sha256": "97cb3539fc6ec3154b2057fe9e0e8e47d05db1f33785bf25efc02aab0d4adc94"
+    },
+    {
+      "path": "packages/db/src/schema/policy-replay-sessions.ts",
+      "sha256": "54ba07b7cf91e88d371b93f4395a7bd25aa7587826387791b996461328b115d7"
+    },
+    {
+      "path": "packages/db/src/schema/policy-conflicts.ts",
+      "sha256": "7cbfc19681c1a77565508476cbd2e704bc23bbb099c8b90aeaa09bd030e46d2b"
+    },
+    {
+      "path": "packages/db/src/schema/policy-governance-snapshots.ts",
+      "sha256": "6632b37d4f2b459108111118e638d4785eb41148c46ddd1c72c527bf06f6f0b0"
+    },
+    {
+      "path": "packages/db/src/schema/grants.ts",
+      "sha256": "997099f91df00ecce6775d1b3df40ba8f573090145b4c9ce240525c0fb8bd4fe"
+    },
+    {
+      "path": "packages/db/src/schema/audit.ts",
+      "sha256": "e148ad998e5136d4677ceec0b373c033dfc25b6eb3ee5e2f5da75880915c5aee"
+    },
+    {
+      "path": "packages/db/src/schema/decision-aggregates.ts",
+      "sha256": "c795603f1014e48c90a770860e8461c421599c9948e70aacc9f7c08b676b73b7"
+    },
+    {
+      "path": "packages/db/src/schema/decision-pipeline-checkpoints.ts",
+      "sha256": "964926aef95a35ad544f9b08349e36dcfb9d56a6c3ee5709546c5e516f207fc7"
+    },
+    {
+      "path": "packages/db/src/schema/decision-pipeline-runs.ts",
+      "sha256": "94f00c164c998627bd59106d61b9ed017fbd701de8b5c0c38736133328c36052"
+    },
+    {
+      "path": "packages/db/src/schema/decision-events.ts",
+      "sha256": "e8f2aa6e3e8cdc49737567dd71b9a9d082a96483b8ee2cb6548ce3fb9f9a03cb"
+    },
+    {
+      "path": "packages/db/src/schema/org-entitlements.ts",
+      "sha256": "d3b260dab36235d4accf64e100660538b45be307aaaea272c57a03e153e8b46c"
+    },
+    {
+      "path": "packages/db/src/schema/pipeline-alerts.ts",
+      "sha256": "7bb7e50b20ba0c81e928203ad3174805817058054d557e254c1296f94ffb5b23"
+    },
+    {
+      "path": "packages/db/src/schema/healthcare-surveys.ts",
+      "sha256": "e75a765c8421a2500949f2e35d1e0689070c6f847a470f8985cfbe18436f0104"
+    },
+    {
+      "path": "packages/db/src/schema/platform-entity-graph.ts",
+      "sha256": "af04157e5557c3d565b663ce59a7bcccee7c74716f1eb8af6800f1ccbe5aa217"
+    },
+    {
+      "path": "packages/platform-ontology/src/schema.ts",
+      "sha256": "585f6a2704de190fc6d453df36f70f6a48db8794a25d57cffe6795e2ab7eaaf5"
+    },
+    {
+      "path": "packages/platform-event-fabric/src/schema.ts",
+      "sha256": "b9c62f3cf989b1e7c4b2c63e6f823784b539954577708007d487b739f2becda0"
+    },
+    {
+      "path": "packages/platform-knowledge-registry/src/schema.ts",
+      "sha256": "83326aa229dab00e72ebf94573aa82d7b436f003595eb8b01ac0489a80b1b4c8"
+    },
+    {
+      "path": "packages/platform-data-fabric/src/schema.ts",
+      "sha256": "e193e1d3f2f7ffad1910abd93e82bb9afdd9260eaf066e2ce6ba22ff1d65d9a7"
+    },
+    {
+      "path": "packages/platform-decision-graph/src/schema.ts",
+      "sha256": "a6520badbf0306ff523f1c1479ffe3c9f2ca00c63fe5eb43913766bde18164fc"
+    },
+    {
+      "path": "packages/platform-semantic-search/src/schema.ts",
+      "sha256": "dd0f9ddca740678e6fe80e4a5b2c9a4db19354ace7db78c5230a4ec455bf60bc"
+    },
+    {
+      "path": "packages/platform-governed-ai/src/schema.ts",
+      "sha256": "6f97c90a14488d403608e3c181e09c6702b968fb72496caad2dadedc16b3b01d"
+    },
+    {
+      "path": "packages/platform-reasoning-engine/src/schema.ts",
+      "sha256": "a245ab80d4edbfec4aa045e6a9f5aed4ae392c2d149c6b6f0528015659eb9b21"
+    },
+    {
+      "path": "packages/db/src/schema/trustcore.ts",
+      "sha256": "70ef55909c7c4fc37e10d61224e8ca17f43efc56c8096659217f0502749821f9"
+    },
+    {
+      "path": "packages/db/src/schema/index.ts",
+      "sha256": "aee22bcd7afcb97805be3beb5bb37fa00b0b82d33b3d4b1cf91a4e968de004ff"
+    },
+    {
+      "path": "packages/db/src/auth-inviter-lock.ts",
+      "sha256": "37664315e7b85bc4b8bbc0f45d6437ca264e7fb2f9f7cba70af85ff449aca202"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/execution-boundary.ts",
+      "sha256": "d47966544ca0e9cde7598ca6af57bf65644f976f4d28a866603d52bb7ec398f8"
+    },
+    {
+      "path": "packages/db/src/auth-client.ts",
+      "sha256": "e76f5544bfc4c64b402fefe009da8bb95032ea1e7322a6eae09f6010d54974ea"
+    },
+    {
+      "path": "packages/platform-auth/src/entra/issuer.ts",
+      "sha256": "93d5339de3a81f9df13da314ae4a10a9c9c206cc89f7dda094559a66603b28bd"
+    },
+    {
+      "path": "packages/platform-auth/src/entra/session-policy.ts",
+      "sha256": "3c0362e8a0a0a408e585031b3ff893a40ebd2b826fbce5fd245cd6fc6773a30f"
+    },
+    {
+      "path": "packages/platform-auth/src/entra/config.ts",
+      "sha256": "62a462f1d97444ea2249ac29353fd8bafdb9c7aa722b7976959adc0b2ce21173"
+    },
+    {
+      "path": "packages/platform-auth/src/entra/adapter.ts",
+      "sha256": "8bfe4a965a7a85b69ac5491a7197f772f0d090cde6bde3cc4dfea53004983ddc"
+    },
+    {
+      "path": "packages/platform-auth/src/policy/service.ts",
+      "sha256": "1da3ace3d5172aa6179965f569d1309ba6b7721c9180a06e8ebbeff71ce62170"
+    },
+    {
+      "path": "packages/platform-auth/src/password/session.ts",
+      "sha256": "ccdf9999c58145a6b950ac321e3a0e740ecbd71f15ead48d83f8d315bc9ed2fa"
+    },
+    {
+      "path": "packages/platform-auth/src/provider-identity.ts",
+      "sha256": "5582ec08ec63cc3a2cf933f4eb2789b03c6d021df91cc7af66de09133b50d5b2"
+    },
+    {
+      "path": "packages/platform-auth/src/acceptance-auth.ts",
+      "sha256": "ab64754c36e6c3179861cca31d7482120d1812978137da6a52d8ec1b2a2822e1"
+    },
+    {
+      "path": "packages/platform-auth/src/entra/admin.ts",
+      "sha256": "28239258be8eda106d388664a3b98c025afde8432f56712cc93b075193e32afe"
+    },
+    {
+      "path": "packages/platform-auth/src/password/password.ts",
+      "sha256": "764431013be37d8293bc4e00e5a8d2ba714bc4cf33dd43fe3816c459c1885c0f"
+    },
+    {
+      "path": "packages/platform-auth/src/mfa/totp.ts",
+      "sha256": "315f74e9c954245bd1f8aaddc0f99affccbbe059719f987372af183803961857"
+    },
+    {
+      "path": "packages/platform-auth/src/runtime-identity.ts",
+      "sha256": "d26a4ec290adbc6fb7085ac48b34dd12a366a9b16714cd62ae961eeb5399faf9"
+    },
+    {
+      "path": "packages/platform-auth/src/mfa/encryption.ts",
+      "sha256": "c03368c1012d88bffb3682e1ecf1ceba4c757bad25132ea24529a3628f9c330b"
+    },
+    {
+      "path": "packages/platform-auth/src/mfa/service.ts",
+      "sha256": "ab9a3fd1e42ca75f209c757840c9db13264e057e52cf7c4214f79f6427ec3cce"
+    },
+    {
+      "path": "packages/platform-auth/src/risk/assess.ts",
+      "sha256": "f477558f9c2fe3127c6305598f12d40d3f971fbd6f5d292079db8d61b37eaa39"
+    },
+    {
+      "path": "packages/platform-auth/src/password/auth-service.ts",
+      "sha256": "07118ffeb5f3f9137830e85f0d8c0e5b3a35f8e08b558578f566eddef1b2eba9"
+    },
+    {
+      "path": "packages/db/src/client.ts",
+      "sha256": "ce00e7968f5918a88d8a30b0baa69f6075edc1cbe432086282500fc64f359ae2"
+    },
+    {
+      "path": "packages/platform-auth/src/entra/server.ts",
+      "sha256": "ef49791c7c8fdf1e6650dcafaa12ecb7c495f7b5a124129fe83424fa12580208"
+    },
+    {
+      "path": "packages/platform-auth/src/auth-db.ts",
+      "sha256": "5b850e71681a793b344f24e177599f213c28c0f0e0f74830bf9919872eb9c114"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/types.ts",
+      "sha256": "a6214c1fdc5db850acf0f7deae8575cd46e543cba79e580ac79566b127f793d9"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/entries.ts",
+      "sha256": "79fc5aa02df0e7a0d67d783e38322b4eeee93b857e2e5b02cb39874449353983"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/privilege-expectations.ts",
+      "sha256": "210c313c933678833cde69723c99e9c5472c495fb35ad55ba216569f860e29b1"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/org-session-authority.ts",
+      "sha256": "2b3716ca2dce7858ffc76982de6bd7ed79c4aa8fe8773c359f9344f4f5c4bc45"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/role-prerequisites.ts",
+      "sha256": "8dc88f5a2c1239fcfd88492eceee5b3193dd36a09662e36ba8ab2652468cb0f3"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "sha256": "8f176f72c0471b84b22c2bbd53fead07e6675b4616071cbfb2e3cd7d9a1d430a"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/index.ts",
+      "sha256": "a7f50c84a8ff795344314a26838237a46901b311a56370934172094e12c95810"
+    },
+    {
+      "path": "packages/platform-auth/src/entra/verify.ts",
+      "sha256": "3be11a65b0ef8e04992c1daf53dd104732a9d24f0a641e663a1f948d8b1727eb"
+    },
+    {
+      "path": "packages/platform-auth/src/org-binding.ts",
+      "sha256": "02f3de5c82075c71f9e5a96fec9344253bb8d5caac377947beb6c1acd9ead5b8"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-sql.ts",
+      "sha256": "99ef7d6714b59606fa03f5285209b974beffe0f0b428d957dacb762b46d38a4c"
+    },
+    {
+      "path": "apps/union-eyes/lib/audit/canonical-audit-chain.ts",
+      "sha256": "6caa1da50ce501a056946d4ef291c9379a7129826dc1d642e9702d0f35ea101c"
+    }
+  ],
+  "trackedSourceInputsVerified": 103,
+  "sameCompiledInputsAsPriorSourceSha": "84239d33dbfbb9a57827fcb91a3ef32a26c2fe8f"
+}

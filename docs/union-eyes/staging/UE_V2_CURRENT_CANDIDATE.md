@@ -1,36 +1,17 @@
-# Observed staging candidate and pending replacement
+# Current staging source and unaccepted replacement
 
-Observed on November 13, 2026: `8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896`,
-image `sha256:133c63e0e8abef77a4ad46aee76fa6a337fa01f9f9e38ada26bc75941f308340`,
-revision `nzila-ue-v2-staging-app--0000010`, explicitly pinned to 100% traffic
-in Multiple revision mode. The live registration uses Entra tenant `cc15259a`
-and client `5470c759`. Current health, session, document and job observations
-are preserved in [the execution evidence](evidence/ue-v2-execution-20261113/index.json).
+Observed staging remains `8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896`, image `sha256:133c63e0e8abef77a4ad46aee76fa6a337fa01f9f9e38ada26bc75941f308340`, revision `nzila-ue-v2-staging-app--0000010` pinned to 100% traffic. Its successful readiness response does not establish security: native probing confirms that additional permissive policies allow an unbound restricted-runtime connection to read owned synthetic tenant cases. Staging is **NO_GO**.
 
-Proposed replacement: `2786943ac51f42b24edc808031015b539ae091f1` in PR #1210.
-CHG-2026-0114 renews the staging-only binding for the observed evidence-storage,
-conversation retry and rollout identity defects. It also includes the current
-pinned-traffic recovery qualification harness. Final exact-head CI, main
-admission, attested images, a fresh reviewed no-delete what-if, protected
-staging apply and deployed requalification remain mandatory. This source is
-not yet deployed or accepted.
+Next application candidate: `167f95034fbdaa163cd67e79c4bca622284e0d77` in #1214. It contains the previously admitted messaging/evidence/authentication-configuration repairs, the French first-visit repair from #1212, and the mandatory restrictive native session boundary, exact deadline-guard compatibility, current messaging model/schema repair, and readiness/native admission checks. All 105 focused tests, strict localization census, inventory and deterministic source generation passed locally; its exact native export/restore passed locally with no privilege mismatches. CI/main admission, private signed-session restored-data proof, additive primary policy/schema reconciliation and deployed requalification remain pending.
 
-Preserve the existing database, original installation receipt and all staging
-data. The regenerated source plan retains 771 tables and 6,255 unchanged SQL
-statements; source commitment metadata changes do not justify a new restore,
-fresh bootstrap or reseed. The [earlier local export receipt](evidence/ue-v2-candidate-export-7d67bcd5-20261111.json)
-remains historical; do not relabel it as replacement acceptance.
+The original canonical installation and 40 checked-in migration hashes are preserved. The retained post-bootstrap catalog differs from a fresh canonical export; strict whole-catalog equality has not passed and is not inferred. The policy repair changes no business row, prior policy or persistent grant. The private recovery clone is a separate PITR target, never an application reroute or primary reset. [Security findings and provenance](evidence/ue-v2-execution-20261113/security-boundary/index.json) retain the observed failures and source-specific local evidence.
 
-The [current contract](UE_STAGING_GO_CONTRACT.json) separates observed 8a0faf64
-receipts from pending replacement qualification. The old contract is preserved
-as a historical receipt. Census regeneration now preserves the evidence
-contract; explicit initialization can only create a new one. Tests generate
-into disposable directories instead of rewriting live acceptance evidence.
+Source `2786943ac51f42b24edc808031015b539ae091f1` passed all CI and was admitted through #1211. Build 43520878953 succeeded with app digest `sha256:a3e8cb35d2b718627be3ce8301cab3bddaf129f2cb519140098743af9e2cbe69`; it has not been deployed and does not qualify the next candidate. Exact application source and workflow-definition source remain separate.
 
-Base release includes operational casework, intake, assignment, member and
-representative journeys, leadership/governance access, documents/evidence,
-deadlines, messaging, English/French/mobile, audit, security and recovery.
-Finance/dues persistence and Financial Officer 2.1 are excluded. Sensitive
-finance denials remain a separate mandatory security criterion. No production
-release or institutional mandate is authorized. Staging remains NO_GO while
-actual defects or required proof gaps remain.
+The [acceptance contract](UE_STAGING_GO_CONTRACT.json) remains evidence-based. The founder operates both anungis and anungis437; Codex review/execution is attributed as delegated agent work. No second reviewer is invented. Base scope includes casework/intake/assignment, member and representative access, leadership/governance, evidence/documents, deadlines, messaging, English/French/mobile, audit, security and recovery. Finance/dues persistence and Financial Officer 2.1 are excluded; sensitive finance denials remain required. No production deployment is authorized.
+
+The combined transaction passed on the private PITR copy: 420 mandatory gates, exact event-guard upgrade and the three missing messaging relations were added; all 423 runtime relations verify. Existing physical table identity, owner, ACL and forced RLS were preserved, with zero persistent operator owner delegation. This is clone evidence only; no primary apply or candidate rollout is credited.
+
+Real signed Entra A/B bindings on the repaired recovery copy now pass own-case/foreign-case isolation, forged actor/org and missing/hash-token denials, cross-tenant UPDATE/INSERT refusal, callback bridge revocation and foreign membership refusal. Restored audit chains recompute correctly (A: 235 records, B: 5). This proves restored-data recovery and the source-bound clone boundary; primary current-candidate runtime criteria remain pending.
+
+The UTC date-only governance check now agrees with EXC-03: an expiresOn date remains valid through that UTC calendar day, invalid dates fail closed, and the next day expires it. No exception was extended. Its 69 focused helper/meta/adoption checks pass. This avoids the unrelated midnight fleet-CI inconsistency while retaining all release gates. The actual signed restored-data proof and native export were repeated for candidate 167f9503.

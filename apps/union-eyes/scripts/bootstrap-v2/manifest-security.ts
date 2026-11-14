@@ -1,3 +1,7 @@
+import {
+  inspectMessagingPhysicalCatalog,
+  messagingPhysicalGuardViolations,
+} from '../../db/auth/messaging-physical-guards'
 import type pg from 'pg'
 import { compileSecurity } from './security'
 import type { V2Plan } from './source'
@@ -6,12 +10,26 @@ import { inspectAuthPrivilegeExpectations } from './auth-privileges'
 import { FRAMEWORK_FUNCTIONS, FRAMEWORK_ROLES } from './framework-contract'
 import { inspectFrameworkPrivileges } from './framework-privileges'
 import { INSTALLER_FUNCTION_OWNER_ROLES } from './execution-roles'
-import { CASE_ASSIGNEE_PREDICATE, CASE_ASSIGNEE_PREDICATE_OWNER } from '../../db/auth/case-assignee-predicate'
+import {
+  CASE_ASSIGNEE_PREDICATE,
+  CASE_ASSIGNEE_PREDICATE_OWNER,
+} from '../../db/auth/case-assignee-predicate'
 import { CONVERSATION_ASSIGNEE_PREDICATE } from '../../db/auth/conversation-assignee-predicate'
+import {
+  BUSINESS_SESSION_POLICY,
+  BUSINESS_SESSION_CATALOG_PREDICATE,
+  BUSINESS_SESSION_POLICY_QUERY,
+  businessSessionPolicyViolations,
+} from '../../db/auth/business-session-policy'
+import {
+  DEADLINE_SESSION_GUARD_QUERY,
+  deadlineSessionGuardViolations,
+} from '../../db/auth/business-session-event-guard'
 
-const ASSIGNEE_COMPANION_SIGNATURES: string[] = [CASE_ASSIGNEE_PREDICATE, CONVERSATION_ASSIGNEE_PREDICATE].map(
-  (name) => `${name.replace(/^public\./, '')}(text,uuid)`,
-)
+const ASSIGNEE_COMPANION_SIGNATURES: string[] = [
+  CASE_ASSIGNEE_PREDICATE,
+  CONVERSATION_ASSIGNEE_PREDICATE,
+].map((name) => `${name.replace(/^public\./, '')}(text,uuid)`)
 
 export interface InstallerMembership {
   role: string
@@ -53,6 +71,24 @@ export function inspectInstallerDelegations(
 export async function qualifyNativePrivileges(client: pg.Client, plan: V2Plan) {
   const rules = compileSecurity(plan).rules
   const mismatches: string[] = []
+  if (plan.authExecution) {
+    mismatches.push(
+      ...businessSessionPolicyViolations((await client.query(BUSINESS_SESSION_POLICY_QUERY)).rows),
+    )
+    mismatches.push(
+      ...deadlineSessionGuardViolations(
+        (await client.query(DEADLINE_SESSION_GUARD_QUERY)).rows,
+        BUSINESS_SESSION_POLICY,
+        BUSINESS_SESSION_CATALOG_PREDICATE,
+      ),
+    )
+  }
+  if (plan.tables.some((table) => table.name === 'message_threads'))
+    mismatches.push(
+      ...messagingPhysicalGuardViolations(
+        await inspectMessagingPhysicalCatalog(async (sql) => (await client.query(sql)).rows),
+      ),
+    )
   const authPrivileges = plan.authExecution ? await inspectAuthPrivilegeExpectations(client) : null
   if (authPrivileges) mismatches.push(...authPrivileges.failures)
   const frameworkPrivileges = plan.frameworkExecution

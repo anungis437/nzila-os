@@ -11,7 +11,7 @@
 import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { ROOT, type ExceptionFile } from './governance-helpers'
+import { ROOT, isExceptionExpired, type ExceptionFile } from './governance-helpers'
 
 const EXCEPTIONS_DIR = join(ROOT, 'governance/exceptions')
 
@@ -70,7 +70,7 @@ describe('CONTRACT_META_001 — Contracts are fast + deterministic', () => {
 
     for (const { filename, data } of exceptionFiles) {
       for (const entry of data.entries) {
-        if (new Date(entry.expiresOn) < today) {
+        if (isExceptionExpired(entry.expiresOn, today)) {
           expired.push(
             `[${data.ruleId}] ${entry.path} expired ${entry.expiresOn} (owner: ${entry.owner}, file: ${filename})`,
           )

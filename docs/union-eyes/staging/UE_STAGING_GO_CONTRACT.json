@@ -7,7 +7,7 @@
   "acceptedStagingCandidateSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
   "stagingWorkflowDefinitionSha": "646ed858a1fc60257e18af40875e632d01c3ab3c",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Observed staging source 8a0faf64 is healthy and has fresh new-tenant session, case isolation, document byte, member-navigation and scheduled-job evidence. The shared platform evidence exporter still fails on real requests, and named member run 43511258681 reproduces duplicate conversation creation on request replay. PR #1210 repairs its canonical storage mismatch and prevents the next rollout from restoring retired authentication settings. Replacement 2786943a is authorized prospectively but is not deployed. Complete affected persona and business journeys, sensitive finance API boundaries, native isolation/audit, actual document expiry/revocation, recovery and capability reconciliation on the qualified replacement before any STAGING GO decision.",
+  "verdictReason": "Native restricted-runtime probing on observed 8a0faf64 confirms unbound tenant reads through additive legacy permissive policies. Forty installed migration ledger hashes match checked-in source, but strict comparison to the fresh canonical export fails for this retained overlay. The mandatory restrictive session guard, fail-closed readiness and French onboarding repair are implemented in proposed 167f9503, plus deadline-guard compatibility and current messaging schema repair, not yet applied/deployed. Exact source and integration CI, private PITR rehearsal, primary reconciliation, attested deployment and real current-candidate qualification remain required. No database reset or production deployment is authorized.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -24,9 +24,10 @@
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PASS",
-      "evidence": "Current-runtime receipt observes exact source 8a0faf64, immutable digest 133c63e0..., explicitly pinned revision --0000010 and new tenant cc15259a. Replacement 2786943a has no built/deployed identity yet.",
+      "evidence": "Current-runtime receipt observes exact source 8a0faf64, immutable digest 133c63e0..., explicitly pinned revision --0000010 and new tenant cc15259a. Source 2786943a was built successfully but remains undeployed and superseded prospectively by 167f9503, which has no deployed identity.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "SOURCE_ENGINEERING",
@@ -44,9 +45,10 @@
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Replacement source 2786943a requires full exact-head CI in #1210 and main admission. #1208 tooling admission does not qualify that application source.",
+      "evidence": "Source 167f9503 (#1214) and its authorization integration require all exact-head checks and main admission. Prior application 2786943a passed all checks and was admitted through #1211.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
@@ -54,7 +56,8 @@
       "status": "PASS",
       "evidence": "Current candidate remains deployed under CHG-2026-0114; latest successful protected apply is run 43430423252. The tenant-migration environment revision and traffic repair are recorded in #1206. Replacement rollout remains pending.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
@@ -62,15 +65,17 @@
       "status": "PASS",
       "evidence": "Current-runtime receipt reports /api/version and /api/ready gitSha 8a0faf64, revision --0000010 and sha256:133c63e0e8abef77a4ad46aee76fa6a337fa01f9f9e38ada26bc75941f308340.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "DATABASE_MIGRATIONS",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Preserve the historical installed migration/native catalog receipt. No migration/schema change occurred between installed 7d67bcd5 and observed 8a0faf64; current /api/ready reports database and catalogAuthority ok. Recheck replacement compatibility without restore/reseed.",
+      "status": "PARTIALLY_PROVEN",
+      "evidence": "All 40 installed scoped/platform migration ledger hashes match checked-in source. Original canonical installation is preserved. Fresh canonical export is not an exact representation of the retained post-bootstrap overlay; the strict native catalog comparison FAILS. The additive mandatory-policy repair and existing-data compatibility require rehearsal and primary proof.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "ENTRA_AUTHENTICATED_SESSIONS",
@@ -78,23 +83,26 @@
       "status": "PASS",
       "evidence": "Fresh real authorization-code sessions for both new-tenant principals in runs 43504547526 and 43508297526: tenant cc15259a, correct subjects, secure HttpOnly cookies, unexpired sessions and successful own-case access.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "API_AND_POSTGRES_TENANT_ISOLATION",
       "requirement": "REQUIRED",
-      "status": "PARTIALLY_PROVEN",
-      "evidence": "Fresh new-tenant real API create/detail/list and opposite-tenant denial pass in 43508297526. Earlier raw native PostgreSQL evidence belongs to the previous identities/candidate; complete current identity-bound native proof before claiming the combined criterion.",
+      "status": "FAIL",
+      "evidence": "Actual restricted runtime ue_staging_runtime / union_eyes_runtime read each owned API-created case with an organization setting and no session token on 8a0faf64. Extra permissive legacy policies OR around the canonical predicate. No probe write committed. Proposed 167f9503 adds a restrictive verified-session gate; it is not yet installed in primary staging.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
       "status": "PARTIALLY_PROVEN",
-      "evidence": "Member role verified live in 43507405235; all 18 EN/FR desktop and 18 390px mobile route checks and five restricted-page denials pass. Corrected #1208 named-persona persisted journeys are now running. No positive assignment, complete bilingual UX or all-persona acceptance is implied by route health. Named member intake create/read and official-case refusal pass, but conversation creation replay FAILS with two different thread IDs in 43511258681. Named organization-admin navigation and scope checks PASS in 43511272077. Positive assignment, complete bilingual UX and full persona acceptance remain unproven.",
+      "evidence": "Named steward, officer, organization-admin and secretary/treasurer navigation/sensitive-denial checks passed on 8a0faf64; member intake passed but duplicate conversation replay failed. Replacement repairs messaging/evidence; current-candidate requalification of all required personas and business workflows remains pending. Rendered English/French/mobile core member pages work, but first-visit tour remains English on the observed runtime; #1212 repairs it prospectively. A further real member diagnostic confirms thread detail/messages/read return HTTP 500 because current lifecycle/read tables were omitted by the old duplicate generator model. The new candidate unifies current models and supplies a bounded additive schema companion; no primary repair or deployment is claimed.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "WORKERS_RETRIES_AND_DELIVERY",
@@ -102,7 +110,8 @@
       "status": "PARTIALLY_PROVEN",
       "evidence": "Fresh SLA job attempted/succeeded 3/3, scanned 18, failed 0. Reaper and deadline-reminder jobs succeeded with zero due work; those runs alone do not prove retry, lease recovery or provider delivery. Preserve earlier receipts as historical only pending scoped requalification.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "AUDIT_AND_TELEMETRY",
@@ -110,15 +119,17 @@
       "status": "PARTIALLY_PROVEN",
       "evidence": "Current Azure logs correlate real session requests and cron executions to the live application. Shared evidence-pack persistence still fails. Recompute actual current audit chains and qualify native sealed artifact persistence on the replacement.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
       "status": "PARTIALLY_PROVEN",
-      "evidence": "New-tenant real upload/intake/replay and own lease issuance pass. Actual private bytes/checksum verified for document 44ef147c in current-private-document-bytes.json. Actual issued expiry at 21:48:44Z, current membership revocation and non-vacuous foreign-document denial remain to be qualified.",
+      "evidence": "New-tenant real upload/intake/replay and own lease issuance pass. Actual private bytes/checksum verified for document 44ef147c in current-private-document-bytes.json. The actual issued lease was denied privately after its 21:48:44Z expiry (403 AuthenticationFailed at 21:49:29Z); current membership revocation and replacement-candidate qualification remain pending.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
@@ -126,15 +137,17 @@
       "status": "PARTIALLY_PROVEN",
       "evidence": "Named member and organization-admin receipts require and observe HTTP 403 for /api/finance/summary and /api/finance/per-capita/inbound. Remaining roles and the replacement require requalification. Finance/dues persistence and Financial Officer 2.1 remain excluded.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "OPERATIONAL_RECOVERY",
       "requirement": "REQUIRED",
-      "status": "NOT_PROVEN",
-      "evidence": "Live configuration is Multiple mode with known-good traffic pinned. #1209 corrects the stale Single-mode rehearsal; complete reviewed protected fault injection and recovery plus applicable backup/restore evidence before passing.",
+      "status": "IN_PROGRESS",
+      "evidence": "Actual private Azure PITR at 2026-11-13T22:30:00Z is Ready as nzila-ue-v2-recovery-20261113 at private 10.40.4.5. First policy repair rehearsal was rejected by the retained event guard and fully rolled back, with zero persisted owner delegations or new policies. Exact compatibility and messaging repair rehearsal are in progress; primary app/routing/data remain preserved. Combined clone repair then passed: 420 restrictive gates, 3 missing messaging relations, exact guard compatibility, 423 verified runtime relations and zero persisted delegation. Real signed restored-data/audit proof remains pending. Real signed A/B restored-data proof then passed own-case isolation, unbound/forged/token denials and complete audit chain recomputation (235/5 records). Primary candidate and protected failed-revision recovery remain required.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "CAPABILITY_TRUTHFULNESS",
@@ -142,7 +155,8 @@
       "status": "PENDING",
       "evidence": "Reconcile registry limitations and actual in-scope behavior after replacement qualification; no finance feature expansion or broad completion claim.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "INSTITUTIONAL_BOUNDARIES",
@@ -150,7 +164,8 @@
       "status": "PARTIALLY_PROVEN",
       "evidence": "No institutional instrument has been issued. Source remains deny-by-default; complete applicable deployed refusal checks without inferring authority from role or platform rank.",
       "observedSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
-      "requalificationRequiredForProposedCandidate": true
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77"
     },
     {
       "id": "STAGING_DECISION_ACCEPTANCE",
@@ -160,8 +175,8 @@
     }
   ],
   "externalBlockers": [],
-  "proposedCandidateSha": "2786943ac51f42b24edc808031015b539ae091f1",
-  "proposedCandidateState": "CI_AND_MAIN_ADMISSION_PENDING_NOT_DEPLOYED",
+  "proposedCandidateSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "proposedCandidateState": "CI_AND_PRIVATE_RECOVERY_QUALIFICATION_PENDING",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
     "included": [
@@ -209,5 +224,14 @@
     "navigationHarness": "Nine settlement contracts and source-derived inventory checks passed; #1208 admitted after all registered checks and 16 trusted required successes.",
     "recoveryHarness": "Six fault/recovery contracts passed locally; #1209 CI/main admission and protected runtime rehearsal pending."
   },
-  "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113"
+  "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
+  "previousUndeployedBuild": {
+    "sourceSha": "2786943ac51f42b24edc808031015b539ae091f1",
+    "workflowDefinitionSha": "923858df7068afa3f03210aa4c38686ea3519765",
+    "runId": "43520878953",
+    "status": "SUCCESS",
+    "deployed": false,
+    "supersededForQualificationBy": "167f95034fbdaa163cd67e79c4bca622284e0d77"
+  },
+  "securityFindingEvidence": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json"
 }

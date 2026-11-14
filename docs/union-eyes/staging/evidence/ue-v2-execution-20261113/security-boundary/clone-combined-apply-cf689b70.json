@@ -1,0 +1,48 @@
+{
+  "ok": true,
+  "status": "APPLY_PASS",
+  "at": "2026-11-13T23:55:23.710Z",
+  "target": "clone",
+  "host": "nzila-ue-v2-recovery-20261113.postgres.database.azure.com",
+  "identity": {
+    "principal": "uev2admin",
+    "database": "ue_v2_staging",
+    "address": "10.40.4.5"
+  },
+  "sourceSha": "cf689b7064037019bcdcf7c903732989be2eb827",
+  "bundleSha256": "cdf2446aa2de9e4d981a231bcef87c7da848a537b63232a75071b2fd253e260c",
+  "planSha256": "f7d3c3356cbac61a274fdcf8cbcda0c0e87158a9b1e7abc75823a76666182322",
+  "result": {
+    "session": {
+      "policy": "ue_v2_verified_business_session",
+      "inspectedRelations": 420,
+      "addedPolicies": 420,
+      "upgradedProtectedGuards": 1
+    },
+    "messaging": {
+      "addedTables": [
+        "message_thread_lifecycle",
+        "message_retention_policies",
+        "message_thread_reads"
+      ],
+      "executedStatements": 51,
+      "preservedExistingRows": true
+    },
+    "verifiedRuntimeRelations": 423,
+    "remainingMissingPolicies": 0,
+    "persistedOwnerDelegations": 0
+  },
+  "existingPhysicalTablesPreserved": true,
+  "businessDmlIssued": false,
+  "existingPoliciesRemoved": false,
+  "eventTriggerDisabled": false,
+  "applicationRerouted": false,
+  "transport": {
+    "bytes": 2528648,
+    "programSha256": "3f9f0dfe7a82736067d1d5ca50523fb55c1f9863ff852777b92b20c5b84c45fc",
+    "fileSha256": {
+      "repair.cjs": "cdf2446aa2de9e4d981a231bcef87c7da848a537b63232a75071b2fd253e260c",
+      "plan.json": "f7d3c3356cbac61a274fdcf8cbcda0c0e87158a9b1e7abc75823a76666182322"
+    }
+  }
+}
