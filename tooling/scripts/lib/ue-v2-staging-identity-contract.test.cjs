@@ -16,3 +16,26 @@ test('a staging redeploy preserves the migrated Entra tenant and client instead 
     assert(source.includes(`const TENANT = '${tenant}'`), name);
   }
 });
+
+
+// A secret reference is unusable unless the staging identity also receives its
+// named secret scope; do not grant vault-wide operator/password access.
+test('every staging app secret reference has a scoped runtime grant and excludes operator credentials', () => {
+  const main = fs.readFileSync(path.join(root, 'infrastructure/bicep/ue-v2/main.bicep'), 'utf8');
+  const apps = fs.readFileSync(path.join(root, 'infrastructure/bicep/ue-v2/modules/apps.bicep'), 'utf8');
+  const block = (text, name) => {
+    const start = text.indexOf('var ' + name + ' = ');
+    assert(start >= 0, name);
+    const end = text.indexOf('\nvar ', start + 1);
+    const resource = text.indexOf('\nresource ', start + 1);
+    return text.slice(start, Math.min(...[end, resource, text.length].filter(x => x >= 0)));
+  };
+  const names = text => [...text.matchAll(/'([a-z][a-z0-9-]+)'/g)].map(match => match[1]);
+  const grants = new Set(names(block(main, 'stagingRuntimeSecretNames')));
+  const required = [...names(block(apps, 'secretNames')), ...names(block(apps, 'stagingAuthSystemSecretNames'))].filter(name => name !== 'staging');
+  for (const name of required) assert(grants.has(name), 'Missing scoped runtime secret grant: ' + name);
+  assert(grants.has('nar-signing-secret'));
+  for (const name of ['admin-db-password', 'db-admin-password', 'bootstrap-database-url']) assert(!grants.has(name), name);
+  assert.match(main, /scope: stagingRuntimeSecrets\[i\]/);
+  assert.match(main, /resource kvSecretsUser[^\n]+if \(env == 'prod'\)/);
+});

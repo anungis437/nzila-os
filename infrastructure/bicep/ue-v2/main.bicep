@@ -412,6 +412,7 @@ var stagingRuntimeSecretNames = concat([
   'system-database-url'
   'auth-database-url'
   'auth-system-database-url'
+  'nar-signing-secret'
   'auth-secret'
   'mfa-encryption-key'
   'voting-secret'

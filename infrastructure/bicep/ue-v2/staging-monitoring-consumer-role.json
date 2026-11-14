@@ -1,0 +1,22 @@
+{
+  "Name": "Nzila UE Dedicated Staging Monitoring Consumer",
+  "Id": "87c4b974-c4d5-5cc2-93b9-9970da4aa5d3",
+  "IsCustom": true,
+  "Description": "Read and attach only the dedicated staging telemetry workspace; assign this role only at that workspace. No production assignment.",
+  "Actions": [
+    "Microsoft.OperationalInsights/workspaces/read",
+    "Microsoft.OperationalInsights/workspaces/sharedKeys/action",
+    "Microsoft.Insights/actionGroups/read",
+    "Microsoft.OperationalInsights/workspaces/listKeys/action",
+    "Microsoft.Insights/scheduledQueryRules/read",
+    "Microsoft.Insights/scheduledQueryRules/write"
+  ],
+  "NotActions": [],
+  "DataActions": [
+    "Microsoft.OperationalInsights/workspaces/tables/data/read"
+  ],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg"
+  ]
+}
