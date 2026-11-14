@@ -142,7 +142,7 @@ describe('cases route', () => {
     let finish!: () => void;
     let returned = false;
     m.buildUnionEvidencePack.mockReturnValueOnce(new Promise<void>(resolve => { finish = resolve; }));
-    const response = POST({ request: { headers: { get: () => null }, json: async () => ({ claimType: 'other', description: 'Synthetic evidence settlement regression' }) }, organizationId: 'org_1', userId: 'u1' }).then((value: unknown) => { returned = true; return value; });
+    const response = POST({ request: { headers: { get: () => null }, json: async () => ({ claimType: 'other', description: 'Synthetic evidence settlement regression' }) }, organizationId: 'org_1', userId: 'u1' }).then((value) => { returned = true; return value; });
     await vi.waitFor(() => expect(m.buildUnionEvidencePack).toHaveBeenCalledTimes(1));
     expect(returned).toBe(false);
     finish();
