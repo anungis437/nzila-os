@@ -14,7 +14,10 @@ assert.equal(change.approval_status, 'APPROVED'); assert.equal(change.founder_st
 assert.equal(change.founder_staging_authorization.production_authorized, false)
 assert(Date.now() >= Date.parse(change.implementation_window_start) && Date.now() <= Date.parse(change.implementation_window_end))
 execFileSync('git', ['merge-base', '--is-ancestor', source, process.env.GITHUB_SHA])
-const az = args => JSON.parse(execFileSync('az', [...args, '--subscription', 'd562ba7f-d891-4504-a489-10917c0ebaaf', '--only-show-errors', '-o', 'json'], { encoding: 'utf8', timeout: 120000 }))
+const az = args => {
+  const output = execFileSync('az', [...args, '--subscription', 'd562ba7f-d891-4504-a489-10917c0ebaaf', '--only-show-errors', '-o', 'json'], { encoding: 'utf8', timeout: 120000 }).trim()
+  return output ? JSON.parse(output) : null
+}
 const revisionName = 'nzila-ue-v2-staging-app--rel' + source.slice(0, 10)
 const args = ['-g', 'nzila-canada-staging-rg', '-n', 'nzila-ue-v2-staging-app', '--revision', revisionName]
 const before = az(['containerapp', 'revision', 'show', ...args])

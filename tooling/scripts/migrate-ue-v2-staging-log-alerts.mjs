@@ -23,7 +23,10 @@ if (args.operation === 'plan') {
   assert.equal(change.founder_staging_authorization.staging_only, true); assert.equal(change.founder_staging_authorization.production_authorized, false)
   assert(Date.now() >= Date.parse(change.implementation_window_start) && Date.now() <= Date.parse(change.implementation_window_end))
   execFileSync('git', ['merge-base', '--is-ancestor', plan.sourceSha, process.env.GITHUB_SHA])
-  const az = values => JSON.parse(execFileSync('az', [...values, '--only-show-errors', '-o', 'json'], { encoding: 'utf8', timeout: 120000 }))
+  const az = values => {
+    const output = execFileSync('az', [...values, '--only-show-errors', '-o', 'json'], { encoding: 'utf8', timeout: 120000 }).trim()
+    return output ? JSON.parse(output) : null
+  }
   const account = az(['account', 'show'])
   assert.equal(account.id, subscription); assert.equal(account.tenantId, 'cc15259a-d2bf-421f-8e44-dccf8dc6232a')
   if (plan.operations === 0) {
