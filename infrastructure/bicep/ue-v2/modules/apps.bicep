@@ -38,6 +38,15 @@ param featureProfile string = 'internal'
 param enableStripe bool = false
 param tags object = {}
 
+var stagingConnectionBudget = loadJsonContent('../staging-connection-budget.json')
+var runtimePoolLimits = deploymentEnvironment == 'prod' ? {
+  DB_POOL_MAX: 10
+  DATABASE_POOL_SIZE: 20
+  SYSTEM_DB_POOL_MAX: 5
+  AUTH_DB_POOL_MAX: 5
+  AUTH_SYSTEM_DB_POOL_MAX: 5
+} : stagingConnectionBudget.poolCaps
+
 var kvBase = endsWith(keyVaultUri, '/') ? keyVaultUri : '${keyVaultUri}/'
 // Secret names are Key Vault secret names; values are resolved at revision start by the identity.
 var secretNames = [
@@ -190,7 +199,14 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'NEXT_PUBLIC_SITE_URL', value: effectiveSiteUrl }
             { name: 'AUTH_URL', value: appUrl }
             { name: 'AUTH_TRUST_HOST', value: 'true' }
-            { name: 'DB_POOL_MAX', value: '10' }
+            // At most two revisions x two replicas during rollout. Seven distinct
+            // pools per process x one connection = 28, leaving seven ordinary
+            // slots on staging's 50-connection server after 15 reserved slots.
+            { name: 'DB_POOL_MAX', value: string(runtimePoolLimits.DB_POOL_MAX) }
+            { name: 'DATABASE_POOL_SIZE', value: string(runtimePoolLimits.DATABASE_POOL_SIZE) }
+            { name: 'SYSTEM_DB_POOL_MAX', value: string(runtimePoolLimits.SYSTEM_DB_POOL_MAX) }
+            { name: 'AUTH_DB_POOL_MAX', value: string(runtimePoolLimits.AUTH_DB_POOL_MAX) }
+            { name: 'AUTH_SYSTEM_DB_POOL_MAX', value: string(runtimePoolLimits.AUTH_SYSTEM_DB_POOL_MAX) }
             { name: 'AZURE_KEY_VAULT_URL', value: keyVaultUri }
             { name: 'AZURE_STORAGE_ACCOUNT_NAME', value: storageAccountName }
             { name: 'AZURE_BLOB_CONTAINER', value: documentsContainerName }

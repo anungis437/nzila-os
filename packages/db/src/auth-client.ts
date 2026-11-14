@@ -39,7 +39,12 @@ export async function executeAuthContext<T>(
   const poolKey = `${variable}:${url}`
   let client = pools.get(poolKey)
   if (!client) {
-    const connection = postgres(url, { max: 5, idle_timeout: 30, prepare: false })
+    const poolVariable = system ? 'AUTH_SYSTEM_DB_POOL_MAX' : 'AUTH_DB_POOL_MAX'
+    const poolMax = Number(process.env[poolVariable] ?? '5')
+    if (!Number.isSafeInteger(poolMax) || poolMax < 1) {
+      throw new Error(`${poolVariable} must be a positive integer`)
+    }
+    const connection = postgres(url, { max: poolMax, idle_timeout: 30, prepare: false })
     client = drizzle(connection, { schema })
     connections.set(poolKey, connection)
     pools.set(poolKey, client)

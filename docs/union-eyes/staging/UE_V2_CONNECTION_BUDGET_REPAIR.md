@@ -1,0 +1,17 @@
+# Staging connection budget and retained revisions
+
+The real `cbf2bc9339f766ce4b5d8500a53e4481644f8680` acceptance run exposed PostgreSQL `53300` while the private operator was retiring owned deadline fixtures. Its six deployed worker scenarios had already passed. The failure is retained separately; it is not changed to a clean first-run success.
+
+An authenticated, read-only primary census observed `max_connections=50`, `reserved_connections=5` and `superuser_reserved_connections=10`: **35 ordinary client slots**. The app configured `DB_POOL_MAX=10` but left the shared platform pool at its separate 20-connection default, both auth pools at five, and the two SYSTEM clients at five. The alternate app client is another independent pool. A per-pool limit is not a server-wide limit.
+
+Azure also showed four revisions with running replicas. Only `--relcbf2bc9339` served traffic; three older revisions still had replicas at zero traffic. Nine active historical revisions were deactivated under CHG-2026-0114 after verifying the current image, source, readiness and explicit 100% traffic. Their metadata and images remain available for explicit reactivation. No database data was deleted or reset. The subsequent owned-fixture retirement succeeded with no pending or claimed fixture reminders.
+
+This change bounds every pool family used by staging. The application tenant and alternate clients count twice against `DB_POOL_MAX`; the app and shared SYSTEM clients count twice against `SYSTEM_DB_POOL_MAX`; the shared platform client and the two separately credentialed auth gateways account for the other three pools. Each staging pool is capped at one connection. The existing defaults remain effective for deployments without auth overrides, and the existing production limits are retained.
+
+At the staging maximum of two replicas and two temporarily active rollout revisions, seven pools per process permit at most 28 application connections. Seven ordinary slots remain for independent work and operators, in addition to PostgreSQL's 15 reserved slots. The gate reads the actual Azure PostgreSQL configuration, refuses an unsafe or mismatched budget, and checks it again before promotion. This is a capacity bound, not a claim that load testing has already passed.
+
+The deployment workflow retires zero-traffic history before adding a revision and again after healthy promotion. Retirement checks explicit pinned traffic before every mutation, waits a minute for prior work to drain, never deactivates the serving revision, and preserves revision metadata and data. This keeps historical readiness probes from accumulating indefinitely.
+
+Local tests reproduce the previous unsafe defaults, verify reserved-slot and replica-growth refusals, exercise separate bounded auth pools and concurrent initialization, and refuse changed/split/latest-based retirement traffic. Exact candidate CI, immutable image build, reviewed staging rollout, simultaneous real-persona tests, actual connection census and the remaining case/document/recovery acceptance are still required. The member form's input-retention observation is being investigated separately; it is not attributed to the connection failure without evidence.
+
+Finance/dues persistence and Financial Officer 2.1 remain outside this release. No production deployment or database reset is authorized. All agent review and execution is attributed to Codex under the continuing solo-founder delegation; no independent human reviewer is invented.
