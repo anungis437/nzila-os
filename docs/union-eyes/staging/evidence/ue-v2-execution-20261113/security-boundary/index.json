@@ -48,12 +48,11 @@
     }
   ],
   "nextCandidate": {
-    "sourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
-    "localNativeExport": "local-native-export-167f9503.json",
-    "sourceProvenance": "repair-167f9503-provenance.json",
-    "localFocusedTests": 105,
-    "utcDateBoundaryTests": 69,
-    "liveApplied": false,
+    "sourceSha": "96b7ebca84552c289df2ea4439e0c6218eab4494",
+    "localNativeExport": "local-native-export-96b7ebca.json",
+    "stewardIdentityFocusedTests": 25,
+    "schemaPlanChanged": false,
+    "databaseRepairCodeChanged": false,
     "deployed": false
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
@@ -64,5 +63,17 @@
     "sameRepairBundleAndPlanAsCandidate": true,
     "nativeSignedProof": "clone-real-signed-native-audit-167f9503.json",
     "signedSourceProvenance": "clone-signed-source-167f9503.json"
+  },
+  "primaryDatabaseRepair": {
+    "sourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+    "qualifiedAuthority": "primary-repair-qualified-authority-167f9503.json",
+    "plan": "primary-combined-plan-167f9503.json",
+    "apply": "primary-combined-apply-167f9503.json",
+    "actualUnboundDenial": "primary-unbound-denial-after-repair-167f9503.json",
+    "realMemberMessages": "primary-real-member-messages-after-schema-repair-167f9503.json",
+    "observedApplicationSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+    "businessDmlIssued": false,
+    "verifiedRuntimeRelations": 423,
+    "persistedOwnerDelegations": 0
   }
 }

@@ -1,0 +1,65 @@
+{
+  "status": "PASS",
+  "purpose": "RETAINED_RUNTIME_CALLABLE_DEFINER_CURRENT_SOURCE_EQUIVALENCE",
+  "sourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "actualCloneCensusSha256": "ad7d08436c4d1a7a0b9995df0f45de44cdb6ff77842eaddb4c0f186dd3349048",
+  "currentNativeSchemaSha256": "a0f3a3df85ad7d18c6322517a5b0d7c5150c9a595ad2eb0f2a6e7a01e45a9d6a",
+  "callableRuntimeDefiners": [
+    {
+      "signature": "ue_case_assignee_authorized(text,uuid)",
+      "bodySha256": "bdda1db89edbd5448e09e2ea42be72b10676414ad1a45983b54df44caae553c7",
+      "owner": "nzila_auth_org_authority_reader",
+      "searchPath": [
+        "search_path=pg_catalog"
+      ],
+      "exactCurrentSourceBody": true
+    },
+    {
+      "signature": "ue_conversation_assignee_authorized(text,uuid)",
+      "bodySha256": "eb9387f5c1884fec11e9117dac8fcb9341299077bedc2d0ae8190b35cf1820a3",
+      "owner": "nzila_auth_org_authority_reader",
+      "searchPath": [
+        "search_path=pg_catalog"
+      ],
+      "exactCurrentSourceBody": true
+    },
+    {
+      "signature": "user_management.auth_business_member_parent_authorized(text,uuid)",
+      "bodySha256": "58a6bcebcfa514c6ef35f378e00ef9015ef8a1ddf0d9aaf6673213093aafa6fc",
+      "owner": "nzila_auth_org_authority_reader",
+      "searchPath": [
+        "search_path=pg_catalog"
+      ],
+      "exactCurrentSourceBody": true
+    },
+    {
+      "signature": "user_management.auth_business_org_authorized(uuid,text[])",
+      "bodySha256": "02d3aa10744e79fb43dcfb0026be2ba0ebd237cc346729aa370cc0b0a06dd13d",
+      "owner": "nzila_auth_org_authority_reader",
+      "searchPath": [
+        "search_path=pg_catalog"
+      ],
+      "exactCurrentSourceBody": true
+    },
+    {
+      "signature": "user_management.auth_business_user_parent_authorized(text,uuid)",
+      "bodySha256": "e47363819ef24657d5c9cb01168e7f360025b8707cdaab00157b13a1a3fd9f34",
+      "owner": "nzila_auth_org_authority_reader",
+      "searchPath": [
+        "search_path=pg_catalog"
+      ],
+      "exactCurrentSourceBody": true
+    },
+    {
+      "signature": "user_management.ue_authority_membership_rows(uuid,text[])",
+      "bodySha256": "f7343c94d02090e677c46e5911adf1a157aa6e8e1b44f6387d543efd0bd51ce4",
+      "owner": "nzila_auth_org_authority_reader",
+      "searchPath": [
+        "search_path=pg_catalog"
+      ],
+      "exactCurrentSourceBody": true
+    }
+  ],
+  "callableBypassDefiners": [],
+  "stagingPrimaryQualified": false
+}

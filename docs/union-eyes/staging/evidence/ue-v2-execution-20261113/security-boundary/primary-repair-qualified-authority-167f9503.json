@@ -1,0 +1,16 @@
+{
+  "sourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "integrationHeadSha": "bec483b1de1d415737119340556eaf37ac6f94fb",
+  "mainAdmissionMergeSha": "b3396380a69bbf3202f8973fa22771a3d0928ca2",
+  "at": "2026-11-14T00:36:52.352445+00:00",
+  "allRequiredChecksPassed": true,
+  "allSourceAndIntegrationChecksPassed": true,
+  "trustedRequiredContextsPerHead": 16,
+  "cloneRehearsalPassed": true,
+  "realSignedRestoredDataAndAuditPassed": true,
+  "bundleSha256": "cdf2446aa2de9e4d981a231bcef87c7da848a537b63232a75071b2fd253e260c",
+  "planSha256": "f7d3c3356cbac61a274fdcf8cbcda0c0e87158a9b1e7abc75823a76666182322",
+  "authority": "CHG-2026-0114, explicit solo-founder continuing staging engineering delegation",
+  "reviewerAttribution": "Codex delegated engineering review; no independent human reviewer claimed",
+  "productionAuthorized": false
+}

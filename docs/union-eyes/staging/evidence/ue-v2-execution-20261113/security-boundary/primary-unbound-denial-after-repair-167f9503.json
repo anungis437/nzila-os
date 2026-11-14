@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "purpose": "READ_ONLY_ACTUAL_RUNTIME_UNBOUND_CONTEXT_SECURITY_DIAGNOSTIC",
+  "status": "DENIALS_PASSED",
+  "applicationSourceSha": "8a0faf64cc67a8bfaef35e39f5acdda8a9ef4896",
+  "at": "2026-11-14T00:42:38.394Z",
+  "identity": {
+    "principal": "ue_staging_runtime",
+    "role": "union_eyes_runtime",
+    "database": "ue_v2_staging"
+  },
+  "observations": [
+    {
+      "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0",
+      "sessionTokenSupplied": false,
+      "expectedVisibleRows": 0,
+      "actualVisibleRows": 0,
+      "observedApiCaseIds": []
+    },
+    {
+      "organizationId": "f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab",
+      "sessionTokenSupplied": false,
+      "expectedVisibleRows": 0,
+      "actualVisibleRows": 0,
+      "observedApiCaseIds": []
+    }
+  ],
+  "probeWritesCommitted": false,
+  "credentialsOrTokensPublished": false,
+  "transport": {
+    "bytes": 585032,
+    "programSha256": "81571062955aa405e51aae12b62347a4dd669ac74abcbce5603bf4b21b7b32f6",
+    "fileSha256": {
+      "native.cjs": "d11ce408722e36094c32ca32fabbb2743d5ed01a0c9ed0b57472199326f056ec"
+    }
+  }
+}
