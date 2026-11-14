@@ -4,7 +4,7 @@
  * Handles all notification logic for grievance workflows
  * Integrates with notification system for multi-channel delivery
  *
- * No notification here carries an actionUrl: the grievance pages are open to no role (lib/notifications/links.ts), so a link would end in a redirect.
+ * These lifecycle notifications currently omit actionUrl. Individual detail pages enforce the caller's case authority through their API.
  */
 
 import { db } from "@/db";
