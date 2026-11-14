@@ -240,7 +240,7 @@ export function changeRecordDefects(record, { changeId, sourceSha, nowMs }) {
       founder.owner_authorization_ref === 'ops/change-records/CHG-2026-0114.founder-authorization.md' &&
       founder.authority_origin === 'OWNER_DIRECTIVE_IN_CONVERSATION' &&
       founder.subscription_id === NEW_SUBSCRIPTION_ID &&
-      founder.candidate_sha === '96b7ebca84552c289df2ea4439e0c6218eab4494' &&
+      founder.candidate_sha === 'ed13cf0a608ad1abf91c183f4afed09c5cc9355a' &&
       founder.staging_only === true &&
       founder.production_authorized === false &&
       founder.technical_gates_required === true &&

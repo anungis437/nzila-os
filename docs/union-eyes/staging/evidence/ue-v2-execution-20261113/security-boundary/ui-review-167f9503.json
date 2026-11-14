@@ -1,0 +1,202 @@
+{
+  "applicationSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+  "evidenceClass": "LOCAL_BROWSER_REAL_ENTRA_AUTHORIZATION_CODE_UI_REVIEW",
+  "at": "2026-11-14T01:27:53.366Z",
+  "observations": [
+    {
+      "path": "/en-CA/dashboard/claims",
+      "mobile": false,
+      "status": 200,
+      "mainSummary": "Viewing: UE V2 Synthetic Tenant AHomeMy RepresentationMessagesMy DocumentsMy UnionHelp & ResourcesAccountProfilePreferencesPrivacyUSbounced-ue-v2-member@resend.devProfileUE V2 Synthetic Tenant AENEnglishUE V2 Synthetic Tenant ASign outMy RepresentationTrack the cases you have opened and their progressWorkAid consent and referralOpen Representation CaseNo cases yetCases you open appear here.Open your first caseGetting startedThis is My Cases — the cases you have opened are tracked here.Open a case to see its progress, or open a new representation case to get started.Next",
+      "lang": "en-CA",
+      "title": "Cases | UnionEyes | UnionEyes [Staging]",
+      "headings": [
+        "My Representation"
+      ],
+      "width": 1440,
+      "scrollWidth": 1440,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "en-CA-desktop-claims.png"
+    },
+    {
+      "path": "/en-CA/dashboard/messages",
+      "mobile": false,
+      "status": 200,
+      "mainSummary": "Viewing: UE V2 Synthetic Tenant AHomeMy RepresentationMessagesMy DocumentsMy UnionHelp & ResourcesAccountProfilePreferencesPrivacyUSbounced-ue-v2-member@resend.devProfileUE V2 Synthetic Tenant AENEnglishUE V2 Synthetic Tenant ASign outMessagesSecure conversations with your union.New conversationOnly you and the union representatives authorised for a conversation can read it. Messages are not monitored around the clock: if something cannot wait, say so clearly and use the contact route your union gave you.Synthetic staging conversation 43511258681Nov 13, 2026, 4:34 p.m.Synthetic staging conversation 43511258681Nov 13, 2026, 4:34 p.m.Select a conversation to read it.Getting startedThis is My Cases — the cases you have opened are tracked here.Open a case to see its progress, or open a new rep",
+      "lang": "en-CA",
+      "title": "Messages | UnionEyes [Staging]",
+      "headings": [
+        "Messages"
+      ],
+      "width": 1440,
+      "scrollWidth": 1440,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "en-CA-desktop-messages.png"
+    },
+    {
+      "path": "/en-CA/dashboard/documents",
+      "mobile": false,
+      "status": 200,
+      "mainSummary": "Viewing: UE V2 Synthetic Tenant AHomeMy RepresentationMessagesMy DocumentsMy UnionHelp & ResourcesAccountProfilePreferencesPrivacyUSbounced-ue-v2-member@resend.devProfileUE V2 Synthetic Tenant AENEnglishUE V2 Synthetic Tenant ASign outStaff libraryPortal documentsMy DocumentsDocuments you have uploaded and documents your union shares with members.Synthetic V2 staging documentStaging qualificationNov 13, 2026Shared by your unionDownloadSynthetic V2 staging documentStaging qualificationNov 13, 2026Shared by your unionDownloadSynthetic V2 staging documentStaging qualificationNov 13, 2026Shared by your unionDownloadSynthetic V2 staging documentStaging qualificationNov 12, 2026Shared by your unionDownloadGetting startedThis is My Cases — the cases you have opened are tracked here.Open a case to",
+      "lang": "en-CA",
+      "title": "Document Management | UnionEyes [Staging]",
+      "headings": [
+        "My Documents"
+      ],
+      "width": 1440,
+      "scrollWidth": 1440,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "en-CA-desktop-documents.png"
+    },
+    {
+      "path": "/en-CA/dashboard/claims",
+      "mobile": true,
+      "status": 200,
+      "mainSummary": "Viewing: UE V2 Synthetic Tenant AHomeMy RepresentationMessagesMy DocumentsMy UnionHelp & ResourcesAccountProfilePreferencesPrivacyUSbounced-ue-v2-member@resend.devProfileUE V2 Synthetic Tenant AENEnglishUE V2 Synthetic Tenant ASign outMy RepresentationTrack the cases you have opened and their progressWorkAid consent and referralOpen Representation CaseNo cases yetCases you open appear here.Open your first caseGetting startedThis is My Cases — the cases you have opened are tracked here.Open a case to see its progress, or open a new representation case to get started.Next",
+      "lang": "en-CA",
+      "title": "Cases | UnionEyes | UnionEyes [Staging]",
+      "headings": [
+        "My Representation"
+      ],
+      "width": 390,
+      "scrollWidth": 390,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "en-CA-mobile-claims.png"
+    },
+    {
+      "path": "/en-CA/dashboard/messages",
+      "mobile": true,
+      "status": 200,
+      "mainSummary": "Viewing: UE V2 Synthetic Tenant AHomeMy RepresentationMessagesMy DocumentsMy UnionHelp & ResourcesAccountProfilePreferencesPrivacyUSbounced-ue-v2-member@resend.devProfileUE V2 Synthetic Tenant AENEnglishUE V2 Synthetic Tenant ASign outMessagesSecure conversations with your union.New conversationOnly you and the union representatives authorised for a conversation can read it. Messages are not monitored around the clock: if something cannot wait, say so clearly and use the contact route your union gave you.Synthetic staging conversation 43511258681Nov 13, 2026, 4:34 p.m.Synthetic staging conversation 43511258681Nov 13, 2026, 4:34 p.m.Select a conversation to read it.Getting startedThis is My Cases — the cases you have opened are tracked here.Open a case to see its progress, or open a new rep",
+      "lang": "en-CA",
+      "title": "Messages | UnionEyes [Staging]",
+      "headings": [
+        "Messages"
+      ],
+      "width": 390,
+      "scrollWidth": 390,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "en-CA-mobile-messages.png"
+    },
+    {
+      "path": "/en-CA/dashboard/documents",
+      "mobile": true,
+      "status": 200,
+      "mainSummary": "Viewing: UE V2 Synthetic Tenant AHomeMy RepresentationMessagesMy DocumentsMy UnionHelp & ResourcesAccountProfilePreferencesPrivacyUSbounced-ue-v2-member@resend.devProfileUE V2 Synthetic Tenant AENEnglishUE V2 Synthetic Tenant ASign outStaff libraryPortal documentsMy DocumentsDocuments you have uploaded and documents your union shares with members.Synthetic V2 staging documentStaging qualificationNov 13, 2026Shared by your unionDownloadSynthetic V2 staging documentStaging qualificationNov 13, 2026Shared by your unionDownloadSynthetic V2 staging documentStaging qualificationNov 13, 2026Shared by your unionDownloadSynthetic V2 staging documentStaging qualificationNov 12, 2026Shared by your unionDownloadGetting startedThis is My Cases — the cases you have opened are tracked here.Open a case to",
+      "lang": "en-CA",
+      "title": "Document Management | UnionEyes [Staging]",
+      "headings": [
+        "My Documents"
+      ],
+      "width": 390,
+      "scrollWidth": 390,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "en-CA-mobile-documents.png"
+    },
+    {
+      "path": "/fr-CA/dashboard/claims",
+      "mobile": false,
+      "status": 200,
+      "mainSummary": "Organisation affichée: UE V2 Synthetic Tenant AAccueilMa représentationMessagesMes documentsMon syndicatAide et ressourcesCompteProfilPréférencesConfidentialitéUSbounced-ue-v2-member@resend.devProfilUE V2 Synthetic Tenant AFRFrançaisUE V2 Synthetic Tenant ASe déconnecterMa représentationSuivez les dossiers que vous avez ouverts et leur progressionConsentement et signalement WorkAidOuvrir un dossier de représentationAucun dossier pour le momentLes dossiers que vous ouvrez apparaissent ici.Ouvrir votre premier dossierPour commencerVoici Ma représentation : vous y suivez les dossiers que vous avez ouverts.Ouvrez un dossier pour consulter sa progression ou créez un dossier de représentation pour commencer.Suivant",
+      "lang": "fr-CA",
+      "title": "Dossiers | UnionEyes | UnionEyes [Staging]",
+      "headings": [
+        "Ma représentation"
+      ],
+      "width": 1440,
+      "scrollWidth": 1440,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "fr-CA-desktop-claims.png"
+    },
+    {
+      "path": "/fr-CA/dashboard/messages",
+      "mobile": false,
+      "status": 200,
+      "mainSummary": "Organisation affichée: UE V2 Synthetic Tenant AAccueilMa représentationMessagesMes documentsMon syndicatAide et ressourcesCompteProfilPréférencesConfidentialitéUSbounced-ue-v2-member@resend.devProfilUE V2 Synthetic Tenant AFRFrançaisUE V2 Synthetic Tenant ASe déconnecterMessagesConversations sécurisées avec votre syndicat.Nouvelle conversationSeuls vous et les représentants syndicaux autorisés pour une conversation peuvent la lire. Les messages ne sont pas surveillés en continu : si une situation ne peut pas attendre, dites-le clairement et utilisez le moyen de contact que votre syndicat vous a donné.Synthetic staging conversation 4351125868113 nov. 2026, 16 h 34Synthetic staging conversation 4351125868113 nov. 2026, 16 h 34Sélectionnez une conversation pour la lire.Pour commencerVoici Ma ",
+      "lang": "fr-CA",
+      "title": "Messages | UnionEyes [Staging]",
+      "headings": [
+        "Messages"
+      ],
+      "width": 1440,
+      "scrollWidth": 1440,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "fr-CA-desktop-messages.png"
+    },
+    {
+      "path": "/fr-CA/dashboard/documents",
+      "mobile": false,
+      "status": 200,
+      "mainSummary": "Organisation affichée: UE V2 Synthetic Tenant AAccueilMa représentationMessagesMes documentsMon syndicatAide et ressourcesCompteProfilPréférencesConfidentialitéUSbounced-ue-v2-member@resend.devProfilUE V2 Synthetic Tenant AFRFrançaisUE V2 Synthetic Tenant ASe déconnecterBibliotheque du personnelDocuments du portailMes documentsLes documents que vous avez téléversés et ceux que votre syndicat partage avec les membres.Synthetic V2 staging documentStaging qualification13 nov. 2026Partagé par votre syndicatTéléchargerSynthetic V2 staging documentStaging qualification13 nov. 2026Partagé par votre syndicatTéléchargerSynthetic V2 staging documentStaging qualification13 nov. 2026Partagé par votre syndicatTéléchargerSynthetic V2 staging documentStaging qualification12 nov. 2026Partagé par votre syn",
+      "lang": "fr-CA",
+      "title": "Gestion des documents | UnionEyes [Staging]",
+      "headings": [
+        "Mes documents"
+      ],
+      "width": 1440,
+      "scrollWidth": 1440,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "fr-CA-desktop-documents.png"
+    },
+    {
+      "path": "/fr-CA/dashboard/claims",
+      "mobile": true,
+      "status": 200,
+      "mainSummary": "Organisation affichée: UE V2 Synthetic Tenant AAccueilMa représentationMessagesMes documentsMon syndicatAide et ressourcesCompteProfilPréférencesConfidentialitéUSbounced-ue-v2-member@resend.devProfilUE V2 Synthetic Tenant AFRFrançaisUE V2 Synthetic Tenant ASe déconnecterMa représentationSuivez les dossiers que vous avez ouverts et leur progressionConsentement et signalement WorkAidOuvrir un dossier de représentationAucun dossier pour le momentLes dossiers que vous ouvrez apparaissent ici.Ouvrir votre premier dossierPour commencerVoici Ma représentation : vous y suivez les dossiers que vous avez ouverts.Ouvrez un dossier pour consulter sa progression ou créez un dossier de représentation pour commencer.Suivant",
+      "lang": "fr-CA",
+      "title": "Dossiers | UnionEyes | UnionEyes [Staging]",
+      "headings": [
+        "Ma représentation"
+      ],
+      "width": 390,
+      "scrollWidth": 390,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "fr-CA-mobile-claims.png"
+    },
+    {
+      "path": "/fr-CA/dashboard/messages",
+      "mobile": true,
+      "status": 200,
+      "mainSummary": "Organisation affichée: UE V2 Synthetic Tenant AAccueilMa représentationMessagesMes documentsMon syndicatAide et ressourcesCompteProfilPréférencesConfidentialitéUSbounced-ue-v2-member@resend.devProfilUE V2 Synthetic Tenant AFRFrançaisUE V2 Synthetic Tenant ASe déconnecterMessagesConversations sécurisées avec votre syndicat.Nouvelle conversationSeuls vous et les représentants syndicaux autorisés pour une conversation peuvent la lire. Les messages ne sont pas surveillés en continu : si une situation ne peut pas attendre, dites-le clairement et utilisez le moyen de contact que votre syndicat vous a donné.Synthetic staging conversation 4351125868113 nov. 2026, 16 h 34Synthetic staging conversation 4351125868113 nov. 2026, 16 h 34Sélectionnez une conversation pour la lire.Pour commencerVoici Ma ",
+      "lang": "fr-CA",
+      "title": "Messages | UnionEyes [Staging]",
+      "headings": [
+        "Messages"
+      ],
+      "width": 390,
+      "scrollWidth": 390,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "fr-CA-mobile-messages.png"
+    },
+    {
+      "path": "/fr-CA/dashboard/documents",
+      "mobile": true,
+      "status": 200,
+      "mainSummary": "Organisation affichée: UE V2 Synthetic Tenant AAccueilMa représentationMessagesMes documentsMon syndicatAide et ressourcesCompteProfilPréférencesConfidentialitéUSbounced-ue-v2-member@resend.devProfilUE V2 Synthetic Tenant AFRFrançaisUE V2 Synthetic Tenant ASe déconnecterBibliotheque du personnelDocuments du portailMes documentsLes documents que vous avez téléversés et ceux que votre syndicat partage avec les membres.Synthetic V2 staging documentStaging qualification13 nov. 2026Partagé par votre syndicatTéléchargerSynthetic V2 staging documentStaging qualification13 nov. 2026Partagé par votre syndicatTéléchargerSynthetic V2 staging documentStaging qualification13 nov. 2026Partagé par votre syndicatTéléchargerSynthetic V2 staging documentStaging qualification12 nov. 2026Partagé par votre syn",
+      "lang": "fr-CA",
+      "title": "Gestion des documents | UnionEyes [Staging]",
+      "headings": [
+        "Mes documents"
+      ],
+      "width": 390,
+      "scrollWidth": 390,
+      "bodyEmpty": false,
+      "missingTranslations": false,
+      "screenshot": "fr-CA-mobile-documents.png"
+    }
+  ],
+  "currentPath": "/fr-CA/dashboard/documents",
+  "currentMobile": true,
+  "status": "PASS"
+}

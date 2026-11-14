@@ -1,6 +1,6 @@
 {
   "purpose": "PRE_REPAIR_SECURITY_FINDING_AND_QUALIFICATION_PROVENANCE",
-  "proposedSourceSha": "453c50df40d5c896710a4631e901ed8b5d44e8e4",
+  "proposedSourceSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
   "productionAuthorized": false,
   "stagingGo": false,
   "entries": [
@@ -44,6 +44,37 @@
       "file": "built-but-undeployed-2786943a.json",
       "sha256": "272251cf83674a7788b642f5e0de25a935d8b52ce92192d22d0aa66d757d0ec3",
       "observedOrProposedSourceSha": "2786943ac51f42b24edc808031015b539ae091f1",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-ed13cf0a.json",
+      "sha256": "ccd979dc7d5127bb978e51eae62fc3e4f9471885b8c443d9e48ab06ec8043a56",
+      "observedOrProposedSourceSha": "ed13cf0a608ad1abf91c183f4afed09c5cc9355a",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "runtime-167f9503-azure.json",
+      "sha256": "334b4306d8d4aee59ac75b0cb1479413a89a3686dfbfee05fa25fae53f5965a7",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "private-document-bytes-167f9503.json",
+      "sha256": "11c937e3907c27ee5c9ba42c0311a21a3933af0111643d4d5923109725a79d7b",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "real-session-43540064035-167f9503.json",
+      "sha256": "1d24d7c3b227baacd7f0d7a56b3e72c239222d40c4090311fe1e63ef9367d321",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
+      "runtimePassInferred": false,
+      "encryptedLeaseEnvelopeOmitted": true
+    },
+    {
+      "file": "ui-review-167f9503.json",
+      "sha256": "5b8261ac904d344052164b4a59b1c0f7eabc1146b319d3c8b09f03d3794f2310",
+      "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
       "runtimePassInferred": false
     }
   ],
