@@ -47,7 +47,7 @@ describe('workbench inline case access', () => {
 
   it('opens and closes existing case details by keyboard without advertising a missing route', async () => {
     serve();
-    render(<WorkbenchConsole />);
+    render(<WorkbenchConsole showGrievanceCases />);
     const expand = await screen.findByRole('button', { name: 'workbench.expand CASE-01' });
     expand.focus();
     await userEvent.keyboard('{Enter}');
@@ -61,6 +61,13 @@ describe('workbench inline case access', () => {
     await userEvent.keyboard(' ');
     expect(expand).toHaveAttribute('aria-expanded', 'false');
     await waitFor(() => expect(screen.queryByText('Synthetic authorized note')).not.toBeInTheDocument());
+  });
+
+  it('hides the staff collection link unless the server admits that destination', async () => {
+    serve();
+    render(<WorkbenchConsole />);
+    await screen.findByRole('button', { name: 'workbench.expand CASE-01' });
+    expect(screen.queryByRole('link', { name: 'workbench.grievanceCases' })).not.toBeInTheDocument();
   });
 
   it('keeps unnumbered cases collapsed and opens their notes using the actual case id', async () => {
@@ -169,7 +176,7 @@ describe('workbench inline case access', () => {
       priority: 'medium', description: 'Dossier synthétique', createdAt: '2026-10-22T12:00:00Z',
       updatedAt: '2026-10-22T12:00:00Z',
     }] } }) }));
-    render(<WorkbenchConsole />);
+    render(<WorkbenchConsole showGrievanceCases />);
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Salaire et heures' })).toBeVisible());
     expect(screen.getByText('Membre inconnu')).toBeVisible();
     expect(screen.getByText(frenchMessages.workbench.submittedOn.replace('{date}', new Date('2026-10-22T12:00:00Z').toLocaleDateString('fr-CA')))).toBeVisible();

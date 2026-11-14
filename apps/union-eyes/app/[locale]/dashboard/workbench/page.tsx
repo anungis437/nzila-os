@@ -1,10 +1,11 @@
 export const dynamic = 'force-dynamic';
 
 import { Metadata } from "next";
-import { requireUser, hasMinRole } from "@/lib/api-auth-guard";
+import { requireUser, hasMinRole, getCurrentUser } from "@/lib/api-auth-guard";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import WorkbenchConsole from "@/components/workbench/workbench-console";
+import { canAccessDashboardPath, getDashboardExperience } from "@/lib/dashboard/role-experience";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -31,5 +32,9 @@ export default async function WorkbenchPage() {
     redirect("/dashboard");
   }
 
-  return <WorkbenchConsole />;
+  const currentUser = await getCurrentUser();
+  const showGrievanceCases = Boolean(currentUser && canAccessDashboardPath(
+    '/dashboard/grievances', getDashboardExperience(currentUser.role), false,
+  ));
+  return <WorkbenchConsole showGrievanceCases={showGrievanceCases} />;
 }

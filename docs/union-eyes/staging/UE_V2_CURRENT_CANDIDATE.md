@@ -72,3 +72,6 @@ The old cron alert query counts successful exit-code-zero terminations as failur
 
 
 Whole-application CI43643427818 on source4687a4ed failed three old collection-denial assertions in two dependent workspace/notification suites (26,094 passed,34 skipped). They are updated to the intentional exact staff collection policy while asserting creation/management and other experiences stay refused. All five affected suites,205 tests, pass locally. The original failure is retained; the final source and authorization integration must independently complete exact CI. No replacement has been deployed.
+
+
+Premerge review also found that executives/governance can open the workbench while the new grievance collection is intentionally staff-only. The server now resolves the canonical current role and advertises the entry only when the destination policy admits it; the client defaults hidden. Existing login/minimum-role gates and API authority remain unchanged. All six affected suites,216 tests, pass locally. The previous candidate was stopped before merge/build/deployment; final exact source qualification and replacement runtime checks are still required.
