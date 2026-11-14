@@ -364,6 +364,14 @@ jobs:
             cat "$RUNNER_TEMP/evidence/what-if-summary.md"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Plan immutable staging log-alert scope replacements
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          node tooling/scripts/migrate-ue-v2-staging-log-alerts.mjs \
+            --operation plan --what-if "$RUNNER_TEMP/evidence/what-if.json" \
+            --output "$RUNNER_TEMP/evidence/log-alert-scope-plan.json"
+
       - name: Upload what-if
         if: always()
         uses: actions/upload-artifact@v4
@@ -484,6 +492,18 @@ jobs:
           node "$GATE" --gate what-if --what-if "$RUNNER_TEMP/evidence/what-if-apply.json" --registry-resource-group "$REGISTRY_RG"
           node "$GATE" --gate drift --reviewed "$REVIEWED" --fresh "$RUNNER_TEMP/evidence/what-if-apply.json"
 
+      - name: Replace only reviewed immutable staging log-alert scopes
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+        run: |
+          set -euo pipefail
+          WHATIF_ARTIFACTS="$RUNNER_TEMP/artifacts/ue-v2-staging-what-if-${GITHUB_RUN_ID}"
+          export EXPECTED_SERVING_REVISION=$(jq -r '.parameters.appPinnedRevisionName.value // empty' "$WHATIF_ARTIFACTS/deploy-parameters.json")
+          node tooling/scripts/migrate-ue-v2-staging-log-alerts.mjs \
+            --operation apply --what-if "$RUNNER_TEMP/evidence/what-if-apply.json" \
+            --reviewed-plan "$WHATIF_ARTIFACTS/log-alert-scope-plan.json" \
+            --output "$RUNNER_TEMP/evidence/log-alert-scope-migration.json"
+
       - name: Drain non-serving history before creating another revision
         env:
           SOURCE_SHA: ${{ needs.plan.outputs.sha }}
@@ -522,6 +542,13 @@ jobs:
             --policy source/infrastructure/bicep/ue-v2/staging-connection-budget.json \
             --parameters "$WHATIF_ARTIFACTS/deploy-parameters.json" \
             > "$RUNNER_TEMP/evidence/connection-budget-after-apply.json"
+
+      - name: Reactivate the exact retained candidate after a partial-apply retry
+        env:
+          SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+          RELEASE_MANIFEST: ${{ runner.temp }}/artifacts/ue-v2-staging-plan-${{ github.run_id }}/release-manifest.json
+          ACTIVATION_RECEIPT: ${{ runner.temp }}/evidence/candidate-reactivation.json
+        run: node tooling/scripts/reactivate-ue-v2-staging-candidate.mjs
 
       - name: Promote traffic to the new revision after it passes readiness
         # The Bicep deployment above pinned traffic to the previously-live revision, so the new

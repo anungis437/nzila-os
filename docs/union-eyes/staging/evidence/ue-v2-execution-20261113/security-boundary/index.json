@@ -217,5 +217,6 @@
     "persistedOwnerDelegations": 0
   },
   "currentOperationalFollowup": "deployed-cbf2bc93-operational-followup.json",
-  "subsequentObservedFindings": "grievance-probe-and-expiry-followup-cbf2bc93.json"
+  "subsequentObservedFindings": "grievance-probe-and-expiry-followup-cbf2bc93.json",
+  "deploymentAlertScopeFailure": "deployment-43602545438-alert-scope-failure.json"
 }
