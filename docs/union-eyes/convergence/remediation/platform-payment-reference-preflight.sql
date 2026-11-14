@@ -56,6 +56,29 @@ LEFT JOIN platform_invoices i ON i.id = pa.invoice_id
 WHERE (a.id IS NOT NULL AND a.organization_id <> p.organization_id)
    OR (i.id IS NOT NULL AND i.organization_id <> p.organization_id)
 ORDER BY p.id;
+-- Allocation ownership and arithmetic: a payment allocation must belong to the
+-- same billing account as its invoice, and aggregate allocations must not
+-- exceed the payment amount. These are diagnostic rows, not corrections.
+SELECT pa.id AS allocation_id, pa.payment_id, pa.invoice_id,
+       p.billing_account_id AS payment_account_id,
+       i.billing_account_id AS invoice_account_id
+FROM payment_allocations pa
+JOIN platform_payments p ON p.id = pa.payment_id
+JOIN platform_invoices i ON i.id = pa.invoice_id
+WHERE p.billing_account_id <> i.billing_account_id
+ORDER BY pa.id;
+SELECT p.id AS payment_id, p.organization_id, p.amount AS payment_amount,
+       COALESCE(SUM(pa.amount), 0) AS allocated_amount
+FROM platform_payments p
+LEFT JOIN payment_allocations pa ON pa.payment_id = p.id
+GROUP BY p.id, p.organization_id, p.amount
+HAVING COALESCE(SUM(pa.amount), 0) > p.amount
+ORDER BY p.organization_id, p.id;
+-- Negative allocation amounts require explicit refund/reversal semantics.
+SELECT pa.id AS allocation_id, pa.payment_id, pa.invoice_id, pa.amount
+FROM payment_allocations pa
+WHERE pa.amount < 0
+ORDER BY pa.id;
 -- Inspect existing uniqueness and partial-index predicates.
 SELECT indexname, indexdef
 FROM pg_indexes
