@@ -223,7 +223,7 @@ function CaseNotesPanel({ state }: { state: CaseNotes | undefined }) {
   );
 }
 
-export default function WorkbenchConsole() {
+export default function WorkbenchConsole({ showGrievanceCases = false }: { showGrievanceCases?: boolean }) {
   const t = useTranslations();
   const locale = useLocale();
   const loadingErrorMessage = t('workbench.errorLoadingCases');
@@ -477,7 +477,7 @@ export default function WorkbenchConsole() {
         <PageHeading title={t('workbench.title')} description={t('workbench.subtitle')} />
         <div className="flex flex-wrap gap-4">
           <a className="inline-flex min-h-11 items-center text-sm underline" href={`/${locale}/dashboard/workbench/workaid`}>{t('workAidPage.openJourney')}</a>
-          <a className="inline-flex min-h-11 items-center text-sm underline" href={`/${locale}/dashboard/grievances`}>{t('workbench.grievanceCases')}</a>
+          {showGrievanceCases && <a className="inline-flex min-h-11 items-center text-sm underline" href={`/${locale}/dashboard/grievances`}>{t('workbench.grievanceCases')}</a>}
         </div>
 
         {/* Loading State */}

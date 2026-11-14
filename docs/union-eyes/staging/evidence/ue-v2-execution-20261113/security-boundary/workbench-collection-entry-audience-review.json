@@ -1,0 +1,22 @@
+{
+  "purpose": "PREMERGE_NAVIGATION_AUDIENCE_COHERENCE_REVIEW",
+  "at": "2026-11-14T22:06:05.941861+00:00",
+  "reviewedSourceSha": "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
+  "finding": "Workbench can also be opened by non-staff experiences; the new exact staff-only grievance collection entry must not be advertised to those callers.",
+  "correction": "Page resolves canonical current server role and applies the actual dashboard destination policy; the client link defaults hidden. Existing page login/minimum role checks and backend case authority remain in force.",
+  "localValidation": {
+    "status": "PASS",
+    "suites": 6,
+    "tests": 216,
+    "logSha256": "6313292f114ce7567a194beedac80a4c4d3ff8767078553a5d4c5d3afb138444",
+    "audiencePageTests": 10
+  },
+  "priorMergeWatcherStoppedBeforeMerge": true,
+  "reviewedCandidateMerged": false,
+  "reviewedCandidateBuilt": false,
+  "reviewedCandidateDeployed": false,
+  "noPermissionsBroadened": true,
+  "noDatabaseChanges": true,
+  "replacementExactQualificationAndRuntimeRequired": true,
+  "stagingGo": false
+}
