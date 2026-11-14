@@ -1,0 +1,28 @@
+{
+  "purpose": "CANDIDATE_BOUND_REAL_DOCUMENT_BYTES",
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "realSessionCiRun": "43635785268",
+  "documentId": "c9a5b973-f8ca-451d-bfa0-43a34309ee0b",
+  "receiptSha256": "6c9bc00b542023b7081fbf8dca1dae32139c2bb132cf0653379b36d9580f0b17",
+  "privateProof": {
+    "ok": true,
+    "purpose": "REAL_PRIVATE_STAGING_DOCUMENT_BYTES",
+    "at": "2026-11-14T20:18:52.670Z",
+    "expiresAt": "2026-11-14T21:10:11Z",
+    "status": 200,
+    "bytes": 69,
+    "checksum": "7d1c6f656c08aca6f9de89121ab0f40626274fe53ecb0d0d9644de5917f465e6",
+    "signedUrlSha256": "9b5af843d65d9cc9a7b6d24190aabd95dd2ba8a0ee7a6151d034f161d07f13cf",
+    "privateAddresses": [
+      "10.40.5.5"
+    ],
+    "storageResponseDate": "Sat, 14 Nov 2026 20:18:52 GMT",
+    "signedQuerySerialized": false,
+    "transport": {
+      "bytes": 556,
+      "programSha256": "4374e2177056f656c297c807a1f986f62114194869da9e25f27a8c2e4ba169dd",
+      "fileSha256": {}
+    }
+  },
+  "signedQuerySerialized": false
+}

@@ -7,7 +7,7 @@
   "acceptedStagingCandidateSha": null,
   "stagingWorkflowDefinitionSha": "bc6d96d81c512afbd700ae5575291313aeac6ce8",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Deployed ea073528 passes five normal persona profiles, real member intake/messaging/worker and security checks, but real representative-case acceptance exposed a nullable case reference used as the workbench selection key. The source fix passes9 local tests; exact source/integration qualification, reviewed deployment and complete final-source runtime acceptance remain required. Finance persistence and Financial Officer2.1 remain excluded.",
+  "verdictReason": "Deployed ea073528 passes five normal profiles,39 grievance business/privacy checks and fresh real revocation/document expiry, but actual workbench acceptance exposes nullable case selection and a missing staff grievance-list entry. Both presentation repairs pass94 local UI/role/catalog tests; final exact source/integration qualification, reviewed staging deployment and complete replacement-source runtime acceptance remain required. Finance persistence and Financial Officer2.1 remain excluded.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -104,7 +104,7 @@
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
       "status": "FAIL",
-      "evidence": "Actual source ea073528 workbench uses nullable claimNumber as a selection key; existing officer API case has no number. Source correction and9 local tests pass, but repaired candidate is not yet admitted/deployed. Native fixture and wrong member-URL test failures remain separately preserved.",
+      "evidence": "Actual ea073528 nullable workbench selection fails. Real grievance semantic/privacy flow passes39 checks, but discovery flags show no workbench entry to the authorized formal grievance collection. Both local presentation corrections pass94 UI/role/catalog checks; qualified deployed replacement evidence remains required.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": null
@@ -130,8 +130,8 @@
     {
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
-      "status": "PARTIALLY_PROVEN",
-      "evidence": "Fresh real full paired/revocation43635785268 passes own/foreign APIs, both401 refusals under the same unexpired provider session, membership restoration and actual private69bytes/checksum. Its unchanged issued URL expires21:10:11Z; actual expiry remains required. Earlier encrypted lease expiry checks are uncollected after temporary evidence private-key loss and are not marked passed. Verification key/helper now use durable private storage; no application signing/authentication/storage key changed.",
+      "status": "PASS",
+      "evidence": "Fresh complete paired/revocation43635785268 passes both401 refusals under the same unexpired provider session and actual membership restoration. Actual private69bytes/checksum pass before expiry; the same issued URL/hash returns403 AuthenticationFailed at21:17:54Z after21:10:11Z. Older lost-key examples remain uncollected, never relabeled. This qualifies deployed ea073528 only; replacement-source evidence is still required.",
       "observedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
       "requalificationRequiredForProposedCandidate": true,
       "proposedSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a"
@@ -183,7 +183,7 @@
   ],
   "externalBlockers": [],
   "proposedCandidateSha": null,
-  "proposedCandidateState": "WORKBENCH_NULL_REFERENCE_SOURCE_REPAIR_NOT_YET_FROZEN",
+  "proposedCandidateState": "WORKBENCH_REFERENCE_AND_STAFF_GRIEVANCE_ENTRY_FINAL_SOURCE_PENDING",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
     "included": [
@@ -241,7 +241,7 @@
     "nestedSystemAndClientAssets": "99 focused tests, four script-asset gate tests, actual before/after production CSS build reproduction, exact-source 776-table fresh/restore/repeat/privileges and actual source-bound primary one-connection regression PASS. SQL bytes/order unchanged; no deployed acceptance inferred.",
     "verificationRunnerCorrection": "14 focused contracts pass, including verified unexpired-session401/403/404 resource denials, late Azure visibility, transient expected revision404, bounded busy recovery, concurrent-change refusal and original failure preservation. Protected runtime reruns remain required.",
     "providerRevisionContract": "Actual read-only Azure response reproduces RevisionNotFound.15 focused contracts now cover that exact CLI JSON shape and require an absent initial known-good revision to fail before mutation. New exact CI/main admission and protected recovery rerun remain required. Application source/image and deployment provenance remain unchanged.",
-    "workbenchNullableReference": "Read-only primary proves a real owned officer case has nullable claimNumber. Both new UI regressions fail before the fix; all9 workbench tests pass after selecting by the actual case id when the number is absent. Canonical plan/self-test and navigation inventory check pass unchanged; no SQL/data/authority mutation. New source CI and deployed qualification remain required."
+    "workbenchNullableReference": "Read-only primary proves a real owned officer case has nullable claimNumber. Both new UI regressions fail before the fix; all9 workbench tests pass after selecting by the actual case id when the number is absent. Canonical plan/self-test and navigation inventory check pass unchanged; no SQL/data/authority mutation. New source CI and deployed qualification remain required. Additional scoped grievance entry and EN/FR catalog/role tests pass94 checks. No new primary destination, API authority or SQL is introduced."
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {

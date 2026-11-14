@@ -1,0 +1,341 @@
+{
+  "status": "PASS",
+  "evidenceClass": "REAL_ENTRA_MEMBER_INTAKE_CONVERSION_STEWARD_ASSIGNMENT_AND_REPRESENTED_MEMBER_PRIVACY",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "at": "2026-11-14T21:12:33.248Z",
+  "intakeId": "cea165c5-5c4a-4893-b082-9b2834e816c3",
+  "officialCaseId": "b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+  "checks": [
+    {
+      "person": "member",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "steward",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "executive",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "admingov",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "member",
+      "path": "/api/grievances",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "cb2d7cb0-1b30-4e01-8903-c5e69eee3918"
+    },
+    {
+      "person": "member",
+      "path": "/api/grievances/cea165c5-5c4a-4893-b082-9b2834e816c3",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "9e1ef5f8-17bf-4509-a258-578fbd10ea85"
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances/cea165c5-5c4a-4893-b082-9b2834e816c3",
+      "method": "get",
+      "status": 403,
+      "expectedStatus": 403,
+      "requestId": "c6b63705-46bf-4423-b6e0-a9a5bde6b1de"
+    },
+    {
+      "person": "executive",
+      "path": "/api/grievances/cea165c5-5c4a-4893-b082-9b2834e816c3",
+      "method": "get",
+      "status": 403,
+      "expectedStatus": 403,
+      "requestId": "399cceed-1d2b-4a4b-b244-6225e51d231f"
+    },
+    {
+      "person": "admingov",
+      "path": "/api/grievances/cea165c5-5c4a-4893-b082-9b2834e816c3",
+      "method": "get",
+      "status": 403,
+      "expectedStatus": 403,
+      "requestId": "fe78bbf4-f697-4aa7-bb30-189e307aa22e"
+    },
+    {
+      "person": "member",
+      "path": "/api/grievances/cea165c5-5c4a-4893-b082-9b2834e816c3/convert",
+      "method": "post",
+      "status": 403,
+      "expectedStatus": 403,
+      "requestId": "facff885-b80d-4d1f-8adb-e66f54efc51e"
+    },
+    {
+      "person": "executive",
+      "path": "/api/grievances/cea165c5-5c4a-4893-b082-9b2834e816c3/recommend-steward",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "a92f8c24-1bfa-4b57-9e25-68b060053dd8"
+    },
+    {
+      "person": "executive",
+      "path": "/api/grievances/cea165c5-5c4a-4893-b082-9b2834e816c3/assign",
+      "method": "patch",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "3597de66-274a-4010-a05c-f081511b8f53"
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances/cea165c5-5c4a-4893-b082-9b2834e816c3",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "1c33d63a-1a5e-4fc0-b9fd-d01c953e91f6"
+    },
+    {
+      "check": "PROFILE_ID_RESOLVES_TO_CANONICAL_PERSON_AND_GOVERNED_ASSIGNMENT",
+      "resourceId": "cea165c5-5c4a-4893-b082-9b2834e816c3",
+      "profileId": "48f5b3bd-15a4-4ece-a2b2-5cb4ef209148",
+      "personId": "c01e5647-8506-4101-bb52-2547000a9e02",
+      "status": "PASS"
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances/cea165c5-5c4a-4893-b082-9b2834e816c3/convert",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "4a9578ea-9205-48eb-b85d-e5eefb5e4ff4"
+    },
+    {
+      "person": "member",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "b8351376-13dd-473b-8899-9e102744e650"
+    },
+    {
+      "person": "executive",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "method": "get",
+      "status": 403,
+      "expectedStatus": 403,
+      "requestId": "abf0d9bd-8af4-459c-95dc-ab1c8e759fc4"
+    },
+    {
+      "person": "executive",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8/recommend-steward",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "b316ccaf-db4f-4358-af46-a5e07f1fec8c"
+    },
+    {
+      "person": "executive",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8/assign",
+      "method": "patch",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "33267ddb-c0c7-4e1c-a56c-fa94baaf6622"
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "b3e5950a-3d38-4a22-8429-3a055429d609"
+    },
+    {
+      "check": "PROFILE_ID_RESOLVES_TO_CANONICAL_PERSON_AND_GOVERNED_ASSIGNMENT",
+      "resourceId": "b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "profileId": "48f5b3bd-15a4-4ece-a2b2-5cb4ef209148",
+      "personId": "c01e5647-8506-4101-bb52-2547000a9e02",
+      "status": "PASS"
+    },
+    {
+      "person": "steward",
+      "path": "/api/workbench/assigned",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "80b7608f-99f0-447f-a15c-879b96816d09"
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "7cf5d447-f8de-42a2-8efd-88f5dc920102"
+    },
+    {
+      "check": "ASSIGNED_FORMAL_GRIEVANCE_API_DISCOVERY_OBSERVATION",
+      "caseId": "b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "claimQueueContainsFormalCase": false,
+      "grievanceCollectionContainsAssignedCase": true,
+      "renderedWorkbenchLink": false
+    },
+    {
+      "check": "ASSIGNED_FORMAL_GRIEVANCE_DISCOVERY_OBSERVATION",
+      "caseId": "b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "claimQueueContainsFormalCase": false,
+      "grievanceCollectionContainsAssignedCase": true,
+      "renderedWorkbenchLink": false
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8/status",
+      "method": "patch",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "7d4a6562-47a9-43ba-bfe1-41408e9937e0"
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8/documents",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "e50acd1b-3b88-4c21-8bb4-332e3907f93c"
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8/documents",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "963e9649-519c-4088-b7ef-807565dec0ac"
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "62b6837f-0567-4347-8309-3bd0b281c4bc"
+    },
+    {
+      "person": "steward",
+      "path": "/en-CA/dashboard/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "locale": "en-CA",
+      "check": "REAL_RENDERED_ASSIGNED_GRIEVANCE_DETAIL",
+      "status": "PASS",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "missingTranslations": false,
+      "screenshot": "/tmp/ue-acceptance-20261113/real-grievance-continuity-ea073528.json.en-CA-assigned-grievance.png",
+      "pageErrors": []
+    },
+    {
+      "person": "steward",
+      "path": "/fr-CA/dashboard/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "locale": "fr-CA",
+      "check": "REAL_RENDERED_ASSIGNED_GRIEVANCE_DETAIL",
+      "status": "PASS",
+      "width": 390,
+      "scrollWidth": 390,
+      "missingTranslations": false,
+      "screenshot": "/tmp/ue-acceptance-20261113/real-grievance-continuity-ea073528.json.fr-CA-assigned-grievance.png",
+      "pageErrors": []
+    },
+    {
+      "person": "member",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "29add3ba-2331-4a45-a0fe-e87cfbdfbae9"
+    },
+    {
+      "person": "member",
+      "path": "/en-CA/dashboard/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "locale": "en-CA",
+      "check": "REAL_RENDERED_BOUNDED_MEMBER_GRIEVANCE_PROGRESS",
+      "status": "PASS",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "missingTranslations": false,
+      "pageErrors": []
+    },
+    {
+      "person": "member",
+      "path": "/fr-CA/dashboard/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "locale": "fr-CA",
+      "check": "REAL_RENDERED_BOUNDED_MEMBER_GRIEVANCE_PROGRESS",
+      "status": "PASS",
+      "width": 390,
+      "scrollWidth": 390,
+      "missingTranslations": false,
+      "pageErrors": []
+    },
+    {
+      "person": "member",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8/status",
+      "method": "patch",
+      "status": 403,
+      "expectedStatus": 403,
+      "requestId": "7d360664-e3de-454d-ac22-e7bfc2f729aa"
+    },
+    {
+      "person": "member",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8/assign",
+      "method": "patch",
+      "status": 403,
+      "expectedStatus": 403,
+      "requestId": "34113d6f-f73f-4a73-8fa6-df0f84344288"
+    },
+    {
+      "person": "admingov",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "method": "get",
+      "status": 403,
+      "expectedStatus": 403,
+      "requestId": "0393f247-f036-4a39-a9a7-f9a024089e24"
+    },
+    {
+      "person": "steward",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "25f4591b-ab26-42f0-a038-3c7561b55ed1"
+    },
+    {
+      "person": "member",
+      "path": "/api/grievances/b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "a4296e4b-d5b9-4834-965a-9032cc8ee327"
+    }
+  ],
+  "fixtureCases": [
+    "cea165c5-5c4a-4893-b082-9b2834e816c3",
+    "b3315cd9-d0c9-4531-bd10-9c311e17f0a8"
+  ],
+  "originalRolesRestored": true,
+  "fixtureAuthorityRetired": true,
+  "sourceMemberContinuity": true,
+  "assignedCaseDiscoverability": {
+    "caseId": "b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+    "claimQueueContainsFormalCase": false,
+    "grievanceCollectionContainsAssignedCase": true,
+    "renderedWorkbenchLink": false
+  },
+  "actualConverterAuthorshipRetained": true,
+  "classificationRetained": true,
+  "privateEventsAndDocumentsWithheld": true,
+  "distinctOwnedTestAccountsOperatedByOneFounder": true,
+  "realUnionAdoptionClaimed": false,
+  "independentHumanApprovalClaimed": false,
+  "actualApplicationCookies": true,
+  "tokensAndCookiesSerialized": false
+}

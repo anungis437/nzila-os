@@ -475,7 +475,10 @@ export default function WorkbenchConsole() {
       >
         {/* Header */}
         <PageHeading title={t('workbench.title')} description={t('workbench.subtitle')} />
-        <a className="inline-flex text-sm underline" href={`/${locale}/dashboard/workbench/workaid`}>{t('workAidPage.openJourney')}</a>
+        <div className="flex flex-wrap gap-4">
+          <a className="inline-flex min-h-11 items-center text-sm underline" href={`/${locale}/dashboard/workbench/workaid`}>{t('workAidPage.openJourney')}</a>
+          <a className="inline-flex min-h-11 items-center text-sm underline" href={`/${locale}/dashboard/grievances`}>{t('workbench.grievanceCases')}</a>
+        </div>
 
         {/* Loading State */}
         {isLoading && (

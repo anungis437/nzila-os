@@ -52,6 +52,7 @@ describe('workbench inline case access', () => {
     expand.focus();
     await userEvent.keyboard('{Enter}');
     expect(expand).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('link', { name: 'workbench.grievanceCases' })).toHaveAttribute('href', '/en-CA/dashboard/grievances');
     const details = document.getElementById(expand.getAttribute('aria-controls')!)!;
     await waitFor(() => expect(details).toHaveTextContent('Synthetic authorized note'));
     expect(screen.getByRole('textbox', { name: 'workbench.addNotePlaceholder' })).toBeEnabled();
@@ -173,5 +174,6 @@ describe('workbench inline case access', () => {
     expect(screen.getByText('Membre inconnu')).toBeVisible();
     expect(screen.getByText(frenchMessages.workbench.submittedOn.replace('{date}', new Date('2026-10-22T12:00:00Z').toLocaleDateString('fr-CA')))).toBeVisible();
     expect(screen.queryByText('Wage & Hour')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: frenchMessages.workbench.grievanceCases })).toHaveAttribute('href', '/fr-CA/dashboard/grievances');
   });
 });

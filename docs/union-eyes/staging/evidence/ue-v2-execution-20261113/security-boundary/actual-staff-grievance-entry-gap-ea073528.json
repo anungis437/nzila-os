@@ -1,0 +1,17 @@
+{
+  "status": "FAIL_CANONICAL_STAFF_GRIEVANCE_ENTRY",
+  "applicationSourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "caseId": "b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+  "actualBusinessPrivacyChecksPassed": 39,
+  "observedDiscovery": {
+    "caseId": "b3315cd9-d0c9-4531-bd10-9c311e17f0a8",
+    "claimQueueContainsFormalCase": false,
+    "grievanceCollectionContainsAssignedCase": true,
+    "renderedWorkbenchLink": false
+  },
+  "existingCollectionServerRequiresAtLeastSteward": true,
+  "existingListApiReturnedTheAssignedCase": true,
+  "staffRolePresentationDidNotAdmitCollection": true,
+  "fix": "Add an EN/FR secondary workbench link and admit only the exact staff collection path; existing scoped API and creation/management route guards remain authoritative.",
+  "at": "2026-11-14T21:28:47.903170+00:00"
+}
