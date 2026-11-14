@@ -33,10 +33,8 @@ import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
 import { getCanonicalOrganizationContext } from '@/lib/auth/canonical-context'
 import { withCanonicalOrganizationBinding } from '@/lib/auth/canonical-organization-selection'
 import { sanitizedBindingError } from '@/lib/db/binding-error'
-import {
-  AuthOrgBindingError,
-  authenticatedOrgBindingSql,
-} from '@nzila/platform-auth/org-binding'
+import { nestedCanonicalTenantScope, withCanonicalTenantScope } from './canonical-transaction-scope'
+import { AuthOrgBindingError, authenticatedOrgBindingSql } from '@nzila/platform-auth/org-binding'
 
 /** Convenience alias for the typed transaction/db handle passed to withRLSContext callbacks */
 export type RLSTx = typeof db
@@ -124,6 +122,8 @@ export async function withRLSContext<T>(
       throw new Error(
         'V2 ordinary context cannot request an unscoped system lookup. Resolve canonical auth membership or use an explicitly authorized system context.',
       )
+    const nested = await nestedCanonicalTenantScope(userId, explicitOrgId, operation)
+    if (nested.nested) return nested.value
     return withCanonicalOrganizationBinding(
       { organizationId: explicitOrgId, expectedActorUserId: userId },
       (binding) =>
@@ -134,7 +134,7 @@ export async function withRLSContext<T>(
           } catch (error) {
             throw sanitizedBindingError(error)
           }
-          return tenantContextStorage.run(tx, () => operation(tx))
+          return withCanonicalTenantScope(tx, binding, operation)
         }),
     )
   }
@@ -226,13 +226,19 @@ export async function withRLSContext<T>(
  * representation authorities (cache 0056). Compatibility (legacy) mode only: the canonical V2 binder already refuses an organization the
  * caller holds no live membership in before any transaction opens, so V2 callers must not use this and it refuses.
  */
-export async function withPrincipalOnlyContext<T>(operation: (tx: RLSTx) => Promise<T>): Promise<T> {
+export async function withPrincipalOnlyContext<T>(
+  operation: (tx: RLSTx) => Promise<T>,
+): Promise<T> {
   if (currentStateContextEnabled()) {
-    throw new Error('withPrincipalOnlyContext is a compatibility-mode pre-check; the canonical binder decides organization access in V2')
+    throw new Error(
+      'withPrincipalOnlyContext is a compatibility-mode pre-check; the canonical binder decides organization access in V2',
+    )
   }
   const { userId } = await auth()
   if (!userId) {
-    throw new Error('Unauthorized: No authenticated user found. User must be logged in via platform auth.')
+    throw new Error(
+      'Unauthorized: No authenticated user found. User must be logged in via platform auth.',
+    )
   }
   return await db.transaction(async (tx) => {
     await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`)

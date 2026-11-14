@@ -17,7 +17,7 @@ let db: ReturnType<typeof drizzle>
 beforeAll(async () => {
   pg = new PGlite()
   await pg.exec(`
-    CREATE TABLE grievances(id uuid PRIMARY KEY, organization_id uuid NOT NULL, grievance_number text, type text, title text,
+    CREATE TABLE grievances(grievant_id uuid, id uuid PRIMARY KEY, organization_id uuid NOT NULL, grievance_number text, type text, title text,
       description text, status text, priority text, created_by text, union_rep_id uuid, grievant_name text, grievant_email text,
       created_at timestamptz DEFAULT now(), updated_at timestamptz DEFAULT now());
     CREATE TABLE ue_authority_resource_relationships (

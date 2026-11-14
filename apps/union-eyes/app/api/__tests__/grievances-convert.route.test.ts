@@ -67,6 +67,8 @@ describe('grievances/[id]/convert route', () => {
           description: 'Desc',
           employerId: null,
           cbaId: null,
+          createdBy: '33333333-3333-4333-8333-333333333333',
+          grievantId: '44444444-4444-4444-8444-444444444444',
         }]),
       })),
     }));
@@ -140,6 +142,7 @@ describe('grievances/[id]/convert route', () => {
     const inserted = (m.db.insert.mock.results[0].value.values as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(inserted).not.toHaveProperty('unionRepId');
     expect(inserted).toMatchObject({ createdBy: 'u1', relatedGrievanceIds: [INTAKE], status: 'filed', organizationId: 'org_1' });
+    expect(inserted.grievantId).toBe('44444444-4444-4444-8444-444444444444');
     expect(m.persistAtomicAudit).toHaveBeenCalledTimes(2);
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'grievance.convert_intake', resourceId: INTAKE }));
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(m.db, expect.objectContaining({ action: 'grievance.create_official_case', resourceId: 'g2' }));
