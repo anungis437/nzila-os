@@ -16,7 +16,7 @@ function az(args) {
   if (r.status !== 0) {
     // Only an allowlisted service error code enters evidence, never stderr,
     // command bodies, environment values or secret references.
-    const code = [...(r.stderr ?? '').matchAll(/(?:\(|"code"\s*:\s*")(ContainerAppOperationInProgress|ResourceNotFound|NotFound)(?:\)|")/g)][0]?.[1];
+    const code = [...(r.stderr ?? '').matchAll(/(?:\(|"code"\s*:\s*")(ContainerAppOperationInProgress|ResourceNotFound|NotFound|RevisionNotFound)(?:\)|")/g)][0]?.[1];
     const error = new Error('Azure operation failed: ' + (code ?? 'UnclassifiedAzureError'));
     error.azureCode = code ?? 'UnclassifiedAzureError'; throw error;
   }
@@ -39,7 +39,7 @@ function requireExpectedLatest(app, expected) {
 function pendingRevision(name) {
   try { return get('/revisions/' + name); }
   catch (error) {
-    if (['ResourceNotFound', 'NotFound'].includes(error.azureCode)) return null;
+    if (['ResourceNotFound', 'NotFound', 'RevisionNotFound'].includes(error.azureCode)) return null;
     throw error;
   }
 }

@@ -1,0 +1,29 @@
+{
+  "sourceSha": "ea073528873c4e5ef33f84e5f7ff5d1fe785499a",
+  "runId": "43634316698",
+  "status": "PASS",
+  "workflowSha": "37477074b622109395f88a02821fda39b9c2e46c",
+  "purpose": "OWNER_ASSISTED_COMPLETION_OF_REVIEWED_ZERO_TRAFFIC_REHEARSAL",
+  "originalWorkflowFailurePreserved": true,
+  "productionAuthorized": false,
+  "observations": [],
+  "observedFailure": {
+    "provisioningState": "Provisioned",
+    "runningState": "Activating",
+    "healthState": "None"
+  },
+  "servingRevision": "nzila-ue-v2-staging-app--relea07352887",
+  "servingWeight": 100,
+  "recovered": {
+    "revision": "nzila-ue-v2-staging-app--qa-recover-43634316698",
+    "provisioningState": "Provisioned",
+    "runningState": "Running",
+    "healthState": "Healthy",
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:af4e021f19f68297dc661ef6b396eb4a9f78f4b817d711e85583d6367abaae24",
+    "trafficWeight": 0
+  },
+  "recoveredRevisionDeactivated": true,
+  "failedRevisionDeactivated": true,
+  "fullTrafficFailoverClaimed": false,
+  "at": "2026-11-14T19:55:52.956917+00:00"
+}
