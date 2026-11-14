@@ -100,6 +100,9 @@ export const POST = withOrganizationAuth(async (request, context) => {
 
     const data = parsed.data;
     const isOfficialCase = data.createOfficialCase === true;
+    if (!isOfficialCase && !(await hasCaseFilingCapacity({ userId, organizationId }, 'member'))) {
+      return standardErrorResponse(ErrorCode.FORBIDDEN, 'Active member filing capacity required');
+    }
 
     // ── Authority gate ──────────────────────────────────────
     // Only steward+ can create official cases.

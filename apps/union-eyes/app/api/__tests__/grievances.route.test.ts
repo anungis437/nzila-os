@@ -142,6 +142,15 @@ describe('grievances route', () => {
     expect(m.persistAtomicAudit).toHaveBeenCalledWith(mockDb, expect.objectContaining({ action: 'grievance.submit_intake', organizationId: 'org_1', userId: 'user_1', resourceId: 'grv_1' }));
   });
 
+  it('refuses intake creation when an active identity has no member filing capacity',async()=>{
+    const {POST}=await loadRoute();
+    m.hasCaseFilingCapacity.mockResolvedValueOnce(false);
+    const response=await POST(new NextRequest('http://localhost/api/grievances',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:'individual',title:'Synthetic intake',description:'Synthetic platform-only capacity refusal'})}),{organizationId:'org_1',userId:'platform-only'});
+    expect(response.status).toBe(403);
+    expect(m.hasCaseFilingCapacity).toHaveBeenCalledWith({organizationId:'org_1',userId:'platform-only'},'member');
+    expect(m.dbInsertValues).not.toHaveBeenCalled();
+  });
+
   it('binds the represented intake member to authentication rather than submitted contact or identity fields', async () => {
     const {POST}=await loadRoute();
     const actor='33333333-3333-4333-8333-333333333333';
