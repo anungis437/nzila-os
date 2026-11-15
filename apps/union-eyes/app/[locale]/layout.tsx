@@ -16,10 +16,13 @@
  * organizational trust for democratic infrastructure.
  */
 import * as Sentry from '@sentry/nextjs';
+import { headers } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n';
+import LocaleClientProvider from '@/components/utilities/locale-client-provider';
+import { CLIENT_MESSAGE_SCOPE_HEADER, clientMessagesForScope } from '@/lib/i18n/client-message-scope';
 import type { Metadata } from 'next';
 
 export function generateStaticParams() {
@@ -47,12 +50,13 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  // Get messages for the locale - must pass locale explicitly
-  const messages = await getMessages({ locale });
-
+  const [messages, requestHeaders] = await Promise.all([getMessages({ locale }), headers()]);
+  const scope = requestHeaders.get(CLIENT_MESSAGE_SCOPE_HEADER);
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
+    <NextIntlClientProvider locale={locale} messages={clientMessagesForScope(messages, scope)}>
+      <LocaleClientProvider locale={locale} initialScope={scope}>
+        {children}
+      </LocaleClientProvider>
     </NextIntlClientProvider>
   );
 }
