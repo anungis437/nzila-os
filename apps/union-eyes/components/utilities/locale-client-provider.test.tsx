@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { Component, type ReactNode } from 'react';
+import { Component, Suspense, use, type ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider, useFormatter, useMessages, useNow, useTimeZone, useTranslations, type AbstractIntlMessages } from 'next-intl';
@@ -26,6 +26,25 @@ function Page({ home }: { home: boolean }) {
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('persistent locale layout browser navigation', () => {
+  for (const initialScope of ['application', 'public-landing']) {
+    it(`keeps awaited server work outside a new loading boundary on a direct ${initialScope} visit`, async () => {
+      let release!: () => void;
+      const pending = new Promise<void>(resolve => { release = resolve; });
+      function AwaitedServerWork() { use(pending); return <p>Server guard settled</p>; }
+      route.pathname = initialScope === 'application' ? '/en-CA/dashboard' : '/en-CA';
+      await act(async () => {
+        render(<Suspense fallback={<p role="status">Existing server boundary</p>}>
+          <NextIntlClientProvider locale="en-CA" messages={{ marketing: { nav: { pricing: 'Pricing' } } }}>
+            <LocaleClientProvider locale="en-CA" initialScope={initialScope}><AwaitedServerWork /></LocaleClientProvider>
+          </NextIntlClientProvider>
+        </Suspense>);
+      });
+      expect(screen.getByRole('status').textContent).toBe('Existing server boundary');
+      await act(async () => { release(); });
+      expect(screen.getByText('Server guard settled')).toBeTruthy();
+    });
+  }
+
   for (const locale of ['en-CA', 'fr-CA']) {
     it(`restores application copy and retains request formatting on navigation from ${locale} home`, async () => {
       const full = await loadMessages(locale, async catalog => (await import(`../../messages/${catalog}.json`)).default) as AbstractIntlMessages;
