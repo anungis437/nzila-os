@@ -6,6 +6,7 @@ const {
   normalizedPath,
   settleRoleLanding,
   settleRestrictedDestination,
+  openVisibleDestination,
 } = require('./ue-staging-navigation-settlement.cjs');
 
 function page(initial, redirects = []) {
@@ -97,4 +98,123 @@ test('refuses invalid wait limits', async () => {
     settleRoleLanding(p, '/en-CA/dashboard/executive', { timeoutMs: 0 }),
     /Invalid bounded/,
   );
+});
+
+function visibleContext(plans) {
+  const pages = [];
+  return {
+    pages,
+    async newPage() {
+      const plan = plans[pages.length];
+      const events = [];
+      let location = 'about:blank';
+      const p = {
+        events,
+        url() { return location; },
+        async setViewportSize(viewport) { events.push(['viewport', viewport]); },
+        async goto(url, options) {
+          events.push(['goto', url, options]);
+          location = url;
+          return { status: () => plan.status ?? 200 };
+        },
+        async waitForURL(predicate) {
+          events.push(['redirect']);
+          if (plan.redirect) location = plan.redirect;
+          if (!predicate(new URL(location))) throw Error('Expected redirect never occurred');
+        },
+        async waitForLoadState(state) {
+          events.push(['loaded', state]);
+          if (plan.afterLoad) location = plan.afterLoad;
+        },
+        async reload() { throw Error('Reload must not interrupt the prior navigation'); },
+        async close() { events.push(['closed']); },
+      };
+      pages.push(p);
+      return p;
+    },
+  };
+}
+
+test('opens mobile at its viewport and waits for the exact streamed personal-settings destination', async () => {
+  const context = visibleContext([{ redirect: 'https://staging.example/en-CA/dashboard/profile' }]);
+  const result = await openVisibleDestination(context, 'https://staging.example',
+    '/en-CA/dashboard/settings', '/en-CA/dashboard/profile', { viewport: { width: 390, height: 844 } });
+  assert.equal(result.responseStatus, 200);
+  assert.equal(result.initialPath, '/en-CA/dashboard/settings');
+  assert.equal(result.finalPath, '/en-CA/dashboard/profile');
+  assert.equal(result.redirectedAfterDOMContentLoaded, true);
+  assert.deepEqual(result.page.events.map(([name]) => name), ['viewport', 'goto', 'redirect', 'loaded']);
+});
+
+test('uses separate desktop and mobile visits instead of reloading a frame with a pending redirect', async () => {
+  const context = visibleContext([
+    { redirect: 'https://staging.example/fr-CA/dashboard/profile' },
+    { redirect: 'https://staging.example/fr-CA/dashboard/profile' },
+  ]);
+  const desktop = await openVisibleDestination(context, 'https://staging.example',
+    '/fr-CA/dashboard/settings', '/fr-CA/dashboard/profile');
+  await desktop.page.close();
+  const mobile = await openVisibleDestination(context, 'https://staging.example',
+    '/fr-CA/dashboard/settings', '/fr-CA/dashboard/profile', { viewport: { width: 390, height: 844 } });
+  assert.notEqual(mobile.page, desktop.page);
+  assert.equal(context.pages.length, 2);
+  assert.equal(desktop.page.events[0][0], 'goto');
+  assert.equal(mobile.page.events[0][0], 'viewport');
+  assert.equal(mobile.finalPath, desktop.finalPath);
+  await mobile.page.close();
+});
+
+test('does not pass a personal settings visit from its initial HTTP 200 without the required redirect', async () => {
+  const context = visibleContext([{}]);
+  await assert.rejects(openVisibleDestination(context, 'https://staging.example',
+    '/en-CA/dashboard/settings', '/en-CA/dashboard/profile'), /Required role-landing redirect did not settle/);
+  assert.equal(context.pages[0].events.at(-1)[0], 'closed');
+});
+
+test('keeps organization settings as the exact administrator destination', async () => {
+  const context = visibleContext([{}]);
+  const result = await openVisibleDestination(context, 'https://staging.example',
+    '/en-CA/dashboard/settings', '/en-CA/dashboard/settings');
+  assert.equal(result.finalPath, '/en-CA/dashboard/settings');
+  assert.equal(result.redirectedAfterDOMContentLoaded, false);
+});
+
+test('refuses a late administrator redirect away from the required organization settings page', async () => {
+  const context = visibleContext([{ afterLoad: 'https://staging.example/en-CA/dashboard/profile' }]);
+  await assert.rejects(openVisibleDestination(context, 'https://staging.example',
+    '/en-CA/dashboard/settings', '/en-CA/dashboard/settings'), /changed after settlement/);
+});
+
+test('refuses a foreign-origin destination even when the path matches', async () => {
+  const context = visibleContext([{ redirect: 'https://elsewhere.example/en-CA/dashboard/profile' }]);
+  await assert.rejects(openVisibleDestination(context, 'https://staging.example',
+    '/en-CA/dashboard/settings', '/en-CA/dashboard/profile'), /changed after settlement/);
+});
+
+test('refuses visible-page HTTP errors without retrying or interpreting them as an authorized landing', async () => {
+  const context = visibleContext([{ status: 503 }]);
+  await assert.rejects(openVisibleDestination(context, 'https://staging.example',
+    '/en-CA/dashboard/settings', '/en-CA/dashboard/settings'), /unexpected HTTP status: 503/);
+  assert.deepEqual(context.pages[0].events.map(([name]) => name), ['goto', 'closed']);
+});
+
+test('never navigates a source-visible route to a foreign origin', async () => {
+  const context = visibleContext([]);
+  await assert.rejects(openVisibleDestination(context, 'https://staging.example',
+    '//elsewhere.example/en-CA/dashboard/settings', '/en-CA/dashboard/settings'), /staging origin/);
+  assert.equal(context.pages.length, 0);
+});
+
+test('records the source settings policy for every actual persona and pins both policy and route', () => {
+  const inventory = require('./ue-v2-navigation-inventory.json');
+  for (const role of ['member', 'steward', 'chief_steward', 'officer', 'secretary_treasurer']) {
+    assert.deepEqual(inventory.profiles[role].accountSettings,
+      { path: '/dashboard/settings', destination: '/dashboard/profile' }, role);
+  }
+  for (const role of ['admin', 'app_owner']) {
+    assert.deepEqual(inventory.profiles[role].accountSettings,
+      { path: '/dashboard/settings', destination: '/dashboard/settings' }, role);
+  }
+  assert(inventory.sourceDigests['apps/union-eyes/lib/auth/org-settings-access.ts']);
+  assert(inventory.sourceDigests['apps/union-eyes/app/[locale]/dashboard/settings/page.tsx']);
 });

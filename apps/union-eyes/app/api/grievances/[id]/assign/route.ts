@@ -60,10 +60,15 @@ export const PATCH = withApi(
     let committed: { assignment: unknown; convergenceTaskId: string } | null;
     try {
       committed = await withRLSContext({ organizationId }, async (tx) => {
+        // Deadline management takes this parent lock before its source rows and canonical audit lock.
+        // Take it before assignment/authority mutations too, so reassignment cannot invert that order
+        // or commit a revocation while a deadline writer is using the previous assignment.
         const [grievance] = await tx
           .select({ id: grievances.id })
           .from(grievances)
-          .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)));
+          .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)))
+          .limit(1)
+          .for('update');
         if (!grievance) return null;
 
         const assignment = await assignSteward(organizationId, grievanceId, stewardId, tx);

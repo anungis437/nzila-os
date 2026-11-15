@@ -11,6 +11,7 @@ const m = vi.hoisted(() => ({
   processAssignmentConvergence: vi.fn(),
   assignPrimaryRepresentative: vi.fn(),
   persistAtomicAudit: vi.fn(),
+  lockGrievance: vi.fn(),
   committed: false,
   committedWhenSystemRan: undefined as boolean | undefined,
 }));
@@ -40,6 +41,12 @@ const GRIEVANCE = '22222222-2222-4222-8222-222222222222';
 const NEW_STEWARD = '11111111-1111-1111-1111-111111111111';
 const NEW_STEWARD_PROFILE = '33333333-3333-4333-8333-333333333333';
 
+function grievanceSelection(rows: Array<{ id: string; unionRepId?: string }> = [{ id: GRIEVANCE }]) {
+  return { from: vi.fn(() => ({ where: vi.fn(() => ({ limit: vi.fn(() => ({
+    for: vi.fn(async (mode: string) => { await m.lockGrievance(mode); return rows; }),
+  })) })) })) };
+}
+
 describe('grievances/[id]/assign route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -68,10 +75,8 @@ describe('grievances/[id]/assign route', () => {
       converged: true,
       refreshedDeadlineIds: ['dl-1'],
     });
-
-    m.tx.select = vi.fn(() => ({
-      from: vi.fn(() => ({ where: vi.fn(async () => [{ id: GRIEVANCE }]) })),
-    }));
+    m.lockGrievance.mockResolvedValue(undefined);
+    m.tx.select = vi.fn(() => grievanceSelection());
     m.tx.update = vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn(async () => null) })) }));
     m.tx.insert = vi.fn(() => ({ values: vi.fn(async () => null) }));
   });
@@ -126,7 +131,7 @@ describe('grievances/[id]/assign route', () => {
   });
 
   it('returns 404 when the grievance does not belong to the caller organization (wrong-org)', async () => {
-    m.tx.select = vi.fn(() => ({ from: vi.fn(() => ({ where: vi.fn(async () => []) })) }));
+    m.tx.select = vi.fn(() => grievanceSelection([]));
     const { PATCH } = await loadRoute();
     const response = await PATCH(assignRequest());
     expect(response.status).toBe(404);
@@ -173,9 +178,7 @@ describe('grievances/[id]/assign route', () => {
   });
 
   it('takes the OUTGOING representative from the kernel, not from the legacy column (a stale legacy value is ignored)', async () => {
-    m.tx.select = vi.fn(() => ({
-      from: vi.fn(() => ({ where: vi.fn(async () => [{ id: GRIEVANCE, unionRepId: 'stale-legacy-value' }]) })),
-    }));
+    m.tx.select = vi.fn(() => grievanceSelection([{ id: GRIEVANCE, unionRepId: 'stale-legacy-value' }]));
     m.assignPrimaryRepresentative.mockResolvedValue({ previousUserId: 'officer-OLD' });
     const { PATCH } = await loadRoute();
     await PATCH(assignRequest());
@@ -235,5 +238,25 @@ describe('grievances/[id]/assign route', () => {
     expect(m.tx.update).not.toHaveBeenCalled();
     expect(m.requestAssignmentConvergence).not.toHaveBeenCalled();
     expect(m.processAssignmentConvergence).not.toHaveBeenCalled();
+  });
+
+  it('waits for a competing deadline writer before any assignment, authority, audit or convergence mutation', async () => {
+    let release!: () => void;
+    let entered!: () => void;
+    const blocked = new Promise<void>(resolve => { entered = resolve; });
+    const released = new Promise<void>(resolve => { release = resolve; });
+    m.lockGrievance.mockImplementationOnce(async () => { entered(); await released; });
+    const { PATCH } = await loadRoute();
+    const pending = PATCH(assignRequest());
+    try {
+      await blocked;
+      expect(m.lockGrievance).toHaveBeenCalledWith('update');
+      for (const mutation of [m.assignSteward, m.assignPrimaryRepresentative, m.tx.update, m.tx.insert, m.persistAtomicAudit, m.requestAssignmentConvergence, m.processAssignmentConvergence]) {
+        expect(mutation).not.toHaveBeenCalled();
+      }
+    } finally { release(); }
+    expect((await pending).status).toBe(200);
+    expect(m.lockGrievance.mock.invocationCallOrder[0]).toBeLessThan(m.assignSteward.mock.invocationCallOrder[0]);
+    expect(m.lockGrievance.mock.invocationCallOrder[0]).toBeLessThan(m.assignPrimaryRepresentative.mock.invocationCallOrder[0]);
   });
 });

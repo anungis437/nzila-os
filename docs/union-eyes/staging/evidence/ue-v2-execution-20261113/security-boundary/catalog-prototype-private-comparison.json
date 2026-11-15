@@ -1,0 +1,259 @@
+{
+  "ok": true,
+  "status": "NATIVE_COMPARISON_COLLECTED",
+  "purpose": "UNCOMMITTED_NATIVE_CATALOG_PERFORMANCE_EXPERIMENT",
+  "at": "2026-11-15T05:55:34.920Z",
+  "observedLiveApplicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "prototypeBundleSha256": "e237d5b83bd369ea33009cbd895f44e12c5ecb1d0a18cf2ef073e9f5e0afb284",
+  "prototypeCatalogSourceDiffSha256": "ed26ae0f3f817692642b1ba99dc5a353dd7be4b7c0d756e9afadf0bcdc964551",
+  "prototypeManifestSha256": "f4e3e51a37511dc192a30bb57470eec6376015189de827a075f7b6d68d4eca39",
+  "result": {
+    "label": "UNCOMMITTED_WORKSPACE_PROTOTYPE",
+    "qualified": false,
+    "deployed": false,
+    "httpSloClaim": "PENDING_ACTUAL_DEPLOYED_K6",
+    "collectedAt": "2026-11-15T05:55:34.889Z",
+    "bundleSha256": "e237d5b83bd369ea33009cbd895f44e12c5ecb1d0a18cf2ef073e9f5e0afb284",
+    "sourceHead": "f2771b6409a60d0191cc3807be83aaf460f098e8",
+    "runtimeIdentity": {
+      "current_user": "union_eyes_runtime",
+      "current_role": "union_eyes_runtime",
+      "session_user": "ue_staging_runtime",
+      "database": "ue_v2_staging"
+    },
+    "poolSize": 1,
+    "canonical": true,
+    "rounds": 3,
+    "measurements": [
+      {
+        "name": "warmup_explicit_single",
+        "count": 1,
+        "wallMs": 785.9432390000001,
+        "durationMs": [
+          785.7182389999999
+        ],
+        "reportOk": [
+          true
+        ],
+        "violationCounts": [
+          0
+        ],
+        "violationMessages": [],
+        "distinctReports": true,
+        "distinctViolations": true,
+        "explicitQueryCount": 28
+      },
+      {
+        "name": "warmup_default_single",
+        "count": 1,
+        "wallMs": 701.114489,
+        "durationMs": [
+          701.0842889999999
+        ],
+        "reportOk": [
+          true
+        ],
+        "violationCounts": [
+          0
+        ],
+        "violationMessages": [],
+        "distinctReports": true,
+        "distinctViolations": true,
+        "explicitQueryCount": null
+      },
+      {
+        "name": "round_1_legacy_five_explicit_one_client",
+        "count": 5,
+        "wallMs": 1957.0672519999998,
+        "durationMs": [
+          1946.8249580000002,
+          1949.010757,
+          1952.1889550000003,
+          1953.517854,
+          1956.5458519999997
+        ],
+        "reportOk": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "violationCounts": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "violationMessages": [],
+        "distinctReports": true,
+        "distinctViolations": true,
+        "explicitQueryCount": 140
+      },
+      {
+        "name": "round_1_new_five_default_pool_one",
+        "count": 5,
+        "wallMs": 370.5045829999999,
+        "durationMs": [
+          370.44498299999987,
+          370.3835829999998,
+          370.3932829999999,
+          370.3869829999999,
+          370.3783830000002
+        ],
+        "reportOk": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "violationCounts": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "violationMessages": [],
+        "distinctReports": true,
+        "distinctViolations": true,
+        "explicitQueryCount": null
+      },
+      {
+        "name": "round_2_new_five_default_pool_one",
+        "count": 5,
+        "wallMs": 381.40027599999985,
+        "durationMs": [
+          381.37487599999986,
+          381.3313760000001,
+          381.31997599999977,
+          381.3112759999999,
+          381.3029759999995
+        ],
+        "reportOk": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "violationCounts": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "violationMessages": [],
+        "distinctReports": true,
+        "distinctViolations": true,
+        "explicitQueryCount": null
+      },
+      {
+        "name": "round_2_legacy_five_explicit_one_client",
+        "count": 5,
+        "wallMs": 1935.841665,
+        "durationMs": [
+          1925.7945709999995,
+          1928.4856690000006,
+          1930.9154679999992,
+          1933.3198659999998,
+          1935.666365
+        ],
+        "reportOk": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "violationCounts": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "violationMessages": [],
+        "distinctReports": true,
+        "distinctViolations": true,
+        "explicitQueryCount": 140
+      },
+      {
+        "name": "round_3_legacy_five_explicit_one_client",
+        "count": 5,
+        "wallMs": 1976.3998410000004,
+        "durationMs": [
+          1964.3487480000003,
+          1968.1928450000005,
+          1970.3723440000003,
+          1973.9499420000002,
+          1976.272340999999
+        ],
+        "reportOk": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "violationCounts": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "violationMessages": [],
+        "distinctReports": true,
+        "distinctViolations": true,
+        "explicitQueryCount": 140
+      },
+      {
+        "name": "round_3_new_five_default_pool_one",
+        "count": 5,
+        "wallMs": 368.2198840000001,
+        "durationMs": [
+          368.18238399999973,
+          368.1270850000001,
+          368.11748500000067,
+          368.11038499999995,
+          368.10408500000085
+        ],
+        "reportOk": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "violationCounts": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "violationMessages": [],
+        "distinctReports": true,
+        "distinctViolations": true,
+        "explicitQueryCount": null
+      }
+    ],
+    "comparisonLimit": "Native driver comparison using actual admission source; explicit pg.Client queue versus default postgres-js pool. Not an HTTP or deployed-candidate result."
+  },
+  "noBusinessOrPrivilegeMutation": true,
+  "productionAuthorized": false,
+  "stagingGo": false,
+  "transport": {
+    "bytes": 518668,
+    "programSha256": "a42d44f3ddc1e4913e0ae50d26892d6f9aa5a938a4a22cf1dcb18d41d47aa8c8",
+    "fileSha256": {
+      "catalog-admission-prototype.cjs": "e237d5b83bd369ea33009cbd895f44e12c5ecb1d0a18cf2ef073e9f5e0afb284",
+      "benchmark.cjs": "4b58c024e3b0543f254e53b49cd976a9965f8dfab9babcc579d0f372856b7989",
+      "manifest.json": "f4e3e51a37511dc192a30bb57470eec6376015189de827a075f7b6d68d4eca39"
+    }
+  }
+}

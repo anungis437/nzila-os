@@ -71,4 +71,40 @@ async function settleRestrictedDestination(page, restrictedPath, responseStatus,
   return { responseStatus, initialPath, finalPath, denialMode: 'BROWSER_REDIRECT' };
 }
 
-module.exports = { normalizedPath, settleRoleLanding, settleRestrictedDestination };
+/** Open each viewport before navigation. Reusing a just-loaded desktop page and
+ * immediately reloading it can interrupt a streamed, source-required redirect.
+ * The declared destination is exact: a successful response alone is not proof
+ * that an administrative page, or a redirect to a personal profile, was allowed.
+ */
+async function openVisibleDestination(context, origin, route, expectedPath, {
+  viewport,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+} = {}) {
+  validateTimeout(timeoutMs);
+  const destination = new URL(route, origin);
+  if (!route.startsWith('/') || destination.origin !== origin) {
+    throw new Error('Visible navigation must remain on the staging origin');
+  }
+  const page = await context.newPage();
+  try {
+    if (viewport) await page.setViewportSize(viewport);
+    const response = await page.goto(destination.href, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+    if (!response || response.status() !== 200) {
+      throw new Error('Visible destination returned an unexpected HTTP status: ' + response?.status());
+    }
+    const settled = await settleRoleLanding(page, expectedPath, { timeoutMs });
+    // Observe the loaded destination after the streamed redirect, rather than
+    // interrupting the frame lifecycle with a reload from another viewport.
+    await page.waitForLoadState('load', { timeout: timeoutMs });
+    const actual = new URL(page.url());
+    if (actual.origin !== origin || normalizedPath(actual) !== normalizedPath(expectedPath)) {
+      throw new Error('Visible destination changed after settlement: expected=' + normalizedPath(expectedPath));
+    }
+    return { page, responseStatus: response.status(), ...settled, finalPath: normalizedPath(actual) };
+  } catch (error) {
+    await page.close().catch(() => {});
+    throw error;
+  }
+}
+
+module.exports = { normalizedPath, settleRoleLanding, settleRestrictedDestination, openVisibleDestination };

@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const { chromium } = require(require.resolve('playwright', { paths: [process.cwd() + '/apps/union-eyes'] }));
-const { settleRoleLanding, settleRestrictedDestination } = require('./lib/ue-staging-navigation-settlement.cjs');
+const { settleRoleLanding, settleRestrictedDestination, openVisibleDestination } = require('./lib/ue-staging-navigation-settlement.cjs');
 const OWNED_PERSONAS = require('./lib/ue-v2-owned-personas.cjs');
 const { safeFailureSummary, fetchWithReadResetRetry } = require('./lib/ue-staging-request-safety.cjs');
 const BASE = 'https://nzila-ue-v2-staging-app.whitemoss-055b7430.canadacentral.azurecontainerapps.io';
@@ -16,17 +16,6 @@ const contexts = new Map();
 function record(value) { report.observations.push({ at: new Date().toISOString(), ...value }); }
 function payload(body) { return body.data ?? body; }
 function guid(value) { assert.match(value, /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i); return value; }
-// Documented Chromium/Playwright race (microsoft/playwright#34889 and related): a reload immediately
-// following a goto can abort with ERR_ABORTED/"frame was detached" while the prior navigation's frame
-// lifecycle is still settling. Retry once; any other error (a real app/test failure) still propagates.
-async function reloadWithRetry(page, options) {
-  try {
-    return await page.reload(options);
-  } catch (error) {
-    if (!/ERR_ABORTED|frame was detached/.test(error.message)) throw error;
-    return page.reload(options);
-  }
-}
 async function request(key, path, method = 'GET', data, expected = [200]) {
   assert(path.startsWith('/api/') && !path.includes('://'));
   const traceId = crypto.randomBytes(16).toString('hex');
@@ -158,7 +147,9 @@ async function main() {
     throw error;
   }
   record({kind:'OBSERVED_ROLE_EXECUTION_HOME',requestedOwnedSyntheticRole:role,initialPath:landing.initialPath,path:landing.finalPath,redirectedAfterDOMContentLoaded:landing.redirectedAfterDOMContentLoaded,initialHttpStatus:homeResponse.status()});await home.close();
-  for(const locale of ['en-CA','fr-CA'])for(const path of [...new Set([...profile.visible.map(x=>x.href),...profile.deepGovernance])]){
+  assert.equal(profile.accountSettings.path,'/dashboard/settings');
+  assert(['/dashboard/profile','/dashboard/settings'].includes(profile.accountSettings.destination));
+  for(const locale of ['en-CA','fr-CA'])for(const path of [...new Set([...profile.visible.map(x=>x.href),...profile.deepGovernance,profile.accountSettings.path])]){
     // Finance 2.1 and dues are outside the base release. The sensitive APIs below
     // must deny a fixture without a live financial mandate, even when its rank
     // permits a finance navigation shell. No positive finance feature claim.
@@ -167,16 +158,23 @@ async function main() {
       continue;
     }
     stage='visible-navigation:'+role+':'+locale+':'+path;
-    const page=await contexts.get('A').newPage();const route='/'+locale+path;
-    const response=await page.goto(BASE+route,{waitUntil:'domcontentloaded'});assert(response);assert.equal(response.status(),200);
-    await settleRoleLanding(page,route.split('?')[0]);
-    assert.equal(await page.getByText('This page could not be found',{exact:true}).count(),0);
-    assert.equal(await page.getByText('Application error: a server-side exception has occurred',{exact:false}).count(),0);
-    record({kind:'REAL_VISIBLE_NAVIGATION',role,experience:profile.experience,path:route,status:response.status(),sourceVisible:profile.visible.some(x=>x.href===path)});
-    await page.setViewportSize({width:390,height:844});await reloadWithRetry(page,{waitUntil:'domcontentloaded'});
-    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
-    assert.equal(overflow,false,'Required mobile route must not overflow');
-    record({kind:'REAL_MOBILE_NAVIGATION',role,path:route,width:390,height:844,horizontalOverflow:overflow});await page.close();
+    const route='/'+locale+path;
+    const expected='/'+locale+(path===profile.accountSettings.path?profile.accountSettings.destination:path.split('?')[0]);
+    const desktop=await openVisibleDestination(contexts.get('A'),BASE,route,expected);
+    try {
+      assert.equal(await desktop.page.getByText('This page could not be found',{exact:true}).count(),0);
+      assert.equal(await desktop.page.getByText('Application error: a server-side exception has occurred',{exact:false}).count(),0);
+      record({kind:'REAL_VISIBLE_NAVIGATION',role,experience:profile.experience,path:route,finalPath:desktop.finalPath,expectedPath:expected,redirectedAfterDOMContentLoaded:desktop.redirectedAfterDOMContentLoaded,status:desktop.responseStatus,sourceVisible:profile.visible.some(x=>x.href===path)});
+    } finally { await desktop.page.close(); }
+    stage='mobile-visible-navigation:'+role+':'+locale+':'+path;
+    const mobile=await openVisibleDestination(contexts.get('A'),BASE,route,expected,{viewport:{width:390,height:844}});
+    try {
+      assert.equal(await mobile.page.getByText('This page could not be found',{exact:true}).count(),0);
+      assert.equal(await mobile.page.getByText('Application error: a server-side exception has occurred',{exact:false}).count(),0);
+      const overflow=await mobile.page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
+      assert.equal(overflow,false,'Required mobile route must not overflow');
+      record({kind:'REAL_MOBILE_NAVIGATION',role,path:route,finalPath:mobile.finalPath,expectedPath:expected,status:mobile.responseStatus,width:390,height:844,horizontalOverflow:overflow});
+    } finally { await mobile.page.close(); }
   }
   stage='direct-scoped-administration-boundaries';
   // Financial and platform operations remain unavailable to these exact fixtures.

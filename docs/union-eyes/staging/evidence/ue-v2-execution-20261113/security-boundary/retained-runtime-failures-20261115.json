@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-11-15T06:12:45.495969+00:00",
+  "applicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "stagingGo": false,
+  "productionAuthorized": false,
+  "originalFailures": [
+    {
+      "kind": "CANONICAL_MAIN_PERFORMANCE",
+      "runId": "43675284397",
+      "attempt": 1,
+      "reason": "Missing staging PERF_BASE_URL selected retired endpoint; 100% HTTP errors",
+      "disposition": "Actual environment target corrected, original failure retained"
+    },
+    {
+      "kind": "CANONICAL_MAIN_PERFORMANCE",
+      "runId": "43675284397",
+      "attempt": 2,
+      "jobId": "132708264012",
+      "httpChecksPassed": 942,
+      "httpErrorRate": 0,
+      "p95Ms": 1990,
+      "p95LimitMs": 500,
+      "p99Ms": 2510,
+      "p99LimitMs": 1500,
+      "status": "FAIL",
+      "disposition": "Root-cause catalog concurrency repair is not yet deployed; no SLO PASS claimed",
+      "privateRawLogSha256": "18015982564cba46a7b6a589232d73010a06e1578a8c64a3658b79af92a1b62a"
+    },
+    {
+      "kind": "REAL_EXECUTIVE_NAVIGATION",
+      "runId": "43680811518",
+      "status": "FAIL",
+      "stage": "visible-navigation:secretary_treasurer:en-CA:/dashboard/settings",
+      "receiptSha256": "2573b7692241d191cf25a8652503bed118570c17243c1718b67672da211ec979",
+      "disposition": "Verifier now derives exact settings redirect from source and opens separate desktop/mobile visits; all-seven final-source rerun required"
+    },
+    {
+      "kind": "FORMAL_CASE_PRIVATE_VERIFIER",
+      "status": "FAIL",
+      "rawReceiptSha256": "ded7f4e121e342fece0950e38c8f8f27d7c972feb806148cd02b24d7d81049e0",
+      "checksBeforeFailure": 23,
+      "failure": {
+        "error": "TimeoutError",
+        "message": "locator.waitFor: Timeout 45000ms exceeded.",
+        "requestDetailsOmitted": true
+      },
+      "disposition": "Collapsed exact case card was not expanded; fresh corrected real flow passed42 checks, original preserved"
+    }
+  ]
+}
