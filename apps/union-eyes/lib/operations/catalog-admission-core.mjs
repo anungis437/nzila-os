@@ -77,13 +77,18 @@ export const admissionQueries = [
                  pol.polcmd,
                  pg_get_expr(pol.polqual, pol.polrelid) AS qual,
                  pg_get_expr(pol.polwithcheck, pol.polrelid) AS with_check,
-                 COALESCE(array_agg(role.rolname) FILTER (WHERE role.rolname IS NOT NULL), ARRAY[]::name[]) AS roles
+                 COALESCE(policy_roles.roles, ARRAY[]::name[]) AS roles
           FROM pg_policy pol
           JOIN pg_class relation ON relation.oid = pol.polrelid
           JOIN pg_namespace namespace ON namespace.oid = relation.relnamespace
-          LEFT JOIN pg_roles role ON role.oid = ANY (pol.polroles)
-          WHERE namespace.nspname = 'public'
-          GROUP BY relation.relname, pol.polname, pol.polcmd, pol.polqual, pol.polwithcheck, pol.polrelid`,
+          LEFT JOIN (
+            SELECT vectors.polroles,
+              COALESCE(array_agg(role.rolname ORDER BY role.rolname) FILTER (WHERE role.rolname IS NOT NULL), ARRAY[]::name[]) AS roles
+            FROM (SELECT DISTINCT polroles FROM pg_policy) AS vectors
+            LEFT JOIN pg_roles role ON role.oid = ANY (vectors.polroles)
+            GROUP BY vectors.polroles
+          ) AS policy_roles ON policy_roles.polroles = pol.polroles
+          WHERE namespace.nspname = 'public'`,
   },
   {
     name: 'publicGrants',

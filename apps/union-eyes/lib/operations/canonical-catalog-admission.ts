@@ -153,15 +153,24 @@ export const CANONICAL_AUTH_QUERIES = {
   memberships: `SELECT member.rolname AS member,granted.rolname AS granted,m.admin_option
     FROM pg_auth_members m JOIN pg_roles member ON member.oid=m.member JOIN pg_roles granted ON granted.oid=m.roleid
     WHERE member.rolname IN (${literals})`,
-  columns: `SELECT r.rolname AS role,n.nspname AS schema_name,c.relname AS table_name,v.privilege,
-    array_agg(a.attname::text ORDER BY a.attname) AS all_columns,
-    COALESCE(array_agg(a.attname::text ORDER BY a.attname) FILTER (WHERE has_column_privilege(r.oid,c.oid,a.attnum,v.privilege)),ARRAY[]::text[]) AS allowed_columns
-    FROM pg_roles r CROSS JOIN pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
-    CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES']) v(privilege)
-    WHERE r.rolname IN (${literals}) AND (n.nspname='user_management' OR
-      (n.nspname='public' AND c.relname IN ('platform_identity_bindings','organization_members') AND r.rolname LIKE 'nzila_auth_%'))
-      AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped
-    GROUP BY r.rolname,n.nspname,c.relname,v.privilege`,
+  columns: `SELECT r.rolname AS role,i.schema_name,i.table_name,v.privilege,
+    i.all_columns,
+    CASE WHEN has_table_privilege(r.oid,i.relation_oid,v.privilege) THEN i.all_columns
+      ELSE ARRAY(SELECT a.attname::text FROM pg_attribute a
+        WHERE a.attrelid=i.relation_oid AND a.attnum>0 AND NOT a.attisdropped
+          AND has_column_privilege(r.oid,i.relation_oid,a.attnum,v.privilege)
+        ORDER BY a.attname) END AS allowed_columns
+    FROM pg_roles r CROSS JOIN (
+      SELECT c.oid AS relation_oid,n.nspname AS schema_name,c.relname AS table_name,
+        array_agg(a.attname::text ORDER BY a.attname) AS all_columns
+      FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
+      WHERE (n.nspname='user_management' OR
+        (n.nspname='public' AND c.relname IN ('platform_identity_bindings','organization_members')))
+        AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped
+      GROUP BY c.oid,n.nspname,c.relname
+    ) AS i CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES']) v(privilege)
+    WHERE r.rolname IN (${literals}) AND (i.schema_name='user_management' OR
+      (i.schema_name='public' AND r.rolname LIKE 'nzila_auth_%'))`,
   tables: `SELECT r.rolname AS role,c.relname AS table_name,v.privilege,
     has_table_privilege(r.oid,c.oid,v.privilege) AS allowed,c.relrowsecurity,c.relforcerowsecurity,owner.rolname AS owner
     FROM pg_roles r CROSS JOIN pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_roles owner ON owner.oid=c.relowner

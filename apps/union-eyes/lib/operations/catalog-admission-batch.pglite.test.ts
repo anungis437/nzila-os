@@ -2,12 +2,59 @@ import { PGlite } from '@electric-sql/pglite'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { AUTH_EXECUTION_ROLES } from '@nzila/db/auth-storage-authority'
 import { admissionQueries, type CatalogRow } from './catalog-admission-core.mjs'
-import { canonicalAdmissionQueries } from './canonical-catalog-admission'
+import { canonicalAdmissionQueries, CANONICAL_AUTH_QUERIES } from './canonical-catalog-admission'
 import { catalogSnapshotExecutor, compileCatalogSnapshot } from './catalog-admission-batch'
 import { evaluateCatalogAdmission } from './catalog-admission'
 
+
+// Independent pre-optimization SQL oracles: the released scans must retain their
+// catalog values and fail-closed decisions after changing how rows are gathered.
+const legacyPolicyQuery = `SELECT relation.relname AS table_name,
+                 pol.polname,
+                 pol.polcmd,
+                 pg_get_expr(pol.polqual, pol.polrelid) AS qual,
+                 pg_get_expr(pol.polwithcheck, pol.polrelid) AS with_check,
+                 COALESCE(array_agg(role.rolname) FILTER (WHERE role.rolname IS NOT NULL), ARRAY[]::name[]) AS roles
+          FROM pg_policy pol
+          JOIN pg_class relation ON relation.oid = pol.polrelid
+          JOIN pg_namespace namespace ON namespace.oid = relation.relnamespace
+          LEFT JOIN pg_roles role ON role.oid = ANY (pol.polroles)
+          WHERE namespace.nspname = 'public'
+          GROUP BY relation.relname, pol.polname, pol.polcmd, pol.polqual, pol.polwithcheck, pol.polrelid`
+const catalogRoles = [...Object.values(AUTH_EXECUTION_ROLES), 'union_eyes_runtime', 'union_eyes_system']
+const catalogRoleLiterals = catalogRoles.map(role => `'${role}'`).join(',')
+const legacyColumnsQuery = `SELECT r.rolname AS role,n.nspname AS schema_name,c.relname AS table_name,v.privilege,
+    array_agg(a.attname::text ORDER BY a.attname) AS all_columns,
+    COALESCE(array_agg(a.attname::text ORDER BY a.attname) FILTER (WHERE has_column_privilege(r.oid,c.oid,a.attnum,v.privilege)),ARRAY[]::text[]) AS allowed_columns
+    FROM pg_roles r CROSS JOIN pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
+    CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES']) v(privilege)
+    WHERE r.rolname IN (${catalogRoleLiterals}) AND (n.nspname='user_management' OR
+      (n.nspname='public' AND c.relname IN ('platform_identity_bindings','organization_members') AND r.rolname LIKE 'nzila_auth_%'))
+      AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped
+    GROUP BY r.rolname,n.nspname,c.relname,v.privilege`
+
 let database: PGlite | undefined
 afterEach(async () => { vi.unstubAllEnvs(); await database?.close(); database = undefined })
+
+const policyQuery = admissionQueries.find(query => query.name === 'policies')!.sql
+const records = (rows: CatalogRow[]) => rows.map(row => JSON.stringify(row)).sort()
+const policyIdentities = (rows: CatalogRow[]) => rows.map(row => `${row.table_name}\0${row.polname}`)
+
+function expectPolicyValuesEqual(legacy: CatalogRow[], actual: CatalogRow[]) {
+  const normalize = (rows: CatalogRow[]) => rows.map(row => {
+    expect(Array.isArray(row.roles)).toBe(true)
+    expect((row.roles as unknown[]).every(role => typeof role === 'string')).toBe(true)
+    // Policies use an unordered role-membership list (length/includes in the
+    // actual assessor). Preserve every member/duplicate; normalize no other array.
+    return { ...row, roles: [...row.roles as string[]].sort() }
+  })
+  expect(records(normalize(actual))).toEqual(records(normalize(legacy)))
+  return { rawPolicyRowOrderEqual: JSON.stringify(policyIdentities(actual)) === JSON.stringify(policyIdentities(legacy)) }
+}
+
+async function query(statement: string) {
+  return (await database!.query<CatalogRow>(statement)).rows
+}
 
 describe('catalog snapshot PostgreSQL semantics', () => {
   it('preserves actual catalog scalar types, nulls, record keys and ordered text arrays', async () => {
@@ -68,5 +115,135 @@ describe('catalog snapshot PostgreSQL semantics', () => {
     // This intentionally incomplete local schema must remain inadmissible.
     expect(serialReport.ok).toBe(false)
     expect(batchedReport.violations).not.toHaveLength(0)
+  }, 20_000)
+})
+
+describe('policy role-vector aggregation', () => {
+  it('preserves every policy value, PUBLIC membership and role multiset across policy forms and owners', async () => {
+    database = new PGlite()
+    await database.exec(`CREATE ROLE policy_zeta NOLOGIN; CREATE ROLE policy_alpha NOLOGIN; CREATE ROLE policy_middle NOLOGIN;
+      CREATE ROLE "policy spaced role" NOLOGIN; CREATE ROLE policy_owner_one NOLOGIN; CREATE ROLE policy_owner_two NOLOGIN;
+      CREATE TABLE public.policy_public_cases(id integer); CREATE TABLE public.policy_single_cases(id integer); CREATE TABLE public."Policy Multi Cases"(id integer);
+      ALTER TABLE public.policy_public_cases OWNER TO policy_owner_one; ALTER TABLE public.policy_single_cases OWNER TO policy_owner_two; ALTER TABLE public."Policy Multi Cases" OWNER TO policy_owner_one;
+      ALTER TABLE public.policy_public_cases ENABLE ROW LEVEL SECURITY; ALTER TABLE public.policy_single_cases ENABLE ROW LEVEL SECURITY; ALTER TABLE public."Policy Multi Cases" ENABLE ROW LEVEL SECURITY;
+      CREATE POLICY public_all ON public.policy_public_cases AS PERMISSIVE FOR ALL TO PUBLIC USING(id>0) WITH CHECK(id<100);
+      CREATE POLICY public_select ON public.policy_public_cases AS RESTRICTIVE FOR SELECT TO PUBLIC USING(id>1);
+      CREATE POLICY single_select ON public.policy_single_cases AS PERMISSIVE FOR SELECT TO policy_zeta USING(id>0);
+      CREATE POLICY single_insert ON public.policy_single_cases AS PERMISSIVE FOR INSERT TO policy_alpha WITH CHECK(id>0);
+      CREATE POLICY single_delete ON public.policy_single_cases AS RESTRICTIVE FOR DELETE TO "policy spaced role" USING(id>0);
+      CREATE POLICY multi_forward ON public."Policy Multi Cases" AS PERMISSIVE FOR ALL TO policy_zeta,policy_alpha,policy_middle USING(id>0) WITH CHECK(id<20);
+      CREATE POLICY multi_reverse ON public."Policy Multi Cases" AS RESTRICTIVE FOR ALL TO policy_middle,policy_alpha,policy_zeta USING(id>0) WITH CHECK(id<20);
+      CREATE POLICY restrictive_update ON public."Policy Multi Cases" AS RESTRICTIVE FOR UPDATE TO policy_zeta USING(id>1) WITH CHECK(id<30);`)
+    const legacy = await query(legacyPolicyQuery), actual = await query(policyQuery)
+    expectPolicyValuesEqual(legacy, actual)
+    expect(actual).toHaveLength(8)
+    const policies = new Map(actual.map(row => [row.polname, row]))
+    expect(policies.get('public_all')?.roles).toEqual([])
+    expect(policies.get('public_select')?.roles).toEqual([])
+    expect(policies.get('single_select')?.roles).toEqual(['policy_zeta'])
+    expect(policies.get('single_insert')?.roles).toEqual(['policy_alpha'])
+    expect(policies.get('single_delete')?.roles).toEqual(['policy spaced role'])
+    expect(policies.get('multi_forward')?.roles).toEqual(['policy_alpha', 'policy_middle', 'policy_zeta'])
+    expect(policies.get('multi_reverse')?.roles).toEqual(policies.get('multi_forward')?.roles)
+    expect(policies.get('single_select')?.qual).not.toBeNull()
+    expect(policies.get('single_select')?.with_check).toBeNull()
+    expect(policies.get('single_insert')?.qual).toBeNull()
+    expect(policies.get('single_insert')?.with_check).not.toBeNull()
+    expect(policies.get('public_all')?.qual).not.toBeNull()
+    expect(policies.get('public_all')?.with_check).not.toBeNull()
+    expect(policies.get('multi_forward')?.table_name).toBe('Policy Multi Cases')
+    const owners = await query("SELECT pg_get_userbyid(c.relowner) AS owner FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind='r'")
+    expect(new Set(owners.map(row => row.owner))).toEqual(new Set(['policy_owner_one', 'policy_owner_two']))
+    const kinds = await query('SELECT polname,polpermissive FROM pg_policy')
+    expect(kinds.find(row => row.polname === 'multi_forward')?.polpermissive).toBe(true)
+    expect(kinds.find(row => row.polname === 'multi_reverse')?.polpermissive).toBe(false)
+  }, 20_000)
+
+  it.each([
+    { name: 'admits a scoped catalog', mutation: '', ok: true, violation: '' },
+    { name: 'refuses a malicious PUBLIC grant', mutation: 'GRANT SELECT ON public.claims TO PUBLIC', ok: false, violation: 'PUBLIC holds SELECT on public.claims' },
+    { name: 'refuses substituting a foreign runtime-policy role', mutation: 'ALTER POLICY claim_runtime ON public.claims TO policy_foreign', ok: false, violation: 'has no runtime SELECT policy' },
+    { name: 'refuses a permissive true runtime policy', mutation: 'ALTER POLICY claim_runtime ON public.claims USING(true) WITH CHECK(true)', ok: false, violation: 'runtime policy claim_runtime is permissive' },
+    { name: 'admits restored scoped authority', mutation: 'ALTER POLICY claim_runtime ON public.claims USING(true) WITH CHECK(true); ALTER POLICY claim_runtime ON public.claims USING(id>0) WITH CHECK(id>0)', ok: true, violation: '' },
+  ])('$name using the unchanged actual assessor', async ({ mutation, ok, violation }) => {
+    database = new PGlite()
+    await database.exec(`CREATE ROLE union_eyes_runtime NOLOGIN; CREATE ROLE union_eyes_system NOLOGIN; CREATE ROLE policy_foreign NOLOGIN;
+      CREATE SCHEMA user_management; CREATE SCHEMA audit_security;
+      GRANT USAGE ON SCHEMA user_management TO union_eyes_runtime,union_eyes_system; GRANT USAGE ON SCHEMA audit_security TO union_eyes_runtime;
+      CREATE TABLE public.claims(id integer); ALTER TABLE public.claims ENABLE ROW LEVEL SECURITY; ALTER TABLE public.claims FORCE ROW LEVEL SECURITY;
+      GRANT SELECT,INSERT,UPDATE,DELETE ON public.claims TO union_eyes_runtime; GRANT SELECT ON public.claims TO union_eyes_system;
+      CREATE POLICY claim_runtime ON public.claims FOR ALL TO union_eyes_runtime USING(id>0) WITH CHECK(id>0);
+      CREATE POLICY claim_system ON public.claims FOR SELECT TO union_eyes_system USING(id>0);`)
+    if (mutation) await database.exec(mutation)
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
+    vi.stubEnv('UE_ENVIRONMENT', 'local-policy-catalog-regression')
+    let legacyPolicies: CatalogRow[] = [], actualPolicies: CatalogRow[] = []
+    const legacy = await evaluateCatalogAdmission(async statement => {
+      const rows = await query(statement === policyQuery ? legacyPolicyQuery : statement)
+      if (statement === policyQuery) legacyPolicies = rows
+      return rows
+    })
+    const actual = await evaluateCatalogAdmission(async statement => {
+      const rows = await query(statement)
+      if (statement === policyQuery) actualPolicies = rows
+      return rows
+    })
+    const { rawPolicyRowOrderEqual } = expectPolicyValuesEqual(legacyPolicies, actualPolicies)
+    const { violations: legacyViolations, ...legacyDecision } = legacy
+    const { violations: actualViolations, ...actualDecision } = actual
+    expect(actualDecision).toEqual(legacyDecision)
+    expect(actual.ok).toBe(ok)
+    // SQL never ordered policy rows. A different violation order is permitted
+    // only when those rows changed order; preserve every violation/duplicate.
+    if (JSON.stringify(actualViolations) !== JSON.stringify(legacyViolations)) expect(rawPolicyRowOrderEqual).toBe(false)
+    expect([...actualViolations].sort()).toEqual([...legacyViolations].sort())
+    if (violation) expect(actualViolations.some(message => message.includes(violation))).toBe(true)
+  }, 20_000)
+})
+
+describe('factored canonical column privilege inspection', () => {
+  it('matches PostgreSQL column checks across grants, PUBLIC, inheritance, owners and relation forms', async () => {
+    database = new PGlite()
+    for (const role of catalogRoles) await database.exec(`CREATE ROLE "${role}" NOLOGIN`)
+    await database.exec(`CREATE ROLE column_parent NOLOGIN; CREATE SCHEMA user_management;
+      CREATE TABLE user_management.column_fixture(zeta integer,alpha integer,middle integer);
+      CREATE TABLE user_management.zero_columns();
+      CREATE TABLE public.platform_identity_bindings(zeta integer,alpha integer,middle integer);
+      CREATE TABLE public.organization_members(zeta integer,alpha integer);
+      CREATE TABLE public.excluded_public(zeta integer); CREATE VIEW user_management.excluded_view AS SELECT 1 AS zeta;`)
+    const check = async (name: string) => {
+      const legacy = await query(legacyColumnsQuery), actual = await query(CANONICAL_AUTH_QUERIES.columns)
+      expect(records(actual), name).toEqual(records(legacy))
+      expect(actual.some(row => ['zero_columns', 'excluded_public', 'excluded_view'].includes(String(row.table_name))), name).toBe(false)
+      expect(actual.some(row => row.schema_name === 'public' && ['union_eyes_runtime', 'union_eyes_system'].includes(String(row.role))), name).toBe(false)
+      return actual
+    }
+    expect((await check('no grants')).every(row => (row.allowed_columns as string[]).length === 0)).toBe(true)
+    const changes = [
+      { name: 'direct independent column grants for all four privileges', sql: 'GRANT SELECT(alpha),INSERT(middle),UPDATE(zeta),REFERENCES(alpha) ON user_management.column_fixture TO nzila_auth_gateway' },
+      { name: 'PUBLIC column grant', sql: 'GRANT SELECT(middle) ON user_management.column_fixture TO PUBLIC' },
+      { name: 'PUBLIC table grant', sql: 'GRANT REFERENCES ON user_management.column_fixture TO PUBLIC' },
+      { name: 'inherited table grant', sql: 'REVOKE REFERENCES ON user_management.column_fixture FROM PUBLIC; GRANT SELECT,UPDATE ON user_management.column_fixture TO column_parent; ALTER ROLE nzila_auth_gateway INHERIT; GRANT column_parent TO nzila_auth_gateway' },
+      { name: 'NOINHERIT membership', sql: 'ALTER ROLE nzila_auth_lookup NOINHERIT; GRANT column_parent TO nzila_auth_lookup' },
+      { name: 'table grant is not negated by column revoke', sql: 'GRANT SELECT ON user_management.column_fixture TO nzila_auth_identity; REVOKE SELECT(alpha) ON user_management.column_fixture FROM nzila_auth_identity' },
+      { name: 'relation ownership', sql: 'ALTER TABLE user_management.column_fixture OWNER TO nzila_auth_system_gateway' },
+      { name: 'owner table privilege revoked with column grant retained', sql: 'REVOKE SELECT ON user_management.column_fixture FROM nzila_auth_system_gateway; GRANT SELECT(alpha) ON user_management.column_fixture TO nzila_auth_system_gateway' },
+      { name: 'dropped column', sql: 'ALTER TABLE user_management.column_fixture DROP COLUMN middle' },
+      { name: 'partitioned, quoted and generated columns', sql: `CREATE TABLE user_management.partition_parent(zeta integer,alpha integer) PARTITION BY RANGE(zeta);
+          CREATE TABLE user_management.partition_child PARTITION OF user_management.partition_parent FOR VALUES FROM(0) TO(10);
+          GRANT SELECT ON user_management.partition_parent TO nzila_auth_lookup;
+          CREATE TABLE user_management."Quoted Table"("Zed Column" integer,"alpha column" integer);
+          GRANT UPDATE("Zed Column") ON user_management."Quoted Table" TO nzila_auth_provider;
+          CREATE TABLE user_management.generated_fixture(base integer,derived integer GENERATED ALWAYS AS(base+1) STORED);
+          GRANT INSERT ON user_management.generated_fixture TO nzila_auth_tenant_admin;` },
+      { name: 'public projections retain role filters and PUBLIC ACLs', sql: 'GRANT SELECT(alpha),UPDATE(zeta) ON public.platform_identity_bindings TO PUBLIC; GRANT SELECT ON public.organization_members TO nzila_auth_gateway' },
+    ]
+    for (const { name, sql } of changes) {
+      await database.exec(sql)
+      const rows = await check(name)
+      if (name === 'PUBLIC column grant') expect(rows.filter(row => row.table_name === 'column_fixture' && row.privilege === 'SELECT').every(row => (row.allowed_columns as string[]).includes('middle'))).toBe(true)
+      if (name === 'PUBLIC table grant') expect(rows.filter(row => row.table_name === 'column_fixture' && row.privilege === 'REFERENCES').every(row => (row.allowed_columns as string[]).length === 3)).toBe(true)
+      if (name === 'dropped column') expect(rows.filter(row => row.table_name === 'column_fixture').every(row => !(row.all_columns as string[]).includes('middle'))).toBe(true)
+    }
   }, 20_000)
 })
