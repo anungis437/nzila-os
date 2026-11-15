@@ -1,0 +1,65 @@
+{
+  "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "evidenceClass": "EXACT_SOURCE_NATIVE_TOOL_BUILD_AND_LOAD_PROOF_ONLY",
+  "tools": [
+    {
+      "kind": "authority",
+      "file": "authority-d57aa1f3-provenance.json",
+      "bundleSha256": "c8ba5eecbf4c2d063f63ebc3e1f419892c6410c49125d3b6619a8ef4718d3bf4",
+      "sourceModules": 125,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "bearer",
+      "file": "bearer-d57aa1f3-provenance.json",
+      "bundleSha256": "33cb42310a4a4dc18707d70df56c18cf6aeb13644a41669441d4ff59658cde58",
+      "sourceModules": 103,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "nested",
+      "file": "nested-d57aa1f3-provenance.json",
+      "bundleSha256": "23b6505b982e3068137468f6530c0a375bda8c0cd7e5be97027241dd1753e0a0",
+      "sourceModules": 106,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "worker",
+      "file": "worker-d57aa1f3-provenance.json",
+      "bundleSha256": "29f3272d51eadbe9361352b19aa6d461c41a358d116c4193490b9dd7f577e4ec",
+      "sourceModules": 56,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "nar",
+      "file": "nar-d57aa1f3-provenance.json",
+      "bundleSha256": "f179ccac029dd1da3d286b033cd2ec31924fde8c5d125f48bac9ec2d077b16e8",
+      "sourceModules": 108,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "system",
+      "file": "system-d57aa1f3-provenance.json",
+      "bundleSha256": "f563562de0e85a66472c41f22d1c12c592aa5cd0ac1a530a203dc786bbb0f3b8",
+      "sourceModules": 208,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "deadline",
+      "file": "deadline-d57aa1f3-provenance.json",
+      "bundleSha256": "389a838121bedb127737bd0f460a2fa737d6adcf6835250a13fe31c77c20beb4",
+      "sourceModules": 444,
+      "runtimeExecutionClaimed": false
+    }
+  ],
+  "distinctSourceModulesVerified": 488,
+  "noFrameworkDatabaseRoleOrKernelMocks": true,
+  "buildSummarySha256": "8f1c990181b72024f80580635b0ad0c36646cec71e88451f724b3141d65415b3",
+  "loadSmokeSha256": "0c3312875abc26bcc1fbdffb7a1d18b2a3fadb3190fb5045312d36ef2494a543",
+  "qualificationOperationsInvoked": 0,
+  "actualSignedRuntimeQualification": "PENDING",
+  "backendSourceBytesAndBundleDigestsEqualPriorQ": true,
+  "historicalRuntimeReused": false,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

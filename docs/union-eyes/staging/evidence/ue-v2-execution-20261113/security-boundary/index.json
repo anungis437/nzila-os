@@ -1,6 +1,6 @@
 {
   "purpose": "PRE_REPAIR_SECURITY_FINDING_AND_QUALIFICATION_PROVENANCE",
-  "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
   "productionAuthorized": false,
   "stagingGo": false,
   "entries": [
@@ -593,31 +593,151 @@
       "sha256": "14d9fadb0e5e804d4aef5959c9cf11f180c268ce654fb6906616eaa1a165f1a4",
       "observedOrProposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "runtimePassInferred": false
+    },
+    {
+      "file": "observed-contract-before-public-message-d57aa1f3.json",
+      "sha256": "fbf6241980f2dad3b00bf5559ed6495bc094c687ee9758655701264a00bd0b65",
+      "observedOrProposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "authority-d57aa1f3-provenance.json",
+      "sha256": "19eba97684df324e6715fea199c28de47736d2efa5703376e22a92598f128ac6",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "bearer-d57aa1f3-provenance.json",
+      "sha256": "adf6a2316c61668bb8cb33d771f75b77065bd9bfa65e65dca3dd0b0ce0881ab3",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nested-d57aa1f3-provenance.json",
+      "sha256": "feeb992efbd23af1fa05e9acd7ffad19072e43e1c61634abcc1e520e48b3e228",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "worker-d57aa1f3-provenance.json",
+      "sha256": "f816962d61144397ca19155e409f94877968854740cd4d2790d11a084c03c4a7",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nar-d57aa1f3-provenance.json",
+      "sha256": "6ed0c223303acbb2186176028a591299abcc93aba8973a7c4e127d6bad2c3af2",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "system-d57aa1f3-provenance.json",
+      "sha256": "aaeb7b16a4c3765c6bcc18a7cafef31c0da338d5026981ad3c35d99e7eefd039",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "deadline-d57aa1f3-provenance.json",
+      "sha256": "7eddbbbfb9edc1dba53ec3e87037b7e5aec3c2297545a08a57cd7b99195612a3",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "native-tool-provenance-d57aa1f3.json",
+      "sha256": "378ccb790acc031b4b6175276e57bd332169ab5a182b880c554c615a96abc95b",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-d57aa1f3.json",
+      "sha256": "81cae2bb96679fdd7174aa461c97ce148a79fc3cca4175e6f8c18090ec8debd4",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "public-message-focused-d57aa1f3.json",
+      "sha256": "6f8f2c552ac967ebecc5d10b0b45a21e563b9c433d3e092e7d4a89fd2fe352b9",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "actual-framework-browser-d57aa1f3.json",
+      "sha256": "a3ddb29dc4dfd8296065182674e03f40c53a222d58131060ab9cdff09ef4114d",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "actual-framework-redirect-d57aa1f3.json",
+      "sha256": "9b1713de34e7eeb2f8c226861d9e0ac660f05fc8f5358db09eb86b4aeed9f17b",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-validation-delta-d57aa1f3.json",
+      "sha256": "f9ac74d52852b6a2544aadcef9d71aad7bbc343bca0b75c1bcf92e9cbd2409ed",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-required-validation-d57aa1f3.json",
+      "sha256": "a46e40e6f49ce1721a60a83abf9da602934bfcd7536eae566c3a9193cac5fd6e",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "observed-runtime-c09de455-reconciliation.json",
+      "sha256": "3744221fce28675b627c75dc3d52bbfcdd0796416249873f5b03b702500380b3",
+      "observedOrProposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "actual-c09de455-performance-request-attribution.json",
+      "sha256": "6f85623ff0171fb4029664cc9dfa802756ebbc65563874a1caa3f97a2753efbf",
+      "observedOrProposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "actual-c09de455-public-payload.json",
+      "sha256": "f743a2609a9fcf295786fa5e4506dc8ed58f7f2a8bcb2dea3d2db83e1b9d70ba",
+      "observedOrProposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "public-message-binding-validation-d57aa1f3.json",
+      "sha256": "782ead710fce3fb5ce77cedc706a410c13fbb3db801b6996e86c766132a1dda4",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "public-message-binding-review-d57aa1f3.json",
+      "sha256": "9a972b99cdfc50bdeb4d61e8b13b8dc2c44b59846f74b2261a5136a27bf69fac",
+      "observedOrProposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "runtimePassInferred": false
     }
   ],
   "nextCandidate": {
-    "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
-    "sourcePR": 1235,
+    "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+    "sourcePR": 1237,
     "bindingPR": null,
-    "bindingReference": "THIS_CHANGE_PENDING_EXACT_CI_AND_MAIN_ADMISSION",
     "workflowSha": null,
+    "bindingReference": "THIS_CHANGE_PENDING_EXACT_CI_AND_MAIN_ADMISSION",
     "deployed": false,
     "sourceCI": "IN_PROGRESS_AT_BINDING_PREPARATION",
-    "nativeQualification": "EXACT_NATIVE_EXPORT_SEVEN_GRAPH_COMPILE_LOAD_PASS_ONLY",
+    "nativeQualification": "EXACT_NATIVE_EXPORT_SEVEN_COMPILE_LOAD_PASS_ONLY",
     "signedRuntime": "PENDING",
     "ciAndRuntimeStillRequired": true,
-    "bindingReview": "catalog-latency-c09de455-binding-review.json",
-    "bindingValidation": "catalog-latency-c09de455-binding-validation.json",
-    "localNativeExport": "local-native-export-c09de455.json",
-    "nativeSqlPrototypeBinding": "catalog-latency-c09de455-native-sql-binding.json",
-    "deployedHttpPerformance": "PENDING_UNCHANGED_500_1500_THRESHOLDS",
-    "mobileVisualReview": "PENDING_ACTUAL_Q",
-    "requiredBroadCommands": "local-required-validation-c09de455.json",
-    "allQRuntimeCriteria": "PENDING",
-    "acceptedStagingCandidateSha": null,
+    "localNativeExport": "local-native-export-d57aa1f3.json",
+    "nativeToolProvenance": "native-tool-provenance-d57aa1f3.json",
+    "focusedSourceAndFramework": "public-message-focused-d57aa1f3.json",
+    "requiredBroadCommands": "local-required-validation-d57aa1f3.json",
+    "failureDeltaAudit": "local-validation-delta-d57aa1f3.json",
     "localHolisticAdvisory": "FAIL_4_OF_5_LOCAL_COMMANDS",
-    "failureDeltaAudit": "PENDING_READ_ONLY_Q_VS_F_COMPARISON",
-    "nativeToolProvenance": "native-source-graphs-c09de455.json"
+    "deployedHttpPerformance": "PENDING_UNCHANGED_500_1500_THRESHOLDS",
+    "mobileVisualReview": "PENDING_ACTUAL_D",
+    "all17RuntimeCriteria": "PENDING",
+    "acceptedStagingCandidateSha": null,
+    "bindingValidation": "public-message-binding-validation-d57aa1f3.json",
+    "bindingReview": "public-message-binding-review-d57aa1f3.json"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -728,24 +848,47 @@
       "admittedWorkflowSha": "213e991f3e392771226ae106162b114d5fffe6f6",
       "remainingSourceSAcceptance": "PERFORMANCE_FAIL_AND_FULL_SEVEN_PENDING",
       "nativeToolProvenance": "native-source-graphs-5b5d0a2f.json"
+    },
+    {
+      "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "sourcePR": 1235,
+      "bindingPR": null,
+      "bindingReference": "THIS_CHANGE_PENDING_EXACT_CI_AND_MAIN_ADMISSION",
+      "workflowSha": null,
+      "deployed": false,
+      "sourceCI": "IN_PROGRESS_AT_BINDING_PREPARATION",
+      "nativeQualification": "EXACT_NATIVE_EXPORT_SEVEN_GRAPH_COMPILE_LOAD_PASS_ONLY",
+      "signedRuntime": "PENDING",
+      "ciAndRuntimeStillRequired": true,
+      "bindingReview": "catalog-latency-c09de455-binding-review.json",
+      "bindingValidation": "catalog-latency-c09de455-binding-validation.json",
+      "localNativeExport": "local-native-export-c09de455.json",
+      "nativeSqlPrototypeBinding": "catalog-latency-c09de455-native-sql-binding.json",
+      "deployedHttpPerformance": "PENDING_UNCHANGED_500_1500_THRESHOLDS",
+      "mobileVisualReview": "PENDING_ACTUAL_Q",
+      "requiredBroadCommands": "local-required-validation-c09de455.json",
+      "allQRuntimeCriteria": "PENDING",
+      "acceptedStagingCandidateSha": null,
+      "localHolisticAdvisory": "FAIL_4_OF_5_LOCAL_COMMANDS",
+      "failureDeltaAudit": "PENDING_READ_ONLY_Q_VS_F_COMPARISON",
+      "nativeToolProvenance": "native-source-graphs-c09de455.json"
     }
   ],
   "currentObservedRuntime": {
-    "sourcePR": 1233,
-    "bindingPR": 1234,
-    "buildRunId": "43691641804",
-    "deployRunId": "43692865139",
-    "revision": "nzila-ue-v2-staging-app--rel5b5d0a2f40",
+    "sourcePR": 1235,
+    "bindingPR": 1236,
+    "buildRunId": "43718756258",
+    "deployRunId": "43720514263",
+    "revision": "nzila-ue-v2-staging-app--relc09de45572",
     "trafficPercent": 100,
-    "imageDigest": "sha256:59335196efdbffa3916c823475be2806d06916b6fba8ff425f81e97dda897ae8",
-    "sourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
-    "workflowAndInfrastructureSha": "213e991f3e392771226ae106162b114d5fffe6f6",
-    "verificationWorkflowSha": "213e991f3e392771226ae106162b114d5fffe6f6",
+    "imageDigest": "sha256:6e22096ccc3d1a1cd2473cec673b7d32fe5c03d44f4973b80f66230b100e5518",
+    "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+    "workflowAndInfrastructureSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
+    "verificationWorkflowSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
     "stagingGo": false,
-    "reconciliation": "observed-runtime-5b5d0a2f-reconciliation.json",
-    "deployedPerformance": "FAIL_718.865MS_P95_LIMIT500MS",
-    "fullSevenPersonas": "PENDING",
-    "targetedPersonasPassed": 2
+    "reconciliation": "observed-runtime-c09de455-reconciliation.json",
+    "deployedPerformance": "FAIL_609.794MS_P95_LIMIT500MS",
+    "fullSevenPersonas": "NOT_EXECUTED_ON_Q"
   },
   "supersededWorkbenchCandidate": {
     "sourceSha": "4687a4ed84935cedb2b436738373b13b7cda2158",
@@ -780,6 +923,25 @@
       "localNativeExport": "local-native-export-80651983.json",
       "nativeLockOnlySourceBinding": "native-deadline-lock-only-80651983.json",
       "catalogPrototypeSourceEquivalence": "catalog-native-source-equivalence-80651983.json"
+    }
+  ],
+  "historicalObservedRuntimeRecords": [
+    {
+      "sourcePR": 1233,
+      "bindingPR": 1234,
+      "buildRunId": "43691641804",
+      "deployRunId": "43692865139",
+      "revision": "nzila-ue-v2-staging-app--rel5b5d0a2f40",
+      "trafficPercent": 100,
+      "imageDigest": "sha256:59335196efdbffa3916c823475be2806d06916b6fba8ff425f81e97dda897ae8",
+      "sourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "workflowAndInfrastructureSha": "213e991f3e392771226ae106162b114d5fffe6f6",
+      "verificationWorkflowSha": "213e991f3e392771226ae106162b114d5fffe6f6",
+      "stagingGo": false,
+      "reconciliation": "observed-runtime-5b5d0a2f-reconciliation.json",
+      "deployedPerformance": "FAIL_718.865MS_P95_LIMIT500MS",
+      "fullSevenPersonas": "PENDING",
+      "targetedPersonasPassed": 2
     }
   ]
 }

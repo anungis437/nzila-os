@@ -1,0 +1,60 @@
+{
+  "status": "READ_ONLY_DELTA_COMPLETE_AGGREGATE_REMAINS_FAIL",
+  "at": "2026-11-15T15:31:17.681316+00:00",
+  "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "baselineSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "allFiveRequiredCommandsActuallyRan": true,
+  "aggregate": {
+    "failedFiles": 2576,
+    "passedFiles": 528,
+    "skippedFiles": 1,
+    "failedTests": 19,
+    "passedTests": 7788,
+    "skippedTests": 12
+  },
+  "newFailureHeaders": [
+    "FAIL  |union-eyes| components/utilities/locale-client-provider.test.tsx [ apps/union-eyes/components/utilities/locale-client-provider.test.tsx ]",
+    "FAIL  |union-eyes| lib/i18n/client-message-scope.test.ts [ apps/union-eyes/lib/i18n/client-message-scope.test.ts ]"
+  ],
+  "removedFailureHeaders": [
+    "FAIL  |@nzila/platform-auth| src/identity-provider-residuals.test.ts > UE-CONV-A-006: provider residuals can only shrink > the retired adapter and webhook verifier are gone from the shared package, and nothing names them again"
+  ],
+  "newHeadersAreCompilationFailuresBeforeTestBodies": true,
+  "missingModule": "@nzila/config/tsconfig/nextjs",
+  "newAssertionFailureHeaders": [],
+  "focusedActualTestsPassed": 16,
+  "unchangedLintAndGovernanceDiagnostics": {
+    "lint": {
+      "setsExactlyEqual": true,
+      "lines": 3
+    },
+    "governance-audit": {
+      "setsExactlyEqual": true,
+      "lines": 40
+    }
+  },
+  "typecheckDelta": {
+    "diagnosticsIdentical": false,
+    "baselineFirstFailure": "@nzila/blob: missing @azure/storage-blob",
+    "candidateFirstFailure": "@nzila/cli: src/index.ts(27,9) TS2554 expected1argument got0",
+    "candidateCliIsolatedReproduced": true,
+    "isolatedCliExitCode": 2,
+    "unchangedTrackedSourceAndConfigurationPaths": [
+      "packages/cli",
+      "packages/config",
+      "packages/blob",
+      "packages/nar",
+      "pnpm-lock.yaml",
+      "package.json",
+      "tsconfig.json",
+      "turbo.json",
+      "apps/union-eyes/tsconfig.json"
+    ],
+    "interpretation": "Fail-fast task scheduling exposes a different unchanged CLI diagnostic; aggregate failure remains, and diagnostic sets are not claimed identical.",
+    "isolatedLogSha256": "6d582e78bb6e3c72073274a637a08aa25dce6f1667d1262dcf9adb12f2544a84"
+  },
+  "priorUnchangedProviderTimeoutAbsent": true,
+  "broadPassClaimed": false,
+  "allFailuresPreexistingClaimed": false,
+  "sourceEditsForAudit": 0
+}

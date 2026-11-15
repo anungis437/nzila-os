@@ -1,61 +1,54 @@
 # Current staging and acceptance delta
 
-Staging serves application `5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb` at 100% on
-`nzila-ue-v2-staging-app--rel5b5d0a2f40`, image
-`sha256:59335196efdbffa3916c823475be2806d06916b6fba8ff425f81e97dda897ae8`.
-Source PR #1233 and binding PR #1234 were admitted at workflow/IaC
-`213e991f3e392771226ae106162b114d5fffe6f6`; immutable build 43691641804 and protected
-CHG-2026-0114 deployment 43692865139 supplied the serving revision. Base STAGING remains **NO_GO**.
+Staging serves `c09de4557236b615fad0a1c992d6ee2b8820bf62` at100% on
+`nzila-ue-v2-staging-app--relc09de45572`, image
+`sha256:6e22096ccc3d1a1cd2473cec673b7d32fe5c03d44f4973b80f66230b100e5518`.
+PRs #1235/#1236 were normally merged at workflow/IaC `c47cb1f33d7cf05b549be617bc0e8411b56db996`;
+immutable build43718756258 and protected CHG-2026-0114 deployment43720514263 supplied it.
+Readiness and exact serving identity pass. **Base STAGING remains NO_GO.**
 
-Actual source-S evidence passes all six base journeys: member intake, NAR, claim deadlines, formal
-grievance continuity/deadlines, messaging and harmless EICAR fail-closed scanning. Three fixture
-authorities were retired and original roles restored. Staff create/reschedule/complete/cancel,
-stale-version and terminal-reopen denial, represented-member privacy, EN/FR desktop/mobile and
-canonical assignment/revocation were exercised. Six worker scenarios pass; provider acceptance
-is proven, inbox receipt is not claimed. Read-only primary qualification preserves all 40 immutable
-migrations and retained records, with zero guard SQL/replay. Final native audit/seals pass.
+Q fails unchanged canonical performance: run43718734553 attempt2, job132833725876,
+exact artifact14164058711 records609.794ms p95 against500ms, max1102.744ms,
+1028requests and1542passed assertions with zero custom errors. Expected favicon404 is
+not counted as a custom error. An initially ambiguous historical artifact download is retained
+privately with its correction; it is not accepted Q evidence. Actual Q request attribution
+records public `/en-CA` p95550.584ms versus health325.185ms. Full public HTML was
+587,373EN /640,563FR bytes. No final full-persona or base journey suite ran on Q.
 
-Real paired run 43698763161 passes same-unexpired-cookie case/document 401 revocation, restored
-officer memberships, the original 69-byte checksum and unchanged original full-hour URL expiry
-403. Targeted app-owner 43701179839 and executive 43701890922 runs pass; they do not establish
-full seven-persona qualification. P’s canonical system_admin/global-false baseline and zero public
-projection rows were restored without inventing a membership. Recovery 43704229851 passes with
-the known S revision at 100% and both QA revisions independently observed inactive. Full traffic
-failover is not claimed. All these observations belong to S, not the proposed replacement.
+Proposed application is `d57aa1f3dde18d44120141c22f3e4fbf8c062153` (source PR #1237). This integration
+binds that exact source; integration CI and main admission are pending. Home navigation/footer
+messages are limited to4044EN /4481FR JSON bytes instead of464590 /506270.
+Application navigation imports the original full catalog and retains formats, request time and
+Toronto timezone. Caller scope hints are overwritten from the actual route; authorization does
+not use this presentation hint. A real framework check caught an introduced loading-boundary
+redirect regression before staging. The conditional boundary now returns the original HTTP307;
+permission assertions were preserved. All16focused tests, scoped typecheck/lint and six real
+EN/FR browser transitions pass. These are source/framework proofs, not staging authentication
+or HTTP performance acceptance.
 
-S still fails the unchanged canonical performance gate: run 43691446485 attempt 2 records
-718.865ms p95 against 500ms. French member-detail badges also visibly split words at 390px;
-recorded scrollWidth is 390px, so this is a readability defect without observed horizontal overflow.
-Managed deadline mobile controls remain usable. Historical failures and contracts are retained.
+Exact D local native fresh/restore/repeat/privileges pass with24,576catalog objects and
+digest`8fd6dc431fdc911a0717dc008220f2bf58b4f4cee2ff35c884bb02fe8e68e15f`.
+Seven tools compile/load with488distinct exact-source modules; backend source bytes and bundle
+digests equal Q. D still needs its configured signed-runtime rehearsal. All five required broad
+local commands ran: docs PASS; lint, typecheck, governance audit and test:fast FAIL. The
+aggregate has2576failed/528passed/1skipped files and19failed/7788passed/12skipped tests.
+The delta records two new files blocked before test bodies by existing shared TS-config
+resolution, no new assertion failure headers, and a different first typecheck failure in unchanged
+CLI source. Broad failure is retained; no blanket preexisting-failure claim is made.
 
-Proposed application is `c09de4557236b615fad0a1c992d6ee2b8820bf62` (source PR #1235).
-This change is its integration binding; its PR number and admitted workflow SHA are pending.
-Q promotes exact measured combined catalog SQL, changing only query indexes 5 and 14 while
-26 other queries, catalog digest function and orchestration body remain unchanged. The promoted
-committed bytes match read-only V4 batch `835a890151701696d2e6bf9d1a3ae682c8a4a6c76fd80817e9c4e78147e6e24d`.
-Native prototype times improve from 350–429ms to 232–272ms; deployed Q HTTP performance is
-still pending. The route-specific mobile header repair must be visually verified after rollout.
+Remaining D work is final exact source/integration CI and normal admission, signed-runtime
+qualification with retained-copy cleanup, read-only primary retention, immutable build, concrete
+reviewed staging rollout, unchanged performance gate, seven fresh personas and all base journeys,
+paired same-cookie revocation and original full-hour document expiry, workers, recovery, final
+audit/seals, telemetry and EN/FR desktop/mobile visual review. All17required D criteria remain
+pending; acceptedStagingCandidateSha is null. Historical S base6/worker6/retention/audit/paired
+expiry/targeted2/recovery proofs remain indexed under their actual source and cannot qualify D.
 
-Exact Q native fresh/restore/repeat/privileges pass with 24,576 catalog objects and the unchanged
-8fd6dc431fdc911a0717dc008220f2bf58b4f4cee2ff35c884bb02fe8e68e15f catalog digest. Seven native
-tools compile/load and verify all 488 distinct included source modules against Q. These are local
-source proofs, not configured signed-runtime or deployed acceptance. All 57 focused checks and
-scoped lint pass. Required broad commands were actually run: docs passed; lint, typecheck,
-governance audit and test:fast failed. Their actual failures remain recorded.
-
-Remaining Q work is exact source/integration CI and eligible main admission, signed-runtime
-rehearsal, read-only primary retention/admission, immutable build, fresh concrete reviewed staging
-rollout, unchanged performance gate, all seven fresh personas, mobile visual review, and fresh
-paired/base/privacy/worker/recovery/audit/telemetry acceptance. All 17 required Q criteria remain
-pending; the local holistic advisory is FAIL, and acceptedStagingCandidateSha is null. The exact
-Q-versus-F extra failure is an unchanged 30-second source-scan timeout. Its isolated five-test
-suite passes with the normal configuration and unchanged timeout; the aggregate failure is retained.
-
-Staff deadline management is required. Dates are staff-entered; automatic legal calculation and
-intake-claim email reminders are not claimed. Formal reminder processing remains in scope.
-Finance/dues persistence and Financial Officer 2.1 are excluded; sensitive finance boundaries must
-fail closed. Preserve live Azure data, the 40 immutable migrations and signing keys. Anungis and
-anungis437 are the same founder; Codex acts under continuing CHG-2026-0114 delegation, ending
-2026-11-16T23:59:59Z without extension. No production, global SaaS promotion, frozen 777 closure
-change or Phase 3B. [Contract](UE_STAGING_GO_CONTRACT.json) ·
+Staff create, reschedule, complete and cancel case deadlines in the app. Dates are staff-entered;
+automatic legal calculation and intake-claim email reminders are not claimed. Formal reminders
+remain in scope. Finance/dues persistence and Financial Officer2.1 are excluded; sensitive finance
+boundaries must fail closed. Preserve primary data,40immutable migrations and signing keys.
+Anungis and anungis437 are the same founder; continuing CHG-2026-0114 delegation ends
+2026-11-16T23:59:59Z without extension. No production, global SaaS promotion, frozen777closure
+change or Phase3B. [Contract](UE_STAGING_GO_CONTRACT.json) ·
 [Evidence index](evidence/ue-v2-execution-20261113/security-boundary/index.json).

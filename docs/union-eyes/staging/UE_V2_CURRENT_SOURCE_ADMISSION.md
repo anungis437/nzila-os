@@ -1,3 +1,27 @@
+# Current source admission checkpoint — November15,2026
+
+Observed serving application is `c09de4557236b615fad0a1c992d6ee2b8820bf62`, admitted at workflow `c47cb1f33d7cf05b549be617bc0e8411b56db996`
+by PRs #1235/#1236. Build43718756258 and deployment43720514263 succeeded; actual runtime
+identity/readiness pass. Canonical performance remains FAIL at609.794ms p95 against500ms.
+
+Proposed `d57aa1f3dde18d44120141c22f3e4fbf8c062153` (PR #1237) has exact local export/restore/repeat/native
+privilege proof with776tables,6267statements and24576objects. Seven native tools compile/load
+and verify488distinct source modules. Six real Next framework browser transitions, HTTP307
+and16focused translation/redirect tests pass. These local proofs do not qualify staging. Broad
+local docs pass; four other required commands fail with an explicit diagnostic delta. Source and
+integration CI, main admission, signed-runtime qualification and fresh rollout are still required.
+
+Current verified V2 Entra public identifiers are client
+`5470c759-3dde-4009-9fd6-3eee46ab7b72` and tenant
+`cc15259a-d2bf-421f-8e44-dccf8dc6232a`. Preserve existing credentials and signing keys.
+Do not replay schema or restore/seed the existing primary; retain all40immutable migration
+records and the known overlay. See [current candidate](UE_V2_CURRENT_CANDIDATE.md).
+
+## Historical bootstrap record (November10; superseded identity and counts)
+
+The following record is retained as historical evidence. Its legacy Entra registration, schema
+counts and bootstrap state do not describe the currently serving V2 configuration.
+
 # Current-source staging schema admission
 
 The previous generator deliberately retained an older hash for the organization

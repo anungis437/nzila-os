@@ -1,12 +1,12 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 staging: exact catalog-query latency and mobile case-header repair",
+  "title": "Union Eyes V2 staging: bounded public translation payload with server redirect preservation",
   "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. Owner-directed founder-operated staging authorization is recorded; no production release, institutional mandate, financial activation, or STAGING GO without runtime proof is authorized.",
   "service": "union-eyes",
   "environment": "STAGING",
   "change_type": "NORMAL",
   "risk_level": "HIGH",
-  "impact_summary": "Creates or updates only the dedicated Union Eyes V2 staging stack in nzila-canada-staging-rg and applies the candidate's staging migrations. No production resource, client data, production DNS, real financial settlement, or institution-specific authority is in scope.",
+  "impact_summary": "Update only the qualified dedicated Union Eyes V2 staging workload. Preserve existing live staging data, all40 installed immutable migrations and the known overlay; no primary schema replay or empty-target restore. No production resource, client data, production DNS, financial settlement or institutional authority is in scope.",
   "requested_by": "anungis437",
   "approvers_required": [
     "anungis437"
@@ -105,7 +105,28 @@
     "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-runtime-5b5d0a2f-reconciliation.json",
     "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/catalog-latency-c09de455-binding-review.json",
     "https://github.com/anungis437/nzila-os/pull/1235",
-    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/catalog-latency-c09de455-binding-validation.json"
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/catalog-latency-c09de455-binding-validation.json",
+    "https://github.com/anungis437/nzila-os/pull/1237",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-contract-before-public-message-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/authority-d57aa1f3-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/bearer-d57aa1f3-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/nested-d57aa1f3-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/worker-d57aa1f3-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/nar-d57aa1f3-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/system-d57aa1f3-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/deadline-d57aa1f3-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/native-tool-provenance-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/public-message-focused-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/actual-framework-browser-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/actual-framework-redirect-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-validation-delta-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-required-validation-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-runtime-c09de455-reconciliation.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/actual-c09de455-performance-request-attribution.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/actual-c09de455-public-payload.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/public-message-binding-validation-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/public-message-binding-review-d57aa1f3.json"
   ],
   "linked_prs": [
     "1137",
@@ -162,7 +183,8 @@
     "1228",
     "1231",
     "1233",
-    "1235"
+    "1235",
+    "1237"
   ],
   "linked_commits": [
     "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
@@ -202,11 +224,12 @@
     "17188f7b602342ab6e88222759a4caba01f52248",
     "80651983dcdf114b488813c64f88ca3aca7ab88d",
     "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
-    "c09de4557236b615fad0a1c992d6ee2b8820bf62"
+    "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+    "d57aa1f3dde18d44120141c22f3e4fbf8c062153"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-15T11:05:23.356318+00:00",
+  "updated_at": "2026-11-15T15:33:35.960352+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -215,7 +238,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+    "candidate_sha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true

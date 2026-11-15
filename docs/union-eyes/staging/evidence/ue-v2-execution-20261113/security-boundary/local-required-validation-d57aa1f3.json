@@ -1,0 +1,55 @@
+{
+  "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "status": "COMPLETED_WITH_FAILURES",
+  "startedAt": "2026-11-15T15:16:14.579754+00:00",
+  "scope": "Required repository commands; all actual failures retained; no finance implementation",
+  "results": [
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0,
+      "status": "PASS",
+      "seconds": 5.71,
+      "logFile": "validate-docs.log",
+      "logSha256": "d18381b5af7f6977ef8258b32a3ed3118e01e8e7221d4b1c4d206f628f47cb12"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 27.51,
+      "logFile": "lint.log",
+      "logSha256": "5dff6af6aa45e84d681bdb47e45098a431a33b000671f6ecf14052b9423d16b4"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 2,
+      "status": "FAIL",
+      "seconds": 40.93,
+      "logFile": "typecheck.log",
+      "logSha256": "e1e98449526dcc39c73666dc0af3a378a45fd92b89148f443b5bdef7cb3595cb"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "exitCode": 2,
+      "status": "FAIL",
+      "seconds": 53.1,
+      "logFile": "governance-audit.log",
+      "logSha256": "a1c12563d966ab72a8057acb01d0730121cd27f89e58b63aac7525ad05df8dc8"
+    },
+    {
+      "command": "pnpm test:fast",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 186.04,
+      "logFile": "test-fast.log",
+      "logSha256": "58116bcb7d9d11778bfdebaa2000b7e45635b014e5fe58c387805b1193ccb044"
+    }
+  ],
+  "finishedAt": "2026-11-15T15:19:20.800248+00:00",
+  "unexpectedTrackedChangesPreserved": [],
+  "localOnly": true,
+  "stagingAcceptance": false,
+  "originalPrivateReceiptSha256": "2f427fa6e689b7890e120d04e8c3246ee46cab256d37cc6b8181d172f85ae94e",
+  "failureDeltaAudit": "local-validation-delta-d57aa1f3.json",
+  "allFailuresPreexistingClaimed": false
+}

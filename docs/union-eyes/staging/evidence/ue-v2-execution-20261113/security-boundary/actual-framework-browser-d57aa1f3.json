@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "purpose": "REAL_NEXT_BROWSER_PERSISTENT_PROVIDER_SCOPE_TRANSITIONS",
+  "applicationSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "observations": [
+    {
+      "path": "/en-CA",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4044,
+      "heading": "Pricing",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/en-CA/catalog-check",
+      "hasCommon": "true",
+      "timeZone": "America/Toronto",
+      "bytes": 464590,
+      "heading": "Save",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/en-CA",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4044,
+      "heading": "Pricing",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/fr-CA",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4481,
+      "heading": "Tarification",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/fr-CA/catalog-check",
+      "hasCommon": "true",
+      "timeZone": "America/Toronto",
+      "bytes": 506270,
+      "heading": "Enregistrer",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/fr-CA",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4481,
+      "heading": "Tarification",
+      "nonce": "owned-navigation-proof"
+    }
+  ],
+  "translationErrors": [],
+  "spoofedScopeOverriddenOnApplicationRoute": true,
+  "actualProductionComponentsImported": true,
+  "programSha256": "94c5ed525344fa0737381401e39cfa8e7d44c9f98228ca4fd6b7b4970409e03f",
+  "applicationAuthTested": false,
+  "stagingRuntimeAcceptanceClaimed": false
+}

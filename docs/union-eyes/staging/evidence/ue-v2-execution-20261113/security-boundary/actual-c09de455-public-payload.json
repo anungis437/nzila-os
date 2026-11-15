@@ -1,0 +1,26 @@
+{
+  "at": "2026-11-15T13:59:59.558859+00:00",
+  "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "observations": [
+    {
+      "path": "/en-CA",
+      "elapsedMs": 197.323,
+      "bodyBytes": 587373,
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "encoding": null,
+      "inlineNextFlightScripts": 1,
+      "messagesOccurrences": 10
+    },
+    {
+      "path": "/fr-CA",
+      "elapsedMs": 222.784,
+      "bodyBytes": 640563,
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "encoding": null,
+      "inlineNextFlightScripts": 1,
+      "messagesOccurrences": 10
+    }
+  ]
+}

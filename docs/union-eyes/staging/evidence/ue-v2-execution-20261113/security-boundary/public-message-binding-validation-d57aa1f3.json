@@ -1,0 +1,39 @@
+{
+  "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "at": "2026-11-15T15:34:06.058647+00:00",
+  "status": "PASS",
+  "checks": [
+    {
+      "command": "pnpm exec vitest run --config /Users/oby/.codex/private-evidence/nzila-os/20261114/execution/binding-validation-d57aa1f3/shared-approval-vitest.config.mjs",
+      "exitCode": 0,
+      "logFile": "check-0.log",
+      "logSha256": "29812a4045048a1286ee57ec68d32726f2ad7ee24f8d0d16c9896133f0fd98dc"
+    },
+    {
+      "command": "node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs tooling/scripts/lib/ue-staging-navigation-settlement.test.cjs tooling/scripts/lib/ue-staging-request-safety.test.cjs",
+      "exitCode": 0,
+      "logFile": "check-1.log",
+      "logSha256": "4a85c886ed948ccb6bafc7418eac3c2ec82807182cce065d9fd776a901a50085"
+    },
+    {
+      "command": "pnpm exec tsx tooling/scripts/generate-ue-v2-navigation-inventory.cts --check",
+      "exitCode": 0,
+      "logFile": "check-2.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0,
+      "logFile": "check-3.log",
+      "logSha256": "d18381b5af7f6977ef8258b32a3ed3118e01e8e7221d4b1c4d206f628f47cb12"
+    }
+  ],
+  "sharedApprovalPassed": 95,
+  "releaseNavigationRequestPassed": 39,
+  "sourceDerivedNavigationCheck": "PASS",
+  "docs": "PASS",
+  "failed": 0,
+  "exactIntegrationCiStillRequired": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}
