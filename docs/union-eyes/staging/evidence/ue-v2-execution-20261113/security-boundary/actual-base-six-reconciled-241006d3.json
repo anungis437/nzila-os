@@ -1,0 +1,74 @@
+{
+  "status": "PASS_RECONCILED_ACTUAL_SOURCE_BOUND_BASE_JOURNEYS",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "actualPrivateReceipt": {
+    "privateFileName": "receipt.json",
+    "sha256": "8ffc1f9ababbd35073d1a2c247f4b25c181c7d97d662c9a9c688523c28686c06"
+  },
+  "stages": [
+    {
+      "stage": "member-ui",
+      "status": "PASS",
+      "actualReceiptSha256": "de4b03dda793f6a08b8f9d85472b228e535518b2a882e632550a4a762120fd4c",
+      "evidenceClass": "ACTUAL_FINAL_SOURCE_REAL_JOURNEY"
+    },
+    {
+      "stage": "member-nar",
+      "status": "PASS",
+      "actualReceiptSha256": "41121b1f8e0e9d0e65acc62e296f2e70ad0135e05d879c4b2a5854aa7bf3f91f",
+      "evidenceClass": "ACTUAL_FINAL_SOURCE_REAL_JOURNEY"
+    },
+    {
+      "stage": "claim-deadlines",
+      "status": "PASS",
+      "actualReceiptSha256": "11a65a1575879cc182e6e1394e14c287eabd63713119d0afa47cb2f263c379c6",
+      "evidenceClass": "ACTUAL_ACTIONS_PLUS_INDEPENDENT_RETIREMENT_RECONCILIATION"
+    },
+    {
+      "stage": "formal-deadlines",
+      "status": "PASS",
+      "actualReceiptSha256": "377303a7f3a1740af88cb3890fc4fa0df8c7ffe024bf05660ffc7e0ca098f20d",
+      "evidenceClass": "ACTUAL_FINAL_SOURCE_REAL_JOURNEY"
+    },
+    {
+      "stage": "messaging",
+      "status": "PASS",
+      "actualReceiptSha256": "b457bc2a1b2f20f598866578e166090eb579570305e7aaf0f2b2d6319d204060",
+      "evidenceClass": "ACTUAL_FINAL_SOURCE_REAL_JOURNEY"
+    },
+    {
+      "stage": "eicar",
+      "status": "PASS",
+      "actualReceiptSha256": "078ecdfb7a09f9359562c29af61fd90a5e21f0fb44e5d69651558c347da08693",
+      "evidenceClass": "ACTUAL_FINAL_SOURCE_REAL_JOURNEY"
+    }
+  ],
+  "authorityCleanup": [
+    {
+      "status": "CLEANED",
+      "actualReceiptSha256": "ec6d831e666242b2b8656561fe46241d3a41f3a2f4a4e06ecbf09bd08b801e1e",
+      "evidenceClass": "ACTUAL_GUARDED_FIXTURE_CLEANUP"
+    },
+    {
+      "status": "CLEANED",
+      "actualReceiptSha256": "10645a33de1b40eb657ae7c4519c992a8a365d8a0198c06fbf1ddf8873c0e77d",
+      "evidenceClass": "ACTUAL_GUARDED_FIXTURE_CLEANUP"
+    },
+    {
+      "status": "CLEANED",
+      "actualReceiptSha256": "11a65a1575879cc182e6e1394e14c287eabd63713119d0afa47cb2f263c379c6",
+      "evidenceClass": "INDEPENDENT_EXACT_OWNED_RETIREMENT_AND_COMMITTED_READ"
+    }
+  ],
+  "originalCoordinatorStatus": "FAIL",
+  "originalCoordinatorReceiptSha256": "a9042c90291d424b952029ddf652e0eb43850d603290a75842678c76118a762d",
+  "originalFailuresRetainedAndNotRelabeled": true,
+  "claimRetirementReconciliation": "actual-claim-retirement-reconciled-241006d3.json",
+  "deadlineDatesStaffEntered": true,
+  "automaticLegalCalculationClaimed": false,
+  "intakeCaseEmailRemindersClaimed": false,
+  "formalGrievanceReminderProcessingInScope": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

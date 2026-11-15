@@ -1,0 +1,116 @@
+{
+  "status": "PASS_SCOPED_BASE_RELEASE_STAGING_TECHNICAL_QUALIFICATION_AND_DELEGATED_ACCEPTANCE",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "bindingHeadSha": "b28afebeb1c521688e1aa854aca32b5cbc052963",
+  "sourcePR": 1241,
+  "bindingPR": 1242,
+  "buildRunId": "43755125987",
+  "deployRunId": "43756733431",
+  "applicationDigest": "sha256:b021b664a0ac0ed90eaec14a232e28cf22f92d6bc50d93ad80512e26443fd874",
+  "revision": "nzila-ue-v2-staging-app--rel241006d302",
+  "trafficPercent": 100,
+  "actualFinalTechnicalCollector": {
+    "privateFileName": "actual-241006d3-final-technical-progress-v3.json",
+    "sha256": "54a430f541c2e81cb72588b0250b6d87fdebaf9e325462207b5f05dff1bd75c8"
+  },
+  "technicalProofHashes": {
+    "sequence": {
+      "privateFileName": "actual-241006d3-runtime-after-cleanup-progress-v2.json",
+      "sha256": "c9e0a55e4a4624ca78c1f0b2cb124b82aac1ae60a5dd1fa7d84cc68b820173ee"
+    },
+    "paired": {
+      "privateFileName": "receipt.json",
+      "sha256": "5847c1fb8becbd27ce622294956dfa46e836a8e8f590b546c63c67f2badcafa9"
+    },
+    "base": {
+      "privateFileName": "receipt.json",
+      "sha256": "8ffc1f9ababbd35073d1a2c247f4b25c181c7d97d662c9a9c688523c28686c06"
+    },
+    "worker": {
+      "privateFileName": "actual-worker-cycle.json",
+      "sha256": "88f50e3e68f5fa7cf2aba2d7713896827c2c3a3f67671fd3fcdd12c282e27b47"
+    },
+    "personas": {
+      "privateFileName": "receipt.json",
+      "sha256": "eb1934fe6f93372ddc84b17cf1f5d0dc3329fdae1c121922981b8609f5f51298"
+    },
+    "recovery": {
+      "privateFileName": "actual-failed-revision-recovery-241006d3.json",
+      "sha256": "e87bf5f2b9c53ad056ce2feb43b3e75228af2c15ebbafebd6f09fee0ff364f7b"
+    },
+    "telemetry": {
+      "privateFileName": "actual-241006d3-request-telemetry-correlation.json",
+      "sha256": "592c096025f29f789ab9fd34c74017065d4ede95a86031178e85edbd87dbe3f0"
+    },
+    "heading": {
+      "privateFileName": "actual-mobile-heading-241006d3-visual-review.json",
+      "sha256": "aeca01ac93b474a3391d907476ce8d4ce34e29dbc67cf05262a030a5f424dcb8"
+    },
+    "language": {
+      "privateFileName": "actual-staging-public-language-241006d3.json",
+      "sha256": "6eb5701e11276a90c3e5c07de18118f7dd0d9b8be035df4afc5ff30d6c0af5c3"
+    },
+    "publicVisual": {
+      "privateFileName": "anonymous-visual-review-241006d3.json",
+      "sha256": "3c3984e5468579707fd84bdab656fe68f1555fe1de615b7d8940a6aaa24c8a7a"
+    },
+    "performance": {
+      "privateFileName": "actual-241006d3-canonical-performance-progress.json",
+      "sha256": "dec7faab9d08c0c399ca697366a22151dad3639ec73382d7b7df176c36be6c80"
+    },
+    "nativeCopy": {
+      "privateFileName": "actual-predeployment-cycle.json",
+      "sha256": "2a3ff02a770d01f37ff4c762f00a00e44a917eede7fa12794bbf3f571a393986"
+    },
+    "runtime": {
+      "privateFileName": "observed-runtime-241006d3.json",
+      "sha256": "a265c8314eb9d831f0021d4e97afdbfd62d1e4b25c8abd982262ed6a99c01de6"
+    },
+    "primary-retention": {
+      "privateFileName": "actual-post-rollout-primary-retention.json",
+      "sha256": "73af36c010d3416a2310cdbcf8e5354d8ec44d63d8c9981a85635de0a935f136"
+    },
+    "final-native-audit-and-seals": {
+      "privateFileName": "actual-final-native-isolation-audit-and-seals.json",
+      "sha256": "b5c9f95c33cf70220679fae5d5ecc9d8ca2ab19abed501b81fb0d401eeecbcd1"
+    }
+  },
+  "decision": {
+    "verdict": "STAGING_GO",
+    "scope": "BASE_RELEASE_STAGING_ONLY",
+    "recordedAt": "2026-11-15T22:14:29.715619+00:00",
+    "authority": "CHG-2026-0114",
+    "authorityExpiresAt": "2026-11-16T23:59:59Z",
+    "ownerAccountsRepresentSameFounder": [
+      "anungis",
+      "anungis437"
+    ],
+    "recordedBy": "Codex under continuing founder-delegated operator/reviewer authority",
+    "independentHumanApprovalClaimed": false,
+    "productionAuthorized": false
+  },
+  "original158PublicEvidenceEntriesAndBytesPreserved": true,
+  "originalBaseCoordinatorFailureRetained": true,
+  "claimCleanupReconciledBy": "actual-claim-retirement-reconciled-241006d3.json",
+  "localHolisticRegression": "FAIL_ADVISORY; lint/typecheck/test:fast/governance:audit fail; docs pass on application source and binding. Final publication command results recorded separately.",
+  "fullSourceCI": {
+    "passedTests": 26215,
+    "skippedTests": 34,
+    "runId": "43748661677",
+    "jobId": 132917499168
+  },
+  "limits": [
+    "Finance/dues persistence and Financial Officer 2.1 excluded; only sensitive finance refusal accepted.",
+    "Staff enter deadline dates and manage creation/rescheduling/completion/cancellation; no automatic legal calculation or intake-case email reminders claimed.",
+    "Formal-grievance reminder processing in scope; provider acceptance does not establish inbox delivery.",
+    "Canonical performance is the unchanged public CI workload: p95 354.1058007ms below500ms; p99 threshold1500ms passed. It does not establish every authenticated API latency.",
+    "Real session revocation denies the same unexpired cookie at case/document APIs. An already-issued URL remains usable until bounded expiry; the same original URL naturally returned403 after its unchanged one-hour expiry.",
+    "Recovery exercised zero-traffic fault/recovered revisions while serving source remained100%; no full-traffic failover certification.",
+    "English/French and390px/1440px browser checks plus actual visual review; no physical-device certification.",
+    "Retained staging schema uses the explicit known-overlay profile; strict whole-catalog fresh equality is not claimed.",
+    "Global frozen777 programme, zero formal defect closures, global SaaS NO_GO and Phase3B HOLD unchanged."
+  ],
+  "stagingGo": true,
+  "productionAuthorized": false
+}

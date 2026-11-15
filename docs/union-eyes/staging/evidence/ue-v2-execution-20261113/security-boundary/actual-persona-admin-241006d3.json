@@ -1,0 +1,449 @@
+{
+  "evidenceClass": "REAL_REMOTE_ENTRA_SESSION_AND_API",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "runId": "43766037458",
+  "observations": [
+    {
+      "at": "2026-11-15T21:53:16.637Z",
+      "kind": "LIVE_SOURCE_IDENTITY",
+      "gitSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "principal": "dc871813-4d38-4ead-8867-6cc8438b863e"
+    },
+    {
+      "at": "2026-11-15T21:53:25.653Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "A",
+      "principal": "dc871813-4d38-4ead-8867-6cc8438b863e",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-15T22:08:25.637Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-15T21:53:26.211Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/profile/roles",
+      "status": 200,
+      "traceId": "0e51b3f1beae00510669e1d7361931b9",
+      "correlationId": "2c3092d5-07bc-41e9-a7f8-122a4305ccbc"
+    },
+    {
+      "at": "2026-11-15T21:53:26.211Z",
+      "kind": "LIVE_CANONICAL_MEMBERSHIP_ROLE",
+      "requestedOwnedSyntheticRole": "admin",
+      "observedCanonicalRole": "admin"
+    },
+    {
+      "at": "2026-11-15T21:53:31.949Z",
+      "kind": "OBSERVED_ROLE_EXECUTION_HOME",
+      "requestedOwnedSyntheticRole": "admin",
+      "initialPath": "/en-CA/dashboard",
+      "path": "/en-CA/dashboard/admin/organizations",
+      "redirectedAfterDOMContentLoaded": true,
+      "initialHttpStatus": 200
+    },
+    {
+      "at": "2026-11-15T21:53:35.414Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/en-CA/dashboard/workspace",
+      "finalPath": "/en-CA/dashboard/workspace",
+      "expectedPath": "/en-CA/dashboard/workspace",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:53:41.987Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/en-CA/dashboard/workspace",
+      "finalPath": "/en-CA/dashboard/workspace",
+      "expectedPath": "/en-CA/dashboard/workspace",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:53:48.462Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/en-CA/dashboard/admin/organizations",
+      "finalPath": "/en-CA/dashboard/admin/organizations",
+      "expectedPath": "/en-CA/dashboard/admin/organizations",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:53:51.272Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/en-CA/dashboard/admin/organizations",
+      "finalPath": "/en-CA/dashboard/admin/organizations",
+      "expectedPath": "/en-CA/dashboard/admin/organizations",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:53:53.816Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/en-CA/dashboard/admin/onboarding",
+      "finalPath": "/en-CA/dashboard/admin/onboarding",
+      "expectedPath": "/en-CA/dashboard/admin/onboarding",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:53:56.886Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/en-CA/dashboard/admin/onboarding",
+      "finalPath": "/en-CA/dashboard/admin/onboarding",
+      "expectedPath": "/en-CA/dashboard/admin/onboarding",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:54:00.440Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/en-CA/dashboard/governance",
+      "finalPath": "/en-CA/dashboard/governance",
+      "expectedPath": "/en-CA/dashboard/governance",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:54:03.967Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/en-CA/dashboard/governance",
+      "finalPath": "/en-CA/dashboard/governance",
+      "expectedPath": "/en-CA/dashboard/governance",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:54:10.473Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/en-CA/dashboard/audits",
+      "finalPath": "/en-CA/dashboard/audits",
+      "expectedPath": "/en-CA/dashboard/audits",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:54:16.875Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/en-CA/dashboard/audits",
+      "finalPath": "/en-CA/dashboard/audits",
+      "expectedPath": "/en-CA/dashboard/audits",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:54:19.593Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/en-CA/dashboard/settings",
+      "finalPath": "/en-CA/dashboard/settings",
+      "expectedPath": "/en-CA/dashboard/settings",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": false
+    },
+    {
+      "at": "2026-11-15T21:54:22.182Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/en-CA/dashboard/settings",
+      "finalPath": "/en-CA/dashboard/settings",
+      "expectedPath": "/en-CA/dashboard/settings",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:54:24.815Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/fr-CA/dashboard/workspace",
+      "finalPath": "/fr-CA/dashboard/workspace",
+      "expectedPath": "/fr-CA/dashboard/workspace",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:54:27.819Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/fr-CA/dashboard/workspace",
+      "finalPath": "/fr-CA/dashboard/workspace",
+      "expectedPath": "/fr-CA/dashboard/workspace",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:54:30.593Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/fr-CA/dashboard/admin/organizations",
+      "finalPath": "/fr-CA/dashboard/admin/organizations",
+      "expectedPath": "/fr-CA/dashboard/admin/organizations",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:54:33.186Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/fr-CA/dashboard/admin/organizations",
+      "finalPath": "/fr-CA/dashboard/admin/organizations",
+      "expectedPath": "/fr-CA/dashboard/admin/organizations",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:54:35.824Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/fr-CA/dashboard/admin/onboarding",
+      "finalPath": "/fr-CA/dashboard/admin/onboarding",
+      "expectedPath": "/fr-CA/dashboard/admin/onboarding",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:54:38.383Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/fr-CA/dashboard/admin/onboarding",
+      "finalPath": "/fr-CA/dashboard/admin/onboarding",
+      "expectedPath": "/fr-CA/dashboard/admin/onboarding",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:54:41.955Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/fr-CA/dashboard/governance",
+      "finalPath": "/fr-CA/dashboard/governance",
+      "expectedPath": "/fr-CA/dashboard/governance",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:54:45.335Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/fr-CA/dashboard/governance",
+      "finalPath": "/fr-CA/dashboard/governance",
+      "expectedPath": "/fr-CA/dashboard/governance",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:54:52.534Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/fr-CA/dashboard/audits",
+      "finalPath": "/fr-CA/dashboard/audits",
+      "expectedPath": "/fr-CA/dashboard/audits",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:54:58.543Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/fr-CA/dashboard/audits",
+      "finalPath": "/fr-CA/dashboard/audits",
+      "expectedPath": "/fr-CA/dashboard/audits",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:55:01.238Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "admin",
+      "experience": "admin",
+      "path": "/fr-CA/dashboard/settings",
+      "finalPath": "/fr-CA/dashboard/settings",
+      "expectedPath": "/fr-CA/dashboard/settings",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": false
+    },
+    {
+      "at": "2026-11-15T21:55:04.549Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "admin",
+      "path": "/fr-CA/dashboard/settings",
+      "finalPath": "/fr-CA/dashboard/settings",
+      "expectedPath": "/fr-CA/dashboard/settings",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:55:07.501Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "admin",
+      "path": "/en-CA/dashboard/finance",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/finance",
+      "finalPath": "/en-CA/dashboard/admin/organizations"
+    },
+    {
+      "at": "2026-11-15T21:55:16.997Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "admin",
+      "path": "/en-CA/dashboard/operations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/operations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T21:55:25.566Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "admin",
+      "path": "/en-CA/dashboard/admin/members",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/admin/members",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T21:55:33.378Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "admin",
+      "path": "/en-CA/dashboard/security",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/security",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T21:55:41.209Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "admin",
+      "path": "/en-CA/dashboard/integrations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/integrations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T21:55:43.292Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/finance/summary",
+      "status": 403,
+      "traceId": "f64923e6cbae45882517bff91424e36d",
+      "correlationId": "bc5a1c6e-0cc2-4d50-86c2-efa3f001ee9b",
+      "responseTraceId": "mwiding4-18a99258"
+    },
+    {
+      "at": "2026-11-15T21:55:43.292Z",
+      "kind": "SENSITIVE_FINANCE_API_DENIED_WITHOUT_MANDATE",
+      "role": "admin",
+      "path": "/api/finance/summary"
+    },
+    {
+      "at": "2026-11-15T21:55:44.583Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/finance/per-capita/inbound",
+      "status": 403,
+      "traceId": "0fe850b706424fffed51c88066127321",
+      "correlationId": "2a98891a-8565-43ce-8a5c-1b180d74e4cb",
+      "responseTraceId": "mwidip1q-7bc8849f"
+    },
+    {
+      "at": "2026-11-15T21:55:44.583Z",
+      "kind": "SENSITIVE_FINANCE_API_DENIED_WITHOUT_MANDATE",
+      "role": "admin",
+      "path": "/api/finance/per-capita/inbound"
+    },
+    {
+      "at": "2026-11-15T21:55:45.623Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases",
+      "status": 403,
+      "traceId": "9b0db963c15acffad2b1f780c7fa6611",
+      "correlationId": "9c6b870e-1119-4725-aedc-79c8019e1345",
+      "responseTraceId": "mwidiq1m-16de4a0f"
+    },
+    {
+      "at": "2026-11-15T21:55:45.701Z",
+      "kind": "NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED",
+      "role": "admin",
+      "platformAdministrator": false,
+      "tenantContentBypassClaimed": false
+    }
+  ],
+  "runtimeAcceptance": false,
+  "requestedOwnedSyntheticRole": "admin",
+  "canonicalEntryCount": 42,
+  "status": "PASS"
+}

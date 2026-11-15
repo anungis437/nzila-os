@@ -1,0 +1,639 @@
+{
+  "evidenceClass": "REAL_REMOTE_ENTRA_SESSION_AND_API",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "runId": "43766533472",
+  "observations": [
+    {
+      "at": "2026-11-15T21:58:49.364Z",
+      "kind": "LIVE_SOURCE_IDENTITY",
+      "gitSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "principal": "ecb4f1d7-b0ae-44f8-bf56-832bc173fc49"
+    },
+    {
+      "at": "2026-11-15T21:58:55.464Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "A",
+      "principal": "ecb4f1d7-b0ae-44f8-bf56-832bc173fc49",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-15T22:13:55.440Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-15T21:58:57.746Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/profile/roles",
+      "status": 200,
+      "traceId": "1d44f521f1e37223d64b14573abceaec",
+      "correlationId": "78882bcf-0bef-422f-bac3-65b26132cf41"
+    },
+    {
+      "at": "2026-11-15T21:58:57.746Z",
+      "kind": "LIVE_CANONICAL_MEMBERSHIP_ROLE",
+      "requestedOwnedSyntheticRole": "chief_steward",
+      "observedCanonicalRole": "chief_steward"
+    },
+    {
+      "at": "2026-11-15T21:59:10.234Z",
+      "kind": "OBSERVED_ROLE_EXECUTION_HOME",
+      "requestedOwnedSyntheticRole": "chief_steward",
+      "initialPath": "/en-CA/dashboard",
+      "path": "/en-CA/dashboard/workbench",
+      "redirectedAfterDOMContentLoaded": true,
+      "initialHttpStatus": 200
+    },
+    {
+      "at": "2026-11-15T21:59:15.199Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/inbox",
+      "finalPath": "/en-CA/dashboard/inbox",
+      "expectedPath": "/en-CA/dashboard/inbox",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:59:18.340Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/inbox",
+      "finalPath": "/en-CA/dashboard/inbox",
+      "expectedPath": "/en-CA/dashboard/inbox",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:59:24.230Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/workbench",
+      "finalPath": "/en-CA/dashboard/workbench",
+      "expectedPath": "/en-CA/dashboard/workbench",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:59:30.214Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/workbench",
+      "finalPath": "/en-CA/dashboard/workbench",
+      "expectedPath": "/en-CA/dashboard/workbench",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:59:34.124Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/members",
+      "finalPath": "/en-CA/dashboard/members",
+      "expectedPath": "/en-CA/dashboard/members",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:59:37.522Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/members",
+      "finalPath": "/en-CA/dashboard/members",
+      "expectedPath": "/en-CA/dashboard/members",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:59:42.831Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/correspondence",
+      "finalPath": "/en-CA/dashboard/correspondence",
+      "expectedPath": "/en-CA/dashboard/correspondence",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:59:49.163Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/correspondence",
+      "finalPath": "/en-CA/dashboard/correspondence",
+      "expectedPath": "/en-CA/dashboard/correspondence",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T21:59:54.403Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/documents",
+      "finalPath": "/en-CA/dashboard/documents",
+      "expectedPath": "/en-CA/dashboard/documents",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T21:59:59.788Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/documents",
+      "finalPath": "/en-CA/dashboard/documents",
+      "expectedPath": "/en-CA/dashboard/documents",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:00:06.334Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/priorities",
+      "finalPath": "/en-CA/dashboard/priorities",
+      "expectedPath": "/en-CA/dashboard/priorities",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:00:11.352Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/priorities",
+      "finalPath": "/en-CA/dashboard/priorities",
+      "expectedPath": "/en-CA/dashboard/priorities",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:00:16.495Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/clause-library",
+      "finalPath": "/en-CA/dashboard/clause-library",
+      "expectedPath": "/en-CA/dashboard/clause-library",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:00:20.755Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/clause-library",
+      "finalPath": "/en-CA/dashboard/clause-library",
+      "expectedPath": "/en-CA/dashboard/clause-library",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:00:28.282Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/en-CA/dashboard/settings",
+      "finalPath": "/en-CA/dashboard/profile",
+      "expectedPath": "/en-CA/dashboard/profile",
+      "redirectedAfterDOMContentLoaded": true,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:00:36.861Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/settings",
+      "finalPath": "/en-CA/dashboard/profile",
+      "expectedPath": "/en-CA/dashboard/profile",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:00:40.830Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/inbox",
+      "finalPath": "/fr-CA/dashboard/inbox",
+      "expectedPath": "/fr-CA/dashboard/inbox",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:00:43.599Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/fr-CA/dashboard/inbox",
+      "finalPath": "/fr-CA/dashboard/inbox",
+      "expectedPath": "/fr-CA/dashboard/inbox",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:00:50.462Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/workbench",
+      "finalPath": "/fr-CA/dashboard/workbench",
+      "expectedPath": "/fr-CA/dashboard/workbench",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:00:56.976Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/fr-CA/dashboard/workbench",
+      "finalPath": "/fr-CA/dashboard/workbench",
+      "expectedPath": "/fr-CA/dashboard/workbench",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:01:03.057Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/members",
+      "finalPath": "/fr-CA/dashboard/members",
+      "expectedPath": "/fr-CA/dashboard/members",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:01:06.578Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/fr-CA/dashboard/members",
+      "finalPath": "/fr-CA/dashboard/members",
+      "expectedPath": "/fr-CA/dashboard/members",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:01:11.543Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/correspondence",
+      "finalPath": "/fr-CA/dashboard/correspondence",
+      "expectedPath": "/fr-CA/dashboard/correspondence",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:01:18.253Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/fr-CA/dashboard/correspondence",
+      "finalPath": "/fr-CA/dashboard/correspondence",
+      "expectedPath": "/fr-CA/dashboard/correspondence",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:01:23.447Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/documents",
+      "finalPath": "/fr-CA/dashboard/documents",
+      "expectedPath": "/fr-CA/dashboard/documents",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:01:27.744Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/fr-CA/dashboard/documents",
+      "finalPath": "/fr-CA/dashboard/documents",
+      "expectedPath": "/fr-CA/dashboard/documents",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:01:31.910Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/priorities",
+      "finalPath": "/fr-CA/dashboard/priorities",
+      "expectedPath": "/fr-CA/dashboard/priorities",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:01:35.404Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/fr-CA/dashboard/priorities",
+      "finalPath": "/fr-CA/dashboard/priorities",
+      "expectedPath": "/fr-CA/dashboard/priorities",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:01:40.012Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/clause-library",
+      "finalPath": "/fr-CA/dashboard/clause-library",
+      "expectedPath": "/fr-CA/dashboard/clause-library",
+      "redirectedAfterDOMContentLoaded": false,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:01:43.563Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/fr-CA/dashboard/clause-library",
+      "finalPath": "/fr-CA/dashboard/clause-library",
+      "expectedPath": "/fr-CA/dashboard/clause-library",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:01:50.909Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "chief_steward",
+      "experience": "staff",
+      "path": "/fr-CA/dashboard/settings",
+      "finalPath": "/fr-CA/dashboard/profile",
+      "expectedPath": "/fr-CA/dashboard/profile",
+      "redirectedAfterDOMContentLoaded": true,
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T22:01:59.426Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "chief_steward",
+      "path": "/fr-CA/dashboard/settings",
+      "finalPath": "/fr-CA/dashboard/profile",
+      "expectedPath": "/fr-CA/dashboard/profile",
+      "status": 200,
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T22:02:09.700Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/finance",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/finance",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T22:02:21.346Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/operations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/operations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T22:02:30.494Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/admin/members",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/admin/members",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T22:02:38.352Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/security",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/security",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T22:02:47.825Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "chief_steward",
+      "path": "/en-CA/dashboard/integrations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/integrations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T22:02:49.644Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/finance/summary",
+      "status": 403,
+      "traceId": "438158699d56aec2ebff73ee092ded88",
+      "correlationId": "8d84a476-f16c-4f7a-af4b-1f80de7da060",
+      "responseTraceId": "mwidrsn8-57feddb7"
+    },
+    {
+      "at": "2026-11-15T22:02:49.644Z",
+      "kind": "SENSITIVE_FINANCE_API_DENIED_WITHOUT_MANDATE",
+      "role": "chief_steward",
+      "path": "/api/finance/summary"
+    },
+    {
+      "at": "2026-11-15T22:02:51.071Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/finance/per-capita/inbound",
+      "status": 403,
+      "traceId": "6b627ab9c816332ec238a87da2c1e3b0",
+      "correlationId": "1e185150-69ad-4068-987e-44bbbda0112d",
+      "responseTraceId": "mwidru0w-31a3e209"
+    },
+    {
+      "at": "2026-11-15T22:02:51.071Z",
+      "kind": "SENSITIVE_FINANCE_API_DENIED_WITHOUT_MANDATE",
+      "role": "chief_steward",
+      "path": "/api/finance/per-capita/inbound"
+    },
+    {
+      "at": "2026-11-15T22:02:52.739Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases",
+      "status": 201,
+      "traceId": "5b19e5a5685192b4c9af0bd8dd42a48a",
+      "correlationId": "d52dc3da-96d2-48fd-961b-e29048314db1",
+      "responseTraceId": "mwidrv4k-3e9cc379"
+    },
+    {
+      "at": "2026-11-15T22:02:54.651Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases/00cef1a3-03c2-461c-9337-5b45913d0a09",
+      "status": 200,
+      "traceId": "f5b3dce79b5343475ddc3ceed54ba1a0",
+      "correlationId": "c233cb2c-c2e1-491d-bfcb-83ed48f47bbd",
+      "responseTraceId": "mwidrwex-fb9c80ca"
+    },
+    {
+      "at": "2026-11-15T22:02:56.507Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases/00cef1a3-03c2-461c-9337-5b45913d0a09/notes",
+      "status": 201,
+      "traceId": "6d689adbd6005a271b68410be57c0d76",
+      "correlationId": "42ffb70a-14b8-4635-a762-b68e71100d6c"
+    },
+    {
+      "at": "2026-11-15T22:02:58.981Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/cases/00cef1a3-03c2-461c-9337-5b45913d0a09/notes",
+      "status": 200,
+      "traceId": "27d6b0e62bc5988c406806c78eb2b3e6",
+      "correlationId": "7283cb0c-bb3d-4e15-b9e8-1d3c679d1707"
+    },
+    {
+      "at": "2026-11-15T22:03:00.950Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "POST",
+      "path": "/api/cases/00cef1a3-03c2-461c-9337-5b45913d0a09/assign",
+      "status": 403,
+      "traceId": "ac00dc090876304b045b8daca5cbfd79",
+      "correlationId": "37f055df-4143-40e5-a4fa-7a1e4622e76b"
+    },
+    {
+      "at": "2026-11-15T22:03:00.950Z",
+      "kind": "REPRESENTATIVE_FILING_NOTE_PERSISTENCE_AND_SELF_MATTER_ASSIGNMENT_DENIAL",
+      "claimId": "00cef1a3-03c2-461c-9337-5b45913d0a09",
+      "internalAssessmentRedacted": true
+    },
+    {
+      "at": "2026-11-15T22:03:01.960Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/members",
+      "status": 200,
+      "traceId": "a2172be218787e76a9c4e1baddf21e56",
+      "correlationId": "514a22db-bbe7-4aa5-a34d-a6fcfb82570f",
+      "responseTraceId": "mwids2qz-2a380796"
+    },
+    {
+      "at": "2026-11-15T22:03:02.827Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/members?organizationId=f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab",
+      "status": 403,
+      "traceId": "114f4044c287ea4c003502dd235fb060",
+      "correlationId": "75cdec79-3ed9-4dd1-988f-49f025eb4b88",
+      "responseTraceId": "mwids3j4-d2a527ac"
+    },
+    {
+      "at": "2026-11-15T22:03:02.827Z",
+      "kind": "MEMBER_DIRECTORY_OWN_SCOPE_AND_FOREIGN_ORGANIZATION_DENIAL",
+      "role": "chief_steward"
+    },
+    {
+      "at": "2026-11-15T22:03:02.944Z",
+      "kind": "NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED",
+      "role": "chief_steward",
+      "platformAdministrator": false,
+      "tenantContentBypassClaimed": false
+    }
+  ],
+  "runtimeAcceptance": false,
+  "requestedOwnedSyntheticRole": "chief_steward",
+  "canonicalEntryCount": 42,
+  "status": "PASS"
+}
