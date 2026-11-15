@@ -1,0 +1,36 @@
+{
+  "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "purpose": "ACTUAL_ANONYMOUS_STAGING_LANGUAGE_SWITCH_DIAGNOSTIC",
+  "status": "FAIL_ROOT_DOCUMENT_LANGUAGE_STALE",
+  "observations": [
+    {
+      "path": "/en-CA",
+      "htmlLang": "en-CA",
+      "heading": "Most unions don't realizehow much knowledge is about to walk out the door.",
+      "banner": "Staging environment. Pre-production data and behavior may change without notice.",
+      "nonce": "read-only-public-check"
+    },
+    {
+      "path": "/fr-CA",
+      "htmlLang": "en-CA",
+      "heading": "La plupart des syndicats ne r\u00e9alisent pascombien de savoir risque de partir avec des personnes cl\u00e9s.",
+      "banner": "Staging environment. Pre-production data and behavior may change without notice.",
+      "nonce": "read-only-public-check"
+    },
+    {
+      "path": "/en-CA",
+      "htmlLang": "en-CA",
+      "heading": "Most unions don't realizehow much knowledge is about to walk out the door.",
+      "banner": "Staging environment. Pre-production data and behavior may change without notice.",
+      "nonce": "read-only-public-check"
+    }
+  ],
+  "errors": [],
+  "authenticationTested": false,
+  "replacementDQualified": false,
+  "observedAfterSource": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "actualBodyAndPickerTranslationSwitches": true,
+  "rootDocumentLanguageTracksLocale": false,
+  "at": "2026-11-15T16:15:00.374Z",
+  "programSha256": "d41deb5c67d231d22e5fb5beb18a3e735f63e71d2de44f72ce0eafa4b9fc3cb1"
+}

@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "purpose": "REAL_NEXT_BROWSER_PERSISTENT_PROVIDER_SCOPE_TRANSITIONS",
+  "applicationSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "workingTreeProofOnly": false,
+  "sourceFilesSha256": {
+    "apps/union-eyes/app/layout.tsx": "7696809c8e08c2e57c10cb777491084be97ce60b3cb8600942d5a2d53c160c45",
+    "apps/union-eyes/components/utilities/root-locale-presentation.tsx": "053817802b06f998970043483a7747ade6b95824691566dbfafa35b88e25c064",
+    "apps/union-eyes/components/utilities/root-locale-presentation.test.tsx": "86744ca0624212c10f69869a19950aeb7e9a3721e9b81eb2e36268dc2e9e8ec0",
+    "apps/union-eyes/components/utilities/locale-client-provider.tsx": "6ecd117b4ca3830c6a5d6866e0b436ee3762bbab04c861e973c3c191e7edf1e7",
+    "apps/union-eyes/app/[locale]/layout.tsx": "664c41d112a42468e4009ba0610416b789ca273508d09f4de57f06404bbbdd10"
+  },
+  "actualRootLocalePresentationImported": true,
+  "observations": [
+    {
+      "path": "/en-CA",
+      "htmlLang": "en-CA",
+      "banner": "Staging environment. Pre-production data and behavior may change without notice.",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4044,
+      "heading": "Pricing",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/en-CA/catalog-check",
+      "htmlLang": "en-CA",
+      "banner": "Staging environment. Pre-production data and behavior may change without notice.",
+      "hasCommon": "true",
+      "timeZone": "America/Toronto",
+      "bytes": 464590,
+      "heading": "Save",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/en-CA",
+      "htmlLang": "en-CA",
+      "banner": "Staging environment. Pre-production data and behavior may change without notice.",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4044,
+      "heading": "Pricing",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/fr-CA",
+      "htmlLang": "fr-CA",
+      "banner": "Environnement de pr\u00e9production. Les donn\u00e9es et le comportement peuvent changer sans pr\u00e9avis.",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4481,
+      "heading": "Tarification",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/fr-CA/catalog-check",
+      "htmlLang": "fr-CA",
+      "banner": "Environnement de pr\u00e9production. Les donn\u00e9es et le comportement peuvent changer sans pr\u00e9avis.",
+      "hasCommon": "true",
+      "timeZone": "America/Toronto",
+      "bytes": 506270,
+      "heading": "Enregistrer",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/fr-CA",
+      "htmlLang": "fr-CA",
+      "banner": "Environnement de pr\u00e9production. Les donn\u00e9es et le comportement peuvent changer sans pr\u00e9avis.",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4481,
+      "heading": "Tarification",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/en-CA",
+      "htmlLang": "en-CA",
+      "banner": "Staging environment. Pre-production data and behavior may change without notice.",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4044,
+      "heading": "Pricing",
+      "nonce": "owned-navigation-proof"
+    }
+  ],
+  "translationErrors": [],
+  "spoofedScopeOverriddenOnApplicationRoute": true,
+  "actualProductionComponentsImported": true,
+  "programSha256": "c0c03f70a9fa1006b3ca87178d760ba4c1e3566da2175031850ff61d8df7532d",
+  "applicationAuthTested": false,
+  "stagingRuntimeAcceptanceClaimed": false
+}

@@ -1,0 +1,152 @@
+{
+  "status": "READ_ONLY_DELTA_COMPLETE_AGGREGATE_REMAINS_FAIL",
+  "at": "2026-11-15T16:34:30.693824+00:00",
+  "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "baselineSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "allFiveRequiredCommandsActuallyRan": true,
+  "aggregate": {
+    "failedFiles": 2577,
+    "passedFiles": 528,
+    "skippedFiles": 1,
+    "failedTests": 19,
+    "passedTests": 7788,
+    "skippedTests": 12
+  },
+  "newFailureHeaders": [
+    "FAIL  |union-eyes| components/utilities/root-locale-presentation.test.tsx [ apps/union-eyes/components/utilities/root-locale-presentation.test.tsx ]"
+  ],
+  "removedFailureHeaders": [],
+  "newHeadersAreCompilationFailuresBeforeTestBodies": true,
+  "groupedCompilationFailure": "TSConfckParseError: failed to resolve \"extends\":\"@nzila/config/tsconfig/nextjs\" in <current-checkout>/apps/union-eyes/tsconfig.json",
+  "missingModule": "@nzila/config/tsconfig/nextjs",
+  "newAssertionFailureHeaders": [],
+  "focusedActualTestsPassed": 19,
+  "diagnosticComparison": {
+    "lint": {
+      "setsExactlyEqual": true,
+      "baseline": [
+        "@nzila/decision-intelligence:build: ../nar/src/secret.ts(1,27): error TS2307: Cannot find module '@nzila/os-core/secrets' or its corresponding type declarations.",
+        "@nzila/decision-intelligence:build: ../nar/src/storage/azure-blob.ts(1,80): error TS2307: Cannot find module '@azure/storage-blob' or its corresponding type declarations.",
+        "Failed:    @nzila/decision-intelligence#build"
+      ],
+      "candidate": [
+        "@nzila/decision-intelligence:build: ../nar/src/secret.ts(1,27): error TS2307: Cannot find module '@nzila/os-core/secrets' or its corresponding type declarations.",
+        "@nzila/decision-intelligence:build: ../nar/src/storage/azure-blob.ts(1,80): error TS2307: Cannot find module '@azure/storage-blob' or its corresponding type declarations.",
+        "Failed:    @nzila/decision-intelligence#build"
+      ]
+    },
+    "typecheck": {
+      "setsExactlyEqual": false,
+      "baseline": [
+        "@nzila/cli:typecheck: src/index.ts(27,9): error TS2554: Expected 1 arguments, but got 0.",
+        "Failed:    @nzila/cli#typecheck"
+      ],
+      "candidate": [
+        "@nzila/blob:typecheck: src/index.ts(12,8): error TS2307: Cannot find module '@azure/storage-blob' or its corresponding type declarations.",
+        "Failed:    @nzila/blob#typecheck"
+      ]
+    },
+    "governance-audit": {
+      "setsExactlyEqual": true,
+      "baseline": [
+        "../../../../packages/blob/src/index.ts(12,8): error TS2307: Cannot find module '@azure/storage-blob' or its corresponding type declarations.",
+        "../../../../packages/os-core/src/policy/authorize.ts(85,59): error TS2307: Cannot find module '@nzila/platform-auth/entra/server' or its corresponding type declarations.",
+        "../../lib/api-auth-guard.ts(1168,9): error TS2554: Expected 0-1 arguments, but got 2.",
+        "../../lib/api-auth-guard.ts(48,58): error TS2307: Cannot find module '@nzila/platform-auth/entra/server' or its corresponding type declarations.",
+        "../../lib/api-auth-guard.ts(69,37): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/api/with-api.ts(46,37): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/auth/auth-service.ts(18,8): error TS2307: Cannot find module '@nzila/platform-auth/password' or its corresponding type declarations.",
+        "../../lib/auth/canonical-context.ts(3,41): error TS2307: Cannot find module '@nzila/platform-auth/auth-execution' or its corresponding type declarations.",
+        "../../lib/auth/canonical-context.ts(4,29): error TS2307: Cannot find module '@nzila/platform-auth/password' or its corresponding type declarations.",
+        "../../lib/auth/canonical-context.ts(5,65): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/auth/canonical-membership-role.ts(1,37): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(14,8): error TS2307: Cannot find module '@nzila/platform-auth/password' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(148,30): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(164,16): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(165,13): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(187,10): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(20,8): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(204,55): error TS18046: 'error' is of type 'unknown'.",
+        "../../lib/auth/canonical-organization-selection.ts(227,14): error TS7006: Parameter 'right' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(227,8): error TS7006: Parameter 'left' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(238,6): error TS7006: Parameter 'candidate' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(242,6): error TS7006: Parameter 'token' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(244,33): error TS7006: Parameter 'token' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(246,8): error TS7006: Parameter 'candidate' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(252,18): error TS7006: Parameter 'ancestor' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(253,15): error TS7006: Parameter 'ancestor' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(257,50): error TS7006: Parameter 'ancestor' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(5,41): error TS2307: Cannot find module '@nzila/platform-auth/auth-execution' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(6,22): error TS2307: Cannot find module '@nzila/platform-auth/entra/server' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(89,32): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/rbac-server.ts(12,30): error TS2307: Cannot find module '@nzila/os-core/config/super-admins' or its corresponding type declarations.",
+        "../../lib/db/canonical-transaction-scope.ts(3,67): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/db/with-rls-context.ts(37,65): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/logger.ts(288,40): error TS2550: Property 'cause' does not exist on type 'Error'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2022' or later.",
+        "../../lib/logger.ts(288,79): error TS2550: Property 'cause' does not exist on type 'Error'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2022' or later.",
+        "../../tsconfig.json(2,14): error TS6053: File '@nzila/config/tsconfig/nextjs' not found.",
+        "src/middleware/authentication.ts(3,59): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "src/middleware/authentication.ts(38,14): error TS7006: Parameter 'binding' implicitly has an 'any' type.",
+        "src/routes/dues-transactions.ts(8,39): error TS2307: Cannot find module '@union-claims/financial' or its corresponding type declarations.",
+        "src/routes/remittances.ts(11,34): error TS2307: Cannot find module '@union-claims/financial' or its corresponding type declarations."
+      ],
+      "candidate": [
+        "../../../../packages/blob/src/index.ts(12,8): error TS2307: Cannot find module '@azure/storage-blob' or its corresponding type declarations.",
+        "../../../../packages/os-core/src/policy/authorize.ts(85,59): error TS2307: Cannot find module '@nzila/platform-auth/entra/server' or its corresponding type declarations.",
+        "../../lib/api-auth-guard.ts(1168,9): error TS2554: Expected 0-1 arguments, but got 2.",
+        "../../lib/api-auth-guard.ts(48,58): error TS2307: Cannot find module '@nzila/platform-auth/entra/server' or its corresponding type declarations.",
+        "../../lib/api-auth-guard.ts(69,37): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/api/with-api.ts(46,37): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/auth/auth-service.ts(18,8): error TS2307: Cannot find module '@nzila/platform-auth/password' or its corresponding type declarations.",
+        "../../lib/auth/canonical-context.ts(3,41): error TS2307: Cannot find module '@nzila/platform-auth/auth-execution' or its corresponding type declarations.",
+        "../../lib/auth/canonical-context.ts(4,29): error TS2307: Cannot find module '@nzila/platform-auth/password' or its corresponding type declarations.",
+        "../../lib/auth/canonical-context.ts(5,65): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/auth/canonical-membership-role.ts(1,37): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(14,8): error TS2307: Cannot find module '@nzila/platform-auth/password' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(148,30): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(164,16): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(165,13): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(187,10): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(20,8): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(204,55): error TS18046: 'error' is of type 'unknown'.",
+        "../../lib/auth/canonical-organization-selection.ts(227,14): error TS7006: Parameter 'right' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(227,8): error TS7006: Parameter 'left' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(238,6): error TS7006: Parameter 'candidate' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(242,6): error TS7006: Parameter 'token' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(244,33): error TS7006: Parameter 'token' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(246,8): error TS7006: Parameter 'candidate' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(252,18): error TS7006: Parameter 'ancestor' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(253,15): error TS7006: Parameter 'ancestor' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(257,50): error TS7006: Parameter 'ancestor' implicitly has an 'any' type.",
+        "../../lib/auth/canonical-organization-selection.ts(5,41): error TS2307: Cannot find module '@nzila/platform-auth/auth-execution' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(6,22): error TS2307: Cannot find module '@nzila/platform-auth/entra/server' or its corresponding type declarations.",
+        "../../lib/auth/canonical-organization-selection.ts(89,32): error TS7006: Parameter 'membership' implicitly has an 'any' type.",
+        "../../lib/auth/rbac-server.ts(12,30): error TS2307: Cannot find module '@nzila/os-core/config/super-admins' or its corresponding type declarations.",
+        "../../lib/db/canonical-transaction-scope.ts(3,67): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/db/with-rls-context.ts(37,65): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "../../lib/logger.ts(288,40): error TS2550: Property 'cause' does not exist on type 'Error'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2022' or later.",
+        "../../lib/logger.ts(288,79): error TS2550: Property 'cause' does not exist on type 'Error'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2022' or later.",
+        "../../tsconfig.json(2,14): error TS6053: File '@nzila/config/tsconfig/nextjs' not found.",
+        "src/middleware/authentication.ts(3,59): error TS2307: Cannot find module '@nzila/platform-auth/org-binding' or its corresponding type declarations.",
+        "src/middleware/authentication.ts(38,14): error TS7006: Parameter 'binding' implicitly has an 'any' type.",
+        "src/routes/dues-transactions.ts(8,39): error TS2307: Cannot find module '@union-claims/financial' or its corresponding type declarations.",
+        "src/routes/remittances.ts(11,34): error TS2307: Cannot find module '@union-claims/financial' or its corresponding type declarations."
+      ]
+    }
+  },
+  "unchangedTrackedSourceAndConfigurationPaths": [
+    "packages/cli",
+    "packages/config",
+    "packages/blob",
+    "packages/nar",
+    "pnpm-lock.yaml",
+    "package.json",
+    "tsconfig.json",
+    "turbo.json",
+    "apps/union-eyes/tsconfig.json"
+  ],
+  "broadPassClaimed": false,
+  "allFailuresPreexistingClaimed": false,
+  "sourceEditsForAudit": 0,
+  "privateAuditSha256": "2c6c4d7b1751f753ca1c33328bf48dcc63fa3d8f4d6584bb961cefa88518ed36"
+}

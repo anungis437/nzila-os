@@ -1,0 +1,67 @@
+{
+  "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "evidenceClass": "EXACT_SOURCE_NATIVE_TOOL_BUILD_AND_LOAD_PROOF_ONLY",
+  "tools": [
+    {
+      "kind": "authority",
+      "file": "authority-0fa684a1-provenance.json",
+      "bundleSha256": "c8ba5eecbf4c2d063f63ebc3e1f419892c6410c49125d3b6619a8ef4718d3bf4",
+      "sourceModules": 125,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "bearer",
+      "file": "bearer-0fa684a1-provenance.json",
+      "bundleSha256": "33cb42310a4a4dc18707d70df56c18cf6aeb13644a41669441d4ff59658cde58",
+      "sourceModules": 103,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "nested",
+      "file": "nested-0fa684a1-provenance.json",
+      "bundleSha256": "23b6505b982e3068137468f6530c0a375bda8c0cd7e5be97027241dd1753e0a0",
+      "sourceModules": 106,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "worker",
+      "file": "worker-0fa684a1-provenance.json",
+      "bundleSha256": "29f3272d51eadbe9361352b19aa6d461c41a358d116c4193490b9dd7f577e4ec",
+      "sourceModules": 56,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "nar",
+      "file": "nar-0fa684a1-provenance.json",
+      "bundleSha256": "f179ccac029dd1da3d286b033cd2ec31924fde8c5d125f48bac9ec2d077b16e8",
+      "sourceModules": 108,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "system",
+      "file": "system-0fa684a1-provenance.json",
+      "bundleSha256": "f563562de0e85a66472c41f22d1c12c592aa5cd0ac1a530a203dc786bbb0f3b8",
+      "sourceModules": 208,
+      "runtimeExecutionClaimed": false
+    },
+    {
+      "kind": "deadline",
+      "file": "deadline-0fa684a1-provenance.json",
+      "bundleSha256": "3099c84a6f58559cfb9249c88d39f9ffb79783163c02559aa0defeca9942d97c",
+      "sourceModules": 444,
+      "runtimeExecutionClaimed": false
+    }
+  ],
+  "distinctSourceModulesVerified": 488,
+  "noFrameworkDatabaseRoleOrKernelMocks": true,
+  "buildSummarySha256": "58d8c5acbf90463f728e479d8b3ec9d28e8167f1490a5204210af2fa74d25603",
+  "loadSmokeSha256": "145e969d5414db27833724a55d6d3fc4bf122add75b9b19266ec8bbc0ad9daf6",
+  "qualificationOperationsInvoked": 0,
+  "actualSignedRuntimeQualification": "PENDING",
+  "trackedBackendSourceBytesEqualPriorQ": true,
+  "bundleDigestsEqualPriorQ": false,
+  "compilerOutputDeltaReview": "native-compiler-delta-0fa684a1.json",
+  "historicalRuntimeReused": false,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

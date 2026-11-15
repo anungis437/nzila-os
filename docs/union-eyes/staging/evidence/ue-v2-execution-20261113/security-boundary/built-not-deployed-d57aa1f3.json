@@ -1,0 +1,30 @@
+{
+  "status": "IMMUTABLE_BUILD_PASS_NOT_DEPLOYED_SUPERSEDED_BEFORE_ROLLOUT",
+  "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "workflowSha": "a1bc22389c7eb4e8eeffc3ab742ffde6b888f63a",
+  "buildRunId": "43733296236",
+  "manifestArtifactId": 14169966707,
+  "manifestSha256": "651af057e1cf97e5fce191e0a02678ddea051ec8e72f34558bf82a549275676d",
+  "images": {
+    "app": {
+      "repository": "nzila-os-union-eyes-v2",
+      "digest": "sha256:dec3bcf5977c2294a4b287eda44fa767ea8c0d4af3c13b76baa94ae236564ca4",
+      "reference": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:dec3bcf5977c2294a4b287eda44fa767ea8c0d4af3c13b76baa94ae236564ca4"
+    },
+    "clamav": {
+      "repository": "ue-clamav-http-adapter",
+      "digest": "sha256:dc49300b70516c89d639ccf31ed6dedbcd5f5fa59a8529b48f25b7ce7c18bb4b",
+      "reference": "nzilaventuresacr.azurecr.io/ue-clamav-http-adapter@sha256:dc49300b70516c89d639ccf31ed6dedbcd5f5fa59a8529b48f25b7ce7c18bb4b"
+    },
+    "cron": {
+      "repository": "ue-cron-curl",
+      "digest": "sha256:b39f6512276aba14fa55991a9d79ecb9aac8d46c409ff4824d797640d270ef4b",
+      "reference": "nzilaventuresacr.azurecr.io/ue-cron-curl@sha256:b39f6512276aba14fa55991a9d79ecb9aac8d46c409ff4824d797640d270ef4b"
+    }
+  },
+  "replacementSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "reason": "Real root document language and shared staging notice do not follow client locale navigation; include the root locale repair in the final release.",
+  "stagingRemainsSourceQ": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "stagingGo": false,
+  "productionAuthorized": false
+}

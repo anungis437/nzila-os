@@ -1,0 +1,69 @@
+{
+  "status": "REVIEWED_EXACT_COMPILER_OUTPUT_DELTA_NOT_RUNTIME_QUALIFICATION",
+  "at": "2026-11-15T16:47:50.068940+00:00",
+  "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "baselineSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "compiler": "esbuild0.27.3",
+  "tools": [
+    {
+      "kind": "authority",
+      "freshBundleSha256": "c8ba5eecbf4c2d063f63ebc3e1f419892c6410c49125d3b6619a8ef4718d3bf4",
+      "priorBundleSha256": "c8ba5eecbf4c2d063f63ebc3e1f419892c6410c49125d3b6619a8ef4718d3bf4",
+      "bundleEqual": true,
+      "trackedSourceAndEntryEqual": true
+    },
+    {
+      "kind": "bearer",
+      "freshBundleSha256": "33cb42310a4a4dc18707d70df56c18cf6aeb13644a41669441d4ff59658cde58",
+      "priorBundleSha256": "33cb42310a4a4dc18707d70df56c18cf6aeb13644a41669441d4ff59658cde58",
+      "bundleEqual": true,
+      "trackedSourceAndEntryEqual": true
+    },
+    {
+      "kind": "nested",
+      "freshBundleSha256": "23b6505b982e3068137468f6530c0a375bda8c0cd7e5be97027241dd1753e0a0",
+      "priorBundleSha256": "23b6505b982e3068137468f6530c0a375bda8c0cd7e5be97027241dd1753e0a0",
+      "bundleEqual": true,
+      "trackedSourceAndEntryEqual": true
+    },
+    {
+      "kind": "worker",
+      "freshBundleSha256": "29f3272d51eadbe9361352b19aa6d461c41a358d116c4193490b9dd7f577e4ec",
+      "priorBundleSha256": "29f3272d51eadbe9361352b19aa6d461c41a358d116c4193490b9dd7f577e4ec",
+      "bundleEqual": true,
+      "trackedSourceAndEntryEqual": true
+    },
+    {
+      "kind": "nar",
+      "freshBundleSha256": "f179ccac029dd1da3d286b033cd2ec31924fde8c5d125f48bac9ec2d077b16e8",
+      "priorBundleSha256": "f179ccac029dd1da3d286b033cd2ec31924fde8c5d125f48bac9ec2d077b16e8",
+      "bundleEqual": true,
+      "trackedSourceAndEntryEqual": true
+    },
+    {
+      "kind": "system",
+      "freshBundleSha256": "f563562de0e85a66472c41f22d1c12c592aa5cd0ac1a530a203dc786bbb0f3b8",
+      "priorBundleSha256": "f563562de0e85a66472c41f22d1c12c592aa5cd0ac1a530a203dc786bbb0f3b8",
+      "bundleEqual": true,
+      "trackedSourceAndEntryEqual": true
+    },
+    {
+      "kind": "deadline",
+      "freshBundleSha256": "3099c84a6f58559cfb9249c88d39f9ffb79783163c02559aa0defeca9942d97c",
+      "priorBundleSha256": "389a838121bedb127737bd0f460a2fa737d6adcf6835250a13fe31c77c20beb4",
+      "bundleEqual": false,
+      "trackedSourceAndEntryEqual": true
+    }
+  ],
+  "allTrackedBackendInputsAndPrivateEntryBytesEqual": true,
+  "allRecordedThirdPartyDependencyInputsEqual": true,
+  "deadlineOnlyDifference": "One additional Node interop flag at __toESM(next/headers,1). The flag controls default export construction; the call site destructures the named cookies export.",
+  "deadlineOnlyTwoByteInsertionConfirmed": true,
+  "insertionByteOffset": 884788,
+  "underlyingCompilerClassificationCauseClaimed": false,
+  "freshNativeImportSmoke": "PASS_ALL7",
+  "configuredSourceENativeOperations": "PENDING_REQUIRED",
+  "oldBundleBytesSubstituted": false,
+  "stagingAcceptanceClaimed": false,
+  "productionAuthorized": false
+}

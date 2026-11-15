@@ -7,7 +7,7 @@
   "acceptedStagingCandidateSha": null,
   "stagingWorkflowDefinitionSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Q is deployed and healthy but actual canonical p95 is609.794ms against unchanged500ms. D limits public home translations and preserves original server redirect behavior;16 focused tests, scoped typecheck/lint, six real framework transitions, HTTP307, exact local export and seven native compile/load checks pass. Required broad local docs pass; lint, typecheck, governance audit and test:fast fail with an explicit diagnostic delta. D source/integration CI, normal admission, signed qualification, rollout and all17required acceptance criteria remain pending. Historical proofs do not satisfy D runtime acceptance.",
+  "verdictReason": "Q remains healthy but fails canonical performance and actual root locale switching. E retains the public payload and server redirect repairs and updates document language and the staging notice during client navigation. Nineteen focused tests, seven actual framework transitions, HTTP307, scoped lint/typecheck and fresh local native/export proofs pass. Four of five broad local commands fail with an explicit delta. All17required E engineering/admission/runtime criteria remain pending; no historical proof is E acceptance.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -24,10 +24,10 @@
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -35,8 +35,8 @@
       "id": "SOURCE_ENGINEERING",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "requalificationRequiredForProposedCandidate": true,
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
@@ -46,23 +46,23 @@
       "id": "LOCAL_HOLISTIC_REGRESSION",
       "requirement": "ADVISORY",
       "status": "FAIL",
-      "evidence": "All five required local commands actually ran on D: docs PASS; lint, typecheck, governance audit and test:fast FAIL. Lint/governance diagnostic sets match Q; typecheck exposes an unchanged CLI argument error instead of the prior first-task missing Azure module. The two new test files stop before their bodies at the existing shared TS-config resolution failure;16 focused tests separately pass. Aggregate FAIL retained.",
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "evidence": "All five required local commands ran on E: docs PASS; lint/typecheck/governance audit/test:fast FAIL. The new root-locale test fails before its body at existing shared TS-config resolution;19focused tests separately pass. Lint/governance diagnostic sets match D; typecheck selects a different unchanged task. Aggregate FAIL retained; no blanket preexisting-failure claim.",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "requalificationRequiredForProposedCandidate": true,
       "historicalObservedStatus": "FAIL",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
-      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
-      "localEvidence": "local-required-validation-d57aa1f3.json",
-      "failureDeltaAudit": "local-validation-delta-d57aa1f3.json"
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "localEvidence": "local-required-validation-0fa684a1.json",
+      "failureDeltaAudit": "local-validation-delta-0fa684a1.json"
     },
     {
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -70,10 +70,10 @@
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -81,10 +81,10 @@
       "id": "DEPLOYED_REVISION_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -92,10 +92,10 @@
       "id": "DATABASE_MIGRATIONS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -103,10 +103,10 @@
       "id": "ENTRA_AUTHENTICATED_SESSIONS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -114,10 +114,10 @@
       "id": "API_AND_POSTGRES_TENANT_ISOLATION",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -125,10 +125,10 @@
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -136,10 +136,10 @@
       "id": "WORKERS_RETRIES_AND_DELIVERY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -147,10 +147,10 @@
       "id": "AUDIT_AND_TELEMETRY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -158,10 +158,10 @@
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -169,10 +169,10 @@
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -180,10 +180,10 @@
       "id": "OPERATIONAL_RECOVERY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -191,10 +191,10 @@
       "id": "CAPABILITY_TRUTHFULNESS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -202,10 +202,10 @@
       "id": "INSTITUTIONAL_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
       "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
@@ -213,8 +213,8 @@
       "id": "STAGING_DECISION_ACCEPTANCE",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
-      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "evidence": "E is not deployed or accepted. Source-bound local/framework checks do not satisfy this criterion. Exact source/integration CI, normal admission and fresh real staging evidence remain required. Observed Q fails performance and root locale presentation; D was built and native-qualified but not deployed.",
+      "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "requalificationRequiredForProposedCandidate": true,
       "historicalObservedStatus": "NOT_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
@@ -222,7 +222,7 @@
     }
   ],
   "externalBlockers": [],
-  "proposedCandidateSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "proposedCandidateSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
   "proposedCandidateState": "SOURCE_FIX_LOCAL_PROOFS_COMPLETE_EXACT_CI_AND_RUNTIME_PENDING",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
@@ -299,16 +299,16 @@
     }
   },
   "localValidation": {
-    "candidateSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
-    "focusedPublicTranslationsAndRedirects": {
-      "passed": 16,
+    "candidateSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+    "focusedRootLocaleTranslationsAndRedirects": {
+      "passed": 19,
       "failed": 0,
       "scopedLint": "PASS",
       "scopedTypecheck": "PASS",
-      "realFrameworkBrowserTransitions": 6,
+      "realFrameworkBrowserTransitions": 7,
       "actualFrameworkHttpRedirect": 307,
       "applicationAuthenticationOrStagingAcceptanceClaimed": false,
-      "record": "public-message-focused-d57aa1f3.json"
+      "record": "public-message-focused-0fa684a1.json"
     },
     "nativeExport": "PASS_EXACT_FRESH_RESTORE_REPEAT_PRIVILEGES_24576_OBJECTS_LOCAL_ONLY",
     "nativeTools": "SEVEN_COMPILE_LOAD_PASS_488_DISTINCT_SOURCE_MODULES_RUNTIME_PENDING",
@@ -318,11 +318,11 @@
       "sourceDerivedNavigationCheck": "PASS",
       "docs": "PASS",
       "failed": 0,
-      "record": "public-message-binding-validation-d57aa1f3.json",
+      "record": "root-locale-binding-validation-0fa684a1.json",
       "exactIntegrationCIStillRequired": true
     },
     "requiredBroadCommands": {
-      "record": "local-required-validation-d57aa1f3.json",
+      "record": "local-required-validation-0fa684a1.json",
       "status": "COMPLETED_WITH_FAILURES",
       "passed": [
         "pnpm validate:docs"
@@ -333,11 +333,11 @@
         "pnpm governance:audit",
         "pnpm test:fast"
       ],
-      "failureDeltaAudit": "local-validation-delta-d57aa1f3.json",
+      "failureDeltaAudit": "local-validation-delta-0fa684a1.json",
       "allFailuresPreexistingClaimed": false
     },
-    "deployedPerformance": "PENDING_ACTUAL_D_K6_UNCHANGED_500_1500_THRESHOLDS",
-    "mobileVisualReview": "PENDING_ACTUAL_D_RENDERED_EN_FR_MOBILE"
+    "deployedPerformance": "PENDING_ACTUAL_E_K6_UNCHANGED_500_1500_THRESHOLDS",
+    "mobileVisualReview": "PENDING_ACTUAL_E_RENDERED_EN_FR_MOBILE"
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -506,18 +506,18 @@
     }
   ],
   "priorSourceCompositionSuiteFailure": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/source-a8442373-whole-application-ci-failure.json",
-  "latestAdmittedVerificationWorkflowSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
-  "previousContractSnapshot": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-contract-before-public-message-d57aa1f3.json",
+  "latestAdmittedVerificationWorkflowSha": "a1bc22389c7eb4e8eeffc3ab742ffde6b888f63a",
+  "previousContractSnapshot": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-contract-before-root-locale-0fa684a1.json",
   "observedRuntimeReconciliation": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-runtime-c09de455-reconciliation.json",
   "historicalSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-deadline-private-copy-2107feeb.json",
-  "proposedSourceNativeQualificationState": "D_EXACT_EXPORT_AND_SEVEN_NATIVE_COMPILE_LOAD_PASS_SIGNED_RUNTIME_PENDING",
+  "proposedSourceNativeQualificationState": "E_EXACT_EXPORT_AND_SEVEN_NATIVE_COMPILE_LOAD_PASS_SIGNED_RUNTIME_PENDING",
   "historicalNativeExportBeforeProbeRelocation": {
     "sourceSha": "17188f7b602342ab6e88222759a4caba01f52248",
     "status": "PASS",
     "catalogObjects": 24576,
     "freshRestoreRepeatAndPrivilegesPassed": true
   },
-  "currentSourceNativeExport": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-d57aa1f3.json",
+  "currentSourceNativeExport": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-0fa684a1.json",
   "supersededCombinedRepairCandidate": {
     "sourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
     "deployed": false,
@@ -527,15 +527,20 @@
     "failureRecord": "catalog-build-identity-env-census-failure-80651983.json"
   },
   "previousProposedCandidate": {
-    "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
-    "sourcePR": 1235,
-    "bindingPR": 1236,
-    "admittedWorkflowSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
-    "nowObservedServing": true,
+    "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+    "sourcePR": 1237,
+    "bindingPR": 1238,
+    "admittedWorkflowSha": "a1bc22389c7eb4e8eeffc3ab742ffde6b888f63a",
+    "buildRunId": 43733296236,
+    "buildStatus": "PASS",
+    "nativeQualificationStatus": "PASS_COPY_STOPPED",
+    "nowObservedServing": false,
+    "deployed": false,
+    "reason": "Root document language and shared notice remain stale during client locale switching; final E includes the correction",
     "replacementAcceptanceInferred": false
   },
   "proposedIntegrationBinding": {
-    "sourcePR": 1237,
+    "sourcePR": 1239,
     "bindingPR": null,
     "workflowSha": null,
     "reference": "THIS_CHANGE_PENDING_CI_AND_MAIN_ADMISSION"
@@ -556,7 +561,7 @@
     "expectedFavicon404ExcludedFromCustomErrors": true,
     "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
     "workflowSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
-    "proposedDStatus": "PENDING"
+    "proposedEStatus": "PENDING"
   },
   "historicalLocalValidationBeforePublicMessageRepair": {
     "candidateSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
@@ -806,5 +811,269 @@
     "p95LimitMs": 500,
     "p99LimitMs": 1500,
     "proposedQStatus": "PENDING"
-  }
+  },
+  "historicalLocalValidationBeforeRootLocaleRepair": {
+    "candidateSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+    "focusedPublicTranslationsAndRedirects": {
+      "passed": 16,
+      "failed": 0,
+      "scopedLint": "PASS",
+      "scopedTypecheck": "PASS",
+      "realFrameworkBrowserTransitions": 6,
+      "actualFrameworkHttpRedirect": 307,
+      "applicationAuthenticationOrStagingAcceptanceClaimed": false,
+      "record": "public-message-focused-d57aa1f3.json"
+    },
+    "nativeExport": "PASS_EXACT_FRESH_RESTORE_REPEAT_PRIVILEGES_24576_OBJECTS_LOCAL_ONLY",
+    "nativeTools": "SEVEN_COMPILE_LOAD_PASS_488_DISTINCT_SOURCE_MODULES_RUNTIME_PENDING",
+    "bindingTests": {
+      "sharedApprovalPassed": 95,
+      "releaseNavigationRequestPassed": 39,
+      "sourceDerivedNavigationCheck": "PASS",
+      "docs": "PASS",
+      "failed": 0,
+      "record": "public-message-binding-validation-d57aa1f3.json",
+      "exactIntegrationCIStillRequired": true
+    },
+    "requiredBroadCommands": {
+      "record": "local-required-validation-d57aa1f3.json",
+      "status": "COMPLETED_WITH_FAILURES",
+      "passed": [
+        "pnpm validate:docs"
+      ],
+      "failed": [
+        "pnpm lint",
+        "pnpm typecheck",
+        "pnpm governance:audit",
+        "pnpm test:fast"
+      ],
+      "failureDeltaAudit": "local-validation-delta-d57aa1f3.json",
+      "allFailuresPreexistingClaimed": false
+    },
+    "deployedPerformance": "PENDING_ACTUAL_D_K6_UNCHANGED_500_1500_THRESHOLDS",
+    "mobileVisualReview": "PENDING_ACTUAL_D_RENDERED_EN_FR_MOBILE"
+  },
+  "historicalCriteriaBeforeRootLocaleRepair": [
+    {
+      "id": "CANDIDATE_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "SOURCE_ENGINEERING",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "requalificationRequiredForProposedCandidate": true,
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "LOCAL_HOLISTIC_REGRESSION",
+      "requirement": "ADVISORY",
+      "status": "FAIL",
+      "evidence": "All five required local commands actually ran on D: docs PASS; lint, typecheck, governance audit and test:fast FAIL. Lint/governance diagnostic sets match Q; typecheck exposes an unchanged CLI argument error instead of the prior first-task missing Azure module. The two new test files stop before their bodies at the existing shared TS-config resolution failure;16 focused tests separately pass. Aggregate FAIL retained.",
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "requalificationRequiredForProposedCandidate": true,
+      "historicalObservedStatus": "FAIL",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "localEvidence": "local-required-validation-d57aa1f3.json",
+      "failureDeltaAudit": "local-validation-delta-d57aa1f3.json"
+    },
+    {
+      "id": "FINAL_CANDIDATE_CI",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "AUTHORIZED_STAGING_DEPLOYMENT",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "DEPLOYED_REVISION_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "DATABASE_MIGRATIONS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "ENTRA_AUTHENTICATED_SESSIONS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "API_AND_POSTGRES_TENANT_ISOLATION",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "WORKERS_RETRIES_AND_DELIVERY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "AUDIT_AND_TELEMETRY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "SENSITIVE_FINANCE_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "OPERATIONAL_RECOVERY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "CAPABILITY_TRUTHFULNESS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "INSTITUTIONAL_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "STAGING_DECISION_ACCEPTANCE",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "D is not yet deployed or accepted. Source-bound local/framework checks do not satisfy this criterion; fresh exact-candidate engineering, admission and real staging acceptance evidence is required. Q remains healthy at100% but fails the unchanged performance gate.",
+      "proposedSourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+      "requalificationRequiredForProposedCandidate": true,
+      "historicalObservedStatus": "NOT_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62"
+    }
+  ],
+  "historicalObservedPerformanceBeforeRootLocaleRepair": {
+    "status": "FAIL",
+    "runId": 43718734553,
+    "attempt": 2,
+    "jobId": 132833725876,
+    "exactArtifactId": 14164058711,
+    "p95Ms": 609.7943071,
+    "p95LimitMs": 500,
+    "p99LimitMs": 1500,
+    "maxMs": 1102.744,
+    "requests": 1028,
+    "assertionsPassed": 1542,
+    "customErrors": 0,
+    "expectedFavicon404ExcludedFromCustomErrors": true,
+    "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+    "workflowSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
+    "proposedDStatus": "PENDING"
+  },
+  "observedBilingualRootDefect": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/actual-root-locale-switch-c09de455-failure.json",
+  "supersededNeverDeployedBuild": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/built-not-deployed-d57aa1f3.json",
+  "supersededNativeQualification": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/native-qualified-not-deployed-d57aa1f3.json"
 }
