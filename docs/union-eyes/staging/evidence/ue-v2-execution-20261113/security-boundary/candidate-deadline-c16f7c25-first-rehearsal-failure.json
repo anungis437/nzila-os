@@ -1,0 +1,16 @@
+{
+  "status": "FAIL",
+  "candidateSourceSha": "c16f7c25ae407afa61c7be0ecec76d0e87e2df19",
+  "observedApplicationSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+  "at": "2026-11-15T02:54:36.719623+00:00",
+  "failureClass": "NATIVE_REHEARSAL_DEPENDENCY_PACKAGING",
+  "message": "Transferred JavaScript bundle loaded Argon2 but did not carry its Linux musl native binary. New deadline service did not execute.",
+  "producerReceipt": "candidate-deadline-private-copy-c16f7c25.json",
+  "producerReceiptSha256": "5cf103a4977b068bcdc20356b024cd063716b733a3ad1dadd20d260f1f2373dd",
+  "ownedCloneStopped": true,
+  "dataAndServerRetained": true,
+  "applicationDeploymentChanged": false,
+  "primaryBusinessMutation": false,
+  "originalCycleReceiptPreserved": "owned-deadline-copy-cycle-c16f7c25.json",
+  "explicitPriorFixtureCleanupAndRoleInspectionRequiredBeforeRetry": true
+}

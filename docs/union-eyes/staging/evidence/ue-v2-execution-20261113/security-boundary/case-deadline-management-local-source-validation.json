@@ -1,0 +1,53 @@
+{
+  "status": "LOCAL_SOURCE_TESTS_PASS_RUNTIME_PENDING",
+  "scopeDecision": "Owner explicitly requires staff case deadline creation and management in base release.",
+  "focusedAndSurroundingTests": {
+    "passed": 414,
+    "failed": 0,
+    "suites": 20
+  },
+  "mandatoryBehavior": [
+    "canonical handler eligibility and case-specific internal/draft-action authority",
+    "organization scoped reads and locked writes",
+    "calendar-day due dates in organization timezone",
+    "idempotent create and stale-version conflict",
+    "reschedule, completion and cancellation with retained records",
+    "atomic mandatory audit, formal reminder scheduling and rollback on failure",
+    "English/French controls, access change and stale-refresh handling",
+    "Member-visible deadline publication requires case:disclose_to_member; member lists omit historical internal descriptions."
+  ],
+  "limitations": [
+    "No automatic legal filing-date calculation",
+    "Intake-case automatic email reminders unavailable; UI states this",
+    "Native retained-schema rehearsal, exact CI, staging deployment and actual candidate runtime acceptance still required"
+  ],
+  "requiredLocalChecks": [
+    {
+      "command": "pnpm lint",
+      "exitCode": 1
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 1
+    },
+    {
+      "command": "pnpm test:fast",
+      "exitCode": 1
+    },
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm governance:audit",
+      "exitCode": 1
+    },
+    {
+      "command": "pnpm inventory:generate",
+      "exitCode": 0
+    }
+  ],
+  "baseVerdict": "STAGING_NO_GO",
+  "productionAuthorized": false,
+  "additionalSecurityRepair": "The existing grievance deadline confirmation/override/supersession service now enforces case-specific internal/draft-action authority and canonical handler eligibility. Overrides reschedule pending reminders; supersession retires pending/claimed reminders atomically."
+}

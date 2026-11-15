@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "candidateSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "priorActualProtocolSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+  "originalActualProtocolFile": "candidate-restored-rehearsal-dd5baaa6.json",
+  "originalActualProtocolSha256": "03f1f4875c7c2355b2efbe1f3df4dae84ced48dd79a675a608762d9c3da0b6a8",
+  "allSixNativeGraphsMatchActualPriorProtocol": true,
+  "actualNewDeadlineNativeServiceFile": "candidate-deadline-private-copy-2107feeb.json",
+  "actualNewDeadlineNativeServiceSha256": "6f4230be592766441dc050d1a70e5cdc77164dfc72414acea338a4ac5df49e09",
+  "newDeadlineServiceUsesActualNativePostgresAndSignedProviderIdentities": true,
+  "ownedCopyStopped": true,
+  "applicationRuntimeAcceptance": false,
+  "productionAuthorized": false,
+  "stagingGo": false
+}

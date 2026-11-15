@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "pr": 1230,
+  "headSha": "998671650ae3a365c22d3489c48701a6e756e7b6",
+  "applicationSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+  "verificationWorkflowSha": "43105177dcf270ac86747874ada42159790b9fb9",
+  "buildDeploymentInfrastructureSha": "034b3498fe68da339c81deb24faa0a424f71cdac",
+  "mergedAt": "2026-11-15T02:31:51Z",
+  "at": "2026-11-15T02:33:26.911339+00:00",
+  "allRegisteredChecksFinishedWithoutFailure": true,
+  "all16TrustedRequiredContextsPassed": true,
+  "unresolvedReviews": 0,
+  "applicationDeploymentChanged": false,
+  "fullPersonaAcceptanceDeferredUntilRequiredDeadlineCandidate": true,
+  "reviewActor": "Codex under continuing solo-founder CHG-2026-0114 delegation",
+  "productionAuthorized": false,
+  "stagingGo": false,
+  "postMergeLocalFetchFailurePreserved": "verifier-1230-admission-progress.json; actual normal GitHub merge succeeded before the local helper ran git fetch outside the checkout. Read-only reconciliation in the correct checkout verified exact main and ancestry."
+}

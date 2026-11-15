@@ -1,5 +1,7 @@
 "use client";
 
+import { CaseDeadlines } from '@/components/claims/case-deadlines';
+
 import React from 'react';
 /**
  * Case Queue (LRO Workbench) - Client Component
@@ -932,6 +934,7 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
 
                               {/* Case Notes */}
                               <CaseNotesPanel state={caseNotes[caseItem.claimId]} />
+                              <div className="mb-6"><CaseDeadlines caseId={caseItem.claimId} /></div>
 
                               {/* Add Note */}
                               <div className="mb-6">

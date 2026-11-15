@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
+vi.mock('@/components/claims/case-deadlines', () => ({ CaseDeadlines: () => null }));
 import WorkbenchConsole from './workbench-console';
 import frenchMessages from '../../messages/fr-CA.json';
 

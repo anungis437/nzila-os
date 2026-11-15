@@ -360,7 +360,7 @@ export function scanRoutes(root: string): RouteEntry[] {
         ...(retiredMethods.length > 0 && !wholly ? { retiredMethods } : {}),
         mutating,
         guard,
-        kernel: /lib\/authority|case-access-service|lib\/documents\/(?:download-issuance|ocr-authority|intake-lifecycle)|authority\/store\/route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/.test(source),
+        kernel: /lib\/authority|case-access-service|lib\/documents\/(?:download-issuance|ocr-authority|intake-lifecycle)|authority\/store\/route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/.test(source) || /\b(?:listCaseDeadlines|createCaseDeadline|changeCaseDeadline)\(/.test(source),
         subordinate: (/lib\/messaging\/thread-(access|assignment|lifecycle|read-state)/.test(source)
           ? 'THREAD_POLICY'
           : /withExternalMatterResourceAuth/.test(source)

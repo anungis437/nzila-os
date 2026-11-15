@@ -1,6 +1,6 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 staging: nullable workbench references and scoped grievance entry",
+  "title": "Union Eyes V2 staging: scoped staff deadline creation and management",
   "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. Owner-directed founder-operated staging authorization is recorded; no production release, institutional mandate, financial activation, or STAGING GO without runtime proof is authorized.",
   "service": "union-eyes",
   "environment": "STAGING",
@@ -81,7 +81,12 @@
     "docs/union-eyes/staging/UE_V2_CONNECTION_BUDGET_REPAIR.md",
     "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-a8195afb.json",
     "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/deployed-cbf2bc93-operational-followup.json",
-    "https://github.com/anungis437/nzila-os/actions/runs/43555575505"
+    "https://github.com/anungis437/nzila-os/actions/runs/43555575505",
+    "https://github.com/anungis437/nzila-os/pull/1231",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/native-source-graphs-2107feeb.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-deadline-private-copy-2107feeb.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/owned-deadline-copy-cycle-2107feeb.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/primary-source-noop-2107feeb-qualification.json"
   ],
   "linked_prs": [
     "1137",
@@ -135,7 +140,8 @@
     "https://github.com/anungis437/nzila-os/pull/1218",
     "https://github.com/anungis437/nzila-os/pull/1219",
     "https://github.com/anungis437/nzila-os/pull/1224",
-    "1228"
+    "1228",
+    "1231"
   ],
   "linked_commits": [
     "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
@@ -170,11 +176,12 @@
     "4687a4ed84935cedb2b436738373b13b7cda2158",
     "5bee2347ec8e1c92232f661250503b7ebe7f9b36",
     "e70027e8687dcaaa533f931d18d2da45582cc3d0",
-    "dd5baaa614ad12dfb1876e59adf73b82bad6df87"
+    "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+    "2107feeb1c2949042d97bd0606efb18e7aa95beb"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-14T22:16:53.290192+00:00",
+  "updated_at": "2026-11-15T03:29:18.330804+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -183,7 +190,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+    "candidate_sha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true

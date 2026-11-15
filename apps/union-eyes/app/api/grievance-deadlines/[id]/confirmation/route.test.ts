@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ApiError } from '@/lib/api/errors';
 
 const mocks = vi.hoisted(() => ({
   withOrganizationAuth: vi.fn((handler: (...args: any[]) => unknown) => handler),
@@ -8,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   supersedeDeadline: vi.fn(),
 }));
 
+vi.mock('@/lib/cases/case-authorization', () => ({ caseAuthorizationResponse: (error: { code?: string }) => error?.code === 'FORBIDDEN' ? new Response(JSON.stringify({error:'FORBIDDEN'}), { status: 403 }) : null }));
 vi.mock('@/lib/organization-middleware', () => ({ withOrganizationAuth: mocks.withOrganizationAuth }));
 vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: mocks.hasMinRole }));
 vi.mock('@/lib/services/deadline-confirmation-service', () => ({
@@ -22,24 +24,24 @@ describe('POST /api/grievance-deadlines/[id]/confirmation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.hasMinRole.mockResolvedValue(true);
-    mocks.confirmDeadline.mockResolvedValue({ id: 'deadline-1', confirmationStatus: 'HUMAN_CONFIRMED' });
-    mocks.overrideDeadline.mockResolvedValue({ id: 'deadline-1', confirmationStatus: 'OVERRIDDEN' });
-    mocks.supersedeDeadline.mockResolvedValue({ id: 'deadline-1', confirmationStatus: 'SUPERSEDED' });
+    mocks.confirmDeadline.mockResolvedValue({ id: '55555555-5555-4555-8555-555555555555', confirmationStatus: 'HUMAN_CONFIRMED' });
+    mocks.overrideDeadline.mockResolvedValue({ id: '55555555-5555-4555-8555-555555555555', confirmationStatus: 'OVERRIDDEN' });
+    mocks.supersedeDeadline.mockResolvedValue({ id: '55555555-5555-4555-8555-555555555555', confirmationStatus: 'SUPERSEDED' });
   });
 
   it('routes confirmation requests through the deadline confirmation service', async () => {
     const response = await POST(
-      new Request('https://example.test/api/grievance-deadlines/deadline-1/confirmation', {
+      new Request('https://example.test/api/grievance-deadlines/55555555-5555-4555-8555-555555555555/confirmation', {
         method: 'POST',
         body: JSON.stringify({ action: 'confirm' }),
       }),
       { organizationId: 'org-1', userId: 'user-1' },
-      { id: 'deadline-1' },
+      { id: '55555555-5555-4555-8555-555555555555' },
     );
 
     expect(response.status).toBe(200);
     expect(mocks.confirmDeadline).toHaveBeenCalledWith({
-      deadlineId: 'deadline-1',
+      deadlineId: '55555555-5555-4555-8555-555555555555',
       organizationId: 'org-1',
       actorId: 'user-1',
     });
@@ -49,12 +51,12 @@ describe('POST /api/grievance-deadlines/[id]/confirmation', () => {
     mocks.hasMinRole.mockResolvedValueOnce(false);
 
     const response = await POST(
-      new Request('https://example.test/api/grievance-deadlines/deadline-1/confirmation', {
+      new Request('https://example.test/api/grievance-deadlines/55555555-5555-4555-8555-555555555555/confirmation', {
         method: 'POST',
         body: JSON.stringify({ action: 'confirm' }),
       }),
       { organizationId: 'org-1', userId: 'user-1' },
-      { id: 'deadline-1' },
+      { id: '55555555-5555-4555-8555-555555555555' },
     );
 
     expect(response.status).toBe(403);
@@ -62,12 +64,12 @@ describe('POST /api/grievance-deadlines/[id]/confirmation', () => {
   });
 
   const override = (overrideDueDate: string) => POST(
-    new Request('https://example.test/api/grievance-deadlines/deadline-1/confirmation', {
+    new Request('https://example.test/api/grievance-deadlines/55555555-5555-4555-8555-555555555555/confirmation', {
       method: 'POST',
       body: JSON.stringify({ action: 'override', overrideDueDate, overrideReason: 'CBA art. 8.02 extension' }),
     }),
     { organizationId: 'org-1', userId: 'user-1' },
-    { id: 'deadline-1' },
+    { id: '55555555-5555-4555-8555-555555555555' },
   );
 
   it('passes a calendar-day override to the service as the day, to fall due at 23:59 in the organization zone', async () => {
@@ -89,3 +91,10 @@ describe('POST /api/grievance-deadlines/[id]/confirmation', () => {
   });
 });
 
+
+
+it('returns the service authority refusal as 403', async () => {
+  mocks.hasMinRole.mockResolvedValue(true); mocks.confirmDeadline.mockRejectedValueOnce(ApiError.forbidden());
+  const result = await POST(new Request('https://example.test/confirmation', { method: 'POST', body: JSON.stringify({ action: 'confirm' }) }), { organizationId: 'org-1', userId: 'user-1' }, { id: '55555555-5555-4555-8555-555555555555' });
+  expect(result.status).toBe(403);
+});
