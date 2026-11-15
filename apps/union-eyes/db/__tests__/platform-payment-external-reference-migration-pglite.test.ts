@@ -90,6 +90,37 @@ describe('payment-reference migration — actual SQL engine execution', () => {
     });
   });
 
+  it('refuses a same-name unique index with reversed key columns', async () => {
+    await withDb(async (db) => {
+      await db.exec(createLedger);
+      await db.exec(
+        'CREATE UNIQUE INDEX platform_payments_org_external_reference_uq ON platform_payments (external_reference, organization_id) WHERE external_reference IS NOT NULL',
+      );
+      await expect(db.exec(migration)).rejects.toThrow(/unexpected definition/);
+      const keys = await db.query<{ first_key: string }>(
+        `SELECT a.attname AS first_key FROM pg_index ix
+         JOIN pg_attribute a ON a.attrelid = ix.indrelid AND a.attnum = ix.indkey[0]
+         WHERE ix.indexrelid = 'platform_payments_org_external_reference_uq'::regclass`,
+      );
+      expect(keys.rows[0]?.first_key).toBe('external_reference');
+    });
+  });
+
+  it('refuses a same-name unique index with an unexpected included column', async () => {
+    await withDb(async (db) => {
+      await db.exec(createLedger);
+      await db.exec(
+        'CREATE UNIQUE INDEX platform_payments_org_external_reference_uq ON platform_payments (organization_id, external_reference) INCLUDE (amount) WHERE external_reference IS NOT NULL',
+      );
+      await expect(db.exec(migration)).rejects.toThrow(/unexpected definition/);
+      const attrs = await db.query<{ n: number }>(
+        `SELECT indnatts::int AS n FROM pg_index
+         WHERE indexrelid = 'platform_payments_org_external_reference_uq'::regclass`,
+      );
+      expect(attrs.rows[0]?.n).toBe(3);
+    });
+  });
+
   it('installs the scoped index and rejects replay while permitting cross-org and NULL references', async () => {
     await withDb(async (db) => {
       await db.exec(createLedger);
