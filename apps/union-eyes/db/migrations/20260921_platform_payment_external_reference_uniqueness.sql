@@ -57,4 +57,30 @@ BEGIN
     'CREATE UNIQUE INDEX IF NOT EXISTS platform_payments_org_external_reference_uq '
     || 'ON platform_payments (organization_id, external_reference) '
     || 'WHERE external_reference IS NOT NULL';
+
+  -- IF NOT EXISTS alone is unsafe: an unrelated index with this name can
+  -- suppress creation and falsely signal that payment replay is protected.
+  -- Verify the actual catalog invariant, including validity and predicate.
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_class idx
+    JOIN pg_index ix ON ix.indexrelid = idx.oid
+    JOIN pg_class tbl ON tbl.oid = ix.indrelid
+    JOIN pg_am am ON am.oid = idx.relam
+    JOIN pg_attribute a1 ON a1.attrelid = tbl.oid AND a1.attnum = ix.indkey[0]
+    JOIN pg_attribute a2 ON a2.attrelid = tbl.oid AND a2.attnum = ix.indkey[1]
+    WHERE idx.oid = to_regclass('platform_payments_org_external_reference_uq')
+      AND tbl.oid = to_regclass('platform_payments')
+      AND am.amname = 'btree'
+      AND ix.indisunique AND ix.indisvalid AND ix.indisready
+      AND ix.indnkeyatts = 2 AND ix.indnatts = 2
+      AND ix.indexprs IS NULL
+      AND a1.attname = 'organization_id'
+      AND a2.attname = 'external_reference'
+      AND regexp_replace(pg_get_expr(ix.indpred, ix.indrelid), '[()"[:space:]]', '', 'g')
+          = 'external_referenceISNOTNULL'
+  ) THEN
+    RAISE EXCEPTION
+      'platform payment reference uniqueness index is missing or has an unexpected definition; refuse financial idempotency qualification';
+  END IF;
 END $$;
