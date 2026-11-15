@@ -1,0 +1,119 @@
+{
+  "status": "READ_ONLY_DELTA_COMPLETE_AGGREGATE_REMAINS_FAIL",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "baselineSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "at": "2026-11-15T18:52:19.602854+00:00",
+  "allFiveRequiredCommandsActuallyRan": true,
+  "aggregate": {
+    "failedFiles": 2577,
+    "passedFiles": 528,
+    "skippedFiles": 1,
+    "failedTests": 19,
+    "passedTests": 7788,
+    "skippedTests": 12
+  },
+  "newFailureHeaders": [],
+  "removedFailureHeaders": [],
+  "diagnosticComparison": {
+    "lint": {
+      "setsExactlyEqual": true,
+      "newDiagnostics": [],
+      "removedDiagnostics": []
+    },
+    "typecheck": {
+      "setsExactlyEqual": false,
+      "newDiagnostics": [
+        "@nzila/cli:typecheck: src/index.ts(27,9): error TS2554: Expected 1 arguments, but got 0.",
+        "Failed:    @nzila/cli#typecheck"
+      ],
+      "removedDiagnostics": [
+        "@nzila/blob:typecheck: src/index.ts(12,8): error TS2307: Cannot find module '@azure/storage-blob' or its corresponding type declarations.",
+        "Failed:    @nzila/blob#typecheck"
+      ]
+    },
+    "governance-audit": {
+      "setsExactlyEqual": true,
+      "newDiagnostics": [],
+      "removedDiagnostics": []
+    }
+  },
+  "changedTrackedSourceFiles": [
+    "apps/union-eyes/components/grievances/grievance-detail-console.tsx",
+    "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json",
+    "docs/union-eyes/staging/UE_V2_CURRENT_CANDIDATE.md",
+    "docs/union-eyes/staging/UE_V2_CURRENT_SOURCE_ADMISSION.md",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/actual-framework-browser-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/actual-framework-redirect-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/actual-root-locale-switch-c09de455-failure.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/authority-0fa684a1-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/bearer-0fa684a1-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/built-not-deployed-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/deadline-0fa684a1-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-required-validation-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-validation-delta-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/nar-0fa684a1-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/native-compiler-delta-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/native-qualified-not-deployed-d57aa1f3.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/native-tool-provenance-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/nested-0fa684a1-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-contract-before-root-locale-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/public-message-focused-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/root-locale-binding-review-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/root-locale-binding-validation-0fa684a1.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/system-0fa684a1-provenance.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/worker-0fa684a1-provenance.json",
+    "ops/change-records/CHG-2026-0114.founder-authorization.md",
+    "ops/change-records/CHG-2026-0114.json",
+    "packages/platform-change-management/src/approvals.ts",
+    "tooling/scripts/lib/ue-v2-navigation-inventory.json",
+    "tooling/scripts/lib/union-eyes-v2-staging-release.mjs",
+    "tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs"
+  ],
+  "focusedExistingTestsPassed": 49,
+  "broadLocalAggregatePassClaimed": false,
+  "runtimeAcceptanceClaimed": false,
+  "changedApplicationFiles": [
+    "apps/union-eyes/components/grievances/grievance-detail-console.tsx"
+  ],
+  "directParentMain": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
+  "nonApplicationDiffIncludesAlreadyMergedEBinding": true,
+  "unchangedTypecheckDiagnosticSourcesAndConfigurations": [
+    {
+      "file": "packages/cli/src/index.ts",
+      "sha256": "7f6c6afe3578d4d31e6097bbfc21de7a2cca1f7bca4c050a3a7916b2bfc647d3",
+      "byteEqualAtBothSources": true
+    },
+    {
+      "file": "packages/cli/package.json",
+      "sha256": "bfb114632e2ff13311a754da4e1783efa22ded0d9945270126b75ce48aba69b1",
+      "byteEqualAtBothSources": true
+    },
+    {
+      "file": "packages/cli/tsconfig.json",
+      "sha256": "9e2d92fb43ecd202b79a3ea4508387938e3176a685e3416a98d6d88e38cab7bb",
+      "byteEqualAtBothSources": true
+    },
+    {
+      "file": "packages/blob/src/index.ts",
+      "sha256": "dd5507ffa43cc1e9da79b9ca916802439506ec20be25c2bb546d70db7733f59f",
+      "byteEqualAtBothSources": true
+    },
+    {
+      "file": "packages/blob/package.json",
+      "sha256": "ab659c08fd1dc0c2671979b14c0eb7f8086e863a80cff491f7bda64d117c3613",
+      "byteEqualAtBothSources": true
+    },
+    {
+      "file": "packages/blob/tsconfig.json",
+      "sha256": "f8b49057e5e8b43dea66cbe588b262d6f1dcbb1df10a81f3af773a7b02d023a0",
+      "byteEqualAtBothSources": true
+    },
+    {
+      "file": "pnpm-lock.yaml",
+      "sha256": "7c8e531a48574062a961c02c8bc7eed49b84d6ff49be6b2430a6b2f08104accc",
+      "byteEqualAtBothSources": true
+    }
+  ]
+}

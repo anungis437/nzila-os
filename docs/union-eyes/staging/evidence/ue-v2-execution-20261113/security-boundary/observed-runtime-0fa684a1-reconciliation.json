@@ -1,0 +1,100 @@
+{
+  "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "workflowSha": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
+  "snapshotAt": "2026-11-15T18:57:48.680874+00:00",
+  "sourcePR": 1239,
+  "bindingPR": 1240,
+  "buildRunId": "43740816205",
+  "deploymentRunId": "43743136344",
+  "runtimeRecordSha256": "0529ba584cf5607eb55463696ffe3225a9ab37fe1310c5a2be2b2f3bd229f49d",
+  "revision": "nzila-ue-v2-staging-app--rel0fa684a156",
+  "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:7f010087f713a536d5f004d7ce688532305270ce797e4612d403da4e13f77fbb",
+  "trafficPercent": 100,
+  "ready": true,
+  "canonicalPerformance": {
+    "status": "PASS",
+    "scope": "UNCHANGED_CANONICAL_PUBLIC_CI_PROFILE",
+    "runId": "43740812602",
+    "runAttempt": 2,
+    "jobId": 132903005188,
+    "artifactId": 14173810704,
+    "p95Milliseconds": 364.048215,
+    "p95LimitMilliseconds": 500,
+    "p99LimitMilliseconds": 1500,
+    "p99ThresholdPassed": true,
+    "maxMilliseconds": 700.838701,
+    "customErrorRate": 0,
+    "receiptSha256": "a1a531d55d602aea48e835c5ae06c1a7720580e368315a52da2f21cca75528c3"
+  },
+  "baseJourneys": {
+    "status": "PASS_ACTUAL_SOURCE_BOUND_BASE_JOURNEYS",
+    "stages": [
+      {
+        "stage": "member-ui",
+        "status": "PASS"
+      },
+      {
+        "stage": "member-nar",
+        "status": "PASS"
+      },
+      {
+        "stage": "claim-deadlines",
+        "status": "PASS"
+      },
+      {
+        "stage": "formal-deadlines",
+        "status": "PASS"
+      },
+      {
+        "stage": "messaging",
+        "status": "PASS"
+      },
+      {
+        "stage": "eicar",
+        "status": "PASS"
+      }
+    ],
+    "authorityLedgersCleaned": 3,
+    "receiptSha256": "d9f202a8f70b3b4a35b23adc2579db917ff9a03daecfbbf44ecf88f53c0b982c"
+  },
+  "worker": {
+    "status": "PASS",
+    "batchPassed": true,
+    "retirementPassed": true,
+    "receiptSha256": "5092d379e302550302957b3d293405cede784ef26d6acee0e666e030d1bc9c93",
+    "providerAcceptanceIsNotInboxDelivery": true
+  },
+  "pairedSession": {
+    "runId": "43744658940",
+    "statusAtSnapshot": "WAITING_ORIGINAL_EXPIRY",
+    "sameUnexpiredCookieCaseAndDocument401": true,
+    "membershipRestoration": "PASS_BASELINE_OBSERVED",
+    "originalBytesProof": "PASS",
+    "originalFullHourExpiryProof": "PENDING_ORIGINAL_EXPIRY_2026_11_15_190813_UTC",
+    "actualRealReceiptSha256": "d4a5b2c2c1ba54bd2286370d7ce23da2b6d44eda0f9380ad181a6ea93ed019ec",
+    "privateEncryptedEnvelopeOmitted": true
+  },
+  "allSevenPersonas": {
+    "statusAtSnapshot": "IN_PROGRESS",
+    "completedRoles": [
+      "member",
+      "steward"
+    ]
+  },
+  "recovery": {
+    "status": "PASS",
+    "runId": "43744291292",
+    "bothQaRevisionsIndependentlyInactive": true,
+    "fullTrafficFailoverClaimed": false,
+    "receiptSha256": "1d4ac8f3ba792c76b3e025a0fccdc6d247b27275dc7848bd24dc330caf90bf67"
+  },
+  "dedicatedWorkspaceRequestCorrelation": {
+    "status": "PASS",
+    "receiptSha256": "fec6244360e9a339fd56ef3aebe6e96a5eb3b81ac5d8535feb682075d0f24073"
+  },
+  "openMobileDefect": "actual-mobile-grievance-title-0fa684a1-failure.json",
+  "acceptedStagingCandidateSha": null,
+  "stagingGo": false,
+  "proposedFStagingAcceptanceInferred": false,
+  "productionAuthorized": false
+}
