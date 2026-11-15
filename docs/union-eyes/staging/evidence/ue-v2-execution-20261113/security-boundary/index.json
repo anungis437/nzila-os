@@ -1139,6 +1139,12 @@
       "sha256": "b150f1d9f2fa0054851f36aa3acdfb482879e6d2053b65cce14f69ae54b27ccb",
       "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "runtimePassInferred": false
+    },
+    {
+      "file": "final-publication-validation-241006d3.json",
+      "sha256": "16dce4b58a03a7e113dfd58727bdbee9f1d4fc5915ba3ae9768d9fcaa0c5f204",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
     }
   ],
   "nextCandidate": {
@@ -1464,5 +1470,6 @@
   ],
   "latestEvidenceSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "lastEvidenceUpdateAt": "2026-11-15T22:14:29.715619+00:00",
-  "verdictScope": "BASE_RELEASE_STAGING_ONLY"
+  "verdictScope": "BASE_RELEASE_STAGING_ONLY",
+  "finalPublicationValidation": "final-publication-validation-241006d3.json"
 }

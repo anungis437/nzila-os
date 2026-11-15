@@ -18,7 +18,7 @@ Unchanged canonical public CI performance passes at p95 **354.1058007 ms**, agai
 
 The mobile grievance title now receives 290 px with status below. Actual 390 px French and 1440 px English presentation were visually reviewed. This is browser evidence; physical-device certification is outside this acceptance.
 
-Exact-source whole application CI passed **26,215 tests**, with 34 skipped. All five required broad local commands ran on source and binding: docs PASS; lint, typecheck, fast tests and governance audit FAIL, with their explicit deltas retained. Final publication checks are recorded separately.
+Exact-source whole application CI passed **26,215 tests**, with 34 skipped. All five required broad local commands ran on source and binding: docs PASS; lint, typecheck, fast tests and governance audit FAIL, with their explicit deltas retained. [Final publication checks](evidence/ue-v2-execution-20261113/security-boundary/final-publication-validation-241006d3.json) again record docs PASS and the other four commands FAIL. Fast-test results are 7,788 passed, 19 failed and 12 skipped, with the same failure headers as the application-source run; 2,577 test files fail. The 38 focused publication tests pass. Eleven generated reports were restored and no unexpected tracked changes occurred.
 
 Scope includes cases/grievances, intake, assignment, members, representatives/stewards, officer/executive and governance access, documents/evidence, staff deadline management, messaging, English/French and mobile, audit, security and recovery. **Finance/dues persistence and Financial Officer 2.1 remain excluded**; only sensitive finance boundaries are accepted.
 

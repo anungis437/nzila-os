@@ -1772,5 +1772,10 @@
     "globalSaasReadiness": "NO_GO",
     "phase3B": "HOLD",
     "productionAuthorized": false
+  },
+  "publicationValidation": {
+    "snapshotSha": "4ae8957bcdfb5cb8b50d51c9b82500fbd8b9ad7f",
+    "evidence": "final-publication-validation-241006d3.json",
+    "status": "COMPLETED_WITH_LOCAL_FAILURES_RETAINED_ADVISORY"
   }
 }
