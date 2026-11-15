@@ -285,7 +285,7 @@ export function GrievanceDetailConsole() {
       )}
 
       {/* Header */}
-      <div className="flex items-start gap-4">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-2 sm:flex sm:gap-4">
         <button type="button" onClick={() => router.back()} aria-label={t("back")} className="text-gray-500 hover:text-gray-800">
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -294,7 +294,7 @@ export function GrievanceDetailConsole() {
           <p className="text-sm text-gray-500">{grievance.grievanceNumber}</p>
         </div>
         <span
-          className={`ml-auto shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${isKnownStatus(grievance.status) ? STATUS_COLORS[grievance.status] : "bg-gray-100"}`}
+          className={`col-start-2 shrink-0 justify-self-start rounded-full px-3 py-1 text-xs font-semibold sm:ml-auto ${isKnownStatus(grievance.status) ? STATUS_COLORS[grievance.status] : "bg-gray-100"}`}
         >
           {statusLabel(grievance.status)}
         </span>
