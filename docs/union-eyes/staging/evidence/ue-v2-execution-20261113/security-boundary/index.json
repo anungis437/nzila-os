@@ -609,7 +609,6 @@
     "bindingReview": "catalog-latency-c09de455-binding-review.json",
     "bindingValidation": "catalog-latency-c09de455-binding-validation.json",
     "localNativeExport": "local-native-export-c09de455.json",
-    "nativeSourceGraphs": "native-source-graphs-c09de455.json",
     "nativeSqlPrototypeBinding": "catalog-latency-c09de455-native-sql-binding.json",
     "deployedHttpPerformance": "PENDING_UNCHANGED_500_1500_THRESHOLDS",
     "mobileVisualReview": "PENDING_ACTUAL_Q",
@@ -617,7 +616,8 @@
     "allQRuntimeCriteria": "PENDING",
     "acceptedStagingCandidateSha": null,
     "localHolisticAdvisory": "FAIL_4_OF_5_LOCAL_COMMANDS",
-    "failureDeltaAudit": "PENDING_READ_ONLY_Q_VS_F_COMPARISON"
+    "failureDeltaAudit": "PENDING_READ_ONLY_Q_VS_F_COMPARISON",
+    "nativeToolProvenance": "native-source-graphs-c09de455.json"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -717,7 +717,6 @@
       "ciAndRuntimeStillRequired": true,
       "bindingReview": "combined-repair-5b5d0a2f-binding-review.json",
       "localNativeExport": "local-native-export-5b5d0a2f.json",
-      "nativeSourceGraphs": "native-source-graphs-5b5d0a2f.json",
       "nativeLockOnlySourceBinding": "native-deadline-lock-only-5b5d0a2f.json",
       "historicalCatalogPrototypeSourceEquivalence": "catalog-native-source-equivalence-80651983.json",
       "freshCorrectedCatalogMeasurement": "PENDING",
@@ -727,7 +726,8 @@
       "observedReconciliation": "observed-runtime-5b5d0a2f-reconciliation.json",
       "bindingCI": "PASS_BEFORE_NORMAL_MAIN_ADMISSION",
       "admittedWorkflowSha": "213e991f3e392771226ae106162b114d5fffe6f6",
-      "remainingSourceSAcceptance": "PERFORMANCE_FAIL_AND_FULL_SEVEN_PENDING"
+      "remainingSourceSAcceptance": "PERFORMANCE_FAIL_AND_FULL_SEVEN_PENDING",
+      "nativeToolProvenance": "native-source-graphs-5b5d0a2f.json"
     }
   ],
   "currentObservedRuntime": {
