@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "candidateSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "verifiedAt": "2026-11-15T03:29:18.330804+00:00",
+  "graphs": {
+    "authority": {
+      "file": "authority-2107feeb-provenance.json",
+      "sha256": "f76ee54d62349d45db11164347251a47ba713124ff3d9b96cc83882167a0040e",
+      "bundleSha256": "296bee35f796fd32d5529bbf784a834655a8b08f5c73bf65046eb066504f2da6",
+      "trackedSourceInputsVerified": 125
+    },
+    "bearer": {
+      "file": "bearer-2107feeb-provenance.json",
+      "sha256": "b1464adf44d1fb1af9a7fa3d8715c1064f9ae1968919a4c60cdc929fba2e0b5c",
+      "bundleSha256": "c8059af98dd19ffe09f80f60c93489bbd3915a87b8c9d09b23459a3719d6d2b6",
+      "trackedSourceInputsVerified": 103
+    },
+    "nested": {
+      "file": "nested-2107feeb-provenance.json",
+      "sha256": "e397ccb351c7734754043f86559ed8907de5cc2d4185e940b64fc3748f8365a8",
+      "bundleSha256": "026ee053c981e60d2f2f30ef2bc0808aece816f1d0043c5d4e24025947f9d5b1",
+      "trackedSourceInputsVerified": 106
+    },
+    "worker": {
+      "file": "worker-2107feeb-provenance.json",
+      "sha256": "9eedaad034c72f46c3e2bc163716471859a5fc9f3bdfb1226ec048cf5427da20",
+      "bundleSha256": "3748c6536bb94b7a87876b1d9f93564c8895b507b1f842499dba9758d3de68cf",
+      "trackedSourceInputsVerified": 56
+    },
+    "nar": {
+      "file": "nar-2107feeb-provenance.json",
+      "sha256": "634816b95ed2d90d94a1d0a06c9426d9643c15be57a3c306d5f7d126c44c5b95",
+      "bundleSha256": "bdb86f4697102812149d2625bbe333cc393387eebe8eea83a6054adca9192470",
+      "trackedSourceInputsVerified": 108
+    },
+    "system": {
+      "file": "system-2107feeb-provenance.json",
+      "sha256": "519d44704225baa3dfbfd4c6dd5a4e205a6822283d8888fce28b383047e29164",
+      "bundleSha256": "c4bba7eb3168ba2df1e21abd2e03811bfa97e423ab1b1103f35fed4218af8ee3",
+      "trackedSourceInputsVerified": 208
+    },
+    "deadline": {
+      "file": "deadline-2107feeb-provenance.json",
+      "sha256": "6f61f926c42635eda7d3158137eb791031f1251de138bb37aea06129899fc35a",
+      "bundleSha256": "177dfa5df8aa50d88ab3f652f0b098d7fd1d784835f5fff0a7d87132c66cd02e",
+      "trackedSourceInputsVerified": 442
+    }
+  },
+  "purpose": "COMPILED_SOURCE_BYTES_AND_PRIVATE_NATIVE_REHEARSAL_PROVENANCE",
+  "applicationDeploymentClaimed": false,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

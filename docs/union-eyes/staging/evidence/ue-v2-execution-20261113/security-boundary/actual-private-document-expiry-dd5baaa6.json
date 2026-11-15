@@ -1,0 +1,29 @@
+{
+  "purpose": "CANDIDATE_BOUND_REAL_DOCUMENT_EXPIRY",
+  "sourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+  "realSessionCiRun": "43663344651",
+  "documentId": "106696a5-d14d-408b-a4d1-399d22d99cd7",
+  "receiptSha256": "9f8cc8977ab5083ba7926961bfb871ece0c60287db5852da3e097622124b507e",
+  "privateProof": {
+    "ok": true,
+    "purpose": "REAL_PRIVATE_STAGING_DOCUMENT_LEASE_EXPIRY",
+    "at": "2026-11-15T02:34:57.785Z",
+    "expiresAt": "2026-11-15T02:34:36Z",
+    "status": 403,
+    "errorCode": "AuthenticationFailed",
+    "storageResponseDate": "Sun, 15 Nov 2026 02:34:57 GMT",
+    "signedUrlSha256": "297be717cec6786cf86e9cf608c22385d6dbd9880b554c8adf8ce104dad03068",
+    "privateAddresses": [
+      "10.40.5.5"
+    ],
+    "actualIssuedUrlUsed": true,
+    "signedQuerySerialized": false,
+    "noClockOrLeaseAlteration": true,
+    "transport": {
+      "bytes": 568,
+      "programSha256": "4374e2177056f656c297c807a1f986f62114194869da9e25f27a8c2e4ba169dd",
+      "fileSha256": {}
+    }
+  },
+  "signedQuerySerialized": false
+}

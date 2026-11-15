@@ -1,6 +1,6 @@
 {
   "purpose": "PRE_REPAIR_SECURITY_FINDING_AND_QUALIFICATION_PROVENANCE",
-  "proposedSourceSha": "cbf2bc9339f766ce4b5d8500a53e4481644f8680",
+  "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
   "productionAuthorized": false,
   "stagingGo": false,
   "entries": [
@@ -166,18 +166,132 @@
       "sha256": "0e2ee6ac6018f8e94ef4c629bdc987a6fb3568e0c5523430f7556f87c8e5cc4e",
       "observedOrProposedSourceSha": "167f95034fbdaa163cd67e79c4bca622284e0d77",
       "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-2107feeb.json",
+      "sha256": "260507461a2fb2e514e996bcb8a495b6139b498d090eb75dce227c22d9e7ed6f",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "candidate-deadline-private-copy-2107feeb.json",
+      "sha256": "6f4230be592766441dc050d1a70e5cdc77164dfc72414acea338a4ac5df49e09",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "owned-deadline-copy-cycle-2107feeb.json",
+      "sha256": "67c49158fb94ad066ea46c628138dee1d072348db373b29938f3fccb35536c5b",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "primary-source-noop-2107feeb-qualification.json",
+      "sha256": "0c4199cdb7431f55f90bf69e0ce72d1504c962329c386871beef10bca2128dc6",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "candidate-deadline-c16f7c25-first-rehearsal-failure.json",
+      "sha256": "8c74443a5e3f90804fc7464937748c439d85abd42e8debd82b5ea6878a3ff109",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "source-c16f7c25-whole-application-ci-failure.json",
+      "sha256": "36936bb6ca6c0e744b63c59fd332b9e6311ec40f378787d5d8053aa873e04604",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "actual-private-document-expiry-dd5baaa6.json",
+      "sha256": "f8302d703fe22fda46232856d72705feb6e7ad74b73744d8738e44293f4154fd",
+      "observedOrProposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "admitted-verification-workflow-1230.json",
+      "sha256": "29adba178eabbf36efc909c0c6e725e8cecaa8d49a53f8c67c3a8a3670342653",
+      "observedOrProposedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "authority-2107feeb-provenance.json",
+      "sha256": "f76ee54d62349d45db11164347251a47ba713124ff3d9b96cc83882167a0040e",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "bearer-2107feeb-provenance.json",
+      "sha256": "b1464adf44d1fb1af9a7fa3d8715c1064f9ae1968919a4c60cdc929fba2e0b5c",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nested-2107feeb-provenance.json",
+      "sha256": "e397ccb351c7734754043f86559ed8907de5cc2d4185e940b64fc3748f8365a8",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "worker-2107feeb-provenance.json",
+      "sha256": "9eedaad034c72f46c3e2bc163716471859a5fc9f3bdfb1226ec048cf5427da20",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nar-2107feeb-provenance.json",
+      "sha256": "634816b95ed2d90d94a1d0a06c9426d9643c15be57a3c306d5f7d126c44c5b95",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "system-2107feeb-provenance.json",
+      "sha256": "519d44704225baa3dfbfd4c6dd5a4e205a6822283d8888fce28b383047e29164",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "deadline-2107feeb-provenance.json",
+      "sha256": "6f61f926c42635eda7d3158137eb791031f1251de138bb37aea06129899fc35a",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "native-source-graphs-2107feeb.json",
+      "sha256": "8357548e78114749188765d9b02885ded6dbeedc4de6dd77ae15c632c4ca64cf",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "observed-contract-before-deadline-replacement-2107feeb.json",
+      "sha256": "0e8115b5491c7e63a7f70104a1232f913696440c8031747afff1b6c8f0edd5ff",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "system-single-pool-2107feeb-source-binding.json",
+      "sha256": "79fd7e2c935d319653b00e5ebe0a48a98c917bf3310ab2d39cb4b7002cdaa921",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "candidate-native-admission-2107feeb.json",
+      "sha256": "9fd8d4707051ba3af299ff1757197901b6aea65658216514740d50b57c11cd9e",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
     }
   ],
   "nextCandidate": {
-    "sourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
-    "sourcePR": 1228,
-    "integrationPR": 1229,
+    "sourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+    "sourcePR": 1231,
     "deployed": false,
-    "localNativeExport": "local-native-export-dd5baaa6.json",
-    "nativeSourceAdmission": "candidate-restored-rehearsal-dd5baaa6.json",
-    "primaryReadOnlyNoop": "primary-source-noop-dd5baaa6-qualification.json",
+    "localNativeExport": "local-native-export-2107feeb.json",
+    "nativeSourceAdmission": "candidate-deadline-private-copy-2107feeb.json",
+    "ownedCopyCycle": "owned-deadline-copy-cycle-2107feeb.json",
+    "primaryReadOnlyNoop": "primary-source-noop-2107feeb-qualification.json",
     "ciAndRuntimeStillRequired": true,
-    "repairSummary": "Nullable workbench case reference fallback and exact staff grievance collection entry; dependent tests enforce creation/management denials"
+    "repairSummary": "Staff creation/rescheduling/completion/cancellation of case deadlines with case authority, explicit public disclosure, legacy confirmation guard and atomic audit/reminders"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -243,15 +357,28 @@
       "ciAndRuntimeStillRequired": true,
       "repairSummary": "Nested system savepoints and authority/context restoration; correct App Router asset graph and MIME security; actual-image gate and navigation inventory CI",
       "ciFailure": "source-a8442373-whole-application-ci-failure.json"
+    },
+    {
+      "sourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "sourcePR": 1228,
+      "integrationPR": 1229,
+      "deployed": false,
+      "localNativeExport": "local-native-export-dd5baaa6.json",
+      "nativeSourceAdmission": "candidate-restored-rehearsal-dd5baaa6.json",
+      "primaryReadOnlyNoop": "primary-source-noop-dd5baaa6-qualification.json",
+      "ciAndRuntimeStillRequired": true,
+      "repairSummary": "Nullable workbench case reference fallback and exact staff grievance collection entry; dependent tests enforce creation/management denials"
     }
   ],
   "currentObservedRuntime": {
-    "sourceSha": "9a7ee373e1205209f864e63f37877c8919bb6738",
-    "workflowAndInfrastructureSha": "8ce043dd393f6e119d82558d28e6ec4a49905236",
-    "buildRunId": "43572581712",
-    "deployRunId": "43609080128",
-    "revision": "nzila-ue-v2-staging-app--rel9a7ee373e1",
+    "sourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+    "workflowAndInfrastructureSha": "034b3498fe68da339c81deb24faa0a424f71cdac",
+    "verificationWorkflowSha": "43105177dcf270ac86747874ada42159790b9fb9",
+    "buildRunId": "43649645122",
+    "deployRunId": "43650665974",
+    "revision": "nzila-ue-v2-staging-app--reldd5baaa614",
     "trafficPercent": 100,
+    "imageDigest": "sha256:7417b2b00e3b18eb6bbe9fad56b56ce67d4ef16dd7023d24de0c1fa210bb300e",
     "stagingGo": false
   },
   "supersededWorkbenchCandidate": {

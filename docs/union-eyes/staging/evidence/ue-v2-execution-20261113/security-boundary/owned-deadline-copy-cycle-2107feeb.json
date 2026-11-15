@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "candidateSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "observedApplicationSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+  "clone": "nzila-ue-v2-recovery-20261113",
+  "primaryRerouted": false,
+  "dataDeleted": false,
+  "productionAuthorized": false,
+  "serverId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-ue-v2-recovery-20261113",
+  "originalState": "Stopped",
+  "fixtureId": "94ed5ea4-cf9e-4f8a-855b-374a8ce4d72e",
+  "caseId": "e951ac6a-71b8-41d6-82ef-511e0e1e5f53",
+  "at": "2026-11-15T03:21:45.698517+00:00",
+  "actualSourceServiceRehearsalPassed": true,
+  "ownedCloneStopped": true,
+  "dataAndServerRetained": true
+}
