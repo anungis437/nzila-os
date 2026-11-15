@@ -3,12 +3,18 @@ import { PgDialect } from 'drizzle-orm/pg-core'
 import type { SQL } from 'drizzle-orm'
 import contract from './catalog-authority-contract.json'
 import { admissionQueries } from './catalog-admission-core.mjs'
+import { createHash } from 'node:crypto'
+import { canonicalAdmissionQueries } from './canonical-catalog-admission'
+import { compileCatalogSnapshot } from './catalog-admission-batch'
 
 const mocks = vi.hoisted(() => ({ execute: vi.fn() }))
 vi.mock('@nzila/db', () => ({ db: { execute: mocks.execute } }))
 
 type Row = Record<string, unknown>
 const dialect = new PgDialect()
+const legacyStatements = admissionQueries.map(query => query.sql)
+const canonicalStatements = [...legacyStatements, ...canonicalAdmissionQueries]
+const plans = [legacyStatements, canonicalStatements]
 
 function deferred() {
   let resolve!: () => void
@@ -43,7 +49,7 @@ describe('catalog admission while inspections overlap', () => {
     mocks.execute.mockReset()
     snapshot = safeSnapshot()
     statements = []
-    mocks.execute.mockImplementation(async (statement: SQL) => read(dialect.sqlToQuery(statement).sql))
+    mocks.execute.mockImplementation(async (statement: SQL) => readBatch(dialect.sqlToQuery(statement).sql))
   })
 
   afterEach(() => {
@@ -57,18 +63,28 @@ describe('catalog admission while inspections overlap', () => {
     return structuredClone(query ? snapshot[query.name] ?? [] : [])
   }
 
+  function readBatch(statement: string): Row[] {
+    const plan = plans.find(statements => compileCatalogSnapshot(statements) === statement)
+    if (!plan) throw new Error('Unexpected default database statement')
+    return plan.map((query, index) => ({
+      query_index: index,
+      query_hash: createHash('sha256').update(query).digest('hex'),
+      query_rows: read(query),
+    }))
+  }
+
   async function holdDefaultInspection(expectedStarts = 1) {
     const gate = deferred(), entered = deferred(), firstEntered = deferred()
     let starts = 0
     mocks.execute.mockImplementation(async (query: SQL) => {
       const statement = dialect.sqlToQuery(query).sql
-      if (statement === admissionQueries[0].sql) {
+      if (plans.some(statements => compileCatalogSnapshot(statements) === statement)) {
         starts++
         if (starts === 1) firstEntered.resolve()
         if (starts === expectedStarts) entered.resolve()
         await gate.promise
       }
-      return read(statement)
+      return readBatch(statement)
     })
     return { gate, entered, firstEntered, starts: () => starts }
   }
@@ -83,8 +99,30 @@ describe('catalog admission while inspections overlap', () => {
     const reports = await Promise.all(requests)
     expect(reports.every(report => report.ok)).toBe(true)
     expect(statements).toEqual(admissionQueries.map(query => query.sql))
+    expect(mocks.execute).toHaveBeenCalledTimes(1)
     reports[0].violations.push('caller-local diagnostic')
     expect(reports[1].violations).toEqual([])
+  })
+
+  it('reads all canonical catalog checks in one fresh default database statement', async () => {
+    vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
+    const { evaluateCatalogAdmission } = await import('./catalog-admission')
+    const batched = await evaluateCatalogAdmission()
+    expect(mocks.execute).toHaveBeenCalledTimes(1)
+    expect(statements).toEqual(canonicalStatements)
+    expect(canonicalStatements).toHaveLength(28)
+    statements = []
+    const serial = await evaluateCatalogAdmission(async statement => read(statement))
+    expect(statements).toEqual(canonicalStatements)
+    expect(batched).toEqual(serial)
+  })
+
+  it('rejects a malformed default snapshot and inspects afresh after that failure', async () => {
+    const { evaluateCatalogAdmission } = await import('./catalog-admission')
+    mocks.execute.mockImplementationOnce(async () => [])
+    await expect(evaluateCatalogAdmission()).rejects.toThrow('Catalog snapshot result count differs')
+    expect((await evaluateCatalogAdmission()).ok).toBe(true)
+    expect(mocks.execute).toHaveBeenCalledTimes(2)
   })
 
   it('shares a running inspection across separately loaded route module copies', async () => {

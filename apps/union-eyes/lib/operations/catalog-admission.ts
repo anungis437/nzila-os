@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto'
 import { sql } from 'drizzle-orm'
 import contract from './catalog-authority-contract.json'
 import { admissionQueries, assessCatalogAdmission, catalogContractDigest } from './catalog-admission-core.mjs'
-import { canonicalCatalogContract, inspectCanonicalAuthCatalog } from './canonical-catalog-admission'
+import { canonicalAdmissionQueries, canonicalCatalogContract, inspectCanonicalAuthCatalog } from './canonical-catalog-admission'
+import { catalogSnapshotExecutor, compileCatalogSnapshot } from './catalog-admission-batch'
 
 export const CATALOG_ADMISSION_PUBLIC_ERROR = 'catalog authority admission failed'
 
@@ -73,13 +74,20 @@ export async function evaluateCatalogAdmission(execute?: Execute): Promise<Catal
   }
   if (execute) return inspectCatalogAdmission(execute, context)
 
+  const statements = [
+    ...admissionQueries.map(query => query.sql),
+    ...(context.canonical ? canonicalAdmissionQueries : []),
+  ]
   const database = createHash('sha256').update(process.env.DATABASE_URL ?? '').digest('hex')
-  const key = JSON.stringify([contractFingerprint, context, database, process.env.GITHUB_SHA ?? ''])
+  const key = JSON.stringify([contractFingerprint, catalogContractDigest(statements), context, database, process.env.GITHUB_SHA ?? ''])
   const inspections = inspectionGlobal[inFlightKey] ??= new Map()
   let pending = inspections.get(key)
   if (!pending) {
     pending = appDatabaseExecutor()
-      .then(executeDefault => inspectCatalogAdmission(executeDefault, context))
+      .then(async executeDefault => {
+        const envelope = await executeDefault(compileCatalogSnapshot(statements))
+        return inspectCatalogAdmission(catalogSnapshotExecutor(statements, envelope), context)
+      })
       .finally(() => {
         if (inspections.get(key) === pending) inspections.delete(key)
       })

@@ -1,7 +1,8 @@
 import { AUTHORITY_PHYSICAL_GUARDS } from '@/db/auth/authority-physical-guards'
-import { physicalGuardViolations } from '@/db/auth/physical-guard-catalog'
+import { physicalGuardQueries, physicalGuardViolations } from '@/db/auth/physical-guard-catalog'
 import {
   inspectMessagingPhysicalCatalog,
+  MESSAGING_PHYSICAL_QUERIES,
   messagingPhysicalGuardViolations,
 } from '@/db/auth/messaging-physical-guards'
 import {
@@ -141,17 +142,56 @@ export function canonicalCatalogContract(base = baseContract) {
   return { payload: canonical, digest: catalogContractDigest(canonical) }
 }
 
+// The same source-owned statements drive serial inspection and the default
+// single-statement snapshot. Keep validation below independent of transport.
+export const CANONICAL_AUTH_QUERIES = {
+  roles: `SELECT rolname,rolsuper,rolbypassrls,rolinherit,rolcanlogin,rolcreatedb,rolcreaterole,
+    has_schema_privilege(rolname,'user_management','USAGE') AS auth_usage,
+    has_schema_privilege(rolname,'user_management','CREATE') AS auth_create,
+    has_schema_privilege(rolname,'public','CREATE') AS public_create
+    FROM pg_roles WHERE rolname IN (${literals})`,
+  memberships: `SELECT member.rolname AS member,granted.rolname AS granted,m.admin_option
+    FROM pg_auth_members m JOIN pg_roles member ON member.oid=m.member JOIN pg_roles granted ON granted.oid=m.roleid
+    WHERE member.rolname IN (${literals})`,
+  columns: `SELECT r.rolname AS role,n.nspname AS schema_name,c.relname AS table_name,v.privilege,
+    array_agg(a.attname::text ORDER BY a.attname) AS all_columns,
+    COALESCE(array_agg(a.attname::text ORDER BY a.attname) FILTER (WHERE has_column_privilege(r.oid,c.oid,a.attnum,v.privilege)),ARRAY[]::text[]) AS allowed_columns
+    FROM pg_roles r CROSS JOIN pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
+    CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES']) v(privilege)
+    WHERE r.rolname IN (${literals}) AND (n.nspname='user_management' OR
+      (n.nspname='public' AND c.relname IN ('platform_identity_bindings','organization_members') AND r.rolname LIKE 'nzila_auth_%'))
+      AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped
+    GROUP BY r.rolname,n.nspname,c.relname,v.privilege`,
+  tables: `SELECT r.rolname AS role,c.relname AS table_name,v.privilege,
+    has_table_privilege(r.oid,c.oid,v.privilege) AS allowed,c.relrowsecurity,c.relforcerowsecurity,owner.rolname AS owner
+    FROM pg_roles r CROSS JOIN pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_roles owner ON owner.oid=c.relowner
+    CROSS JOIN unnest(ARRAY['DELETE','TRUNCATE','TRIGGER']) v(privilege)
+    WHERE r.rolname IN (${literals}) AND (n.nspname='user_management' OR
+      (n.nspname='public' AND c.relname IN ('platform_identity_bindings','organization_members') AND r.rolname LIKE 'nzila_auth_%'))
+      AND c.relkind IN ('r','p')`,
+  functions: `SELECT p.proname,p.prosecdef,p.proconfig,owner.rolname AS owner,r.rolname AS role,
+    has_function_privilege(r.oid,p.oid,'EXECUTE') AS allowed,has_function_privilege('public',p.oid,'EXECUTE') AS public_execute
+    FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_roles owner ON owner.oid=p.proowner CROSS JOIN pg_roles r
+    WHERE n.nspname='user_management' AND r.rolname IN (${literals})`,
+} as const
+
+export const canonicalAdmissionQueries: readonly string[] = [
+  ...Object.values(CANONICAL_AUTH_QUERIES),
+  CASE_ASSIGNEE_CATALOG_QUERY,
+  CONVERSATION_ASSIGNEE_CATALOG_QUERY,
+  BUSINESS_SESSION_POLICY_QUERY,
+  DEADLINE_SESSION_GUARD_QUERY,
+  ...Object.values(MESSAGING_PHYSICAL_QUERIES),
+  ...Object.values(physicalGuardQueries(AUTHORITY_PHYSICAL_GUARDS)),
+]
+
 /** Batched PostgreSQL 15 compatible catalog reads. No credentials, mutations,
  * SET ROLE, or admission-triggered privilege repair are permitted here.
  */
 export async function inspectCanonicalAuthCatalog(execute: Execute): Promise<string[]> {
   const violations: string[] = []
   const roleRows =
-    await execute(`SELECT rolname,rolsuper,rolbypassrls,rolinherit,rolcanlogin,rolcreatedb,rolcreaterole,
-    has_schema_privilege(rolname,'user_management','USAGE') AS auth_usage,
-    has_schema_privilege(rolname,'user_management','CREATE') AS auth_create,
-    has_schema_privilege(rolname,'public','CREATE') AS public_create
-    FROM pg_roles WHERE rolname IN (${literals})`)
+    await execute(CANONICAL_AUTH_QUERIES.roles)
   for (const role of roles) {
     const actual = roleRows.find((row) => row.rolname === role)
     const canonical = Object.values(AUTH_EXECUTION_ROLES).some((value) => value === role)
@@ -174,9 +214,7 @@ export async function inspectCanonicalAuthCatalog(execute: Execute): Promise<str
     }
   }
   const memberships =
-    await execute(`SELECT member.rolname AS member,granted.rolname AS granted,m.admin_option
-    FROM pg_auth_members m JOIN pg_roles member ON member.oid=m.member JOIN pg_roles granted ON granted.oid=m.roleid
-    WHERE member.rolname IN (${literals})`)
+    await execute(CANONICAL_AUTH_QUERIES.memberships)
   for (const row of memberships) {
     if (
       !AUTH_ROLE_MEMBERSHIP_EXPECTATIONS[String(row.member)]?.includes(String(row.granted)) ||
@@ -204,15 +242,7 @@ export async function inspectCanonicalAuthCatalog(execute: Execute): Promise<str
     },
   }
   const columns =
-    await execute(`SELECT r.rolname AS role,n.nspname AS schema_name,c.relname AS table_name,v.privilege,
-    array_agg(a.attname::text ORDER BY a.attname) AS all_columns,
-    COALESCE(array_agg(a.attname::text ORDER BY a.attname) FILTER (WHERE has_column_privilege(r.oid,c.oid,a.attnum,v.privilege)),ARRAY[]::text[]) AS allowed_columns
-    FROM pg_roles r CROSS JOIN pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
-    CROSS JOIN unnest(ARRAY['SELECT','INSERT','UPDATE','REFERENCES']) v(privilege)
-    WHERE r.rolname IN (${literals}) AND (n.nspname='user_management' OR
-      (n.nspname='public' AND c.relname IN ('platform_identity_bindings','organization_members') AND r.rolname LIKE 'nzila_auth_%'))
-      AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped
-    GROUP BY r.rolname,n.nspname,c.relname,v.privilege`)
+    await execute(CANONICAL_AUTH_QUERIES.columns)
   for (const row of columns) {
     const declared =
       row.schema_name === 'public'
@@ -233,13 +263,7 @@ export async function inspectCanonicalAuthCatalog(execute: Execute): Promise<str
   for (const table of expectedTables)
     if (!columns.some((row) => row.schema_name === 'user_management' && row.table_name === table))
       violations.push(`${table}: canonical auth relation is absent`)
-  const tables = await execute(`SELECT r.rolname AS role,c.relname AS table_name,v.privilege,
-    has_table_privilege(r.oid,c.oid,v.privilege) AS allowed,c.relrowsecurity,c.relforcerowsecurity,owner.rolname AS owner
-    FROM pg_roles r CROSS JOIN pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_roles owner ON owner.oid=c.relowner
-    CROSS JOIN unnest(ARRAY['DELETE','TRUNCATE','TRIGGER']) v(privilege)
-    WHERE r.rolname IN (${literals}) AND (n.nspname='user_management' OR
-      (n.nspname='public' AND c.relname IN ('platform_identity_bindings','organization_members') AND r.rolname LIKE 'nzila_auth_%'))
-      AND c.relkind IN ('r','p')`)
+  const tables = await execute(CANONICAL_AUTH_QUERIES.tables)
   for (const row of tables) {
     const expected =
       AUTH_PRIVILEGE_EXPECTATIONS[String(row.role)]?.[String(row.table_name)]?.[
@@ -256,10 +280,7 @@ export async function inspectCanonicalAuthCatalog(execute: Execute): Promise<str
       )
   }
   const functions =
-    await execute(`SELECT p.proname,p.prosecdef,p.proconfig,owner.rolname AS owner,r.rolname AS role,
-    has_function_privilege(r.oid,p.oid,'EXECUTE') AS allowed,has_function_privilege('public',p.oid,'EXECUTE') AS public_execute
-    FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_roles owner ON owner.oid=p.proowner CROSS JOIN pg_roles r
-    WHERE n.nspname='user_management' AND r.rolname IN (${literals})`)
+    await execute(CANONICAL_AUTH_QUERIES.functions)
   for (const expected of AUTH_FUNCTION_EXPECTATIONS) {
     const actual = functions.filter((row) => row.proname === expected.name)
     if (actual.length !== roles.length)
