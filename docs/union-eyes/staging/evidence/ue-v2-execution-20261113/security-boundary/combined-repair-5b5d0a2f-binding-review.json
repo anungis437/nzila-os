@@ -1,0 +1,54 @@
+{
+  "record": "COMBINED_REPAIR_SOURCE_BINDING_REVIEW",
+  "at": "2026-11-15T07:11:14.902958+00:00",
+  "candidateSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+  "sourcePR": 1233,
+  "bindingPR": 1234,
+  "supersededUndeployedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+  "correction": "Use existing registered image-supplied GITHUB_SHA for catalog flight source separation; no new knob or ceiling change",
+  "originalWholeApplicationFailure": "catalog-build-identity-env-census-failure-80651983.json",
+  "catalogAndEnvironmentTests": {
+    "passed": 47,
+    "failed": 0,
+    "strictCensusExit": 0
+  },
+  "nativeExport": {
+    "file": "local-native-export-5b5d0a2f.json",
+    "status": "PASS_FRESH_RESTORE_REPEAT_NATIVE_PRIVILEGES",
+    "objects": 24576
+  },
+  "nativeTools": {
+    "file": "native-source-graphs-5b5d0a2f.json",
+    "status": "SEVEN_BUILD_LOAD_PASS_ONLY",
+    "configuredSignedRuntime": "PENDING"
+  },
+  "lockOnly": {
+    "file": "native-deadline-lock-only-5b5d0a2f.json",
+    "actualExecutionSourceSha": "96f6f79ad685738086f66914582d5461b7a9b870",
+    "includedSourceModulesEqualCandidate": 16,
+    "authKernelRlsOrDurableCommitClaimed": false
+  },
+  "nativeCatalogExperiment": {
+    "historicalSource": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+    "historicalFiveCallMs": "~370",
+    "freshCorrectedSourceExperiment": "PENDING",
+    "deployedHttpSlo": "PENDING_ACTUAL_K6"
+  },
+  "sourceCI": "IN_PROGRESS",
+  "bindingCI": "PENDING_NEW_HEAD",
+  "bindingValidation": {
+    "at": "2026-11-15T07:14:56.106882+00:00",
+    "sharedApprovalTestsPassed": 94,
+    "releaseNavigationRequestTestsPassed": 39,
+    "failed": 0,
+    "sourceDerivedNavigationCheck": "PASS",
+    "previousDeployed2107AndProposed806Refused": true
+  },
+  "observedApplicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "replacementDeployed": false,
+  "reviewActor": "Codex under continuing solo-founder CHG-2026-0114 delegation",
+  "independentHumanReviewClaimed": false,
+  "implementationWindowEndUnchanged": "2026-11-16T23:59:59Z",
+  "stagingGo": false,
+  "productionAuthorized": false
+}

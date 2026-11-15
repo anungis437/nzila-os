@@ -1,19 +1,59 @@
 # Current staging and acceptance delta
 
-Staging serves application source `2107feeb1c2949042d97bd0606efb18e7aa95beb` at 100% on `nzila-ue-v2-staging-app--rel2107feeb1c`, image `sha256:968ba6845f2ad622a7275734a5123daa5cbb329b6c0a76580b170ca1f63af0a0`. Source PR #1231 and binding PR #1232 completed all registered premerge checks and 16 trusted required contexts before normal merge at `e539e6ddc5bf5934c6f6cb40065d1a14faee6101` on November 15 at 04:06:20Z. Build 43675288070 and protected deployment 43676475162 succeeded using that workflow/IaC source under CHG-2026-0114. Base STAGING remains **NO_GO**.
+Staging serves application `2107feeb1c2949042d97bd0606efb18e7aa95beb` at100% on
+`nzila-ue-v2-staging-app--rel2107feeb1c`, image
+`sha256:968ba6845f2ad622a7275734a5123daa5cbb329b6c0a76580b170ca1f63af0a0`.
+Build43675288070 and protected CHG-2026-0114 deployment43676475162 used workflow/IaC
+`e539e6ddc5bf5934c6f6cb40065d1a14faee6101`. PR1231/1232 were admitted after all registered
+and16 trusted required successes. Base STAGING remains **NO_GO**.
 
-On deployed 2107feeb, paired real Entra sessions and existing-session membership revocation pass in 43677154289. The unchanged originally issued private document URL returned 403 at 05:35:29Z after its original expiry. Failed-revision recovery 43677270661 passes; the known serving revision retains 100% traffic. The signed retained-copy protocol passes, with the recovery copy stopped and retained at 05:19. Initial native isolation/audit verifies 906/35 audit records and two sealed packs. Final audit, retention and telemetry must follow all remaining logical mutations and cleanup.
+Actual2107 intake-case assignment/deadline management passes22 checks. Formal grievance
+continuity/deadline management passes42, including staff create/reschedule/complete/cancel,
+represented-member read-only dates, EN/FR desktop/mobile, canonical identity mapping and
+assignment revocation. Original roles were restored and fixture authority retired; synthetic
+records remain. The first formal verifier failure is preserved: its exact case card had not
+been expanded before waiting for the detail link. The corrected fresh flow passed.
 
-Actual browser/API case assignment and deadline management passes 22 checks; formal grievance continuity and deadline management passes 42 checks. Both restore original roles and retire fixture authority. The initial formal verifier waited for a detail link inside a collapsed card; its failure is preserved. The corrected verifier expands the exact card and clicks the existing canonical link. Staff enter, reschedule, complete and cancel dates under case-specific authority. Automatic legal filing-date calculation and intake-case email reminders are not claimed.
+Paired/session revocation43677154289 passes. Its original issued document URL returned403
+AuthenticationFailed at05:35:29.865Z after its original05:35:17Z expiry, with the same URL hash
+and no query, clock or lease alteration. Failed-revision recovery43677270661 passes; the known
+serving revision retained100%, both drills are inactive, and latest/Ready metadata names an
+inactive recovery revision. The owned-copy signed protocol passed at05:19 and the copy is stopped.
+Initial native audit verifies906/35 records and two actual sealed packs; final audit must follow
+all remaining logical mutations and cleanup.
 
-Member, steward and officer normal navigation profiles pass on 2107feeb. Secretary-treasurer run 43680811518 failed during settings verification after 19 observations; its failure is retained. The settings route redirects non-administrators to profile. The replacement verifier records that exact destination and opens an independent mobile page with its viewport set before navigation. Admin and platform settings assertions stay strict. All seven persona profiles, including sensitive finance refusals, require replacement-source reruns.
+The actual canonical performance run43675284397 still fails on2107: approximately1.99s p95
+and2.51s p99 against unchanged500/1500ms limits. The original wrong-target failure remains;
+the existing staging target now points at the actual V2 endpoint. The original executive
+navigation43680811518 settings redirect/reload failure is also retained. All seven corrected
+persona profiles must pass on the replacement source.
 
-The actual main performance run remains **FAIL**, approximately 1.99 seconds p95. The catalog repair prototype measures approximately 0.37 seconds in a source/native probe; it is not deployed acceptance and no threshold changed. The replacement also fixes formal-case parent locking and legacy deadline lock ordering. Three source PostgreSQL opt-in cases remain skipped. A separate three-case native lock-only probe preserves execution SHA 96f6f79a, verifies all 16 included modules against 80651983 and uses explicit ports stand-ins. It does not qualify authentication, kernel, RLS or durable workflow behavior. All seven probe transactions rolled back, the fixture hash stayed unchanged, and the private copy was stopped and retained.
+Proposed application source is `5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb` (PR1233), with
+integration PR1234. It coalesces only overlapping catalog inspections and discards every settled
+result, aligns formal assignment and legacy confirmation with parent-first deadline locks, and
+verifies exact source-defined settings destinations on separate desktop/mobile visits. The final
+correction uses the existing registered, image-supplied GITHUB_SHA build identity. Undeployed806
+whole-app CI passed26,170 tests and failed one census check for its GIT_SHA read; that failure
+remains on file. The correction passes47 catalog/environment checks and the strict census without
+changing a ceiling or adding an environment knob.
 
-Proposed application source is `80651983dcdf114b488813c64f88ca3aca7ab88d` (PR #1233). Source 17188f7b superseded 96f6f79a through the exact Gitleaks false-positive fingerprint and local validation record. CI then correctly rejected the opt-in raw PostgreSQL harness inside the application layer. Final 80651983 moves that unchanged harness to tooling/native-tests, regenerates four repository inventory outputs and preserves the failure. Runtime implementation, assertions and architecture gates are unchanged. Original Gitleaks/architecture and broad local lint/typecheck/test/governance failures remain recorded.
+Exact5b5 native fresh/restore/repeat/privileges pass with24,576 catalog objects. Seven fresh native
+tools verify all included source bytes and pass build/load checks without framework/database/role/
+kernel mocks. The deadline import smoke uses test mode; configured signed-runtime execution remains
+required. A separate actual recovery-copy lock-only probe passed three checks with seven rollbacks
+and unchanged fixture hashes; all16 source modules match5b5. It claims no authentication, kernel/RLS
+binding or durable commit. The earlier catalog comparison of approximately1.96s versus0.37s is
+historical806 native evidence; fresh corrected-source measurement and actual deployed k6 remain required.
 
-Focused 32 catalog, 70 deadline/assignment/continuity and 23 navigation/request checks pass. Local database-boundary tests pass 16/16 with the repository timeout; the earlier temporary-config timeout remains preserved. Final binding checks pass: 94 shared approval tests, 39 release/navigation/request tests, navigation inventory generation check and diff whitespace check. The default root test runner failed on existing shared configuration/cache permissions; the successful shared run used task-local real source aliases and a private cache. Canonical plan validation and exact 80651983 native export pass: 24,576 catalog objects with fresh/restore/repeat/privileges. The earlier 17188f7b export remains historical evidence. Source/binding CI, remaining source qualification, normal main admission, immutable build, fresh concrete infrastructure review, protected staging approval and replacement-source runtime acceptance remain required. Every replacement criterion remains pending.
+Remaining work is exact source/integration CI and normal main admission, signed-runtime rehearsal,
+read-only primary zero-SQL/40-migration/retention checks, immutable build, concrete reviewed rollout,
+the unchanged performance gate, all seven personas and final business/privacy/worker/recovery/audit/
+telemetry evidence. Historical observations cannot satisfy replacement runtime criteria.
 
-Preserve live staging data, original installation receipts and immutable migration history; no reset or released-migration replay. Finance/dues persistence and Financial Officer 2.1 are excluded; sensitive boundaries must fail closed. The same founder operates anungis/anungis437, with Codex executing under continuing staging delegation. The implementation window still ends 2026-11-16T23:59:59Z. No fictional reviewer, institutional ratification or production deployment is authorized. Global SaaS NO_GO, frozen 777 closure counts and the Phase 3B boundary remain unchanged.
-
-[Contract](UE_STAGING_GO_CONTRACT.json) · [Evidence index](evidence/ue-v2-execution-20261113/security-boundary/index.json) · [Observed runtime](evidence/ue-v2-execution-20261113/security-boundary/observed-runtime-2107feeb-reconciliation.json).
+Staff deadline creation and management are required. Dates are staff-entered; automatic legal
+calculation and intake email reminders are not claimed. Formal reminder processing remains in scope.
+Finance/dues persistence and Financial Officer2.1 are excluded; sensitive finance boundaries must
+fail closed. Preserve live Azure data,40 immutable migrations and signing keys. Anungis/anungis437
+are one founder; Codex executes the continuing staging delegation. No production, global SaaS
+promotion, frozen777 closure change or Phase3B. [Contract](UE_STAGING_GO_CONTRACT.json) ·
+[Evidence index](evidence/ue-v2-execution-20261113/security-boundary/index.json).

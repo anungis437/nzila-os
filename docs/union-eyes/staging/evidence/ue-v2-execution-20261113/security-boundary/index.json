@@ -1,6 +1,6 @@
 {
   "purpose": "PRE_REPAIR_SECURITY_FINDING_AND_QUALIFICATION_PROVENANCE",
-  "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+  "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
   "productionAuthorized": false,
   "stagingGo": false,
   "entries": [
@@ -424,20 +424,95 @@
       "sha256": "195fc01b9b8cb581aa48a579ba4d129fb5ba59494f30fedb518946d954cc76ca",
       "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "runtimePassInferred": false
+    },
+    {
+      "file": "deadline-5b5d0a2f-provenance.json",
+      "sha256": "d023eaf52befc5f72f8b67e3a8a78623b90e3cc561c2aa399c7bea66d50983fe",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nar-5b5d0a2f-provenance.json",
+      "sha256": "90191dac5ae05eb694c16799b573f5f135651b7a07115c80d9cd9a29edcc87a4",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "bearer-5b5d0a2f-provenance.json",
+      "sha256": "a8d37a483276af2007c5ef8c06daa43452971e22d424e0c94a1616a318fd506e",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "authority-5b5d0a2f-provenance.json",
+      "sha256": "c3b2e1ed1b1f0d07e27203565aac9fbd6a2b253594203e003b919263757b34c9",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "native-deadline-lock-only-5b5d0a2f.json",
+      "sha256": "4faa9305a5c9ca041bd4a98c0b5628b194f9e9b0bbb25823ff5363fee0ec896b",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "worker-5b5d0a2f-provenance.json",
+      "sha256": "94c5b32ebc65603349d45872f0863c0bd708bf53d42c070bf52efdd39a7d0bc9",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "combined-repair-5b5d0a2f-binding-review.json",
+      "sha256": "5888ab4fd5d4fcc6d5ce8e008e063b5d9cbebe67e959dc8fe5b0848578b29db8",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "native-source-graphs-5b5d0a2f.json",
+      "sha256": "c24b63807a4d2747e35acf7b1799d440b5ff8799ba92a1cf8167b6b362ea4d6a",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "system-5b5d0a2f-provenance.json",
+      "sha256": "176f2eff1639dc0039505859de1056e65a93083393c541b68ff307c8be9a2003",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-5b5d0a2f.json",
+      "sha256": "5320e2abf1d1631d11aed8c0c1c62379fd162095160b87390b86bb17dbb2ea28",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nested-5b5d0a2f-provenance.json",
+      "sha256": "cf667a4ac61de22d76839ade60ba2931cd25cc9878d030743f487faa422c52b5",
+      "observedOrProposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "catalog-build-identity-env-census-failure-80651983.json",
+      "sha256": "88c8c0dbd2d5c1ee2206d0596f37f8d5c45aa92ad03cde75fe5ef92bdfe955df",
+      "observedOrProposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "runtimePassInferred": false
     }
   ],
   "nextCandidate": {
-    "sourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+    "sourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
     "sourcePR": 1233,
+    "bindingPR": 1234,
     "deployed": false,
     "sourceCI": "IN_PROGRESS",
-    "nativeQualification": "EXACT_NATIVE_EXPORT_PASS_LOCK_ONLY_SOURCE_EQUIVALENCE_VERIFIED_RUNTIME_PENDING",
+    "nativeQualification": "EXACT_EXPORT_AND_SEVEN_GRAPH_BUILD_LOAD_PASS_SIGNED_RUNTIME_PENDING",
     "ciAndRuntimeStillRequired": true,
-    "bindingReview": "combined-repair-80651983-binding-review.json",
-    "repairSummary": "canonical catalog admission cost; formal case parent locking; legacy deadline lock ordering; exact settings redirect settlement and independent mobile navigation",
-    "localNativeExport": "local-native-export-80651983.json",
-    "nativeLockOnlySourceBinding": "native-deadline-lock-only-80651983.json",
-    "catalogPrototypeSourceEquivalence": "catalog-native-source-equivalence-80651983.json"
+    "bindingReview": "combined-repair-5b5d0a2f-binding-review.json",
+    "localNativeExport": "local-native-export-5b5d0a2f.json",
+    "nativeSourceGraphs": "native-source-graphs-5b5d0a2f.json",
+    "nativeLockOnlySourceBinding": "native-deadline-lock-only-5b5d0a2f.json",
+    "historicalCatalogPrototypeSourceEquivalence": "catalog-native-source-equivalence-80651983.json",
+    "freshCorrectedCatalogMeasurement": "PENDING",
+    "originalWholeApplicationFailure": "catalog-build-identity-env-census-failure-80651983.json"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -560,6 +635,21 @@
       "sourcePR": 1228,
       "wholeApplicationInventoryCI": "source-e70027e8-repository-inventory-ci-failure.json",
       "deployed": false
+    }
+  ],
+  "supersededCombinedRepairCandidates": [
+    {
+      "sourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "sourcePR": 1233,
+      "deployed": false,
+      "sourceCI": "IN_PROGRESS",
+      "nativeQualification": "EXACT_NATIVE_EXPORT_PASS_LOCK_ONLY_SOURCE_EQUIVALENCE_VERIFIED_RUNTIME_PENDING",
+      "ciAndRuntimeStillRequired": true,
+      "bindingReview": "combined-repair-80651983-binding-review.json",
+      "repairSummary": "canonical catalog admission cost; formal case parent locking; legacy deadline lock ordering; exact settings redirect settlement and independent mobile navigation",
+      "localNativeExport": "local-native-export-80651983.json",
+      "nativeLockOnlySourceBinding": "native-deadline-lock-only-80651983.json",
+      "catalogPrototypeSourceEquivalence": "catalog-native-source-equivalence-80651983.json"
     }
   ]
 }
