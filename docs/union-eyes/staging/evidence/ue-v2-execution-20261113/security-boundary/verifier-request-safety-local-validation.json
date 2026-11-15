@@ -1,0 +1,51 @@
+{
+  "applicationSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+  "applicationDeploymentChanged": false,
+  "focusedTests": {
+    "passed": 21,
+    "failed": 0,
+    "scope": [
+      "request error redaction",
+      "bounded read-only connection-reset retry",
+      "streamed redirect settlement",
+      "identity/revocation contracts",
+      "frozen census preservation"
+    ]
+  },
+  "requiredLocalChecks": [
+    {
+      "command": "pnpm lint",
+      "exitCode": 1,
+      "log": "/tmp/ue-acceptance-20261113/verifier-pnpm-lint.log"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 1,
+      "log": "/tmp/ue-acceptance-20261113/verifier-pnpm-typecheck.log"
+    },
+    {
+      "command": "pnpm test:fast",
+      "exitCode": 1,
+      "log": "/tmp/ue-acceptance-20261113/verifier-pnpm-test-fast.log"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0,
+      "log": "/tmp/ue-acceptance-20261113/verifier-pnpm-validate-docs.log"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "exitCode": 1,
+      "log": "/tmp/ue-acceptance-20261113/verifier-pnpm-governance-audit.log"
+    },
+    {
+      "command": "pnpm inventory:generate",
+      "exitCode": 0,
+      "log": "/tmp/ue-acceptance-20261113/verifier-pnpm-inventory-generate.log"
+    }
+  ],
+  "localFailureCause": "Host dependency gaps: turbo; Vitest configuration plugins; financial-service next-auth and argon2 types. These failed checks are not recorded as PASS.",
+  "inventoryRepeatIdentical": true,
+  "baseVerdict": "STAGING_NO_GO",
+  "productionAuthorized": false
+}

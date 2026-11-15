@@ -64,7 +64,9 @@ jobs:
         run: pnpm -C apps/union-eyes exec playwright install --with-deps chromium
 
       - name: Verify acceptance script syntax
-        run: node --check tooling/scripts/qualify-ue-v2-real-entra.cjs
+        run: |
+          node --check tooling/scripts/qualify-ue-v2-real-entra.cjs
+          node --test tooling/scripts/lib/ue-staging-request-safety.test.cjs
 
       - name: Authenticate verified synthetic principals and exercise the live candidate
         if: ${{ !inputs.verify_membership_revocation }}

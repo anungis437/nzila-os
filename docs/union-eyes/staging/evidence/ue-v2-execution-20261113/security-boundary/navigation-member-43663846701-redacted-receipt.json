@@ -1,0 +1,466 @@
+{
+  "evidenceClass": "REAL_REMOTE_ENTRA_SESSION_AND_API",
+  "sourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+  "workflowSha": "034b3498fe68da339c81deb24faa0a424f71cdac",
+  "runId": "43663846701",
+  "observations": [
+    {
+      "at": "2026-11-15T01:37:26.416Z",
+      "kind": "LIVE_SOURCE_IDENTITY",
+      "gitSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "principal": "6a0fe972-ed1c-49ca-83c8-00b9b214f96f"
+    },
+    {
+      "at": "2026-11-15T01:37:34.399Z",
+      "kind": "REAL_ENTRA_AUTHORIZATION_CODE_SESSION",
+      "persona": "A",
+      "principal": "6a0fe972-ed1c-49ca-83c8-00b9b214f96f",
+      "tenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+      "expires": "2026-11-15T01:52:34.381Z",
+      "events": [
+        {
+          "path": "/api/auth/callback/microsoft-entra-id",
+          "status": 302
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/session",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        },
+        {
+          "path": "/api/auth/me",
+          "status": 200
+        }
+      ],
+      "secureHttpOnlyCookie": true
+    },
+    {
+      "at": "2026-11-15T01:37:37.447Z",
+      "kind": "API",
+      "persona": "A",
+      "method": "GET",
+      "path": "/api/profile/roles",
+      "status": 200,
+      "traceId": "53e1746381e14ba01b7b2833bd69924e",
+      "correlationId": "6d78e196-3164-43a3-9c29-d584b24b1d46"
+    },
+    {
+      "at": "2026-11-15T01:37:37.448Z",
+      "kind": "LIVE_CANONICAL_MEMBERSHIP_ROLE",
+      "requestedOwnedSyntheticRole": "member",
+      "observedCanonicalRole": "member"
+    },
+    {
+      "at": "2026-11-15T01:37:40.866Z",
+      "kind": "OBSERVED_ROLE_EXECUTION_HOME",
+      "requestedOwnedSyntheticRole": "member",
+      "initialPath": "/en-CA/dashboard",
+      "path": "/en-CA/dashboard",
+      "redirectedAfterDOMContentLoaded": false,
+      "initialHttpStatus": 200
+    },
+    {
+      "at": "2026-11-15T01:37:42.806Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:37:48.939Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:37:53.436Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/claims",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:37:58.768Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/claims",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:38:05.903Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/messages",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:38:11.852Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/messages",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:38:18.507Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/documents",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:38:24.310Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/documents",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:38:30.554Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/union",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:38:36.124Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/union",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:38:41.691Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/help",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:38:46.546Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/help",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:38:50.327Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/profile",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:38:54.613Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/profile",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:38:59.386Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/preferences",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:39:04.768Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/preferences",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:39:09.569Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/en-CA/dashboard/privacy",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:39:14.092Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/en-CA/dashboard/privacy",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:39:18.921Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:39:24.959Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:39:29.649Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/claims",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:39:34.656Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/claims",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:39:41.153Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/messages",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:39:47.695Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/messages",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:39:53.344Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/documents",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:39:59.242Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/documents",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:40:06.517Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/union",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:40:12.706Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/union",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:40:18.636Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/help",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:40:23.995Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/help",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:40:27.948Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/profile",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:40:31.903Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/profile",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:40:36.633Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/preferences",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:40:41.915Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/preferences",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:40:46.921Z",
+      "kind": "REAL_VISIBLE_NAVIGATION",
+      "role": "member",
+      "experience": "member",
+      "path": "/fr-CA/dashboard/privacy",
+      "status": 200,
+      "sourceVisible": true
+    },
+    {
+      "at": "2026-11-15T01:40:51.365Z",
+      "kind": "REAL_MOBILE_NAVIGATION",
+      "role": "member",
+      "path": "/fr-CA/dashboard/privacy",
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    {
+      "at": "2026-11-15T01:41:00.984Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/finance",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/finance",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T01:41:11.587Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/operations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/operations",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T01:41:21.913Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/admin/members",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/admin/members",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T01:41:32.151Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/security",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/security",
+      "finalPath": "/en-CA/dashboard"
+    },
+    {
+      "at": "2026-11-15T01:41:42.432Z",
+      "kind": "RESTRICTED_DESTINATION_DENIED_TO_ELIGIBLE_FIXTURE",
+      "role": "member",
+      "path": "/en-CA/dashboard/integrations",
+      "status": 200,
+      "denialMode": "BROWSER_REDIRECT",
+      "initialPath": "/en-CA/dashboard/integrations",
+      "finalPath": "/en-CA/dashboard"
+    }
+  ],
+  "runtimeAcceptance": false,
+  "requestedOwnedSyntheticRole": "member",
+  "canonicalEntryCount": 42,
+  "status": "FAIL",
+  "failure": {
+    "stage": "sensitive-finance-api-boundaries",
+    "error": "Error",
+    "message": "apiRequestContext.fetch: socket hang up",
+    "requestHeadersAndCookiesOmitted": true
+  },
+  "rawReceiptSha256": "ad351a17f6500619933aa97ebe81276ebeafe344841a9296628d4fc575c47df3",
+  "credentialBearingOriginalRetainedPrivately": true,
+  "originalStatusUnchanged": "FAIL"
+}

@@ -5,6 +5,7 @@ const crypto = require('node:crypto');
 const { chromium } = require(require.resolve('playwright', { paths: [process.cwd() + '/apps/union-eyes'] }));
 const { settleRoleLanding, settleRestrictedDestination } = require('./lib/ue-staging-navigation-settlement.cjs');
 const OWNED_PERSONAS = require('./lib/ue-v2-owned-personas.cjs');
+const { safeFailureSummary, fetchWithReadResetRetry } = require('./lib/ue-staging-request-safety.cjs');
 const BASE = 'https://nzila-ue-v2-staging-app.whitemoss-055b7430.canadacentral.azurecontainerapps.io';
 const TENANT = 'cc15259a-d2bf-421f-8e44-dccf8dc6232a';
 const PEOPLE = {};
@@ -30,7 +31,7 @@ async function request(key, path, method = 'GET', data, expected = [200]) {
   assert(path.startsWith('/api/') && !path.includes('://'));
   const traceId = crypto.randomBytes(16).toString('hex');
   const correlationId = crypto.randomUUID();
-  const response = await contexts.get(key).request.fetch(BASE + path, { method, data, headers: { traceparent: '00-' + traceId + '-' + crypto.randomBytes(8).toString('hex') + '-01', 'x-correlation-id': correlationId, 'x-trace-id': traceId } });
+  const response = await fetchWithReadResetRetry(contexts.get(key).request, BASE + path, { method, data, headers: { traceparent: '00-' + traceId + '-' + crypto.randomBytes(8).toString('hex') + '-01', 'x-correlation-id': correlationId, 'x-trace-id': traceId } }, retry => record({ kind: 'READ_TRANSPORT_RESET_RETRY', persona: key, method, path, ...retry }));
   record({ kind: 'API', persona: key, method, path, status: response.status(), traceId, correlationId, responseTraceId: response.headers()['x-trace-id'] });
   assert(expected.includes(response.status()), 'Required API status mismatch');
   return response;
@@ -204,4 +205,4 @@ async function main() {
   record({kind:'NO_INSTITUTIONAL_OR_FINANCIAL_AUTHORITY_INFERRED',role,platformAdministrator:role==='app_owner',tenantContentBypassClaimed:false});
   report.status='PASS';
 }
-main().catch(error=>{report.status='FAIL';report.failure={stage,error:error.name,message:error.message};process.exitCode=1;}).finally(async()=>{if(browser)await browser.close().catch(()=>{});fs.mkdirSync(OUT,{recursive:true});fs.writeFileSync(OUT+'/receipt.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,stage,observations:report.observations.length}));});
+main().catch(error=>{report.status='FAIL';report.failure={stage,...safeFailureSummary(error)};process.exitCode=1;}).finally(async()=>{if(browser)await browser.close().catch(()=>{});fs.mkdirSync(OUT,{recursive:true});fs.writeFileSync(OUT+'/receipt.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,stage,observations:report.observations.length}));});

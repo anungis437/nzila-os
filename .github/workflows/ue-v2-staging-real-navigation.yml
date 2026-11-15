@@ -47,6 +47,7 @@ jobs:
           node --check tooling/scripts/qualify-ue-v2-real-navigation.cjs
           node --check tooling/scripts/lib/ue-staging-navigation-settlement.cjs
           node --test tooling/scripts/lib/ue-staging-navigation-settlement.test.cjs
+          node --test tooling/scripts/lib/ue-staging-request-safety.test.cjs
           pnpm exec tsx tooling/scripts/generate-ue-v2-navigation-inventory.cts --check
       - name: Verify actual provider session and source-defined visible navigation
         env:
