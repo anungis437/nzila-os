@@ -1,3 +1,28 @@
+# Current source admission checkpoint — November 15, 2026
+
+Observed Q `c09de4557236b615fad0a1c992d6ee2b8820bf62` remains deployed under workflow `c47cb1f33d7cf05b549be617bc0e8411b56db996` with build
+43718756258/deployment 43720514263. Readiness passes; canonical performance fails at
+609.794ms p95 against 500ms. Real locale switching also leaves document language and
+the root staging notice in English after the page body changes to French.
+
+D `d57aa1f3dde18d44120141c22f3e4fbf8c062153` was admitted by PRs #1237/#1238 at `a1bc22389c7eb4e8eeffc3ab742ffde6b888f63a`; build
+43733296236 and all six native qualification phases pass, with the copy stopped. D was
+not deployed. Proposed E `0fa684a15641e84cb2aa3c94a2fad49428d64f60` from PR #1239 includes the root locale repair.
+Its 19 focused tests, scoped typecheck/lint, seven actual framework browser transitions,
+HTTP 307, exact local export and seven native compile/load proofs pass. Broad docs pass;
+four other required commands fail and their explicit delta is retained. E still needs exact
+CI, main admission, configured signed qualification and all fresh real staging acceptance.
+
+Current V2 Entra public identifiers remain client `5470c759-3dde-4009-9fd6-3eee46ab7b72`
+and tenant `cc15259a-d2bf-421f-8e44-dccf8dc6232a`. Preserve existing credentials, signing
+keys, primary data, 40 immutable migration records and the known overlay. No primary
+replay, empty-target restore or seeding. See [current candidate](UE_V2_CURRENT_CANDIDATE.md).
+
+## Historical preceding source-admission and bootstrap snapshots
+
+The following checkpoints retain their original dates, identities, counts and states. They
+do not override the current observation and proposal above.
+
 # Current source admission checkpoint — November15,2026
 
 Observed serving application is `c09de4557236b615fad0a1c992d6ee2b8820bf62`, admitted at workflow `c47cb1f33d7cf05b549be617bc0e8411b56db996`

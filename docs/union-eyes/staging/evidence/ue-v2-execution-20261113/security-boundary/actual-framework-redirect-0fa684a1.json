@@ -1,0 +1,7 @@
+{
+  "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "httpStatus": 307,
+  "location": "/en-CA/sign-in",
+  "frameworkOnlyNotApplicationAuthenticationProof": true,
+  "status": "PASS"
+}

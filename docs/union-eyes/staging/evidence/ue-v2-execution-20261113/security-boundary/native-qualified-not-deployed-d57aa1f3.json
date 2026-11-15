@@ -1,0 +1,44 @@
+{
+  "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "workflowSha": "a1bc22389c7eb4e8eeffc3ab742ffde6b888f63a",
+  "observedApplicationSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "status": "PASS_NATIVE_QUALIFICATION_ONLY_NOT_DEPLOYED",
+  "phases": [
+    {
+      "name": "primary-zero-sql",
+      "status": "PASS",
+      "receiptSha256": "29dd4c74046f41c0dc75edafb4858938c05237721208ecbf39db2275c9864e25"
+    },
+    {
+      "name": "signed-protocol",
+      "status": "PASS",
+      "receiptSha256": "a668b4753b3317855c38e36a177504a6c9a8ae9e8e97f1193283fcfb6f79ed1f"
+    },
+    {
+      "name": "clean-baseline-diagnostic",
+      "status": "PASS",
+      "receiptSha256": "5720d0e4bbc5b3e7aa323b620b6dd26721c6c2b87a09e74d9535f67b88e8e547"
+    },
+    {
+      "name": "source-native-deadline",
+      "status": "PASS",
+      "receiptSha256": "3bc9e4d2388ed4f54ae570f611d2281674e900a4038e11d51951b938a3d3359f"
+    },
+    {
+      "name": "final-copy-audit",
+      "status": "PASS",
+      "receiptSha256": "fbec30437c7d0701778dd02e96ddd93b79dc557dbb50508d5a7ef2813f7ece71"
+    },
+    {
+      "name": "final-copy-zero-sql",
+      "status": "PASS",
+      "receiptSha256": "e7942313a01878bdf4917f8a8506b21e451d15521ff7d8428c71fa3ca15a93bc"
+    }
+  ],
+  "actualPrivateCycleSha256": "e10e15524eb2ea722e060309962915e0d0292af78a72c6388c1f09d2f5d59b4d",
+  "ownedCopyStopped": true,
+  "primaryNoDdlDmlOrReplay": true,
+  "replacementEAcceptanceInferred": false,
+  "stagingGo": false,
+  "productionAuthorized": false
+}
