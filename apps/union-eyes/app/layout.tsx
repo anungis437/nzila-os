@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/utilities/providers";
+import { RootLocalePresentation } from '@/components/utilities/root-locale-presentation';
 import LayoutWrapper from "@/components/layout-wrapper";
 import { AuthProvider } from '@nzila/platform-auth/entra/client';
 import { NzilaAppShell } from '@nzila/platform-shell';
@@ -177,11 +178,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
-        {site.isStaging ? (
-          <div className="ue-environment-banner border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-950">
-            {locale === 'fr-CA' ? 'Environnement de préproduction. Les données et le comportement peuvent changer sans préavis.' : 'Staging environment. Pre-production data and behavior may change without notice.'}
-          </div>
-        ) : null}
+        <RootLocalePresentation initialLocale={locale} staging={site.isStaging} />
         <AuthProvider>
           <NzilaAppShell moduleId="union-eyes">
             <Providers>
