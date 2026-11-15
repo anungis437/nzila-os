@@ -1,6 +1,6 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 staging: catalog admission, deadline lock ordering and exact navigation verification",
+  "title": "Union Eyes V2 staging: exact catalog-query latency and mobile case-header repair",
   "description": "Deploy the source-complete Union Eyes Gate 0 candidate to the authorized V2 non-production staging stack so Phase 3A runtime and credentialed persona qualification can be executed. The deployment must use the approved main-only build and deploy workflows, digest-pinned images, reviewed what-if output, protected GitHub environments, workload identity, synthetic staging data, and the direct-scoped authority rule in issue #1116. Owner-directed founder-operated staging authorization is recorded; no production release, institutional mandate, financial activation, or STAGING GO without runtime proof is authorized.",
   "service": "union-eyes",
   "environment": "STAGING",
@@ -97,7 +97,15 @@
     "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/catalog-build-identity-env-census-failure-80651983.json",
     "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-5b5d0a2f.json",
     "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/native-source-graphs-5b5d0a2f.json",
-    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/combined-repair-5b5d0a2f-binding-review.json"
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/combined-repair-5b5d0a2f-binding-review.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-c09de455.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/native-source-graphs-c09de455.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/catalog-latency-c09de455-native-sql-binding.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-required-validation-c09de455.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-runtime-5b5d0a2f-reconciliation.json",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/catalog-latency-c09de455-binding-review.json",
+    "https://github.com/anungis437/nzila-os/pull/1235",
+    "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/catalog-latency-c09de455-binding-validation.json"
   ],
   "linked_prs": [
     "1137",
@@ -153,7 +161,8 @@
     "https://github.com/anungis437/nzila-os/pull/1224",
     "1228",
     "1231",
-    "1233"
+    "1233",
+    "1235"
   ],
   "linked_commits": [
     "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
@@ -192,11 +201,12 @@
     "2107feeb1c2949042d97bd0606efb18e7aa95beb",
     "17188f7b602342ab6e88222759a4caba01f52248",
     "80651983dcdf114b488813c64f88ca3aca7ab88d",
-    "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb"
+    "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+    "c09de4557236b615fad0a1c992d6ee2b8820bf62"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-15T07:10:00.003678+00:00",
+  "updated_at": "2026-11-15T11:05:23.356318+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -205,7 +215,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+    "candidate_sha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true

@@ -1,0 +1,223 @@
+{
+  "record": "OBSERVED_5B5_STAGING_RUNTIME_RECONCILIATION",
+  "collectedAt": "2026-11-15T10:47:57.652896+00:00",
+  "applicationSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+  "workflowSha": "213e991f3e392771226ae106162b114d5fffe6f6",
+  "authority": "CHG-2026-0114 continuing solo-founder staging delegation; anungis/anungis437 are one founder; Codex delegated executor",
+  "serving": {
+    "revision": "nzila-ue-v2-staging-app--rel5b5d0a2f40",
+    "trafficPercent": 100,
+    "appImageDigest": "sha256:59335196efdbffa3916c823475be2806d06916b6fba8ff425f81e97dda897ae8",
+    "buildRunId": 43691641804,
+    "deploymentRunId": 43692865139,
+    "observedRuntimeProof": {
+      "retainedPrivateReceipt": "observed-runtime-5b5d0a2f.json",
+      "sha256": "94c388e9ed8087214b1257e73137e308011c4f702ee72522c3dc366c0e075fef"
+    }
+  },
+  "baseJourneys": {
+    "status": "PASS_ACTUAL_SOURCE_BOUND_BASE_JOURNEYS",
+    "stages": [
+      {
+        "stage": "member-ui",
+        "status": "PASS",
+        "receiptSha256": "9f954a6fa05306ce4f7d39a0679bfd5e5113559a5647fcf2dd9175e20c1d2b84"
+      },
+      {
+        "stage": "member-nar",
+        "status": "PASS",
+        "receiptSha256": "d6ac3f10a360488a4eb273b5eafeedb1fe83813f1b15ffe96d19322a7c6707bb"
+      },
+      {
+        "stage": "claim-deadlines",
+        "status": "PASS",
+        "receiptSha256": "27be91d65c63a934b1469f9673bed1efcd4a43b0b22aaf7871ccbf9e9d5e1a20"
+      },
+      {
+        "stage": "formal-deadlines",
+        "status": "PASS",
+        "receiptSha256": "9ef459342190b8a7c1915590478b799081b7baa02f2d76b72421b9c00d45f012"
+      },
+      {
+        "stage": "messaging",
+        "status": "PASS",
+        "receiptSha256": "c6e9122ec46c89a91cf4e51ee38b50bc96a79181375b05c1e80951c93fdcce74"
+      },
+      {
+        "stage": "eicar",
+        "status": "PASS",
+        "receiptSha256": "b059be29a649de518fb4a68840fe6119a62459c51916d4d4c4f04a34d20d3b9b"
+      }
+    ],
+    "authorityCleanupStatuses": [
+      "CLEANED",
+      "CLEANED",
+      "CLEANED"
+    ],
+    "proof": {
+      "retainedPrivateReceipt": "actual-base-journeys-5b5d0a2f-attempt1/receipt.json",
+      "sha256": "ce49042c874e31a5d1e9cba289d3e165f819903575006d31f0018397a1bbf690"
+    }
+  },
+  "targetedPersonas": {
+    "status": "PASS_TARGETED_PLATFORM_AND_EXECUTIVE_DISCOVERY",
+    "scope": "Platform-owner and executive only; full seven-persona qualification remains pending",
+    "roles": [
+      {
+        "role": "app_owner",
+        "runId": "43701179839",
+        "status": "PASS",
+        "sha256": "b23184d29cda8fb7d533bde4b651f3f18ce1af2284c5e73bc91912913c92b1d7"
+      },
+      {
+        "role": "secretary_treasurer",
+        "runId": "43701890922",
+        "status": "PASS",
+        "sha256": "d1a06c20556958733c315ddfa8f3d6de4ea4f3000d93939451506ce86f27a5ce"
+      }
+    ],
+    "platformOriginalBaselineRestored": "PASS_BASELINE_OBSERVED",
+    "proof": {
+      "retainedPrivateReceipt": "actual-targeted-personas-5b5d0a2f-attempt1/receipt.json",
+      "sha256": "cf26d5d289d09af33c4c668e848107b6ebeaff84bd4c0777743bbdc792485e70"
+    }
+  },
+  "pairedSessions": {
+    "status": "PASS_FRESH_PAIRED_REAL_COOKIE_REVOCATION_RESTORED_ORIGINAL_URL_BYTES_AND_EXPIRY",
+    "runId": "43698763161",
+    "sameUnexpiredCookieRevocationCaseAndDocument401": true,
+    "membershipOriginalBaselineRestored": "PASS_BASELINE_OBSERVED",
+    "originalBytes": {
+      "status": 200,
+      "bytes": 69,
+      "expiresAt": "2026-11-15T10:23:33Z",
+      "proof": {
+        "retainedPrivateReceipt": "actual-paired-session-5b5d0a2f-attempt2/private-original-bytes.json",
+        "sha256": "cba38e33f02186c889c4166deeb0c627819614b06f2a2d38e80ee3c14f3f354c"
+      }
+    },
+    "originalExpiry": {
+      "ok": true,
+      "expiresAt": "2026-11-15T10:23:33Z",
+      "status": 403,
+      "errorCode": "AuthenticationFailed",
+      "signedUrlSha256": "2b35016c86b3876e13cc98d2ada22d7901d03d2e0dd574ec6204b26485e774fb",
+      "actualIssuedUrlUsed": true,
+      "noClockOrLeaseAlteration": true
+    },
+    "expiryProof": {
+      "retainedPrivateReceipt": "actual-paired-session-5b5d0a2f-attempt2/private-original-expiry.json",
+      "sha256": "c7e5cdc987f58f1c125bdb4a89be6ac19aa28b4976d7131064c6b6d784705a8b"
+    },
+    "proof": {
+      "retainedPrivateReceipt": "actual-paired-session-5b5d0a2f-attempt2/receipt.json",
+      "sha256": "3e281480d0261f776495a1246a40e3da830ef3c5c965b01401a40a68329b5699"
+    }
+  },
+  "workers": {
+    "status": "PASS",
+    "batchPassed": true,
+    "retirementPassed": true,
+    "providerAcceptanceOnlyNotInboxReceipt": true,
+    "proof": {
+      "retainedPrivateReceipt": "worker-cycle-5b5d0a2f-fe244742.json",
+      "sha256": "5f56ff04234bb423703ad00ab5564bc75ba177d43bf50f56368324299deca48e"
+    }
+  },
+  "primaryRetention": {
+    "status": "POST_ROLLOUT_READ_ONLY_PASS",
+    "guardStatements": 0,
+    "physicalRelations": 781,
+    "physicalFingerprint": "5e3e187aae90852bfed2c374ddc7afeafd879270852b2c7deb076a97efac660d",
+    "originalOwnerAclRlsAndTableIdentitiesExactlyUnchanged": true,
+    "immutableMigrations": 40,
+    "all40SourceHashesVerifiedAtCandidate": true,
+    "original10RetainedIdsPreserved": true,
+    "noCommit": true,
+    "noPrimaryGuardReapplication": true,
+    "releasedMigrationsReplayed": false,
+    "proof": {
+      "retainedPrivateReceipt": "post-rollout-5b5d0a2f/primary/actual-post-rollout-primary-retention.json",
+      "sha256": "6b7c5400ea3535a4f77541aa75d635b45a027e96321db93f2c85a6fdab225797"
+    }
+  },
+  "finalPrimarySecurityAudit": {
+    "status": "PASS",
+    "checks": 30,
+    "auditChains": [
+      {
+        "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0",
+        "records": 1478,
+        "headHash": "0dcf93d138dbffd13044d4f5456c8f26d969563f8b61833086c147125c4fe192"
+      },
+      {
+        "organizationId": "f3a1c2d4-5e6b-4a7c-9d8e-1234567890ab",
+        "records": 40,
+        "headHash": "d2f98fa15f8c0dd889022b1c1e146f39b6b25ad1a65e7bc3fb040b337e6d817c"
+      }
+    ],
+    "sealedEvidence": [
+      {
+        "packId": "4eaee937-3040-4aa8-9f70-74defffe0fa8",
+        "status": "sealed",
+        "artifactId": "2a8f42c1-3059-45ae-96eb-6edefa32be85",
+        "contentHash": "47dc6faf15e9150c89437b6ee1325318251496111e5f1b6f82b2acd7f0f29155",
+        "packHash": "3dd0a916b8a0476504fd4f53affc1a40ea5dc4ee18896422f3644a7370c129cf",
+        "sizeBytes": 178
+      },
+      {
+        "packId": "e83ed79f-2ca7-4841-a08e-4179321461bf",
+        "status": "sealed",
+        "artifactId": "df87f69a-1bf2-4269-9333-41fedcbebea2",
+        "contentHash": "e9c62a0d7c629e537c7185d9f91815dbd161477c380538be8afb2e9ae9923c7e",
+        "packHash": "2a7f48e44f26d862575e3a06644149019636a637f22cb843181589666230f38f",
+        "sizeBytes": 178
+      }
+    ],
+    "transactionalProbeWritesRolledBack": true,
+    "signedTokensOrCookiesSerialized": false,
+    "proof": {
+      "retainedPrivateReceipt": "final-primary-native-5b5d0a2f/actual-final-native-isolation-audit-and-seals.json",
+      "sha256": "99c33ee008267ccf4a825e6d9b336ee8c9125633153328d80e96e9fc6730004b"
+    }
+  },
+  "actualKnownFailure": {
+    "criterion": "UNCHANGED_CANONICAL_PERFORMANCE",
+    "runId": 43691446485,
+    "attempt": 2,
+    "p95Ms": 718.86528625,
+    "limitMs": 500,
+    "proof": {
+      "retainedPrivateReceipt": "actual-new-source-performance-43691446485-attempt2/k6-summary.json",
+      "sha256": "e6140081292fc36efdee6a5ad90896f91085ad0e7dfa5e1bda44771b5946bfd9"
+    }
+  },
+  "additionalOutstanding": [
+    "Full seven-persona fresh qualification",
+    "French mobile status-badge wrapping repair deployed and visually verified",
+    "Final candidate implementation, exact source/integration qualification, reviewed staging rollout, unchanged performance pass and all final runtime evidence"
+  ],
+  "financePersistenceAndFinancialOfficer21InBaseRelease": false,
+  "manualStaffDeadlineManagementRequired": true,
+  "automaticLegalDeadlineCalculationClaimed": false,
+  "claimEmailRemindersClaimed": false,
+  "fullTrafficFailoverClaimed": false,
+  "stagingGo": false,
+  "globalSaasRuling": "NO_GO",
+  "frozenGlobalRows": 777,
+  "globalClosures": 0,
+  "phase3BHeld": true,
+  "independentHumanApprovalClaimed": false,
+  "productionAuthorized": false,
+  "credentialsTokensCookiesOrSignedUrlsIncluded": false,
+  "recovery": {
+    "status": "PASS",
+    "runId": "43704229851",
+    "knownServingRevision": "nzila-ue-v2-staging-app--rel5b5d0a2f40",
+    "servingWeight": 100,
+    "bothQaRevisionsIndependentlyObservedInactive": true,
+    "fullTrafficFailoverClaimed": false,
+    "actualReceiptSha256": "a3116e7aa5c17b4557c8a08cd1745077326d7490920cef5c036f8a015154d4b8",
+    "actualGithubRun": "https://github.com/anungis437/nzila-os/actions/runs/43704229851"
+  }
+}
