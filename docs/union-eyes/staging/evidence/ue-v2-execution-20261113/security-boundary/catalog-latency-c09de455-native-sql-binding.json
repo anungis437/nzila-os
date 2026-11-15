@@ -1,0 +1,40 @@
+{
+  "record": "EXACT_PROMOTED_SQL_BYTES_BOUND_TO_READ_ONLY_NATIVE_EXPERIMENT",
+  "candidateSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "sourcePR": 1235,
+  "measuredNativeSourceSha": "ef31d9b38c71418ea8ddf4a48757cf317facea0d",
+  "measurementIsFinalQRuntime": false,
+  "queryCount": 28,
+  "changedQueryIndexes": [
+    5,
+    14
+  ],
+  "otherQueriesExactUnchanged": 26,
+  "compiledBatchSha256": "835a890151701696d2e6bf9d1a3ae682c8a4a6c76fd80817e9c4e78147e6e24d",
+  "evaluatedSqlEqualsMeasuredV4Combined": true,
+  "promotedSourceFileSha256": {
+    "apps/union-eyes/lib/operations/catalog-admission-core.mjs": "529a39c5ea431b1bcdf264969014557d0e54e352516782342e81c7b8121e7b70",
+    "apps/union-eyes/lib/operations/canonical-catalog-admission.ts": "87cd049e61237ac7f98525373399f64e03043e0fb5d69fa72bd9466893457329",
+    "apps/union-eyes/lib/operations/catalog-admission-batch.pglite.test.ts": "ea911061f5d86746d7351764145ae65476de318bf458b9fe533ec633a2bf0c32"
+  },
+  "promotedQSourceBytesVerified": true,
+  "retainedByteProofSha256": "c78c20d6a090d4ff3d1ee33ac1d2a0b4cb309f1225768bad069a3f45336b4539",
+  "retainedNativeMeasurementSha256": "bdbc6dc3a9286bb5082e1e5012cedb588f2455e0433f95babb94d774c3e82a2a",
+  "historicalReadOnlyNativeBaselineMs": [
+    350,
+    429
+  ],
+  "historicalReadOnlyNativeCombinedMs": [
+    232,
+    272
+  ],
+  "focusedTests": {
+    "passed": 57,
+    "failed": 0,
+    "suites": 6
+  },
+  "scopedLint": "PASS",
+  "deployedHttpSlo": "PENDING_ACTUAL_Q_K6_UNCHANGED_500_1500_THRESHOLDS",
+  "productionAuthorized": false,
+  "stagingGo": false
+}

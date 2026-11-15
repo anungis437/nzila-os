@@ -1,0 +1,56 @@
+{
+  "record": "EXACT_Q_INTEGRATION_BINDING_LOCAL_VALIDATION",
+  "applicationSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "at": "2026-11-15T11:09:02.789293+00:00",
+  "bindingCommitSha": null,
+  "bindingPR": null,
+  "workflowSha": null,
+  "sharedApprovalPassed": 95,
+  "priorSharedApprovalCount": 94,
+  "addedCase": "Reject current observed source S as the new candidate",
+  "releaseNavigationRequestPassed": 39,
+  "failed": 0,
+  "sourceDerivedNavigationCheck": "PASS",
+  "sourceAliases": "Task-local aliases resolve actual repository package exports; no mocked approval implementation or shared dependency changes",
+  "commands": [
+    {
+      "command": "pnpm exec vitest run --config /tmp/ue-acceptance-20261113/binding-validation-c09de455/shared-approval-vitest.config.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "testsPassed": 95,
+      "logFile": "shared-approval.log",
+      "logSha256": "a528a639396d8bfb3805fabe6eb6bf7d6e932dae6908349ede2fb797ba22ed39"
+    },
+    {
+      "command": "node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs tooling/scripts/lib/ue-staging-navigation-settlement.test.cjs tooling/scripts/lib/ue-staging-request-safety.test.cjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "testsPassed": 39,
+      "logFile": "release-navigation-request.log",
+      "logSha256": "226f23f08a74b0c0ad5417b999602952c6a223f322f4acb28de873c3545b0349"
+    },
+    {
+      "command": "pnpm exec tsx tooling/scripts/generate-ue-v2-navigation-inventory.cts --check",
+      "status": "PASS",
+      "exitCode": 0,
+      "testsPassed": null,
+      "logFile": "source-navigation-check.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "status": "PASS",
+      "exitCode": 0,
+      "testsPassed": null,
+      "logFile": "validate-docs.log",
+      "logSha256": "d18381b5af7f6977ef8258b32a3ed3118e01e8e7221d4b1c4d206f628f47cb12",
+      "criticalErrors": 0,
+      "generatedReportsPreservedThenRestored": true
+    }
+  ],
+  "oldSRejectedByBothAuthorizationImplementations": true,
+  "previous2107And806RefusalsRetained": true,
+  "stagingAcceptanceClaimed": false,
+  "productionAuthorized": false,
+  "diffCheck": "PASS"
+}

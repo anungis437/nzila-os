@@ -105,6 +105,7 @@ describe('solo-founder Union Eyes V2 staging (CHG-2026-0114)', () => {
     ['other change', (c: ChangeRecord) => ({ ...c, change_id: 'CHG-2026-0199' })],
     ['other service', (c: ChangeRecord) => ({ ...c, service: 'web' })],
     ['other candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: 'f'.repeat(40) } })],
+    ['current observed staging source is not the proposed candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: '5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb' } })],
     ['previous deployed candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: '2107feeb1c2949042d97bd0606efb18e7aa95beb' } })],
     ['superseded staging candidate', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, candidate_sha: '80651983dcdf114b488813c64f88ca3aca7ab88d' } })],
     ['other subscription', (c: ChangeRecord) => ({ ...c, founder_staging_authorization: { ...c.founder_staging_authorization!, subscription_id: '00000000-0000-0000-0000-000000000000' } })],

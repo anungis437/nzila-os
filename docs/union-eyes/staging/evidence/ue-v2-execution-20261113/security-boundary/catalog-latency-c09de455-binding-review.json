@@ -1,0 +1,65 @@
+{
+  "record": "CATALOG_LATENCY_AND_MOBILE_SOURCE_BINDING_REVIEW",
+  "at": "2026-11-15T11:09:02.789293+00:00",
+  "candidateSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "sourcePR": 1235,
+  "bindingPR": null,
+  "bindingReference": "THIS_CHANGE_PENDING_EXACT_CI_AND_MAIN_ADMISSION",
+  "workflowSha": null,
+  "observedApplicationSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+  "observedWorkflowSha": "213e991f3e392771226ae106162b114d5fffe6f6",
+  "observedReconciliation": "observed-runtime-5b5d0a2f-reconciliation.json",
+  "repair": "Promote exact measured V4 combined catalog SQL and route-specific mobile case-header wrapping; preserve canonical authority, SQL protections and unchanged SLO limits",
+  "catalogAndMobileFocusedValidation": {
+    "passed": 57,
+    "failed": 0,
+    "scopedLint": "PASS"
+  },
+  "nativeExport": {
+    "file": "local-native-export-c09de455.json",
+    "status": "PASS_FRESH_RESTORE_REPEAT_NATIVE_PRIVILEGES_LOCAL_ONLY",
+    "objects": 24576
+  },
+  "nativeTools": {
+    "file": "native-source-graphs-c09de455.json",
+    "status": "SEVEN_COMPILE_LOAD_EXACT_SOURCE_PASS_ONLY",
+    "distinctSourceModules": 488,
+    "configuredSignedRuntime": "PENDING"
+  },
+  "nativeCatalogExperiment": {
+    "file": "catalog-latency-c09de455-native-sql-binding.json",
+    "actualMeasuredSourceSha": "ef31d9b38c71418ea8ddf4a48757cf317facea0d",
+    "committedQSourceBytesEqualProof": true,
+    "compiledBatchSha256": "835a890151701696d2e6bf9d1a3ae682c8a4a6c76fd80817e9c4e78147e6e24d",
+    "actualQDeployedHttpSlo": "PENDING",
+    "observedSHttpSlo": "FAIL_718.865MS_P95_LIMIT500MS"
+  },
+  "broadLocalCommands": {
+    "file": "local-required-validation-c09de455.json",
+    "status": "COMPLETED_WITH_FAILURES",
+    "passed": 1,
+    "failed": 4,
+    "allActuallyExecuted": true,
+    "failureDeltaAudit": "PENDING_READ_ONLY_Q_VS_F_COMPARISON",
+    "allFailuresPreexistingClaimed": false
+  },
+  "sourceCI": "IN_PROGRESS_AT_BINDING_PREPARATION",
+  "bindingCI": "PENDING_NEW_INTEGRATION_HEAD",
+  "bindingValidation": {
+    "file": "catalog-latency-c09de455-binding-validation.json",
+    "sharedApprovalTestsPassed": 95,
+    "releaseNavigationRequestTestsPassed": 39,
+    "sourceDerivedNavigationCheck": "PASS",
+    "failed": 0
+  },
+  "replacementDeployed": false,
+  "mobileVisualReview": "PENDING_ACTUAL_Q",
+  "allQRuntimeCriteria": "17_REQUIRED_PENDING",
+  "acceptedStagingCandidateSha": null,
+  "reviewActor": "Codex under continuing solo-founder CHG-2026-0114 delegation",
+  "independentHumanReviewClaimed": false,
+  "implementationWindowEndUnchanged": "2026-11-16T23:59:59Z",
+  "stagingGo": false,
+  "productionAuthorized": false,
+  "localHolisticAdvisory": "FAIL_4_OF_5_LOCAL_COMMANDS"
+}

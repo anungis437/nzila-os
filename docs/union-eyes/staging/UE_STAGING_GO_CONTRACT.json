@@ -5,9 +5,9 @@
   "generatedOn": "2026-11-15",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
   "acceptedStagingCandidateSha": null,
-  "stagingWorkflowDefinitionSha": "e539e6ddc5bf5934c6f6cb40065d1a14faee6101",
+  "stagingWorkflowDefinitionSha": "213e991f3e392771226ae106162b114d5fffe6f6",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "Observed2107 staging has actual22-check intake and42-check formal staff deadline journeys, original-URL expiry and recovery evidence, but its health performance fails and final acceptance is incomplete. Proposed5b5d0a2f repairs catalog concurrency, formal parent/legacy lock order, settings verification and the build-identity reference caught by the806 whole-suite census failure. Exact fresh/restore/repeat/privileges and fresh seven-tool build/load checks pass;47 catalog/environment checks and strict census pass without ceiling changes. Exact source/integration CI, signed-runtime rehearsal, primary zero-SQL admission, reviewed rollout, unchanged deployed performance gate and all replacement runtime criteria remain required.",
+  "verdictReason": "Observed S5b5 has actual six-stage base, worker, retained-primary, audit/seals, paired original-full-hour expiry, two targeted persona and recovery evidence, but canonical performance fails at 718.865ms p95 versus unchanged500ms and full seven-persona acceptance is incomplete. Proposed Qc09de455 promotes exact measured catalog SQL and repairs mobile case-header wrapping. Exact local native export and seven graph compile/load pass;57 focused tests/scoped lint pass. Required broad local docs pass while four other commands fail. Exact source/integration CI, eligible main admission, signed-runtime qualification, primary read-only checks, immutable build, reviewed rollout and all actual Q criteria remain pending. No historical S observation satisfies Q runtime acceptance.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -24,204 +24,206 @@
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Observed2107feeb is pinned100% on --rel2107feeb1c; build43675288070/deploy43676475162 and workflow/IaCe539e6dd are recorded."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "SOURCE_ENGINEERING",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "Frozen 777 closure counts remain unchanged. Proposed 80651983 has focused source validation and exact native export qualification; its exact CI is still required."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "LOCAL_HOLISTIC_REGRESSION",
       "requirement": "ADVISORY",
-      "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "status": "FAIL",
+      "evidence": "All five required local commands were actually run on Q. pnpm validate:docs PASS; pnpm lint, pnpm typecheck, pnpm governance:audit and pnpm test:fast FAIL. The exact Q-vs-F failure delta audit is pending; no blanket preexisting-failure classification or green broad result is inferred. This advisory does not satisfy or replace any of the17required Q runtime criteria.",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
       "historicalObservedStatus": "FAIL",
-      "historicalObservedEvidence": "Broad local lint/typecheck/test/governance failures remain recorded in local-catalog-deadline-navigation-validation-20261115.json; focused passes do not overwrite them.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb"
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "observedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "localEvidence": "local-required-validation-c09de455.json",
+      "failureDeltaAudit": "PENDING_READ_ONLY_Q_VS_F_COMPARISON"
     },
     {
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
-      "historicalObservedStatus": "FAIL",
-      "historicalObservedEvidence": "Prior2107 sourcePR1231/binding1232 passed premerge registered and16trusted required contexts before main e539e6dd. Subsequent actual-main performance remains FAIL at approximately1.99s p95; sourcePR1233 CI is running."
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Observed2107 build43675288070 and protected CHG-2026-0114 deploy43676475162 passed with workflow/IaCe539e6dd. Proposed80651983 is not deployed."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Actual serving --rel2107feeb1c retains100% traffic and digest968ba684\u2026; inactive recovery metadata is not mistaken for serving traffic."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "DATABASE_MIGRATIONS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
-      "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "Retained original installation and immutable migration history are preserved. Observed 2107 primary admission required zero guard SQL. The exact replacement export passes fresh/restore/repeat/privileges without resetting primary staging."
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "ENTRA_AUTHENTICATED_SESSIONS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Paired real Entra session run43677154289 passes on2107; this does not qualify replacement-source personas."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "API_AND_POSTGRES_TENANT_ISOLATION",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Observed2107 paired APIs and initial source-bound native isolation pass. Replacement-source native/API evidence remains required."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "Observed2107 claim/deadline22checks and formal/deadline42checks PASS with original roles restored and fixture authority retired. Member/steward/officer normal profiles pass; E43680811518 settings failure is preserved. Corrected settings settlement requires all7 final-source reruns and remaining base journeys."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "WORKERS_RETRIES_AND_DELIVERY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
-      "historicalObservedStatus": "PENDING",
-      "historicalObservedEvidence": "Final candidate worker delivery/retry/recovery and owned-fixture retirement remain required; no historical worker result is promoted."
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "AUDIT_AND_TELEMETRY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "Observed2107 initial native audit recomputes906/35records and2sealed packs. Final audit, retention, telemetry and cleanup must follow all remaining logical mutations."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Observed2107 paired/revocation43677154289 PASS. Actual unchanged originally issued document URL returned403 at05:35:29Z after original expiry. Replacement-source proof remains required."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "Normal observed profiles provide partial fail-closed boundary evidence. All7 final-source profiles remain required; finance/dues persistence and Financial Officer2.1 remain excluded."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "OPERATIONAL_RECOVERY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Observed2107 failed-revision43677270661 PASS; signed retained-copy protocol and stopped/retained-copy cycle PASS05:19. Replacement-source recovery remains required."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "CAPABILITY_TRUTHFULNESS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "Actual2107 staff deadline journeys are now exercised for both case types. Dates are staff-entered; automatic legal calculation and intake email reminders are not claimed. Final replacement-source reconciliation remains required."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "INSTITUTIONAL_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "Observed2107 bounded member/formal continuity and synthetic scoped fixture cleanup pass. Distinct owned accounts are operated by one founder, without real union ratification or independent-human claims. Final-source refusal and positive scope evidence remain required."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
     },
     {
       "id": "STAGING_DECISION_ACCEPTANCE",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Proposed5b5d0a2f is not deployed or accepted. Exact native export and seven source graphs pass;47 catalog/environment checks and strict census pass. Final source/integration CI, signed-runtime rehearsal and actual replacement-source deployment/acceptance remain pending. Historical observations retain their original source.",
-      "proposedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "evidence": "Q c09de455 is not deployed or accepted. Exact export and seven native build/load/source graphs pass;57 focused checks and scoped lint pass. Source/integration CI and all final Q runtime evidence remain required. Current S observations are historical for Q and cannot satisfy this criterion.",
+      "proposedSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
       "requalificationRequiredForProposedCandidate": true,
       "historicalObservedStatus": "NOT_PROVEN",
-      "historicalObservedEvidence": "The founder authorizes continuing engineering/staging execution; no STAGING GO acceptance event is recorded.",
-      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb"
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "observedSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb"
     }
   ],
   "externalBlockers": [],
-  "proposedCandidateSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
-  "proposedCandidateState": "EXACT_SOURCE_AND_INTEGRATION_CI_NATIVE_RUNTIME_QUALIFICATION_PENDING",
+  "proposedCandidateSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "proposedCandidateState": "EXACT_SOURCE_CI_AND_NEW_INTEGRATION_BINDING_PENDING_Q_NOT_DEPLOYED",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
     "included": [
@@ -284,17 +286,53 @@
       "staffCaseDeadlines": "414 tests across20 suites PASS, including13 actual PostgreSQL-compatible SQL tests,10 UI and9 HTTP tests plus confirmation, disclosure, casework and strict censuses. Exact776-table fresh/restore/repeat/privileges PASS; real signed native private-copy intake/formal service rehearsal and cleanup PASS. All7 compiled source graphs verified. Required local broad host/dependency/type failures remain failures; exact CI and deployed browser acceptance are pending.",
       "combinedCatalogDeadlineNavigationRepair": "Source 96f6 focused 32 catalog + 70 deadline/assignment/continuity + 23 navigation/request contracts PASS; three source PostgreSQL opt-ins remain SKIPPED. Runtime implementation is unchanged in 80651983; the unchanged opt-in probe moved to tooling after 17188f7b CI correctly rejected application-layer raw-driver imports. The failure is preserved and no gate changed. The separate three native lock-only cases retain execution source 96f6 and all 16 included modules match 806; explicit ports stand-ins do not establish authentication/kernel/RLS. Exact 806 native export PASS: 24,576 catalog objects, fresh/restore/repeat/privileges. Local database-boundary tests pass 16/16 using the repository timeout; the earlier temporary-config timeout is retained. Broad local command failures remain failures. Exact CI and final deployed performance/persona acceptance remain required.",
       "combinedRepairSourceBinding": "94 shared approval and39 release/navigation/request tests PASS; navigation inventory check, exact pins,17required+1advisory PENDING criteria,62 evidence index hashes and unchanged implementation window verified. The default root runner retains its actual shared configuration/cache EPERM failure; the focused shared run uses task-local real source aliases and private cache, without changing repository tests or shared dependencies."
+    },
+    "beforeCatalogLatencyQ": {
+      "candidateSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+      "catalogAndEnvironment": "47 passed across5 suites; strict environment census exit0, UNDECLARED0; no ceilings changed",
+      "unchangedDeadlineCode": "70 passed,3 opt-in runner cases skipped before this metadata correction; separate native lock-only execution source96 is retained with exact included-source equality",
+      "nativeExport": "Exact5b5d0a2f fresh/restore/repeat/native privileges PASS24576 objects; not runtime acceptance",
+      "nativeTools": "Seven fresh exact-source build/load checks pass; real configured deadline production execution remains pending",
+      "bindingTests": "94 shared approval tests and39 release/navigation/request tests PASS; previous2107 and proposed806 refused; exact CI still required",
+      "broadLocalCommands": "Earlier broad failures remain recorded, no broad local PASS inferred; exact CI required",
+      "deployedPerformance": "PENDING_ACTUAL_NEW_SOURCE_K6_UNCHANGED_500_1500_THRESHOLDS"
     }
   },
   "localValidation": {
-    "candidateSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
-    "catalogAndEnvironment": "47 passed across5 suites; strict environment census exit0, UNDECLARED0; no ceilings changed",
-    "unchangedDeadlineCode": "70 passed,3 opt-in runner cases skipped before this metadata correction; separate native lock-only execution source96 is retained with exact included-source equality",
-    "nativeExport": "Exact5b5d0a2f fresh/restore/repeat/native privileges PASS24576 objects; not runtime acceptance",
-    "nativeTools": "Seven fresh exact-source build/load checks pass; real configured deadline production execution remains pending",
-    "bindingTests": "94 shared approval tests and39 release/navigation/request tests PASS; previous2107 and proposed806 refused; exact CI still required",
-    "broadLocalCommands": "Earlier broad failures remain recorded, no broad local PASS inferred; exact CI required",
-    "deployedPerformance": "PENDING_ACTUAL_NEW_SOURCE_K6_UNCHANGED_500_1500_THRESHOLDS"
+    "candidateSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+    "focusedCatalogAndMobile": {
+      "passed": 57,
+      "failed": 0,
+      "scopedLint": "PASS"
+    },
+    "nativeExport": "PASS_EXACT_FRESH_RESTORE_REPEAT_PRIVILEGES_24576_OBJECTS_LOCAL_ONLY",
+    "nativeTools": "SEVEN_COMPILE_LOAD_PASS_488_DISTINCT_SOURCE_MODULES_RUNTIME_PENDING",
+    "bindingTests": {
+      "sharedApprovalPassed": 95,
+      "releaseNavigationRequestPassed": 39,
+      "sourceDerivedNavigationCheck": "PASS",
+      "failed": 0,
+      "record": "catalog-latency-c09de455-binding-validation.json",
+      "exactIntegrationCIStillRequired": true
+    },
+    "requiredBroadCommands": {
+      "record": "local-required-validation-c09de455.json",
+      "status": "COMPLETED_WITH_FAILURES",
+      "passed": [
+        "pnpm validate:docs"
+      ],
+      "failed": [
+        "pnpm lint",
+        "pnpm typecheck",
+        "pnpm governance:audit",
+        "pnpm test:fast"
+      ],
+      "failureDeltaAudit": "local-test-fast-delta-c09de455.json",
+      "allFailuresPreexistingClaimed": false,
+      "additionalFailureFinding": "Unchanged provider-residual scan hit its existing30s timeout in aggregate; isolated normal-config5tests PASS. Aggregate FAIL retained; no source regression reproduced."
+    },
+    "deployedPerformance": "PENDING_ACTUAL_Q_K6_UNCHANGED_500_1500_THRESHOLDS",
+    "mobileVisualReview": "PENDING_ACTUAL_Q_RENDERED_EN_FR_MOBILE"
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -306,7 +344,7 @@
     "supersededForQualificationBy": "167f95034fbdaa163cd67e79c4bca622284e0d77"
   },
   "securityFindingEvidence": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json",
-  "observedStagingCandidateSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "observedStagingCandidateSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
   "historicalCriteriaBeforeNestedSystemRepair": [
     {
       "id": "CANDIDATE_IDENTITY",
@@ -463,18 +501,18 @@
     }
   ],
   "priorSourceCompositionSuiteFailure": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/source-a8442373-whole-application-ci-failure.json",
-  "latestAdmittedVerificationWorkflowSha": "e539e6ddc5bf5934c6f6cb40065d1a14faee6101",
-  "previousContractSnapshot": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-contract-before-combined-repair-80651983.json",
-  "observedRuntimeReconciliation": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-runtime-2107feeb-reconciliation.json",
+  "latestAdmittedVerificationWorkflowSha": "213e991f3e392771226ae106162b114d5fffe6f6",
+  "previousContractSnapshot": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-contract-before-catalog-latency-c09de455.json",
+  "observedRuntimeReconciliation": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-runtime-5b5d0a2f-reconciliation.json",
   "historicalSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-deadline-private-copy-2107feeb.json",
-  "proposedSourceNativeQualificationState": "EXACT_EXPORT_PASS_SEVEN_GRAPHS_BUILD_PASS_SIGNED_RUNTIME_AND_DEPLOYMENT_PENDING",
+  "proposedSourceNativeQualificationState": "Q_EXACT_EXPORT_AND_SEVEN_GRAPH_COMPILE_LOAD_PASS_SIGNED_RUNTIME_PENDING",
   "historicalNativeExportBeforeProbeRelocation": {
     "sourceSha": "17188f7b602342ab6e88222759a4caba01f52248",
     "status": "PASS",
     "catalogObjects": 24576,
     "freshRestoreRepeatAndPrivilegesPassed": true
   },
-  "currentSourceNativeExport": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-5b5d0a2f.json",
+  "currentSourceNativeExport": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-c09de455.json",
   "supersededCombinedRepairCandidate": {
     "sourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
     "deployed": false,
@@ -482,5 +520,30 @@
     "result": "26170 passed,1 environment census failure,34 skipped",
     "reason": "GIT_SHA read instead of registered image-supplied GITHUB_SHA",
     "failureRecord": "catalog-build-identity-env-census-failure-80651983.json"
+  },
+  "previousProposedCandidate": {
+    "sourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+    "sourcePR": 1233,
+    "bindingPR": 1234,
+    "admittedWorkflowSha": "213e991f3e392771226ae106162b114d5fffe6f6",
+    "nowObservedServing": true,
+    "replacementAcceptanceInferred": false
+  },
+  "proposedIntegrationBinding": {
+    "sourcePR": 1235,
+    "bindingPR": null,
+    "workflowSha": null,
+    "reference": "THIS_CHANGE_PENDING_CI_AND_MAIN_ADMISSION"
+  },
+  "observedPerformance": {
+    "sourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
+    "workflowSha": "213e991f3e392771226ae106162b114d5fffe6f6",
+    "status": "FAIL",
+    "runId": 43691446485,
+    "attempt": 2,
+    "p95Ms": 718.86528625,
+    "p95LimitMs": 500,
+    "p99LimitMs": 1500,
+    "proposedQStatus": "PENDING"
   }
 }

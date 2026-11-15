@@ -1,0 +1,78 @@
+{
+  "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "status": "COMPLETED_WITH_FAILURES",
+  "startedAt": "2026-11-15T10:55:46.589712+00:00",
+  "scope": "Required repository commands; all actual failures retained; no finance implementation",
+  "results": [
+    {
+      "command": "pnpm lint",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 19.85,
+      "log": "/tmp/ue-acceptance-20261113/local-required-validation-c09de455/lint.log"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 32.27,
+      "log": "/tmp/ue-acceptance-20261113/local-required-validation-c09de455/typecheck.log"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0,
+      "status": "PASS",
+      "seconds": 33.47,
+      "log": "/tmp/ue-acceptance-20261113/local-required-validation-c09de455/validate-docs.log"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "exitCode": 2,
+      "status": "FAIL",
+      "seconds": 108.26,
+      "log": "/tmp/ue-acceptance-20261113/local-required-validation-c09de455/governance-audit.log"
+    },
+    {
+      "command": "pnpm test:fast",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 214.22,
+      "log": "/tmp/ue-acceptance-20261113/local-required-validation-c09de455/test-fast.log"
+    }
+  ],
+  "finishedAt": "2026-11-15T10:59:20.977702+00:00",
+  "unexpectedTrackedChangesPreserved": [],
+  "logEvidence": [
+    {
+      "command": "pnpm lint",
+      "file": "lint.log",
+      "sha256": "0e82b68e1869c1b8ba453c85d8ddc7e71e804826f88847ade70c3b929fbcdf9c"
+    },
+    {
+      "command": "pnpm typecheck",
+      "file": "typecheck.log",
+      "sha256": "4ab289838e3fbd12ee89b4c7da51219ed25b8099959aff39c5faafafd10dba36"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "file": "validate-docs.log",
+      "sha256": "d18381b5af7f6977ef8258b32a3ed3118e01e8e7221d4b1c4d206f628f47cb12"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "file": "governance-audit.log",
+      "sha256": "92f8ead07da1bd94b4b2e7202adf04c0e53852dfc28026d242f3544317858b4f"
+    },
+    {
+      "command": "pnpm test:fast",
+      "file": "test-fast.log",
+      "sha256": "11bc0a91801293d4816e69caef5d42bea872b11ac4f1a5ee58fe4aeb0edac384"
+    }
+  ],
+  "localOnly": true,
+  "stagingAcceptance": false,
+  "originalPrivateReceiptSha256": "9024c0d529855ca9b5e0c64aee1012985bbfe648813b84b5e4c52bddce055093",
+  "failureDeltaAudit": "local-test-fast-delta-c09de455.json",
+  "allFailuresPreexistingClaimed": false,
+  "additionalFailureStatus": "AGGREGATE_TIMEOUT_WITH_UNCHANGED_INPUTS_ISOLATED_5_PASS_NO_TIMEOUT_CHANGE"
+}

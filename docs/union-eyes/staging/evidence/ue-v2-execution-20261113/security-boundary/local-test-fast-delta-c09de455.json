@@ -1,0 +1,81 @@
+{
+  "label": "READ_ONLY_LOCAL_TEST_FAST_DELTA_AUDIT",
+  "sourceQ": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "baselineF": "ef31d9b38c71418ea8ddf4a48757cf317facea0d",
+  "aggregateStatusUnchanged": "FAIL",
+  "aggregateQ": {
+    "failedFiles": 2575,
+    "passedFiles": 527,
+    "skippedFiles": 1,
+    "failedTests": 20,
+    "passedTests": 7786,
+    "skippedTests": 12
+  },
+  "aggregateF": {
+    "failedFiles": 2574,
+    "passedFiles": 528,
+    "skippedFiles": 1,
+    "failedTests": 19,
+    "passedTests": 7787,
+    "skippedTests": 12
+  },
+  "QonlyFailureHeaders": [
+    "|@nzila/platform-auth| src/identity-provider-residuals.test.ts > UE-CONV-A-006: provider residuals can only shrink > the retired adapter and webhook verifier are gone from the shared package, and nothing names them again"
+  ],
+  "FonlyFailureHeaders": [],
+  "additionalFailure": {
+    "path": "packages/platform-auth/src/identity-provider-residuals.test.ts",
+    "line": 56,
+    "test": "the retired adapter and webhook verifier are gone from the shared package, and nothing names them again",
+    "kind": "TEST_TIMEOUT",
+    "timeoutMs": 30000,
+    "aggregateSuiteDurationMs": 49824,
+    "assertionFailureReported": false,
+    "operation": "synchronous git grep --untracked across apps/packages/tooling for unchanged retired-export pattern"
+  },
+  "unchangedInputs": [
+    {
+      "path": "packages/platform-auth/src/identity-provider-residuals.test.ts",
+      "F_Q_bytesEqual": true,
+      "Q_currentBytesEqual": true,
+      "sha256": "aabd6613e621b128f454049d5a402c03b3e9adb89f2a86d326c86450782edea0"
+    },
+    {
+      "path": "packages/platform-auth/src/identity-provider-residuals.ts",
+      "F_Q_bytesEqual": true,
+      "Q_currentBytesEqual": true,
+      "sha256": "2f4e627318cd9f0fd747d8f26f00d8f5a6ec81ce1e63c38737dcc513923c2d78"
+    },
+    {
+      "path": "packages/platform-auth/package.json",
+      "F_Q_bytesEqual": true,
+      "Q_currentBytesEqual": true,
+      "sha256": "c79ba102ddb6c5cc6b7fc555d4577f1fe28ab8012fb99038ae5f10e675cc77a4"
+    },
+    {
+      "path": "packages/platform-auth/vitest.config.ts",
+      "F_Q_bytesEqual": true,
+      "Q_currentBytesEqual": true,
+      "sha256": "19b4ab4969e70453d18b3543545ffcdb4e77b01dfddcf18472c0302ad110b880"
+    }
+  ],
+  "isolatedRerun": {
+    "command": "node node_modules/vitest/vitest.mjs run --project=@nzila/platform-auth packages/platform-auth/src/identity-provider-residuals.test.ts",
+    "exitCode": 0,
+    "passedFiles": 1,
+    "passedTests": 5,
+    "failedTests": 0,
+    "durationSeconds": 8.24,
+    "normalProjectConfiguration": true,
+    "timeoutChanged": false,
+    "mocksAdded": false,
+    "log": "/tmp/ue-acceptance-20261113/local-test-fast-delta-c09de455/isolated-provider-residuals.log",
+    "logSha256": "99e61a7fc27d029cf41cdf937db5d1e69d06d0c03e09ceff6a3768d6ffeb73c4"
+  },
+  "sourceConnection": "Test imports only Node filesystem/process helpers and unchanged residual registry. Catalog SQL is searched as text, not executed. Both pre-existing provider-content assertions and retired-export assertions passed in isolation.",
+  "finding": "A new aggregate timeout occurred in unchanged code; no Q catalog/source assertion regression reproduced. Local monorepo scheduling/load is an inference supported by the isolated PASS and aggregate duration, not an instrumented CPU claim.",
+  "fixProposal": "No application or test gate changes. Preserve aggregate FAIL and record isolated PASS separately; use exact-source CI results. Investigate runner scheduling only if the unchanged timeout repeats.",
+  "sourceEdits": 0,
+  "cloudActions": 0,
+  "originalPrivateAuditSha256": "822d2c5ccf2db3f6b4d12bbff8eb4c70e2631f2ceedf763b0b54650f1328327b"
+}

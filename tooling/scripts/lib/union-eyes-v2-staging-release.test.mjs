@@ -300,9 +300,10 @@ test('CLI fails closed on a missing change record and a tag manifest', () => {
 
 test('CHG-2026-0114 founder direction accepts only the exact candidate and preserves staging boundaries', () => {
   const approved = JSON.parse(fs.readFileSync(path.join(REPO, 'ops/change-records/CHG-2026-0114.json'), 'utf8'))
-  const sha = '5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb'
+  const sha = 'c09de4557236b615fad0a1c992d6ee2b8820bf62'
   const opts = { changeId: 'CHG-2026-0114', sourceSha: sha, nowMs: Date.parse('2026-11-10T12:00:00Z') }
   assert.deepEqual(changeRecordDefects(approved, opts), [])
+  assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: '5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: '80651983dcdf114b488813c64f88ca3aca7ab88d' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects({ ...approved, founder_staging_authorization: { ...approved.founder_staging_authorization, candidate_sha: '2107feeb1c2949042d97bd0606efb18e7aa95beb' } }, opts).includes('FOUNDER_STAGING_AUTHORIZATION_INVALID'))
   assert.ok(changeRecordDefects({ ...approved, environment: 'PROD' }, opts).includes('CHANGE_RECORD_WRONG_ENVIRONMENT'))

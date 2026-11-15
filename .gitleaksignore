@@ -228,3 +228,13 @@ docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api
 # introducing commit, exact inventory path, generic rule and line; retain every
 # scanner rule and scan of every other occurrence, file and future commit.
 96f6f79ad685738086f66914582d5461b7a9b870:tooling/scripts/lib/ue-v2-navigation-inventory.json:generic-api-key:7
+
+# Union Eyes evidence index: reviewed commit-ID false positives, 2026-11-15.
+# All three values were independently verified as real Git commits: observed
+# application, proposed application and admitted workflow. The v8.24.3 rule
+# also matches bare 40-hex values when its keyword appears in the file.
+# These exceptions cover only the introducing commit/path/rule/line; scanner
+# rules remain unchanged. The metadata key is renamed to avoid future matches.
+fb5694fa1cb338085d0b0d2f30598b50b9e73ac5:docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json:sourcegraph-access-token:711
+fb5694fa1cb338085d0b0d2f30598b50b9e73ac5:docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json:sourcegraph-access-token:726
+fb5694fa1cb338085d0b0d2f30598b50b9e73ac5:docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json:sourcegraph-access-token:729
