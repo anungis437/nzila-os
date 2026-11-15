@@ -1,0 +1,31 @@
+{
+  "recordedAt": "2026-11-15T06:26:41.022870+00:00",
+  "failedSourceSha": "17188f7b602342ab6e88222759a4caba01f52248",
+  "status": "FAIL_PRESERVED",
+  "failures": [
+    {
+      "runId": "43684990404",
+      "jobId": "132723556335",
+      "check": "UE Whole Contract Test Suite",
+      "failed": 2,
+      "passed": 10097
+    },
+    {
+      "runId": "43684990382",
+      "jobId": "132723556649",
+      "check": "Pilot Contract Tests",
+      "failed": 2,
+      "passed": 10097
+    }
+  ],
+  "cause": "Opt-in native PostgreSQL lock test was located inside the application layer and directly imported the raw driver/instantiated Drizzle; INV-06 correctly refused both occurrences",
+  "repair": "Move the unchanged opt-in harness to tooling/native-tests/ue-deadline-lock-order.postgres.test.ts; preserve all native assertions, target/TLS guards, and existing database-boundary enforcement",
+  "gateModified": false,
+  "nativeProbeAssertionsModified": false,
+  "rawLogSha256": {
+    "132723556335": "b964dfde3f269f9826aa218f21f0393c49635e6aed84cd4e81466dd29375e8c9",
+    "132723556649": "b7d50d12c2df37f7735450efaba531f34f777368061eeb284dfa776e2150f86a"
+  },
+  "stagingGo": false,
+  "productionAuthorized": false
+}
