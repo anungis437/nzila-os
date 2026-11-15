@@ -10,6 +10,7 @@ const catalogs = {
   it: () => import('../../messages/it.json'),
   pt: () => import('../../messages/pt.json'),
 };
+// ga-check:exempt -- immutable translation-import promises for React Suspense; no business records, sessions or authorization results.
 const pending = new Map<string, Promise<AbstractIntlMessages>>();
 
 /** These are immutable build assets, not session or catalog-authority results.
