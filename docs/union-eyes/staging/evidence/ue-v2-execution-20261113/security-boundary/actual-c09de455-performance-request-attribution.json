@@ -1,0 +1,97 @@
+{
+  "status": "ACTUAL_READ_ONLY_REQUEST_ATTRIBUTION",
+  "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "workflowSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
+  "at": "2026-11-15T15:02:53.692997+00:00",
+  "performanceRunId": "43718734553",
+  "performanceRunAttempt": 2,
+  "workspaceId": "ce2ff61f-0059-46eb-b18b-a9be8162d009",
+  "query": "AppRequests | where TimeGenerated between(datetime(2026-11-15T13:53:30Z)..datetime(2026-11-15T13:56:10Z)) | where AppRoleInstance startswith 'nzila-ue-v2-staging-app--relc09de45572-' | extend Path=tostring(parse_url(Url).Path) | summarize count(),p50=percentile(DurationMs,50),p95=percentile(DurationMs,95),max(DurationMs) by Path,ResultCode | order by p95 desc",
+  "rows": [
+    {
+      "Path": "/api/ready",
+      "ResultCode": "200",
+      "TableName": "PrimaryResult",
+      "count_": "16",
+      "max_DurationMs": "1070.448",
+      "p50": "301.439",
+      "p95": "1070.448"
+    },
+    {
+      "Path": "/api/cron/deadline-reminders",
+      "ResultCode": "200",
+      "TableName": "PrimaryResult",
+      "count_": "1",
+      "max_DurationMs": "989.874",
+      "p50": "989.874",
+      "p95": "989.874"
+    },
+    {
+      "Path": "/en-CA",
+      "ResultCode": "200",
+      "TableName": "PrimaryResult",
+      "count_": "257",
+      "max_DurationMs": "759.595",
+      "p50": "188.75574999999998",
+      "p95": "550.584"
+    },
+    {
+      "Path": "/api/health",
+      "ResultCode": "200",
+      "TableName": "PrimaryResult",
+      "count_": "257",
+      "max_DurationMs": "729.766",
+      "p50": "276.44",
+      "p95": "325.185"
+    },
+    {
+      "Path": "",
+      "ResultCode": "200",
+      "TableName": "PrimaryResult",
+      "count_": "1335",
+      "max_DurationMs": "858.314",
+      "p50": "1.7023636363636363",
+      "p95": "295.44849999999997"
+    },
+    {
+      "Path": "/favicon.ico",
+      "ResultCode": "404",
+      "TableName": "PrimaryResult",
+      "count_": "257",
+      "max_DurationMs": "537.848",
+      "p50": "75.661",
+      "p95": "155.861"
+    },
+    {
+      "Path": "",
+      "ResultCode": "404",
+      "TableName": "PrimaryResult",
+      "count_": "257",
+      "max_DurationMs": "536.716",
+      "p50": "75.003",
+      "p95": "154.89"
+    },
+    {
+      "Path": "",
+      "ResultCode": "307",
+      "TableName": "PrimaryResult",
+      "count_": "514",
+      "max_DurationMs": "402.761",
+      "p50": "45.598222222222226",
+      "p95": "91.449"
+    },
+    {
+      "Path": "/api/health/liveness",
+      "ResultCode": "200",
+      "TableName": "PrimaryResult",
+      "count_": "8",
+      "max_DurationMs": "87.822",
+      "p50": "5.193",
+      "p95": "87.822"
+    }
+  ],
+  "candidateRevisionInstanceFiltered": true,
+  "rawUrlsQueriesOrSessionMaterialSerialized": false,
+  "diagnosticOnly": true,
+  "newSourceHttpPassClaimed": false
+}

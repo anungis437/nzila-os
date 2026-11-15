@@ -1,0 +1,923 @@
+{
+  "evidenceClass": "CANDIDATE_NATIVE_TOOL_BUILD_ONLY_NOT_EXECUTION",
+  "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "bundleSha256": "f563562de0e85a66472c41f22d1c12c592aa5cd0ac1a530a203dc786bbb0f3b8",
+  "trackedSourceInputsVerified": 208,
+  "trackedSourceModules": [
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/profiles.ts",
+      "sha256": "4df6f8831e26804b98a096dce821e69651f3f5f9db00dc9084a8b24ea91de1d6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/pending-profiles.ts",
+      "sha256": "398600767b8df110fd78d1626f62ca71da7860e27675451befec1434b575b8b2"
+    },
+    {
+      "path": "apps/union-eyes/db/schema-organizations.ts",
+      "sha256": "92299ec281612b899331b2c3dfa16d61cc0a4f30f3bf5d6331e1f7924a8be835"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/user-management-schema.ts",
+      "sha256": "84b42fca18fc5ef2a053f58caada909c33d6ff197c92fb15c86398110d9d94a4"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/user-management.ts",
+      "sha256": "441e01db3bef2700357e8a333b21033559e4c356be454f825452ea132c4e51dc"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/committee-workspace-schema.ts",
+      "sha256": "3b7e301663333626b66e7b59c878295f4ec5417016c6100b114209b8ea2b4866"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/union-structure-schema.ts",
+      "sha256": "231aa4b2b8e85e7b0dbf1cf40842a815fe327277ed22acc83c104133833cd66d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/member-employment.ts",
+      "sha256": "1871efe2c88a63bfbc7ee16e537532c811e7669078c546d894bb3fe14ad0059f"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/member-breaks.ts",
+      "sha256": "07b074b99895296f64c62b8abc35536fb5e03d53e6a4458ab555f23e24e5c49f"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/member-segments.ts",
+      "sha256": "17e7343d7aca9508b2075ddaf01dcb116b0918948308c12a284c6b52beb06589"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/addresses.ts",
+      "sha256": "fb4075bf4575ded929a413f7d8409abd04e85d69e3e2686bd2dd5a00c89f43bf"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/stewards.ts",
+      "sha256": "88ea87668e641d94b8339c3d1f576f57f6e881a4bf92d8791e0c50f414fae8c9"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/jurisdiction-preferences.ts",
+      "sha256": "47f7586f22372156dda6984cc2ed53b1b4dd909027b3e12f1bf499a5dc5e2517"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/enhanced-rbac.ts",
+      "sha256": "e9aa52880575a544476ad26fc08dbeeaa60e5713b8d999471eeec530af2d48b2"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/member/index.ts",
+      "sha256": "8930edea5c0643196b8d82d877378de12e9f7d1fd7f07b32f517b7a2d1841bd5"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/claims-schema.ts",
+      "sha256": "6c87859e64aa7eda350530125073662ef5c05925367dd8a7fb352199690bf889"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/claims.ts",
+      "sha256": "2d98404ea7e1ee5fbd942e4f81244ad3103e663b8b68881e754b7b619aadf889"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/grievances.ts",
+      "sha256": "7dfcf25b76bf4a3113bd3b49c652fd4345de2f26efe8d8c59ca3431270f8a772"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/deadlines.ts",
+      "sha256": "3cc3146ca1a398aaaf257f6ef1941bbf09d2106760ef334675925b968b2c110a"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/workflows.ts",
+      "sha256": "0240fde7f62a525f8eeb39656eafd547c8849e80632d76cea5fe5ffdf523867a"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts",
+      "sha256": "827b7b31b11073f9e48d9176e71f5fac916447c939deff22185ef7f139059556"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/profiles-schema.ts",
+      "sha256": "4df6f8831e26804b98a096dce821e69651f3f5f9db00dc9084a8b24ea91de1d6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/satisfaction.ts",
+      "sha256": "e23d22c8353e8edd8203a1b68c085f8aafaa88eed6e31ec985d1f3314c4f5bef"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/claims/index.ts",
+      "sha256": "72f6c22c8a24d632bee4646f461d73233dd9c6d2f156cb5e95e9294759f384c8"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/agreements/collective-agreements.ts",
+      "sha256": "63b2ed3f2fa5b819073f698ba0a924e58161f520a7894e8f2c51743ddbebb381"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/agreements/cba.ts",
+      "sha256": "fb7687bd01db9d680a34d8593cc12593977cd38a3ead29c3d98f2c4197454fc8"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/agreements/clauses.ts",
+      "sha256": "0907507ef406bad635e6c8c8ea61f245a86d894709de58021b2b1a3c08a6d617"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/agreements/intelligence.ts",
+      "sha256": "3c93d86b9a491b180198a74dddb8841c0bfe08a7a94708b5bb0827e0c852fe9d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/agreements/shared-library.ts",
+      "sha256": "102eb0cbade7a018590e5e0e2b8a3509d6316a98cd92e465b3412936f4e4253f"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/collective-agreements-schema.ts",
+      "sha256": "63b2ed3f2fa5b819073f698ba0a924e58161f520a7894e8f2c51743ddbebb381"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/bargaining-negotiations-schema.ts",
+      "sha256": "04494b4fd6874243ef432fd868d8ea978b6ef65c040421dbb685e810919c9e79"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/agreements/negotiations.ts",
+      "sha256": "5e17e45409646ce7b7c866e44d8da747498d5a2d41ce776a21d0ec5110131658"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/agreements/clause-embeddings.ts",
+      "sha256": "2bdd47aa753338f22bd9878cd4674e107de69c965df858c8d00ad4d88b24090d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/agreements/index.ts",
+      "sha256": "a4f815ef3a7c14aa8f4095bf10976754245a72bb2c073c13c620a803a84884fd"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/dues.ts",
+      "sha256": "50ab7602ca6bac0ae3553f4cadef41191999d330a4af18b050b78f0676cc4de3"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/dues-assignments.ts",
+      "sha256": "bd716250a4960a81ab7ff7c2c2a3b179662ce9581810f67c505d4c28a02f95ee"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/autopay.ts",
+      "sha256": "bad8f2aed22f015f11ccf5c5397341243ae68980a35b682fbd57f077e234664b"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/payments.ts",
+      "sha256": "e08bea62dabad4e875652db7753e7b86ef12fb6abd393b7da18c30a8747eb45d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/accounting.ts",
+      "sha256": "936dffd3f05c4b49690cefa7c81ec4b51ff2389353b4ecd09fefea462d4be36d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/taxes.ts",
+      "sha256": "6ab654497bc7ae00f7dff16f586a46f9bcf04a500f162c8459f8c1afd3b5227e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/transfer-pricing.ts",
+      "sha256": "415d2fa64a320ed94ec8f916ea2817eafb237b451613f02d0d2a71811393f133"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/billing-config.ts",
+      "sha256": "c762f51f972183453f8c32d4be106f007a32bb8c7aebcac6838ed3624b4822f3"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/pension.ts",
+      "sha256": "846ff1312b164b7e561dab93c1c252853f0edc5cb17f83927303781782a377a6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/platform-billing.ts",
+      "sha256": "64aaa003a4c709dc4443d86cd48d45aaff1400052b37ed19736f58cda6865bef"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/contracts.ts",
+      "sha256": "f1b988aade5a9e6af88ef00bf6d4b9f539dc97a36b11525092302ef93e09e666"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/usage-metering.ts",
+      "sha256": "5c4a994ce50b432c8154794ca70ca7118f083ffbb1029dbb6456846ef08746a8"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/dunning.ts",
+      "sha256": "9d6dd9feaded4d7cd8c8ebc1d1379a6ef33d7e75d426df6edc67f7c0895d9d72"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/platform-ledger.ts",
+      "sha256": "b12c79c10cf7461b52d3ccace7869e455b0b42574119ef30a30c5bc952f247ac"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/allocation.ts",
+      "sha256": "abbf89017e4dbf394bb075ffbca2ae317c305be1bd59d3f2dfb77bf573f6be20"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/transaction-fees.ts",
+      "sha256": "98e1e3b2752481fc54c8779d42424ececa5b383ddc79652518449454b0ccd69d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/pricing-templates.ts",
+      "sha256": "8a6bda8ee2e72c3432d25f45ad62406e1b3762ee328ce8849ab2d4319f7f5991"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/contract-amendments.ts",
+      "sha256": "8579d5669c22be40aae9e83315d21c0934536ad581979d0dee6982b346f3e7f5"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/reconciliation.ts",
+      "sha256": "28d6123b2db187e1b6e2d46a00c94c3fed23942589d8517a7668b1fbe6eadd8f"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/finance/index.ts",
+      "sha256": "8ccbe30aff48eb23a44d344b2739f3228629309097c1c16086ef1f725bb54c59"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/governance/governance.ts",
+      "sha256": "5e7a44c9c3c9aef457c93537730083641e336a6df251571d066c15940fd12fbe"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/governance/conflicts.ts",
+      "sha256": "86ac777d163bc28b65c97fc364dcd65c944739dad36d0db7547a09947b57a95b"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/organization-members-schema.ts",
+      "sha256": "b215546ce18fe095694821a874eea83cb7835485a72a0fbab71bac7c38cc1150"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/governance/voting.ts",
+      "sha256": "d69e5243e902b6d94266fa873264efb44392e2ff6fdcea3715e10e9ca3a9e84b"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/governance/strategic-goals.ts",
+      "sha256": "9daec31139bf7864462f700bb0cb56d7fcc03181c951e5ef232cc9c5a17bf0be"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/governance/bylaws.ts",
+      "sha256": "4f5cd923aa4b2169f164fbf9dc8903600d405a9546812eb08f6e315b7a12cc08"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/governance/signatories.ts",
+      "sha256": "7ea0fdaf6917e8f1ece21b6f96e558eb9aa7b282147de3a3a248c1f73e2de33d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/governance/governance-policies.ts",
+      "sha256": "1519e327797594f71519c79258fe6531020422e95a7e126c46f2acca05dd596b"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/governance/index.ts",
+      "sha256": "ddee5b5a4016eed26c1988940a3f23bdb7bf5fa3d69ef45aa9a6d9ea7696e47f"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/messages-schema.ts",
+      "sha256": "df054b3001f3c1eed7f74189d9f8134accfb5ce816bbfaf67a8af6b36e78ff01"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/messages.ts",
+      "sha256": "59cd3be6eeb00c0cbc9884ac10ec7f3cdb38b909d557486bf80140bf779faf51"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/notifications.ts",
+      "sha256": "e3053cc56779dc157577cdd78b9c3eeb6165cb63392e3207b77d4dd8aebe7aa7"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/contact-submissions.ts",
+      "sha256": "4d4c23015b9487fc9afc9d538e0f5af52f3c452a2e20dbe506a06336b69d2d1e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/email-address-suppressions.ts",
+      "sha256": "b5806510a8142439451f8bf0273c8f017ab004c36dc8be4a1efc2d6f0c1d0657"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/newsletters.ts",
+      "sha256": "8d5b5dfc83f8ac25fdb5d777580796fadd6590f9203574b3241f73a3ce9dda4d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/sms.ts",
+      "sha256": "761f909be1cf2afad3e691dab78d9aef428d698e0832acc5b46be831f69fa453"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/surveys.ts",
+      "sha256": "07a722ba7a4417d6d3f676954c1f2cd6bc4b5ad4bf48051b3ed8461bd60a0ff7"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/analytics.ts",
+      "sha256": "fda31de21b9150958846cc73ac21de7edc519e1253343bd988269881f0db4140"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/push-notifications.ts",
+      "sha256": "79ef94c5a0b3fce12413ff245d7bf81a2d2cadc25a4aa57fd3d0d571202315a3"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/public-content.ts",
+      "sha256": "52817f78a3c1aa4b6d3f2891b697e0228dd2e71c56c13efc54eae835e6eac9c1"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/campaigns.ts",
+      "sha256": "020d49cf088aaaf21d20145dde40d4079f0384b557bbafc2debd3dc657e03edf"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/organizer-workflows.ts",
+      "sha256": "6219ae8f006ef4975d9ac2ea908ed0692e733eaee3ca0654d5a2e2baccd9c840"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/employer-communications.ts",
+      "sha256": "8461f13ceb577b067660dcbc238eb82540cdb83b3843b3b62221a5b3b9bad397"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/communications/index.ts",
+      "sha256": "da01cf110c42fed85d8c221cfbe9cc9452212fdcbb73a01cbc8f9cd9b0aa87f6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/documents-schema.ts",
+      "sha256": "289df4c31b2f2f6ef497abe485273f568fc59bb85d169369cfa59953ae833223"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/documents/documents.ts",
+      "sha256": "1850b3abb0a322fcf1333709e8eda3c25cf5d4c7b62d02b8b6b156496635fe57"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/member-profile-v2-schema.ts",
+      "sha256": "282c49a9f1c073d1483484e1ca43b1e811afe3f5a3664ae3b9742e6aff8377c6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/member-documents-schema.ts",
+      "sha256": "15fe77838479fc394606a09877e96d6cf6090781b774ce2f92945c387e9dd9d7"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/documents/member-documents.ts",
+      "sha256": "40b90341e490c58d002e2a16b92f9298a57a47220ecb86e06a83a96822146b8a"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/documents/signatures.ts",
+      "sha256": "0740afcba0cb34afa1378af80c1036e65e6f90dc8f4494bcabbf3745c732ccf2"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/documents/workflows.ts",
+      "sha256": "d0ef42cf78f4bd2fbd9d1dfad008e8c2020644295ba477f28409e336089bdb4c"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/documents/correspondence.ts",
+      "sha256": "6eeb70a895e9b7bf1dc08bd938b90d8bf78a417bb16f71506017a4afdec60b5a"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/documents/index.ts",
+      "sha256": "b0fe5dae920a3891765495478b3aa25e9d7a556834b50d087225b9c8e7863208"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/scheduling/calendar.ts",
+      "sha256": "9db74cf63425cfeb9febf3fbfd315d546d88e341956483345fb9836d4dfdcc82"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/scheduling/training.ts",
+      "sha256": "ec67169535556e8811fdecd4a7aff0d0f3eaab3836ad229722d2fb3dbd61e915"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/scheduling/index.ts",
+      "sha256": "92d86da80995af0ce28dac47b2ed5582ee6c91ebd46c8dd95893cd219341073b"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/provincial-privacy.ts",
+      "sha256": "0a30ff76bc0889a241bd45bd7340cb8c5eafde776c34dfe754cfd15b9e2ad928"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/gdpr.ts",
+      "sha256": "c28614e75a554f56778fef2e66ef0b26c534f89b813957f1defba9ba56559003"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/geofence.ts",
+      "sha256": "b649b8c659515041e38ae1f26d913f27924ef9d4657d78a9a67373e1262f8006"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/indigenous-data.ts",
+      "sha256": "00a21ced9e2acce11dad9c1c7ff20d704449c2b682d8584745b2aeb4e443cce7"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/immigration.ts",
+      "sha256": "3e7944102c2e0d619d439d0988dbacc1851037a78ef1dd8fca7c83fa6c4798e9"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/force-majeure.ts",
+      "sha256": "592e807044c941e1d437e6d7979b7a473e624cac61ffd269bd83e0aa3d72e150"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/employer-interference.ts",
+      "sha256": "20f24dd5c2e0d263ec9570e22a87880e861abf4151cf2f9a85c0b093b8a0b784"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/whiplash.ts",
+      "sha256": "f15f27e0bfa816dbc1dfb9f5bd386ea8e4afdf8c91b765d5d7e6496cfb8a1324"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/certifications.ts",
+      "sha256": "3eac3447f5319aecd3ab45c52341766e6e6126713bfdf8967d75278616764a20"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/pci-dss.ts",
+      "sha256": "71bdd9444b477aa822dd68587498435e5c1ed86d05aebf7aa7a9c9eaa2bef075"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/employer-compliance.ts",
+      "sha256": "ada3f41c30f1dd54c944a0ecb2c223a183be7a4d9783dab7821423e04a50bea6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/statutory-rules.ts",
+      "sha256": "768c37c6c78e55b99113dfef3948a80969cb876330e42c33c1b4a4e98e8e5c93"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/equity-privacy.ts",
+      "sha256": "903dcd6f364516ecc8bd1c8c7e8c948055897931ea793e91abb7eb9db5164ab0"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/compliance/index.ts",
+      "sha256": "c32732e68c75f4dfab3dd558ef1d5cfcdab16ddcd71d38def9aa2e9f8a145dea"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/benchmarks.ts",
+      "sha256": "11c80c4a103571ca65da547585fd15ecdb45d535712e3a9bde788ab958c0aec9"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/lrb.ts",
+      "sha256": "7216b426c86ad8da25553f766915a8c6f450df0c37ec56586599d9aa88a418de"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/cba-clauses-schema.ts",
+      "sha256": "d5a7fdae1738959deb3ce1aa438c71ab721ae81b3bab3834e6e22f9ceb015cb6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/cba-intelligence-schema.ts",
+      "sha256": "044b14e7a10249bbb8370c759013d42df9a31e2b4d5de90acb48973fccb60bfb"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/precedents.ts",
+      "sha256": "9768d962eb1a4df8b63004d1aa630433786b8bd125a4ad1d94930f1b87f1bce6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/congress.ts",
+      "sha256": "9d619673c488a623c7305de7ef23c3ad5a6b33871abc5c6d1986f9661adda32c"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/hris.ts",
+      "sha256": "a76ffc9e92775b3e9f84566ea103c1f2c66ce47d70539a34bb9552e7b2782f6d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/accounting.ts",
+      "sha256": "f609ce782e55a67504e9c0328fd3e2d9cf82746b85e4af6dd571c61504366782"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/insurance.ts",
+      "sha256": "4795127e03fb7f4f6d9be44a669599e3a893879e68b259bc57bf3ee1495559e3"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/communication.ts",
+      "sha256": "4c5d4338ef3971a46ef958bb9accd6d33b36a10c3a517348bfec01a3935e2004"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/lms.ts",
+      "sha256": "046b8b4899c7333ecfdca2f5e9bbecee53b99ac9c09562e69a327d05c75a8da5"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/documents.ts",
+      "sha256": "fb8c403c0e842f3b954b9889ad51e929fed98046c700bcd5e563ea0cb16e54bf"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/pension.ts",
+      "sha256": "f25364998d8724b05d3774d11dfb3d3c55a09a833c5e75594fcccbac18e8371f"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/calendar.ts",
+      "sha256": "50fb16afd1ac972c8da6cfb8783827b43d9a211d9642c61b85edca01eeb636cd"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/data/index.ts",
+      "sha256": "27fcbaedcbc455f7a5963cc1e45287139fe843c0dc80ac1d529796814a569823"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/cba-intelligence/ingestion.ts",
+      "sha256": "07e3987cb0e990a23a1e483b03ec1e4f9de30cb90da3959090390a8f9297ca1e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/cba-intelligence/extraction.ts",
+      "sha256": "5cb8cf700d6f0689b614834ae243eda17e92d3816e57a583e1ea85975f267f30"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/cba-intelligence/documents.ts",
+      "sha256": "5bf03d1f64e1de7fe949df81634aaa3d55afc2eee976dcc9f73c465bbdd6650d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/cba-intelligence/source-registry.ts",
+      "sha256": "2cd8ede01d3d6582ad0b2c94d5086da114e9cef02c94f36e0940267e772f15ea"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/cba-intelligence/review.ts",
+      "sha256": "95abe263fdf9ecde3a275517e867b50769a259712f0a1ca3ad9516917440d170"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/cba-intelligence/benchmarks.ts",
+      "sha256": "dd16202cd1567e338a19d96ddb352ccebe072992a1eeb41f05d79b006ec3edee"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/cba-intelligence/freshness.ts",
+      "sha256": "46a2574d63256036c3b1f17e43a4a3f6c9ddcfa14b4006af35d663bc8081237e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/cba-intelligence/index.ts",
+      "sha256": "79e838ec830e1b1bb9143df136d2f0775e5a3126b07c8d09b38969cc5d6b0cb6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/health-safety/health-safety-schema.ts",
+      "sha256": "e111f3e1f4311228548ee5662bbae8dbe1c87a3929093edeab41afaacc7b0411"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/health-safety/cnesst-schema.ts",
+      "sha256": "5346ae1883562a0d1947415adaa72e823ac04cd287506ae1ed29a0a24aef4ace"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/health-safety/provincial-wcb-schema.ts",
+      "sha256": "32923fe81b536580224ac93f865eafb9b2fc2f0cfa8570198dad01bae26e0b55"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/health-safety/index.ts",
+      "sha256": "f29c2d13a9419c61c8c8f9edf22afd4f6b4a68305532de2399008157ca9057a4"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/predictions.ts",
+      "sha256": "cc51de0c12fb5ef0f7676a4846c96c4c7e32bd735dd6eb83686f9717b0fc6094"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/chatbot.ts",
+      "sha256": "3f5f60b6479f33d881aaf1c75b21847680906279269bd2de679150c409344020"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/ai-grievance-triage.ts",
+      "sha256": "eddad862d4a73e9cb3b7c19a4b46dc1c2b7fc3b7a7050ffdf4192b166e851340"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/ai-clause-reasoning.ts",
+      "sha256": "eed6f4a1085851e08f5b58591df928f506ebf3f15d14e63de5787f842fb7149e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/employer-risk-scores.ts",
+      "sha256": "c1808c3e71dc58ffc988906b548da03a66b195f76253f9b9d41cf29632090b69"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/ai-copilot-sessions.ts",
+      "sha256": "c50923afa44538aa7cbbd0093f8f55c5e2b206ab3425a9f6e7104f0ba7702666"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/ai-insight-reports.ts",
+      "sha256": "56c55750967388063912ab1242583038ea8e528dcbe868be99c9c28e5674c724"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/knowledge-transfer-runtime.ts",
+      "sha256": "7dc1c38ad1c9b5427667a571e93f519841892c82f246eec6fb8ab83c16a47bce"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/authority-kernel.ts",
+      "sha256": "f57c55dc981b6d15463d49703c25bcf4ec88d0ff9ce4007efb35407491d269f4"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/ml/index.ts",
+      "sha256": "c08f440144ececef85378701dc0403f9f808c6e894abd8de390ffa77607dac90"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/analytics/reporting.ts",
+      "sha256": "353678be9b0fc727dc7a3757a15e74827866db110b2ed24c76144bb357a0d3c4"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/analytics/reports.ts",
+      "sha256": "f93215661205953330f4054e460163d009d656d9e1aa256b77b94849ac44a3b7"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/analytics/index.ts",
+      "sha256": "a5c10eb0805a634399110382bbc8aacc40246744354bef7ec762f3cb1d366f8b"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/audit.ts",
+      "sha256": "c94b886e2289e9bc3911e39eb7cb10f8e9af38dd5cf7ee8735ecbf7e9d43d24d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/public-intake-audit.ts",
+      "sha256": "6a22992d09e5e931746e2161c23d8908036d9feef51114955c9b2c14348215a5"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/features.ts",
+      "sha256": "575bf6dab6689894affdadd3c099ac2b5c82b33fc0e26dfae7c1bf70ca6f4548"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/uuid-mapping.ts",
+      "sha256": "1a526c3970cc9445fa8c5402d6c328b39f41b95c5e164608c2f97d8084ce85a6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/alerting.ts",
+      "sha256": "835cc93028f215931ed4e28e7508fd0590fe900bdd6c788058ee3cd819321f8d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/automation.ts",
+      "sha256": "370b57134b34daf16028efac2d9f0ccb668f9f2b90aec76c44af1660b6a6fcfd"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/rewards.ts",
+      "sha256": "a201feec20465ca31b25d3cca5d61dbc6ea21b93ff9e665b10774520d9fd043f"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/awards.ts",
+      "sha256": "5fe3d129bfd430e565393c3ad60fa1ee243a65257172dd962b724031e6c9edbf"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/organizing.ts",
+      "sha256": "a05d234fc8d38057fe4ddab4b7cebc3924ba9ac4e72c9f4563b48657d8ee57e5"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/sharing.ts",
+      "sha256": "a1ce1bddd81754c4f23def7e44a459aab222b642023681015deb14642b1aa6ee"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/cms.ts",
+      "sha256": "4367cc2967768aec6ec4de5e79b6e63e2548bea675da8335aed49977d6f3c151"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/erp.ts",
+      "sha256": "39510279053c07e2562a01dd97512496f5496de34392542c898d8cbb2a34ba4e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/clc-partnership.ts",
+      "sha256": "6f5854c7e8e07bb8cc57d1a34f42f10c3340019f2be6aa0d1178880cd2126957"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/clc-sync.ts",
+      "sha256": "716e7840ff897a0a9221e299dc2759aac8f8d1d390b32a5522d3e9f572004100"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/clc-per-capita.ts",
+      "sha256": "94fd0e274b2706cf4b0dd681be8157ffc9149ce4f194757312b8f5b7db9a52df"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/clc-audit.ts",
+      "sha256": "738b4d4b808004cb12d30f236659591383ffa6d9e7a3f2a4225ac2fcf189a58e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/addresses.ts",
+      "sha256": "be4cbcd2a66bd5a3b1960e16c805649b3684ca172c133bf444e65559ea073aaf"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/social-media.ts",
+      "sha256": "8870a277ca4860b76aea847ed4c9f018feb053cfc6682cfaa50ec4b313d3088c"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/trust-fmv.ts",
+      "sha256": "afb376b75a3a095575d63e6f453350e5068dbaf0e06929244cc213dbdfa924e2"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/defensibility.ts",
+      "sha256": "7c25170848fcf7f5cb0da1d443eda901d8889ddae46ccfe2631f66e01fe4806c"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/accessibility.ts",
+      "sha256": "06a45a4318480125f0fb70eb10abce63095cb2a5f45ae4bce1446a0a395c8458"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/support.ts",
+      "sha256": "7389962a992e3bb4c5d0fdecca836e0b9743e79f82b34e0f5c0a9e6a59f3bb28"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/integrations.ts",
+      "sha256": "e75046d02e8afb3c55e28ad9bef836d3920667cabb611fadb82f1e9545c5b945"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/exit-interviews.ts",
+      "sha256": "8beba2021a2b175282d3ea6f16d67c3c2a0782d482574812e0b75f8b58c911ce"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/infrastructure/index.ts",
+      "sha256": "d077070d7c1f1023ec2ca6b3a801761f46a246ddc8e0deb484186a57e4106163"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/pilot-onboarding.ts",
+      "sha256": "3eaab5abe41994846eafb0ab88ea61f87b10175b1ff0ef2fdf71edf0c56d0729"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/pilot-demo-seeds.ts",
+      "sha256": "8f75574cee65cb20ffef954973d1d23a53dc7ea5ad1e87ba946565bff94c6520"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/pilot-fixture-rows.ts",
+      "sha256": "3909800810e2a28d9a232dbd006c9d078db00be14063aa60c6b05da03281d50f"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/pilot-enrollments.ts",
+      "sha256": "a2eae39118957f7a7a34d68dedce3a7f35e164c675f514767340c0a6f3997cdf"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/pilot-milestones.ts",
+      "sha256": "30970747e8748b0ad77fc04708e1317dee90ddfa9a76660c2763b67b90a2924e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/pilot-events.ts",
+      "sha256": "849c9beef399393d1bffe0ea60f1328334068e8f25527ff4221ab597b957572b"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/pilot-feedback.ts",
+      "sha256": "671fb767cdb487486bef91816cfc1982a9b6f84bf117f549ffc90157ae2b6328"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/marketing.ts",
+      "sha256": "51a5b3c5de299b9b4845f9f1b730d99125c52f03c7dadb3965da9d03b9dc8d2d"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/pilot-contact-lifecycle.ts",
+      "sha256": "4adcac6e09be64c5ce2ac34262e015884a5f252472fd26143ca085115f29c7be"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/pilot-commercial-governance.ts",
+      "sha256": "c9ac7051967840f65e09f1a6fbd9faa0ba0529c8d4773ee384bbc83c35ae906b"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/pilot/index.ts",
+      "sha256": "952018b94ea0227a85939ebcbbad4b3cf29e7dab4ddc627ce9eca0bc770d749c"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/clc-per-capita-schema.ts",
+      "sha256": "8771612a694eaf493fef37f806e32da1e4efb60c7a59e81d3b3e11360515debd"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/federation/federation-schema.ts",
+      "sha256": "01c66a821a14a9b8e948f8e17bbae692be49b1d1dd60924e06e793905402712a"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/federation/index.ts",
+      "sha256": "b86ee138297b849bb6103d533d530405dbb1409f0b7589b6195c834edda15b51"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/dispatch/dispatch.ts",
+      "sha256": "d8a35c35ba174257305e9cf613f176b81ced0c5eb007159f2c362972f9074103"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/employer-execution/employer-runtime-profile.ts",
+      "sha256": "cea76ce5e6a88e35d5a8401a695ae85c9c50385c5bc648820ec2228de103519e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/employer-execution/employer-execution-core.ts",
+      "sha256": "2954f88ea732e7a4dfd2a3e57a5c3ab723c2355a4ee3af054e9b6887be176a8f"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/employer-execution/employer-timesheets.ts",
+      "sha256": "6e6d728a108748db0c057dcfddfe464db921c5ce8bb90207524c3f0df35396b6"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/employer-execution/employer-payroll-runs.ts",
+      "sha256": "35408f32526c95d153c837671e0be6426d2f735e9427c64e271f4bc8501a927b"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/employer-execution/employer-remittance-runs.ts",
+      "sha256": "7a1ccc00e6e7a4d74e308e13b372856da431d08fb713325a95f1562d587633dd"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/employer-execution/employer-compliance.ts",
+      "sha256": "0905bf234d70d566303e11bb4d7316d7652f870c76d14a5cc424b777f9c17382"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/employer-execution/employer-artifacts.ts",
+      "sha256": "6130bdd4715ea631ee4c32201ae103c2b31828c2828d7c7af3e41850952e32d7"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/domains/employer-execution/index.ts",
+      "sha256": "3dfdd942b6151da51ea1c29647d4aa3aab9c1afcc6c5a9cff81313ee0cf5ebfa"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/board-packet-schema.ts",
+      "sha256": "40992e7d5c8d2a73a34654beafcebd09f62b43e51c6a367d57265ecb397bb62e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/gate-13-job-cancellation-governance.ts",
+      "sha256": "11b73089b8f4b04540bc91c0aa708070b6a6afad3ad18f71025463fcc533a603"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/deadline-engine-schema.ts",
+      "sha256": "e9b5daf058894b038d552dbcb6f821d38a88767c959c0c3201c5f6d459689a51"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/dues-finance-schema.ts",
+      "sha256": "2381c682bf3e78691e7b78395b4110a6aae3f8ea4724beaef292f4577cc8909e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/staging-proof-schema.ts",
+      "sha256": "3d252dffac5bc12c7e12a5dc2ea6d7f820d7ae56fe97056b5a1f27fc640ddd85"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/icra-schema.ts",
+      "sha256": "9f5889b568fb4b11a68b2d2562e2b4c22b926b6b14ca4235424ed22bdd35a2bd"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/policy-lifecycle-schema.ts",
+      "sha256": "61f644ab62ba7119f1e933ff12e3c87c9f1179275f6e1de195612ee1f0d6904e"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/representation-authority-schema.ts",
+      "sha256": "b97cd1046eded3c4c70d09301febcf61748c76de1ca6d16ffe471d4c8514651a"
+    },
+    {
+      "path": "apps/union-eyes/db/schema/index.ts",
+      "sha256": "c61d50148c7c4df3a71a529830ca3f7bf3fdb867f7ec326c821aac0e19f8e4a2"
+    },
+    {
+      "path": "apps/union-eyes/db/driver-dates.ts",
+      "sha256": "1208c66d172d5ac70a2bf00246bdda32b68ab960516a63cd12e44f6d3221d5a4"
+    },
+    {
+      "path": "apps/union-eyes/db/system-db.ts",
+      "sha256": "fcca6f1f65ccb3959fb16a4e285e26d7a41be856bf1a73e9c021e4e85d841f18"
+    },
+    {
+      "path": "apps/union-eyes/db/system-context-storage.ts",
+      "sha256": "20cd213b2f7d42e61ad14c203c8a792111acc4039a826556c7158ace74613be3"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/canonical-bootstrap.ts",
+      "sha256": "26886f088315372546f97556eaacd0cf83a657fe1a2e4d8a43ba12720e65023f"
+    },
+    {
+      "path": "apps/union-eyes/lib/db/system-transaction-scope.ts",
+      "sha256": "97f3241473eba8711f4f43db1504c241b8f3c4bd2e12328471a9c0b173598285"
+    },
+    {
+      "path": "apps/union-eyes/lib/logger.ts",
+      "sha256": "fa4b6cbf9d0dc242b9935a94a1cd02232133d048f45d0ce5ce9cffd3c116daae"
+    },
+    {
+      "path": "apps/union-eyes/lib/communications/address-suppression.ts",
+      "sha256": "d9c0acfa42784f2ab92e172ab0b82391b89c9e42760a5cc3ab4e0bf7a131bfad"
+    }
+  ],
+  "allInputCount": 1273,
+  "candidateSourceBytesVerified": true,
+  "outsideRepositorySourceInputsExcluded": false,
+  "originalRepositorySourceInputs": 0,
+  "allSourceInputsClassifiedAndVerified": true,
+  "mocksUsed": false,
+  "reconstructedExportOnlyEntry": true,
+  "historicalDeadlineWrapperRecovered": null,
+  "entryPointSha256": "9225e6a3070f0a9807323685d69137523ebe30c84d487f1ed084c31473c913ae",
+  "compiledAt": "2026-11-15T15:16:48.928Z",
+  "compiler": "esbuild 0.27.3",
+  "externalImports": [
+    "../../profiles-schema",
+    "../schema-organizations",
+    "./rewards",
+    "child_process",
+    "crypto",
+    "diagnostics_channel",
+    "drizzle-orm/pg-core",
+    "events",
+    "fs",
+    "module",
+    "net",
+    "node:async_hooks",
+    "node:child_process",
+    "node:crypto",
+    "node:diagnostics_channel",
+    "node:events",
+    "node:fs",
+    "node:http",
+    "node:https",
+    "node:inspector",
+    "node:module",
+    "node:net",
+    "node:os",
+    "node:path",
+    "node:readline",
+    "node:stream",
+    "node:tls",
+    "node:tty",
+    "node:url",
+    "node:util",
+    "node:worker_threads",
+    "node:zlib",
+    "os",
+    "path",
+    "perf_hooks",
+    "process",
+    "stream",
+    "tls",
+    "tty",
+    "url",
+    "util",
+    "worker_threads"
+  ],
+  "localLoadSmoke": {
+    "passed": true,
+    "exports": [
+      "closeSystemClient",
+      "getActiveSystemDb",
+      "sql",
+      "suppressedAddressHashes",
+      "systemDb",
+      "withSystemContext"
+    ],
+    "expectedExports": [
+      "closeSystemClient",
+      "getActiveSystemDb",
+      "sql",
+      "suppressedAddressHashes",
+      "systemDb",
+      "withSystemContext"
+    ],
+    "exit": 0,
+    "signal": null,
+    "nodeEnvironment": "production",
+    "noExternalNodePath": true,
+    "credentialsOrEndpointEnvironmentProvided": false,
+    "qualificationOperationsInvoked": 0
+  },
+  "cloudQualificationExecuted": false,
+  "allInputsPrivateEvidenceSha256": "41f35976216b942ed2bbb0979c2a50d86f04aef3b7f1129281134f82d1c07fff",
+  "fullPrivateProvenanceSha256": "05544c1b0e8680b0e476e358c67faa87b0818c90775e047cea4f82812594055f"
+}

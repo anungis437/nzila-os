@@ -43,8 +43,7 @@
  */
 
 import { createRouteMatcher } from '@nzila/platform-auth/entra/server';
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './lib/locales';
 import { CRON_API_ROUTES, isPublicRoute as isPublicApiRoute } from './lib/public-routes';
@@ -52,6 +51,7 @@ import { cronSecretMatches } from './lib/api/cron-secret';
 import { decideApiLimit, isGuardExempt, logDegradedOnce, presentedCredential } from './lib/rate-limit/proxy-api-guard';
 import { checkRateLimit, RATE_LIMITS } from './lib/rate-limiter';
 import { evaluateTestBypassGuard, readTestBypassGuardEnv } from './lib/reality/test-bypass-guard';
+import { clientMessageRequestHeaders } from './lib/i18n/client-message-scope';
 
 // Edge-safe logger — os-core's createLogger uses Node.js APIs (process.stdout,
 // node:crypto, node:async_hooks) that are unavailable on the Edge Runtime.
@@ -609,7 +609,9 @@ async function authMiddleware(req: NextRequest): Promise<NextResponse> {
   }
 
   // For non-API routes, run i18n middleware and return its response
-  const intlResponse = intlMiddleware(req);
+  const intlResponse = intlMiddleware(new NextRequest(req, {
+    headers: clientMessageRequestHeaders(req.nextUrl.pathname, req.headers),
+  }));
   // intlMiddleware returns a Response; wrap it so we can attach our header
   if (intlResponse instanceof NextResponse) {
     return withRequestId(intlResponse, requestId);

@@ -1,0 +1,80 @@
+{
+  "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+  "sourcePr": 1237,
+  "at": "2026-11-15T15:25:31.589926+00:00",
+  "evidenceClass": "FOCUSED_UI_SOURCE_AND_REAL_NEXT_FRAMEWORK_ONLY",
+  "sourceFilesSha256": {
+    "app/[locale]/layout.tsx": "664c41d112a42468e4009ba0610416b789ca273508d09f4de57f06404bbbdd10",
+    "proxy.ts": "716def903b4e0046af24f224f7b97ace08ea3d4b635a28a283443764c7005085",
+    "components/utilities/locale-client-provider.tsx": "6ecd117b4ca3830c6a5d6866e0b436ee3762bbab04c861e973c3c191e7edf1e7",
+    "components/utilities/locale-client-provider.test.tsx": "9ac6c79c60e21b6337c200d7aae6fd21f15d65b3d11989827f7aac57d5dc585f",
+    "lib/i18n/browser-messages.ts": "ad6136ae2e2691d5b1f94a4f85f7397007f5f6fdf0310f2587e060109ac73256",
+    "lib/i18n/client-message-scope.ts": "7728649bec8cf965e5fc777c9b710b81ab84280d8a5419955998399bb5052bb8",
+    "lib/i18n/client-message-scope.test.ts": "65ee430cdcc20481b704931ceec8b28e96c1e4c9feac8917c66e30f341be1aac"
+  },
+  "focusedTestsPassed": 16,
+  "scopedTypecheckPassed": true,
+  "scopedLintPassed": true,
+  "actualBrowserReceiptSha256": "a3ddb29dc4dfd8296065182674e03f40c53a222d58131060ab9cdff09ef4114d",
+  "browserTransitions": [
+    {
+      "path": "/en-CA",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4044,
+      "heading": "Pricing",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/en-CA/catalog-check",
+      "hasCommon": "true",
+      "timeZone": "America/Toronto",
+      "bytes": 464590,
+      "heading": "Save",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/en-CA",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4044,
+      "heading": "Pricing",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/fr-CA",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4481,
+      "heading": "Tarification",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/fr-CA/catalog-check",
+      "hasCommon": "true",
+      "timeZone": "America/Toronto",
+      "bytes": 506270,
+      "heading": "Enregistrer",
+      "nonce": "owned-navigation-proof"
+    },
+    {
+      "path": "/fr-CA",
+      "hasCommon": "false",
+      "timeZone": "America/Toronto",
+      "bytes": 4481,
+      "heading": "Tarification",
+      "nonce": "owned-navigation-proof"
+    }
+  ],
+  "browserTranslationErrors": [],
+  "actualRedirect": {
+    "sourceSha": "d57aa1f3dde18d44120141c22f3e4fbf8c062153",
+    "status": 307,
+    "location": "/en-CA/sign-in",
+    "frameworkOnlyNotApplicationAuthenticationProof": true
+  },
+  "originalPermissionBoundarySpecUnchangedFromSource92": true,
+  "actualApplicationAuthClaimed": false,
+  "stagingRuntimeAcceptanceClaimed": false,
+  "productionAuthorized": false
+}
