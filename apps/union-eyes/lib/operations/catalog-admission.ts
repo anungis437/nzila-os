@@ -74,7 +74,7 @@ export async function evaluateCatalogAdmission(execute?: Execute): Promise<Catal
   if (execute) return inspectCatalogAdmission(execute, context)
 
   const database = createHash('sha256').update(process.env.DATABASE_URL ?? '').digest('hex')
-  const key = JSON.stringify([contractFingerprint, context, database, process.env.GIT_SHA ?? ''])
+  const key = JSON.stringify([contractFingerprint, context, database, process.env.GITHUB_SHA ?? ''])
   const inspections = inspectionGlobal[inFlightKey] ??= new Map()
   let pending = inspections.get(key)
   if (!pending) {
