@@ -62,6 +62,19 @@ describe('payment-reference migration — actual SQL engine execution', () => {
     });
   });
 
+
+  it('refuses a same-name nonunique index instead of silently accepting it', async () => {
+    await withDb(async (db) => {
+      await db.exec(createLedger);
+      await db.exec('CREATE INDEX platform_payments_org_external_reference_uq ON platform_payments (organization_id)');
+      await expect(db.exec(migration)).rejects.toThrow(/unexpected definition/);
+      const indexes = await db.query<{ unique: boolean }>(
+        `SELECT indisunique AS unique FROM pg_index WHERE indexrelid = 'platform_payments_org_external_reference_uq'::regclass`,
+      );
+      expect(indexes.rows[0]?.unique).toBe(false);
+    });
+  });
+
   it('installs the scoped index and rejects replay while permitting cross-org and NULL references', async () => {
     await withDb(async (db) => {
       await db.exec(createLedger);
