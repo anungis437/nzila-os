@@ -75,6 +75,21 @@ describe('payment-reference migration — actual SQL engine execution', () => {
     });
   });
 
+  it('refuses a same-name unique index with an incorrect predicate', async () => {
+    await withDb(async (db) => {
+      await db.exec(createLedger);
+      await db.exec(
+        'CREATE UNIQUE INDEX platform_payments_org_external_reference_uq ON platform_payments (organization_id, external_reference) WHERE amount > 0',
+      );
+      await expect(db.exec(migration)).rejects.toThrow(/unexpected definition/);
+      const index = await db.query<{ predicate: string | null }>(
+        `SELECT pg_get_expr(indpred, indrelid) AS predicate
+         FROM pg_index WHERE indexrelid = 'platform_payments_org_external_reference_uq'::regclass`,
+      );
+      expect(index.rows[0]?.predicate).toMatch(/amount/);
+    });
+  });
+
   it('installs the scoped index and rejects replay while permitting cross-org and NULL references', async () => {
     await withDb(async (db) => {
       await db.exec(createLedger);
