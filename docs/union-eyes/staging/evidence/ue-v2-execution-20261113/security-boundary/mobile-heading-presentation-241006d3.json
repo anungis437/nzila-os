@@ -1,0 +1,136 @@
+{
+  "status": "PASS_LOCAL_PRESENTATION_ONLY",
+  "sourceFile": "apps/union-eyes/components/grievances/grievance-detail-console.tsx",
+  "priorSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "priorSourceFileSha256": "70a016adb2e09d4d3c3ea48f5590c315d12614174200d8c8ab919a3113aef62c",
+  "proposedSourceFileSha256": "fd44596ad2024fb08c7c4ddefb4abe1e8ea83680db1d03aa0e6166edd3e50a2b",
+  "headerJsxExtractedFromActualSource": true,
+  "actualProjectTailwindCompiler": true,
+  "sourceCommitted": false,
+  "actualAuthenticationOrDeploymentTested": false,
+  "stagingAcceptanceClaimed": false,
+  "results": [
+    {
+      "heading": {
+        "x": 68,
+        "y": 32,
+        "width": 132.625,
+        "height": 320,
+        "bottom": 352
+      },
+      "badge": {
+        "x": 216.625,
+        "y": 32,
+        "width": 141.375,
+        "height": 24,
+        "bottom": 56
+      },
+      "header": {
+        "x": 32,
+        "y": 32,
+        "width": 326,
+        "height": 380,
+        "bottom": 412
+      },
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "title": "Synthetic member grievance acceptance 0fa684a1 2177fa6f-4cd9-4190-9ad9-571a71a11a67",
+      "status": "Accus\u00e9 de r\u00e9ception",
+      "name": "oldFr",
+      "screenshotFileName": "oldFr.png",
+      "screenshotSha256": "e85d70483a3ee9b6b1ab0fac6f53c6f48b0723594b5eeee970c1be03c33e49a8"
+    },
+    {
+      "heading": {
+        "x": 68,
+        "y": 32,
+        "width": 290,
+        "height": 128,
+        "bottom": 160
+      },
+      "badge": {
+        "x": 68,
+        "y": 188,
+        "width": 141.375,
+        "height": 24,
+        "bottom": 212
+      },
+      "header": {
+        "x": 32,
+        "y": 32,
+        "width": 326,
+        "height": 180,
+        "bottom": 212
+      },
+      "scrollWidth": 390,
+      "viewportWidth": 390,
+      "title": "Synthetic member grievance acceptance 0fa684a1 2177fa6f-4cd9-4190-9ad9-571a71a11a67",
+      "status": "Accus\u00e9 de r\u00e9ception",
+      "name": "newFr",
+      "screenshotFileName": "newFr.png",
+      "screenshotSha256": "ed0a07a553a250b2e66ba730b483f8f31c65a49225952a70d294dca291ba5ee4"
+    },
+    {
+      "heading": {
+        "x": 68,
+        "y": 32,
+        "width": 1215.3125,
+        "height": 32,
+        "bottom": 64
+      },
+      "badge": {
+        "x": 1299.3125,
+        "y": 32,
+        "width": 108.6875,
+        "height": 24,
+        "bottom": 56
+      },
+      "header": {
+        "x": 32,
+        "y": 32,
+        "width": 1376,
+        "height": 52,
+        "bottom": 84
+      },
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "title": "Synthetic member grievance acceptance 0fa684a1 2177fa6f-4cd9-4190-9ad9-571a71a11a67",
+      "status": "Acknowledged",
+      "name": "oldEn",
+      "screenshotFileName": "oldEn.png",
+      "screenshotSha256": "6da2dfef9cb5c871feb84813d84c0e3634dac590dfb48f1f6037338c7d7dddf9"
+    },
+    {
+      "heading": {
+        "x": 68,
+        "y": 32,
+        "width": 1215.3125,
+        "height": 32,
+        "bottom": 64
+      },
+      "badge": {
+        "x": 1299.3125,
+        "y": 32,
+        "width": 108.6875,
+        "height": 24,
+        "bottom": 56
+      },
+      "header": {
+        "x": 32,
+        "y": 32,
+        "width": 1376,
+        "height": 52,
+        "bottom": 84
+      },
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "title": "Synthetic member grievance acceptance 0fa684a1 2177fa6f-4cd9-4190-9ad9-571a71a11a67",
+      "status": "Acknowledged",
+      "name": "newEn",
+      "screenshotFileName": "newEn.png",
+      "screenshotSha256": "6da2dfef9cb5c871feb84813d84c0e3634dac590dfb48f1f6037338c7d7dddf9"
+    }
+  ],
+  "exactProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "sourceFileBytesVerifiedAtCommit": true
+}

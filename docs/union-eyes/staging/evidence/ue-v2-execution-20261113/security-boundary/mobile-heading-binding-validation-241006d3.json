@@ -1,0 +1,46 @@
+{
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "at": "2026-11-15T19:04:27.572756+00:00",
+  "status": "PASS",
+  "checks": [
+    {
+      "command": "pnpm exec vitest run --config shared-approval-vitest.config.mjs",
+      "exitCode": 0,
+      "logFile": "check-0.log",
+      "logSha256": "3841b5047e848a62f63c81d25b9de65a39020d067cd1f31bc9c8a769d3f32e31"
+    },
+    {
+      "command": "node --test tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs tooling/scripts/lib/ue-staging-navigation-settlement.test.cjs tooling/scripts/lib/ue-staging-request-safety.test.cjs",
+      "exitCode": 0,
+      "logFile": "check-1.log",
+      "logSha256": "0958ab152ad9c3271a557de4059715577185ebd1186c3a82aeeb843b525f7011"
+    },
+    {
+      "command": "pnpm exec tsx tooling/scripts/generate-ue-v2-navigation-inventory.cts --check",
+      "exitCode": 0,
+      "logFile": "check-2.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0,
+      "logFile": "check-3-final.log",
+      "logSha256": "7ecfbad9dacecadd2f9cb5c2d491064c3b58dbad07c64b11857aa9577735c6ce"
+    },
+    {
+      "command": "node --test tooling/scripts/lib/ue-staging-go-census.test.mjs",
+      "exitCode": 0,
+      "logFile": "check-4.log",
+      "logSha256": "b07d4aca12c86bccb1933bd62242d921dd750ebc0a9356deb0f01e4c670bc17b"
+    }
+  ],
+  "sharedApprovalPassed": 95,
+  "releaseNavigationRequestPassed": 39,
+  "frozenCensusContractPassed": 4,
+  "sourceDerivedNavigationCheck": "PASS",
+  "docs": "PASS",
+  "failed": 0,
+  "exactIntegrationCiStillRequired": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

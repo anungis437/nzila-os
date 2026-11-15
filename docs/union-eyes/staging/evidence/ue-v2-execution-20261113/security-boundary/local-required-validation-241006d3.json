@@ -1,0 +1,53 @@
+{
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "status": "COMPLETED_WITH_FAILURES",
+  "startedAt": "2026-11-15T18:42:03.466830+00:00",
+  "scope": "Required repository commands; all actual failures retained; no finance implementation",
+  "results": [
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 2,
+      "status": "FAIL",
+      "seconds": 16.71,
+      "logSha256": "8fd7be3cdcee8bc6bc5b3676181b35b880b11503f65c9a020f1a3a2120266916",
+      "logFileName": "typecheck.log"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0,
+      "status": "PASS",
+      "seconds": 24.05,
+      "logSha256": "d18381b5af7f6977ef8258b32a3ed3118e01e8e7221d4b1c4d206f628f47cb12",
+      "logFileName": "validate-docs.log"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 30.04,
+      "logSha256": "16d898e5e4ddef7588677f7c320bd6bc55a80e2c033c753338772f6573f6390a",
+      "logFileName": "lint.log"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "exitCode": 2,
+      "status": "FAIL",
+      "seconds": 116.31,
+      "logSha256": "67c4455e4302a805e33c56f20378b322e0189ef963ef9dd7967fedd5635b7d03",
+      "logFileName": "governance-audit.log"
+    },
+    {
+      "command": "pnpm test:fast",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 203.08,
+      "logSha256": "fc1947178c58e77133438df87c56addde0f6f81b53f9ec1eb45757d8a98e8e1b",
+      "logFileName": "test-fast.log"
+    }
+  ],
+  "finishedAt": "2026-11-15T18:45:26.707065+00:00",
+  "unexpectedTrackedChangesPreserved": [],
+  "evidenceClass": "ACTUAL_LOCAL_COMMANDS_NOT_STAGING_ACCEPTANCE",
+  "generatedOutputsRestored": 11,
+  "stagingGo": false
+}

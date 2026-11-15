@@ -64,7 +64,7 @@ export function hasFounderOperatedStagingApproval(change: ChangeRecord): boolean
     a.owner_authorization_ref === 'ops/change-records/CHG-2026-0114.founder-authorization.md' &&
     a.authority_origin === 'OWNER_DIRECTIVE_IN_CONVERSATION' &&
     a.subscription_id === 'd562ba7f-d891-4504-a489-10917c0ebaaf' &&
-    a.candidate_sha === '0fa684a15641e84cb2aa3c94a2fad49428d64f60' &&
+    a.candidate_sha === '241006d302c14567e541d619675fbead3ec3f258' &&
     a.staging_only === true &&
     a.production_authorized === false &&
     a.technical_gates_required === true &&

@@ -1,6 +1,6 @@
 {
   "purpose": "PRE_REPAIR_SECURITY_FINDING_AND_QUALIFICATION_PROVENANCE",
-  "proposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "productionAuthorized": false,
   "stagingGo": false,
   "entries": [
@@ -839,32 +839,145 @@
       "sha256": "dd73ff3923ae6e9535594d7aa7d90b2551ce73696750bf5fb7ea7f3be1d798d3",
       "observedOrProposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
       "runtimePassInferred": false
+    },
+    {
+      "file": "observed-contract-before-mobile-heading-241006d3.json",
+      "sha256": "c49f77caac949f66c6bcf6e6aa89ca2347f419aab9cc7fff3a90b27c9bf21e31",
+      "observedOrProposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "actual-mobile-grievance-title-0fa684a1-failure.json",
+      "sha256": "0a729c0b3c41a7bdce1b71838f6187008e2a504b0ee40b347b3e28b913b1baaa",
+      "observedOrProposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "mobile-heading-focused-241006d3.json",
+      "sha256": "4ccc55c47a4fc850425d4c5e771f7d21ae0400c70767386f57e314f0637fa4e4",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "mobile-heading-presentation-241006d3.json",
+      "sha256": "851591e871a120864c23490c884fc643ddf5f0c99b8249e3b1b8ca14fb877349",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-validation-delta-241006d3.json",
+      "sha256": "35ee4632d425d03f5549fbd73047c6deced2fe960cea01e4eeb0de37621cb1b3",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-required-validation-241006d3.json",
+      "sha256": "9118f843bd32a90908e96f1d7c4bc3c52472cd2958ed4d4fc9208191e471f2ed",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "authority-241006d3-provenance.json",
+      "sha256": "36b1aff92aef818e5b9bb20ac43ec1b8373372f5ac43ce3b8f6025bbf47ac9a2",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "bearer-241006d3-provenance.json",
+      "sha256": "6f10a50bba1d2870946f2e0259d4ebf68b59ede82ea0880866ff21bdc45d159b",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nested-241006d3-provenance.json",
+      "sha256": "eda7f80f5f8abcca7349ebf820132111c647a32a274ee113e33ae583bd8be012",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "worker-241006d3-provenance.json",
+      "sha256": "3f9e76bebe0a80094f9cc5191c7bd834880b00607cb7853918df4312bffada41",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "nar-241006d3-provenance.json",
+      "sha256": "4e927d9ab91478c1de7c1b84a9865cdd10d3e2b49801d402d09b81d091011104",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "system-241006d3-provenance.json",
+      "sha256": "59f60c3d49452bc33d4a912da726da6f6058f14877c24b61292850953f51565d",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "deadline-241006d3-provenance.json",
+      "sha256": "8276bf09783f4064fe833657463d45b1e6f2dc3d92976f0bc38b86233b9e9327",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "native-tool-provenance-241006d3.json",
+      "sha256": "cd8b83c349ad618a710c83c5ecfd4d1a67221c55c530fb95fcd9ddab04b4184d",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "local-native-export-241006d3.json",
+      "sha256": "1ca41764011697974496193a81d8800aee61a83c157cd403e39f9d3b704dd095",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "read-only-copy-diagnostic-241006d3.json",
+      "sha256": "d1073cd2519135be845f2adb2f44a2f34b6184e69c5a6a97f2f5b9285822563f",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "observed-runtime-0fa684a1-reconciliation.json",
+      "sha256": "50b3cda4a55b5deb8332ad3ab1e51bc6711b3dffdfd22a11e048d6ea8ff60e31",
+      "observedOrProposedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "mobile-heading-binding-validation-241006d3.json",
+      "sha256": "0370eeea16c6730629d7ff403c87de74677788edc0b8146112eea368129a91dd",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
+    },
+    {
+      "file": "mobile-heading-binding-review-241006d3.json",
+      "sha256": "e8a55d7d6251b543d0885f2948348adedd4f14e13a2f66eb661a666be61e18b0",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
     }
   ],
   "nextCandidate": {
-    "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-    "sourcePR": 1239,
+    "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "sourcePR": 1241,
     "bindingPR": null,
     "workflowSha": null,
     "bindingReference": "THIS_CHANGE_PENDING_EXACT_CI_AND_MAIN_ADMISSION",
     "deployed": false,
     "sourceCI": "IN_PROGRESS_AT_BINDING_PREPARATION",
-    "nativeQualification": "EXACT_NATIVE_EXPORT_SEVEN_COMPILE_LOAD_PASS_ONLY",
+    "nativeQualification": "FRESH_LOCAL_SEVEN_COMPILE_EXPORT_AND_READONLY_COPY_DIAGNOSTIC_PASS_ONLY",
     "signedRuntime": "PENDING",
     "ciAndRuntimeStillRequired": true,
-    "localNativeExport": "local-native-export-0fa684a1.json",
-    "nativeToolProvenance": "native-tool-provenance-0fa684a1.json",
-    "focusedSourceAndFramework": "public-message-focused-0fa684a1.json",
-    "requiredBroadCommands": "local-required-validation-0fa684a1.json",
-    "failureDeltaAudit": "local-validation-delta-0fa684a1.json",
+    "localNativeExport": "local-native-export-241006d3.json",
+    "nativeToolProvenance": "native-tool-provenance-241006d3.json",
+    "focusedSourceAndPresentation": "mobile-heading-focused-241006d3.json",
+    "requiredBroadCommands": "local-required-validation-241006d3.json",
+    "failureDeltaAudit": "local-validation-delta-241006d3.json",
     "localHolisticAdvisory": "FAIL_4_OF_5_LOCAL_COMMANDS",
     "deployedHttpPerformance": "PENDING_UNCHANGED_500_1500_THRESHOLDS",
-    "mobileVisualReview": "PENDING_ACTUAL_E",
+    "mobileVisualReview": "PENDING_ACTUAL_F",
     "all17RuntimeCriteria": "PENDING",
     "acceptedStagingCandidateSha": null,
-    "rootLocaleFrameworkProof": "actual-framework-browser-0fa684a1.json",
-    "bindingValidation": "root-locale-binding-validation-0fa684a1.json",
-    "bindingReview": "root-locale-binding-review-0fa684a1.json"
+    "bindingValidation": "mobile-heading-binding-validation-241006d3.json",
+    "bindingReview": "mobile-heading-binding-review-241006d3.json"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -1031,24 +1144,51 @@
       "nativeQualificationResult": "native-qualified-not-deployed-d57aa1f3.json",
       "supersededBeforeRollout": true,
       "replacementSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60"
+    },
+    {
+      "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "sourcePR": 1239,
+      "bindingPR": 1240,
+      "workflowSha": null,
+      "bindingReference": "THIS_CHANGE_PENDING_EXACT_CI_AND_MAIN_ADMISSION",
+      "deployed": true,
+      "sourceCI": "IN_PROGRESS_AT_BINDING_PREPARATION",
+      "nativeQualification": "EXACT_NATIVE_EXPORT_SEVEN_COMPILE_LOAD_PASS_ONLY",
+      "signedRuntime": "PENDING",
+      "ciAndRuntimeStillRequired": true,
+      "localNativeExport": "local-native-export-0fa684a1.json",
+      "nativeToolProvenance": "native-tool-provenance-0fa684a1.json",
+      "focusedSourceAndFramework": "public-message-focused-0fa684a1.json",
+      "requiredBroadCommands": "local-required-validation-0fa684a1.json",
+      "failureDeltaAudit": "local-validation-delta-0fa684a1.json",
+      "localHolisticAdvisory": "FAIL_4_OF_5_LOCAL_COMMANDS",
+      "deployedHttpPerformance": "PENDING_UNCHANGED_500_1500_THRESHOLDS",
+      "mobileVisualReview": "PENDING_ACTUAL_E",
+      "all17RuntimeCriteria": "PENDING",
+      "acceptedStagingCandidateSha": null,
+      "rootLocaleFrameworkProof": "actual-framework-browser-0fa684a1.json",
+      "bindingValidation": "root-locale-binding-validation-0fa684a1.json",
+      "bindingReview": "root-locale-binding-review-0fa684a1.json",
+      "admittedWorkflowSha": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
+      "actualRuntimeReconciliation": "observed-runtime-0fa684a1-reconciliation.json",
+      "openMobileDefect": "actual-mobile-grievance-title-0fa684a1-failure.json"
     }
   ],
   "currentObservedRuntime": {
-    "sourcePR": 1235,
-    "bindingPR": 1236,
-    "buildRunId": "43718756258",
-    "deployRunId": "43720514263",
-    "revision": "nzila-ue-v2-staging-app--relc09de45572",
+    "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+    "workflowAndInfrastructureSha": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
+    "verificationWorkflowSha": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
+    "sourcePR": 1239,
+    "bindingPR": 1240,
+    "buildRunId": "43740816205",
+    "deployRunId": "43743136344",
+    "revision": "nzila-ue-v2-staging-app--rel0fa684a156",
+    "imageDigest": "sha256:7f010087f713a536d5f004d7ce688532305270ce797e4612d403da4e13f77fbb",
     "trafficPercent": 100,
-    "imageDigest": "sha256:6e22096ccc3d1a1cd2473cec673b7d32fe5c03d44f4973b80f66230b100e5518",
-    "sourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
-    "workflowAndInfrastructureSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
-    "verificationWorkflowSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
-    "stagingGo": false,
-    "reconciliation": "observed-runtime-c09de455-reconciliation.json",
-    "deployedPerformance": "FAIL_609.794MS_P95_LIMIT500MS",
-    "fullSevenPersonas": "NOT_EXECUTED_ON_Q",
-    "bilingualRootPresentationFailure": "actual-root-locale-switch-c09de455-failure.json"
+    "reconciliation": "observed-runtime-0fa684a1-reconciliation.json",
+    "deployedPerformance": "PASS_364_048MS_P95_LIMIT500MS",
+    "openMobileDefect": "actual-mobile-grievance-title-0fa684a1-failure.json",
+    "stagingGo": false
   },
   "supersededWorkbenchCandidate": {
     "sourceSha": "4687a4ed84935cedb2b436738373b13b7cda2158",

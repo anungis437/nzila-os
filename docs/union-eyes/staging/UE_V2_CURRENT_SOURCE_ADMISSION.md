@@ -1,5 +1,19 @@
 # Current source admission checkpoint — November 15, 2026
 
+Proposed source `241006d302c14567e541d619675fbead3ec3f258` / PR #1241 repairs the mobile grievance header observed on actual staging. At 390 px the current title has about 133 px beside the status badge; the proposal gives it 290 px and moves status below it, preserving desktop layout. Forty-nine existing grievance tests, scoped lint and actual JSX/Tailwind browser presentation pass. Seven fresh native compile/import tools, local export/restore/native privileges and a read-only retained-copy diagnostic also pass. Full main-bound signed qualification and exact-source deployed proofs remain pending. Four broad local commands still fail with an explicit delta; docs pass.
+
+Actual staging source `0fa684a15641e84cb2aa3c94a2fad49428d64f60` was normally admitted by PRs #1239/#1240 at workflow/IaC `6f68994122ca8dadfab4055b1bdc1943c8a8a7d4`. Build 43740816205 and deployment 43743136344 succeeded, and the healthy E revision serves 100%. Its canonical performance passes at 364.048215 ms p95 against 500 ms; six base journeys, six worker scenarios and retirement, recovery and telemetry pass. Its original paired-session expiry and complete seven-persona sequence are recorded at their actual snapshot status. The mobile title defect remains open on E. See [source-bound reconciliation](evidence/ue-v2-execution-20261113/security-boundary/observed-runtime-0fa684a1-reconciliation.json).
+
+The proposed F source still requires exact source/integration CI, normal main admission, full signed native qualification, immutable build and fresh real staging evidence. All 17 required F criteria are pending; accepted candidate remains null and scoped verdict NO_GO. No E proof qualifies F.
+
+Existing CHG-2026-0114 founder staging authority and window remain in force. The two founder logins identify one person. Preserve credentials, signing keys, primary data, all 40 immutable migration records and the known overlay. Finance persistence and Financial Officer 2.1 remain excluded; staff-entered deadline creation and management are required. The global 777-item programme and Phase 3B hold remain unchanged. Production is not authorized.
+
+## Historical preceding source-admission and bootstrap snapshots
+
+The following original source-bound observations retain their original dates and states and do not override the current checkpoint above.
+
+# Current source admission checkpoint — November 15, 2026
+
 Observed Q `c09de4557236b615fad0a1c992d6ee2b8820bf62` remains deployed under workflow `c47cb1f33d7cf05b549be617bc0e8411b56db996` with build
 43718756258/deployment 43720514263. Readiness passes; canonical performance fails at
 609.794ms p95 against 500ms. Real locale switching also leaves document language and

@@ -1,0 +1,14 @@
+{
+  "status": "PASS_READ_ONLY_COPY_DIAGNOSTIC_ONLY",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "workflowSha": null,
+  "actualCycleSha256": "5f0377de291ac5f58a8d0a086966acc5c2d37d00b2bbf1485ffc94a61cadf7af",
+  "actualDiagnosticSha256": "33dbca0fa3bbed15613fac1f015422e3d9a6f74b9988c8a986c7c95f700d3b36",
+  "originalCopyCanariesAnd40MigrationLedgerVerified": true,
+  "ownedCopyStopped": true,
+  "networkAndDataPreserved": true,
+  "primaryUntouched": true,
+  "fullSignedSourceNativeQualification": "PENDING",
+  "stagingGo": false
+}

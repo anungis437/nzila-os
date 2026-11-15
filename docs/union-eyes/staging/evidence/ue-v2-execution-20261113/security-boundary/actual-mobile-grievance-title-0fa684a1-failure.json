@@ -1,0 +1,18 @@
+{
+  "status": "CONFIRMED_REAL_STAGING_MOBILE_LAYOUT_DEFECT",
+  "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "workflowSha": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
+  "at": "2026-11-15T18:36:06.172673+00:00",
+  "viewportWidth": 390,
+  "locale": "fr-CA",
+  "actualImageSha256": "aa6a4c4e492f0e02d0a4abd6b47320d40bbb6f3b40a16c0d60ad7525063010a8",
+  "sourceFile": "apps/union-eyes/components/grievances/grievance-detail-console.tsx",
+  "rootCause": "Header keeps back button, flex1 title and shrink0 French status badge on one row at390px. The readable status reserves most available width, squeezing the title into a narrow column and breaking ordinary words and the long synthetic title across excessive lines.",
+  "requiredRepair": "Allow title to use remaining mobile row width and place status on a separate mobile row, retaining the desktop arrangement and status visibility.",
+  "businessFunctionalityFailureClaimed": false,
+  "baseMobileAcceptanceBlockedPendingRepairAndFreshVerification": true,
+  "actualSourceEvidenceMustRemainELabelled": true,
+  "stagingGo": false,
+  "productionAuthorized": false,
+  "actualImageFileName": "formal-deadlines.json.fr-CA-assigned-grievance.png"
+}

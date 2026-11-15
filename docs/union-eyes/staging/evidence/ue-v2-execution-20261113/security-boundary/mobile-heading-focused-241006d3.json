@@ -1,0 +1,32 @@
+{
+  "status": "PASS_FOCUSED_SOURCE_AND_LOCAL_PRESENTATION_ONLY",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "priorObservedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "at": "2026-11-15T18:42:59.759235+00:00",
+  "change": "Two responsive class strings in grievance-detail-console.tsx; mobile title/back row plus separate status row, existing desktop arrangement retained.",
+  "existingFocusedComponentAndModelTests": {
+    "files": 2,
+    "passed": 49,
+    "exitCode": 0,
+    "logSha256": "d2b508fe50061c5df5c6942deea472b6f69f0edc37633a9e249a079aeac3812e"
+  },
+  "scopedEslint": {
+    "exitCode": 0,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "repositoryInventoryRegeneration": {
+    "exitCode": 0,
+    "trackedInventoryChanges": 0
+  },
+  "actualTailwindAndExactSourceHeaderJsxPresentation": {
+    "status": "PASS_LOCAL_PRESENTATION_ONLY",
+    "receiptSha256": "9632b2c9f5090747e09c9094920e6249e798aeb9d0ca3cf2939a6abf13080087",
+    "old390pxTitleWidth": 132.625,
+    "proposed390pxTitleWidth": 290,
+    "desktopWidthPreserved": true,
+    "newFrenchAndEnglishImagesViewed": true
+  },
+  "actualStagingSourceStillE": true,
+  "stagingAcceptanceClaimed": false,
+  "productionAuthorized": false
+}
