@@ -39,7 +39,7 @@ describe('catalog admission while inspections overlap', () => {
     vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '0')
     vi.stubEnv('UE_ENVIRONMENT', 'catalog-admission-unit')
     vi.stubEnv('DATABASE_URL', 'postgresql://catalog-unit.invalid/first')
-    vi.stubEnv('GIT_SHA', 'catalog-admission-unit')
+    vi.stubEnv('GITHUB_SHA', 'catalog-admission-unit')
     mocks.execute.mockReset()
     snapshot = safeSnapshot()
     statements = []
@@ -168,7 +168,7 @@ describe('catalog admission while inspections overlap', () => {
       await held.firstEntered.promise
       if (changed === 'environment') vi.stubEnv('UE_ENVIRONMENT', 'second-catalog-environment')
       if (changed === 'database') vi.stubEnv('DATABASE_URL', 'postgresql://catalog-unit.invalid/second')
-      if (changed === 'source') vi.stubEnv('GIT_SHA', 'second-catalog-source')
+      if (changed === 'source') vi.stubEnv('GITHUB_SHA', 'second-catalog-source')
       if (changed === 'canonical mode') vi.stubEnv('UE_CANONICAL_BOOTSTRAP_V2', '1')
       const second = evaluateCatalogAdmission()
       await held.entered.promise
