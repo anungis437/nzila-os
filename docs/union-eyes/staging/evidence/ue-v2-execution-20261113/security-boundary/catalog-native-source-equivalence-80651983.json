@@ -1,0 +1,511 @@
+{
+  "candidateSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+  "originalExperimentHead": "f2771b6409a60d0191cc3807be83aaf460f098e8",
+  "actualExperimentLabel": "UNCOMMITTED_WORKSPACE_PROTOTYPE",
+  "includedTrackedSourceInputsEqualCandidate": true,
+  "sourceInputsVerified": 99,
+  "trackedSourceModules": [
+    {
+      "path": "apps/union-eyes/lib/operations/catalog-authority-contract.json",
+      "bytes": 107893,
+      "sha256": "21d5fdb5f923316d6aaa6f72f188d6d84f84531813a8e01ea4345d328e19e04d"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/catalog-admission-core.mjs",
+      "bytes": 18396,
+      "sha256": "82be5d2ee1cb93dd7995f4ce2ae7b882eaef0033edc16eb96fcede02424000ff"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/authority-physical-guards.ts",
+      "bytes": 74657,
+      "sha256": "866936f6a9cdc553cdfba8121b6232ea93ca345aeed04ff34084aa0679f86a7d"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/physical-guard-catalog.ts",
+      "bytes": 9775,
+      "sha256": "0ccd6e227bc5a6de09cad7ac6930b461e1fd0624df82ad4a7a80dcdf7aadb2e0"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/messaging-physical-guards.ts",
+      "bytes": 22417,
+      "sha256": "70c9bee0193bb5b25b2f3e0837c5b5b8cdeb346d24e5eef54a2b4357b1f6d10b"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/types.ts",
+      "bytes": 5314,
+      "sha256": "a6214c1fdc5db850acf0f7deae8575cd46e543cba79e580ac79566b127f793d9"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/entries.ts",
+      "bytes": 13356,
+      "sha256": "79fc5aa02df0e7a0d67d783e38322b4eeee93b857e2e5b02cb39874449353983"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/execution-boundary.ts",
+      "bytes": 7416,
+      "sha256": "d47966544ca0e9cde7598ca6af57bf65644f976f4d28a866603d52bb7ec398f8"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/privilege-expectations.ts",
+      "bytes": 8006,
+      "sha256": "210c313c933678833cde69723c99e9c5472c495fb35ad55ba216569f860e29b1"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/org-session-authority.ts",
+      "bytes": 7283,
+      "sha256": "2b3716ca2dce7858ffc76982de6bd7ed79c4aa8fe8773c359f9344f4f5c4bc45"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/role-prerequisites.ts",
+      "bytes": 2290,
+      "sha256": "8dc88f5a2c1239fcfd88492eceee5b3193dd36a09662e36ba8ab2652468cb0f3"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/bootstrap-sql.ts",
+      "bytes": 36322,
+      "sha256": "8f176f72c0471b84b22c2bbd53fead07e6675b4616071cbfb2e3cd7d9a1d430a"
+    },
+    {
+      "path": "packages/db/src/auth-storage-authority/index.ts",
+      "bytes": 205,
+      "sha256": "a7f50c84a8ff795344314a26838237a46901b311a56370934172094e12c95810"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/catalog-v2-decisions.json",
+      "bytes": 2140,
+      "sha256": "c82e7d917fa277647d1768a0b7ca61fa4a1710a4ad1a6d688fab4cf62ec8ddec"
+    },
+    {
+      "path": "apps/union-eyes/lib/action-enforcer.ts",
+      "bytes": 4188,
+      "sha256": "cdec80fbf342399f9ecf6f3a2a683ea09494cf45dadca1923f7994e7f8caa5d7"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-permissions.ts",
+      "bytes": 1321,
+      "sha256": "69c316108fc05589c7bd9ee2eaf0fa3f96f292813c94f8e6057ce1ac9cde4a68"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/case-assignee-predicate.ts",
+      "bytes": 4936,
+      "sha256": "9c7642a6a6618949dcca99a45c8b5ad4cc00ba2dc77e3bd6fdf91ea38e7320a4"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/capacity.ts",
+      "bytes": 4479,
+      "sha256": "5e385dc5cc132b1ec5d9594115661cc44d2f35d9844859cf0c54a018bcaa18af"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/conversation-assignee-predicate.ts",
+      "bytes": 5345,
+      "sha256": "38e590bb56f7e5a62a336c3df94ff301c127e330e0f14150f94a86ff61850b8b"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/business-session-event-guard.ts",
+      "bytes": 5680,
+      "sha256": "f48fad3ada7363cff32aec9fd6e27fff9422fc6189afa344c406f393d8a44b83"
+    },
+    {
+      "path": "apps/union-eyes/db/auth/business-session-policy.ts",
+      "bytes": 6143,
+      "sha256": "130155caa6bb40783770101efa6501f7d83ccba1c4a5c111f8da66c8b8ced1b1"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/canonical-catalog-admission.ts",
+      "bytes": 13179,
+      "sha256": "bea4dfb0f121a02d7abb0197171c2cdf4a43974a8eadf3ed07c1364d151c5b55"
+    },
+    {
+      "path": "packages/db/src/schema/orgs.ts",
+      "bytes": 4085,
+      "sha256": "1ff125a6d59bd9a840c9d4094c9c4a9667a7fbcc8f038e8b6a818e9ee84d9570"
+    },
+    {
+      "path": "packages/db/src/schema/governance.ts",
+      "bytes": 4937,
+      "sha256": "bb8a212287eaba316edd07dad1f580416848b94126c4e0997338d6f505cee4d7"
+    },
+    {
+      "path": "packages/db/src/schema/equity.ts",
+      "bytes": 5453,
+      "sha256": "0fd6a70ac3ffbd6857b9edd13a145a3abfbc8333dac18e802078fcb16b5e5f7b"
+    },
+    {
+      "path": "packages/db/src/schema/finance.ts",
+      "bytes": 9275,
+      "sha256": "29436abc580bf1d71b1ee6ae6cc2e55cd39b656a82b47ee6d4a47e3b72f28118"
+    },
+    {
+      "path": "packages/db/src/schema/operations.ts",
+      "bytes": 11326,
+      "sha256": "f2edb70082b824c10e100425f812e0df94f7f935c6902e83a521af845ed367af"
+    },
+    {
+      "path": "packages/db/src/schema/payments.ts",
+      "bytes": 10583,
+      "sha256": "88a272b16aa5c75c8581370c68c887950002498655a9319835fd29f8d17eb5ef"
+    },
+    {
+      "path": "packages/db/src/schema/commerce.ts",
+      "bytes": 54997,
+      "sha256": "753d237ab94893599c0ce1b2d97ca903bceee94a8f49c4f428daf9f7e3cddf67"
+    },
+    {
+      "path": "packages/db/src/schema/ai.ts",
+      "bytes": 18627,
+      "sha256": "c603a283acbf601e9399a16e29b5f505c049ef926cc980affa3ca48c48403609"
+    },
+    {
+      "path": "packages/db/src/schema/ai-governance.ts",
+      "bytes": 4468,
+      "sha256": "829cdc7c6830486527e0d15c822fdd103b96bc430d1d64d2753deec9dd6fbea5"
+    },
+    {
+      "path": "packages/db/src/schema/ml.ts",
+      "bytes": 14836,
+      "sha256": "b42ea0a14e68bedc08ccbe2582a0288c18ae3f2b08d42cd592a89f48b77d1304"
+    },
+    {
+      "path": "packages/db/src/schema/ue.ts",
+      "bytes": 2545,
+      "sha256": "5a60940451bd67f8b81c0e271619f029f0b7e335690804418e2296821d1b339a"
+    },
+    {
+      "path": "packages/db/src/schema/partners.ts",
+      "bytes": 9780,
+      "sha256": "5070f531075f36fb2cc37bde4f6564c590bcd8b03f70b5261dbc8c0555fdd223"
+    },
+    {
+      "path": "packages/db/src/schema/automation.ts",
+      "bytes": 5078,
+      "sha256": "f14281bc11c6ea28cbd906e689cbf5d6e25bdeb236f6f5ac07805cea6f4b36e3"
+    },
+    {
+      "path": "packages/db/src/schema/tax.ts",
+      "bytes": 9281,
+      "sha256": "9ffab36dffdc66b2b633d4fcd6dd75e880f06f67e4c6f0aee1bb7055dcec010d"
+    },
+    {
+      "path": "packages/db/src/schema/nacp.ts",
+      "bytes": 10549,
+      "sha256": "af16ca8c0fbf3931517828dbd17e86e98c89ee6bd4405b62d28be0e8a636854c"
+    },
+    {
+      "path": "packages/db/src/schema/zonga.ts",
+      "bytes": 41648,
+      "sha256": "70ae97c61f4254e26a85138ee8e5adb557e5236ab324ef4914a0737a8784e910"
+    },
+    {
+      "path": "packages/db/src/schema/platform.ts",
+      "bytes": 9091,
+      "sha256": "e0b4e30cdafb7dcca9cbcbe49c3e71d7eeca4b0a8039dc1b4fe7487cefc795e3"
+    },
+    {
+      "path": "packages/db/src/schema/integrations.ts",
+      "bytes": 4235,
+      "sha256": "eb14da7e696b470fcc94eff69b3e3630820ca584acc5d5a0f216fe0f43e85d65"
+    },
+    {
+      "path": "packages/db/src/schema/trade.ts",
+      "bytes": 16620,
+      "sha256": "915aaec78f7b90b575225719957b7a4634495021defd603762ab8c093fa3fcc7"
+    },
+    {
+      "path": "packages/db/src/schema/agri.ts",
+      "bytes": 20997,
+      "sha256": "a617b9eb709f225d6242eafc7c5aebe5f65147ac3e279a75658fca9693a639fb"
+    },
+    {
+      "path": "packages/db/src/schema/methodology.ts",
+      "bytes": 2083,
+      "sha256": "0c92c251f1e5a216a9d5eaec8dbc2563d010c257f9c63c20ddcaaa4a5c3b045a"
+    },
+    {
+      "path": "packages/db/src/schema/cora-evidence.ts",
+      "bytes": 9152,
+      "sha256": "a1b710beb8010df8e7629755b19367ced12aad1d26a9d371c11c0839ebf7e6f6"
+    },
+    {
+      "path": "packages/db/src/schema/cora-farmer360.ts",
+      "bytes": 4692,
+      "sha256": "eda327959536477fc03e36cbda05b26d817f3f98add5c671cad6f330d17febc7"
+    },
+    {
+      "path": "packages/db/src/schema/auth.ts",
+      "bytes": 18105,
+      "sha256": "d6edf0617679b8b487f4b5a7765f8bc2d030b1e410f79a028901f7a80577e0fe"
+    },
+    {
+      "path": "packages/db/src/schema/platform-authorization.ts",
+      "bytes": 7227,
+      "sha256": "a0767c3ad85c33c5a1273cefba6b14e8e89f44206ce6bde755cde96dcf95060c"
+    },
+    {
+      "path": "packages/db/src/schema/mobility.ts",
+      "bytes": 12270,
+      "sha256": "66e6794ee5dd77a50e29ae5fbbe0cbae4b10d2a1ac6259429c8210c12dd7198e"
+    },
+    {
+      "path": "packages/db/src/schema/flow/enums.ts",
+      "bytes": 3720,
+      "sha256": "4317d20bef6453d21f945f11454d4a0e8c038b9bc3108761bf98ce72b0f366f4"
+    },
+    {
+      "path": "packages/db/src/schema/flow/customers.ts",
+      "bytes": 816,
+      "sha256": "283cc10976f0de51a8d0c78986be3fcc479410c84c4717314540a29cc277331d"
+    },
+    {
+      "path": "packages/db/src/schema/flow/products.ts",
+      "bytes": 999,
+      "sha256": "800e9ca1e7a297071af67b7295dff175fcab1e1c78e232dc6d0aad441352276f"
+    },
+    {
+      "path": "packages/db/src/schema/flow/quotes.ts",
+      "bytes": 1064,
+      "sha256": "ae9bcae276481739eaf9388aa2bab59d2e1770aa98cecb79501da0f42383f853"
+    },
+    {
+      "path": "packages/db/src/schema/flow/orders.ts",
+      "bytes": 1189,
+      "sha256": "31e0ee4ecb75358402c87fe739e7775776c3e536968c68a54043a2db81f7e1c6"
+    },
+    {
+      "path": "packages/db/src/schema/flow/vendors.ts",
+      "bytes": 1813,
+      "sha256": "401949c9c57c9e9ba466a0e80b66ed33fcd249da2e1ef0f7357d9a5b252e4b51"
+    },
+    {
+      "path": "packages/db/src/schema/flow/purchase-orders.ts",
+      "bytes": 1096,
+      "sha256": "2084df476a991ccb4909a3e237dd1e2fb1c265ea36b2429378402b3602f49b71"
+    },
+    {
+      "path": "packages/db/src/schema/flow/production.ts",
+      "bytes": 1775,
+      "sha256": "9d2be49a898a1f026504ae507e44fb69e3955c6083e81dce0c6ac01e5f4edbb5"
+    },
+    {
+      "path": "packages/db/src/schema/flow/shipments.ts",
+      "bytes": 1529,
+      "sha256": "372538204c2415e64011fc9b3116c9b1a3aba3cae3d5130a6ee404dc333a40ac"
+    },
+    {
+      "path": "packages/db/src/schema/flow/payments.ts",
+      "bytes": 1955,
+      "sha256": "81b9bf319d74f371711bc31f4d570177af263688fac847c28d39607ca458efd5"
+    },
+    {
+      "path": "packages/db/src/schema/flow/invoices.ts",
+      "bytes": 1030,
+      "sha256": "8b6e0f5c005221a871823f45472ba69e6ab33b9d4fb4a52156c9be95c1eaa459"
+    },
+    {
+      "path": "packages/db/src/schema/flow/events.ts",
+      "bytes": 1120,
+      "sha256": "6fd8db52636c1400713f90ed8a39e93676fdacf7e824c42e7ce527556f5a4d72"
+    },
+    {
+      "path": "packages/db/src/schema/flow/audit.ts",
+      "bytes": 713,
+      "sha256": "ae0c01e642a3b758bdd79e89170af22f428fcd3df9d39b7a66f321f77cb42b37"
+    },
+    {
+      "path": "packages/db/src/schema/flow/relations.ts",
+      "bytes": 7085,
+      "sha256": "e6bf685c6e2b81204c68c926826dcb93e31e90f62be634ca7d9d700ecbdf0e3a"
+    },
+    {
+      "path": "packages/db/src/schema/flow/index.ts",
+      "bytes": 488,
+      "sha256": "b21fb04c5f64cdb35cb769824732c0250ed13767ccd85d59bbbf760bc4bbfea8"
+    },
+    {
+      "path": "packages/db/src/schema/pilot-metrics.ts",
+      "bytes": 9085,
+      "sha256": "ac0e96763baad286410dc00a682605560912a2cea4533984ac7aaabc0047dfd9"
+    },
+    {
+      "path": "packages/db/src/schema/executive.ts",
+      "bytes": 17291,
+      "sha256": "8bd922e7b7654941ace0000a6e4a500d74f3b561373f37c8b5f1a0a816ef8d23"
+    },
+    {
+      "path": "packages/db/src/schema/itsm.ts",
+      "bytes": 31474,
+      "sha256": "4ed7378199511c1e2a2198a04b3a4d71a607a591986c4d5d2a09b96a45769720"
+    },
+    {
+      "path": "packages/db/src/schema/exec-data.ts",
+      "bytes": 7213,
+      "sha256": "ec11560dd47a7bc7cba0b650454a6842ab61ec55a9117c3a8af3edd894791311"
+    },
+    {
+      "path": "packages/db/src/schema/governed-policies.ts",
+      "bytes": 9366,
+      "sha256": "922a2a771f9abdf4cc5e6e91930c54e498412c18202cde1ad6d8010424c5f23f"
+    },
+    {
+      "path": "packages/db/src/schema/policy-governance-events.ts",
+      "bytes": 3851,
+      "sha256": "97cb3539fc6ec3154b2057fe9e0e8e47d05db1f33785bf25efc02aab0d4adc94"
+    },
+    {
+      "path": "packages/db/src/schema/policy-replay-sessions.ts",
+      "bytes": 5906,
+      "sha256": "54ba07b7cf91e88d371b93f4395a7bd25aa7587826387791b996461328b115d7"
+    },
+    {
+      "path": "packages/db/src/schema/policy-conflicts.ts",
+      "bytes": 3675,
+      "sha256": "7cbfc19681c1a77565508476cbd2e704bc23bbb099c8b90aeaa09bd030e46d2b"
+    },
+    {
+      "path": "packages/db/src/schema/policy-governance-snapshots.ts",
+      "bytes": 4508,
+      "sha256": "6632b37d4f2b459108111118e638d4785eb41148c46ddd1c72c527bf06f6f0b0"
+    },
+    {
+      "path": "packages/db/src/schema/grants.ts",
+      "bytes": 1852,
+      "sha256": "997099f91df00ecce6775d1b3df40ba8f573090145b4c9ce240525c0fb8bd4fe"
+    },
+    {
+      "path": "packages/db/src/schema/audit.ts",
+      "bytes": 2048,
+      "sha256": "e148ad998e5136d4677ceec0b373c033dfc25b6eb3ee5e2f5da75880915c5aee"
+    },
+    {
+      "path": "packages/db/src/schema/decision-aggregates.ts",
+      "bytes": 2040,
+      "sha256": "c795603f1014e48c90a770860e8461c421599c9948e70aacc9f7c08b676b73b7"
+    },
+    {
+      "path": "packages/db/src/schema/decision-pipeline-checkpoints.ts",
+      "bytes": 1781,
+      "sha256": "964926aef95a35ad544f9b08349e36dcfb9d56a6c3ee5709546c5e516f207fc7"
+    },
+    {
+      "path": "packages/db/src/schema/decision-pipeline-runs.ts",
+      "bytes": 1770,
+      "sha256": "94f00c164c998627bd59106d61b9ed017fbd701de8b5c0c38736133328c36052"
+    },
+    {
+      "path": "packages/db/src/schema/decision-events.ts",
+      "bytes": 2981,
+      "sha256": "e8f2aa6e3e8cdc49737567dd71b9a9d082a96483b8ee2cb6548ce3fb9f9a03cb"
+    },
+    {
+      "path": "packages/db/src/schema/org-entitlements.ts",
+      "bytes": 2575,
+      "sha256": "d3b260dab36235d4accf64e100660538b45be307aaaea272c57a03e153e8b46c"
+    },
+    {
+      "path": "packages/db/src/schema/pipeline-alerts.ts",
+      "bytes": 1370,
+      "sha256": "7bb7e50b20ba0c81e928203ad3174805817058054d557e254c1296f94ffb5b23"
+    },
+    {
+      "path": "packages/db/src/schema/healthcare-surveys.ts",
+      "bytes": 5342,
+      "sha256": "e75a765c8421a2500949f2e35d1e0689070c6f847a470f8985cfbe18436f0104"
+    },
+    {
+      "path": "packages/db/src/schema/platform-entity-graph.ts",
+      "bytes": 2752,
+      "sha256": "af04157e5557c3d565b663ce59a7bcccee7c74716f1eb8af6800f1ccbe5aa217"
+    },
+    {
+      "path": "packages/platform-ontology/src/schema.ts",
+      "bytes": 2849,
+      "sha256": "585f6a2704de190fc6d453df36f70f6a48db8794a25d57cffe6795e2ab7eaaf5"
+    },
+    {
+      "path": "packages/platform-event-fabric/src/schema.ts",
+      "bytes": 2263,
+      "sha256": "b9c62f3cf989b1e7c4b2c63e6f823784b539954577708007d487b739f2becda0"
+    },
+    {
+      "path": "packages/platform-knowledge-registry/src/schema.ts",
+      "bytes": 2720,
+      "sha256": "83326aa229dab00e72ebf94573aa82d7b436f003595eb8b01ac0489a80b1b4c8"
+    },
+    {
+      "path": "packages/platform-data-fabric/src/schema.ts",
+      "bytes": 4499,
+      "sha256": "e193e1d3f2f7ffad1910abd93e82bb9afdd9260eaf066e2ce6ba22ff1d65d9a7"
+    },
+    {
+      "path": "packages/platform-decision-graph/src/schema.ts",
+      "bytes": 2487,
+      "sha256": "a6520badbf0306ff523f1c1479ffe3c9f2ca00c63fe5eb43913766bde18164fc"
+    },
+    {
+      "path": "packages/platform-semantic-search/src/schema.ts",
+      "bytes": 1353,
+      "sha256": "dd0f9ddca740678e6fe80e4a5b2c9a4db19354ace7db78c5230a4ec455bf60bc"
+    },
+    {
+      "path": "packages/platform-governed-ai/src/schema.ts",
+      "bytes": 1891,
+      "sha256": "6f97c90a14488d403608e3c181e09c6702b968fb72496caad2dadedc16b3b01d"
+    },
+    {
+      "path": "packages/platform-reasoning-engine/src/schema.ts",
+      "bytes": 1664,
+      "sha256": "a245ab80d4edbfec4aa045e6a9f5aed4ae392c2d149c6b6f0528015659eb9b21"
+    },
+    {
+      "path": "packages/db/src/schema/trustcore.ts",
+      "bytes": 30521,
+      "sha256": "70ef55909c7c4fc37e10d61224e8ca17f43efc56c8096659217f0502749821f9"
+    },
+    {
+      "path": "packages/db/src/schema/index.ts",
+      "bytes": 2246,
+      "sha256": "aee22bcd7afcb97805be3beb5bb37fa00b0b82d33b3d4b1cf91a4e968de004ff"
+    },
+    {
+      "path": "packages/db/src/client.ts",
+      "bytes": 1158,
+      "sha256": "ce00e7968f5918a88d8a30b0baa69f6075edc1cbe432086282500fc64f359ae2"
+    },
+    {
+      "path": "packages/db/src/raw.ts",
+      "bytes": 860,
+      "sha256": "84679036de0fe5da1accc73cb400b1339ff185630b7beded54d235d9c707021e"
+    },
+    {
+      "path": "packages/db/src/scoped.ts",
+      "bytes": 12939,
+      "sha256": "547017c221072b3f4bd115ed6780f5ce1819680d77697277aa2d488cf43b626d"
+    },
+    {
+      "path": "packages/db/src/audit.ts",
+      "bytes": 13332,
+      "sha256": "dec93da0068f60d7e02962fad8fac0831caee3e074ebc1bb946db9277afd5354"
+    },
+    {
+      "path": "packages/db/src/org-registry.ts",
+      "bytes": 20713,
+      "sha256": "1e4aa6de4a204bd4b0608eb700f187a9e2f1b070c1733088d0a7ea942a65757b"
+    },
+    {
+      "path": "packages/db/src/index.ts",
+      "bytes": 614,
+      "sha256": "f356d72546865f64878d6e39d5f0b5a435ffd2f52aab4f3c4d3aa81eb73a5de7"
+    },
+    {
+      "path": "apps/union-eyes/lib/operations/catalog-admission.ts",
+      "bytes": 3873,
+      "sha256": "45e97302f3e7a62bd1cbf7c660e2942952ba7e727da9edd5ffc3fe33eb304424"
+    }
+  ],
+  "prototypeBundleSha256": "e237d5b83bd369ea33009cbd895f44e12c5ecb1d0a18cf2ef073e9f5e0afb284",
+  "prototypeManifestSha256": "f4e3e51a37511dc192a30bb57470eec6376015189de827a075f7b6d68d4eca39",
+  "actualExecutionReceipt": "catalog-prototype-private-comparison.json",
+  "actualExecutionReceiptSha256": "cab9ea6047f73a99138e01b5978194b16c094d2315e1d1b4624ffb6a178acdda",
+  "httpSloClaim": "PENDING_ACTUAL_DEPLOYED_K6",
+  "stagingGo": false,
+  "productionAuthorized": false
+}

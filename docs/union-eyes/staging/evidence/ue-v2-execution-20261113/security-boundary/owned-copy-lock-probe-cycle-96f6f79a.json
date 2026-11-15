@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "candidateSourceSha": "96f6f79ad685738086f66914582d5461b7a9b870",
+  "observedApplicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "primaryRerouted": false,
+  "dataDeleted": false,
+  "productionAuthorized": false,
+  "stagingGo": false,
+  "serverId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/nzila-ue-v2-recovery-20261113",
+  "originalState": "Stopped",
+  "at": "2026-11-15T06:21:28.516401+00:00",
+  "nativeLockOnlyProbePassed": true,
+  "actualReceipt": "/tmp/ue-acceptance-20261113/lock-probe-96f6f79a/private-lock-order-result.json",
+  "ownedCopyStopped": true,
+  "dataAndServerRetained": true
+}

@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "record": "UE_STAGING_GO_CONTRACT",
   "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
-  "generatedOn": "2026-11-14",
+  "generatedOn": "2026-11-15",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
   "acceptedStagingCandidateSha": null,
-  "stagingWorkflowDefinitionSha": "034b3498fe68da339c81deb24faa0a424f71cdac",
+  "stagingWorkflowDefinitionSha": "e539e6ddc5bf5934c6f6cb40065d1a14faee6101",
   "verdict": "STAGING_NO_GO",
-  "verdictReason": "The founder requires staff deadline creation and management. Deployed dd5baaa6 does not supply this required journey. Source2107feeb passes414 local tests and exact native qualification, including real signed private-copy execution for both case types and cleanup, but is not deployed. Final exact source/integration CI, reviewed staging rollout and complete replacement-source persona/business/privacy/recovery/audit evidence remain required. Finance persistence and Financial Officer2.1 remain excluded.",
+  "verdictReason": "Staging 2107feeb supplies actual claim and formal staff deadline journeys, with restored roles and retired fixture authority, but final acceptance remains unfinished. Its main performance run fails at approximately 1.99 seconds p95, and its secretary-treasurer navigation run failed during settings verification. Proposed 80651983 repairs catalog admission, deadline lock order and the verifier. Its exact native export passes fresh/restore/repeat/privileges; the approximately 0.37-second catalog prototype remains source/native evidence. Exact source/integration CI, main admission, immutable build, reviewed staging rollout and all replacement-source persona/business/privacy/recovery/audit evidence remain required. Finance persistence and Financial Officer 2.1 remain excluded.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": false
@@ -24,204 +24,204 @@
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Source ea073528, immutable app digest af4e021f19f68297dc661ef6b396eb4a9f78f4b817d711e85583d6367abaae24, actual /api/version and Azure named serving revision agree. observed-runtime-ea073528.json."
+      "historicalObservedEvidence": "Observed2107feeb is pinned100% on --rel2107feeb1c; build43675288070/deploy43676475162 and workflow/IaCe539e6dd are recorded."
     },
     {
       "id": "SOURCE_ENGINEERING",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "requalificationRequiredForProposedCandidate": true,
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
-      "historicalObservedStatus": "FAIL",
-      "historicalObservedEvidence": "Actual source ea073528 workbench uses nullable claimNumber as a selection key; existing officer API case has no number. Source correction and9 local tests pass, but repaired candidate is not yet admitted/deployed. Native fixture and wrong member-URL test failures remain separately preserved."
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "Frozen 777 closure counts remain unchanged. Proposed 80651983 has focused source validation and exact native export qualification; its exact CI is still required."
     },
     {
       "id": "LOCAL_HOLISTIC_REGRESSION",
       "requirement": "ADVISORY",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "requalificationRequiredForProposedCandidate": true,
-      "historicalObservedStatus": "NON_BLOCKING_HOST_LIMITATION",
-      "historicalObservedEvidence": "Local 49,052 tests passed; 13 host-specific failures concern unrelated civic fixtures or a missing Python cryptography package. This is non-blocking local-host evidence, not staging proof; the exact-candidate CI remains the qualification baseline.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87"
+      "historicalObservedStatus": "FAIL",
+      "historicalObservedEvidence": "Broad local lint/typecheck/test/governance failures remain recorded in local-catalog-deadline-navigation-validation-20261115.json; focused passes do not overwrite them.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb"
     },
     {
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
-      "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Source PR1224 and integration PR1225 completed all registered checks with no failures/pending and all16 trusted required contexts before normal main admission bc6d96d8. Exact source whole-app CI43617951771 and HTTP isolation43617951709 succeeded. admitted-ea073528-merge.json."
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "historicalObservedStatus": "FAIL",
+      "historicalObservedEvidence": "Prior2107 sourcePR1231/binding1232 passed premerge registered and16trusted required contexts before main e539e6dd. Subsequent actual-main performance remains FAIL at approximately1.99s p95; sourcePR1233 CI is running."
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Immutable build43620798141 and deployment43622244265 succeeded under CHG-2026-0114 following fresh concrete what-if review and protected delegated founder approval. App source ea073528 and workflow/IaC bc6d96d8 remain independently recorded."
+      "historicalObservedEvidence": "Observed2107 build43675288070 and protected CHG-2026-0114 deploy43676475162 passed with workflow/IaCe539e6dd. Proposed80651983 is not deployed."
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Observed named revision --relea07352887 pinned100% in Multiple mode, exact manifest image and real liveness/readiness/source verified. Rehearsal revisions remain zero traffic; owned cleanup preserved metadata."
+      "historicalObservedEvidence": "Actual serving --rel2107feeb1c retains100% traffic and digest968ba684\u2026; inactive recovery metadata is not mistaken for serving traffic."
     },
     {
       "id": "DATABASE_MIGRATIONS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
-      "historicalObservedStatus": "PENDING",
-      "historicalObservedEvidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof."
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "Retained original installation and immutable migration history are preserved. Observed 2107 primary admission required zero guard SQL. The exact replacement export passes fresh/restore/repeat/privileges without resetting primary staging."
     },
     {
       "id": "ENTRA_AUTHENTICATED_SESSIONS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Actual remote provider authorization-code A/B sessions43629425230 pass correct identity/tenant, unexpired secureHttpOnly provider cookies and API workflows. No manufactured or serialized session. real-paired-ea073528-43629425230.json."
+      "historicalObservedEvidence": "Paired real Entra session run43677154289 passes on2107; this does not qualify replacement-source personas."
     },
     {
       "id": "API_AND_POSTGRES_TENANT_ISOLATION",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Real paired own/foreign case and document API refusals plus30 real-signed retained-primary native checks pass. Native tenant proof uses separately identified member SQL identity; it does not infer direct case authority. Complete initial audit/seal proof retained."
+      "historicalObservedEvidence": "Observed2107 paired APIs and initial source-bound native isolation pass. Replacement-source native/API evidence remains required."
     },
     {
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
-      "historicalObservedStatus": "FAIL",
-      "historicalObservedEvidence": "Actual ea073528 nullable workbench selection fails. Real grievance semantic/privacy flow passes39 checks, but discovery flags show no workbench entry to the authorized formal grievance collection. Both local presentation corrections pass94 UI/role/catalog checks; qualified deployed replacement evidence remains required."
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "Observed2107 claim/deadline22checks and formal/deadline42checks PASS with original roles restored and fixture authority retired. Member/steward/officer normal profiles pass; E43680811518 settings failure is preserved. Corrected settings settlement requires all7 final-source reruns and remaining base journeys."
     },
     {
       "id": "WORKERS_RETRIES_AND_DELIVERY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
-      "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Actual deployed ea073528 six-scenario worker acceptance passes provider acceptance/idempotency, controlled retry, real lease expiry/concurrency, stale-recipient suppression, successor scheduling and durable assignment convergence. Owned fixture retirement passes with no pending/claimed work, physical catalog unchanged and temporary operator delegation removed. Provider acceptance does not prove inbox delivery. worker-recovery-ea073528.json and worker-fixture-retirement-ea073528.json."
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "historicalObservedStatus": "PENDING",
+      "historicalObservedEvidence": "Final candidate worker delivery/retry/recovery and owned-fixture retirement remain required; no historical worker result is promoted."
     },
     {
       "id": "AUDIT_AND_TELEMETRY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "Dedicated staging workspace and all7 actual alert configurations verified; initial actual complete primary audit chains479/18 and sealed case packs pass. Final post-mutation audit reconciliation remains required."
+      "historicalObservedEvidence": "Observed2107 initial native audit recomputes906/35records and2sealed packs. Final audit, retention, telemetry and cleanup must follow all remaining logical mutations."
     },
     {
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "Fresh complete paired/revocation43635785268 passes both401 refusals under the same unexpired provider session and actual membership restoration. Actual private69bytes/checksum pass before expiry; the same issued URL/hash returns403 AuthenticationFailed at21:17:54Z after21:10:11Z. Older lost-key examples remain uncollected, never relabeled. This qualifies deployed ea073528 only; replacement-source evidence is still required."
+      "historicalObservedEvidence": "Observed2107 paired/revocation43677154289 PASS. Actual unchanged originally issued document URL returned403 at05:35:29Z after original expiry. Replacement-source proof remains required."
     },
     {
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
-      "historicalObservedStatus": "PENDING",
-      "historicalObservedEvidence": "All final-source persona finance boundary checks remain in progress; finance/dues persistence and Financial Officer2.1 are outside base release."
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "Normal observed profiles provide partial fail-closed boundary evidence. All7 final-source profiles remain required; finance/dues persistence and Financial Officer2.1 remain excluded."
     },
     {
       "id": "OPERATIONAL_RECOVERY",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
-      "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "Recovery run43630465718 FAIL retained because Azure write had not settled and recoveryPATCH encountered ContainerAppOperationInProgress. Reviewed owner-assisted completion restored exact immutable healthy template at0traffic and deactivated both owned drill revisions, preserving serving source100%. Activating alone is not a proven failed state; corrected protected failure/recovery drill and actual current-source restored-copy protocol remain required. Corrected protected43634316698 also FAIL retained: actual provider pending-revision error is RevisionNotFound, reproduced with a read-only absent revision GET. Narrow provider-contract correction and owned cleanup are in progress; no failed workflow is relabeled."
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "Observed2107 failed-revision43677270661 PASS; signed retained-copy protocol and stopped/retained-copy cycle PASS05:19. Replacement-source recovery remains required."
     },
     {
       "id": "CAPABILITY_TRUTHFULNESS",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
-      "historicalObservedStatus": "PENDING",
-      "historicalObservedEvidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof."
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "Actual2107 staff deadline journeys are now exercised for both case types. Dates are staff-entered; automatic legal calculation and intake email reminders are not claimed. Final replacement-source reconciliation remains required."
     },
     {
       "id": "INSTITUTIONAL_BOUNDARIES",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "requalificationRequiredForProposedCandidate": true,
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
-      "historicalObservedStatus": "PENDING",
-      "historicalObservedEvidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof."
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "Observed2107 bounded member/formal continuity and synthetic scoped fixture cleanup pass. Distinct owned accounts are operated by one founder, without real union ratification or independent-human claims. Final-source refusal and positive scope evidence remain required."
     },
     {
       "id": "STAGING_DECISION_ACCEPTANCE",
       "requirement": "REQUIRED",
       "status": "PENDING",
-      "evidence": "Source2107feeb is not deployed. Exact native/private-copy qualification is predeployment evidence only; each required runtime criterion needs actual replacement evidence. Prior contract and failures are retained in observed-contract-before-deadline-replacement-2107feeb.json and indexed historical receipts.",
-      "proposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "evidence": "Proposed 80651983 is not deployed or accepted. Exact native export passes, while source/integration CI and remaining qualification are pending. Observed 2107 evidence is retained separately and cannot satisfy this replacement criterion.",
+      "proposedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
       "requalificationRequiredForProposedCandidate": true,
-      "historicalObservedStatus": "PENDING",
-      "historicalObservedEvidence": "Final deployed ea073528 qualification remains in progress; no historical/source-only evidence substitutes for the required actual proof.",
-      "observedSourceSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87"
+      "historicalObservedStatus": "NOT_PROVEN",
+      "historicalObservedEvidence": "The founder authorizes continuing engineering/staging execution; no STAGING GO acceptance event is recorded.",
+      "observedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb"
     }
   ],
   "externalBlockers": [],
-  "proposedCandidateSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
-  "proposedCandidateState": "NATIVE_QUALIFIED_EXACT_CI_MAIN_BUILD_DEPLOY_AND_RUNTIME_PENDING",
+  "proposedCandidateSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+  "proposedCandidateState": "NATIVE_EXPORT_QUALIFIED_EXACT_CI_AND_RUNTIME_PENDING",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
     "included": [
@@ -282,7 +282,9 @@
     "providerRevisionContract": "Actual read-only Azure response reproduces RevisionNotFound.15 focused contracts now cover that exact CLI JSON shape and require an absent initial known-good revision to fail before mutation. New exact CI/main admission and protected recovery rerun remain required. Application source/image and deployment provenance remain unchanged.",
     "workbenchNullableReference": "Read-only primary proves a real owned officer case has nullable claimNumber. Both new UI regressions fail before the fix; all9 workbench tests pass after selecting by the actual case id when the number is absent. Canonical plan/self-test and navigation inventory check pass unchanged; no SQL/data/authority mutation. New source CI and deployed qualification remain required. Additional scoped grievance entry and EN/FR catalog/role tests pass94 checks. No new primary destination, API authority or SQL is introduced.",
     "workbenchAndGrievanceEntry": "216 tests across six affected page/UI/role/catalog/workspace/notification suites PASS. The server resolves the canonical current role and the link defaults hidden unless the exact destination policy admits it. Exact native fresh/restore/repeat/privileges PASS; all six backend source graphs/bundles match deployed ea073528. Current primary inspection requires0guardSQL. Local broad host failures and original whole-app CI failure remain retained; final exact CI and replacement runtime evidence are required.",
-    "staffCaseDeadlines": "414 tests across20 suites PASS, including13 actual PostgreSQL-compatible SQL tests,10 UI and9 HTTP tests plus confirmation, disclosure, casework and strict censuses. Exact776-table fresh/restore/repeat/privileges PASS; real signed native private-copy intake/formal service rehearsal and cleanup PASS. All7 compiled source graphs verified. Required local broad host/dependency/type failures remain failures; exact CI and deployed browser acceptance are pending."
+    "staffCaseDeadlines": "414 tests across20 suites PASS, including13 actual PostgreSQL-compatible SQL tests,10 UI and9 HTTP tests plus confirmation, disclosure, casework and strict censuses. Exact776-table fresh/restore/repeat/privileges PASS; real signed native private-copy intake/formal service rehearsal and cleanup PASS. All7 compiled source graphs verified. Required local broad host/dependency/type failures remain failures; exact CI and deployed browser acceptance are pending.",
+    "combinedCatalogDeadlineNavigationRepair": "Source 96f6 focused 32 catalog + 70 deadline/assignment/continuity + 23 navigation/request contracts PASS; three source PostgreSQL opt-ins remain SKIPPED. Runtime implementation is unchanged in 80651983; the unchanged opt-in probe moved to tooling after 17188f7b CI correctly rejected application-layer raw-driver imports. The failure is preserved and no gate changed. The separate three native lock-only cases retain execution source 96f6 and all 16 included modules match 806; explicit ports stand-ins do not establish authentication/kernel/RLS. Exact 806 native export PASS: 24,576 catalog objects, fresh/restore/repeat/privileges. Local database-boundary tests pass 16/16 using the repository timeout; the earlier temporary-config timeout is retained. Broad local command failures remain failures. Exact CI and final deployed performance/persona acceptance remain required.",
+    "combinedRepairSourceBinding": "94 shared approval and39 release/navigation/request tests PASS; navigation inventory check, exact pins,17required+1advisory PENDING criteria,62 evidence index hashes and unchanged implementation window verified. The default root runner retains its actual shared configuration/cache EPERM failure; the focused shared run uses task-local real source aliases and private cache, without changing repository tests or shared dependencies."
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -294,8 +296,7 @@
     "supersededForQualificationBy": "167f95034fbdaa163cd67e79c4bca622284e0d77"
   },
   "securityFindingEvidence": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json",
-  "observedStagingCandidateSha": "dd5baaa614ad12dfb1876e59adf73b82bad6df87",
-  "currentSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-deadline-private-copy-2107feeb.json",
+  "observedStagingCandidateSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
   "historicalCriteriaBeforeNestedSystemRepair": [
     {
       "id": "CANDIDATE_IDENTITY",
@@ -452,5 +453,16 @@
     }
   ],
   "priorSourceCompositionSuiteFailure": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/source-a8442373-whole-application-ci-failure.json",
-  "latestAdmittedVerificationWorkflowSha": "43105177dcf270ac86747874ada42159790b9fb9"
+  "latestAdmittedVerificationWorkflowSha": "e539e6ddc5bf5934c6f6cb40065d1a14faee6101",
+  "previousContractSnapshot": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-contract-before-combined-repair-80651983.json",
+  "observedRuntimeReconciliation": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/observed-runtime-2107feeb-reconciliation.json",
+  "historicalSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-deadline-private-copy-2107feeb.json",
+  "proposedSourceNativeQualificationState": "EXACT_EXPORT_PASS_LOCK_ONLY_SOURCE_EQUIVALENCE_VERIFIED_RUNTIME_PENDING",
+  "historicalNativeExportBeforeProbeRelocation": {
+    "sourceSha": "17188f7b602342ab6e88222759a4caba01f52248",
+    "status": "PASS",
+    "catalogObjects": 24576,
+    "freshRestoreRepeatAndPrivilegesPassed": true
+  },
+  "currentSourceNativeExport": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/local-native-export-80651983.json"
 }

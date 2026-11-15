@@ -1,0 +1,101 @@
+{
+  "record": "COMBINED_REPAIR_SOURCE_BINDING_REVIEW",
+  "at": "2026-11-15T06:31:32.636554+00:00",
+  "candidateSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+  "sourcePR": 1233,
+  "precedingSourceSha": "17188f7b602342ab6e88222759a4caba01f52248",
+  "precedingSourceSupersededOnlyBy": [
+    "unchanged opt-in native PostgreSQL probe relocated from application layer to tooling/native-tests",
+    "four generated repository inventory outputs",
+    "preserved architecture contract failure record"
+  ],
+  "repairScope": [
+    "canonical catalog admission cost",
+    "formal case parent locking",
+    "legacy deadline lock ordering",
+    "exact settings redirect settlement and independent mobile navigation"
+  ],
+  "localValidation": {
+    "file": "local-catalog-deadline-navigation-validation-20261115.json",
+    "sha256": "d1abbd52b74682bcd501c76227bfe46608c011e9dc6eff9c0b58359045103546"
+  },
+  "sourceCI": "IN_PROGRESS",
+  "bindingCI": "NOT_STARTED",
+  "nativeExport": {
+    "status": "PASS",
+    "file": "local-native-export-80651983.json",
+    "sha256": "1efd2adefefd1896f9b04508635106810507adcb5063e5a37692663b5c5a8b20",
+    "catalogObjects": 24576,
+    "catalogDigest": "8fd6dc431fdc911a0717dc008220f2bf58b4f4cee2ff35c884bb02fe8e68e15f",
+    "freshRestoreRepeatAndPrivilegesPassed": true
+  },
+  "observedApplicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "replacementDeployed": false,
+  "sourcePostgresOptInCases": "SKIPPED_THREE",
+  "separateBundledLockProbe": "Three native lock-only cases PASS under preserved execution source96f6f79a; all16 included source modules match80651983 byte-for-byte. Authentication, kernel, RLS, durable mutation and deployed acceptance are explicitly not proven.",
+  "reviewActor": "Codex under continuing solo-founder CHG-2026-0114 delegation",
+  "independentHumanReviewClaimed": false,
+  "implementationWindowEndUnchanged": "2026-11-16T23:59:59Z",
+  "stagingGo": false,
+  "productionAuthorized": false,
+  "applicationRuntimeImplementationIdenticalToPrecedingSource": true,
+  "historicalNativeExport": {
+    "sourceSha": "17188f7b602342ab6e88222759a4caba01f52248",
+    "status": "PASS",
+    "catalogObjects": 24576,
+    "freshRestoreRepeatAndPrivilegesPassed": true
+  },
+  "originalArchitectureFailure": "native-probe-application-boundary-failure-17188f7b.json",
+  "gitleaksSourceHistory": "96f6f79a was superseded by17188f7b only through the exact false-positive fingerprint and local validation record; that failure remains preserved.",
+  "lockOnlySourceEquivalence": {
+    "status": "PASS_SIXTEEN_INCLUDED_MODULES",
+    "file": "native-deadline-lock-only-80651983.json",
+    "sha256": "008dbe00ba79f64adcaf2782b5800d0885df1788bbf15ecf511dd14d7425b2ff",
+    "historicalExecutedSourceSha": "96f6f79ad685738086f66914582d5461b7a9b870",
+    "authenticationKernelAndRlsProven": false
+  },
+  "bindingValidation": {
+    "checkedAt": "2026-11-15T06:32:29.901610+00:00",
+    "sharedApprovalTests": {
+      "passed": 94,
+      "failed": 0,
+      "runner": "task-local isolated config with real source aliases and private cache"
+    },
+    "releaseNavigationAndRequestSafetyTests": {
+      "passed": 39,
+      "failed": 0
+    },
+    "navigationInventoryCheck": "PASS",
+    "diffWhitespaceCheck": "PASS",
+    "exactCandidatePins": "PASS",
+    "requiredCriteriaPending": 17,
+    "advisoryCriteriaPending": 1,
+    "ordinaryRootRunner": {
+      "status": "FAIL_ENVIRONMENT",
+      "cause": "Unrelated shared workspace configuration/dependency failures and EPERM creating shared node_modules/.vite-temp config cache",
+      "passInferred": false
+    }
+  },
+  "catalogPrototypeSourceEquivalence": {
+    "file": "catalog-native-source-equivalence-80651983.json",
+    "sha256": "a73fd3f9b2dc0ac70affd7e0e79ae2280a6ce72303280501a1fc3feb1774372f",
+    "includedModulesVerified": 99,
+    "experimentLabel": "UNCOMMITTED_WORKSPACE_PROTOTYPE",
+    "deployedHttpSlo": "PENDING_ACTUAL_DEPLOYED_K6"
+  },
+  "nativeToolBuildProof": {
+    "file": "native-source-graphs-80651983.json",
+    "sha256": "2f9075b3e20ca9d5b3cbec54bde74fdaf4a4c647027b7b7e827e05a9e090efb6",
+    "tools": 7,
+    "runtimeExecutionClaimed": false,
+    "actualSignedDeadlineQualification": "PENDING"
+  },
+  "additionalLocalValidation": {
+    "databaseBoundaryChecks": 16,
+    "databaseBoundaryFailed": 0,
+    "testTimeoutMs": 120000,
+    "timeoutSource": "tooling/contract-tests/vitest.config.ts",
+    "relocatedDeadlineAndContinuityChecksPassed": 70,
+    "relocatedOptInNativeTestsSkipped": 3
+  }
+}

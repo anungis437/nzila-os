@@ -1,0 +1,122 @@
+{
+  "record": "OBSERVED_STAGING_RUNTIME_RECONCILIATION",
+  "at": "2026-11-15T06:25:54.676694+00:00",
+  "applicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "workflowAndInfrastructureSha": "e539e6ddc5bf5934c6f6cb40065d1a14faee6101",
+  "sourcePR": 1231,
+  "bindingPR": 1232,
+  "mergedAt": "2026-11-15T04:06:20Z",
+  "buildRunId": "43675288070",
+  "deployRunId": "43676475162",
+  "revision": "nzila-ue-v2-staging-app--rel2107feeb1c",
+  "trafficPercent": 100,
+  "imageDigest": "sha256:968ba6845f2ad622a7275734a5123daa5cbb329b6c0a76580b170ca1f63af0a0",
+  "observations": {
+    "pairedSessionsAndExistingSessionRevocation": {
+      "status": "PASS",
+      "runId": "43677154289"
+    },
+    "originalDocumentUrlExpiry": {
+      "status": "PASS",
+      "actualHttpStatus": 403,
+      "observedAt": "2026-11-15T05:35:29Z",
+      "originalUrlUnchanged": true
+    },
+    "failedRevisionRecovery": {
+      "status": "PASS",
+      "runId": "43677270661"
+    },
+    "ownedRestoredCopyProtocol": {
+      "status": "PASS",
+      "cycleCompletedAt": "2026-11-15T05:19:49.934159+00:00",
+      "copyStoppedAndRetained": true
+    },
+    "claimAssignmentAndManagedDeadlines": {
+      "status": "PASS",
+      "checks": 22,
+      "originalRolesRestored": true,
+      "fixtureAuthorityRetired": true
+    },
+    "formalGrievanceAndManagedDeadlines": {
+      "status": "PASS",
+      "checks": 42,
+      "originalRolesRestored": true,
+      "fixtureAuthorityRetired": true
+    },
+    "initialNativeAuditAndSealedEvidence": {
+      "status": "PASS",
+      "auditRecords": [
+        906,
+        35
+      ],
+      "sealedPacks": 2,
+      "finalAfterAllMutationsStillRequired": true
+    },
+    "performance": {
+      "status": "FAIL",
+      "actualMainP95SecondsApproximate": 1.99,
+      "prototypeCatalogP95SecondsApproximate": 0.37,
+      "prototypeDeployed": false
+    },
+    "personaNavigation": {
+      "normalProfilesObservedPass": [
+        "member",
+        "steward",
+        "officer"
+      ],
+      "secretaryTreasurerRunId": "43680811518",
+      "secretaryTreasurerStatus": "FAIL",
+      "settingsVerifierCorrectionRequiresAllSevenReplacementSourceReruns": true
+    }
+  },
+  "privateReceiptHashes": [
+    {
+      "privateEvidenceFile": "observed-runtime-2107feeb.json",
+      "sha256": "4824e8374e6a158e82fdb3275e9eeef561638d00c11c85fc6c8b5a5ffa379a42"
+    },
+    {
+      "privateEvidenceFile": "real-session-43677154289/receipt.json",
+      "sha256": "b8f9e8a73eb9b654b0bd146f35fb367d2913a6bf68d38767c1d2c0617569be07"
+    },
+    {
+      "privateEvidenceFile": "rollback-result-43677270661/receipt.json",
+      "sha256": "5f8fcccfae85a41dc87ea9701906c0c9af5f6bf6d85f55e77576d87920070e0d"
+    },
+    {
+      "privateEvidenceFile": "actual-private-document-expiry-2107feeb.json",
+      "sha256": "04fef04593a4426969cdeaee4c7b759e102f4e1509b337b02a18791f90676bc8"
+    },
+    {
+      "privateEvidenceFile": "owned-restored-copy-cycle-2107feeb.json",
+      "sha256": "0b8f044b3896596b756225e9746524daa896f3ae3534c0832843e96c04da6a55"
+    },
+    {
+      "privateEvidenceFile": "clone-current-source-2107feeb-actual-runtime-protocol.json",
+      "sha256": "e7e4953a43214a9e0468a524928d796f6be626fe2f90d9261243c1840fea79a4"
+    },
+    {
+      "privateEvidenceFile": "real-case-assignment-2107feeb.json",
+      "sha256": "bc31cce1c5f339cb7c3cc31a918d094a68cc24dbabbb61fee2c21bd51c639fb7"
+    },
+    {
+      "privateEvidenceFile": "real-grievance-continuity-2107feeb.json",
+      "sha256": "a7d66160a0d51c3b5075cfafb96fcc547d6ac7bb71cd42cf7546e4db492cbcc9"
+    },
+    {
+      "privateEvidenceFile": "primary-native-isolation-audit-sealed-evidence-2107feeb.json",
+      "sha256": "366c79aa27d8c1a2a227bf9ab0f7daa7c23f9d053fc21102eb1b778a12a124e8"
+    },
+    {
+      "privateEvidenceFile": "navigation-secretary_treasurer-43680811518/receipt.json",
+      "sha256": "2573b7692241d191cf25a8652503bed118570c17243c1718b67672da211ec979"
+    },
+    {
+      "privateEvidenceFile": "real-grievance-continuity-2107feeb-first-card-expansion-assumption-failure.json",
+      "sha256": "ded7f4e121e342fece0950e38c8f8f27d7c972feb806148cd02b24d7d81049e0"
+    }
+  ],
+  "proposedCandidateSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+  "replacementRuntimeAcceptance": false,
+  "stagingGo": false,
+  "productionAuthorized": false
+}
