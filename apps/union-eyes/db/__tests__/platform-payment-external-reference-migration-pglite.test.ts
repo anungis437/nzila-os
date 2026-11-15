@@ -75,6 +75,31 @@ describe('payment-reference migration — actual SQL engine execution', () => {
     });
   });
 
+  it('refuses a same-name index attached to an unrelated table', async () => {
+    await withDb(async (db) => {
+      await db.exec(createLedger);
+      await db.exec(`
+        CREATE TABLE unrelated_payments (
+          organization_id uuid NOT NULL,
+          external_reference varchar(255)
+        );
+        CREATE UNIQUE INDEX platform_payments_org_external_reference_uq
+          ON unrelated_payments (organization_id, external_reference)
+          WHERE external_reference IS NOT NULL;
+      `);
+      await expect(db.exec(migration)).rejects.toThrow(/unexpected definition/);
+      const index = await db.query<{ table_name: string }>(
+        `SELECT indrelid::regclass::text AS table_name FROM pg_index
+         WHERE indexrelid = 'platform_payments_org_external_reference_uq'::regclass`,
+      );
+      expect(index.rows[0]?.table_name).toBe('unrelated_payments');
+      const paymentCount = await db.query<{ n: number }>(
+        'SELECT count(*)::int AS n FROM platform_payments',
+      );
+      expect(paymentCount.rows[0]?.n).toBe(0);
+    });
+  });
+
   it('refuses a same-name unique index with an incorrect predicate', async () => {
     await withDb(async (db) => {
       await db.exec(createLedger);
