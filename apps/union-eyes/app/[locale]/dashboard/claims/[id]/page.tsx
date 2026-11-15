@@ -212,16 +212,16 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
             </button>
           </Link>
           
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 basis-full sm:basis-auto sm:flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{claim.claimNumber ?? t('claims.claimDetails')}</h1>
               {claim.claimType && <p className="text-gray-600">{claimTypeLabels[claim.claimType] || claim.claimType}</p>}
             </div>
-            <div className="flex gap-2">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>
+            <div className="flex flex-wrap gap-2">
+              <span className={`shrink-0 whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color}`}>
                 {statusInfo.label}
               </span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${priorityInfo.color}`}>
+              <span className={`shrink-0 whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium ${priorityInfo.color}`}>
                 {priorityInfo.label}
               </span>
             </div>
