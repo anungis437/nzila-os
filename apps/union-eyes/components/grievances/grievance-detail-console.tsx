@@ -10,6 +10,7 @@
  * address: it carries no file, so it sends no size and no content hash (the server records the version as unverified), and it says so.
  * Every word comes from the message catalogs (grievanceDetailConsole), in both languages.
  */
+import { CaseDeadlines } from '@/components/claims/case-deadlines';
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
@@ -394,6 +395,8 @@ export function GrievanceDetailConsole() {
           <CardContent className="whitespace-pre-wrap text-sm text-gray-700">{grievance.description ?? t("noDescription")}</CardContent>
         </Card>
       </div>
+
+      <CaseDeadlines caseId={grievance.id} />
 
       {/* Timeline */}
       <Card>

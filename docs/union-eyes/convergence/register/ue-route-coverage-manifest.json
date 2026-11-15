@@ -1,9 +1,9 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1034,
-  "mutating": 702,
-  "kernel": 62,
+  "routes": 1035,
+  "mutating": 703,
+  "kernel": 63,
   "byGuard": {
    "ADMIN_AUTH": 7,
    "CAPABILITY_TOKEN": 15,
@@ -15,7 +15,7 @@
    "PLATFORM_AUTH_HANDLER": 9,
    "RETIRED": 239,
    "ROLE_AUTH": 106,
-   "SESSION_AUTH": 58,
+   "SESSION_AUTH": 59,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 409,
    "WITH_API_PUBLIC": 2
@@ -31,13 +31,13 @@
    "PLATFORM_AUTH_HANDLER": 7,
    "RETIRED": 224,
    "ROLE_AUTH": 57,
-   "SESSION_AUTH": 34,
+   "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
    "WITH_API": 254
   },
   "mutatingByAudit": {
    "ATOMIC": 175,
-   "ATOMIC_SERVICE": 127,
+   "ATOMIC_SERVICE": 128,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 82,
    "EXEMPT_BALLOT_SECRECY": 2,
@@ -51,7 +51,7 @@
    "CRUD_TENANT_TX": 82,
    "NONE": 315,
    "SYSTEM_CONTEXT": 58,
-   "TENANT_TX": 246
+   "TENANT_TX": 247
   }
  },
  "routes": [
@@ -2869,6 +2869,20 @@
    "subordinate": null,
    "data": "TENANT_TX",
    "audit": "READ_ONLY"
+  },
+  {
+   "route": "cases/[caseId]/deadlines/route.ts",
+   "methods": [
+    "GET",
+    "PATCH",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "SESSION_AUTH",
+   "kernel": true,
+   "subordinate": null,
+   "data": "TENANT_TX",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "cases/[caseId]/escalate/route.ts",

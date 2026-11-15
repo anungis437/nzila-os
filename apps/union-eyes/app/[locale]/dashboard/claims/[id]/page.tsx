@@ -10,7 +10,7 @@ import { ArrowLeft, Calendar, MapPin, FileText, Clock, AlertCircle } from 'lucid
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from '@/components/file-upload';
 import { Button } from '@/components/ui/button';
-import { ClaimDeadlineUnavailable } from '@/components/claims/claim-deadline-unavailable';
+import { CaseDeadlines } from '@/components/claims/case-deadlines';
 import { usePilotTracking } from '@/lib/hooks/use-pilot-tracking';
 import { envelopeRow, envelopeRows, readApiError } from '@/lib/client/api-envelope';
 import { formatDay } from '@/lib/client/day';
@@ -296,7 +296,7 @@ setError(err instanceof Error ? err.message : 'Failed to load claim');
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
             >
-              <ClaimDeadlineUnavailable />
+              <CaseDeadlines caseId={claim.claimId} />
             </motion.div>
 
             {/* Case activity */}

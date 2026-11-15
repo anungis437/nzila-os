@@ -13,7 +13,7 @@ vi.mock('next-intl', () => ({ useTranslations: () => (key: string) => key, useLo
 vi.mock('next/navigation', () => ({ useParams: () => ({ id: 'claim-1' }), useRouter: () => ({ push: vi.fn() }) }))
 vi.mock('@/lib/hooks/use-pilot-tracking', () => ({ usePilotTracking: () => ({ trackCaseViewed: h.trackCaseViewed }) }))
 vi.mock('@/components/file-upload', () => ({ FileUpload: () => null }))
-vi.mock('@/components/claims/claim-deadline-unavailable', () => ({ ClaimDeadlineUnavailable: () => null }))
+vi.mock('@/components/claims/case-deadlines', () => ({ CaseDeadlines: () => null }))
 
 import ClaimDetailPage from './page'
 

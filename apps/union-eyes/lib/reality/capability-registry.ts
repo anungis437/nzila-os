@@ -693,6 +693,15 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
   //     - real scheduled invocation (manual curl, not scheduler)
   // ------------------------------------------------------------------------
   {
+    id: 'UE-CASE-DEADLINE-MANAGEMENT',
+    title: 'Staff-entered case and grievance deadline management',
+    state: 'LIMITED',
+    ownedBy: ['lib/cases/case-deadlines.ts', 'app/api/cases/[caseId]/deadlines/route.ts', 'components/claims/case-deadlines.tsx'],
+    evidence: ['lib/cases/case-deadlines.pglite.test.ts — actual PostgreSQL persistence, optimistic conflict, authority refusals, mandatory-audit rollback and terminal-record retention'],
+    targetWave: 0,
+    notes: 'Owner-required base capability. Manual due dates, rescheduling, completion and cancellation require handler eligibility plus explicit kernel draft-action/internal-case authority. Dates use the organization zone; no legal filing-date calculation. Existing formal grievance reminders are scheduled transactionally; intake-case email reminders remain unavailable and the UI says so. Current source/runtime qualification is pending; this entry does not claim deployed acceptance.',
+  },
+  {
     id: 'UE-DEADLINE-CORE',
     title: 'Deadline engine — core outbox schema',
     state: 'LIMITED',

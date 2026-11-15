@@ -1,0 +1,57 @@
+{
+  "status": "LOCAL_SOURCE_TESTS_PASS_RUNTIME_PENDING",
+  "scopeDecision": "Owner explicitly requires staff case deadline creation and management in base release.",
+  "focusedAndSurroundingTests": {
+    "passed": 359,
+    "failed": 0,
+    "suites": 15
+  },
+  "mandatoryBehavior": [
+    "canonical handler eligibility and case-specific internal/draft-action authority",
+    "organization scoped reads and locked writes",
+    "calendar-day due dates in organization timezone",
+    "idempotent create and stale-version conflict",
+    "reschedule, completion and cancellation with retained records",
+    "atomic mandatory audit, formal reminder scheduling and rollback on failure",
+    "English/French controls, access change and stale-refresh handling"
+  ],
+  "limitations": [
+    "No automatic legal filing-date calculation",
+    "Intake-case automatic email reminders unavailable; UI states this",
+    "Native retained-schema rehearsal, exact CI, staging deployment and actual candidate runtime acceptance still required"
+  ],
+  "requiredLocalChecks": [
+    {
+      "command": "pnpm lint",
+      "exitCode": 1,
+      "log": "/tmp/ue-acceptance-20261113/case-deadlines-pnpm-lint.log"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 1,
+      "log": "/tmp/ue-acceptance-20261113/case-deadlines-pnpm-typecheck.log"
+    },
+    {
+      "command": "pnpm test:fast",
+      "exitCode": 1,
+      "log": "/tmp/ue-acceptance-20261113/case-deadlines-pnpm-test-fast.log"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0,
+      "log": "/tmp/ue-acceptance-20261113/case-deadlines-pnpm-validate-docs.log"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "exitCode": 1,
+      "log": "/tmp/ue-acceptance-20261113/case-deadlines-pnpm-governance-audit.log"
+    },
+    {
+      "command": "pnpm inventory:generate",
+      "exitCode": 0,
+      "log": "/tmp/ue-acceptance-20261113/case-deadlines-pnpm-inventory-generate.log"
+    }
+  ],
+  "baseVerdict": "STAGING_NO_GO",
+  "productionAuthorized": false
+}

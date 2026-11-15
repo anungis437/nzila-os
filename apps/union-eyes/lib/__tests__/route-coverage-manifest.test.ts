@@ -134,8 +134,21 @@ describe('route coverage manifest (UE-CONV-K-008)', () => {
   it('treats a route as kernel-decided only when it imports the kernel or the kernel-backed case access service', () => {
     for (const e of fresh.filter((r) => r.kernel && r.guard !== 'DELEGATED')) {
       const source = readFileSync(join(ROOT, 'app', 'api', e.route), 'utf8')
-      expect(source).toMatch(/lib\/authority|case-access-service|download-issuance|ocr-authority|intake-lifecycle|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(/)
+      expect(source).toMatch(/lib\/authority|case-access-service|download-issuance|ocr-authority|intake-lifecycle|route-adapter|findReadableCase\(|requireCaseFilingCapacity\(|hasCaseFilingCapacity\(|requireKernelCaseAction\(|(?:listCaseDeadlines|createCaseDeadline|changeCaseDeadline)\(/)
     }
+  })
+
+  it('recognizes the deadline boundary only while both writes require case-specific kernel authority and mandatory audit', () => {
+    const service = readFileSync(join(ROOT, 'lib', 'cases', 'case-deadlines.ts'), 'utf8')
+    for (const name of ['createCaseDeadline', 'changeCaseDeadline']) {
+      expect(service).toMatch(new RegExp(`export async function ${name}[\\s\\S]*?targetFor\\(tx, actor, reference, true\\)`))
+    }
+    expect(service).toContain("action: 'case:read_internal'")
+    expect(service).toContain("action: 'case:draft_action'")
+    expect(service).toContain("requireCaseFilingCapacity(tx, actor, 'handler')")
+    expect(service).toContain('await writeDeadlineAuditEvent(')
+    const route = fresh.find(entry => entry.route === 'cases/[caseId]/deadlines/route.ts')!
+    expect(route).toMatchObject({ kernel: true, data: 'TENANT_TX', audit: 'ATOMIC_SERVICE' })
   })
 
   it('counts a platform-auth service as audited only while its audit record is mandatory, not best-effort', () => {
