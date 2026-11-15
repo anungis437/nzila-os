@@ -280,6 +280,12 @@
       "sha256": "9fd8d4707051ba3af299ff1757197901b6aea65658216514740d50b57c11cd9e",
       "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
       "runtimePassInferred": false
+    },
+    {
+      "file": "integration-8f9d4d12-shared-approval-binding-failure.json",
+      "sha256": "c3214731b0dc4c7b4b59cfe367067729d0f3f52d7a6428f976aeceaf0a5ab854",
+      "observedOrProposedSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+      "runtimePassInferred": false
     }
   ],
   "nextCandidate": {

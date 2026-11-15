@@ -1,0 +1,21 @@
+{
+  "status": "FAIL",
+  "integrationHeadSha": "8f9d4d12233559eda254231fdd145f8822d8f7cc",
+  "applicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "runId": "43672731326",
+  "jobId": "132686213173",
+  "check": "Unit coverage (shared)",
+  "failingPackage": "@nzila/platform-change-management",
+  "failingTest": "solo-founder Union Eyes V2 staging (CHG-2026-0114): accepts the real owner-directed staging record without claiming a second reviewer",
+  "packageTestsPassed": 92,
+  "packageTestsFailed": 1,
+  "rootCause": "The fourth exact candidate binding in the shared change-approval validator still named the previous dd5baaa6 source, while the three release/navigation bindings and CHG named2107feeb. The validator correctly refused the inconsistent record.",
+  "correction": "Bind shared validator to the same exact approved2107feeb source and explicitly test denial of previous deployed candidate. Retain all other owner, staging-only, subscription, evidence, linked-source and technical-gate checks.",
+  "correctedLocalPackageTestsPassed": 94,
+  "correctedExactIntegrationCiStillRequired": true,
+  "priorFailureRelabeled": false,
+  "deploymentOccurred": false,
+  "productionAuthorized": false,
+  "logSha256": "185ad68171a61e4d35ee21ca1c4408f7baa3cdfbb0e045945ff0e5990af3a65f",
+  "at": "2026-11-15T03:38:10.887867+00:00"
+}

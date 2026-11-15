@@ -20,3 +20,6 @@ The deadline repair also closes the older confirmation URL’s role-only authori
 
 
 Proposed application source is `2107feeb1c2949042d97bd0606efb18e7aa95beb` (PR1231). Source and integration CI, immutable build, concrete staging review and deployment remain pending. Verification-only PR1230 was normally merged at `43105177dcf270ac86747874ada42159790b9fb9` after all registered and16trusted required successes; it does not change the running image or the original build/deploy/IaC provenance. See [current native qualification](evidence/ue-v2-execution-20261113/security-boundary/native-source-graphs-2107feeb.json).
+
+
+Initial integration8f9d4d12 shared coverage failed because its shared change-approval validator retained the previous exact candidate pin. The corrected integration binds that fourth validator as well and adds explicit previous-candidate refusal; all94 local change-management tests pass. The original CI failure remains on file and final integration CI must pass before merge.
