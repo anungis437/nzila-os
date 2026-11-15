@@ -12590,7 +12590,7 @@
   },
   "caseDeadlines": {
     "title": "Case deadlines",
-    "manualDates": "Dates are entered by your representative. No legal filing deadline is calculated automatically.",
+    "manualDates": "Dates are entered by your representative. No legal filing deadline is calculated automatically. New deadline names and dates entered here are visible to the represented member.",
     "timeZone": "Due at 23:59 in {zone}.",
     "formalReminders": "Upcoming reminders follow the formal grievance’s assigned representative.",
     "trackedDates": "These case dates are tracked here. Automatic email reminders are not available for intake cases.",

@@ -9,27 +9,32 @@ import { calendarDayInZone, endOfDayInZone } from '@/lib/deadline-engine/deadlin
 import { loadOrganizationTimeZone } from '@/lib/deadline-engine/organization-time-zone'
 import { writeDeadlineAuditEvent } from '@/lib/deadline-engine/audit'
 import { scheduleGrievanceDeadlineReminders } from '@/lib/deadline-engine/reminder-scheduler'
+import { MEMBER_VISIBLE_DEADLINE_TYPE } from './case-deadline-contract'
 import type { CreateCaseDeadlineInput, ChangeCaseDeadlineInput, CaseDeadlineWire } from './case-deadline-contract'
 import { isTerminalDeadlineStatus } from '@/lib/deadline-engine/deadline-semantics'
 
 
 type Source = 'claim_deadlines' | 'grievance_deadlines'
-type Target = { id: string; source: Source; canManage: boolean }
+type Target = { id: string; source: Source; canManage: boolean; memberVisible: boolean }
 type Row = { id: string; title: string; due_at: Date | string; status: string; version: string }
 
 const rows = async <T>(tx: RLSTx, query: ReturnType<typeof sql>) => await tx.execute(query) as unknown as T[]
 
-/** Drafting a dated case action requires BOTH handler eligibility and the kernel's explicit draft-action authority.
+/** Publishing a dated case action requires handler eligibility, explicit draft-action authority and member-disclosure authority.
  * A role, case read, note-writing permission or platform administration cannot substitute for either. */
 async function targetFor(tx: RLSTx, actor: CaseActor, reference: string, write: boolean): Promise<Target> {
   const claim = await findReadableCase(tx, actor, reference, write)
   let id = claim?.claimId
+  let memberVisible = claim?.visibility === 'member_visible'
   const source: Source = claim ? 'claim_deadlines' : 'grievance_deadlines'
   if (!claim) {
     if (!isUuid(reference)) throw ApiError.notFound('Case')
     const found = await rows<{ id: string }>(tx, sql`SELECT id::text FROM grievances
       WHERE id=${reference}::uuid AND organization_id=${actor.organizationId}::uuid ${write ? sql`FOR UPDATE` : sql``}`)
-    if (!found[0] || (await decideCase(tx, { ...actor, caseId: reference, action: 'case:read' })).effect !== 'allow') throw ApiError.notFound('Case')
+    if (!found[0]) throw ApiError.notFound('Case')
+    const read = await decideCase(tx, { ...actor, caseId: reference, action: 'case:read' })
+    if (read.effect !== 'allow') throw ApiError.notFound('Case')
+    memberVisible = read.scope?.visibility === 'member_visible'
     id = found[0].id
   }
   const caseId = id!
@@ -37,9 +42,10 @@ async function targetFor(tx: RLSTx, actor: CaseActor, reference: string, write: 
   try { await requireCaseFilingCapacity(tx, actor, 'handler') } catch (error) { if (error instanceof ApiError) handler = false; else throw error }
   const canManage = handler &&
     (await decideCase(tx, { ...actor, caseId, action: 'case:read_internal' })).effect === 'allow' &&
-    (await decideCase(tx, { ...actor, caseId, action: 'case:draft_action' })).effect === 'allow'
+    (await decideCase(tx, { ...actor, caseId, action: 'case:draft_action' })).effect === 'allow' &&
+    (await decideCase(tx, { ...actor, caseId, action: 'case:disclose_to_member' })).effect === 'allow'
   if (write && !canManage) throw ApiError.forbidden('Case deadline management authority required')
-  return { id: caseId, source, canManage }
+  return { id: caseId, source, canManage, memberVisible }
 }
 
 // Identifiers come exclusively from the two source-owned models above, never from request data.
@@ -59,7 +65,7 @@ function wire(row: Row, zone: string): CaseDeadlineWire {
 export async function listCaseDeadlines(tx: RLSTx, actor: CaseActor, reference: string) {
   const target = await targetFor(tx, actor, reference, false)
   const { timeZone } = await loadOrganizationTimeZone(actor.organizationId)
-  const found = await rows<Row>(tx, sql`${selectFor(target)} WHERE ${scopeFor(target, actor)} ORDER BY due_date,id LIMIT 201`)
+  const found = await rows<Row>(tx, sql`${selectFor(target)} WHERE ${scopeFor(target, actor)} ${target.memberVisible ? sql`AND deadline_type=${MEMBER_VISIBLE_DEADLINE_TYPE}` : sql``} ORDER BY due_date,id LIMIT 201`)
   return { caseId: target.id, canManage: target.canManage, timeZone, remindersAvailable: target.source === 'grievance_deadlines',
     truncated: found.length > 200, deadlines: found.slice(0, 200).map(row => wire(row, timeZone)) }
 }
@@ -92,10 +98,10 @@ export async function createCaseDeadline(tx: RLSTx, actor: CaseActor, reference:
   }
   if (target.source === 'claim_deadlines') await tx.execute(sql`INSERT INTO claim_deadlines
     (id,claim_id,organization_id,deadline_name,deadline_type,event_date,original_deadline,due_date)
-    VALUES (${input.id}::uuid,${target.id}::uuid,${actor.organizationId}::uuid,${input.title},'staff_entered',now(),${due.toISOString()}::timestamptz,${due.toISOString()}::timestamptz)`)
+    VALUES (${input.id}::uuid,${target.id}::uuid,${actor.organizationId}::uuid,${input.title},${MEMBER_VISIBLE_DEADLINE_TYPE},now(),${due.toISOString()}::timestamptz,${due.toISOString()}::timestamptz)`)
   else await tx.execute(sql`INSERT INTO grievance_deadlines
     (id,grievance_id,deadline_type,description,due_date,confirmation_status,confirmed_at,confirmed_by,reminder_days)
-    VALUES (${input.id}::uuid,${target.id}::uuid,'staff_entered',${input.title},${due.toISOString()}::timestamptz,'HUMAN_CONFIRMED',now(),${actor.userId},ARRAY[7,3,1])`)
+    VALUES (${input.id}::uuid,${target.id}::uuid,${MEMBER_VISIBLE_DEADLINE_TYPE},${input.title},${due.toISOString()}::timestamptz,'HUMAN_CONFIRMED',now(),${actor.userId},ARRAY[7,3,1])`)
   await audit(tx, actor, target, input.id, 'deadline.created', { due_at: due.toISOString(), time_zone: timeZone,
     title_sha256: createHash('sha256').update(input.title).digest('hex'), legal_calculation_claimed: false })
   await schedule(target, actor, input.id, due)

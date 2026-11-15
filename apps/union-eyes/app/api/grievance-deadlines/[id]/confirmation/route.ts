@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { ApiError } from '@/lib/api/errors';
+import { caseAuthorizationResponse } from '@/lib/cases/case-authorization';
 import { NextResponse } from 'next/server';
 import { hasMinRole } from '@/lib/api-auth-guard';
 import { withOrganizationAuth } from '@/lib/organization-middleware';
@@ -28,8 +30,8 @@ const confirmationSchema = z.discriminatedUnion('action', [
 ]);
 
 export const POST = withOrganizationAuth(async (request, context, params?: { id?: string }) => {
-  if (!params?.id) {
-    return NextResponse.json({ error: 'Missing deadline ID' }, { status: 400 });
+  if (!params?.id || !z.guid().safeParse(params.id).success) {
+    return NextResponse.json({ error: 'Invalid deadline ID' }, { status: 400 });
   }
 
   const canConfirm = await hasMinRole('steward');
@@ -37,7 +39,9 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id?
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const parsed = confirmationSchema.safeParse(await request.json());
+  let body: unknown;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+  const parsed = confirmationSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid confirmation payload', details: parsed.error.flatten() }, { status: 400 });
   }
@@ -48,7 +52,8 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id?
     actorId: context.userId,
   };
 
-  const updated = parsed.data.action === 'confirm'
+  let updated;
+  try { updated = parsed.data.action === 'confirm'
     ? await confirmDeadline(base)
     : parsed.data.action === 'override'
       ? await overrideDeadline({
@@ -59,6 +64,12 @@ export const POST = withOrganizationAuth(async (request, context, params?: { id?
         overrideReason: parsed.data.overrideReason,
       })
       : await supersedeDeadline(base);
+  } catch (error) {
+    const denied = caseAuthorizationResponse(error);
+    if (denied) return denied;
+    if (error instanceof ApiError && error.code === 'CONFLICT') return NextResponse.json({ error: 'CONFLICT' }, { status: 409 });
+    throw error;
+  }
 
   if (!updated) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });

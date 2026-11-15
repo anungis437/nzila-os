@@ -11852,7 +11852,7 @@
   },
   "caseDeadlines": {
     "title": "Échéances du dossier",
-    "manualDates": "Les dates sont saisies par votre représentant. Aucune échéance légale de dépôt n’est calculée automatiquement.",
+    "manualDates": "Les dates sont saisies par votre représentant. Aucune échéance légale de dépôt n’est calculée automatiquement. Les noms et les dates des nouvelles échéances saisies ici sont visibles par le membre représenté.",
     "timeZone": "Échéance à 23 h 59, fuseau {zone}.",
     "formalReminders": "Les rappels à venir suivent le représentant affecté au grief officiel.",
     "trackedDates": "Ces dates sont suivies ici. Les rappels automatiques par courriel ne sont pas disponibles pour les dossiers de demande.",

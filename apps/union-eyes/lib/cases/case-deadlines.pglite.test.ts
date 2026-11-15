@@ -3,18 +3,18 @@ import { PGlite } from '@electric-sql/pglite'
 import { PgDialect } from 'drizzle-orm/pg-core'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 
-const state = vi.hoisted(() => ({ permissions: new Set<string>(), handlers: new Set<string>(), failAudit: false, failSchedule: false }))
+const state = vi.hoisted(() => ({ permissions: new Set<string>(), memberVisible: new Set<string>(), handlers: new Set<string>(), failAudit: false, failSchedule: false }))
 vi.mock('@/lib/cases/case-authorization', () => ({
   findReadableCase: async (tx: RLSTx, actor: { userId: string; organizationId: string }, id: string) => {
     const { sql } = await import('drizzle-orm')
     const result = await tx.execute(sql`SELECT id::text, claim_id::text AS "claimId" FROM claims WHERE claim_id=${id}::uuid AND organization_id=${actor.organizationId}::uuid`)
-    return state.permissions.has(actor.userId+':'+id+':case:read') ? result[0] ?? null : null
+    return state.permissions.has(actor.userId+':'+id+':case:read') ? result[0] ? { ...result[0], visibility: state.memberVisible.has(actor.userId) ? 'member_visible' : 'internal' } : null : null
   },
   requireCaseFilingCapacity: async (_tx: unknown, actor: { userId: string }) => {
     if (!state.handlers.has(actor.userId)) { const { ApiError } = await import('@/lib/api/errors'); throw ApiError.forbidden() }
   },
 }))
-vi.mock('@/lib/authority/store/route-adapter', () => ({ decideCase: async (_tx: unknown, request: { userId: string; caseId: string; action: string }) => ({ effect: state.permissions.has(request.userId+':'+request.caseId+':'+request.action) ? 'allow' : 'deny' }) }))
+vi.mock('@/lib/authority/store/route-adapter', () => ({ decideCase: async (_tx: unknown, request: { userId: string; caseId: string; action: string }) => ({ effect: state.permissions.has(request.userId+':'+request.caseId+':'+request.action) ? 'allow' : 'deny', scope: { visibility: state.memberVisible.has(request.userId) ? 'member_visible' : 'internal' } }) }))
 vi.mock('@/lib/authority/store/executor', () => ({ isUuid: (value: string) => /^[a-f0-9-]{36}$/.test(value) }))
 vi.mock('@/lib/deadline-engine/organization-time-zone', () => ({ loadOrganizationTimeZone: async () => ({ timeZone: 'America/Toronto' }) }))
 vi.mock('@/lib/deadline-engine/audit', () => ({ writeDeadlineAuditEvent: async (value: unknown, tx: RLSTx) => {
@@ -37,14 +37,14 @@ function adapter(connection: { query: PGlite['query'] }): RLSTx {
 }
 const transaction = <T>(fn: (tx: RLSTx) => Promise<T>) => pg.transaction(connection => fn(adapter(connection)))
 function allow(user: string, caseId = claim, manage = true) {
-  for (const action of manage ? ['case:read', 'case:read_internal', 'case:draft_action'] : ['case:read']) state.permissions.add(user+':'+caseId+':'+action)
+  for (const action of manage ? ['case:read', 'case:read_internal', 'case:draft_action', 'case:disclose_to_member'] : ['case:read']) state.permissions.add(user+':'+caseId+':'+action)
   if (manage) state.handlers.add(user)
 }
 const create = () => transaction(tx => createCaseDeadline(tx, actor, claim, { id: deadline, title: 'Staff entered date', dueDay: '2027-03-14' }))
 const list = () => transaction(tx => listCaseDeadlines(tx, actor, claim))
 const mutate = (version: string, action: 'complete' | 'cancel' | 'reschedule', dueDay = '2027-03-15') => transaction(tx => changeCaseDeadline(tx, actor, claim, action === 'reschedule' ? { id: deadline, version, action, dueDay } : { id: deadline, version, action }))
 beforeEach(async () => {
-  state.permissions.clear(); state.handlers.clear(); state.failAudit=false; state.failSchedule=false; vi.clearAllMocks()
+  state.permissions.clear(); state.memberVisible.clear(); state.handlers.clear(); state.failAudit=false; state.failSchedule=false; vi.clearAllMocks()
   pg = new PGlite()
   await pg.exec(`CREATE TABLE claims(id uuid,claim_id uuid PRIMARY KEY,organization_id uuid);
     CREATE TABLE grievances(id uuid PRIMARY KEY,organization_id uuid);
@@ -66,6 +66,13 @@ describe('authorized manual case deadlines with real PostgreSQL transactions', (
     expect(scheduleGrievanceDeadlineReminders).not.toHaveBeenCalled()
     expect((await list()).remindersAvailable).toBe(false)
   })
+  it('shows a member only explicitly disclosed manual deadlines and hides historical internal descriptions',async()=>{
+    await create();allow('represented-member',claim,false);state.memberVisible.add('represented-member')
+    await pg.query("INSERT INTO claim_deadlines(id,claim_id,organization_id,deadline_name,deadline_type,due_date) VALUES($1,$2,$3,'Legacy internal task','internal',$4)",[other,claim,org,new Date('2027-04-01')])
+    const result=await transaction(tx=>listCaseDeadlines(tx,{...actor,userId:'represented-member'},claim))
+    expect(result.deadlines.map(x=>x.id)).toEqual([deadline]);expect(result.canManage).toBe(false)
+    expect((await list()).deadlines).toHaveLength(2)
+  })
   it('rejects a reused create id with different content instead of silently replacing the deadline', async () => {
     await create()
     await expect(transaction(tx=>createCaseDeadline(tx,actor,claim,{id:deadline,title:'Different',dueDay:'2027-03-14'}))).rejects.toMatchObject({code:'CONFLICT'})
@@ -74,9 +81,10 @@ describe('authorized manual case deadlines with real PostgreSQL transactions', (
   it('requires explicit draft-action and internal access as well as handler eligibility', async () => {
     allow('read-only',claim,false)
     expect((await transaction(tx=>listCaseDeadlines(tx,{...actor,userId:'read-only'},claim))).canManage).toBe(false)
-    for(const who of ['read-only','title-only','missing-internal']) {
+    for(const who of ['read-only','title-only','missing-internal','missing-disclosure']) {
       if(who==='title-only')state.handlers.add(who)
       if(who==='missing-internal'){allow(who);state.permissions.delete(who+':'+claim+':case:read_internal')}
+      if(who==='missing-disclosure'){allow(who);state.permissions.delete(who+':'+claim+':case:disclose_to_member')}
       await expect(transaction(tx=>createCaseDeadline(tx,{...actor,userId:who},claim,{id:deadline,title:'Refused',dueDay:'2027-01-01'}))).rejects.toMatchObject({code:who==='title-only'?'NOT_FOUND':'FORBIDDEN'})
     }
     expect((await pg.query('SELECT * FROM claim_deadlines')).rows).toHaveLength(0)

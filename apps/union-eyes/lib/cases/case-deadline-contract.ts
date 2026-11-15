@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import { isCalendarDay } from '@/lib/deadline-engine/deadline-day'
 
+/** Only records created with an explicit member-disclosure decision use this server-owned classification. */
+export const MEMBER_VISIBLE_DEADLINE_TYPE = 'ue_case_member_deadline_v1'
+
 const day = z.string().refine(isCalendarDay, 'Invalid calendar day')
 export const CreateCaseDeadline = z.object({ id: z.guid(), title: z.string().trim().min(1).max(200), dueDay: day }).strict()
 const change = { id: z.guid(), version: z.string().min(1).max(80) }

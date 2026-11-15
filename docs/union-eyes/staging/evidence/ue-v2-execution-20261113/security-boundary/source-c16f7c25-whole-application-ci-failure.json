@@ -1,0 +1,16 @@
+{
+  "status": "FAILURE_PRESERVED",
+  "sourceSha": "c16f7c25ae407afa61c7be0ecec76d0e87e2df19",
+  "runId": "43668557010",
+  "jobId": "132673275618",
+  "passedTests": 26140,
+  "skippedTests": 34,
+  "failedTests": 2,
+  "failedChecks": [
+    "component-wiring-census: replaced claim deadline unavailable component was left unused",
+    "orphan-census: same replaced component was no longer reached"
+  ],
+  "rootCorrection": "Remove the replaced unused component. Retain the real deadline panel and census checks without increasing ceilings.",
+  "applicationDeploymentChanged": false,
+  "productionAuthorized": false
+}
