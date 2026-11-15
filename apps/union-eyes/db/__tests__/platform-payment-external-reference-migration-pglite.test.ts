@@ -146,6 +146,42 @@ describe('payment-reference migration — actual SQL engine execution', () => {
     });
   });
 
+  it('refuses a same-name full unique index that would reject legitimate NULL references', async () => {
+    await withDb(async (db) => {
+      await db.exec(createLedger);
+      await db.exec(
+        'CREATE UNIQUE INDEX platform_payments_org_external_reference_uq ON platform_payments (organization_id, external_reference)',
+      );
+      await expect(db.exec(migration)).rejects.toThrow(/unexpected definition/);
+      const index = await db.query<{ predicate: string | null }>(
+        `SELECT pg_get_expr(indpred, indrelid) AS predicate FROM pg_index
+         WHERE indexrelid = 'platform_payments_org_external_reference_uq'::regclass`,
+      );
+      expect(index.rows[0]?.predicate).toBeNull();
+    });
+  });
+
+  it('can be reapplied without weakening an already installed idempotency constraint', async () => {
+    await withDb(async (db) => {
+      await db.exec(createLedger);
+      await db.exec(migration);
+      await db.exec(migration);
+      const index = await db.query<{ unique: boolean; valid: boolean; ready: boolean }>(
+        `SELECT indisunique AS unique, indisvalid AS valid, indisready AS ready
+         FROM pg_index WHERE indexrelid = 'platform_payments_org_external_reference_uq'::regclass`,
+      );
+      expect(index.rows).toEqual([{ unique: true, valid: true, ready: true }]);
+      await db.query(
+        'INSERT INTO platform_payments (organization_id, external_reference, amount) VALUES ($1,$2,10)',
+        [orgA, 'replay-after-rerun'],
+      );
+      await expect(db.query(
+        'INSERT INTO platform_payments (organization_id, external_reference, amount) VALUES ($1,$2,20)',
+        [orgA, 'replay-after-rerun'],
+      )).rejects.toThrow();
+    });
+  });
+
   it('installs the scoped index and rejects replay while permitting cross-org and NULL references', async () => {
     await withDb(async (db) => {
       await db.exec(createLedger);
