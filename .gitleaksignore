@@ -220,3 +220,11 @@ docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json:generic-api
 # Current code uses URL username/password setters. This commit-qualified
 # fingerprint covers only that historical template; scanner rules are unchanged.
 5cbe2186bdeab888fa015d309317db11207df87e:tooling/scripts/qualify-ue-managed-pg16-restore.cts:nzila-database-url-with-password:271
+
+# Union Eyes navigation source inventory: reviewed false positive, 2026-11-15.
+# Codex under CHG-2026-0114 verified the reported value is the generated SHA-256
+# of the tracked organization-settings policy, not a credential. The generator's
+# --check verifies that exact source commitment. Limit this exception to the
+# introducing commit, exact inventory path, generic rule and line; retain every
+# scanner rule and scan of every other occurrence, file and future commit.
+96f6f79ad685738086f66914582d5461b7a9b870:tooling/scripts/lib/ue-v2-navigation-inventory.json:generic-api-key:7

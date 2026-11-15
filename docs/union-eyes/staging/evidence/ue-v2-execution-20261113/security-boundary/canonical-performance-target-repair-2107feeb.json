@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-15T05:11:05.706277+00:00",
+  "purpose": "CORRECT_CANONICAL_PERFORMANCE_STAGING_TARGET_CONFIGURATION",
+  "runId": "43675284397",
+  "workflowSha": "e539e6ddc5bf5934c6f6cb40065d1a14faee6101",
+  "applicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "environment": "staging",
+  "variable": "PERF_BASE_URL",
+  "before": "ABSENT; existing workflow fallback selected retired jollydune staging address",
+  "after": "https://nzila-ue-v2-staging-app.whitemoss-055b7430.canadacentral.azurecontainerapps.io",
+  "thresholdsChanged": false,
+  "applicationDeploymentChanged": false,
+  "productionAuthorized": false,
+  "reviewActor": "Codex under continuing solo-founder CHG-2026-0114 staging QA delegation",
+  "originalFailureRetained": true,
+  "configuredTargetReadBackVerified": true,
+  "failedJobRerunRequested": true
+}

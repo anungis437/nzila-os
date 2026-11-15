@@ -1,0 +1,148 @@
+{
+  "applicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "purpose": "MEASURE_CONCURRENT_HEALTH_CHECK_COMPONENT_LATENCY_WITHOUT_MUTATIONS",
+  "at": "2026-11-15T05:24:49.889445+00:00",
+  "requests": [
+    {
+      "request": 0,
+      "status": 200,
+      "elapsedMs": 1998,
+      "checks": {
+        "process": {
+          "status": "ok"
+        },
+        "database": {
+          "status": "ok",
+          "ms": 6
+        },
+        "auth": {
+          "status": "ok"
+        },
+        "redis": {
+          "status": "ok",
+          "ms": 66
+        },
+        "backend": {
+          "status": "ok"
+        },
+        "catalogAuthority": {
+          "status": "ok",
+          "ms": 1923
+        }
+      }
+    },
+    {
+      "request": 1,
+      "status": 200,
+      "elapsedMs": 2012,
+      "checks": {
+        "process": {
+          "status": "ok"
+        },
+        "database": {
+          "status": "ok",
+          "ms": 5
+        },
+        "auth": {
+          "status": "ok"
+        },
+        "redis": {
+          "status": "ok",
+          "ms": 51
+        },
+        "backend": {
+          "status": "ok"
+        },
+        "catalogAuthority": {
+          "status": "ok",
+          "ms": 1926
+        }
+      }
+    },
+    {
+      "request": 2,
+      "status": 200,
+      "elapsedMs": 1998,
+      "checks": {
+        "process": {
+          "status": "ok"
+        },
+        "database": {
+          "status": "ok",
+          "ms": 5
+        },
+        "auth": {
+          "status": "ok"
+        },
+        "redis": {
+          "status": "ok",
+          "ms": 62
+        },
+        "backend": {
+          "status": "ok"
+        },
+        "catalogAuthority": {
+          "status": "ok",
+          "ms": 1921
+        }
+      }
+    },
+    {
+      "request": 3,
+      "status": 200,
+      "elapsedMs": 2004,
+      "checks": {
+        "process": {
+          "status": "ok"
+        },
+        "database": {
+          "status": "ok",
+          "ms": 5
+        },
+        "auth": {
+          "status": "ok"
+        },
+        "redis": {
+          "status": "ok",
+          "ms": 58
+        },
+        "backend": {
+          "status": "ok"
+        },
+        "catalogAuthority": {
+          "status": "ok",
+          "ms": 1923
+        }
+      }
+    },
+    {
+      "request": 4,
+      "status": 200,
+      "elapsedMs": 2008,
+      "checks": {
+        "process": {
+          "status": "ok"
+        },
+        "database": {
+          "status": "ok",
+          "ms": 5
+        },
+        "auth": {
+          "status": "ok"
+        },
+        "redis": {
+          "status": "ok",
+          "ms": 53
+        },
+        "backend": {
+          "status": "ok"
+        },
+        "catalogAuthority": {
+          "status": "ok",
+          "ms": 1923
+        }
+      }
+    }
+  ],
+  "productionAuthorized": false
+}

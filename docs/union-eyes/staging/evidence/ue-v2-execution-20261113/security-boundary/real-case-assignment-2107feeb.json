@@ -1,0 +1,218 @@
+{
+  "status": "PASS",
+  "evidenceClass": "REAL_ENTRA_CASE_ASSIGNMENT_WITH_EXPLICIT_SYNTHETIC_KERNEL_FIXTURES",
+  "applicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "at": "2026-11-15T05:37:05.724Z",
+  "caseId": "9ac64c87-2af2-4792-9461-f1b826971d18",
+  "checks": [
+    {
+      "person": "member",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "steward",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "executive",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "admingov",
+      "check": "REAL_ENTRA_AUTHORIZATION_CODE_SUBJECT_TENANT_ACTUAL_ROLE_SECURE_COOKIE",
+      "status": "PASS"
+    },
+    {
+      "person": "steward",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "00566213-da20-4172-b1d2-4a51cdc804cb"
+    },
+    {
+      "person": "executive",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "87a1dc28-b674-4b10-9345-597b0f94c09e"
+    },
+    {
+      "person": "member",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "a08a4835-002a-4ce9-9373-405a6ec0942e"
+    },
+    {
+      "person": "admingov",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "2af5e83f-317b-4422-b64c-1824b0989991"
+    },
+    {
+      "person": "executive",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "2a8fb732-9254-4808-89c8-cc8612e46a92"
+    },
+    {
+      "person": "steward",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "ddca63a6-11a9-4944-acce-6396c3546b7a"
+    },
+    {
+      "person": "executive",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18/assign",
+      "method": "post",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "9a7d1b95-9c4a-4061-99b0-e59ca293e5d9"
+    },
+    {
+      "person": "steward",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "177444ad-b24b-4820-a361-3d248e9a6627"
+    },
+    {
+      "person": "member",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "6dc5b1a2-16fe-4c8d-8ba8-c9bb871cc3c0"
+    },
+    {
+      "person": "admingov",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "d5cb9332-bb5f-4f18-af00-638848d280b7"
+    },
+    {
+      "person": "steward",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18/notes",
+      "method": "post",
+      "status": 201,
+      "expectedStatus": 201,
+      "requestId": "bf4a79f9-a565-4eae-a44f-54d46b6df706"
+    },
+    {
+      "person": "steward",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18/notes",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "f82e4265-e308-4a07-af92-02bccffb24d2"
+    },
+    {
+      "person": "steward",
+      "path": "/api/workbench/assigned",
+      "method": "get",
+      "status": 200,
+      "expectedStatus": 200,
+      "requestId": "e8d23c6d-9b75-415c-9443-604240527599"
+    },
+    {
+      "check": "REAL_RENDERED_CASE_DEADLINE_CREATE_RESCHEDULE_COMPLETE_CANCEL_AND_SCOPED_DENIALS",
+      "status": "PASS",
+      "locale": "en-CA",
+      "caseId": "9ac64c87-2af2-4792-9461-f1b826971d18",
+      "deadlineIds": [
+        "0ddf65c9-8fc9-4ce8-8cc4-2a4c5e84333d",
+        "648dd650-0dfe-4f28-a64a-cb06d7a1b051"
+      ],
+      "completedRecordRetained": true,
+      "cancelledRecordRetained": true,
+      "readOnlyExecutiveDenied": true,
+      "unrelatedGovernanceDenied": true,
+      "representedMemberReadOnly": false,
+      "staleVersionDenied": true,
+      "terminalReopenDenied": true,
+      "screenshot": "/tmp/ue-acceptance-20261113/real-case-assignment-2107feeb.json.en-CA-managed-deadlines.png",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "missingTranslations": false
+    },
+    {
+      "person": "steward",
+      "check": "REAL_RENDERED_DISCOVERABLE_EXPANDED_ASSIGNED_CASE_AND_PERSISTED_INTERNAL_NOTE",
+      "path": "/en-CA/dashboard/workbench",
+      "locale": "en-CA",
+      "caseId": "9ac64c87-2af2-4792-9461-f1b826971d18",
+      "claimNumber": null,
+      "displayIdentifier": "9ac64c87-2af2-4792-9461-f1b826971d18",
+      "status": "PASS",
+      "screenshot": "/tmp/ue-acceptance-20261113/real-case-assignment-2107feeb.json.en-CA-assigned-workbench.png",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "missingTranslations": false
+    },
+    {
+      "check": "REAL_RENDERED_CASE_DEADLINE_CREATE_RESCHEDULE_COMPLETE_CANCEL_AND_SCOPED_DENIALS",
+      "status": "PASS",
+      "locale": "fr-CA",
+      "caseId": "9ac64c87-2af2-4792-9461-f1b826971d18",
+      "deadlineIds": [
+        "75c5f2a0-8eec-4daa-9913-60b45b119395",
+        "94d03cb0-3882-48b1-b119-b513e54ba807"
+      ],
+      "completedRecordRetained": true,
+      "cancelledRecordRetained": true,
+      "readOnlyExecutiveDenied": true,
+      "unrelatedGovernanceDenied": true,
+      "representedMemberReadOnly": false,
+      "staleVersionDenied": true,
+      "terminalReopenDenied": true,
+      "screenshot": "/tmp/ue-acceptance-20261113/real-case-assignment-2107feeb.json.fr-CA-managed-deadlines.png",
+      "width": 390,
+      "scrollWidth": 390,
+      "missingTranslations": false
+    },
+    {
+      "person": "steward",
+      "check": "REAL_RENDERED_DISCOVERABLE_EXPANDED_ASSIGNED_CASE_AND_PERSISTED_INTERNAL_NOTE",
+      "path": "/fr-CA/dashboard/workbench",
+      "locale": "fr-CA",
+      "caseId": "9ac64c87-2af2-4792-9461-f1b826971d18",
+      "claimNumber": null,
+      "displayIdentifier": "9ac64c87-2af2-4792-9461-f1b826971d18",
+      "status": "PASS",
+      "screenshot": "/tmp/ue-acceptance-20261113/real-case-assignment-2107feeb.json.fr-CA-assigned-workbench.png",
+      "width": 390,
+      "scrollWidth": 390,
+      "missingTranslations": false
+    },
+    {
+      "person": "steward",
+      "path": "/api/cases/9ac64c87-2af2-4792-9461-f1b826971d18",
+      "method": "get",
+      "status": 404,
+      "expectedStatus": 404,
+      "requestId": "b0e672c1-9716-4f44-a62e-49799908a777"
+    }
+  ],
+  "originalRolesRestored": true,
+  "fixtureAuthorityRetired": true,
+  "distinctTestAccountsOperatedByOneFounder": true,
+  "realUnionAdoptionClaimed": false,
+  "independentHumanApprovalClaimed": false,
+  "actualApplicationCookies": true,
+  "tokensAndCookiesSerialized": false
+}

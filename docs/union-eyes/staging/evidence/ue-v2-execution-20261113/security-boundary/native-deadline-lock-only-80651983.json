@@ -1,0 +1,169 @@
+{
+  "candidateSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+  "historicalExecutedSourceSha": "96f6f79ad685738086f66914582d5461b7a9b870",
+  "sourceInputsVerified": 16,
+  "includedSourceInputsEqualCandidate": true,
+  "rawReceiptSha256": "60cd1845cdca700584bf858b419bd90609416660921a5d1b3eec3abdd3f517b3",
+  "actualLockOnlyResult": {
+    "ok": true,
+    "status": "LOCK_ONLY_PASS",
+    "purpose": "OWNED_PITR_REAL_SOURCE_PARENT_FIRST_LOCK_PROBE",
+    "label": "CANDIDATE_SOURCE_LOCK_ONLY_PROBE",
+    "at": "2026-11-15T06:19:00.049Z",
+    "target": {
+      "host": "nzila-ue-v2-recovery-20261113.postgres.database.azure.com",
+      "database": "ue_v2_staging",
+      "address": "10.40.4.5",
+      "verifiedTls": true,
+      "principal": "uev2admin"
+    },
+    "fixture": {
+      "organizationId": "b96359c3-a8de-458c-8469-afc084b7fbc0",
+      "grievanceId": "5508fac5-a8bf-46ab-831e-56f7c3ef8374",
+      "deadlineId": "ccc118fe-40cd-43cd-ae4b-02edc8a4ae7b",
+      "actorId": "bc42cb91-b331-46d9-87a1-970e1af814e4",
+      "incomingUserId": "c01e5647-8506-4101-bb52-2547000a9e02"
+    },
+    "checks": [
+      {
+        "name": "assignment_parent_before_authority_audit",
+        "waitEventType": "Lock",
+        "blockedByParentWriter": true,
+        "authorityCallsBeforeRelease": 0,
+        "parentWriterAcquiredAuditLock": true
+      },
+      {
+        "name": "legacy_parent_before_child_and_authority",
+        "waitEventType": "Lock",
+        "blockedByParentWriter": true,
+        "authorityCallsBeforeRelease": 0,
+        "childNowaitAcquiredByOtherWriter": true
+      },
+      {
+        "name": "foreign_organization_filtered_before_mutation_ports",
+        "confirmationResult": null,
+        "assignmentStatus": 404,
+        "authorityCalls": 0,
+        "assignmentCalls": 0
+      }
+    ],
+    "transactionsStarted": 7,
+    "transactionsRolledBack": 7,
+    "fixtureBeforeSha256": "15518062c4bc2ccb959ee50486b78bcac2a47876d82ebb33a9f64239662471b4",
+    "fixtureAfterSha256": "15518062c4bc2ccb959ee50486b78bcac2a47876d82ebb33a9f64239662471b4",
+    "noPrimaryConnection": true,
+    "noCommit": true,
+    "noFixtureSeedOrDelete": true,
+    "noDdlOrPersistentPrivilegeChange": true,
+    "authenticationProven": false,
+    "kernelPolicyProven": false,
+    "rlsBindingProven": false,
+    "deployedCandidateProven": false,
+    "stagingGo": false,
+    "productionAuthorized": false,
+    "limitations": [
+      "Authentication/caller binding, entitlement wrapper, RLS context and kernel decisions are explicit test-only stand-ins.",
+      "Assignment eligibility/relationship mutation, canonical audit persistence, convergence, reminders and evidence ports are instrumented stand-ins; authority/audit stand-ins acquire the real organization advisory transaction lock.",
+      "Response serialization and logging are stand-ins. Actual assignment route, confirmation discovery/parent/child lock SQL, schema mappings and Drizzle/node-postgres execute against the owned copy.",
+      "Uses the existing copy inspection identity uev2admin without impersonating a runtime user. No signed-in access or real authorization is established.",
+      "All transactions roll back; no fixture creation/deletion, durable assignment/confirmation, audit integrity, HTTP result or staging GO is established."
+    ],
+    "workspaceSourceHead": "96f6f79ad685738086f66914582d5461b7a9b870",
+    "prototypeBundleSha256": "46e7e722ef8d3d0214378160b7d5968b14d33ebaeab3f2f50a47b50ae56c651c",
+    "prototypeTrackedSourceDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "prototypeManifestSha256": "035758546e713d321393bebf8c88680c126f2f902fa10ab684194b05e6fad223",
+    "actualSourceModuleHashes": [
+      {
+        "path": "apps/union-eyes/lib/api/errors.ts",
+        "bytes": 4172,
+        "sha256": "d4852b7ee60754dfe3ab909e62e8050a384652556d5aa07fc74dcdceacab8249"
+      },
+      {
+        "path": "apps/union-eyes/lib/api/schemas.ts",
+        "bytes": 3342,
+        "sha256": "b01f7819a6aaa0df7dd20754cb270627581d28439ea1ea7528e36063f0b401f7"
+      },
+      {
+        "path": "apps/union-eyes/app/api/__tests__/support/with-api-stub.ts",
+        "bytes": 7320,
+        "sha256": "5145f9d55eb3b8dad4da28eeb3bafd9c56ee88820716116f6c6f4095d7226a6f"
+      },
+      {
+        "path": "apps/union-eyes/db/schema/domains/claims/grievances.ts",
+        "bytes": 14427,
+        "sha256": "7dfcf25b76bf4a3113bd3b49c652fd4345de2f26efe8d8c59ca3431270f8a772"
+      },
+      {
+        "path": "apps/union-eyes/db/schema/domains/claims/grievance-lifecycle.ts",
+        "bytes": 5081,
+        "sha256": "827b7b31b11073f9e48d9176e71f5fac916447c939deff22185ef7f139059556"
+      },
+      {
+        "path": "apps/union-eyes/lib/authority/store/executor.ts",
+        "bytes": 6377,
+        "sha256": "0256f05222be1056c6a90387a391b0c30d23b93e3e17264bcd602dec2814c0d9"
+      },
+      {
+        "path": "apps/union-eyes/app/api/grievances/[id]/assign/route.ts",
+        "bytes": 6870,
+        "sha256": "25bc6b673287f259fe2991d0918d791f4143561b2eda2e0668f92a23a58202e4"
+      },
+      {
+        "path": "apps/union-eyes/db/schema-organizations.ts",
+        "bytes": 17022,
+        "sha256": "92299ec281612b899331b2c3dfa16d61cc0a4f30f3bf5d6331e1f7924a8be835"
+      },
+      {
+        "path": "apps/union-eyes/db/schema/claims-schema.ts",
+        "bytes": 7134,
+        "sha256": "6c87859e64aa7eda350530125073662ef5c05925367dd8a7fb352199690bf889"
+      },
+      {
+        "path": "apps/union-eyes/db/schema/domains/claims/claims.ts",
+        "bytes": 1015,
+        "sha256": "2d98404ea7e1ee5fbd942e4f81244ad3103e663b8b68881e754b7b619aadf889"
+      },
+      {
+        "path": "apps/union-eyes/db/schema/domains/claims/workflows.ts",
+        "bytes": 28432,
+        "sha256": "0240fde7f62a525f8eeb39656eafd547c8849e80632d76cea5fe5ffdf523867a"
+      },
+      {
+        "path": "apps/union-eyes/lib/deadline-engine/deadline-day.ts",
+        "bytes": 13090,
+        "sha256": "aaa51205aa6754faa1a9656a641c5dc1f80704a5c8a8df440c5d1e1707375fdd"
+      },
+      {
+        "path": "apps/union-eyes/lib/cases/case-deadline-contract.ts",
+        "bytes": 1132,
+        "sha256": "06700da814e3cb7cf083944fa32008187b45e94ace76b9efd661e6e763d57a4c"
+      },
+      {
+        "path": "apps/union-eyes/lib/deadline-engine/deadline-semantics.ts",
+        "bytes": 1505,
+        "sha256": "f86e4a78f8f02b307ff631f1084ad33108e1d1f129a6a986f13be4cd05a98737"
+      },
+      {
+        "path": "apps/union-eyes/lib/deadline-engine/deadline-scope.ts",
+        "bytes": 656,
+        "sha256": "0ab68bea675db8700026c6d6bfc668851688601c524cd3641f15fd1d4326fd42"
+      },
+      {
+        "path": "apps/union-eyes/lib/services/deadline-confirmation-service.ts",
+        "bytes": 9255,
+        "sha256": "4aed7c04d762e6eeb637011766db64bc5a145c0653143092f1e4d2d4e00fa3c6"
+      }
+    ],
+    "fixtureEvidenceSha256": "6f4230be592766441dc050d1a70e5cdc77164dfc72414acea338a4ac5df49e09",
+    "transport": {
+      "bytes": 500132,
+      "programSha256": "aa66588cca278631298ece938c9f87d16b56ffd65fd0da2717d0e8f5969828ef",
+      "fileSha256": {
+        "lock-order-probe.cjs": "46e7e722ef8d3d0214378160b7d5968b14d33ebaeab3f2f50a47b50ae56c651c",
+        "manifest.json": "035758546e713d321393bebf8c88680c126f2f902fa10ab684194b05e6fad223"
+      }
+    }
+  },
+  "stagingGo": false,
+  "productionAuthorized": false
+}

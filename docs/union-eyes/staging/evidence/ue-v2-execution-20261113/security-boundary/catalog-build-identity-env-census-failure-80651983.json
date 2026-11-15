@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-15T06:55:20.953390+00:00",
+  "failedSourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
+  "originalRunId": "43685548434",
+  "originalJobId": "132725225407",
+  "originalStatus": "FAIL",
+  "wholeApplicationResult": {
+    "passed": 26170,
+    "failed": 1,
+    "skipped": 34,
+    "testSuitesPassed": 2002,
+    "testSuitesFailed": 1,
+    "testSuitesSkipped": 5
+  },
+  "failedCheck": "environment registry census: UNDECLARED GIT_SHA 1 > 0 in catalog-admission.ts",
+  "cause": "Catalog inspection source separation read an unregistered name instead of the existing build identity",
+  "repair": "Use GITHUB_SHA, already registered, supplied by Docker build and used by getBuildMetadata; keep source-separation assertions using the same actual build identity",
+  "registryOrCeilingRelaxed": false,
+  "newEnvironmentKnobAdded": false,
+  "validation": {
+    "catalogAndEnvironmentTestsPassed": 47,
+    "suitesPassed": 5,
+    "failed": 0,
+    "strictEnvironmentCensusExitCode": 0
+  },
+  "rawCiLogSha256": "23c094ccc498b88e368c40d58afcedf2dbe54a889237074558a8018cd5879a1d",
+  "stagingGo": false,
+  "productionAuthorized": false
+}

@@ -1,0 +1,77 @@
+{
+  "at": "2026-11-15T06:19:55.062255+00:00",
+  "applicationSourceTested": "96f6f79ad685738086f66914582d5461b7a9b870",
+  "status": "FOCUSED_PASS_BROAD_LOCAL_NOT_PASS",
+  "focused": [
+    {
+      "suite": "Catalog admission/core/canonical",
+      "passed": 32,
+      "failed": 0
+    },
+    {
+      "suite": "Deadline/assignment/continuity and target guards",
+      "passed": 70,
+      "failed": 0,
+      "skippedNativePg": 3
+    },
+    {
+      "suite": "Navigation settlement/request safety",
+      "passed": 23,
+      "failed": 0
+    }
+  ],
+  "focusedEslint": "PASS",
+  "navigationGenerationCheck": "PASS",
+  "repositoryInventoryAndDrift": "PASS",
+  "requiredLocalCommands": [
+    {
+      "command": "pnpm lint",
+      "exitCode": 2,
+      "status": "FAIL",
+      "observedFailure": "Unresolved shared @nzila/os-core/secrets and @azure/storage-blob dependencies in decision-intelligence build"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 2,
+      "status": "FAIL",
+      "observedFailure": "Existing @nzila/cli argument mismatch at src/index.ts:27"
+    },
+    {
+      "command": "pnpm test:fast --maxWorkers=2",
+      "exitCode": 1,
+      "status": "FAIL",
+      "testFilesFailed": 2573,
+      "testFilesPassed": 528,
+      "testFilesSkipped": 1,
+      "testsFailed": 19,
+      "testsPassed": 7787,
+      "testsSkipped": 12,
+      "note": "Shared dependency/configuration initialization and broader local failures remain failures; focused application tests use explicit source aliases"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0,
+      "status": "PASS",
+      "criticalErrors": 0
+    },
+    {
+      "command": "pnpm governance:audit",
+      "exitCode": 2,
+      "status": "FAIL",
+      "observedFailure": "Reached financial-service typecheck; missing shared workspace dependencies and TypeScript library errors. Finance remains out of base; no implementation changes made."
+    }
+  ],
+  "gitleaks": {
+    "version": "8.30.1",
+    "sourceRange": "e539e6ddc5bf5934c6f6cb40065d1a14faee6101..96f6f79ad685738086f66914582d5461b7a9b870",
+    "status": "PASS_AFTER_EXACT_FALSE_POSITIVE_REVIEW",
+    "originalCiRun": "43684531323",
+    "originalJob": "132722108242",
+    "originalStatus": "FAIL",
+    "finding": "generic-api-key at source-derived navigation inventory line7",
+    "verifiedPublicSourceDigest": "4a33635c65fea47b9eb294522c7cd9151a2a75f9e47cc8eb7ba7378e99e2de71",
+    "exceptionScope": "Original introducing commit + exact path/rule/line fingerprint only; no rule or file exclusion"
+  },
+  "stagingGo": false,
+  "productionAuthorized": false
+}

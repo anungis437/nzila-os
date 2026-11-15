@@ -1,5 +1,6 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { grievanceDeadlines } from '@/db/schema/domains/claims/workflows';
+import { grievances } from '@/db/schema/domains/claims/grievances';
 import { withRLSContext, type RLSTx } from '@/lib/db/with-rls-context';
 import { MEMBER_VISIBLE_DEADLINE_TYPE } from '@/lib/cases/case-deadline-contract';
 import { ApiError } from '@/lib/api/errors';
@@ -23,9 +24,23 @@ type DeadlineActor = { organizationId: string; deadlineId: string; actorId: stri
 
 /** The older confirmation URL shares the case-specific authority boundary with manual management. */
 export async function authorizeDeadlineConfirmation(tx: RLSTx, params: DeadlineActor, allowTerminal = false) {
-  const [current] = await tx.select({ grievanceId: grievanceDeadlines.grievanceId, status: grievanceDeadlines.status, deadlineType: grievanceDeadlines.deadlineType })
+  // Discover the parent without locking the child. Manual deadline management and formal
+  // reassignment lock the owning grievance first; taking the child first would invert that order.
+  const [reference] = await tx.select({ grievanceId: grievanceDeadlines.grievanceId })
     .from(grievanceDeadlines)
     .where(and(eq(grievanceDeadlines.id, params.deadlineId), inOrganization(params.organizationId)))
+    .limit(1);
+  if (!reference) return null;
+  const [parent] = await tx.select({ id: grievances.id })
+    .from(grievances)
+    .where(and(eq(grievances.id, reference.grievanceId), eq(grievances.organizationId, params.organizationId)))
+    .limit(1).for('update');
+  if (!parent) return null;
+  // The parent lock may have waited for reassignment. Re-read both the owning link and source
+  // state under its own lock, then decide authority afresh; the discovery read grants nothing.
+  const [current] = await tx.select({ grievanceId: grievanceDeadlines.grievanceId, status: grievanceDeadlines.status, deadlineType: grievanceDeadlines.deadlineType })
+    .from(grievanceDeadlines)
+    .where(and(eq(grievanceDeadlines.id, params.deadlineId), eq(grievanceDeadlines.grievanceId, parent.id), inOrganization(params.organizationId)))
     .limit(1).for('update');
   if (!current) return null;
   const actor = { organizationId: params.organizationId, userId: params.actorId };

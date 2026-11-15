@@ -1,25 +1,59 @@
 # Current staging and acceptance delta
 
-Staging serves application source `dd5baaa614ad12dfb1876e59adf73b82bad6df87` at100% on `nzila-ue-v2-staging-app--reldd5baaa614`, immutable image `sha256:7417b2b00e3b18eb6bbe9fad56b56ce67d4ef16dd7023d24de0c1fa210bb300e`. Build43649645122 and deployment43650665974 succeeded using workflow/IaC `034b3498fe68da339c81deb24faa0a424f71cdac` under CHG-2026-0114. Source PR1228 and binding PR1229 completed all registered checks and16 trusted required checks before normal merge. Each whole-application suite reported26,108 passed and34 skipped tests. Base STAGING remains **NO_GO** pending the remaining actual runtime evidence.
+Staging serves application `2107feeb1c2949042d97bd0606efb18e7aa95beb` at100% on
+`nzila-ue-v2-staging-app--rel2107feeb1c`, image
+`sha256:968ba6845f2ad622a7275734a5123daa5cbb329b6c0a76580b170ca1f63af0a0`.
+Build43675288070 and protected CHG-2026-0114 deployment43676475162 used workflow/IaC
+`e539e6ddc5bf5934c6f6cb40065d1a14faee6101`. PR1231/1232 were admitted after all registered
+and16 trusted required successes. Base STAGING remains **NO_GO**.
 
-The deployed repair gives cases with null references a real case-id fallback and exposes the English/French formal-grievance collection entry only to the canonical server roles admitted by that destination. Exact native fresh/restore/repeat/privilege qualification passed; all six backend source graphs and bundles match the prior qualified source. Primary admission executed0 guard SQL and preserved the40 immutable migrations.
+Actual2107 intake-case assignment/deadline management passes22 checks. Formal grievance
+continuity/deadline management passes42, including staff create/reschedule/complete/cancel,
+represented-member read-only dates, EN/FR desktop/mobile, canonical identity mapping and
+assignment revocation. Original roles were restored and fixture authority retired; synthetic
+records remain. The first formal verifier failure is preserved: its exact case card had not
+been expanded before waiting for the detail link. The corrected fresh flow passed.
 
-On this deployed source, actual failed-revision recovery43651736905 passed: the bad revision became unhealthy, the exact healthy template recovered at0 traffic, both drill revisions were deactivated, and the known application retained100% traffic. Azure latest/latestReady metadata names the inactive recovery revision; serving traffic remains on the named application revision. Actual same-unexpired-session membership revocation43651455708 denied both case and document access. A separately verified owned-membership restoration completed after an initial operator timeout; the initial coordinator failure remains preserved.
+Paired/session revocation43677154289 passes. Its original issued document URL returned403
+AuthenticationFailed at05:35:29.865Z after its original05:35:17Z expiry, with the same URL hash
+and no query, clock or lease alteration. Failed-revision recovery43677270661 passes; the known
+serving revision retained100%, both drills are inactive, and latest/Ready metadata names an
+inactive recovery revision. The owned-copy signed protocol passed at05:19 and the copy is stopped.
+Initial native audit verifies906/35 records and two actual sealed packs; final audit must follow
+all remaining logical mutations and cleanup.
 
-Fresh paired-session run43663344651 passed on the same application. Its private document returned69 checksum-verified bytes before the original02:34:36Z November15 expiry. The actual unchanged URL returned403 AuthenticationFailed at02:34:57.785Z after that original expiry, with the same signed-URL hash and no clock or lease alteration (actual-private-document-expiry-dd5baaa6.json). Initial native isolation, retained-data, audit-chain and sealed-evidence checks passed; final audit and retention verification must follow all remaining logical mutations and role cleanup.
+The actual canonical performance run43675284397 still fails on2107: approximately1.99s p95
+and2.51s p99 against unchanged500/1500ms limits. The original wrong-target failure remains;
+the existing staging target now points at the actual V2 endpoint. The original executive
+navigation43680811518 settings redirect/reload failure is also retained. All seven corrected
+persona profiles must pass on the replacement source.
 
-Member navigation43663846701 stopped after46 observations because a sensitive finance boundary read raised a connection reset without an HTTP response. It is a failed run, not a finance feature request or a passed denial. The verifier now bounds connection-reset retries to reads, never retries writes or HTTP responses, and retains explicit retry observations and required status assertions. Both acceptance scripts omit credential-bearing framework call logs from persisted failures. The original failed artifact was preserved privately and removed from GitHub; its redacted receipt and containment hashes are retained in this evidence directory. The owned synthetic session has expired.
+Proposed application source is `5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb` (PR1233), with
+integration PR1234. It coalesces only overlapping catalog inspections and discards every settled
+result, aligns formal assignment and legacy confirmation with parent-first deadline locks, and
+verifies exact source-defined settings destinations on separate desktop/mobile visits. The final
+correction uses the existing registered, image-supplied GITHUB_SHA build identity. Undeployed806
+whole-app CI passed26,170 tests and failed one census check for its GIT_SHA read; that failure
+remains on file. The correction passes47 catalog/environment checks and the strict census without
+changing a ceiling or adding an environment knob.
 
-Remaining qualification includes all seven successful persona profiles, actual member intake and signatures, assignment and persisted notes, the English/French workbench-to-assigned-grievance browser journey, messaging privacy, malware refusal, worker recovery and retirement, the owned restored-copy protocol, actual document expiry, final audit/retention/telemetry, and original-role/temporary-authority cleanup. Historical source results cannot satisfy this source's runtime pass rule. The verifier repair changes neither application source nor image and requires no application deployment.
+Exact5b5 native fresh/restore/repeat/privileges pass with24,576 catalog objects. Seven fresh native
+tools verify all included source bytes and pass build/load checks without framework/database/role/
+kernel mocks. The deadline import smoke uses test mode; configured signed-runtime execution remains
+required. A separate actual recovery-copy lock-only probe passed three checks with seven rollbacks
+and unchanged fixture hashes; all16 source modules match5b5. It claims no authentication, kernel/RLS
+binding or durable commit. The earlier catalog comparison of approximately1.96s versus0.37s is
+historical806 native evidence; fresh corrected-source measurement and actual deployed k6 remain required.
 
-Finance/dues persistence and Financial Officer2.1 are outside the base release; sensitive finance boundaries must fail closed. Preserve live Azure data; no reset/replay or production deployment. Anungis/anungis437 are one founder, with Codex executing under continuing staging delegation. Global SaaS readiness remains NO_GO, the frozen777 closure counts remain unchanged, and Phase3B is not authorized. [Contract](UE_STAGING_GO_CONTRACT.json) · [Evidence index](evidence/ue-v2-execution-20261113/security-boundary/index.json).
+Remaining work is exact source/integration CI and normal main admission, signed-runtime rehearsal,
+read-only primary zero-SQL/40-migration/retention checks, immutable build, concrete reviewed rollout,
+the unchanged performance gate, all seven personas and final business/privacy/worker/recovery/audit/
+telemetry evidence. Historical observations cannot satisfy replacement runtime criteria.
 
-Owner clarification on November14: staff must create and manage case deadlines in the base release. Current dd5baaa6 provides reminder processing but not the required staff creation/completion journey. This is an additional base release blocker. The proposed dedicated case route and English/French deadline panel add staff-entered dates, rescheduling, completion and cancellation under explicit case-specific authority and atomic audit. Automatic legal filing-date calculation is not claimed. Intake-case email reminders remain unavailable and are stated as such; the existing formal-grievance scheduler is retained. Source qualification, private retained-schema rehearsal, an authorized staging rollout and new candidate runtime evidence are still required.
-
-The deadline repair also closes the older confirmation URL’s role-only authorization path and keeps its override/supersession reminders consistent. Publishing member-visible dates requires separate kernel disclosure authority; historical internal deadline descriptions are withheld from the member projection. Initial source c16f7c25 CI passed26,140 tests and failed two census checks because the replaced unavailable component remained unused; that component is now removed, and the original failure is retained. Final local regression is414 passed tests across20 suites. The first native rehearsal failed before deadline execution because the pinned Argon2 Linux binary was omitted; that failure remains preserved. The corrected exact-source2107feeb rehearsal passes both intake and formal deadline services using real signed provider identities, native runtime transactions, retained schema, actual audit/reminders and denied writes. Setup and cleanup pass for both phases; the owned copy is again stopped and retained. Exact fresh/restore/repeat/privileges and all7 compiled source graphs pass. Primary inspection requires0guardSQL and makes no business mutation. These results do not claim a deployed deadline journey.
-
-
-Proposed application source is `2107feeb1c2949042d97bd0606efb18e7aa95beb` (PR1231). Source and integration CI, immutable build, concrete staging review and deployment remain pending. Verification-only PR1230 was normally merged at `43105177dcf270ac86747874ada42159790b9fb9` after all registered and16trusted required successes; it does not change the running image or the original build/deploy/IaC provenance. See [current native qualification](evidence/ue-v2-execution-20261113/security-boundary/native-source-graphs-2107feeb.json).
-
-
-Initial integration8f9d4d12 shared coverage failed because its shared change-approval validator retained the previous exact candidate pin. The corrected integration binds that fourth validator as well and adds explicit previous-candidate refusal; all94 local change-management tests pass. The original CI failure remains on file and final integration CI must pass before merge.
+Staff deadline creation and management are required. Dates are staff-entered; automatic legal
+calculation and intake email reminders are not claimed. Formal reminder processing remains in scope.
+Finance/dues persistence and Financial Officer2.1 are excluded; sensitive finance boundaries must
+fail closed. Preserve live Azure data,40 immutable migrations and signing keys. Anungis/anungis437
+are one founder; Codex executes the continuing staging delegation. No production, global SaaS
+promotion, frozen777 closure change or Phase3B. [Contract](UE_STAGING_GO_CONTRACT.json) ·
+[Evidence index](evidence/ue-v2-execution-20261113/security-boundary/index.json).

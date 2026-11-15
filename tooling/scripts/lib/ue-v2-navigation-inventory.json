@@ -1,9 +1,11 @@
 {
-  "applicationSourceSha": "2107feeb1c2949042d97bd0606efb18e7aa95beb",
+  "applicationSourceSha": "5b5d0a2f402e3f11e8d2cccfe528e9a3a5e4bebb",
   "sourceDigests": {
     "apps/union-eyes/lib/dashboard/role-experience.ts": "972f2a0d4a90230d01dd31941a70fdaf65dbe535284c777230b713bc0b47c826",
     "apps/union-eyes/lib/executive/executive-navigation.ts": "1c85199c05fadb90cf5e3bb2dbea949c5c275c2ebd4e676ced40fde373c6a187",
-    "apps/union-eyes/lib/auth/roles.ts": "fb554f61106e309292f054e7a36348de5045ebb45e250bfb37d6af25446e1ace"
+    "apps/union-eyes/lib/auth/roles.ts": "fb554f61106e309292f054e7a36348de5045ebb45e250bfb37d6af25446e1ace",
+    "apps/union-eyes/lib/auth/org-settings-access.ts": "4a33635c65fea47b9eb294522c7cd9151a2a75f9e47cc8eb7ba7378e99e2de71",
+    "apps/union-eyes/app/[locale]/dashboard/settings/page.tsx": "8486c554fe926947944bdc468b32ccfaf268194d2dd55d94e1553be49dc370e3"
   },
   "canonicalEntryCount": 42,
   "uniquePaths": [
@@ -326,7 +328,11 @@
           "group": "Account"
         }
       ],
-      "deepGovernance": []
+      "deepGovernance": [],
+      "accountSettings": {
+        "path": "/dashboard/settings",
+        "destination": "/dashboard/profile"
+      }
     },
     "steward": {
       "experience": "staff",
@@ -373,7 +379,11 @@
           "group": "Settings"
         }
       ],
-      "deepGovernance": []
+      "deepGovernance": [],
+      "accountSettings": {
+        "path": "/dashboard/settings",
+        "destination": "/dashboard/profile"
+      }
     },
     "chief_steward": {
       "experience": "staff",
@@ -420,7 +430,11 @@
           "group": "Settings"
         }
       ],
-      "deepGovernance": []
+      "deepGovernance": [],
+      "accountSettings": {
+        "path": "/dashboard/settings",
+        "destination": "/dashboard/profile"
+      }
     },
     "officer": {
       "experience": "executive",
@@ -465,7 +479,11 @@
       "deepGovernance": [
         "/dashboard/trust",
         "/dashboard/intelligence"
-      ]
+      ],
+      "accountSettings": {
+        "path": "/dashboard/settings",
+        "destination": "/dashboard/profile"
+      }
     },
     "secretary_treasurer": {
       "experience": "executive",
@@ -515,7 +533,11 @@
       "deepGovernance": [
         "/dashboard/trust",
         "/dashboard/intelligence"
-      ]
+      ],
+      "accountSettings": {
+        "path": "/dashboard/settings",
+        "destination": "/dashboard/profile"
+      }
     },
     "admin": {
       "experience": "admin",
@@ -543,7 +565,11 @@
           "href": "/dashboard/audits"
         }
       ],
-      "deepGovernance": []
+      "deepGovernance": [],
+      "accountSettings": {
+        "path": "/dashboard/settings",
+        "destination": "/dashboard/settings"
+      }
     },
     "app_owner": {
       "experience": "admin",
@@ -587,7 +613,11 @@
           "href": "/dashboard/operations"
         }
       ],
-      "deepGovernance": []
+      "deepGovernance": [],
+      "accountSettings": {
+        "path": "/dashboard/settings",
+        "destination": "/dashboard/settings"
+      }
     }
   }
 }
