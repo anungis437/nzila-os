@@ -1,0 +1,63 @@
+{
+  "status": "PASS_EXACT_SOURCE_AND_BINDING_CI_NORMAL_MAIN_ADMISSION",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "integrationSha": "b28afebeb1c521688e1aa854aca32b5cbc052963",
+  "heads": [
+    {
+      "pr": 1241,
+      "headSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "actualPreMergeEligible": true,
+      "trustedRequiredChecks": 16,
+      "failedOrPendingOrMissingOrUnresolved": false,
+      "eligibilitySnapshotSha256": "4932795e7139048c96ae3bbff8083f7c10020229f794fa537fa499316e533ced"
+    },
+    {
+      "pr": 1242,
+      "headSha": "b28afebeb1c521688e1aa854aca32b5cbc052963",
+      "actualPreMergeEligible": true,
+      "trustedRequiredChecks": 16,
+      "failedOrPendingOrMissingOrUnresolved": false,
+      "eligibilitySnapshotSha256": "23cd3c707ee7ffd2fb39e89a763621b1e18dcec407d46e2ee96a976dff2c34cc"
+    }
+  ],
+  "actualMergeRecordSha256": "d8ddb6a743f2d238a3e7cc4f5e59a10fc833835c85a2004770d59640e5352a10",
+  "merged": [
+    {
+      "pr": 1241,
+      "headSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "mergeSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+      "mergedAt": "2026-11-15T19:55:32Z"
+    },
+    {
+      "pr": 1242,
+      "headSha": "b28afebeb1c521688e1aa854aca32b5cbc052963",
+      "mergeSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+      "mergedAt": "2026-11-15T19:55:30Z"
+    }
+  ],
+  "mainTreeExactlyEqualsBindingHead": true,
+  "protectionBypassUsed": false,
+  "wholeApplicationCI": {
+    "status": "PASS_ACTUAL_EXACT_SOURCE_CI_NOT_STAGING_ACCEPTANCE",
+    "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "runId": 43748661677,
+    "jobId": 132917499168,
+    "workflowPath": ".github/workflows/ue-full-regression.yml",
+    "jobConclusion": "success",
+    "startedAt": "2026-11-15T18:47:02Z",
+    "completedAt": "2026-11-15T19:00:03Z",
+    "summaryLines": [
+      "2026-11-15T18:59:57.1072087Z  Test Files  2008 passed | 5 skipped (2013)",
+      "2026-11-15T18:59:57.1241101Z       Tests  26215 passed | 34 skipped (26249)"
+    ],
+    "rawJobLogSha256": "bfb5fc31c0a0bb8a8e3e528e92ab2287731611029311c21de9e240c1a563f108",
+    "actualStagingAcceptance": false,
+    "stagingGo": false,
+    "collectedAt": "2026-11-15T19:12:22.450016+00:00"
+  },
+  "localHolisticAdvisory": "FAIL_4_OF_5_LOCAL_COMMANDS_RETAINED",
+  "sourceCIIsNotRuntimeAcceptance": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

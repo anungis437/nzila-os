@@ -151,3 +151,10 @@ and policies. It preserves grantors, grant options, ownership, RLS flags,
 function bodies and every policy literal/operator. Negative regressions prove
 that public grants, BYPASSRLS, tenant-predicate changes and role-literal changes
 remain different. No object was missing or extra in the measured round trip.
+
+
+## Final exact-source base staging acceptance — 2026-11-15T22:14:29.715619+00:00
+
+Application `241006d302c14567e541d619675fbead3ec3f258`, binding `b28afebeb1c521688e1aa854aca32b5cbc052963` and deployed workflow/IaC `c51dcd75094e4af364b5c9d54a75f3321e2eef1b` have completed the actual source-bound qualification. Source #1241/binding #1242 passed all 16 trusted required contexts and normal main admission; immutable build 43755125987 and protected deployment 43756733431 serve named revision `--rel241006d302` at 100%. All 7 real persona runs, independent role restoration, six base journeys, six worker scenarios/retirement, original paired-cookie revocation and full-hour original URL expiry, final primary retention and native audit/seals, EN/FR mobile presentation, canonical public workload 354.1058007 ms p95, telemetry and zero-traffic recovery pass. The original missing claim-cleanup receipt remains FAIL and is explicitly reconciled by exact-owned retirement plus independent read.
+
+Codex records **STAGING_GO / BASE_RELEASE_STAGING_ONLY** under the continuing founder-delegated operator/reviewer authority, CHG-2026-0114. Anungis/anungis437 are the same founder; no independent human approval is asserted. Authority expiry 2026-11-16T23:59:59Z unchanged. [Current candidate](UE_V2_CURRENT_CANDIDATE.md) and the source-bound evidence/contract retain local holistic FAIL_ADVISORY, the known schema-overlay profile, manual deadline dates, no intake-case email reminder or inbox-delivery claim, bounded issued-URL expiry, no full-traffic failover claim, finance persistence/Financial Officer 2.1 exclusions, global 777 / zero formal closures / global SaaS NO_GO / Phase 3B HOLD and no production authorization. Primary retained data,40 immutable migrations and signing references remain preserved.

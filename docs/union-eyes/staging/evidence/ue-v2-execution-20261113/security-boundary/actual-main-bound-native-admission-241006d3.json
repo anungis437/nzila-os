@@ -1,0 +1,58 @@
+{
+  "status": "PASS_CURRENT_SOURCE_MAIN_BOUND_SIGNED_OWNED_COPY_AND_PRIMARY_READ_ONLY_ADMISSION",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "sourceAndBindingRequiredTrustedChecks": 16,
+  "nativeCopyActualCycleSha256": "2a3ff02a770d01f37ff4c762f00a00e44a917eede7fa12794bbf3f571a393986",
+  "nativeCopyManifestSha256": "924a2803fcc2ea54c7d0783c3cb2effdff8a460e878ed49a925b59154966452d",
+  "phases": [
+    {
+      "name": "primary-zero-sql",
+      "status": "PASS",
+      "actualReceiptSha256": "7d7c9727949059c7e8b14f2a3a9c0f145c00545a0d575ac90d19ee53cae4968c"
+    },
+    {
+      "name": "signed-protocol",
+      "status": "PASS",
+      "actualReceiptSha256": "f8874e46cfb43ce0aa4a9e4a7cbfc25accca680e174c22a19f55e32fbae4a516"
+    },
+    {
+      "name": "clean-baseline-diagnostic",
+      "status": "PASS",
+      "actualReceiptSha256": "fe4f2b3dcee6ceecd5fa4379cbad93293927e71b4e666a2d7fbf06bd77c9077f"
+    },
+    {
+      "name": "source-native-deadline",
+      "status": "PASS",
+      "actualReceiptSha256": "ccb2fa44127929caf3db176203badadb141ec72cf311df63de81015e687c0e1b"
+    },
+    {
+      "name": "final-copy-audit",
+      "status": "PASS",
+      "actualReceiptSha256": "308892c476dcdcd6a68318bdf1c2df31c590614da1482169db7c2a5b6c78d64c"
+    },
+    {
+      "name": "final-copy-zero-sql",
+      "status": "PASS",
+      "actualReceiptSha256": "04a7f36149895713518278e5df4c11d58706e5bef625f5f13ae27211dd21039d"
+    }
+  ],
+  "allActualSixPhasesPassed": true,
+  "ownedCopyStopped": true,
+  "copyDataAndServerRetained": true,
+  "copyNetworkExactlyUnchanged": true,
+  "primaryRerouted": false,
+  "observedApplicationDuringPredeployment": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "primaryActualReadOnlyReceiptSha256": "7d7c9727949059c7e8b14f2a3a9c0f145c00545a0d575ac90d19ee53cae4968c",
+  "primaryGuardStatements": 0,
+  "immutableMigrationCount": 40,
+  "originalIdsPreserved": true,
+  "physicalOwnerAclRlsAndTableIdentityBaselinePreserved": true,
+  "primaryNoDdlOrPrivilegeMutation": true,
+  "primaryNoBusinessDml": true,
+  "currentSourceNativeExportSha256": "1ca41764011697974496193a81d8800aee61a83c157cd403e39f9d3b704dd095",
+  "copyRetentionScope": "RECORDED_ORIGINAL_RESTORED_COPY_CASES_ONLY",
+  "predeploymentProofDoesNotClaimDeployedApplicationAcceptance": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

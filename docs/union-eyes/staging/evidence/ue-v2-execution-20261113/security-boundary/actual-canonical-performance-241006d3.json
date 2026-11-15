@@ -1,0 +1,163 @@
+{
+  "status": "PASS",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "runId": "43755122322",
+  "runAttempt": 2,
+  "jobId": 132945242707,
+  "artifactId": 14178318318,
+  "artifactArchiveSha256": "463831545ded800482a711182539c4161272be099c7640bda1e9c7704b2ea02c",
+  "workloadSha256": "46427acd5c6d1df3e9c70ae7b727440a94dc6fa180cca7f784e7ea29950251ac",
+  "thresholdsUnchanged": {
+    "p95Milliseconds": 500,
+    "p99Milliseconds": 1500
+  },
+  "observedBefore": {
+    "app": "union-eyes",
+    "gitSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "buildTimestamp": "2026-11-15T19:58:44Z",
+    "appVersion": "0.0.0",
+    "releaseId": "UE-V2-STAGING-241006d302c14567e541d619675fbead3ec3f258",
+    "artifactId": "241006d302c14567e541d619675fbead3ec3f258"
+  },
+  "observedAfter": {
+    "app": "union-eyes",
+    "gitSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "buildTimestamp": "2026-11-15T19:58:44Z",
+    "appVersion": "0.0.0",
+    "releaseId": "UE-V2-STAGING-241006d302c14567e541d619675fbead3ec3f258",
+    "artifactId": "241006d302c14567e541d619675fbead3ec3f258"
+  },
+  "metrics": {
+    "data_received": {
+      "count": 41555258,
+      "rate": 294499.69471328886
+    },
+    "http_reqs": {
+      "count": 1160,
+      "rate": 8.220852481951024
+    },
+    "errors": {
+      "fails": 870,
+      "passes": 0,
+      "thresholds": {
+        "rate<0.25": false
+      },
+      "value": 0
+    },
+    "http_req_tls_handshaking": {
+      "max": 64.764191,
+      "p(90)": 0,
+      "p(95)": 0,
+      "avg": 0.27115940603448274,
+      "min": 0,
+      "med": 0
+    },
+    "http_req_failed": {
+      "passes": 290,
+      "fails": 870,
+      "value": 0.25
+    },
+    "data_sent": {
+      "count": 168424,
+      "rate": 1193.6110848449302
+    },
+    "http_req_sending": {
+      "p(90)": 0.089354,
+      "p(95)": 0.0991165,
+      "avg": 0.05333146206896545,
+      "min": 0.011792,
+      "med": 0.0465925,
+      "max": 0.15443
+    },
+    "http_req_waiting": {
+      "p(90)": 340.93240529999997,
+      "p(95)": 352.84125185,
+      "avg": 206.0305329215518,
+      "min": 74.601811,
+      "med": 176.557483,
+      "max": 949.800696
+    },
+    "checks": {
+      "passes": 1740,
+      "fails": 0,
+      "value": 1
+    },
+    "http_req_duration": {
+      "med": 225.779579,
+      "max": 949.933876,
+      "p(90)": 342.9148783,
+      "p(95)": 354.1058007,
+      "avg": 234.18229379827605,
+      "min": 74.791165,
+      "thresholds": {
+        "p(95)<500": false,
+        "p(99)<1500": false
+      }
+    },
+    "vus": {
+      "value": 1,
+      "min": 1,
+      "max": 5
+    },
+    "http_req_blocked": {
+      "p(95)": 0.000611,
+      "avg": 0.5393571948275815,
+      "min": 0.000191,
+      "med": 0.00034,
+      "max": 127.130087,
+      "p(90)": 0.000531
+    },
+    "http_req_connecting": {
+      "p(90)": 0,
+      "p(95)": 0,
+      "avg": 0.2636291189655172,
+      "min": 0,
+      "med": 0,
+      "max": 62.499086
+    },
+    "vus_max": {
+      "min": 5,
+      "max": 5,
+      "value": 5
+    },
+    "iteration_duration": {
+      "p(95)": 2238.48469255,
+      "avg": 1840.7543482620695,
+      "min": 1438.236174,
+      "med": 1827.121427,
+      "max": 2459.512284,
+      "p(90)": 2020.5786398999999
+    },
+    "iterations": {
+      "rate": 2.055213120487756,
+      "count": 290
+    },
+    "http_req_duration{expected_response:true}": {
+      "avg": 241.82822031149405,
+      "min": 74.791165,
+      "med": 235.795422,
+      "max": 949.933876,
+      "p(90)": 345.5650944,
+      "p(95)": 357.08665644999996
+    },
+    "http_req_receiving": {
+      "max": 123.898965,
+      "p(90)": 62.0703543,
+      "p(95)": 64.46951584999998,
+      "avg": 28.09842941465517,
+      "min": 0.023191,
+      "med": 0.4914925
+    }
+  },
+  "requestedAt": "2026-11-15T20:22:08.009432+00:00",
+  "at": "2026-11-15T20:25:24.481803+00:00",
+  "scope": "UNCHANGED_CANONICAL_PUBLIC_CI_PROFILE",
+  "actualPrivateReceipt": {
+    "privateFileName": "actual-241006d3-canonical-performance-progress.json",
+    "sha256": "dec7faab9d08c0c399ca697366a22151dad3639ec73382d7b7df176c36be6c80"
+  },
+  "initialAttemptNotCandidateAcceptance": true,
+  "allAuthenticatedApiLatencyClaimed": false,
+  "stagingGo": false
+}

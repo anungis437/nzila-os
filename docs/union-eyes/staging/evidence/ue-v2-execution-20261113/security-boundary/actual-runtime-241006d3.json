@@ -1,0 +1,125 @@
+{
+  "status": "PASS_EXACT_DEPLOYED_SOURCE_IMAGE_WORKFLOW_INFRASTRUCTURE_AND_SEVEN_ALERTS",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "buildRunId": "43755125987",
+  "deploymentRunId": "43756733431",
+  "runtimeRecord": {
+    "privateFileName": "observed-runtime-241006d3.json",
+    "sha256": "a265c8314eb9d831f0021d4e97afdbfd62d1e4b25c8abd982262ed6a99c01de6"
+  },
+  "version": {
+    "app": "union-eyes",
+    "gitSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "buildTimestamp": "2026-11-15T19:58:44Z",
+    "appVersion": "0.0.0",
+    "releaseId": "UE-V2-STAGING-241006d302c14567e541d619675fbead3ec3f258",
+    "artifactId": "241006d302c14567e541d619675fbead3ec3f258"
+  },
+  "readiness": {
+    "ready": true,
+    "status": "ready",
+    "app": "union-eyes",
+    "environment": "staging",
+    "gitSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "buildTimestamp": "2026-11-15T19:58:44Z",
+    "artifactId": "241006d302c14567e541d619675fbead3ec3f258",
+    "releaseId": "UE-V2-STAGING-241006d302c14567e541d619675fbead3ec3f258",
+    "appVersion": "0.0.0",
+    "timestamp": "2026-11-15T20:21:49.104Z",
+    "checks": {
+      "process": "ok",
+      "noTestBypass": "ok",
+      "database": "ok",
+      "catalogAuthority": "ok",
+      "storage": "unknown",
+      "thirdParty": "unknown",
+      "decisionProof": "ok"
+    }
+  },
+  "azure": {
+    "name": "nzila-ue-v2-staging-app",
+    "revision": "nzila-ue-v2-staging-app--rel241006d302",
+    "image": "nzilaventuresacr.azurecr.io/nzila-os-union-eyes-v2@sha256:b021b664a0ac0ed90eaec14a232e28cf22f92d6bc50d93ad80512e26443fd874",
+    "minReplicas": 1,
+    "maxReplicas": 2,
+    "traffic": [
+      {
+        "revisionName": "nzila-ue-v2-staging-app--rel241006d302",
+        "weight": 100
+      }
+    ],
+    "probes": [
+      {
+        "httpGet": {
+          "path": "/api/health/liveness",
+          "port": 3000
+        },
+        "initialDelaySeconds": 20,
+        "periodSeconds": 20,
+        "timeoutSeconds": 5,
+        "type": "Liveness"
+      },
+      {
+        "httpGet": {
+          "path": "/api/ready",
+          "port": 3000
+        },
+        "initialDelaySeconds": 10,
+        "periodSeconds": 10,
+        "timeoutSeconds": 10,
+        "type": "Readiness"
+      }
+    ],
+    "verifiedConfiguration": {
+      "DB_POOL_MAX": {
+        "name": "DB_POOL_MAX",
+        "value": "1"
+      },
+      "DATABASE_POOL_SIZE": {
+        "name": "DATABASE_POOL_SIZE",
+        "value": "1"
+      },
+      "SYSTEM_DB_POOL_MAX": {
+        "name": "SYSTEM_DB_POOL_MAX",
+        "value": "1"
+      },
+      "AUTH_DB_POOL_MAX": {
+        "name": "AUTH_DB_POOL_MAX",
+        "value": "1"
+      },
+      "AUTH_SYSTEM_DB_POOL_MAX": {
+        "name": "AUTH_SYSTEM_DB_POOL_MAX",
+        "value": "1"
+      },
+      "NAR_SIGNING_SECRET": {
+        "name": "NAR_SIGNING_SECRET",
+        "secretRef": "nar-signing-secret"
+      },
+      "NAR_SIGNING_KEY_ID": {
+        "name": "NAR_SIGNING_KEY_ID",
+        "value": "ue-v2-staging-nar-v1"
+      },
+      "READY_REQUIRE_DECISION_PROOF": {
+        "name": "READY_REQUIRE_DECISION_PROOF",
+        "value": "true"
+      }
+    },
+    "workspaceId": "ce2ff61f-0059-46eb-b18b-a9be8162d009",
+    "workspaceResourceId": "/subscriptions/d562ba7f-d891-4504-a489-10917c0ebaaf/resourceGroups/nzila-canada-staging-rg/providers/Microsoft.OperationalInsights/workspaces/nzila-ue-v2-staging-law",
+    "workspaceRetentionDays": 30,
+    "workspaceDailyCapGb": 1
+  },
+  "infrastructureProvenance": {
+    "schema": "ue-v2-staging-infrastructure/v1",
+    "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "infrastructureSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+    "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+    "parametersSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+    "infrastructureTreeSha": "a3911f56bf832a45bf0eddce39959bb69a1eca0f",
+    "templateSha256": "898134f80ac86db92eacd88e70c29d6c83210a067de9c88a6815c372937d1350"
+  },
+  "sevenAlertsVerified": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

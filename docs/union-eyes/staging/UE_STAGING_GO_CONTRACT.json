@@ -4,43 +4,60 @@
   "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
   "generatedOn": "2026-11-15",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
-  "acceptedStagingCandidateSha": null,
-  "stagingWorkflowDefinitionSha": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
-  "verdict": "STAGING_NO_GO",
-  "verdictReason": "E is healthy and passes canonical performance, six base journeys, six worker scenarios, recovery and telemetry. Actual French390px visual review still finds a squeezed grievance title. F gives the title its mobile row width and places status below it while preserving desktop. Forty-nine focused tests, scoped lint, exact JSX/Tailwind browser presentation and fresh native/export proofs pass. Four broad local commands fail with an explicit delta. All17required F criteria need exact-source CI, normal admission and fresh deployed evidence.",
+  "acceptedStagingCandidateSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "stagingWorkflowDefinitionSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "verdict": "STAGING_GO",
+  "verdictReason": "All17required scoped BASE criteria now PASS on actual deployed F241006d3/M5c51dcd75, including all7real personas and cleanup, staff deadline management, full original URL expiry, native audit/seals/retention and unchanged canonical performance. Broad local regression remainsFAIL_ADVISORY; finance persistence, global777 closure, global SaaS promotion, Phase3B and production excluded.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
-    "acceptanceRecorded": false
+    "acceptanceRecorded": true,
+    "recordedAt": "2026-11-15T22:14:29.715619+00:00",
+    "recordedBy": "Codex under continuing founder-delegated operator/reviewer authority",
+    "authority": "CHG-2026-0114",
+    "ownerAccountsRepresentSameFounder": [
+      "anungis",
+      "anungis437"
+    ],
+    "independentHumanApprovalClaimed": false,
+    "evidence": "observed-runtime-241006d3-reconciliation.json"
   },
   "boundaries": {
     "stagingOnly": true,
     "productionAuthorized": false,
     "mergeAuthorizedByThisContract": false,
-    "institutionalPowersInferred": false
+    "institutionalPowersInferred": false,
+    "baseReleaseStagingOnly": true
   },
   "passRule": "Every REQUIRED criterion must be PASS from real deployed evidence on the accepted staging revision; synthetic, local, source-only, or historical evidence cannot satisfy a runtime criterion.",
   "criteria": [
     {
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Actual version, readiness, image digest, source ancestry and main workflow match F/M5.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-runtime-241006d3.json"
+      ]
     },
     {
       "id": "SOURCE_ENGINEERING",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "status": "PASS",
+      "evidence": "Frozen777 remain source-implemented with zero formal closures; exact-source whole application CI passed26215 tests,34 skipped. Scoped base runtime proofs are separate.",
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": true,
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": false,
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "source-ci-and-normal-main-admission-241006d3.json",
+        "docs/union-eyes/staging/UE_GATE0_QUALIFICATION_CENSUS.json"
+      ]
     },
     {
       "id": "LOCAL_HOLISTIC_REGRESSION",
@@ -48,7 +65,7 @@
       "status": "FAIL",
       "evidence": "All five required local commands ran on F: docs PASS; lint/typecheck/governance audit/test:fast FAIL. Fast-test failure headers and lint/governance diagnostic sets match E. Typecheck reports the different unchanged CLI task instead of the unchanged blob task. Forty-nine focused grievance tests pass separately. Aggregate FAIL is retained.",
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": true,
+      "requalificationRequiredForProposedCandidate": false,
       "historicalObservedStatus": "FAIL",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
@@ -58,172 +75,227 @@
     {
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Source#1241 and binding#1242 each passed all16 trusted required contexts with no failed/pending/unresolved checks before normal expected-head main admission.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "source-ci-and-normal-main-admission-241006d3.json"
+      ]
     },
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Build43755125987/protected deployment43756733431 completed after concrete what-if review under unchanged CHG-2026-0114 staging delegation.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-reviewed-protected-deployment-241006d3.json"
+      ]
     },
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Named sourceF revision --rel241006d302 is healthy at100%; immutable image and complete IaC/workflow lineage verified.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-runtime-241006d3.json"
+      ]
     },
     {
       "id": "DATABASE_MIGRATIONS",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Post-rollout read-only guard plans0statements; all40 immutable migrations/source hashes, selected5claims/2grievances/3documents and physical owner/ACL/RLS/OID/filenode baseline retained. Known-overlay profile explicit.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-final-primary-retention-241006d3.json",
+        "actual-main-bound-native-admission-241006d3.json"
+      ]
     },
     {
       "id": "ENTRA_AUTHENTICATED_SESSIONS",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Actual paired browser authorization-code sessions and all7real role sessions verified; secure HttpOnly cookie and canonical current role observed.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-seven-personas-and-restoration-241006d3.json",
+        "actual-paired-original-full-hour-241006d3.json"
+      ]
     },
     {
       "id": "API_AND_POSTGRES_TENANT_ISOLATION",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Actual paired APIs plus final103-source native proof deny foreign/forged/missing/hashed bearer contexts; cross-tenant update0 and insert42501, bridge revocation and prior case/document retention pass.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-final-native-isolation-audit-seals-241006d3.json"
+      ]
     },
     {
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "All6 actual base stages and all7persona journeys pass. Staff intake/formal deadline create/reschedule/complete/cancel, EN/FR phone/desktop, assignment, privacy, messaging and EICAR refusals pass. Original missing-cleanup receipt remainsFAIL; exact-owned retirement and independent baseline read explicitly reconcile it.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-base-six-reconciled-241006d3.json",
+        "actual-seven-personas-and-restoration-241006d3.json",
+        "actual-bilingual-mobile-core-visual-review-241006d3.json"
+      ]
     },
     {
       "id": "WORKERS_RETRIES_AND_DELIVERY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Six actual cron/provider/fault/retry/idempotency/lease/suppression/successor scenarios pass;75s abandoned lease naturally waited, owned pending/claimed0 and ACL baseline restored. Provider acceptance only.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-worker-six-and-retirement-241006d3.json"
+      ]
     },
     {
       "id": "AUDIT_AND_TELEMETRY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Complete native audit hash chains and actual current-pair sealed artifact/manifests verify in both organizations;45actual request traces correlate to F revision in dedicated LAW.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-final-native-isolation-audit-seals-241006d3.json",
+        "actual-request-telemetry-241006d3.json"
+      ]
     },
     {
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Same unexpired cookie denied401 at case and document after membership removal; roles restored. Original69bytes/checksum and same original URL natural full-hour403 expiry pass; privacy/legal/member boundaries and EICAR unusable-intake refusal pass separately.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-paired-original-full-hour-241006d3.json",
+        "actual-base-six-reconciled-241006d3.json",
+        "actual-original-url-expiry-timing-241006d3.json"
+      ]
     },
     {
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "All7roles denied sensitive summary/per-capita APIs without scoped mandate; restricted browser routes settle to allowed destinations. Finance persistence/Financial Officer2.1 excluded.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-seven-personas-and-restoration-241006d3.json"
+      ]
     },
     {
       "id": "OPERATIONAL_RECOVERY",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Source-bound restored-copy/export/native rehearsal and cleanup passed with copy stopped; actual protected zero-traffic revision fault/recovery passed, both QA revisions independently inactive, servingF100. No full-traffic failover claim.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PASS",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-recovery-241006d3.json",
+        "actual-main-bound-native-admission-241006d3.json"
+      ]
     },
     {
       "id": "CAPABILITY_TRUTHFULNESS",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "All7source-defined EN/FR navigation journeys and390pxmobile views pass. Actual F title layout290px/status-below and desktop arrangement visually confirmed; dates/reminder/finance limitations explicitly disclosed.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-bilingual-mobile-core-visual-review-241006d3.json",
+        "actual-seven-personas-and-restoration-241006d3.json"
+      ]
     },
     {
       "id": "INSTITUTIONAL_BOUNDARIES",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-      "requalificationRequiredForProposedCandidate": true,
+      "status": "PASS",
+      "evidence": "Platform/admin identity gives no tenant-content or finance bypass; all7role sensitive refusals and actual native foreign membership binding refusal pass. No institutional mandate inferred.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
-      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-seven-personas-and-restoration-241006d3.json",
+        "actual-final-native-isolation-audit-seals-241006d3.json"
+      ]
     },
     {
       "id": "STAGING_DECISION_ACCEPTANCE",
       "requirement": "REQUIRED",
-      "status": "PENDING",
-      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "status": "PASS",
+      "evidence": "All17required scoped criteria now have exact-source evidence. Codex records BASE_RELEASE_STAGING_ONLY GO under existing continuing solo-founder delegation; anungis/anungis437 are one founder. No independent human or production approval claimed.",
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": true,
+      "requalificationRequiredForProposedCandidate": false,
       "historicalObservedStatus": "NOT_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
-      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60"
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "evidenceRefs": [
+        "observed-runtime-241006d3-reconciliation.json"
+      ]
     }
   ],
   "externalBlockers": [],
   "proposedCandidateSha": "241006d302c14567e541d619675fbead3ec3f258",
-  "proposedCandidateState": "SOURCE_FIX_LOCAL_PROOFS_COMPLETE_EXACT_CI_AND_RUNTIME_PENDING",
+  "proposedCandidateState": "ACCEPTED_SCOPED_BASE_RELEASE_STAGING_ONLY",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
     "included": [
@@ -325,7 +397,7 @@
     "supersededForQualificationBy": "167f95034fbdaa163cd67e79c4bca622284e0d77"
   },
   "securityFindingEvidence": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/index.json",
-  "observedStagingCandidateSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+  "observedStagingCandidateSha": "241006d302c14567e541d619675fbead3ec3f258",
   "historicalCriteriaBeforeNestedSystemRepair": [
     {
       "id": "CANDIDATE_IDENTITY",
@@ -482,11 +554,11 @@
     }
   ],
   "priorSourceCompositionSuiteFailure": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/source-a8442373-whole-application-ci-failure.json",
-  "latestAdmittedVerificationWorkflowSha": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
-  "previousContractSnapshot": "observed-contract-before-mobile-heading-241006d3.json",
-  "observedRuntimeReconciliation": "observed-runtime-0fa684a1-reconciliation.json",
+  "latestAdmittedVerificationWorkflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "previousContractSnapshot": "observed-contract-before-final-acceptance-241006d3.json",
+  "observedRuntimeReconciliation": "observed-runtime-241006d3-reconciliation.json",
   "historicalSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-deadline-private-copy-2107feeb.json",
-  "proposedSourceNativeQualificationState": "FRESH_LOCAL_EXPORT_SEVEN_COMPILE_IMPORT_AND_READONLY_COPY_DIAGNOSTIC_PASS_FULL_SIGNED_MAIN_BOUND_QUALIFICATION_PENDING",
+  "proposedSourceNativeQualificationState": "PASS_ACTUAL_SOURCE_BOUND_NATIVE_AND_RESTORED_COPY_OWNED_COPY_STOPPED",
   "historicalNativeExportBeforeProbeRelocation": {
     "sourceSha": "17188f7b602342ab6e88222759a4caba01f52248",
     "status": "PASS",
@@ -519,26 +591,172 @@
     "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
     "sourcePR": 1241,
     "branch": "chore/ue-v2-mobile-heading-binding-20261115",
-    "workflowSha": null,
-    "state": "PENDING_EXACT_CI_AND_NORMAL_MAIN_ADMISSION"
+    "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+    "state": "NORMALLY_ADMITTED_AND_DEPLOYED_ACTUAL_BASE_RUNTIME_ACCEPTED",
+    "bindingPR": 1242,
+    "headSha": "b28afebeb1c521688e1aa854aca32b5cbc052963"
   },
   "observedPerformance": {
     "status": "PASS",
-    "scope": "UNCHANGED_CANONICAL_PUBLIC_CI_PROFILE",
-    "runId": "43740812602",
+    "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+    "runId": "43755122322",
     "runAttempt": 2,
-    "jobId": 132903005188,
-    "artifactId": 14173810704,
-    "p95Milliseconds": 364.048215,
-    "p95LimitMilliseconds": 500,
-    "p99LimitMilliseconds": 1500,
-    "p99ThresholdPassed": true,
-    "maxMilliseconds": 700.838701,
-    "customErrorRate": 0,
-    "receiptSha256": "a1a531d55d602aea48e835c5ae06c1a7720580e368315a52da2f21cca75528c3",
-    "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
-    "workflowSha": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
-    "requalificationRequiredForProposedCandidate": true
+    "jobId": 132945242707,
+    "artifactId": 14178318318,
+    "artifactArchiveSha256": "463831545ded800482a711182539c4161272be099c7640bda1e9c7704b2ea02c",
+    "workloadSha256": "46427acd5c6d1df3e9c70ae7b727440a94dc6fa180cca7f784e7ea29950251ac",
+    "thresholdsUnchanged": {
+      "p95Milliseconds": 500,
+      "p99Milliseconds": 1500
+    },
+    "observedBefore": {
+      "app": "union-eyes",
+      "gitSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "buildTimestamp": "2026-11-15T19:58:44Z",
+      "appVersion": "0.0.0",
+      "releaseId": "UE-V2-STAGING-241006d302c14567e541d619675fbead3ec3f258",
+      "artifactId": "241006d302c14567e541d619675fbead3ec3f258"
+    },
+    "observedAfter": {
+      "app": "union-eyes",
+      "gitSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "buildTimestamp": "2026-11-15T19:58:44Z",
+      "appVersion": "0.0.0",
+      "releaseId": "UE-V2-STAGING-241006d302c14567e541d619675fbead3ec3f258",
+      "artifactId": "241006d302c14567e541d619675fbead3ec3f258"
+    },
+    "metrics": {
+      "data_received": {
+        "count": 41555258,
+        "rate": 294499.69471328886
+      },
+      "http_reqs": {
+        "count": 1160,
+        "rate": 8.220852481951024
+      },
+      "errors": {
+        "fails": 870,
+        "passes": 0,
+        "thresholds": {
+          "rate<0.25": false
+        },
+        "value": 0
+      },
+      "http_req_tls_handshaking": {
+        "max": 64.764191,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0.27115940603448274,
+        "min": 0,
+        "med": 0
+      },
+      "http_req_failed": {
+        "passes": 290,
+        "fails": 870,
+        "value": 0.25
+      },
+      "data_sent": {
+        "count": 168424,
+        "rate": 1193.6110848449302
+      },
+      "http_req_sending": {
+        "p(90)": 0.089354,
+        "p(95)": 0.0991165,
+        "avg": 0.05333146206896545,
+        "min": 0.011792,
+        "med": 0.0465925,
+        "max": 0.15443
+      },
+      "http_req_waiting": {
+        "p(90)": 340.93240529999997,
+        "p(95)": 352.84125185,
+        "avg": 206.0305329215518,
+        "min": 74.601811,
+        "med": 176.557483,
+        "max": 949.800696
+      },
+      "checks": {
+        "passes": 1740,
+        "fails": 0,
+        "value": 1
+      },
+      "http_req_duration": {
+        "med": 225.779579,
+        "max": 949.933876,
+        "p(90)": 342.9148783,
+        "p(95)": 354.1058007,
+        "avg": 234.18229379827605,
+        "min": 74.791165,
+        "thresholds": {
+          "p(95)<500": false,
+          "p(99)<1500": false
+        }
+      },
+      "vus": {
+        "value": 1,
+        "min": 1,
+        "max": 5
+      },
+      "http_req_blocked": {
+        "p(95)": 0.000611,
+        "avg": 0.5393571948275815,
+        "min": 0.000191,
+        "med": 0.00034,
+        "max": 127.130087,
+        "p(90)": 0.000531
+      },
+      "http_req_connecting": {
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0.2636291189655172,
+        "min": 0,
+        "med": 0,
+        "max": 62.499086
+      },
+      "vus_max": {
+        "min": 5,
+        "max": 5,
+        "value": 5
+      },
+      "iteration_duration": {
+        "p(95)": 2238.48469255,
+        "avg": 1840.7543482620695,
+        "min": 1438.236174,
+        "med": 1827.121427,
+        "max": 2459.512284,
+        "p(90)": 2020.5786398999999
+      },
+      "iterations": {
+        "rate": 2.055213120487756,
+        "count": 290
+      },
+      "http_req_duration{expected_response:true}": {
+        "avg": 241.82822031149405,
+        "min": 74.791165,
+        "med": 235.795422,
+        "max": 949.933876,
+        "p(90)": 345.5650944,
+        "p(95)": 357.08665644999996
+      },
+      "http_req_receiving": {
+        "max": 123.898965,
+        "p(90)": 62.0703543,
+        "p(95)": 64.46951584999998,
+        "avg": 28.09842941465517,
+        "min": 0.023191,
+        "med": 0.4914925
+      }
+    },
+    "requestedAt": "2026-11-15T20:22:08.009432+00:00",
+    "at": "2026-11-15T20:25:24.481803+00:00",
+    "scope": "UNCHANGED_CANONICAL_PUBLIC_CI_PROFILE",
+    "actualPrivateReceipt": {
+      "privateFileName": "actual-241006d3-canonical-performance-progress.json",
+      "sha256": "dec7faab9d08c0c399ca697366a22151dad3639ec73382d7b7df176c36be6c80"
+    },
+    "initialAttemptNotCandidateAcceptance": true,
+    "allAuthenticatedApiLatencyClaimed": false
   },
   "historicalLocalValidationBeforePublicMessageRepair": {
     "candidateSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
@@ -1314,5 +1532,250 @@
     "workflowSha": "c47cb1f33d7cf05b549be617bc0e8411b56db996",
     "proposedEStatus": "PENDING"
   },
-  "observedMobileTitleDefect": "actual-mobile-grievance-title-0fa684a1-failure.json"
+  "observedMobileTitleDefect": "actual-mobile-grievance-title-0fa684a1-failure.json",
+  "historicalCriteriaBeforeFinalFQualification": [
+    {
+      "id": "CANDIDATE_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "SOURCE_ENGINEERING",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "LOCAL_HOLISTIC_REGRESSION",
+      "requirement": "ADVISORY",
+      "status": "FAIL",
+      "evidence": "All five required local commands ran on F: docs PASS; lint/typecheck/governance audit/test:fast FAIL. Fast-test failure headers and lint/governance diagnostic sets match E. Typecheck reports the different unchanged CLI task instead of the unchanged blob task. Forty-nine focused grievance tests pass separately. Aggregate FAIL is retained.",
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "historicalObservedStatus": "FAIL",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "localEvidence": "local-required-validation-241006d3.json",
+      "failureDeltaAudit": "local-validation-delta-241006d3.json"
+    },
+    {
+      "id": "FINAL_CANDIDATE_CI",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "AUTHORIZED_STAGING_DEPLOYMENT",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "DEPLOYED_REVISION_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "DATABASE_MIGRATIONS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "ENTRA_AUTHENTICATED_SESSIONS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "API_AND_POSTGRES_TENANT_ISOLATION",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "WORKERS_RETRIES_AND_DELIVERY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "AUDIT_AND_TELEMETRY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "SENSITIVE_FINANCE_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "OPERATIONAL_RECOVERY",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "CAPABILITY_TRUTHFULNESS",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "INSTITUTIONAL_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred."
+    },
+    {
+      "id": "STAGING_DECISION_ACCEPTANCE",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "evidence": "F is not deployed or accepted. Its local presentation, native and export checks do not satisfy a runtime criterion. Exact source/integration CI, normal main admission and fresh F staging evidence remain required. E functional passes and actual mobile failure are separately source-bound in observed-runtime-0fa684a1-reconciliation.json.",
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "historicalObservedStatus": "NOT_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "observedSourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60"
+    }
+  ],
+  "historicalObservedRuntimeBeforeFinalFQualification": {
+    "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+    "performance": {
+      "status": "PASS",
+      "scope": "UNCHANGED_CANONICAL_PUBLIC_CI_PROFILE",
+      "runId": "43740812602",
+      "runAttempt": 2,
+      "jobId": 132903005188,
+      "artifactId": 14173810704,
+      "p95Milliseconds": 364.048215,
+      "p95LimitMilliseconds": 500,
+      "p99LimitMilliseconds": 1500,
+      "p99ThresholdPassed": true,
+      "maxMilliseconds": 700.838701,
+      "customErrorRate": 0,
+      "receiptSha256": "a1a531d55d602aea48e835c5ae06c1a7720580e368315a52da2f21cca75528c3",
+      "sourceSha": "0fa684a15641e84cb2aa3c94a2fad49428d64f60",
+      "workflowSha": "6f68994122ca8dadfab4055b1bdc1943c8a8a7d4",
+      "requalificationRequiredForProposedCandidate": true
+    },
+    "reconciliation": "observed-runtime-0fa684a1-reconciliation.json"
+  },
+  "verdictScope": "BASE_RELEASE_STAGING_ONLY",
+  "resolvedMobileTitleDefectEvidence": "actual-bilingual-mobile-core-visual-review-241006d3.json",
+  "requiredCriteriaTally": {
+    "required": 17,
+    "pass": 17,
+    "fail": 0,
+    "pending": 0,
+    "advisoryFail": 1
+  },
+  "globalProgrammeBoundary": {
+    "frozenPopulation": 777,
+    "formallyClosed": 0,
+    "globalSaasReadiness": "NO_GO",
+    "phase3B": "HOLD",
+    "productionAuthorized": false
+  },
+  "publicationValidation": {
+    "snapshotSha": "4ae8957bcdfb5cb8b50d51c9b82500fbd8b9ad7f",
+    "evidence": "final-publication-validation-241006d3.json",
+    "status": "COMPLETED_WITH_LOCAL_FAILURES_RETAINED_ADVISORY"
+  }
 }

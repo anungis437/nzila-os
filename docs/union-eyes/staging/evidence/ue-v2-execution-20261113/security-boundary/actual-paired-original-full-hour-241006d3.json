@@ -1,0 +1,51 @@
+{
+  "status": "PASS_FRESH_PAIRED_REAL_COOKIE_REVOCATION_RESTORED_ORIGINAL_URL_BYTES_AND_EXPIRY",
+  "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "runId": "43758240705",
+  "actualPrivateCoordinator": {
+    "privateFileName": "receipt.json",
+    "sha256": "5847c1fb8becbd27ce622294956dfa46e836a8e8f590b546c63c67f2badcafa9"
+  },
+  "actualRealReceiptSha256": "1994992be564330d3218e10f5d53b84a7080241f6c10628a873885b29a5b1dd0",
+  "actualUnexpiredCookieDenial": {
+    "at": "2026-11-15T20:37:36.807Z",
+    "kind": "EXISTING_REAL_SESSION_DENIED_AFTER_MEMBERSHIP_REVOCATION",
+    "persona": "A",
+    "claimId": "9003abd3-7d31-4862-9dcc-e4ccdc909142",
+    "documentId": "60f09712-54e8-4ad2-83ec-63fb24dd3560",
+    "sessionStillUnexpired": true,
+    "verifiedPrincipal": "ecb4f1d7-b0ae-44f8-bf56-832bc173fc49",
+    "verifiedTenant": "cc15259a-d2bf-421f-8e44-dccf8dc6232a",
+    "caseStatus": 401,
+    "documentStatus": 401,
+    "previouslyIssuedLeaseRequiresSeparateActualExpiryProof": true
+  },
+  "membershipRestorationStatus": "PASS_BASELINE_OBSERVED",
+  "originalBytes": {
+    "status": 200,
+    "bytes": 69,
+    "checksum": "7d1c6f656c08aca6f9de89121ab0f40626274fe53ecb0d0d9644de5917f465e6",
+    "actualReceiptSha256": "0bb949eac2c4db79ac614c70291d98fec122664bd3bc0b69c098647bb3b80705"
+  },
+  "originalLease": {
+    "signedUrlSha256": "47fa5a60daa268866a29beff09c98955ed35a95b2de31ce4e6662cd79d32e01f",
+    "issuedAt": "2026-11-15T20:31:36.095Z",
+    "expiresAt": "2026-11-15T21:31:35Z",
+    "checksum": "7d1c6f656c08aca6f9de89121ab0f40626274fe53ecb0d0d9644de5917f465e6"
+  },
+  "actualExpiry": {
+    "ok": true,
+    "status": 403,
+    "errorCode": "AuthenticationFailed",
+    "expiresAt": "2026-11-15T21:31:35Z",
+    "actualIssuedUrlUsed": true,
+    "noClockOrLeaseAlteration": true,
+    "signedUrlSha256": "47fa5a60daa268866a29beff09c98955ed35a95b2de31ce4e6662cd79d32e01f",
+    "actualReceiptSha256": "fd97a78548aff6127b849f7009b70ebfacb17dd538bb68e2a97219f0e5d8266f"
+  },
+  "previouslyIssuedUrlRemainsUsableUntilItsBoundedExpiry": true,
+  "encryptedEnvelopeAndUrlAndCookiesOmitted": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

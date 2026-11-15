@@ -1,0 +1,95 @@
+{
+  "status": "COMPLETED_WITH_LOCAL_FAILURES_RETAINED_ADVISORY",
+  "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "publicationSnapshotSha": "4ae8957bcdfb5cb8b50d51c9b82500fbd8b9ad7f",
+  "startedAt": "2026-11-15T22:17:07.872565+00:00",
+  "finishedAt": "2026-11-15T22:20:41.425222+00:00",
+  "commandsActuallyRun": 5,
+  "commands": [
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 16.3,
+      "privateLogSha256": "b37ce95c86caf1545aa2722e1fdb402099248e07576f3ecf82ddba2e6aae678c"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "exitCode": 0,
+      "status": "PASS",
+      "seconds": 22.76,
+      "privateLogSha256": "7ecfbad9dacecadd2f9cb5c2d491064c3b58dbad07c64b11857aa9577735c6ce"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "exitCode": 2,
+      "status": "FAIL",
+      "seconds": 118.38,
+      "privateLogSha256": "23cb57d081868637270b2ba68048026ca0db0a4ae906bec94e2c1e7515d8b922"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 127.25,
+      "privateLogSha256": "8cb9b84d4ab8c4e211ed7f56f00ec4675daad9098fde5deb3dc68fc0d6689843"
+    },
+    {
+      "command": "pnpm test:fast",
+      "exitCode": 1,
+      "status": "FAIL",
+      "seconds": 213.37,
+      "privateLogSha256": "1f6fd1691055fc17619d864a9880ccc87b736ab16c681acbab73cdbc25458d04"
+    }
+  ],
+  "fastTestSummary": {
+    "failedFiles": 2577,
+    "passedFiles": 528,
+    "skippedFiles": 1,
+    "failedTests": 19,
+    "passedTests": 7788,
+    "skippedTests": 12
+  },
+  "fastFailureHeadersExactlyEqualApplicationSourceRun": true,
+  "failureHeaderCount": 2591,
+  "actualDiagnosticComparison": {
+    "lint": {
+      "sameDiagnosticSet": true,
+      "onlyInPublication": [],
+      "onlyInSourceRun": []
+    },
+    "typecheck": {
+      "sameDiagnosticSet": false,
+      "onlyInPublication": [
+        "src/index.ts(12,8): error TS2307: Cannot find module '@azure/storage-blob' or its corresponding type declarations."
+      ],
+      "onlyInSourceRun": [
+        "src/index.ts(27,9): error TS2554: Expected 1 arguments, but got 0."
+      ]
+    },
+    "governance-audit": {
+      "sameDiagnosticSet": true,
+      "onlyInPublication": [],
+      "onlyInSourceRun": []
+    }
+  },
+  "sourceImplementationAndWorkflowBytesUnchangedFromDeployedMain": true,
+  "generatedReportsRestored": 11,
+  "unexpectedTrackedChanges": 0,
+  "privateRestorationReceiptSha256": "e8eeba462b7fd909a2b376949ee5feeb589c4411b80770aef047caa4a9575aed",
+  "focusedPublicationTests": {
+    "command": "node --test tooling/scripts/lib/ue-staging-go-census.test.mjs tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs tooling/scripts/lib/ue-staging-navigation-settlement.test.cjs",
+    "passed": 38,
+    "failed": 0,
+    "skipped": 0
+  },
+  "preCommitSecretScan": {
+    "command": "gitleaks git --pre-commit --staged --redact",
+    "exitCode": 0,
+    "findings": 0
+  },
+  "meaning": "All actual failures are retained. Local whole-repository failures do not become PASS because exact-source application CI and scoped staging acceptance pass.",
+  "productionAuthorized": false,
+  "stagingGoClaimedByLocalCommands": false
+}
