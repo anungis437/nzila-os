@@ -4,7 +4,28 @@ The accepted staging record proves the named casework and access journeys on app
 
 Some earlier defect remediation removed misleading controls or changed false success into an honest unavailable response. Those changes repaired the false behavior while leaving the capability unavailable. A source-remediation count is not a count of implemented features.
 
-## November 16 current execution
+## November 16 runtime qualification delta
+
+Observed staging is application `7d939bf5399ef768cc71a837730a6ff143d079d1`, workflow `5fae54b471e84d73eab5e44d723aee12a0add797`, build `43870172495`, deployment `43875150222`. Proposed repair source is `41dba402dd53fec280091f11f46a99077dd91465`. Its binding and deployed qualification remain pending. Full base release is **STAGING_NO_GO**; the historical accepted F record has its original narrower scope.
+
+[Actual prior-candidate observations](evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json) prove the fresh controlled invitation receipt, acceptance, dashboard and first case; durable identity, membership, case and creation audit have independent readback. Reopening remains recipient-attested. Both controlled accounts and their cases are preserved. The recipient also confirmed the Azure test alert; continuous detection and recovery remain unproven.
+
+Six persona roles passed on the observed source. Chief Steward mobile workbench navigation failed its page-load limit; all temporary access was restored. Real automatic claim matching, balancing, capacity contention and assignment audits have partial positive proof, but the mandatory signed-in case-read workload failed both declared stages. Formal automatic matching and same-cookie post-retirement HTTP denials were not reached. The proposed repair reduces repeated authentication work and fixes actual PDF parser and OCR transaction-lifetime defects; local component tests do not establish deployed remediation.
+
+The base-release work still required is:
+
+- Admit, build and qualify the exact repair; repeat unchanged authenticated workload, all seven personas, paired access, base journeys and worker scenarios.
+- Finish invitation error/reissue/revoke/duplicate/MFA and membership lifecycle matrices, plus persistent setup write/reload/refusal/audit checks. Observed T2 invitation acceptance has hard-coded English text and an English dashboard redirect. The proposed source repairs both and retains language through MFA; its actual bilingual first-use and boundary qualification remain pending.
+- Complete connected intake, triage, automatic claim/formal assignment, investigation, transition, closure, successor handoff, member follow-through and permitted senior oversight.
+- Exercise document upload, search, download, version binding, real image/PDF extraction, distinct-principal human review, self-review/stale-edit refusal, purpose-controlled publication and user-facing sealed export.
+- Qualify correspondence approval/dispatch, enabled staff messaging/preferences/read state, accurate leadership counts/drill-down and organization access removal.
+- Connect staff-managed deadlines to member/workbench/handoff views and prove formal reminder receipt in a controlled inbox. Automatic legal-date calculation and intake reminder email remain disclosed separate limits.
+- Qualify the implemented in-app privacy self-service (explicit founder requirement). Continuous backup/audit/worker/dependency freshness, alert recovery, enabled bilingual states and declared accessibility checks remain unfinished; reconcile the action ledger against actual proofs.
+
+Finance/dues persistence and Financial Officer 2.1 stay excluded. Full-traffic failover, physical-device certification and operating cadence retain their separately declared scope. The founder explicitly extended the same CHG-2026-0114 staging scope through `2026-11-17T03:00:00Z` (10 p.m. Toronto on November 16); production deployment remains excluded.
+
+## November 16 earlier source-S execution
+
 
 Staging now serves application `78301eecc968ff3a21b602a9c9307c50f73cd5f8`, workflow `17099dc87643e5206c931285cfaefc377261fd79`, build `43825322999` and deployment `43830579236`. The historical accepted F17-criterion record remains historical; full base-release staging acceptance is unfinished. [Actual source-S observations](evidence/ue-v2-document-review-20261116/source-78301eec-action-observations.json) record six real worker scenarios plus exact fixture retirement, and fresh read-only preservation of the controlled invited member and original case/audit.
 

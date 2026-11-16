@@ -1,0 +1,28 @@
+{
+  "status": "PASS_ACTUAL_READ_ONLY_RETAINED_COPY_DIAGNOSTIC",
+  "applicationSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "observedApplicationSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+  "candidateWorkflowSha": null,
+  "readOnlyReceiptSha256": "ca18b1638c4c8c69a9508191d4c896d71bc3023a4e5d0af5e502e461b0aa92e6",
+  "cycleReceiptSha256": "326b02972614ae9623b23f8948eed50a130aca52b7ff26b93787e6617d018e8d",
+  "recordedAt": "2026-11-16T21:29:47.077Z",
+  "checks": {
+    "immutableFortyLedger": true,
+    "noOwnerDelegations": true,
+    "physicalGuardZeroStatements": true,
+    "claimsVisibilityUnrestricted": true,
+    "recordedOriginalCopyClaimsPresent": true,
+    "recordedCopyFormalCasePresent": true,
+    "noPersistentFailedNonceAuthority": true,
+    "physicalMetadataUnchanged": true
+  },
+  "ownedCopyStopped": true,
+  "privateNetworkExactlyUnchanged": true,
+  "dataAndServerRetained": true,
+  "primaryUntouched": true,
+  "businessDmlSchemaOrPrivilegeMutation": false,
+  "fullMainBoundNativeQualificationStillRequired": true,
+  "freshPitrCurrencyClaimed": false,
+  "candidateRuntimeAcceptanceClaimed": false,
+  "productionAuthorized": false
+}
