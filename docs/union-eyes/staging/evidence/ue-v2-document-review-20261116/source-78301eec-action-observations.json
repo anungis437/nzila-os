@@ -1,0 +1,60 @@
+{
+  "status": "ACTUAL_SOURCE_S_OBSERVATIONS_FOLLOWUP_NOT_DEPLOYED",
+  "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "workflowSha": "17099dc87643e5206c931285cfaefc377261fd79",
+  "buildRunId": "43825322999",
+  "deploymentRunId": "43830579236",
+  "imageDigest": "sha256:5dc0247a5011a5764bb0a87fe14cfcad5726ec552dbd38ab01a291bad7983a11",
+  "observedServingRevision": "nzila-ue-v2-staging-app--rel78301eecc9",
+  "trafficPercent": 100,
+  "automaticMatching": {
+    "status": "INCOMPLETE",
+    "actualAdminProfileUiSaveAndPersistenceReadback": "PASS",
+    "expertiseMismatchRefusal": "PASS_HTTP409",
+    "successfulAssignmentJourney": "NOT_QUALIFIED",
+    "failuresRetained": true,
+    "latestAttemptAuthorityProfilesAndPgSessionsRetired": true
+  },
+  "confirmedDefects": [
+    {
+      "kind": "PHONE_SELECT_CLIPPED",
+      "viewportWidth": 390,
+      "controlLeft": 32,
+      "controlRight": 732,
+      "wholePageWidthCheckInsufficient": true,
+      "proofSha256": "17420232320a69be3ea399ac44bfeafc33a8e5d73f6e7ffe24a43fc723e9f4b0"
+    },
+    {
+      "kind": "EXECUTIVE_MENU_REDIRECT_OVERRIDES_EXPLICIT_CASE_STANDING",
+      "actualRole": "secretary_treasurer",
+      "requestedPath": "/en-CA/dashboard/workbench",
+      "redirectedPath": "/en-CA/dashboard/executive",
+      "proofSha256": "c77b4d4ee8c03761304dd8f351a392de553166402e6cf6118e93926c21bd0e5c"
+    }
+  ],
+  "actualWorker": {
+    "status": "PASS_SIX_SCENARIOS_AND_EXACT_OWNED_RETIREMENT",
+    "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+    "receiptSha256": "f65fa01c41e50fce2d8e723e9befe7d4787d6b32418d32e6b9f86209700c636f",
+    "retirementSha256": "59bdf411f8023b5a896549b2e90958c09ef52edac8631574e437f483b45c0404",
+    "providerAcceptanceIsNotInboxReceipt": true
+  },
+  "controlledAccountAndOriginalCaseRetention": {
+    "status": "PASS_READ_ONLY",
+    "receiptSha256": "c68a3b31ffde9657515810d14a966cb133600fbb20f696e180e0b5bdab803834",
+    "originalIdentityInvitationAndCaseRetained": true,
+    "oneActiveMembership": true,
+    "role": "member",
+    "caseStatus": "submitted",
+    "originalCreationAuditPreserved": true,
+    "originalFirstUseAndReopeningEvidenceSource": "241006d302c14567e541d619675fbead3ec3f258",
+    "newFirstUseOrBrowserReopeningClaimed": false,
+    "databaseMutationStatements": 0
+  },
+  "runtimeObservationRecordedAt": "2026-11-16T08:34:08.135724+00:00",
+  "runtimeObservationSha256": "983d7ff66c9de1fa4e16b15d71fa277611f437002f64c990acf89d5e5d2e0cf3",
+  "followupLocalValidation": "base-ui-local-validation.json",
+  "followupNotDeployed": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

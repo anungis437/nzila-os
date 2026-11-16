@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { usePilotMode } from "@/contexts/pilot-mode-context";
+import { verifyWorkbenchRouteAccess } from '@/lib/dashboard/workbench-route-access';
 import {
   canAccessDashboardPath,
   getDashboardExperience,
@@ -43,6 +44,19 @@ export default function RoleExperienceGuard({ userRole }: RoleExperienceGuardPro
     }
 
     if (!allowed && pathname !== localizedLanding) {
+      // An executive may also hold explicit casework standing. The menu policy
+      // cannot erase it, and a title alone cannot establish it. Keep the normal
+      // menu while asking the existing caller-scoped queue before redirecting.
+      if (experience === 'executive' && pathWithoutLocale === '/dashboard/workbench') {
+        const controller = new AbortController();
+        let cancelled = false;
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        void verifyWorkbenchRouteAccess(controller.signal)
+          .then(hasAccess => { if (!cancelled && !hasAccess) router.replace(localizedLanding); })
+          .catch(() => { if (!cancelled) router.replace(localizedLanding); })
+          .finally(() => clearTimeout(timeout));
+        return () => { cancelled = true; clearTimeout(timeout); controller.abort(); };
+      }
       router.replace(localizedLanding);
     }
   }, [pathname, locale, experience, isPilotMode, landing, router]);

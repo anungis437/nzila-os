@@ -5,7 +5,7 @@
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
   "currentRepairBranch": "fix/ue-onboarding-admin-20261115",
-  "currentRepairRuntimeQualification": "NOT_DEPLOYED",
+  "currentRepairRuntimeQualification": "FOLLOWUP_ALL_FIVE_LOCAL_GATES_PASS_EXACT_SOURCE_CI_ADMISSION_DEPLOYMENT_AND_ACTION_QUALIFICATION_PENDING",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -191,9 +191,9 @@
     {
       "id": "C09",
       "action": "Automatic workload and expertise assignment",
-      "state": "LOCAL_IMPLEMENTATION_STAGING_PENDING",
-      "evidenceSummary": "Live claim/formal-grievance callers and EN/FR controls now use canonical assignment authority, saved representative expertise/capacity and actual open primary-assignment workload. Three native PostgreSQL contention tests pass; SQL and route/UI integration checks pass locally.",
-      "remaining": "Final exact-source checks/CI, qualified admission/deployment, real staged admin profile configuration and authorized matching, no-match/capacity/conflict/role/tenant/refusal, readback/audit/retry and concurrent-request evidence.",
+      "state": "SOURCE_REPAIR_STAGING_PENDING",
+      "evidenceSummary": "Live claim/formal-grievance callers and EN/FR controls now use canonical assignment authority, saved representative expertise/capacity and actual open primary-assignment workload. Three native PostgreSQL contention tests pass; SQL and route/UI integration checks pass locally. Actual source78301eec admin profile UI save/readback and expertise-mismatch409 passed, but the executive menu guard redirected an explicitly authorized actor away from the workbench. A390px selected representative control also extended to x732. Both root repairs are in this follow-up; full matching is unqualified.",
+      "remaining": "Admit/deploy the follow-up; qualify the exact live casework guard and EN/FR phone controls, positive claim/formal automatic matching, balancing/capacity/conflict/role/tenant/retry/concurrency and durable canonical/audit outcomes.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -315,9 +315,9 @@
     {
       "id": "C15",
       "action": "OCR document extraction",
-      "state": "PARTIAL_IMPLEMENTATION_STAGING_PENDING",
-      "evidenceSummary": "Machine extraction and transcript draft/review/publication APIs exist. Source audit on 78301eec confirmed that the document screen exposes draft saving but no human-review or publication control.",
-      "remaining": "Implement the authorized transcript review/publication screen and qualify actual extraction, exact document-version binding, resource authority, stale edits, self-review refusal and saved outcomes.",
+      "state": "SOURCE_IMPLEMENTED_STAGING_PENDING",
+      "evidenceSummary": "The source78301eec audit found no human-review/publication controls. This follow-up connects document preview to explicit transcript read, draft, review and publication actions. All five local gates and focused/census regressions passed; deployed OCR and review/publication qualification remain pending.",
+      "remaining": "Qualify actual extraction, exact document-version binding, resource authority, stale edits, self-review refusal, saved publication/audit outcomes and rendered English/French/mobile behavior on the deployed follow-up.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -334,7 +334,8 @@
       "negativeMatrix": null,
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
-      "coverageFieldsComplete": false
+      "coverageFieldsComplete": false,
+      "localImplementationEvidence": "evidence/ue-v2-document-review-20261116/base-ui-local-validation.json"
     },
     {
       "id": "C16",
@@ -590,5 +591,8 @@
     "allRequiredTrustedChecksPassed": 16,
     "allRegisteredCheckRunsConcludedWithoutFailure": 130,
     "newSourceRuntimeQualification": "PENDING"
-  }
+  },
+  "currentDeployedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "currentDeployedWorkflowSha": "17099dc87643e5206c931285cfaefc377261fd79",
+  "currentFollowupLocalEvidence": "evidence/ue-v2-document-review-20261116/base-ui-local-validation.json"
 }
