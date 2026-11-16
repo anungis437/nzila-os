@@ -315,9 +315,9 @@
     {
       "id": "C15",
       "action": "OCR document extraction",
-      "state": "PARTIAL_IMPLEMENTATION_STAGING_PENDING",
-      "evidenceSummary": "Machine extraction and transcript draft/review/publication APIs exist. Source audit on 78301eec confirmed that the document screen exposes draft saving but no human-review or publication control.",
-      "remaining": "Implement the authorized transcript review/publication screen and qualify actual extraction, exact document-version binding, resource authority, stale edits, self-review refusal and saved outcomes.",
+      "state": "SOURCE_IMPLEMENTED_STAGING_PENDING",
+      "evidenceSummary": "The source78301eec audit found no human-review/publication controls. This follow-up connects document preview to explicit transcript read, draft, review and publication actions. All five local gates and focused/census regressions passed; deployed OCR and review/publication qualification remain pending.",
+      "remaining": "Qualify actual extraction, exact document-version binding, resource authority, stale edits, self-review refusal, saved publication/audit outcomes and rendered English/French/mobile behavior on the deployed follow-up.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -334,7 +334,8 @@
       "negativeMatrix": null,
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
-      "coverageFieldsComplete": false
+      "coverageFieldsComplete": false,
+      "localImplementationEvidence": "evidence/ue-v2-document-review-20261116/local-validation.json"
     },
     {
       "id": "C16",

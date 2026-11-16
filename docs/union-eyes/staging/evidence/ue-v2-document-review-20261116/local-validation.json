@@ -1,0 +1,108 @@
+{
+  "status": "PASS_LOCAL_IMPLEMENTATION_CHECKS_ONLY",
+  "baseMainSha": "17099dc87643e5206c931285cfaefc377261fd79",
+  "sourceCommitNotYetAssignedAtTestTime": true,
+  "testedSourceModules": [
+    {
+      "path": "apps/union-eyes/components/documents/document-browser.tsx",
+      "state": "MODIFIED",
+      "sha256": "ceaf5d73955cd1794e2faf7974148abc34df05560f041c2bcdcc456f53af6e4b"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/transcript-review.tsx",
+      "state": "ADDED",
+      "sha256": "7c09910be538f8768bf133c38ecab39311d420bc5a505435e37c485d079b6568"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/transcript-review.test.tsx",
+      "state": "ADDED",
+      "sha256": "8d497d1f1beffe9950ef5c719712d2250a1cc5d2912f6500593eab84471ec648"
+    },
+    {
+      "path": "apps/union-eyes/lib/documents/transcript-review-client.ts",
+      "state": "ADDED",
+      "sha256": "5b3bc2a8c5fbcbcb467df935618e20f0cdb58584ef709cc75d5d2b224a9dda2f"
+    }
+  ],
+  "checks": {
+    "lint": {
+      "status": "PASS",
+      "tasks": 172,
+      "logSha256": "89afce9da912458178aba4b37d059ea54ad1a064d8f88564da9bae620c37a6a4"
+    },
+    "typecheck": {
+      "status": "PASS",
+      "tasks": 238,
+      "logSha256": "e957614c4a67241fad661e59b2437d1f0ebe9356ac0ed4e66b326df5119e96e7"
+    },
+    "testFast": {
+      "status": "PASS",
+      "passed": 39275,
+      "skipped": 1694,
+      "filesPassed": 3001,
+      "filesSkipped": 117,
+      "sourceUnchanged": true,
+      "dockerPreflightPassed": true,
+      "logSha256": "e36cf5f153f130a0bd13e2082836549be7c0eb147181095f460a982b1d3f62ea"
+    },
+    "docs": {
+      "status": "PASS",
+      "errors": 0,
+      "logSha256": "94067aa809991af417c990ad913c53c030e48a758914130a0959ed6fd6873b92"
+    },
+    "governance": {
+      "status": "PASS",
+      "logSha256": "440b8112f1e7828e6c7fb2921aad37b96e6f605559294b2761e72d0bb8bc0da1"
+    },
+    "focused": {
+      "status": "PASS",
+      "tests": 36,
+      "files": 4,
+      "scope": "jsdom rendered component and existing real PGlite transcript model regressions; not a deployed browser",
+      "logSha256": "52dc86b0489f142f27e6d24816d03a142b49f43cfb8058caeb34581e71314cc8"
+    },
+    "frontendResponseCensus": {
+      "status": "PASS",
+      "tests": 51,
+      "files": 2,
+      "ceilingsOrAllowlistChanged": false,
+      "logSha256": "951161cb18522f1c6f0fea0269308b21dcff9b754242258a26ca3b5c3dbb43dd"
+    }
+  },
+  "behavior": [
+    "Transcript text loads only after an explicit request from an authorized document preview",
+    "Strict exact-document/version and parent-revision response validation; no success on malformed responses or missing durable readback",
+    "Draft save, explicit original-document confirmation for human review, server self-review refusal and separate evidence publication",
+    "Stale edits retained for explicit comparison/reload; no mutation retry after unknown outcome",
+    "Separate server-provided write and publication permissions; unauthorized read clears text",
+    "English and French interface with wrapping controls"
+  ],
+  "retainedFailedAttempts": [
+    {
+      "attempt": "focused-v1",
+      "result": "2 ambiguous current-state/history text selectors failed; changed tests to assert the current-state paragraph, original log retained",
+      "logSha256": "8479380c8edc2edfc5ee97e577bfc3af241a2231d07b3f07e198a86179beb490"
+    },
+    {
+      "attempt": "census-v1",
+      "result": "2 untyped-reader findings from conditional publication endpoint; original log retained",
+      "logSha256": "4afb459189f28fd009fe86bea8a03fc36ea792f4d066affea5d7dd0cfbd93d23"
+    },
+    {
+      "attempt": "census-v2",
+      "result": "2 response-shape findings from sharing response reading between POST publication and PUT revision; separate explicit routes and response readers resolved this without changing a ceiling",
+      "logSha256": "771d28a8aac1ff52a006baa5772b891bf3f4f50da369e707ee37219efec85833"
+    }
+  ],
+  "runtimeQualificationPending": [
+    "Actual OCR extraction on deployed source",
+    "Real document authority/deny matrix and current version binding",
+    "Real draft/review/self-review/stale/publication persistence and audit",
+    "Rendered English/French and mobile layout in staging"
+  ],
+  "schemaMigrationsDependenciesOrAuthorityPolicyChanged": false,
+  "stagingAcceptanceClaimed": false,
+  "fullBaseReleaseGo": false,
+  "productionAuthorized": false,
+  "collectedAt": "2026-11-16T08:31:55.477448+00:00"
+}

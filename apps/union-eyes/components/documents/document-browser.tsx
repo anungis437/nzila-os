@@ -17,6 +17,7 @@ import {
 import { authorizeBulkDownload, bulkOutcomeNotice, recordBrowserOpens } from '@/lib/documents/bulk-download';
 import { listDenied, requestAuthorizedDownload } from '@/lib/documents/document-repository-client';
 import { OCRUpload } from '@/components/documents/ocr-upload';
+import { TranscriptReview } from '@/components/documents/transcript-review';
 
 export type { BrowserDocument };
 
@@ -218,6 +219,7 @@ export function DocumentBrowser({
           <h3 className="font-medium">{preview.title}</h3>
           <p className="text-sm">{copy.previewMeta}</p>
           <p className="text-sm">{preview.documentType} · {preview.privacyLabel}</p>
+          <TranscriptReview key={preview.id} documentId={preview.id} />
           <Button type="button" className="mt-3" variant="outline" onClick={() => setPreview(null)}>{copy.close}</Button>
         </div>
       )}
