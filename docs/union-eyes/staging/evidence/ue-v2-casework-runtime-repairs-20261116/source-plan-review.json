@@ -1,26 +1,23 @@
 {
-  "status": "EXACT_THREE_CURRENT_SOURCE_HASH_REBINDING",
-  "baseApplicationSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
-  "baseSourcePlanSha256": "9bf7598e965e70ac3a4ca68092ee8011b1a3e78dd049c5c90ea22fafe63b0637",
-  "currentSourcePlanSha256": "0bf36ab5093daf0b0bc70c414de02bfe3ae39afec47d1d2238da1655a5924073",
-  "updates": [
-    {
-      "path": "apps/union-eyes/lib/db/canonical-transaction-scope.ts",
-      "before": "b74aa99e439e8cc3c22df0101bd644871ca6477ff3b81688cf52b5aa48158c68",
-      "after": "b341370018fb4e5630fced8b4ee6b92b6337f851ff013902c6dd844093bebf64"
-    },
-    {
-      "path": "apps/union-eyes/lib/api/with-api.ts",
-      "before": "d606a2aa2871cf25a918e91368a831605c4a8146b3063b53000e7490a606f234",
-      "after": "4f99a29734b7574cb6da7119c41ca1a2ef97537537979f065fd0487fd096cebc"
-    },
-    {
-      "path": "packages/db/src/auth-client.ts",
-      "before": "f081c11a77d615d588dfb600a7ec6006924840ab874f3f4fcc040ee2bcb6740a",
-      "after": "0690d685c543da860bbe7d421c71732c57708623595ed6f52f4c7e2b36b942a1"
-    }
+  "status": "PASS_DETERMINISTIC_GENERATION_AND_SQL_IDENTITY_REVIEW",
+  "baselineApplicationSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+  "supersededIncompletePlanCommit": "2a514e7a1c6c889a459578b27e794497c6150e5b",
+  "sourceCommitmentPathsChanged": [
+    "apps/union-eyes/lib/db/canonical-transaction-scope.ts",
+    "apps/union-eyes/lib/api/with-api.ts",
+    "packages/db/src/auth-client.ts"
   ],
-  "allOtherPlanValuesUnchanged": true,
-  "schemaTablesColumnsRolesGrantsPoliciesChanged": false,
-  "sourceDriftGuardPreserved": true
+  "statements": 6267,
+  "allSqlStatementBytesIdentical": true,
+  "tablesAndColumnsUnchanged": true,
+  "rolesGrantsPoliciesUnchanged": true,
+  "deterministicSelfTest": "PASS",
+  "sourcePlanSha256": "022bc0b85f845dee606f76b3609ac621f5cdddf5bb2b4e94c4a570b82705c74b",
+  "originalExportAndCiFailuresPreserved": true,
+  "productionAuthorized": false,
+  "stagingAcceptanceClaimed": false,
+  "generatedStatementMetadataFieldsCorrected": 252,
+  "generatedStatementMetadataField": "sourceDigest",
+  "otherPlanContentExactlyEqual": true,
+  "privateFullChangePathListSha256": "a79e7a00f87eec2d56482677e9731c2ecdc6237a8d4111b9b4efb676368dc523"
 }

@@ -1,47 +1,47 @@
 {
   "schemaVersion": 1,
-  "recordedAt": "2026-11-16T16:07:42.351483+00:00",
+  "recordedAt": "2026-11-16T16:41:52.732384+00:00",
   "baseHeadBeforeRepair": "5fae54b471e84d73eab5e44d723aee12a0add797",
   "requiredChecks": [
     {
       "command": "pnpm lint",
-      "startedAt": "2026-11-16T15:47:38.007598+00:00",
+      "startedAt": "2026-11-16T16:25:26.725708+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T15:49:37.200736+00:00",
-      "logSha256": "43b0ab671a0e7456bc7e8aea36d5c92feb6b56dd0cbc363010d5ab1c2d2d7a8c"
+      "finishedAt": "2026-11-16T16:27:16.889534+00:00",
+      "logSha256": "91992efd2a35ff0d32a92a4c92177e9b2b802319a171c931c24584a76dd27a55"
     },
     {
       "command": "pnpm typecheck",
-      "startedAt": "2026-11-16T15:49:37.205553+00:00",
+      "startedAt": "2026-11-16T16:27:16.891222+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T15:53:12.029736+00:00",
-      "logSha256": "b5da3c04205d666d1ed84cf27c85118b7148d6af8a7c72bfd83bf3c77b89a2d5"
+      "finishedAt": "2026-11-16T16:29:34.208595+00:00",
+      "logSha256": "5a160e419137087b1cf7d6154b33ce6290fcca907ad7be2cecc52a1949630840"
     },
     {
       "command": "pnpm test:fast",
-      "startedAt": "2026-11-16T15:53:12.039715+00:00",
+      "startedAt": "2026-11-16T16:29:34.216372+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T16:04:06.153632+00:00",
-      "logSha256": "2f180afb4f0871eae4370bc79d58f7ad5c176b0c6dadd1d4fd891ca87bb1de3e"
+      "finishedAt": "2026-11-16T16:40:36.355230+00:00",
+      "logSha256": "93fb751dd72c40fc890f86b8777a32b666211de00057635662c9efe05edfcaca"
     },
     {
       "command": "pnpm validate:docs",
-      "startedAt": "2026-11-16T16:04:06.162838+00:00",
+      "startedAt": "2026-11-16T16:40:36.364565+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T16:04:12.722450+00:00",
-      "logSha256": "18d1c7ad126f29b24b0007be385a16553a2d92aa0ca48b01deddf5824d67c0a5"
+      "finishedAt": "2026-11-16T16:40:42.764907+00:00",
+      "logSha256": "da6f2feb9bca9dca0e4a882cdf47f4b762ad1193852399ab275ee337ab8adb7d"
     },
     {
       "command": "pnpm governance:audit",
-      "startedAt": "2026-11-16T16:04:12.730973+00:00",
+      "startedAt": "2026-11-16T16:40:42.773377+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T16:04:46.720330+00:00",
-      "logSha256": "a6683f93aaac929675c4d46aa56dfb5d5d1370f00fee8f0318e9daf1ba4d2f73"
+      "finishedAt": "2026-11-16T16:41:18.653563+00:00",
+      "logSha256": "cbcd78bfdfc0f57d9baec156aaa6c064d8ec9b42041acfb6162d08d8ef6939a4"
     }
   ],
   "sourceUnchangedDuringChecks": true,
@@ -72,7 +72,7 @@
     },
     {
       "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
-      "sha256": "0bf36ab5093daf0b0bc70c414de02bfe3ae39afec47d1d2238da1655a5924073"
+      "sha256": "022bc0b85f845dee606f76b3609ac621f5cdddf5bb2b4e94c4a570b82705c74b"
     },
     {
       "path": "apps/union-eyes/lib/services/ocr-service.ts",
@@ -294,9 +294,19 @@
       "passed": 39297,
       "failed": 1,
       "cause": "Repository scan exceeded30s; standalone default scan1.599s. Security check, source scope and limits unchanged."
+    },
+    {
+      "record": "initial-PR1254-source-plan-drift",
+      "candidateSha": "2a514e7a1c6c889a459578b27e794497c6150e5b",
+      "ciRunId": "43906646206",
+      "status": "FAIL",
+      "cause": "Manual source hash rebinding omitted generated statement sourceDigest metadata; deterministic regeneration corrects 252 metadata fields. All 6267 SQL statement bytes and all other non-provenance plan values are identical.",
+      "localExportAlsoFailedBeforeContainerCreation": true,
+      "originalFailureReceiptsPreserved": true
     }
   ],
   "stagingAcceptanceClaimed": false,
   "fullBaseStagingGo": false,
-  "productionAuthorized": false
+  "productionAuthorized": false,
+  "validationBaseHead": "2a514e7a1c6c889a459578b27e794497c6150e5b"
 }
