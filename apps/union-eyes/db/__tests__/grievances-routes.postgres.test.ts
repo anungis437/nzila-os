@@ -414,12 +414,12 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       const userId = (await admin.query('SELECT user_id::text FROM stewards WHERE id=$1', [id])).rows[0].user_id as string
       await admin.query('UPDATE stewards SET specialization=$2 WHERE id=$1', [id, specialization])
       await admin.query(`INSERT INTO user_management.users (user_id,email,is_active,lifecycle_state,created_at,updated_at)
-        VALUES ($1,$1 || '@example.test',true,'active',now(),now())`, [userId])
+        VALUES ($1,$2,true,'active',now(),now())`, [userId, `${userId}@example.test`])
       await admin.query(`INSERT INTO user_management.organization_users (organization_id,user_id,role,is_active)
         VALUES ($1,$2,'steward',$3)`, [organizationId, userId, active])
       await admin.query(`INSERT INTO organization_members
         (organization_id,user_id,role,status,is_primary,name,email,created_at,updated_at)
-        VALUES ($1,$2,'steward','active',false,$2,$2 || '@example.test',now(),now())`, [organizationId, userId])
+        VALUES ($1,$2::text,'steward','active',false,$2::text,$3,now(),now())`, [organizationId, userId, `${userId}@example.test`])
       return id
     }
 
