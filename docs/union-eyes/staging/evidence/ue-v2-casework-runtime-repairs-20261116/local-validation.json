@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-16T17:58:38.719553+00:00",
+  "baseHeadBeforeRepair": "5fae54b471e84d73eab5e44d723aee12a0add797",
+  "requiredChecks": [
+    {
+      "command": "pnpm lint",
+      "startedAt": "2026-11-16T17:20:42.291513+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T17:27:15.446243+00:00",
+      "logSha256": "8f0185b6dc19538e8ddc9d7a574b73ddb031032954a89d2fb20cfbff0fc095c3"
+    },
+    {
+      "command": "pnpm typecheck",
+      "startedAt": "2026-11-16T17:27:15.455398+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T17:35:32.759122+00:00",
+      "logSha256": "2bef081221d4478472730663d09af31f89a63ecfc9265df5e92f88e32ec4b580"
+    },
+    {
+      "command": "pnpm test:fast",
+      "startedAt": "2026-11-16T17:35:32.762244+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T17:52:27.618073+00:00",
+      "logSha256": "0eb3f6b4e06e8e715be680d7c8b472259869194792dd1dce7e5c160a878b46b4"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "startedAt": "2026-11-16T17:52:27.643386+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T17:52:36.978028+00:00",
+      "logSha256": "da6f2feb9bca9dca0e4a882cdf47f4b762ad1193852399ab275ee337ab8adb7d"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "startedAt": "2026-11-16T17:52:36.998984+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T17:53:16.177666+00:00",
+      "logSha256": "db9311b5a0edf31b9ab5f6220c3b30f96aa69b385940d6ce65bd8f4aaf6cc880"
+    }
+  ],
+  "sourceUnchangedDuringChecks": true,
+  "testedSourceModules": [
+    {
+      "path": "apps/union-eyes/lib/db/canonical-transaction-scope.ts",
+      "sha256": "b341370018fb4e5630fced8b4ee6b92b6337f851ff013902c6dd844093bebf64"
+    },
+    {
+      "path": "apps/union-eyes/lib/db/canonical-transaction-principal.test.ts",
+      "sha256": "d145dec9fdea07064d22f49d73ac2af4e40523371b5d2e2ad1a7dd81c1f90026"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-authorization.ts",
+      "sha256": "2832becd0b77e43aacfa86a08b5c808e34b4888e50a1976c378471ca14914e0d"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-authorization.pglite.test.ts",
+      "sha256": "cdad34fe5f647699e3d650de1faeeefec8a59973e8f4625c6198a7bace212f0a"
+    },
+    {
+      "path": "packages/db/src/auth-client.ts",
+      "sha256": "0690d685c543da860bbe7d421c71732c57708623595ed6f52f4c7e2b36b942a1"
+    },
+    {
+      "path": "packages/db/src/__tests__/auth-pool-budget.test.ts",
+      "sha256": "02a087062893723cd54388ed167fdb7cd53365d7ec1201dc998cdc4f5ddb1baf"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "sha256": "022bc0b85f845dee606f76b3609ac621f5cdddf5bb2b4e94c4a570b82705c74b"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/ocr-service.ts",
+      "sha256": "466868df5bb1b9df3b4aaa463751c4bf6bdc50893a573081229309e4572f7a21"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/__tests__/ocr-service.test.ts",
+      "sha256": "b17456ea1c432606d616dab5e2a49a03e347613a95b4fb79f58f638ab36a22a0"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/__tests__/ocr-pdf-real.test.ts",
+      "sha256": "66dc7581dd78b18311e73e889f15770b6a012174b6f99a51adbbe7449821a7f0"
+    },
+    {
+      "path": "apps/union-eyes/lib/api/with-api.ts",
+      "sha256": "4f99a29734b7574cb6da7119c41ca1a2ef97537537979f065fd0487fd096cebc"
+    },
+    {
+      "path": "apps/union-eyes/lib/api/__tests__/with-api-canonical.test.ts",
+      "sha256": "cc66b721ec71943d171e880cb2817839c8567a0805d2ca7fe1d30597d0c8dd27"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.ts",
+      "sha256": "bd52b998b8e711f16d947d5227d91a4745d47c0e6a5fc8641d58f800d50a94f3"
+    },
+    {
+      "path": "apps/union-eyes/lib/documents/ocr-extract.ts",
+      "sha256": "f7fcd883e89b19d04e0f09de3a1f9badbe9de8175d2b77490a08eeba9e23eadc"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/documents-external-workbook-routes.postgres.test.ts",
+      "sha256": "152057162bee191a4b8b623246de2405316377445bfbe18a32d9ade1744eb2d8"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/repository/route.ts",
+      "sha256": "037f9f4a34003298cdfb926067abbdb040aa3956ac5639d1a86e0012b008f219"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/repository/[id]/versions/route.ts",
+      "sha256": "c6afbbe11f624e92b2363311d6c4367c3e7ad4d7b727cc23c14bd1327ff50537"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/repository/downloads/route.ts",
+      "sha256": "70e840365a0286071f8f345d8956790f2050c80d37a6c89d2d60ca1149aa2bdc"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+      "sha256": "82e15171bfaa4bf6e420be66a6298b358f42d779bf13e099e0010ebd07dc269b"
+    }
+  ],
+  "fullFast": {
+    "testsPassed": 39309,
+    "testsSkipped": 1694,
+    "filesPassed": 3004,
+    "filesSkipped": 117,
+    "thresholdsAndExclusionsUnchanged": true,
+    "repositoryDefaultConcurrency": true
+  },
+  "focused": {
+    "testsPassed": 102,
+    "filesPassed": 9,
+    "logSha256": "dcbc4abf580ff0ea44431b3c7a6226c6c9b360dfd27047d8e07ef308e9734e96"
+  },
+  "authenticationScopeComparison": {
+    "status": "PASS_READ_ONLY_COMPARISON_NOT_HTTP_SLO_PASS",
+    "actualTransportExitCode": 0,
+    "baseSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+    "patchIdentity": "EXACT_T2_80_MODULE_GRAPH_PLUS_ONE_UNCOMMITTED_AUTH_SETTINGS_PATCH",
+    "poolMaxPerVariant": 1,
+    "allTwelveSelectorsVerified": true,
+    "measurements": [
+      {
+        "label": "deployed",
+        "phase": "warmup",
+        "count": 1,
+        "wallMs": 223.45708600000216,
+        "durationMs": [
+          223.33478599999944
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "patched",
+        "phase": "warmup",
+        "count": 1,
+        "wallMs": 205.84499300000607,
+        "durationMs": [
+          205.82079299999896
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "deployed",
+        "phase": "round_1",
+        "count": 5,
+        "wallMs": 347.63914599999407,
+        "durationMs": [
+          65.53094799999963,
+          133.62190900000132,
+          210.76451900000393,
+          284.6564120000039,
+          347.4215449999974
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "patched",
+        "phase": "round_1",
+        "count": 5,
+        "wallMs": 181.35866299999907,
+        "durationMs": [
+          24.30112999999983,
+          79.02552000000287,
+          104.04665199999727,
+          136.06952200000524,
+          181.0287610000014
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "patched",
+        "phase": "round_2",
+        "count": 5,
+        "wallMs": 146.71237900000415,
+        "durationMs": [
+          26.490340999996988,
+          51.66527499999938,
+          72.77078600000095,
+          120.33943899999576,
+          146.02387499999895
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "deployed",
+        "phase": "round_2",
+        "count": 5,
+        "wallMs": 356.94409599999926,
+        "durationMs": [
+          71.34267800000089,
+          145.0193700000018,
+          215.0992419999966,
+          282.3255990000034,
+          356.39549299999635
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "deployed",
+        "phase": "round_3",
+        "count": 5,
+        "wallMs": 334.8091779999959,
+        "durationMs": [
+          59.86991799999669,
+          126.55157199999667,
+          202.00657299999875,
+          263.8019010000062,
+          334.480475999997
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "patched",
+        "phase": "round_3",
+        "count": 5,
+        "wallMs": 172.07821400000103,
+        "durationMs": [
+          47.21935099999973,
+          73.34608899999876,
+          95.56860700000107,
+          118.81383099999948,
+          171.86551300000428
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      }
+    ],
+    "rawReceiptSha256": "ab59359e732da04de5ad48e75735743c59466964e96a878175aeeeb2b8e7dfcd",
+    "scope": "Trusted operator read-only identity scopes with actual source modules; not a real-user or full HTTP load pass. Restricted-role pg_stat_ssl was unobservable; strict verify-full driver mode is recorded separately.",
+    "sourceModuleSha256": "0690d685c543da860bbe7d421c71732c57708623595ed6f52f4c7e2b36b942a1"
+  },
+  "realLocalOcrEngines": {
+    "status": "PASS_REAL_LOCAL_ENGINES_PRIVATE_REPAIR_NOT_STAGING_ACCEPTANCE",
+    "ocrServiceSha256": "466868df5bb1b9df3b4aaa463751c4bf6bdc50893a573081229309e4572f7a21",
+    "checks": [
+      {
+        "kind": "REAL_IMAGE_OCR",
+        "status": "PASS",
+        "confidence": 95,
+        "expectedTextFound": true
+      },
+      {
+        "kind": "REAL_SCANNED_PDF_RENDER_AND_OCR",
+        "status": "PASS",
+        "pages": 1,
+        "expectedTextFound": true
+      },
+      {
+        "kind": "REAL_MIXED_TEXT_SCANNED_PDF_PAGE_ORDER",
+        "status": "PASS",
+        "pages": 2
+      }
+    ],
+    "rawReceiptSha256": "391c974e1f7e6121745e5f2d7c154057e383d3ac7aa2edcbd13b6c99b5a8ac96",
+    "scope": "Local component runs with actual Tesseract and PDFParse; synthetic files only; no live document authority, HTTP route, transcript persistence or publication acceptance is inferred."
+  },
+  "priorFailuresPreserved": [
+    {
+      "record": "performance-source-attempt1",
+      "passed": 39297,
+      "failed": 1,
+      "cause": "Old source commitment hashes; exact reviewed hashes rebound with guard preserved."
+    },
+    {
+      "record": "performance-source-attempt2",
+      "passed": 39297,
+      "failed": 1,
+      "cause": "Repository scan exceeded30s; standalone default scan1.599s. Security check, source scope and limits unchanged."
+    },
+    {
+      "record": "initial-PR1254-source-plan-drift",
+      "candidateSha": "2a514e7a1c6c889a459578b27e794497c6150e5b",
+      "ciRunId": "43906646206",
+      "status": "FAIL",
+      "cause": "Manual source hash rebinding omitted generated statement sourceDigest metadata; deterministic regeneration corrects 252 metadata fields. All 6267 SQL statement bytes and all other non-provenance plan values are identical.",
+      "localExportAlsoFailedBeforeContainerCreation": true,
+      "originalFailureReceiptsPreserved": true
+    },
+    {
+      "record": "PR1254-native-OCR-declaration-expectation",
+      "candidateSha": "4b544d2f327024cdfe57e1cdc8a971c7d8fe8ff7",
+      "ciRunId": "43910586707",
+      "postgres15JobId": "133451100264",
+      "postgres16JobId": "133451099604",
+      "bothPostgresVersionsSameSingleFailure": true,
+      "status": "FAIL",
+      "failedTests": 1,
+      "passedTests": 1076,
+      "cause": "Native route declaration expected unspecified wrapper context for OCR; repaired route explicitly opts out. Expect false for OCR only; all eight role floors and other settings are retained.",
+      "actualNativePostgresQualificationForCorrectedHead": "PENDING_CI",
+      "productImplementationChangedByNativeAssertionCorrection": false,
+      "testTimeoutsOrExpectedSkipListsChanged": false
+    }
+  ],
+  "stagingAcceptanceClaimed": false,
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false,
+  "validationBaseHead": "4b544d2f327024cdfe57e1cdc8a971c7d8fe8ff7",
+  "additionalFocusedDocumentRegression": {
+    "status": "PASS_LOCAL_ONLY",
+    "files": 8,
+    "tests": 106,
+    "logSha256": "961744929a72bd48d5ecd6dafffd52e6f8658df273b7ed3f67d02c5c335bca18"
+  },
+  "handlerOwnedDocumentStorageScopes": {
+    "status": "SOURCE_REPAIR_LOCAL_VALIDATION_ONLY",
+    "routes": [
+      {
+        "path": "apps/union-eyes/app/api/documents/repository/route.ts",
+        "method": "POST",
+        "sha256": "037f9f4a34003298cdfb926067abbdb040aa3956ac5639d1a86e0012b008f219"
+      },
+      {
+        "path": "apps/union-eyes/app/api/documents/repository/[id]/versions/route.ts",
+        "method": "POST",
+        "sha256": "c6afbbe11f624e92b2363311d6c4367c3e7ad4d7b727cc23c14bd1327ff50537"
+      },
+      {
+        "path": "apps/union-eyes/app/api/documents/repository/downloads/route.ts",
+        "method": "POST",
+        "sha256": "70e840365a0286071f8f345d8956790f2050c80d37a6c89d2d60ca1149aa2bdc"
+      },
+      {
+        "path": "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+        "method": "GET",
+        "sha256": "82e15171bfaa4bf6e420be66a6298b358f42d779bf13e099e0010ebd07dc269b"
+      }
+    ],
+    "nativeRoleFloorsRetained": 8,
+    "nativeExplicitHandlerOwnedDeclarations": 5,
+    "otherDeclarationsUnchanged": 3,
+    "authenticationInheritedContextAndResourceVersionAuditChecksRetained": true,
+    "newDeployedHttpProofClaimed": false
+  }
+}

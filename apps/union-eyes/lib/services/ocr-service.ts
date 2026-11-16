@@ -66,8 +66,6 @@ interface AzureReadPage {
   lines?: AzureReadLine[];
 }
 
-type PdfParseResult = { text?: string };
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -434,34 +432,37 @@ async function processAzureOCR(
  */
 export async function processPDFOCR(
   pdfBuffer: Buffer,
-  _options: OCROptions = {}
+  options: OCROptions = {}
 ): Promise<{ pages: OCRResult[]; fullText: string }> {
   try {
-    const pdfParseModule = await import("pdf-parse");
-    const pdfParseExport = "default" in pdfParseModule ? pdfParseModule.default : pdfParseModule;
-    const pdfParse = pdfParseExport as (buffer: Buffer) => Promise<PdfParseResult>;
-    
-    // First try to extract text directly from PDF
-    const pdfData = await pdfParse(pdfBuffer);
-    
-    if (pdfData.text && pdfData.text.trim().length > 0) {
-      // PDF has extractable text
-      return {
-        pages: [{
-          text: pdfData.text,
-          confidence: 100, // Direct extraction is 100% accurate
-        }],
-        fullText: pdfData.text,
-      };
+    const { PDFParse } = await import("pdf-parse");
+    const parser = new PDFParse({ data: new Uint8Array(pdfBuffer) });
+    try {
+      const extracted = await parser.getText();
+      if (extracted.pages.length === 0) throw new Error("PDF contains no readable pages");
+      const pages: OCRResult[] = [];
+      for (const page of extracted.pages) {
+        if (page.text.trim().length > 0) {
+          pages.push({ text: page.text, confidence: 100 });
+          continue;
+        }
+        // Render and recognize image-only pages using the installed parser
+        // and the same image OCR provider. Mixed documents keep page order.
+        const rendered = await parser.getScreenshot({
+          partial: [page.num], desiredWidth: 1600,
+          imageBuffer: true, imageDataUrl: false,
+        });
+        const image = rendered.pages.find(candidate => candidate.pageNumber === page.num);
+        if (!image?.data.byteLength) throw new Error("PDF page image is unavailable");
+        pages.push(await processImageOCR(Buffer.from(image.data), options));
+      }
+      return { pages, fullText: pages.map(page => page.text).join("\n\n") };
+    } finally {
+      await parser.destroy();
     }
-
-    // If no text found, PDF is likely scanned - need image OCR
-    // This requires converting PDF to images first
-    throw new Error("Scanned PDF OCR requires pdf2pic or similar library. Please install: npm install pdf2pic");
-    
   } catch (error) {
-    if (getErrorCode(error) === "MODULE_NOT_FOUND") {
-      throw new Error("PDF parsing library not installed. Run: npm install pdf-parse");
+    if (getErrorCode(error) === "MODULE_NOT_FOUND" || getErrorCode(error) === "ERR_MODULE_NOT_FOUND") {
+      throw new Error("PDF parsing library is unavailable");
     }
     throw error;
   }

@@ -5,11 +5,12 @@ import { PGlite } from '@electric-sql/pglite'
 import { drizzle } from 'drizzle-orm/pglite'
 import { claims, claimUpdates } from '@/db/schema/claims-schema'
 
-const m = vi.hoisted(() => ({ auth: vi.fn(), organization: vi.fn(), role: vi.fn(), audit: vi.fn() }))
+const m = vi.hoisted(() => ({ auth: vi.fn(), organization: vi.fn(), role: vi.fn(), audit: vi.fn(), principal: vi.fn() }))
 vi.mock('@nzila/platform-auth/entra/server', () => ({ auth: m.auth }))
 vi.mock('@/lib/organization-utils', () => ({ getOrganizationIdForUser: m.organization, getUserRoleInOrganization: m.role }))
 vi.mock('@/lib/audit-logger', () => ({ auditLog: m.audit, AuditEventType: {AUTH_FAILED:'AUTH_FAILED'}, AuditSeverity:{HIGH:'HIGH'} }))
 vi.mock('@/lib/auth/canonical-bootstrap', () => ({currentStateContextEnabled:()=>true}))
+vi.mock('@/lib/db/canonical-transaction-scope', () => ({ canonicalTenantPrincipal: m.principal }))
 import { caseHistoryVisibility, getCaseActor, type CaseActor } from './case-authorization'
 import { casePolicyRole } from './case-permissions'
 
@@ -38,6 +39,7 @@ beforeAll(async()=>{
 afterAll(async()=>{await pg?.close()})
 beforeEach(()=>{
   vi.clearAllMocks()
+  m.principal.mockReturnValue(null)
   m.auth.mockResolvedValue({userId:actor.userId})
   m.organization.mockResolvedValue(org)
   m.role.mockResolvedValue('member')
@@ -70,5 +72,24 @@ describe('case history visibility and the case actor against PostgreSQL',()=>{
   it('uses only the resolved organization role',async()=>{
     expect(await getCaseActor()).toEqual(actor)
     expect(m.role).toHaveBeenCalledWith(actor.userId,org)
+  })
+  it('uses the verified transaction actor without opening redundant identity scopes',async()=>{
+    m.principal.mockReturnValue({userId:'bound-actor',organizationId:foreign,role:'secretary_treasurer',isSystemAdmin:false})
+    expect(await getCaseActor()).toEqual({userId:'bound-actor',organizationId:foreign,role:'officer'})
+    expect(m.auth).not.toHaveBeenCalled()
+    expect(m.organization).not.toHaveBeenCalled()
+    expect(m.role).not.toHaveBeenCalled()
+  })
+  it('does not turn a platform flag or an unknown bound role into case authority',async()=>{
+    m.principal.mockReturnValue({userId:actor.userId,organizationId:org,role:'admin',isSystemAdmin:true})
+    await expect(getCaseActor()).rejects.toMatchObject({code:'FORBIDDEN'})
+    m.principal.mockReturnValue({userId:actor.userId,organizationId:org,role:'unknown',isSystemAdmin:false})
+    await expect(getCaseActor()).rejects.toMatchObject({code:'ROLE_REQUIRED'})
+    expect(m.auth).not.toHaveBeenCalled()
+  })
+  it('propagates scope refusal instead of falling back to another identity lookup',async()=>{
+    m.principal.mockImplementationOnce(()=>{throw new Error('expired transaction authority')})
+    await expect(getCaseActor()).rejects.toThrow('expired transaction authority')
+    expect(m.auth).not.toHaveBeenCalled()
   })
 })

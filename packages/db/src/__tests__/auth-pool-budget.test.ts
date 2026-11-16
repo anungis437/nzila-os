@@ -1,4 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest'
+import { PgDialect } from 'drizzle-orm/pg-core'
+import { authContextSettings } from '../auth-storage-authority'
+import type { SQL } from 'drizzle-orm'
 
 async function fixture() {
   vi.resetModules()
@@ -11,11 +14,11 @@ async function fixture() {
     return client
   })
   const principal = { gateway: true, other_gateway: false, rolsuper: false, rolbypassrls: false, rolcreatedb: false, rolcreaterole: false, rolinherit: false, rolcanlogin: true, owns_auth: false }
-  const tx = { execute: vi.fn(async () => [principal]) }
+  const tx = { execute: vi.fn(async (_statement: SQL) => [principal]) }
   vi.doMock('postgres', () => ({ default: postgres }))
   vi.doMock('drizzle-orm/postgres-js', () => ({ drizzle: () => ({ transaction: async (callback: (value: typeof tx) => unknown) => callback(tx) }) }))
   const module = await import('../auth-client')
-  return { module, postgres, clients }
+  return { module, postgres, clients, tx }
 }
 
 afterEach(() => {
@@ -23,6 +26,36 @@ afterEach(() => {
   vi.resetModules()
   vi.doUnmock('postgres')
   vi.doUnmock('drizzle-orm/postgres-js')
+})
+
+it('installs every bound selector, including cleared selectors, before the callback in one query', async () => {
+  const { module, tx } = await fixture()
+  const context = { phase: 'identity', userId: 'owned-user' } as const
+  const dialect = new PgDialect()
+  await module.executeAuthContext(context, async () => {
+    // Principal inspection, SET LOCAL ROLE, then one complete settings query.
+    expect(tx.execute).toHaveBeenCalledTimes(3)
+    const statement = dialect.sqlToQuery(tx.execute.mock.calls[2][0])
+    const expected = Object.entries(authContextSettings(context)).flat()
+    expect(statement.params).toEqual(expected)
+    expect(statement.sql.match(/set_config\(/g)).toHaveLength(expected.length / 2)
+    expect(statement.sql).not.toContain('owned-user')
+    expect(expected).toContain('')
+  })
+})
+
+it('propagates a settings failure without entering the authenticated callback', async () => {
+  const { module, tx } = await fixture()
+  const error = new Error('settings refused')
+  tx.execute.mockImplementationOnce(async () => [{ gateway: true, other_gateway: false,
+    rolsuper: false, rolbypassrls: false, rolcreatedb: false, rolcreaterole: false,
+    rolinherit: false, rolcanlogin: true, owns_auth: false }])
+    .mockImplementationOnce(async () => [])
+    .mockRejectedValueOnce(error)
+  const callback = vi.fn()
+  await expect(module.executeAuthContext({ phase: 'identity', userId: 'owned-user' }, callback))
+    .rejects.toBe(error)
+  expect(callback).not.toHaveBeenCalled()
 })
 
 it('uses independently bounded dedicated gateway pools and closes both without changing identity authority', async () => {

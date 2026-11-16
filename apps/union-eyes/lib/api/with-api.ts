@@ -133,10 +133,11 @@ export interface WithApiOptions<
   /**
    * Run the handler inside a transaction-local RLS context
    * (`withRLSContext({ organizationId })`) so org-scoped RLS policies apply to
-   * the handler's own DB reads/writes. Opt-in in legacy mode; mandatory for
-   * authenticated, org-required V2 handlers. Set by the CRUD factory for
-   * org-scoped resources. Custom routes that manage their own context, or that
-   * are system/public, leave this unset.
+   * the handler's own DB reads/writes. Opt-in in legacy mode; the default for
+   * authenticated, org-required V2 handlers. A slow handler that manages each
+   * database operation in its own guarded context explicitly sets false.
+   * Authentication, organization checks and inherited-context validation still
+   * apply. The CRUD factory enables this for org-scoped resources.
    */
   rlsOrgContext?: boolean;
 
@@ -718,10 +719,11 @@ export function withApi<
         ) {
           const { getActiveTenantDb } = await import('@/db/tenant-context-storage');
           if (!getActiveTenantDb()) {
-            const { withRLSContext } = await import('@/lib/db/with-rls-context');
-            return withRLSContext({ organizationId: resolvedOrganizationId }, runHandler);
-          }
-          if (currentStateContextEnabled()) {
+            if (options.rlsOrgContext !== false) {
+              const { withRLSContext } = await import('@/lib/db/with-rls-context');
+              return withRLSContext({ organizationId: resolvedOrganizationId }, runHandler);
+            }
+          } else if (currentStateContextEnabled()) {
             const { validateRLSContext } = await import('@/lib/db/with-rls-context');
             const active = await validateRLSContext();
             if (active.userId !== user?.id || active.orgId !== resolvedOrganizationId)

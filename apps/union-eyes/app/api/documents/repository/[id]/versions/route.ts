@@ -35,6 +35,7 @@ const appendVersionSchema = z.object({
 export const POST = withApi(
   {
     auth: { required: true },
+    rlsOrgContext: false,
     entitlement: 'grievance_case_suite',
     // Authority is decided per document (its uploader or the case kernel), not by a role floor. The intake and storage
     // checks reach out to blob storage, so no database transaction is held across them: the reads before the write and

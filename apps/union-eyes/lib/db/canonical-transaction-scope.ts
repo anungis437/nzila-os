@@ -7,6 +7,19 @@ import type { RLSTx } from './with-rls-context'
 
 const scopes = new AsyncLocalStorage<{ tx: RLSTx; binding: AuthenticatedOrgBinding }>()
 
+/** Server-internal actor of the current verified transaction; never returns its bearer. */
+export function canonicalTenantPrincipal(): Pick<
+  AuthenticatedOrgBinding, 'userId' | 'organizationId' | 'role' | 'isSystemAdmin'
+> | null {
+  const active = scopes.getStore()
+  if (!active) return null
+  if (getActiveSystemDb()) throw new AuthOrgBindingError('ROLE_REQUIRED')
+  if (!Number.isFinite(active.binding.expiresAt.getTime()) || active.binding.expiresAt.getTime() <= Date.now())
+    throw new AuthOrgBindingError('SESSION_AUTHORITY_REQUIRED')
+  const { userId, organizationId, role, isSystemAdmin } = active.binding
+  return { userId, organizationId, role, isSystemAdmin }
+}
+
 /** Internal server boundary: called only after attaching a verified binding to this transaction. */
 export function withCanonicalTenantScope<T>(
   tx: RLSTx,

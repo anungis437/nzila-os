@@ -9,6 +9,9 @@ const mocks = vi.hoisted(() => ({
   mockAzureReadInStream: vi.fn(),
   mockAzureGetReadResult: vi.fn(),
   mockPdfParse: vi.fn(),
+  mockPdfScreenshot: vi.fn(),
+  mockPdfDestroy: vi.fn(),
+  mockPdfConstructor: vi.fn(),
   mockSharpToBuffer: vi.fn(),
   mockSharpFactory: vi.fn(),
 }));
@@ -57,7 +60,12 @@ vi.mock('@azure/ms-rest-js', () => ({
 }));
 
 vi.mock('pdf-parse', () => ({
-  default: mocks.mockPdfParse,
+  PDFParse: class {
+    constructor(options: unknown) { mocks.mockPdfConstructor(options); }
+    getText = mocks.mockPdfParse;
+    getScreenshot = mocks.mockPdfScreenshot;
+    destroy = mocks.mockPdfDestroy;
+  },
 }));
 
 vi.mock('sharp', () => ({
@@ -128,7 +136,9 @@ describe('processImageOCR', () => {
         ],
       },
     });
-    mocks.mockPdfParse.mockResolvedValue({ text: 'PDF direct text' });
+    mocks.mockPdfParse.mockResolvedValue({ text: 'PDF direct text', total: 1, pages: [{ num: 1, text: 'PDF direct text' }] });
+    mocks.mockPdfScreenshot.mockResolvedValue({ total: 1, pages: [{ pageNumber: 1, data: new Uint8Array([1, 2, 3]) }] });
+    mocks.mockPdfDestroy.mockResolvedValue(undefined);
     mocks.mockSharpToBuffer.mockResolvedValue(Buffer.from('processed'));
     mocks.mockSharpFactory.mockReturnValue({
       grayscale: vi.fn().mockReturnThis(),
@@ -300,20 +310,59 @@ describe('processImageOCR', () => {
   });
 
   describe('PDF and utility exports', () => {
-    it('processPDFOCR returns direct parsed text', async () => {
-      const result = await processPDFOCR(Buffer.from('pdf'));
+    it('reads the installed parser class contract and disposes text PDFs without rendering', async () => {
+      const input = Buffer.from('pdf');
+      const result = await processPDFOCR(input);
       expect(result.fullText).toBe('PDF direct text');
       expect(result.pages[0].confidence).toBe(100);
+      expect(mocks.mockPdfConstructor).toHaveBeenCalledWith({ data: new Uint8Array(input) });
+      expect(mocks.mockPdfScreenshot).not.toHaveBeenCalled();
+      expect(mocks.mockPdfDestroy).toHaveBeenCalledOnce();
     });
 
-    it('processPDFOCR throws scanned-pdf guidance when text is empty', async () => {
-      mocks.mockPdfParse.mockResolvedValueOnce({ text: '   ' });
-      await expect(processPDFOCR(Buffer.from('pdf'))).rejects.toThrow('Scanned PDF OCR requires pdf2pic');
+    it('renders and recognizes image-only pages with the requested language', async () => {
+      mocks.mockPdfParse.mockResolvedValueOnce({ total: 1, pages: [{ num: 1, text: '   ' }] });
+      const result = await processPDFOCR(Buffer.from('pdf'), { language: 'fra' });
+      expect(result.fullText).toBe('Hello World');
+      expect(result.pages[0].confidence).toBe(95);
+      expect(mocks.mockPdfScreenshot).toHaveBeenCalledWith({ partial: [1], desiredWidth: 1600, imageBuffer: true, imageDataUrl: false });
+      expect(mocks.mockCreateWorker).toHaveBeenCalledWith('fra', 1, expect.any(Object));
+      expect(mocks.mockPdfDestroy).toHaveBeenCalledOnce();
     });
 
-    it('processPDFOCR maps module-not-found errors', async () => {
-      mocks.mockPdfParse.mockRejectedValueOnce({ code: 'MODULE_NOT_FOUND' });
-      await expect(processPDFOCR(Buffer.from('pdf'))).rejects.toThrow('PDF parsing library not installed');
+    it('keeps text and scanned pages in their original order', async () => {
+      mocks.mockPdfParse.mockResolvedValueOnce({ total: 3, pages: [{ num: 1, text: 'first' }, { num: 2, text: '' }, { num: 3, text: 'last' }] });
+      mocks.mockPdfScreenshot.mockResolvedValueOnce({ total: 3, pages: [{ pageNumber: 2, data: new Uint8Array([1, 2, 3]) }] });
+      expect((await processPDFOCR(Buffer.from('pdf'))).pages.map(page => page.text)).toEqual(['first', 'Hello World', 'last']);
+      expect(mocks.mockPdfScreenshot).toHaveBeenCalledOnce();
+    });
+
+    it('refuses absent page images instead of returning empty successful OCR', async () => {
+      mocks.mockPdfParse.mockResolvedValueOnce({ total: 1, pages: [{ num: 1, text: '' }] });
+      mocks.mockPdfScreenshot.mockResolvedValueOnce({ total: 1, pages: [] });
+      await expect(processPDFOCR(Buffer.from('pdf'))).rejects.toThrow('PDF page image is unavailable');
+      expect(mocks.mockRecognize).not.toHaveBeenCalled();
+      expect(mocks.mockPdfDestroy).toHaveBeenCalledOnce();
+    });
+
+    it('disposes the PDF parser and image worker after recognition failure', async () => {
+      mocks.mockPdfParse.mockResolvedValueOnce({ total: 1, pages: [{ num: 1, text: '' }] });
+      mocks.mockRecognize.mockRejectedValueOnce(new Error('recognition failed'));
+      await expect(processPDFOCR(Buffer.from('pdf'))).rejects.toThrow('recognition failed');
+      expect(mocks.mockTerminate).toHaveBeenCalledOnce();
+      expect(mocks.mockPdfDestroy).toHaveBeenCalledOnce();
+    });
+
+    it('refuses empty page sets and disposes failed parses', async () => {
+      mocks.mockPdfParse.mockResolvedValueOnce({ total: 0, pages: [] });
+      await expect(processPDFOCR(Buffer.from('pdf'))).rejects.toThrow('PDF contains no readable pages');
+      expect(mocks.mockPdfDestroy).toHaveBeenCalledOnce();
+    });
+
+    it.each(['MODULE_NOT_FOUND', 'ERR_MODULE_NOT_FOUND'])('maps a missing parser dependency %s and still disposes the parser', async code => {
+      mocks.mockPdfParse.mockRejectedValueOnce({ code });
+      await expect(processPDFOCR(Buffer.from('pdf'))).rejects.toThrow('PDF parsing library is unavailable');
+      expect(mocks.mockPdfDestroy).toHaveBeenCalledOnce();
     });
 
     it('preprocessImage returns transformed buffer', async () => {
