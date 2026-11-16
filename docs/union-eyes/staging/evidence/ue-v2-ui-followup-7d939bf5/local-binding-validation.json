@@ -1,0 +1,169 @@
+{
+  "status": "PASS_LOCAL_ONLY",
+  "recordedAt": "2026-11-16T12:27:40.119978+00:00",
+  "applicationSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+  "sourceAdmissionMergeSha": "1ecb345ca5871b89ac8cb7b0ec379aab0a4ef323",
+  "bindingCommitSha": null,
+  "fiveRequiredChecks": [
+    {
+      "command": "pnpm lint",
+      "status": "PASS",
+      "startedAt": "2026-11-16T12:08:07.213272+00:00",
+      "completedAt": "2026-11-16T12:10:28.783031+00:00",
+      "privateReceiptSha256": "7891aacb3982c56f7f1582709150b973903cd75157e85725ce0ac18dbc6f2958",
+      "logSha256": "5b6206fd14f99b71737d41b027ca32ac8683f87397d4b0aae5b6cb85561032fe"
+    },
+    {
+      "command": "pnpm typecheck",
+      "status": "PASS",
+      "startedAt": "2026-11-16T12:10:28.793392+00:00",
+      "completedAt": "2026-11-16T12:13:24.308779+00:00",
+      "privateReceiptSha256": "0b3aeb115a6ffe929880aed850529fff5f814107f959262a69f66ce1e757d8d2",
+      "logSha256": "653a347100d68f2342ef986d8d684af43fdb01a21427f5cc28d6bf201a788129"
+    },
+    {
+      "command": "pnpm test:fast",
+      "status": "PASS",
+      "startedAt": "2026-11-16T12:14:49.094215+00:00",
+      "completedAt": "2026-11-16T12:26:39.280194+00:00",
+      "privateReceiptSha256": "911737dad530016e075a802033f6ca9f825afcdbe13824176ea89c613c6e7451",
+      "logSha256": "91c96a8d6f4dab7b1bf7d8fdd199978bac172ae85c5d7d7be7b902d408c2c29f"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "status": "PASS",
+      "startedAt": "2026-11-16T12:26:39.286173+00:00",
+      "completedAt": "2026-11-16T12:26:46.160180+00:00",
+      "privateReceiptSha256": "17ce8c67dba587fe9475606347c7f6d49f585a577940a5657886450acd5204c2",
+      "logSha256": "18d1c7ad126f29b24b0007be385a16553a2d92aa0ca48b01deddf5824d67c0a5"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "status": "PASS",
+      "startedAt": "2026-11-16T12:13:24.319454+00:00",
+      "completedAt": "2026-11-16T12:13:48.420195+00:00",
+      "privateReceiptSha256": "237a2a8cf1b021245dfa02583256473e136e1e544067c420224b4bc93dfc3e9e",
+      "logSha256": "ca013f2095c800a992505059baa591c18ddae14223ae2544071d466614ef3592"
+    }
+  ],
+  "fastTestSummary": [
+    "Test Files  3002 passed | 117 skipped (3119)",
+    "Tests  39288 passed | 1694 skipped (40995)",
+    "Duration  706.08s (tests 57%, import 26%, environment 11%, transform 5%)"
+  ],
+  "protectedInputsUnchanged": true,
+  "testedInputFiles": [
+    {
+      "path": "apps/union-eyes/components/admin/representative-matching-profiles.tsx",
+      "sha256": "496d1951ee5a77a1715cb34fc3068f39d6e29a578ae4600e5fa3740cd2ba2d49"
+    },
+    {
+      "path": "apps/union-eyes/components/dashboard/role-experience-guard.test.tsx",
+      "sha256": "276051e23f14527ce1e127a99c87304ca178ac6a307c270fa2a90274d02b3e9e"
+    },
+    {
+      "path": "apps/union-eyes/components/dashboard/role-experience-guard.tsx",
+      "sha256": "ec7c638481752ed11d6e347a2201f839c019d1edc1dd48c0116e341581624b90"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-browser.tsx",
+      "sha256": "ceaf5d73955cd1794e2faf7974148abc34df05560f041c2bcdcc456f53af6e4b"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/transcript-review.test.tsx",
+      "sha256": "8d497d1f1beffe9950ef5c719712d2250a1cc5d2912f6500593eab84471ec648"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/transcript-review.tsx",
+      "sha256": "7c09910be538f8768bf133c38ecab39311d420bc5a505435e37c485d079b6568"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/workbench-projection.ts",
+      "sha256": "d000019096fe9a213727bdb792997e193f5f074f70dc6fd28aa6c50d2fb00780"
+    },
+    {
+      "path": "apps/union-eyes/lib/dashboard/workbench-route-access.ts",
+      "sha256": "e9710e66d3a8470415e10a205cd7a98c809beb816d21774d6e64cc66cec3ab4a"
+    },
+    {
+      "path": "apps/union-eyes/lib/documents/transcript-review-client.ts",
+      "sha256": "5b3bc2a8c5fbcbcb467df935618e20f0cdb58584ef709cc75d5d2b224a9dda2f"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json",
+      "sha256": "e8164dbd0e68c1c8b79886987b1390cdc4ec5beec78f80eecea5ecdc0b23ae33"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_CURRENT_CANDIDATE.md",
+      "sha256": "7e4b040b1d2f28331e0ce859c75c20cb7efb45a816b5be27593124a8e0e16bb0"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_CURRENT_SOURCE_ADMISSION.md",
+      "sha256": "42213d44fc5626e3f3b8720877243cf7dafdad86c902d9f8819be81f8e850ba9"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-ui-followup-7d939bf5/contract-before-ui-followup.json",
+      "sha256": "39e91fce30aac12e054ea2bd2a0cbac26d43374d828cf1b531d0a541b9600b27"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-ui-followup-7d939bf5/exact-source-ci.json",
+      "sha256": "6740136222c7fd10fcd8bfeb2bbaf4464966f71b332d1150b7ff5c4ed61112ed"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-ui-followup-7d939bf5/fresh-local-export.json",
+      "sha256": "c631de6ce786516c8c7881ac334db324d2ff9f4b6e24e5c7a96e2da834986bf7"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-ui-followup-7d939bf5/fresh-native-tool-build.json",
+      "sha256": "2a3a18eb9581107130d2e595e9212b443e44fc127c9fd4b6ccc84c53bb4540cb"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-ui-followup-7d939bf5/observed-source-before-binding.json",
+      "sha256": "f3295ad977fda7daace6c5fb0e9542e564c432d5fc5bc509d61356efe14b1ce6"
+    },
+    {
+      "path": "ops/change-records/CHG-2026-0114.founder-authorization.md",
+      "sha256": "d69ceb3b6afeae40f5194ead1bd37fdac7fb1d2be5fd41e8d081f5c4f6007646"
+    },
+    {
+      "path": "ops/change-records/CHG-2026-0114.json",
+      "sha256": "6741a39e76e02b0aa06531a07a94d014c8dbef4780261483cbe3854a3d8d678a"
+    },
+    {
+      "path": "packages/platform-change-management/src/approvals.ts",
+      "sha256": "58cc7cf87b661465a3f56592c138e326077f010f92b8c39eb2aee0a307172027"
+    },
+    {
+      "path": "tooling/scripts/lib/ue-v2-navigation-inventory.json",
+      "sha256": "33489ab108595b30c2d568abc8b826a8068aaca56d062e0661798872904dc20b"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-v2-staging-release.mjs",
+      "sha256": "cc2a00d357c6ebab6cf76f797c131066b665a0ce0880dab91e6515f9b1600359"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs",
+      "sha256": "231157aa0e8ac8c4640e95da6d2bb4999a4de0dccfe8f892962b108a0fc2c511"
+    }
+  ],
+  "failedLauncherAttemptPreserved": {
+    "status": "FAILED_BEFORE_TEST_EXECUTION",
+    "reason": "A private copied runner resolved a duplicate output-directory segment. The path was corrected, original failed receipt preserved, and tests then executed unchanged.",
+    "privateReceiptSha256": "691304bd8a4f761b86974fbcd2fce9fb143413547554f0c336dce3bfd181e385",
+    "testDefinitionsTimeoutsSkipsAndCeilingsChanged": false
+  },
+  "sourcePr": 1252,
+  "sourcePrNormalMerge": true,
+  "sourceCi": {
+    "trustedRequiredPassed": 16,
+    "registeredChecks": 129,
+    "workflowRuns": 26,
+    "failed": 0
+  },
+  "nativeLocalBuildAndExportPassed": true,
+  "bindingCiAndNormalMainAdmission": "PENDING",
+  "actualMainBoundNativeQualification": "PENDING",
+  "candidateDeployment": "PENDING",
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false
+}

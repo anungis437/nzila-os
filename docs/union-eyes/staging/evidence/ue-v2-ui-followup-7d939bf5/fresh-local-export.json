@@ -1,0 +1,8 @@
+{
+  "sourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+  "status": "PASS_LOCAL_EXPORT_RESTORE_NOOP_PRIVILEGES",
+  "privateReceiptSha256": "6d407b5dc932dc4b3ff8da5577c2606e36b7be3a236a4a111806446e3a9a2cf9",
+  "catalogDigest": "8fd6dc431fdc911a0717dc008220f2bf58b4f4cee2ff35c884bb02fe8e68e15f",
+  "sourcePlanDigest": "c7420a455e8ea3e7cc5e77645a784864d0734444945d2c813fa8cec43047f1f0",
+  "stagingAcceptance": false
+}

@@ -163,3 +163,8 @@ Codex records **STAGING_GO / BASE_RELEASE_STAGING_ONLY** under the continuing fo
 ## Onboarding and automatic matching candidate — 2026-11-16
 
 Source `78301eecc968ff3a21b602a9c9307c50f73cd5f8` / PR #1247 passed exact-source CI and normal source admission. Fresh source-bound local native compile/import and export/restore/no-op/privilege proofs passed. Integration binding and actual main-bound native qualification remain pending. The current serving source remains accepted F `241006d302c14567e541d619675fbead3ec3f258` / workflow `c51dcd75094e4af364b5c9d54a75f3321e2eef1b`. Repaired-source staging actions and the broader base action ledger remain unqualified; no historical pass is relabelled. Staging-only authority and its existing end time remain unchanged; production is not authorized.
+
+
+## Base UI source admission — 2026-11-16
+
+Source `7d939bf5399ef768cc71a837730a6ff143d079d1` / PR #1252 passed exact-source CI and normal admission. Fresh seven-tool native compile/import and local export/restore/no-op/privilege proofs passed. Actual observed staging remains `78301eecc968ff3a21b602a9c9307c50f73cd5f8` / workflow `17099dc87643e5206c931285cfaefc377261fd79`. Binding/main-bound qualification and deployed final-source acceptance remain pending. Historical accepted F evidence, original191-entry evidence index, current S observations and live data retain their provenance. The full base ledger remains unfinished, and production is not authorized.

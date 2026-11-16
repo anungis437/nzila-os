@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "recordedDate": "2026-11-15",
+  "recordedDate": "2026-11-16",
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "fix/ue-onboarding-admin-20261115",
-  "currentRepairRuntimeQualification": "FOLLOWUP_ALL_FIVE_LOCAL_GATES_PASS_EXACT_SOURCE_CI_ADMISSION_DEPLOYMENT_AND_ACTION_QUALIFICATION_PENDING",
+  "currentRepairBranch": "chore/ue-ui-staging-binding-20261116",
+  "currentRepairRuntimeQualification": "FOLLOWUP_SOURCE_NORMAL_MERGE_PASS_BINDING_AND_EXACT_RUNTIME_ACTION_QUALIFICATION_PENDING",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -114,7 +114,7 @@
       "action": "Persistent organization setup",
       "state": "LOCAL_REPAIR_STAGING_PENDING",
       "evidenceSummary": "Persistent base setup uses three bounded steps; a shared live business-session administrator predicate removes an unnecessary auth-gateway dependency. French setup/support text, localized links and phone wrapping are implemented; local access and UI checks pass.",
-      "remaining": "Fresh exact-source CI, deployed verify/reload, refusal and audit rollback, and actual EN/FR phone qualification.",
+      "remaining": "Binding CI and normal main admission, deployed verify/reload, refusal and audit rollback, and actual EN/FR phone qualification.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -193,7 +193,7 @@
       "action": "Automatic workload and expertise assignment",
       "state": "SOURCE_REPAIR_STAGING_PENDING",
       "evidenceSummary": "Live claim/formal-grievance callers and EN/FR controls now use canonical assignment authority, saved representative expertise/capacity and actual open primary-assignment workload. Three native PostgreSQL contention tests pass; SQL and route/UI integration checks pass locally. Actual source78301eec admin profile UI save/readback and expertise-mismatch409 passed, but the executive menu guard redirected an explicitly authorized actor away from the workbench. A390px selected representative control also extended to x732. Both root repairs are in this follow-up; full matching is unqualified.",
-      "remaining": "Admit/deploy the follow-up; qualify the exact live casework guard and EN/FR phone controls, positive claim/formal automatic matching, balancing/capacity/conflict/role/tenant/retry/concurrency and durable canonical/audit outcomes.",
+      "remaining": "Finish binding admission and deployment; qualify the exact live casework guard and EN/FR loaded phone controls, positive claim/formal automatic matching, balancing/capacity/conflict/role/tenant/retry/concurrency and durable canonical/audit outcomes.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -221,7 +221,7 @@
       "id": "C10",
       "action": "Senior representative supervision",
       "state": "PARTIAL_STAGED",
-      "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01\u2013SR22 are not all certified.",
+      "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01–SR22 are not all certified.",
       "remaining": "Positive permitted review/escalation/exception/delegation actions for enabled pilot scope.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -316,7 +316,7 @@
       "id": "C15",
       "action": "OCR document extraction",
       "state": "SOURCE_IMPLEMENTED_STAGING_PENDING",
-      "evidenceSummary": "The source78301eec audit found no human-review/publication controls. This follow-up connects document preview to explicit transcript read, draft, review and publication actions. All five local gates and focused/census regressions passed; deployed OCR and review/publication qualification remain pending.",
+      "evidenceSummary": "The source78301eec audit found no human-review/publication controls. Follow-up source7d939bf5 connects document preview to explicit transcript read, draft, review and publication actions. All five local source gates, focused/census checks and all registered source CI concluded without failure; PR1252 merged normally. Deployed OCR and review/publication qualification remain pending.",
       "remaining": "Qualify actual extraction, exact document-version binding, resource authority, stale edits, self-review refusal, saved publication/audit outcomes and rendered English/French/mobile behavior on the deployed follow-up.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -578,21 +578,37 @@
     "Automatic legal filing-date calculation and intake deadline email reminders remain absent, distinct from implemented staff deadline management"
   ],
   "nextExecution": [
-    "Finish current repair validation and exact-head CI; normal merge only if eligible.",
-    "Admit a new application source and binding with valid staging authority, preserving the accepted old record.",
+    "Finish staging binding CI and normal main admission for the source already merged in PR1252.",
+    "Complete exact-main-bound native qualification, immutable build, reviewed preview and authorized staging-only rollout.",
     "Qualify repaired organization-admin/onboarding positive and negative actions on that exact deployment.",
-    "Complete connected casework/supervisory and user-facing document/evidence workflows.",
-    "Qualify leadership content and required operational controls; reconcile unresolved product promises."
+    "Qualify claim and formal-grievance automatic workload/expertise matching, loaded EN/FR phone controls and authenticated case reads.",
+    "Complete connected casework, document/evidence, leadership and required operational actions; reconcile the full base ledger from actual evidence."
   ],
-  "proposedCandidateSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "proposedCandidateSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
   "sourceAdmission": {
-    "pullRequest": 1247,
-    "normalMergeSha": "14e10b94252f183a0246127fba5a9d174ccb22e8",
+    "pullRequest": 1252,
+    "sourceHeadSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+    "normalMergeSha": "1ecb345ca5871b89ac8cb7b0ec379aab0a4ef323",
     "allRequiredTrustedChecksPassed": 16,
-    "allRegisteredCheckRunsConcludedWithoutFailure": 130,
+    "allRegisteredCheckRunsConcludedWithoutFailure": 129,
+    "workflowRunsConcludedWithoutFailure": 26,
+    "conditionalSkipsRemainRecorded": true,
     "newSourceRuntimeQualification": "PENDING"
   },
   "currentDeployedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
   "currentDeployedWorkflowSha": "17099dc87643e5206c931285cfaefc377261fd79",
-  "currentFollowupLocalEvidence": "evidence/ue-v2-document-review-20261116/base-ui-local-validation.json"
+  "currentFollowupLocalEvidence": "evidence/ue-v2-document-review-20261116/base-ui-local-validation.json",
+  "sourceAdmissionHistory": [
+    {
+      "recordedBeforeUiBinding": true,
+      "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "admission": {
+        "pullRequest": 1247,
+        "normalMergeSha": "14e10b94252f183a0246127fba5a9d174ccb22e8",
+        "allRequiredTrustedChecksPassed": 16,
+        "allRegisteredCheckRunsConcludedWithoutFailure": 130,
+        "newSourceRuntimeQualification": "PENDING"
+      }
+    }
+  ]
 }
