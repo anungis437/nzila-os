@@ -43,8 +43,9 @@ export const memberCaseUrl = (claimId: string): string => `/dashboard/claims/${u
 export const workbenchUrl = (): string => '/dashboard/workbench';
 
 /** A conversation in the messages screen of the person it is for: the member's own, or the staff member's queue. */
-export function messageThreadUrl(threadId: string, audience: 'member' | 'staff'): string {
+export function messageThreadUrl(threadId: string, audience: 'member' | 'staff', purpose: 'general' | 'privacy_request' = 'general'): string {
   const id = uuidSegment('threadId', threadId);
+  if (purpose === 'privacy_request') return `/dashboard/privacy?thread=${id}`;
   return audience === 'member' ? `/dashboard/messages?thread=${id}` : `/dashboard/messages/staff?thread=${id}`;
 }
 

@@ -55,6 +55,7 @@ export interface ThreadDetail {
   canReply: boolean
   canClose: boolean
   canArchive: boolean
+  purpose: 'general' | 'privacy_request'
   /** The conversation's member sees a plain statement; its assignee sees the full position (never a hold reference). */
   retention: { audience: 'member'; state: MemberRetention } | ({ audience: 'staff' } & RetentionState)
 }
@@ -72,8 +73,9 @@ export async function getThreadDetail(tx: RLSTx, actor: CaseActor, threadId: str
     representativeAssigned: Boolean(thread.staffId),
     viewerRole,
     canReply: isOpenThread(thread),
-    canClose: thread.status !== 'closed',
+    canClose: thread.status !== 'closed' && thread.category !== 'privacy_request',
     canArchive: thread.status === 'closed' && !thread.isArchived,
+    purpose: thread.category === 'privacy_request' ? 'privacy_request' : 'general',
     retention: viewerRole === 'member' ? { audience: 'member', state: memberRetentionView(retention) } : { audience: 'staff', ...retention },
   }
 }

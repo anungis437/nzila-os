@@ -4,10 +4,14 @@ import { inAppNotifications } from '@/db/schema'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { messageThreadUrl } from '@/lib/notifications/links'
 import { notifyTriagers } from '@/lib/messaging/thread-assignment'
-import type { CaseActor } from '@/lib/cases/case-authorization'
+import type { PrivacyResponseRecord, PrivacyThreadBinding } from '@/lib/privacy/request-contract'
 import { loadParticipationContext, participationAllows, type ConversationRow } from '@/lib/messaging/conversation-participation'
 import { staffMembershipLive } from '@/lib/messaging/staff-liveness'
+import { lockPrivacyThread } from '@/lib/messaging/thread-lock'
 import type { RLSTx } from '@/lib/db/with-rls-context'
+
+/** Conversation ownership/assignment decides access; a case-role label is not an authority input. */
+export interface ConversationActor { userId: string; organizationId: string }
 
 /**
  * Conversation authority. message_threads/messages carry tenant RLS only, so participation is
@@ -29,23 +33,23 @@ export function isOpenThread(thread: { status: string; isArchived: boolean | nul
 }
 
 /** Staff participation is the live stored membership. The actor role label is not consulted. */
-export async function staffActing(tx: RLSTx, actor: CaseActor): Promise<boolean> {
+export async function staffActing(tx: RLSTx, actor: ConversationActor): Promise<boolean> {
   return staffMembershipLive(tx, actor)
 }
 
-async function readableRows<T extends ConversationRow>(tx: RLSTx, actor: CaseActor, threads: T[]): Promise<T[]> {
+async function readableRows<T extends ConversationRow>(tx: RLSTx, actor: ConversationActor, threads: T[]): Promise<T[]> {
   if (threads.length === 0) return []
   const context = await loadParticipationContext(tx, actor)
   return threads.filter((thread) => participationAllows(context, thread, 'message:read'))
 }
 
-export function threadReadScope(actor: CaseActor, staffLive: boolean): SQL {
+export function threadReadScope(actor: ConversationActor, staffLive: boolean): SQL {
   const tenant = eq(messageThreads.organizationId, actor.organizationId)
   const own = eq(messageThreads.memberId, actor.userId)
   return and(tenant, staffLive ? or(own, eq(messageThreads.staffId, actor.userId)) : own)!
 }
 
-const isMemberOf = (actor: CaseActor, thread: { memberId: string }) => thread.memberId === actor.userId
+const isMemberOf = (actor: ConversationActor, thread: { memberId: string }) => thread.memberId === actor.userId
 
 export interface ThreadView {
   id: string
@@ -57,6 +61,7 @@ export interface ThreadView {
   representativeAssigned: boolean
   /** `member` for the conversation's owner, `assignee` for the staff member it is assigned to. */
   viewerRole: 'member' | 'assignee'
+  purpose: 'general' | 'privacy_request'
 }
 
 export interface MessageView {
@@ -80,7 +85,7 @@ const readByCounterpart = sql<boolean>`EXISTS (
   WHERE r.thread_id = messages.thread_id AND r.last_read_at >= messages.created_at
     AND (CASE WHEN messages.sender_id = rt.member_id THEN r.user_id <> rt.member_id ELSE r.user_id = rt.member_id END))`
 
-export async function listThreads(tx: RLSTx, actor: CaseActor): Promise<ThreadView[]> {
+export async function listThreads(tx: RLSTx, actor: ConversationActor): Promise<ThreadView[]> {
   const staffLive = await staffActing(tx, actor)
   const threads = await tx
     .select({ thread: messageThreads, lastActivity })
@@ -98,10 +103,11 @@ export async function listThreads(tx: RLSTx, actor: CaseActor): Promise<ThreadVi
     createdAt: iso(t.createdAt)!,
     representativeAssigned: Boolean(t.staffId),
     viewerRole: t.memberId === actor.userId ? 'member' : 'assignee',
+    purpose: t.category === 'privacy_request' ? 'privacy_request' : 'general',
   }))
 }
 
-export async function findReadableThread(tx: RLSTx, actor: CaseActor, threadId: string) {
+export async function findReadableThread(tx: RLSTx, actor: ConversationActor, threadId: string) {
   if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(threadId)) return null
   const staffLive = await staffActing(tx, actor)
   const [thread] = await tx.select().from(messageThreads).where(and(threadReadScope(actor, staffLive), eq(messageThreads.id, threadId))).limit(1)
@@ -110,7 +116,7 @@ export async function findReadableThread(tx: RLSTx, actor: CaseActor, threadId: 
   return allowed ?? null
 }
 
-function toView(m: typeof messages.$inferSelect, actor: CaseActor, read = false): MessageView {
+function toView(m: typeof messages.$inferSelect, actor: ConversationActor, read = false): MessageView {
   return {
     id: m.id,
     fromMe: m.senderId === actor.userId,
@@ -122,7 +128,7 @@ function toView(m: typeof messages.$inferSelect, actor: CaseActor, read = false)
   }
 }
 
-export async function listThreadMessages(tx: RLSTx, actor: CaseActor, threadId: string): Promise<MessageView[] | null> {
+export async function listThreadMessages(tx: RLSTx, actor: ConversationActor, threadId: string): Promise<MessageView[] | null> {
   const thread = await findReadableThread(tx, actor, threadId)
   if (!thread) return null
   const rows = await tx
@@ -135,9 +141,26 @@ export async function listThreadMessages(tx: RLSTx, actor: CaseActor, threadId: 
 }
 
 
-export async function createMemberThread(tx: RLSTx, actor: CaseActor, input: { subject: string; body: string; clientRequestId?: string }) {
+export async function createMemberThread(tx: RLSTx, actor: ConversationActor, input: { subject: string; body: string; clientRequestId?: string }) {
+  return createConversation(tx, actor, input)
+}
+
+/** Server-only binding. The general conversation API cannot supply a privacy category or metadata. */
+export async function createPrivacyRequestThread(
+  tx: RLSTx, actor: ConversationActor,
+  input: { subject: string; body: string; clientRequestId: string },
+  binding: PrivacyThreadBinding,
+) {
+  return createConversation(tx, actor, input, binding)
+}
+
+async function createConversation(
+  tx: RLSTx, actor: ConversationActor,
+  input: { subject: string; body: string; clientRequestId?: string },
+  privacy?: PrivacyThreadBinding,
+) {
   const metadata = input.clientRequestId
-    ? JSON.stringify({clientRequestId: input.clientRequestId, operation: 'create_member_thread'})
+    ? JSON.stringify({clientRequestId: input.clientRequestId, operation: privacy ? 'create_privacy_request_thread' : 'create_member_thread', ...(privacy ? {privacyRequest: privacy} : {})})
     : null
   if (metadata) {
     // Serialize only this actor's exact submission. No thread UPDATE privilege
@@ -153,7 +176,7 @@ export async function createMemberThread(tx: RLSTx, actor: CaseActor, input: { s
   }
   const [thread] = await tx
     .insert(messageThreads)
-    .values({ subject: input.subject, memberId: actor.userId, organizationId: actor.organizationId, category: 'general' })
+    .values({ subject: input.subject, memberId: actor.userId, organizationId: actor.organizationId, category: privacy ? 'privacy_request' : 'general' })
     .returning()
   await tx.insert(messages).values({
     threadId: thread.id,
@@ -183,16 +206,23 @@ export type PostResult =
 
 export async function postThreadMessage(
   tx: RLSTx,
-  actor: CaseActor,
+  actor: ConversationActor,
   threadId: string,
   input: { body: string; clientRequestId?: string },
   notifyAllowed: (recipientId: string) => Promise<boolean> = async () => true,
+  privacyResponse?: PrivacyResponseRecord,
 ): Promise<PostResult> {
-  const thread = await findReadableThread(tx, actor, threadId)
+  let thread = await findReadableThread(tx, actor, threadId)
+  if (thread?.category === 'privacy_request') {
+    await lockPrivacyThread(tx, actor.organizationId, thread.id)
+    thread = await findReadableThread(tx, actor, threadId)
+  }
   if (!thread) return { kind: 'not_found' }
   if (!isOpenThread(thread)) return { kind: 'closed' }
 
-  const metadata = input.clientRequestId ? JSON.stringify({ clientRequestId: input.clientRequestId }) : null
+  const metadata = input.clientRequestId
+    ? JSON.stringify({ clientRequestId: input.clientRequestId, ...(privacyResponse ? { privacyResponse } : {}) })
+    : null
   if (metadata) {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`messages:reply:${actor.organizationId}:${actor.userId}:${thread.id}:${input.clientRequestId}`}, 0))`)
     const [existing] = await tx
@@ -205,7 +235,8 @@ export async function postThreadMessage(
 
   const [row] = await tx
     .insert(messages)
-    .values({ threadId: thread.id, senderId: actor.userId, senderRole: isMemberOf(actor, thread) ? 'member' : 'staff', content: input.body, metadata })
+    .values({ threadId: thread.id, senderId: actor.userId, senderRole: isMemberOf(actor, thread) ? 'member' : 'staff', content: input.body, metadata,
+      ...(privacyResponse ? { createdAt: sql`clock_timestamp()` } : {}) })
     .returning()
   await persistAtomicAudit(tx, {
     organizationId: actor.organizationId,
@@ -227,7 +258,7 @@ export async function postThreadMessage(
       message: 'You have a new message in a secure conversation.',
       type: 'info',
       actionLabel: 'Open conversation',
-      actionUrl: messageThreadUrl(thread.id, recipientIsMember ? 'member' : 'staff'),
+      actionUrl: messageThreadUrl(thread.id, recipientIsMember ? 'member' : 'staff', thread.category === 'privacy_request' ? 'privacy_request' : 'general'),
       data: { event: 'thread_message', threadId: thread.id },
     })
   }

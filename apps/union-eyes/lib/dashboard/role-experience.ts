@@ -300,6 +300,9 @@ export function getAllowedPrefixesByExperience(): Record<DashboardExperience, st
 }
 
 export function canAccessDashboardPath(pathname: string, experience: DashboardExperience, isPilotMode: boolean): boolean {
+  // Every authenticated account can request its own information. The request
+  // APIs enforce subject ownership and explicit conversation assignment.
+  if (pathname === '/dashboard/privacy') return true;
   // A link to one matter is presented to any authenticated experience. Its API
   // decides actual case standing and returns only the caller's bounded view.
   // This does not admit the grievance collection, creation or management routes.

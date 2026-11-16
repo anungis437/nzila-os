@@ -35,6 +35,8 @@ describe('the builders', () => {
     expect(memberCaseUrl(CLAIM)).toBe(`/dashboard/claims/${CLAIM}`);
     expect(messageThreadUrl(THREAD, 'member')).toBe(`/dashboard/messages?thread=${THREAD}`);
     expect(messageThreadUrl(THREAD, 'staff')).toBe(`/dashboard/messages/staff?thread=${THREAD}`);
+    expect(messageThreadUrl(THREAD, 'member', 'privacy_request')).toBe(`/dashboard/privacy?thread=${THREAD}`);
+    expect(messageThreadUrl(THREAD, 'staff', 'privacy_request')).toBe(`/dashboard/privacy?thread=${THREAD}`);
   });
 
   it('write an id in lower case', () => {
@@ -90,6 +92,8 @@ describe('every builder leads to a page the app serves, in every locale', () => 
     workbenchUrl: workbenchUrl(),
     'messageThreadUrl (member)': messageThreadUrl(THREAD, 'member'),
     'messageThreadUrl (staff)': messageThreadUrl(THREAD, 'staff'),
+    'messageThreadUrl (privacy subject)': messageThreadUrl(THREAD, 'member', 'privacy_request'),
+    'messageThreadUrl (privacy handler)': messageThreadUrl(THREAD, 'staff', 'privacy_request'),
     'the notifications page': '/dashboard/notifications',
     'a member Home': '/dashboard',
   };
@@ -109,6 +113,12 @@ describe('every builder leads to a page the app serves, in every locale', () => 
     for (const missing of ['/dashboard/alerts', '/dashboard/cases/abc', '/grievances/abc', '/documents/abc/sign', '/dashboard/signatures/abc']) {
       expect(judgeLink(missing, pages, locales), missing).toBe('PAGE_MISSING');
     }
+  });
+});
+
+describe('privacy notification destination', () => {
+  it.each(EXPERIENCES)('admits the %s experience to its own/assigned privacy screen; APIs still enforce participation', experience => {
+    expect(canAccessDashboardPath(messageThreadUrl(THREAD, 'member', 'privacy_request').split('?')[0], experience, false)).toBe(true);
   });
 });
 

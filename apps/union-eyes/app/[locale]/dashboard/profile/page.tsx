@@ -80,11 +80,10 @@ export default function ProfilePage() {
       organization={organizationName}
       role={roleDisplay}
       onSignOut={() => signOut("/")}
-      manage={
-        isMember
-          ? undefined
-          : [{ href: `/${locale}/settings/mfa`, title: t("memberProfile.securityLink"), description: t("memberProfile.securityDescription") }]
-      }
+      manage={[
+        { href: `/${locale}/dashboard/privacy`, title: t("memberPrivacy.title"), description: t("memberPrivacy.description") },
+        ...(isMember ? [] : [{ href: `/${locale}/settings/mfa`, title: t("memberProfile.securityLink"), description: t("memberProfile.securityDescription") }]),
+      ]}
     />
   );
 }

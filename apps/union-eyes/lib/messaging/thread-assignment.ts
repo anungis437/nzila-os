@@ -6,6 +6,7 @@ import type { RLSTx } from '@/lib/db/with-rls-context'
 import { messageThreadUrl } from '@/lib/notifications/links'
 import { hasLiveDesignation, liveDesignees } from '@/lib/triage/designations'
 import { staffMembershipLive } from '@/lib/messaging/staff-liveness'
+import { lockPrivacyThread } from '@/lib/messaging/thread-lock'
 
 /**
  * Staff assignment of member conversations.
@@ -109,12 +110,18 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 export async function assignThread(tx: RLSTx, actor: MessageActor, input: AssignInput, deps: Dependencies): Promise<AssignResult> {
   const now = clock(deps)
   if (!UUID.test(input.threadId)) return { kind: 'not_found' }
-  const [thread] = await tx
+  let [thread] = await tx
     .select()
     .from(messageThreads)
     .where(and(eq(messageThreads.id, input.threadId), eq(messageThreads.organizationId, actor.organizationId)))
     .limit(1)
   if (!thread) return { kind: 'not_found' }
+  if (thread.category === 'privacy_request') {
+    await lockPrivacyThread(tx, actor.organizationId, thread.id)
+    ;[thread] = await tx.select().from(messageThreads)
+      .where(and(eq(messageThreads.id, input.threadId), eq(messageThreads.organizationId, actor.organizationId))).limit(1)
+    if (!thread) return { kind: 'not_found' }
+  }
 
   const isAssignee = thread.staffId !== null && thread.staffId === actor.userId && (await staffMembershipLive(tx, actor))
   const isTriager = await hasLiveTriageDesignation(tx, actor, now)
@@ -175,7 +182,7 @@ export async function assignThread(tx: RLSTx, actor: MessageActor, input: Assign
       message: 'A member conversation has been assigned to you.',
       type: 'info',
       actionLabel: 'Open conversation',
-      actionUrl: messageThreadUrl(thread.id, 'staff'),
+      actionUrl: messageThreadUrl(thread.id, 'staff', thread.category === 'privacy_request' ? 'privacy_request' : 'general'),
       data: { event: 'thread_assigned', threadId: thread.id },
     })
   }

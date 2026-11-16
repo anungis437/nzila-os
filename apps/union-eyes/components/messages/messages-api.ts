@@ -16,6 +16,7 @@ export type ThreadSummary = {
   createdAt: string;
   representativeAssigned: boolean;
   viewerRole: 'member' | 'assignee';
+  purpose?: 'general' | 'privacy_request';
 };
 
 export type QueueEntry = { id: string; subject: string; category: string | null; priority: string | null; createdAt: string };
@@ -45,6 +46,7 @@ export type ThreadDetail = {
   canReply: boolean;
   canClose: boolean;
   canArchive: boolean;
+  purpose?: 'general' | 'privacy_request';
   retention?: Retention;
 };
 
@@ -76,6 +78,12 @@ function viewerRole(row: Record<string, unknown>): 'member' | 'assignee' {
   return role;
 }
 
+function purpose(row: Record<string, unknown>): { purpose?: 'general' | 'privacy_request' } {
+  if (row.purpose === undefined) return {};
+  if (row.purpose !== 'general' && row.purpose !== 'privacy_request') throw new ApiShapeError('Unknown conversation purpose');
+  return { purpose: row.purpose };
+}
+
 function listOf(body: unknown, key: string): unknown[] {
   const list = envelopeData(body)[key];
   if (!Array.isArray(list)) throw new ApiShapeError(`no ${key}`);
@@ -93,6 +101,7 @@ function threadFrom(value: unknown): ThreadSummary {
     createdAt: timestamp(row, 'createdAt'),
     representativeAssigned: flag(row, 'representativeAssigned'),
     viewerRole: viewerRole(row),
+    ...purpose(row),
   };
 }
 
@@ -155,6 +164,7 @@ export function threadDetailFrom(body: unknown): ThreadDetail {
     canReply: flag(row, 'canReply'),
     canClose: flag(row, 'canClose'),
     canArchive: flag(row, 'canArchive'),
+    ...purpose(row),
     retention: retentionFrom(row.retention),
   };
 }

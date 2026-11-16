@@ -1,8 +1,8 @@
 {
  "register": "UE-CONV-K-008",
  "summary": {
-  "routes": 1037,
-  "mutating": 705,
+  "routes": 1040,
+  "mutating": 708,
   "kernel": 64,
   "byGuard": {
    "ADMIN_AUTH": 7,
@@ -13,11 +13,11 @@
    "NONE": 24,
    "ORG_AUTH": 13,
    "PLATFORM_AUTH_HANDLER": 9,
-   "RETIRED": 239,
+   "RETIRED": 238,
    "ROLE_AUTH": 104,
    "SESSION_AUTH": 59,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 409,
+   "WITH_API": 413,
    "WITH_API_PUBLIC": 2
   },
   "mutatingByGuard": {
@@ -29,27 +29,27 @@
    "NONE": 9,
    "ORG_AUTH": 8,
    "PLATFORM_AUTH_HANDLER": 7,
-   "RETIRED": 224,
+   "RETIRED": 223,
    "ROLE_AUTH": 55,
    "SESSION_AUTH": 35,
    "WEBHOOK_SIGNATURE": 4,
-   "WITH_API": 254
+   "WITH_API": 258
   },
   "mutatingByAudit": {
    "ATOMIC": 175,
-   "ATOMIC_SERVICE": 130,
+   "ATOMIC_SERVICE": 134,
    "COMPUTE_ONLY": 32,
    "CRUD_ATOMIC": 82,
    "EXEMPT_BALLOT_SECRECY": 2,
    "EXEMPT_UNATTRIBUTABLE": 27,
    "INTENT_OUTCOME": 25,
    "NO_WRITES_FOUND": 9,
-   "NONE": 223
+   "NONE": 222
   },
   "mutatingByData": {
    "AMBIENT_DB": 1,
    "CRUD_TENANT_TX": 82,
-   "NONE": 316,
+   "NONE": 319,
    "SYSTEM_CONTEXT": 58,
    "TENANT_TX": 248
   }
@@ -11546,17 +11546,42 @@
    "audit": "ATOMIC"
   },
   {
+   "route": "privacy/dsar/[requestId]/export/route.ts",
+   "methods": [
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
+   "route": "privacy/dsar/[requestId]/route.ts",
+   "methods": [
+    "GET",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
+  },
+  {
    "route": "privacy/dsar/route.ts",
    "methods": [
     "GET",
     "POST"
    ],
    "mutating": true,
-   "guard": "RETIRED",
+   "guard": "WITH_API",
    "kernel": false,
    "subordinate": null,
    "data": "NONE",
-   "audit": "NONE"
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "privacy/provincial/route.ts",
@@ -11570,6 +11595,20 @@
    "subordinate": null,
    "data": "NONE",
    "audit": "NONE"
+  },
+  {
+   "route": "privacy/threads/[threadId]/route.ts",
+   "methods": [
+    "GET",
+    "PATCH",
+    "POST"
+   ],
+   "mutating": true,
+   "guard": "WITH_API",
+   "kernel": false,
+   "subordinate": null,
+   "data": "NONE",
+   "audit": "ATOMIC_SERVICE"
   },
   {
    "route": "profile/roles/route.ts",

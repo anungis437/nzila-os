@@ -1,0 +1,329 @@
+{
+  "status": "PASS_LOCAL_ONLY",
+  "recordedAt": "2026-11-16T19:45:54.791380+00:00",
+  "validationBaseHead": "18d05be30cb37ac036b7862e2d0bf75e61dca810",
+  "sourceUnchangedDuringChecks": true,
+  "requiredChecks": [
+    {
+      "command": "pnpm lint",
+      "startedAt": "2026-11-16T19:22:03.089066+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T19:24:05.813007+00:00",
+      "logSha256": "6199a8ce1d7ebcc909689dd962621fda4e77da18142f3ba02d01d089930a1f00"
+    },
+    {
+      "command": "pnpm typecheck",
+      "startedAt": "2026-11-16T19:24:05.830323+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T19:27:10.565206+00:00",
+      "logSha256": "e4766746fbebe40b5b29ba5eeda56c5db7917a4fa7ba8a55269c93be8018d0e4"
+    },
+    {
+      "command": "pnpm test:fast",
+      "startedAt": "2026-11-16T19:27:10.575896+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T19:41:09.554280+00:00",
+      "logSha256": "2eed1c1e0f0ab3549c7bb6c5895a9cda5bba15b1634a1132c08b2d4504ce52e3"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "startedAt": "2026-11-16T19:41:09.584288+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T19:41:21.722801+00:00",
+      "logSha256": "a6fa3a563f3177e4fb45314226507d729484db0f659cc9f351f33c30f2aa83d9"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "startedAt": "2026-11-16T19:41:21.728189+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T19:42:03.569695+00:00",
+      "logSha256": "cc21274c946b62d24e110e13153f4fbc06ae9a380cd6c17be079da3c45cd6525"
+    }
+  ],
+  "fastTestSummary": [
+    "Test Files  3008 passed | 118 skipped (3126)",
+    "Tests  39358 passed | 1698 skipped (41069)",
+    "Duration  835.64s (tests 57%, import 27%, environment 11%, transform 4%)"
+  ],
+  "testedSourceModules": [
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/privacy/page.tsx",
+      "sha256": "9289ea4283c0bf9da7430a3c6d9b4eedb86ce9a8c5c95cd68242e448875b2a97"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/profile/page.tsx",
+      "sha256": "146583cd2f667d64f1d74879579ad6c45782cb15b819a2dc25f1762ac3820729"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+      "sha256": "82e15171bfaa4bf6e420be66a6298b358f42d779bf13e099e0010ebd07dc269b"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.ts",
+      "sha256": "bd52b998b8e711f16d947d5227d91a4745d47c0e6a5fc8641d58f800d50a94f3"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/repository/[id]/versions/route.ts",
+      "sha256": "c6afbbe11f624e92b2363311d6c4367c3e7ad4d7b727cc23c14bd1327ff50537"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/repository/downloads/route.ts",
+      "sha256": "70e840365a0286071f8f345d8956790f2050c80d37a6c89d2d60ca1149aa2bdc"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/repository/route.ts",
+      "sha256": "037f9f4a34003298cdfb926067abbdb040aa3956ac5639d1a86e0012b008f219"
+    },
+    {
+      "path": "apps/union-eyes/app/api/privacy/__tests__/data-classification-policy-writerole.test.ts",
+      "sha256": "e4c177da214a53e10e9870cf4ecc18d588b775bab608d9be767809a0d694ad95"
+    },
+    {
+      "path": "apps/union-eyes/app/api/privacy/dsar/[requestId]/export/route.ts",
+      "sha256": "3c20b82b2185b3318d5147e13d13e90decd88e2421979f58504cf83587a229be"
+    },
+    {
+      "path": "apps/union-eyes/app/api/privacy/dsar/[requestId]/route.ts",
+      "sha256": "ceef29c9a0a2fef97fd6c1aa4c97447427a6a985d69586ecb5c04bcd0f58f6e7"
+    },
+    {
+      "path": "apps/union-eyes/app/api/privacy/dsar/route.ts",
+      "sha256": "1edad49a4a6b3d6dcdb60065d9c84c7050d50147f58a4504d62c69b3e2a6fda7"
+    },
+    {
+      "path": "apps/union-eyes/app/api/privacy/threads/[threadId]/route.ts",
+      "sha256": "d5c8c93126fd174a4b398dd42d971ce45887439e6bd06930027f7664b0ce9f89"
+    },
+    {
+      "path": "apps/union-eyes/app/invite/accept/invitation-copy.ts",
+      "sha256": "fd7668113177af052e3ce6b2548c21533f47c45aa862041772fdac6165a5699e"
+    },
+    {
+      "path": "apps/union-eyes/app/invite/accept/page.test.tsx",
+      "sha256": "2fef0b91dde1491bf8f8fe084aeb23242c696f0f2b9bf078fe5fcd122f52d469"
+    },
+    {
+      "path": "apps/union-eyes/app/invite/accept/page.tsx",
+      "sha256": "7a7f89e30ac07329f523063648f747ff363fe042c45d776623ccf09cee160ff6"
+    },
+    {
+      "path": "apps/union-eyes/components/member/member-privacy.tsx",
+      "sha256": "74386826912be00bfbd440d4bdb93de2684092fba19d9f377b912f05dc942800"
+    },
+    {
+      "path": "apps/union-eyes/components/messages/conversation-panel.tsx",
+      "sha256": "d7fefd1b513a3e5d9dd8ad66b87dd5fd4390fbd18b95c10c7e4fc45b09706880"
+    },
+    {
+      "path": "apps/union-eyes/components/messages/messages-api.ts",
+      "sha256": "8a79b4ac03ebf7866ac83bc2b7c4e5c5ed3dcca122b2987cfcd81bbc712ccbc1"
+    },
+    {
+      "path": "apps/union-eyes/components/privacy/privacy-api.test.ts",
+      "sha256": "720f0363b37c2f94fbf9f033fcc20cba152fb7e510f23cd3d8e87a4bb35cea43"
+    },
+    {
+      "path": "apps/union-eyes/components/privacy/privacy-api.ts",
+      "sha256": "f8139582c65d269291bcea368de7b02f73cc079b1d2a159063fbba3926b4bddf"
+    },
+    {
+      "path": "apps/union-eyes/components/privacy/privacy-copy.ts",
+      "sha256": "dce9951250c3bf37d64a5d6b7d10568ccd09da3e2ea4b890e489a8992f71cde2"
+    },
+    {
+      "path": "apps/union-eyes/components/privacy/privacy-self-service.test.tsx",
+      "sha256": "47636239ce35b86bfefde867125dfedcdd54d59e51b79ee1bc5c6dc95d6c1981"
+    },
+    {
+      "path": "apps/union-eyes/components/privacy/privacy-self-service.tsx",
+      "sha256": "6f02bc0506eb13531ce42564585ed074c24c78b0af4e5d42b2c20cbbf7d0b526"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/documents-external-workbook-routes.postgres.test.ts",
+      "sha256": "152057162bee191a4b8b623246de2405316377445bfbe18a32d9ade1744eb2d8"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/privacy-requests.postgres.test.ts",
+      "sha256": "f593476dad7fb360c79a8646a3c46b8f4ab1d5b957f7b51b6371e6475490a9a1"
+    },
+    {
+      "path": "apps/union-eyes/lib/api/__tests__/with-api-canonical.test.ts",
+      "sha256": "cc66b721ec71943d171e880cb2817839c8567a0805d2ca7fe1d30597d0c8dd27"
+    },
+    {
+      "path": "apps/union-eyes/lib/api/with-api.ts",
+      "sha256": "4f99a29734b7574cb6da7119c41ca1a2ef97537537979f065fd0487fd096cebc"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-authorization.pglite.test.ts",
+      "sha256": "cdad34fe5f647699e3d650de1faeeefec8a59973e8f4625c6198a7bace212f0a"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-authorization.ts",
+      "sha256": "2832becd0b77e43aacfa86a08b5c808e34b4888e50a1976c378471ca14914e0d"
+    },
+    {
+      "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "sha256": "fe37af53696cba61d38f3bb7a5e430a421da39f6fd0b73d37500a4fab6e78a66"
+    },
+    {
+      "path": "apps/union-eyes/lib/db/canonical-transaction-principal.test.ts",
+      "sha256": "d145dec9fdea07064d22f49d73ac2af4e40523371b5d2e2ad1a7dd81c1f90026"
+    },
+    {
+      "path": "apps/union-eyes/lib/db/canonical-transaction-scope.ts",
+      "sha256": "b341370018fb4e5630fced8b4ee6b92b6337f851ff013902c6dd844093bebf64"
+    },
+    {
+      "path": "apps/union-eyes/lib/documents/ocr-extract.ts",
+      "sha256": "f7fcd883e89b19d04e0f09de3a1f9badbe9de8175d2b77490a08eeba9e23eadc"
+    },
+    {
+      "path": "apps/union-eyes/lib/messaging/thread-access.ts",
+      "sha256": "eee18d6b76ef7af8c336ac8add57dbdd8262a2dc21a4deea969492664c1da4c2"
+    },
+    {
+      "path": "apps/union-eyes/lib/messaging/thread-assignment.ts",
+      "sha256": "39d0eb34bbaf2d440483df809d513ef33aef4d1f8c1a1ca7f7086771ac3e7ca0"
+    },
+    {
+      "path": "apps/union-eyes/lib/messaging/thread-lifecycle.ts",
+      "sha256": "b27362fdf8ae735b0b2a63c6cd7a07ebf4cb247d008de3661bed4572e4bca8a9"
+    },
+    {
+      "path": "apps/union-eyes/lib/messaging/thread-lock.ts",
+      "sha256": "f7957b5e56d16c2e1c50a18ffc06bea3731c3f8ac1dadf68f12bd83a509aadbd"
+    },
+    {
+      "path": "apps/union-eyes/lib/messaging/thread-read-state.ts",
+      "sha256": "f932b5b3f4d03e66b7620674f75f799c8dbd6e3d19621075ff58fff7edd93146"
+    },
+    {
+      "path": "apps/union-eyes/lib/notifications/__tests__/links.test.ts",
+      "sha256": "c56a37a435ab4f897e92eaf47bc1b1f2792001497f67e31f078a2a60ce0a1b30"
+    },
+    {
+      "path": "apps/union-eyes/lib/notifications/links.ts",
+      "sha256": "ab5ffa495bee0791684b55f63568241c9d89bde1ddf93cb092228163495b50e9"
+    },
+    {
+      "path": "apps/union-eyes/lib/privacy/__tests__/privacy-test-database.ts",
+      "sha256": "5ec7df92c1377ea7babcb98b67d69c6f804494946dd1df75f2de074d034c7a03"
+    },
+    {
+      "path": "apps/union-eyes/lib/privacy/api.ts",
+      "sha256": "b3f57d737a1a35b1b4b27c82f218f42929507c9c21cdb89e43da9cd133c048a5"
+    },
+    {
+      "path": "apps/union-eyes/lib/privacy/request-contract.test.ts",
+      "sha256": "b5a4bc0eeecad88b67f7db6b6d5feec516fcaf67554581227fc58f2afdf46a4d"
+    },
+    {
+      "path": "apps/union-eyes/lib/privacy/request-contract.ts",
+      "sha256": "ad678ff4f69bd22841ff0b0419f30642fad5756eb3f8eac19107a8978b2705c9"
+    },
+    {
+      "path": "apps/union-eyes/lib/privacy/requests.pglite.test.ts",
+      "sha256": "29c8f11e7275bebbbcbb101dfe9adacf225c4f3cee26b6e520bd3f0429d7f5ed"
+    },
+    {
+      "path": "apps/union-eyes/lib/privacy/requests.ts",
+      "sha256": "70919db13c48908d45f77ee6f58c248da74d35c5b4ff89520dd2f24cbab9b513"
+    },
+    {
+      "path": "apps/union-eyes/lib/reality/capability-registry.ts",
+      "sha256": "c0f58a301b951ad30f6e7f763bef4baa9968fac9542566b9b8ff53bc3e4a00a0"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/__tests__/ocr-pdf-real.test.ts",
+      "sha256": "66dc7581dd78b18311e73e889f15770b6a012174b6f99a51adbbe7449821a7f0"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/__tests__/ocr-service.test.ts",
+      "sha256": "b17456ea1c432606d616dab5e2a49a03e347613a95b4fb79f58f638ab36a22a0"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/ocr-service.ts",
+      "sha256": "466868df5bb1b9df3b4aaa463751c4bf6bdc50893a573081229309e4572f7a21"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "sha256": "022bc0b85f845dee606f76b3609ac621f5cdddf5bb2b4e94c4a570b82705c74b"
+    },
+    {
+      "path": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
+      "sha256": "32ac02348b30144c3b76aeb1ece5d24607a202162dc4ec828b35146f979c1a4e"
+    },
+    {
+      "path": "packages/db/src/__tests__/auth-pool-budget.test.ts",
+      "sha256": "02a087062893723cd54388ed167fdb7cd53365d7ec1201dc998cdc4f5ddb1baf"
+    },
+    {
+      "path": "packages/db/src/auth-client.ts",
+      "sha256": "0690d685c543da860bbe7d421c71732c57708623595ed6f52f4c7e2b36b942a1"
+    }
+  ],
+  "newFeatureInputs": 35,
+  "inheritedAdmittedRepairInputs": 19,
+  "inheritedRepairSource": "765ab12fb7b3f9b25d61d6bd418496b9cfb95430",
+  "inheritedRepairPr": 1254,
+  "nativeComponentProof": "native-privacy-component.json",
+  "dependenciesSchemaGrantsOrExistingRetentionChanged": false,
+  "testTimeoutsThresholdsOrExpectedSkipListsChanged": false,
+  "sourceCiAndNormalAdmission": "PENDING",
+  "candidateDeployment": "PENDING",
+  "stagingAcceptanceClaimed": false,
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false,
+  "priorAttemptsPreserved": [
+    {
+      "attempt": "local-native-v1",
+      "status": "FAIL_SETUP",
+      "cause": "Controlled handler fixture omitted required name and email; no native test body ran. Fixture corrected."
+    },
+    {
+      "attempt": "notification-link-test-v3",
+      "status": "FAIL_TEST_CALL",
+      "cause": "New test called the existing navigation function with reversed arguments. Test call corrected; product access assertion retained."
+    },
+    {
+      "attempt": "required-checks-v4",
+      "status": "FAIL_LOCAL_REGRESSION",
+      "passedTests": 39351,
+      "failedTests": 5,
+      "failedFiles": 4,
+      "cause": "Generated route inventory remained stale, the old DSAR 501 assertion remained, and a test-only database helper lived in production lib scope. Regenerated inventory without changing baselines, moved the helper to tests and added actual subject-bound API failure tests."
+    },
+    {
+      "attempt": "required-checks-v3",
+      "status": "ABORTED_INVALID_EXECUTION_PATH",
+      "completedChecks": [
+        "pnpm lint",
+        "pnpm typecheck"
+      ],
+      "cause": "A launcher PATH typo omitted Docker. Own coordinator/test descendants were stopped; corrected run verifies Docker CLI and daemon before checks."
+    },
+    {
+      "attempt": "required-checks-v2",
+      "status": "INTERRUPTED_FOR_ACTUAL_REVIEW_FINDING",
+      "completedChecks": [
+        "pnpm lint",
+        "pnpm typecheck"
+      ],
+      "cause": "New privacy notification calls bypassed saved preferences. Interrupted own test tree, reused the existing preference helper and added a no-notice/message-delivery regression before a fresh full check run."
+    },
+    {
+      "attempt": "required-checks-v1",
+      "status": "FAIL_COORDINATOR_ARTIFACT_NAME_COLLISION",
+      "completedChecks": [
+        "pnpm lint"
+      ],
+      "cause": "Runner refused to overwrite an existing preliminary log. Fresh full five-check attempt required."
+    }
+  ]
+}

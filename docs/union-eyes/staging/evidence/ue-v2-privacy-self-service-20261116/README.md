@@ -1,0 +1,11 @@
+# Privacy self-service and bilingual invitation source validation
+
+The founder requires in-app privacy self-service before full base-release staging GO. This source adds private request submission and tracking, requester clarification and withdrawal, assigned-handler identity/scope review, reasoned responses/refusals, and acknowledgement of an exact response. The request, response, account download and acknowledgement remain separate events. A bounded request list loads message history only for the selected request.
+
+An account JSON download contains only reviewed account identity (name, email and account/organization identifiers), own consent records and privacy request metadata. It excludes case files and other people’s conversations. Downloads expire after seven days; the client verifies the actual bytes before acknowledging the response. Other information and rights need an appropriate handler response. Retention and legal holds remain enforced; the app does not automatically erase business records or make a legal determination. Administrator rank grants no access to another subject’s request or private conversation.
+
+English and French privacy controls and invitation acceptance are implemented. The invitation screen retains its selected language through authenticator/recovery-code challenges and opens the corresponding dashboard. Existing invitation and MFA authority is unchanged.
+
+[Local validation](local-validation.json) records all five actual repository checks against 35 new inputs (34 application files and the generated route inventory) and the 19 inherited runtime-repair inputs from normally merged [PR #1254](https://github.com/anungis437/nzila-os/pull/1254). The [native component record](native-privacy-component.json) states exactly what the real local PostgreSQL test covers and which boundaries its harness replaces.
+
+Source CI, normal admission, main-bound native qualification, immutable image checks and deployed privacy/invitation acceptance remain pending. The inherited casework query-cost, Chief Steward mobile and document-extraction repairs still require new staging measurements. The [base action ledger](../../UE_V2_BASE_ACTION_COVERAGE.json) remains unfinished. **Full base STAGING GO is ungranted.** Finance/dues persistence and Financial Officer 2.1 remain excluded. No production deployment is authorized.
