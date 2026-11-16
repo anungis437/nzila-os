@@ -1,54 +1,54 @@
 {
   "status": "PASS_LOCAL_ONLY",
-  "recordedAt": "2026-11-16T19:45:54.791380+00:00",
-  "validationBaseHead": "18d05be30cb37ac036b7862e2d0bf75e61dca810",
+  "recordedAt": "2026-11-16T20:26:01.461316+00:00",
+  "validationBaseHead": "00c0e3111a897ddf14764191cdd53616044f77ba",
   "sourceUnchangedDuringChecks": true,
   "requiredChecks": [
     {
       "command": "pnpm lint",
-      "startedAt": "2026-11-16T19:22:03.089066+00:00",
+      "startedAt": "2026-11-16T20:06:03.916860+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T19:24:05.813007+00:00",
-      "logSha256": "6199a8ce1d7ebcc909689dd962621fda4e77da18142f3ba02d01d089930a1f00"
+      "finishedAt": "2026-11-16T20:08:11.211990+00:00",
+      "logSha256": "25879d5a9f081403f840538076d0224405fea77b07817f46913fa9eb7a7c2258"
     },
     {
       "command": "pnpm typecheck",
-      "startedAt": "2026-11-16T19:24:05.830323+00:00",
+      "startedAt": "2026-11-16T20:08:11.219749+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T19:27:10.565206+00:00",
-      "logSha256": "e4766746fbebe40b5b29ba5eeda56c5db7917a4fa7ba8a55269c93be8018d0e4"
+      "finishedAt": "2026-11-16T20:11:02.767757+00:00",
+      "logSha256": "2e00ca7c0462c04fe49cb539470d30835a7c2309faeb56af9064b83713313a63"
     },
     {
       "command": "pnpm test:fast",
-      "startedAt": "2026-11-16T19:27:10.575896+00:00",
+      "startedAt": "2026-11-16T20:11:02.768835+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T19:41:09.554280+00:00",
-      "logSha256": "2eed1c1e0f0ab3549c7bb6c5895a9cda5bba15b1634a1132c08b2d4504ce52e3"
+      "finishedAt": "2026-11-16T20:25:05.008419+00:00",
+      "logSha256": "d97254f7281bb1ca8fa6cc247315d41a969c2c90d52d36c55359bb6f8a906a1a"
     },
     {
       "command": "pnpm validate:docs",
-      "startedAt": "2026-11-16T19:41:09.584288+00:00",
+      "startedAt": "2026-11-16T20:25:05.015961+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T19:41:21.722801+00:00",
-      "logSha256": "a6fa3a563f3177e4fb45314226507d729484db0f659cc9f351f33c30f2aa83d9"
+      "finishedAt": "2026-11-16T20:25:14.561840+00:00",
+      "logSha256": "459ede2775f20c579cb0bbce84e49c96e8f019a55e8ce0df8b894b9b6c387870"
     },
     {
       "command": "pnpm governance:audit",
-      "startedAt": "2026-11-16T19:41:21.728189+00:00",
+      "startedAt": "2026-11-16T20:25:14.580304+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T19:42:03.569695+00:00",
-      "logSha256": "cc21274c946b62d24e110e13153f4fbc06ae9a380cd6c17be079da3c45cd6525"
+      "finishedAt": "2026-11-16T20:25:55.316745+00:00",
+      "logSha256": "dd7f9ae608ce830c575c1f067362273e1300104900b3afdf3719ddf4964f917d"
     }
   ],
   "fastTestSummary": [
     "Test Files  3008 passed | 118 skipped (3126)",
     "Tests  39358 passed | 1698 skipped (41069)",
-    "Duration  835.64s (tests 57%, import 27%, environment 11%, transform 4%)"
+    "Duration  837.50s (tests 52%, import 31%, environment 12%, transform 5%)"
   ],
   "testedSourceModules": [
     {
@@ -266,9 +266,13 @@
     {
       "path": "packages/db/src/auth-client.ts",
       "sha256": "0690d685c543da860bbe7d421c71732c57708623595ed6f52f4c7e2b36b942a1"
+    },
+    {
+      "path": "tooling/scripts/lib/ue-v2-navigation-inventory.json",
+      "sha256": "a13124fdc5e8ccdfe4df375bb4c22307cc012c05297691bb48cb25b9b794a808"
     }
   ],
-  "newFeatureInputs": 35,
+  "newFeatureInputs": 36,
   "inheritedAdmittedRepairInputs": 19,
   "inheritedRepairSource": "765ab12fb7b3f9b25d61d6bd418496b9cfb95430",
   "inheritedRepairPr": 1254,
@@ -281,6 +285,13 @@
   "fullBaseStagingGo": false,
   "productionAuthorized": false,
   "priorAttemptsPreserved": [
+    {
+      "attempt": "ci-00c0e311-shared-coverage",
+      "status": "FAIL_STALE_GENERATED_NAVIGATION_SOURCE_DIGEST",
+      "run": 43943298389,
+      "job": 133566488532,
+      "cause": "The checked-in navigation inventory retained the previous role-experience source digest. Ordinary regeneration changes one digest only; menus and historical source binding unchanged. Original failure retained."
+    },
     {
       "attempt": "local-native-v1",
       "status": "FAIL_SETUP",
