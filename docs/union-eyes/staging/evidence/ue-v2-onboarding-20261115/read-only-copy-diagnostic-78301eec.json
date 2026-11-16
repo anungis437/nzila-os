@@ -1,0 +1,22 @@
+{
+  "status": "PASS_READ_ONLY_COPY_DIAGNOSTIC_ONLY",
+  "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSha": null,
+  "recordedAt": "2026-11-16T06:06:32.102872+00:00",
+  "actualCycleSha256": "946f761eb8e7251b949c2cf37922d81e0e1085f07fd4e84658ba54b17c5c09f0",
+  "actualDiagnosticSha256": "ac8b93840d364095783267b7ab38caeea5a784ac21bb21ec2f7f05188e94f177",
+  "allOriginalFortyMigrationEntriesVerified": true,
+  "originalCopyTwoClaimsAndOneFormalCaseVerified": true,
+  "copyDocumentRetentionClaimed": false,
+  "originalRoleProjectionsVerified": true,
+  "physicalMetadataUnchanged": true,
+  "failedNonceAuthorityAbsent": true,
+  "ownedCopyStopped": true,
+  "networkAndDataRetained": true,
+  "primaryUntouched": true,
+  "fixtureMutations": 0,
+  "fullSignedMainBoundQualification": "PENDING",
+  "stagingGo": false,
+  "productionAuthorized": false
+}

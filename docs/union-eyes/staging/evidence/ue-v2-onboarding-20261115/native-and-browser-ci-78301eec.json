@@ -1,0 +1,105 @@
+{
+  "status": "PASS_EXACT_SOURCE_SYNTHETIC_CI_ONLY",
+  "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "recordedAt": "2026-11-16T06:06:32.102872+00:00",
+  "nativePostgreSQL": [
+    {
+      "kind": "UE-COMBINED-SCHEMA-NATIVE-PG",
+      "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "postgresMajor": "15",
+      "runId": "43810300958",
+      "runAttempt": "1",
+      "files": 96,
+      "total": 1079,
+      "passed": 1078,
+      "failed": 0,
+      "skipped": 1,
+      "skippedByDesign": [
+        {
+          "file": "message-lifecycle.postgres.test.ts",
+          "title": "reads the membership through the conversation predicate when Canonical V2 is on, as the runtime role",
+          "reason": "Needs the Canonical V2 auth topology (user_management.auth_business_org_authorized and ue_conversation_assignee_authorized), which the legacy-topology combined database this job builds does not install. The test skips itself instead of passing, so that path is not proven by this job."
+        }
+      ],
+      "status": "PASS",
+      "evidenceClass": "NATIVE_POSTGRES",
+      "limitation": "Disposable synthetic QA database on the legacy auth topology; not real-login, Canonical V2, Azure immutable-audit, or staging acceptance",
+      "privateReceiptSha256": "cf01ab7b28693988e464187a710e3f76e70b3ac00e82a75ba6f42f9d6756cb64"
+    },
+    {
+      "kind": "UE-COMBINED-SCHEMA-NATIVE-PG",
+      "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "postgresMajor": "16",
+      "runId": "43810300958",
+      "runAttempt": "1",
+      "files": 96,
+      "total": 1079,
+      "passed": 1078,
+      "failed": 0,
+      "skipped": 1,
+      "skippedByDesign": [
+        {
+          "file": "message-lifecycle.postgres.test.ts",
+          "title": "reads the membership through the conversation predicate when Canonical V2 is on, as the runtime role",
+          "reason": "Needs the Canonical V2 auth topology (user_management.auth_business_org_authorized and ue_conversation_assignee_authorized), which the legacy-topology combined database this job builds does not install. The test skips itself instead of passing, so that path is not proven by this job."
+        }
+      ],
+      "status": "PASS",
+      "evidenceClass": "NATIVE_POSTGRES",
+      "limitation": "Disposable synthetic QA database on the legacy auth topology; not real-login, Canonical V2, Azure immutable-audit, or staging acceptance",
+      "privateReceiptSha256": "80ed959c9b6b2584f048fc3c48340e90ae43bfa359bfb5c8f736ee339d954c38"
+    }
+  ],
+  "productionBuildBrowserWorkers": [
+    {
+      "shard": 1,
+      "runId": 43810300992,
+      "runAttempt": 1,
+      "headSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "headTree": "03a5d060359a1890ae98361958fe54369ef53024",
+      "mode": "synthetic-pr",
+      "build": "success",
+      "playwright": "success",
+      "privateReceiptSha256": "f26bb89401646af568441b6ddbbce50bd4f0736061bdc392861f9d23d9c68c80"
+    },
+    {
+      "shard": 2,
+      "runId": 43810300992,
+      "runAttempt": 1,
+      "headSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "headTree": "03a5d060359a1890ae98361958fe54369ef53024",
+      "mode": "synthetic-pr",
+      "build": "success",
+      "playwright": "success",
+      "privateReceiptSha256": "232ad63fcde2326f1010f2475b605b77249259981d6de34820a3bd337e5fbe28"
+    },
+    {
+      "shard": 3,
+      "runId": 43810300992,
+      "runAttempt": 1,
+      "headSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "headTree": "03a5d060359a1890ae98361958fe54369ef53024",
+      "mode": "synthetic-pr",
+      "build": "success",
+      "playwright": "success",
+      "privateReceiptSha256": "a147c07e679de7d813020f9277627fdc37c3def5d8b10dceb9d1ebd677eda371"
+    },
+    {
+      "shard": 4,
+      "runId": 43810300992,
+      "runAttempt": 1,
+      "headSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "headTree": "03a5d060359a1890ae98361958fe54369ef53024",
+      "mode": "synthetic-pr",
+      "build": "success",
+      "playwright": "success",
+      "privateReceiptSha256": "bb6c75431f674c6afc8fd8d9ea5072cd667703ba65a610d99264f20e66e671e1"
+    }
+  ],
+  "allFourWorkersAndAggregatePassed": true,
+  "browserRunId": 43810300992,
+  "liveEntraOrCanonicalV2ProofInferred": false,
+  "syntheticPerformanceStubIsNotAuthenticatedStagingPerformance": true,
+  "stagingGo": false,
+  "productionAuthorized": false
+}

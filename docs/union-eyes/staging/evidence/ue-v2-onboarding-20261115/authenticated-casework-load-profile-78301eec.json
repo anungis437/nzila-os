@@ -1,0 +1,33 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "workflowSha": null,
+  "declaredAt": "2026-11-16T06:06:32.102872+00:00",
+  "authorization": "CHG-2026-0114",
+  "origin": "https://nzila-ue-v2-staging-app.whitemoss-055b7430.canadacentral.azurecontainerapps.io",
+  "profile": {
+    "warmupSeconds": 10,
+    "stages": [
+      {
+        "concurrency": 1,
+        "durationSeconds": 60
+      },
+      {
+        "concurrency": 5,
+        "durationSeconds": 180
+      }
+    ],
+    "p95Ms": 500,
+    "p99Ms": 1500,
+    "errorRate": 0,
+    "maxRequests": 10000
+  },
+  "programSha256": "38d25004469a65319b6e0878c3e067217f884247eec5d9ec4ba8ca048d8c5332",
+  "programFile": "qualify-authenticated-casework-load.cjs",
+  "scope": "Actual Entra sessions, at least two authorized personas, producer-verified owned QA resources, GET casework workload; credentials and content not serialized",
+  "authBootstrapIsSeparateFromWorkload": true,
+  "backendReadsMayAppendMandatoryAudits": true,
+  "businessMutationRequests": 0,
+  "actualStagingResults": "PENDING",
+  "productionAuthorized": false
+}

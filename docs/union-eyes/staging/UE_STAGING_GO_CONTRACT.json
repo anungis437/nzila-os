@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "record": "UE_STAGING_GO_CONTRACT",
   "mandateId": "UE-GATE0-TO-STAGING-GO-20261109",
-  "generatedOn": "2026-11-15",
+  "generatedOn": "2026-11-16",
   "engineeringBaselineSha": "e87e3799f3cd9a2408f75d846bc5ec676dae3847",
-  "acceptedStagingCandidateSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "acceptedStagingCandidateSha": null,
   "stagingWorkflowDefinitionSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "verdict": "STAGING_GO",
-  "verdictReason": "All 17 required scoped BASE criteria remain PASS on accepted deployed F 241006d3 / workflow M5 c51dcd75. The four broad local failures are now repaired and verified on M6 with the same application tree as F and validated code trees identical to admitted M5. This is scoped staging acceptance; remaining capability limits and unverified release journeys are listed separately. Finance persistence, global 777 formal closure, Phase 3B and production remain outside this decision.",
+  "verdict": "STAGING_NO_GO",
+  "verdictReason": "Repaired onboarding and founder-required automatic matching have source/local proof. The exact candidate still requires integration admission, main-bound native qualification, staging rollout and real positive/negative persona/action evidence. The broader base action ledger is incomplete; historical F passes remain F evidence.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
-    "acceptanceRecorded": true,
-    "recordedAt": "2026-11-15T22:14:29.715619+00:00",
+    "acceptanceRecorded": false,
+    "recordedAt": null,
     "recordedBy": "Codex under continuing founder-delegated operator/reviewer authority",
     "authority": "CHG-2026-0114",
     "ownerAccountsRepresentSameFounder": [
@@ -19,7 +19,7 @@
       "anungis437"
     ],
     "independentHumanApprovalClaimed": false,
-    "evidence": "observed-runtime-241006d3-reconciliation.json"
+    "evidence": null
   },
   "boundaries": {
     "stagingOnly": true,
@@ -33,11 +33,11 @@
     {
       "id": "CANDIDATE_IDENTITY",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Actual version, readiness, image digest, source ancestry and main workflow match F/M5.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -47,10 +47,10 @@
     {
       "id": "SOURCE_ENGINEERING",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Frozen777 remain source-implemented with zero formal closures; exact-source whole application CI passed26215 tests,34 skipped. Scoped base runtime proofs are separate.",
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "requalificationRequiredForProposedCandidate": true,
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
@@ -63,12 +63,12 @@
       "id": "LOCAL_HOLISTIC_REGRESSION",
       "requirement": "ADVISORY",
       "status": "PASS",
-      "evidence": "All four previously failed local commands completed successfully after repairing the cross-checkout dependency link and isolated Python prerequisite. Application tree equals accepted F and validated code trees equal admitted M5; no tests or limits weakened. Historical failed runs remain on file.",
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "evidence": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/local-business-admin-browser-and-regression.json",
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "requalificationRequiredForProposedCandidate": false,
       "historicalObservedStatus": "FAIL",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
-      "observedSourceSha": "7753084d79c9db310bc483b87ade0de76415cd7e",
+      "observedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "localEvidence": "local-check-repair-7753084d.json",
       "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "evidenceRefs": [
@@ -79,11 +79,11 @@
     {
       "id": "FINAL_CANDIDATE_CI",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Source#1241 and binding#1242 each passed all16 trusted required contexts with no failed/pending/unresolved checks before normal expected-head main admission.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -93,11 +93,11 @@
     {
       "id": "AUTHORIZED_STAGING_DEPLOYMENT",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Build43755125987/protected deployment43756733431 completed after concrete what-if review under unchanged CHG-2026-0114 staging delegation.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -107,11 +107,11 @@
     {
       "id": "DEPLOYED_REVISION_IDENTITY",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Named sourceF revision --rel241006d302 is healthy at100%; immutable image and complete IaC/workflow lineage verified.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -121,11 +121,11 @@
     {
       "id": "DATABASE_MIGRATIONS",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Post-rollout read-only guard plans0statements; all40 immutable migrations/source hashes, selected5claims/2grievances/3documents and physical owner/ACL/RLS/OID/filenode baseline retained. Known-overlay profile explicit.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -136,11 +136,11 @@
     {
       "id": "ENTRA_AUTHENTICATED_SESSIONS",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Actual paired browser authorization-code sessions and all7real role sessions verified; secure HttpOnly cookie and canonical current role observed.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -151,11 +151,11 @@
     {
       "id": "API_AND_POSTGRES_TENANT_ISOLATION",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Actual paired APIs plus final103-source native proof deny foreign/forged/missing/hashed bearer contexts; cross-tenant update0 and insert42501, bridge revocation and prior case/document retention pass.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -165,11 +165,11 @@
     {
       "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "All6 actual base stages and all7persona journeys pass. Staff intake/formal deadline create/reschedule/complete/cancel, EN/FR phone/desktop, assignment, privacy, messaging and EICAR refusals pass. Original missing-cleanup receipt remainsFAIL; exact-owned retirement and independent baseline read explicitly reconcile it.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -181,11 +181,11 @@
     {
       "id": "WORKERS_RETRIES_AND_DELIVERY",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Six actual cron/provider/fault/retry/idempotency/lease/suppression/successor scenarios pass;75s abandoned lease naturally waited, owned pending/claimed0 and ACL baseline restored. Provider acceptance only.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -195,11 +195,11 @@
     {
       "id": "AUDIT_AND_TELEMETRY",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Complete native audit hash chains and actual current-pair sealed artifact/manifests verify in both organizations;45actual request traces correlate to F revision in dedicated LAW.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -210,11 +210,11 @@
     {
       "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Same unexpired cookie denied401 at case and document after membership removal; roles restored. Original69bytes/checksum and same original URL natural full-hour403 expiry pass; privacy/legal/member boundaries and EICAR unusable-intake refusal pass separately.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -226,11 +226,11 @@
     {
       "id": "SENSITIVE_FINANCE_BOUNDARIES",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "All7roles denied sensitive summary/per-capita APIs without scoped mandate; restricted browser routes settle to allowed destinations. Finance persistence/Financial Officer2.1 excluded.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -240,11 +240,11 @@
     {
       "id": "OPERATIONAL_RECOVERY",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Source-bound restored-copy/export/native rehearsal and cleanup passed with copy stopped; actual protected zero-traffic revision fault/recovery passed, both QA revisions independently inactive, servingF100. No full-traffic failover claim.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PASS",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -255,11 +255,11 @@
     {
       "id": "CAPABILITY_TRUTHFULNESS",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "All7source-defined EN/FR navigation journeys and390pxmobile views pass. Actual F title layout290px/status-below and desktop arrangement visually confirmed; dates/reminder/finance limitations explicitly disclosed.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -270,11 +270,11 @@
     {
       "id": "INSTITUTIONAL_BOUNDARIES",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "Platform/admin identity gives no tenant-content or finance bypass; all7role sensitive refusals and actual native foreign membership binding refusal pass. No institutional mandate inferred.",
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
       "historicalObservedStatus": "PARTIALLY_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "evidenceRefs": [
@@ -285,21 +285,51 @@
     {
       "id": "STAGING_DECISION_ACCEPTANCE",
       "requirement": "REQUIRED",
-      "status": "PASS",
-      "evidence": "All17required scoped criteria now have exact-source evidence. Codex records BASE_RELEASE_STAGING_ONLY GO under existing continuing solo-founder delegation; anungis/anungis437 are one founder. No independent human or production approval claimed.",
-      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "requalificationRequiredForProposedCandidate": false,
+      "status": "PENDING",
+      "evidence": "Historical accepted F evidence is retained separately. New candidate exact-source admission and applicable deployed action evidence remain pending.",
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "requalificationRequiredForProposedCandidate": true,
       "historicalObservedStatus": "NOT_PROVEN",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
       "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "evidenceRefs": [
         "observed-runtime-241006d3-reconciliation.json"
       ]
+    },
+    {
+      "id": "REPAIRED_ONBOARDING_ACTIONS",
+      "title": "Repaired invitation and organization setup workflows",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "evidence": "Exact-source positive/negative invitation creation, delivery-state presentation, acceptance/MFA, reissue/revoke, duplicate requests, setup persistence, administrator/member/foreign-tenant boundaries, English/French phone layout and atomic audit."
+    },
+    {
+      "id": "AUTOMATIC_WORKLOAD_EXPERTISE_ASSIGNMENT",
+      "title": "Automatic workload and expertise matching",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "evidence": "Exact-source authorized claim/formal assignment, saved profile readback, actual workload/capacity, conflict/recusal/no-match/role/tenant refusals, retry/concurrency and canonical/audit readback."
+    },
+    {
+      "id": "BASE_ACTION_COVERAGE",
+      "title": "Base-release action and operations coverage",
+      "requirement": "REQUIRED",
+      "status": "PENDING",
+      "proposedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": true,
+      "evidence": "Reconcile the current action ledger against actual implemented and staged base workflows. Scope exclusions and separately deferred standards remain explicit; navigation, local source and historical F receipts do not substitute for required action proof."
     }
   ],
   "externalBlockers": [],
-  "proposedCandidateSha": "241006d302c14567e541d619675fbead3ec3f258",
-  "proposedCandidateState": "ACCEPTED_SCOPED_BASE_RELEASE_STAGING_ONLY",
+  "proposedCandidateSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "proposedCandidateState": "SOURCE_ADMITTED_FRESH_NATIVE_LOCAL_PROOFS_PASS_BINDING_AND_RUNTIME_PENDING",
   "baseReleaseScope": {
     "ownerDecisionDate": "2026-11-13",
     "included": [
@@ -375,22 +405,11 @@
     }
   },
   "localValidation": {
-    "sourceSha": "7753084d79c9db310bc483b87ade0de76415cd7e",
-    "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-    "applicationTreeEqualsAcceptedSource": true,
-    "validatedCodeTreesEqualAdmittedWorkflowMain": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-    "status": "PASS",
-    "commandsActuallyRun": 5,
-    "passingCommands": [
-      "lint",
-      "typecheck",
-      "test:fast",
-      "validate:docs",
-      "governance:audit"
-    ],
-    "failingCommands": [],
-    "evidence": "local-check-repair-7753084d.json",
-    "documentationCommandExecution": "Within the successful governance command; fresh changed-document validation follows before review."
+    "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+    "status": "PASS_LOCAL_ONLY",
+    "allFiveRequiredCommandsPassed": true,
+    "evidence": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/local-business-admin-browser-and-regression.json",
+    "notStagingAcceptance": true
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -560,17 +579,17 @@
   ],
   "priorSourceCompositionSuiteFailure": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/source-a8442373-whole-application-ci-failure.json",
   "latestAdmittedVerificationWorkflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "previousContractSnapshot": "observed-contract-before-final-acceptance-241006d3.json",
+  "previousContractSnapshot": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/observed-contract-before-onboarding-matching-78301eec.json",
   "observedRuntimeReconciliation": "observed-runtime-241006d3-reconciliation.json",
   "historicalSourceRestoredRehearsal": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113/security-boundary/candidate-deadline-private-copy-2107feeb.json",
-  "proposedSourceNativeQualificationState": "PASS_ACTUAL_SOURCE_BOUND_NATIVE_AND_RESTORED_COPY_OWNED_COPY_STOPPED",
+  "proposedSourceNativeQualificationState": "FRESH_LOCAL_EXPORT_AND_SEVEN_NATIVE_TOOLS_PASS_FULL_MAIN_BOUND_QUALIFICATION_PENDING",
   "historicalNativeExportBeforeProbeRelocation": {
     "sourceSha": "17188f7b602342ab6e88222759a4caba01f52248",
     "status": "PASS",
     "catalogObjects": 24576,
     "freshRestoreRepeatAndPrivilegesPassed": true
   },
-  "currentSourceNativeExport": "local-native-export-241006d3.json",
+  "currentSourceNativeExport": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/fresh-local-export-78301eec.json",
   "supersededCombinedRepairCandidate": {
     "sourceSha": "80651983dcdf114b488813c64f88ca3aca7ab88d",
     "deployed": false,
@@ -593,13 +612,10 @@
     "replacementAcceptanceInferred": false
   },
   "proposedIntegrationBinding": {
-    "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-    "sourcePR": 1241,
-    "branch": "chore/ue-v2-mobile-heading-binding-20261115",
-    "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-    "state": "NORMALLY_ADMITTED_AND_DEPLOYED_ACTUAL_BASE_RUNTIME_ACCEPTED",
-    "bindingPR": 1242,
-    "headSha": "b28afebeb1c521688e1aa854aca32b5cbc052963"
+    "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+    "sourcePR": 1247,
+    "workflowSha": null,
+    "state": "PENDING_BINDING_CI_AND_NORMAL_MAIN_ADMISSION"
   },
   "observedPerformance": {
     "status": "PASS",
@@ -1765,10 +1781,10 @@
   "verdictScope": "BASE_RELEASE_STAGING_ONLY",
   "resolvedMobileTitleDefectEvidence": "actual-bilingual-mobile-core-visual-review-241006d3.json",
   "requiredCriteriaTally": {
-    "required": 17,
-    "pass": 17,
+    "required": 20,
+    "pass": 0,
     "fail": 0,
-    "pending": 0,
+    "pending": 20,
     "advisoryFail": 0,
     "advisoryPass": 1
   },
@@ -1822,5 +1838,311 @@
       "status": "COMPLETED_WITH_LOCAL_FAILURES_RETAINED_ADVISORY"
     }
   },
-  "remainingWorkInventory": "UE_V2_BASE_RELEASE_REMAINING_WORK.md"
+  "remainingWorkInventory": "UE_V2_BASE_RELEASE_REMAINING_WORK.md",
+  "historicalCriteriaBeforeOnboardingAndMatchingRepair": [
+    {
+      "id": "CANDIDATE_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Actual version, readiness, image digest, source ancestry and main workflow match F/M5.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-runtime-241006d3.json"
+      ]
+    },
+    {
+      "id": "SOURCE_ENGINEERING",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Frozen777 remain source-implemented with zero formal closures; exact-source whole application CI passed26215 tests,34 skipped. Scoped base runtime proofs are separate.",
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "source-ci-and-normal-main-admission-241006d3.json",
+        "docs/union-eyes/staging/UE_GATE0_QUALIFICATION_CENSUS.json"
+      ]
+    },
+    {
+      "id": "LOCAL_HOLISTIC_REGRESSION",
+      "requirement": "ADVISORY",
+      "status": "PASS",
+      "evidence": "All four previously failed local commands completed successfully after repairing the cross-checkout dependency link and isolated Python prerequisite. Application tree equals accepted F and validated code trees equal admitted M5; no tests or limits weakened. Historical failed runs remain on file.",
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "historicalObservedStatus": "FAIL",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "observedSourceSha": "7753084d79c9db310bc483b87ade0de76415cd7e",
+      "localEvidence": "local-check-repair-7753084d.json",
+      "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "evidenceRefs": [
+        "local-check-repair-7753084d.json"
+      ],
+      "historicalFailureDeltaAudit": "local-validation-delta-241006d3.json"
+    },
+    {
+      "id": "FINAL_CANDIDATE_CI",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Source#1241 and binding#1242 each passed all16 trusted required contexts with no failed/pending/unresolved checks before normal expected-head main admission.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "source-ci-and-normal-main-admission-241006d3.json"
+      ]
+    },
+    {
+      "id": "AUTHORIZED_STAGING_DEPLOYMENT",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Build43755125987/protected deployment43756733431 completed after concrete what-if review under unchanged CHG-2026-0114 staging delegation.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-reviewed-protected-deployment-241006d3.json"
+      ]
+    },
+    {
+      "id": "DEPLOYED_REVISION_IDENTITY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Named sourceF revision --rel241006d302 is healthy at100%; immutable image and complete IaC/workflow lineage verified.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-runtime-241006d3.json"
+      ]
+    },
+    {
+      "id": "DATABASE_MIGRATIONS",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Post-rollout read-only guard plans0statements; all40 immutable migrations/source hashes, selected5claims/2grievances/3documents and physical owner/ACL/RLS/OID/filenode baseline retained. Known-overlay profile explicit.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-final-primary-retention-241006d3.json",
+        "actual-main-bound-native-admission-241006d3.json"
+      ]
+    },
+    {
+      "id": "ENTRA_AUTHENTICATED_SESSIONS",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Actual paired browser authorization-code sessions and all7real role sessions verified; secure HttpOnly cookie and canonical current role observed.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-seven-personas-and-restoration-241006d3.json",
+        "actual-paired-original-full-hour-241006d3.json"
+      ]
+    },
+    {
+      "id": "API_AND_POSTGRES_TENANT_ISOLATION",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Actual paired APIs plus final103-source native proof deny foreign/forged/missing/hashed bearer contexts; cross-tenant update0 and insert42501, bridge revocation and prior case/document retention pass.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-final-native-isolation-audit-seals-241006d3.json"
+      ]
+    },
+    {
+      "id": "BUSINESS_WORKFLOWS_AND_PERSONAS",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "All6 actual base stages and all7persona journeys pass. Staff intake/formal deadline create/reschedule/complete/cancel, EN/FR phone/desktop, assignment, privacy, messaging and EICAR refusals pass. Original missing-cleanup receipt remainsFAIL; exact-owned retirement and independent baseline read explicitly reconcile it.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-base-six-reconciled-241006d3.json",
+        "actual-seven-personas-and-restoration-241006d3.json",
+        "actual-bilingual-mobile-core-visual-review-241006d3.json"
+      ]
+    },
+    {
+      "id": "WORKERS_RETRIES_AND_DELIVERY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Six actual cron/provider/fault/retry/idempotency/lease/suppression/successor scenarios pass;75s abandoned lease naturally waited, owned pending/claimed0 and ACL baseline restored. Provider acceptance only.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-worker-six-and-retirement-241006d3.json"
+      ]
+    },
+    {
+      "id": "AUDIT_AND_TELEMETRY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Complete native audit hash chains and actual current-pair sealed artifact/manifests verify in both organizations;45actual request traces correlate to F revision in dedicated LAW.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-final-native-isolation-audit-seals-241006d3.json",
+        "actual-request-telemetry-241006d3.json"
+      ]
+    },
+    {
+      "id": "DOCUMENT_REVOCATION_AND_PRIVACY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Same unexpired cookie denied401 at case and document after membership removal; roles restored. Original69bytes/checksum and same original URL natural full-hour403 expiry pass; privacy/legal/member boundaries and EICAR unusable-intake refusal pass separately.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-paired-original-full-hour-241006d3.json",
+        "actual-base-six-reconciled-241006d3.json",
+        "actual-original-url-expiry-timing-241006d3.json"
+      ]
+    },
+    {
+      "id": "SENSITIVE_FINANCE_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "All7roles denied sensitive summary/per-capita APIs without scoped mandate; restricted browser routes settle to allowed destinations. Finance persistence/Financial Officer2.1 excluded.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-seven-personas-and-restoration-241006d3.json"
+      ]
+    },
+    {
+      "id": "OPERATIONAL_RECOVERY",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Source-bound restored-copy/export/native rehearsal and cleanup passed with copy stopped; actual protected zero-traffic revision fault/recovery passed, both QA revisions independently inactive, servingF100. No full-traffic failover claim.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PASS",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-recovery-241006d3.json",
+        "actual-main-bound-native-admission-241006d3.json"
+      ]
+    },
+    {
+      "id": "CAPABILITY_TRUTHFULNESS",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "All7source-defined EN/FR navigation journeys and390pxmobile views pass. Actual F title layout290px/status-below and desktop arrangement visually confirmed; dates/reminder/finance limitations explicitly disclosed.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-bilingual-mobile-core-visual-review-241006d3.json",
+        "actual-seven-personas-and-restoration-241006d3.json"
+      ]
+    },
+    {
+      "id": "INSTITUTIONAL_BOUNDARIES",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "Platform/admin identity gives no tenant-content or finance bypass; all7role sensitive refusals and actual native foreign membership binding refusal pass. No institutional mandate inferred.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "historicalObservedStatus": "PARTIALLY_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "evidenceRefs": [
+        "actual-seven-personas-and-restoration-241006d3.json",
+        "actual-final-native-isolation-audit-seals-241006d3.json"
+      ]
+    },
+    {
+      "id": "STAGING_DECISION_ACCEPTANCE",
+      "requirement": "REQUIRED",
+      "status": "PASS",
+      "evidence": "All17required scoped criteria now have exact-source evidence. Codex records BASE_RELEASE_STAGING_ONLY GO under existing continuing solo-founder delegation; anungis/anungis437 are one founder. No independent human or production approval claimed.",
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "historicalObservedStatus": "NOT_PROVEN",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "evidenceRefs": [
+        "observed-runtime-241006d3-reconciliation.json"
+      ]
+    }
+  ],
+  "historicalAcceptedSourceBeforeOnboardingAndMatchingRepair": {
+    "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "workflowSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+    "criteriaPassed": 17,
+    "snapshot": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/observed-contract-before-onboarding-matching-78301eec.json",
+    "originalEvidenceIndexSha256": "919603cefc18b05117487065f8cc155ea0278c4269fda63fc279c7b980541352"
+  },
+  "proposedCandidateEvidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115",
+  "proposedCandidateEvidence": [
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/observed-contract-before-onboarding-matching-78301eec.json",
+      "sha256": "72353e1c34a8ec85d09f92d0b68c9b61e8b6c63c8ea1a64d7379405b7bef18bd"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/exact-source-ci-78301eec.json",
+      "sha256": "e8cdd8664b2ae641b446b2441aa6a5eafe6751f17a1ffce9dfe3c0bab6c31acd"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/fresh-native-tool-build-78301eec.json",
+      "sha256": "d0b5c8972bf34f87b02200874ad561e6db5b56905904c0df6d5aa639abb8e865"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/fresh-local-export-78301eec.json",
+      "sha256": "1c18aecb9a4ca15c6cab552256d324dbcb24090d955f0a7c1bd10509e981fd26"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/native-and-browser-ci-78301eec.json",
+      "sha256": "f6f10cdf70d7320b8f3eb98b708e1cbe0190f5f650771afd6bd7464137fcb9f2"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/read-only-copy-diagnostic-78301eec.json",
+      "sha256": "81f6681c272df208b03eff8697c30116fd53845b41c2fb0ef8ec1fb6e75cd089"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/authenticated-casework-load-profile-78301eec.json",
+      "sha256": "6415fa716b37a4b1031af2742840e4eea58814bee6ea40f5dfd812e3eb82984c"
+    }
+  ]
 }

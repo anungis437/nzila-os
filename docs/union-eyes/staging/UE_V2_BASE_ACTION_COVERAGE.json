@@ -315,9 +315,9 @@
     {
       "id": "C15",
       "action": "OCR document extraction",
-      "state": "SOURCE_IMPLEMENTED_UNQUALIFIED",
-      "evidenceSummary": "app/api/documents/[id]/ocr/route.ts and canonical PGlite tests exist.",
-      "remaining": "Actual staged extraction with document revision binding, resource authority and human review, or explicit release boundary.",
+      "state": "PARTIAL_IMPLEMENTATION_STAGING_PENDING",
+      "evidenceSummary": "Machine extraction and transcript draft/review/publication APIs exist. Source audit on 78301eec confirmed that the document screen exposes draft saving but no human-review or publication control.",
+      "remaining": "Implement the authorized transcript review/publication screen and qualify actual extraction, exact document-version binding, resource authority, stale edits, self-review refusal and saved outcomes.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -325,7 +325,10 @@
       },
       "ui": "/dashboard/documents",
       "apiMethods": [
-        "POST /api/documents/{id}/ocr"
+        "POST /api/documents/{id}/ocr",
+        "GET /api/documents/{id}/transcript",
+        "PUT /api/documents/{id}/transcript",
+        "POST /api/documents/{id}/transcript/publish"
       ],
       "positiveDurableResult": null,
       "negativeMatrix": null,
@@ -579,5 +582,13 @@
     "Qualify repaired organization-admin/onboarding positive and negative actions on that exact deployment.",
     "Complete connected casework/supervisory and user-facing document/evidence workflows.",
     "Qualify leadership content and required operational controls; reconcile unresolved product promises."
-  ]
+  ],
+  "proposedCandidateSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "sourceAdmission": {
+    "pullRequest": 1247,
+    "normalMergeSha": "14e10b94252f183a0246127fba5a9d174ccb22e8",
+    "allRequiredTrustedChecksPassed": 16,
+    "allRegisteredCheckRunsConcludedWithoutFailure": 130,
+    "newSourceRuntimeQualification": "PENDING"
+  }
 }
