@@ -1,0 +1,117 @@
+{
+  "status": "PASS_ALL_FOUR_PREVIOUSLY_FAILED_LOCAL_COMMANDS",
+  "collectedAt": "2026-11-15T23:33:51.737277+00:00",
+  "executionSnapshotSha": "7753084d79c9db310bc483b87ade0de76415cd7e",
+  "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "applicationTreeExactlyEqualsAcceptedSource": true,
+  "allValidatedCodeTreesExactlyEqualAdmittedWorkflowMain": true,
+  "admittedWorkflowMainSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "codeTrees": {
+    "apps": "fd4956dc63eff1b6451c2baab2a80bf2fd4d52d8",
+    "packages": "3ffe6b6919b95d0810df9a9ec29f352079370835",
+    "tooling": "2c767bf684ab5b309809f2d1860d9e3f759236e4",
+    ".github": "ac0fb6e0315a8fe48ca8f218f98b024c13635238"
+  },
+  "existingSourceToWorkflowBindingDifferences": [
+    "packages/platform-change-management/src/approvals.ts",
+    "tooling/scripts/lib/ue-v2-navigation-inventory.json",
+    "tooling/scripts/lib/union-eyes-v2-staging-release.mjs",
+    "tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs"
+  ],
+  "nodeVersion": "v24.16.0",
+  "pnpmVersion": "10.33.0",
+  "pnpmLockSha256": "7c8e531a48574062a961c02c8bc7eed49b84d6ff49be6b2430a6b2f08104accc",
+  "commands": [
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "logSha256": "b8690f1c27afe70da00d4d4038509b9296b26db2434753e996352a0e9cfad771",
+      "tasksSuccessful": 172,
+      "tasksTotal": 172
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "logSha256": "0a8207e5b89eca02d34b0261bdbc0be4192af859c61c05ad6d4ff6924b5abb7e",
+      "tasksSuccessful": 238,
+      "tasksTotal": 238
+    },
+    {
+      "command": "pnpm governance:audit",
+      "exitCode": 0,
+      "logSha256": "5085758672b0620108597fe9379c157371821af119ced961a21dba5001ead500"
+    },
+    {
+      "command": "pnpm test:fast",
+      "attempt": 2,
+      "exitCode": 0,
+      "logSha256": "92e1e8181b3077c136e14d004062dc6843ba8390e49693ae4c542f233f4e9576",
+      "summaryLines": [
+        " Test Files  2990 passed | 116 skipped (3106)",
+        "      Tests  39197 passed | 1687 skipped (40897)"
+      ],
+      "passedFiles": 2990,
+      "skippedFiles": 116,
+      "passedTests": 39197,
+      "skippedTests": 1687,
+      "testsOrLimitsWeakened": false
+    }
+  ],
+  "documentationValidation": {
+    "command": "pnpm validate:docs",
+    "exitCode": 0,
+    "execution": "First command of successful pnpm governance:audit on the same snapshot; final changed-document validation recorded separately before review."
+  },
+  "rootCauses": [
+    {
+      "cause": "Root node_modules was a temporary cross-checkout link with missing workspace packages and dependencies.",
+      "repair": "Preserved the original link without changing its shared target; installed the exact current workspace with pnpm install --frozen-lockfile.",
+      "dependencyManifestsOrLockfileChanged": false
+    },
+    {
+      "cause": "The vault fixture runs python3 -I, which excludes user-site packages. cryptography/cffi/pycparser existed only in the user site.",
+      "repair": "Installed the same existing host versions into the selected interpreter using isolated pip with --no-user and binary wheels.",
+      "versions": {
+        "cryptography": "48.0.0",
+        "cffi": "2.0.0",
+        "pycparser": "3.0"
+      },
+      "previouslyAbsentFromIsolatedInterpreter": true,
+      "existingUserSiteChanged": false,
+      "backendLinuxRuntimeLockChanged": false
+    }
+  ],
+  "pythonInstallLogSha256": "1c448c3ee71b7a1f3ee78d078c1400b05679802fb585843d30a1ad775c90e946",
+  "firstFullPostInstallRun": {
+    "command": "pnpm test:fast",
+    "attempt": 1,
+    "exitCode": 1,
+    "logSha256": "07ea6bd6cd09b3daaac1f3b2ca5eb42832992cbd1713f9befee1eeb7bd4e1996",
+    "failedFiles": 1,
+    "passedFiles": 2989,
+    "skippedFiles": 116,
+    "failedTests": 3,
+    "passedTests": 39194,
+    "skippedTests": 1687,
+    "failure": "local-vault-fixture.test.ts cannot import cryptography under python3 -I; normal Python resolves only user-site package"
+  },
+  "targetedVaultRepairProof": {
+    "command": "pnpm exec vitest run --project=union-eyes-heavy apps/union-eyes/scripts/bootstrap-v2/local-vault-fixture.test.ts",
+    "exitCode": 0,
+    "passedTests": 3,
+    "failedTests": 0,
+    "logSha256": "3d2a419bb2a05c8963dab21e83084ea544b09d698c26fd73a5501c2b05892eb3"
+  },
+  "firstFailureRetained": true,
+  "originalPublicFailuresRetained": true,
+  "finalFastSummaryExactlyAsReported": [
+    " Test Files  2990 passed | 116 skipped (3106)",
+    "      Tests  39197 passed | 1687 skipped (40897)"
+  ],
+  "lintWarningsRemain": true,
+  "testsOrAssertionsOrSelectionOrTimeoutsWeakened": false,
+  "applicationOrFinanceFeatureImplementationChanged": false,
+  "newStagingDeploymentPerformed": false,
+  "localChecksAreNotNewRuntimeQualification": true,
+  "productionAuthorized": false
+}

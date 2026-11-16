@@ -1145,6 +1145,12 @@
       "sha256": "16dce4b58a03a7e113dfd58727bdbee9f1d4fc5915ba3ae9768d9fcaa0c5f204",
       "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "runtimePassInferred": false
+    },
+    {
+      "file": "local-check-repair-7753084d.json",
+      "sha256": "1cfe1ac4eb81862382a017d3c9790ad13f2905e8b56fa41bb1b9b7a8c0d17517",
+      "observedOrProposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "runtimePassInferred": false
     }
   ],
   "nextCandidate": {
@@ -1161,15 +1167,18 @@
     "localNativeExport": "local-native-export-241006d3.json",
     "nativeToolProvenance": "native-tool-provenance-241006d3.json",
     "focusedSourceAndPresentation": "mobile-heading-focused-241006d3.json",
-    "requiredBroadCommands": "local-required-validation-241006d3.json",
+    "requiredBroadCommands": "local-check-repair-7753084d.json",
     "failureDeltaAudit": "local-validation-delta-241006d3.json",
-    "localHolisticAdvisory": "FAIL_4_OF_5_LOCAL_COMMANDS",
+    "localHolisticAdvisory": "PASS_REPAIRED_WORKSPACE_AND_ISOLATED_PYTHON_PREREQUISITES",
     "deployedHttpPerformance": "PASS_UNCHANGED_500_1500_THRESHOLDS",
     "mobileVisualReview": "PASS_ACTUAL_F",
     "all17RuntimeCriteria": "PASS_SCOPED_BASE_RELEASE_STAGING_ONLY",
     "acceptedStagingCandidateSha": "241006d302c14567e541d619675fbead3ec3f258",
     "bindingValidation": "mobile-heading-binding-validation-241006d3.json",
-    "bindingReview": "mobile-heading-binding-review-241006d3.json"
+    "bindingReview": "mobile-heading-binding-review-241006d3.json",
+    "historicalLocalHolisticAdvisory": "FAIL_4_OF_5_LOCAL_COMMANDS",
+    "historicalRequiredBroadCommands": "local-required-validation-241006d3.json",
+    "currentLocalValidationSnapshotSha": "7753084d79c9db310bc483b87ade0de76415cd7e"
   },
   "realMessagingFailure": "actual-member-message-detail-failure-8a0faf64.json",
   "privateCloneRepair": {
@@ -1469,7 +1478,13 @@
     }
   ],
   "latestEvidenceSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-  "lastEvidenceUpdateAt": "2026-11-15T22:14:29.715619+00:00",
+  "lastEvidenceUpdateAt": "2026-11-15T23:33:51.737277+00:00",
   "verdictScope": "BASE_RELEASE_STAGING_ONLY",
-  "finalPublicationValidation": "final-publication-validation-241006d3.json"
+  "finalPublicationValidation": "final-publication-validation-241006d3.json",
+  "currentLocalValidation": {
+    "evidence": "local-check-repair-7753084d.json",
+    "executionSnapshotSha": "7753084d79c9db310bc483b87ade0de76415cd7e",
+    "status": "PASS_ALL_FOUR_PREVIOUSLY_FAILED_LOCAL_COMMANDS",
+    "applicationTreeEqualsAcceptedSource": true
+  }
 }

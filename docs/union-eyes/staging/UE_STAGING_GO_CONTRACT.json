@@ -7,7 +7,7 @@
   "acceptedStagingCandidateSha": "241006d302c14567e541d619675fbead3ec3f258",
   "stagingWorkflowDefinitionSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
   "verdict": "STAGING_GO",
-  "verdictReason": "All17required scoped BASE criteria now PASS on actual deployed F241006d3/M5c51dcd75, including all7real personas and cleanup, staff deadline management, full original URL expiry, native audit/seals/retention and unchanged canonical performance. Broad local regression remainsFAIL_ADVISORY; finance persistence, global777 closure, global SaaS promotion, Phase3B and production excluded.",
+  "verdictReason": "All 17 required scoped BASE criteria remain PASS on accepted deployed F 241006d3 / workflow M5 c51dcd75. The four broad local failures are now repaired and verified on M6 with the same application tree as F and validated code trees identical to admitted M5. This is scoped staging acceptance; remaining capability limits and unverified release journeys are listed separately. Finance persistence, global 777 formal closure, Phase 3B and production remain outside this decision.",
   "decisionAuthority": {
     "role": "NZILA_SOLO_FOUNDER",
     "acceptanceRecorded": true,
@@ -62,15 +62,19 @@
     {
       "id": "LOCAL_HOLISTIC_REGRESSION",
       "requirement": "ADVISORY",
-      "status": "FAIL",
-      "evidence": "All five required local commands ran on F: docs PASS; lint/typecheck/governance audit/test:fast FAIL. Fast-test failure headers and lint/governance diagnostic sets match E. Typecheck reports the different unchanged CLI task instead of the unchanged blob task. Forty-nine focused grievance tests pass separately. Aggregate FAIL is retained.",
+      "status": "PASS",
+      "evidence": "All four previously failed local commands completed successfully after repairing the cross-checkout dependency link and isolated Python prerequisite. Application tree equals accepted F and validated code trees equal admitted M5; no tests or limits weakened. Historical failed runs remain on file.",
       "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
       "requalificationRequiredForProposedCandidate": false,
       "historicalObservedStatus": "FAIL",
       "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
-      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-      "localEvidence": "local-required-validation-241006d3.json",
-      "failureDeltaAudit": "local-validation-delta-241006d3.json"
+      "observedSourceSha": "7753084d79c9db310bc483b87ade0de76415cd7e",
+      "localEvidence": "local-check-repair-7753084d.json",
+      "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "evidenceRefs": [
+        "local-check-repair-7753084d.json"
+      ],
+      "historicalFailureDeltaAudit": "local-validation-delta-241006d3.json"
     },
     {
       "id": "FINAL_CANDIDATE_CI",
@@ -371,21 +375,22 @@
     }
   },
   "localValidation": {
-    "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
-    "status": "FAIL_ADVISORY",
+    "sourceSha": "7753084d79c9db310bc483b87ade0de76415cd7e",
+    "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+    "applicationTreeEqualsAcceptedSource": true,
+    "validatedCodeTreesEqualAdmittedWorkflowMain": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+    "status": "PASS",
     "commandsActuallyRun": 5,
     "passingCommands": [
-      "validate:docs"
-    ],
-    "failingCommands": [
       "lint",
       "typecheck",
       "test:fast",
+      "validate:docs",
       "governance:audit"
     ],
-    "evidence": "local-required-validation-241006d3.json",
-    "delta": "local-validation-delta-241006d3.json",
-    "focusedTestsPassed": 49
+    "failingCommands": [],
+    "evidence": "local-check-repair-7753084d.json",
+    "documentationCommandExecution": "Within the successful governance command; fresh changed-document validation follows before review."
   },
   "evidenceDirectory": "docs/union-eyes/staging/evidence/ue-v2-execution-20261113",
   "previousUndeployedBuild": {
@@ -1764,7 +1769,8 @@
     "pass": 17,
     "fail": 0,
     "pending": 0,
-    "advisoryFail": 1
+    "advisoryFail": 0,
+    "advisoryPass": 1
   },
   "globalProgrammeBoundary": {
     "frozenPopulation": 777,
@@ -1774,8 +1780,47 @@
     "productionAuthorized": false
   },
   "publicationValidation": {
-    "snapshotSha": "4ae8957bcdfb5cb8b50d51c9b82500fbd8b9ad7f",
-    "evidence": "final-publication-validation-241006d3.json",
-    "status": "COMPLETED_WITH_LOCAL_FAILURES_RETAINED_ADVISORY"
-  }
+    "snapshotSha": "7753084d79c9db310bc483b87ade0de76415cd7e",
+    "evidence": "local-check-repair-7753084d.json",
+    "status": "PASS_LOCAL_WORKSPACE_REPAIR_PREVIOUS_FAILURES_RETAINED"
+  },
+  "historicalLocalValidationBeforeWorkspaceRepair": {
+    "contractCommit": "7753084d79c9db310bc483b87ade0de76415cd7e",
+    "criterion": {
+      "id": "LOCAL_HOLISTIC_REGRESSION",
+      "requirement": "ADVISORY",
+      "status": "FAIL",
+      "evidence": "All five required local commands ran on F: docs PASS; lint/typecheck/governance audit/test:fast FAIL. Fast-test failure headers and lint/governance diagnostic sets match E. Typecheck reports the different unchanged CLI task instead of the unchanged blob task. Forty-nine focused grievance tests pass separately. Aggregate FAIL is retained.",
+      "proposedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "requalificationRequiredForProposedCandidate": false,
+      "historicalObservedStatus": "FAIL",
+      "historicalObservedEvidence": "See source-S reconciliation: actual base6/worker6/40-migration retention/audit-seals/paired full-hour expiry/targeted2/recovery proofs are source-bound. Actual S performance still fails718.865ms p95; full seven personas remain pending. No Q acceptance is inferred.",
+      "observedSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "localEvidence": "local-required-validation-241006d3.json",
+      "failureDeltaAudit": "local-validation-delta-241006d3.json"
+    },
+    "localValidation": {
+      "sourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+      "status": "FAIL_ADVISORY",
+      "commandsActuallyRun": 5,
+      "passingCommands": [
+        "validate:docs"
+      ],
+      "failingCommands": [
+        "lint",
+        "typecheck",
+        "test:fast",
+        "governance:audit"
+      ],
+      "evidence": "local-required-validation-241006d3.json",
+      "delta": "local-validation-delta-241006d3.json",
+      "focusedTestsPassed": 49
+    },
+    "publicationValidation": {
+      "snapshotSha": "4ae8957bcdfb5cb8b50d51c9b82500fbd8b9ad7f",
+      "evidence": "final-publication-validation-241006d3.json",
+      "status": "COMPLETED_WITH_LOCAL_FAILURES_RETAINED_ADVISORY"
+    }
+  },
+  "remainingWorkInventory": "UE_V2_BASE_RELEASE_REMAINING_WORK.md"
 }
