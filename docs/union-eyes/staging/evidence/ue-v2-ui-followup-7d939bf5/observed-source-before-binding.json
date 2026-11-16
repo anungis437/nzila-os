@@ -1,0 +1,10 @@
+{
+  "sourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "workflowSha": "17099dc87643e5206c931285cfaefc377261fd79",
+  "recordedAt": "2026-11-16T11:46:03.934893+00:00",
+  "runtimeReceiptSha256": "4b7a1a52f59a903de567db3ab5c3780a480026c7d85c850e17054983651ede35",
+  "buildRunId": "43825322999",
+  "deploymentRunId": "43830579236",
+  "freshRuntimeAcceptanceForProposedCandidate": false,
+  "productionAuthorized": false
+}

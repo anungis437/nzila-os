@@ -1,0 +1,28 @@
+{
+  "status": "PASS_ACTUAL_READ_ONLY_RETAINED_COPY_DIAGNOSTIC",
+  "applicationSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+  "observedApplicationSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "candidateWorkflowSha": null,
+  "readOnlyReceiptSha256": "de421d1e2ba811bbd5ab0f8184a15bc52885a6f6dd7ff80056e87aca701007cc",
+  "cycleReceiptSha256": "7630722e7adcf3177a9d2a289d8a09b7dcb802b21e55e67e5d3e0eabd9d4ade4",
+  "recordedAt": "2026-11-16T12:11:33.233Z",
+  "checks": {
+    "immutableFortyLedger": true,
+    "noOwnerDelegations": true,
+    "physicalGuardZeroStatements": true,
+    "claimsVisibilityUnrestricted": true,
+    "recordedOriginalCopyClaimsPresent": true,
+    "recordedCopyFormalCasePresent": true,
+    "noPersistentFailedNonceAuthority": true,
+    "physicalMetadataUnchanged": true
+  },
+  "ownedCopyStopped": true,
+  "privateNetworkExactlyUnchanged": true,
+  "dataAndServerRetained": true,
+  "primaryUntouched": true,
+  "businessDmlSchemaOrPrivilegeMutation": false,
+  "fullMainBoundNativeQualificationStillRequired": true,
+  "freshPitrCurrencyClaimed": false,
+  "candidateRuntimeAcceptanceClaimed": false,
+  "productionAuthorized": false
+}
