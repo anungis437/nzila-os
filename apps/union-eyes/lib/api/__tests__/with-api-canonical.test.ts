@@ -67,6 +67,43 @@ describe('opt-in canonical API authority', () => {
     expect(mocks.legacyOrganization).not.toHaveBeenCalled()
   })
 
+  it('leaves slow work outside an outer transaction when the handler owns its database scopes', async () => {
+    let active = false
+    const betweenScopes: boolean[] = []
+    mocks.rls.mockImplementation(async (_context, callback) => {
+      const previous = active
+      active = true
+      try { return await callback() } finally { active = previous }
+    })
+    const response = await withApi({ rlsOrgContext: false }, async () => {
+      await mocks.rls({ organizationId: user.organizationId }, async () => ({}))
+      betweenScopes.push(active)
+      await Promise.resolve() // external processing belongs between the two guarded database operations
+      await mocks.rls({ organizationId: user.organizationId }, async () => ({}))
+      return { processed: true }
+    })(request())
+    expect(response.status).toBe(200)
+    expect(betweenScopes).toEqual([false])
+    expect(mocks.rls).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps organization and authentication requirements for handlers managing their own database scopes', async () => {
+    const handler = vi.fn()
+    mocks.user.mockResolvedValueOnce({ ...user, organizationId: null })
+    expect((await withApi({ rlsOrgContext: false }, handler)(request())).status).toBe(403)
+    mocks.user.mockResolvedValueOnce(null)
+    expect((await withApi({ rlsOrgContext: false }, handler)(request())).status).toBe(401)
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('still refuses a mismatched inherited transaction for a handler managing its own scopes', async () => {
+    mocks.active.mockReturnValueOnce({})
+    mocks.context.mockResolvedValueOnce({ userId: user.id, orgId: 'foreign-organization' })
+    const handler = vi.fn()
+    expect((await withApi({ rlsOrgContext: false }, handler)(request())).status).toBe(403)
+    expect(handler).not.toHaveBeenCalled()
+  })
+
   it('does not upgrade canonical roles through a legacy fallback', async () => {
     const handler = vi.fn()
     const response = await withApi({ auth: { minRole: 'admin' } }, handler)(request())

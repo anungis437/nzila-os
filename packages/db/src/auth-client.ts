@@ -64,8 +64,15 @@ export async function executeAuthContext<T>(
         !principal.rolcanlogin || principal.owns_auth)
       throw new Error('Unsafe auth database principal: dedicated non-owner gateway membership required')
     await tx.execute(sql.raw(`SET LOCAL ROLE "${role}"`))
-    for (const [key, value] of Object.entries(settings))
-      await tx.execute(sql`SELECT set_config(${key}, ${value}, true)`)
+    // Every selector, including empty values, must be installed before the
+    // callback. They are independent transaction-local settings, so apply
+    // them in one round trip instead of holding the gateway pool across one
+    // query per setting. Role/principal validation and the inviter lock stay
+    // on this same transaction.
+    await tx.execute(sql`SELECT ${sql.join(
+      Object.entries(settings).map(([key, value]) => sql`set_config(${key}, ${value}, true)`),
+      sql`, `,
+    )}`)
     const inviter = inviterAuthorityLockUserId(context)
     if (inviter) await lockInviterAuthority(tx, inviter)
     return callback(tx as unknown as Database)

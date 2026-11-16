@@ -14,6 +14,8 @@ import { liveDesignationExists } from '@/lib/triage/designations'
 import { decideCase, drizzleExecutor, kernelCaseRelationshipScope } from '@/lib/authority/store/route-adapter'
 import { activeMembershipSource } from '@/lib/authority/store/active-membership-source'
 import type { Action, Capacity } from '@/lib/authority/ontology'
+import { canonicalTenantPrincipal } from '@/lib/db/canonical-transaction-scope'
+import { canonicalMembershipRole } from '@/lib/auth/canonical-membership-role'
 
 /**
  * Case access for the claims model, decided by the authority kernel (UE-CONV-E-001).
@@ -35,6 +37,19 @@ export type CaseKernelAction = Extract<
 >
 
 export async function getCaseActor(): Promise<CaseActor> {
+  if (currentStateContextEnabled()) {
+    const principal = canonicalTenantPrincipal()
+    if (principal) {
+      // withApi/withRLSContext already authenticated this exact actor and
+      // attached its live bridge. Re-resolving identity and opening two more
+      // bridges here only repeats that work. Case reads/actions still run
+      // the kernel against live authority on the same bound transaction.
+      const resolvedRole = canonicalMembershipRole(principal.role, principal.isSystemAdmin === true)
+      const role = casePolicyRole(resolvedRole)
+      if (!role) throw ApiError.forbidden()
+      return { userId: principal.userId, organizationId: principal.organizationId, role }
+    }
+  }
   const { userId } = await auth()
   if (!userId) throw ApiError.unauthorized()
   const organizationId = await getOrganizationIdForUser(userId)

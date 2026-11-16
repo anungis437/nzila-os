@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-16T16:07:42.351483+00:00",
+  "baseHeadBeforeRepair": "5fae54b471e84d73eab5e44d723aee12a0add797",
+  "requiredChecks": [
+    {
+      "command": "pnpm lint",
+      "startedAt": "2026-11-16T15:47:38.007598+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T15:49:37.200736+00:00",
+      "logSha256": "43b0ab671a0e7456bc7e8aea36d5c92feb6b56dd0cbc363010d5ab1c2d2d7a8c"
+    },
+    {
+      "command": "pnpm typecheck",
+      "startedAt": "2026-11-16T15:49:37.205553+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T15:53:12.029736+00:00",
+      "logSha256": "b5da3c04205d666d1ed84cf27c85118b7148d6af8a7c72bfd83bf3c77b89a2d5"
+    },
+    {
+      "command": "pnpm test:fast",
+      "startedAt": "2026-11-16T15:53:12.039715+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T16:04:06.153632+00:00",
+      "logSha256": "2f180afb4f0871eae4370bc79d58f7ad5c176b0c6dadd1d4fd891ca87bb1de3e"
+    },
+    {
+      "command": "pnpm validate:docs",
+      "startedAt": "2026-11-16T16:04:06.162838+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T16:04:12.722450+00:00",
+      "logSha256": "18d1c7ad126f29b24b0007be385a16553a2d92aa0ca48b01deddf5824d67c0a5"
+    },
+    {
+      "command": "pnpm governance:audit",
+      "startedAt": "2026-11-16T16:04:12.730973+00:00",
+      "status": "PASS",
+      "exitCode": 0,
+      "finishedAt": "2026-11-16T16:04:46.720330+00:00",
+      "logSha256": "a6683f93aaac929675c4d46aa56dfb5d5d1370f00fee8f0318e9daf1ba4d2f73"
+    }
+  ],
+  "sourceUnchangedDuringChecks": true,
+  "testedSourceModules": [
+    {
+      "path": "apps/union-eyes/lib/db/canonical-transaction-scope.ts",
+      "sha256": "b341370018fb4e5630fced8b4ee6b92b6337f851ff013902c6dd844093bebf64"
+    },
+    {
+      "path": "apps/union-eyes/lib/db/canonical-transaction-principal.test.ts",
+      "sha256": "d145dec9fdea07064d22f49d73ac2af4e40523371b5d2e2ad1a7dd81c1f90026"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-authorization.ts",
+      "sha256": "2832becd0b77e43aacfa86a08b5c808e34b4888e50a1976c378471ca14914e0d"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-authorization.pglite.test.ts",
+      "sha256": "cdad34fe5f647699e3d650de1faeeefec8a59973e8f4625c6198a7bace212f0a"
+    },
+    {
+      "path": "packages/db/src/auth-client.ts",
+      "sha256": "0690d685c543da860bbe7d421c71732c57708623595ed6f52f4c7e2b36b942a1"
+    },
+    {
+      "path": "packages/db/src/__tests__/auth-pool-budget.test.ts",
+      "sha256": "02a087062893723cd54388ed167fdb7cd53365d7ec1201dc998cdc4f5ddb1baf"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "sha256": "0bf36ab5093daf0b0bc70c414de02bfe3ae39afec47d1d2238da1655a5924073"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/ocr-service.ts",
+      "sha256": "466868df5bb1b9df3b4aaa463751c4bf6bdc50893a573081229309e4572f7a21"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/__tests__/ocr-service.test.ts",
+      "sha256": "b17456ea1c432606d616dab5e2a49a03e347613a95b4fb79f58f638ab36a22a0"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/__tests__/ocr-pdf-real.test.ts",
+      "sha256": "66dc7581dd78b18311e73e889f15770b6a012174b6f99a51adbbe7449821a7f0"
+    },
+    {
+      "path": "apps/union-eyes/lib/api/with-api.ts",
+      "sha256": "4f99a29734b7574cb6da7119c41ca1a2ef97537537979f065fd0487fd096cebc"
+    },
+    {
+      "path": "apps/union-eyes/lib/api/__tests__/with-api-canonical.test.ts",
+      "sha256": "cc66b721ec71943d171e880cb2817839c8567a0805d2ca7fe1d30597d0c8dd27"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/ocr/route.ts",
+      "sha256": "bd52b998b8e711f16d947d5227d91a4745d47c0e6a5fc8641d58f800d50a94f3"
+    },
+    {
+      "path": "apps/union-eyes/lib/documents/ocr-extract.ts",
+      "sha256": "f7fcd883e89b19d04e0f09de3a1f9badbe9de8175d2b77490a08eeba9e23eadc"
+    }
+  ],
+  "fullFast": {
+    "testsPassed": 39309,
+    "testsSkipped": 1694,
+    "filesPassed": 3004,
+    "filesSkipped": 117,
+    "thresholdsAndExclusionsUnchanged": true,
+    "repositoryDefaultConcurrency": true
+  },
+  "focused": {
+    "testsPassed": 102,
+    "filesPassed": 9,
+    "logSha256": "dcbc4abf580ff0ea44431b3c7a6226c6c9b360dfd27047d8e07ef308e9734e96"
+  },
+  "authenticationScopeComparison": {
+    "status": "PASS_READ_ONLY_COMPARISON_NOT_HTTP_SLO_PASS",
+    "actualTransportExitCode": 0,
+    "baseSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+    "patchIdentity": "EXACT_T2_80_MODULE_GRAPH_PLUS_ONE_UNCOMMITTED_AUTH_SETTINGS_PATCH",
+    "poolMaxPerVariant": 1,
+    "allTwelveSelectorsVerified": true,
+    "measurements": [
+      {
+        "label": "deployed",
+        "phase": "warmup",
+        "count": 1,
+        "wallMs": 223.45708600000216,
+        "durationMs": [
+          223.33478599999944
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "patched",
+        "phase": "warmup",
+        "count": 1,
+        "wallMs": 205.84499300000607,
+        "durationMs": [
+          205.82079299999896
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "deployed",
+        "phase": "round_1",
+        "count": 5,
+        "wallMs": 347.63914599999407,
+        "durationMs": [
+          65.53094799999963,
+          133.62190900000132,
+          210.76451900000393,
+          284.6564120000039,
+          347.4215449999974
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "patched",
+        "phase": "round_1",
+        "count": 5,
+        "wallMs": 181.35866299999907,
+        "durationMs": [
+          24.30112999999983,
+          79.02552000000287,
+          104.04665199999727,
+          136.06952200000524,
+          181.0287610000014
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "patched",
+        "phase": "round_2",
+        "count": 5,
+        "wallMs": 146.71237900000415,
+        "durationMs": [
+          26.490340999996988,
+          51.66527499999938,
+          72.77078600000095,
+          120.33943899999576,
+          146.02387499999895
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "deployed",
+        "phase": "round_2",
+        "count": 5,
+        "wallMs": 356.94409599999926,
+        "durationMs": [
+          71.34267800000089,
+          145.0193700000018,
+          215.0992419999966,
+          282.3255990000034,
+          356.39549299999635
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "deployed",
+        "phase": "round_3",
+        "count": 5,
+        "wallMs": 334.8091779999959,
+        "durationMs": [
+          59.86991799999669,
+          126.55157199999667,
+          202.00657299999875,
+          263.8019010000062,
+          334.480475999997
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      },
+      {
+        "label": "patched",
+        "phase": "round_3",
+        "count": 5,
+        "wallMs": 172.07821400000103,
+        "durationMs": [
+          47.21935099999973,
+          73.34608899999876,
+          95.56860700000107,
+          118.81383099999948,
+          171.86551300000428
+        ],
+        "allTwelveSelectorsMatched": true,
+        "readOnlyAndRoleVerified": true,
+        "tlsDriverMode": "verify-full",
+        "pgStatSslVisibilityClaimed": false
+      }
+    ],
+    "rawReceiptSha256": "ab59359e732da04de5ad48e75735743c59466964e96a878175aeeeb2b8e7dfcd",
+    "scope": "Trusted operator read-only identity scopes with actual source modules; not a real-user or full HTTP load pass. Restricted-role pg_stat_ssl was unobservable; strict verify-full driver mode is recorded separately.",
+    "sourceModuleSha256": "0690d685c543da860bbe7d421c71732c57708623595ed6f52f4c7e2b36b942a1"
+  },
+  "realLocalOcrEngines": {
+    "status": "PASS_REAL_LOCAL_ENGINES_PRIVATE_REPAIR_NOT_STAGING_ACCEPTANCE",
+    "ocrServiceSha256": "466868df5bb1b9df3b4aaa463751c4bf6bdc50893a573081229309e4572f7a21",
+    "checks": [
+      {
+        "kind": "REAL_IMAGE_OCR",
+        "status": "PASS",
+        "confidence": 95,
+        "expectedTextFound": true
+      },
+      {
+        "kind": "REAL_SCANNED_PDF_RENDER_AND_OCR",
+        "status": "PASS",
+        "pages": 1,
+        "expectedTextFound": true
+      },
+      {
+        "kind": "REAL_MIXED_TEXT_SCANNED_PDF_PAGE_ORDER",
+        "status": "PASS",
+        "pages": 2
+      }
+    ],
+    "rawReceiptSha256": "391c974e1f7e6121745e5f2d7c154057e383d3ac7aa2edcbd13b6c99b5a8ac96",
+    "scope": "Local component runs with actual Tesseract and PDFParse; synthetic files only; no live document authority, HTTP route, transcript persistence or publication acceptance is inferred."
+  },
+  "priorFailuresPreserved": [
+    {
+      "record": "performance-source-attempt1",
+      "passed": 39297,
+      "failed": 1,
+      "cause": "Old source commitment hashes; exact reviewed hashes rebound with guard preserved."
+    },
+    {
+      "record": "performance-source-attempt2",
+      "passed": 39297,
+      "failed": 1,
+      "cause": "Repository scan exceeded30s; standalone default scan1.599s. Security check, source scope and limits unchanged."
+    }
+  ],
+  "stagingAcceptanceClaimed": false,
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false
+}

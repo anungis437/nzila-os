@@ -1,0 +1,11 @@
+# Union Eyes V2 casework runtime repairs
+
+The admitted staging source `7d939bf5399ef768cc71a837730a6ff143d079d1` failed the declared authenticated case-read workload. Its Chief Steward mobile workbench also exceeded the page-load limit. The actual baseline PDF service fails with the installed parser API. These [pre-repair findings](pre-repair-findings.json) and the [failed staging read profile](failed-staging-read-profile.json) remain failures.
+
+The candidate reduces repeated authentication work by installing all twelve transaction-local selectors together and reusing the principal of an already verified tenant transaction for case work. It does not cache an authorization decision. The same live kernel decisions, SQL session and membership checks, bridge retirement and transaction rollback remain in force; expired authority and system connections cannot borrow a tenant principal, and the accessor never exposes its bearer.
+
+PDF extraction uses the installed PDFParse class API, recognizes scanned pages through the existing image OCR engine, preserves mixed-page order and disposes parser and worker resources. PDF extraction provenance advances to version 2. The document OCR route explicitly owns its two short guarded database operations, so byte processing runs between them. Authentication, organization checks and validation of inherited contexts still apply; document authority, version and audit are rechecked before an extraction can be stored or returned.
+
+[Local validation](local-validation.json) records all five required checks, 39,309 passing tests with existing skips, 102 focused regression checks, exact tested module hashes, and separate real-engine component and read-only authentication-scope comparisons. These component results do not replace actual deployed persona, resource, extraction, review, publication or load qualification. The [source plan](source-plan-review.json) rebinds exactly three changed source hashes while retaining every other schema, role, grant and policy value.
+
+Fresh admitted-source staging qualification, exact image provenance and the unchanged authenticated workload remain required. Full base staging GO is ungranted. Finance features and production deployment remain outside this work.

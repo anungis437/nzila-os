@@ -17,6 +17,8 @@ export interface BytesExtraction {
 
 /** Pin the engine identity that appears in provenance. Bump when an engine's behaviour is intentionally changed. */
 const ENGINE_VERSION = '1';
+// The PDF pipeline now uses PDFParse's class API and recognizes scanned pages.
+const PDF_ENGINE_VERSION = '2';
 
 export async function extractTextFromBytes(
   buffer: Buffer,
@@ -56,7 +58,7 @@ export async function extractTextFromBytes(
     confidence,
     language: 'en',
     engine,
-    engineVersion: ENGINE_VERSION,
+    engineVersion: kind === 'pdf' ? PDF_ENGINE_VERSION : ENGINE_VERSION,
     metadata: { ...metadata, truncated: bounded.truncated },
   };
 }

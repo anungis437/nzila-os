@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "baselineApplicationSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+  "findings": [
+    {
+      "kind": "ACTUAL_STAGING_CHIEF_MOBILE_WORKBENCH_TIMEOUT",
+      "runId": "43889606451",
+      "status": "FAIL",
+      "failure": {
+        "type": "AssertionError",
+        "message": "Actual navigation failed: {\"stage\": \"mobile-visible-navigation:chief_steward:en-CA:/dashboard/workbench\", \"error\": \"TimeoutError\", \"message\": \"page.goto: Timeout 20000ms exceeded.\", \"requestDetailsOmitted\": true}"
+      },
+      "baselineRestorationVerified": true,
+      "scope": "Five other roles passed in the original coordinator; separate app-owner-only proof passed. The all-seven coordinator remains failed."
+    },
+    {
+      "kind": "ACTUAL_SOURCE_PDF_PARSER_API_MISMATCH",
+      "status": "FAIL_REPRODUCED_LOCALLY",
+      "sourceModuleSha256": "7bb87ed2531e2ce16b2e717b87af1e4a39568af3d6876c8eed866f47d91d88b9",
+      "realInstalledParser": true,
+      "parserVersion": "2.4.5",
+      "errorType": "TypeError",
+      "errorMessage": "pdfParse is not a function",
+      "rawReceiptSha256": "8d7eb91ed29c0ec047a7213e165014a8e8dc560422feb4b33d9fe2f832792569",
+      "scope": "Actual tracked baseline module and real installed lockfile dependency; not a live HTTP OCR or persona proof."
+    },
+    {
+      "kind": "ACTUAL_WRAPPER_TRANSACTION_LIFETIME_REPRODUCTION",
+      "status": "FAIL_BEFORE_REPAIR",
+      "failedAssertions": 1,
+      "otherTestsPassed": 10,
+      "rawLogSha256": "7a2c8a5bd33a4cada06ddc15af44cba7299ac9fa6be8e6d998aee55aa3af7f30",
+      "scope": "Local API wrapper test: explicit handler-managed context still left the transaction active during external processing. Original auth, organization and inherited-context negative tests retained."
+    }
+  ],
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false
+}

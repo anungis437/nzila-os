@@ -28,7 +28,8 @@ export const POST = withApi(
   {
     auth: { required: true, minRole: 'member' },
     entitlement: 'grievance_case_suite',
-    // No rlsOrgContext: the storage read and the extraction are slow and must not hold a database transaction, so the database work is
+    rlsOrgContext: false,
+    // Handler-managed RLS: the storage read and the extraction are slow and must not hold a database transaction, so the database work is
     // two short organization transactions opened below.
     openapi: { tags: ['Documents'], summary: 'Extract text from the latest version of a document (machine OCR, human review required)' },
   },
