@@ -7,14 +7,32 @@
  */
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocale } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiErrorMessage, isRecord } from '@/lib/client/api-envelope';
+import { invitationCopy, invitationLocale, frenchInvitationErrors, type InvitationLocale } from './invitation-copy';
 
 export default function InviteAcceptPage() {
   const router = useRouter();
   const params = useSearchParams();
   const token = params.get('token') ?? '';
+  const rootLocale = useLocale();
+  const explicitLocale = invitationLocale(params.get('locale'));
+  const [locale, setLocale] = useState<InvitationLocale>(explicitLocale ?? invitationLocale(rootLocale) ?? 'en-CA');
+  const t = invitationCopy[locale];
+
+  useEffect(() => {
+    const cookie = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/)?.[1];
+    setLocale(explicitLocale ?? invitationLocale(cookie) ?? (rootLocale.startsWith('fr') ? 'fr-CA' : invitationLocale(navigator.language.split('-')[0])) ?? 'en-CA');
+  }, [explicitLocale, rootLocale]);
+  useEffect(() => { document.documentElement.lang = locale; }, [locale]);
+
+  function changeLanguage(value: InvitationLocale) {
+    setLocale(value);
+    setError(null);
+    document.cookie = `NEXT_LOCALE=${value}; Path=/; Max-Age=31536000; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+  }
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -38,25 +56,26 @@ export default function InviteAcceptPage() {
       });
       const data: unknown = await res.json();
       if (!res.ok) {
-        setError(apiErrorMessage(data, 'Could not accept invite'));
+        const message = apiErrorMessage(data, t.failed);
+        setError(locale === 'fr-CA' ? frenchInvitationErrors[message] ?? t.failed : message);
         return;
       }
-      if (!isRecord(data)) { setError('Sign-in could not be confirmed. Please try again.'); return; }
+      if (!isRecord(data)) { setError(t.unconfirmed); return; }
       if (!challengeToken && data.requiresMfa === true) {
         if (typeof data.challengeToken !== 'string' || !data.challengeToken) {
-          setError('Verification could not be started. Please sign in again.');
+          setError(t.verificationFailed);
           return;
         }
         setChallengeToken(data.challengeToken);
         return;
       }
       if (challengeToken ? data.ok !== true : !(isRecord(data.user) && typeof data.user.id === 'string' && data.user.id)) {
-        setError('Sign-in could not be confirmed. Please try again.');
+        setError(t.unconfirmed);
         return;
       }
-      router.replace('/en-CA/dashboard');
+      router.replace(`/${locale}/dashboard`);
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(t.network);
     } finally {
       setLoading(false);
     }
@@ -65,42 +84,49 @@ export default function InviteAcceptPage() {
   return (
     <main className="min-h-screen grid place-items-center bg-gray-50 px-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow p-8 space-y-6">
+        <label className="block text-sm text-gray-700">{t.language}
+          <select className="ml-2 rounded border p-2" value={locale} disabled={loading} onChange={event => changeLanguage(event.target.value as InvitationLocale)}>
+            <option value="en-CA">English</option><option value="fr-CA">Français</option>
+          </select>
+        </label>
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">
-            Accept your invitation
+            {t.title}
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            {challengeToken ? 'Verify your identity to finish signing in.' : 'Confirm your details to join the organization.'}
+            {challengeToken ? t.verifyDescription : t.description}
           </p>
         </div>
 
         {!token && (
           <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
-            Missing invite token.
+            {t.missing}
           </div>
         )}
 
         {error && (
-          <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          <div role="alert" className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
             {error}
           </div>
         )}
 
         <form onSubmit={submit} className="space-y-4">
           {challengeToken ? <div className="space-y-3">
-            <label className="block" htmlFor="invite-mfa-code">{useRecovery ? 'Recovery code' : 'Authenticator code'}</label>
+            <label className="block" htmlFor="invite-mfa-code">{useRecovery ? t.recovery : t.authenticator}</label>
             <input id="invite-mfa-code" value={code} onChange={event => setCode(event.target.value)} autoComplete="one-time-code" required className="w-full rounded border p-2" />
-            <label className="flex items-center gap-2"><input type="checkbox" checked={useRecovery} onChange={event => { setUseRecovery(event.target.checked); setCode(''); }} />Use a recovery code</label>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={useRecovery} onChange={event => { setUseRecovery(event.target.checked); setCode(''); }} />{t.useRecovery}</label>
           </div> : <div className="grid grid-cols-2 gap-3">
             <div>
               <label
                 htmlFor="firstName"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                First name
+                {t.firstName}
               </label>
               <input
                 id="firstName"
+                maxLength={100}
+                autoComplete="given-name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-electric focus:ring-2 focus:ring-electric/20 outline-none transition-colors"
@@ -111,10 +137,12 @@ export default function InviteAcceptPage() {
                 htmlFor="lastName"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Last name
+                {t.lastName}
               </label>
               <input
                 id="lastName"
+                maxLength={100}
+                autoComplete="family-name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-electric focus:ring-2 focus:ring-electric/20 outline-none transition-colors"
@@ -127,7 +155,7 @@ export default function InviteAcceptPage() {
             disabled={loading || !token}
             className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Working…' : challengeToken ? 'Verify identity' : 'Accept invitation'}
+            {loading ? t.working : challengeToken ? t.verify : t.accept}
           </button>
         </form>
       </div>

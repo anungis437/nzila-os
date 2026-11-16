@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { logger } from '@/lib/logger';
@@ -214,6 +215,11 @@ export function ConversationPanel({
             {thread.status !== 'open' ? ` · ${t(`status.${thread.status}`)}` : ''}
             {thread.isArchived ? ` · ${t('archived')}` : ''}
           </p>
+          {thread.purpose === 'privacy_request' && (
+            <Link href={`/${locale}/dashboard/privacy?thread=${encodeURIComponent(threadId)}`} className="mt-2 inline-block rounded border px-3 py-2 text-sm font-medium">
+              {locale.startsWith('fr') ? 'Ouvrir la demande de confidentialité' : 'Open privacy request'}
+            </Link>
+          )}
         </div>
       </div>
 

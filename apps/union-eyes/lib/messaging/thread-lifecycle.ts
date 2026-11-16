@@ -3,7 +3,7 @@ import { messageRetentionPolicies, messageThreadLifecycle, messageThreads } from
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import type { CaseActor } from '@/lib/cases/case-authorization'
 import type { RLSTx } from '@/lib/db/with-rls-context'
-import { findReadableThread } from '@/lib/messaging/thread-access'
+import { findReadableThread, type ConversationActor } from '@/lib/messaging/thread-access'
 import { decideMessageHold, decideMessageRetention } from '@/lib/authority/store/route-adapter'
 
 /**
@@ -28,7 +28,7 @@ export type LifecycleVia = 'thread_member' | 'current_assignee' | 'organization_
 export type LifecycleResult =
   | { kind: 'ok'; action: 'close' | 'archive' }
   | { kind: 'not_found' }
-  | { kind: 'conflict'; code: 'ALREADY_CLOSED' | 'NOT_CLOSED' | 'ALREADY_ARCHIVED' | 'CHANGED_CONCURRENTLY' }
+  | { kind: 'conflict'; code: 'ALREADY_CLOSED' | 'NOT_CLOSED' | 'ALREADY_ARCHIVED' | 'CHANGED_CONCURRENTLY' | 'PRIVACY_WORKFLOW_REQUIRED' }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 export const MAX_HOLD_REFERENCE = 200
@@ -37,7 +37,7 @@ export const MAX_RETENTION_DAYS = 36500
 
 async function recordLifecycle(
   tx: RLSTx,
-  actor: CaseActor,
+  actor: ConversationActor,
   thread: { id: string },
   action: 'close' | 'archive' | 'hold_place' | 'hold_release',
   via: LifecycleVia,
@@ -59,9 +59,13 @@ async function recordLifecycle(
 }
 
 /** Close or archive. Authority is being the conversation's member or its current, live assignee: exactly who can read it. */
-export async function changeThreadLifecycle(tx: RLSTx, actor: CaseActor, threadId: string, action: 'close' | 'archive'): Promise<LifecycleResult> {
+export async function changeThreadLifecycle(tx: RLSTx, actor: ConversationActor, threadId: string, action: 'close' | 'archive', privacyRequestId?: string): Promise<LifecycleResult> {
   const thread = await findReadableThread(tx, actor, threadId)
   if (!thread) return { kind: 'not_found' }
+  // A generic close must not strand a pending rights request or manufacture completion.
+  // The privacy service verifies its immutable request binding before supplying this server-only argument.
+  if (action === 'close' && thread.category === 'privacy_request' && !privacyRequestId)
+    return { kind: 'conflict', code: 'PRIVACY_WORKFLOW_REQUIRED' }
   const via: LifecycleVia = thread.memberId === actor.userId ? 'thread_member' : 'current_assignee'
 
   if (action === 'close') {

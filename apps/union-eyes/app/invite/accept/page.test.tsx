@@ -4,10 +4,11 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import '@testing-library/jest-dom/vitest';
 import InviteAcceptPage from './page';
 
-const nav = vi.hoisted(() => ({ replace: vi.fn() }));
-vi.mock('next/navigation', () => ({ useRouter: () => nav, useSearchParams: () => new URLSearchParams('token=invite-bearer') }));
+const nav = vi.hoisted(() => ({ replace: vi.fn(), locale: 'en-CA', params: 'token=invite-bearer' }));
+vi.mock('next/navigation', () => ({ useRouter: () => nav, useSearchParams: () => new URLSearchParams(nav.params) }));
+vi.mock('next-intl', () => ({ useLocale: () => nav.locale }));
 const fetchMock = vi.fn();
-beforeEach(() => { nav.replace.mockReset(); fetchMock.mockReset(); vi.stubGlobal('fetch', fetchMock); });
+beforeEach(() => { nav.replace.mockReset(); nav.locale = 'en-CA'; nav.params = 'token=invite-bearer'; document.cookie = 'NEXT_LOCALE=; Path=/; Max-Age=0'; fetchMock.mockReset(); vi.stubGlobal('fetch', fetchMock); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('invitation acceptance and MFA', () => {
@@ -34,5 +35,39 @@ describe('invitation acceptance and MFA', () => {
     render(<InviteAcceptPage />); fireEvent.click(screen.getByRole('button', { name: 'Accept invitation' }));
     await screen.findByText('Sign-in could not be confirmed. Please try again.');
     expect(nav.replace).not.toHaveBeenCalled();
+  });
+
+  it('accepts in French and keeps the selected language when opening the dashboard', async () => {
+    nav.params += '&locale=fr-CA';
+    fetchMock.mockResolvedValueOnce(Response.json({ user: { id: 'u1' } }));
+    render(<InviteAcceptPage />);
+    expect(screen.getByLabelText('Prénom')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Accepter l’invitation' }));
+    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith('/fr-CA/dashboard'));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).token).toBe('invite-bearer');
+  });
+
+  it('switches languages while preserving the invitation and MFA challenge, and localizes a refused code', async () => {
+    fetchMock.mockResolvedValueOnce(Response.json({ user: { id: 'u1' }, requiresMfa: true, challengeToken: 'mfa-challenge' }));
+    render(<InviteAcceptPage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Accept invitation' }));
+    await screen.findByLabelText('Authenticator code');
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'fr-CA' } });
+    fireEvent.click(screen.getByLabelText('Utiliser un code de récupération'));
+    fireEvent.change(screen.getByLabelText('Code de récupération'), { target: { value: 'controlled-recovery' } });
+    fetchMock.mockResolvedValueOnce(Response.json({ error: 'Invalid code' }, { status: 400 }));
+    fireEvent.click(screen.getByRole('button', { name: 'Vérifier l’identité' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Code invalide');
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ challengeToken: 'mfa-challenge', recoveryCode: 'controlled-recovery' });
+    expect(nav.replace).not.toHaveBeenCalled();
+  });
+
+  it('honors a French preference cookie and never turns an arbitrary locale into a redirect destination', async () => {
+    document.cookie = 'NEXT_LOCALE=fr-CA; Path=/';
+    nav.params += '&locale=https://example.test';
+    fetchMock.mockResolvedValueOnce(Response.json({ user: { id: 'u1' } }));
+    render(<InviteAcceptPage />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Accepter l’invitation' }));
+    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith('/fr-CA/dashboard'));
   });
 });

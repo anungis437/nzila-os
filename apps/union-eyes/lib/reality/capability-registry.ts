@@ -1162,9 +1162,13 @@ export const CAPABILITY_REGISTRY: readonly Capability[] = [
   {
     id: 'UE-PRIVACY-DSAR-WORKFLOW',
     title: 'Information-rights (DSAR) request handling',
-    state: 'NOT_IMPLEMENTED',
-    ownedBy: ['app/api/privacy/dsar/route.ts'],
-    evidence: ['app/api/privacy/dsar/route.ts — throws ApiError.notImplemented → HTTP 501'],
+    state: 'LIMITED',
+    ownedBy: ['app/api/privacy/dsar/route.ts', 'lib/privacy/requests.ts', 'components/privacy/privacy-self-service.tsx'],
+    evidence: [
+      'lib/privacy/requests.pglite.test.ts — local request/response, ownership, assigned-handler, audit rollback and bounded account export regressions',
+      'components/privacy/privacy-self-service.test.tsx — local English/French, reload, refusal, nonce and organization-switch regressions',
+    ],
+    notes: 'In-app submission, tracking, clarification, assigned-handler review and exact-response acknowledgement. Account JSON downloads cover reviewed name/email, own consents and request history only. Case records and other rights require an appropriate handler response; no automatic business-record deletion, legal determination or tenant-wide administrator access. Combined native-route, CI and deployed acceptance remain unproven for this source.',
     targetWave: 9,
   },
   {
