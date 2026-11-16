@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { z } from 'zod'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import { ApiError } from '@/lib/api/errors'
-import { currentStateContextEnabled } from '@/lib/auth/canonical-bootstrap'
+import { isActiveOrganizationAdministrator } from '@/lib/auth/organization-admin'
 import { drizzleExecutor } from '@/lib/authority/store/route-adapter'
 import { persistAtomicAudit } from '@/lib/audit/atomic-audit'
 import { matchingRepresentativeEligible } from './assignment-eligibility'
@@ -11,14 +11,7 @@ import { AssignmentProfileInput } from './assignment-profile-contract'
 
 /** A role title supplied by a route or client is never administration authority. Re-read on the mutation transaction. */
 export async function requireMatchingProfileAdmin(tx: RLSTx, actor: { userId: string; organizationId: string }) {
-  const exec = drizzleExecutor(tx)
-  const { rows } = currentStateContextEnabled()
-    ? await exec.query<{ allowed: boolean }>('SELECT user_management.auth_business_org_authorized($1::uuid,ARRAY[\'admin\']::text[]) AS allowed', [actor.organizationId])
-    : await exec.query<{ allowed: boolean }>(`SELECT EXISTS(SELECT FROM user_management.users u
-        JOIN user_management.organization_users m ON m.user_id=u.user_id
-        WHERE u.user_id=$1 AND u.is_active AND u.lifecycle_state='active'
-          AND m.organization_id=$2::uuid AND m.is_active AND m.role='admin') AS allowed`, [actor.userId, actor.organizationId])
-  if (rows[0]?.allowed !== true) throw ApiError.forbidden()
+  if (!(await isActiveOrganizationAdministrator(tx, actor))) throw ApiError.forbidden()
 }
 
 export async function saveAssignmentProfile(tx: RLSTx, actor: { userId: string; organizationId: string }, input: z.infer<typeof AssignmentProfileInput>) {

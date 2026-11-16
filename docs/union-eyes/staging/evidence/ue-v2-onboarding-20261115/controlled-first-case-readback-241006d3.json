@@ -1,0 +1,28 @@
+{
+  "status": "PASS_ACCEPTED_SOURCE_FIRST_CASE_AND_INTAKE_AUDIT_READBACK",
+  "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "recordedAt": "2026-11-16T04:28:57.624564+00:00",
+  "recipientAccountAndCaseIdentifiersRedacted": true,
+  "controlledMemberIdSha256": "31c4bd0d391ca7e74a3238684fdb852141303bc5705ac1faecdc705073713e3c",
+  "caseIdSha256": "de288ccdf149ad620f12552dc7887be45f55bea0c247892bd8bddd0cf80838e0",
+  "savedCasesIndependentlyVerified": 1,
+  "caseStatus": "submitted",
+  "caseCreatedAt": "2026-11-16T00:56:03.978Z",
+  "exactActorOrganizationAndCaseCreationAuditVerified": true,
+  "creationAuditAction": "case.intake_submitted",
+  "sourceAuditContract": {
+    "path": "apps/union-eyes/app/api/cases/intake/route.ts",
+    "sha256": "ab3a1f259e8b68535ee3c95a42c94bc630c45e0af675926a8ab98998fe0ef1fa"
+  },
+  "privateVerificationReceiptSha256": "20ccca45d99dc9b363814760fcc1554bbd0af0c22b4f6d27d751e9ff3366ce52",
+  "actualReadbackReceiptSha256": "79347f2005e71d584a9973c8b24907e3b7164ee2b6e7d1607245f3608913ee35",
+  "reopeningEvidence": "USER_CONFIRMED; browser reopening was not independently replayed",
+  "caseContentsNamesAndEmailNotRead": true,
+  "databaseMutationStatements": 0,
+  "accountAndCaseDisposition": "RETAINED_AS_LIVE_STAGING_DATA; no deactivation or deletion",
+  "originalFailedPredicateAttemptRetained": true,
+  "originalFailureReason": "The initial readback expected the general claim.create event; the actual member intake uses case.intake_submitted. The exact accepted-source contract and observed audit were then verified.",
+  "repairedCandidateStagingAcceptanceClaimed": false,
+  "productionAuthorized": false
+}

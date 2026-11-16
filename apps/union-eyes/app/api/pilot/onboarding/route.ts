@@ -7,7 +7,7 @@
 
 import { z } from "zod";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { canManageOrganizationInvites } from '@nzila/platform-auth/invites';
+import { isActiveOrganizationAdministrator } from '@/lib/auth/organization-admin';
 import { CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
@@ -29,7 +29,8 @@ export const GET = withOrganizationAuth(async (_request, context) => {
   const { organizationId } = context;
 
   try {
-    const canAccess = await canManageOrganizationInvites(context.userId, organizationId);
+    const canAccess = await withRLSContext({ organizationId }, tx =>
+      isActiveOrganizationAdministrator(tx, { userId: context.userId, organizationId }));
     if (!canAccess) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
@@ -105,7 +106,8 @@ export const PATCH = withOrganizationAuth(async (request, context) => {
   const { organizationId, userId } = context;
 
   try {
-    const canAccess = await canManageOrganizationInvites(userId, organizationId);
+    const canAccess = await withRLSContext({ organizationId }, tx =>
+      isActiveOrganizationAdministrator(tx, { userId, organizationId }));
     if (!canAccess) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,

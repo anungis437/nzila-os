@@ -27,8 +27,8 @@
       "id": "C01",
       "action": "Invitation to first case",
       "state": "PARTIAL_POSITIVE_JOURNEY_PROVEN",
-      "evidenceSummary": "Real admin creation and independent accepted membership readback; user confirmed receipt, dashboard, case creation and reopening.",
-      "remaining": "Exact repaired-source staging negatives, audit/case readback and retained-fixture disposition.",
+      "evidenceSummary": "Real admin invitation and independent accepted identity/membership/session readback; user confirmed receipt, dashboard and case create/reopen. Later read-only queries independently verified the saved case and its exact-actor case.intake_submitted audit on accepted F.",
+      "remaining": "Exact repaired-source staging positive and negative journeys; reopening remains user-attested. The controlled account and case are retained as live staging data.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -113,8 +113,8 @@
       "id": "C05",
       "action": "Persistent organization setup",
       "state": "LOCAL_REPAIR_STAGING_PENDING",
-      "evidenceSummary": "An existing persistent checklist was found; base admin now uses it, checks invitation records, rechecks historical flags and omits demo/integration controls.",
-      "remaining": "Staged verify/reload, audit rollback and final EN/FR/mobile treatment.",
+      "evidenceSummary": "Persistent base setup uses three bounded steps; a shared live business-session administrator predicate removes an unnecessary auth-gateway dependency. French setup/support text, localized links and phone wrapping are implemented; local access and UI checks pass.",
+      "remaining": "Fresh exact-source CI, deployed verify/reload, refusal and audit rollback, and actual EN/FR phone qualification.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",

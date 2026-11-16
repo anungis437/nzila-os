@@ -43,6 +43,7 @@ export interface ChecklistItem {
 }
 
 export interface PilotReadinessChecklistProps {
+  locale?: string;
   items?: ChecklistItem[];
   readinessData?: PilotReadinessData;
   onItemComplete?: (id: string) => void;
@@ -242,9 +243,18 @@ export function PilotReadinessChecklist({
   readinessData,
   onItemComplete,
   className,
+  locale,
 }: PilotReadinessChecklistProps) {
-  const checklist = items
+  const fr = locale?.startsWith('fr') ?? false;
+  const french: Record<string, { label: string; description: string; actionLabel: string }> = {
+    org_seeded: { label: 'Organisation créée', description: 'Votre organisation a été créée et configurée dans UnionEyes.', actionLabel: 'Paramètres de l’organisation' },
+    users_invited: { label: 'Invitations enregistrées', description: 'Créez une invitation pour un membre ou un collègue de cette organisation. La réception du courriel est vérifiée séparément.', actionLabel: 'Inviter des utilisateurs' },
+    roles_assigned: { label: 'Invitation du personnel acceptée', description: 'Un collègue a accepté une invitation avec un rôle du personnel. Cette étape ne certifie pas ses accès actuels.', actionLabel: 'Gérer les rôles' },
+  };
+  const source = items
     ?? (readinessData ? buildReadinessChecklist(readinessData) : DEFAULT_CHECKLIST.map((item) => ({ ...item, completed: false })));
+  const checklist = source.map(item => ({ ...item, ...(fr ? french[item.id] : {}),
+    actionHref: locale && item.actionHref?.startsWith('/') ? `/${locale}${item.actionHref}` : item.actionHref }));
   const completedCount = checklist.filter((i) => i.completed).length;
   const totalCount = checklist.length;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -254,9 +264,9 @@ export function PilotReadinessChecklist({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold">Pilot Readiness</h3>
+          <h3 className="text-sm font-semibold">{fr ? 'Préparation du pilote' : 'Pilot Readiness'}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {completedCount} of {totalCount} steps completed
+            {fr ? `${completedCount} étapes terminées sur ${totalCount}` : `${completedCount} of ${totalCount} steps completed`}
           </p>
         </div>
         <Badge variant={progressPct === 100 ? "default" : "secondary"}>
@@ -283,7 +293,7 @@ export function PilotReadinessChecklist({
             <div
               key={item.id}
               className={cn(
-                "flex items-center gap-3 p-3 rounded-md transition-colors",
+                "flex flex-wrap items-center gap-3 p-3 rounded-md transition-colors sm:flex-nowrap",
                 item.completed
                   ? "bg-green-50 dark:bg-green-950/20"
                   : "hover:bg-muted/50"
@@ -296,7 +306,7 @@ export function PilotReadinessChecklist({
                 <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
               )}
               <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="flex-1 min-w-0">
+              <div className="min-w-[10rem] flex-1">
                 <span
                   className={cn(
                     "text-sm font-medium",
@@ -338,7 +348,7 @@ export function PilotReadinessChecklist({
                   className="shrink-0 text-xs h-7"
                   onClick={() => onItemComplete(item.id)}
                 >
-                  Verify
+                  {fr ? 'Vérifier' : 'Verify'}
                 </Button>
               )}
             </div>
@@ -351,10 +361,10 @@ export function PilotReadinessChecklist({
         <div className="text-center py-3 bg-green-50 dark:bg-green-950/20 rounded-md">
           <CheckCircle2 className="h-6 w-6 text-green-600 mx-auto mb-1" />
           <p className="text-sm font-medium text-green-700 dark:text-green-400">
-            Setup checklist recorded
+            {fr ? 'Configuration enregistrée' : 'Setup checklist recorded'}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Operational acceptance and current access are verified separately.
+            {fr ? 'La validation opérationnelle et les accès actuels sont vérifiés séparément.' : 'Operational acceptance and current access are verified separately.'}
           </p>
         </div>
       )}

@@ -1,0 +1,462 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-16T05:21:56.199560+00:00",
+  "status": "PASS_LOCAL_ONLY",
+  "applicationCommit": null,
+  "workingHeadBeforeRepair": "686d91323aede555735b06ec95e4628e9a0161c1",
+  "baseMain": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
+  "sourceBinding": "Working head plus enumerated tested changes. DELETED means intentional source removal. Final committed candidate requires independent exact-head CI.",
+  "localRepositoryGates": {
+    "lint": {
+      "status": "PASS",
+      "privateLog": "business-admin-final-publication-lint.log",
+      "logSha256": "d0e34193b793427edc432649ef4133980ac909dc91907ba4354706e2ad7bd5fc",
+      "tasks": 172,
+      "errors": 0,
+      "existingWarnings": 3114
+    },
+    "typecheck": {
+      "status": "PASS",
+      "privateLog": "business-admin-final-publication-typecheck.log",
+      "logSha256": "3981a95c15c00317220398245b33cad51ef3c4d2a4d5f61222868cdff801336b",
+      "tasks": 238
+    },
+    "testFast": {
+      "status": "PASS",
+      "privateLog": "business-admin-test-fast.log",
+      "logSha256": "1448c5ddceb37bbf234dab1a113419e240f8eae9ea23b432c6d002636edfeed8",
+      "passed": 39268,
+      "skipped": 1694,
+      "filesPassed": 3000,
+      "filesSkipped": 117,
+      "sourceUnchanged": true
+    },
+    "validateDocs": {
+      "status": "PASS",
+      "privateLog": "business-admin-root-docs.log",
+      "logSha256": "94067aa809991af417c990ad913c53c030e48a758914130a0959ed6fd6873b92"
+    },
+    "governanceAudit": {
+      "status": "PASS",
+      "privateLog": "business-admin-root-governance.log",
+      "logSha256": "bd3ba64716077dbc44da24a2f163e109acff0d4b456472d10b103828251bacea"
+    }
+  },
+  "fastReceiptSha256": "ada2b9a44c9d637f6508d3c3edc75c05e0ae4bd3b853247455569eef1e4d0272",
+  "realLocalBrowser": {
+    "status": "PASS",
+    "tests": 5,
+    "durationSeconds": 17.5,
+    "environment": "Disposable combined PostgreSQL; real Next development server; system Chrome",
+    "authentication": "LOCAL_QA_ONLY; not V2/Entra staging authentication",
+    "checks": [
+      "Member/admin dashboard prerequisite",
+      "Three base setup steps loaded from real API",
+      "Visible completed step before/after reload plus independent saved-state read and member mutation403",
+      "Administrator persisted-checklist response envelope",
+      "French390px heading, localized invitation destination and no horizontal page overflow"
+    ],
+    "browserLogSha256": "5d1c9c3dc6f6dce94fa76fcec7318bd3705e191b41f73a2b7d3831669ada932e",
+    "verificationReceiptSha256": "33041b3339e02e26a89d7ffd680a87e26b03ab1b5308efb140572fd5f98ed7bc",
+    "testedFilesUnchanged": true,
+    "timeoutsAndRetryLimitsUnchanged": true,
+    "earlierAttemptsRetained": [
+      "v4 found no tests; not a pass",
+      "v5 cold development compilation exceeded unchanged auth-preflight timeout; setup tests did not run",
+      "v6 browser Response.body stalled after UI update; failed run retained. Final test checks actual visible completion and an independent persisted read instead of the echoed response body."
+    ]
+  },
+  "liveBusinessAdministration": {
+    "focusedTestsPassed": 35,
+    "privateLogSha256": "10bc6fe2750dcec9a142ecd48bf80f5ffb2caea392bb6633e155d40091bfd20d",
+    "sourcePlanSelfTest": "PASS",
+    "sourcePlanLogSha256": "029005ca6e2f3a950ce31679a0c5cc4f1963b75df73af4bf6d3f55a25136aa8e",
+    "authority": "Direct active canonical organization administrator, bound to the actual transaction actor. Storage failures have no role-title or credential fallback.",
+    "invitationServiceAuthGatewayBoundaryChanged": false
+  },
+  "preservation": {
+    "changedSqlMigrationFiles": [],
+    "historicalEvidenceEntriesReverified": 191,
+    "historicalReceiptsRelabelled": false,
+    "acceptedServingSource": "241006d302c14567e541d619675fbead3ec3f258"
+  },
+  "stagedSecretScan": {
+    "status": "PASS",
+    "privateLogSha256": "b47623cab514b9da7aabf9fe4ef004d55dbdb5b73cc946f97972485dd1a44d66"
+  },
+  "remaining": [
+    "Exact final candidate CI and normal admission",
+    "Fresh native/export/integration/main-bound qualification",
+    "Authorized staging-only rollout and real new-source positive/negative actions",
+    "Full base action and operational qualification"
+  ],
+  "stagingAcceptanceClaimed": false,
+  "productionAuthorized": false,
+  "testedSourceModules": [
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/admin/members/page.test.tsx",
+      "state": "PRESENT",
+      "sha256": "5818f3d3a384d766fdde8fb7b065fd110b488f949ed0af2519694ca7ca873039"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/admin/members/page.tsx",
+      "state": "PRESENT",
+      "sha256": "e0dfc57995ea93815c09ff365199de3a911e963199730be158742ad649c93721"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/admin/onboarding/page.tsx",
+      "state": "PRESENT",
+      "sha256": "a2dbd62c8f300a238d3db03dbde2a45ff68f722a20a99e9d2248667833be41b0"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/pilot/onboarding/onboarding-console.test.tsx",
+      "state": "PRESENT",
+      "sha256": "966712fd2a079428c848c74ff57221902fe987144a311b39005f410de1d57c46"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/pilot/onboarding/onboarding-console.tsx",
+      "state": "PRESENT",
+      "sha256": "88838c13d48014bfe4f86d60b0ccbfce9d5efd323c1eeef83f351c1919c10ffa"
+    },
+    {
+      "path": "apps/union-eyes/app/[locale]/dashboard/pilot/onboarding/page.tsx",
+      "state": "PRESENT",
+      "sha256": "84444b812890c40c5732648b16fbf2a64f772584dcfbf11ed37f241a1daedb28"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/all-routes-smoke.test.ts",
+      "state": "PRESENT",
+      "sha256": "0de0cfac0b6334ebc1e0fe8accb8d4f448c86a3cdca019be163d8aac3f6aa2f4"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/assignment-profiles.route.test.ts",
+      "state": "PRESENT",
+      "sha256": "c48b582db4be6832c5929ba47c485950e89125579dd1e4032711ff39b816762a"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/auth-invite-create.route.test.ts",
+      "state": "PRESENT",
+      "sha256": "d92223efef1f9456f68a37fcd49ae47f49604606cecc45dea3a2ac65a22b5257"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/auth-invite-manage.route.test.ts",
+      "state": "PRESENT",
+      "sha256": "6af58805db3e849e3445a24d83f28aa7bde2cef621be10ae8305ef2b341e2f06"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/cases-assign.route.test.ts",
+      "state": "PRESENT",
+      "sha256": "2f0cab1d23333738886213f4695ac170eeab3ff0f35ade3a2706db34b0cbeb50"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/grievances-assign.route.test.ts",
+      "state": "PRESENT",
+      "sha256": "1386763421c55589a1132eb653bc5874082b0aec9559a029babad44121249cc5"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/grievances-recommend-steward.route.test.ts",
+      "state": "PRESENT",
+      "sha256": "8cca7c76aeee322f5525bf458bc5662308aa6af93d4a6fe91546d4c49eab7dbd"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/pilot-onboarding.route.test.ts",
+      "state": "PRESENT",
+      "sha256": "42e1bf1d353633987c2757ff964df68f1723ff3990ae17839fcb036e7c4d133a"
+    },
+    {
+      "path": "apps/union-eyes/app/api/__tests__/workbench-authorization.route.test.ts",
+      "state": "PRESENT",
+      "sha256": "f7deb1627f5000e10054ad6007c0c7f198bc7a166da4cd8a61b4f80fbf82251f"
+    },
+    {
+      "path": "apps/union-eyes/app/api/assignment-profiles/route.ts",
+      "state": "PRESENT",
+      "sha256": "0ebdb3ac6e3defe09e30562a7f6b137b3aaf57e6be5feab41f412b560a66bd76"
+    },
+    {
+      "path": "apps/union-eyes/app/api/auth/invite/create/route.ts",
+      "state": "PRESENT",
+      "sha256": "548120536947a47af92827a04d18ffa889d489e700b7df4bf6975fe54a0e1d30"
+    },
+    {
+      "path": "apps/union-eyes/app/api/auth/invite/manage/route.ts",
+      "state": "PRESENT",
+      "sha256": "9b484300b9a2cac3260306bb56415d7c6a2f8270713164b5d2c9f0d54681550c"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/assign/route.ts",
+      "state": "PRESENT",
+      "sha256": "dceb30a60185cfa3606fd0fbe4f237294acc74d6de76079f99fedad721bb53bf"
+    },
+    {
+      "path": "apps/union-eyes/app/api/grievances/[id]/assign/route.ts",
+      "state": "PRESENT",
+      "sha256": "b94e3c5a70e15567fd45e172d335dd08a693eca2659bad668f1a0d412262abe7"
+    },
+    {
+      "path": "apps/union-eyes/app/api/grievances/[id]/recommend-steward/route.ts",
+      "state": "PRESENT",
+      "sha256": "40a4eae9eb2a82121066e04ca86f10dd24ddb8c45ab1ad8ecfa42b9f652f3db7"
+    },
+    {
+      "path": "apps/union-eyes/app/api/pilot/onboarding/route.ts",
+      "state": "PRESENT",
+      "sha256": "40a218ff6ec2a805fb42ae80be5faf2c6f1e955b86c5f6055cf1efbe7626b1f8"
+    },
+    {
+      "path": "apps/union-eyes/app/api/workbench/assigned/route.ts",
+      "state": "PRESENT",
+      "sha256": "4c3e62278a1b51c970162e469d861c12eb5b4fc98949b8a399ace4528a8d2578"
+    },
+    {
+      "path": "apps/union-eyes/app/invite/accept/page.test.tsx",
+      "state": "PRESENT",
+      "sha256": "7aef672fd28ee100b0bb5394f6610e835951f7336c8680aea5ab650961e83020"
+    },
+    {
+      "path": "apps/union-eyes/app/invite/accept/page.tsx",
+      "state": "PRESENT",
+      "sha256": "f2f526e59620de8b9c6abcfdf2022e975823a4e06a85d4652fd2d9c9878385cf"
+    },
+    {
+      "path": "apps/union-eyes/components/__tests__/steward-recommendations.test.tsx",
+      "state": "PRESENT",
+      "sha256": "b0fe6a2107457062683ad1d2ad9bfb4b7e7055b14af174e805ca6dc82e81a086"
+    },
+    {
+      "path": "apps/union-eyes/components/admin/__tests__/organization-invitations.test.tsx",
+      "state": "PRESENT",
+      "sha256": "4843f0dd491d7a35e2262d5f9f32061aa5daa1f4f9e4bac54704d5101e940a38"
+    },
+    {
+      "path": "apps/union-eyes/components/admin/__tests__/representative-matching-profiles.test.tsx",
+      "state": "PRESENT",
+      "sha256": "43749ba284d4339774f9d50426d6e87a16bc31491aa8dddde1dcca92bf8cd45f"
+    },
+    {
+      "path": "apps/union-eyes/components/admin/members-console.tsx",
+      "state": "PRESENT",
+      "sha256": "e192ba25d13c0286f45049ad2a4834ae68ce7e9e3c48d6734a16e6adb70dcb23"
+    },
+    {
+      "path": "apps/union-eyes/components/admin/organization-invitations.tsx",
+      "state": "PRESENT",
+      "sha256": "473d4d50386f630b7e7ea79adfb7d77910d3a8f92dec72db0f0d4482d24d0b41"
+    },
+    {
+      "path": "apps/union-eyes/components/admin/representative-matching-profiles.tsx",
+      "state": "PRESENT",
+      "sha256": "f6a0dae98911754ee6834d2cccd1f91b80adf7679ecfae87ed3048a5b4125af2"
+    },
+    {
+      "path": "apps/union-eyes/components/onboarding/admin-onboarding-wizard.tsx",
+      "state": "DELETED",
+      "sha256": null
+    },
+    {
+      "path": "apps/union-eyes/components/pilot/pilot-readiness-checklist.tsx",
+      "state": "PRESENT",
+      "sha256": "55cb85ca8a849cacc007f0ab6693dbacccfb33f9f6025c00de0a490ddb079632"
+    },
+    {
+      "path": "apps/union-eyes/components/pilot/pilot-support-card.tsx",
+      "state": "PRESENT",
+      "sha256": "9b249b9d6f9b2a8b6bbce6e848ee57d07b1e34dd4837ef3f9d9c308d829e5b13"
+    },
+    {
+      "path": "apps/union-eyes/components/steward-recommendations.tsx",
+      "state": "PRESENT",
+      "sha256": "5ca799ad83b6a362e988f78c09e6129798421c060e6fe238cf240008bc91c40a"
+    },
+    {
+      "path": "apps/union-eyes/components/workbench/workbench-console.test.tsx",
+      "state": "PRESENT",
+      "sha256": "27b0a4a4f754e39b1637cb9f6c628aa156f218cb7b0a5ac7932ac6949107ec52"
+    },
+    {
+      "path": "apps/union-eyes/components/workbench/workbench-console.tsx",
+      "state": "PRESENT",
+      "sha256": "8a0f9eae5ae0b52214ad542301ce4c08779366a6181d9c1fed5592bb47e98a8d"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/authority-kernel-harness.ts",
+      "state": "PRESENT",
+      "sha256": "d932e169477fe77bf039ecf3e0bc7bbd4dc8ccf88fd196944d4ca637ed5f70d7"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/grievances-routes.postgres.test.ts",
+      "state": "PRESENT",
+      "sha256": "89c1572c17db91d3dcf37075bf3a0c2062bf400b4c250a3cf90d23f3bc16a227"
+    },
+    {
+      "path": "apps/union-eyes/e2e/cape-features.spec.ts",
+      "state": "PRESENT",
+      "sha256": "f40a6cf07c83c61886790215ba05ca04ccd3e3d97962eae69ba67fe062ee3392"
+    },
+    {
+      "path": "apps/union-eyes/lib/__tests__/workbench-projection.test.ts",
+      "state": "PRESENT",
+      "sha256": "51f0673e5e0cf3f8c57cbb1015b19f889fc2c880e1ed52ac407948bfbbd47fc3"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/__tests__/clc-national-role-boundary.test.ts",
+      "state": "PRESENT",
+      "sha256": "a3ea07a7775991756ed2da28979c31f5063b10877be1b3fb67a6e89eef228dfb"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/organization-admin.pglite.test.ts",
+      "state": "PRESENT",
+      "sha256": "238fa080b945ee930913201f38e3307356d00aa9e7124de46fa251f504fe87b4"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/organization-admin.ts",
+      "state": "PRESENT",
+      "sha256": "686b9506939c340384a0c6670fa119a5361dfb53f959e81dc80d9247139daf68"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/store/lifecycle.ts",
+      "state": "PRESENT",
+      "sha256": "42cf0d61b0d7bf1783d5ef3c04f98c0afc7d0eba0cc2aab9510e5f8cc6f58db2"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/assignment-capacity.ts",
+      "state": "PRESENT",
+      "sha256": "cf739fcf96f5fdf0f31c358002a3b8ada5b5db134112b037567f7130ab6afae1"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/assignment-eligibility.ts",
+      "state": "PRESENT",
+      "sha256": "747c6761716a37d65d20309fab4345d102f8ed6c3a41a6684b287393d14562a8"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/assignment-profile-contract.ts",
+      "state": "PRESENT",
+      "sha256": "5237eb977eaf59f3ec16cf71dada3ecd2620ac7d63c3f4d592e7bd0d235df345"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/assignment-profiles.pglite.test.ts",
+      "state": "PRESENT",
+      "sha256": "8278e361bda646a823acfef55a71c9793a52c061ee27235b9d99bc415b531a4d"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/assignment-profiles.ts",
+      "state": "PRESENT",
+      "sha256": "4f33d5fc3017badae6b9b59e696937cb8ff105d5d10ba586538af962e052f1b9"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/assignment-ranking.ts",
+      "state": "PRESENT",
+      "sha256": "fc6f6e4711ca00e2774742bfb3e2d0635dfc6a85bba71a2bd743919b30bbe5e1"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/automatic-assignment.pglite.test.ts",
+      "state": "PRESENT",
+      "sha256": "f6dec897192a128877af4ea89351e29fc26e693be3f33e44cac0bfb31e21764c"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/automatic-assignment.ts",
+      "state": "PRESENT",
+      "sha256": "0efcf333f9d617aa71a4268ee2e5974e1e5970c44856794a5660fedad979f11e"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/case-authorization.ts",
+      "state": "PRESENT",
+      "sha256": "594eaa697ed2397190658fc05116e87ba356ee926079ef9c91d50e5f75258f4e"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/workbench-projection.ts",
+      "state": "PRESENT",
+      "sha256": "7fc8d2a32c18a994142fb72e1ad2a8583b8c1ec3a208933c584d43b60944fa3e"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/workbench-queue.ts",
+      "state": "PRESENT",
+      "sha256": "3ff4403786947bfe05fc65881293f7ecc05446d6db6e3847d4484e4c43be3523"
+    },
+    {
+      "path": "apps/union-eyes/lib/dashboard/__tests__/role-experience.test.ts",
+      "state": "PRESENT",
+      "sha256": "61f9d55c48521be4ce72112d682af2ab93ec1d6f0041c406d9d244a1461ea0ba"
+    },
+    {
+      "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "state": "PRESENT",
+      "sha256": "e629524f290de079e9088575c9c93a020dd2976a9c83b0072e328312ec550a1f"
+    },
+    {
+      "path": "apps/union-eyes/lib/members/invitation-delivery.ts",
+      "state": "PRESENT",
+      "sha256": "6a7114f0ec7bde2f240d233776ab5fb90d1f886c9357227afb03628c4f1c60e2"
+    },
+    {
+      "path": "apps/union-eyes/lib/organization-middleware.ts",
+      "state": "PRESENT",
+      "sha256": "2067ec84de8adfe000ea4628b1f5ce222439e3c8541fd053703f84c087fc8440"
+    },
+    {
+      "path": "apps/union-eyes/lib/pilot/__tests__/onboarding-invitation-evidence.test.ts",
+      "state": "PRESENT",
+      "sha256": "0056e31089bd9d3b7e3f94e3ec0b7314e7fe7abdcc19cbf5a971f759ff4b81fe"
+    },
+    {
+      "path": "apps/union-eyes/lib/pilot/onboarding-checklist-evidence.ts",
+      "state": "PRESENT",
+      "sha256": "146b7aafc8a497d6710645eacd3d2cdd2810233694a66c7a05b36bc070543c71"
+    },
+    {
+      "path": "apps/union-eyes/lib/reality/capability-registry.ts",
+      "state": "PRESENT",
+      "sha256": "d7051534fd38a9c977abea44649002962cbaeb03386b3990082de89041114f5a"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/__tests__/s49-f06-a4-truthful-institutional-outcomes.test.ts",
+      "state": "PRESENT",
+      "sha256": "5626b0f96c05a949a3a5e563a9acd1ecc085d0f58c8b378a1317a7dbbb0d1b18"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/__tests__/steward-assignment.test.ts",
+      "state": "PRESENT",
+      "sha256": "3ce9c34cfe1d33dbf2439a2f29adc5d617e726a2cc59ca5601609fed48ee96f9"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/case-access-service.ts",
+      "state": "PRESENT",
+      "sha256": "88ff4b47b4f668ff7aa3688246e5d6ba7cbfca3a2e953842da4ed895ff5778af"
+    },
+    {
+      "path": "apps/union-eyes/lib/services/steward-assignment.ts",
+      "state": "PRESENT",
+      "sha256": "78779d4cba1ca91027e1154ac8b216d0be6bd5c59b3dc4d1b52b2511ff1144b1"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts",
+      "state": "PRESENT",
+      "sha256": "83fa455df55bdc2391cc43a4881f8a5508ddf71aa8bbc878c29166bdd004fb06"
+    },
+    {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/automatic-assignment.native.test.ts",
+      "state": "PRESENT",
+      "sha256": "87fe6e18899d12327be5793c12aae64312731fce174c69b28a9166bc3d96fc8d"
+    },
+    {
+      "path": "apps/union-eyes/scripts/lib/route-coverage-scan.ts",
+      "state": "PRESENT",
+      "sha256": "8552de68da594e785658534e05e6c3cba8d97b7186068181bab2243be3dba6b2"
+    },
+    {
+      "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
+      "state": "PRESENT",
+      "sha256": "9bf7598e965e70ac3a4ca68092ee8011b1a3e78dd049c5c90ea22fafe63b0637"
+    },
+    {
+      "path": "packages/platform-auth/src/auth-db.ts",
+      "state": "PRESENT",
+      "sha256": "033ed0dce658f5db1ed2012019dbb7d9f4d2352bf1c43250317cad2a2b5f4587"
+    },
+    {
+      "path": "packages/platform-auth/src/invites/service.ts",
+      "state": "PRESENT",
+      "sha256": "98c0033ef4b22ec2a5d9456a34c4cc261aa8fc4738a9eab657027b674f4355b7"
+    }
+  ]
+}

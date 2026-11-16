@@ -35,6 +35,25 @@ afterEach(() => {
 })
 
 describe('OnboardingConsole: what it shows', () => {
+  it('shows French base setup, support and localized action links, with the same persisted verification request', async () => {
+    fetchMock.mockResolvedValueOnce(answer({}))
+    render(<OnboardingConsole supportEmail="help@example.test" organizationSetup locale="fr-CA" />)
+    expect(await screen.findByText('0 étapes terminées sur 3')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Configuration de l’organisation' })).toBeInTheDocument()
+    expect(screen.getByText('Invitations enregistrées')).toBeInTheDocument()
+    expect(screen.getByText('Invitation du personnel acceptée')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Inviter des utilisateurs/ })).toHaveAttribute('href', '/fr-CA/dashboard/admin/members')
+    expect(screen.getByRole('link', { name: 'Contacter l’assistance' })).toBeInTheDocument()
+    fetchMock.mockResolvedValueOnce(refusal(409, 'This step cannot be marked complete'))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Vérifier' })[0])
+    expect(await screen.findByRole('alert')).toHaveTextContent('Impossible de vérifier cette étape')
+    expect(JSON.parse((requestsTo('PATCH')[0][1] as { body: string }).body)).toEqual({ itemId: 'org-seeded', completed: true })
+    expect(screen.getByText('0 étapes terminées sur 3')).toBeInTheDocument()
+    fetchMock.mockResolvedValueOnce(answer({ 'org-seeded': true, 'users-invited': true, 'roles-assigned': true }))
+    fireEvent.click(screen.getByRole('button', { name: 'Actualiser' }))
+    expect(await screen.findByText('Configuration enregistrée')).toBeInTheDocument()
+    expect(screen.getByText('La validation opérationnelle et les accès actuels sont vérifiés séparément.')).toBeInTheDocument()
+  })
   it('uses the persisted three-step organization setup without demo or optional integration controls', async () => {
     fetchMock.mockResolvedValueOnce(answer({ 'org-seeded': true }));
     render(<OnboardingConsole supportEmail="help@example.test" organizationSetup />);
