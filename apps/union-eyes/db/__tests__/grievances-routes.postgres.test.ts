@@ -39,6 +39,17 @@ vi.mock('@/db', async () => ({ db: (await import('./native-route-harness')).ambi
 vi.mock('@/lib/db/with-rls-context', async () => (await import('./native-route-harness')).rlsContextModule)
 vi.mock('@/lib/audit/atomic-audit', async () => ({ persistAtomicAudit: (await import('./native-route-harness')).recordAudit }))
 vi.mock('@/lib/api/with-api', async () => ({ withApi: (await import('./native-route-harness')).emulatedWithApi }))
+// This fixture uses legacy self-only identity RLS, not a V2 authenticated
+// business session. Supply the real canonical fact query through its read-only
+// system transport; do not invent candidate membership or replace eligibility.
+vi.mock('@/lib/authority/store/active-membership-source', async () => {
+  const { canonicalMembershipSource } = await import('@/lib/authority/store/identity')
+  const { harness, SYSTEM_ROLE } = await import('./native-route-harness')
+  return { activeMembershipSource: async (_exec: unknown, organizationId: string, userIds: string[]) => {
+    const { drizzleExecutor } = await import('@/lib/authority/store/route-adapter')
+    return harness.tenant(SYSTEM_ROLE, null, null, tx => canonicalMembershipSource(drizzleExecutor(tx), organizationId, userIds))
+  } }
+})
 vi.mock('@/lib/api-auth-guard', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api-auth-guard')>()
   const { roleInOrganization } = await import('./native-route-harness')
