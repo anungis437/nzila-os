@@ -299,8 +299,8 @@
     {
       "id": "C14",
       "action": "User-facing sealed evidence export",
-      "state": "PARTIAL_STAGED",
-      "evidenceSummary": "Case evidence seals and cryptographic verification passed; that is not a user-facing PDF/export journey.",
+      "state": "STAGING_CONFIGURATION_REPAIR_QUALIFICATION_PENDING",
+      "evidenceSummary": "Case evidence seals and cryptographic verification passed; that is not a user-facing PDF/export journey. Actual staging has no EVIDENCE_SEAL_KEY mapping although the export source requires it in production mode. The binding adds a dedicated staging-only named secret reference and access; the key was prepared without rotation or changing app environment. No HTTP success or failure is inferred from this observation.",
       "remaining": "Browser control to authorized generated pack/download/verification and failure handling.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -313,7 +313,8 @@
       "negativeMatrix": null,
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
-      "coverageFieldsComplete": false
+      "coverageFieldsComplete": false,
+      "proposedConfigurationEvidence": "evidence/ue-v2-runtime-repairs-41dba402/sealed-export-configuration.json"
     },
     {
       "id": "C15",

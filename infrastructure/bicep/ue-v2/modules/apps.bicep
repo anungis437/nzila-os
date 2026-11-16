@@ -61,7 +61,7 @@ var secretNames = [
   'resend-api-key'
   'storage-account-key'
 ]
-var stagingAuthSystemSecretNames = deploymentEnvironment == 'staging' ? ['auth-system-database-url', 'nar-signing-secret'] : []
+var stagingAuthSystemSecretNames = deploymentEnvironment == 'staging' ? ['auth-system-database-url', 'nar-signing-secret', 'evidence-seal-key'] : []
 var authSystemEnvironment = deploymentEnvironment == 'staging' ? [
   { name: 'AUTH_SYSTEM_DATABASE_URL', secretRef: 'auth-system-database-url' }
 ] : [
@@ -74,6 +74,7 @@ var stagingEnvironment = deploymentEnvironment == 'staging' ? [
   { name: 'UE_FRONTEND_IMAGE_DIGEST', value: last(split(appImage, '@')) }
   { name: 'NAR_SIGNING_SECRET', secretRef: 'nar-signing-secret' }
   { name: 'NAR_SIGNING_KEY_ID', value: 'ue-v2-staging-nar-v1' }
+  { name: 'EVIDENCE_SEAL_KEY', secretRef: 'evidence-seal-key' }
   { name: 'READY_REQUIRE_DECISION_PROOF', value: 'true' }
 ] : []
 var stripeSecretNames = enableStripe ? ['stripe-secret-key', 'stripe-webhook-secret'] : []

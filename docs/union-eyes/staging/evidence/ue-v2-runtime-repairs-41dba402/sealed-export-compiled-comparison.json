@@ -1,0 +1,49 @@
+{
+  "status": "PASS_ONLY_EXPECTED_STAGING_SECRET_VARIABLES_CHANGED",
+  "at": "2026-11-16T22:27:57.532107+00:00",
+  "applicationSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "previousBindingHeadSha": "bda5182c06f61424a09cfdc77190be1780a9df96",
+  "beforeCompiledSha256": "22133f14c35e51839eaedde9c74c78807d0179aaf4ce810e04a074121ac09177",
+  "afterCompiledSha256": "7f30ae71990c8bb139981d5a04fc5134dfe885098bdf61c02ca6abcb8d1e98c8",
+  "compiler": "0.49.2.45890",
+  "actualChangedVariables": [
+    {
+      "path": "/resources/25/properties/template/variables/stagingAuthSystemSecretNames",
+      "before": "[if(equals(parameters('deploymentEnvironment'), 'staging'), createArray('auth-system-database-url', 'nar-signing-secret'), createArray())]",
+      "after": "[if(equals(parameters('deploymentEnvironment'), 'staging'), createArray('auth-system-database-url', 'nar-signing-secret', 'evidence-seal-key'), createArray())]"
+    },
+    {
+      "path": "/resources/25/properties/template/variables/stagingEnvironment",
+      "before": "[if(equals(parameters('deploymentEnvironment'), 'staging'), createArray(createObject('name', 'TARGET_ENVIRONMENT', 'value', 'staging'), createObject('name', 'UE_APP_URL', 'value', variables('appUrl')), createObject('name', 'UE_MARKETING_URL', 'value', variables('effectiveSiteUrl')), createObject('name', 'UE_FRONTEND_IMAGE_DIGEST', 'value', last(split(parameters('appImage'), '@'))), createObject('name', 'NAR_SIGNING_SECRET', 'secretRef', 'nar-signing-secret'), createObject('name', 'NAR_SIGNING_KEY_ID', 'value', 'ue-v2-staging-nar-v1'), createObject('name', 'READY_REQUIRE_DECISION_PROOF', 'value', 'true')), createArray())]",
+      "after": "[if(equals(parameters('deploymentEnvironment'), 'staging'), createArray(createObject('name', 'TARGET_ENVIRONMENT', 'value', 'staging'), createObject('name', 'UE_APP_URL', 'value', variables('appUrl')), createObject('name', 'UE_MARKETING_URL', 'value', variables('effectiveSiteUrl')), createObject('name', 'UE_FRONTEND_IMAGE_DIGEST', 'value', last(split(parameters('appImage'), '@'))), createObject('name', 'NAR_SIGNING_SECRET', 'secretRef', 'nar-signing-secret'), createObject('name', 'NAR_SIGNING_KEY_ID', 'value', 'ue-v2-staging-nar-v1'), createObject('name', 'EVIDENCE_SEAL_KEY', 'secretRef', 'evidence-seal-key'), createObject('name', 'READY_REQUIRE_DECISION_PROOF', 'value', 'true')), createArray())]"
+    },
+    {
+      "path": "/variables/stagingRuntimeSecretNames",
+      "before": "[concat(createArray('database-url', 'system-database-url', 'auth-database-url', 'auth-system-database-url', 'nar-signing-secret', 'auth-secret', 'mfa-encryption-key', 'voting-secret', 'cron-secret', 'redis-url', 'resend-api-key', 'storage-account-key'), if(and(not(empty(parameters('entraClientId'))), not(empty(parameters('entraTenantId')))), createArray('azure-ad-client-secret'), createArray()), if(parameters('enableStripe'), createArray('stripe-secret-key', 'stripe-webhook-secret'), createArray()))]",
+      "after": "[concat(createArray('database-url', 'system-database-url', 'auth-database-url', 'auth-system-database-url', 'nar-signing-secret', 'evidence-seal-key', 'auth-secret', 'mfa-encryption-key', 'voting-secret', 'cron-secret', 'redis-url', 'resend-api-key', 'storage-account-key'), if(and(not(empty(parameters('entraClientId'))), not(empty(parameters('entraTenantId')))), createArray('azure-ad-client-secret'), createArray()), if(parameters('enableStripe'), createArray('stripe-secret-key', 'stripe-webhook-secret'), createArray()))]"
+    }
+  ],
+  "generatorMetadataOnlyChanges": [
+    {
+      "path": "/metadata/_generator/templateHash",
+      "before": "7814327307725150826",
+      "after": "10075850743644785438"
+    },
+    {
+      "path": "/resources/25/properties/template/metadata/_generator/templateHash",
+      "before": "16226396811144376541",
+      "after": "5350794213565410889"
+    }
+  ],
+  "allOtherCompiledDefinitionsExactlyUnchanged": true,
+  "stagingConditionalEnvironmentAndSecretNamesRetainEmptyProductionBranch": true,
+  "namedSecretRbacLoopStillConditionedOnStagingApplications": true,
+  "actualWhatIfRequiredBeforeDeployment": true,
+  "inputFilesSha256": {
+    "infrastructure/bicep/ue-v2/main.bicep": "db40a810b0ff3f6696cf24d8ed7734703c65e057fc392e4b1210792541b9d9ff",
+    "infrastructure/bicep/ue-v2/modules/apps.bicep": "0b8a2d0f589901e04a50053e1e55789a73a870221f02051f2e747a0b4c5f0dcb",
+    "tooling/scripts/lib/ue-v2-staging-identity-contract.test.cjs": "edb3eb2cddda2b846beb6d2e6ff1a0c36bc5900c5f21e4bf071c140e31b80e45"
+  },
+  "productionAzureOperationPerformed": false,
+  "productionAuthorized": false
+}

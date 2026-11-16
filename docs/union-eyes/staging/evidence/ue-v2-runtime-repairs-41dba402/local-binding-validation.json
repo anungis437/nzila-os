@@ -1,6 +1,6 @@
 {
   "status": "PASS_LOCAL_ONLY",
-  "recordedAt": "2026-11-16T22:14:16.498200+00:00",
+  "recordedAt": "2026-11-16T22:47:58.539773+00:00",
   "applicationSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
   "sourceAdmissionMergeSha": "81b63e7c2ea801bd56a4a9348f0a0eadcef19c87",
   "bindingCommitSha": null,
@@ -8,53 +8,53 @@
     {
       "command": "pnpm lint",
       "status": "PASS",
-      "startedAt": "2026-11-16T21:49:07.049638+00:00",
+      "startedAt": "2026-11-16T22:24:13.859578+00:00",
       "exitCode": 0,
-      "logSha256": "2315e5b0e14980752c01ed3fe543ccfdd854e76a4bf96938efcfe2d961eb443d",
-      "completedAt": "2026-11-16T21:51:33.939378+00:00",
+      "logSha256": "7c719a298752ff49a0c855eb6a8d0a1df88302e198f003729ace6eb28c8b37f4",
+      "completedAt": "2026-11-16T22:26:46.635590+00:00",
       "protectedInputsUnchanged": true
     },
     {
       "command": "pnpm typecheck",
       "status": "PASS",
-      "startedAt": "2026-11-16T21:51:34.766662+00:00",
+      "startedAt": "2026-11-16T22:26:47.394626+00:00",
       "exitCode": 0,
-      "logSha256": "3fc1315c20db93497ffba3442e1b1c7a8f8428a3a12797434c47d707df3963a2",
-      "completedAt": "2026-11-16T21:55:34.722966+00:00",
+      "logSha256": "afc5c0a82bbbe046fd73d0460191d0f45a8327f1049eece5989dc66ed59f677a",
+      "completedAt": "2026-11-16T22:31:23.995079+00:00",
       "protectedInputsUnchanged": true
     },
     {
       "command": "pnpm test:fast",
       "status": "PASS",
-      "startedAt": "2026-11-16T21:55:35.416621+00:00",
+      "startedAt": "2026-11-16T22:31:24.721181+00:00",
       "exitCode": 0,
-      "logSha256": "b33b6f60f96af6c5fc0f136194e898b702d2e3f8d23e911380e64c221b1c6b14",
-      "completedAt": "2026-11-16T22:13:27.536955+00:00",
+      "logSha256": "a1f00fbc7ba159238bacb860a84711e86647995f4ce0258981cb3a4c201c6874",
+      "completedAt": "2026-11-16T22:47:14.743517+00:00",
       "protectedInputsUnchanged": true
     },
     {
       "command": "pnpm validate:docs",
       "status": "PASS",
-      "startedAt": "2026-11-16T22:13:28.754213+00:00",
+      "startedAt": "2026-11-16T22:47:15.820450+00:00",
       "exitCode": 0,
       "logSha256": "989fff88804727e827012ed3d8ceeffe4a2f6f03554f5f6d1ce786c7f9628a98",
-      "completedAt": "2026-11-16T22:13:38.423479+00:00",
+      "completedAt": "2026-11-16T22:47:23.382330+00:00",
       "protectedInputsUnchanged": true
     },
     {
       "command": "pnpm governance:audit",
       "status": "PASS",
-      "startedAt": "2026-11-16T22:13:39.080338+00:00",
+      "startedAt": "2026-11-16T22:47:24.062047+00:00",
       "exitCode": 0,
-      "logSha256": "c7c1188fe03bb01a2073a8df04f4903aa3fc492612f6f3c9e8497ddff91da11e",
-      "completedAt": "2026-11-16T22:14:15.021523+00:00",
+      "logSha256": "d500d9d9ad7dccc471093ac5650cc9f338ad87d87861942cdb14d06ff0f87262",
+      "completedAt": "2026-11-16T22:47:46.428639+00:00",
       "protectedInputsUnchanged": true
     }
   ],
   "fastTestSummary": [
     "Test Files  3008 passed | 118 skipped (3126)",
     "Tests  39358 passed | 1698 skipped (41069)",
-    "Duration  1068.67s (tests 53%, import 28%, environment 11%, transform 7%)"
+    "Duration  946.27s (tests 58%, import 26%, environment 11%, transform 5%, worker 1%)"
   ],
   "protectedInputsUnchanged": true,
   "testedInputFiles": [
@@ -64,11 +64,11 @@
     },
     {
       "path": "docs/union-eyes/staging/UE_V2_BASE_ACTION_COVERAGE.json",
-      "sha256": "6f56d6595b174d8c883c3eaa08b05346eba002c413ff63d7b1e5d7378845a98c"
+      "sha256": "3bafd23fbfa7888c23b92b8b7b37921c0acf55f536d1c6f2766c6f38099a21d8"
     },
     {
       "path": "docs/union-eyes/staging/UE_V2_BASE_RELEASE_REMAINING_WORK.md",
-      "sha256": "15ce59f41c8256f4df68389f09ba6adde2db2616ca7d0a77e076399f041cdb54"
+      "sha256": "7044352434bb076e5619f9ee0183c4d512e46d961ee3e22a5144c514972f6669"
     },
     {
       "path": "docs/union-eyes/staging/UE_V2_CURRENT_CANDIDATE.md",
@@ -99,12 +99,32 @@
       "sha256": "2b7f622d3da721709b7a476692fffe54e0ddfb4642abbb251f054a74a897f406"
     },
     {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-runtime-repairs-41dba402/local-binding-validation-before-seal-config.json",
+      "sha256": "d3505afd7bb12401ceb4f1d7085f381b1b544cd61f9099e37a2a1e1e939bd22f"
+    },
+    {
       "path": "docs/union-eyes/staging/evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
       "sha256": "5d83a48b904d0c67d337501fc3d9aa9fcad6d6ed4539fe9d183e2b2c7f8febbc"
     },
     {
       "path": "docs/union-eyes/staging/evidence/ue-v2-runtime-repairs-41dba402/observed-source-before-binding.json",
       "sha256": "a61ce2921b8956a8688e48fd59aeb1f66d59ea73a44e6b2dcb048aeee88203d0"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-runtime-repairs-41dba402/read-only-copy-diagnostic.json",
+      "sha256": "ce8b16cced6898412cf5902a4ab121581c16cc3be6c64e7e650b3aca1b902afd"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-runtime-repairs-41dba402/sealed-export-configuration.json",
+      "sha256": "64f293bb6c8d88a6c6107d81cc86662d9beda1d32611251df88c5f49fbb4e1f5"
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/main.bicep",
+      "sha256": "db40a810b0ff3f6696cf24d8ed7734703c65e057fc392e4b1210792541b9d9ff"
+    },
+    {
+      "path": "infrastructure/bicep/ue-v2/modules/apps.bicep",
+      "sha256": "0b8a2d0f589901e04a50053e1e55789a73a870221f02051f2e747a0b4c5f0dcb"
     },
     {
       "path": "ops/change-records/CHG-2026-0114.founder-authorization.md",
@@ -121,6 +141,10 @@
     {
       "path": "tooling/scripts/lib/ue-v2-navigation-inventory.json",
       "sha256": "4567838106a1a0f9d1e630964058783dc61ede6fe2221b44ba06c7c3717a431f"
+    },
+    {
+      "path": "tooling/scripts/lib/ue-v2-staging-identity-contract.test.cjs",
+      "sha256": "edb3eb2cddda2b846beb6d2e6ff1a0c36bc5900c5f21e4bf071c140e31b80e45"
     },
     {
       "path": "tooling/scripts/lib/union-eyes-v2-staging-release.mjs",
@@ -144,5 +168,16 @@
   "actualMainBoundNativeQualification": "PENDING",
   "candidateDeployment": "PENDING",
   "fullBaseStagingGo": false,
-  "productionAuthorized": false
+  "productionAuthorized": false,
+  "bindingHeadAtCheck": "bda5182c06f61424a09cfdc77190be1780a9df96",
+  "previousBindingValidation": {
+    "path": "local-binding-validation-before-seal-config.json",
+    "sha256": "d3505afd7bb12401ceb4f1d7085f381b1b544cd61f9099e37a2a1e1e939bd22f"
+  },
+  "stagingConfigurationRepair": {
+    "evidence": "sealed-export-configuration.json",
+    "actualKeyPreparedWithoutRotation": true,
+    "actualApplicationEnvironmentChanged": false,
+    "qualifiedStagingDeploymentAndRealExportStillRequired": true
+  }
 }

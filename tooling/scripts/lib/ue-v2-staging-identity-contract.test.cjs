@@ -41,6 +41,17 @@ test('every staging app secret reference has a scoped runtime grant and excludes
 });
 
 const vm = require('node:vm');
+test('staging sealed exports use a dedicated named secret and preserve production configuration', () => {
+  const source = fs.readFileSync(path.join(root, 'infrastructure/bicep/ue-v2/modules/apps.bicep'), 'utf8');
+  const scopedNames = source.match(/var stagingAuthSystemSecretNames = deploymentEnvironment == 'staging' \? \[([^\]]+)\] : \[\]/);
+  assert(scopedNames && scopedNames[1].includes("'evidence-seal-key'"));
+  const staging = source.slice(source.indexOf('var stagingEnvironment = '), source.indexOf('var stripeSecretNames = '));
+  assert(staging.startsWith("var stagingEnvironment = deploymentEnvironment == 'staging' ? ["));
+  assert(staging.includes("{ name: 'EVIDENCE_SEAL_KEY', secretRef: 'evidence-seal-key' }"));
+  assert(staging.trimEnd().endsWith('] : []'));
+  assert.equal((source.match(/name: 'EVIDENCE_SEAL_KEY'/g) ?? []).length, 1);
+  assert(!staging.includes("name: 'EVIDENCE_SEAL_KEY', secretRef: 'nar-signing-secret'"));
+});
 async function revokedSession({caseStatus = 401, documentStatus = 401, expired = false, wrongIdentity = false, wrongTenant = false} = {}) {
   const source = fs.readFileSync(path.join(root, 'tooling/scripts/qualify-ue-v2-real-entra.cjs'), 'utf8');
   const functionSource = source.slice(source.indexOf('async function verifyRevokedExistingSession('), source.indexOf('async function main()'));
