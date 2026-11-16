@@ -1,0 +1,164 @@
+{
+  "status": "PASS_ELIGIBLE_NORMAL_MERGE",
+  "recordedAt": "2026-11-16T21:48:14.019961+00:00",
+  "candidateSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "pullRequest": "https://github.com/anungis437/nzila-os/pull/1256",
+  "headMatches": true,
+  "requiredTrustedCheckCount": 16,
+  "trustedIntegrationId": 15368,
+  "requiredTrustedChecks": [
+    {
+      "context": "Merge Authority / Lint & Typecheck",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637158863
+      ]
+    },
+    {
+      "context": "Merge Authority / Unit Tests",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637163999
+      ]
+    },
+    {
+      "context": "Merge Authority / Schema Integrity",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637168943
+      ]
+    },
+    {
+      "context": "Merge Authority / PostgreSQL RLS",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637172621
+      ]
+    },
+    {
+      "context": "Merge Authority / Migration Chain",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637176730
+      ]
+    },
+    {
+      "context": "Merge Authority / Affected Build",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637180757
+      ]
+    },
+    {
+      "context": "Merge Authority / Architectural Contracts",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637184752
+      ]
+    },
+    {
+      "context": "Merge Authority / Repository Inventory",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637188754
+      ]
+    },
+    {
+      "context": "Merge Authority / Governance Integrity",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637193177
+      ]
+    },
+    {
+      "context": "Merge Authority / Hash Chain Integrity",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637197070
+      ]
+    },
+    {
+      "context": "Merge Authority / Operating Layer",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637200853
+      ]
+    },
+    {
+      "context": "Merge Authority / IaC Security",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637204956
+      ]
+    },
+    {
+      "context": "Merge Authority / Ops Documentation",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133637209696
+      ]
+    },
+    {
+      "context": "Gitleaks",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133624986453,
+        133624239087
+      ]
+    },
+    {
+      "context": "TruffleHog OSS",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133624990052,
+        133624239106
+      ]
+    },
+    {
+      "context": "Docker Secret Policy",
+      "integrationId": 15368,
+      "passed": true,
+      "checkIds": [
+        133624993242,
+        133624238673
+      ]
+    }
+  ],
+  "allRequiredTrustedPassed": true,
+  "missingOrUnpassedRequired": [],
+  "currentCheckRunCount": 115,
+  "currentWorkflowRunCount": 18,
+  "allRegisteredChecksConcluded": true,
+  "failedChecks": [],
+  "pendingChecks": [],
+  "pendingWorkflowRuns": [],
+  "mergeable": "MERGEABLE",
+  "mergeStateStatus": "CLEAN",
+  "localValidationEvidence": "docs/union-eyes/staging/evidence/ue-v2-document-runtime-packaging-20261116/local-validation.json",
+  "skippedCurrentChecks": [
+    "Performance Regression Gate (canonical)",
+    "CodeRabbit",
+    "UE E2E worker (${{ matrix.shard }}/4)",
+    "Governance Baseline / Red-Team Adversarial",
+    "auto-merge",
+    "tag-policy",
+    "Trivy Container Scan",
+    "Red-Team Adversarial"
+  ],
+  "productionAuthorized": false
+}

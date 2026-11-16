@@ -1,0 +1,111 @@
+{
+  "status": "MIXED_ACTUAL_PRIOR_CANDIDATE_RESULTS_NOT_PROPOSED_SOURCE_ACCEPTANCE",
+  "applicationSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+  "workflowSha": "5fae54b471e84d73eab5e44d723aee12a0add797",
+  "recordedAt": "2026-11-16T21:49:05.455364+00:00",
+  "controlledOnboarding": {
+    "receiptAcceptanceDashboardCaseCreateAndReopen": "USER_ATTESTED_PASS",
+    "independentIdentityMembershipCaseAndCreationAudit": "PASS_READ_ONLY",
+    "humanReceiptSha256": "1b3138a6c59684c498e2c7c7d37f9e606af5cdf4cd153e095d64d5bd2091c8eb",
+    "durableReceiptSha256": "6ee69a65ae818a9a87101848a7759e4f8d59cd6ed473676215ab68fd61efc640",
+    "accountAndCasePreserved": true,
+    "reopenIndependentlyReplayed": false
+  },
+  "personas": {
+    "sixRolesPassed": [
+      "member",
+      "steward",
+      "officer",
+      "secretary_treasurer",
+      "admin",
+      "app_owner"
+    ],
+    "chiefSteward": "FAIL_MOBILE_WORKBENCH_PAGE_LOAD_LIMIT",
+    "failedRunId": "43889606451",
+    "allSevenPassed": false,
+    "temporaryAccessRestored": true,
+    "failedCoordinatorSha256": "c745ed381a2bc9857696a8fa529b56f85408728767e89dbf55f0b9d33a9cca72",
+    "separateAppOwnerReceiptSha256": "a7974dd38b852363d72b489c5c7d256bc4efaf97ae8395f35c3c2f224af7e050"
+  },
+  "authenticatedCaseworkLoad": {
+    "status": "FAIL",
+    "rawReceiptSha256": "6345b5319fa28b7e1d4ee7b21ff4db573fb258187c916c3bb3016c794af32781",
+    "profile": {
+      "warmupSeconds": 10,
+      "warmupRequestsPerSecond": 5,
+      "stages": [
+        {
+          "concurrency": 1,
+          "durationSeconds": 60,
+          "requestsPerSecond": 5
+        },
+        {
+          "concurrency": 5,
+          "durationSeconds": 180,
+          "requestsPerSecond": 20
+        }
+      ],
+      "minimumScheduledThroughputRatio": 0.95,
+      "p95Ms": 500,
+      "p99Ms": 1500,
+      "errorRate": 0,
+      "maxRequests": 10000
+    },
+    "stages": [
+      {
+        "concurrency": 1,
+        "durationSeconds": 60,
+        "requestsPerSecond": 5,
+        "actualDurationSeconds": 61.672,
+        "requests": 32,
+        "scheduledRequests": 300,
+        "scheduledThroughputRatio": 0.10666666666666667,
+        "errors": 0,
+        "errorRate": 0,
+        "p95Ms": 2218.8860419999983,
+        "p99Ms": 3028.391666999989,
+        "maxMs": 3028.391666999989,
+        "failureMetadata": [],
+        "sampleSha256": "cd735fe0ce4ac6d61b91c8e8a682992029fd26ebe95e35f7ca5212889b2793a2",
+        "passed": false
+      },
+      {
+        "concurrency": 5,
+        "durationSeconds": 180,
+        "requestsPerSecond": 20,
+        "actualDurationSeconds": 185.279,
+        "requests": 106,
+        "scheduledRequests": 3600,
+        "scheduledThroughputRatio": 0.029444444444444443,
+        "errors": 0,
+        "errorRate": 0,
+        "p95Ms": 10088.482707999996,
+        "p99Ms": 10156.549041999999,
+        "maxMs": 11649.871040999991,
+        "failureMetadata": [],
+        "sampleSha256": "1934ab62b15aad9d4fd03a461f24b91d18669210f3cd42b916da3aa5898c7caa",
+        "passed": false
+      }
+    ],
+    "thresholdsRelaxed": false
+  },
+  "matching": {
+    "overallQualification": "FAIL_AUTHENTICATED_LOAD",
+    "actualClaimAssignmentsAndBalancingCapacityRaceAndAudits": "PARTIAL_POSITIVE_STAGING_PROOF",
+    "formalAutomaticAssignment": "NOT_EXECUTED",
+    "sameCookiePostRetirementHttpDenials": "NOT_EXECUTED_AFTER_LOAD_FAILURE",
+    "ownedAuthorityRetirementProfilesAndStaffSessionCleanup": "PASS",
+    "independentReadOnlyForensicReceiptSha256": "e232207b3f8fddde90fc910acef3c76c251467c443cddfc299fe942cbe22c27d"
+  },
+  "externalAlert": {
+    "controlledEmailReceipt": "USER_ATTESTED_PASS",
+    "receiptSha256": "386f2952e99b80b54d703f13ce142863db6ab560188524a3f90124aabc9a4a28",
+    "originalAzureCliTimeoutPreserved": true,
+    "requestReplayed": false,
+    "continuousDetectionAndRecoveryProven": false
+  },
+  "proposedSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "proposedRuntimeQualified": false,
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false
+}

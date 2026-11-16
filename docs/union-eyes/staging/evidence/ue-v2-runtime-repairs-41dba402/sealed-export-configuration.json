@@ -1,0 +1,33 @@
+{
+  "status": "CONFIRMED_REQUIRED_STAGING_CONFIGURATION_OMISSION_REPAIR_LOCAL_PREFLIGHT_PASS_DEPLOYMENT_PENDING",
+  "at": "2026-11-16T22:23:44.717866+00:00",
+  "applicationSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "previousBindingHeadSha": "bda5182c06f61424a09cfdc77190be1780a9df96",
+  "finding": "Actual serving staging environment has no EVIDENCE_SEAL_KEY. Exact source requires it in production mode; staging NODE_ENV is production. No HTTP export failure was fabricated.",
+  "runtimeEnvironmentNamesProofSha256": "5e66bcb4942c85b84f2c517c9acdcdde6b9f11fb816641e089e4dc9f5c4f51c8",
+  "repair": "Staging-only managed-identity reference to dedicated evidence-seal-key, with Key Vault Secrets User on that one named secret. Existing app secrets and production environment selection are unchanged.",
+  "focusedContracts": {
+    "status": "PASS",
+    "tests": 20,
+    "logSha256": "dac433ef380373ce4de9af0218f6b9c61d30198f350361aeb3b8f2e567391f3f"
+  },
+  "bicepCompile": {
+    "status": "PASS",
+    "compiler": "0.49.2.45890",
+    "compiledTemplateSha256": "7f30ae71990c8bb139981d5a04fc5134dfe885098bdf61c02ca6abcb8d1e98c8",
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "keyPreparation": {
+    "status": "PASS_ACTUAL_STAGING_VAULT_ONLY",
+    "receiptSha256": "ae412912a2f68539c126fc20a20e8f3a0ca963331578231b5751df2a9c393c32",
+    "createdOnlyWhenAbsent": true,
+    "existingSecretRotated": false,
+    "valueSerialized": false,
+    "applicationEnvironmentChanged": false
+  },
+  "fullFiveChecksAfterConfigurationChange": "PENDING",
+  "scopedRoleAndEnvironmentStillRequireQualifiedDeployment": true,
+  "actualSealedExportAndAuditStillRequired": true,
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false
+}

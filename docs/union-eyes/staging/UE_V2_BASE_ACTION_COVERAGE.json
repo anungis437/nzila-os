@@ -27,8 +27,8 @@
       "id": "C01",
       "action": "Invitation to first case",
       "state": "PARTIAL_POSITIVE_JOURNEY_PROVEN",
-      "evidenceSummary": "Real admin invitation and independent accepted identity/membership/session readback; user confirmed receipt, dashboard and case create/reopen. Later read-only queries independently verified the saved case and its exact-actor case.intake_submitted audit on accepted F.",
-      "remaining": "Exact repaired-source staging positive and negative journeys; reopening remains user-attested. The controlled account and case are retained as live staging data.",
+      "evidenceSummary": "Real T2 administrator invitation, explicit controlled-recipient confirmation of receipt/acceptance/dashboard/case-create/reopen, and independent durable accepted identity, active Member membership, saved case and same-actor case.intake_submitted audit. Account and case retained.",
+      "remaining": "Proposed-source positive and negative boundary requalification; re-opening remains user-attested, not independently browser-replayed.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -43,7 +43,8 @@
       "negativeMatrix": null,
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
-      "coverageFieldsComplete": false
+      "coverageFieldsComplete": false,
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
     },
     {
       "id": "C02",
@@ -91,8 +92,8 @@
     {
       "id": "C04",
       "action": "Organization-admin invitation entry",
-      "state": "LOCAL_REPAIR_STAGING_PENDING",
-      "evidenceSummary": "Direct active admin membership opens a tenant console; platform support retains a separate console and receives no invitation authority by title.",
+      "state": "PARTIAL_POSITIVE_STAGING_PROVEN",
+      "evidenceSummary": "Actual T2 administrator UI navigation and successful controlled invitation submission passed. Other-role/tenant refusals still require their complete matrix.",
       "remaining": "New-source real admin navigation and positive mutation plus unauthorized role/tenant denial.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -107,7 +108,8 @@
       "negativeMatrix": null,
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
-      "coverageFieldsComplete": false
+      "coverageFieldsComplete": false,
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
     },
     {
       "id": "C05",
@@ -191,9 +193,9 @@
     {
       "id": "C09",
       "action": "Automatic workload and expertise assignment",
-      "state": "SOURCE_REPAIR_STAGING_PENDING",
-      "evidenceSummary": "Live claim/formal-grievance callers and EN/FR controls now use canonical assignment authority, saved representative expertise/capacity and actual open primary-assignment workload. Three native PostgreSQL contention tests pass; SQL and route/UI integration checks pass locally. Actual source78301eec admin profile UI save/readback and expertise-mismatch409 passed, but the executive menu guard redirected an explicitly authorized actor away from the workbench. A390px selected representative control also extended to x732. Both root repairs are in this follow-up; full matching is unqualified.",
-      "remaining": "Finish binding admission and deployment; qualify the exact live casework guard and EN/FR loaded phone controls, positive claim/formal automatic matching, balancing/capacity/conflict/role/tenant/retry/concurrency and durable canonical/audit outcomes.",
+      "state": "PARTIAL_STAGED_OVERALL_QUALIFICATION_FAILED",
+      "evidenceSummary": "Actual T2 loaded EN/FR phone controls, canonical profile save/readback, expertise mismatch409, executive automatic claim assignment, balanced workload, two-slot three-request capacity race (200/200/409), retry409 and four durable assignment audits passed. Mandatory authenticated read load failed; owned authority/profile/session cleanup passed.",
+      "remaining": "Proposed-source unchanged authenticated workload and all persona checks; formal-grievance automatic matching, same-cookie post-retirement denials and complete enabled assignment negative matrix.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -215,13 +217,14 @@
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
       "coverageFieldsComplete": false,
-      "ownerDecision": "Require automatic workload/expertise matching"
+      "ownerDecision": "Require automatic workload/expertise matching",
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
     },
     {
       "id": "C10",
       "action": "Senior representative supervision",
       "state": "PARTIAL_STAGED",
-      "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01–SR22 are not all certified.",
+      "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01\u2013SR22 are not all certified.",
       "remaining": "Positive permitted review/escalation/exception/delegation actions for enabled pilot scope.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -296,8 +299,8 @@
     {
       "id": "C14",
       "action": "User-facing sealed evidence export",
-      "state": "PARTIAL_STAGED",
-      "evidenceSummary": "Case evidence seals and cryptographic verification passed; that is not a user-facing PDF/export journey.",
+      "state": "STAGING_CONFIGURATION_REPAIR_QUALIFICATION_PENDING",
+      "evidenceSummary": "Case evidence seals and cryptographic verification passed; that is not a user-facing PDF/export journey. Actual staging has no EVIDENCE_SEAL_KEY mapping although the export source requires it in production mode. The binding adds a dedicated staging-only named secret reference and access; the key was prepared without rotation or changing app environment. No HTTP success or failure is inferred from this observation.",
       "remaining": "Browser control to authorized generated pack/download/verification and failure handling.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -310,13 +313,14 @@
       "negativeMatrix": null,
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
-      "coverageFieldsComplete": false
+      "coverageFieldsComplete": false,
+      "proposedConfigurationEvidence": "evidence/ue-v2-runtime-repairs-41dba402/sealed-export-configuration.json"
     },
     {
       "id": "C15",
       "action": "OCR document extraction",
-      "state": "SOURCE_IMPLEMENTED_STAGING_PENDING",
-      "evidenceSummary": "The source78301eec audit found no human-review/publication controls. Follow-up source7d939bf5 connects document preview to explicit transcript read, draft, review and publication actions. All five local source gates, focused/census checks and all registered source CI concluded without failure; PR1252 merged normally. Deployed OCR and review/publication qualification remain pending.",
+      "state": "SOURCE_REPAIR_LOCAL_PASS_STAGING_PENDING",
+      "evidenceSummary": "Exact T2 source with real installed PDFParse2.4.5 reproduced TypeError: pdfParse is not a function. The proposed source repairs the class API, scanned/mixed pages and OCR transaction lifetime. Local component proof does not certify actual deployed extraction/review/publication. The cached Linux image also omitted native canvas under byte-identical packaging inputs. The new builder copies only the installed PDF/OCR dependency closure; an actual offline Linux rehearsal passed text/image/mixed-page extraction. The final candidate image and HTTP document routes remain unqualified.",
       "remaining": "Qualify actual extraction, exact document-version binding, resource authority, stale edits, self-review refusal, saved publication/audit outcomes and rendered English/French/mobile behavior on the deployed follow-up.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -335,7 +339,9 @@
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
       "coverageFieldsComplete": false,
-      "localImplementationEvidence": "evidence/ue-v2-document-review-20261116/base-ui-local-validation.json"
+      "localImplementationEvidence": "evidence/ue-v2-document-review-20261116/base-ui-local-validation.json",
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",
+      "proposedPackagingEvidence": "evidence/ue-v2-document-runtime-packaging-20261116/local-validation.json"
     },
     {
       "id": "C16",
@@ -416,9 +422,9 @@
     {
       "id": "C20",
       "action": "Privacy request handling",
-      "state": "UNAVAILABLE_SELF_SERVICE_ALTERNATIVE_UNQUALIFIED",
-      "evidenceSummary": "The DSAR route is explicitly unavailable. A bounded supported alternative needs its own qualification.",
-      "remaining": "Confirm and exercise receipt, identity check, disclosure/correction and completion for the release process.",
+      "state": "IMPLEMENTED_LOCAL_PASS_STAGING_QUALIFICATION_PENDING",
+      "evidenceSummary": "Observed T2 privacy/dsar returns501. The proposed source implements subject-owned in-app requests and secure conversations, assigned-handler identity/scope review, reasoned responses/refusals, reviewed own-account downloads and exact-response acknowledgement or withdrawal. Actual local checks passed; legacy-snapshot PostgreSQL component proof retains its session/HTTP/audit harness limits. No combined-source deployed privacy pass is claimed.",
+      "remaining": "Qualify actual member profile-to-request and designated handler queue-to-response UI, subject/tenant/unassigned and stale denials, identity/scope review, actual download byte receipt, acknowledgement, withdrawal, refusal and durable audit/retention. Other information and rights require an appropriate actual handler response; no automatic erasure or legal conclusion.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
         "organization": "Active private membership; no hierarchy or platform-title content bypass",
@@ -430,7 +436,11 @@
       "negativeMatrix": null,
       "persistenceAndAudit": null,
       "retryRecoveryAndCleanup": null,
-      "coverageFieldsComplete": false
+      "coverageFieldsComplete": false,
+      "ownerDecision": "Require in-app self-service",
+      "requiredBeforeFullBaseStagingGo": true,
+      "proposedSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+      "sourceEvidence": "evidence/ue-v2-privacy-self-service-20261116/local-validation.json"
     },
     {
       "id": "C21",
@@ -485,14 +495,16 @@
     {
       "id": "O02",
       "action": "Authenticated casework performance",
-      "state": "UNVERIFIED",
-      "remaining": "Existing public-workload p95 is not an authenticated workload test."
+      "state": "ACTUAL_STAGING_FAILED_REPAIR_PENDING",
+      "remaining": "Actual T2 authenticated profile failed declared latency and throughput at both stages with0HTTPerrors. Repeat unchanged profile on admitted proposed source; no public-route or component timing substitutes.",
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
     },
     {
       "id": "O03",
       "action": "Sustained pilot workload",
-      "state": "UNVERIFIED",
-      "remaining": "Declare concurrency, dataset, duration and budgets; measure actual signed-in journeys."
+      "state": "ACTUAL_STAGING_FAILED_REPAIR_PENDING",
+      "remaining": "Actual T2 authenticated profile failed declared latency and throughput at both stages with0HTTPerrors. Repeat unchanged profile on admitted proposed source; no public-route or component timing substitutes.",
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
     },
     {
       "id": "O04",
@@ -521,8 +533,9 @@
     {
       "id": "O08",
       "action": "External alerts and recovery",
-      "state": "PARTIAL_PROVEN",
-      "remaining": "Bounded real fault/recovery passed; external monitor, alert delivery and recovery freshness remain to qualify."
+      "state": "PARTIAL_PROVEN_CONTROLLED_ALERT_RECEIPT_CONFIRMED",
+      "remaining": "Controlled recipient confirmed actual Azure test alert receipt; original command timeout retained, without retry. Continuous fault detection, alert state recovery and freshness still need evidence.",
+      "observedPriorCandidateEvidence": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
     },
     {
       "id": "O09",
@@ -584,7 +597,7 @@
     "Qualify claim and formal-grievance automatic workload/expertise matching, loaded EN/FR phone controls and authenticated case reads.",
     "Complete connected casework, document/evidence, leadership and required operational actions; reconcile the full base ledger from actual evidence."
   ],
-  "proposedCandidateSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+  "proposedCandidateSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
   "sourceAdmission": {
     "pullRequest": 1252,
     "sourceHeadSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
@@ -595,8 +608,8 @@
     "conditionalSkipsRemainRecorded": true,
     "newSourceRuntimeQualification": "PENDING"
   },
-  "currentDeployedSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
-  "currentDeployedWorkflowSha": "17099dc87643e5206c931285cfaefc377261fd79",
+  "currentDeployedSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+  "currentDeployedWorkflowSha": "5fae54b471e84d73eab5e44d723aee12a0add797",
   "currentFollowupLocalEvidence": "evidence/ue-v2-document-review-20261116/base-ui-local-validation.json",
   "sourceAdmissionHistory": [
     {
@@ -610,5 +623,6 @@
         "newSourceRuntimeQualification": "PENDING"
       }
     }
-  ]
+  ],
+  "latestObservedCandidateDelta": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json"
 }

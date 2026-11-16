@@ -1,0 +1,23 @@
+{
+  "status": "APPROVED_EXPLICIT_FOUNDER_REPLY",
+  "changeRecord": "CHG-2026-0114",
+  "candidateSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "previousWindowEnd": "2026-11-16T23:59:59Z",
+  "approvedWindowEnd": "2026-11-17T03:00:00Z",
+  "approvedAt": "2026-11-16T21:41:11.227685+00:00",
+  "founderDecision": "Extend to 10 p.m. Toronto",
+  "localTime": "November 16, 2026, 10 p.m. America/Toronto",
+  "source": "Explicit current founder reply in the engineering execution chat",
+  "privateApprovalReceiptSha256": "f557a3dfd1b141293bc83a1484b73892d4137c2c1973ae41d65ee6006be86d21",
+  "sameFounderAccounts": [
+    "anungis",
+    "anungis437"
+  ],
+  "independentHumanReviewerClaimed": false,
+  "existingQualifiedStagingScopePreserved": true,
+  "financeFeaturesExcluded": true,
+  "liveDataResetOrDeletionAuthorized": false,
+  "newInstitutionalOrAdministrativeAuthorityAuthorized": false,
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false
+}
