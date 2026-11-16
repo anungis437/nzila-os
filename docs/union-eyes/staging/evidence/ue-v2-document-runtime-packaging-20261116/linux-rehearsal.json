@@ -1,0 +1,27 @@
+{
+  "status": "PASS_LINUX_PACKAGING_HELPER_AND_REAL_ASSETS_NOT_CANDIDATE_IMAGE",
+  "priorBaseSourceSha": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "priorBaseLocalImageId": "sha256:6e22096ccc3d1a1cd2473cec673b7d32fe5c03d44f4973b80f66230b100e5518",
+  "copyExitCode": 0,
+  "assetsExitCode": 0,
+  "linuxNativeDependency": {
+    "name": "@napi-rs/canvas-linux-x64-gnu",
+    "version": "0.1.80",
+    "registryArchiveIntegrity": "sha512-BeXAmhKg1kX3UCrJsYbdQd3hIMDH/K6HnP/pG2LuITaXhXBiNdh//TVVVVCBbJzVQaV5gK/4ZOCMrQW9mvuTqA==",
+    "verifiedAgainstUnchangedCandidateLockfile": true,
+    "archiveSha256": "ecc8e67c4ffc3973bac790a743c359fbc6edb3a3d46cc2cb32916ed3a58b4d00"
+  },
+  "copierSha256": "4b38b92c7524a63398768eacfe61c1cc0e2cbbb6b15bf7c49dbc56c344ac3a38",
+  "receiptSha256": "b1c1ead64222501db730c8d532b49cf4e71ede194db27dd19cc8ef9e9d03191c",
+  "actualLinuxChecks": [
+    "PDF text extraction",
+    "Real Tesseract worker and WASM image recognition",
+    "Native PDF page rendering and scanned-page OCR; mixed order retained"
+  ],
+  "offlineModelSeeded": true,
+  "networkDisabled": true,
+  "actualProductServiceOrHttpRouteExecuted": false,
+  "actualCandidateImageAcceptanceClaimed": false,
+  "productFirstUseModelDownloadQualified": false,
+  "productionAuthorized": false
+}

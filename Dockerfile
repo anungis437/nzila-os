@@ -150,6 +150,11 @@ ARG NODE_MAX_OLD_SPACE=8192
 ENV NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE}"
 # Build-time placeholder only. Real auth secret is injected at runtime via ACA secret refs.
 RUN AUTH_SECRET=${BUILD_AUTH_PLACEHOLDER} pnpm turbo build ${TURBO_FILTER} --concurrency=1
+# PDF native bindings and OCR worker/WASM files are loaded dynamically and can
+# be omitted by standalone tracing. Copy their installed dependency closure.
+RUN if [ -d apps/union-eyes/.next/standalone ]; then \
+      node tooling/scripts/lib/ue-document-runtime-deps.mjs; \
+    fi
 # ============================================
 # Web production stage
 # ============================================
