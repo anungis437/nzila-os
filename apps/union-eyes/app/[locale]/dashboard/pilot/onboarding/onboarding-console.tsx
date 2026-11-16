@@ -42,14 +42,17 @@ interface OnboardingAnswer {
 }
 
 /** The reason a refused or failed answer gives (`{ code, message }`), or the fallback when it gives none. */
-async function reasonOf(response: Response, fallback: string): Promise<string> {
+async function reasonOf(response: Response, fallback: string, translated = false): Promise<string> {
   const failure = (await response.json().catch(() => null)) as { message?: unknown } | null;
-  return typeof failure?.message === 'string' && failure.message ? failure.message : fallback;
+  return !translated && typeof failure?.message === 'string' && failure.message ? failure.message : fallback;
 }
 
 // ─── Page ─────────────────────────────────────────────────────
 
-export default function OnboardingConsole({ supportEmail }: { supportEmail: string }) {
+export default function OnboardingConsole({ supportEmail, organizationSetup = false, locale }: { supportEmail: string; organizationSetup?: boolean; locale?: string }) {
+  const fr = locale?.startsWith('fr') ?? false;
+  const loadFailure = fr ? 'Impossible de charger l’état de la configuration.' : 'The setup status could not be loaded.';
+  const verifyFailure = fr ? 'Impossible de vérifier cette étape. Vérifiez les données de votre organisation.' : 'The step could not be verified.';
   const [loading, setLoading] = useState(true);
   const [state, setState] = useState<PilotState | null>(null);
   /** What went wrong the last time something was asked of the server, in the server's own words where it gave them. */
@@ -60,7 +63,7 @@ export default function OnboardingConsole({ supportEmail }: { supportEmail: stri
     try {
       const response = await fetch('/api/pilot/onboarding');
       if (!response.ok) {
-        setProblem(await reasonOf(response, 'The setup status could not be loaded.'));
+        setProblem(await reasonOf(response, loadFailure, fr));
         return;
       }
       const result = (await response.json()) as OnboardingAnswer;
@@ -71,11 +74,11 @@ export default function OnboardingConsole({ supportEmail }: { supportEmail: stri
       });
     } catch (error) {
       logger.error('Failed to load pilot state', error);
-      setProblem('The setup status could not be loaded.');
+      setProblem(loadFailure);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fr, loadFailure]);
 
   useEffect(() => {
     fetchPilotState();
@@ -117,10 +120,10 @@ export default function OnboardingConsole({ supportEmail }: { supportEmail: stri
         body: JSON.stringify({ itemId, completed: true }),
       });
       if (response.ok) await fetchPilotState();
-      else setProblem(await reasonOf(response, 'The step could not be verified.'));
+      else setProblem(await reasonOf(response, verifyFailure, fr));
     } catch (error) {
       logger.error('Failed to update checklist', error);
-      setProblem('The step could not be verified.');
+      setProblem(verifyFailure);
     }
   };
 
@@ -128,8 +131,8 @@ export default function OnboardingConsole({ supportEmail }: { supportEmail: stri
     return (
       <div className="container mx-auto py-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Pilot Onboarding</h1>
-          <p className="text-sm text-muted-foreground">Loading setup status…</p>
+          <h1 className="text-2xl font-bold">{fr ? 'Configuration de l’organisation' : organizationSetup ? 'Organization setup' : 'Pilot Onboarding'}</h1>
+          <p className="text-sm text-muted-foreground">{fr ? 'Chargement de la configuration…' : 'Loading setup status…'}</p>
         </div>
         <LoadingSkeletonComposer variant="card" rows={3} />
       </div>
@@ -139,21 +142,21 @@ export default function OnboardingConsole({ supportEmail }: { supportEmail: stri
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <Rocket className="h-6 w-6 text-primary" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">Welcome to UnionEyes</h1>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold">{organizationSetup ? (fr ? 'Configuration de l’organisation' : 'Organization setup') : 'Welcome to UnionEyes'}</h1>
             <p className="text-sm text-muted-foreground">
-              Complete the steps below to get your organization up and running.
+              {fr ? 'Effectuez les étapes ci-dessous pour configurer votre organisation.' : 'Complete the steps below to get your organization up and running.'}
             </p>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={fetchPilotState}>
           <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-          Refresh
+          {fr ? 'Actualiser' : 'Refresh'}
         </Button>
       </div>
 
@@ -164,12 +167,12 @@ export default function OnboardingConsole({ supportEmail }: { supportEmail: stri
       )}
 
       {/* Readiness checklist */}
-      {state && <PilotReadinessChecklist items={state.checklist} onItemComplete={handleChecklistVerify} />}
+      {state && <PilotReadinessChecklist items={organizationSetup ? state.checklist.filter(item => ['org_seeded', 'users_invited', 'roles_assigned'].includes(item.id)) : state.checklist} onItemComplete={handleChecklistVerify} locale={locale} />}
 
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Demo data */}
-        {state && (
+        {state && !organizationSetup && (
           <DemoDataBadge
             isActive={state.demo.isActive}
             dataset={state.demo.dataset}
@@ -180,7 +183,7 @@ export default function OnboardingConsole({ supportEmail }: { supportEmail: stri
         )}
 
         {/* Support */}
-        <PilotSupportCard supportEmail={supportEmail} />
+        <PilotSupportCard supportEmail={supportEmail} locale={locale} />
       </div>
     </div>
   );

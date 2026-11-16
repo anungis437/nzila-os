@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
   getCaseActor: vi.fn(),
+  loadWorkbenchCases: vi.fn(),
   caseReadScope: vi.fn(() => 'READ_SCOPE'),
   findReadableCase: vi.fn(),
   assignPrimaryRepresentative: vi.fn(),
@@ -25,6 +26,7 @@ class TestAuthorityStoreError extends Error {
   constructor(code: string, message: string) { super(message); this.code = code; }
 }
 
+vi.mock('@/lib/cases/workbench-queue', () => ({ loadWorkbenchCases: m.loadWorkbenchCases }));
 vi.mock('@/lib/services/case-access-service', () => ({ assignPrimaryRepresentative: m.assignPrimaryRepresentative }));
 vi.mock('@/lib/authority/store/executor', () => ({ AuthorityStoreError: TestAuthorityStoreError }));
 vi.mock('@/lib/api/framework', () => ({
@@ -63,6 +65,7 @@ describe('GET /api/workbench/assigned', () => {
     vi.clearAllMocks();
     m.getCaseActor.mockResolvedValue(steward);
     m.withRLSContext.mockImplementation(async (fn: (tx: unknown) => unknown) => fn({ execute: m.execute }));
+    m.loadWorkbenchCases.mockResolvedValue([{ access: 'triage', canAssign: true, claimId: 'c1' }]);
     m.execute.mockResolvedValue([{
       claimId: 'c1', claimNumber: 'CLM-1', memberId: 'm1', assignedTo: 'other', description: 'secret',
       memberEmail: 'm@example.test', status: 'submitted',
@@ -80,14 +83,15 @@ describe('GET /api/workbench/assigned', () => {
     m.getCaseActor.mockResolvedValue(chief);
     const { GET } = await import('../workbench/assigned/route');
     const result = await GET({ request: new NextRequest('http://localhost/api/workbench/assigned') }) as any;
-    expect(m.caseReadScope).toHaveBeenCalledWith(chief, 'c');
+    expect(m.loadWorkbenchCases).toHaveBeenCalledWith(expect.anything(), chief, null);
     expect(result.claims[0].access).toBe('triage');
     expect(result.claims[0]).not.toHaveProperty('memberEmail');
     expect(result.claims[0]).not.toHaveProperty('description');
     expect(result.capabilities.canAssign).toBe(true);
   });
 
-  it('does not offer assignment to an ordinary steward', async () => {
+  it('does not offer assignment when the queue carries no individual kernel allow', async () => {
+    m.loadWorkbenchCases.mockResolvedValue([{ access: 'triage', claimId: 'c1', canAssign: false }]);
     const { GET } = await import('../workbench/assigned/route');
     const result = await GET({ request: new NextRequest('http://localhost/api/workbench/assigned?organizationId=org-1') }) as any;
     expect(result.capabilities.canAssign).toBe(false);

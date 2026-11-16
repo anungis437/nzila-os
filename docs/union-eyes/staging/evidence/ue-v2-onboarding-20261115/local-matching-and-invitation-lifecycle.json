@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-16T02:37:51.657896+00:00",
+  "state": "LOCAL_PROOF_STAGING_PENDING",
+  "applicationCommit": null,
+  "branch": "fix/ue-onboarding-admin-20261115",
+  "baseMain": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
+  "nativeAutomaticMatching": {
+    "passed": 3,
+    "separateConcurrentConnections": true,
+    "scenarios": [
+      "last available slot refuses second automatic assignment",
+      "simultaneous requests balance across available representatives",
+      "manual and automatic assignment serialize on the same capacity lock"
+    ],
+    "membershipTopology": "Local restricted runtime with actual canonical tables and kernel; deployed V2 session predicate not qualified by this run",
+    "log": "auto-native-gate.log"
+  },
+  "nativeInvitationLifecycle": {
+    "passed": 11,
+    "includes": [
+      "inviter suspension racing issuance",
+      "membership removal racing issuance",
+      "concurrent create/reissue and mandatory-audit rollback"
+    ]
+  },
+  "focusedTests": {
+    "auto-focused-final.log": 135,
+    "files": 14,
+    "countsMustNotBeSummedWithEarlierRuns": true,
+    "auto-readonly-queue-final.log": 22
+  },
+  "sourcePlan": {
+    "trackedSqlMigrationsCompared": 445,
+    "changedSqlMigrationPaths": [],
+    "sourcePlanChangedSections": [
+      "statements",
+      "sourceCommitments"
+    ],
+    "tablesBefore": 776,
+    "tablesAfter": 776,
+    "deterministicRegeneration": "PASS",
+    "productionAuthorized": false,
+    "sqlStatementBytesIdentical": true,
+    "statementMetadataOnlyChange": "sourceDigest",
+    "sourcePlanSha256": "9bf7598e965e70ac3a4ca68092ee8011b1a3e78dd049c5c90ea22fafe63b0637"
+  },
+  "privateLogSha256": {
+    "auto-native-final.log": "66ca13bf59623316e984c3be1950c41f2fe913865ab50d814c4b4de6637a2b8c",
+    "auto-focused-attempt2.log": "9bc7b38d8b53714c4e7d956406a7aa58af52cc9b6ae49202e0bfb4eb0e7c2403",
+    "auto-integration-final.log": "b97155b9104cba1237173830d66637ba42e7bcbb0a169519e2abf047434a0618",
+    "native-with-lifecycle-lock.log": "304cd938631f76532662d9d75386fd13cb623b92edde1c074e48e6ead802a498",
+    "source-plan-regeneration-auto.log": "029005ca6e2f3a950ce31679a0c5cc4f1963b75df73af4bf6d3f55a25136aa8e",
+    "auto-focused-final.log": "6c929990b83d0ada18d209150f7fa51b078519546c5909ee3fe9537933c3a02d",
+    "auto-native-gate.log": "103283c319707789177f9aaaf532e5aa6077bdc79dcf64b2e9feb24778b8a2e1",
+    "source-plan-regeneration-gate.log": "029005ca6e2f3a950ce31679a0c5cc4f1963b75df73af4bf6d3f55a25136aa8e",
+    "auto-readonly-queue-final.log": "3b2753db11ab82702564760a18868a5d5207437a0ea11f4ccf988403580cfa70",
+    "response-contract-census-attempt2.log": "2f9e729dee9e364a5da4a6d4a33a3e5a8f7ad1ca7065be310ae15baec030d5d0",
+    "response-contract-mapped-focused.log": "dd0111101f91cbf80aefbb135d25ffebf260fdd0ad2b721229e9514f7c453415",
+    "test-fast-matching-final.log": "c01c0308b25185cf0094bf911a7c8dc7c2472cfd86871c8abc7ee899f58c0188",
+    "source-plan-census-fixed.log": "029005ca6e2f3a950ce31679a0c5cc4f1963b75df73af4bf6d3f55a25136aa8e",
+    "test-fast-matching-final2.log": "4b4bbf2f66c01564993d27ec007861e659e3218426e706e030bc7a791a46f8a4",
+    "final-fast-matching-result2.json": "ff2a9aaacf1a48a64c005e8a2ab3ee459fce12540feab6a08b1bce45cac4587e"
+  },
+  "limits": [
+    "Exact-head GitHub CI, merge and staging qualification remain pending",
+    "No new-source staging deployment or persona/action acceptance is claimed",
+    "The accepted serving application remains 241006d302c14567e541d619675fbead3ec3f258",
+    "Finance features excluded; production unauthorized"
+  ],
+  "productionAuthorized": false,
+  "queueProof": [
+    "Supervisor discovers an unassigned case in the mandate scope",
+    "Live kernel determines each case read and assignment affordance",
+    "A stale primary-assignee mirror grants no content access",
+    "A designated steward without a case grant receives only triage metadata",
+    "After assignment the canonical representative is read back and automatic reassignment is withheld",
+    "Read-only supervisory access does not advertise note, transition or close controls"
+  ],
+  "frontendContractRepair": {
+    "fullFastAttempt1": {
+      "result": "FAIL",
+      "failed": 2,
+      "passed": 39259,
+      "skipped": 1694,
+      "failedChecks": [
+        "response-shape-census",
+        "untyped-read-census"
+      ],
+      "sourceUnchanged": true
+    },
+    "targetedFinal": {
+      "censusTestsPassed": 51,
+      "uiAndRouteTestsPassed": 22,
+      "limitsChanged": false,
+      "logs": [
+        "response-contract-census-attempt2.log",
+        "response-contract-mapped-focused.log"
+      ]
+    },
+    "finalFullFastRerun": {
+      "status": "PASS",
+      "passed": 39264,
+      "skipped": 1694,
+      "filesPassed": 2999,
+      "filesSkipped": 117,
+      "sourceUnchanged": true,
+      "limitsChanged": false
+    }
+  },
+  "localRepositoryGates": {
+    "lint": {
+      "status": "PASS",
+      "tasks": 172
+    },
+    "typecheck": {
+      "status": "PASS",
+      "tasks": 238
+    },
+    "testFast": {
+      "status": "PASS",
+      "passed": 39264,
+      "skipped": 1694
+    },
+    "validateDocs": {
+      "status": "PASS",
+      "errors": 0
+    },
+    "governanceAudit": {
+      "status": "PASS"
+    },
+    "stagedSecretScan": {
+      "status": "PASS"
+    }
+  }
+}

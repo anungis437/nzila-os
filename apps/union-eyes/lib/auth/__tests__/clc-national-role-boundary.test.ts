@@ -141,9 +141,9 @@ describe('CLC national dashboard authority boundary (PR #752 round 5/6/12)', () 
     expect(ROLE_HIERARCHY.coo).toBeGreaterThan(ROLE_HIERARCHY.admin);
   });
 
-  it('the invite-create route is gated only by an ordinary tenant-level role (admin), not a platform-level one — confirming the allow-list is the actual enforcement boundary, not the route gate', () => {
+  it('the invite-create route requires direct active organization administration, and no platform title substitutes for that membership', () => {
     const source = readFileSync(resolve(APP_ROOT, 'app/api/auth/invite/create/route.ts'), 'utf8');
-    expect(source).toMatch(/hasMinRole\('admin'\)/);
+    expect(source).toContain('canManageOrganizationInvites(context.userId, context.organizationId)');
     for (const role of PLATFORM_ELEVATED_ROLES) {
       expect(source.includes(`hasMinRole('${role}')`)).toBe(false);
     }

@@ -4,6 +4,20 @@ The accepted staging record proves the named casework and access journeys on app
 
 Some earlier defect remediation removed misleading controls or changed false success into an honest unavailable response. Those changes repaired the false behavior while leaving the capability unavailable. A source-remediation count is not a count of implemented features.
 
+## November 15 onboarding execution update
+
+[The action coverage ledger](UE_V2_BASE_ACTION_COVERAGE.json) is the current action-level follow-up. Its unfilled fields remain unverified; the 17 accepted staging criteria do not fill them implicitly.
+
+A fresh real organization administrator created a controlled invitation on accepted application `241006d3`. The recipient confirmed inbox receipt, acceptance to the dashboard, and creation/reopening of a test case. Independent read-only database queries confirmed the accepted invitation, verified active identity, exactly one active membership in the intended organization with role `member`, and an active session. [Redacted proof](evidence/ue-v2-onboarding-20261115/controlled-invitation-first-use-241006d3.json) separates those observations from user-attested casework. The account and test case are retained; no business data was deleted.
+
+A later [read-only case and audit verification](evidence/ue-v2-onboarding-20261115/controlled-first-case-readback-241006d3.json) independently confirmed the saved case and its `case.intake_submitted` creation audit on the same accepted source. Reopening remains user-confirmed. The controlled account and case are retained as live staging data.
+
+This closes the absence of positive invitation receipt/first-use evidence. It does **not** complete the repaired-source staging qualification: the invitation delivery-status UI, direct-admin entry, secure reissue/revocation, duplicate-request handling, required acceptance audit, MFA continuation and persistent setup repairs still need exact-source CI/admission and deployed positive/negative proof. New code/local tests are not described as deployed functionality.
+
+Source review confirmed that the persistent setup API and console already existed. The former admin wizard used browser-only completion and advertised unavailable capabilities. The repair connects base admin setup to the persistent workflow and verifies invitation creation/acceptance against invitation records rather than inferring it from directory rows. The working repair also uses the same live business-session administrator predicate as profile management, and adds French base setup/support text, localized links and phone wrapping. Exact-source browser/staging proof remains required.
+
+Automatic workload/expertise matching is explicitly required by the founder for the base release. The working candidate now connects actual claim and formal-grievance assignment controls to canonical grants, records administrator-configured expertise/capacity and ranks actual open workload. Local SQL tests cover saved outcomes, refusal and audit rollback; three native PostgreSQL tests cover last-slot contention, concurrent balancing and the shared manual-assignment capacity lock. Exact-source CI, admission/deployment and real staging action qualification remain unfinished. The legacy direct-write engine is still unused. OCR, correspondence, sealed-pack user export, connected supervision/closure, leadership content and the remaining operational matrices need the action-specific qualification in the ledger. Manual assignment, selected document access, or navigation is not substituted for those proofs.
+
 ## Working and verified in the accepted staging scope
 
 The seven provisioned personas, scoped case/intake filing and assignment, member-directory access, representative case authority, document bytes/scanning/revocation, staff deadline creation/rescheduling/completion/cancellation, in-app conversation/reply persistence, formal-grievance reminder worker scenarios, English/French browser presentation, audit chains/current-case evidence seals, selected original data retention and bounded recovery all have final-source receipts. Manual intake deadlines are implemented; the older registry wording saying they cannot be completed predates the new case-deadline service.
@@ -23,8 +37,8 @@ These limits were disclosed by the staging contract. They were not implemented b
 
 | Item | Existing evidence | Missing evidence or implementation |
 | --- | --- | --- |
-| New-member onboarding | Invitation create/accept code and unit/native tests exist. The final seven-persona runs use already-provisioned identities. | A final-source real staging administrator invitation → recipient receipt → acceptance → correct identity/membership → first authorized case journey is not in the accepted runtime bundle. This is unverified, not a demonstrated code failure. |
-| Email receipt | Worker scenarios use reserved provider machine-test addresses and verify provider acceptance, retry and continuity. | Receipt in a controlled recipient inbox is not proved. Provider acceptance must not be called inbox delivery. |
+| New-member onboarding | Fresh accepted-source invitation receipt/dashboard/first case are user-confirmed; canonical identity/membership/session have independent readback. | Accepted-source case metadata and its creation audit now have independent readback; the account/case are retained. Repaired-source positive/negative qualification remains unfinished; see the action ledger. |
+| Email receipt | Controlled invitation inbox receipt is user-confirmed. Worker scenarios separately prove provider acceptance, retry and continuity. | Formal deadline-recipient inbox receipt and terminal event correlation remain unqualified. |
 | Physical mobile/browser targets | Real browser journeys and visual review at 390 px and 1440 px in English/French passed. | Physical-device and additional browser-engine certification is not in the accepted evidence. |
 | Authenticated casework performance | The unchanged canonical public profile passed at p95 354.1058007 ms against 500 ms. | Latency/load qualification for the authenticated casework APIs is not established by that public profile. |
 | Full-traffic failover | Restored-copy/native qualification and zero-traffic fault/recovered revision checks passed; the serving revision stayed at 100%. | A full-traffic failover exercise was not performed. |
@@ -35,7 +49,7 @@ These limits were disclosed by the staging contract. They were not implemented b
 
 These are not silently counted as delivered by the staging acceptance:
 
-- A direct Add Member form is unavailable. The implemented joining path is invitation-based, and its full live journey still needs the verification above.
+- A direct Add Member form is unavailable. The implemented joining path is invitation-based; positive first use now has the bounded proof above, with the remaining adversarial/staging work recorded separately.
 - The separate member case-timeline page is unavailable and unlinked; this is distinct from the tested case-detail workflow.
 - Document approval workflows and template authoring are unavailable; document storage/access/evidence are the verified scope.
 - SMS sending, campaign sending/scheduling and notification digest/quiet-hour controls are unavailable; persisted in-app conversations/replies are the verified messaging scope.

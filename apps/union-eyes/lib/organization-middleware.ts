@@ -116,6 +116,9 @@ export function withOrganizationAuth<T = any>(
           { status: 403 },
         )
       }
+      if (error instanceof Error && (error as { code?: string }).code === 'AUTH_TENANT_ADMIN_REQUIRED') {
+        return NextResponse.json({ error: 'Forbidden - An active organization administrator is required' }, { status: 403 })
+      }
       if (error instanceof Error && (error as { code?: string }).code === 'ENTITLEMENT_REQUIRED') {
         return NextResponse.json(
           { error: 'Module access denied', code: 'ENTITLEMENT_REQUIRED' },

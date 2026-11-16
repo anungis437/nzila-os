@@ -1,15 +1,16 @@
 /**
  * Evidence behind the pilot onboarding checklist.
  *
- * A step is marked complete only when the organization's own data shows it happened: members other than the caller exist, a
+ * A step is marked complete only when the organization's own data shows it happened: invitations were recorded or accepted, a
  * collective agreement is stored, employers are imported, an integration is configured, an export was audited. The caller's
  * statement that it happened is not evidence. Reopening a step needs no evidence.
  *
- * Everything runs in the caller's tenant transaction, so only the organization's own rows are counted, and only counts are
- * returned (they go into the audit record; no row content does).
+ * Application reads use the caller's tenant transaction; invitations use the separately scoped tenant-auth gateway.
+ * Only counts are returned into the audit record; no row content or credentials are included.
  */
-import { and, eq, ne, sql } from 'drizzle-orm'
-import { organizationMembers, organizations } from '@/db/schema'
+import { and, eq, sql } from 'drizzle-orm'
+import { organizations } from '@/db/schema'
+import { listOrganizationInvites } from '@nzila/platform-auth/invites'
 import { employers } from '@/db/schema/union-structure-schema'
 import { collectiveAgreements } from '@/db/schema/domains/agreements/collective-agreements'
 import { apiIntegrations } from '@/db/schema/integration-schema'
@@ -49,30 +50,16 @@ export async function verifyChecklistStep(
       return n > 0 ? { ok: true, evidence: { organizationRows: n } } : { ok: false, missing: 'the organization record' }
     }
     case 'users-invited': {
-      const n = await countOf(
-        tx
-          .select({ n: sql<number>`count(*)` })
-          .from(organizationMembers)
-          .where(and(eq(organizationMembers.organizationId, organizationId), ne(organizationMembers.userId, actorUserId))),
-      )
-      return n > 0 ? { ok: true, evidence: { otherMembers: n } } : { ok: false, missing: 'any member other than you in this organization' }
+      const invitations = await listOrganizationInvites(actorUserId, organizationId)
+      const n = invitations.filter(invite => invite.acceptedAt || (!invite.revokedAt && invite.expiresAt.getTime() > Date.now())).length
+      return n > 0 ? { ok: true, evidence: { recordedInvitations: n } } : { ok: false, missing: 'an accepted or usable invitation in this organization' }
     }
     case 'roles-assigned': {
-      const n = await countOf(
-        tx
-          .select({ n: sql<number>`count(*)` })
-          .from(organizationMembers)
-          .where(
-            and(
-              eq(organizationMembers.organizationId, organizationId),
-              ne(organizationMembers.userId, actorUserId),
-              ne(organizationMembers.role, 'member'),
-            ),
-          ),
-      )
+      const invitations = await listOrganizationInvites(actorUserId, organizationId)
+      const n = invitations.filter(invite => invite.acceptedAt && invite.role !== 'member').length
       return n > 0
-        ? { ok: true, evidence: { otherMembersWithRole: n } }
-        : { ok: false, missing: 'a member other than you who holds a role above member' }
+        ? { ok: true, evidence: { acceptedStaffInvitations: n } }
+        : { ok: false, missing: 'an accepted staff invitation in this organization' }
     }
     case 'contracts-uploaded': {
       const n = await countOf(

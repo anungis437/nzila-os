@@ -13,7 +13,7 @@ import type { Capacity, Mandate, MandateKind, MandateScope, Membership, Resource
 import { auditAuthorityMutation } from './audit'
 import { enforceAuthority, type EnforcementDeps } from './enforce'
 import { AuthorityStoreError, bindSessionActor, type SqlExecutor } from './executor'
-import { loadActiveIssuanceRule, loadAuthorityFacts, loadHolderMandates, loadIssuanceApproval, mapMandate } from './facts'
+import { loadActiveIssuanceRule, loadAuthorityFacts, loadHolderMandates, loadIssuanceApproval, mapMandate, mapRecusal } from './facts'
 import {
   changeMandateState,
   insertAcceptance,
@@ -82,6 +82,10 @@ async function evaluateIssuance(exec: SqlExecutor, deps: EnforcementDeps, e: Eva
   })
   const holderMembership = await holderMembershipOf(exec, deps, e.organizationId, e.holderUserId)
   const holderMandates = e.operation === 'issue' || e.operation === 'amend' ? await loadHolderMandates(exec, e.organizationId, e.holderUserId) : []
+  // Issuer facts contain only the issuer/delegators' recusals. Conferring a grant must also load the proposed holder's own recusals.
+  const holderRecusals = e.operation === 'issue' || e.operation === 'amend'
+    ? (await exec.query<Row>('SELECT * FROM ue_authority_recusals WHERE organization_id=$1 AND principal_user_id=$2 AND lifted_at IS NULL',
+      [e.organizationId, e.holderUserId])).rows.map(mapRecusal) : []
   let approval = null
   if (e.approvalRequestId) {
     const a = await loadIssuanceApproval(exec, e.organizationId, e.approvalRequestId)
@@ -101,7 +105,7 @@ async function evaluateIssuance(exec: SqlExecutor, deps: EnforcementDeps, e: Eva
       holderMandates,
       approval,
     },
-    facts,
+    { ...facts, recusals: [...facts.recusals, ...holderRecusals] },
     holderMembership,
     rule,
     now,

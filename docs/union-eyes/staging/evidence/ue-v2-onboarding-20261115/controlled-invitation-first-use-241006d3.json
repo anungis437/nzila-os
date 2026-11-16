@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "recordedDate": "2026-11-15",
+  "evidenceClass": "BOUNDED_REAL_STAGING_CONTROLLED_INVITATION",
+  "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "workflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "change": "CHG-2026-0114",
+  "inviter": "REAL_ENTRA_ORGANIZATION_ADMIN",
+  "recipientIdentity": "INVITATION_BEARER_TO_NEW_CANONICAL_MEMBER",
+  "invitationCreated": {
+    "httpStatus": 201,
+    "providerSubmission": "accepted"
+  },
+  "userConfirmed": {
+    "inboxReceipt": true,
+    "acceptedToDashboard": true,
+    "createdAndReopenedTestCase": true
+  },
+  "independentReadback": {
+    "acceptedInvitation": true,
+    "emailVerified": true,
+    "activeUser": true,
+    "oneActiveMembershipInIntendedOrganization": true,
+    "role": "member",
+    "activeSession": true,
+    "readOnlyTransactions": true,
+    "databaseMutationStatements": 0
+  },
+  "transportCleanup": {
+    "temporaryAccessRemoved": true,
+    "priorScannerScaleRestored": true
+  },
+  "privateProofSha256": {
+    "baseline-controlled-invite-receipt.json": "5b857f007813c8a42493152e496618ecddd2875d671dc7857caa199beb8c1abf",
+    "controlled-invite-readback-receipt.json": "fd49f77183b3015592ba9e334a3c31847500e3bcb8abd735600bca6001acdbf2",
+    "user-confirmed-first-use.json": "c068714305c461cd00094355340201d4f526141da0424e9bb43efe207663f9c1"
+  },
+  "limitations": [
+    "Case creation and reopening are user-confirmed, not an independently automated case-row or audit readback.",
+    "Negative acceptance, revocation and reissue tests for the repaired source have local proof only.",
+    "The controlled member account and user-created test case are retained; no business record was deleted.",
+    "No Entra binding is inferred for the invitee: invitation acceptance establishes a normal PG-backed session."
+  ],
+  "repairedSourceDeployed": false,
+  "productionAuthorized": false,
+  "fullOnboardingQualification": "PARTIAL_POSITIVE_JOURNEY_PROVEN"
+}

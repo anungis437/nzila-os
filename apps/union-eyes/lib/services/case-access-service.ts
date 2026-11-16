@@ -18,6 +18,7 @@ import { AuthorityStoreError, isUuid } from '@/lib/authority/store/executor'
 import { assignCase, reassignCase, revokeCaseAssignment } from '@/lib/authority/store/lifecycle'
 import { decideCase, drizzleExecutor, kernelDeps } from '@/lib/authority/store/route-adapter'
 import type { Action } from '@/lib/authority/ontology'
+import { lockAssignmentScope, requireRepresentativeCapacity, refreshRepresentativeWorkloads } from '@/lib/cases/assignment-capacity'
 
 export interface CaseAccessScopeInput {
   canComment?: boolean
@@ -399,10 +400,12 @@ export async function assignPrimaryRepresentative(
   tx: RLSTx,
   params: { organizationId: string; grievanceId: string; issuerUserId: string; assigneeUserId: string },
 ): Promise<{ previousUserId: string | null }> {
+  await lockAssignmentScope(tx, params.organizationId)
   const exec = drizzleExecutor(tx)
   const current = (await listCaseCollaborators(tx, params.organizationId, params.grievanceId)).filter((c) => c.relation !== 'collaborator')
   const holders = [...new Set(current.map((c) => c.userId))]
   if (holders.length === 1 && holders[0] === params.assigneeUserId) return { previousUserId: params.assigneeUserId }
+  await requireRepresentativeCapacity(tx, params.organizationId, params.assigneeUserId, params.grievanceId)
   const effectiveAt = new Date(Date.now() - 1000)
   const permissions = ['read', 'read_internal', 'comment', 'write_notes', 'draft_action', 'upload_evidence', 'modify_document', 'process_ocr']
   if (holders.length === 0) {
@@ -410,6 +413,7 @@ export async function assignPrimaryRepresentative(
       organizationId: params.organizationId, issuerUserId: params.issuerUserId, caseId: params.grievanceId,
       assigneeUserId: params.assigneeUserId, permissions, effectiveAt,
     })
+    await refreshRepresentativeWorkloads(tx, params.organizationId, [params.assigneeUserId])
     return { previousUserId: null }
   }
   const [first, ...others] = holders
@@ -422,5 +426,6 @@ export async function assignPrimaryRepresentative(
       await revokeCaseAssignment(exec, kernelDeps, { organizationId: params.organizationId, issuerUserId: params.issuerUserId, caseId: params.grievanceId, relationshipId: rel.id })
     }
   }
+  await refreshRepresentativeWorkloads(tx, params.organizationId, [...holders, params.assigneeUserId])
   return { previousUserId: first }
 }

@@ -52,6 +52,10 @@ interface DbClaim {
   claimNumber: string | null;
   organizationId: string;
   access?: 'case' | 'triage';
+  canAssign?: boolean;
+  canAddNote?: boolean;
+  canTransition?: boolean;
+  canClose?: boolean;
   claimType: string;
   status: string;
   priority: string;
@@ -95,6 +99,10 @@ interface Case {
   daysOpen: number;
   claimType: string;
   triage: boolean;
+  canAssign: boolean;
+  canAddNote: boolean;
+  canTransition: boolean;
+  canClose: boolean;
 }
 
 // Map database claim types to UI-friendly labels
@@ -150,6 +158,10 @@ const mapDbClaimToCase = (claim: DbClaim, t: (key: string) => string): Case => (
   id: claim.claimNumber || claim.claimId,
   claimId: claim.claimId,
   triage: claim.access === 'triage',
+  canAssign: claim.canAssign === true,
+  canAddNote: claim.canAddNote === true,
+  canTransition: claim.canTransition === true,
+  canClose: claim.canClose === true,
   title: claimTypeLabels[claim.claimType] ? t(`workbench.caseTypes.${claimTypeLabels[claim.claimType]}`) : claim.claimType || t('workbench.untitledCase'),
   description: claim.description ?? '',
   status: mapDbStatusToUi(claim.status),
@@ -372,22 +384,26 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
     if (!isExpanded && !caseItem.triage) void loadNotes(caseItem.claimId);
   };
 
-  const handleAssignToMe = async (caseItem: Case) => {
+  const handleAutomaticAssignment = async (caseItem: Case) => {
     setActionLoading(caseItem.id);
     try {
       const res = await fetch(`/api/cases/${caseItem.claimId}/assign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assigneeId: user?.id ?? '', reason: 'Self-assigned from case queue' }),
+        body: JSON.stringify({ automatic: true }),
       });
       if (res.ok) {
         setActionError(null);
         await refetchCases();
       } else {
-        setActionError(t('workbench.assignDenied'));
+        setActionError(res.status === 409
+          ? (locale.startsWith('fr') ? 'Aucune attribution effectuée. Vérifiez l’attribution actuelle, l’expertise et la capacité des représentants.' : 'No assignment made. Check the current assignment and representatives’ expertise and capacity.')
+          : t('workbench.assignDenied'));
+        await refetchCases();
       }
     } catch {
       setActionError(t('workbench.actionFailed'));
+      await refetchCases();
     } finally {
       setActionLoading(null);
     }
@@ -894,14 +910,9 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
                                   <p role="note" className="rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
                                     {t('workbench.restrictedMatterNotice')}
                                   </p>
-                                  {canAssign && !caseItem.assignedTo && (
-                                    <button
-                                      onClick={() => handleAssignToMe(caseItem)}
-                                      disabled={actionLoading === caseItem.id}
-                                      className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                    >
-                                      {actionLoading === caseItem.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserCheck className="w-5 h-5" />}
-                                      {t('workbench.assignToMe')}
+                                  {canAssign && caseItem.canAssign && !caseItem.assignedTo && (
+                                    <button onClick={() => handleAutomaticAssignment(caseItem)} disabled={actionLoading === caseItem.id} className="rounded-lg border px-4 py-3 disabled:opacity-50">
+                                      {locale.startsWith('fr') ? 'Attribuer selon l’expertise et la charge' : 'Match expertise and assign'}
                                     </button>
                                   )}
                                 </div>
@@ -937,7 +948,7 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
                               <div className="mb-6"><CaseDeadlines caseId={caseItem.claimId} /></div>
 
                               {/* Add Note */}
-                              <div className="mb-6">
+                              {caseItem.canAddNote && <div className="mb-6">
                                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                   <MessageSquare className="w-4 h-4" />
                                   {t('workbench.addCaseNote')}
@@ -965,21 +976,16 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
                                     {t('workbench.addNote')}
                                   </button>
                                 </div>
-                              </div>
+                              </div>}
 
                               {/* Action Buttons */}
                               <div className="flex flex-wrap gap-3">
-                                {canAssign && !caseItem.assignedTo && caseItem.memberId !== user?.id && (
-                                  <button
-                                    onClick={() => handleAssignToMe(caseItem)}
-                                    disabled={actionLoading === caseItem.id}
-                                    className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                  >
-                                    {actionLoading === caseItem.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserCheck className="w-5 h-5" />}
-                                    {t('workbench.assignToMe')}
+                                {canAssign && caseItem.canAssign && !caseItem.assignedTo && caseItem.memberId !== user?.id && (
+                                  <button onClick={() => handleAutomaticAssignment(caseItem)} disabled={actionLoading === caseItem.id} className="rounded-lg border px-4 py-3 disabled:opacity-50">
+                                    {locale.startsWith('fr') ? 'Attribuer selon l’expertise et la charge' : 'Match expertise and assign'}
                                   </button>
                                 )}
-                                {caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
+                                {caseItem.canTransition && caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
                                   <select
                                     aria-label={t('workbench.updateStatusLabel')}
                                     onChange={(e) => {
@@ -994,13 +1000,13 @@ export default function WorkbenchConsole({ showGrievanceCases = false }: { showG
                                     <option value="assigned">{t('workbench.statusOptions.assigned')}</option>
                                     <option value="investigation">{t('workbench.statusOptions.investigation')}</option>
                                     <option value="pending_documentation">{t('workbench.statusOptions.pending_documentation')}</option>
-                                    <option value="resolved">{t('workbench.statusOptions.resolved')}</option>
-                                    <option value="rejected">{t('workbench.statusOptions.rejected')}</option>
-                                    <option value="closed">{t('workbench.statusOptions.closed')}</option>
+                                    {caseItem.canClose && <option value="resolved">{t('workbench.statusOptions.resolved')}</option>}
+                                    {caseItem.canClose && <option value="rejected">{t('workbench.statusOptions.rejected')}</option>}
+                                    {caseItem.canClose && <option value="closed">{t('workbench.statusOptions.closed')}</option>}
                                   </select>
                                 )}
                                 {/* Escalate to formal grievance — only for active grievance-type claims */}
-                                {caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
+                                {caseItem.canTransition && caseItem.status !== "resolved" && caseItem.status !== "rejected" && (
                                   <button
                                     onClick={() => handleEscalateToGrievance(caseItem)}
                                     disabled={escalatingId === caseItem.id}

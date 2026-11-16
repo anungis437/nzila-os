@@ -251,6 +251,12 @@ vi.mock('@nzila/platform-auth/entra/config', () => ({
     POST: vi.fn().mockResolvedValue(new Response(null, { status: 200 })),
   },
 }));
+// This importability smoke uses synthetic app auth, not an auth database session.
+// Native and route-specific invitation tests cover the live direct-admin grant.
+vi.mock('@nzila/platform-auth/invites', async importOriginal => ({
+  ...await importOriginal<typeof import('@nzila/platform-auth/invites')>(),
+  canManageOrganizationInvites: vi.fn().mockResolvedValue(false),
+}));
 vi.mock('server-only', () => ({}));
 vi.mock('resend', () => ({
   Resend: function Resend() {

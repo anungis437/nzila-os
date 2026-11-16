@@ -20,6 +20,7 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); language.locale = 'en-CA'; l
 
 describe('workbench inline case access', () => {
   const ownedClaim = {
+    canAddNote: true, canTransition: true, canClose: true,
     claimId: 'owned-case', claimNumber: 'CASE-01', organizationId: 'owned-org', memberId: 'owned-member',
     claimType: 'grievance_pay', status: 'assigned', priority: 'medium', description: 'Synthetic case summary',
     createdAt: '2026-10-22T12:00:00Z', updatedAt: '2026-10-22T12:00:00Z',
@@ -140,7 +141,7 @@ describe('workbench inline case access', () => {
   it('shows triage-only matters without contact data and offers assignment only when the server allows it', async () => {
     const triageClaim = {
       access: 'triage', claimId: 'triage-case', claimNumber: 'CASE-TR', claimType: 'grievance_pay', status: 'submitted',
-      priority: 'medium', createdAt: '2026-10-22T12:00:00Z', updatedAt: '2026-10-22T12:00:00Z', assignedTo: null,
+      priority: 'medium', createdAt: '2026-10-22T12:00:00Z', updatedAt: '2026-10-22T12:00:00Z', assignedTo: null, canAssign: true,
     };
     const respond = (canAssign: boolean) => vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true,
       json: async () => ({ data: { claims: [triageClaim], capabilities: { canAssign } } }) }));
@@ -152,13 +153,13 @@ describe('workbench inline case access', () => {
     expect(screen.getByRole('note')).toHaveTextContent('workbench.restrictedMatterNotice');
     expect(screen.queryByText('workbench.memberContact')).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox', { name: 'workbench.addNotePlaceholder' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /workbench\.assignToMe/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Match expertise and assign' })).not.toBeInTheDocument();
     first.unmount();
 
     respond(true);
     render(<WorkbenchConsole />);
     await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-TR' }));
-    expect(screen.getByRole('button', { name: /workbench\.assignToMe/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Match expertise and assign' })).toBeEnabled();
     expect(screen.queryByText('workbench.memberContact')).not.toBeInTheDocument();
   });
 
@@ -184,4 +185,30 @@ describe('workbench inline case access', () => {
     expect(screen.queryByText('Wage & Hour')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: frenchMessages.workbench.grievanceCases })).toHaveAttribute('href', '/fr-CA/dashboard/grievances');
   });
+  it.each(['en-CA','fr-CA'])('requests automatic assignment in %s and reloads the queue after a no-match conflict', async (locale) => {
+    language.locale = locale;
+    const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === 'POST') return Response.json({ error: 'NO_ELIGIBLE_MATCH' }, { status: 409 });
+      return Response.json({ data: { claims: [{ ...ownedClaim, assignedTo: null, access: 'triage', canAssign: true }], capabilities: { canAssign: true } } });
+    });
+    vi.stubGlobal('fetch', fetcher);
+    render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-01' }));
+    await userEvent.click(screen.getByRole('button', { name: locale === 'fr-CA' ? 'Attribuer selon l’expertise et la charge' : 'Match expertise and assign' }));
+    await waitFor(() => expect(fetcher).toHaveBeenCalledWith('/api/cases/owned-case/assign', expect.objectContaining({ method: 'POST', body: JSON.stringify({ automatic: true }) })));
+    expect(await screen.findByRole('alert')).toHaveTextContent(locale === 'fr-CA' ? 'Aucune attribution effectuée' : 'No assignment made');
+    expect(fetcher.mock.calls.filter(([,init]) => !init?.method)).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: 'workbench.assignToMe' })).toBeNull();
+  });
+
+  it('shows a supervisor’s read-only case without advertising note or status mutations', async () => {
+    serve({ claims: [{ ...ownedClaim, canAddNote: false, canTransition: false, canClose: false }] });
+    render(<WorkbenchConsole />);
+    await userEvent.click(await screen.findByRole('button', { name: 'workbench.expand CASE-01' }));
+    await waitFor(() => expect(screen.getByText('Synthetic authorized note')).toBeVisible());
+    expect(screen.queryByRole('textbox', { name: 'workbench.addNotePlaceholder' })).toBeNull();
+    expect(screen.queryByRole('combobox', { name: 'workbench.updateStatusLabel' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'workbench.escalateToGrievance' })).toBeNull();
+  });
+
 });

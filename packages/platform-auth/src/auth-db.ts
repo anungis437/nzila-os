@@ -1,8 +1,9 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
 import type { Database } from '@nzila/db/client'
-import { executeAuthContext } from '@nzila/db/auth-client'
-import type { AuthExecutionContext } from '@nzila/db/auth-storage-authority'
-import { getTableColumns, sql } from 'drizzle-orm'
+import { executeAuthContext, lockInviterAuthority } from '@nzila/db/auth-client'
+import { AUTH_EXECUTION_ROLES, authContextSettings, type AuthExecutionContext } from '@nzila/db/auth-storage-authority'
+import { authUsers } from '@nzila/db/schema'
+import { eq, getTableColumns, sql } from 'drizzle-orm'
 import type { PgTable } from 'drizzle-orm/pg-core'
 
 /**
@@ -56,11 +57,28 @@ export async function withTenantAuthContext<T>(
   const { auth } = await import('./entra/server')
   const actor = await auth()
   if (!actor.userId || actor.userId !== userId) throw new Error('Authenticated tenant actor required')
-  return withAuthContext({ phase: 'tenant-admin', userId, organizationId }, async () => {
-    const [membership] = await authDb.execute(sql`SELECT 1 FROM user_management.organization_users
-      WHERE user_id=${userId} AND organization_id=${organizationId} AND is_active AND role='admin'`)
-    if (!membership) throw new Error('Active organization administrator required')
-    return callback()
+  // Share the lifecycle/revocation lock BEFORE reading live authority. Identity
+  // already has self-only user SELECT; tenant-admin deliberately has no user
+  // table grant. Promote this one connection only after the locked self-read,
+  // keeping the lock through the tenant mutation and its mandatory audit.
+  return withAuthContext({ phase: 'identity', userId }, async () => {
+    await lockInviterAuthority(authDb, userId)
+    const [user] = await authDb.select({ active: authUsers.isActive, lifecycle: authUsers.lifecycleState })
+      .from(authUsers).where(eq(authUsers.userId, userId)).limit(1)
+    if (!user?.active || user.lifecycle !== 'active')
+      throw Object.assign(new Error('Active organization administrator required'), { code: 'AUTH_TENANT_ADMIN_REQUIRED' })
+    const scope = execution.getStore()!
+    const tenantContext: AuthExecutionContext = { phase: 'tenant-admin', userId, organizationId }
+    await scope.executor.execute(sql.raw(`SET LOCAL ROLE "${AUTH_EXECUTION_ROLES.tenantAdmin}"`))
+    for (const [key, value] of Object.entries(authContextSettings(tenantContext)))
+      await scope.executor.execute(sql`SELECT set_config(${key}, ${value}, true)`)
+    return execution.run({ executor: scope.executor, context: tenantContext }, async () => {
+      const [membership] = await authDb.execute(sql`SELECT 1 FROM user_management.organization_users
+        WHERE user_id=${userId} AND organization_id=${organizationId} AND is_active AND role='admin'`)
+      if (!membership)
+        throw Object.assign(new Error('Active organization administrator required'), { code: 'AUTH_TENANT_ADMIN_REQUIRED' })
+      return callback()
+    })
   })
 }
 

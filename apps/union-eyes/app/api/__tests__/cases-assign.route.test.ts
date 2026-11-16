@@ -16,8 +16,10 @@ const m = vi.hoisted(() => ({
   updateReturning: vi.fn(),
   findReadableCase: vi.fn(),
   assignPrimaryRepresentative: vi.fn(),
+  automaticallyAssignRepresentative: vi.fn(),
 }));
 
+vi.mock('@/lib/cases/automatic-assignment', async original => ({ ...(await original<typeof import('@/lib/cases/automatic-assignment')>()), automaticallyAssignRepresentative: m.automaticallyAssignRepresentative }));
 vi.mock('@/lib/services/case-access-service', () => ({ assignPrimaryRepresentative: m.assignPrimaryRepresentative }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
 
@@ -57,6 +59,7 @@ describe('cases/[caseId]/assign route', () => {
     });
     m.assignPrimaryRepresentative.mockResolvedValue({ previousUserId: null });
     m.assigneeEligible.mockResolvedValue(true);
+    m.automaticallyAssignRepresentative.mockResolvedValue({ assigneeId: 'u2', stewardProfileId: 'profile-2', kernel: { previousUserId: null }, matching: { strategy: 'recorded_expertise_live_workload_v1', specialization: 'safety', openCasesBefore: 0, maxCaseload: 5 } });
     m.insertQueue = [];
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.updateReturning.mockResolvedValue([{ claimId: 'c1' }]);
@@ -238,6 +241,32 @@ describe('cases/[caseId]/assign route', () => {
     expect(response.status).toBe(403);
     expect(m.persistAtomicAudit).not.toHaveBeenCalled();
     expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
+  });
+
+  it('authorizes and locks the case before automatic matching, then audits the actual selected representative', async () => {
+    const { POST } = await loadRoute();
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'member', assignedTo: null, status: 'filed', claimType: 'workplace_safety' }]);
+    m.insertQueue.push([{ updateId: 'up-auto' }]);
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', { method: 'POST', body: JSON.stringify({ automatic: true }) }), { params: Promise.resolve({ caseId: 'c1' }) });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ assignedTo: 'u2' });
+    expect(m.findReadableCase).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'c1', true, 'case:assign');
+    expect(m.findReadableCase.mock.invocationCallOrder[0]).toBeLessThan(m.automaticallyAssignRepresentative.mock.invocationCallOrder[0]);
+    expect(m.assignPrimaryRepresentative).not.toHaveBeenCalled();
+    expect(m.persistAtomicAudit.mock.calls[0][1].details).toMatchObject({ toAssignee: 'u2', matching: { specialization: 'safety' } });
+  });
+  it('refuses mixed manual/automatic input without opening an assignment transaction', async () => {
+    const { POST } = await loadRoute();
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', { method: 'POST', body: JSON.stringify({ automatic: true, assigneeId: 'chosen-by-client' }) }), { params: Promise.resolve({ caseId: 'c1' }) });
+    expect(response.status).toBe(400); expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+  it('returns an honest no-match conflict and performs no follow-up writes', async () => {
+    const { POST } = await loadRoute();
+    const { AssignmentMatchingError } = await import('@/lib/cases/automatic-assignment');
+    m.claimQueue.push([{ claimId: 'c1', memberId: 'member', assignedTo: null, status: 'filed', claimType: 'workplace_safety' }]);
+    m.automaticallyAssignRepresentative.mockRejectedValueOnce(new AssignmentMatchingError('No available match'));
+    const response = await POST(new Request('http://localhost/api/cases/c1/assign', { method: 'POST', body: JSON.stringify({ automatic: true }) }), { params: Promise.resolve({ caseId: 'c1' }) });
+    expect(response.status).toBe(409); expect(m.persistAtomicAudit).not.toHaveBeenCalled(); expect(m.buildUnionEvidencePack).not.toHaveBeenCalled();
   });
 
 });

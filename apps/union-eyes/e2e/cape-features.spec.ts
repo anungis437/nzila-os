@@ -168,101 +168,75 @@ test.describe("Pilot readiness checklist", () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    // Pilot onboarding is currently the admin onboarding wizard surface.
     await gotoDashboardAsRole(page, 'admin');
   });
 
-  test("onboarding page renders checklist with 7 items", async ({ page }) => {
-    await gotoWithTransientRetry(page, "/en-CA/dashboard/admin/onboarding", {
-      waitUntil: "domcontentloaded",
-      timeout: 45_000,
-    });
-    await expect(page.locator("body")).toBeVisible({ timeout: 15_000 });
-
-    // Canonical onboarding wizard heading.
-    await expect(
-      page.getByRole("heading", { name: /Administrator Onboarding/i })
-    ).toBeVisible({ timeout: 20_000 });
-
-    // Progress indicator is shown. Use .first() because the wizard renders the
-    // step label twice (visible + aria/screen-reader duplicate) and strict-mode
-    // otherwise flags 2 matches (observed at f3e2bb2fe/1c07b50b2).
-    await expect(page.getByText(/Step 1 of 5/i).first()).toBeVisible();
+  test("organization setup shows the three base steps from persisted state", async ({ page }) => {
+    const loaded = page.waitForResponse(response => new URL(response.url()).pathname === '/api/pilot/onboarding' && response.request().method() === 'GET');
+    await gotoWithTransientRetry(page, "/en-CA/dashboard/admin/onboarding", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    expect((await loaded).status()).toBe(200);
+    await expect(page.getByRole('heading', { name: 'Organization setup', exact: true })).toBeVisible();
+    const checklist = page.getByRole('list').filter({ has: page.getByText('Organization seeded', { exact: true }) });
+    await expect(checklist.getByRole('listitem')).toHaveCount(3);
+    for (const label of ['Organization seeded', 'Invitations recorded', 'Staff invitation accepted'])
+      await expect(checklist.getByText(label, { exact: true })).toBeVisible();
+    await expect(page.getByText(/of 3 steps completed/)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Admin Capabilities', exact: true })).toHaveCount(0);
+    await expect(page.getByText('Integrations configured', { exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Seed Demo|Create Demo|Purge Demo/i })).toHaveCount(0);
   });
 
-  test("checklist displays all 7 expected items", async ({ page }) => {
-    await page.goto("/en-CA/dashboard/admin/onboarding", { waitUntil: "domcontentloaded" });
-    await expect(
-      page.getByRole("heading", { name: /Administrator Onboarding/i })
-    ).toBeVisible({ timeout: 15_000 });
-
-    await expect(page.getByText(/Step 1 of 5/i).first()).toBeVisible({ timeout: 10_000 });
-
-    // Wait for full client hydration. The header renders an org-selector whose
-    // "Loading..." placeholder only disappears once client components have
-    // mounted. While it is present, React handlers on the wizard may not yet
-    // be attached and clicks get silently dropped (observed in CI).
-    await page
-      .locator('text=/^Loading\\.\\.\\.$/')
-      .first()
-      .waitFor({ state: "hidden", timeout: 15_000 })
-      .catch(() => {
-        // Selector may simply not exist if header hydrates fast — that's fine.
-      });
-
-    // Confirm OverviewStep content has hydrated before interacting.
-    await expect(
-      page.getByRole("heading", { name: "Admin Capabilities" }),
-    ).toBeVisible({
-      timeout: 10_000,
-    });
-
-    const continueBtn = page.getByRole("button", { name: /^Continue$/i });
-    await expect(continueBtn).toBeEnabled({ timeout: 10_000 });
-    await continueBtn.scrollIntoViewIfNeeded();
-
-    // Step 2 indicator (text node may be split across spans in CI); also
-    // assert against the Step 2 CardTitle heading "User Management" which is
-    // unique to Step 2 (Step 1 only renders it as a list item, not a heading).
-    const stepTwoIndicator = page.getByText(/Step\s*2\s*of\s*5/i);
-    const stepTwoHeading = page.getByRole("heading", { name: /^User Management$/i });
-
-    // Retry-on-no-advance. Use a DOM click via evaluate() as the primary
-    // mechanism — React's event delegation at document root reliably picks
-    // it up even when Playwright's pointer-based click is dropped due to
-    // late hydration or transient overlays observed in CI.
-    await expect(async () => {
-      const advanced =
-        (await stepTwoIndicator.isVisible().catch(() => false)) ||
-        (await stepTwoHeading.isVisible().catch(() => false));
-      if (!advanced) {
-        await continueBtn
-          .evaluate((el) => (el as HTMLButtonElement).click())
-          .catch(async () => {
-            await continueBtn.click({ timeout: 5_000, force: true });
-          });
-      }
-      await expect(stepTwoHeading.or(stepTwoIndicator).first()).toBeVisible({
-        timeout: 3_000,
-      });
-    }).toPass({ timeout: 30_000, intervals: [1500, 2500, 3500] });
-  });
-
-  test("pilot onboarding API returns valid checklist state", async ({
-    request,
-  }) => {
-    const response = await request.get("/api/pilot/onboarding");
-
-    // Auth may reject — but the endpoint must be reachable
-    expect([200, 401, 403]).toContain(response.status());
-
-    if (response.status() === 200) {
-      const body = await response.json();
-      expect(body).toHaveProperty("items");
-      expect(body).toHaveProperty("totalCount", 7);
-      expect(body).toHaveProperty("isComplete");
-      expect(typeof body.completedCount).toBe("number");
+  test("verified organization setup survives reload and a member cannot change it", async ({ page }) => {
+    const before = await page.request.get('/api/pilot/onboarding');
+    expect(before.status()).toBe(200);
+    const original = (await before.json()).data.items['org-seeded'];
+    try {
+      const reset = await page.request.patch('/api/pilot/onboarding', { data: { itemId: 'org-seeded', completed: false } });
+      expect(reset.status()).toBe(200);
+      await page.goto('/en-CA/dashboard/admin/onboarding', { waitUntil: 'domcontentloaded' });
+      const row = page.getByRole('listitem').filter({ has: page.getByText('Organization seeded', { exact: true }) });
+      const saved = page.waitForResponse(response => new URL(response.url()).pathname === '/api/pilot/onboarding' && response.request().method() === 'PATCH');
+      await row.getByRole('button', { name: 'Verify', exact: true }).click();
+      const response = await saved;
+      expect(response.status()).toBe(200);
+      await expect(row).toBeVisible();
+      await expect(row.getByRole('button', { name: 'Verify', exact: true })).toHaveCount(0);
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await expect(page.getByRole('heading', { name: 'Organization setup', exact: true })).toBeVisible();
+      await expect(row).toBeVisible();
+      await expect(row.getByRole('button', { name: 'Verify', exact: true })).toHaveCount(0);
+      const persisted = await page.request.get('/api/pilot/onboarding');
+      expect(persisted.status()).toBe(200);
+      expect((await persisted.json()).data.items['org-seeded']).toBe(true);
+      await loginAsRole(page, 'member');
+      expect((await page.request.patch('/api/pilot/onboarding', { data: { itemId: 'org-seeded', completed: false } })).status()).toBe(403);
+    } finally {
+      await loginAsRole(page, 'admin');
+      expect((await page.request.patch('/api/pilot/onboarding', { data: { itemId: 'org-seeded', completed: original } })).status()).toBe(200);
     }
+  });
+
+  test("admin onboarding API returns the persisted checklist envelope", async ({ page }) => {
+    const response = await page.request.get('/api/pilot/onboarding');
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.success).toBe(true);
+    expect(body.data).toHaveProperty('items');
+    expect(body.data).toHaveProperty('totalCount', 7);
+    expect(body.data).toHaveProperty('isComplete');
+    expect(typeof body.data.completedCount).toBe('number');
+  });
+
+  test('French organization setup fits a phone and keeps its localized admin destination', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const loaded = page.waitForResponse(response => new URL(response.url()).pathname === '/api/pilot/onboarding' && response.request().method() === 'GET');
+    await page.goto('/fr-CA/dashboard/admin/onboarding', { waitUntil: 'domcontentloaded' });
+    expect((await loaded).status()).toBe(200);
+    await expect(page.getByRole('heading', { name: 'Configuration de l’organisation', exact: true })).toBeVisible();
+    await expect(page.getByText('Invitations enregistrées', { exact: true })).toBeVisible();
+    await expect(page.getByText('Invitation du personnel acceptée', { exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Inviter des utilisateurs/ })).toHaveAttribute('href', '/fr-CA/dashboard/admin/members');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   });
 });
 

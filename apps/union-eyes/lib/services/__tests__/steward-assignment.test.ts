@@ -22,6 +22,10 @@ const { mockSelectFrom, mockInsertValues, mockReturning, mockFindFirst, mockUpda
   };
 });
 
+const matching = vi.hoisted(() => ({ workload: vi.fn(), eligible: vi.fn(), query: vi.fn() }));
+vi.mock('@/lib/cases/assignment-capacity', () => ({ representativeWorkloads: matching.workload }));
+vi.mock('@/lib/cases/assignment-eligibility', () => ({ matchingRepresentativeEligible: matching.eligible }));
+vi.mock('@/lib/authority/store/route-adapter', () => ({ drizzleExecutor: () => ({ query: matching.query }) }));
 vi.mock('@/db/db', () => ({
   db: {
     select: vi.fn(() => ({
@@ -134,10 +138,12 @@ describe('recommendSteward', () => {
     mockSelectFrom.mockReturnValue({
       where: vi.fn(() => []),
     });
-    await expect(recommendSteward('org-1', 'g-missing', tx)).rejects.toThrow('Grievance not found');
+    await expect(recommendSteward('org-1', 'g-missing', tx, 'issuer')).rejects.toThrow('Grievance not found');
   });
 
-  it('returns scored candidates sorted desc', async () => {
+  it('ranks expertise using live workload and omits profiles without recorded matching expertise', async () => {
+    matching.workload.mockResolvedValue(new Map([['u1', 3], ['u2', 1]]));
+    matching.eligible.mockResolvedValue(true); matching.query.mockResolvedValue({ rows: [] });
     let callCount = 0;
     mockSelectFrom.mockImplementation(() => ({
       where: vi.fn(() => {
@@ -151,9 +157,9 @@ describe('recommendSteward', () => {
         ];
       }),
     }));
-    const candidates = await recommendSteward('org-1', 'g-1', tx);
-    expect(candidates.length).toBe(2);
-    expect(candidates[0].score).toBeGreaterThanOrEqual(candidates[1].score);
+    const candidates = await recommendSteward('org-1', 'g-1', tx, 'issuer');
+    expect(candidates).toHaveLength(1);
+    expect(candidates[0]).toMatchObject({ userId: 'u1', currentCaseload: 3, exactExpertise: true });
   });
 });
 

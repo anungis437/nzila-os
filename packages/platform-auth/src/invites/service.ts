@@ -4,7 +4,7 @@
  * Flow:
  *   1. An authenticated admin calls createInvite(orgId, email, role).
  *      We generate a 32-byte token, store its SHA-256 hash, and return the
- *      raw token (route handler emails it; dev mode echoes it back).
+ *      raw token to the server-only mailer; route JSON never echoes it.
  *   2. Recipient clicks /invite/accept?token=… which calls acceptInvite().
  *   3. acceptInvite() verifies the hash + expiry + non-revoked + non-accepted,
  *      ensures an authUsers row exists for the email (creating one if needed,
@@ -19,7 +19,7 @@
  *     membership or session write. A denial that commits first confers nothing.
  */
 import { randomBytes, createHash } from 'crypto'
-import { authDb as db, withAuthContext, withAuthSavepoint, withTenantAuthContext, insertAuthRow } from '../auth-db'
+import { authDb as db, withAuthContext, withAuthSavepoint, withTenantAuthContext, withAuthenticatedAuthContext, insertAuthRow } from '../auth-db'
 import { lockInviterAuthority } from '@nzila/db/auth-client'
 import { AUTH_TENANT_ASSIGNABLE_ROLES } from '@nzila/db/auth-storage-authority'
 import {
@@ -28,7 +28,7 @@ import {
   authOrganizationUsers,
   authAuditLog,
 } from '@nzila/db/schema'
-import { eq, and, sql, gt, isNull } from 'drizzle-orm'
+import { eq, and, sql, gt, isNull, desc, ne } from 'drizzle-orm'
 import { completeAuthFirstFactor } from '../complete-auth'
 
 const INVITE_TOKEN_BYTES = 32
@@ -66,7 +66,82 @@ export interface CreateInviteResult {
   inviteId?: string
   token?: string
   expiresAt?: Date
+  email?: string
+  role?: string
   error?: string
+}
+
+export interface ManageInviteInput {
+  inviteId: string
+  organizationId: string
+  actorUserId: string
+  ipAddress?: string | null
+  userAgent?: string | null
+}
+
+/** A platform title is not a tenant administration grant. Read the live, direct membership. */
+export async function canManageOrganizationInvites(userId: string, organizationId: string): Promise<boolean> {
+  return withAuthenticatedAuthContext(userId, async () => {
+    const [membership] = await db.select({ id: authOrganizationUsers.organizationUserId })
+      .from(authOrganizationUsers).where(and(
+        eq(authOrganizationUsers.userId, userId),
+        eq(authOrganizationUsers.organizationId, organizationId),
+        eq(authOrganizationUsers.isActive, true),
+        eq(authOrganizationUsers.role, 'admin'),
+      )).limit(1)
+    return Boolean(membership)
+  })
+}
+
+/** Token hashes and bearer links never leave the service in a listing. */
+export async function listOrganizationInvites(userId: string, organizationId: string) {
+  return withTenantAuthContext(userId, organizationId, () => db.select({
+    id: authInvites.id, email: authInvites.email, role: authInvites.role,
+    createdAt: authInvites.createdAt, expiresAt: authInvites.expiresAt,
+    acceptedAt: authInvites.acceptedAt, revokedAt: authInvites.revokedAt,
+    acceptedUserId: authInvites.acceptedUserId,
+  }).from(authInvites).where(eq(authInvites.organizationId, organizationId))
+    .orderBy(desc(authInvites.createdAt)).limit(100))
+}
+
+/** Reissue atomically retires the old bearer; even a failed email never leaves two usable links. */
+export async function reissueInvite(input: ManageInviteInput): Promise<CreateInviteResult> {
+  return withTenantAuthContext(input.actorUserId, input.organizationId, async () => {
+    const [invite] = await db.select().from(authInvites).where(and(
+      eq(authInvites.id, input.inviteId), eq(authInvites.organizationId, input.organizationId),
+      isNull(authInvites.acceptedAt), isNull(authInvites.revokedAt),
+    )).for('update')
+    if (!invite || !ALLOWED_ROLES.has(invite.role)) return { success: false, error: 'Invitation is no longer available' }
+    await lockInviteRecipient(invite.email, input.organizationId)
+    if (await pendingInviteExists(invite.email, input.organizationId, invite.id))
+      return { success: false, error: 'Another pending invitation exists. Refresh the invitation list.' }
+    await db.update(authInvites).set({ revokedAt: new Date() }).where(eq(authInvites.id, invite.id))
+    const replacement = await createInviteWithContext({
+      email: invite.email, organizationId: input.organizationId, role: invite.role,
+      invitedBy: input.actorUserId, ipAddress: input.ipAddress, userAgent: input.userAgent,
+    }, invite.email, invite.role)
+    await logEvent('invite_reissued', {
+      userId: input.actorUserId, ipAddress: input.ipAddress, userAgent: input.userAgent,
+      metadata: { inviteId: invite.id, replacementInviteId: replacement.inviteId, organizationId: input.organizationId },
+    }, true)
+    return replacement
+  })
+}
+
+export async function revokeInvite(input: ManageInviteInput): Promise<{ success: boolean; error?: string }> {
+  return withTenantAuthContext(input.actorUserId, input.organizationId, async () => {
+    const [invite] = await db.select().from(authInvites).where(and(
+      eq(authInvites.id, input.inviteId), eq(authInvites.organizationId, input.organizationId),
+      isNull(authInvites.acceptedAt), isNull(authInvites.revokedAt),
+    )).for('update')
+    if (!invite) return { success: false, error: 'Invitation is no longer available' }
+    await db.update(authInvites).set({ revokedAt: new Date() }).where(eq(authInvites.id, invite.id))
+    await logEvent('invite_revoked', {
+      userId: input.actorUserId, ipAddress: input.ipAddress, userAgent: input.userAgent,
+      metadata: { inviteId: invite.id, organizationId: input.organizationId },
+    }, true)
+    return { success: true }
+  })
 }
 
 export interface AcceptInviteInput {
@@ -96,6 +171,19 @@ function generateToken(): string {
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')
+}
+
+async function lockInviteRecipient(email: string, organizationId: string) {
+  await db.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(['invite-recipient', organizationId, email])}, 0))`)
+}
+
+async function pendingInviteExists(email: string, organizationId: string, exceptId?: string) {
+  const [row] = await db.select({ id: authInvites.id }).from(authInvites).where(and(
+    eq(authInvites.organizationId, organizationId), eq(authInvites.email, email),
+    isNull(authInvites.revokedAt), isNull(authInvites.acceptedAt), gt(authInvites.expiresAt, new Date()),
+    ...(exceptId ? [ne(authInvites.id, exceptId)] : []),
+  )).limit(1)
+  return Boolean(row)
 }
 
 async function logEvent(
@@ -138,7 +226,12 @@ export async function createInvite(
   if (!ALLOWED_ROLES.has(role)) {
     return { success: false, error: `Invalid role: ${role}` }
   }
-  return withTenantAuthContext(input.invitedBy, input.organizationId, () => createInviteWithContext(input, email, role))
+  return withTenantAuthContext(input.invitedBy, input.organizationId, async () => {
+    await lockInviteRecipient(email, input.organizationId)
+    if (await pendingInviteExists(email, input.organizationId))
+      return { success: false, error: 'A pending invitation already exists. Reissue it from the invitation list.' }
+    return createInviteWithContext(input, email, role)
+  })
 }
 
 async function createInviteWithContext(input: CreateInviteInput, email: string, role: string): Promise<CreateInviteResult> {
@@ -167,7 +260,7 @@ async function createInviteWithContext(input: CreateInviteInput, email: string, 
     },
   }, true)
 
-  return { success: true, inviteId: row.id, token, expiresAt }
+  return { success: true, inviteId: row.id, token, expiresAt, email, role }
 }
 
 export async function acceptInvite(
@@ -307,7 +400,7 @@ async function acceptInviteWithContext(input: AcceptInviteInput, tokenHash: stri
       organizationId: confirmed.organizationId,
       role: confirmed.role,
     },
-  })
+  }, true)
   await db.update(authInvites).set({ acceptedAt: new Date(), acceptedUserId: userId })
     .where(eq(authInvites.id, confirmed.id))
 

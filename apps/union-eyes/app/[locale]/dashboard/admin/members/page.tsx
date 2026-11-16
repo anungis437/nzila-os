@@ -1,6 +1,7 @@
 /**
  * Admin Members Management Page (server component wrapper)
- * Enforces platform RBAC before rendering the client console.
+ * Direct organization admins manage their own invitations. Platform support
+ * retains its separately guarded console; a platform title grants no invite authority.
  */
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,8 @@ import { Metadata } from 'next';
 import { redirect } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
 import MembersConsole from "@/components/admin/members-console";
+import OrganizationInvitations from '@/components/admin/organization-invitations';
+import { canManageOrganizationInvites } from '@nzila/platform-auth/invites';
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -24,10 +27,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function AdminMembersPage() {
-  await requireUser();
+  const user = await requireUser();
+  if (await canManageOrganizationInvites(user.userId, user.organizationId))
+    return <OrganizationInvitations />;
 
-  const isAdmin = await hasMinRole("support_manager");
-  if (!isAdmin) redirect("/dashboard");
-
-  return <MembersConsole />;
+  if (await hasMinRole('support_manager')) return <MembersConsole />;
+  redirect('/dashboard');
 }

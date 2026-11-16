@@ -21,13 +21,16 @@ import { getCaseActor, findReadableCase, caseAssigneeEligible, denyCaseAction, c
 import { authorizationDenialResponse } from '@/lib/api/authorization-denial';
 import { assignPrimaryRepresentative } from '@/lib/services/case-access-service';
 import { AuthorityStoreError } from '@/lib/authority/store/executor';
+import { AssignmentMatchingError, automaticallyAssignRepresentative } from '@/lib/cases/automatic-assignment';
 
 export const dynamic = 'force-dynamic';
 
-const AssignCaseSchema = z.object({
-  assigneeId: z.string().min(1, 'Assignee ID is required').max(255),
-  reason: z.string().max(1000).optional(),
-});
+class AssignmentConflictError extends Error {}
+
+const AssignCaseSchema = z.union([
+  z.object({ assigneeId: z.string().min(1).max(255), reason: z.string().max(1000).optional() }).strict(),
+  z.object({ automatic: z.literal(true), reason: z.string().max(1000).optional() }).strict(),
+]);
 
 /**
  * POST /api/cases/[caseId]/assign — Assign a case to a steward/officer
@@ -68,14 +71,20 @@ export async function POST(
       );
     }
 
-    const { assigneeId, reason } = parsed.data;
+    const reason = parsed.data.reason;
+    let selectedAssigneeId = 'assigneeId' in parsed.data ? parsed.data.assigneeId : null;
 
     const result = await withRLSContext(async (tx) => {
       // The kernel decides the caller may assign this case (a mandate or delegation naming assignment).
       const claim = await findReadableCase(tx,actor,caseId,true,'case:assign');
 
       if (!claim) return null;
-      if (!(await caseAssigneeEligible(tx,actor,assigneeId)))
+      if (claim.memberId === userId) return { denied: true as const, conflict: true as const, claimId: claim.claimId };
+      const automatic = 'automatic' in parsed.data
+        ? await automaticallyAssignRepresentative(tx, actor, claim.claimId, claim.claimType) : null;
+      const assigneeId = automatic?.assigneeId ?? selectedAssigneeId!;
+      selectedAssigneeId = assigneeId;
+      if (!automatic && !(await caseAssigneeEligible(tx,actor,assigneeId)))
         return {denied:true as const,claimId:claim.claimId};
 
       // The kernel owns the assignment: it re-decides the issuer's authority, the assignee's capacity and conflicts, and
@@ -86,7 +95,7 @@ export async function POST(
       if (claim.memberId === userId || claim.memberId === assigneeId)
         return {denied:true as const,conflict:true as const,claimId:claim.claimId};
 
-      const kernel = await assignPrimaryRepresentative(tx, { organizationId: orgId, grievanceId: claim.claimId, issuerUserId: userId, assigneeUserId: assigneeId });
+      const kernel = automatic?.kernel ?? await assignPrimaryRepresentative(tx, { organizationId: orgId, grievanceId: claim.claimId, issuerUserId: userId, assigneeUserId: assigneeId });
       // The kernel is the record of who holds the case; the mirror may be stale or empty.
       previousAssignee = kernel.previousUserId;
       if (previousAssignee === assigneeId) {
@@ -110,7 +119,7 @@ export async function POST(
         })
         .where(and(eq(claims.claimId, claim.claimId), eq(claims.organizationId, orgId)))
         .returning({ claimId: claims.claimId });
-      if (!changed) return {conflicted:true as const,claimId:claim.claimId};
+      if (!changed) throw new AssignmentConflictError();
 
       // Durable in-transaction history of the transfer.
       const [update] = await tx
@@ -144,6 +153,7 @@ export async function POST(
           updatedBy: userId,
           // Who held the authority to route this case, and under which instrument.
           authority: claim.authority,
+          ...(automatic ? { matching: automatic.matching } : {}),
         },
       });
 
@@ -163,15 +173,10 @@ export async function POST(
         { status: 200 },
       );
     }
-    if ('conflicted' in result) {
-      return NextResponse.json(
-        { error: 'ASSIGNMENT_CONFLICT', message: 'The case assignment changed concurrently. Reload the case and retry.', caseId: result.claimId },
-        { status: 409 },
-      );
-    }
     if(result.denied) return await denyCaseAction(actor,'case_assign',result.claimId,
       'conflict' in result ? 'Case parties cannot assign or receive their own case' : 'Assignee is not an active canonical representative in this organization');
 
+    const assigneeId = selectedAssigneeId!;
     logger.info('Case assigned', {
       caseId: result.claimId,
       fromAssignee: result.previousAssignee,
@@ -202,6 +207,10 @@ export async function POST(
       { status: 200 },
     );
   } catch (error) {
+    if (error instanceof AssignmentConflictError)
+      return NextResponse.json({ error: 'ASSIGNMENT_CONFLICT', message: 'The case assignment changed concurrently. Reload the case and retry.' }, { status: 409 });
+    if (error instanceof AssignmentMatchingError)
+      return NextResponse.json({ error: error.code, message: error.message }, { status: 409 });
     if (error instanceof AuthorityStoreError && (error.code === 'DENIED' || error.code === 'PRECONDITION' || error.code === 'NOT_FOUND')) {
       return NextResponse.json({ error: 'FORBIDDEN', message: 'The authority kernel did not authorize this assignment.' }, { status: 403 });
     }

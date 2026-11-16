@@ -7,7 +7,7 @@
 
 import { z } from "zod";
 import { withOrganizationAuth } from "@/lib/organization-middleware";
-import { hasMinRole } from "@/lib/api-auth-guard";
+import { isActiveOrganizationAdministrator } from '@/lib/auth/organization-admin';
 import { CAPE_AUDIT_EVENTS } from "@/lib/audit/cape-audit-events";
 import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import {
@@ -29,11 +29,12 @@ export const GET = withOrganizationAuth(async (_request, context) => {
   const { organizationId } = context;
 
   try {
-    const canAccess = await hasMinRole("officer");
+    const canAccess = await withRLSContext({ organizationId }, tx =>
+      isActiveOrganizationAdministrator(tx, { userId: context.userId, organizationId }));
     if (!canAccess) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
-        "Requires officer role or above"
+        "Requires an active organization administrator"
       );
     }
 
@@ -53,6 +54,12 @@ export const GET = withOrganizationAuth(async (_request, context) => {
     const rowMap = new Map(rows.map((r) => [r.itemId, r.completed]));
     for (const itemId of CHECKLIST_ITEM_IDS) {
       items[itemId] = rowMap.get(itemId) ?? false;
+      // Earlier completion flags counted directory rows, not invitations. They
+      // cannot attest invitation creation or acceptance without current source evidence.
+      if (items[itemId] && (itemId === 'users-invited' || itemId === 'roles-assigned')) {
+        const check = await withRLSContext({ organizationId }, tx => verifyChecklistStep(tx, organizationId, context.userId, itemId));
+        items[itemId] = check.ok;
+      }
     }
 
     const completedCount = Object.values(items).filter(Boolean).length;
@@ -99,11 +106,12 @@ export const PATCH = withOrganizationAuth(async (request, context) => {
   const { organizationId, userId } = context;
 
   try {
-    const canAccess = await hasMinRole("officer");
+    const canAccess = await withRLSContext({ organizationId }, tx =>
+      isActiveOrganizationAdministrator(tx, { userId, organizationId }));
     if (!canAccess) {
       return standardErrorResponse(
         ErrorCode.FORBIDDEN,
-        "Requires officer role or above"
+        "Requires an active organization administrator"
       );
     }
 

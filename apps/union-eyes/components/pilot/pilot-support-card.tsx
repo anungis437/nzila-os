@@ -18,26 +18,28 @@ import { cn } from "@/lib/utils";
 export interface PilotSupportCardProps {
   /** The product's support mailbox (lib/support-contact). */
   supportEmail: string;
+  locale?: string;
   className?: string;
 }
 
-export function PilotSupportCard({ supportEmail, className }: PilotSupportCardProps) {
+export function PilotSupportCard({ supportEmail, className, locale }: PilotSupportCardProps) {
+  const fr = locale?.startsWith('fr') ?? false;
   return (
     <Card className={cn("p-5 space-y-4", className)}>
       <div className="flex items-center gap-2">
         <LifeBuoy className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold">Support</h3>
+        <h3 className="text-sm font-semibold">{fr ? 'Assistance' : 'Support'}</h3>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Write to the support team with any question about your pilot.
+        {fr ? 'Écrivez à l’équipe d’assistance pour toute question concernant votre pilote.' : 'Write to the support team with any question about your pilot.'}
       </p>
 
       <div className="flex items-start gap-3">
         <Mail className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
         <div className="flex-1 min-w-0">
-          <span className="text-[11px] text-muted-foreground block">Support email</span>
-          <a href={`mailto:${supportEmail}`} className="text-sm font-medium text-primary hover:underline">
+          <span className="text-[11px] text-muted-foreground block">{fr ? 'Courriel d’assistance' : 'Support email'}</span>
+          <a href={`mailto:${supportEmail}`} className="break-all text-sm font-medium text-primary hover:underline">
             {supportEmail}
           </a>
         </div>
@@ -45,9 +47,9 @@ export function PilotSupportCard({ supportEmail, className }: PilotSupportCardPr
 
       <div className="pt-2 border-t">
         <Button variant="outline" size="sm" className="w-full" asChild>
-          <a href={`mailto:${supportEmail}?subject=Pilot%20Support%20Request`}>
+          <a href={`mailto:${supportEmail}?subject=${encodeURIComponent(fr ? 'Demande d’assistance pour le pilote' : 'Pilot Support Request')}`}>
             <Mail className="h-3.5 w-3.5 mr-1.5" />
-            Contact Support
+            {fr ? 'Contacter l’assistance' : 'Contact Support'}
           </a>
         </Button>
       </div>

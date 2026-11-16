@@ -113,6 +113,7 @@ export interface ReadableCase {
   assignedTo: string | null
   status: string
   priority: string
+  claimType: string | null
   visibility: CaseVisibility
   /** The sources of authority the kernel relied on for this decision (mandate, relationship, ...), for the audit record. */
   authority: ReadonlyArray<{ kind: string; id: string; instrument: string }>
@@ -135,7 +136,7 @@ export async function findReadableCase(
   if (!reference || reference.length > 255) throw ApiError.badRequest('Invalid case reference')
   const referenceScope = UUID.test(reference) ? or(eq(claims.claimId, reference), eq(claims.claimNumber, reference)) : eq(claims.claimNumber, reference)
   const query = tx
-    .select({ id: claims.id, claimId: claims.claimId, organizationId: claims.organizationId, memberId: claims.memberId, assignedTo: claims.assignedTo, status: claims.status, priority: claims.priority })
+    .select({ id: claims.id, claimId: claims.claimId, organizationId: claims.organizationId, memberId: claims.memberId, assignedTo: claims.assignedTo, status: claims.status, priority: claims.priority, claimType: claims.claimType })
     .from(claims)
     .where(and(eq(claims.organizationId, actor.organizationId), referenceScope))
     .limit(1)
@@ -206,16 +207,17 @@ export function caseHistoryVisibility(visibility: CaseVisibility): SQL {
   return and(eq(claimUpdates.isInternal, false), eq(claimUpdates.visibilityScope, 'member'))!
 }
 
-export async function caseAssigneeEligible(tx: RLSTx, actor: CaseActor, assigneeId: string): Promise<boolean> {
+export async function caseAssigneeEligible(tx: RLSTx, actor: Pick<CaseActor, 'userId' | 'organizationId'>, assigneeId: string): Promise<boolean> {
   if (currentStateContextEnabled()) {
     // The predicate checks the actual business session and the target's private
     // live membership. A request userId is never promoted to an auth identity.
-    const [row] = await tx.execute(sql`SELECT public.ue_case_assignee_authorized(${assigneeId},${actor.organizationId}::uuid) AS allowed`)
+    const { rows: [row] } = await drizzleExecutor(tx).query<{ allowed: boolean }>(
+      'SELECT public.ue_case_assignee_authorized($1,$2::uuid) AS allowed', [assigneeId, actor.organizationId])
     return row?.allowed === true
   }
-  const rows = await tx.execute(sql`SELECT role FROM public.organization_members
-    WHERE organization_id=${actor.organizationId}::uuid AND user_id=${assigneeId}
-      AND status='active' AND deleted_at IS NULL LIMIT 1`)
+  const { rows } = await drizzleExecutor(tx).query<{ role: string }>(`SELECT role FROM public.organization_members
+    WHERE organization_id=$1::uuid AND user_id=$2
+      AND status='active' AND deleted_at IS NULL LIMIT 1`, [actor.organizationId, assigneeId])
   const role = typeof rows[0]?.role === 'string' ? casePolicyRole(rows[0].role) : null
   return !!role && caseActionAllowed('note_add_internal', role)
 }

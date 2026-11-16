@@ -1,7 +1,9 @@
 export const dynamic = 'force-dynamic';
 
-import AdminOnboardingWizard from '@/components/onboarding/admin-onboarding-wizard';
+import OnboardingConsole from '@/app/[locale]/dashboard/pilot/onboarding/onboarding-console';
+import { supportEmail } from '@/lib/support-contact';
 
-export default function AdminOnboardingPage() {
-  return <AdminOnboardingWizard />;
+export default async function AdminOnboardingPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return <OnboardingConsole supportEmail={supportEmail()} organizationSetup locale={locale} />;
 }

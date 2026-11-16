@@ -228,6 +228,8 @@ const ATOMIC_AUDIT = /persistAtomicAudit|appendMandatoryAudit|performAtomic(?:Sy
  */
 export const AUTH_MANDATORY_AUDIT_SERVICES: Record<string, { file: string; proof: RegExp }> = {
   createInvite: { file: 'invites/service.ts', proof: /\},\s*true\)\s*\n\s*\n\s*return \{ success: true, inviteId/ },
+  reissueInvite: { file: 'invites/service.ts', proof: /logEvent\('invite_reissued',[\s\S]*?\}, true\)/ },
+  revokeInvite: { file: 'invites/service.ts', proof: /logEvent\('invite_revoked',[\s\S]*?\}, true\)/ },
   updateOrgAuthPolicy: { file: 'policy/admin.ts', proof: /await withAuthSavepoint\(async \(\) => db\.insert\(authAuditLog\)[\s\S]*?org_policy_updated/ },
   disableMfa: { file: 'mfa/service.ts', proof: /mfa_disabled[\s\S]*?\}, db, true\)/ },
   enrollMfa: { file: 'mfa/service.ts', proof: /await logEvent\('mfa_enroll_started', \{ userId: input\.userId \}, db, true\)/ },

@@ -3,11 +3,10 @@
  * Returns claims from the database for the LRO workbench case queue.
  */
 import { withApi, ApiError } from '@/lib/api/framework';
-import { sql } from 'drizzle-orm';
 import { withRLSContext } from '@/lib/db/with-rls-context';
-import { getCaseActor, caseReadScope } from '@/lib/cases/case-authorization';
-import { claimIdentitySelect } from '@/lib/cases/claim-identity';
-import { projectWorkbenchRow, workbenchCapabilities } from '@/lib/cases/workbench-projection';
+import { getCaseActor } from '@/lib/cases/case-authorization';
+import { loadWorkbenchCases } from '@/lib/cases/workbench-queue';
+import { workbenchCapabilities } from '@/lib/cases/workbench-projection';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,58 +32,11 @@ export const GET = withApi(
       throw ApiError.forbidden('Organization scope is not permitted for this actor.');
     }
 
-    const conditions: ReturnType<typeof sql>[] = [caseReadScope(actor, 'c')];
-    if (status) {
-      conditions.push(sql`c.status = ${status}`);
-    }
-
-    const where = sql`WHERE ${sql.join(conditions, sql` AND `)}`;
-
-    const rows = await withRLSContext(async (tx) => tx.execute(
-      sql`SELECT
-            c.claim_id AS "claimId",
-            c.claim_number AS "claimNumber",
-            c.organization_id AS "organizationId",
-            c.is_anonymous AS "isAnonymous",
-            c.claim_type AS "claimType",
-            c.status,
-            c.priority,
-            c.incident_date AS "incidentDate",
-            c.location,
-            c.description,
-            c.desired_outcome AS "desiredOutcome",
-            c.witnesses_present AS "witnessesPresent",
-            c.witness_details AS "witnessDetails",
-            c.previously_reported AS "previouslyReported",
-            c.previous_report_details AS "previousReportDetails",
-            c.assigned_to AS "assignedTo",
-            c.assigned_at AS "assignedAt",
-            COALESCE(c.attachments, '[]'::jsonb) AS attachments,
-            COALESCE(c.voice_transcriptions, '[]'::jsonb) AS "voiceTranscriptions",
-            COALESCE(c.metadata, '{}'::jsonb) AS metadata,
-            c.created_at AS "createdAt",
-            c.updated_at AS "updatedAt",
-            c.closed_at AS "closedAt",
-            ${claimIdentitySelect(actor, true)}
-          FROM claims c
-          LEFT JOIN organization_members m
-            ON m.user_id = c.member_id
-            AND m.organization_id::text = c.organization_id::text
-          ${where}
-          ORDER BY
-            CASE c.priority
-              WHEN 'critical' THEN 1
-              WHEN 'high' THEN 2
-              WHEN 'medium' THEN 3
-              WHEN 'low' THEN 4
-            END,
-            c.created_at DESC
-          LIMIT 200`
-    ));
+    const rows = await withRLSContext(tx => loadWorkbenchCases(tx, actor, status));
 
     return {
-      claims: Array.from(rows as Iterable<Record<string, unknown>>).map((row) => projectWorkbenchRow(actor, row)),
-      capabilities: workbenchCapabilities(actor),
+      claims: rows,
+      capabilities: workbenchCapabilities(rows),
     };
   },
 );

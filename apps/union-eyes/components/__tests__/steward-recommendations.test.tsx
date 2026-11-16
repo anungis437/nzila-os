@@ -63,11 +63,11 @@ describe('StewardRecommendations: the recommendation request', () => {
     await showCandidates();
 
     expect(fetchMock).toHaveBeenCalledWith('/api/grievances/grievance-1/recommend-steward', expect.objectContaining({ method: 'POST' }));
-    expect(screen.getByText('Steward user-123…')).toBeInTheDocument();
+    expect(screen.getByText('Steward 1')).toBeInTheDocument();
     expect(screen.getByText('Ontario')).toBeInTheDocument();
     expect(screen.getByText('Discipline')).toBeInTheDocument();
     expect(screen.getByText('Load: 2/10')).toBeInTheDocument();
-    expect(screen.getByText('87')).toBeInTheDocument();
+    expect(screen.getByText('General practice')).toBeInTheDocument();
     expect(screen.queryByText(/No steward could be recommended/)).toBeNull();
   });
 
@@ -137,7 +137,7 @@ describe('StewardRecommendations: the recommendation request', () => {
     server(async () => answer({}));
     await showCandidates(vi.fn(), 'fr-CA');
 
-    expect(screen.getByText('Représentant user-123…')).toBeInTheDocument();
+    expect(screen.getByText('Représentant 1')).toBeInTheDocument();
     expect(screen.getByText('Charge: 2/10')).toBeInTheDocument();
   });
 
@@ -201,4 +201,13 @@ describe('StewardRecommendations: assignment', () => {
     expect(onAssign).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Assign' })).toBeEnabled();
   });
+  it.each(['en-CA','fr-CA'] as const)('offers automatic matching without selecting a profile in %s', async (locale) => {
+    const onAssign = vi.fn();
+    const fetcher = server(async () => answer({ success: true }));
+    render(<NextIntlClientProvider locale={locale} messages={locale === 'en-CA' ? enCA : frCA}><StewardRecommendations grievanceId="grievance-1" onAssign={onAssign} /></NextIntlClientProvider>);
+    fireEvent.click(screen.getByRole('button', { name: locale === 'en-CA' ? 'Match expertise and assign' : 'Attribuer selon l’expertise et la charge' }));
+    await waitFor(() => expect(onAssign).toHaveBeenCalledWith('automatic'));
+    expect(fetcher).toHaveBeenCalledWith('/api/grievances/grievance-1/assign', expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ automatic: true }) }));
+  });
+
 });

@@ -75,7 +75,7 @@ describe('grievances/[id]/recommend-steward route', () => {
     const { POST } = await loadRoute();
     const response = await POST(post());
     expect(response.status).toBe(200);
-    expect(m.recommendSteward).toHaveBeenCalledWith('org_1', GRIEVANCE, { tx: true });
+    expect(m.recommendSteward).toHaveBeenCalledWith('org_1', GRIEVANCE, { tx: true }, 'u1');
     expect(m.auditDataMutation).toHaveBeenCalledWith(expect.objectContaining({ resource: 'steward_recommendations', resourceId: GRIEVANCE, organizationId: 'org_1' }));
   });
 });

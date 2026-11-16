@@ -12,6 +12,8 @@ const m = vi.hoisted(() => ({
   assignPrimaryRepresentative: vi.fn(),
   persistAtomicAudit: vi.fn(),
   lockGrievance: vi.fn(),
+  requireKernelCaseAction: vi.fn(),
+  automaticallyAssignRepresentative: vi.fn(),
   committed: false,
   committedWhenSystemRan: undefined as boolean | undefined,
 }));
@@ -21,6 +23,9 @@ vi.mock('@/lib/db/with-rls-context', () => ({
   withRLSContext: m.withRLSContext,
   withSystemContext: m.withSystemContext,
 }));
+vi.mock('@/lib/cases/case-authorization', () => ({ requireKernelCaseAction: m.requireKernelCaseAction }));
+vi.mock('@/lib/cases/assignment-capacity', () => ({ lockAssignmentScope: vi.fn(), refreshRepresentativeWorkloads: vi.fn() }));
+vi.mock('@/lib/cases/automatic-assignment', async original => ({ ...(await original<typeof import('@/lib/cases/automatic-assignment')>()), automaticallyAssignRepresentative: m.automaticallyAssignRepresentative }));
 vi.mock('@/lib/services/case-access-service', () => ({ assignPrimaryRepresentative: m.assignPrimaryRepresentative }));
 vi.mock('@/lib/services/steward-assignment', () => ({ assignSteward: m.assignSteward }));
 vi.mock('@/lib/audit/atomic-audit', () => ({ persistAtomicAudit: m.persistAtomicAudit }));
@@ -53,6 +58,8 @@ describe('grievances/[id]/assign route', () => {
     resetCaller();
     caller.role = 'officer';
     caller.params = { id: GRIEVANCE };
+    m.requireKernelCaseAction.mockResolvedValue(undefined);
+    m.automaticallyAssignRepresentative.mockResolvedValue({ assigneeId: NEW_STEWARD, stewardProfileId: NEW_STEWARD_PROFILE, kernel: { previousUserId: null }, matching: { specialization: 'safety', maxCaseload: 5 } });
     m.committed = false;
     m.committedWhenSystemRan = undefined;
     m.assignSteward.mockResolvedValue({ grievanceId: GRIEVANCE, stewardId: NEW_STEWARD });
@@ -259,4 +266,27 @@ describe('grievances/[id]/assign route', () => {
     expect(m.lockGrievance.mock.invocationCallOrder[0]).toBeLessThan(m.assignSteward.mock.invocationCallOrder[0]);
     expect(m.lockGrievance.mock.invocationCallOrder[0]).toBeLessThan(m.assignPrimaryRepresentative.mock.invocationCallOrder[0]);
   });
+  it('automatically assigns through one kernel grant and retains durable deadline convergence', async () => {
+    const { PATCH } = await loadRoute();
+    expect((await PATCH(assignRequest({ automatic: true }))).status).toBe(200);
+    expect(m.requireKernelCaseAction).toHaveBeenCalledWith(m.tx, { userId: 'u1', organizationId: 'org_1' }, GRIEVANCE, 'case:assign');
+    expect(m.requireKernelCaseAction.mock.invocationCallOrder[0]).toBeLessThan(m.automaticallyAssignRepresentative.mock.invocationCallOrder[0]);
+    expect(m.assignPrimaryRepresentative).not.toHaveBeenCalled();
+    expect(m.assignSteward).toHaveBeenCalledWith('org_1', GRIEVANCE, NEW_STEWARD_PROFILE, m.tx);
+    expect(m.persistAtomicAudit.mock.calls[0][1].details).toMatchObject({ matching: { specialization: 'safety' } });
+    expect(m.requestAssignmentConvergence).toHaveBeenCalled();
+  });
+  it('does not look for a match when the live kernel refuses the caller', async () => {
+    const { ApiError } = await import('@/lib/api/errors');
+    m.requireKernelCaseAction.mockRejectedValueOnce(ApiError.forbidden());
+    const { PATCH } = await loadRoute();
+    expect((await PATCH(assignRequest({ automatic: true }))).status).toBe(403);
+    expect(m.automaticallyAssignRepresentative).not.toHaveBeenCalled(); expect(m.assignSteward).not.toHaveBeenCalled();
+  });
+  it('rejects mixed assignment methods before any transaction', async () => {
+    const { PATCH } = await loadRoute();
+    expect((await PATCH(assignRequest({ automatic: true, stewardId: NEW_STEWARD_PROFILE }))).status).toBe(400);
+    expect(m.withRLSContext).not.toHaveBeenCalled();
+  });
+
 });
