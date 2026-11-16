@@ -2,10 +2,8 @@
  * Steward Assignment Service
  *
  * Recommends and assigns stewards to grievances based on
- * region match, specialization, workload, and priority.
- *
- * Exposes `calculateStewardScore()` as an ML-ready scoring
- * function that can later be swapped for a trained model.
+ * recorded expertise and actual open workload. Recommendation order follows the
+ * same deterministic policy as automatic assignment; the kernel decides each grant.
  */
 
 import type { RLSTx } from "@/lib/db/with-rls-context";
@@ -13,6 +11,10 @@ import { ApiError } from "@/lib/api/errors";
 import { stewards } from "@/db/schema/domains/member/stewards";
 import { stewardAssignments } from "@/db/schema/union-structure-schema";
 import { grievances } from "@/db/schema/domains/claims/grievances";
+import { matchingRepresentativeEligible } from '@/lib/cases/assignment-eligibility';
+import { drizzleExecutor } from '@/lib/authority/store/route-adapter';
+import { representativeWorkloads } from '@/lib/cases/assignment-capacity';
+import { matchingExpertise, rankMatchingProfiles } from '@/lib/cases/assignment-ranking';
 import { eq, and, asc, sql } from "drizzle-orm";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -25,6 +27,7 @@ export interface StewardCandidate {
   currentCaseload: number;
   maxCaseload: number;
   score: number;
+  exactExpertise?: boolean;
 }
 
 export interface ScoringInput {
@@ -131,10 +134,10 @@ export async function recommendSteward(
   orgId: string,
   grievanceId: string,
   tx: RLSTx,
+  issuerUserId: string,
 ): Promise<StewardCandidate[]> {
-  // Fetch the grievance
   const [grievance] = await tx
-    .select()
+    .select({ id: grievances.id, type: grievances.type })
     .from(grievances)
     .where(
       and(eq(grievances.id, grievanceId), eq(grievances.organizationId, orgId)),
@@ -150,27 +153,26 @@ export async function recommendSteward(
     .from(stewards)
     .where(and(eq(stewards.orgId, orgId), eq(stewards.active, true)));
 
-  // Score each
-  const candidates: StewardCandidate[] = activeStewards.map((s) => ({
-    stewardId: s.id,
-    userId: s.userId,
-    region: s.region,
-    specialization: s.specialization,
-    currentCaseload: s.currentCaseload,
-    maxCaseload: s.maxCaseload,
-    score: calculateStewardScore({
-      stewardRegion: s.region,
-      stewardSpecialization: s.specialization,
-      currentCaseload: s.currentCaseload,
-      maxCaseload: s.maxCaseload,
-      grievanceCategory: grievance.type,
-      grievancePriority: grievance.priority,
-      grievanceRegion: grievance.workplaceName, // best-effort region proxy
-    }),
-  }));
-
-  // Sort descending by score
-  candidates.sort((a, b) => b.score - a.score);
+  const workloads = await representativeWorkloads(tx, orgId, activeStewards.map(profile => profile.userId));
+  const recused = new Set((await drizzleExecutor(tx).query<{ principal_user_id: string }>(
+    `SELECT principal_user_id FROM ue_authority_recusals WHERE organization_id=$1::uuid
+      AND resource_type='case' AND resource_id=$2::uuid AND lifted_at IS NULL`, [orgId, grievanceId],
+  )).rows.map(row => row.principal_user_id));
+  const ranked = rankMatchingProfiles(activeStewards.map(profile => ({
+    id: profile.id, userId: profile.userId, specialization: profile.specialization,
+    maxCaseload: profile.maxCaseload, openCases: workloads.get(profile.userId) ?? 0,
+  })), grievance.type);
+  const candidates: StewardCandidate[] = [];
+  for (const profile of ranked) {
+    if (profile.userId === issuerUserId || recused.has(profile.userId) ||
+      !(await matchingRepresentativeEligible(tx, { userId: issuerUserId, organizationId: orgId }, profile.userId))) continue;
+    const stored = activeStewards.find(row => row.id === profile.id)!;
+    const exactExpertise = matchingExpertise(profile.specialization, grievance.type);
+    candidates.push({ stewardId: profile.id, userId: profile.userId, region: stored.region,
+      specialization: profile.specialization, currentCaseload: profile.openCases, maxCaseload: profile.maxCaseload,
+      exactExpertise, score: Math.round((1 - profile.openCases / profile.maxCaseload) * 100),
+    });
+  }
   return candidates;
 }
 

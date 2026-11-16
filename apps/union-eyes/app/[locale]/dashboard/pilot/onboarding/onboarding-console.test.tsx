@@ -35,6 +35,14 @@ afterEach(() => {
 })
 
 describe('OnboardingConsole: what it shows', () => {
+  it('uses the persisted three-step organization setup without demo or optional integration controls', async () => {
+    fetchMock.mockResolvedValueOnce(answer({ 'org-seeded': true }));
+    render(<OnboardingConsole supportEmail="help@example.test" organizationSetup />);
+    expect(await screen.findByText('1 of 3 steps completed')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Invite users/ })).toHaveAttribute('href', '/dashboard/admin/members');
+    expect(screen.queryByText('Load Demo Data')).not.toBeInTheDocument();
+    expect(screen.queryByText('Integrations configured')).not.toBeInTheDocument();
+  });
   it('reads the steps out of the framework data and shows the support address it was given, and nothing made up', async () => {
     fetchMock.mockResolvedValueOnce(answer({ 'org-seeded': true }))
     render(<OnboardingConsole supportEmail="help@example.test" />)

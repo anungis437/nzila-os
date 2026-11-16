@@ -332,8 +332,8 @@ const INTEGRATION_MANAGER_ROLES = [...SUPPORT_MANAGER_ROLES, 'data_analytics_man
 // The security page admits security_manager and above (levels in lib/auth/roles.ts): the integration, billing and data managers rank below it.
 const SECURITY_ROLES = [...PLATFORM_LEAD_ROLES, 'customer_success_director', 'security_manager'];
 const PLATFORM_NAVIGATION_ROLES: Record<string, readonly string[]> = {
+  '/dashboard/admin/members': ['admin', ...SUPPORT_MANAGER_ROLES],
   '/dashboard/operations': PLATFORM_LEAD_ROLES,
-  '/dashboard/admin/members': SUPPORT_MANAGER_ROLES,
   '/dashboard/integrations': INTEGRATION_MANAGER_ROLES,
   '/dashboard/security': SECURITY_ROLES,
 };
@@ -343,6 +343,7 @@ const PLATFORM_NAVIGATION_ROLES: Record<string, readonly string[]> = {
  * scripts/runtime/nav-guard-census.ts holds this table to the guards in the pages and layouts, so a destination is never offered to a role it would redirect.
  */
 export const DESTINATION_MIN_ROLE: Readonly<Record<string, UserRole>> = {
+  '/dashboard/admin/members': UserRole.ADMIN,
   '/dashboard/workbench': UserRole.STEWARD,
   '/dashboard/members': UserRole.STEWARD,
   '/dashboard/correspondence': UserRole.STEWARD,

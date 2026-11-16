@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { apiErrorMessage } from '@/lib/client/api-envelope';
+import { apiErrorMessage, isRecord } from '@/lib/client/api-envelope';
 
 export default function InviteAcceptPage() {
   const router = useRouter();
@@ -20,20 +20,38 @@ export default function InviteAcceptPage() {
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [challengeToken, setChallengeToken] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [useRecovery, setUseRecovery] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/invite/accept', {
+      const res = await fetch(challengeToken ? '/api/auth/mfa/challenge' : '/api/auth/invite/accept', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, firstName, lastName }),
+        body: JSON.stringify(challengeToken
+          ? { challengeToken, ...(useRecovery ? { recoveryCode: code.trim() } : { code: code.trim() }) }
+          : { token, firstName, lastName }),
       });
-      const data = await res.json();
+      const data: unknown = await res.json();
       if (!res.ok) {
         setError(apiErrorMessage(data, 'Could not accept invite'));
+        return;
+      }
+      if (!isRecord(data)) { setError('Sign-in could not be confirmed. Please try again.'); return; }
+      if (!challengeToken && data.requiresMfa === true) {
+        if (typeof data.challengeToken !== 'string' || !data.challengeToken) {
+          setError('Verification could not be started. Please sign in again.');
+          return;
+        }
+        setChallengeToken(data.challengeToken);
+        return;
+      }
+      if (challengeToken ? data.ok !== true : !(isRecord(data.user) && typeof data.user.id === 'string' && data.user.id)) {
+        setError('Sign-in could not be confirmed. Please try again.');
         return;
       }
       router.replace('/en-CA/dashboard');
@@ -52,7 +70,7 @@ export default function InviteAcceptPage() {
             Accept your invitation
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Confirm your details to join the organization.
+            {challengeToken ? 'Verify your identity to finish signing in.' : 'Confirm your details to join the organization.'}
           </p>
         </div>
 
@@ -69,7 +87,11 @@ export default function InviteAcceptPage() {
         )}
 
         <form onSubmit={submit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          {challengeToken ? <div className="space-y-3">
+            <label className="block" htmlFor="invite-mfa-code">{useRecovery ? 'Recovery code' : 'Authenticator code'}</label>
+            <input id="invite-mfa-code" value={code} onChange={event => setCode(event.target.value)} autoComplete="one-time-code" required className="w-full rounded border p-2" />
+            <label className="flex items-center gap-2"><input type="checkbox" checked={useRecovery} onChange={event => { setUseRecovery(event.target.checked); setCode(''); }} />Use a recovery code</label>
+          </div> : <div className="grid grid-cols-2 gap-3">
             <div>
               <label
                 htmlFor="firstName"
@@ -98,14 +120,14 @@ export default function InviteAcceptPage() {
                 className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-electric focus:ring-2 focus:ring-electric/20 outline-none transition-colors"
               />
             </div>
-          </div>
+          </div>}
 
           <button
             type="submit"
             disabled={loading || !token}
             className="w-full bg-electric hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-electric/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Accepting…' : 'Accept invitation'}
+            {loading ? 'Working…' : challengeToken ? 'Verify identity' : 'Accept invitation'}
           </button>
         </form>
       </div>

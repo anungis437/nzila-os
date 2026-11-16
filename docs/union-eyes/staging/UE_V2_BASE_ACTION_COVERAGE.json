@@ -1,0 +1,583 @@
+{
+  "schemaVersion": 1,
+  "recordedDate": "2026-11-15",
+  "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
+  "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
+  "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
+  "currentRepairBranch": "fix/ue-onboarding-admin-20261115",
+  "currentRepairRuntimeQualification": "NOT_DEPLOYED",
+  "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
+  "fullBaseActionQualification": "INCOMPLETE",
+  "productionAuthorized": false,
+  "founderModel": "anungis and anungis437 are one founder; no independent-human reviewer is invented",
+  "excluded": [
+    "Union finance and dues persistence",
+    "Financial Officer 2.1",
+    "Production deployment"
+  ],
+  "rules": [
+    "Navigation never proves action execution.",
+    "Null coverage fields are unverified work, never implicit passes.",
+    "Source/local proof is not staging proof.",
+    "Broader persona contracts are not automatically base blockers; enabled pilot scope must be explicit.",
+    "Absent features cannot be labelled implemented by replacing them with an unavailable notice."
+  ],
+  "actions": [
+    {
+      "id": "C01",
+      "action": "Invitation to first case",
+      "state": "PARTIAL_POSITIVE_JOURNEY_PROVEN",
+      "evidenceSummary": "Real admin creation and independent accepted membership readback; user confirmed receipt, dashboard, case creation and reopening.",
+      "remaining": "Exact repaired-source staging negatives, audit/case readback and retained-fixture disposition.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": "/invite/accept",
+      "apiMethods": [
+        "POST /api/auth/invite/create",
+        "POST /api/auth/invite/accept"
+      ],
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C02",
+      "action": "Truthful invitation email status",
+      "state": "LOCAL_REPAIR_STAGING_PENDING",
+      "evidenceSummary": "201 creation is separated from provider submission; failed submission is never labelled sent.",
+      "remaining": "Repaired-source staging provider failure and recovery.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": "/dashboard/admin/members",
+      "apiMethods": [
+        "POST /api/auth/invite/create"
+      ],
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C03",
+      "action": "Invitation reissue and revocation",
+      "state": "LOCAL_REPAIR_STAGING_PENDING",
+      "evidenceSummary": "Existing tenant-auth privileges; transactional retirement, required audit, foreign-tenant and replay refusal; concurrent create/reissue verified on native PostgreSQL.",
+      "remaining": "Real staged admin UI/API recovery, revoked/expired bearer refusal and audit readback.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": "/dashboard/admin/members",
+      "apiMethods": [
+        "GET /api/auth/invite/manage",
+        "POST /api/auth/invite/manage"
+      ],
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C04",
+      "action": "Organization-admin invitation entry",
+      "state": "LOCAL_REPAIR_STAGING_PENDING",
+      "evidenceSummary": "Direct active admin membership opens a tenant console; platform support retains a separate console and receives no invitation authority by title.",
+      "remaining": "New-source real admin navigation and positive mutation plus unauthorized role/tenant denial.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": "/dashboard/admin/members",
+      "apiMethods": [
+        "GET /api/auth/invite/manage"
+      ],
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C05",
+      "action": "Persistent organization setup",
+      "state": "LOCAL_REPAIR_STAGING_PENDING",
+      "evidenceSummary": "An existing persistent checklist was found; base admin now uses it, checks invitation records, rechecks historical flags and omits demo/integration controls.",
+      "remaining": "Staged verify/reload, audit rollback and final EN/FR/mobile treatment.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": "/dashboard/admin/onboarding",
+      "apiMethods": [
+        "GET /api/pilot/onboarding",
+        "PATCH /api/pilot/onboarding"
+      ],
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C06",
+      "action": "Membership and access lifecycle",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Membership-removal access denial passed on F; full new/role-change/suspend/reinstate/deactivate positive workflow was not qualified.",
+      "remaining": "Complete enabled membership lifecycle and same-session revocation matrix.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C07",
+      "action": "Multiple capacity and active organization",
+      "state": "UNVERIFIED_VARIANTS",
+      "evidenceSummary": "Canonical organization binding and selected membership boundaries exist; do not infer every combination.",
+      "remaining": "List enabled pilot role/capacity combinations and exercise organization/resource switches.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C08",
+      "action": "Connected intake to closure",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Six admitted base journeys cover selected filing, assignment and casework stages on F.",
+      "remaining": "One connected intake/triage/assignment/investigation/transition/close/handoff flow with persisted outcomes.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C09",
+      "action": "Automatic workload and expertise assignment",
+      "state": "LOCAL_IMPLEMENTATION_STAGING_PENDING",
+      "evidenceSummary": "Live claim/formal-grievance callers and EN/FR controls now use canonical assignment authority, saved representative expertise/capacity and actual open primary-assignment workload. Three native PostgreSQL contention tests pass; SQL and route/UI integration checks pass locally.",
+      "remaining": "Final exact-source checks/CI, qualified admission/deployment, real staged admin profile configuration and authorized matching, no-match/capacity/conflict/role/tenant/refusal, readback/audit/retry and concurrent-request evidence.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": [
+        "/dashboard/admin/members",
+        "/dashboard/workbench",
+        "/dashboard/grievances"
+      ],
+      "apiMethods": [
+        "GET /api/assignment-profiles",
+        "PUT /api/assignment-profiles",
+        "POST /api/cases/{caseId}/assign (automatic:true)",
+        "PATCH /api/grievances/{id}/assign (automatic:true)"
+      ],
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false,
+      "ownerDecision": "Require automatic workload/expertise matching"
+    },
+    {
+      "id": "C10",
+      "action": "Senior representative supervision",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Selected mandate and assignment boundaries have proof; SR01\u2013SR22 are not all certified.",
+      "remaining": "Positive permitted review/escalation/exception/delegation actions for enabled pilot scope.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C11",
+      "action": "Successor handoff",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Formal deadline recipient convergence and outgoing-recipient suppression passed.",
+      "remaining": "Connected successor acceptance, unfinished obligations and outgoing resource revocation.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C12",
+      "action": "Member case follow-through",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Member filing and scoped case reads passed; the newly invited member confirmed create/reopen.",
+      "remaining": "Enabled status/history/clarification/acknowledgement/review-request actions and negative disclosure boundaries.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C13",
+      "action": "Role-specific document journey",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Selected bytes, malware scanning and access/URL revocation passed.",
+      "remaining": "Connected upload/download/search across member, representative and supervisory case contexts.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C14",
+      "action": "User-facing sealed evidence export",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Case evidence seals and cryptographic verification passed; that is not a user-facing PDF/export journey.",
+      "remaining": "Browser control to authorized generated pack/download/verification and failure handling.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C15",
+      "action": "OCR document extraction",
+      "state": "SOURCE_IMPLEMENTED_UNQUALIFIED",
+      "evidenceSummary": "app/api/documents/[id]/ocr/route.ts and canonical PGlite tests exist.",
+      "remaining": "Actual staged extraction with document revision binding, resource authority and human review, or explicit release boundary.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": "/dashboard/documents",
+      "apiMethods": [
+        "POST /api/documents/{id}/ocr"
+      ],
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C16",
+      "action": "Correspondence approval and dispatch",
+      "state": "SOURCE_IMPLEMENTED_UNQUALIFIED",
+      "evidenceSummary": "Dedicated draft/revision/submit/approve/sign/dispatch routes exist; navigation is not execution proof.",
+      "remaining": "Enabled staff draft through recipient-safe dispatch, delivery/receipt and audit.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C17",
+      "action": "Staff messaging and preferences",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Member-thread replies and selected four-role access controls passed.",
+      "remaining": "Staff initiation, participants, preference enforcement and persisted read state.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C18",
+      "action": "Leadership indicators and drill-down",
+      "state": "NAVIGATION_ONLY",
+      "evidenceSummary": "Officer/executive destination access was exercised; metric content and drill-down were not thereby certified.",
+      "remaining": "Accurate scoped counts, freshness, authorized drill-down and inaccessible-source states.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C19",
+      "action": "Organization administration and audit operations",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Selected admin navigation and denials passed; current code repairs the invitation entry.",
+      "remaining": "Positive enabled organization configuration, access removal and audit-operation workflows.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C20",
+      "action": "Privacy request handling",
+      "state": "UNAVAILABLE_SELF_SERVICE_ALTERNATIVE_UNQUALIFIED",
+      "evidenceSummary": "The DSAR route is explicitly unavailable. A bounded supported alternative needs its own qualification.",
+      "remaining": "Confirm and exercise receipt, identity check, disclosure/correction and completion for the release process.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C21",
+      "action": "Connected deadlines",
+      "state": "PARTIAL_STAGED",
+      "evidenceSummary": "Staff-entered create/reschedule/complete/cancel and formal reminder-worker scenarios passed on F.",
+      "remaining": "Connected cross-workbench/member/handoff presentation and notification matrix; legal calculation and intake email reminders remain absent.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": "/dashboard/claims/{caseId}",
+      "apiMethods": [
+        "GET /api/cases/{caseId}/deadlines",
+        "POST /api/cases/{caseId}/deadlines",
+        "PATCH /api/cases/{caseId}/deadlines"
+      ],
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    },
+    {
+      "id": "C22",
+      "action": "Failure, concurrency and recovery coverage",
+      "state": "PARTIAL_STAGED_AND_LOCAL",
+      "evidenceSummary": "Selected source-bound recovery/worker proofs exist; invitation concurrency and audit rollback now have native local proof.",
+      "remaining": "Apply retry/stale/partial-failure/recovery/cleanup criteria to every enabled action.",
+      "canonicalAuthority": {
+        "identity": "Verified internal principal",
+        "organization": "Active private membership; no hierarchy or platform-title content bypass",
+        "roleOrMandate": "Action-specific verification remains required"
+      },
+      "ui": null,
+      "apiMethods": null,
+      "positiveDurableResult": null,
+      "negativeMatrix": null,
+      "persistenceAndAudit": null,
+      "retryRecoveryAndCleanup": null,
+      "coverageFieldsComplete": false
+    }
+  ],
+  "operations": [
+    {
+      "id": "O01",
+      "action": "Controlled inbox delivery",
+      "state": "PARTIAL_PROVEN",
+      "remaining": "Invitation receipt confirmed by controlled recipient; formal deadline recipient inbox and terminal events remain unqualified."
+    },
+    {
+      "id": "O02",
+      "action": "Authenticated casework performance",
+      "state": "UNVERIFIED",
+      "remaining": "Existing public-workload p95 is not an authenticated workload test."
+    },
+    {
+      "id": "O03",
+      "action": "Sustained pilot workload",
+      "state": "UNVERIFIED",
+      "remaining": "Declare concurrency, dataset, duration and budgets; measure actual signed-in journeys."
+    },
+    {
+      "id": "O04",
+      "action": "Continuous backup freshness",
+      "state": "UNVERIFIED",
+      "remaining": "One-time restored-copy proof does not establish continuous authoritative backup monitoring."
+    },
+    {
+      "id": "O05",
+      "action": "Daily audit seal monitoring",
+      "state": "UNVERIFIED",
+      "remaining": "One-time chain and evidence sealing proof does not establish daily checkpoint freshness."
+    },
+    {
+      "id": "O06",
+      "action": "Worker and cron freshness",
+      "state": "PARTIAL_PROVEN",
+      "remaining": "Six worker scenarios passed; continuous heartbeat, queue age and schedule monitoring still need proof."
+    },
+    {
+      "id": "O07",
+      "action": "Dependency health",
+      "state": "UNVERIFIED",
+      "remaining": "Connect authoritative scanner/storage/mail/database health; do not provision excluded Redis/Django/payment dependencies merely to fill old probes."
+    },
+    {
+      "id": "O08",
+      "action": "External alerts and recovery",
+      "state": "PARTIAL_PROVEN",
+      "remaining": "Bounded real fault/recovery passed; external monitor, alert delivery and recovery freshness remain to qualify."
+    },
+    {
+      "id": "O09",
+      "action": "Full-traffic failover",
+      "state": "DEFERRED_SEPARATE_AUTHORITY",
+      "remaining": "Zero-traffic recovery proof is not a full-traffic cutover."
+    },
+    {
+      "id": "O10",
+      "action": "Physical devices and browser engines",
+      "state": "UNVERIFIED_SEPARATE_RELEASE_LEVEL",
+      "remaining": "390/1440 browser captures are not physical-device or alternate-engine certification."
+    },
+    {
+      "id": "O11",
+      "action": "Accessibility",
+      "state": "UNVERIFIED_FULL_STANDARD",
+      "remaining": "Complete keyboard, screen-reader and declared WCAG qualification for enabled journeys."
+    },
+    {
+      "id": "O12",
+      "action": "Complete bilingual states",
+      "state": "PARTIAL_PROVEN",
+      "remaining": "Admitted EN/FR casework passed; all enabled errors, accessibility strings and new setup screens need qualification."
+    },
+    {
+      "id": "O13",
+      "action": "Registry and status consistency",
+      "state": "PARTIAL_LOCAL_REPAIR",
+      "remaining": "New invitation/setup entries remain LIMITED. Historical deadline and operational descriptions still require truthful reconciliation."
+    },
+    {
+      "id": "O14",
+      "action": "Pilot outcomes and telemetry",
+      "state": "UNVERIFIED_PRODUCT_BOUNDARY",
+      "remaining": "Do not invent usage figures; confirm required purpose, consent, retention and outcome measures."
+    },
+    {
+      "id": "O15",
+      "action": "Incident and periodic restore cadence",
+      "state": "DEFERRED_OPERATING_CADENCE",
+      "remaining": "Document and exercise the agreed operating cadence without inventing additional staff or reviewers."
+    }
+  ],
+  "positiveOnboardingEvidence": "evidence/ue-v2-onboarding-20261115/controlled-invitation-first-use-241006d3.json",
+  "deferredCapabilities": [
+    "Direct Add Member form: intended path is invitation-based onboarding",
+    "Standalone member timeline; case-detail history is a separate supported surface",
+    "Document approvals and template authoring",
+    "SMS, campaigns, digest and quiet hours",
+    "External WorkAid/Clio connector and specialist acceptance",
+    "Federation roll-ups and cross-union analytics",
+    "Automatic legal filing-date calculation and intake deadline email reminders remain absent, distinct from implemented staff deadline management"
+  ],
+  "nextExecution": [
+    "Finish current repair validation and exact-head CI; normal merge only if eligible.",
+    "Admit a new application source and binding with valid staging authority, preserving the accepted old record.",
+    "Qualify repaired organization-admin/onboarding positive and negative actions on that exact deployment.",
+    "Complete connected casework/supervisory and user-facing document/evidence workflows.",
+    "Qualify leadership content and required operational controls; reconcile unresolved product promises."
+  ]
+}

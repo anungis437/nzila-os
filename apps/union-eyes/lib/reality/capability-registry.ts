@@ -94,6 +94,40 @@ export interface Capability {
  * entries are ONLY updated when the underlying state genuinely changes.
  */
 export const CAPABILITY_REGISTRY: readonly Capability[] = [
+  {
+    id: 'UE-AUTOMATIC-CASE-ASSIGNMENT',
+    title: 'Automatic representative matching by recorded expertise and live workload',
+    state: 'LIMITED',
+    ownedBy: ['lib/cases/automatic-assignment.ts', 'lib/cases/assignment-ranking.ts', 'lib/cases/assignment-capacity.ts', 'lib/cases/assignment-profiles.ts', 'app/api/assignment-profiles/route.ts', 'components/admin/representative-matching-profiles.tsx', 'components/workbench/workbench-console.tsx', 'components/steward-recommendations.tsx'],
+    evidence: [
+      'scripts/bootstrap-v2/automatic-assignment.native.test.ts — three local native PostgreSQL concurrency tests: last-slot refusal, balanced concurrent requests and shared manual/automatic capacity lock',
+      'lib/cases/automatic-assignment.pglite.test.ts; assignment-profiles.pglite.test.ts — real SQL, canonical assignment, live workload, capacity, recusal, inactive membership and mandatory-audit rollback',
+      'app/api/__tests__/cases-assign.route.test.ts; grievances-assign.route.test.ts; assignment-profiles.route.test.ts; components/admin/__tests__/representative-matching-profiles.test.tsx — server-bound authority, strict input, persistence controls and EN/FR actions',
+    ],
+    targetWave: 0,
+    notes: 'Required for base by founder decision. The real claim/formal-grievance assignment routes call the canonical kernel; the legacy direct-write engine remains unused. Active representative profiles record expertise and capacity. Ranking uses actual open primary assignments, exact/family expertise before explicitly configured general practice, and stable tie resolution. Each grant still requires case-specific authority and an adopted rule. Organization administration alone cannot hold a representative assignment. Retry never silently replaces an existing primary assignee. New-source CI, admission and credentialed staging action proof are pending; local proof is not staging acceptance.',
+  },
+  {
+    id: 'UE-ORGANIZATION-INVITATIONS',
+    title: 'Organization administrator invitations, reissue, revocation and acceptance',
+    state: 'LIMITED',
+    ownedBy: ['app/api/auth/invite/create/route.ts', 'app/api/auth/invite/manage/route.ts', 'components/admin/organization-invitations.tsx', 'app/invite/accept/page.tsx'],
+    evidence: [
+      'scripts/bootstrap-v2/auth-invite-concurrency.native.test.ts — actual PostgreSQL scoped auth roles: creation/listing, hashed tokens, foreign-tenant refusal, single replacement under concurrent reissue, old/revoked/replayed bearer refusal, acceptance and mandatory-audit rollback',
+      'app/api/__tests__/auth-invite-create.route.test.ts, auth-invite-manage.route.test.ts; components/admin/__tests__/organization-invitations.test.tsx; app/invite/accept/page.test.tsx — delivery uncertainty, direct-admin requirement, server-owned tenant and actor, EN/FR controls and required MFA settlement',
+    ],
+    targetWave: 0,
+    notes: 'Source/local proof only. Provider submission is distinct from inbox receipt. The latest 100 invitations are listed without tokens or hashes. Reissue retires the previous bearer transactionally; a failed email leaves a recoverable invitation. Full controlled-inbox onboarding through first case, new-source staging qualification and Entra account-linking variants remain unverified. No production acceptance claim.',
+  },
+  {
+    id: 'UE-ORGANIZATION-SETUP-CHECKLIST',
+    title: 'Persistent organization setup checklist',
+    state: 'LIMITED',
+    ownedBy: ['app/api/pilot/onboarding/route.ts', 'app/[locale]/dashboard/admin/onboarding/page.tsx', 'lib/pilot/onboarding-checklist-evidence.ts'],
+    evidence: ['app/api/__tests__/pilot-onboarding.route.test.ts; lib/pilot/__tests__/onboarding-invitation-evidence.test.ts — organization-scoped evidence and required atomic audit', 'app/[locale]/dashboard/pilot/onboarding/onboarding-console.test.tsx — read, verification and reload'],
+    targetWave: 0,
+    notes: 'The admin entry uses persisted setup evidence instead of the former browser-only wizard. Invitation steps read the tenant-auth invitation source; historical directory-derived flags are rechecked before display. Staff acceptance is a setup event, not proof of current resource authority. Demo controls and optional integration steps are absent from the base admin setup. Credentialed staging persistence and full bilingual/physical-device qualification remain pending.',
+  },
   // ------------------------------------------------------------------------
   // Generated scaffold actions (UE-FINAL-CONVERGENCE-2026-10: 200 "accepted" → HTTP 501)
   //

@@ -16,6 +16,7 @@ interface StewardCandidate {
   currentCaseload: number;
   maxCaseload: number;
   score: number;
+  exactExpertise?: boolean;
 }
 
 interface StewardRecommendationsProps {
@@ -29,12 +30,18 @@ const COPY = {
     steward: "Steward",
     load: "Load",
     noneFound: "No steward could be recommended for this grievance.",
+    automatic: "Match expertise and assign",
+    expertise: "Expertise match",
+    general: "General practice",
   },
   fr: {
     assignFailed: "Le représentant n’a pas pu être attribué.",
     steward: "Représentant",
     load: "Charge",
     noneFound: "Aucun représentant n’a pu être recommandé pour ce grief.",
+    automatic: "Attribuer selon l’expertise et la charge",
+    expertise: "Expertise correspondante",
+    general: "Pratique générale",
   },
 } as const;
 
@@ -60,6 +67,7 @@ function toCandidates(data: unknown): StewardCandidate[] {
       currentCaseload: candidate.currentCaseload,
       maxCaseload: candidate.maxCaseload,
       score: candidate.score,
+      exactExpertise: candidate.exactExpertise === true,
     };
   });
 }
@@ -102,17 +110,17 @@ export function StewardRecommendations({
     }
   }
 
-  async function handleAssign(stewardId: string) {
-    setAssigning(stewardId);
+  async function handleAssign(stewardId?: string) {
+    setAssigning(stewardId ?? 'automatic');
     setError(null);
     try {
       const res = await fetch(`/api/grievances/${grievanceId}/assign`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stewardId }),
+        body: JSON.stringify(stewardId ? { stewardId } : { automatic: true }),
       });
       if (res.ok) {
-        onAssign?.(stewardId);
+        onAssign?.(stewardId ?? 'automatic');
       } else {
         setError(await readApiError(res, copy.assignFailed));
       }
@@ -143,6 +151,7 @@ export function StewardRecommendations({
         </button>
       </CardHeader>
       <CardContent>
+        <button onClick={() => void handleAssign()} disabled={assigning !== null || loading} className="mb-3 rounded bg-blue-600 px-3 py-2 text-sm text-white disabled:opacity-50">{copy.automatic}</button>
         {error && (
           <p className="mb-3 text-sm text-red-600">{error}</p>
         )}
@@ -166,7 +175,7 @@ export function StewardRecommendations({
                     {idx + 1}
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{copy.steward} {c.userId.slice(0, 8)}…</p>
+                    <p className="text-sm font-medium">{copy.steward} {idx + 1}</p>
                     <div className="mt-0.5 flex items-center gap-3 text-xs text-gray-500">
                       {c.region && (
                         <span className="flex items-center gap-1">
@@ -186,11 +195,11 @@ export function StewardRecommendations({
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
-                    {c.score}
+                    {c.exactExpertise ? copy.expertise : copy.general}
                   </span>
                   <button
                     onClick={() => handleAssign(c.stewardId)}
-                    disabled={assigning === c.stewardId}
+                    disabled={assigning !== null || loading}
                     className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50"
                   >
                     {assigning === c.stewardId ? t("assigning") : t("assignButton")}

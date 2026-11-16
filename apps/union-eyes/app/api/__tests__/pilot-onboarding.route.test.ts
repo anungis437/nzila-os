@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const m = vi.hoisted(() => ({
-  hasMinRole: vi.fn(),
+  canManageOrganizationInvites: vi.fn(),
   emitCapeAuditEvent: vi.fn(),
   persistAtomicAudit: vi.fn(),
   withRLSContext: vi.fn(),
@@ -34,7 +34,7 @@ const mockDb = {
 vi.mock('@/lib/organization-middleware', () => ({
   withOrganizationAuth: vi.fn((handler: (req: NextRequest, ctx: any) => Promise<Response>) => (req: NextRequest, ctx: any) => handler(req, ctx)),
 }));
-vi.mock('@/lib/api-auth-guard', () => ({ hasMinRole: m.hasMinRole }));
+vi.mock('@nzila/platform-auth/invites', () => ({ canManageOrganizationInvites: m.canManageOrganizationInvites }));
 vi.mock('@/lib/audit/cape-audit-events', () => ({
   CAPE_AUDIT_EVENTS: {
     PILOT_CHECKLIST_ITEM_COMPLETED: 'PILOT_CHECKLIST_ITEM_COMPLETED',
@@ -70,16 +70,16 @@ describe('pilot/onboarding route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     m.selectQueue = [];
-    m.hasMinRole.mockResolvedValue(true);
+    m.canManageOrganizationInvites.mockResolvedValue(true);
     m.persistAtomicAudit.mockResolvedValue(undefined);
     m.withRLSContext.mockImplementation(async (_ctx: unknown, fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
     m.verifyChecklistStep.mockResolvedValue({ ok: true, evidence: { organizationRows: 1 } });
     m.getDemoDatasetSummary.mockReturnValue({ members: 10, employers: 2, grievances: 3, timelines: 1, resolutions: 1 });
   });
 
-  it('GET returns forbidden for users below officer', async () => {
+  it('GET returns forbidden for callers without organization administration', async () => {
     const { GET } = await loadRoute();
-    m.hasMinRole.mockResolvedValueOnce(false);
+    m.canManageOrganizationInvites.mockResolvedValueOnce(false);
 
     const response = await GET(new NextRequest('http://localhost/api/pilot/onboarding'), { organizationId: 'org_1', userId: 'u1' });
     expect(response.status).toBe(403);
@@ -163,9 +163,9 @@ describe('pilot/onboarding route', () => {
     expect(response.status).toBe(500);
   });
 
-  it('PATCH writes no audit for an unknown item or a caller below officer', async () => {
+  it('PATCH writes no audit for an unknown item or a caller without organization administration', async () => {
     await patch({ itemId: 'not-real', completed: true });
-    m.hasMinRole.mockResolvedValueOnce(false);
+    m.canManageOrganizationInvites.mockResolvedValueOnce(false);
     const forbidden = await patch({ itemId: 'org-seeded', completed: true });
 
     expect(forbidden.status).toBe(403);

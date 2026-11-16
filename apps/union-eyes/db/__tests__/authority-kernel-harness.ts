@@ -58,7 +58,12 @@ const BUSINESS_FIXTURE_SQL = `
   CREATE TABLE public.grievances (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, created_by text, grievant_id uuid,
     created_at timestamptz NOT NULL DEFAULT now(), is_confidential boolean DEFAULT false, has_legal_implications boolean DEFAULT false,
-    union_rep_id uuid);
+    union_rep_id uuid, status text NOT NULL DEFAULT 'draft');
+  CREATE TABLE public.stewards (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(), org_id uuid NOT NULL, user_id uuid NOT NULL,
+    region varchar(255), specialization varchar(255), active boolean NOT NULL DEFAULT true,
+    max_caseload integer NOT NULL DEFAULT 10, current_caseload integer NOT NULL DEFAULT 0,
+    created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
   CREATE TABLE public.claims (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), claim_id uuid NOT NULL UNIQUE DEFAULT gen_random_uuid(), claim_number varchar(50),
     organization_id uuid NOT NULL, member_id varchar(255), assigned_to varchar(255), status text NOT NULL DEFAULT 'submitted',
@@ -108,6 +113,7 @@ const GRANTS = `
   GRANT SELECT, INSERT, UPDATE, DELETE ON public.audit_logs TO union_eyes_runtime;
   GRANT SELECT ON public.claims TO union_eyes_runtime;
   GRANT SELECT ON public.grievances, public.grievance_case_access_assignments, public.documents, public.document_links, public.payments TO union_eyes_runtime;
+  GRANT SELECT,INSERT,UPDATE ON public.stewards TO union_eyes_runtime;
 `
 
 export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: boolean; canonicalIdentity?: boolean } = {}): Promise<void> {
@@ -137,6 +143,7 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
   for (const t of ['audit_logs', 'grievances', 'claims', 'grievance_case_access_assignments', 'documents', 'payments']) {
     await db.exec(`SELECT ue_create_direct_org_rls_policy('${t}')`)
   }
+  await db.exec("SELECT ue_create_direct_org_rls_policy('stewards','org_id')")
   if (!options.canonicalIdentity) await db.exec(IDENTITY_GRANTS)
   await db.exec(GRANTS)
   for (const e of authorityKernelEntries) {

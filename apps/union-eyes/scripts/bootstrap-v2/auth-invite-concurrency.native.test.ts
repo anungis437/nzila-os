@@ -23,9 +23,10 @@ import { createHash } from 'node:crypto'
 import pg from 'pg'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { closeAuthClients } from '../../../../packages/db/src/auth-client'
-import { acceptInvite } from '../../../../packages/platform-auth/src/invites/service'
+import { acceptInvite, createInvite, canManageOrganizationInvites, listOrganizationInvites, reissueInvite, revokeInvite } from '../../../../packages/platform-auth/src/invites/service'
 import { AUTH_EXECUTION_ROLES, compileAuthBootstrapSql } from './auth-sql'
 import { compileSyntheticAuthFixtureSql } from './auth-fixture'
+import { withAuthContext } from '../../../../packages/platform-auth/src/auth-db'
 
 const cookies = vi.hoisted(() => ({ token: '', actor: '', provider: '', set: vi.fn() }))
 vi.mock('../../../../packages/platform-auth/src/entra/server', () => ({
@@ -59,6 +60,7 @@ describe.skipIf(!enabled)('invitation redemption concurrency against disposable 
     await owner.connect()
     await peer.connect()
     await owner.query(compileSyntheticAuthFixtureSql())
+    await owner.query('CREATE ROLE union_eyes_runtime NOLOGIN NOSUPERUSER NOBYPASSRLS; CREATE ROLE union_eyes_system NOLOGIN NOSUPERUSER NOBYPASSRLS;')
     await owner.query(compileAuthBootstrapSql())
     await owner.query(`CREATE ROLE auth_concurrency_login LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS PASSWORD 'synthetic-only';
       CREATE ROLE auth_concurrency_system_login LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS PASSWORD 'synthetic-only';
@@ -97,6 +99,87 @@ describe.skipIf(!enabled)('invitation redemption concurrency against disposable 
     const row = (await owner.query(`SELECT revoked_at IS NOT NULL AS revoked FROM user_management.invites WHERE email=$1`, [email])).rows[0]
     return row?.revoked === true
   }
+
+  it.each(['suspension', 'membership removal'])('refuses invitation issuance when %s commits during the request', async (change) => {
+    await restoreInviter()
+    cookies.actor = inviter
+    const email = change === 'suspension' ? 'issuance-suspension@example.invalid' : 'issuance-membership-removal@example.invalid'
+    await peer.query('BEGIN')
+    try {
+      if (change === 'suspension')
+        await peer.query(`UPDATE user_management.users SET lifecycle_state='suspended', is_active=false WHERE user_id=$1`, [inviter])
+      else
+        await peer.query('UPDATE user_management.organization_users SET is_active=false WHERE user_id=$1 AND organization_id=$2', [inviter, orgA])
+      const creation = createInvite({ email, organizationId: orgA, invitedBy: inviter }).then(
+        value => ({ value, error: null }), error => ({ value: null, error }),
+      )
+      await new Promise(resolve => setTimeout(resolve, 200))
+      await peer.query('COMMIT')
+      const result = await creation
+      expect(result.error).toMatchObject({ code: 'AUTH_TENANT_ADMIN_REQUIRED' })
+      expect(result.value).toBeNull()
+      expect((await owner.query('SELECT count(*)::int n FROM user_management.invites WHERE email=$1', [email])).rows[0].n).toBe(0)
+    } finally {
+      await peer.query('ROLLBACK')
+      await restoreInviter()
+      cookies.actor = ''
+    }
+  })
+
+  it('issues, lists, rotates and revokes real hashed invitations without exposing either credential', async () => {
+    await restoreInviter()
+    cookies.actor = inviter
+    expect(await canManageOrganizationInvites(inviter, orgA)).toBe(true)
+    expect(await canManageOrganizationInvites(inviter, orgB)).toBe(false)
+    const first = await createInvite({ email: 'managed-new@example.invalid', role: 'member', organizationId: orgA, invitedBy: inviter })
+    expect(first.success).toBe(true)
+    const rows = await listOrganizationInvites(inviter, orgA)
+    expect(rows.find(row => row.id === first.inviteId)).toMatchObject({ email: 'managed-new@example.invalid', role: 'member' })
+    expect(JSON.stringify(rows)).not.toContain(first.token)
+    expect(JSON.stringify(rows)).not.toContain('tokenHash')
+    await expect(reissueInvite({ inviteId: first.inviteId!, organizationId: orgB, actorUserId: inviter })).rejects.toThrow()
+    const second = await reissueInvite({ inviteId: first.inviteId!, organizationId: orgA, actorUserId: inviter })
+    expect(second.success).toBe(true)
+    expect(second.token).not.toBe(first.token)
+    expect((await acceptInvite({ token: first.token! })).success).toBe(false)
+    const accepted = await acceptInvite({ token: second.token! })
+    expect(accepted.user).toMatchObject({ email: 'managed-new@example.invalid', organizationId: orgA, role: 'member' })
+    expect((await acceptInvite({ token: second.token! })).success).toBe(false)
+    expect((await revokeInvite({ inviteId: second.inviteId!, organizationId: orgA, actorUserId: inviter })).success).toBe(false)
+    const third = await createInvite({ email: 'managed-revoke@example.invalid', organizationId: orgA, invitedBy: inviter })
+    expect((await revokeInvite({ inviteId: third.inviteId!, organizationId: orgA, actorUserId: inviter })).success).toBe(true)
+    expect((await acceptInvite({ token: third.token! })).success).toBe(false)
+    const events = (await owner.query(`SELECT event_type FROM user_management.auth_audit_log WHERE metadata->>'inviteId'=$1`, [first.inviteId])).rows
+    expect(events.map(row => row.event_type)).toEqual(expect.arrayContaining(['invite_created', 'invite_reissued']))
+    cookies.actor = ''
+  })
+
+  it('allows only one replacement under concurrent reissue and rolls back rotation when required audit fails', async () => {
+    await restoreInviter()
+    // Establish two independent tenant execution scopes; the database, not a mocked query builder,
+    // serializes the race. The preceding case exercises authenticated actor promotion separately.
+    const tenant = <T,>(op: () => Promise<T>) => withAuthContext({ phase: 'tenant-admin', userId: inviter, organizationId: orgA }, op)
+    const created = await Promise.all([0, 1].map(() => tenant(() => createInvite({ email: 'managed-race@example.invalid', organizationId: orgA, invitedBy: inviter }))))
+    expect(created.filter(result => result.success)).toHaveLength(1)
+    const first = created.find(result => result.success)!
+    const input = { inviteId: first.inviteId!, organizationId: orgA, actorUserId: inviter }
+    const replacements = await Promise.all([tenant(() => reissueInvite(input)), tenant(() => reissueInvite(input))])
+    expect(replacements.filter(result => result.success)).toHaveLength(1)
+    const replacement = replacements.find(result => result.success)!
+    await owner.query(`CREATE FUNCTION user_management.test_refuse_invite_audit() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN IF NEW.event_type='invite_reissued' THEN RAISE EXCEPTION 'synthetic audit failure'; END IF; RETURN NEW; END $$;
+      CREATE TRIGGER test_refuse_invite_audit BEFORE INSERT ON user_management.auth_audit_log
+      FOR EACH ROW EXECUTE FUNCTION user_management.test_refuse_invite_audit();`)
+    try {
+      await expect(tenant(() => reissueInvite({ ...input, inviteId: replacement.inviteId! }))).rejects.toMatchObject({ cause: { message: 'synthetic audit failure' } })
+      const row = (await owner.query('SELECT revoked_at FROM user_management.invites WHERE id=$1', [replacement.inviteId])).rows[0]
+      expect(row.revoked_at).toBeNull()
+    } finally {
+      await owner.query('DROP TRIGGER test_refuse_invite_audit ON user_management.auth_audit_log; DROP FUNCTION user_management.test_refuse_invite_audit()')
+    }
+    expect((await acceptInvite({ token: replacement.token! })).success).toBe(true)
+    cookies.actor = ''
+  })
 
   it('an offboarding that commits first leaves the redemption with nothing', async () => {
     const token = await issue('concurrency-offboard-first@example.invalid')

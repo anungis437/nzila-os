@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PilotOnboardingPage() {
   await requireUser();
 
-  const hasAccess = await hasMinRole('officer');
+  const hasAccess = await hasMinRole('admin');
   if (!hasAccess) {
     redirect('/dashboard');
   }

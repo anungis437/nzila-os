@@ -14,6 +14,9 @@ import { persistAtomicAudit } from "@/lib/audit/atomic-audit";
 import { buildUnionEvidencePack } from '@/lib/evidence';
 import { logger } from '@/lib/logger';
 import { assignSteward } from "@/lib/services/steward-assignment";
+import { lockAssignmentScope, refreshRepresentativeWorkloads } from '@/lib/cases/assignment-capacity';
+import { AssignmentMatchingError, automaticallyAssignRepresentative } from '@/lib/cases/automatic-assignment';
+import { requireKernelCaseAction } from '@/lib/cases/case-authorization';
 import { assignPrimaryRepresentative } from "@/lib/services/case-access-service";
 import { AuthorityStoreError } from "@/lib/authority/store/executor";
 import { requestAssignmentConvergence, processAssignmentConvergence } from "@/lib/deadline-engine";
@@ -24,9 +27,7 @@ import {
 } from "@/lib/api/standardized-responses";
 import { eq, and } from "drizzle-orm";
 
-const assignSchema = z.object({
-  stewardId: z.guid(),
-});
+const assignSchema = z.union([z.object({ stewardId: z.guid() }).strict(), z.object({ automatic: z.literal(true) }).strict()]);
 
 export const PATCH = withApi(
   {
@@ -48,11 +49,11 @@ export const PATCH = withApi(
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid grievance ID");
     }
 
-    const parsed = assignSchema.safeParse(await request.json());
+    const parsed = assignSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) {
       return standardErrorResponse(ErrorCode.VALIDATION_ERROR, "Invalid input", parsed.error.flatten());
     }
-    const stewardId = parsed.data.stewardId;
+    let selectedStewardId = 'stewardId' in parsed.data ? parsed.data.stewardId : null;
     const continuityCorrelationId = randomUUID();
 
     // The grievance check, the assignment, the caseload change, the primary-representative mirror, the case event, the audit record and the durable
@@ -64,19 +65,25 @@ export const PATCH = withApi(
         // Take it before assignment/authority mutations too, so reassignment cannot invert that order
         // or commit a revocation while a deadline writer is using the previous assignment.
         const [grievance] = await tx
-          .select({ id: grievances.id })
+          .select({ id: grievances.id, type: grievances.type })
           .from(grievances)
           .where(and(eq(grievances.id, grievanceId), eq(grievances.organizationId, organizationId)))
           .limit(1)
           .for('update');
         if (!grievance) return null;
+        await requireKernelCaseAction(tx, { userId, organizationId }, grievanceId, 'case:assign');
+        await lockAssignmentScope(tx, organizationId);
 
+        const automatic = 'automatic' in parsed.data
+          ? await automaticallyAssignRepresentative(tx, { userId, organizationId }, grievanceId, grievance.type) : null;
+        const stewardId = automatic?.stewardProfileId ?? selectedStewardId!;
+        selectedStewardId = stewardId;
         const assignment = await assignSteward(organizationId, grievanceId, stewardId, tx);
         const assigneeUserId = assignment.stewardId;
 
         // The kernel decides: the officer needs case:assign authority under an adopted rule and the assignee must be an
         // eligible, conflict-free representative. A refusal throws before anything below is written.
-        const { previousUserId: previousUnionRepId } = await assignPrimaryRepresentative(tx, {
+        const { previousUserId: previousUnionRepId } = automatic?.kernel ?? await assignPrimaryRepresentative(tx, {
           organizationId,
           grievanceId,
           issuerUserId: userId,
@@ -85,6 +92,7 @@ export const PATCH = withApi(
 
         // The legacy primary-representative column is kept as a compatibility mirror for readers not yet migrated to the
         // kernel. It is never an authority source.
+        if (automatic) await refreshRepresentativeWorkloads(tx, organizationId, [assigneeUserId]);
         await tx
           .update(grievances)
           .set({ unionRepId: assigneeUserId, updatedAt: new Date() })
@@ -103,7 +111,7 @@ export const PATCH = withApi(
           action: 'grievance.assign_steward',
           resourceType: 'grievances',
           resourceId: grievanceId,
-          details: { stewardProfileId: stewardId, stewardId: assigneeUserId, previousUnionRepId },
+          details: { stewardProfileId: stewardId, stewardId: assigneeUserId, previousUnionRepId, ...(automatic ? { matching: automatic.matching } : {}) },
         });
 
         const { taskId } = await requestAssignmentConvergence(tx, {
@@ -116,6 +124,7 @@ export const PATCH = withApi(
         return { assignment, convergenceTaskId: taskId };
       });
     } catch (error) {
+      if (error instanceof AssignmentMatchingError) return standardErrorResponse(ErrorCode.CONFLICT, error.message);
       if (error instanceof AuthorityStoreError && (error.code === 'DENIED' || error.code === 'PRECONDITION' || error.code === 'NOT_FOUND')) {
         return standardErrorResponse(ErrorCode.FORBIDDEN, "The authority kernel did not authorize this assignment");
       }
@@ -138,7 +147,7 @@ export const PATCH = withApi(
       actionType: 'GRIEVANCE_ASSIGNED',
       orgId: organizationId,
       actorId: userId,
-      artifacts: [{ type: 'grievance', data: { grievanceId, stewardId } }],
+      artifacts: [{ type: 'grievance', data: { grievanceId, stewardId: selectedStewardId } }],
     }).catch((err) => logger.warn('Evidence pack failed', { error: String(err), actionType: 'GRIEVANCE_ASSIGNED' }));
 
     return standardSuccessResponse(assignment);

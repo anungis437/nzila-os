@@ -127,10 +127,11 @@ describe('lib/dashboard/role-experience', () => {
 
     it('does not advertise platform operations to an ordinary organization admin', () => {
       const nav = getVisibleNavigationForExperience('admin', false, 'admin');
-      for (const path of ['/dashboard/admin/members', '/dashboard/security', '/dashboard/integrations', '/dashboard/operations']) {
+      for (const path of ['/dashboard/security', '/dashboard/integrations', '/dashboard/operations']) {
         expect(nav.some(item => item.href === path)).toBe(false);
       }
       expect(nav.some(item => item.href === '/dashboard/audits')).toBe(true);
+      expect(nav.some(item => item.href === '/dashboard/admin/members')).toBe(true);
       expect(getVisibleNavigationForExperience('admin', false, 'platform_lead')).toEqual(getNavigationForExperience('admin'));
     });
 

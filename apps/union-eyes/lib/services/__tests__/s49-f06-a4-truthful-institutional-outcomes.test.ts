@@ -35,7 +35,8 @@ describe('F06 batch 3 (A4): an outcome is recorded only when the system did it o
     for (const step of ['org-seeded', 'users-invited', 'roles-assigned', 'contracts-uploaded', 'employers-imported', 'integrations-configured', 'export-verified']) {
       expect(evidence).toContain(`case '${step}'`)
     }
-    expect(evidence).toContain("ne(organizationMembers.userId, actorUserId)")
+    expect(evidence).toContain('listOrganizationInvites(actorUserId, organizationId)')
+    expect(evidence).toContain('acceptedStaffInvitations')
   })
 
   it('onboarding events are verified against membership before the event and audit row are written', () => {

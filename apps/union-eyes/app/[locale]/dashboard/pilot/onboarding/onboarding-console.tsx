@@ -49,7 +49,7 @@ async function reasonOf(response: Response, fallback: string): Promise<string> {
 
 // ─── Page ─────────────────────────────────────────────────────
 
-export default function OnboardingConsole({ supportEmail }: { supportEmail: string }) {
+export default function OnboardingConsole({ supportEmail, organizationSetup = false }: { supportEmail: string; organizationSetup?: boolean }) {
   const [loading, setLoading] = useState(true);
   const [state, setState] = useState<PilotState | null>(null);
   /** What went wrong the last time something was asked of the server, in the server's own words where it gave them. */
@@ -145,7 +145,7 @@ export default function OnboardingConsole({ supportEmail }: { supportEmail: stri
             <Rocket className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Welcome to UnionEyes</h1>
+            <h1 className="text-2xl font-bold">{organizationSetup ? 'Organization setup' : 'Welcome to UnionEyes'}</h1>
             <p className="text-sm text-muted-foreground">
               Complete the steps below to get your organization up and running.
             </p>
@@ -164,12 +164,12 @@ export default function OnboardingConsole({ supportEmail }: { supportEmail: stri
       )}
 
       {/* Readiness checklist */}
-      {state && <PilotReadinessChecklist items={state.checklist} onItemComplete={handleChecklistVerify} />}
+      {state && <PilotReadinessChecklist items={organizationSetup ? state.checklist.filter(item => ['org_seeded', 'users_invited', 'roles_assigned'].includes(item.id)) : state.checklist} onItemComplete={handleChecklistVerify} />}
 
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Demo data */}
-        {state && (
+        {state && !organizationSetup && (
           <DemoDataBadge
             isActive={state.demo.isActive}
             dataset={state.demo.dataset}

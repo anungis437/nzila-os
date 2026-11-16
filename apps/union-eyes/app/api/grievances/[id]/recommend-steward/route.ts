@@ -36,7 +36,7 @@ export const POST = withApi(
       candidates = await withRLSContext({ organizationId }, async (tx) => {
         // Recommending who should take a case is part of assigning it: it needs the kernel's assignment authority.
         await requireKernelCaseAction(tx, { userId, organizationId }, caseId, 'case:assign');
-        return recommendSteward(organizationId, caseId, tx);
+        return recommendSteward(organizationId, caseId, tx, userId);
       });
     } catch (error) {
       if (error instanceof ApiError && error.code === 'FORBIDDEN') {

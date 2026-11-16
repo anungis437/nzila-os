@@ -77,19 +77,19 @@ const DEFAULT_CHECKLIST: Omit<ChecklistItem, "completed">[] = [
   },
   {
     id: "users_invited",
-    label: "Users invited",
-    description: "Invite stewards, staff, and administrators to join the platform.",
+    label: "Invitations recorded",
+    description: "Create an invitation for a member or colleague in this organization. Email receipt is verified separately.",
     icon: Users,
     actionLabel: "Invite users",
-    actionHref: "/dashboard/admin/users",
+    actionHref: "/dashboard/admin/members",
   },
   {
     id: "roles_assigned",
-    label: "Roles assigned",
-    description: "Assign appropriate roles (admin, officer, steward, member) to each user.",
+    label: "Staff invitation accepted",
+    description: "A colleague accepted an invitation with a staff role. This setup record does not certify their current access.",
     icon: Shield,
     actionLabel: "Manage roles",
-    actionHref: "/dashboard/admin/users",
+    actionHref: "/dashboard/admin/members",
   },
   {
     id: "contracts_uploaded",
@@ -175,7 +175,7 @@ export function buildReadinessChecklist(data: PilotReadinessData): ChecklistItem
       icon: Users,
       completed: data.users > 0,
       actionLabel: "Invite users",
-      actionHref: "/dashboard/admin/users",
+      actionHref: "/dashboard/admin/members",
     },
     {
       id: "roles",
@@ -186,7 +186,7 @@ export function buildReadinessChecklist(data: PilotReadinessData): ChecklistItem
       icon: Shield,
       completed: data.roles > 0,
       actionLabel: "Manage roles",
-      actionHref: "/dashboard/admin/users",
+      actionHref: "/dashboard/admin/members",
     },
     {
       id: "contracts",
@@ -351,10 +351,10 @@ export function PilotReadinessChecklist({
         <div className="text-center py-3 bg-green-50 dark:bg-green-950/20 rounded-md">
           <CheckCircle2 className="h-6 w-6 text-green-600 mx-auto mb-1" />
           <p className="text-sm font-medium text-green-700 dark:text-green-400">
-            Your pilot environment is ready!
+            Setup checklist recorded
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            You can begin filing grievances and managing cases.
+            Operational acceptance and current access are verified separately.
           </p>
         </div>
       )}
