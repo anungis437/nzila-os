@@ -326,12 +326,12 @@
     "fast-check": "^4.6.0",
     "lefthook": "^2.1.1",
     "jszip": "^3.10.1",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.19.3",
-    "turbo": "^2.11.10",
+    "turbo": "^2.11.11",
     "typescript": "^6",
-    "vitest": "^5.0.5",
+    "vitest": "^5.1.0",
     "yaml": "^2.8.3"
   },
   "pnpm": {

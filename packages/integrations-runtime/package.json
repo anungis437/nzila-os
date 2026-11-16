@@ -37,9 +37,9 @@
   },
   "devDependencies": {
     "typescript": "^6",
-    "vitest": "^5.0.5",
-    "@typescript-eslint/eslint-plugin": "^8.72.1",
-    "@typescript-eslint/parser": "^8.72.1",
+    "vitest": "^5.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.72.2",
+    "@typescript-eslint/parser": "^8.72.2",
     "eslint": "^10"
   }
 }
