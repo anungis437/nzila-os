@@ -1,0 +1,162 @@
+{
+  "status": "PASS_LOCAL_BINDING_CHECKS_ONLY",
+  "recordedAt": "2026-11-16T06:55:25.736990+00:00",
+  "qualifiedApplicationSourceSha": "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
+  "bindingBaseMainSha": "14e10b94252f183a0246127fba5a9d174ccb22e8",
+  "bindingCommit": null,
+  "applicationTreeUnchanged": true,
+  "testedBindingFiles": [
+    {
+      "path": "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json",
+      "state": "PRESENT",
+      "sha256": "39e91fce30aac12e054ea2bd2a0cbac26d43374d828cf1b531d0a541b9600b27"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_BASE_ACTION_COVERAGE.json",
+      "state": "PRESENT",
+      "sha256": "cc491789df255c880942f37d6f421353bba9eb54516ceb7923cdc7e41aa68084"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_BASE_RELEASE_REMAINING_WORK.md",
+      "state": "PRESENT",
+      "sha256": "27317aaa8233bae79caa634cd1aa0811fffd00497db53c3e0cb08b628dd660d3"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_CURRENT_CANDIDATE.md",
+      "state": "PRESENT",
+      "sha256": "41c9ff36aa0ebe0d85cbb60239921f2bb99f12262c68d339a867ca6a6e4aa6f5"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_CURRENT_SOURCE_ADMISSION.md",
+      "state": "PRESENT",
+      "sha256": "d2b0a54fb2ee2252fdb7f11ec15c7c81e87c53af55df68678272f1c1b3e3c010"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/authenticated-casework-load-profile-78301eec.json",
+      "state": "PRESENT",
+      "sha256": "6415fa716b37a4b1031af2742840e4eea58814bee6ea40f5dfd812e3eb82984c"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/exact-source-ci-78301eec.json",
+      "state": "PRESENT",
+      "sha256": "e8cdd8664b2ae641b446b2441aa6a5eafe6751f17a1ffce9dfe3c0bab6c31acd"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/fresh-local-export-78301eec.json",
+      "state": "PRESENT",
+      "sha256": "1c18aecb9a4ca15c6cab552256d324dbcb24090d955f0a7c1bd10509e981fd26"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/fresh-native-tool-build-78301eec.json",
+      "state": "PRESENT",
+      "sha256": "d0b5c8972bf34f87b02200874ad561e6db5b56905904c0df6d5aa639abb8e865"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/native-and-browser-ci-78301eec.json",
+      "state": "PRESENT",
+      "sha256": "f6f10cdf70d7320b8f3eb98b708e1cbe0190f5f650771afd6bd7464137fcb9f2"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/observed-contract-before-onboarding-matching-78301eec.json",
+      "state": "PRESENT",
+      "sha256": "72353e1c34a8ec85d09f92d0b68c9b61e8b6c63c8ea1a64d7379405b7bef18bd"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-onboarding-20261115/read-only-copy-diagnostic-78301eec.json",
+      "state": "PRESENT",
+      "sha256": "81f6681c272df208b03eff8697c30116fd53845b41c2fb0ef8ec1fb6e75cd089"
+    },
+    {
+      "path": "ops/change-records/CHG-2026-0114.founder-authorization.md",
+      "state": "PRESENT",
+      "sha256": "fd4ea899d05c08d325f458d008e615126ba562c009e6624fadf8c1f18ddb0047"
+    },
+    {
+      "path": "ops/change-records/CHG-2026-0114.json",
+      "state": "PRESENT",
+      "sha256": "0163f0462dba2d201dc4d125f5089b563ebe1f4758adb3410b69024b99882a5c"
+    },
+    {
+      "path": "packages/platform-change-management/src/approvals.ts",
+      "state": "PRESENT",
+      "sha256": "f35c39146d80f87bfbd91aaf3fa2f2c609580d12542e7451e1836e8d2420f8d4"
+    },
+    {
+      "path": "tooling/scripts/lib/ue-v2-navigation-inventory.json",
+      "state": "PRESENT",
+      "sha256": "f4a5246fcccf5e6066b1ea3c67f3b31b2292bf06c7f99832fb81a8b779a9aba2"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-v2-staging-release.mjs",
+      "state": "PRESENT",
+      "sha256": "ea4b270fe2c2892c3c14ae53a171d28a9ae17913d8633a7669296180c7167e9b"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs",
+      "state": "PRESENT",
+      "sha256": "044a07f6779d8d1682f3cc76034a87bc58405cd2608836d6ecf6cdf1a2bd8170"
+    }
+  ],
+  "localRepositoryGates": {
+    "lint": {
+      "status": "PASS",
+      "privateLog": "root-lint.log",
+      "logSha256": "751b7ad10e5cc616c8186153207c21989d41b1db48b2b406f67657d3a7f17555"
+    },
+    "typecheck": {
+      "status": "PASS",
+      "privateLog": "root-typecheck.log",
+      "logSha256": "1911b7f77cdfc2c0928fa6abc5962f402e18cc26cd922229d4c407d85b1a0b5f"
+    },
+    "testFast": {
+      "status": "PASS",
+      "privateLog": "binding-test-fast-v2.log",
+      "logSha256": "ae030f00081f16c87c2ed88d3a773231e796081c218cb99dfed77eabdc85dbf6"
+    },
+    "validateDocs": {
+      "status": "PASS",
+      "privateLog": "root-docs.log",
+      "logSha256": "94067aa809991af417c990ad913c53c030e48a758914130a0959ed6fd6873b92"
+    },
+    "governanceAudit": {
+      "status": "PASS",
+      "privateLog": "root-governance.log",
+      "logSha256": "7a9b8b9ae14ecc3148923a8a43b83328bce07e95992c83ac9066b7cbcf2333e1"
+    }
+  },
+  "fullFast": {
+    "passed": 39268,
+    "skipped": 1694,
+    "filesPassed": 3000,
+    "filesSkipped": 117,
+    "sourceUnchanged": true,
+    "privateReceiptSha256": "aa3edc7e4db07e77c4af43dd6497751c358489c86a93a41f1e6ddd21157a27de"
+  },
+  "focusedChangeApproval": {
+    "passed": 95,
+    "files": 2,
+    "logSha256": "670507dc60cd09dcb63904291c627d670051d348ea2a8de66fd6dc1d285315d1"
+  },
+  "focusedReleaseGuard": {
+    "passed": 16,
+    "logSha256": "b6271baa494d42583592bffe03a62647318da3240a90096e867a41e929af7c69",
+    "stalePreviousCandidateRefused": true
+  },
+  "retainedFirstFailedRun": {
+    "status": "FAIL",
+    "failedSuites": 2,
+    "passed": 39231,
+    "skipped": 1731,
+    "sourceUnchanged": true,
+    "cause": "Docker was omitted from this invocation PATH; ENOENT occurred before both local database suites started",
+    "receiptSha256": "0d6cc9d071af7beffc5be3e9ba0802749cf3ee91ab1fa5c3364df47c09ff80bb",
+    "diagnosticSha256": "950da1a442dff973933913e4f7fe1a2083dce768fea2539066abcf8486138dab",
+    "correctedEnvironmentFocusedRerunPassed": 37,
+    "testsOrLimitsChanged": false
+  },
+  "newMetadataPublication": "This evidence file was added after tests; tested policy, contract and source files remain unchanged. Publication docs and secret scan run separately.",
+  "bindingCiAndMainAdmission": "PENDING",
+  "fullMainBoundQualification": "PENDING",
+  "stagingAcceptance": false,
+  "productionAuthorized": false
+}
