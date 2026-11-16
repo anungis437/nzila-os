@@ -1,0 +1,41 @@
+{
+  "status": "PASS_UNCHANGED_PACKAGING_ROOT_CAUSE_BINDING",
+  "at": "2026-11-16T20:57:29.336913+00:00",
+  "actualCachedImageSource": "c09de4557236b615fad0a1c992d6ee2b8820bf62",
+  "currentAdmittedSource": "232bfa049d2e39f3362ad6dcf519981f76a31f6e",
+  "currentAdmittedMain": "76774bf0ab287d6c4584681358a245af723792f1",
+  "unchangedInputs": [
+    {
+      "path": "Dockerfile",
+      "sha256": "4d29efa69430ffa819324107219e37f0a53566ab0ac722825ad21f12833f72d6",
+      "bytesExactlyEqualAtPriorImageAndCurrentAdmittedSource": true
+    },
+    {
+      "path": "apps/union-eyes/next.config.ts",
+      "sha256": "f6b80928c341fbcc1ba4560dd2cbb98e5d25479ddc5b921a8a1e58e72931c3d0",
+      "bytesExactlyEqualAtPriorImageAndCurrentAdmittedSource": true
+    },
+    {
+      "path": "apps/union-eyes/package.json",
+      "sha256": "a572344dc52d43f267025c5813891bc56eb3704ab9ce82d70a95b0eedea6161f",
+      "bytesExactlyEqualAtPriorImageAndCurrentAdmittedSource": true
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "7c8e531a48574062a961c02c8bc7eed49b84d6ff49be6b2430a6b2f08104accc",
+      "bytesExactlyEqualAtPriorImageAndCurrentAdmittedSource": true
+    },
+    {
+      "path": ".npmrc",
+      "sha256": "a28c9d86a8981049d203ad164cff1e753ed61dc0460ee8765316cbb3d0007d00",
+      "bytesExactlyEqualAtPriorImageAndCurrentAdmittedSource": true
+    }
+  ],
+  "runtimeImageFailure": "@napi-rs/canvas missing; DOMMatrix undefined",
+  "repair": "Copy installed dependency closure for pdf-parse and tesseract.js, preserve nested resolution and all native/WASM/worker files, then verify imports during build",
+  "noNewDependenciesSchemaGrantsOrBusinessSemantics": true,
+  "linuxRehearsalActualPass": "linux-runtime-rehearsal-v1/result.json",
+  "actualCandidateImageAndHttpStillRequired": true,
+  "productionAuthorized": false,
+  "privateDiagnosticReceiptSha256": "76e0f1a979a4302481d2d6e679d4b1b089e303a5c62b5668d10d5fe90cb3d9a3"
+}
