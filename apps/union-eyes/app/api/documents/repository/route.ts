@@ -254,6 +254,7 @@ export const GET = withApi(
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'member' },
+    rlsOrgContext: false,
     entitlement: 'grievance_case_suite',
     // The intake and storage checks reach out to blob storage, so no database transaction is held across them: the
     // reads before the write and the write itself are each their own organization transaction.

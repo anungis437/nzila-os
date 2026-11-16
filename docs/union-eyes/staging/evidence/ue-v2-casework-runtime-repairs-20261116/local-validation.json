@@ -1,47 +1,47 @@
 {
   "schemaVersion": 1,
-  "recordedAt": "2026-11-16T16:41:52.732384+00:00",
+  "recordedAt": "2026-11-16T17:58:38.719553+00:00",
   "baseHeadBeforeRepair": "5fae54b471e84d73eab5e44d723aee12a0add797",
   "requiredChecks": [
     {
       "command": "pnpm lint",
-      "startedAt": "2026-11-16T16:25:26.725708+00:00",
+      "startedAt": "2026-11-16T17:20:42.291513+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T16:27:16.889534+00:00",
-      "logSha256": "91992efd2a35ff0d32a92a4c92177e9b2b802319a171c931c24584a76dd27a55"
+      "finishedAt": "2026-11-16T17:27:15.446243+00:00",
+      "logSha256": "8f0185b6dc19538e8ddc9d7a574b73ddb031032954a89d2fb20cfbff0fc095c3"
     },
     {
       "command": "pnpm typecheck",
-      "startedAt": "2026-11-16T16:27:16.891222+00:00",
+      "startedAt": "2026-11-16T17:27:15.455398+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T16:29:34.208595+00:00",
-      "logSha256": "5a160e419137087b1cf7d6154b33ce6290fcca907ad7be2cecc52a1949630840"
+      "finishedAt": "2026-11-16T17:35:32.759122+00:00",
+      "logSha256": "2bef081221d4478472730663d09af31f89a63ecfc9265df5e92f88e32ec4b580"
     },
     {
       "command": "pnpm test:fast",
-      "startedAt": "2026-11-16T16:29:34.216372+00:00",
+      "startedAt": "2026-11-16T17:35:32.762244+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T16:40:36.355230+00:00",
-      "logSha256": "93fb751dd72c40fc890f86b8777a32b666211de00057635662c9efe05edfcaca"
+      "finishedAt": "2026-11-16T17:52:27.618073+00:00",
+      "logSha256": "0eb3f6b4e06e8e715be680d7c8b472259869194792dd1dce7e5c160a878b46b4"
     },
     {
       "command": "pnpm validate:docs",
-      "startedAt": "2026-11-16T16:40:36.364565+00:00",
+      "startedAt": "2026-11-16T17:52:27.643386+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T16:40:42.764907+00:00",
+      "finishedAt": "2026-11-16T17:52:36.978028+00:00",
       "logSha256": "da6f2feb9bca9dca0e4a882cdf47f4b762ad1193852399ab275ee337ab8adb7d"
     },
     {
       "command": "pnpm governance:audit",
-      "startedAt": "2026-11-16T16:40:42.773377+00:00",
+      "startedAt": "2026-11-16T17:52:36.998984+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T16:41:18.653563+00:00",
-      "logSha256": "cbcd78bfdfc0f57d9baec156aaa6c064d8ec9b42041acfb6162d08d8ef6939a4"
+      "finishedAt": "2026-11-16T17:53:16.177666+00:00",
+      "logSha256": "db9311b5a0edf31b9ab5f6220c3b30f96aa69b385940d6ce65bd8f4aaf6cc880"
     }
   ],
   "sourceUnchangedDuringChecks": true,
@@ -101,6 +101,26 @@
     {
       "path": "apps/union-eyes/lib/documents/ocr-extract.ts",
       "sha256": "f7fcd883e89b19d04e0f09de3a1f9badbe9de8175d2b77490a08eeba9e23eadc"
+    },
+    {
+      "path": "apps/union-eyes/db/__tests__/documents-external-workbook-routes.postgres.test.ts",
+      "sha256": "152057162bee191a4b8b623246de2405316377445bfbe18a32d9ade1744eb2d8"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/repository/route.ts",
+      "sha256": "037f9f4a34003298cdfb926067abbdb040aa3956ac5639d1a86e0012b008f219"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/repository/[id]/versions/route.ts",
+      "sha256": "c6afbbe11f624e92b2363311d6c4367c3e7ad4d7b727cc23c14bd1327ff50537"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/repository/downloads/route.ts",
+      "sha256": "70e840365a0286071f8f345d8956790f2050c80d37a6c89d2d60ca1149aa2bdc"
+    },
+    {
+      "path": "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+      "sha256": "82e15171bfaa4bf6e420be66a6298b358f42d779bf13e099e0010ebd07dc269b"
     }
   ],
   "fullFast": {
@@ -303,10 +323,61 @@
       "cause": "Manual source hash rebinding omitted generated statement sourceDigest metadata; deterministic regeneration corrects 252 metadata fields. All 6267 SQL statement bytes and all other non-provenance plan values are identical.",
       "localExportAlsoFailedBeforeContainerCreation": true,
       "originalFailureReceiptsPreserved": true
+    },
+    {
+      "record": "PR1254-native-OCR-declaration-expectation",
+      "candidateSha": "4b544d2f327024cdfe57e1cdc8a971c7d8fe8ff7",
+      "ciRunId": "43910586707",
+      "postgres15JobId": "133451100264",
+      "postgres16JobId": "133451099604",
+      "bothPostgresVersionsSameSingleFailure": true,
+      "status": "FAIL",
+      "failedTests": 1,
+      "passedTests": 1076,
+      "cause": "Native route declaration expected unspecified wrapper context for OCR; repaired route explicitly opts out. Expect false for OCR only; all eight role floors and other settings are retained.",
+      "actualNativePostgresQualificationForCorrectedHead": "PENDING_CI",
+      "productImplementationChangedByNativeAssertionCorrection": false,
+      "testTimeoutsOrExpectedSkipListsChanged": false
     }
   ],
   "stagingAcceptanceClaimed": false,
   "fullBaseStagingGo": false,
   "productionAuthorized": false,
-  "validationBaseHead": "2a514e7a1c6c889a459578b27e794497c6150e5b"
+  "validationBaseHead": "4b544d2f327024cdfe57e1cdc8a971c7d8fe8ff7",
+  "additionalFocusedDocumentRegression": {
+    "status": "PASS_LOCAL_ONLY",
+    "files": 8,
+    "tests": 106,
+    "logSha256": "961744929a72bd48d5ecd6dafffd52e6f8658df273b7ed3f67d02c5c335bca18"
+  },
+  "handlerOwnedDocumentStorageScopes": {
+    "status": "SOURCE_REPAIR_LOCAL_VALIDATION_ONLY",
+    "routes": [
+      {
+        "path": "apps/union-eyes/app/api/documents/repository/route.ts",
+        "method": "POST",
+        "sha256": "037f9f4a34003298cdfb926067abbdb040aa3956ac5639d1a86e0012b008f219"
+      },
+      {
+        "path": "apps/union-eyes/app/api/documents/repository/[id]/versions/route.ts",
+        "method": "POST",
+        "sha256": "c6afbbe11f624e92b2363311d6c4367c3e7ad4d7b727cc23c14bd1327ff50537"
+      },
+      {
+        "path": "apps/union-eyes/app/api/documents/repository/downloads/route.ts",
+        "method": "POST",
+        "sha256": "70e840365a0286071f8f345d8956790f2050c80d37a6c89d2d60ca1149aa2bdc"
+      },
+      {
+        "path": "apps/union-eyes/app/api/documents/[id]/download/route.ts",
+        "method": "GET",
+        "sha256": "82e15171bfaa4bf6e420be66a6298b358f42d779bf13e099e0010ebd07dc269b"
+      }
+    ],
+    "nativeRoleFloorsRetained": 8,
+    "nativeExplicitHandlerOwnedDeclarations": 5,
+    "otherDeclarationsUnchanged": 3,
+    "authenticationInheritedContextAndResourceVersionAuditChecksRetained": true,
+    "newDeployedHttpProofClaimed": false
+  }
 }

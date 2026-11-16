@@ -31,6 +31,20 @@
       "otherTestsPassed": 10,
       "rawLogSha256": "7a2c8a5bd33a4cada06ddc15af44cba7299ac9fa6be8e6d998aee55aa3af7f30",
       "scope": "Local API wrapper test: explicit handler-managed context still left the transaction active during external processing. Original auth, organization and inherited-context negative tests retained."
+    },
+    {
+      "kind": "SOURCE_AUDIT_HANDLER_OWNED_DOCUMENT_STORAGE_SCOPES",
+      "status": "SOURCE_CONFIRMED_WRAPPER_DECLARATION_MISMATCH",
+      "sourceSha": "4b544d2f327024cdfe57e1cdc8a971c7d8fe8ff7",
+      "affectedOperations": [
+        "document_registration",
+        "document_version_upload",
+        "individual_download",
+        "independent_batch_download"
+      ],
+      "cause": "Each handler already manages its guarded SQL phases, but an unspecified canonical withApi context adds an outer transaction across storage or the full batch. Explicit false selects the existing handler-owned contexts.",
+      "authenticationInheritedContextResourceVersionAndAuditChecksRetained": true,
+      "newDeployedHttpFailureReceiptClaimed": false
     }
   ],
   "fullBaseStagingGo": false,

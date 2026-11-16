@@ -276,22 +276,23 @@ describe.skipIf(!URL)('the document, external and workbook routes on the combine
 
   describe('what the routes ask of the wrapper', () => {
     it('declares the role floor each document route enforces, and opens its own transactions around the database work', () => {
-      const declared: Array<[string, string | undefined]> = [
+      const declared: Array<[string, string | undefined, false?]> = [
         ['List the documents of the organization repository the caller may see', 'member'],
-        ['Record an uploaded file as a governed document', 'member'],
+        ['Record an uploaded file as a governed document', 'member', false],
         ['Read one document of the repository with its versions', 'member'],
         ['Change the privacy label of a document', 'steward'],
-        ['Append a version to a document', undefined],
-        ['Issue audited download links for a batch of documents (independent, not atomic)', 'member'],
-        ['Issue a time-limited, audited download link for a document', 'member'],
-        ['Extract text from the latest version of a document (machine OCR, human review required)', 'member'],
+        ['Append a version to a document', undefined, false],
+        ['Issue audited download links for a batch of documents (independent, not atomic)', 'member', false],
+        ['Issue a time-limited, audited download link for a document', 'member', false],
+        ['Extract text from the latest version of a document (machine OCR, human review required)', 'member', false],
       ]
-      for (const [summary, floor] of declared) {
+      for (const [summary, floor, wrapperContext] of declared) {
         const config = harness.configs.find((entry) => entry.openapi?.summary === summary)
         expect(config?.auth?.required, summary).toBe(true)
         expect(config?.auth?.minRole, summary).toBe(floor)
-        // The routes open short transactions of their own (so none is held across storage); none leans on a wrapper-opened one.
-        expect(config?.rlsOrgContext, summary).toBeUndefined()
+        // Storage-facing routes explicitly opt out of the V2 wrapper transaction:
+        // external work runs between their guarded operations, and batch downloads stay independent.
+        expect(config?.rlsOrgContext, summary).toBe(wrapperContext)
       }
     })
 

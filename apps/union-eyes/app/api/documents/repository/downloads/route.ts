@@ -61,6 +61,7 @@ function describeOutcome(documentId: string, outcome: DownloadOutcome): ItemResu
 export const POST = withApi(
   {
     auth: { required: true, minRole: 'member' },
+    rlsOrgContext: false,
     entitlement: 'grievance_case_suite',
     // Each document is its own organization transaction (below): the batch is not one.
     openapi: { tags: ['Documents'], summary: 'Issue audited download links for a batch of documents (independent, not atomic)' },

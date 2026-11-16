@@ -12,6 +12,7 @@ import { issueDocumentDownload } from '@/lib/documents/download-issuance';
 export const GET = withApi(
   {
     auth: { required: true, minRole: 'member' },
+    rlsOrgContext: false,
     entitlement: 'grievance_case_suite',
     openapi: { tags: ['Documents'], summary: 'Issue a time-limited, audited download link for a document' },
   },
