@@ -1,0 +1,115 @@
+{
+  "status": "PASS_LOCAL_ONLY",
+  "collectedAt": "2026-11-16T11:37:41.723047+00:00",
+  "baseMainSha": "17099dc87643e5206c931285cfaefc377261fd79",
+  "headAtTest": "e03476038f69fa70e9204eceab1d9b916ed9177f",
+  "finalSourceCommitNotYetAssigned": true,
+  "testedSourceModules": [
+    {
+      "path": "apps/union-eyes/components/admin/representative-matching-profiles.tsx",
+      "sha256": "496d1951ee5a77a1715cb34fc3068f39d6e29a578ae4600e5fa3740cd2ba2d49",
+      "state": "MODIFIED"
+    },
+    {
+      "path": "apps/union-eyes/components/dashboard/role-experience-guard.test.tsx",
+      "sha256": "276051e23f14527ce1e127a99c87304ca178ac6a307c270fa2a90274d02b3e9e",
+      "state": "ADDED"
+    },
+    {
+      "path": "apps/union-eyes/components/dashboard/role-experience-guard.tsx",
+      "sha256": "ec7c638481752ed11d6e347a2201f839c019d1edc1dd48c0116e341581624b90",
+      "state": "MODIFIED"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/document-browser.tsx",
+      "sha256": "ceaf5d73955cd1794e2faf7974148abc34df05560f041c2bcdcc456f53af6e4b",
+      "state": "MODIFIED"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/transcript-review.test.tsx",
+      "sha256": "8d497d1f1beffe9950ef5c719712d2250a1cc5d2912f6500593eab84471ec648",
+      "state": "ADDED"
+    },
+    {
+      "path": "apps/union-eyes/components/documents/transcript-review.tsx",
+      "sha256": "7c09910be538f8768bf133c38ecab39311d420bc5a505435e37c485d079b6568",
+      "state": "ADDED"
+    },
+    {
+      "path": "apps/union-eyes/lib/cases/workbench-projection.ts",
+      "sha256": "d000019096fe9a213727bdb792997e193f5f074f70dc6fd28aa6c50d2fb00780",
+      "state": "MODIFIED"
+    },
+    {
+      "path": "apps/union-eyes/lib/dashboard/workbench-route-access.ts",
+      "sha256": "e9710e66d3a8470415e10a205cd7a98c809beb816d21774d6e64cc66cec3ab4a",
+      "state": "ADDED"
+    },
+    {
+      "path": "apps/union-eyes/lib/documents/transcript-review-client.ts",
+      "sha256": "5b3bc2a8c5fbcbcb467df935618e20f0cdb58584ef709cc75d5d2b224a9dda2f",
+      "state": "ADDED"
+    }
+  ],
+  "localRepositoryGates": {
+    "lint": {
+      "status": "PASS",
+      "logSha256": "e51317043aa7de3850ba352a77791defc4040d75dbdcef2b11e9d9cd8b4a655f"
+    },
+    "typecheck": {
+      "status": "PASS",
+      "logSha256": "68544cc9d5d7a1eef03c78c4a8b2c25bc6b3106e002088187059acd0955f8792"
+    },
+    "governanceAudit": {
+      "status": "PASS",
+      "logSha256": "35c5710df15027bb892e935f28bbf743827fa5dca46a209cd4945616c4569856"
+    },
+    "testFast": {
+      "status": "PASS",
+      "passed": 39288,
+      "skipped": 1694,
+      "filesPassed": 3002,
+      "filesSkipped": 117,
+      "sourceUnchanged": true,
+      "dockerPreflightPassed": true,
+      "logSha256": "6936d7a079be21cf39b62d4a84228e80a107967393a77dc7173e1e6a08e582b0"
+    },
+    "validateDocs": {
+      "status": "PASS",
+      "errors": 0,
+      "logSha256": "18d1c7ad126f29b24b0007be385a16553a2d92aa0ca48b01deddf5824d67c0a5"
+    }
+  },
+  "focused": {
+    "status": "PASS",
+    "tests": 52,
+    "files": 5,
+    "logSha256": "f75294fad64e61a527a2e71fc56014d654906d9dd9c3703f5e09fcdce485cce6"
+  },
+  "frontendCensus": {
+    "status": "PASS",
+    "tests": 51,
+    "files": 2,
+    "logSha256": "4fa147b61e09de03a632585c7b6e3ddbeef00c4fcf49fd2128ea70b4a7b92587",
+    "ceilingsAndAllowlistsUnchanged": true
+  },
+  "repairs": [
+    "Document preview transcript read, draft, explicit original-document review and separate evidence publication; strict exact-version and durable readback",
+    "Matching form unique accessible labels and constrained flex/select widths; actual source-S selected control extended to x732 on a390px viewport",
+    "Exact executive workbench presentation consults the existing live caller-scoped queue before redirecting; empty/failed/malformed answers keep the normal landing; route changes cancel stale decisions",
+    "Existing workbench response declares its stable keys without changing its JSON or case authority"
+  ],
+  "retainedFailures": {
+    "sourceSCredentialAndBrowserAttempts": "Five actual failed matching attempts retained; none is a successful assignment qualification",
+    "readerCensusV3": "6 reader keys not declared in opaque queue type",
+    "readerCensusV4": "9 reader reads not declared in opaque queue type; fixed by explicit existing WorkbenchRow response type",
+    "fullRegressionV1": "17 timed-out tests across15files during repeated actual host sleep/thermal-maintenance sleep; no assertion failure; unchanged source/test budgets; failed logs retained; full v2 runs with scoped caffeinate sleep prevention",
+    "launcherPreparation": "Wrong census test selection and a private launcher syntax error failed before checks ran; corrected attempts preserved"
+  },
+  "newSourceRuntimeAcceptance": false,
+  "automaticMatchingStagingSuccessClaimed": false,
+  "schemaMigrationDependencyOrAuthorityGrantChanged": false,
+  "fullBaseReleaseGo": false,
+  "productionAuthorized": false,
+  "finalizedAt": "2026-11-16T11:38:57.448189+00:00"
+}

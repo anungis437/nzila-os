@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { isRecord, ApiShapeError } from '@/lib/client/api-envelope';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ const labels: Record<string, [string, string]> = {
 
 export default function RepresentativeMatchingProfiles() {
   const fr = useLocale().startsWith('fr');
+  const formId = useId();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [people, setPeople] = useState<Person[]>([]);
   const [specializations, setSpecializations] = useState<string[]>([]);
@@ -73,15 +74,15 @@ export default function RepresentativeMatchingProfiles() {
     {saved && !problem && <p role="status">{fr ? 'Profil enregistré.' : 'Profile saved.'}</p>}
     <Button variant="outline" disabled={busy} onClick={() => void load()}>{fr ? 'Actualiser les profils' : 'Refresh profiles'}</Button>
     {loaded && <form className="flex flex-wrap items-end gap-4" onSubmit={event => { event.preventDefault(); void save(); }}>
-      <label>{fr ? 'Représentant' : 'Representative'}<select className="block min-h-10 max-w-full rounded border p-2" required value={userId} onChange={event => choose(event.target.value)}>
+      <div className="min-w-0 max-w-full flex-1 basis-64"><label htmlFor={`${formId}-representative`}>{fr ? 'Représentant' : 'Representative'}</label><select id={`${formId}-representative`} className="block min-h-10 w-full min-w-0 max-w-full rounded border p-2" required value={userId} onChange={event => choose(event.target.value)}>
         <option value="">{fr ? 'Choisir' : 'Choose'}</option>
         {people.map(person => <option key={person.userId} value={person.userId}>{person.label}</option>)}
         {userId && !people.some(person => person.userId === userId) && <option value={userId}>{fr ? 'Représentant indisponible' : 'Unavailable representative'}</option>}
-      </select></label>
-      <label>{fr ? 'Expertise' : 'Expertise'}<select className="block min-h-10 rounded border p-2" value={specialization} onChange={event => setSpecialization(event.target.value)}>
+      </select></div>
+      <div className="min-w-0 max-w-full"><label htmlFor={`${formId}-expertise`}>{fr ? 'Expertise' : 'Expertise'}</label><select id={`${formId}-expertise`} className="block min-h-10 w-full min-w-0 max-w-full rounded border p-2" value={specialization} onChange={event => setSpecialization(event.target.value)}>
         {specializations.map(value => <option key={value} value={value}>{labels[value]?.[fr ? 1 : 0] ?? value}</option>)}
         {!specializations.includes(specialization) && <option value={specialization} disabled>{specialization}</option>}
-      </select></label>
+      </select></div>
       <label>{fr ? 'Maximum de dossiers ouverts' : 'Maximum open cases'}<input className="block min-h-10 w-28 rounded border p-2" type="number" min={1} max={1000} required value={maxCaseload} onChange={event => setMaxCaseload(Number(event.target.value))} /></label>
       <label className="flex gap-2"><input type="checkbox" checked={active} onChange={event => setActive(event.target.checked)} />{fr ? 'Disponible' : 'Available'}</label>
       <Button type="submit" disabled={busy || !userId || !specializations.includes(specialization)}>{fr ? 'Enregistrer le profil' : 'Save profile'}</Button>

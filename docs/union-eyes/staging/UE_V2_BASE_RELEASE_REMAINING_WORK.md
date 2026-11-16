@@ -4,6 +4,12 @@ The accepted staging record proves the named casework and access journeys on app
 
 Some earlier defect remediation removed misleading controls or changed false success into an honest unavailable response. Those changes repaired the false behavior while leaving the capability unavailable. A source-remediation count is not a count of implemented features.
 
+## November 16 current execution
+
+Staging now serves application `78301eecc968ff3a21b602a9c9307c50f73cd5f8`, workflow `17099dc87643e5206c931285cfaefc377261fd79`, build `43825322999` and deployment `43830579236`. The historical accepted F17-criterion record remains historical; full base-release staging acceptance is unfinished. [Actual source-S observations](evidence/ue-v2-document-review-20261116/source-78301eec-action-observations.json) record six real worker scenarios plus exact fixture retirement, and fresh read-only preservation of the controlled invited member and original case/audit.
+
+Actual administrator profile saving/readback and expertise refusal passed, but matching execution exposed two more defects: the long representative selector is clipped on a phone, and the general executive menu guard redirects an actor who has explicit case authority away from the workbench. The follow-up fixes both, and includes the missing transcript review/publication controls. [Local validation](evidence/ue-v2-document-review-20261116/base-ui-local-validation.json) is separate from deployed qualification. Failed runs and cleanup receipts are retained. No successful automatic assignment journey is claimed yet.
+
 ## November 15 onboarding execution update
 
 [The action coverage ledger](UE_V2_BASE_ACTION_COVERAGE.json) is the current action-level follow-up. Its unfilled fields remain unverified; the 17 accepted staging criteria do not fill them implicitly.
