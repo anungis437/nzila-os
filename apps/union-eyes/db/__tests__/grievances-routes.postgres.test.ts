@@ -59,9 +59,10 @@ vi.mock('@/lib/services/case-access-service', () => {
     },
   }
 })
-vi.mock('@/lib/cases/case-authorization', async () => {
+vi.mock('@/lib/cases/case-authorization', async (importOriginal) => {
   const { ApiError } = await import('@/lib/api/errors')
   return {
+    ...(await importOriginal<typeof import('@/lib/cases/case-authorization')>()),
     requireKernelCaseAction: async () => {
       if (!state.kernelAllows) throw ApiError.forbidden()
     },
@@ -395,14 +396,35 @@ describe.skipIf(!URL)('the grievance routes on the combined schema, as the real 
       return rows[0].id as string
     }
 
-    it('recommends the caller\'s organization\'s stewards only', async () => {
+    // Matching requires recorded expertise and live membership, not just an
+    // unrelated profile UUID. Keep the real eligibility reads in this SQL test.
+    const matchingSteward = async (organizationId: string, specialization: string | null, active = true) => {
+      const id = await steward(organizationId, 'Ontario')
+      const userId = (await admin.query('SELECT user_id::text FROM stewards WHERE id=$1', [id])).rows[0].user_id as string
+      await admin.query('UPDATE stewards SET specialization=$2 WHERE id=$1', [id, specialization])
+      await admin.query(`INSERT INTO user_management.users (user_id,email,is_active,lifecycle_state,created_at,updated_at)
+        VALUES ($1,$1 || '@example.test',true,'active',now(),now())`, [userId])
+      await admin.query(`INSERT INTO user_management.organization_users (organization_id,user_id,role,is_active)
+        VALUES ($1,$2,'steward',$3)`, [organizationId, userId, active])
+      await admin.query(`INSERT INTO organization_members
+        (organization_id,user_id,role,status,is_primary,name,email,created_at,updated_at)
+        VALUES ($1,$2,'steward','active',false,$2,$2 || '@example.test',now(),now())`, [organizationId, userId])
+      return id
+    }
+
+    it('recommends only eligible stewards with recorded expertise in the caller\'s organization', async () => {
       const grievance = await newGrievance(ORG_A, memberA)
-      const mine = await steward(ORG_A, 'Ontario')
-      await steward(ORG_B, 'Ontario')
+      const mine = await matchingSteward(ORG_A, 'general')
+      const foreign = await matchingSteward(ORG_B, 'general')
+      const unspecified = await matchingSteward(ORG_A, null)
+      const inactive = await matchingSteward(ORG_A, 'general', false)
       const response = await run(recommend!.POST, asOfficerA, { params: { id: grievance } })
       expect(response.status).toBe(200)
       const candidates = (await json(response)).data as unknown as Array<{ stewardId: string }>
       expect(candidates.map((candidate) => candidate.stewardId)).toContain(mine)
+      expect(candidates.map((candidate) => candidate.stewardId)).not.toEqual(expect.arrayContaining([foreign]))
+      expect(candidates.map((candidate) => candidate.stewardId)).not.toEqual(expect.arrayContaining([unspecified]))
+      expect(candidates.map((candidate) => candidate.stewardId)).not.toEqual(expect.arrayContaining([inactive]))
       const known = (await admin.query(`SELECT id::text FROM stewards WHERE org_id = $1`, [ORG_A])).rows.map((row) => row.id)
       expect(known).toContain(mine)
       expect(candidates.every((candidate) => known.includes(candidate.stewardId))).toBe(true)

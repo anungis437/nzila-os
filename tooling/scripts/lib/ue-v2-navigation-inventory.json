@@ -1,7 +1,7 @@
 {
   "applicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "sourceDigests": {
-    "apps/union-eyes/lib/dashboard/role-experience.ts": "972f2a0d4a90230d01dd31941a70fdaf65dbe535284c777230b713bc0b47c826",
+    "apps/union-eyes/lib/dashboard/role-experience.ts": "e629524f290de079e9088575c9c93a020dd2976a9c83b0072e328312ec550a1f",
     "apps/union-eyes/lib/executive/executive-navigation.ts": "1c85199c05fadb90cf5e3bb2dbea949c5c275c2ebd4e676ced40fde373c6a187",
     "apps/union-eyes/lib/auth/roles.ts": "fb554f61106e309292f054e7a36348de5045ebb45e250bfb37d6af25446e1ace",
     "apps/union-eyes/lib/auth/org-settings-access.ts": "4a33635c65fea47b9eb294522c7cd9151a2a75f9e47cc8eb7ba7378e99e2de71",
@@ -551,6 +551,10 @@
         {
           "label": "Organization",
           "href": "/dashboard/admin/organizations"
+        },
+        {
+          "label": "Users & Roles",
+          "href": "/dashboard/admin/members"
         },
         {
           "label": "Pilot Configuration",
