@@ -52,7 +52,7 @@ export function decideMemberFinancialRecord(
   if (req.delegationId) return deny(req, now, { code: 'DELEGATION_INVALID', detail: 'financial duties are not delegable' })
   const membership = activeMembership(facts, req.organizationId)
   if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
-  const recusal = activeRecusal(facts.recusals, req.principalUserId, req.resource, req.organizationId)
+  const recusal = activeRecusal(facts.recusals, req.principalUserId, req.resource, req.organizationId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
 
   // A member may always see their own financial record, and nothing else's.
@@ -92,7 +92,7 @@ export function decideFinancialTransaction(
   const membership = activeMembership(facts, req.organizationId)
   if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
   if (tx.adverseUserIds.includes(me)) return deny(req, now, { code: 'ADVERSE_PARTY' })
-  const recusal = activeRecusal(facts.recusals, me, req.resource, req.organizationId)
+  const recusal = activeRecusal(facts.recusals, me, req.resource, req.organizationId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
 
   // Stored approvals must themselves respect segregation; otherwise the record

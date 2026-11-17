@@ -12,6 +12,7 @@ import { sql, type SQL } from 'drizzle-orm'
 import { PgDialect } from 'drizzle-orm/pg-core'
 import type { RLSTx } from '@/lib/db/with-rls-context'
 import type { Action, Decision } from '../ontology'
+import { ACTIVE_RECUSAL_SQL } from '../common'
 import { enforceAuthority, enforceCaseProjection, type EnforcementDeps } from './enforce'
 import { activeMembershipSource } from './active-membership-source'
 import type { SqlExecutor } from './executor'
@@ -138,6 +139,6 @@ export function kernelCaseRelationshipScope(userId: string, caseIdColumn: SQL, o
        AND NOT EXISTS (
          SELECT 1 FROM ue_authority_recusals z
           WHERE z.organization_id = r.organization_id AND z.principal_user_id = r.principal_user_id
-            AND z.resource_type = 'case' AND z.resource_id = r.resource_id AND z.lifted_at IS NULL)
+            AND z.resource_type = 'case' AND z.resource_id = r.resource_id AND ${sql.raw(ACTIVE_RECUSAL_SQL)})
   )`
 }

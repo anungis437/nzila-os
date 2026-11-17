@@ -85,7 +85,7 @@ async function evaluateIssuance(exec: SqlExecutor, deps: EnforcementDeps, e: Eva
   const holderMandates = e.operation === 'issue' || e.operation === 'amend' ? await loadHolderMandates(exec, e.organizationId, e.holderUserId) : []
   // Issuer facts contain only the issuer/delegators' recusals. Conferring a grant must also load the proposed holder's own recusals.
   const holderRecusals = e.operation === 'issue' || e.operation === 'amend'
-    ? (await exec.query<Row>('SELECT * FROM ue_authority_recusals WHERE organization_id=$1 AND principal_user_id=$2 AND lifted_at IS NULL',
+    ? (await exec.query<Row>('SELECT * FROM ue_authority_recusals WHERE organization_id=$1 AND principal_user_id=$2',
       [e.organizationId, e.holderUserId])).rows.map(mapRecusal) : []
   let approval = null
   if (e.approvalRequestId) {

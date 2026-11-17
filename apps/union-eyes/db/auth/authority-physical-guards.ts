@@ -1,5 +1,54 @@
 /** Current source-owned institutional protections; reference SQL is never replayed on live databases. */
 import type { PhysicalGuardContract } from './physical-guard-catalog'
+import { ACTIVE_RECUSAL_SQL } from '../../lib/authority/common'
+
+// Additive companion: existing released guard bodies remain immutable on installed databases.
+const LIFECYCLE_DECISION_GUARD_BODY = `
+DECLARE checked_at timestamptz;
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtextextended('ue.case-mail.principal:'||person,0))
+    FROM (SELECT DISTINCT person FROM unnest(ARRAY[NEW.approver_user_id,NEW.authority_line_user_id]) person ORDER BY person) people;
+  checked_at:=clock_timestamp();
+  IF EXISTS (
+    SELECT FROM public.ue_authority_recusals
+    WHERE organization_id = NEW.organization_id AND resource_type = 'approval_request'
+      AND resource_id = NEW.approval_request_id
+      AND principal_user_id IN (NEW.approver_user_id, NEW.authority_line_user_id)
+      AND ${ACTIVE_RECUSAL_SQL.replaceAll('clock_timestamp()', 'checked_at')}
+  ) THEN
+    RAISE EXCEPTION 'RECUSED: no effective independent recusal lift' USING ERRCODE = '42501';
+  END IF;
+  IF NEW.delegation_id IS NOT NULL AND NOT EXISTS (
+    SELECT FROM public.ue_authority_delegations d
+    WHERE d.id = NEW.delegation_id AND d.organization_id = NEW.organization_id
+      AND d.delegate_user_id = NEW.approver_user_id AND d.delegator_user_id = NEW.authority_line_user_id
+      AND d.status = 'active' AND d.revoked_at IS NULL
+      AND isfinite(d.effective_at) AND isfinite(d.expires_at)
+      AND d.effective_at <= checked_at AND d.expires_at > checked_at
+      AND (NOT d.requires_acceptance OR EXISTS (
+        SELECT FROM public.ue_authority_acceptances a
+        WHERE a.organization_id = d.organization_id AND a.instrument_type = 'delegation'
+          AND a.instrument_id = d.id AND a.accepted_by = d.delegate_user_id
+          AND isfinite(a.accepted_at) AND a.accepted_at <= checked_at))
+      AND EXISTS (
+        SELECT FROM public.ue_authority_mandates m
+        WHERE m.organization_id = d.organization_id AND m.principal_user_id = d.delegator_user_id
+          AND m.kind = 'executive_office' AND 'approve' = ANY(m.powers)
+          AND m.status = 'active' AND m.revoked_at IS NULL
+          AND isfinite(m.effective_at) AND isfinite(m.expires_at)
+          AND m.effective_at <= checked_at AND m.expires_at > checked_at
+          AND (NOT m.requires_acceptance OR EXISTS (
+            SELECT FROM public.ue_authority_acceptances a
+            WHERE a.organization_id = m.organization_id AND a.instrument_type = 'mandate'
+              AND a.instrument_id = m.id AND a.accepted_by = m.principal_user_id
+              AND isfinite(a.accepted_at) AND a.accepted_at <= checked_at))
+      )
+  ) THEN
+    RAISE EXCEPTION 'DELEGATION_INVALID: a live accepted delegation and executive office are required' USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END;
+`
 export const AUTHORITY_PHYSICAL_GUARDS = {
   source: 'apps/union-eyes/db/auth/authority-physical-guards.ts',
   references: [
@@ -34,6 +83,12 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
     'ue_authority_reviews',
   ],
   functions: [
+    {
+      name: 'ue_authority_guard_lifecycle_decision',
+      body: LIFECYCLE_DECISION_GUARD_BODY,
+      returns: 'trigger', args: '', volatility: 'v', language: 'plpgsql',
+      path: 'pg_catalog,public,pg_temp', callable: false,
+    },
     {
       name: 'ue_authority_block_mutation',
       body: "\nBEGIN\n  RAISE EXCEPTION 'authority records are append-only: % on % is not permitted', TG_OP, TG_TABLE_NAME USING ERRCODE = '42501';\nEND;\n",
@@ -833,8 +888,43 @@ export const AUTHORITY_PHYSICAL_GUARDS = {
       definition:
         "CHECK (((opened_by IS NULL) OR ((length((opened_by)::text) >= 1) AND (length((opened_by)::text) <= 255) AND ((opened_by)::text = btrim((opened_by)::text)) AND ((opened_by)::text !~ '[[:cntrl:]]'::text))))",
     },
+    {
+      table_name: 'ue_authority_acceptances', name: 'ue_authority_acceptance_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(accepted_at) AND (accepted_at <= clock_timestamp())))',
+    },
+    {
+      table_name: 'ue_authority_delegations', name: 'ue_authority_deleg_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(effective_at) AND isfinite(expires_at) AND ((revoked_at IS NULL) OR isfinite(revoked_at))))',
+    },
+    {
+      table_name: 'ue_authority_mandates', name: 'ue_authority_mandates_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(effective_at) AND isfinite(expires_at) AND ((revoked_at IS NULL) OR isfinite(revoked_at))))',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships', name: 'ue_authority_rel_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(effective_at) AND ((expires_at IS NULL) OR isfinite(expires_at)) AND ((revoked_at IS NULL) OR isfinite(revoked_at))))',
+    },
+    {
+      table_name: 'ue_authority_resource_relationships', name: 'ue_authority_rel_primary_origin_chk', type: 'c',
+      definition: "CHECK (((status <> 'active'::text) OR (resource_type <> 'case'::text) OR (relation <> ALL (ARRAY['owner'::text, 'assignee'::text])) OR ((origin = 'explicit'::text) AND (granted_by IS NOT NULL) AND ((granted_by)::text <> (principal_user_id)::text) AND (issuance_rule_id IS NOT NULL))))",
+    },
+    {
+      table_name: 'ue_authority_disclosure_consents', name: 'ue_authority_consent_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(granted_at) AND isfinite(expires_at) AND ((revoked_at IS NULL) OR isfinite(revoked_at))))',
+    },
+    {
+      table_name: 'ue_authority_recusals', name: 'ue_authority_recusal_finite_time_chk', type: 'c',
+      definition: 'CHECK ((isfinite(declared_at) AND ((lifted_at IS NULL) OR (isfinite(lifted_at) AND (lifted_at >= declared_at) AND (lifted_at <= clock_timestamp())))))',
+    },
   ],
   triggers: [
+    {
+      table_name: 'ue_authority_approval_decisions', name: 'ue_authority_guard_lifecycle_decision',
+      function_name: 'ue_authority_guard_lifecycle_decision', tgtype: 7,
+      tgdeferrable: false, tginitdeferred: false,
+      definition: 'CREATE TRIGGER ue_authority_guard_lifecycle_decision BEFORE INSERT ON public.ue_authority_approval_decisions FOR EACH ROW EXECUTE FUNCTION ue_authority_guard_lifecycle_decision()',
+      args_hex: '',
+    },
     {
       table_name: 'ue_authority_acceptances',
       name: 'ue_authority_guard_actor',

@@ -147,6 +147,10 @@ export interface InsertRelationshipInput {
 export async function insertRelationship(exec: SqlExecutor, i: InsertRelationshipInput): Promise<string> {
   requireUuids(i.organizationId, i.resourceId, i.issuanceRuleId)
   requirePrincipals(i.principalUserId, i.grantedBy)
+  if (i.resourceType === 'case' && (i.relation === 'owner' || i.relation === 'assignee') &&
+    (i.origin !== 'explicit' || !i.grantedBy || i.grantedBy === i.principalUserId || !i.issuanceRuleId)) {
+    throw new AuthorityStoreError('DENIED', 'primary case assignments require an independent governed explicit grant')
+  }
   if (i.grantedBy) await bindSessionActor(exec, i.grantedBy, 'relationship grantor')
   const row = await one(
     exec,

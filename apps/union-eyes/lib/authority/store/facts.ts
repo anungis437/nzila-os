@@ -207,7 +207,7 @@ export async function loadAuthorityFacts(
   const recusals = (
     await exec.query<Row>(
       `SELECT * FROM ue_authority_recusals
-       WHERE organization_id = $1 AND principal_user_id = ANY($2::text[]) AND lifted_at IS NULL`,
+       WHERE organization_id = $1 AND principal_user_id = ANY($2::text[])`,
       [org, people],
     )
   ).rows.map(mapRecusal)

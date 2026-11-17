@@ -12,7 +12,7 @@
  * the exact issuance); this module additionally checks what only facts can show
  * (issuer capacity and mandate, membership, conflicts, segregation of duties).
  */
-import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity, hasPrimaryCaseHandlerOnlyPower } from './common'
+import { activeMembership, activeRecusal, assessMandate, duplicateMembership, hasCapacity, hasPrimaryCaseHandlerOnlyPower, validInstant } from './common'
 import { dutyConflicts } from './policies/finance'
 import {
   POLICY_VERSION,
@@ -162,8 +162,10 @@ function result(
   effect: 'allow' | 'deny',
   reasons: Reason[],
 ): IssuanceDecision {
+  const clockValid = validInstant(now)
+  const allowed = effect === 'allow' && clockValid
   return {
-    effect,
+    effect: allowed ? 'allow' : 'deny',
     domain: req.domain,
     operation: req.operation,
     issuerUserId: req.issuerUserId,
@@ -171,9 +173,9 @@ function result(
     organizationId: req.organizationId,
     ruleId: rule?.id ?? null,
     ruleVersion: rule?.version ?? null,
-    requiresAcceptance: effect === 'allow' ? !!rule?.requiresAcceptance : false,
-    reasons,
-    evaluatedAt: now.toISOString(),
+    requiresAcceptance: allowed ? !!rule?.requiresAcceptance : false,
+    reasons: clockValid ? reasons : [{ code: 'FACTS_CONTRADICTORY', detail: 'evaluation clock is invalid' }],
+    evaluatedAt: clockValid ? now.toISOString() : 'INVALID_CLOCK',
     policyVersion: POLICY_VERSION,
   }
 }
@@ -259,7 +261,7 @@ function evaluate(
 
   // 3. Conflicts.
   if (req.resource) {
-    const recusal = activeRecusal(facts.recusals, req.issuerUserId, req.resource, org)
+    const recusal = activeRecusal(facts.recusals, req.issuerUserId, req.resource, org, now)
     if (recusal) return deny({ code: 'RECUSED', detail: 'issuer is recused from this matter', ref: recusal.id })
     if ((req.adverseUserIds ?? []).includes(req.issuerUserId)) return deny({ code: 'ADVERSE_PARTY', detail: 'issuer is a party to the matter' })
   }
@@ -286,7 +288,7 @@ function evaluate(
     return deny({ code: 'CAPACITY_NOT_ELIGIBLE', detail: `the holder's capacity is not eligible for ${req.domain}` })
   }
   if ((req.adverseUserIds ?? []).includes(req.holderUserId)) return deny({ code: 'ADVERSE_PARTY', detail: 'the holder is a party to the matter' })
-  if (req.resource && activeRecusal(facts.recusals, req.holderUserId, req.resource, org)) {
+  if (req.resource && activeRecusal(facts.recusals, req.holderUserId, req.resource, org, now)) {
     return deny({ code: 'RECUSED', detail: 'the holder is recused from this matter' })
   }
 
@@ -295,11 +297,15 @@ function evaluate(
     return deny({ code: 'EXCEEDS_RULE_CEILING', detail: 'requested powers exceed the rule ceiling', ref: rule.id })
   }
   if (req.domain !== 'case_assignment' && req.domain !== 'recusal') {
-    if (!req.expiresAt || !req.effectiveAt) return deny({ code: 'INSTRUMENT_INVALID', detail: 'an effective date and an expiry are required' })
+    if (!validInstant(req.expiresAt) || !validInstant(req.effectiveAt)) return deny({ code: 'INSTRUMENT_INVALID', detail: 'finite effective and expiry timestamps are required' })
     if (rule.maxTermDays !== null && req.expiresAt.getTime() - req.effectiveAt.getTime() > rule.maxTermDays * DAY_MS) {
       return deny({ code: 'EXCEEDS_RULE_CEILING', detail: `term exceeds ${rule.maxTermDays} day(s)`, ref: rule.id })
     }
     if (req.expiresAt.getTime() <= req.effectiveAt.getTime()) return deny({ code: 'INSTRUMENT_INVALID', detail: 'expiry must follow the effective date' })
+  }
+  if ((req.effectiveAt !== undefined && !validInstant(req.effectiveAt)) ||
+      (req.expiresAt != null && !validInstant(req.expiresAt))) {
+    return deny({ code: 'INSTRUMENT_INVALID', detail: 'authority validity timestamps must be finite' })
   }
 
   // 5. Independent approval, bound to the exact issuance, excluding issuer and holder.

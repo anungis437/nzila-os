@@ -43,6 +43,16 @@ export interface Live {
 
 export type Liveness = 'live' | 'not_yet_effective' | 'expired' | 'revoked' | 'inconsistent'
 
+export const validInstant = (value: unknown): value is Date =>
+  value instanceof Date && Number.isFinite(value.getTime())
+
+/** Set-based callers must not discard a restriction because its purported lift is malformed or future-dated. */
+export const ACTIVE_RECUSAL_SQL = `((lifted_at IS NOT NULL AND isfinite(declared_at) AND isfinite(lifted_at)
+  AND lifted_at >= declared_at AND lifted_at <= clock_timestamp()
+  AND lifted_by IS NOT NULL AND lifted_by <> principal_user_id
+  AND length(lifted_by) BETWEEN 1 AND 255 AND lifted_by = btrim(lifted_by)
+  AND lifted_by !~ '[[:cntrl:]]') IS NOT TRUE)`
+
 /**
  * Time is authoritative over the status column: a row marked active but past
  * its expiry is expired; a revokedAt in the past is revoked whatever `status`
@@ -51,9 +61,9 @@ export type Liveness = 'live' | 'not_yet_effective' | 'expired' | 'revoked' | 'i
  */
 export function liveness(row: Live, now: Date): Liveness {
   // Invalid Date comparisons otherwise evaluate false and can turn malformed authority into a live grant.
-  if (!Number.isFinite(now.getTime()) || !Number.isFinite(row.effectiveAt.getTime()) ||
-      (row.expiresAt !== null && !Number.isFinite(row.expiresAt.getTime())) ||
-      (row.revokedAt !== null && !Number.isFinite(row.revokedAt.getTime()))) return 'inconsistent'
+  if (!validInstant(now) || !validInstant(row.effectiveAt) ||
+      (row.expiresAt !== null && !validInstant(row.expiresAt)) ||
+      (row.revokedAt !== null && !validInstant(row.revokedAt))) return 'inconsistent'
   if (row.expiresAt && row.expiresAt.getTime() <= row.effectiveAt.getTime()) return 'inconsistent'
   if (row.revokedAt) {
     if (row.status === 'active') return 'inconsistent'
@@ -122,7 +132,10 @@ export function assessMandate(m: Mandate, orgId: string, now: Date): InstrumentV
     reasons.push({ code: 'INSTRUMENT_EXPIRED_OR_REVOKED', detail: lv, ref: m.id })
   }
   if (!m.sourceInstrument || m.sourceInstrument.trim() === '') bad('no source instrument recorded')
-  if (m.requiresAcceptance === true && !(m.acceptedAt && m.acceptedAt.getTime() <= now.getTime())) {
+  if (m.acceptedAt != null && (!validInstant(m.acceptedAt) || !validInstant(now) || m.acceptedAt.getTime() > now.getTime())) {
+    bad('acceptance timestamp is invalid or in the future')
+  }
+  if (m.requiresAcceptance === true && !(validInstant(m.acceptedAt) && validInstant(now) && m.acceptedAt.getTime() <= now.getTime())) {
     reasons.push({ code: 'NOT_ACCEPTED', detail: 'the holder has not accepted this mandate', ref: m.id })
   }
   if (m.powers.length === 0) bad('no powers granted')
@@ -188,7 +201,10 @@ export function assessDelegation(
   if (d.delegatorUserId === d.delegateUserId) bad('self-delegation')
   if (d.actions.length === 0) bad('delegation names no actions')
   if (d.expiresAt === null) bad('delegation has no term')
-  if (d.requiresAcceptance === true && !(d.acceptedAt && d.acceptedAt.getTime() <= now.getTime())) {
+  if (d.acceptedAt != null && (!validInstant(d.acceptedAt) || !validInstant(now) || d.acceptedAt.getTime() > now.getTime())) {
+    bad('acceptance timestamp is invalid or in the future')
+  }
+  if (d.requiresAcceptance === true && !(validInstant(d.acceptedAt) && validInstant(now) && d.acceptedAt.getTime() <= now.getTime())) {
     reasons.push({ code: 'NOT_ACCEPTED', detail: 'the delegate has not accepted this delegation', ref: d.id })
   }
   return { effective: reasons.length === 0, reasons }
@@ -201,6 +217,7 @@ export function activeRecusal(
   userId: string,
   resource: ResourceRef,
   orgId: string,
+  now: Date,
 ): Recusal | null {
   return (
     recusals.find(
@@ -209,7 +226,12 @@ export function activeRecusal(
         r.principalUserId === userId &&
         r.resource.type === resource.type &&
         r.resource.id === resource.id &&
-        r.liftedAt === null,
+        // Restrictions remain in force until a coherent, independent lift has actually taken effect.
+        !(validInstant(now) && validInstant(r.declaredAt) && validInstant(r.liftedAt) &&
+          r.liftedAt.getTime() >= r.declaredAt.getTime() && r.liftedAt.getTime() <= now.getTime() &&
+          typeof r.liftedBy === 'string' && r.liftedBy.length >= 1 && r.liftedBy.length <= 255 &&
+          r.liftedBy === r.liftedBy.trim() && !/[\u0000-\u001f\u007f]/.test(r.liftedBy) &&
+          r.liftedBy !== r.principalUserId),
     ) ?? null
   )
 }
@@ -228,22 +250,24 @@ export interface DecisionInput {
 }
 
 export function build(i: DecisionInput): Decision {
-  const allow = i.effect === 'allow'
+  const clockValid = validInstant(i.now)
+  const allow = i.effect === 'allow' && clockValid
   const obligations = new Set<Obligation>(i.obligations ?? [])
   // Every allow is auditable; there is no un-audited path.
   if (allow) obligations.add('audit_required')
   return {
-    effect: i.effect,
+    effect: allow ? 'allow' : 'deny',
     action: i.req.action,
     principalUserId: i.req.principalUserId,
     organizationId: i.req.organizationId,
     resource: i.req.resource,
     scope: allow ? (i.scope ?? {}) : {},
     authority: allow ? (i.authority ?? []) : [],
-    reasons: i.reasons,
+    reasons: clockValid ? i.reasons : [{ code: 'FACTS_CONTRADICTORY', detail: 'evaluation clock is invalid' }],
     obligations: [...obligations],
     authorityLineUserId: i.authorityLineUserId ?? i.req.principalUserId,
-    evaluatedAt: i.now.toISOString(),
+    // An explicit invalid marker cannot be mistaken for timestamped qualification evidence.
+    evaluatedAt: clockValid ? i.now.toISOString() : 'INVALID_CLOCK',
     policyVersion: POLICY_VERSION,
   }
 }

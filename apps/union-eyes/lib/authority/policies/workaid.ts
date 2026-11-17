@@ -55,9 +55,9 @@ export function decideWorkAid(
   const membership = activeMembership(facts, orgId)
   if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
   const recusal =
-    activeRecusal(facts.recusals, me, req.resource, orgId) ??
+    activeRecusal(facts.recusals, me, req.resource, orgId, now) ??
     // A recusal from the underlying case also bars every WorkAid act on it: the matter is that case, referred.
-    activeRecusal(facts.recusals, me, { type: 'case', id: matter.caseId, organizationId: orgId }, orgId)
+    activeRecusal(facts.recusals, me, { type: 'case', id: matter.caseId, organizationId: orgId }, orgId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
 
   const categories = req.categories ?? []

@@ -57,7 +57,7 @@ export function decideMessageParticipation(
   }
   const membership = activeMembership(facts, req.organizationId)
   if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
-  const recusal = activeRecusal(facts.recusals, req.principalUserId, req.resource, req.organizationId)
+  const recusal = activeRecusal(facts.recusals, req.principalUserId, req.resource, req.organizationId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
 
   if (req.principalUserId === thread.memberUserId) {
@@ -114,7 +114,7 @@ export function decideMessageThread(
   }
   const membership = activeMembership(facts, req.organizationId)
   if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
-  const recusal = activeRecusal(facts.recusals, req.principalUserId, req.resource, req.organizationId)
+  const recusal = activeRecusal(facts.recusals, req.principalUserId, req.resource, req.organizationId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
   if (!hasCapacity(membership, HOLD_CAPACITIES)) {
     return deny(req, now, {
@@ -177,7 +177,7 @@ export function decideMessageRetention(
   }
   const membership = activeMembership(facts, req.organizationId)
   if (!membership) return deny(req, now, { code: 'NOT_AN_ACTIVE_MEMBER' })
-  const recusal = activeRecusal(facts.recusals, req.principalUserId, req.resource, req.organizationId)
+  const recusal = activeRecusal(facts.recusals, req.principalUserId, req.resource, req.organizationId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id })
   if (!hasCapacity(membership, HOLD_CAPACITIES)) {
     return deny(req, now, {

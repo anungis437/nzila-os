@@ -1,3 +1,4 @@
+import { CASE_SCOPE_FACTS_FIXTURE_SQL } from './case-scope-facts-fixture'
 /**
  * Shared harness for the authority-kernel database tests (PGlite and real PostgreSQL).
  *
@@ -56,7 +57,7 @@ const IDENTITY_FIXTURE_SQL = `
 
 const BUSINESS_FIXTURE_SQL = `
   CREATE TABLE public.grievances (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, created_by text, grievant_id uuid,
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL, created_by text, grievant_id uuid, represented_member_user_id text,
     created_at timestamptz NOT NULL DEFAULT now(), is_confidential boolean DEFAULT false, has_legal_implications boolean DEFAULT false,
     union_rep_id uuid, status text NOT NULL DEFAULT 'draft');
   CREATE TABLE public.stewards (
@@ -128,6 +129,7 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
   // With canonicalIdentity the identity relations, roles and grants come from the real auth bootstrap instead.
   if (!options.canonicalIdentity) await db.exec(IDENTITY_FIXTURE_SQL)
   await db.exec(BUSINESS_FIXTURE_SQL)
+  await db.exec(CASE_SCOPE_FACTS_FIXTURE_SQL)
   if (!options.realAuditLogs) await db.exec(AUDIT_FIXTURE_SQL)
   await db.exec(PLATFORM_SQL)
   await db.exec(MESSAGE_THREAD_AUTHORITY_SQL)
@@ -140,12 +142,13 @@ export async function installAuthoritySchema(db: Db, options: { realAuditLogs?: 
   await db.exec(WORKAID_WORDING_SQL)
   await db.exec(WORKAID_WORDING_RLS_SQL)
   await db.exec(WORKAID_REFERRAL_SCOPE_SQL)
-  for (const t of ['audit_logs', 'grievances', 'claims', 'grievance_case_access_assignments', 'documents', 'payments']) {
+  for (const t of ['bargaining_units','case_territories','case_authority_scopes','case_respondents','audit_logs', 'grievances', 'claims', 'grievance_case_access_assignments', 'documents', 'payments']) {
     await db.exec(`SELECT ue_create_direct_org_rls_policy('${t}')`)
   }
   await db.exec("SELECT ue_create_direct_org_rls_policy('stewards','org_id')")
   if (!options.canonicalIdentity) await db.exec(IDENTITY_GRANTS)
   await db.exec(GRANTS)
+  await db.exec('GRANT SELECT ON bargaining_units,case_territories,case_authority_scopes,case_respondents TO union_eyes_runtime')
   for (const e of authorityKernelEntries) {
     await db.exec(`GRANT ${e.requiredRuntimePrivileges.join(', ')} ON ${e.table} TO union_eyes_runtime`)
   }

@@ -15,6 +15,7 @@
  * Anything missing, malformed or ambiguous is a refusal.
  */
 import { isPrincipalId } from './store/executor'
+import { isLive, validInstant } from './common'
 
 export const COUNSEL_AUDIENCE = 'union-eyes/counsel-intake'
 export const COUNSEL_ASSERTION_MAX_LIFETIME_MS = 5 * 60_000
@@ -52,6 +53,7 @@ export function validateCounselAssertion(
   const expires = assertion.expiresAt?.getTime()
   if (!Number.isFinite(issued) || !Number.isFinite(expires)) return no('invalid validity window')
   const now = expected.now.getTime()
+  if (!Number.isFinite(now)) return no('invalid evaluation clock')
   if (issued > now + COUNSEL_CLOCK_SKEW_MS) return no('issued in the future')
   if (expires <= now) return no('expired')
   if (expires <= issued || expires - issued > COUNSEL_ASSERTION_MAX_LIFETIME_MS) return no('lifetime exceeds the maximum')
@@ -133,12 +135,13 @@ export type CounselCapacityResult = { ok: true; capacity: CounselCapacityKind } 
 
 export function evaluateCounselCapacity(facts: CounselConflictFacts, engagement: CounselEngagement | null, org: string, matterId: string, now: Date): CounselCapacityResult {
   const no = (code: string, reason: string): CounselCapacityResult => ({ ok: false, code, reason })
+  if (!validInstant(now)) return no('COUNSEL_ENGAGEMENT_INVALID', 'invalid evaluation clock')
   if (facts.userId === facts.memberUserId || facts.userId === facts.referrerUserId) return no('COUNSEL_IS_PARTY', 'counsel cannot be the member or the union referrer of this matter')
   if (facts.adverseUserIds.includes(facts.userId)) return no('COUNSEL_ADVERSE', 'counsel is a party adverse to the underlying case')
 
   const live = (e: CounselEngagement): boolean =>
     e.organizationId === org && e.matterId === matterId && e.counselUserId === facts.userId &&
-    e.revokedAt === null && e.effectiveAt.getTime() <= now.getTime() && (e.expiresAt === null || e.expiresAt.getTime() > now.getTime())
+    isLive({ ...e, status: 'active' }, now)
 
   if (facts.unionCapacities.length === 0) {
     if (engagement && !live(engagement)) return no('COUNSEL_ENGAGEMENT_INVALID', 'the engagement is not live for this matter')

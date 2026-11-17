@@ -96,7 +96,7 @@ export function decideCase(
   if (c.adverseUserIds.includes(principalId)) {
     return deny(req, now, { code: 'ADVERSE_PARTY', detail: 'principal is a respondent in this matter' })
   }
-  const recusal = activeRecusal(facts.recusals, principalId, req.resource, orgId)
+  const recusal = activeRecusal(facts.recusals, principalId, req.resource, orgId, now)
   if (recusal) return deny(req, now, { code: 'RECUSED', ref: recusal.id, detail: recusal.reason })
 
   const action = req.action
@@ -250,7 +250,7 @@ export function decideCase(
       else if (privilegedMatter || action === 'case:read_privileged') misses.push({ code: 'PRIVILEGED_MATTER', ref: d.id, detail: 'delegations do not reach privileged matters' })
       else if (!activeMembership(facts, orgId, d.delegatorUserId)) misses.push(bad('delegator no longer holds an active membership'))
       else if (c.adverseUserIds.includes(d.delegatorUserId)) misses.push({ code: 'ADVERSE_PARTY', ref: d.id, detail: 'delegator is a respondent' })
-      else if (activeRecusal(facts.recusals, d.delegatorUserId, req.resource, orgId)) misses.push({ code: 'RECUSED', ref: d.id, detail: 'delegator is recused' })
+      else if (activeRecusal(facts.recusals, d.delegatorUserId, req.resource, orgId, now)) misses.push({ code: 'RECUSED', ref: d.id, detail: 'delegator is recused' })
       else {
         const office = facts.mandates.find(
           (m) =>
@@ -310,6 +310,9 @@ function relationshipGrant(r: ResourceRelationship, capacities: readonly Capacit
       return { actions: MEMBER_ACTIONS, visibility: 'member_visible' }
     case 'owner':
     case 'assignee':
+      if (r.origin !== 'explicit' || !r.grantedBy || r.grantedBy === r.principalUserId) {
+        return { actions: [], visibility: 'internal', miss: { code: 'INSTRUMENT_INVALID', detail: 'primary assignment is not an independent explicit grant' } }
+      }
       return handler
         ? { actions: PRIMARY_HANDLER_ACTIONS, visibility: 'internal' }
         : { actions: [], visibility: 'internal', miss: { code: 'CAPACITY_NOT_ELIGIBLE', detail: `${r.relation} requires a representation capacity` } }

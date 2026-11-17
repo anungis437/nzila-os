@@ -19,6 +19,7 @@ import { analyticsAiEntries } from './analytics-ai'
 import { authorityKernelEntries } from './authority-kernel'
 import { baseline0108Entries } from './baseline-0108'
 import { claimsContinuityEntries } from './claims-continuity'
+import { caseScopeEntries } from './case-scope'
 import { communicationsNotificationsEntries } from './communications-notifications'
 import { documentsEvidenceEntries } from './documents-evidence'
 import { financeEntries } from './finance'
@@ -37,6 +38,7 @@ export const storageAuthorityManifest: StorageAuthorityEntry[] = [
   ...analyticsAiEntries,
   ...authorityKernelEntries,
   ...baseline0108Entries,
+  ...caseScopeEntries,
   ...claimsContinuityEntries,
   ...communicationsNotificationsEntries,
   ...documentsEvidenceEntries,

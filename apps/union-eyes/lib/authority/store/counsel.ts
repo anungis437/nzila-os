@@ -7,6 +7,7 @@
  * implemented here; it is the injected `CounselAssertionVerifier`, and without one every assertion is refused.
  */
 import { createHash } from 'node:crypto'
+import { assessMandate } from '../common'
 import {
   authenticateCounselAssertion,
   type CounselAssertion,
@@ -54,7 +55,7 @@ export async function recordCounselEngagement(
   }
   const now = (deps.now ?? (() => new Date()))()
   const office = (await loadHolderMandates(exec, i.organizationId, i.recorderUserId)).some(
-    (x) => x.kind === 'executive_office' && x.sourceInstrument.length > 0 && x.powers.includes('approve') && x.effectiveAt <= now && x.expiresAt !== null && x.expiresAt > now,
+    (x) => x.kind === 'executive_office' && x.powers.includes('approve') && assessMandate(x, i.organizationId, now).effective,
   )
   if (!office) throw new AuthorityStoreError('DENIED', 'ENGAGEMENT_RECORDER_NOT_AUTHORIZED: no live executive-office mandate')
   const row = (

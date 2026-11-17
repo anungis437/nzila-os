@@ -31,6 +31,7 @@ import type {
   ResourceRelationship,
   WorkAidMatterFacts,
 } from '../ontology'
+import { validInstant } from '../common'
 import { DEFAULT_DOCUMENT_CLASS_POLICY, type DocumentClassPolicy } from '../document-class'
 import { isPrincipalId, isUuid, parsePgTextArray, type SqlExecutor } from './executor'
 
@@ -71,29 +72,68 @@ export function decimalToMinor(value: unknown): number {
 export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Date, policy: DocumentClassPolicy = DEFAULT_DOCUMENT_CLASS_POLICY): Promise<LoadedResource | null> {
   const org = req.resource.organizationId
   if (!isUuid(org) || !isUuid(req.resource.id)) return null
-  let row = (
-    await exec.query<Row>(
-      `SELECT id::text AS id, organization_id::text AS organization_id, created_by, grievant_id::text AS represented_member_id, created_at,
-              COALESCE(is_confidential, false) AS is_confidential,
-              COALESCE(has_legal_implications, false) AS has_legal_implications
-         FROM public.grievances WHERE organization_id = $1::uuid AND id = $2::uuid`,
-      [org, req.resource.id],
-    )
-  ).rows[0]
-  // A claim is a case too: its kernel id is its public claim_id, and the member who filed it is its creator. A claim
-  // carries no confidentiality or legal-implications column, so it is a standard, non-confidential case until a
-  // governed source says otherwise. The two id spaces are both uuids; a grievance match always wins.
-  if (!row) {
-    row = (
-      await exec.query<Row>(
-        `SELECT claim_id::text AS id, organization_id::text AS organization_id, member_id AS created_by, created_at,
-                false AS is_confidential, false AS has_legal_implications
-           FROM public.claims WHERE organization_id = $1::uuid AND claim_id = $2::uuid`,
-        [org, req.resource.id],
-      )
-    ).rows[0]
+  if (!validInstant(now)) throw new Error('invalid case evaluation clock')
+  const scopes = (await exec.query<Row>(
+    `SELECT s.*, u.organization_id::text AS unit_organization_id, u.status::text AS unit_status, u.archived_at AS unit_archived_at,
+            t.organization_id::text AS territory_organization_id,t.retired_at AS territory_retired_at,t.source_instrument AS territory_instrument
+       FROM public.case_authority_scopes s
+       LEFT JOIN public.bargaining_units u ON u.id=s.unit_id
+       LEFT JOIN public.case_territories t ON t.id=s.territory_id
+      WHERE s.organization_id=$1::uuid AND s.case_id=$2::uuid`, [org, req.resource.id],
+  )).rows
+  if (scopes.length > 1) throw new Error('contradictory case authority scope')
+  const scope = scopes[0]
+  const grievance = (await exec.query<Row>(
+    `SELECT id::text AS id,organization_id::text AS organization_id,created_by,
+            grievant_id::text AS legacy_represented_member_id,represented_member_user_id,created_at,
+            COALESCE(is_confidential,false) AS is_confidential,COALESCE(has_legal_implications,false) AS has_legal_implications
+       FROM public.grievances WHERE organization_id=$1::uuid AND id=$2::uuid`, [org, req.resource.id],
+  )).rows[0]
+  const claim = (await exec.query<Row>(
+    `SELECT claim_id::text AS id,organization_id::text AS organization_id,member_id AS created_by,
+            member_id AS represented_member_id,created_at,false AS is_confidential,false AS has_legal_implications
+       FROM public.claims WHERE organization_id=$1::uuid AND claim_id=$2::uuid`, [org, req.resource.id],
+  )).rows[0]
+  if (!grievance && !claim) return null
+  if (grievance) {
+    const represented = grievance.represented_member_user_id
+    const legacy = grievance.legacy_represented_member_id
+    if (represented != null && legacy != null && represented !== legacy) throw new Error('contradictory grievance represented member')
+    grievance.represented_member_id = represented ?? legacy
   }
-  if (!row) return null
+  let row: Row
+  if (scope) {
+    const claimParent = scope.claim_id != null && scope.grievance_id == null && String(scope.claim_id) === req.resource.id
+    const grievanceParent = scope.grievance_id != null && scope.claim_id == null && String(scope.grievance_id) === req.resource.id
+    if (!claimParent && !grievanceParent) throw new Error('invalid canonical case parent')
+    if (claimParent) {
+      if (!claim) throw new Error('canonical claim parent is missing')
+      row = claim
+      if (grievance) {
+        const recordedAt = scope.mirror_recorded_at == null ? null : toDate(scope.mirror_recorded_at)
+        if (String(scope.grievance_mirror_id) !== req.resource.id || !recordedAt || recordedAt.getTime() > now.getTime()
+          || !isPrincipalId(scope.mirror_recorded_by) || grievance.represented_member_user_id !== claim.represented_member_id) {
+          throw new Error('same-id grievance has no coherent governed mirror provenance')
+        }
+        // A formal mirror can narrow classification; it never replaces the canonical creator, member or governed scope.
+        row = { ...claim, is_confidential: grievance.is_confidential === true, has_legal_implications: grievance.has_legal_implications === true }
+      } else if (scope.grievance_mirror_id != null) throw new Error('recorded grievance mirror is missing')
+    } else {
+      if (!grievance || claim) throw new Error('ambiguous or missing canonical grievance parent')
+      row = grievance
+    }
+  } else {
+    if (grievance && claim) throw new Error('ambiguous same-id case parents lack governed provenance')
+    row = grievance ?? claim!
+  }
+  if (scope?.unit_id != null && scope.unit_organization_id !== org) throw new Error('case unit belongs to another organization or is missing')
+  if (scope?.territory_id != null && scope.territory_organization_id !== org) throw new Error('case territory belongs to another organization or is missing')
+  const respondents = scope ? (await exec.query<Row>(
+    `SELECT respondent_user_id FROM public.case_respondents WHERE organization_id=$1::uuid AND scope_id=$2::uuid
+       AND (revoked_at IS NULL OR NOT isfinite(revoked_at) OR revoked_at>$3 OR revoked_at<recorded_at OR revoked_by IS NULL)`,
+    [org, scope.id, now],
+  )).rows : []
+  if (respondents.some(party => !isPrincipalId(party.respondent_user_id))) throw new Error('case respondent identity is malformed')
 
   // Counsel control comes only from an accepted, unwithdrawn WorkAid referral.
   const counsel = (
@@ -108,17 +148,15 @@ export async function loadCase(exec: SqlExecutor, req: AuthorityRequest, now: Da
     kind: 'case',
     id: String(row.id),
     organizationId: String(row.organization_id),
-    // The unit is the organization that owns the claim. It is written by the server from the authenticated membership when the
-    // case is filed and is never accepted from a client, so it is a trusted jurisdiction: a mandate scoped to this unit covers
-    // only this organization's cases (exact match, never inherited through the hierarchy). Territory has no governed source yet
-    // and stays absent, so a territory-scoped mandate cannot match.
-    unitId: String(row.organization_id),
-    territoryId: null,
+    // Jurisdiction is an adopted persisted fact, never inferred from the organization or workplace.
+    unitId: scope?.unit_id != null && scope.unit_status === 'active' && scope.unit_archived_at == null ? String(scope.unit_id) : null,
+    territoryId: scope?.territory_id != null && scope.territory_retired_at == null && typeof scope.territory_instrument === 'string'
+      && scope.territory_instrument.trim().length > 0 ? String(scope.territory_id) : null,
     // Legal implications are the only privilege signal; confidentiality is carried separately.
     classification: row.has_legal_implications === true ? 'privileged' : 'standard',
     confidential: row.is_confidential === true,
     counselControlled: counsel,
-    adverseUserIds: [],
+    adverseUserIds: [...new Set(respondents.map(party => String(party.respondent_user_id)))],
   }
   if (req.action === 'case:read_own_submission' && isUuid(req.documentId)) {
     const doc = await loadDocument(exec, org, req.documentId, policy)

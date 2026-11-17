@@ -1,4 +1,5 @@
 /** Local source/model policy regression; not a signed-in staging acceptance claim. */
+import { CASE_SCOPE_FACTS_FIXTURE_SQL } from '../../../db/__tests__/case-scope-facts-fixture'
 import { PGlite } from '@electric-sql/pglite'
 import { randomUUID } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
@@ -14,10 +15,11 @@ describe('the stored represented member survives conversion authorship', () => {
       member = randomUUID(),
       converter = randomUUID()
     try {
-      await pg.exec(`CREATE TABLE grievances(id uuid,organization_id uuid,created_by text,grievant_id uuid,created_at timestamptz,is_confidential boolean,has_legal_implications boolean);
+      await pg.exec(`CREATE TABLE grievances(id uuid,organization_id uuid,created_by text,grievant_id uuid,represented_member_user_id text,created_at timestamptz,is_confidential boolean,has_legal_implications boolean);
         CREATE TABLE claims(claim_id uuid,organization_id uuid,member_id text,created_at timestamptz);
         CREATE TABLE ue_authority_workaid_matters(organization_id uuid,case_id uuid,counsel_accepted_at timestamptz,withdrawn_at timestamptz);`)
-      await pg.query('INSERT INTO grievances VALUES($1,$2,$3,$4,$5,false,false)', [
+      await pg.exec(CASE_SCOPE_FACTS_FIXTURE_SQL)
+      await pg.query('INSERT INTO grievances(id,organization_id,created_by,grievant_id,created_at,is_confidential,has_legal_implications) VALUES($1,$2,$3,$4,$5,false,false)', [
         id,
         ORG,
         converter,
