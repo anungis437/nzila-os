@@ -11885,5 +11885,10 @@
     "accessChanged": "Votre accès au dossier a changé. Rechargez le dossier pour vérifier votre accès.",
     "savedRefreshFailed": "La modification a été enregistrée, mais la liste actuelle n’a pas pu être chargée. Réessayez pour afficher le dernier état.",
     "truncated": "Les 200 premières échéances sont affichées."
+  },
+  "memberDirectoryBootstrap": {
+    "pending": "Finalisation de votre profil de membre…",
+    "failed": "Votre connexion a réussi, mais votre profil de membre n’a pas pu être finalisé. Réessayez avec cette session.",
+    "retry": "Réessayer"
   }
 }

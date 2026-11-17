@@ -11863,5 +11863,10 @@
     "accessChanged": "Your case access changed. Reload the case to check your access.",
     "savedRefreshFailed": "The change was saved, but the current deadline list could not be loaded. Retry to see the latest record.",
     "truncated": "The first 200 deadlines are shown."
+  },
+  "memberDirectoryBootstrap": {
+    "pending": "Finishing your member profile…",
+    "failed": "Your sign-in succeeded, but your member profile could not be finished. Try again using this session.",
+    "retry": "Try again"
   }
 }

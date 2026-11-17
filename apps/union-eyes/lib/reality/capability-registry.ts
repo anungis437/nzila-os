@@ -95,6 +95,24 @@ export interface Capability {
  */
 export const CAPABILITY_REGISTRY: readonly Capability[] = [
   {
+    id:'UE-CANONICAL-MEMBER-DIRECTORY-BOOTSTRAP',
+    title:'Canonical member contact projection after invitation acceptance',
+    state:'LIMITED',
+    ownedBy:['lib/members/own-directory-profile.ts','app/api/members/self/bootstrap/route.ts','components/members/member-directory-bootstrap.tsx'],
+    evidence:['scripts/bootstrap-v2/member-letter-delivery.native.test.ts — actual canonical PostgreSQL roles, concurrent own-profile creation, revoked/foreign/platform refusal and mandatory-audit rollback'],
+    targetWave:0,
+    notes:'Canonical authentication remains membership authority. An explicit own-session POST creates missing contact data and the business FK anchor, with mandatory audit in one transaction. Existing inactive/deleted profiles are not revived. Exact-source CI, qualified staging rollout and the controlled invited account directory readback are pending. No staging acceptance claim.',
+  },
+  {
+    id:'UE-APPROVED-LETTER-EMAIL',
+    title:'In-app email for approved and signed letters',
+    state:'LIMITED',
+    ownedBy:['lib/correspondence/email-delivery.ts','lib/correspondence/email-intent.ts','lib/services/correspondence-service.ts','app/api/correspondence/[id]/dispatch/route.ts','app/api/correspondence/[id]/email-status/route.ts'],
+    evidence:['scripts/bootstrap-v2/member-letter-delivery.native.test.ts — actual PostgreSQL outbox, provider-seam uncertainty, audited retry and receipt settlement; email-intent.test.ts — envelope and signer-summary integrity'],
+    targetWave:0,
+    notes:'Required for base by founder decision. Source implementation sends approved plain text with signer attribution separately to each recipient, using a sealed durable outbox and a stable provider key within23h. Provider acceptance is distinct from delivery and human receipt. Attachments are refused rather than omitted; existing signed letters need a verified summary through the approval/signing workflow. No private signature/profile visibility or new DB grant is added. The two attribution policy checks require separately qualified owner-operated compatibility repair before rollout. CI, actual provider delivery, controlled inbox receipt and final staging access proofs are pending. No PKI or staging GO claim.',
+  },
+  {
     id: 'UE-CASE-SEALED-EVIDENCE-EXPORT',
     title: 'Authorized case evidence PDF and sealed JSON download',
     state: 'LIMITED',

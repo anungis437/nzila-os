@@ -68,6 +68,12 @@ export interface ResendSendContext {
   templateId?: string;
   maxRetries?: number;
   disableRetry?: boolean;
+  /** Stable provider key for a durable outbox item; never generated per attempt. */
+  idempotencyKey?: string;
+  /** Formal correspondence errors must not echo recipient/content values. */
+  sensitiveContent?: boolean;
+  /** Absolute boundary of a durable outbox's provider idempotency window. */
+  notAfter?: number;
 }
 
 interface ResendParsedError {
@@ -232,7 +238,13 @@ export async function sendResendEmail(
   const finalPayload = attachObservability(screened.payload, context);
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-    const { data, error } = await client.emails.send(finalPayload);
+    // Suppression/connection waits must not allow a stale task to start a new
+    // provider request after its safe replay window has elapsed.
+    if (context.notAfter !== undefined && (!Number.isFinite(context.notAfter) || Date.now() >= context.notAfter))
+      return {success:false,error:'Email replay window elapsed',code:'OUTBOX_WINDOW_ELAPSED'};
+    const { data, error } = context.idempotencyKey
+      ? await client.emails.send(finalPayload, { idempotencyKey: context.idempotencyKey })
+      : await client.emails.send(finalPayload);
 
     if (!error) {
       return {
@@ -252,11 +264,11 @@ export async function sendResendEmail(
       logger.error('Error sending email', {
         feature: context.feature,
         statusCode: parsed.statusCode,
-        error: parsed.message,
+        error: context.sensitiveContent ? 'Provider rejected correspondence submission' : parsed.message,
       });
       return {
         success: false,
-        error: parsed.message,
+        error: context.sensitiveContent ? 'Provider rejected correspondence submission' : parsed.message,
         statusCode: parsed.statusCode,
         code: parsed.code,
       };

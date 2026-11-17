@@ -263,6 +263,15 @@ export function compileSecurity(plan: V2Plan) {
     let checkPredicate = writePredicate
     if (complete && checkPredicate) {
       const parentChecks = table.foreignKeys.flatMap((foreignKey) => {
+        // These are participant attributions, not access to another person's
+        // private profile. The FK still requires the contact anchor to exist;
+        // canonical membership proves the referenced participant is active in
+        // this organization without granting SELECT on their private profile.
+        if (plan.authExecution && table.name === 'correspondence' && foreignKey.table === 'profiles'
+          && foreignKey.referencedColumn === 'user_id'
+          && ['drafted_by','assigned_signer_id','approved_by','signed_by','dispatched_by'].includes(foreignKey.column)) {
+          return [`(${quote(foreignKey.column)} IS NULL OR ${AUTH_BUSINESS_MEMBER_PARENT_PREDICATE}(${quote(foreignKey.column)}::text, (${org})::uuid))`]
+        }
         if (
           plan.authExecution &&
           foreignKey.table === 'user_management.users' &&

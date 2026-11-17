@@ -9,6 +9,7 @@ import { probeBaseApplicationReadiness } from '@/lib/operations/base-application
 import { readReminderHealth, readLatestReminderReceipt, probeReminderMailProvider } from '@/lib/operations/reminder-health'
 import { withSystemContext } from '@/lib/db/with-rls-context'
 import { baseOperationalReport, emitBaseOperationalMonitor } from '@/lib/operations/base-monitor-telemetry'
+import { processCorrespondenceEmails, readCorrespondenceQueueHealth } from '@/lib/correspondence/email-delivery'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -18,6 +19,8 @@ export const POST = withApi({ auth: { cron: true }, openapi: {
 } }, async () => {
   if (readinessPolicy().profile !== 'union-eyes-v2-base') return NextResponse.json({ error: 'Base operational profile required' }, { status: 503 })
   const sourceSha = getBuildMetadata('union-eyes').gitSha
+  let correspondenceWorkerOk = true
+  try { await processCorrespondenceEmails() } catch { correspondenceWorkerOk = false }
   let azure
   try {
     azure = await probeAzureOperations(parseOperationalArmConfiguration(process.env.UE_OPERATIONS_ARM_CONFIGURATION), process.env.AZURE_CLIENT_ID ?? '')
@@ -28,7 +31,12 @@ export const POST = withApi({ auth: { cron: true }, openapi: {
     work.catch(() => ({ state: 'fail' as const, note: 'Operational database measurement could not be read' }))
   const [dependencies, audit, queue, mail] = await Promise.all([
     probeBaseApplicationReadiness(sourceSha, process.env.UE_APP_URL), probeDailyAuditSeals(),
-    measured(withSystemContext(tx => readReminderHealth(tx))),
+    measured(withSystemContext(async tx => {
+      const reminders = await readReminderHealth(tx)
+      const letters = await readCorrespondenceQueueHealth(tx)
+      return { ...reminders, state: correspondenceWorkerOk && reminders.state === 'ok' && letters.state === 'ok' ? 'ok' as const : 'fail' as const,
+        note:'Measured reminder and correspondence queue age, leases and unresolved failures',letters }
+    })),
     measured(withSystemContext(tx => readLatestReminderReceipt(tx)).then(receipt => probeReminderMailProvider(receipt))),
   ])
   const report = baseOperationalReport({ ...azure, dependencies, audit, queue, mail })
