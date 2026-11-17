@@ -1,0 +1,521 @@
+{
+  "record": "UE_STEP1_OWNERSHIP_DELTA_STATIC_RECONCILIATION",
+  "schemaVersion": 1,
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "sourceInputs": [
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_BASE_CRITICAL_REVIEW.json",
+      "blobSha": "27f2004e0fd29ce7a6ae1c414cbfcd4104bfc662"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_IDENTITY_BOUNDARY_REVIEW.json",
+      "blobSha": "5c3b5e7e261b97f4b8f8bfe28d6e8e72a5f61ea6"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_EXTERNAL_OPERATIONS_REVIEW.json",
+      "blobSha": "47416e2e42f58d5e6bad6907c4d690200c7e5492"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_SCHEDULE_CAPABILITY_REVIEW.json",
+      "blobSha": "e2be11e049dd16a95f8a01a69d22dbfa236d2b08"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_ADJACENT_DOMAIN_REVIEW_A.json",
+      "blobSha": "9db0e3c47f8ced03ae4fe1e3e104599997aba43b"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_ADJACENT_DOMAIN_REVIEW_B.json",
+      "blobSha": "4a263938d5fcb78df9c652c9f06d0cfdc82cbf74"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_NEW_METHOD_ADJACENT_DOMAIN_REVIEW_C.json",
+      "blobSha": "bfda6ec8f61733f946905bb2bbf454dfa755e9a3"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_INDEPENDENT_GIT_TREE_CENSUS.json",
+      "blobSha": "d78948e5a4e35fe54b530befd1ede6922a78cbd0"
+    },
+    {
+      "path": "docs/union-eyes/convergence/register/ue-route-capability-ownership.json",
+      "blobSha": "841fc2a285647ff046ca0b2e488f7ecd8c0e60cd"
+    },
+    {
+      "path": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
+      "blobSha": "f6f6bf59bd2cfa80042105d7f950cce9ccada71d"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_STAKEHOLDER_ACTION_CENSUS.json",
+      "blobSha": "956ac8910aee8d51c69883246d21dfbb839917a8"
+    }
+  ],
+  "counts": {
+    "reviewedNewMethodKeys": 112,
+    "distinctNewMethodFiles": 77,
+    "remainingNewMethodKeys": 0,
+    "removedHistoricalMethodKeys": 41,
+    "removedRouteFile": 5,
+    "removedMethodExistingRoute": 36
+  },
+  "tests": {
+    "uniqueKeys": true,
+    "exactAddedKeySet": true,
+    "exactBlobRefs": true,
+    "allActionLinksValid": true,
+    "noRuntimePromotion": true,
+    "allBatchDecisionsHeld": true,
+    "finalQueueEmpty": true
+  },
+  "removedKeys": [
+    {
+      "key": "DELETE apps/union-eyes/app/api/breaks/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/breaks/[id]/route.ts",
+      "sourceBlob": "080bf1906ff1231fba11cad3a925ff19aaed1b71",
+      "currentExplicitMethods": [
+        "GET",
+        "PATCH"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/carbon/validate/route.ts",
+      "path": "apps/union-eyes/app/api/carbon/validate/route.ts",
+      "sourceBlob": "624f0bf01f29668d9b6a466efe6a2095a3fb1bc2",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/clause-library/compare/route.ts",
+      "path": "apps/union-eyes/app/api/clause-library/compare/route.ts",
+      "sourceBlob": "c40698bbab1892768539f6f9a95bde0ddfe9de3b",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+      "path": "apps/union-eyes/app/api/communications/polls/[pollId]/route.ts",
+      "sourceBlob": "257481fa113a714a10a8d60b74a6a62a94f02dc2",
+      "currentExplicitMethods": [
+        "DELETE",
+        "GET",
+        "PATCH"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts",
+      "path": "apps/union-eyes/app/api/cron/analytics/daily-metrics/route.ts",
+      "sourceBlob": "faf646c52f5ed155b49943296d933bb631fa0670",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/deadline-overdue/route.ts",
+      "path": "apps/union-eyes/app/api/cron/deadline-overdue/route.ts",
+      "sourceBlob": "2fa923315aabc998654388c39a3aa55e9797a4d1",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/deadline-reminders/route.ts",
+      "path": "apps/union-eyes/app/api/cron/deadline-reminders/route.ts",
+      "sourceBlob": "4c444bd266dc134de8c1489b54f66d4b4bee8325",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/document-intake-reaper/route.ts",
+      "path": "apps/union-eyes/app/api/cron/document-intake-reaper/route.ts",
+      "sourceBlob": "6f8c565fd32abf7f787a976e99573a7da43e1aac",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/education-reminders/route.ts",
+      "path": "apps/union-eyes/app/api/cron/education-reminders/route.ts",
+      "sourceBlob": "4dc53d57ac77de8c047caa8b4b3922bc2431e70d",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/external-data-sync/route.ts",
+      "path": "apps/union-eyes/app/api/cron/external-data-sync/route.ts",
+      "sourceBlob": "1a4d2e330afe84bd082b61576987b888d573df46",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/location-retention/route.ts",
+      "path": "apps/union-eyes/app/api/cron/location-retention/route.ts",
+      "sourceBlob": "c8cabe27013b5b1cc8fe4486a87c537fad5f247d",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/monthly-dues/route.ts",
+      "path": "apps/union-eyes/app/api/cron/monthly-dues/route.ts",
+      "sourceBlob": "d1d13441592365aa337ac8d5ae5778332988950b",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/monthly-per-capita/route.ts",
+      "path": "apps/union-eyes/app/api/cron/monthly-per-capita/route.ts",
+      "sourceBlob": "8d3a67849e659c0ec7605a872115559046ddc09f",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/overdue-notifications/route.ts",
+      "path": "apps/union-eyes/app/api/cron/overdue-notifications/route.ts",
+      "sourceBlob": "59445ff1b9d4edbfd15e4e48b8eee4ffa8330e25",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/process-messages/route.ts",
+      "path": "apps/union-eyes/app/api/cron/process-messages/route.ts",
+      "sourceBlob": "1128fa6a8a764de20df6a929c153a385e01beb0a",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/process-notifications/route.ts",
+      "path": "apps/union-eyes/app/api/cron/process-notifications/route.ts",
+      "sourceBlob": "e4d0971eef2071cef8217b3c642f8a547a9912b9",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/cron/scheduled-reports/route.ts",
+      "path": "apps/union-eyes/app/api/cron/scheduled-reports/route.ts",
+      "sourceBlob": "a3b613faf483a815884e7867c076b2d4d9b46980",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/deadlines/overdue/route.ts",
+      "path": "apps/union-eyes/app/api/deadlines/overdue/route.ts",
+      "sourceBlob": "ac5406dd1b54f989f47e0771a4b445c01ab21b85",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/deadlines/upcoming/route.ts",
+      "path": "apps/union-eyes/app/api/deadlines/upcoming/route.ts",
+      "sourceBlob": "4ba20ff7f40b9e7270eb8197619666e00e7bd544",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/dues/payment-methods/route.ts",
+      "path": "apps/union-eyes/app/api/dues/payment-methods/route.ts",
+      "sourceBlob": null,
+      "currentExplicitMethods": [],
+      "sourceDisposition": "ROUTE_FILE_NO_LONGER_TRACKED",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/equity/monitoring/route.ts",
+      "path": "apps/union-eyes/app/api/equity/monitoring/route.ts",
+      "sourceBlob": "2436c0e7e03f20eef0fd1de004a970c302407b11",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/equity/snapshots/route.ts",
+      "path": "apps/union-eyes/app/api/equity/snapshots/route.ts",
+      "sourceBlob": "d29452db29f38d234a37ed558a9f2bb880f2d88b",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/federations/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/federations/[id]/route.ts",
+      "sourceBlob": "9d280a6f2ee51927fa66be8e159e1dfe9cf8acba",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/federations/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/federations/[id]/route.ts",
+      "sourceBlob": "9d280a6f2ee51927fa66be8e159e1dfe9cf8acba",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/federations/route.ts",
+      "path": "apps/union-eyes/app/api/federations/route.ts",
+      "sourceBlob": "02fd4665726cb53541298887f8b2443bdaca77e5",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+      "path": "apps/union-eyes/app/api/integrations/shopify/webhooks/route.ts",
+      "sourceBlob": "524f04aeec8836cfe14f787243e3c7fdd53e358d",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+      "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+      "sourceBlob": "287dd314b8fb40bcb91a275228f4332ef051b9da",
+      "currentExplicitMethods": [
+        "GET",
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+      "path": "apps/union-eyes/app/api/meeting-rooms/[id]/bookings/route.ts",
+      "sourceBlob": "287dd314b8fb40bcb91a275228f4332ef051b9da",
+      "currentExplicitMethods": [
+        "GET",
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+      "path": "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+      "sourceBlob": "6f1b58397b308f9684eab9753c770a572fa1e330",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+      "path": "apps/union-eyes/app/api/organizations/[id]/access-logs/route.ts",
+      "sourceBlob": "6f1b58397b308f9684eab9753c770a572fa1e330",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts",
+      "path": "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts",
+      "sourceBlob": "e30677a88feed0a30aa393609c1d6605408f4c70",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts",
+      "path": "apps/union-eyes/app/api/organizations/[id]/sharing-settings/route.ts",
+      "sourceBlob": "e30677a88feed0a30aa393609c1d6605408f4c70",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/organizing/forms/generate/route.ts",
+      "path": "apps/union-eyes/app/api/organizing/forms/generate/route.ts",
+      "sourceBlob": "69b83ff6aa0238b2f8e1160c3b38742d235b479d",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/payment/status/route.ts",
+      "path": "apps/union-eyes/app/api/payment/status/route.ts",
+      "sourceBlob": null,
+      "currentExplicitMethods": [],
+      "sourceDisposition": "ROUTE_FILE_NO_LONGER_TRACKED",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/profile/me/route.ts",
+      "path": "apps/union-eyes/app/api/profile/me/route.ts",
+      "sourceBlob": null,
+      "currentExplicitMethods": [],
+      "sourceDisposition": "ROUTE_FILE_NO_LONGER_TRACKED",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "GET apps/union-eyes/app/api/rewards/cron/route.ts",
+      "path": "apps/union-eyes/app/api/rewards/cron/route.ts",
+      "sourceBlob": "c5a1c5532d234e983afd75b48ae0f09efc218160",
+      "currentExplicitMethods": [
+        "POST"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "DELETE apps/union-eyes/app/api/stewards/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/stewards/[id]/route.ts",
+      "sourceBlob": "2619a231a1182cc0634c92055bbf182858db3b02",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "PATCH apps/union-eyes/app/api/stewards/[id]/route.ts",
+      "path": "apps/union-eyes/app/api/stewards/[id]/route.ts",
+      "sourceBlob": "2619a231a1182cc0634c92055bbf182858db3b02",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/stewards/route.ts",
+      "path": "apps/union-eyes/app/api/stewards/route.ts",
+      "sourceBlob": "0597701169c1e4c3462fabcf9d97e610cfc4c9d1",
+      "currentExplicitMethods": [
+        "GET"
+      ],
+      "sourceDisposition": "METHOD_NO_LONGER_EXPLICIT",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/whop/create-checkout/route.ts",
+      "path": "apps/union-eyes/app/api/whop/create-checkout/route.ts",
+      "sourceBlob": null,
+      "currentExplicitMethods": [],
+      "sourceDisposition": "ROUTE_FILE_NO_LONGER_TRACKED",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    },
+    {
+      "key": "POST apps/union-eyes/app/api/whop/unauthenticated-checkout/route.ts",
+      "path": "apps/union-eyes/app/api/whop/unauthenticated-checkout/route.ts",
+      "sourceBlob": null,
+      "currentExplicitMethods": [],
+      "sourceDisposition": "ROUTE_FILE_NO_LONGER_TRACKED",
+      "requiredVerification": "Framework/rewrites/replacement behavior and authorized/unauthorized refusal; no inferred deployed removal.",
+      "runtimeVerified": false
+    }
+  ],
+  "limitations": [
+    "All 112 new keys have inspected direct source and candidate scope. No transitive authorization or final base disposition is claimed.",
+    "Removed method keys compared to exact executed AST census; negative runtime behavior is not implied.",
+    "Existing 1,605 historical keys remain separate semantic review, especially 1,321 with changed route blobs."
+  ]
+}
