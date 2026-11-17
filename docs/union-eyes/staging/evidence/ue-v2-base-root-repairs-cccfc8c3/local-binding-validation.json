@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 2,
+  "status": "PASS_LOCAL_ONLY",
+  "applicationSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "sourceAdmissionMergeSha": "3352fee0e38c8e128f58d526dc154b9ec08ba988",
+  "bindingCommitSha": null,
+  "recordedAt": "2026-11-17T03:12:33.859505+00:00",
+  "fiveRequiredChecks": [
+    {
+      "command": "pnpm lint",
+      "status": "PASS",
+      "startedAt": "2026-11-17T02:52:56.820359+00:00",
+      "exitCode": 0,
+      "logSha256": "cb6d12d2954a857120c87ac7d5581f9da8cc5cfca7325ab923e4435e03aa6c1a",
+      "completedAt": "2026-11-17T02:55:01.794753+00:00",
+      "protectedInputsUnchanged": true
+    },
+    {
+      "command": "pnpm typecheck",
+      "status": "PASS",
+      "startedAt": "2026-11-17T02:55:02.474854+00:00",
+      "exitCode": 0,
+      "logSha256": "d3d7d3186e6f34403a0b372f5e3f4f64b631d95b4f0d27d57eb8b7d4423b3664",
+      "completedAt": "2026-11-17T02:59:00.382539+00:00",
+      "protectedInputsUnchanged": true
+    },
+    {
+      "command": "pnpm test:fast",
+      "status": "PASS",
+      "startedAt": "2026-11-17T02:59:01.176868+00:00",
+      "exitCode": 0,
+      "logSha256": "f5fbc0bbbc060ffc720473b861aa37b027622a7e3644c7529079ce5d77a1733f",
+      "completedAt": "2026-11-17T03:11:35.478477+00:00",
+      "protectedInputsUnchanged": true
+    },
+    {
+      "command": "pnpm validate:docs",
+      "status": "PASS",
+      "startedAt": "2026-11-17T03:11:36.611384+00:00",
+      "exitCode": 0,
+      "logSha256": "989fff88804727e827012ed3d8ceeffe4a2f6f03554f5f6d1ce786c7f9628a98",
+      "completedAt": "2026-11-17T03:11:44.611739+00:00",
+      "protectedInputsUnchanged": true
+    },
+    {
+      "command": "pnpm governance:audit",
+      "status": "PASS",
+      "startedAt": "2026-11-17T03:11:45.285158+00:00",
+      "exitCode": 0,
+      "logSha256": "59007f983a0682e14fe37246105077b6fbfdad7b34356652e5544f5a1b6455c5",
+      "completedAt": "2026-11-17T03:12:21.828161+00:00",
+      "protectedInputsUnchanged": true
+    }
+  ],
+  "fastTestSummary": [
+    "Test Files  3013 passed | 118 skipped (3131)",
+    "Tests  39416 passed | 1698 skipped (41127)",
+    "Duration  750.30s (tests 55%, import 26%, environment 12%, transform 5%)"
+  ],
+  "testedInputFiles": [
+    {
+      "path": "docs/union-eyes/staging/UE_STAGING_GO_CONTRACT.json",
+      "sha256": "2b2163e12046133b17aab7dcd2d8992d0b9e2d031fc35e36f9d3d17f7bcddf7f"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_CURRENT_CANDIDATE.md",
+      "sha256": "d877e3368d964a8646ab777c2db38b8b54164460bedc768076937296056c964b"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_CURRENT_SOURCE_ADMISSION.md",
+      "sha256": "7b44338d50f1ae3946b749a0dfb4e815f50d52636fd78b8250041d8b555a6f79"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/contract-before-root-repairs.json",
+      "sha256": "d04af4b89928a8af5bcdea834fabcc6982b8125cbc005c090de2cc62748d04a4"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/exact-source-ci.json",
+      "sha256": "dc7dc97c7dc747e26a1a387b0f25dddbd6527b98590816a32cd04332a5b1be71"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/founder-window-extension.json",
+      "sha256": "afbc241644896bc81929315f725654530cae73627fdf15a1c2c1feb8c199bc20"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/fresh-local-export.json",
+      "sha256": "6ae5f41789f2671d9010da93f16a36c76f446a00a5e9403e866a1d7b08b70153"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/fresh-native-tool-build.json",
+      "sha256": "9e2f903969cae9e8d9257ee5b548829fd7adccaa7fc0f0552b853030364613b3"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/observed-source-before-binding.json",
+      "sha256": "11c9778c78af839cdbd167159865131ec30954964c7646228ded9bcb418206a9"
+    },
+    {
+      "path": "ops/change-records/CHG-2026-0114.founder-authorization.md",
+      "sha256": "3d80fc8aec3cdaca015a7827a47661e84a9e5f5c1727b3ac14253d08191e03e1"
+    },
+    {
+      "path": "ops/change-records/CHG-2026-0114.json",
+      "sha256": "906dcccfbb6dd259c5ebb6fa2a1e98ce00303b10541d4b52dd3979a67e804064"
+    },
+    {
+      "path": "packages/platform-change-management/src/approvals.ts",
+      "sha256": "0bcc71bc82e2a86c514f5144f67c865dfea3e47cf06cbfcdc4106a0e82acf61b"
+    },
+    {
+      "path": "tooling/scripts/lib/ue-v2-navigation-inventory.json",
+      "sha256": "324483d0ac6f30deb87c8f64323ed81ade259e81d0263d673e26d36417f62a1d"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-v2-staging-release.mjs",
+      "sha256": "56fb06a306cec8faccb923b0fed02b734f95dca2eae9e757f3601bec2b4a0209"
+    },
+    {
+      "path": "tooling/scripts/lib/union-eyes-v2-staging-release.test.mjs",
+      "sha256": "d367b5e8ad47fb103ee719bef95574d11a8e8d1bdade042daf025cc676d34395"
+    }
+  ],
+  "privateCheckReceiptSha256": "4c6b22330eca1d73180d431afe21272c255e8c24314b1abc117940ebf12eba15",
+  "rootReviewReceiptSha256": "9ca174e4f4424a9f93b4cbbebe24b856682476d00aa35c7bd321e84257daad60",
+  "stagingRuntimeAcceptance": false,
+  "fullBaseStagingGo": false,
+  "productionAuthorized": false
+}
