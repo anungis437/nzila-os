@@ -1,0 +1,14 @@
+{
+  "status": "PASS_SINGLE_AUTH_EMAIL_CHECK_DDL_DELTA",
+  "changedSqlStatements": [
+    {
+      "canonicalId": "PLATFORM_AUTH_CURRENT:users:0",
+      "beforeSha256": "d931f9914590cb81c898b2dce2ec28c779dc589311786bffed320c444063a59f",
+      "afterSha256": "ad2fedae6743160c7b939531906639efcdc191e54bb49a2b9870050ef195d78d"
+    }
+  ],
+  "statementsUnchanged": 6266,
+  "tableCountUnchanged": true,
+  "releasedMigrationFilesChanged": 0,
+  "dataOrGrantMutation": false
+}

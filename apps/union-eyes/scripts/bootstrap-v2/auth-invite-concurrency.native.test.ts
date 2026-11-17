@@ -27,6 +27,9 @@ import { acceptInvite, createInvite, canManageOrganizationInvites, listOrganizat
 import { AUTH_EXECUTION_ROLES, compileAuthBootstrapSql } from './auth-sql'
 import { compileSyntheticAuthFixtureSql } from './auth-fixture'
 import { withAuthContext } from '../../../../packages/platform-auth/src/auth-db'
+import { AUTH_EMAIL_PATTERN, compileAuthEmailCompatibilityUpgradeSql, LEGACY_AUTH_EMAIL_PATTERN, authEmailSqlLiteral } from '../../../../packages/db/src/auth-email-check'
+import { handleAcceptInvite } from '../../../../packages/platform-auth/src/invites/handlers'
+import { NextRequest } from 'next/server'
 
 const cookies = vi.hoisted(() => ({ token: '', actor: '', provider: '', set: vi.fn() }))
 vi.mock('../../../../packages/platform-auth/src/entra/server', () => ({
@@ -99,6 +102,99 @@ describe.skipIf(!enabled)('invitation redemption concurrency against disposable 
     const row = (await owner.query(`SELECT revoked_at IS NOT NULL AS revoked FROM user_management.invites WHERE email=$1`, [email])).rows[0]
     return row?.revoked === true
   }
+
+  async function acceptForm(token: string) {
+    return handleAcceptInvite(new NextRequest('https://synthetic.invalid/api/auth/accept-invite', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token, firstName: 'Synthetic', lastName: 'Invite' }),
+    }))
+  }
+
+  async function acceptanceState(email: string) {
+    return (await owner.query(`SELECT
+      (SELECT count(*)::int FROM user_management.users WHERE email=$1) users,
+      (SELECT count(*)::int FROM user_management.organization_users WHERE user_id IN
+        (SELECT user_id FROM user_management.users WHERE email=$1)) memberships,
+      (SELECT count(*)::int FROM user_management.user_sessions WHERE user_id IN
+        (SELECT user_id FROM user_management.users WHERE email=$1)) sessions,
+      (SELECT count(*)::int FROM user_management.auth_audit_log WHERE event_type='invite_accepted'
+        AND metadata->>'inviteId' IN (SELECT id::text FROM user_management.invites WHERE email=$1)) audits,
+      (SELECT accepted_at IS NOT NULL AND accepted_user_id IS NOT NULL FROM user_management.invites WHERE email=$1) accepted`, [email])).rows[0]
+  }
+
+  it('reproduces legacy form failure, upgrades only the check, then accepts the original tagged invitation once', async () => {
+    const email = 'original+tag@example.invalid'
+    const token = await issue(email)
+    await owner.query(`ALTER TABLE user_management.users DROP CONSTRAINT valid_email,
+      ADD CONSTRAINT valid_email CHECK (email ~* ${authEmailSqlLiteral(LEGACY_AUTH_EMAIL_PATTERN)})`)
+    const snapshot = async () => (await owner.query(`SELECT c.oid,c.relfilenode,c.relowner,c.relacl,c.relrowsecurity,c.relforcerowsecurity,
+      (SELECT jsonb_agg(to_jsonb(u) ORDER BY user_id) FROM user_management.users u) users,
+      (SELECT jsonb_agg(to_jsonb(p) ORDER BY policyname) FROM pg_policies p WHERE schemaname='user_management') policies
+      FROM pg_class c WHERE c.oid='user_management.users'::regclass`)).rows[0]
+    const before = await snapshot()
+    expect((await acceptForm(token)).status).toBe(500)
+    expect(await acceptanceState(email)).toEqual({ users: 0, memberships: 0, sessions: 0, audits: 0, accepted: false })
+    // This transaction is disposable local PostgreSQL; rollback must restore
+    // the legacy constraint. The independently committed retry is deliberate.
+    await owner.query('BEGIN; SET LOCAL lock_timeout=\'5s\'; SET LOCAL statement_timeout=\'30s\'')
+    await owner.query(compileAuthEmailCompatibilityUpgradeSql())
+    expect(await snapshot()).toEqual(before)
+    await owner.query('ROLLBACK')
+    expect((await acceptForm(token)).status).toBe(500)
+    await owner.query('BEGIN; SET LOCAL lock_timeout=\'5s\'; SET LOCAL statement_timeout=\'30s\'')
+    await owner.query(compileAuthEmailCompatibilityUpgradeSql())
+    await owner.query('COMMIT')
+    expect(await snapshot()).toEqual(before)
+    const constraint = async () => (await owner.query(`SELECT oid,pg_get_constraintdef(oid) definition FROM pg_constraint
+      WHERE conrelid='user_management.users'::regclass AND conname='valid_email'`)).rows[0]
+    const upgraded = await constraint()
+    await owner.query(compileAuthEmailCompatibilityUpgradeSql())
+    expect(await constraint()).toEqual(upgraded)
+    expect((await acceptForm(token)).status).toBe(200)
+    expect(await acceptanceState(email)).toEqual({ users: 1, memberships: 1, sessions: 1, audits: 1, accepted: true })
+    expect((await acceptForm(token)).status).toBe(400)
+    expect(await acceptanceState(email)).toEqual({ users: 1, memberships: 1, sessions: 1, audits: 1, accepted: true })
+  })
+
+  it('refuses unknown, absent, unvalidated and conflicting upgrade states without changing them', async () => {
+    for (const mutation of [
+      'ALTER TABLE user_management.users DROP CONSTRAINT valid_email',
+      'ALTER TABLE user_management.users DROP CONSTRAINT valid_email, ADD CONSTRAINT valid_email CHECK (email IS NOT NULL)',
+      `ALTER TABLE user_management.users DROP CONSTRAINT valid_email, ADD CONSTRAINT valid_email CHECK (email ~* ${authEmailSqlLiteral(AUTH_EMAIL_PATTERN)}) NOT VALID`,
+      'ALTER TABLE user_management.users ADD CONSTRAINT valid_email_compatibility CHECK (email IS NOT NULL)',
+    ]) {
+      await owner.query('BEGIN')
+      try {
+        await owner.query(mutation)
+        await expect(owner.query(compileAuthEmailCompatibilityUpgradeSql())).rejects.toMatchObject({ code: 'P0001' })
+      } finally { await owner.query('ROLLBACK') }
+    }
+  })
+
+  it('rolls back new apostrophe/tagged account, membership, session and token consumption when mandatory audit fails, then retries', async () => {
+    const email = "o'brien+retry@example.invalid"
+    const token = await issue(email)
+    await owner.query(`CREATE FUNCTION user_management.test_refuse_accept_audit() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN IF NEW.event_type='invite_accepted' THEN RAISE EXCEPTION 'synthetic acceptance audit failure'; END IF; RETURN NEW; END $$;
+      CREATE TRIGGER test_refuse_accept_audit BEFORE INSERT ON user_management.auth_audit_log
+      FOR EACH ROW EXECUTE FUNCTION user_management.test_refuse_accept_audit()`)
+    try {
+      expect((await acceptForm(token)).status).toBe(500)
+      expect(await acceptanceState(email)).toEqual({ users: 0, memberships: 0, sessions: 0, audits: 0, accepted: false })
+    } finally {
+      await owner.query('DROP TRIGGER test_refuse_accept_audit ON user_management.auth_audit_log; DROP FUNCTION user_management.test_refuse_accept_audit()')
+    }
+    expect((await acceptForm(token)).status).toBe(200)
+    expect(await acceptanceState(email)).toEqual({ users: 1, memberships: 1, sessions: 1, audits: 1, accepted: true })
+  })
+
+  it('serializes simultaneous redemption of a new tagged address without duplicate accounts or sessions', async () => {
+    const email = 'concurrent+tag@example.invalid'
+    const token = await issue(email)
+    const responses = await Promise.all([acceptForm(token), acceptForm(token)])
+    expect(responses.map(response => response.status).sort()).toEqual([200, 400])
+    expect(await acceptanceState(email)).toEqual({ users: 1, memberships: 1, sessions: 1, audits: 1, accepted: true })
+  })
 
   it.each(['suspension', 'membership removal'])('refuses invitation issuance when %s commits during the request', async (change) => {
     await restoreInviter()

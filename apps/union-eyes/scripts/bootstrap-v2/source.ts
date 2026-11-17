@@ -521,6 +521,7 @@ export async function buildPlan(wheelhouse: string): Promise<V2Plan> {
   )
   for (const file of [
     'pnpm-lock.yaml',
+    'packages/db/src/auth-email-check.ts',
     'apps/union-eyes/tsconfig.json',
     'packages/config/tsconfig.nextjs.json',
     'packages/config/tsconfig.base.json',
