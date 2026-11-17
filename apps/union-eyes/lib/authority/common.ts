@@ -50,6 +50,10 @@ export type Liveness = 'live' | 'not_yet_effective' | 'expired' | 'revoked' | 'i
  * is inverted, is inconsistent and never live.
  */
 export function liveness(row: Live, now: Date): Liveness {
+  // Invalid Date comparisons otherwise evaluate false and can turn malformed authority into a live grant.
+  if (!Number.isFinite(now.getTime()) || !Number.isFinite(row.effectiveAt.getTime()) ||
+      (row.expiresAt !== null && !Number.isFinite(row.expiresAt.getTime())) ||
+      (row.revokedAt !== null && !Number.isFinite(row.revokedAt.getTime()))) return 'inconsistent'
   if (row.expiresAt && row.expiresAt.getTime() <= row.effectiveAt.getTime()) return 'inconsistent'
   if (row.revokedAt) {
     if (row.status === 'active') return 'inconsistent'
