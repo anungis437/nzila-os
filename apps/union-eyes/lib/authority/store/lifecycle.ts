@@ -241,10 +241,12 @@ export async function activateIssuanceRule(exec: SqlExecutor, deps: EnforcementD
   await bindSessionActor(exec, i.actorUserId, 'rule activator')
   const rule = (await exec.query<Row>(`SELECT domain, operation, status, drafted_by, source_instrument, allowed_powers FROM ue_authority_issuance_rules WHERE organization_id = $1 AND id = $2`, [i.organizationId, i.ruleId])).rows[0]
   if (!rule || rule.status !== 'draft') throw new AuthorityStoreError('NOT_FOUND', 'no draft rule with this id')
-  if (!Array.isArray(rule.allowed_powers) || !rule.allowed_powers.every((power: unknown): power is string => typeof power === 'string')) {
-    throw new AuthorityStoreError('PRECONDITION', 'issuance rule power list is invalid')
+  if (rule.domain === 'supervisory' && (rule.operation === 'issue' || rule.operation === 'amend')) {
+    if (!Array.isArray(rule.allowed_powers) || !rule.allowed_powers.every((power: unknown): power is string => typeof power === 'string')) {
+      throw new AuthorityStoreError('PRECONDITION', 'issuance rule power list is invalid')
+    }
+    requireRulePowerCeiling(rule.domain, rule.operation, rule.allowed_powers)
   }
-  requireRulePowerCeiling(String(rule.domain), String(rule.operation), rule.allowed_powers)
   const approval = await loadIssuanceApproval(exec, i.organizationId, i.approvalRequestId)
   if (!approval || approval.status !== 'satisfied' || approval.subjectType !== 'rule_adoption' || approval.subjectId !== i.ruleId) {
     throw new AuthorityStoreError('PRECONDITION', 'a satisfied rule_adoption approval bound to this rule is required')
