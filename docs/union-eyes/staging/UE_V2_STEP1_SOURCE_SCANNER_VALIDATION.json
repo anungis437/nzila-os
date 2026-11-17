@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_SOURCE_SCANNER_VALIDATION",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "anchorCommit": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "scanner": {
+    "path": "apps/union-eyes/scripts/runtime/step1-source-surface-census.cjs",
+    "gitBlobSha": "53a320aa8d7d5eb66079e41db44494c5aad08923",
+    "byteIdentityVerifiedAgainstLocalTestedCopy": true,
+    "localNode": "22.16.0",
+    "localTypeScript": "5.8.3",
+    "repoTypeScriptDeclaredRange": "^6",
+    "syntaxCheck": "PASS",
+    "parserTests": {
+      "passed": 16,
+      "total": 16
+    },
+    "syntheticGitCheckoutTests": [
+      {
+        "case": "Detect destructured missing methods, non-API route, direct and inline use-server, escaped directive candidate",
+        "status": "PASS"
+      },
+      {
+        "case": "Strict mode rejects omitted API methods",
+        "status": "PASS",
+        "exitCode": 1
+      },
+      {
+        "case": "Refuses output inside checkout",
+        "status": "PASS",
+        "exitCode": 1
+      },
+      {
+        "case": "Refuses dirty tracked source",
+        "status": "PASS",
+        "exitCode": 1
+      },
+      {
+        "case": "Strict success when fixture API inventory matches",
+        "status": "PASS",
+        "exitCode": 0
+      }
+    ]
+  },
+  "sourceTree": {
+    "path": "docs/union-eyes/staging/UE_V2_STEP1_INDEPENDENT_GIT_TREE_CENSUS.json",
+    "blobSha": "d78948e5a4e35fe54b530befd1ede6922a78cbd0",
+    "counts": {
+      "apiRouteFiles": 1042,
+      "manifestRouteFiles": 1042,
+      "allAppRouteFiles": 1044,
+      "manifestMethods": 1713,
+      "additionalConfirmedApiMethods": 2,
+      "additionalConfirmedNonApiMethods": 2,
+      "minimumAccountedExplicitMethods": 1717
+    }
+  },
+  "directActionsFolder": {
+    "treeSha": "073dcc2d239717905ba04a360079389159b3c49c",
+    "nonTestSourceFiles": 4,
+    "explicitServerModules": 3,
+    "exportedServerActionCandidates": 30,
+    "files": [
+      {
+        "path": "apps/union-eyes/actions/analytics-actions.ts",
+        "blobSha": "be78350481b54795f9c1dd69f7b08d3cd7b30dbd",
+        "moduleServerDirective": true,
+        "exportCandidates": [
+          "calculateMetrics",
+          "generatePredictions",
+          "detectMetricTrends",
+          "createKPI",
+          "getAnalyticsMetrics"
+        ],
+        "reviewBucket": "ANALYTICS_TENANT_AUTHORITY_AND_BASE_ADJACENCY",
+        "verifiedRuntime": false,
+        "scopeVerified": false
+      },
+      {
+        "path": "apps/union-eyes/actions/member-employment-actions.ts",
+        "blobSha": "888e1fd0fc48c856f6ad6013bae8a65d0dc3c8e6",
+        "moduleServerDirective": true,
+        "exportCandidates": [
+          "createJobClassificationAction",
+          "getJobClassificationsByOrganizationAction",
+          "updateJobClassificationAction"
+        ],
+        "reviewBucket": "EMPLOYMENT_RECORD_AUTHORITY_AND_BASE_ADJACENCY",
+        "verifiedRuntime": false,
+        "scopeVerified": false
+      },
+      {
+        "path": "apps/union-eyes/actions/rewards-actions.ts",
+        "blobSha": "8470da06f94a0907e8b3cc5af9dc78bf17e6b271",
+        "moduleServerDirective": true,
+        "exportCandidates": [
+          "createRecognitionProgram",
+          "updateRecognitionProgram",
+          "listRecognitionPrograms",
+          "createRecognitionAwardType",
+          "listAwardTypes",
+          "createAward",
+          "nominatePeer",
+          "approveAward",
+          "issueAward",
+          "revokeAward",
+          "rejectAward",
+          "listAwardsByStatus",
+          "listMyAwards",
+          "createBudgetEnvelope",
+          "listBudgetEnvelopes",
+          "getBudgetUsageSummary",
+          "getMyWalletBalance",
+          "getMyWalletLedger",
+          "initiateRedemption",
+          "cancelRedemption",
+          "listMyRedemptions",
+          "getRewardsSummary"
+        ],
+        "reviewBucket": "REWARDS_FINANCIAL_AND_MEMBER_AUTHORITY",
+        "verifiedRuntime": false,
+        "scopeVerified": false
+      },
+      {
+        "path": "apps/union-eyes/actions/icra/get-profile.ts",
+        "blobSha": "7aeaf88c99256ceedbd8ab106032b2b1eafe727c",
+        "moduleServerDirective": false,
+        "exportCandidates": [
+          "getAuthorizedIcraProfile"
+        ],
+        "reviewBucket": "ASSESSMENT_HELPER_REACHABILITY",
+        "verifiedRuntime": false,
+        "scopeVerified": false
+      }
+    ],
+    "limit": "Root actions folder only; full source AST scan may reveal inline and exported actions elsewhere. Historical caller map is not a current denominator."
+  },
+  "remaining": [
+    "Execute scanner on clean full repository checkout with locked repo TypeScript version; reconcile all method discrepancies and unresolved syntax/export findings.",
+    "Validate framework-generated methods, rewrite/proxy branches and external identity callbacks independently.",
+    "Classify full server actions, provider callbacks, workers, Python tasks and shared package reachability; validate concrete institutional authority configurations.",
+    "Do not update historical manifest or active application without explicit separate source-transition reconciliation. No application CI, staging or production proof from this receipt."
+  ]
+}
