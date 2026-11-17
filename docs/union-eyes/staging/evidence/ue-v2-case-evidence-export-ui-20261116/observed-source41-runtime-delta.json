@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-17T01:08:27.331439+00:00",
+  "sourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "workflowSha": "beb67cf1f5219da572393340334540abd51ca276",
+  "runtimeProofSha256": "3e778cc39b4d80298c0b9d7ce4b36c4096b044064327d5098f004c320aec9f39",
+  "status": "ACTUAL_INVITATION_DEFECT_AND_AUTHENTICATED_PERFORMANCE_FAILURE",
+  "invitation": {
+    "stage": "INVITE_CLIENT_READY_u",
+    "actualPublicRouteCrashed": true,
+    "separateNoBearerHttpStatus": 500,
+    "rootCause": "Public invitation route called useLocale without the localized layout NextIntl provider; unit mock hid the missing context.",
+    "beforeRepairRealContextTestsFailed": 5,
+    "afterRepairRealContextTestsPassed": 8,
+    "unusedOwnedInvitationsRevoked": 2,
+    "acceptedStaffFromFailedCohort": 0,
+    "localRepairDeployed": false
+  },
+  "authenticatedCasework": {
+    "status": "FAIL",
+    "profile": {
+      "warmupSeconds": 10,
+      "warmupRequestsPerSecond": 5,
+      "stages": [
+        {
+          "concurrency": 1,
+          "durationSeconds": 60,
+          "requestsPerSecond": 5
+        },
+        {
+          "concurrency": 5,
+          "durationSeconds": 180,
+          "requestsPerSecond": 20
+        }
+      ],
+      "minimumScheduledThroughputRatio": 0.95,
+      "p95Ms": 500,
+      "p99Ms": 1500,
+      "errorRate": 0,
+      "maxRequests": 10000
+    },
+    "stages": [
+      {
+        "concurrency": 1,
+        "durationSeconds": 60,
+        "requestsPerSecond": 5,
+        "actualDurationSeconds": 60.35,
+        "requests": 108,
+        "scheduledRequests": 300,
+        "scheduledThroughputRatio": 0.36,
+        "errors": 0,
+        "errorRate": 0,
+        "p95Ms": 680.4624170000025,
+        "p99Ms": 799.6898750000037,
+        "maxMs": 1093.7965419999964,
+        "failureMetadata": [],
+        "sampleSha256": "efd17a12e06e1507c2cc0490b70c324fd94f87bc98fe36c983331ae8f38bdca2",
+        "passed": false
+      },
+      {
+        "concurrency": 5,
+        "durationSeconds": 180,
+        "requestsPerSecond": 20,
+        "actualDurationSeconds": 181.184,
+        "requests": 449,
+        "scheduledRequests": 3600,
+        "scheduledThroughputRatio": 0.12472222222222222,
+        "errors": 0,
+        "errorRate": 0,
+        "p95Ms": 2275.315499999997,
+        "p99Ms": 2567.5584590000217,
+        "maxMs": 2883.112583000009,
+        "failureMetadata": [],
+        "sampleSha256": "40ab85a230d7cde098bb5806839d2a4d7b9563a72e6e8a66cfd0595025f07083",
+        "passed": false
+      }
+    ],
+    "actualBusinessReadErrorCount": 0,
+    "temporaryAuthorityRetired": true,
+    "sameSessionPostRetirement404Checks": 5,
+    "originalProfilesPreserved": true,
+    "newSyntheticCasesRetained": 5,
+    "automaticMatchingAcceptanceClaimed": false,
+    "localRepair": "One verified callback-scoped bridge/profile retained through short case-detail and workbench reads, including transaction commit. No cross-request caching, RLS changes, pool increases or threshold reductions. Workbench now loads case facts once for7 distinct pure kernel decisions, without caching between cases/calls; all mutation/export endpoints still reauthorize.",
+    "localRepairPerformancePassClaimed": false
+  },
+  "privateReceipts": [
+    {
+      "name": "actual-casework-load-41dba402-v1/actual-authenticated-casework-load.json",
+      "sha256": "ac391ddec03e027a37b5fe57df5eefe436ec31cdd1bfaacc1ba7396f294d8627"
+    },
+    {
+      "name": "actual-casework-load-41dba402-v1/browser-result.json",
+      "sha256": "b5c7c2e5fc095067b55ba89eb49921850d8c3a5b6f1ff6abbfa9272b47f89b3e"
+    },
+    {
+      "name": "actual-casework-load-41dba402-v1/authority-cleanup-result.json",
+      "sha256": "842b2ba226f96f160783377c14ce20c63e9d85aa1f8a2b564d87da4f5f691068"
+    },
+    {
+      "name": "actual-matching-41dba402-v1/browser-result.json",
+      "sha256": "da486b61f07f8b98c4aafdf670ca1f1e499906fb107496d805c7246ce8da321a"
+    },
+    {
+      "name": "actual-matching-41dba402-v1/actual-owned-invitation-retirement.json",
+      "sha256": "8179d9ba5510d8b46d9aca59b1a7a2bbbfeea9271d968018bd16de24c6f78f74"
+    },
+    {
+      "name": "public-invite-client-exception-41dba402-v1/result.json",
+      "sha256": "67f8528d77a59a565077b5daf227fd2a5f069bce30b3f9121a57904c228bc3ce"
+    }
+  ],
+  "productionAuthorized": false,
+  "financeFeaturesExcluded": true,
+  "fullBaseStagingGo": false
+}

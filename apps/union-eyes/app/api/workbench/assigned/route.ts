@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export const GET = withApi(
   {
+    canonicalRequestScope: true,
     auth: { required: true, minRole: 'steward' },
     openapi: {
       tags: ['Workbench'],

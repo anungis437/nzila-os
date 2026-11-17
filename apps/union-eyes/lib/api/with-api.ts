@@ -141,6 +141,9 @@ export interface WithApiOptions<
    */
   rlsOrgContext?: boolean;
 
+  /** Reuse one verified bridge through a short, organization-scoped request. */
+  canonicalRequestScope?: boolean;
+
   // ── Validation ────────────────────────────────────────────────────────────
 
   /**
@@ -364,6 +367,9 @@ export function withApi<
   }
   const requireCron = options.auth?.cron === true;
   const requireOrg = options.requireOrg ?? requireAuth; // default: enforce org for auth'd routes
+  if (options.canonicalRequestScope && (!requireAuth || !requireOrg || options.rlsOrgContext === false)) {
+    throw new Error('withApi: canonicalRequestScope requires user authentication and an outer organization transaction');
+  }
   const minRoleLevel = options.auth?.minRole
     ? (ROLE_HIERARCHY[options.auth.minRole] ?? 0)
     : null;
@@ -388,6 +394,7 @@ export function withApi<
     const governanceHeaders = correlationToHeaders(governanceCtx);
 
     try {
+      const executeRequest = async (): Promise<NextResponse> => {
       // ── 1. Resolve route params (Next.js 16 async params) ───────────────
       let params: Record<string, string> = {};
       if (nextContext?.params) {
@@ -800,7 +807,17 @@ export function withApi<
       );
       return response;
 
+      };
+      if (options.canonicalRequestScope && currentStateContextEnabled()) {
+        const { withCanonicalApiContext } = await import('@/lib/auth/canonical-context');
+        return await withCanonicalApiContext(executeRequest);
+      }
+      return await executeRequest();
+
     } catch (error: any) {
+      if (error instanceof AuthOrgBindingError) {
+        return standardErrorResponse(ErrorCode.AUTH_REQUIRED, 'Authentication required', undefined, traceId);
+      }
       // ── Known API errors ───────────────────────────────────────────────
       if (error instanceof ApiError) {
         return standardErrorResponse(error.code, error.message, error.details, traceId);

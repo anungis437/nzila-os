@@ -9,7 +9,7 @@
  */
 import { deny } from '../common'
 import { decide } from '../kernel'
-import type { AuthorityFacts, AuthorityRequest, Decision, ResourceFacts, ResourceRelationship } from '../ontology'
+import type { AuthorityFacts, AuthorityRequest, Decision, ReasonCode, ResourceFacts, ResourceRelationship } from '../ontology'
 import { AuthorityStoreError, bindSessionActor, sessionActor, type SqlExecutor } from './executor'
 import { loadApprovalRequestFacts, loadAuthorityFacts, loadHolderMandates, loadRelationships, type MembershipSource } from './facts'
 import { actionForClass, classifyDocument, DEFAULT_DOCUMENT_CLASS_POLICY, type DocumentClassPolicy } from '../document-class'
@@ -172,6 +172,56 @@ export function assertAllowed(decision: Decision): Decision {
     throw new AuthorityStoreError('DENIED', `${decision.action} denied: ${decision.reasons.map((r) => r.code).join(', ') || 'no reason recorded'}`)
   }
   return decision
+}
+
+export const CASE_PROJECTION_ACTIONS = [
+  'case:read', 'case:assign', 'case:comment', 'case:write_notes',
+  'case:transition', 'case:close', 'case:export_sealed_evidence',
+] as const
+export type CaseProjectionAction = typeof CASE_PROJECTION_ACTIONS[number]
+
+/**
+ * One read-only case projection: load fresh authoritative facts once, then
+ * evaluate each action separately in the unchanged kernel. No facts or decisions
+ * are cached between cases/calls. Actual mutations and exports still reauthorize.
+ */
+export async function enforceCaseProjection(
+  exec: SqlExecutor,
+  deps: EnforcementDeps,
+  input: { principalUserId: string; organizationId: string; caseId: string },
+): Promise<Record<CaseProjectionAction, Decision>> {
+  const request: AuthorityRequest = {
+    principalUserId: input.principalUserId, organizationId: input.organizationId,
+    resource: { type: 'case', id: input.caseId, organizationId: input.organizationId },
+    action: 'case:read',
+  }
+  const now = (deps.now ?? (() => new Date()))()
+  const refuse = (code: ReasonCode, detail: string) => Object.fromEntries(CASE_PROJECTION_ACTIONS.map(action =>
+    [action, deny({ ...request, action }, now, { code, detail })],
+  )) as Record<CaseProjectionAction, Decision>
+  try {
+    const session = await sessionActor(exec)
+    if (!session) return refuse('PRINCIPAL_NOT_AUTHENTICATED', 'no authenticated session is bound to this transaction')
+    if (session !== input.principalUserId)
+      return refuse('PRINCIPAL_MISMATCH', 'the decided principal is not the authenticated principal of this transaction')
+    let facts = await loadAuthorityFacts(exec, deps.memberships, {
+      organizationId: input.organizationId, principalUserId: input.principalUserId,
+      authenticated: true, resource: request.resource, now,
+    })
+    // These projection actions need the same canonical case facts. No document
+    // own-submission or custom action-dependent resource loader is accepted.
+    const loaded = await loadCase(exec, request, now, deps.documentPolicy ?? DEFAULT_DOCUMENT_CLASS_POLICY)
+    if (loaded?.relationships?.length) facts = {
+      ...facts,
+      relationships: [...facts.relationships, ...loaded.relationships.filter(r => r.principalUserId === input.principalUserId)],
+    }
+    const evaluatedAt = (deps.now ?? (() => new Date()))()
+    return Object.fromEntries(CASE_PROJECTION_ACTIONS.map(action =>
+      [action, decide({ ...request, action }, facts, loaded?.resource ?? null, evaluatedAt)],
+    )) as Record<CaseProjectionAction, Decision>
+  } catch (error) {
+    return refuse('FACTS_CONTRADICTORY', `authority facts could not be loaded: ${error instanceof Error ? error.message : 'unknown error'}`)
+  }
 }
 
 /**

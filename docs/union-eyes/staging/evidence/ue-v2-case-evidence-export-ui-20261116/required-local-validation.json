@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "status": "PASS_REQUIRED_LOCAL_FIVE_EXACT_IMPLEMENTATION_INPUTS_NOT_STAGING",
-  "recordedAt": "2026-11-17T00:12:01.342516+00:00",
-  "baseHead": "d771da3a8ff03ae3ebec5d1cb05cb20942380ef0",
-  "privateReceiptSha256": "7382114a20b4cff48fae17b8b5193eeecb16f8adc27f3e2258a929a5abad4406",
-  "exactInputCount": 77,
+  "recordedAt": "2026-11-17T01:41:42.741377+00:00",
+  "baseHead": "48d122d72c2fc5c0be561d52092fe0125037741b",
+  "privateReceiptSha256": "dd52b5c68752142e5768957083f2979b6de1ebc023b68e659d3d1ceb33223395",
+  "exactInputCount": 95,
   "sourceModules": [
     {
       "path": "Dockerfile",
@@ -25,6 +25,10 @@
     {
       "path": "apps/union-eyes/app/api/cases/[caseId]/export/route.ts",
       "sha256": "ea227d94ed3fbb242795fd4266cf02f576b525b869851986d5c6b4e327d8c336"
+    },
+    {
+      "path": "apps/union-eyes/app/api/cases/[caseId]/route.ts",
+      "sha256": "0378a31bf1e9e88c118d1b05869b2a7e50ade8654646e7ded9922ac681e5ef27"
     },
     {
       "path": "apps/union-eyes/app/api/documents/[id]/download/route.ts",
@@ -67,16 +71,20 @@
       "sha256": "d5c8c93126fd174a4b398dd42d971ce45887439e6bd06930027f7664b0ce9f89"
     },
     {
+      "path": "apps/union-eyes/app/api/workbench/assigned/route.ts",
+      "sha256": "58d444a406230821f283f05e16b75b04680c0c3758c9807e7b4af9d8526ad487"
+    },
+    {
       "path": "apps/union-eyes/app/invite/accept/invitation-copy.ts",
       "sha256": "fd7668113177af052e3ce6b2548c21533f47c45aa862041772fdac6165a5699e"
     },
     {
       "path": "apps/union-eyes/app/invite/accept/page.test.tsx",
-      "sha256": "2fef0b91dde1491bf8f8fe084aeb23242c696f0f2b9bf078fe5fcd122f52d469"
+      "sha256": "32741c11bcc3d3f4374e416709563e5ba8d218755dfbf976d4b6dd78cc98be44"
     },
     {
       "path": "apps/union-eyes/app/invite/accept/page.tsx",
-      "sha256": "7a7f89e30ac07329f523063648f747ff363fe042c45d776623ccf09cee160ff6"
+      "sha256": "118fc07b4cef86df497bf0adb1e98e4bd388ceb5e83b792e8d1f9c937542800d"
     },
     {
       "path": "apps/union-eyes/components/claims/case-evidence-export.test.tsx",
@@ -127,6 +135,10 @@
       "sha256": "eeca4e9fd2b051c228bba5583de18459c678c0e4beb636f0089e9ca5d46085c5"
     },
     {
+      "path": "apps/union-eyes/db/__tests__/authority-case-projection.pglite.test.ts",
+      "sha256": "0a36638d395d312f4fb8036ac950c1e9b912ddaf502377d1aa09b8ca0dd675ad"
+    },
+    {
       "path": "apps/union-eyes/db/__tests__/documents-external-workbook-routes.postgres.test.ts",
       "sha256": "152057162bee191a4b8b623246de2405316377445bfbe18a32d9ade1744eb2d8"
     },
@@ -139,12 +151,48 @@
       "sha256": "0aba4fac380a8a18fb59949f76b46f945dc80cff449f64c0aac67b12cbbdeb09"
     },
     {
+      "path": "apps/union-eyes/lib/api-auth-guard.ts",
+      "sha256": "d6b8e0c3f4fb2906677846fb198920dc110679cef3f0474e5353ed838f2c47a1"
+    },
+    {
       "path": "apps/union-eyes/lib/api/__tests__/with-api-canonical.test.ts",
-      "sha256": "cc66b721ec71943d171e880cb2817839c8567a0805d2ca7fe1d30597d0c8dd27"
+      "sha256": "5ad37671466a54d05770983d2088849bd574400803fc5f95b6914dba7a01807a"
     },
     {
       "path": "apps/union-eyes/lib/api/with-api.ts",
-      "sha256": "4f99a29734b7574cb6da7119c41ca1a2ef97537537979f065fd0487fd096cebc"
+      "sha256": "068d6e7d0e1c7c9451d249bcfc3080422518abe226893112dc3bc931ab050ae6"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/__tests__/canonical-binding-reuse.test.ts",
+      "sha256": "e0da0d833ee8ac39ed2b568a59891c8e716cfc692c1ed1238d5788f8708dd206"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/__tests__/canonical-context.test.ts",
+      "sha256": "4309f40ad8839b6d182b29933003a4153b89be72c960411e121e2240c1400d83"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/__tests__/canonical-request-scope.test.ts",
+      "sha256": "22df9d1b54b7b675fbe222875c0294a1bd9597395fada54aab7e7e7dfa5a6153"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/canonical-context.ts",
+      "sha256": "92f2f9144c079556e456e2d7a8ee82f8e47d60453cb3ee29d4a55464ad6c86f4"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/canonical-organization-selection.ts",
+      "sha256": "85d6583fa9642d6bc6c5d11a8da97915d4bcfd9e03da6a190924bdf5836bfdd1"
+    },
+    {
+      "path": "apps/union-eyes/lib/auth/canonical-request-scope.ts",
+      "sha256": "d951c3d2d2721a6a0f10fbe7d1822d2e599ea5860fad9bbfac4ca6ddf6488c5e"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/store/enforce.ts",
+      "sha256": "f246ec8461d65eff9e1398b69676f42e08bda265c5f78e7deaee6c5b410d2557"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/store/route-adapter.ts",
+      "sha256": "bb9f99a44cace3ef1580ed31eb86bfcb30e3231e7a60a21d1afa69fd1d610f3a"
     },
     {
       "path": "apps/union-eyes/lib/cases/case-authorization.pglite.test.ts",
@@ -164,11 +212,15 @@
     },
     {
       "path": "apps/union-eyes/lib/cases/workbench-queue.ts",
-      "sha256": "ee096da1ae69696e6faa3814e3ca234ec3545de45bb3d535cf93b6b97b9680dd"
+      "sha256": "4e85be7a018ed3e93f81ea8b8c25ef1fda655ec02e5f86dc888757f758ee323e"
     },
     {
       "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
       "sha256": "fe37af53696cba61d38f3bb7a5e430a421da39f6fd0b73d37500a4fab6e78a66"
+    },
+    {
+      "path": "apps/union-eyes/lib/db/__tests__/with-rls-context.test.ts",
+      "sha256": "eb5e3baaad79089c19a929eb40144a88f37a55374927ffa925bd700e8b3f2404"
     },
     {
       "path": "apps/union-eyes/lib/db/canonical-transaction-principal.test.ts",
@@ -177,6 +229,10 @@
     {
       "path": "apps/union-eyes/lib/db/canonical-transaction-scope.ts",
       "sha256": "b341370018fb4e5630fced8b4ee6b92b6337f851ff013902c6dd844093bebf64"
+    },
+    {
+      "path": "apps/union-eyes/lib/db/with-rls-context.ts",
+      "sha256": "cf18681be3ab9cbcfe15192c871c68ae70cee4af6c639ca644981b1143a1d1cb"
     },
     {
       "path": "apps/union-eyes/lib/documents/ocr-extract.ts",
@@ -259,8 +315,12 @@
       "sha256": "e9879a0211ab11aba1641dd9e2210d4c23197233003550281dbd4fc6dea82e1c"
     },
     {
+      "path": "apps/union-eyes/scripts/bootstrap-v2/source.ts",
+      "sha256": "967cdf963df0372df9f442aafa943fdb979f8f5dbca1bab05e5d74f7f377b76b"
+    },
+    {
       "path": "docs/union-eyes/bootstrap-v2/UE_CANONICAL_SCHEMA_V2_SOURCE_PLAN.json",
-      "sha256": "022bc0b85f845dee606f76b3609ac621f5cdddf5bb2b4e94c4a570b82705c74b"
+      "sha256": "cf38314040e4013837d0d75797e408dcb01540227762c62dc50d55d78a56595f"
     },
     {
       "path": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
@@ -268,15 +328,27 @@
     },
     {
       "path": "docs/union-eyes/staging/UE_V2_BASE_ACTION_COVERAGE.json",
-      "sha256": "83d842b1f053e84e957195d1320790c6207481f062107c681f0d22f8faedd352"
+      "sha256": "4dadf08227bb65034b34f3adb98d3ec53c8b4accb82d1086f2fd0d07c0c18dd4"
     },
     {
       "path": "docs/union-eyes/staging/evidence/ue-v2-case-evidence-export-ui-20261116/local-source-review.json",
       "sha256": "ac1c04f56f2256f220ac2b74b1310b2a289f0dfcafd75bd34600db863d33e8ae"
     },
     {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-case-evidence-export-ui-20261116/observed-source41-privacy-self-service.json",
+      "sha256": "9bab33bd552071536a2dda5bc8d56ed32d7a771833de448f5eed346853a15438"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-case-evidence-export-ui-20261116/observed-source41-runtime-delta.json",
+      "sha256": "1f347344dab823fb4f3dd8d1544f1ac2369121867522f7a0435fcd8a1dcf6107"
+    },
+    {
       "path": "docs/union-eyes/staging/evidence/ue-v2-case-evidence-export-ui-20261116/orphan-regression-resolution.json",
       "sha256": "50c0b6a386f64e996851c0deeb4fbc8437e61bd7d71012f4f148033bd9ed49e7"
+    },
+    {
+      "path": "docs/union-eyes/staging/evidence/ue-v2-case-evidence-export-ui-20261116/request-scope-local-review.json",
+      "sha256": "6af16e25e72b68851d14e544881225b30f6a86baa2d460926bb95d4cf7c2d790"
     },
     {
       "path": "infrastructure/bicep/ue-v2/main.bicep",
@@ -318,63 +390,70 @@
   "commands": [
     {
       "command": "pnpm lint",
-      "startedAt": "2026-11-16T23:53:24.288591+00:00",
+      "startedAt": "2026-11-17T01:24:07.328348+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T23:55:29.735955+00:00",
-      "logSha256": "6c755f7920b2636f2bbbe9692a233626d78f447c36cc3da012e0fa8f70b47cef"
+      "finishedAt": "2026-11-17T01:26:00.421972+00:00",
+      "logSha256": "a35acf633a3298d31beb198af11bb0399e38eb0ace8857a5bac1e35fc629b18d"
     },
     {
       "command": "pnpm typecheck",
-      "startedAt": "2026-11-16T23:55:29.737505+00:00",
+      "startedAt": "2026-11-17T01:26:00.427150+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-16T23:58:24.268850+00:00",
-      "logSha256": "89c7c29f1c30ee943e95b83c2f186838415693afa9297b9a9899ff36ef69af70"
+      "finishedAt": "2026-11-17T01:28:45.311639+00:00",
+      "logSha256": "65a7e18e17650e8fab6d64dda68f9d4aac9a7b2bb270f924a7ceb840ba609a6b"
     },
     {
       "command": "pnpm test:fast",
-      "startedAt": "2026-11-16T23:58:24.277400+00:00",
+      "startedAt": "2026-11-17T01:28:45.321601+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-17T00:10:23.612532+00:00",
-      "logSha256": "b35b8fa28f1d10a853f969e4d3a548f7888245c8cc0a75a01c43406c92f04d7f"
+      "finishedAt": "2026-11-17T01:40:47.985727+00:00",
+      "logSha256": "480bf7c98e23738493bdaf6a4f410660026b44f4c1486ecb1f46c0266c3652f5"
     },
     {
       "command": "pnpm validate:docs",
-      "startedAt": "2026-11-17T00:10:23.614261+00:00",
+      "startedAt": "2026-11-17T01:40:47.993747+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-17T00:10:30.565392+00:00",
+      "finishedAt": "2026-11-17T01:40:56.946235+00:00",
       "logSha256": "989fff88804727e827012ed3d8ceeffe4a2f6f03554f5f6d1ce786c7f9628a98"
     },
     {
       "command": "pnpm governance:audit",
-      "startedAt": "2026-11-17T00:10:30.584091+00:00",
+      "startedAt": "2026-11-17T01:40:56.964115+00:00",
       "status": "PASS",
       "exitCode": 0,
-      "finishedAt": "2026-11-17T00:11:08.752990+00:00",
-      "logSha256": "517477977195f0b8e63a09918d822dbeb7f7ffd8006673ee846baad4d7be8e5f"
+      "finishedAt": "2026-11-17T01:41:34.661291+00:00",
+      "logSha256": "59505e7f486f904fa5562887056e8dc893b9bbb3fb116b261cb2ce75f417899e"
     }
   ],
-  "focusedTests": {
+  "focusedRootRepairTests": {
+    "tests": 123,
+    "files": 8,
+    "status": "PASS",
+    "logSha256": "bc58b859711854ae1fad4f4c6c02063c77cf162d0221721811b7eee63d580173"
+  },
+  "priorPdfFocusedTests": {
     "tests": 96,
     "files": 8,
-    "result": "PASS",
+    "status": "PASS",
     "logSha256": "38e58096c579d60b0e163d6f8f7cfbf44966778ff064a1cef4e38166c007c073"
   },
-  "frontendAndResponseCensus": {
+  "priorInterfaceCensus": {
     "tests": 58,
     "files": 2,
-    "result": "PASS",
-    "logSha256": "fcc47ff867510c55e58566a7b8f22633d02db9ff554253a89e40a2f12d081dc4"
+    "status": "PASS",
+    "logSha256": "fcc47ff867510c55e58566a7b8f22633d02db9ff554253a89e40a2f12d081dc4",
+    "rerunIncludedInTestFast": true
   },
   "testThresholdsOrExclusionsChanged": false,
   "applicationDeploymentPerformed": false,
   "newSourceCi": "PENDING",
   "stagingBrowserDownloadAndDurableAudit": "PENDING",
+  "stagingPerformanceRemediationClaimed": false,
   "fullBaseStagingGo": false,
   "productionAuthorized": false,
-  "financeFeaturesExcluded": true,
-  "sourceModuleEncoding": "Exact source-byte digests as explicit path and SHA-256 entries"
+  "financeFeaturesExcluded": true
 }

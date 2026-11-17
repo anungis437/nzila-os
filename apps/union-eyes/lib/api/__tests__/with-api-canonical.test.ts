@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   context: vi.fn(),
   legacyOrganization: vi.fn(),
   legacyRole: vi.fn(),
+  requestScope: vi.fn(),
 }))
 vi.mock('@/lib/api-auth-guard', () => ({
   getCurrentUser: mocks.user,
@@ -23,6 +24,7 @@ vi.mock('@/lib/organization-utils', () => ({
   getOrganizationIdForUser: mocks.legacyOrganization,
 }))
 vi.mock('@/lib/auth/rbac-server', () => ({ getUserRole: mocks.legacyRole }))
+vi.mock('@/lib/auth/canonical-context', () => ({ withCanonicalApiContext: mocks.requestScope }))
 vi.mock('@/lib/rate-limiter', () => ({
   checkRateLimit: async () => ({ allowed: true }),
   createRateLimitHeaders: () => ({}),
@@ -54,6 +56,7 @@ describe('opt-in canonical API authority', () => {
     mocks.active.mockReturnValue(undefined)
     mocks.legacyRole.mockResolvedValue('app_owner')
     mocks.legacyOrganization.mockResolvedValue('foreign-legacy-organization')
+    mocks.requestScope.mockImplementation(async callback => callback())
   })
   afterEach(() => vi.unstubAllEnvs())
 
@@ -157,4 +160,40 @@ describe('opt-in canonical API authority', () => {
     mocks.user.mockRejectedValueOnce(new Error('synthetic database failure'))
     expect((await withApi({}, async () => ({}))(request())).status).toBe(500)
   })
+
+  it('runs an opted-in case read and its RLS transaction before releasing the request binding', async () => {
+    let bridgeLive = false
+    mocks.requestScope.mockImplementationOnce(async callback => {
+      bridgeLive = true
+      try { return await callback() } finally { bridgeLive = false }
+    })
+    mocks.rls.mockImplementationOnce(async (_context, callback) => {
+      expect(bridgeLive).toBe(true)
+      const result = await callback()
+      expect(bridgeLive).toBe(true) // transaction/deferred checks precede bridge revocation
+      return result
+    })
+    const response = await withApi({ canonicalRequestScope: true }, async () => {
+      expect(bridgeLive).toBe(true)
+      return { own: true }
+    })(request())
+    expect(response.status).toBe(200)
+    expect(mocks.requestScope).toHaveBeenCalledTimes(1)
+    expect(mocks.rls).toHaveBeenCalledTimes(1)
+    expect(bridgeLive).toBe(false)
+  })
+
+  it('fails closed when the opted-in request cannot establish live authority', async () => {
+    const handler = vi.fn()
+    mocks.requestScope.mockRejectedValueOnce(new AuthOrgBindingError('SESSION_AUTHORITY_REQUIRED'))
+    expect((await withApi({ canonicalRequestScope: true }, handler)(request())).status).toBe(401)
+    expect(handler).not.toHaveBeenCalled()
+    expect(mocks.rls).not.toHaveBeenCalled()
+  })
+
+  it.each([{ auth: { required: false } }, { requireOrg: false }, { rlsOrgContext: false }])(
+    'refuses request binding reuse without a bounded authenticated outer organization transaction: %j', options => {
+      expect(() => withApi({ ...options, canonicalRequestScope: true }, async () => null)).toThrow('canonicalRequestScope requires')
+    },
+  )
 })

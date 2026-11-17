@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "status": "123_FOCUSED_TESTS_PASS_REQUIRED5_AND_STAGING_PENDING",
+  "basedOnCommit": "48d122d72c2fc5c0be561d52092fe0125037741b",
+  "scope": "Short case detail GET and assigned-workbench GET only; one verified callback-scoped bridge and profile kept through RLS transaction commit. Other routes retain their existing independent scoped operations.",
+  "invariants": [
+    "No cross-request authority cache",
+    "Fresh canonical identity, membership and active-organization selection before each outer request",
+    "No actor/organization/required-role replacement; bridge expiry and system override fail closed",
+    "Detached work loses scope at callback completion",
+    "Database authenticated bridge, parent-session, live RLS and resource kernel checks unchanged",
+    "Pool limits, load thresholds, dependencies, SQL and grants unchanged"
+  ],
+  "focusedReceiptSha256": "bc58b859711854ae1fad4f4c6c02063c77cf162d0221721811b7eee63d580173",
+  "canonicalPlanReviewSha256": "dfc2835c55549d28cacf57edc4bb4246810c11763dcb9e5e6e16e22486fc7f3a",
+  "actualStagingPerformanceRemediationClaimed": false,
+  "productionAuthorized": false,
+  "fullBaseStagingGo": false,
+  "workbenchProjection": {
+    "scope": "Each case gets one fresh authoritative fact/resource load, then all7 separate unchanged-kernel action decisions. No reuse between cases or calls; action endpoints reauthorize independently.",
+    "actualComponentResult": "PGlite equality against7 independent authoritative loads across member/handler/supervisor/unassigned/privileged/foreign/missing/recused/expired cases; forged principal and loader failure deny every action.",
+    "queryReduction": "At least fivefold fewer actual SQL queries per case projection in the local component test. No HTTP latency pass inferred."
+  }
+}

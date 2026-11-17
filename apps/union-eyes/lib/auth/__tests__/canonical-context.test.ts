@@ -23,7 +23,8 @@ vi.mock('@nzila/platform-auth/auth-execution', () => ({
 }))
 
 import { AuthOrgBindingError } from '@nzila/platform-auth/org-binding'
-import { getCanonicalOrganizationContext, getCanonicalPasswordActor } from '../canonical-context'
+import { getCanonicalOrganizationContext, getCanonicalPasswordActor, withCanonicalApiContext } from '../canonical-context'
+import { currentCanonicalRequest } from '../canonical-request-scope'
 import { UserRole } from '../roles'
 
 describe('canonical current organization authority', () => {
@@ -32,6 +33,7 @@ describe('canonical current organization authority', () => {
     organizationId: '11111111-1111-4111-8111-111111111111',
     role: 'admin',
     sessionToken: 'synthetic-server-held-only',
+    expiresAt: new Date(Date.now() + 30000),
   }
   const profile = {
     email: 'canonical@example.invalid',
@@ -127,5 +129,38 @@ describe('canonical current organization authority', () => {
   it('does not access canonical profiles for an unauthenticated password request', async () => {
     expect(await getCanonicalPasswordActor()).toBeNull()
     expect(mocks.context).not.toHaveBeenCalled()
+  })
+
+  it('retains one bridge and one profile read until the bounded API operation returns', async () => {
+    let bridgeLive = false
+    mocks.binding.mockImplementationOnce(async (_options, callback) => {
+      bridgeLive = true
+      try { return await callback(binding) } finally { bridgeLive = false }
+    })
+    await withCanonicalApiContext(async () => {
+      expect(bridgeLive).toBe(true)
+      const first = await getCanonicalOrganizationContext({ expectedActorUserId: binding.userId })
+      const second = await getCanonicalOrganizationContext({ organizationId: binding.organizationId })
+      expect(first).toEqual(second)
+      expect(first).not.toHaveProperty('sessionToken')
+      await withCanonicalApiContext(async () => {
+        expect(currentCanonicalRequest()?.profile.userId).toBe(binding.userId)
+      })
+      expect(bridgeLive).toBe(true)
+    })
+    expect(bridgeLive).toBe(false)
+    expect(mocks.binding).toHaveBeenCalledTimes(1)
+    expect(mocks.limit).toHaveBeenCalledTimes(1)
+    expect(currentCanonicalRequest()).toBeNull()
+    // A subsequent request must resolve live authority again.
+    await getCanonicalOrganizationContext()
+    expect(mocks.binding).toHaveBeenCalledTimes(2)
+    expect(mocks.limit).toHaveBeenCalledTimes(2)
+  })
+
+  it('releases the API scope and the binder on handler failure', async () => {
+    const failure = new Error('synthetic handler failure')
+    await expect(withCanonicalApiContext(async () => { throw failure })).rejects.toBe(failure)
+    expect(currentCanonicalRequest()).toBeNull()
   })
 })
