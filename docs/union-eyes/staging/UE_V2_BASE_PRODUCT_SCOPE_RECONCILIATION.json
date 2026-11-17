@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "recordedDate": "2026-11-17",
   "baselineRepositorySha": "8147ae480bb8ff0ab815b615fab67192728883e0",
-  "status": "PRODUCT_SCOPE_CENSUS_MAPPED_PENDING_SCOPE_DECISIONS_AND_SOURCE_CENSUS",
+  "status": "STEP_1_WORKING_PRODUCT_SCOPE_BASELINE_READY_FOR_SOURCE_CENSUS",
   "purpose": "Step 1 input to the single existing UE_V2_BASE_ACTION_COVERAGE ledger; not a second release gate. Scope classification is separate from implementation and runtime evidence.",
   "sourceBlobs": {
     "historical": {
@@ -176,6 +176,54 @@
     "protocolService": {
       "path": "apps/union-eyes/lib/representation/protocol-service.ts",
       "blobSha": "419b49d0222ff8ab9c730afe99f4d76284831304"
+    },
+    "productPage": {
+      "path": "apps/web/app/union-eyes/page.tsx",
+      "blobSha": "8df900e67fdccbde08f3d8ae3fe9012b8765cbbd"
+    },
+    "antiSurveillance": {
+      "path": "apps/web/app/anti-surveillance/page.tsx",
+      "blobSha": "e26eebe657892ae5c5f4521791e005ced7225df2"
+    },
+    "ocraPage": {
+      "path": "apps/web/app/continuity-assessment/page.tsx",
+      "blobSha": "b72bf81d1d932d62b1c7e5d9a85f8fe142049f42"
+    },
+    "starterKitPage": {
+      "path": "apps/web/app/starter-kit/page.tsx",
+      "blobSha": "71955f54c369f23fb798779ad7080e50bfa1a499"
+    },
+    "catalog": {
+      "path": "governance/portfolio/product-catalog.json",
+      "blobSha": "bd26eef98924eca519df67dca35a93f5b974a229"
+    },
+    "platformProduct": {
+      "path": "platform/products/union-eyes.json",
+      "blobSha": "7d6198d3bb4febbb1dad077b6070de8b10b764d8"
+    },
+    "revenueProfile": {
+      "path": "docs/categories/products-and-market/union-eyes/revenue-profile.md",
+      "blobSha": "258c0003b811d71853ae26c8ac501ea5b4f67f09"
+    },
+    "deliveryModel": {
+      "path": "reports/commercialization/union-eyes-pilot-delivery-model.md",
+      "blobSha": "c83d273557f4291c6a01f628ca7ed4116ae6ed07"
+    },
+    "ueReadme": {
+      "path": "docs/union-eyes/README.md",
+      "blobSha": "faaa60ab739a79279bac13a0b9bd4fd86dbeba03"
+    },
+    "saasRerun": {
+      "path": "docs/union-eyes/reality-remediation/25_UE_SAAS_OPERATIONAL_READINESS_RERUN.md",
+      "blobSha": "eb6f4271eb66ea701d6d08a2f0edb0b8eee3a6ab"
+    },
+    "roleExperience": {
+      "path": "apps/union-eyes/lib/dashboard/role-experience.ts",
+      "blobSha": "9035268e06bd642493b5290c32b277ee38a1bbc8"
+    },
+    "currentCandidate": {
+      "path": "docs/union-eyes/staging/UE_V2_CURRENT_CANDIDATE.md",
+      "blobSha": "55d77d12b0a3bbb1264db41aa7e8659c9f750464"
     }
   },
   "scopeVocabulary": {
@@ -262,7 +310,9 @@
     "Prior founder product ratification is not fabricated from historical proposals; exact subsequent ratification record was not located during this pass.",
     "Historical institutional dossier 111 records includes earlier programme-specific decisions and blockers. These are indexed, not recertified or ratified; no duplicate institutional sign-off is requested.",
     "Stakeholder universe was previously limited to persona families; 39 role values and 32 trust-boundary stakeholder families have now been enumerated. Dedicated external UI/API/action coverage, actual approved pilot scope, and direct vs recipient-only classification must be reconciled in Step 1 and consumed in Step 2/3.",
-    "Prior conversation evidence indicates earlier Member 2.1 and Representative 2.2 design freezes and architectural models. Later reconstructed baseline records remain proposal-only in repository. No exact artifact-level ratification of reconstructed records established. Historical client examples are not actual adopted customer protocols or customer acceptance."
+    "Prior conversation evidence indicates earlier Member 2.1 and Representative 2.2 design freezes and architectural models. Later reconstructed baseline records remain proposal-only in repository. No exact artifact-level ratification of reconstructed records established. Historical client examples are not actual adopted customer protocols or customer acceptance.",
+    "Final adversarial review corrected mixed governance G21/G28, external O18/G26 and conditional privileged-read actions; broadened stakeholder census to 35 (procurement/legal/IT, case support and data migration). Earlier counts and scope claims remain historical. Defined design/offer requirements are not runtime proof.",
+    "Current approved commercial offer/prices and actual customer agreement/representation model, migration inputs and service targets not established from repository sources. No client contract or live legal authority assumed."
   ],
   "baseFamilies": [
     {
@@ -4423,14 +4473,18 @@
     {
       "id": "O18",
       "title": "Affiliations, federations, councils and partnerships",
-      "scope": "DEFERRED",
-      "reason": "Separate product increment; preserve security, truthful unavailability and non-regression if route remains reachable.",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "officer-executive",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Bounded authorized national/external representation is a distinct conditional product capability. Full affiliation/rollups remain deferred.",
+      "adversarialReconciliation": true,
+      "scopeBoundaryCluster": "SB07",
+      "activationCondition": "Offer/selectability or actual customer protocol establishes required positive coverage; otherwise truthful unavailable."
     },
     {
       "id": "O19",
@@ -5205,8 +5259,8 @@
     {
       "id": "G15",
       "title": "Data access, correction, portability and information-rights requests",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "governance-officer",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-OMIT-PRIVACY-RIGHTS",
@@ -5214,8 +5268,9 @@
       "interpretationFromProposedSource": false,
       "securityBoundaryRetained": true,
       "scopeBoundaryCluster": "SB05",
-      "scopeBoundary": "Self-service information-rights request, authorized handler response/export/acknowledgement is explicitly required at C20; broader automation and every statutory request subtype not implied.",
-      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
+      "scopeBoundary": "Base privacy request, authorized response, export and acknowledgement required; other statutory automation conditional.",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required.",
+      "adversarialReconciliation": true
     },
     {
       "id": "G16",
@@ -5262,17 +5317,18 @@
     {
       "id": "G19",
       "title": "Authorized external disclosures, consent and sharing grants",
-      "scope": "CONDITIONAL",
-      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
+      "scope": "REQUIRED",
+      "reason": "Base product commitment or cross-cutting security/operational prerequisite. Scope is limited to enabled base journeys.",
       "persona": "governance-officer",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-G-002",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
       "securityBoundaryRetained": true,
-      "scopeBoundary": "Required confidentiality and authorized sharing enforcement; external specialist disclosure and other new integrations separate.",
+      "scopeBoundary": "Actual recipient and external resource-grant authorization, confidentiality and revocation required; live specialist integration separately deferred.",
       "scopeBoundaryCluster": "SB05",
-      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required.",
+      "adversarialReconciliation": true
     },
     {
       "id": "G20",
@@ -5292,15 +5348,18 @@
     {
       "id": "G21",
       "title": "Financial, trustee and independent audit assurance",
-      "scope": "EXCLUDED",
-      "reason": "Explicit exclusion from positive base feature delivery; applicable security controls still required.",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "governance-officer",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-D-003",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
       "securityBoundaryRetained": true,
-      "scopeBoundary": "Financial/trustee assurance product excluded; non-financial auditor, provenance and evidence scope remain required under G22–G23."
+      "scopeBoundary": "Financial trustee/finance assurance excluded; nonfinancial independent audit and authorized evidence remain in scope where adopted. Do not exclude the entire mixed row.",
+      "adversarialReconciliation": true,
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G22",
@@ -5359,14 +5418,18 @@
     {
       "id": "G26",
       "title": "Federation, national, regional and local oversight boundaries",
-      "scope": "DEFERRED",
-      "reason": "Separate product increment; preserve security, truthful unavailability and non-regression if route remains reachable.",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "governance-officer",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Required deny wrong organization/scope; positive authorized external oversight only for adopted/advertised protocol, not federation rollup.",
+      "adversarialReconciliation": true,
+      "scopeBoundaryCluster": "SB07",
+      "activationCondition": "Offer/selectability or actual customer protocol establishes required positive coverage; otherwise truthful unavailable."
     },
     {
       "id": "G27",
@@ -5383,14 +5446,18 @@
     {
       "id": "G28",
       "title": "AI governance, explainability and human accountability",
-      "scope": "DEFERRED",
-      "reason": "Separate product increment; preserve security, truthful unavailability and non-regression if route remains reachable.",
+      "scope": "CONDITIONAL",
+      "reason": "Only adopted/enabled variants or the bounded base slice apply; broader design needs explicit scope reconciliation.",
       "persona": "governance-officer",
       "historicalDefinition": "INDIVIDUAL",
       "capabilityId": "UE-CAP-I-001",
       "mandatoryInHistoricalProgram": true,
       "interpretationFromProposedSource": false,
-      "securityBoundaryRetained": true
+      "securityBoundaryRetained": true,
+      "scopeBoundary": "Mandatory human control, traceability, non-surveillance and authorized purpose for any enabled OCR/automation/AI; standalone AI governance product deferred.",
+      "adversarialReconciliation": true,
+      "scopeBoundaryCluster": "SB05",
+      "activationCondition": "If offered, test full substantive lifecycle and exact appointment/mandate. Baseline security and subject rights remain required."
     },
     {
       "id": "G29",
@@ -7921,7 +7988,8 @@
       "topic": "Agreement, benefits, events, participation, and digital card",
       "reason": "The member canonical tells My Union to list these as not available and not to invent values. That honest absence is not an authorization to build those products in Gates 1–15.",
       "evidence": "docs/union-eyes/reality-remediation/UE_MEMBER_CANONICAL_2_1.md M07",
-      "scope": "DEFERRED"
+      "scope": "DEFERRED",
+      "scopeBoundary": "Do not implement benefits/events/cards or full member agreement portal based on this record. Authorized internal casework agreement reference is a separate required slice. Own My Union facts and links do not grant access to these unadopted surfaces."
     },
     {
       "id": "UE-SCOPE-REPORTS-DASHBOARD-REMOVED",
@@ -8479,8 +8547,8 @@
       "disposition": "RECONCILE_EXISTING_OWNER_DECISION_NO_NEW_ADOPTION"
     }
   ],
-  "qualification": "NOT_SCOPE_ACCEPTED_OR_RUNTIME_QUALIFIED",
-  "next": "Split mixed and conditional records with source/owner scope receipts; verify all discovered source IDs; consume this classification in C01–C22/O01–O15 action-level census rather than use it as feature or release evidence.",
+  "qualification": "SCOPE_PLANNING_BASELINE_ONLY_NOT_RELEASE_ACCEPTANCE",
+  "next": "Proceed to Step 2 read-only technical UI/action/route/worker/webhook census using the existing action ledger. Carry source/authority mapping and all conditional axes; any discovered unmapped offered functionality returns to Step 1 rather than being silently deferred or included. No product implementation, deployment, or customer authority authorized.",
   "counts": {
     "base": {
       "REQUIRED": 33,
@@ -8501,10 +8569,10 @@
       "EXCLUDED": 30
     },
     "historicalPersonas": {
-      "REQUIRED": 65,
-      "CONDITIONAL": 62,
-      "DEFERRED": 13,
-      "EXCLUDED": 42
+      "REQUIRED": 67,
+      "CONDITIONAL": 64,
+      "DEFERRED": 10,
+      "EXCLUDED": 41
     },
     "proposed": {
       "REQUIRED": 90,
@@ -8513,8 +8581,8 @@
       "EXCLUDED": 50
     },
     "authorityActions": {
-      "REQUIRED": 20,
-      "CONDITIONAL": 12,
+      "REQUIRED": 16,
+      "CONDITIONAL": 16,
       "DEFERRED": 3,
       "EXCLUDED": 6
     },
@@ -8525,8 +8593,8 @@
       "EXCLUDED": 0
     },
     "stakeholderFamilies": {
-      "REQUIRED": 18,
-      "CONDITIONAL": 13,
+      "REQUIRED": 20,
+      "CONDITIONAL": 14,
       "DEFERRED": 1,
       "EXCLUDED": 0
     },
@@ -8535,6 +8603,12 @@
       "CONDITIONAL": 25,
       "DEFERRED": 0,
       "EXCLUDED": 5
+    },
+    "commercialCommitments": {
+      "REQUIRED": 13,
+      "CONDITIONAL": 3,
+      "DEFERRED": 1,
+      "EXCLUDED": 0
     }
   },
   "historicalPilotScope": {
@@ -10234,15 +10308,19 @@
     },
     {
       "id": "case:read_third_party_restricted",
-      "scope": "REQUIRED",
+      "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundary": "Positive scope limited to explicit, supported classification-specific authority and current resource grant; hard-negative and non-disclosure coverage mandatory even when no positive workflow is offered. Never grant blanket privileged access or counsel-controlled read.",
+      "activationCondition": "Actual enabled action, institutional classification and explicit resource grant."
     },
     {
       "id": "case:read_privileged",
-      "scope": "REQUIRED",
+      "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundary": "Positive scope limited to explicit, supported classification-specific authority and current resource grant; hard-negative and non-disclosure coverage mandatory even when no positive workflow is offered. Never grant blanket privileged access or counsel-controlled read.",
+      "activationCondition": "Actual enabled action, institutional classification and explicit resource grant."
     },
     {
       "id": "case:comment",
@@ -10270,9 +10348,11 @@
     },
     {
       "id": "case:modify_document",
-      "scope": "REQUIRED",
+      "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundary": "Positive scope limited to explicit, supported classification-specific authority and current resource grant; hard-negative and non-disclosure coverage mandatory even when no positive workflow is offered. Never grant blanket privileged access or counsel-controlled read.",
+      "activationCondition": "Actual enabled action, institutional classification and explicit resource grant."
     },
     {
       "id": "case:process_ocr",
@@ -10282,9 +10362,11 @@
     },
     {
       "id": "case:disclose_to_member",
-      "scope": "REQUIRED",
+      "scope": "CONDITIONAL",
       "securityBoundaryRetained": true,
-      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant."
+      "note": "Positive scope is bounded to enabled base operations. Step 3 must map each allowed and denied resource authority; no role-title grant.",
+      "scopeBoundary": "Positive scope limited to explicit, supported classification-specific authority and current resource grant; hard-negative and non-disclosure coverage mandatory even when no positive workflow is offered. Never grant blanket privileged access or counsel-controlled read.",
+      "activationCondition": "Actual enabled action, institutional classification and explicit resource grant."
     },
     {
       "id": "case:export_sealed_evidence",
@@ -10487,7 +10569,7 @@
   ],
   "stakeholderCensus": {
     "status": "FIRST_PASS_PROPOSED_PENDING_ACTION_LEVEL_RECONCILIATION",
-    "note": "Seven designed personas are not the complete stakeholder universe; 39 stored role values and distinct stakeholder trust boundaries overlap. No one-to-one account-count assumption. External recipient is different from authenticated external representative and external counsel. Positive feature scope separate from mandatory negative/security qualification.",
+    "note": "Seven design personas are not the full stakeholder universe. All 39 role values and 35 stakeholder families accounted for in this census; functional capacity, lifecycle subject, machine principal and external recipient may overlap with a person. No account count inferred.",
     "roleValues": [
       {
         "id": "app_owner",
@@ -11430,6 +11512,91 @@
           "Dependent/beneficiary/authorized proxy only where relevant to approved product and legal relationship",
           "Volunteer, event or training participant; adjacent product"
         ]
+      },
+      {
+        "id": "SA33",
+        "name": "Customer procurement, legal/data-protection, IT/identity and security approvers",
+        "kind": "CUSTOMER_ASSURANCE",
+        "scope": "REQUIRED",
+        "interfaceMode": "Capacity or relationship; no dedicated workspace implied",
+        "requiredBoundary": "Named customer activation, provider/configuration and data-handling authorities; separate from tenant admin by capacity where needed. Agreement/DPA/readiness and exit controlled; no assumed separate workspace.",
+        "sources": [
+          "commercialPilot",
+          "deliveryModel",
+          "productPage"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "SCOPE_REVIEWED_REQUIRES_ACTION_MAPPING",
+        "overlappingFamilies": [
+          "SA03",
+          "SA10",
+          "SA12",
+          "SA21",
+          "SA25"
+        ],
+        "lifecycleIds": [
+          "L02",
+          "L03",
+          "L12",
+          "L13",
+          "L15"
+        ]
+      },
+      {
+        "id": "SA34",
+        "name": "Case-support staff, evidence/appeal coordinator and records custodian",
+        "kind": "LOCAL_CASE_SUPPORT",
+        "scope": "REQUIRED",
+        "interfaceMode": "Capacity or relationship; no dedicated workspace implied",
+        "requiredBoundary": "Actual case-scoped evidence collection, missing-item tracking, permitted appeal preparation and record handling. No legal representation, signature or disclosure from support title; use existing eligible capacity where available.",
+        "sources": [
+          "productPage",
+          "roleExperience",
+          "representative"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "SCOPE_REVIEWED_REQUIRES_ACTION_MAPPING",
+        "overlappingFamilies": [
+          "SA07",
+          "SA11",
+          "SA12"
+        ],
+        "lifecycleIds": [
+          "L06",
+          "L07",
+          "L08",
+          "L09",
+          "L11"
+        ]
+      },
+      {
+        "id": "SA35",
+        "name": "Institutional data steward, migration operator and legacy-system custodian",
+        "kind": "MIGRATION_BOUNDARY",
+        "scope": "CONDITIONAL",
+        "interfaceMode": "Capacity or relationship; no dedicated workspace implied",
+        "requiredBoundary": "Agreed dataset transfer, validation, authoritative source, integrity/reconciliation, limited data retention, access and rollback. No new general bulk import module or production migration inferred.",
+        "sources": [
+          "commercialPilot",
+          "deliveryModel",
+          "ueReadme"
+        ],
+        "securityBoundaryRetained": true,
+        "scopeStatus": "SCOPE_REVIEWED_REQUIRES_ACTION_MAPPING",
+        "overlappingFamilies": [
+          "SA10",
+          "SA23",
+          "SA25",
+          "SA29",
+          "SA33"
+        ],
+        "lifecycleIds": [
+          "L02",
+          "L03",
+          "L13",
+          "L15"
+        ],
+        "activationCondition": "Actual agreed data migration; safe custody and no unauthorized writes always."
       }
     ],
     "provenanceLimits": [
@@ -11581,7 +11748,9 @@
           "SA09",
           "SA26",
           "SA23",
-          "SA21"
+          "SA21",
+          "SA33",
+          "SA35"
         ],
         "scope": "REQUIRED",
         "boundary": "Named sponsor, scope/contract/DPA and authorized plan. May be handled through verified external process; no required new automated payment rail or e-sign feature."
@@ -11596,7 +11765,9 @@
           "SA23",
           "SA24",
           "SA25",
-          "SA28"
+          "SA28",
+          "SA33",
+          "SA35"
         ],
         "scope": "REQUIRED",
         "boundary": "Correct tenant, protocol approval, worksite/reference configuration, setup checklist, demonstrably true readiness, no synthetic records in real data."
@@ -11643,7 +11814,8 @@
           "SA07",
           "SA08",
           "SA19",
-          "SA32"
+          "SA32",
+          "SA34"
         ],
         "scope": "REQUIRED",
         "boundary": "Own intake, assistance, status and intake-to-case or alternate outcome; nonmember/retiree eligibility conditional."
@@ -11659,7 +11831,8 @@
           "SA14",
           "SA15",
           "SA16",
-          "SA19"
+          "SA19",
+          "SA34"
         ],
         "scope": "REQUIRED",
         "boundary": "Assigned/eligible handler, actual automatic matching, supervision, protocol-specific and scoped external boundaries, no adverse or foreign access."
@@ -11677,7 +11850,8 @@
           "SA17",
           "SA19",
           "SA28",
-          "SA29"
+          "SA29",
+          "SA34"
         ],
         "scope": "REQUIRED",
         "boundary": "Authorized upload, scan, OCR, review, evidence classification and versioning; external contributor workflows only if explicitly granted; counsel-controlled excluded."
@@ -11698,7 +11872,8 @@
           "SA19",
           "SA20",
           "SA22",
-          "SA28"
+          "SA28",
+          "SA34"
         ],
         "scope": "REQUIRED",
         "boundary": "Messages, approved letters with actual dispatch, recipient delivery, deadlines, reminder worker and recovery. Direct statutory/tribunal submissions not inferred."
@@ -11736,7 +11911,8 @@
           "SA09",
           "SA15",
           "SA19",
-          "SA22"
+          "SA22",
+          "SA34"
         ],
         "scope": "REQUIRED",
         "boundary": "Valid closure, member projection, successor acceptance/access revocation and retained deadlines/evidence. No external legal decision inferred."
@@ -11753,7 +11929,8 @@
           "SA19",
           "SA21",
           "SA25",
-          "SA30"
+          "SA30",
+          "SA33"
         ],
         "scope": "REQUIRED",
         "boundary": "Base confidentiality/audit, privacy request through acknowledgement, authorized review/evidence. Independent investigations/elections/extra regulator portal conditional or deferred."
@@ -11769,7 +11946,9 @@
           "SA27",
           "SA28",
           "SA29",
-          "SA31"
+          "SA31",
+          "SA33",
+          "SA35"
         ],
         "scope": "REQUIRED",
         "boundary": "Support access scope, dependency monitoring, backups, worker recovery, security incidents and truthful status."
@@ -11806,7 +11985,9 @@
           "SA25",
           "SA26",
           "SA28",
-          "SA29"
+          "SA29",
+          "SA33",
+          "SA35"
         ],
         "scope": "REQUIRED",
         "boundary": "Exit or transfer, revoke sessions/access/grants/credentials, maintain required records and export/disposition by adopted retention rules. Customer exit automation conditional; no arbitrary deletion."
@@ -11847,7 +12028,14 @@
       "Union dues and finance",
       "Unverified pricing, conversion or ROI claims",
       "Production deployment under this scope record"
-    ]
+    ],
+    "currentSourceTruth": {
+      "publicProduct": "Pilot-validation/design presentation; not production availability.",
+      "publicOCRA": "Informational page, not live questionnaire or automatic report.",
+      "starterKit": "Explanatory content and assessment/contact links; automated purchase or delivery not evidenced.",
+      "historicalOfferConflict": "Earlier offer stack, revenue profile and pilot durations are historically inconsistent; exact current prices, packaging and contractual SLA not established here.",
+      "antiSurveillance": "Binding product acceptance boundary: organization-level continuity, human decisions, no worker productivity scores or covert profiling."
+    }
   },
   "technicalActorSourceIndex": {
     "status": "HISTORICAL_DISCOVERY_ONLY_STEP2_REGENERATE",
@@ -12002,80 +12190,405 @@
       "id": "SC01",
       "decision": "Offer envelope vs first-client envelope",
       "recommendation": "Qualify every advertised/selectable protocol; actual first customer selects its approved model; no invented client approval.",
-      "status": "RECOMMENDED_NOT_RATIFIED",
+      "status": "WORKING_SCOPE_DISPOSITION_FOR_CENSUS",
       "evidence": [
         "protocols",
         "protocolService",
         "representative"
-      ]
+      ],
+      "decisionBasis": "Founder requested continued scope review. Engineering interpretation for planning, not fabricated artifact ratification or real customer adoption. Any conflicting current offer or customer contract takes precedence and must be explicitly reconciled."
     },
     {
       "id": "SC02",
       "decision": "Bounded external representative capability",
       "recommendation": "Include grant, scoped matter view, document metadata/deposit/download and revocation wherever representation model requires an external actor. Treat independently from WorkAid.",
-      "status": "RECOMMENDED_NOT_RATIFIED",
+      "status": "WORKING_SCOPE_DISPOSITION_FOR_CENSUS",
       "evidence": [
         "externalMiddleware",
         "externalIntake",
         "externalDownload",
         "externalGrant"
-      ]
+      ],
+      "decisionBasis": "Founder requested continued scope review. Engineering interpretation for planning, not fabricated artifact ratification or real customer adoption. Any conflicting current offer or customer contract takes precedence and must be explicitly reconciled."
     },
     {
       "id": "SC03",
       "decision": "Independent governance extent",
       "recommendation": "Required case governance, authority, audit, privacy request and nonfinancial scoped oversight. Full investigations/elections/policy suite separately adopted.",
-      "status": "RECOMMENDED_NOT_RATIFIED",
+      "status": "WORKING_SCOPE_DISPOSITION_FOR_CENSUS",
       "evidence": [
         "governance",
         "physicalGuards",
         "base"
-      ]
+      ],
+      "decisionBasis": "Founder requested continued scope review. Engineering interpretation for planning, not fabricated artifact ratification or real customer adoption. Any conflicting current offer or customer contract takes precedence and must be explicitly reconciled."
     },
     {
       "id": "SC04",
       "decision": "Commercial automation extent",
       "recommendation": "Require working acquisition-to-tenant/entitlement/first-use and offboarding process. Automated public acquisition, starter-product purchase/CRM/contract/invoice only if current offer actually promises it.",
-      "status": "RECOMMENDED_NOT_RATIFIED",
+      "status": "WORKING_SCOPE_DISPOSITION_FOR_CENSUS",
       "evidence": [
         "commercialPilot",
         "revenuePlaybook",
         "publicApplicant"
-      ]
+      ],
+      "decisionBasis": "Founder requested continued scope review. Engineering interpretation for planning, not fabricated artifact ratification or real customer adoption. Any conflicting current offer or customer contract takes precedence and must be explicitly reconciled."
     },
     {
       "id": "SC05",
       "decision": "Reconstructed persona and grouped historical IDs",
       "recommendation": "Reference previously approved design intent where verified. Never mark 0C2 proposed baselines adopted from broad founder instruction; preserve missing source/grouped ID uncertainty, specify current base actions from actual source in Step 2.",
-      "status": "EVIDENCE_RECONCILIATION_REQUIRED",
+      "status": "HISTORICAL_PROVENANCE_GAP_PRESERVED",
       "evidence": [
         "ratification",
         "steward",
         "representative",
         "senior"
-      ]
+      ],
+      "decisionBasis": "Founder requested continued scope review. Engineering interpretation for planning, not fabricated artifact ratification or real customer adoption. Any conflicting current offer or customer contract takes precedence and must be explicitly reconciled."
     },
     {
       "id": "SC06",
       "decision": "Operating tier and client readiness",
       "recommendation": "Declare actual pilot cohort, expected load, browser/device/accessibility target, email and recovery objectives, data migration, exit and operational cadence; use prior pilot programme as historical reference, not a new live-data authorization.",
-      "status": "RECOMMENDED_NOT_RATIFIED",
+      "status": "WORKING_SCOPE_DISPOSITION_FOR_CENSUS",
       "evidence": [
         "pilot",
         "commercialPilot",
         "base"
+      ],
+      "decisionBasis": "Founder requested continued scope review. Engineering interpretation for planning, not fabricated artifact ratification or real customer adoption. Any conflicting current offer or customer contract takes precedence and must be explicitly reconciled."
+    },
+    {
+      "id": "SC07",
+      "decision": "Human-centred intelligence and evidence boundary",
+      "recommendation": "Treat anti-surveillance, accountable human decisions, missing-item/appeal support and handoff continuity as explicit base design requirements. Do not convert workflow metrics into individual performance scoring; no standalone memory dashboard, predictive analytics or legal filing feature inferred.",
+      "status": "WORKING_SCOPE_DISPOSITION_FOR_CENSUS",
+      "evidence": [
+        "productPage",
+        "antiSurveillance",
+        "ueReadme",
+        "saasRerun"
       ]
     }
   ],
   "step1Verification": {
-    "scopeInventory": "Census records classified; conditional rows carry scope rationale or trigger. Counts describe overlapping source records.",
+    "scopeInventory": "All enumerated source records and existing base families classified or bounded. Final adversarial review adds a commercial commitments crosswalk, explicit product anti-surveillance constraints, corrected mixed rows, and customer/case-support/migration actors.",
+    "scopeFreeze": "Working product planning baseline; founder's proceed authorizes review, not independent artifact acceptance, customer contractual terms or institutional adoption. No new formal approval gate for engineering census.",
     "remaining": [
-      "SC01–SC06 scope decisions remain recommended/need exact evidence; this is not product ratification.",
-      "Product route/UI operation census in Step 2 may identify newly discovered scope, which must be fed back into this record rather than assumed required.",
-      "No evidence of current active first-client approved protocol, current offer terms, actual governance appointment or independent institutional adoption."
+      "Exact historical reconstructed persona ratification and grouped SR atomic source definitions unresolved; no historical fact invented. Step 2/3 map actual enabled business actions; no unconditional claim of exhaustive inventory before source census.",
+      "Actual customer configuration, service tier, commercial commitments and adopted authority remain external facts; only their applicable positive workflow depends on verification. Mandatory security and truthfulness coverage proceeds.",
+      "Step 2 source discovery can reopen scope for newly identified enabled or marketed actions. No silent scope drop."
     ],
     "applicationChanges": false,
     "stagingChanges": false,
     "releaseStatusChanged": false
+  },
+  "commercialCommitmentMatrix": {
+    "status": "SCOPE_REVIEWED_NOT_RUNTIME_QUALIFIED",
+    "rows": [
+      {
+        "id": "PC01",
+        "title": "Member first concern, documents, missing items and visible expectations",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C08",
+          "C12",
+          "C13",
+          "C17"
+        ],
+        "evidence": [
+          "productPage",
+          "member"
+        ],
+        "scopeBoundary": "Provide a connected member-facing path; explicit outstanding evidence/request status. A broader generic request-management product is not implied."
+      },
+      {
+        "id": "PC02",
+        "title": "Steward review, next action and follow-up ownership",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C08",
+          "C09",
+          "C10",
+          "C21"
+        ],
+        "evidence": [
+          "productPage",
+          "pilot"
+        ],
+        "scopeBoundary": "Correct protocol and resource authority; no silent dropped or unowned tasks."
+      },
+      {
+        "id": "PC03",
+        "title": "Case support: evidence package, appeal preparation, missing-item tracking and shared permitted context",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C08",
+          "C13",
+          "C14",
+          "C16",
+          "C21"
+        ],
+        "evidence": [
+          "productPage",
+          "revenueProfile"
+        ],
+        "scopeBoundary": "Human-entered appeal dates and authorized preparation/record of outcome. No automatic legal calculation, professional advice, tribunal submission or guaranteed arbitration outcome."
+      },
+      {
+        "id": "PC04",
+        "title": "Successor receives permitted history, unresolved obligations and decision context",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C10",
+          "C11",
+          "C12",
+          "C21",
+          "C22"
+        ],
+        "evidence": [
+          "productPage",
+          "saasRerun"
+        ],
+        "scopeBoundary": "Preserve handoff decision context, ownership, dates and communications; outgoing revocation. Standalone institutional-memory dashboard remains parked, not a waiver of continuity."
+      },
+      {
+        "id": "PC05",
+        "title": "Scoped knowledge and precedent for case handler",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C08",
+          "C13",
+          "C18"
+        ],
+        "evidence": [
+          "productPage",
+          "representative"
+        ],
+        "scopeBoundary": "Authorized available references, source and effective version; usable agreement clause/precedent retrieval to the extent promised; no automatic binding legal interpretation, predictive ranking or fabricated precedent."
+      },
+      {
+        "id": "PC06",
+        "title": "Leadership governance posture and service continuity",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C18",
+          "C19",
+          "O13"
+        ],
+        "evidence": [
+          "productPage",
+          "antiSurveillance"
+        ],
+        "scopeBoundary": "Source-backed organization/queue aggregates; no individual productivity or behavior scoring, covert profiling, unauthorized raw case drill-down."
+      },
+      {
+        "id": "PC07",
+        "title": "Anti-surveillance and human authority",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C07",
+          "C09",
+          "C15",
+          "C18",
+          "C19",
+          "C20",
+          "C22",
+          "O14"
+        ],
+        "evidence": [
+          "antiSurveillance",
+          "productPage"
+        ],
+        "scopeBoundary": "No tracking individual time, attention, location, productivity, communication patterns or behavior for surveillance; no automated punitive action. Bounded current caseload/availability used for assignment is operational context, not worker performance rating; minimized and scoped. Human accountable decisions and evidence provenance, including AI outputs."
+      },
+      {
+        "id": "PC08",
+        "title": "Institutional control, export and exit",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C13",
+          "C14",
+          "C19",
+          "C20",
+          "C22",
+          "O15"
+        ],
+        "evidence": [
+          "antiSurveillance",
+          "commercialPilot"
+        ],
+        "scopeBoundary": "Authorized exportability, access/grant revocation, retained obligations and records. Contract-specific full export/retention/deletion procedure must exist, may be approved manual rather than new bulk export module. No arbitrary deletion or cross-tenant access."
+      },
+      {
+        "id": "PC09",
+        "title": "Pilot contact, fit, data authority, and acceptance",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C01",
+          "C04",
+          "C05",
+          "C19",
+          "O14"
+        ],
+        "evidence": [
+          "productPage",
+          "commercialPilot",
+          "deliveryModel"
+        ],
+        "scopeBoundary": "Working verifiable intake-to-customer handoff, named sponsor and bounded pilot scope, subject rights/consent where applicable, appropriate agreement before real data. Actual automated acquisition workflow not inferred from informational page."
+      },
+      {
+        "id": "PC10",
+        "title": "Continuity assessment and starter kit",
+        "scope": "CONDITIONAL",
+        "baseFamilies": [
+          "C05",
+          "C18",
+          "O14"
+        ],
+        "evidence": [
+          "ocraPage",
+          "starterKitPage",
+          "ueReadme"
+        ],
+        "scopeBoundary": "Adjacent commercial offering; current web source explicitly describes explanatory OCRA page and no live questionnaire/generated report; starter kit content not evidence of checkout/delivery. Preserve separately owed commercial commitments; no presumption that historical pricing is current or technical fulfilment exists."
+      },
+      {
+        "id": "PC11",
+        "title": "AI case intelligence and federation product",
+        "scope": "DEFERRED",
+        "baseFamilies": [
+          "C07",
+          "C18",
+          "C19",
+          "C22"
+        ],
+        "evidence": [
+          "revenueProfile",
+          "ueReadme",
+          "productPage"
+        ],
+        "scopeBoundary": "April profile mentions both as broad product design; later pilot lock and README park predictive, cross-affiliate rollups. Do not sell as verified base. Bounded external representation separate; actual active AI/analytics controls still required."
+      },
+      {
+        "id": "PC12",
+        "title": "External dues record reflection",
+        "scope": "CONDITIONAL",
+        "baseFamilies": [
+          "C12",
+          "C19",
+          "C22"
+        ],
+        "evidence": [
+          "ueReadme",
+          "registry"
+        ],
+        "scopeBoundary": "Owner decision: externally handled, existing authorized read-only records or absent/accurate empty/failed state. No native ledger, collection, calculation, remittance, reconciliation, submission, export or Financial Officer 2.1. Scope of displayed financial data requires appropriate authority; no widening."
+      },
+      {
+        "id": "PC13",
+        "title": "Buyer activation and commercial entitlement",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C04",
+          "C05",
+          "C06",
+          "C19"
+        ],
+        "evidence": [
+          "deliveryModel",
+          "commercialPilot",
+          "catalog"
+        ],
+        "scopeBoundary": "Actual authorized agreement/entitlement/tenant transition and review, extension or exit. Native payment and full automatic subscription conversion only where current confirmed commercial offering requires them; not union financial functionality."
+      },
+      {
+        "id": "PC14",
+        "title": "Role-scoped operational confidentiality",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C06",
+          "C07",
+          "C10",
+          "C13",
+          "C16",
+          "C19",
+          "C20",
+          "C22"
+        ],
+        "evidence": [
+          "productPage",
+          "roleExperience",
+          "physicalGuards"
+        ],
+        "scopeBoundary": "Positive appropriate business operations and negative disallowed access. UI experience, stored role, membership, capacity, appointment, mandate, matter relationship and privilege evaluated separately."
+      },
+      {
+        "id": "PC15",
+        "title": "Customer-owned data migration and go-live",
+        "scope": "CONDITIONAL",
+        "baseFamilies": [
+          "C05",
+          "C06",
+          "C13",
+          "C19",
+          "C22",
+          "O15"
+        ],
+        "evidence": [
+          "commercialPilot",
+          "deliveryModel"
+        ],
+        "scopeBoundary": "Only agreed initial/historical data inputs; mapping, retention, duplicate checks, scoped reconciliation, permitted migration and rollback. The legacy CUPE-specific fixture is not a general real-data import solution. No production activation under this record."
+      },
+      {
+        "id": "PC16",
+        "title": "Bilingual, accessible, responsive entire journey",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "C01",
+          "C05",
+          "C08",
+          "C11",
+          "C12",
+          "C13",
+          "C14",
+          "C15",
+          "C16",
+          "C17",
+          "C19",
+          "C20",
+          "C21",
+          "O10",
+          "O11",
+          "O12"
+        ],
+        "evidence": [
+          "productPage",
+          "member",
+          "governance"
+        ],
+        "scopeBoundary": "EN/FR for actual tasks and status/error/recovery, phone and desktop usability, applicable accessibility target; declared device/engine and additional testing boundaries remain explicit. No certification claim."
+      },
+      {
+        "id": "PC17",
+        "title": "Honest offering and release claims",
+        "scope": "REQUIRED",
+        "baseFamilies": [
+          "O13",
+          "O14"
+        ],
+        "evidence": [
+          "productPage",
+          "platformProduct",
+          "catalog",
+          "currentCandidate"
+        ],
+        "scopeBoundary": "Website describes design/pilot validation, not blanket production availability. Timestamped offer/status must reflect actual evidence and approved pilot configuration. Catalog financial/market projections, historical readiness figures and design claims are not operating results. No production authority."
+      }
+    ]
   }
 }
