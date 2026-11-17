@@ -2,297 +2,126 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createStripeAdapter, type StripeConfig } from './stripe.adapter'
 import { PaymentProvider, PaymentIntentStatus, PayoutStatus, RefundStatus } from '../types'
 
-const mockFetch = vi.fn()
-vi.stubGlobal('fetch', mockFetch)
+const mocks = vi.hoisted(() => ({
+  factory: vi.fn(),
+  intentCreate: vi.fn(), intentCapture: vi.fn(),
+  chargeRetrieve: vi.fn(), refundCreate: vi.fn(), payoutCreate: vi.fn(),
+  verify: vi.fn(),
+}))
 
-const config: StripeConfig = {
-  secretKey: 'sk_test_123',
-  webhookSecret: 'whsec_test',
-  apiVersion: '2024-04-10',
-}
+vi.mock('@nzila/payments-stripe', () => ({
+  createStripeClientForKey: (...args: unknown[]) => {
+    mocks.factory(args[0])
+    return {
+      paymentIntents: { create: mocks.intentCreate, capture: mocks.intentCapture },
+      charges: { retrieve: mocks.chargeRetrieve },
+      refunds: { create: mocks.refundCreate },
+      payouts: { create: mocks.payoutCreate },
+      webhooks: { constructEvent: mocks.verify },
+    }
+  },
+}))
 
-function jsonResponse(data: unknown, status = 200) {
-  return { ok: status >= 200 && status < 300, status, statusText: 'OK', json: () => Promise.resolve(data), text: () => Promise.resolve(JSON.stringify(data)) }
-}
+const config: StripeConfig = { secretKey: 'sk_test_123', webhookSecret: 'whsec_test' }
+const fakeIntent = (extra: Record<string, unknown> = {}) => ({
+  id: 'pi_123', status: 'requires_confirmation', amount: 1000000,
+  currency: 'usd', metadata: {}, created: 1700000000, client_secret: 'cs_test', ...extra,
+})
+const intentRequest = () => ({
+  orderId: 'ord-1', userId: 'user-1', amount: 10000,
+  currency: 'USD', method: 'card', provider: PaymentProvider.STRIPE, idempotencyKey: 'idem-1',
+})
 
-describe('createStripeAdapter', () => {
-  let adapter: ReturnType<typeof createStripeAdapter>
+describe('Stripe adapter uses the shared Endive SDK', () => {
+  beforeEach(() => vi.resetAllMocks())
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-    adapter = createStripeAdapter(config)
-  })
-
-  it('exposes STRIPE provider', () => {
+  it('uses the one SDK factory and exposes STRIPE provider', () => {
+    const adapter = createStripeAdapter(config)
+    expect(mocks.factory).toHaveBeenCalledWith('sk_test_123')
     expect(adapter.provider).toBe(PaymentProvider.STRIPE)
   })
 
-  describe('createIntent', () => {
-    it('creates a Stripe payment intent', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse({
-        id: 'pi_123',
-        status: 'requires_confirmation',
-        amount: 1000000,
-        currency: 'usd',
-        metadata: {},
-        created: 1700000000,
-        client_secret: 'cs_test',
-      }))
-
-      const result = await adapter.createIntent({
-        orderId: 'ord-1',
-        userId: 'user-1',
-        amount: 10000,
-        currency: 'USD',
-        method: 'card',
-        provider: PaymentProvider.STRIPE,
-        idempotencyKey: 'idem-1',
-      })
-
-      expect(result.id).toBe('pi_123')
-      expect(result.status).toBe(PaymentIntentStatus.CREATED)
-      expect(result.provider).toBe(PaymentProvider.STRIPE)
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.stripe.com/v1/payment_intents',
-        expect.objectContaining({ method: 'POST' }),
-      )
-    })
-
-    it('maps processing status', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse({
-        id: 'pi_proc',
-        status: 'processing',
-        amount: 500,
-        currency: 'usd',
-        metadata: {},
-        created: 1700000000,
-        client_secret: 'cs_proc',
-      }))
-
-      const result = await adapter.createIntent({
-        orderId: 'ord-2',
-        userId: 'user-1',
-        amount: 5,
-        currency: 'USD',
-        method: 'card',
-        provider: PaymentProvider.STRIPE,
-        idempotencyKey: 'idem-2',
-      })
-      expect(result.status).toBe(PaymentIntentStatus.PROCESSING)
-    })
-
-    it('throws on Stripe API error', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        statusText: 'Bad Request',
-        json: () => Promise.resolve({ error: { message: 'Invalid amount' } }),
-      })
-
-      await expect(adapter.createIntent({
-        orderId: 'ord-3',
-        userId: 'user-1',
-        amount: -1,
-        currency: 'USD',
-        method: 'card',
-        provider: PaymentProvider.STRIPE,
-        idempotencyKey: 'idem-3',
-      })).rejects.toThrow('Stripe API error')
-    })
+  it('creates an intent through the official SDK with dynamic methods and idempotency', async () => {
+    mocks.intentCreate.mockResolvedValue(fakeIntent())
+    const result = await createStripeAdapter(config).createIntent(intentRequest())
+    expect(result.id).toBe('pi_123')
+    expect(result.status).toBe(PaymentIntentStatus.CREATED)
+    expect(result.metadata.clientSecret).toBe('cs_test')
+    expect(mocks.intentCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 1000000, currency: 'usd', automatic_payment_methods: { enabled: true } }),
+      expect.objectContaining({ idempotencyKey: 'idem-1' }),
+    )
+    expect(mocks.intentCreate.mock.calls[0][0]).not.toHaveProperty('payment_method_types')
   })
 
-  describe('captureIntent', () => {
-    it('captures and fetches receipt URL', async () => {
-      mockFetch
-        .mockResolvedValueOnce(jsonResponse({
-          id: 'pi_cap',
-          status: 'succeeded',
-          amount: 1000,
-          currency: 'usd',
-          metadata: {},
-          created: 1700000000,
-          client_secret: 'cs_cap',
-          latest_charge: 'ch_abc',
-        }))
-        .mockResolvedValueOnce(jsonResponse({
-          id: 'ch_abc',
-          amount: 1000,
-          receipt_url: 'https://receipt.stripe.com/ch_abc',
-          created: 1700000000,
-        }))
-
-      const capture = await adapter.captureIntent('pi_cap')
-      expect(capture.intentId).toBe('pi_cap')
-      expect(capture.capturedAmount).toBe(10) // 1000 cents / 100
-      expect(capture.receiptUrl).toBe('https://receipt.stripe.com/ch_abc')
-    })
-
-    it('handles capture without latest_charge', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse({
-        id: 'pi_nochg',
-        status: 'succeeded',
-        amount: 500,
-        currency: 'usd',
-        metadata: {},
-        created: 1700000000,
-        client_secret: 'cs_nochg',
-      }))
-
-      const capture = await adapter.captureIntent('pi_nochg')
-      expect(capture.receiptUrl).toBeNull()
-      expect(capture.providerTransactionId).toBe('pi_nochg')
-    })
+  it('maps processing status and propagates SDK errors', async () => {
+    mocks.intentCreate.mockResolvedValueOnce(fakeIntent({ status: 'processing' }))
+    const adapter = createStripeAdapter(config)
+    expect((await adapter.createIntent(intentRequest())).status).toBe(PaymentIntentStatus.PROCESSING)
+    mocks.intentCreate.mockRejectedValueOnce(new Error('Invalid amount'))
+    await expect(adapter.createIntent(intentRequest())).rejects.toThrow('Invalid amount')
   })
 
-  describe('refundIntent', () => {
-    it('creates a refund', async () => {
-      mockFetch
-        .mockResolvedValueOnce(jsonResponse({
-          id: 'pi_ref',
-          status: 'succeeded',
-          amount: 1000,
-          currency: 'usd',
-          metadata: {},
-          created: 1700000000,
-        }))
-        .mockResolvedValueOnce(jsonResponse({
-          id: 're_123',
-          amount: 500,
-          status: 'succeeded',
-          created: 1700000001,
-        }))
-
-      const refund = await adapter.refundIntent('pi_ref', 5, 'duplicate')
-      expect(refund.id).toBe('re_123')
-      expect(refund.amount).toBe(5) // 500 cents / 100
-      expect(refund.status).toBe(RefundStatus.COMPLETED)
-    })
-
-    it('maps processing refund status', async () => {
-      mockFetch
-        .mockResolvedValueOnce(jsonResponse({ id: 'pi_ref2' }))
-        .mockResolvedValueOnce(jsonResponse({
-          id: 're_pend',
-          amount: 300,
-          status: 'pending',
-          created: 1700000001,
-        }))
-
-      const refund = await adapter.refundIntent('pi_ref2', 3, 'requested')
-      expect(refund.status).toBe(RefundStatus.PROCESSING)
-    })
+  it('captures intent and reads its receipt from the charge', async () => {
+    mocks.intentCapture.mockResolvedValue(fakeIntent({ id: 'pi_cap', amount: 1000, status: 'succeeded', latest_charge: 'ch_abc' }))
+    mocks.chargeRetrieve.mockResolvedValue({ receipt_url: 'https://receipt.stripe.com/ch_abc' })
+    const capture = await createStripeAdapter(config).captureIntent('pi_cap')
+    expect(capture.capturedAmount).toBe(10)
+    expect(capture.receiptUrl).toBe('https://receipt.stripe.com/ch_abc')
+    expect(mocks.chargeRetrieve).toHaveBeenCalledWith('ch_abc', {})
   })
 
-  describe('createPayout', () => {
-    it('creates a Stripe payout', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse({
-        id: 'po_stripe',
-        amount: 500000,
-        currency: 'usd',
-        status: 'paid',
-        created: 1700000000,
-        arrival_date: 1700086400,
-      }))
-
-      const result = await adapter.createPayout({
-        id: 'po-1',
-        recipientId: 'artist-1',
-        amount: 5000,
-        currency: 'USD',
-        method: 'card',
-        provider: PaymentProvider.STRIPE,
-        destination: { type: 'bank_account', accountIdentifier: 'ba_123', accountName: 'Artist' },
-        status: PayoutStatus.PENDING,
-        providerPayoutId: null,
-        batchId: null,
-        scheduledAt: new Date(),
-        completedAt: null,
-      })
-
-      expect(result.providerPayoutId).toBe('po_stripe')
-      expect(result.status).toBe(PayoutStatus.COMPLETED)
-    })
-
-    it('maps non-paid payout status to PROCESSING', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse({
-        id: 'po_pend',
-        amount: 100000,
-        currency: 'usd',
-        status: 'pending',
-        created: 1700000000,
-        arrival_date: 1700086400,
-      }))
-
-      const result = await adapter.createPayout({
-        id: 'po-2',
-        recipientId: 'artist-2',
-        amount: 1000,
-        currency: 'USD',
-        method: 'card',
-        provider: PaymentProvider.STRIPE,
-        destination: { type: 'bank_account', accountIdentifier: 'ba_456', accountName: 'Artist 2' },
-        status: PayoutStatus.PENDING,
-        providerPayoutId: null,
-        batchId: null,
-        scheduledAt: new Date(),
-        completedAt: null,
-      })
-
-      expect(result.status).toBe(PayoutStatus.PROCESSING)
-      expect(result.completedAt).toBeNull()
-    })
+  it('allows capture without a charge and does not fabricate a receipt', async () => {
+    mocks.intentCapture.mockResolvedValue(fakeIntent({ latest_charge: null, amount: 500 }))
+    const capture = await createStripeAdapter(config).captureIntent('pi_nochg')
+    expect(capture.receiptUrl).toBeNull()
+    expect(mocks.chargeRetrieve).not.toHaveBeenCalled()
   })
 
-  describe('verifyWebhook', () => {
-    it('returns true for valid signature', () => {
-      const now = Math.floor(Date.now() / 1000)
-      expect(adapter.verifyWebhook(`t=${now},v1=abc123`, '{}')).toBe(true)
-    })
-
-    it('returns false for missing timestamp', () => {
-      expect(adapter.verifyWebhook('v1=abc123', '{}')).toBe(false)
-    })
-
-    it('returns false for missing v1 signature', () => {
-      expect(adapter.verifyWebhook('t=12345', '{}')).toBe(false)
-    })
-
-    it('returns false for stale timestamp', () => {
-      const old = Math.floor(Date.now() / 1000) - 600
-      expect(adapter.verifyWebhook(`t=${old},v1=abc123`, '{}')).toBe(false)
-    })
-
-    it('returns false for empty expected signature', () => {
-      const now = Math.floor(Date.now() / 1000)
-      expect(adapter.verifyWebhook(`t=${now},v1=`, '{}')).toBe(false)
-    })
+  it('creates refunds without an unnecessary prior read', async () => {
+    mocks.refundCreate.mockResolvedValue({ id: 're_123', amount: 500, status: 'succeeded', created: 1700000001 })
+    const refund = await createStripeAdapter(config).refundIntent('pi_ref', 5, 'duplicate')
+    expect(refund.status).toBe(RefundStatus.COMPLETED)
+    expect(refund.amount).toBe(5)
+    expect(mocks.refundCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ payment_intent: 'pi_ref', amount: 500, reason: 'duplicate' }), {},
+    )
   })
 
-  describe('connectAccountId', () => {
-    it('includes Stripe-Account header when connectAccountId set', async () => {
-      const connectAdapter = createStripeAdapter({ ...config, connectAccountId: 'acct_123' })
-      mockFetch.mockResolvedValueOnce(jsonResponse({
-        id: 'pi_conn',
-        status: 'requires_confirmation',
-        amount: 100,
-        currency: 'usd',
-        metadata: {},
-        created: 1700000000,
-        client_secret: 'cs_conn',
-      }))
+  it('maps pending refunds to processing', async () => {
+    mocks.refundCreate.mockResolvedValue({ id: 're_pending', amount: 300, status: 'pending', created: 1700000001 })
+    expect((await createStripeAdapter(config).refundIntent('pi_ref', 3, 'requested')).status).toBe(RefundStatus.PROCESSING)
+  })
 
-      await connectAdapter.createIntent({
-        orderId: 'ord-conn',
-        userId: 'user-1',
-        amount: 1,
-        currency: 'USD',
-        method: 'card',
-        provider: PaymentProvider.STRIPE,
-        idempotencyKey: 'idem-conn',
-      })
-
-      const fetchCall = mockFetch.mock.calls[0]!
-      expect(fetchCall[1].headers['Stripe-Account']).toBe('acct_123')
+  it('creates a payout using the SDK', async () => {
+    mocks.payoutCreate.mockResolvedValue({ id: 'po_1', status: 'paid', arrival_date: 1700086400 })
+    const payout = await createStripeAdapter(config).createPayout({
+      id: 'po-1', recipientId: 'artist-1', amount: 5000, currency: 'USD',
+      method: 'card', provider: PaymentProvider.STRIPE,
+      destination: { type: 'bank_account', accountIdentifier: 'ba_123', accountName: 'Artist' },
+      status: PayoutStatus.PENDING, providerPayoutId: null, batchId: null,
+      scheduledAt: new Date(), completedAt: null,
     })
+    expect(payout.status).toBe(PayoutStatus.COMPLETED)
+    expect(mocks.payoutCreate).toHaveBeenCalledWith(expect.objectContaining({ amount: 500000 }), {})
+  })
+
+  it('verifies signed webhook by delegating to the SDK, rejecting bad signatures', () => {
+    const adapter = createStripeAdapter(config)
+    mocks.verify.mockReturnValue({})
+    expect(adapter.verifyWebhook('t=valid,v1=signed', '{}')).toBe(true)
+    expect(mocks.verify).toHaveBeenCalledWith('{}', 't=valid,v1=signed', 'whsec_test')
+    mocks.verify.mockImplementation(() => { throw new Error('bad signature') })
+    expect(adapter.verifyWebhook('t=123,v1=abc123', '{}')).toBe(false)
+    expect(createStripeAdapter({ ...config, webhookSecret: '' }).verifyWebhook('t=valid,v1=signed', '{}')).toBe(false)
+  })
+
+  it('isolates connected-account requests through Stripe-Account options', async () => {
+    mocks.intentCreate.mockResolvedValue(fakeIntent())
+    const adapter = createStripeAdapter({ ...config, connectAccountId: 'acct_123' })
+    await adapter.createIntent(intentRequest())
+    expect(mocks.intentCreate).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      stripeAccount: 'acct_123', idempotencyKey: 'idem-1',
+    }))
   })
 })

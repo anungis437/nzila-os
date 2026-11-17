@@ -9,7 +9,7 @@ import { verifyWebhookSignature, WebhookSignatureError } from '@nzila/payments-s
 import { platformDb } from '@nzila/db/platform'
 import { sql } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
-import type Stripe from 'stripe'
+import type { Stripe } from '@nzila/payments-stripe'
 import {
   emitSubscriptionStarted,
   emitSubscriptionUpgraded,
@@ -286,11 +286,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 /* ─── Invoice Paid (Renewal) ─── */
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  const obj = invoice as unknown as Record<string, unknown>
-  const sub = obj.subscription
-  const subscriptionId = typeof sub === 'string'
-    ? sub
-    : (sub as { id?: string } | null)?.id ?? null
+  // Endive invoices carry their subscription relation under parent.
+  const sub = invoice.parent?.subscription_details?.subscription
+  const subscriptionId = typeof sub === 'string' ? sub : sub?.id ?? null
 
   if (!subscriptionId) return
 

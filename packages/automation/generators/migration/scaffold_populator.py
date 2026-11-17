@@ -409,7 +409,7 @@ jwcrypto>=1.5
 openai>=1.30
 pgvector>=0.3
 # Billing
-stripe>=9.0
+stripe==16.1.0
 # Email
 resend>=2.0
 # Observability

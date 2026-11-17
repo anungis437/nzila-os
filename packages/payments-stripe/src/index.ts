@@ -1,7 +1,8 @@
 /**
  * @nzila/payments-stripe — barrel export
  */
-export { getStripeClient } from './client'
+export { getStripeClient, createStripeClientForKey } from './client'
+export { STRIPE_API_VERSION, STRIPE_SDK_VERSION } from './version'
 export { getStripeEnv, validateStripeEnv } from './env'
 export { verifyWebhookSignature, WebhookSignatureError, extractEntityIdFromEvent } from './webhooks'
 export { normalizeAndPersist, markEventFailed } from './normalize'

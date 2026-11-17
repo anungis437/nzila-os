@@ -11,6 +11,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@nzila/payments-stripe": "workspace:*",
     "@nzila/zonga-economics": "workspace:*",
     "@nzila/zonga-rights": "workspace:*",
     "zod": "^4.6.7"

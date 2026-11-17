@@ -160,21 +160,20 @@ export async function createSubscription(
     items: [{ price: input.priceId }],
     payment_behavior: 'default_incomplete',
     payment_settings: { save_default_payment_method: 'on_subscription' },
-    expand: ['latest_invoice.payment_intent'],
+    expand: ['latest_invoice.confirmation_secret'],
     ...(input.trialDays && { trial_period_days: input.trialDays }),
     metadata,
   })
 
-  const invoice = subscription.latest_invoice as Stripe.Invoice & {
-    payment_intent: Stripe.PaymentIntent
-  }
+  // Endive invoices expose a confirmation secret, not invoice.payment_intent.
+  const invoice = typeof subscription.latest_invoice === 'string' ? null : subscription.latest_invoice
 
-  // Stripe v20: current_period_end moved from Subscription to SubscriptionItem
+  // Subscription periods belong to subscription items.
   const firstItem = subscription.items.data[0]
 
   return {
     subscriptionId: subscription.id,
-    clientSecret: invoice?.payment_intent?.client_secret ?? null,
+    clientSecret: invoice?.confirmation_secret?.client_secret ?? null,
     status: subscription.status,
     currentPeriodEnd: firstItem.current_period_end,
   }

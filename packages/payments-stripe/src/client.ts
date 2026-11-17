@@ -1,27 +1,22 @@
-/**
- * @nzila/payments-stripe — Stripe SDK client singleton
- *
- * Do NOT create multiple Stripe instances. Reuse this singleton.
- */
+/** The one Stripe server SDK factory across Nzila. */
 import Stripe from 'stripe'
 import { getStripeEnv } from './env'
+import { STRIPE_API_VERSION } from './version'
 
 let _stripe: Stripe | null = null
 
-/**
- * Get or create the Stripe SDK client.
- * Uses STRIPE_SECRET_KEY from validated env.
- */
-export function getStripeClient(): Stripe {
-  if (_stripe) return _stripe
-
-  const env = getStripeEnv()
-
-  _stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-    apiVersion: '2026-02-25.clover',
+/** Explicitly supplied account key; always uses the same Endive API version. */
+export function createStripeClientForKey(apiKey: string): Stripe {
+  if (!apiKey || !apiKey.trim()) throw new Error('Stripe API key must be provided')
+  return new Stripe(apiKey, {
+    apiVersion: STRIPE_API_VERSION,
     typescript: true,
     maxNetworkRetries: 3,
   })
+}
 
+export function getStripeClient(): Stripe {
+  if (_stripe) return _stripe
+  _stripe = createStripeClientForKey(getStripeEnv().STRIPE_SECRET_KEY)
   return _stripe
 }
