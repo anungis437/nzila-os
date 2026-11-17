@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { decide } from '../kernel'
-import { assessMandate, PRIMARY_CASE_HANDLER_ONLY_ACTIONS } from '../common'
+import { assessDelegation, assessMandate, PRIMARY_CASE_HANDLER_ONLY_ACTIONS } from '../common'
 import { decideIssuance, type IssuanceRule, type IssuanceRequest } from '../issuance'
 import type { Action, Capacity } from '../ontology'
 import { ahead, ago, CASE_ID, DAY, HOUR, NOW, ORG, U, caseFacts, delegation, facts, mandate, membership, recusal, ref, relationship, request } from './fixtures'
@@ -73,6 +73,16 @@ describe('primary case-handler-only authority is a hard ceiling', () => {
       expect(assessMandate(m, ORG, NOW).effective).toBe(false)
       expect(decide(request(U.chief, 'case:read', resource), facts(U.chief, caps, { mandates: [m] }), caseFacts(), NOW).effect).toBe('deny')
     }
+  })
+
+  it('requires a valid acceptance timestamp for mandate and delegation activation', () => {
+    const invalid = new Date(NaN)
+    const m = mandate({ requiresAcceptance: true, acceptedAt: invalid })
+    const d = delegation({ requiresAcceptance: true, acceptedAt: invalid })
+    expect(assessMandate(m, ORG, NOW).effective).toBe(false)
+    expect(assessMandate(m, ORG, NOW).reasons.map(x => x.code)).toContain('NOT_ACCEPTED')
+    expect(assessDelegation(d, ORG, NOW).effective).toBe(false)
+    expect(assessDelegation(d, ORG, NOW).reasons.map(x => x.code)).toContain('NOT_ACCEPTED')
   })
 
   it('retains legitimate scoped read and assignment powers', () => {
