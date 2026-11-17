@@ -5812,7 +5812,7 @@
       "id": "S1-A01",
       "state": "REMEDIATION_CANDIDATE_CI_NOT_GREEN",
       "pr": 1268,
-      "head": "d7050fddc236af52dac758fc632f36b984a63c87",
+      "head": "5e8c2d54ad1d3c3b186e7428bd74141a0ff465e4",
       "observed": "Previous f4660fa6 candidate passed native PostgreSQL 15/16, full regression, E2E, CI, security regression and V2 bootstrap provenance; its GA/Governance dependency failures remained. NEW candidate d7050fdd contains two additional storage checks, a low-level writer guard and strictly validated representation-protocol approval provenance; latest observed security regression passed but GA, Governance, Security Design Review and bootstrap provenance were red; other exact-head checks still running.",
       "required": "No published upstream patched version identified. Verify actual dependency graph and either remove/replace vulnerable paths or validate a controlled upstream-compatible fix; regenerate and verify lockfile in an actual checkout. Exact-candidate audit and all CI must pass; no waiver or optimistic version bump.",
       "advisory": {
@@ -5862,10 +5862,175 @@
         "artifact": 14354883811,
         "artifactName": "ue-step1-generated-plan-d7050fdd",
         "sha256": "34e756fdc7b9c509842b883dd408c22997848103411389c0cbb955ebffc49b19",
-        "state": "DETERMINISTIC_GENERATION_AND_INDEPENDENT_HASH_VERIFIED_TRANSFER_PENDING",
+        "state": "EXACT_GENERATED_BYTES_COMMITTED_FINAL_CI_PENDING",
         "scratchBranch": "agents/ue-step1-plan-regeneration-20261117",
         "scratchMaterializationWorkflowCommit": "b48bdda1577cda2fc9d250c2a1f5ec3175bc4fab",
-        "note": "The connector rejected the 9,981,459-character plan upload. Isolated workflow may materialize only the digest-pinned artifact on the scratch branch; no deployment, PR or main-branch write by the workflow. Only the resulting plan blob may be transferred to the remediation branch by a guarded ref update."
+        "note": "Two independent generation runs in one read-only job; reconstructed exact SHA-256 independently from old source and generated diff. Connector large upload rejected; isolated artifact transfer job granted standard repository contents write and actions read, wrote only digest-pinned file on scratch branch. Git blob reuse transferred only one verified plan file onto candidate via expected-SHA ref update. Direct compare and file readback confirmed exact blob. Both scratch workflows excluded from PR. Final-head bootstrap and all checks remain to be verified.",
+        "materializeRun": 44144729961,
+        "scratchReceiptCommit": "baaeb8a026e69e702ded8131df31afcd90166cd5",
+        "committedBlob": "d8f3822b39344ab226762acd79dbb22ee0a80247",
+        "committedHead": "5e8c2d54ad1d3c3b186e7428bd74141a0ff465e4"
+      },
+      "finalHeadChecks": {
+        "observed": [
+          {
+            "name": "Secret Scan",
+            "id": 44145018153,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Union Eyes Full Regression",
+            "id": 44145017627,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Union Eyes Bootstrap V2 Provenance",
+            "id": 44145015462,
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "name": "Nzila Governance Gate",
+            "id": 44145014930,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Reality Anti-Theatre",
+            "id": 44145014718,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Portfolio Governance",
+            "id": 44145014900,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Access Review Governance Gate",
+            "id": 44145014972,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Repo Inventory Check",
+            "id": 44145015412,
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "name": "Nzila GA Gate",
+            "id": 44145015551,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Union Eyes Security Regression",
+            "id": 44145015560,
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "name": "Capital Discipline",
+            "id": 44145016672,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Branch and Tag Governance",
+            "id": 44145016693,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Reliability Guard",
+            "id": 44145014886,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "App Floor Check",
+            "id": 44145015409,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Publish required checks",
+            "id": 44145014376,
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "name": "Merge Authority",
+            "id": 44145015118,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "runtime-governance-attestation",
+            "id": 44145014697,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Union Eyes Native PostgreSQL Acceptance",
+            "id": 44145015352,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Container Security Scan (Trivy)",
+            "id": 44145016653,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Security Design Review Gate",
+            "id": 44145015140,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "CI",
+            "id": 44145014945,
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Union Eyes Disposable HTTP and Browser Acceptance",
+            "id": 44145014998,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "CUPE Pilot Readiness Gates",
+            "id": 44145014785,
+            "status": "queued",
+            "conclusion": null
+          },
+          {
+            "name": "Dependabot Auto-Merge",
+            "id": 44145015029,
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "E2E Tests",
+            "id": 44145015755,
+            "status": "pending",
+            "conclusion": null
+          },
+          {
+            "name": "Doc Hygiene",
+            "id": 44145016943,
+            "status": "in_progress",
+            "conclusion": null
+          }
+        ],
+        "note": "No inherited prior-head success; later changes require refreshed evidence."
       }
     },
     {
@@ -5975,7 +6140,8 @@
     "remediationPR": 1268,
     "sourceChanges": [
       "bb9ff6d89d4631e2545192c95b4c1ca79f5cfcfd",
-      "d7050fddc236af52dac758fc632f36b984a63c87"
+      "d7050fddc236af52dac758fc632f36b984a63c87",
+      "5e8c2d54ad1d3c3b186e7428bd74141a0ff465e4"
     ],
     "disposition": "STEP_1_OPEN_STEP_2_HELD",
     "noWaiver": true,
@@ -5983,6 +6149,8 @@
     "noDeployment": true,
     "noLiveMutation": true,
     "noInstitutionalAuthorityIssued": true,
-    "limitations": "Repository connector plus isolated CI, not an executable local monorepo or credentialed staging session. No prior CI pass inherited by later candidate. Positive feature exclusions remain unchanged."
+    "limitations": "Repository connector plus isolated CI, not an executable local monorepo or credentialed staging session. No prior CI pass inherited by later candidate. Positive feature exclusions remain unchanged.",
+    "currentCandidate": "5e8c2d54ad1d3c3b186e7428bd74141a0ff465e4",
+    "scratchWorkflowIsolation": "No scratch workflow merged or transferred into PR; materialization completed on scratch only."
   }
 }
