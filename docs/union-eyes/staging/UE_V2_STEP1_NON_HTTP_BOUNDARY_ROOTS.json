@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_NON_HTTP_BOUNDARY_ROOTS",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "anchorCommit": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "sourcePackageJsonBlob": "8f0c0860156de3e62165b3657ffe9f5291740991",
+  "directWorkspaceDependencies": [
+    {
+      "name": "@nzila/ai-sdk",
+      "version": "workspace:*",
+      "tree": "c0d641d1ac5aa85d477d3029488d3c01f00200a3",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "AI_OR_ANALYTICS"
+    },
+    {
+      "name": "@nzila/attestation-visibility",
+      "version": "workspace:*",
+      "tree": "e31e6efb81efdf60485b1a48c3d1f3227d2d0197",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/blob",
+      "version": "workspace:*",
+      "tree": "817300943d69045df59f64d436d2249f5dd7874d",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "EXTERNAL_PROVIDER_OR_DATA"
+    },
+    {
+      "name": "@nzila/continuity-review",
+      "version": "workspace:*",
+      "tree": "5640d15a22d639392e9992bb5ad4114269629b2b",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "APPLICATION_SUPPORT"
+    },
+    {
+      "name": "@nzila/crm-hubspot",
+      "version": "workspace:*",
+      "tree": "71f2363d9099ff4e93c8a2c19422c45fc5d48585",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "EXTERNAL_PROVIDER_OR_DATA"
+    },
+    {
+      "name": "@nzila/cupe-vocabulary",
+      "version": "workspace:*",
+      "tree": "9a20c52ed2fd1bee60f0c43f41e9b314771d844d",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "APPLICATION_SUPPORT"
+    },
+    {
+      "name": "@nzila/db",
+      "version": "workspace:*",
+      "tree": "118d837d96bce811955bcec58017698644942530",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/decision-core",
+      "version": "workspace:*",
+      "tree": "0ac76b1618d3d6a8bee25a22493e1cb4aa235d84",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/governance-middleware",
+      "version": "workspace:*",
+      "tree": "45c32683f834f38e86552845c78412719ae3c872",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/governance-operations",
+      "version": "workspace:*",
+      "tree": "1c9e8b997833a49aa183aaba82c6a75fe6d52c54",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/governance-otel",
+      "version": "workspace:*",
+      "tree": "d0d51c15666a18f6c8a0d134bf9fedbd0c5b11c7",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/governance-review",
+      "version": "workspace:*",
+      "tree": "ca3673cf735e98db40e6a975e394e364806bb67c",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/ml-sdk",
+      "version": "workspace:*",
+      "tree": "8d0878d287e61e8107b582c41b4b212f0283cb0e",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "AI_OR_ANALYTICS"
+    },
+    {
+      "name": "@nzila/nar",
+      "version": "workspace:*",
+      "tree": "afe9bdad53eabc65908195277b35c1347517d028",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "AI_OR_ANALYTICS"
+    },
+    {
+      "name": "@nzila/oci-confidence",
+      "version": "workspace:*",
+      "tree": "94a93826b424bb527d32321bb7412a957d5d988b",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "APPLICATION_SUPPORT"
+    },
+    {
+      "name": "@nzila/operational-convergence",
+      "version": "workspace:*",
+      "tree": "30e4298fe35a9b2c54e21c7c1af3c699464d508e",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "APPLICATION_SUPPORT"
+    },
+    {
+      "name": "@nzila/organizational-cognition-core",
+      "version": "workspace:*",
+      "tree": "0a5010145cac883cb43f038b3c0e4c1fb247f676",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "AI_OR_ANALYTICS"
+    },
+    {
+      "name": "@nzila/organizational-governance-graph",
+      "version": "workspace:*",
+      "tree": "1e76edcccf3860c7a73e7f285b1bac945cc1ced2",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/os-core",
+      "version": "workspace:*",
+      "tree": "8f5e1d176a5feb62b9286d1603b736f93455dff3",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/payments-stripe",
+      "version": "workspace:*",
+      "tree": "592b135500ec4130d319d4fcd54e6d082e4a3b5f",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "EXTERNAL_PROVIDER_OR_DATA"
+    },
+    {
+      "name": "@nzila/platform-auth",
+      "version": "workspace:*",
+      "tree": "6d21a70e127d9f2944733046a600306ff88f8d9d",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/platform-cognition-core",
+      "version": "workspace:*",
+      "tree": "f464186bf328652195416678c3eebeabfd9d46e6",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "AI_OR_ANALYTICS"
+    },
+    {
+      "name": "@nzila/platform-pilot-metrics",
+      "version": "workspace:*",
+      "tree": "9a8b28d0ca6e279a0239b8aa64d98e35eb695ad7",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "EXTERNAL_PROVIDER_OR_DATA"
+    },
+    {
+      "name": "@nzila/platform-shell",
+      "version": "workspace:*",
+      "tree": "f14e2ccd34c859c2dcb895677524609700edf1c5",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "APPLICATION_SUPPORT"
+    },
+    {
+      "name": "@nzila/policies",
+      "version": "workspace:*",
+      "tree": "9a593f6c972953bb0fcb0d2df5a8de088a4a4993",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "IDENTITY_AUTHORITY_DATA"
+    },
+    {
+      "name": "@nzila/reality-env",
+      "version": "workspace:*",
+      "tree": "46475131d110d7e75de30ab049b21e6483e007d7",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "APPLICATION_SUPPORT"
+    },
+    {
+      "name": "@nzila/stabilization-signals",
+      "version": "workspace:*",
+      "tree": "6335fe1adee42fa91571d270aa3d50a43aa22009",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "APPLICATION_SUPPORT"
+    },
+    {
+      "name": "@nzila/ue-cognition",
+      "version": "workspace:*",
+      "tree": "3a86141700f1eb223822e3391dab2f75f224972f",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "AI_OR_ANALYTICS"
+    },
+    {
+      "name": "@nzila/ui",
+      "version": "workspace:*",
+      "tree": "553a697ab7fa9f15604d7e31c85b04d8da7af9c9",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "APPLICATION_SUPPORT"
+    },
+    {
+      "name": "@nzila/workload-intelligence",
+      "version": "workspace:*",
+      "tree": "eec99e312894b000e2b95608c46fb246df17a487",
+      "reachability": "NOT_YET_RECONCILED",
+      "candidateBoundary": "AI_OR_ANALYTICS"
+    }
+  ],
+  "developmentWorkspaceDependencies": [
+    {
+      "name": "@nzila/config",
+      "version": "workspace:*"
+    },
+    {
+      "name": "@nzila/evidence",
+      "version": "workspace:*"
+    }
+  ],
+  "backendRoots": [
+    {
+      "path": "ai_core",
+      "treeSha": "e49e98b7a78ca61c886959b46e92b3190c6658a9",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "analytics",
+      "treeSha": "87995c5aea9a0ebe2644f01573573c3648899830",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "apps",
+      "treeSha": "d6844bbd0e7cd2ab02ff7d1319f17dda61da4473",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "auth_core",
+      "treeSha": "ffd1a9f947a14517ad99642d8aa28b7190ebea7c",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "bargaining",
+      "treeSha": "41cd56ce8b0777a8b456ee1d3a50da730b855c29",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "billing",
+      "treeSha": "4acc5aa604a053ea0de557b767fa59d4c8309d49",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "compliance",
+      "treeSha": "f7bbf52ec9a5e0d79200dc5512b6cda69b21d6fd",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "config",
+      "treeSha": "f22a26c17d7fa781b83d8a32eecd92f5c5927c61",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "content",
+      "treeSha": "04d787e792b8f83789edd5b37780bb34358a78b1",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "core",
+      "treeSha": "48a6f0344ddf8369cd08c5b371a83aae5dba8b79",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "exit_interviews",
+      "treeSha": "495e26a74bd39bf54d8c92debe1ba5228fcfdcb5",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "grievances",
+      "treeSha": "ab43ec78f5f2e8e532c833ded6dd89cb6b1e5074",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "middleware",
+      "treeSha": "f3423c2b629a4de3c3fdc842b3c010cc600148e9",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "notifications",
+      "treeSha": "5fe0ffa8d0b104abdbff2c0637a9e660f5ca4fb2",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "observability",
+      "treeSha": "ad397c13a268efa2f1fbde355dcf80204d72c4a3",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "services",
+      "treeSha": "a3855c0f26ac86f4bdadefd235c1adff0cd64cad",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "tests",
+      "treeSha": "8c12c669043fd4e6e6c206a99bd44fef0808eb5b",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    },
+    {
+      "path": "unions",
+      "treeSha": "6faec43a0ddf64492d390a0ddd1bf290073b1fc3",
+      "review": "PENDING_RUNTIME_ADMISSION_AND_REACHABILITY"
+    }
+  ],
+  "backendConfigRoots": [
+    {
+      "path": "__init__.py",
+      "sha": "313f182e70746bd9470c45f07329620cb98acb79",
+      "type": "blob"
+    },
+    {
+      "path": "asgi.py",
+      "sha": "28ec5905b6086c6085843b6669aab11c106a8991",
+      "type": "blob"
+    },
+    {
+      "path": "celery.py",
+      "sha": "4d33e802c7d83d4d420eff633f06410e7de636e6",
+      "type": "blob"
+    },
+    {
+      "path": "hardening.py",
+      "sha": "a85dedfa3db5a9baed426642632249af9b166bad",
+      "type": "blob"
+    },
+    {
+      "path": "settings.py",
+      "sha": "1c0d122f503ee6b818976b4d32e8670191e46f03",
+      "type": "blob"
+    },
+    {
+      "path": "test_settings_hardening.py",
+      "sha": "397ba424deaa5e7930d76d7b644cf7a670b4f5f2",
+      "type": "blob"
+    },
+    {
+      "path": "urls.py",
+      "sha": "6e2f84cb10dc436c3b6009f7b9bc70ae4d7f57f4",
+      "type": "blob"
+    },
+    {
+      "path": "wsgi.py",
+      "sha": "a79b09ba5f10eea24158194c12a1e19c014cfa05",
+      "type": "blob"
+    }
+  ],
+  "limits": [
+    "Declared dependencies are not proof of imports, deployed services or reachable callers. Package transitive closure, worker/task registration and sidecar exposure require a pinned checkout and deployment evidence.",
+    "Backend folder listing is not a live Django URL or Celery task inventory. No sidecar or task was invoked."
+  ],
+  "requiredJoins": [
+    "direct and transitive workspace dependencies to actual use-server/route/service callsites",
+    "provider callbacks to credentials, replay bounds and durable writes",
+    "Django URL and Celery task registries to deployed profiles and tenant-scoped identity",
+    "scheduled jobs to live configuration and receipts"
+  ]
+}
