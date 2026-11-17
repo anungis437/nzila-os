@@ -39,6 +39,16 @@ only one user, membership, session and accepted audit. Existing inviter lifecycl
 membership-removal, foreign-organization, reissue and replay cases still passed.
 These are local results, not actual recipient acceptance or staging GO.
 
+The first published candidate, `482df3d6780aa58cf6b3f4851912875b3b88f2f0`
+(PR #1262), failed CI: its branch prefix was outside repository policy, and two
+contract jobs found the same unrefreshed shared-schema fingerprint. The corrected
+branch uses the permitted `fix/` family and refreshes that generated baseline;
+the invitation implementation and native-tested SQL producer remain unchanged.
+The first retained-copy attempt stopped at the operator access preflight before
+opening a transaction or changing a check. Its failed receipt is retained and
+the copy was stopped with its network and data retained. No primary compatibility
+update or recipient retry is inferred from those attempts.
+
 The exact candidate still requires the repository checks, CI, actual retained-copy
 and primary compatibility evidence, and the recipient's original-invitation retry
 with dashboard and case creation/reopen evidence. Founder-delegated engineering

@@ -1,0 +1,8 @@
+{
+  "status": "PASS_ONLY_AUTH_SCHEMA_BASELINE_CHANGED",
+  "changedFiles": [
+    "packages/db/src/schema/auth.ts"
+  ],
+  "recordCountUnchanged": true,
+  "applicationInputsUnchanged": true
+}
