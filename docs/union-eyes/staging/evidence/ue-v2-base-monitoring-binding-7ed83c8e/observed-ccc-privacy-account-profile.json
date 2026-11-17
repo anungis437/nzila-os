@@ -1,0 +1,14 @@
+{
+  "status": "PASS_ACTUAL_PRIVACY_UI_HTTP_DURABLE_AUDIT_RETENTION",
+  "sourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "workflowSha": "c3b7349260d3736860f4faef5b72c20c68d3ce63",
+  "browserReceiptSha256": "adc92fa4dca032a7e9a8a2895218e75bc23fd1a3aef5e463a9f428f4c052cd32",
+  "durableReceiptSha256": "c57f4e6ace83f666ba12a837a82af2e2c926c110dd96d1ba00bb43be15538f99",
+  "scopesQualified": [
+    "account_profile"
+  ],
+  "requests": 3,
+  "broaderStatutoryAutomaticFulfilmentClaimed": false,
+  "productionAuthorized": false,
+  "fullBaseStagingGo": false
+}
