@@ -1,0 +1,40 @@
+{
+  "at": "2026-11-17T11:26:30.231527+00:00",
+  "actualHttpRead": true,
+  "productionDeployment": false,
+  "version": {
+    "httpStatus": 200,
+    "data": {
+      "app": "union-eyes",
+      "gitSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+      "buildTimestamp": "2026-11-17T03:42:01Z",
+      "appVersion": "0.0.0",
+      "releaseId": "UE-V2-STAGING-cccfc8c311a1017f80241bf089c00ef0c6828751",
+      "artifactId": "cccfc8c311a1017f80241bf089c00ef0c6828751"
+    }
+  },
+  "readiness": {
+    "httpStatus": 200,
+    "data": {
+      "ready": true,
+      "status": "ready",
+      "app": "union-eyes",
+      "environment": "staging",
+      "gitSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+      "buildTimestamp": "2026-11-17T03:42:01Z",
+      "artifactId": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+      "releaseId": "UE-V2-STAGING-cccfc8c311a1017f80241bf089c00ef0c6828751",
+      "appVersion": "0.0.0",
+      "timestamp": "2026-11-17T11:26:30.720Z",
+      "checks": {
+        "process": "ok",
+        "noTestBypass": "ok",
+        "database": "ok",
+        "catalogAuthority": "ok",
+        "storage": "unknown",
+        "thirdParty": "unknown",
+        "decisionProof": "ok"
+      }
+    }
+  }
+}

@@ -4,8 +4,8 @@
   "baselineRepositorySha": "3f6c9d0a8d4be74b6b12a03983616e299c86baaf",
   "acceptedApplicationSourceSha": "241006d302c14567e541d619675fbead3ec3f258",
   "acceptedWorkflowSourceSha": "c51dcd75094e4af364b5c9d54a75f3321e2eef1b",
-  "currentRepairBranch": "feat/ue-base-operational-monitoring-20261117",
-  "currentRepairRuntimeQualification": "CCC_APPLICATION_DEPLOYED_SEPARATE_EMAIL_CHECK_REPAIR_APPLIED_RECIPIENT_RETRY_AND_REMAINING_BASE_PROOFS_PENDING",
+  "currentRepairBranch": "chore/ue-base-monitoring-staging-7ed83c8e",
+  "currentRepairRuntimeQualification": "SOURCE_QUALIFIED_BINDING_AND_DEPLOYED_BASE_PROOFS_PENDING",
   "scopedStagingDecision": "STAGING_GO_17_OF_17_FOR_ACCEPTED_SOURCE_ONLY",
   "fullBaseActionQualification": "INCOMPLETE",
   "productionAuthorized": false,
@@ -427,8 +427,8 @@
     {
       "id": "C20",
       "action": "Privacy request handling",
-      "state": "ACTUAL_SOURCE41_ACCOUNT_PROFILE_PASS_NEW_CANDIDATE_REQUALIFICATION_PENDING",
-      "evidenceSummary": "Actual source41 real Entra UI/HTTP passed43 checks: member profile-to-request; assigned handler identity/scope review, clarification, reasoned response/refusal; FR675-byte own-account download with exact-response acknowledgement; withdrawal; subject/tenant/unassigned/stale refusals. Three requests reached terminal states. Read-only durable verification recomputed all2409 organization audit records and confirmed owned handler designation revoked. Scope account_profile; no automatic erasure or broader legal conclusion.",
+      "state": "ACTUAL_CCC_ACCOUNT_PROFILE_PASS_NEW_CANDIDATE_REQUALIFICATION_PENDING",
+      "evidenceSummary": "Actual serving CCC real Entra UI/HTTP passed43 checks and durable audit/retention verification for account_profile; three requests reached terminal states. This remains bounded to that source and scope.",
       "remaining": "Repeat the qualified account_profile journey on the final corrected candidate; other rights require an appropriate actual handler response, without an automatic statutory-fulfilment claim.",
       "canonicalAuthority": {
         "identity": "Verified internal principal",
@@ -444,9 +444,9 @@
       "coverageFieldsComplete": false,
       "ownerDecision": "Require in-app self-service",
       "requiredBeforeFullBaseStagingGo": true,
-      "proposedSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+      "proposedSourceSha": "7ed83c8e081b8da5f0a738e45ac08ef15647193b",
       "sourceEvidence": "evidence/ue-v2-privacy-self-service-20261116/local-validation.json",
-      "observedCurrentCandidateEvidence": "evidence/ue-v2-case-evidence-export-ui-20261116/observed-source41-privacy-self-service.json"
+      "observedCurrentCandidateEvidence": "docs/union-eyes/staging/evidence/ue-v2-base-monitoring-binding-7ed83c8e/observed-ccc-privacy-account-profile.json"
     },
     {
       "id": "C21",
@@ -605,20 +605,20 @@
     "Qualify claim and formal-grievance automatic workload/expertise matching, loaded EN/FR phone controls and authenticated case reads.",
     "Complete connected casework, document/evidence, leadership and required operational actions; reconcile the full base ledger from actual evidence."
   ],
-  "proposedCandidateSourceSha": "41dba402dd53fec280091f11f46a99077dd91465",
+  "proposedCandidateSourceSha": "7ed83c8e081b8da5f0a738e45ac08ef15647193b",
   "sourceAdmission": {
-    "pullRequest": 1252,
-    "sourceHeadSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
-    "normalMergeSha": "1ecb345ca5871b89ac8cb7b0ec379aab0a4ef323",
+    "pullRequest": 1264,
+    "sourceHeadSha": "7ed83c8e081b8da5f0a738e45ac08ef15647193b",
+    "normalMergeSha": "8147ae480bb8ff0ab815b615fab67192728883e0",
     "allRequiredTrustedChecksPassed": 16,
     "allRegisteredCheckRunsConcludedWithoutFailure": 129,
     "workflowRunsConcludedWithoutFailure": 26,
     "conditionalSkipsRemainRecorded": true,
     "newSourceRuntimeQualification": "PENDING"
   },
-  "currentDeployedSourceSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
-  "currentDeployedWorkflowSha": "5fae54b471e84d73eab5e44d723aee12a0add797",
-  "currentFollowupLocalEvidence": "evidence/ue-v2-document-review-20261116/base-ui-local-validation.json",
+  "currentDeployedSourceSha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "currentDeployedWorkflowSha": "c3b7349260d3736860f4faef5b72c20c68d3ce63",
+  "currentFollowupLocalEvidence": "docs/union-eyes/staging/evidence/ue-v2-base-operational-monitoring-20261117/local-validation-v2.json",
   "sourceAdmissionHistory": [
     {
       "recordedBeforeUiBinding": true,
@@ -630,6 +630,16 @@
         "allRegisteredCheckRunsConcludedWithoutFailure": 130,
         "newSourceRuntimeQualification": "PENDING"
       }
+    },
+    {
+      "pullRequest": 1252,
+      "sourceHeadSha": "7d939bf5399ef768cc71a837730a6ff143d079d1",
+      "normalMergeSha": "1ecb345ca5871b89ac8cb7b0ec379aab0a4ef323",
+      "allRequiredTrustedChecksPassed": 16,
+      "allRegisteredCheckRunsConcludedWithoutFailure": 129,
+      "workflowRunsConcludedWithoutFailure": 26,
+      "conditionalSkipsRemainRecorded": true,
+      "newSourceRuntimeQualification": "PENDING"
     }
   ],
   "latestObservedCandidateDelta": "evidence/ue-v2-runtime-repairs-41dba402/observed-prior-candidate-delta.json",

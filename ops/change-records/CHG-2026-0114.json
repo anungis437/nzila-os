@@ -1,7 +1,7 @@
 {
   "change_id": "CHG-2026-0114",
-  "title": "Union Eyes V2 staging: invitations, casework access and verified sealed exports",
-  "description": "Continue founder-delegated base-release engineering and qualified staging verification: repair public invitation rendering and repeated case authorization; add verified EN/FR sealed evidence downloads. Preserve live staging data, exact source/main/image/native provenance and fail-closed sensitive finance boundaries. Finance feature implementation, production and live-data resets remain excluded.",
+  "title": "Union Eyes V2 staging: base operational monitoring and leadership repair",
+  "description": "Continue founder-delegated base-release root repairs and qualified staging verification. Measure real dependency, backup, worker, queue, provider and daily audit checkpoint health; repair reproduced leadership rendering. Preserve live data and exact source/main/image/database provenance. Production, finance implementation and live-data resets remain excluded.",
   "service": "union-eyes",
   "environment": "STAGING",
   "change_type": "NORMAL",
@@ -195,7 +195,14 @@
     "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/founder-window-extension.json",
     "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/fresh-native-tool-build.json",
     "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/fresh-local-export.json",
-    "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/observed-source-before-binding.json"
+    "docs/union-eyes/staging/evidence/ue-v2-base-root-repairs-cccfc8c3/observed-source-before-binding.json",
+    "docs/union-eyes/staging/evidence/ue-v2-base-monitoring-binding-7ed83c8e/contract-before-monitoring-binding.json",
+    "docs/union-eyes/staging/evidence/ue-v2-base-monitoring-binding-7ed83c8e/exact-source-ci.json",
+    "docs/union-eyes/staging/evidence/ue-v2-base-monitoring-binding-7ed83c8e/founder-window-extension.json",
+    "docs/union-eyes/staging/evidence/ue-v2-base-monitoring-binding-7ed83c8e/observed-serving-before-binding.json",
+    "docs/union-eyes/staging/evidence/ue-v2-base-monitoring-binding-7ed83c8e/observed-ccc-privacy-account-profile.json",
+    "docs/union-eyes/staging/evidence/ue-v2-base-monitoring-binding-7ed83c8e/fresh-native-tool-build.json",
+    "docs/union-eyes/staging/evidence/ue-v2-base-monitoring-binding-7ed83c8e/fresh-local-export.json"
   ],
   "linked_prs": [
     "1137",
@@ -260,7 +267,8 @@
     "1247",
     "1252",
     "1256",
-    "1258"
+    "1258",
+    "1264"
   ],
   "linked_commits": [
     "2eb48a0e8bb41be5dca3cb08c57c294f0327d8f9",
@@ -309,11 +317,12 @@
     "78301eecc968ff3a21b602a9c9307c50f73cd5f8",
     "7d939bf5399ef768cc71a837730a6ff143d079d1",
     "41dba402dd53fec280091f11f46a99077dd91465",
-    "cccfc8c311a1017f80241bf089c00ef0c6828751"
+    "cccfc8c311a1017f80241bf089c00ef0c6828751",
+    "7ed83c8e081b8da5f0a738e45ac08ef15647193b"
   ],
   "status": "APPROVED",
   "created_at": "2026-11-09T19:20:00-05:00",
-  "updated_at": "2026-11-17T02:43:13.209402+00:00",
+  "updated_at": "2026-11-17T12:07:53.668517+00:00",
   "founder_staging_authorization": {
     "mission": "UE_V2_ISOLATED_STAGING_QUALIFICATION",
     "operating_mode": "SOLO_FOUNDER",
@@ -322,7 +331,7 @@
     "owner_authorization_ref": "ops/change-records/CHG-2026-0114.founder-authorization.md",
     "authority_origin": "OWNER_DIRECTIVE_IN_CONVERSATION",
     "subscription_id": "d562ba7f-d891-4504-a489-10917c0ebaaf",
-    "candidate_sha": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+    "candidate_sha": "7ed83c8e081b8da5f0a738e45ac08ef15647193b",
     "staging_only": true,
     "production_authorized": false,
     "technical_gates_required": true
