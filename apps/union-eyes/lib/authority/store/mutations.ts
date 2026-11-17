@@ -14,6 +14,7 @@
  * database.
  */
 import { randomUUID } from 'node:crypto'
+import { hasPrimaryCaseHandlerOnlyPower } from '../common'
 import type { AuthorityRequest, Decision, MandateKind, MandateScope, ResourceType } from '../ontology'
 import { auditAuthorityMutation } from './audit'
 import { assertAllowed, enforceAuthority, requireCounselSession, type EnforcementDeps } from './enforce'
@@ -64,6 +65,9 @@ export interface InsertMandateInput {
 export async function insertMandate(exec: SqlExecutor, i: InsertMandateInput): Promise<string> {
   requireUuids(i.organizationId, i.id, i.issuanceRuleId, i.approvalRequestId, i.supersedesId)
   requirePrincipals(i.principalUserId, i.grantedBy, i.approvedBy)
+  if (i.kind === 'supervisory' && hasPrimaryCaseHandlerOnlyPower(i.powers)) {
+    throw new AuthorityStoreError('DENIED', 'supervisory mandate exceeds the primary case-handler-only ceiling')
+  }
   await bindSessionActor(exec, i.grantedBy, 'mandate issuer')
   const id = i.id ?? randomUUID()
   await one(
