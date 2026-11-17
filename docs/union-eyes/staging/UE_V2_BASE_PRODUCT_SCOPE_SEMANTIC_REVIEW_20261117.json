@@ -5813,8 +5813,17 @@
       "state": "REMEDIATION_CANDIDATE_CI_NOT_GREEN",
       "pr": 1268,
       "head": "f4660fa6b63d744ae33241eafaed2123e7acb9b7",
-      "observed": "Native PostgreSQL 15/16 and security regression passed. Governance and GA gates failed due to unwaived high advisory 1247710 picomatch; full regression/HTTP/browser and general CI in progress at observation.",
-      "required": "Resolve dependency through verified compatible patch and regenerated lockfile; exact-head full CI, stored mandate/rule preflight and source admission; no waiver."
+      "observed": "Exact f4660fa6 head: native PostgreSQL 15/16, security regression, full application regression and bootstrap provenance workflows passed. GA and Governance Gate dependency audits failed on the same unwaived advisory 1247710. Browser/HTTP, general CI and other running checks not established complete at observation.",
+      "required": "No published upstream patched version identified. Verify actual dependency graph and either remove/replace vulnerable paths or validate a controlled upstream-compatible fix; regenerate and verify lockfile in an actual checkout. Exact-candidate audit and all CI must pass; no waiver or optimistic version bump.",
+      "advisory": {
+        "id": "GHSA-fc5q-39xc-vjpf",
+        "cve": "CVE-2026-112366",
+        "url": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
+        "affected": "<=4.0.7",
+        "patchedVersion": "None listed at review",
+        "cvss": 8.7
+      },
+      "furtherReview": "Source candidate tests enforce nondelegable action list against supervisory, collaborator and executive delegation paths. Independently verify owner/assignee origin and uniqueness at both fact loading and physical storage, direct caller paths, and explicit emergency grant denials; no live exploit inferred from pure-policy inspection."
     },
     {
       "id": "S1-HIST",
@@ -5824,7 +5833,18 @@
     {
       "id": "S1-TRANSITIVE",
       "state": "OPEN",
-      "required": "Verify transitive non-HTTP execution, worker/queue/cron/webhook, storage, direct DB, server action and service paths; negative tests for confused deputy and bypass."
+      "required": "Verify transitive non-HTTP execution, worker/queue/cron/webhook, storage, direct DB, server action and service paths; negative tests for confused deputy and bypass.",
+      "historicalEvidence": {
+        "source": "docs/union-eyes/bootstrap-v2/UE_V2_FINANCIAL_SCOPE_AUTHORITY.md",
+        "status": "NOT_PROVEN",
+        "typescriptCandidateCallers": 901,
+        "typescriptRuntimeQualified": 10,
+        "djangoRouteMethodBindings": 12978,
+        "registeredCeleryTasks": 19,
+        "beatScheduleEntries": 12,
+        "conservativeReachablePythonMutationCallers": 142,
+        "caution": "Historical discovery denominators only, not current source coverage or mutually additive; unresolved dynamic SQL and transitive paths require exact-source reconciliation."
+      }
     },
     {
       "id": "S1-CONFIG",
