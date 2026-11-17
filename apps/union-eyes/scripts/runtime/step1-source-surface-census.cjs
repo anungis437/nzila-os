@@ -51,6 +51,7 @@ function analyze(fileName, source) {
   const moduleServer = hasServerDirective(sf.statements)
   const lineOf = node => sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1
   const add = (name, kind, node) => {
+    if (exports.has(name)) unresolved.push({kind:'duplicate_export_candidate',name,line:lineOf(node)})
     exports.add(name)
     exportDetails.push({ name, kind, line:lineOf(node) })
   }
@@ -117,7 +118,8 @@ function selfTest() {
   assert.equal(analyze('page.tsx',"export default function Page(){async function action(){'use server';}; return null}").inlineServerActions.length,1)
   assert.equal(analyze('page.tsx',"const actions=()=>{'use server';}; const b=()=>{'use strict';'use server';}").inlineServerActions.length,2)
   assert.equal(analyze('page.tsx',"function notAction(){let a=1; 'use server';}").inlineServerActions.length,0)
-  console.log(JSON.stringify({selfTests:15,result:'PASS'}))
+  assert.ok(analyze('route.ts',"export const GET=fn; export { GET };").unresolved.some(x=>x.kind==='duplicate_export_candidate'))
+  console.log(JSON.stringify({selfTests:16,result:'PASS'}))
 }
 function main() {
   const args=process.argv.slice(2)
@@ -138,9 +140,8 @@ function main() {
   const read=name=>fs.readFileSync(path.join(root,name),'utf8')
   for(const name of sort(new Set([...prod,...routeFiles]))) {
     const source=read(name)
-    // Scan all tracked runtime source, not just filenames named actions. Other
-    // sources need parse only if they can carry the literal server directive.
-    if(!routeSet.has(name)&&!source.includes('use server')) continue
+    // Parse every in-scope source, including arbitrary filenames and escaped
+    // directive text. A textual prefilter can silently omit server actions.
     const parsed=analyze(name,source)
     const digest=sha256(source)
     if(routeSet.has(name)) {
@@ -152,8 +153,8 @@ function main() {
     for(const action of parsed.inlineServerActions)inline.push({path:name,sha256:digest,...action})
     if(routeSet.has(name)||parsed.moduleServer||parsed.inlineServerActions.length) {
       for(const problem of parsed.unresolved)unresolved.push({path:name,...problem})
-      for(const message of parsed.parseErrors)unresolved.push({path:name,kind:'syntax_diagnostic',message})
     }
+    for(const message of parsed.parseErrors)unresolved.push({path:name,kind:'syntax_diagnostic',message})
   }
   const text=read(MANIFEST),manifest=JSON.parse(text)
   const manifestFiles=new Set(manifest.routes.map(r=>APP+'app/api/'+r.route))
