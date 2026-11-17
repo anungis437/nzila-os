@@ -23,6 +23,17 @@ import {
 export const EMERGENCY_MAX_MS = 24 * 60 * 60 * 1000
 export const EMERGENCY_MIN_JUSTIFICATION = 20
 
+/** These case powers are inherent in a live primary owner/assignee relationship.
+ * An institutional rule may narrow but cannot confer them through a secondary authority source.
+ */
+export const PRIMARY_CASE_HANDLER_ONLY_ACTIONS: readonly Action[] = [
+  'case:disclose_to_member', 'case:export_sealed_evidence', 'case:close',
+]
+
+export function hasPrimaryCaseHandlerOnlyPower(powers: readonly string[]): boolean {
+  return PRIMARY_CASE_HANDLER_ONLY_ACTIONS.some(action => powers.includes(action) || powers.includes(action.slice('case:'.length)))
+}
+
 export interface Live {
   status: string
   effectiveAt: Date
@@ -120,6 +131,7 @@ export function assessMandate(m: Mandate, orgId: string, now: Date): InstrumentV
     const bounded = (s.unitIds?.length ?? 0) + (s.territoryIds?.length ?? 0) + (s.resourceIds?.length ?? 0) > 0
     if (!bounded) bad('supervisory mandate has no unit, territory or resource scope')
     if (m.powers.includes('read_privileged')) bad('supervisory mandates cannot reach privileged matters')
+    if (hasPrimaryCaseHandlerOnlyPower(m.powers)) bad('supervisory mandates cannot carry primary case-handler-only powers')
   }
 
   if (m.kind === 'financial') {
