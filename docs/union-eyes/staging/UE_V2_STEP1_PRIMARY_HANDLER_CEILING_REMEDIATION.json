@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_PRIMARY_HANDLER_CEILING_REMEDIATION",
+  "finding": "S1-A01",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "baseline": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "fixBranch": "fix/ue-primary-handler-ceiling-step1-20261117",
+  "fixHead": "396a8f5af9e359a1098251ba4c33cc5b3990ef93",
+  "status": "SOURCE_CORRECTION_COMMITTED_STATIC_READBACK_PASS_EXECUTION_AND_DATABASE_PENDING",
+  "observed": "Documented primary-only actions can fall through to a supervisory mandate or injected delegation fact in the baseline source. Default templates and delegated storage restrictions reduce reachability but do not pin all layers. No executed exploit or live access established.",
+  "changedFiles": [
+    {
+      "path": "apps/union-eyes/lib/authority/common.ts",
+      "blobSha": "cf0b43aa4c1445dbab7dbc5019e56049fb587b6d"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/policies/case.ts",
+      "blobSha": "0406bf67493fe559e60045f1f71987566fffa78e"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/issuance.ts",
+      "blobSha": "f45d7d2935fb2e68f9b8213473da9308b87667dc"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/store/lifecycle.ts",
+      "blobSha": "8f3e4d384f4f10f213979e8df684c30ca89dbb4f"
+    },
+    {
+      "path": "apps/union-eyes/lib/authority/__tests__/primary-handler-ceiling.test.ts",
+      "blobSha": "067d39062666d36e9ba50fda0ad343f43f13ebe8"
+    }
+  ],
+  "checks": {
+    "sharedCeilingExists": true,
+    "caseRelationshipUsesCeiling": true,
+    "mandateBarrierBeforeCandidate": true,
+    "delegationBarrierBeforeEvaluation": true,
+    "issuanceRuleBarrier": true,
+    "draftGuardBeforeInsert": true,
+    "activationGuardBeforeRetire": true,
+    "testsRetainIndependentRelationship": true,
+    "testsChallengeInjectedFacts": true,
+    "isolatedChangedFiles": true
+  },
+  "regressionTests": {
+    "path": "apps/union-eyes/lib/authority/__tests__/primary-handler-ceiling.test.ts",
+    "state": "NOT_EXECUTED",
+    "testCasesDeclared": 21,
+    "command": "pnpm --dir apps/union-eyes exec vitest run lib/authority/__tests__/primary-handler-ceiling.test.ts lib/authority/__tests__/issuance.test.ts"
+  },
+  "designDecisions": [
+    "Hard ceiling follows existing primary-handler policy; no new institutional rights. Mixed supervisory mandates containing prohibited powers fail closed as invalid; scan existing data and arrange governed replacement if any affected rows exist.",
+    "Independent valid primary owner/assignee relationship still permits actions; contaminated mandate cannot add authority.",
+    "Restrict draft and activation changes to supervisory issue/amend; revocation/suspension paths remain available."
+  ],
+  "remaining": [
+    "Execute baseline diagnostic and branch regression, full authority suite, typecheck, and route integration tests on locked checkout.",
+    "Inspect actual current database constraint and canonical topology. Add a forward-only guard/migration for rule and mandate persistence if required, with exact native/PostgreSQL contract tests and preflight inventory of affected rows; no automatic mutation of existing authority.",
+    "Reconcile with active release branch and current candidate by explicit admission; no merge, production, deployment, or runtime qualification in this pass."
+  ]
+}
