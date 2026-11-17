@@ -3,7 +3,7 @@ import { decide } from '../kernel'
 import { assessDelegation, assessMandate, PRIMARY_CASE_HANDLER_ONLY_ACTIONS } from '../common'
 import { decideIssuance, type IssuanceRule, type IssuanceRequest } from '../issuance'
 import type { Action, Capacity } from '../ontology'
-import { ahead, ago, CASE_ID, DAY, HOUR, NOW, ORG, U, caseFacts, delegation, facts, mandate, membership, recusal, ref, relationship, request } from './fixtures'
+import { ahead, ago, CASE_ID, DAY, HOUR, NOW, ORG, ORG_B, U, caseFacts, delegation, facts, mandate, membership, recusal, ref, relationship, request } from './fixtures'
 
 const caps: Capacity[] = ['member', 'chief_steward', 'steward']
 const resource = ref('case', CASE_ID)
@@ -96,6 +96,23 @@ describe('primary case-handler-only authority is a hard ceiling', () => {
     expect(decide(req, f, caseFacts(), NOW).effect).toBe('deny')
     const inScope = { ...office, scope: { resourceIds: [CASE_ID] } }
     expect(decide(req, { ...f, mandates: [inScope] }, caseFacts(), NOW).effect).toBe('allow')
+  })
+
+  it('rejects contradictory nested resource tenant on relationships and recusals', () => {
+    const req = request(U.chief, 'case:close', resource)
+    const owner = primary('owner')
+    const foreignRef = ref('case', CASE_ID, ORG_B)
+    const foreignOwner = { ...owner, resource: foreignRef }
+    const foreignRecusal = recusal({ principalUserId: U.chief, resource: foreignRef, liftedAt: ago(HOUR) })
+    for (const f of [
+      facts(U.chief, caps, { relationships: [foreignOwner] }),
+      facts(U.chief, caps, { relationships: [owner], recusals: [foreignRecusal] }),
+    ]) {
+      const result = decide(req, f, caseFacts(), NOW)
+      expect(result.effect).toBe('deny')
+      expect(result.reasons.map(x => x.code)).toContain('FACTS_CONTRADICTORY')
+    }
+    expect(decide(req, facts(U.chief, caps, { relationships: [owner] }), caseFacts(), NOW).effect).toBe('allow')
   })
 
   it('retains legitimate scoped read and assignment powers', () => {
