@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_ITERATION_CLOSURE_RECEIPT",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "sourceInputs": [
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_OWNERSHIP_DELTA_STATIC_VALIDATION.json",
+      "blobSha": "3ba9b3c8d4de2b0a1351d6ff145c89ead27e9835"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_ADDITIONAL_SOURCE_ACTOR_VARIANTS.json",
+      "blobSha": "e6f6a38aa6a2138645362da687da282bb447ff76"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_BASE_ACTION_BINDING_CORRECTIONS.json",
+      "blobSha": "dc32f38a72aed986ad3def183ac34ac82992aa6c"
+    },
+    {
+      "path": "docs/union-eyes/staging/UE_V2_STEP1_EXECUTED_SOURCE_CENSUS_RECEIPT.json",
+      "blobSha": "1c2cd062d926e0e9eb5d0fdf9636b03bc162ac75"
+    }
+  ],
+  "completedSubgates": {
+    "newHistoricalOwnershipKeyDirectSourceReview": {
+      "reviewed": 112,
+      "total": 112,
+      "files": 77,
+      "staticChecks": 7,
+      "semanticScopeAndRuntime": "OPEN"
+    },
+    "historicalRemovedKeyInventory": {
+      "reviewed": 41,
+      "absentFiles": 5,
+      "absentMethodsOnSurvivingFiles": 36,
+      "runtime": "OPEN"
+    },
+    "additionalActorVariants": {
+      "parentCategories": 20,
+      "priorVariants": 11,
+      "newVariants": 13,
+      "totalVariants": 24,
+      "staticChecks": 4,
+      "admission": "OPEN"
+    },
+    "actionBindingCorrections": {
+      "families": 22,
+      "uniqueMethodCandidates": 121,
+      "correctedRouteInterpretations": 10,
+      "authority": "OPEN"
+    }
+  },
+  "securityRemediation": {
+    "pr": 1268,
+    "qualifiedCodeHead": "b5e2094e790b3a45a5115d83ef0811e88d845253",
+    "wholeApplicationRun": {
+      "id": 44132027281,
+      "passed": 26522,
+      "failed": 0,
+      "skipped": 34,
+      "primaryHandlerNewTests": 21,
+      "conclusion": "success"
+    },
+    "nativeRun": {
+      "id": 44132027482,
+      "postgres15": {
+        "passed": 1082,
+        "failed": 0,
+        "skipped": 1
+      },
+      "postgres16": {
+        "passed": 1082,
+        "failed": 0,
+        "skipped": 1
+      }
+    },
+    "securityRegressionRun": 44132027475,
+    "inventoryRepairedHead": "f4660fa6b63d744ae33241eafaed2123e7acb9b7",
+    "generatedInventoryBlobMatches": [
+      {
+        "path": "tooling/repo-inventory/output/inventory.json",
+        "blobSha": "791e51c06625ee6a0b111096fb655754cde58a46"
+      },
+      {
+        "path": "tooling/repo-inventory/output/repo-inventory.json",
+        "blobSha": "791e51c06625ee6a0b111096fb655754cde58a46"
+      },
+      {
+        "path": "tooling/repo-inventory/output/inventory.md",
+        "blobSha": "ddc8425bcad0c730321ce4f44b2e39d0f93dee4c"
+      },
+      {
+        "path": "tooling/repo-inventory/output/repo-inventory.md",
+        "blobSha": "ddc8425bcad0c730321ce4f44b2e39d0f93dee4c"
+      }
+    ],
+    "exactCIGeneratedBlobsMatched": true,
+    "latestHeadCI": "NOT_YET_VERIFIED",
+    "newDependencyAudit": {
+      "advisoryId": 1247710,
+      "package": "picomatch",
+      "severity": "high",
+      "sourceRuns": [
+        44136157075,
+        44136157448
+      ],
+      "disposition": "OPEN_FIX_DEPENDENCY_NO_WAIVER",
+      "notes": "Intervening changes were generated inventory outputs only. Advisory timing/reachability and patched version not established. No waiver, dependency change or deployment performed."
+    }
+  },
+  "remainingClosure": [
+    "Current semantic authority/scope disposition for existing 1605 ownership methods, especially 1321 changed-route-source entries; same route blob alone is not dependency proof.",
+    "Transitive dependency and non-HTTP reachability, including Python deployment profile isolation.",
+    "Concrete institution-specific grants, multi-capacity and action-specific scope verification; C11 successor acceptance remains unbound.",
+    "Final disposition for 141 application registry capabilities; complete source-to-actor/action contract and adversarial review.",
+    "Exact latest security branch CI, stored-mandate preflight and physical database enforcement review; resolve high dependency advisory without weakening gate."
+  ],
+  "boundary": "No merge, staging or production deployment, tenant/live mutation, or final source/runtime acceptance."
+}
