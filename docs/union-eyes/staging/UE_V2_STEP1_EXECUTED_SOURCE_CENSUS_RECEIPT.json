@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_EXECUTED_SOURCE_CENSUS_RECEIPT",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "baseline": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "scannedCommit": "790005dd421bcf22fa49d3cd342aef039e386f39",
+  "workflowRunId": 44131889827,
+  "jobId": 134210914859,
+  "workflowConclusion": "success",
+  "artifact": {
+    "id": 14351245230,
+    "name": "ue-step1-source-790005dd421bcf22fa49d3cd342aef039e386f39",
+    "digest": "sha256:21873c059815e86c1c58f4a428bc45459d71e63f0edd02b05f08cdc1b9bab2bd",
+    "url": "https://github.com/anungis437/nzila-os/actions/runs/44131889827"
+  },
+  "observations": {
+    "parserSelfTests": "16/16 PASS",
+    "sourceInventoryMatch": true,
+    "trackedTypeScriptJavaScriptSourceFiles": 4175,
+    "allAppRouteFiles": 1044,
+    "apiRouteFiles": 1042,
+    "explicitMethods": 1717,
+    "apiExplicitMethods": 1715,
+    "serverActionModules": 4,
+    "serverModuleExportCandidates": 31,
+    "inlineDirectiveCandidates": 0,
+    "unresolvedScannerFindings": 0,
+    "fileDelta": {
+      "unclassified": [],
+      "stale": []
+    },
+    "methodDelta": {
+      "unclassified": [],
+      "stale": []
+    },
+    "changedRouteBlobs": 0,
+    "pythonSourceFilesParsed": 271,
+    "pythonSyntaxCandidates": 1724
+  },
+  "evidenceBoundary": "Observed successful exact-SHA GitHub Actions job and uploaded artifact; logs inspected. Python candidates are syntax observations, not endpoint/task counts. Server exports are declarations, not admitted callable actions. No runtime or tenant authority proof.",
+  "remaining": [
+    "Identify actual fourth server-action module and 31st export via artifact or exact-key output; reconcile all candidates.",
+    "Resolve historical route ownership delta and changed source conditions against base scope.",
+    "Resolve non-HTTP reachability, provider callbacks and deployed-profile isolation.",
+    "Verify action-specific institutional configuration and authority; complete Step 1 scope checks before Step 2."
+  ]
+}
