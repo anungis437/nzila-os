@@ -24,10 +24,11 @@ def suffix(n):
         return n.attr
     return ""
 
-def argument(n):
-    if isinstance(n, ast.Constant):
-        return n.value if isinstance(n.value, (str, int, float, bool, type(None))) else repr(n.value)
-    return ast.unparse(n)
+def argument_shape(n, public_literal=False):
+    # Do not retain arbitrary task arguments, payloads or string expressions.
+    if public_literal and isinstance(n, ast.Constant) and isinstance(n.value, str):
+        return {"literal_route_or_module": n.value}
+    return {"node_type": type(n).__name__}
 
 def discover(tree):
     candidates = []
@@ -35,14 +36,14 @@ def discover(tree):
         if isinstance(n, ast.Call) and suffix(n.func) in names:
             # Syntax only: similarly named unrelated calls remain visible.
             candidates.append({"kind": "CALL_CANDIDATE", "line": n.lineno, "column": n.col_offset,
-                "symbol": ast.unparse(n.func), "arguments": [argument(x) for x in n.args[:3]],
+                "symbol": suffix(n.func), "arguments": [argument_shape(x, i == 0 and suffix(n.func) in {"path", "re_path", "include", "register"}) for i, x in enumerate(n.args[:3])],
                 "keywords": [x.arg for x in n.keywords]})
         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             for d in n.decorator_list:
                 target = d.func if isinstance(d, ast.Call) else d
                 if suffix(target) in names:
                     candidates.append({"kind": "DECORATOR_CANDIDATE", "line": d.lineno, "column": d.col_offset,
-                        "symbol": ast.unparse(target), "declaration": n.name})
+                        "symbol": suffix(target), "declaration": n.name})
         if isinstance(n, (ast.Assign, ast.AnnAssign)):
             targets = n.targets if isinstance(n, ast.Assign) else [n.target]
             for target in targets:
