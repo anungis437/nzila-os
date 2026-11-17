@@ -16949,7 +16949,7 @@
       "key": "POST onboarding/discover-federation/route.ts",
       "guard": "ROLE_AUTH",
       "domain": "onboarding",
-      "reviewBucket": "UNCLASSIFIED_DOMAIN_REVIEW",
+      "reviewBucket": "BASE_ADJACENT",
       "actionCandidates": [],
       "boundaryCandidates": [],
       "baseDisposition": "OPEN_SOURCE_AND_SCOPE_CHECK",
@@ -16959,7 +16959,7 @@
       "key": "POST onboarding/events/route.ts",
       "guard": "ROLE_AUTH",
       "domain": "onboarding",
-      "reviewBucket": "UNCLASSIFIED_DOMAIN_REVIEW",
+      "reviewBucket": "BASE_ADJACENT",
       "actionCandidates": [],
       "boundaryCandidates": [],
       "baseDisposition": "OPEN_SOURCE_AND_SCOPE_CHECK",
@@ -16969,7 +16969,7 @@
       "key": "GET onboarding/peer-benchmarks/route.ts",
       "guard": "WITH_API",
       "domain": "onboarding",
-      "reviewBucket": "UNCLASSIFIED_DOMAIN_REVIEW",
+      "reviewBucket": "BASE_ADJACENT",
       "actionCandidates": [],
       "boundaryCandidates": [],
       "baseDisposition": "OPEN_SOURCE_AND_SCOPE_CHECK",
@@ -17039,7 +17039,7 @@
       "key": "POST onboarding/suggest-clauses/route.ts",
       "guard": "ROLE_AUTH",
       "domain": "onboarding",
-      "reviewBucket": "UNCLASSIFIED_DOMAIN_REVIEW",
+      "reviewBucket": "BASE_ADJACENT",
       "actionCandidates": [],
       "boundaryCandidates": [],
       "baseDisposition": "OPEN_SOURCE_AND_SCOPE_CHECK",
@@ -20333,7 +20333,7 @@
       "key": "GET tenant/current/route.ts",
       "guard": "WITH_API",
       "domain": "tenant",
-      "reviewBucket": "UNCLASSIFIED_DOMAIN_REVIEW",
+      "reviewBucket": "BASE_ADJACENT",
       "actionCandidates": [],
       "boundaryCandidates": [],
       "baseDisposition": "OPEN_SOURCE_AND_SCOPE_CHECK",
@@ -20425,7 +20425,7 @@
       "key": "GET union-eyes/queue-status/route.ts",
       "guard": "SESSION_AUTH",
       "domain": "union-eyes",
-      "reviewBucket": "UNCLASSIFIED_DOMAIN_REVIEW",
+      "reviewBucket": "OPS_IDENTITY_INTEGRATION",
       "actionCandidates": [],
       "boundaryCandidates": [],
       "baseDisposition": "OPEN_SOURCE_AND_SCOPE_CHECK",
@@ -21430,7 +21430,7 @@
         "apps/union-eyes/lib/authority/policies/case.ts",
         "apps/union-eyes/lib/cases/case-authorization.ts"
       ],
-      "correction": "Primary-handler positive case; supervisor-only, collaborator, role-only and privileged-context negative cases; inspect actual route decision and no-byte/no-audit-write side effect."
+      "correction": "Primary-handler positive case; supervisor-only, collaborator and role-only negatives; test privileged classification independently. Refusal returns no protected bytes, creates no business effect and no success audit; retain required denial/security audit."
     },
     {
       "id": "S1-G02",
@@ -21454,12 +21454,12 @@
     {
       "id": "S1-G04",
       "severity": "P0",
-      "finding": "Historical HTTP manifest lacks one or more scheduled source jobs; method denominator must incorporate live-source tree, not just manifest.",
+      "finding": "All 14 scheduled source jobs have matching POST keys in the historical HTTP manifest, including base-operations-monitor. This exact join does not establish the complete live-source tree, provider callbacks, actual configured jobs or runtime execution.",
       "evidence": [
         "apps/union-eyes/lib/operations/scheduled-jobs.json",
         "apps/union-eyes/app/api/cron/base-operations-monitor/route.ts"
       ],
-      "correction": "Rebuild source tree, schedule, server action and webhook inventory before sealing; preserve missing job rows separately."
+      "correction": "Preserve this successful static schedule-to-manifest join; independently rebuild the route tree, server actions, callbacks and deployed schedule inventory before sealing."
     },
     {
       "id": "S1-G05",
@@ -21517,20 +21517,24 @@
       "BASE_AUTHORITY_DEPENDENCY_REVIEW": 2
     },
     "routeBuckets": {
-      "BASE_ADJACENT": 226,
+      "BASE_ADJACENT": 231,
       "MANIFEST_RETIRED_VERIFY_501_OR_ABSENCE": 483,
       "EXACT_PATTERN_ACTION_CANDIDATE": 113,
       "SPECIALIZED_EXTENSION_REVIEW": 602,
-      "OPS_IDENTITY_INTEGRATION": 51,
+      "OPS_IDENTITY_INTEGRATION": 52,
       "FINANCE_BOUNDARY": 98,
       "PUBLIC_COMMERCIAL_OR_ASSESSMENT": 88,
-      "EXTERNAL_BOUNDARY": 46,
-      "UNCLASSIFIED_DOMAIN_REVIEW": 6
+      "EXTERNAL_BOUNDARY": 46
     },
     "routeMethods": 1713,
     "jobCount": 14,
     "missingManifestJobs": [],
     "invalidActionRefs": 0,
     "findings": 8
-  }
+  },
+  "reviewCorrections": [
+    "Schedule join was re-read from committed data: 14/14 present, not a missing-job finding.",
+    "Six uncategorized route-method rows were assigned review queues after inspecting their exact paths; queue assignment still does not decide enablement.",
+    "Security refusal may create legitimate denial evidence; do not require zero audit writes."
+  ]
 }
