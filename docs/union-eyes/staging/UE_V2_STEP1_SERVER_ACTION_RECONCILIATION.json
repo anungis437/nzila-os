@@ -1,0 +1,442 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_SERVER_ACTION_EXACT_EXPORT_RECONCILIATION",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "baseline": "8147ae480bb8ff0ab815b615fab67192728883e0",
+  "sourceScanRun": 44131889827,
+  "sourceScanCount": 31,
+  "sourceInputs": [
+    {
+      "path": "apps/union-eyes/actions/analytics-actions.ts",
+      "blobSha": "be78350481b54795f9c1dd69f7b08d3cd7b30dbd"
+    },
+    {
+      "path": "apps/union-eyes/actions/member-employment-actions.ts",
+      "blobSha": "888e1fd0fc48c856f6ad6013bae8a65d0dc3c8e6"
+    },
+    {
+      "path": "apps/union-eyes/actions/rewards-actions.ts",
+      "blobSha": "8470da06f94a0907e8b3cc5af9dc78bf17e6b271"
+    },
+    {
+      "path": "apps/union-eyes/lib/monitoring/status-actions.ts",
+      "blobSha": "6e7da880c1bece2cfb98a1309cb365612ff88521"
+    }
+  ],
+  "rows": [
+    {
+      "key": "apps/union-eyes/actions/analytics-actions.ts#calculateMetrics",
+      "effect": "write",
+      "sourceObservedGuard": "getActor",
+      "sourceObservedDelegate": "metric insertion, atomic audit",
+      "scopeCandidate": "ANALYTICS_ADJACENT_UNLESS_EXACT_LEADERSHIP_CALLER_PROVEN",
+      "actionCandidates": [
+        "C18"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/analytics-actions.ts#generatePredictions",
+      "effect": "write",
+      "sourceObservedGuard": "getActor",
+      "sourceObservedDelegate": "prediction insertion, atomic audit",
+      "scopeCandidate": "ANALYTICS_ADJACENT_UNLESS_EXACT_LEADERSHIP_CALLER_PROVEN",
+      "actionCandidates": [
+        "C18"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/analytics-actions.ts#detectMetricTrends",
+      "effect": "write",
+      "sourceObservedGuard": "getActor",
+      "sourceObservedDelegate": "trend insertion, atomic audit",
+      "scopeCandidate": "ANALYTICS_ADJACENT_UNLESS_EXACT_LEADERSHIP_CALLER_PROVEN",
+      "actionCandidates": [
+        "C18"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/analytics-actions.ts#createKPI",
+      "effect": "write",
+      "sourceObservedGuard": "auth + getCurrentUserOrgId",
+      "sourceObservedDelegate": "KPI insertion, atomic audit",
+      "scopeCandidate": "ANALYTICS_ADJACENT_UNLESS_EXACT_LEADERSHIP_CALLER_PROVEN",
+      "actionCandidates": [
+        "C18"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/analytics-actions.ts#getAnalyticsMetrics",
+      "effect": "read",
+      "sourceObservedGuard": "getCurrentUserOrgId",
+      "sourceObservedDelegate": "tenant-scoped metric read",
+      "scopeCandidate": "ANALYTICS_ADJACENT_UNLESS_EXACT_LEADERSHIP_CALLER_PROVEN",
+      "actionCandidates": [
+        "C18"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/member-employment-actions.ts#createJobClassificationAction",
+      "effect": "write",
+      "sourceObservedGuard": "requireAdmin",
+      "sourceObservedDelegate": "create classification",
+      "scopeCandidate": "EMPLOYMENT_ADMIN_ADJACENT",
+      "actionCandidates": [
+        "C19"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/member-employment-actions.ts#getJobClassificationsByOrganizationAction",
+      "effect": "read",
+      "sourceObservedGuard": "requireAdmin",
+      "sourceObservedDelegate": "read classifications",
+      "scopeCandidate": "EMPLOYMENT_ADMIN_ADJACENT",
+      "actionCandidates": [
+        "C19"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/member-employment-actions.ts#updateJobClassificationAction",
+      "effect": "write",
+      "sourceObservedGuard": "requireAdmin",
+      "sourceObservedDelegate": "update classification",
+      "scopeCandidate": "EMPLOYMENT_ADMIN_ADJACENT",
+      "actionCandidates": [
+        "C19"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#createRecognitionProgram",
+      "effect": "write",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#updateRecognitionProgram",
+      "effect": "write",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#listRecognitionPrograms",
+      "effect": "read",
+      "sourceObservedGuard": "member",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#createRecognitionAwardType",
+      "effect": "write",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#listAwardTypes",
+      "effect": "read",
+      "sourceObservedGuard": "member",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#createAward",
+      "effect": "write",
+      "sourceObservedGuard": "admin + active recipient",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#nominatePeer",
+      "effect": "write",
+      "sourceObservedGuard": "member + active recipient",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#approveAward",
+      "effect": "write",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#issueAward",
+      "effect": "write",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#revokeAward",
+      "effect": "write",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#rejectAward",
+      "effect": "write",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#listAwardsByStatus",
+      "effect": "read",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#listMyAwards",
+      "effect": "read",
+      "sourceObservedGuard": "own member subject",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#createBudgetEnvelope",
+      "effect": "write",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#listBudgetEnvelopes",
+      "effect": "read",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#getBudgetUsageSummary",
+      "effect": "read",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#getMyWalletBalance",
+      "effect": "read",
+      "sourceObservedGuard": "own member subject",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#getMyWalletLedger",
+      "effect": "read",
+      "sourceObservedGuard": "own member subject",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#initiateRedemption",
+      "effect": "write + external commerce",
+      "sourceObservedGuard": "own member subject",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#cancelRedemption",
+      "effect": "write",
+      "sourceObservedGuard": "own member subject",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#listMyRedemptions",
+      "effect": "read",
+      "sourceObservedGuard": "own member subject",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/actions/rewards-actions.ts#getRewardsSummary",
+      "effect": "read",
+      "sourceObservedGuard": "admin",
+      "sourceObservedDelegate": "delegated rewards service; exact service permission, transaction and audit verification pending",
+      "scopeCandidate": "REWARDS_ADJACENT_SEPARATE_FROM_UNION_FINANCE",
+      "actionCandidates": [
+        "C22"
+      ],
+      "boundaryVerification": "Direct server action invocation must enforce live identity, active tenant, own-subject or named role as applicable; wrong tenant, revoked session and unauthenticated deny. No unauthorized business effect.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "key": "apps/union-eyes/lib/monitoring/status-actions.ts#getStatusAction",
+      "effect": "read + dependency probes",
+      "sourceObservedGuard": "public surface; no tenant session assumed",
+      "sourceObservedDelegate": "getSystemStatus; public projection and failure redaction verification",
+      "scopeCandidate": "PUBLIC_STATUS_OPERATIONAL_BOUNDARY",
+      "actionCandidates": [
+        "O07",
+        "O08"
+      ],
+      "boundaryVerification": "Anonymous status response reveals no secrets, raw upstream errors or tenant data; dependency degradation is truthful.",
+      "scopeVerified": false,
+      "runtimeVerified": false
+    }
+  ],
+  "counts": {
+    "modules": 4,
+    "actions": 31,
+    "uniqueKeys": 31
+  },
+  "limitations": [
+    "Source module exports and immediate guard evidence, not proof of Next.js compiled action IDs or actual client callsites; caller/service join remains open.",
+    "Base positive admission is not inferred for rewards, analytics, employment or private data; source-defined boundary obligations remain in scope.",
+    "No financial, external commerce or tenant action executed."
+  ]
+}
