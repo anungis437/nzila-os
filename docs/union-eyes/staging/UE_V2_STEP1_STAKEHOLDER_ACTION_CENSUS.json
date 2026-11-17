@@ -1,0 +1,2097 @@
+{
+  "schemaVersion": 1,
+  "record": "UE_STEP1_STAKEHOLDER_ACTION_CENSUS",
+  "recordedDate": "2026-11-17",
+  "decision": "STEP1_OPEN_STEP2_HELD",
+  "purpose": "Source-derived role census and proposed adversarial action design; no new authority, activation, deployment or acceptance.",
+  "sourceInputs": {
+    "roles": {
+      "path": "apps/union-eyes/lib/auth/roles.ts",
+      "blobSha": "1b412184d58a1dc2b51f0fab3ccdca67390051bd"
+    },
+    "ledger": {
+      "path": "docs/union-eyes/staging/UE_V2_BASE_ACTION_COVERAGE.json",
+      "blobSha": "e94eae071f3b3b2ac16e8173ccda42c2cf22706a"
+    },
+    "registry": {
+      "path": "apps/union-eyes/lib/reality/capability-registry.ts",
+      "blobSha": "d283c6544b5f0bc5c9e044611bb421e73807f58c"
+    },
+    "routes": {
+      "path": "docs/union-eyes/convergence/register/ue-route-coverage-manifest.json",
+      "blobSha": "f6f6bf59bd2cfa80042105d7f950cce9ccada71d"
+    },
+    "external": {
+      "path": "apps/union-eyes/lib/services/external-resource-authorization-service.ts",
+      "blobSha": "87c954547185b15683e7b76401116dd6f6e79509"
+    },
+    "nav": {
+      "path": "docs/union-eyes/staging/UE_V2_REAL_NAVIGATION_ACCEPTANCE.md",
+      "blobSha": "6403de8af815dba6532fcca6783d40e1a1446d63"
+    },
+    "fixtures": {
+      "path": "apps/union-eyes/e2e/helpers/role-fixtures.ts",
+      "blobSha": "302668086f6a0c53f682db43dfcfd1d74b64d78d"
+    },
+    "actorMap": {
+      "path": "docs/union-eyes/bootstrap-v2/UE_V2_APPLICATION_ACTOR_MAP.md",
+      "blobSha": "2c7b6bda006cf78e45ecc2209df37dffd16a3468"
+    }
+  },
+  "recordedServingApplicationSource": "cccfc8c311a1017f80241bf089c00ef0c6828751",
+  "scopeExclusions": [
+    "Union finance and dues persistence",
+    "Financial Officer 2.1",
+    "Production deployment"
+  ],
+  "deferredCapabilities": [
+    "Direct Add Member form: intended path is invitation-based onboarding",
+    "Standalone member timeline; case-detail history is a separate supported surface",
+    "Document approvals and template authoring",
+    "SMS, campaigns, digest and quiet hours",
+    "External WorkAid/Clio connector and specialist acceptance",
+    "Federation roll-ups and cross-union analytics",
+    "Automatic legal filing-date calculation and intake deadline email reminders remain absent, distinct from implemented staff deadline management"
+  ],
+  "roleCensus": {
+    "total": 39,
+    "tenantLocal": 11,
+    "platform": 18,
+    "institutionalHierarchy": 5,
+    "legacy": 5,
+    "roles": [
+      {
+        "role": "app_owner",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": true,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "coo",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "cto",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "platform_lead",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "customer_success_director",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "support_manager",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "data_analytics_manager",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "billing_manager",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "integration_manager",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "compliance_manager",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "security_manager",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "support_agent",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "data_analyst",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "billing_specialist",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "integration_specialist",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "content_manager",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "training_coordinator",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "system_admin",
+        "classification": "PLATFORM_OPERATIONS",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "clc_executive",
+        "classification": "INSTITUTIONAL_HIERARCHY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "clc_staff",
+        "classification": "INSTITUTIONAL_HIERARCHY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "fed_executive",
+        "classification": "INSTITUTIONAL_HIERARCHY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "fed_staff",
+        "classification": "INSTITUTIONAL_HIERARCHY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "national_officer",
+        "classification": "INSTITUTIONAL_HIERARCHY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "admin",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": true,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "president",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "vice_president",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "secretary_treasurer",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": true,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "chief_steward",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": true,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "officer",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": true,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "clerk",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "steward",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": true,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "bargaining_committee",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "health_safety_rep",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "member",
+        "classification": "TENANT_LOCAL",
+        "historicalSevenRoleFixture": true,
+        "basePositiveEligibility": "ACTION_SPECIFIC_NOT_ESTABLISHED",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "guest",
+        "classification": "LEGACY_COMPATIBILITY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "DENY_NEW_ASSIGNMENT_VERIFY_ALIAS_BOUNDARY",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "congress_staff",
+        "classification": "LEGACY_COMPATIBILITY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "DENY_NEW_ASSIGNMENT_VERIFY_ALIAS_BOUNDARY",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "federation_staff",
+        "classification": "LEGACY_COMPATIBILITY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "DENY_NEW_ASSIGNMENT_VERIFY_ALIAS_BOUNDARY",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "union_rep",
+        "classification": "LEGACY_COMPATIBILITY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "DENY_NEW_ASSIGNMENT_VERIFY_ALIAS_BOUNDARY",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      },
+      {
+        "role": "staff_rep",
+        "classification": "LEGACY_COMPATIBILITY",
+        "historicalSevenRoleFixture": false,
+        "basePositiveEligibility": "DENY_NEW_ASSIGNMENT_VERIFY_ALIAS_BOUNDARY",
+        "grantRule": "Role label alone grants no case, financial, or cross-tenant content authority."
+      }
+    ]
+  },
+  "actorContexts": [
+    {
+      "id": "A01",
+      "actor": "Public visitor / assessment capability holder",
+      "minimumAuthority": "public route or purpose-bound bearer; no private session",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A02",
+      "actor": "Invited recipient / onboarding principal",
+      "minimumAuthority": "valid recipient-bound invitation, verified identity, expiry and MFA",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A03",
+      "actor": "Member, grievant or represented person",
+      "minimumAuthority": "active membership plus separate creator/represented-person relationship",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A04",
+      "actor": "Former, suspended or revoked member or staff",
+      "minimumAuthority": "revocation and live authority re-evaluation; no inherited access",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A05",
+      "actor": "Assigned representative / specialized representative",
+      "minimumAuthority": "active membership plus explicit case grant; capacity and scope",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A06",
+      "actor": "Senior representative / supervisor",
+      "minimumAuthority": "accepted supervisory mandate, named resource scope and action",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A07",
+      "actor": "Officer / executive / successor",
+      "minimumAuthority": "valid office or delegated mandate; succession and outgoing revocation",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A08",
+      "actor": "Union operations clerk / authorized correspondence staff",
+      "minimumAuthority": "action-specific staff authority; draft, approve and dispatch separated",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A09",
+      "actor": "Tenant organization administrator / access custodian",
+      "minimumAuthority": "active canonical admin membership; no implicit case access",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A10",
+      "actor": "Governance, privacy handler, independent reviewer or auditor",
+      "minimumAuthority": "specific review or assurance grant, independence and recusal",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A11",
+      "actor": "Financial officer / trustee",
+      "minimumAuthority": "explicit financial mandate; base finance positive workflows excluded",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A12",
+      "actor": "National union, federation, CLC / affiliate representative",
+      "minimumAuthority": "explicit delegated organization/resource authority; hierarchy alone insufficient",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A13",
+      "actor": "Nzila platform operator / support / owner",
+      "minimumAuthority": "canonical platform entitlement; scoped support, no tenant-content bypass",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A14",
+      "actor": "External representative, specialist, WorkAid or counsel",
+      "minimumAuthority": "verified external identity; matter authority/grant; separately consent and document/version scope",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A15",
+      "actor": "Employer, respondent, witness, adverse party or external recipient",
+      "minimumAuthority": "specific authorized disclosure/participation only; no ordinary case access",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A16",
+      "actor": "Third-party data subject, dependent or member proxy",
+      "minimumAuthority": "verified relationship or legal instrument; no self-asserted authority",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A17",
+      "actor": "Identity provider / webhook / integration service principal",
+      "minimumAuthority": "issuer/signature/audience and narrow service or resource scope",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A18",
+      "actor": "Cron / queue worker / scanner / mail / storage / backup service",
+      "minimumAuthority": "authenticated service identity; job, tenant and data purpose",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A19",
+      "actor": "AI assistant / retrieval / automation / agent",
+      "minimumAuthority": "delegated initiating principal and action scope; machine output is not institutional approval",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    },
+    {
+      "id": "A20",
+      "actor": "Anonymous, stale-session, forged, foreign-tenant or untrusted actor",
+      "minimumAuthority": "refusal; no private disclosure or business mutation",
+      "disposition": "CLASSIFIED_REVIEW_SCOPE_POSITIVE_ADMISSION_AND_SOURCE_MAPPING_PENDING"
+    }
+  ],
+  "baseActionFamilies": [
+    {
+      "id": "C01",
+      "family": "Invitation to first case",
+      "priorLedgerState": "REPAIR_APPLIED_RECIPIENT_RETRY_PENDING",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A02",
+        "A03",
+        "A09"
+      ],
+      "boundaryActorCandidates": [
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "create invite; redeem as intended principal; open and reopen first case; read back identity, membership, case and audit",
+      "negativeScenario": "wrong recipient; expired/revoked/replayed link; duplicate membership; same-session revocation",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C02",
+      "family": "Truthful invitation email status",
+      "priorLedgerState": "LOCAL_REPAIR_STAGING_PENDING",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A09",
+        "A17",
+        "A18"
+      ],
+      "boundaryActorCandidates": [
+        "A20",
+        "A13"
+      ],
+      "positiveScenario": "provider acceptance vs delivery; failed send then recovery",
+      "negativeScenario": "forged or missing event; duplicate event; provider outage; no fabricated success",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C03",
+      "family": "Invitation reissue and revocation",
+      "priorLedgerState": "LOCAL_REPAIR_STAGING_PENDING",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A09",
+        "A02"
+      ],
+      "boundaryActorCandidates": [
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "reissue and revoke; verify replacement and terminal audit",
+      "negativeScenario": "old link, wrong recipient, expired grant and unauthorized issuer refused",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C04",
+      "family": "Organization-admin invitation entry",
+      "priorLedgerState": "PARTIAL_POSITIVE_STAGING_PROVEN",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A09"
+      ],
+      "boundaryActorCandidates": [
+        "A05",
+        "A13",
+        "A20"
+      ],
+      "positiveScenario": "admin UI and direct API invitation mutation",
+      "negativeScenario": "non-admin, wrong tenant, platform role without tenant authority",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C05",
+      "family": "Persistent organization setup",
+      "priorLedgerState": "LOCAL_REPAIR_STAGING_PENDING",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A09"
+      ],
+      "boundaryActorCandidates": [
+        "A05",
+        "A13",
+        "A20"
+      ],
+      "positiveScenario": "persist setup, reload, compare saved values and audit",
+      "negativeScenario": "wrong tenant; stale concurrent write; injected failure rollback",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C06",
+      "family": "Membership and access lifecycle",
+      "priorLedgerState": "PARTIAL_STAGED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A09",
+        "A03",
+        "A04"
+      ],
+      "boundaryActorCandidates": [
+        "A20",
+        "A13"
+      ],
+      "positiveScenario": "invite, activate, change permitted role, suspend/reinstate, remove",
+      "negativeScenario": "unauthorized escalation; legacy assignment; removed-role same-session requests",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C07",
+      "family": "Multiple capacity and active organization",
+      "priorLedgerState": "UNVERIFIED_VARIANTS",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A09",
+        "A12",
+        "A13"
+      ],
+      "boundaryActorCandidates": [
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "switch active org/capacity; select explicit case grant; verify split scope",
+      "negativeScenario": "foreign or same-org unrelated case; wrong capacity; stale cached mandate",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C08",
+      "family": "Connected intake to closure",
+      "priorLedgerState": "PARTIAL_STAGED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A07"
+      ],
+      "boundaryActorCandidates": [
+        "A15",
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "intake, triage, assignment, investigation, transition, closure and handoff",
+      "negativeScenario": "unassigned rep, adverse party, invalid transition, revoked assignment",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C09",
+      "family": "Automatic workload and expertise assignment",
+      "priorLedgerState": "PARTIAL_STAGED_OVERALL_QUALIFICATION_FAILED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A06",
+        "A09",
+        "A18"
+      ],
+      "boundaryActorCandidates": [
+        "A05",
+        "A20"
+      ],
+      "positiveScenario": "configure expertise/capacity; auto-match claim and formal grievance; persist grant and audit",
+      "negativeScenario": "foreign/inactive/unqualified profile; last slot contention; rollback; duplicate assignment",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C10",
+      "family": "Senior representative supervision",
+      "priorLedgerState": "PARTIAL_STAGED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A06",
+        "A07"
+      ],
+      "boundaryActorCandidates": [
+        "A05",
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "named-case review, escalation, exception and delegation under valid mandate",
+      "negativeScenario": "scope mismatch; missing approval; conflict/recusal; expired mandate",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C11",
+      "family": "Successor handoff",
+      "priorLedgerState": "PARTIAL_STAGED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A06",
+        "A07",
+        "A05"
+      ],
+      "boundaryActorCandidates": [
+        "A04",
+        "A20"
+      ],
+      "positiveScenario": "successor accepts transfer, pending obligations persist, outgoing access revoked",
+      "negativeScenario": "unaccepted succession; stale former principal; cross-org successor",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C12",
+      "family": "Member case follow-through",
+      "priorLedgerState": "PARTIAL_STAGED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A03"
+      ],
+      "boundaryActorCandidates": [
+        "A15",
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "status/history, authorized clarification, acknowledgement, review request",
+      "negativeScenario": "internal/privileged/third-party record; unrelated case; role-only bypass",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C13",
+      "family": "Role-specific document journey",
+      "priorLedgerState": "PARTIAL_STAGED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A18"
+      ],
+      "boundaryActorCandidates": [
+        "A14",
+        "A15",
+        "A20"
+      ],
+      "positiveScenario": "upload, scan, list/search and download under role/resource/version grant",
+      "negativeScenario": "unsafe bytes; unrelated case; revoked grant; stale version; disclosure",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C14",
+      "family": "User-facing sealed evidence export",
+      "priorLedgerState": "BROWSER_PDF_IMPLEMENTED_LOCAL_PROOF_STAGING_PENDING",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A05",
+        "A06"
+      ],
+      "boundaryActorCandidates": [
+        "A03",
+        "A13",
+        "A14",
+        "A20"
+      ],
+      "positiveScenario": "authorized EN/FR PDF and sealed JSON download, verify envelope and audit",
+      "negativeScenario": "foreign/unassigned; forbidden label; revoked grant; tamper; failure recovery",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C15",
+      "family": "OCR document extraction",
+      "priorLedgerState": "SOURCE_REPAIR_LOCAL_PASS_STAGING_PENDING",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A05",
+        "A06",
+        "A18"
+      ],
+      "boundaryActorCandidates": [
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "extract real image/PDF, save draft, separate reviewer approves, publish exact version",
+      "negativeScenario": "self-review; stale version; unsafe source; unauthorized reader and rollback",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C16",
+      "family": "Correspondence approval and dispatch",
+      "priorLedgerState": "SOURCE_IMPLEMENTED_UNQUALIFIED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A08",
+        "A07",
+        "A05",
+        "A18"
+      ],
+      "boundaryActorCandidates": [
+        "A15",
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "draft, authorized approval, safe dispatch and receipt/audit",
+      "negativeScenario": "self-approval if prohibited; wrong recipient; injected partial send; retry dedupe",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C17",
+      "family": "Staff messaging and preferences",
+      "priorLedgerState": "PARTIAL_STAGED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A03",
+        "A05",
+        "A08"
+      ],
+      "boundaryActorCandidates": [
+        "A15",
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "staff initiation, reply, read state and preference enforcement",
+      "negativeScenario": "nonparticipant, foreign thread, stale access, blocked preference",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C18",
+      "family": "Leadership indicators and drill-down",
+      "priorLedgerState": "SOURCE_CONTRACT_REPAIR_RUNTIME_PENDING",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A07",
+        "A10"
+      ],
+      "boundaryActorCandidates": [
+        "A12",
+        "A13",
+        "A20"
+      ],
+      "positiveScenario": "scoped indicator counts, freshness, drill-down to allowed projection",
+      "negativeScenario": "hierarchy/role-only access; missing source; suppressed data leakage",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C19",
+      "family": "Organization administration and audit operations",
+      "priorLedgerState": "PARTIAL_STAGED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A09",
+        "A10",
+        "A13"
+      ],
+      "boundaryActorCandidates": [
+        "A05",
+        "A20"
+      ],
+      "positiveScenario": "configuration, access removal, scoped audit and distinct platform operations",
+      "negativeScenario": "tenant admin reaches platform route; platform operator reads private tenant content; audit tamper",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C20",
+      "family": "Privacy request handling",
+      "priorLedgerState": "ACTUAL_SOURCE41_ACCOUNT_PROFILE_PASS_NEW_CANDIDATE_REQUALIFICATION_PENDING",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A03",
+        "A10"
+      ],
+      "boundaryActorCandidates": [
+        "A13",
+        "A15",
+        "A20"
+      ],
+      "positiveScenario": "self-service account export, appropriate handler response, expiry and byte verification",
+      "negativeScenario": "other subject, privileged case export, reused download, legal hold bypass",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C21",
+      "family": "Connected deadlines",
+      "priorLedgerState": "PARTIAL_STAGED",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A03",
+        "A05",
+        "A06",
+        "A18"
+      ],
+      "boundaryActorCandidates": [
+        "A15",
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "staff-entered deadlines, views, handoff, formal reminder delivery",
+      "negativeScenario": "unauthorized date changes; stale revision; foreign recipient; no inferred legal date or intake email",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    },
+    {
+      "id": "C22",
+      "family": "Failure, concurrency and recovery coverage",
+      "priorLedgerState": "PARTIAL_STAGED_AND_LOCAL",
+      "eligibilityCaveat": "Actor references are test-design candidates, not granted roles; negative actor references are contextual, not categorical.",
+      "positiveActorCandidates": [
+        "A02",
+        "A03",
+        "A05",
+        "A06",
+        "A07",
+        "A08",
+        "A09",
+        "A10",
+        "A13",
+        "A17",
+        "A18",
+        "A19"
+      ],
+      "boundaryActorCandidates": [
+        "A20",
+        "A04"
+      ],
+      "positiveScenario": "per-action retry, concurrency, atomic rollback, idempotency and fixture cleanup",
+      "negativeScenario": "duplicate/out-of-order event; stale request; interrupted transaction; unauthorized cleanup",
+      "requiredProof": [
+        "source and deployed candidate binding",
+        "actual UI/API method and authority decision",
+        "durable postcondition and audit",
+        "negative no-write/no-disclosure assertion",
+        "retry/recovery and exact fixture cleanup"
+      ],
+      "routeBindings": "UNRECONCILED",
+      "runtimeStatus": "NOT_EXECUTED_IN_THIS_PASS",
+      "coverageComplete": false
+    }
+  ],
+  "operationalAreas": [
+    {
+      "id": "O01",
+      "action": "Controlled inbox delivery",
+      "priorLedgerState": "PARTIAL_PROVEN",
+      "remaining": "Invitation receipt confirmed by controlled recipient; formal deadline recipient inbox and terminal events remain unqualified.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O02",
+      "action": "Authenticated casework performance",
+      "priorLedgerState": "ACTUAL_SOURCE41_FAILED_LOCAL_REPAIR_PENDING",
+      "remaining": "Actual unchanged source41 authenticated profile failed: concurrency1 p95 680.462ms,108/300 requests; concurrency5 p95 2275.315ms,449/3600 requests; zero HTTP errors. All owned authority retired, five same-session post-retirement404 checks passed, original profiles retained. One-bridge request repair remains local and unmeasured in staging. Repeat unchanged thresholds on the admitted repaired source; bounded load is not a full pilot soak. Workbench action projection also has a local fresh-per-case fact-load repair with independent kernel decisions; deployed timing and persona proof remain pending.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O03",
+      "action": "Sustained pilot workload",
+      "priorLedgerState": "ACTUAL_SOURCE41_FAILED_LOCAL_REPAIR_PENDING",
+      "remaining": "Actual unchanged source41 authenticated profile failed: concurrency1 p95 680.462ms,108/300 requests; concurrency5 p95 2275.315ms,449/3600 requests; zero HTTP errors. All owned authority retired, five same-session post-retirement404 checks passed, original profiles retained. One-bridge request repair remains local and unmeasured in staging. Repeat unchanged thresholds on the admitted repaired source; bounded load is not a full pilot soak. Workbench action projection also has a local fresh-per-case fact-load repair with independent kernel decisions; deployed timing and persona proof remain pending.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O04",
+      "action": "Continuous backup freshness",
+      "priorLedgerState": "UNVERIFIED",
+      "remaining": "One-time restored-copy proof does not establish continuous authoritative backup monitoring.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O05",
+      "action": "Daily audit seal monitoring",
+      "priorLedgerState": "UNVERIFIED",
+      "remaining": "One-time chain and evidence sealing proof does not establish daily checkpoint freshness.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O06",
+      "action": "Worker and cron freshness",
+      "priorLedgerState": "PARTIAL_PROVEN",
+      "remaining": "Six worker scenarios passed; continuous heartbeat, queue age and schedule monitoring still need proof.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O07",
+      "action": "Dependency health",
+      "priorLedgerState": "UNVERIFIED",
+      "remaining": "Connect authoritative scanner/storage/mail/database health; do not provision excluded Redis/Django/payment dependencies merely to fill old probes.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O08",
+      "action": "External alerts and recovery",
+      "priorLedgerState": "PARTIAL_PROVEN_CONTROLLED_ALERT_RECEIPT_CONFIRMED",
+      "remaining": "Controlled recipient confirmed actual Azure test alert receipt; original command timeout retained, without retry. Continuous fault detection, alert state recovery and freshness still need evidence.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O09",
+      "action": "Full-traffic failover",
+      "priorLedgerState": "DEFERRED_SEPARATE_AUTHORITY",
+      "remaining": "Zero-traffic recovery proof is not a full-traffic cutover.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O10",
+      "action": "Physical devices and browser engines",
+      "priorLedgerState": "UNVERIFIED_SEPARATE_RELEASE_LEVEL",
+      "remaining": "390/1440 browser captures are not physical-device or alternate-engine certification.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O11",
+      "action": "Accessibility",
+      "priorLedgerState": "UNVERIFIED_FULL_STANDARD",
+      "remaining": "Complete keyboard, screen-reader and declared WCAG qualification for enabled journeys.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O12",
+      "action": "Complete bilingual states",
+      "priorLedgerState": "PARTIAL_PROVEN",
+      "remaining": "Admitted EN/FR casework passed; all enabled errors, accessibility strings and new setup screens need qualification.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O13",
+      "action": "Registry and status consistency",
+      "priorLedgerState": "PARTIAL_LOCAL_REPAIR",
+      "remaining": "New invitation/setup entries remain LIMITED. Historical deadline and operational descriptions still require truthful reconciliation.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O14",
+      "action": "Pilot outcomes and telemetry",
+      "priorLedgerState": "UNVERIFIED_PRODUCT_BOUNDARY",
+      "remaining": "Do not invent usage figures; confirm required purpose, consent, retention and outcome measures.",
+      "coverageComplete": false
+    },
+    {
+      "id": "O15",
+      "action": "Incident and periodic restore cadence",
+      "priorLedgerState": "DEFERRED_OPERATING_CADENCE",
+      "remaining": "Document and exercise the agreed operating cadence without inventing additional staff or reviewers.",
+      "coverageComplete": false
+    }
+  ],
+  "capabilityCensus": {
+    "count": 141,
+    "method": "literal registry id/title/state extraction; verify generator against full AST before sealing denominator",
+    "entries": [
+      {
+        "id": "UE-CASE-SEALED-EVIDENCE-EXPORT",
+        "title": "Authorized case evidence PDF and sealed JSON download",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-AUTOMATIC-CASE-ASSIGNMENT",
+        "title": "Automatic representative matching by recorded expertise and live workload",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ORGANIZATION-INVITATIONS",
+        "title": "Organization administrator invitations, reissue, revocation and acceptance",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ORGANIZATION-SETUP-CHECKLIST",
+        "title": "Persistent organization setup checklist",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-MEMBERS-MERGE-BULK-EXPORT",
+        "title": "Member merge, bulk and export actions",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-CLAIMS-BULK",
+        "title": "Bulk claim actions",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-CLC-REMITTANCE-SUBMIT-EXPORT",
+        "title": "CLC remittance submission and export",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-CARBON-ACCOUNTING",
+        "title": "Carbon accounting: dashboard, infrastructure monitoring and claim validation",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-TAX-DOCUMENTS",
+        "title": "Tax slips, T106, RL-1 and COPE receipt generation",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-TAX-CRA-EXPORT",
+        "title": "CRA tax export",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-COMMUNICATIONS-EXPORTS",
+        "title": "Campaign, distribution-list and survey exports",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-ALERT-TEST-EXECUTION",
+        "title": "Alert test execution",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-ORG-HIERARCHY-SEED",
+        "title": "Organization hierarchy seeding",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CRON-MONTHLY-DUES",
+        "title": "Monthly dues cron (main app)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CRON-OVERDUE-NOTIFICATIONS",
+        "title": "Overdue-notifications cron (main app)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CRON-PROCESS-MESSAGES",
+        "title": "Message-processing cron",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CRON-PROCESS-NOTIFICATIONS",
+        "title": "Notification-processing cron",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CRON-SCHEDULED-REPORTS",
+        "title": "Scheduled-reports cron",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CRON-DAILY-METRICS",
+        "title": "Daily analytics metrics cron",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CRON-BILLING-LIFECYCLE",
+        "title": "Billing lifecycle cron (period, invoices, finalization, overdue state)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ADMIN-PILOT-STATUS",
+        "title": "Pilot readiness aggregator (/api/admin/pilot-status)",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DB-POSTGRES-PING",
+        "title": "PostgreSQL round-trip probe",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-REALITY-DEMO-GUARD",
+        "title": "Demo profile enforcement probe",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-SECRET-DATABASE-URL",
+        "title": "DATABASE_URL presence probe",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-SECRET-AUTH",
+        "title": "AUTH_SECRET presence probe",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-SECRET-ENTRA-TENANT",
+        "title": "AZURE_AD_TENANT_ID presence probe",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DB-MIGRATIONS-APPLIED",
+        "title": "Applied-migrations probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-TENANT-ISOLATION",
+        "title": "Runtime tenant-isolation probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-REDIS-PING",
+        "title": "Redis reachability probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DJANGO-SIDECAR-HEALTH",
+        "title": "Django sidecar health probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-QUEUE-DEPTH",
+        "title": "Job queue depth probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-WORKER-HEARTBEAT",
+        "title": "Worker heartbeat probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CRON-FRESHNESS",
+        "title": "Cron freshness probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-EMAIL-PROBE",
+        "title": "E-mail deliverability probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-SMS-PROBE",
+        "title": "SMS deliverability probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CLAMAV-PROBE",
+        "title": "Malware scanner reachability probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-STORAGE-PROBE",
+        "title": "Blob storage reachability probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-PAYMENT-PROBE",
+        "title": "Payment provider reachability probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-SENTRY-PROBE",
+        "title": "Error monitoring reachability probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-SYNTHETIC-MONITORING",
+        "title": "Synthetic monitoring probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-AUDIT-SEAL",
+        "title": "Audit log tamper-seal probe",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-BACKUP-FRESHNESS",
+        "title": "Backup freshness probe",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-RESTORE-PROOF",
+        "title": "Restore drill probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-REGISTRY-CONSISTENCY",
+        "title": "Capability registry consistency probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEPLOYMENT-REVISION",
+        "title": "Deployed revision alignment probe",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-BOC-EXCHANGE-RATE",
+        "title": "Bank of Canada FX rate resolution",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEMO-SEPARATE-PACKAGE",
+        "title": "Demo runtime is a separate npm package",
+        "registryState": "REAL",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-BUILD-OPERATIONAL-ISOLATION",
+        "title": "Operational build carries no customer-specific demo content",
+        "registryState": "REAL",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DASH-REPORTS-INDEX",
+        "title": "Reports dashboard index (/dashboard/reports) — REMOVED",
+        "registryState": "REMOVED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DASH-DEBUG",
+        "title": "Developer debug page (/dashboard/debug) — dev-only",
+        "registryState": "DISABLED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEV-SENTRY-EXAMPLE",
+        "title": "Sentry example page (/sentry-example-page) — REMOVED",
+        "registryState": "REMOVED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CASE-DEADLINE-MANAGEMENT",
+        "title": "Staff-entered case and grievance deadline management",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-CORE",
+        "title": "Deadline engine — core outbox schema",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-REMINDERS",
+        "title": "Deadline engine — reminder scheduler",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-DELIVERY",
+        "title": "Deadline engine — worker + at-least-once delivery",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-OVERDUE",
+        "title": "Deadline engine — overdue detector",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-RECOVERY",
+        "title": "Deadline engine — lease recovery + append-only audit",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-WORKER-CLAIM",
+        "title": "Deadline engine — worker claim under FOR UPDATE SKIP LOCKED",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-EXECUTION-PERSISTENCE",
+        "title": "Deadline engine — append-only execution rows",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-PROVIDER-ACCEPTANCE",
+        "title": "Deadline engine — provider acceptance via Resend",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-DIRECT-DEAD-LETTER",
+        "title": "Deadline engine — immediate dead-letter on synchronous permanent failure",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DUES-PORTAL-BALANCE",
+        "title": "Member dues portal — balance summary (member's own view)",
+        "registryState": "REAL",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DUES-PORTAL-PAYMENT-HISTORY",
+        "title": "Member dues portal — payment history",
+        "registryState": "REAL",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DUES-PORTAL-ISSUE-REPORTING",
+        "title": "Member dues portal — deduction issue reporting",
+        "registryState": "REAL",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DUES-PORTAL-DEDUCTIONS",
+        "title": "Member dues portal — payroll deduction history",
+        "registryState": "REAL",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DUES-DIRECT-PAYMENT",
+        "title": "Member dues portal — direct Stripe payment / autopay / saved payment methods",
+        "registryState": "DISABLED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DEADLINE-ASSIGNMENT-CONTINUITY",
+        "title": "Deadline engine — recipient continuity across representative reassignment",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CLAIM-DEADLINES-SURFACE",
+        "title": "Claim deadlines (claim_deadlines table) — listed on Priorities, with no recipients, reminders, completion or extension",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CLAIM-ANONYMOUS-FILING",
+        "title": "Claims — opt-in anonymous filing, member identity withheld from readers who are not representing the member",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-DUES-CALCULATION-WORKFLOW",
+        "title": "Monthly dues calculation (financial-service microservice)",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-DUES-REMINDER-SCHEDULER",
+        "title": "Dues payment reminders (7-day / 1-day / overdue)",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ANALYTICS-SCHEDULED-REPORTS-UI",
+        "title": "Scheduled reports admin UI",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-PRIVACY-INCIDENT-WORKFLOW",
+        "title": "Privacy incident (breach) management",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-PRIVACY-DSAR-WORKFLOW",
+        "title": "Information-rights (DSAR) request handling",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-PRIVACY-PROVINCIAL-CASES",
+        "title": "Provincial / jurisdictional privacy cases",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-PRIVACY-BREACH-ASSESSMENT",
+        "title": "Breach notification determination (PIPEDA / provincial)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-EMERGENCY-DECLARATION",
+        "title": "Emergency declaration, break-glass activation, recovery and preparedness reporting",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-GOV-INDEPENDENT-REVIEW",
+        "title": "Independent governance review workflow (intake → finding → verified remediation)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-GOV-ELECTION-VOTING-RESULTS",
+        "title": "Council election vote casting, tabulation and published results",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-GOV-COUNCIL-ELECTION-RECORDS",
+        "title": "Council election records (list, view, create)",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ORG-SHARING-SETTINGS",
+        "title": "Organization data-sharing settings and access log",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-MEMBERS-DIRECT-CREATE",
+        "title": "Create a member record directly from the dashboard",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-HS-CORRECTIVE-ACTIONS",
+        "title": "Health & safety corrective-action tracking",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-HS-REPORT-EXPORT",
+        "title": "Health & safety dashboard and inspection report PDF export",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ORG-MEMBERS-BULK-TRANSFER",
+        "title": "Bulk transfer of members between organizations",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-DUES-ADMIN-PAYMENTS",
+        "title": "Dues payments administration (list and detail)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-ORG-BULK-IMPORT",
+        "title": "Bulk import of organizations",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ORGANIZER-IMPACT",
+        "title": "Organizer impact measurement",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ORGANIZING-FIELD-NOTES",
+        "title": "Organizing field notes",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-MOVEMENT-INSIGHTS-CONSENT-REVOCATION",
+        "title": "Revocation of data-aggregation consent",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-MOVEMENT-INSIGHTS-CONSENT-GRANT",
+        "title": "Granting data-aggregation consent",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-MOVEMENT-INSIGHTS-LEGISLATIVE-BRIEF",
+        "title": "Legislative brief export (movement insights)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-MEMBER-CASE-TIMELINE",
+        "title": "Member case timeline (/dashboard/member/timeline/[caseId])",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-BARGAINING-NEGOTIATION-DETAIL",
+        "title": "Negotiation detail view (/dashboard/bargaining/negotiations/[id])",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-PILOT-TRAINING-GUIDES",
+        "title": "Pilot training guides (/docs/guides/*)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-COMPLIANCE-CHARTER-STATUS",
+        "title": "Charter compliance status and reporting deadlines (/dashboard/compliance)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-COMPLIANCE-POSTURE-REPORTING",
+        "title": "Compliance score, regulatory status, risk assessment and downloadable compliance reports (/dashboard/compliance-admin)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DOCUMENT-APPROVAL-WORKFLOW",
+        "title": "Document approval workflow (reviewers, stages, approve and reject decisions)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-DOCUMENT-TEMPLATE-AUTHORING",
+        "title": "Document template authoring (create, edit, delete, usage counts)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ADMIN-SYSTEM-SETTINGS",
+        "title": "Admin system settings",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ADMIN-SECURITY-OVERVIEW",
+        "title": "Admin security overview",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ADMIN-REPORTS-HUB",
+        "title": "Admin reports hub",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ADMIN-SYSTEM-CACHE-CLEAR",
+        "title": "Admin \"clear application cache\" action — REMOVED",
+        "registryState": "REMOVED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CLC-ANALYTICS-EXPORT",
+        "title": "CLC analytics dashboard PDF export — REMOVED",
+        "registryState": "REMOVED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-UNION-BUDGETS-EXPENSES-VENDORS",
+        "title": "Union budgets, expenses and vendors",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-STRIKE-FUNDS",
+        "title": "Strike funds, stipends, disbursements, eligibility, picket lines",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-AFFILIATE-REMITTANCES",
+        "title": "CLC / National / federation affiliate remittances",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-PENSION-TRUSTEE-ADMIN",
+        "title": "Pension trustee appointment and administration",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-PENSION-REPORTS",
+        "title": "Pension administration reports (T4A generation)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-PENSION-BENEFIT-ESTIMATE",
+        "title": "Pension benefit estimate for a member",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-DUES-REPORTS",
+        "title": "Dues reports (admin)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-DUES-BILLING-CYCLE-HISTORY",
+        "title": "Billing cycle history (admin)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-SURVEYS-RESPOND",
+        "title": "Answering a survey",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ANALYTICS-OVERVIEW",
+        "title": "Analytics overview console",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ANALYTICS-COMPARATIVE",
+        "title": "Comparative analytics",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CROSS-UNION-ANALYTICS",
+        "title": "Cross-union analytics",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CLC-INTELLIGENCE",
+        "title": "CLC labour intelligence",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-SOCIAL-MEDIA-UI",
+        "title": "Social media management screens",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ANALYTICS-ENGAGEMENT-DASHBOARDS",
+        "title": "Engagement, benchmark and communication analytics dashboards — REMOVED",
+        "registryState": "REMOVED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-CLC-AGED-RECEIVABLES",
+        "title": "CLC aged receivables report — REMOVED",
+        "registryState": "REMOVED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-FIN-EMPLOYER-REMITTANCE-INGESTION",
+        "title": "Employer remittance upload (source preservation only)",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-REP-CASE-AUTHORITY-SCOPING",
+        "title": "Representative case, member-directory and document authority scoping",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-REP-PROTOCOL-GOVERNANCE",
+        "title": "Representation protocol: administrator-saved, separately approved, audited",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-SSO-SIGN-IN",
+        "title": "Enterprise SSO sign-in, token exchange, provisioning and SCIM driven by a stored provider",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-EXT-INTEGRATION-SYNC",
+        "title": "Integration synchronization driven by a stored api_integrations configuration",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-REP-MANDATE-RECUSAL-DELEGATION",
+        "title": "Representative mandate model: recusal, territory, privileged-matter restriction, temporary delegation",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-WORKAID-SPECIALIST-REFERRAL",
+        "title": "WorkAid specialist referral, acknowledgement and milestone integration",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-WORKAID-UNION-SIDE-DISCLOSURE",
+        "title": "WorkAid union-side consent, referral record, document authorisation and revocation",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-PLATFORM-USAGE-TELEMETRY",
+        "title": "Platform usage telemetry: page views, sign-ins and feature adoption per organization",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-AI-SEMANTIC-SEARCH",
+        "title": "Semantic search over the knowledge base: search, chatbot retrieval and exit-interview indexing (needs pgvector)",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-GOVERNANCE-POLICY-LIFECYCLE",
+        "title": "Policy lifecycle governance: governed policies, approval chains, conflicts, replay, events and snapshots",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-SMS-SEND",
+        "title": "Sending SMS messages and campaigns",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-SMS-CONVERSATIONS",
+        "title": "SMS inbox: marking conversations read and archiving them",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-CHATBOT-MESSAGE-FEEDBACK",
+        "title": "Chatbot message feedback (thumbs up / down)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-CHATBOT-SESSION-ARCHIVE",
+        "title": "Archive a chatbot session",
+        "registryState": "LIMITED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-CALENDAR-ATTENDEES-RECURRENCE",
+        "title": "Calendar event attendees and recurrence",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-CALENDAR-SYNC",
+        "title": "External calendar synchronization (Google, Outlook)",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-CAMPAIGN-SEND",
+        "title": "Sending and scheduling communication campaigns",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-ACTION-NOTIFICATION-DELIVERY-PREFERENCES",
+        "title": "Notification content categories, digest frequency and quiet hours",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-HS-INSPECTION-SCHEDULING",
+        "title": "Health & safety inspection scheduling",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      },
+      {
+        "id": "UE-HS-ATTACHMENTS",
+        "title": "Hazard photos and incident attachments",
+        "registryState": "NOT_IMPLEMENTED",
+        "baseDisposition": "UNRECONCILED"
+      }
+    ]
+  },
+  "routeManifestCensus": {
+    "summary": {
+      "routes": 1042,
+      "mutating": 710,
+      "kernel": 64,
+      "byGuard": {
+        "ADMIN_AUTH": 7,
+        "CAPABILITY_TOKEN": 15,
+        "CRON_SECRET": 1,
+        "CRUD_FACTORY": 133,
+        "DELEGATED": 18,
+        "NONE": 24,
+        "ORG_AUTH": 13,
+        "PLATFORM_AUTH_HANDLER": 9,
+        "RETIRED": 238,
+        "ROLE_AUTH": 104,
+        "SESSION_AUTH": 59,
+        "WEBHOOK_SIGNATURE": 4,
+        "WITH_API": 415,
+        "WITH_API_PUBLIC": 2
+      },
+      "mutatingByGuard": {
+        "ADMIN_AUTH": 7,
+        "CAPABILITY_TOKEN": 9,
+        "CRON_SECRET": 1,
+        "CRUD_FACTORY": 82,
+        "DELEGATED": 10,
+        "NONE": 9,
+        "ORG_AUTH": 8,
+        "PLATFORM_AUTH_HANDLER": 7,
+        "RETIRED": 223,
+        "ROLE_AUTH": 55,
+        "SESSION_AUTH": 35,
+        "WEBHOOK_SIGNATURE": 4,
+        "WITH_API": 260
+      },
+      "mutatingByAudit": {
+        "ATOMIC": 175,
+        "ATOMIC_SERVICE": 135,
+        "COMPUTE_ONLY": 33,
+        "CRUD_ATOMIC": 82,
+        "EXEMPT_BALLOT_SECRECY": 2,
+        "EXEMPT_UNATTRIBUTABLE": 27,
+        "INTENT_OUTCOME": 25,
+        "NO_WRITES_FOUND": 9,
+        "NONE": 222
+      },
+      "mutatingByData": {
+        "AMBIENT_DB": 1,
+        "CRUD_TENANT_TX": 82,
+        "NONE": 320,
+        "SYSTEM_CONTEXT": 59,
+        "TENANT_TX": 248
+      }
+    },
+    "note": "Historical manifest snapshot is not proof of current live route or base enablement. Method-level reconciliation remains open."
+  },
+  "remaining": [
+    "Reconcile every registry entry, current route-method, server action, worker, webhook, public token, and external actor boundary to base action/operation or explicit source-backed defer/deny disposition.",
+    "Resolve exact enabled role/capacity variants and authority source for each action, including external grants, institutional review, machine delegation and absence/refusal.",
+    "Verify source inventory completeness against current route tree and server actions; preserve history and candidate provenance.",
+    "Resolve candidate-summary versus serving-source record drift without promoting prior evidence.",
+    "Verify exact positive/negative scenario definitions and coverage joins; zero unresolved scope or orphaned route/actor/action rows before Step 1 exit."
+  ]
+}
